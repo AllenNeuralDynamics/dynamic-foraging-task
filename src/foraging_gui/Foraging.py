@@ -36,7 +36,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._InitializeBonsai()
         self.threadpool=QThreadPool()
         self.threadpool2=QThreadPool()
-
+        self.OpenOptogenetics=0
     def _InitializeBonsai(self):
         #os.system("start E:\BonsaiBehavior-master\BonsaiBehavior-master\Bonsai\Bonsai.exe E:\DynamicForagingGUI\Foraging4\foraging-v4.bonsai") 
         self.ip = "127.0.0.1"
@@ -69,6 +69,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.Clear.clicked.connect(self._Clear)
         self.Start.clicked.connect(self._Start)
         self.NewSession.clicked.connect(self._NewSession)
+        self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
+
     def closeEvent(self, event):
         reply = QMessageBox.question(self, 'Foraging Close', 'Do you want to save the result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
@@ -96,20 +98,26 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _Snipping(self):
         os.system("start %windir%\system32\SnippingTool.exe") 
     def _Optogenetics(self):
-        Opto_dialog = OptogeneticsDialog(self)
-        Opto_dialog.show()
+        if self.OpenOptogenetics==0:
+            self.Opto_dialog = OptogeneticsDialog(self)
+            self.OpenOptogenetics=1
+        if self.action_Optogenetics.isChecked()==True:
+            self.Opto_dialog.show()
+        else:
+            self.Opto_dialog.hide()
+
     def _Camera(self):
-        Camera_dialog = CameraDialog(self)
-        Camera_dialog.show()
+        self.Camera_dialog = CameraDialog(self)
+        self.Camera_dialog.show()
     def _Manipulator(self):
-        ManipulatoB_dialog = ManipulatorDialog(self)
-        ManipulatoB_dialog.show()
+        self.ManipulatoB_dialog = ManipulatorDialog(self)
+        self.ManipulatoB_dialog.show()
     def _MotorStage(self):
-        MotorStage_dialog = MotorStageDialog(self)
-        MotorStage_dialog.show()
+        self.MotorStage_dialog = MotorStageDialog(self)
+        self.MotorStage_dialog.show()
     def _Calibration(self):
-        Calibration_dialog = CalibrationDialog(self)
-        Calibration_dialog.show()
+        self.Calibration_dialog = CalibrationDialog(self)
+        self.Calibration_dialog.show()
     def _about(self):
         QMessageBox.about(
             self,
@@ -242,11 +250,97 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 print(GeneratedTrials.B_CurrentTrialN)
                 #generate a new trial
                 GeneratedTrials._GenerateATrial()
-
+    def _OptogeneticsB(self):
+        if self.OptogeneticsB.currentText()=='on':
+            self._Optogenetics()
+            self.action_Optogenetics.setChecked(True)
+            self.Opto_dialog.show()
+        else:
+            self.action_Optogenetics.setChecked(False)
+            self.Opto_dialog.hide()
 class OptogeneticsDialog(QDialog,Ui_Optogenetics):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
+        self._connectSignalsSlots()
+    def _connectSignalsSlots(self):
+        self.Laser_1.currentIndexChanged.connect(self._Laser_1)
+        self.Laser_2.currentIndexChanged.connect(self._Laser_2)
+        self.Laser_3.currentIndexChanged.connect(self._Laser_3)
+        self.Laser_4.currentIndexChanged.connect(self._Laser_4)
+        self.Protocol_1.activated.connect(self._activated_1)
+        self.Protocol_2.activated.connect(self._activated_2)
+        self.Protocol_3.activated.connect(self._activated_3)
+        self.Protocol_4.activated.connect(self._activated_4)
+    def _Laser_1(self):
+        self._Laser(1)
+    def _Laser_2(self):
+        self._Laser(2)
+    def _Laser_3(self):
+        self._Laser(3)
+    def _Laser_4(self):
+        self._Laser(4)
+    def _activated_1(self):
+        self._activated(1)
+    def _activated_2(self):
+        self._activated(2)
+    def _activated_3(self):
+        self._activated(3)
+    def _activated_4(self):
+        self._activated(4)
+    def _activated(self,Numb):
+        if Numb==1: 
+            Inactlabel1=8 # pulse duration
+            Inactlabel2=6 # frequency
+        elif  Numb==2: 
+            Inactlabel1=17
+            Inactlabel2=15
+        elif  Numb==3: 
+            Inactlabel1=26
+            Inactlabel2=24
+        elif  Numb==4: 
+            Inactlabel1=35
+            Inactlabel2=33
+        if eval('self.Protocol_'+str(Numb)+'.currentText()')=='Sine':
+            eval('self.label'+str(Inactlabel1)+'.setEnabled('+str(False)+')')
+            eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(False)+')')
+            eval('self.label'+str(Inactlabel2)+'.setEnabled('+str(True)+')')
+            eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(True)+')')
+        if eval('self.Protocol_'+str(Numb)+'.currentText()')=='Pulse':
+            eval('self.label'+str(Inactlabel1)+'.setEnabled('+str(True)+')')
+            eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(True)+')')
+            eval('self.label'+str(Inactlabel2)+'.setEnabled('+str(True)+')')
+            eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(True)+')')
+        if eval('self.Protocol_'+str(Numb)+'.currentText()')=='Constant':
+            eval('self.label'+str(Inactlabel1)+'.setEnabled('+str(False)+')')
+            eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(False)+')')
+            eval('self.label'+str(Inactlabel2)+'.setEnabled('+str(False)+')')
+            eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(False)+')')
+    def _Laser(self,Numb):
+        if Numb==1: 
+            Inactlabel=range(1,9)
+        elif  Numb==2: 
+            Inactlabel=range(10,18)
+        elif  Numb==3: 
+            Inactlabel=range(19,27)
+        elif  Numb==4: 
+            Inactlabel=range(28,36)
+        if eval('self.Laser_'+str(Numb)+'.currentText()')=='NA':
+            Label=False
+        else:
+            Label=True
+        eval('self.Location_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.AlignTo_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.Probability_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.Duration_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.Protocol_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.RD_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        for i in Inactlabel:
+            eval('self.label'+str(i)+'.setEnabled('+str(Label)+')')
+        if eval('self.Laser_'+str(Numb)+'.currentText()')!='NA':    
+            eval('self._activated_'+str(Numb)+'()')
 
 class CameraDialog(QDialog,Ui_Camera):
     def __init__(self, parent=None):
