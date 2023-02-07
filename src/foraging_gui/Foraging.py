@@ -98,14 +98,35 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _Snipping(self):
         os.system("start %windir%\system32\SnippingTool.exe") 
     def _Optogenetics(self):
+        '''will be triggered when the optogenetics icon is pressed'''
         if self.OpenOptogenetics==0:
             self.Opto_dialog = OptogeneticsDialog(self)
             self.OpenOptogenetics=1
+            self._UpdateOptoPar() # update optogenetics parameters from the loaded file
         if self.action_Optogenetics.isChecked()==True:
             self.Opto_dialog.show()
         else:
             self.Opto_dialog.hide()
-
+    def _UpdateOptoPar(self):
+        '''Update optogenetics parameters from the loaded file'''
+        if 'Opto_dialog' in self.__dict__ and 'Obj' in self.__dict__:
+            Obj=self.Obj
+            for child in self.Opto_dialog.findChildren(QtWidgets.QLineEdit):
+                if child.objectName() in Obj.keys():
+                    child.setText(Obj[child.objectName()][0])
+                else:
+                    child.clear()
+            for child in self.Opto_dialog.findChildren(QtWidgets.QDoubleSpinBox):
+                if child.objectName() in Obj.keys():
+                    child.setValue(float(Obj[child.objectName()][0]))
+                else:
+                    child.clear()
+            for child in self.Opto_dialog.findChildren(QtWidgets.QComboBox):
+                for i in range(child.count()):
+                    if child.objectName() in Obj.keys():
+                        if child.itemText(i) == Obj[child.objectName()][0]:
+                            child.setCurrentIndex(i)
+        
     def _Camera(self):
         self.Camera_dialog = CameraDialog(self)
         self.Camera_dialog.show()
@@ -145,12 +166,18 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 Obj[child.objectName()]=child.text()
             for child in self.centralwidget.findChildren(QtWidgets.QComboBox):
                 Obj[child.objectName()]=child.currentText()
+            if 'Opto_dialog' in self.__dict__:
+                for child in self.Opto_dialog.findChildren(QtWidgets.QDoubleSpinBox)+self.Opto_dialog.findChildren(QtWidgets.QLineEdit):
+                    Obj[child.objectName()]=child.text()
+                for child in self.Opto_dialog.findChildren(QtWidgets.QComboBox):
+                    Obj[child.objectName()]=child.currentText()
             savemat(self.SaveFile, Obj)
 
     def _Open(self):
         fname = QFileDialog.getOpenFileName(self, 'Open file',self.default_saveFolder,"Behavior files (*.mat)")
         if fname[0] != '':
             Obj = loadmat(fname[0])
+            self.Obj=Obj
             for child in self.centralwidget.findChildren(QtWidgets.QLineEdit):
                 if child.objectName() in Obj.keys():
                     child.setText(Obj[child.objectName()][0])
@@ -166,6 +193,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     if child.objectName() in Obj.keys():
                         if child.itemText(i) == Obj[child.objectName()][0]:
                             child.setCurrentIndex(i)
+            if 'Opto_dialog' in self.__dict__:
+                self._UpdateOptoPar()
+
     def _Clear(self):
         for child in self.TrainingParameters.findChildren(QtWidgets.QLineEdit):
             child.clear()
@@ -251,8 +281,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 #generate a new trial
                 GeneratedTrials._GenerateATrial()
     def _OptogeneticsB(self):
+        ''' optogenetics control in the main window'''
         if self.OptogeneticsB.currentText()=='on':
-            self._Optogenetics()
+            self._Optogenetics() # press the optogenetics icon
             self.action_Optogenetics.setChecked(True)
             self.Opto_dialog.show()
         else:
@@ -272,6 +303,10 @@ class OptogeneticsDialog(QDialog,Ui_Optogenetics):
         self.Protocol_2.activated.connect(self._activated_2)
         self.Protocol_3.activated.connect(self._activated_3)
         self.Protocol_4.activated.connect(self._activated_4)
+        self.Protocol_1.currentIndexChanged.connect(self._activated_1)
+        self.Protocol_2.currentIndexChanged.connect(self._activated_2)
+        self.Protocol_3.currentIndexChanged.connect(self._activated_3)
+        self.Protocol_4.currentIndexChanged.connect(self._activated_4)
     def _Laser_1(self):
         self._Laser(1)
     def _Laser_2(self):
@@ -317,6 +352,7 @@ class OptogeneticsDialog(QDialog,Ui_Optogenetics):
             eval('self.label'+str(Inactlabel2)+'.setEnabled('+str(False)+')')
             eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(False)+')')
     def _Laser(self,Numb):
+        ''' activate/inactivate optogenetics conditions'''
         if Numb==1: 
             Inactlabel=range(1,9)
         elif  Numb==2: 
