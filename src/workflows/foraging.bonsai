@@ -11,6 +11,7 @@
                  xmlns:osc="clr-namespace:Bonsai.Osc;assembly=Bonsai.Osc"
                  xmlns:al="clr-namespace:Bonsai.Audio;assembly=Bonsai.Audio"
                  xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                 xmlns:mx="clr-namespace:Bonsai.DAQmx;assembly=Bonsai.DAQmx"
                  xmlns="https://bonsai-rx.org/2018/workflow">
   <Workflow>
     <Nodes>
@@ -285,7 +286,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Equal">
                     <Operand xsi:type="StringProperty">
-                      <Value>NoReward</Value>
+                      <Value>Left</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -324,7 +325,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="NotEqual">
                     <Operand xsi:type="StringProperty">
-                      <Value>NoReward</Value>
+                      <Value>Left</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -391,7 +392,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Equal">
                     <Operand xsi:type="StringProperty">
-                      <Value>Right</Value>
+                      <Value>NoReward</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -429,7 +430,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="NotEqual">
                     <Operand xsi:type="StringProperty">
-                      <Value>Right</Value>
+                      <Value>NoReward</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -534,7 +535,7 @@ def process(value):
                 <harp:VisualIndicators>On</harp:VisualIndicators>
                 <harp:Heartbeat>Disable</harp:Heartbeat>
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                <harp:PortName>COM3</harp:PortName>
+                <harp:PortName>COM4</harp:PortName>
               </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
@@ -1230,6 +1231,28 @@ def process(value):
           </Edges>
         </Workflow>
       </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="IntProperty">
+          <Value>0</Value>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="mx:AnalogOutput">
+          <mx:SignalSource />
+          <mx:SampleRate>5000</mx:SampleRate>
+          <mx:ActiveEdge>Rising</mx:ActiveEdge>
+          <mx:SampleMode>ContinuousSamples</mx:SampleMode>
+          <mx:BufferSize>1000</mx:BufferSize>
+          <mx:Channels>
+            <mx:AnalogOutputChannelConfiguration>
+              <mx:ChannelName>Out</mx:ChannelName>
+              <mx:MinimumValue>-10</mx:MinimumValue>
+              <mx:MaximumValue>10</mx:MaximumValue>
+              <mx:VoltageUnits>Volts</mx:VoltageUnits>
+            </mx:AnalogOutputChannelConfiguration>
+          </mx:Channels>
+        </Combinator>
+      </Expression>
     </Nodes>
     <Edges>
       <Edge From="0" To="7" Label="Source1" />
@@ -1249,6 +1272,7 @@ def process(value):
       <Edge From="14" To="15" Label="Source1" />
       <Edge From="15" To="16" Label="Source1" />
       <Edge From="16" To="17" Label="Source1" />
+      <Edge From="21" To="22" Label="Source1" />
     </Edges>
   </Workflow>
 </WorkflowBuilder>

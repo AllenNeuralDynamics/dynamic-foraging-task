@@ -290,6 +290,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.action_Optogenetics.setChecked(False)
             self.Opto_dialog.hide()
 class OptogeneticsDialog(QDialog,Ui_Optogenetics):
+    '''Optogenetics dialog'''
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
@@ -307,6 +308,24 @@ class OptogeneticsDialog(QDialog,Ui_Optogenetics):
         self.Protocol_2.currentIndexChanged.connect(self._activated_2)
         self.Protocol_3.currentIndexChanged.connect(self._activated_3)
         self.Protocol_4.currentIndexChanged.connect(self._activated_4)
+        
+        self.LaserStart_1.activated.connect(self._activated_1)
+        self.LaserStart_2.activated.connect(self._activated_2)
+        self.LaserStart_3.activated.connect(self._activated_3)
+        self.LaserStart_4.activated.connect(self._activated_4)
+        self.LaserStart_1.currentIndexChanged.connect(self._activated_1)
+        self.LaserStart_2.currentIndexChanged.connect(self._activated_2)
+        self.LaserStart_3.currentIndexChanged.connect(self._activated_3)
+        self.LaserStart_4.currentIndexChanged.connect(self._activated_4)
+
+        self.LaserEnd_1.activated.connect(self._activated_1)
+        self.LaserEnd_2.activated.connect(self._activated_2)
+        self.LaserEnd_3.activated.connect(self._activated_3)
+        self.LaserEnd_4.activated.connect(self._activated_4)
+        self.LaserEnd_1.currentIndexChanged.connect(self._activated_1)
+        self.LaserEnd_2.currentIndexChanged.connect(self._activated_2)
+        self.LaserEnd_3.currentIndexChanged.connect(self._activated_3)
+        self.LaserEnd_4.currentIndexChanged.connect(self._activated_4)
     def _Laser_1(self):
         self._Laser(1)
     def _Laser_2(self):
@@ -324,57 +343,66 @@ class OptogeneticsDialog(QDialog,Ui_Optogenetics):
     def _activated_4(self):
         self._activated(4)
     def _activated(self,Numb):
-        if Numb==1: 
-            Inactlabel1=8 # pulse duration
-            Inactlabel2=6 # frequency
-        elif  Numb==2: 
-            Inactlabel1=17
-            Inactlabel2=15
-        elif  Numb==3: 
-            Inactlabel1=26
-            Inactlabel2=24
-        elif  Numb==4: 
-            Inactlabel1=35
-            Inactlabel2=33
+        '''enable/disable items based on protocols and laser start/end'''
+        Inactlabel1=15 # pulse duration
+        Inactlabel2=13 # frequency
+        Inactlabel3=14 # Ramping down
         if eval('self.Protocol_'+str(Numb)+'.currentText()')=='Sine':
-            eval('self.label'+str(Inactlabel1)+'.setEnabled('+str(False)+')')
+            eval('self.label'+str(Numb)+'_'+str(Inactlabel1)+'.setEnabled('+str(False)+')')
             eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(False)+')')
-            eval('self.label'+str(Inactlabel2)+'.setEnabled('+str(True)+')')
+            eval('self.label'+str(Numb)+'_'+str(Inactlabel2)+'.setEnabled('+str(True)+')')
             eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(True)+')')
+            eval('self.label'+str(Numb)+'_'+str(Inactlabel3)+'.setEnabled('+str(True)+')')
+            eval('self.RD_'+str(Numb)+'.setEnabled('+str(True)+')')
         if eval('self.Protocol_'+str(Numb)+'.currentText()')=='Pulse':
-            eval('self.label'+str(Inactlabel1)+'.setEnabled('+str(True)+')')
+            eval('self.label'+str(Numb)+'_'+str(Inactlabel1)+'.setEnabled('+str(True)+')')
             eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(True)+')')
-            eval('self.label'+str(Inactlabel2)+'.setEnabled('+str(True)+')')
+            eval('self.label'+str(Numb)+'_'+str(Inactlabel2)+'.setEnabled('+str(True)+')')
             eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(True)+')')
+            eval('self.label'+str(Numb)+'_'+str(Inactlabel3)+'.setEnabled('+str(False)+')')
+            eval('self.RD_'+str(Numb)+'.setEnabled('+str(True)+')')
         if eval('self.Protocol_'+str(Numb)+'.currentText()')=='Constant':
-            eval('self.label'+str(Inactlabel1)+'.setEnabled('+str(False)+')')
+            eval('self.label'+str(Numb)+'_'+str(Inactlabel1)+'.setEnabled('+str(False)+')')
             eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(False)+')')
-            eval('self.label'+str(Inactlabel2)+'.setEnabled('+str(False)+')')
-            eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(False)+')')
+            eval('self.label'+str(Numb)+'_'+str(Inactlabel2)+'.setEnabled('+str(False)+')')
+            eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(True)+')')
+            eval('self.label'+str(Numb)+'_'+str(Inactlabel3)+'.setEnabled('+str(True)+')')
+            eval('self.RD_'+str(Numb)+'.setEnabled('+str(True)+')')
+        if eval('self.LaserStart_'+str(Numb)+'.currentText()')=='NA':
+            eval('self.label'+str(Numb)+'_'+str(9)+'.setEnabled('+str(False)+')')
+            eval('self.OffsetStart_'+str(Numb)+'.setEnabled('+str(False)+')')
+        else:
+            eval('self.label'+str(Numb)+'_'+str(9)+'.setEnabled('+str(True)+')')
+            eval('self.OffsetStart_'+str(Numb)+'.setEnabled('+str(True)+')')
+        if eval('self.LaserEnd_'+str(Numb)+'.currentText()')=='NA':
+            eval('self.label'+str(Numb)+'_'+str(11)+'.setEnabled('+str(False)+')')
+            eval('self.OffsetEnd_'+str(Numb)+'.setEnabled('+str(False)+')')
+        else:
+            eval('self.label'+str(Numb)+'_'+str(11)+'.setEnabled('+str(True)+')')
+            eval('self.OffsetEnd_'+str(Numb)+'.setEnabled('+str(True)+')')
     def _Laser(self,Numb):
-        ''' activate/inactivate optogenetics conditions'''
-        if Numb==1: 
-            Inactlabel=range(1,9)
-        elif  Numb==2: 
-            Inactlabel=range(10,18)
-        elif  Numb==3: 
-            Inactlabel=range(19,27)
-        elif  Numb==4: 
-            Inactlabel=range(28,36)
+        ''' enable/disable items based on laser (blue/green/orange/red/NA)'''
+        Inactlabel=range(1,16)
         if eval('self.Laser_'+str(Numb)+'.currentText()')=='NA':
             Label=False
         else:
             Label=True
         eval('self.Location_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.AlignTo_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.LaserPower_'+str(Numb)+'.setEnabled('+str(Label)+')')
         eval('self.Probability_'+str(Numb)+'.setEnabled('+str(Label)+')')
         eval('self.Duration_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.Condition_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.ConditionP_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.LaserStart_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.OffsetStart_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.LaserEnd_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.OffsetEnd_'+str(Numb)+'.setEnabled('+str(Label)+')')
         eval('self.Protocol_'+str(Numb)+'.setEnabled('+str(Label)+')')
         eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(Label)+')')
         eval('self.RD_'+str(Numb)+'.setEnabled('+str(Label)+')')
         eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(Label)+')')
         for i in Inactlabel:
-            eval('self.label'+str(i)+'.setEnabled('+str(Label)+')')
+            eval('self.label'+str(Numb)+'_'+str(i)+'.setEnabled('+str(Label)+')')
         if eval('self.Laser_'+str(Numb)+'.currentText()')!='NA':    
             eval('self._activated_'+str(Numb)+'()')
 
@@ -429,7 +457,7 @@ class GenerateTrials():
     def _GenerateATrial(self):
         self.RewardPairs=self.B_RewardFamilies[int(self.TP_RewardFamily())-1][:int(self.TP_RewardPairsN())]
         self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.TP_BaseRewardSum())
-        
+        # determine the reward probability of the next trial based on tasks
         if (self.TP_Task() in ['Coupled Baiting','Coupled Without Baiting']) and any(self.B_ANewBlock==1):
             # get the reward probabilities pool
             RewardProbPool=np.append(self.RewardProb,np.fliplr(self.RewardProb),axis=0)
@@ -483,7 +511,9 @@ class GenerateTrials():
         self.B_ITIHistory.append(self.CurrentITI)
         self.B_DelayHistory.append(self.CurrentDelay)
         self.B_ResponseTimeHistory.append(float(self.ResponseTime()))
-
+    
+        # generate the optogenetics waveform
+        
     def _InitiateATrial(self,rig):
         # Determine if the current lick port should be baited. self.B_Baited can only be updated after receiving response of the animal, so this part cannot appear in the _GenerateATrial section
         self.CurrentBait=self.B_CurrentRewardProb>np.random.random(2)
