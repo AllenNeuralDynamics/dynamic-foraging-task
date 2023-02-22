@@ -533,7 +533,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>offset=</string>
+    <string>offset (s)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -1048,7 +1048,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>offset=</string>
+    <string>offset (s)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -1934,7 +1934,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>offset=</string>
+    <string>offset (s)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -3158,7 +3158,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>offset=</string>
+    <string>offset (s)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>

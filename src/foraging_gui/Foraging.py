@@ -23,6 +23,7 @@ import rigcontrol
 from pyOSC3.OSC3 import OSCStreamingClient
 from PyQt5.QtCore import *
 import traceback
+import subprocess
 
 class Window(QMainWindow, Ui_ForagingGUI):
     def __init__(self, parent=None):
@@ -38,7 +39,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.threadpool2=QThreadPool()
         self.OpenOptogenetics=0
     def _InitializeBonsai(self):
-        #os.system("start E:\BonsaiBehavior-master\BonsaiBehavior-master\Bonsai\Bonsai.exe E:\DynamicForagingGUI\Foraging4\foraging-v4.bonsai") 
+        #os.system(" E:\\GitHub\\dynamic-foraging-task\\bonsai\\Bonsai.exe E:\\GitHub\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai  --start") 
+        #workflow_file = "E:\\GitHub\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai"
+        #result=subprocess.run(["E:\\GitHub\\dynamic-foraging-task\\bonsai\\Bonsai.exe", "workflows", "--start", workflow_file], check=True)
+        #output = result.stdout.decode()
+        #workflow_id = re.search(r"Workflow started with ID: (.+)", output).group(1)
+        #print(f"Workflow started with ID {workflow_id}")
         self.ip = "127.0.0.1"
         self.request_port = 4002
         self.client = OSCStreamingClient()  # Create client
@@ -48,6 +54,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.client2 = OSCStreamingClient()  # Create client
         self.client2.connect((self.ip, self.request_port2))
         self.rig2 = rigcontrol.RigClient(self.client2)
+        self.request_port3 = 4004
+        self.client3 = OSCStreamingClient()  # Create client
+        self.client3.connect((self.ip, self.request_port3))
+        self.rig3 = rigcontrol.RigClient(self.client3)
 
     def connectSignalsSlots(self):
         self.action_About.triggered.connect(self._about)
@@ -79,12 +89,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Start.setChecked(False)
             self.client.close()
             self.client2.close()
+            self.client3.close()
             print('Window closed')
         elif reply == QMessageBox.No:
             event.accept()
             self.Start.setChecked(False)
             self.client.close()
             self.client2.close()
+            self.client3.close()
             print('Window closed')
         else:
             event.ignore()
@@ -126,7 +138,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     if child.objectName() in Obj.keys():
                         if child.itemText(i) == Obj[child.objectName()][0]:
                             child.setCurrentIndex(i)
-        
+
     def _Camera(self):
         self.Camera_dialog = CameraDialog(self)
         self.Camera_dialog.show()
@@ -171,30 +183,97 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     Obj[child.objectName()]=child.text()
                 for child in self.Opto_dialog.findChildren(QtWidgets.QComboBox):
                     Obj[child.objectName()]=child.currentText()
+
+            # save behavor events
+            if hasattr(self, 'GeneratedTrials'):
+                # Do something if self has the GeneratedTrials attribute
+                # Create an empty dictionary to store the fields with the 'B_' prefix and other behavior events
+                Obj['LeftLickTime']=self.GeneratedTrials.LeftLickTime
+                Obj['RightLickTime']=self.GeneratedTrials.RightLickTime
+                Obj['TrialStartTime']=self.GeneratedTrials.TrialStartTime
+                Obj['TrialEndTime']=self.GeneratedTrials.TrialEndTime
+                Obj['GoCueTime']=self.GeneratedTrials.GoCueTime
+                # Iterate over all attributes of the GeneratedTrials object
+                for attr_name in dir(self.GeneratedTrials):
+                    if attr_name.startswith('B_'):
+                        # Add the field to the dictionary with the 'B_' prefix removed
+                        Obj[attr_name] = getattr(self.GeneratedTrials, attr_name)
             savemat(self.SaveFile, Obj)
 
     def _Open(self):
-        fname = QFileDialog.getOpenFileName(self, 'Open file',self.default_saveFolder,"Behavior files (*.mat)")
-        if fname[0] != '':
-            Obj = loadmat(fname[0])
-            self.Obj=Obj
-            for child in self.centralwidget.findChildren(QtWidgets.QLineEdit):
-                if child.objectName() in Obj.keys():
-                    child.setText(Obj[child.objectName()][0])
+        fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior files (*.mat)")
+        if fname:
+            Obj = loadmat(fname)
+            self.Obj = Obj
+            widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))}
+            widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
+
+            for key in widget_dict.keys():
+                if key in Obj:
+                    widget = widget_dict[key]
+                    value=Obj[key]
+                    if len(value)==0:
+                        value=np.array([''], dtype='<U1')
+                    if isinstance(widget, QtWidgets.QLineEdit):
+                        widget.setText(value[-1])
+                    elif isinstance(widget, QtWidgets.QComboBox):
+                        index = widget.findText(value[-1])
+                        if index != -1:
+                            widget.setCurrentIndex(index)
+                    elif isinstance(widget, QtWidgets.QDoubleSpinBox):
+                        widget.setValue(float(value[-1]))
                 else:
-                    child.clear()
-            for child in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox):
-                if child.objectName() in Obj.keys():
-                    child.setValue(float(Obj[child.objectName()][0]))
-                else:
-                    child.clear()
-            for child in self.centralwidget.findChildren(QtWidgets.QComboBox):
-                for i in range(child.count()):
-                    if child.objectName() in Obj.keys():
-                        if child.itemText(i) == Obj[child.objectName()][0]:
-                            child.setCurrentIndex(i)
+                    widget = widget_dict[key]
+                    if not isinstance(widget, QtWidgets.QComboBox):
+                        widget.clear()
             if 'Opto_dialog' in self.__dict__:
                 self._UpdateOptoPar()
+            try:
+                # visualization when loading the data
+                self._LoadVisualization()
+            except Exception as e:
+                # Catch the exception and print error information
+                print("An error occurred:")
+                print(traceback.format_exc())
+
+    def _LoadVisualization(self):
+        self.NewSession.click()
+        self.InitializeVisual=0
+        Obj=self.Obj
+        # visualization of the loaded data
+        self.GeneratedTrials=GenerateTrials(self)
+        # Iterate over all attributes of the GeneratedTrials object
+        for attr_name in dir(self.GeneratedTrials):
+            if attr_name in Obj.keys():
+                try:
+                    # Get the value of the attribute from Obj
+                    value = Obj[attr_name]
+                    # Set the attribute in the GeneratedTrials object
+                    setattr(self.GeneratedTrials, attr_name, value)
+                except:
+                    pass
+        # this is a bug to use the scipy.io.loadmat or savemat (it will change the dimension of the nparray)
+        self.GeneratedTrials.B_AnimalResponseHistory=self.GeneratedTrials.B_AnimalResponseHistory[0]
+        self.GeneratedTrials.TrialStartTime=self.GeneratedTrials.TrialStartTime[0]
+        self.GeneratedTrials.TrialEndTime=self.GeneratedTrials.TrialEndTime[0]
+        self.GeneratedTrials.GoCueTime=self.GeneratedTrials.GoCueTime[0]
+
+        PlotM=PlotV(win=self,GeneratedTrials=self.GeneratedTrials,width=5, height=4)
+        layout=self.Visualization.layout()
+        if layout is not None:
+            for i in reversed(range(layout.count())):
+                layout.itemAt(i).widget().setParent(None)
+            layout.invalidate()
+        layout=self.Visualization.layout()
+        if layout is None:
+            layout=QVBoxLayout(self.Visualization)
+        toolbar = NavigationToolbar(PlotM, self)
+        toolbar.setMaximumHeight(20)
+        toolbar.setMaximumWidth(300)
+        layout.addWidget(toolbar)
+        layout.addWidget(PlotM)
+        PlotM._Update(GeneratedTrials=self.GeneratedTrials)
+        
 
     def _Clear(self):
         for child in self.TrainingParameters.findChildren(QtWidgets.QLineEdit):
@@ -240,7 +319,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             GeneratedTrials=GenerateTrials(self)
             self.GeneratedTrials=GeneratedTrials
             self.StartANewSession=0
-            PlotM=PlotV(GeneratedTrials,self,width=5, height=4)
+            PlotM=PlotV(win=self,GeneratedTrials=GeneratedTrials,width=5, height=4)
             #generate the first trial outside the loop, only for new session
             self.ANewTrial=1
             GeneratedTrials._GenerateATrial()
@@ -250,6 +329,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
         if self.InitializeVisual==0: # only run once
             self.PlotM=PlotM
             layout=self.Visualization.layout()
+            if layout is not None:
+                for i in reversed(range(layout.count())):
+                    layout.itemAt(i).widget().setParent(None)
+                layout.invalidate()
             if layout is None:
                 layout=QVBoxLayout(self.Visualization)
             toolbar = NavigationToolbar(PlotM, self)
@@ -264,12 +347,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # start the trial loop
         while self.Start.isChecked():
             QApplication.processEvents()
-            if self.ANewTrial==1: 
+            if self.ANewTrial==1 and GeneratedTrials.GeneFinish==1: 
                 self.ANewTrial=0     
                 #initiate the generated trial
                 GeneratedTrials._InitiateATrial(self.rig)
                 #get the response of the animal using a different thread
-                worker = Worker(GeneratedTrials._GetAnimalResponse,self.rig)
+                worker = Worker(GeneratedTrials._GetAnimalResponse,self.rig,self.rig3)
                 worker.signals.finished.connect(self._thread_complete)
                 self.threadpool.start(worker)
                 #get the licks of the animal using a different thread
@@ -279,7 +362,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 PlotM._Update(GeneratedTrials=GeneratedTrials)
                 print(GeneratedTrials.B_CurrentTrialN)
                 #generate a new trial
+                GeneratedTrials.GeneFinish=0
                 GeneratedTrials._GenerateATrial()
+
     def _OptogeneticsB(self):
         ''' optogenetics control in the main window'''
         if self.OptogeneticsB.currentText()=='on':
@@ -289,6 +374,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         else:
             self.action_Optogenetics.setChecked(False)
             self.Opto_dialog.hide()
+            
 class OptogeneticsDialog(QDialog,Ui_Optogenetics):
     '''Optogenetics dialog'''
     def __init__(self, parent=None):
@@ -433,8 +519,8 @@ class GenerateTrials():
         self.B_CurrentTrialN=0
         self._GetTrainingParameters(win)
         self.B_LickPortN=2
-        self.B_ANewBlock=np.array([1,1])
-        self.B_RewardProHistory=np.array([[],[]])
+        self.B_ANewBlock=np.array([1,1]).astype(int)
+        self.B_RewardProHistory=np.array([[],[]]).astype(int)
         self.B_BlockLenHistory=[[],[]]
         self.B_BaitHistory=np.array([[],[]]).astype(bool)
         self.B_ITIHistory=[]
@@ -442,16 +528,16 @@ class GenerateTrials():
         self.B_ResponseTimeHistory=[]
         self.B_CurrentRewardProb=np.empty((2,))
         self.B_AnimalCurrentResponse=[]
-        self.B_AnimalResponseHistory=np.array([]) # 0 lick left; 1 lick right; 2 no response
-        self.B_Baited=np.array([False,False])
-        self.B_CurrentRewarded=np.array([[False],[False]]) # whether to receive reward
+        self.B_AnimalResponseHistory=np.array([]).astype(float) # 0 lick left; 1 lick right; 2 no response
+        self.B_Baited=np.array([False,False]).astype(bool)
+        self.B_CurrentRewarded=np.array([[False],[False]]).astype(bool) # whether to receive reward
         self.B_RewardedHistory=np.array([[],[]]).astype(bool)
         self.B_Time=[]
-        self.LeftLickTime=np.array([])
-        self.RightLickTime=np.array([])
-        self.TrialStartTime=np.array([])
-        self.TrialEndTime=np.array([])
-        self.GoCueTime=[]
+        self.LeftLickTime=np.array([]).astype(float)
+        self.RightLickTime=np.array([]).astype(float)
+        self.TrialStartTime=np.array([]).astype(float)
+        self.TrialEndTime=np.array([]).astype(float)
+        self.GoCueTime=np.array([]).astype(float)
         self.ResponseTime=win.ResponseTime.text
         
     def _GenerateATrial(self):
@@ -511,9 +597,13 @@ class GenerateTrials():
         self.B_ITIHistory.append(self.CurrentITI)
         self.B_DelayHistory.append(self.CurrentDelay)
         self.B_ResponseTimeHistory.append(float(self.ResponseTime()))
-    
-        # generate the optogenetics waveform
+        # generate the optogenetics waveform of the next trial
         
+        # send the waveform to Bonsai temporarily stored for using in the next trial 
+        # laser on/off of the next trial
+        # finish of this sectiom
+        self.GeneFinish=1
+
     def _InitiateATrial(self,rig):
         # Determine if the current lick port should be baited. self.B_Baited can only be updated after receiving response of the animal, so this part cannot appear in the _GenerateATrial section
         self.CurrentBait=self.B_CurrentRewardProb>np.random.random(2)
@@ -529,7 +619,7 @@ class GenerateTrials():
         rig.ResponseTime(float(self.ResponseTime()))
         rig.start(1)
   
-    def _GetAnimalResponse(self,rig):
+    def _GetAnimalResponse(self,rig,rig3):
         '''
         # random forager
         self.B_AnimalCurrentResponse=random.choice(range(2))
@@ -551,6 +641,9 @@ class GenerateTrials():
         a=rig.receive()
         # can not use self.CurrentBait to decide if this current trial is rewarded or not as a new trial was already generated before this
         b=rig.receive()
+        # go cue start time
+        GoCueTime=rig3.receive()
+        self.GoCueTime=np.append(self.GoCueTime,GoCueTime[1])
 
         if a.address=='/TrialEndTime':
             TrialEndTime=a
@@ -559,7 +652,7 @@ class GenerateTrials():
         if b.address=='/TrialEndTime':
             TrialEndTime=b
         elif b.address=='/TrialEnd':
-            TrialOutcome=b       
+            TrialOutcome=b
         if TrialOutcome[1]=='NoResponse':
             self.B_AnimalCurrentResponse=2
             self.B_CurrentRewarded[0]=False
@@ -614,7 +707,7 @@ class GenerateTrials():
             exec('self.'+'TP_'+child.objectName()+'='+'child.currentText')
 
 class PlotV(FigureCanvas):
-    def __init__(self,GeneratedTrials,win,parent=None,dpi=100,width=5, height=4):
+    def __init__(self,win,GeneratedTrials=None,parent=None,dpi=100,width=5, height=4):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         gs = GridSpec(10, 30, wspace = 3, hspace = 0.1, bottom = 0.1, top = 0.95, left = 0.04, right = 0.98)
         self.ax1 = self.fig.add_subplot(gs[0:4, 0:20])
@@ -646,12 +739,12 @@ class PlotV(FigureCanvas):
         self.B_TrialEndTime=GeneratedTrials.TrialEndTime
 
         if self.B_CurrentTrialN>0:
-            self.B_Time=GeneratedTrials.TrialEndTime-GeneratedTrials.TrialStartTime[0]
+            self.B_Time=self.B_TrialEndTime-GeneratedTrials.TrialStartTime[0]
         else:
-            self.B_Time=GeneratedTrials.TrialEndTime
+            self.B_Time=self.B_TrialEndTime
         self.B_BTime=self.B_Time.copy()
         try:
-            Delta=self.B_TrialEndTime[-1]-GeneratedTrials.TrialStartTime[0]
+            Delta=self.B_TrialEndTime[-1]-self.B_TrialStartTime[0]
             self.B_BTime=np.append(self.B_BTime,Delta+0.02*Delta)
         except:
             self.B_BTime=np.append(self.B_BTime,2)
