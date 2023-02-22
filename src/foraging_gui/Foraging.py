@@ -374,7 +374,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         else:
             self.action_Optogenetics.setChecked(False)
             self.Opto_dialog.hide()
-            
+
 class OptogeneticsDialog(QDialog,Ui_Optogenetics):
     '''Optogenetics dialog'''
     def __init__(self, parent=None):
@@ -815,7 +815,7 @@ class PlotV(FigureCanvas):
       
         LeftBait=np.where(self.B_BaitHistory[0][:-1]==True)
         RightBait=np.where(self.B_BaitHistory[1][:-1]==True)
-        MarkerSize=5
+        MarkerSize=3
         # plot the upcoming trial start time
         if self.B_CurrentTrialN>0:
             NewTrialStart=np.array(self.B_BTime[-1])
@@ -843,7 +843,7 @@ class PlotV(FigureCanvas):
         if np.size(RightChoice_Rewarded) !=0:
             ax1.plot(self.B_Time[RightChoice_Rewarded], np.zeros(len(self.B_Time[RightChoice_Rewarded]))+.8, 'go',markerfacecolor = (0, 1, 0, 1),markersize=MarkerSize)
         if np.size(NoResponse) !=0:
-            ax1.plot(self.B_Time[NoResponse], np.zeros(len(self.B_Time[NoResponse]))+.5, 'Xk',label='NoResponse',markersize=5,alpha=0.2)
+            ax1.plot(self.B_Time[NoResponse], np.zeros(len(self.B_Time[NoResponse]))+.5, 'Xk',label='NoResponse',markersize=MarkerSize,alpha=0.2)
         if self.B_CurrentTrialN>kernel_size:
             ax2.plot(self.B_Time[kernel_size-1:],ResponseHistoryF[:-kernel_size+1],'k',label='Choice_frac')
             ax2.plot(self.B_Time[kernel_size-1:],RewardedHistoryF[:-kernel_size+1],'g',label='reward_frac')
