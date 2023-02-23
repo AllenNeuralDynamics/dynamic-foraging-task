@@ -38,6 +38,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.threadpool=QThreadPool()
         self.threadpool2=QThreadPool()
         self.OpenOptogenetics=0
+        self._Optogenetics() # open the optogenetics panel 
     def _InitializeBonsai(self):
         #os.system(" E:\\GitHub\\dynamic-foraging-task\\bonsai\\Bonsai.exe E:\\GitHub\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai  --start") 
         #workflow_file = "E:\\GitHub\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai"
@@ -114,30 +115,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
         if self.OpenOptogenetics==0:
             self.Opto_dialog = OptogeneticsDialog(self)
             self.OpenOptogenetics=1
-            self._UpdateOptoPar() # update optogenetics parameters from the loaded file
         if self.action_Optogenetics.isChecked()==True:
             self.Opto_dialog.show()
         else:
             self.Opto_dialog.hide()
-    def _UpdateOptoPar(self):
-        '''Update optogenetics parameters from the loaded file'''
-        if 'Opto_dialog' in self.__dict__ and 'Obj' in self.__dict__:
-            Obj=self.Obj
-            for child in self.Opto_dialog.findChildren(QtWidgets.QLineEdit):
-                if child.objectName() in Obj.keys():
-                    child.setText(Obj[child.objectName()][0])
-                else:
-                    child.clear()
-            for child in self.Opto_dialog.findChildren(QtWidgets.QDoubleSpinBox):
-                if child.objectName() in Obj.keys():
-                    child.setValue(float(Obj[child.objectName()][0]))
-                else:
-                    child.clear()
-            for child in self.Opto_dialog.findChildren(QtWidgets.QComboBox):
-                for i in range(child.count()):
-                    if child.objectName() in Obj.keys():
-                        if child.itemText(i) == Obj[child.objectName()][0]:
-                            child.setCurrentIndex(i)
 
     def _Camera(self):
         self.Camera_dialog = CameraDialog(self)
@@ -173,7 +154,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 break
         self.SaveFile = QFileDialog.getSaveFileName(self, 'Save File',SaveFile)[0]
         if self.SaveFile != '':
-            Obj={}
+            if hasattr(self, 'GeneratedTrials'):
+                if hasattr(self.GeneratedTrials, 'Obj'):
+                    Obj=self.GeneratedTrials.Obj
+            else:
+                Obj={}
             for child in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)+self.centralwidget.findChildren(QtWidgets.QLineEdit):
                 Obj[child.objectName()]=child.text()
             for child in self.centralwidget.findChildren(QtWidgets.QComboBox):
@@ -200,6 +185,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         Obj[attr_name] = getattr(self.GeneratedTrials, attr_name)
             savemat(self.SaveFile, Obj)
 
+            #self._save_dict_to_hdf5(Obj,self.SaveFile)
+
     def _Open(self):
         fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior files (*.mat)")
         if fname:
@@ -207,6 +194,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Obj = Obj
             widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))}
             widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
+            widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))})  # update optogenetics parameters from the loaded file
 
             for key in widget_dict.keys():
                 if key in Obj:
@@ -226,8 +214,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     widget = widget_dict[key]
                     if not isinstance(widget, QtWidgets.QComboBox):
                         widget.clear()
-            if 'Opto_dialog' in self.__dict__:
-                self._UpdateOptoPar()
             try:
                 # visualization when loading the data
                 self._LoadVisualization()
@@ -237,17 +223,20 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 print(traceback.format_exc())
 
     def _LoadVisualization(self):
+        '''To visulize the training when loading a session'''
         self.NewSession.click()
         self.InitializeVisual=0
         Obj=self.Obj
-        # visualization of the loaded data
         self.GeneratedTrials=GenerateTrials(self)
         # Iterate over all attributes of the GeneratedTrials object
         for attr_name in dir(self.GeneratedTrials):
             if attr_name in Obj.keys():
                 try:
                     # Get the value of the attribute from Obj
-                    value = Obj[attr_name]
+                    if attr_name.startswith('TP_'):
+                        value = Obj[attr_name][-1]
+                    else:
+                        value = Obj[attr_name]
                     # Set the attribute in the GeneratedTrials object
                     setattr(self.GeneratedTrials, attr_name, value)
                 except:
@@ -517,7 +506,6 @@ class GenerateTrials():
         self.win=win
         self.B_RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self.B_CurrentTrialN=0
-        self._GetTrainingParameters(win)
         self.B_LickPortN=2
         self.B_ANewBlock=np.array([1,1]).astype(int)
         self.B_RewardProHistory=np.array([[],[]]).astype(int)
@@ -539,12 +527,18 @@ class GenerateTrials():
         self.TrialEndTime=np.array([]).astype(float)
         self.GoCueTime=np.array([]).astype(float)
         self.ResponseTime=win.ResponseTime.text
-        
+        self.Obj={}
+        # get all of the training parameters of the current trial
+        self._GetTrainingParameters(self.win)
     def _GenerateATrial(self):
-        self.RewardPairs=self.B_RewardFamilies[int(self.TP_RewardFamily())-1][:int(self.TP_RewardPairsN())]
-        self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.TP_BaseRewardSum())
+        # get all of the training parameters of the current trial
+        self._GetTrainingParameters(self.win)
+        # save all of the parameters in each trial
+        self._SaveParameters()
+        self.RewardPairs=self.B_RewardFamilies[int(self.TP_RewardFamily)-1][:int(self.TP_RewardPairsN)]
+        self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.TP_BaseRewardSum)
         # determine the reward probability of the next trial based on tasks
-        if (self.TP_Task() in ['Coupled Baiting','Coupled Without Baiting']) and any(self.B_ANewBlock==1):
+        if (self.TP_Task in ['Coupled Baiting','Coupled Without Baiting']) and any(self.B_ANewBlock==1):
             # get the reward probabilities pool
             RewardProbPool=np.append(self.RewardProb,np.fliplr(self.RewardProb),axis=0)
             # exclude the previous reward probabilities
@@ -554,13 +548,13 @@ class GenerateTrials():
             # get the reward probabilities of the current block
             self.B_CurrentRewardProb=RewardProbPool[random.choice(range(np.shape(RewardProbPool)[0]))]
             # randomly draw a block length between Min and Max
-            self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta()),1)+float(self.TP_BlockMin())))
-            if self.BlockLen>float(self.TP_BlockMax()):
-                self.BlockLen=int(self.TP_BlockMax())
+            self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta),1)+float(self.TP_BlockMin)))
+            if self.BlockLen>float(self.TP_BlockMax):
+                self.BlockLen=int(self.TP_BlockMax)
             for i in range(len(self.B_ANewBlock)):
                 self.B_BlockLenHistory[i].append(self.BlockLen)
             self.B_ANewBlock=np.array([0,0])
-        elif (self.TP_Task() in ['Uncoupled Baiting','Uncoupled Without Baiting'])  and any(self.B_ANewBlock==1):
+        elif (self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting'])  and any(self.B_ANewBlock==1):
             # get the reward probabilities pool
             for i in range(len(self.B_ANewBlock)):
                 if self.B_ANewBlock[i]==1:
@@ -572,9 +566,9 @@ class GenerateTrials():
                     # get the reward probabilities of the current block
                     self.B_CurrentRewardProb[i]=RewardProbPool[random.choice(range(np.shape(RewardProbPool)[0]))]
                     # randomly draw a block length between Min and Max
-                    self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta()),1)+float(self.TP_BlockMin())))
-                    if self.BlockLen>float(self.TP_BlockMax()):
-                        self.BlockLen=int(self.TP_BlockMax())
+                    self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta),1)+float(self.TP_BlockMin)))
+                    if self.BlockLen>float(self.TP_BlockMax):
+                        self.BlockLen=int(self.TP_BlockMax)
                     self.B_BlockLenHistory[i].append(self.BlockLen)
                     self.B_ANewBlock[i]=0
         self.B_RewardProHistory=np.append(self.B_RewardProHistory,self.B_CurrentRewardProb.reshape(self.B_LickPortN,1),axis=1)
@@ -583,17 +577,17 @@ class GenerateTrials():
             if self.B_CurrentTrialN>=sum(self.B_BlockLenHistory[i]):
                 self.B_ANewBlock[i]=1
         # transition to the next block when NextBlock button is clicked
-        if self.TP_NextBlock():
+        if self.TP_NextBlock:
             self.B_ANewBlock[:]=1
             self.win.NextBlock.setChecked(False)
         
         # get the ITI time and delay time
-        self.CurrentITI = float(np.random.exponential(float(self.TP_ITIBeta()),1)+float(self.TP_ITIMin()))
-        if self.CurrentITI>float(self.TP_ITIMax()):
-            self.CurrentITI=float(self.TP_ITIMax())
-        self.CurrentDelay = float(np.random.exponential(float(self.TP_DelayBeta()),1)+float(self.TP_DelayMin()))
-        if self.CurrentDelay>float(self.TP_DelayMax()):
-            self.CurrentDelay=float(self.TP_DelayMax())
+        self.CurrentITI = float(np.random.exponential(float(self.TP_ITIBeta),1)+float(self.TP_ITIMin))
+        if self.CurrentITI>float(self.TP_ITIMax):
+            self.CurrentITI=float(self.TP_ITIMax)
+        self.CurrentDelay = float(np.random.exponential(float(self.TP_DelayBeta),1)+float(self.TP_DelayMin))
+        if self.CurrentDelay>float(self.TP_DelayMax):
+            self.CurrentDelay=float(self.TP_DelayMax)
         self.B_ITIHistory.append(self.CurrentITI)
         self.B_DelayHistory.append(self.CurrentDelay)
         self.B_ResponseTimeHistory.append(float(self.ResponseTime()))
@@ -607,7 +601,7 @@ class GenerateTrials():
     def _InitiateATrial(self,rig):
         # Determine if the current lick port should be baited. self.B_Baited can only be updated after receiving response of the animal, so this part cannot appear in the _GenerateATrial section
         self.CurrentBait=self.B_CurrentRewardProb>np.random.random(2)
-        if (self.TP_Task() in ['Coupled Baiting','Uncoupled Baiting']):
+        if (self.TP_Task in ['Coupled Baiting','Uncoupled Baiting']):
              self.CurrentBait= self.CurrentBait | self.B_Baited
         self.B_Baited=  self.CurrentBait.copy()
         self.B_BaitHistory=np.append(self.B_BaitHistory, self.CurrentBait.reshape(2,1),axis=1)
@@ -695,16 +689,40 @@ class GenerateTrials():
 
     # get training parameters
     def _GetTrainingParameters(self,win):
-        for child in win.TrainingParameters.findChildren(QtWidgets.QLineEdit):
-            exec('self.'+'TP_'+child.objectName()+'='+'child.text')
-        for child in win.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox):
-            exec('self.'+'TP_'+child.objectName()+'='+'child.text')
-        for child in win.TrainingParameters.findChildren(QtWidgets.QComboBox):
-            exec('self.'+'TP_'+child.objectName()+'='+'child.currentText')   
-        for child in win.TrainingParameters.findChildren(QtWidgets.QPushButton):
-            exec('self.'+'TP_'+child.objectName()+'='+'child.isChecked')   
-        for child in win.centralwidget.findChildren(QtWidgets.QComboBox):
-            exec('self.'+'TP_'+child.objectName()+'='+'child.currentText')
+        '''Get training parameters'''
+        # Iterate over each container to find child widgets and store their values in self
+        for container in [win.TrainingParameters, win.centralwidget, win.Opto_dialog]:
+            # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
+            for child in container.findChildren((QtWidgets.QLineEdit, QtWidgets.QDoubleSpinBox)):
+                # Set an attribute in self with the name 'TP_' followed by the child's object name
+                # and store the child's text value
+                setattr(self, 'TP_'+child.objectName(), child.text())
+            # Iterate over each child of the container that is a QComboBox
+            for child in container.findChildren(QtWidgets.QComboBox):
+                # Set an attribute in self with the name 'TP_' followed by the child's object name
+                # and store the child's current text value
+                setattr(self, 'TP_'+child.objectName(), child.currentText())
+            # Iterate over each child of the container that is a QPushButton
+            for child in container.findChildren(QtWidgets.QPushButton):
+                # Set an attribute in self with the name 'TP_' followed by the child's object name
+                # and store whether the child is checked or not
+                setattr(self, 'TP_'+child.objectName(), child.isChecked())
+
+    def _SaveParameters(self):
+         for attr_name in dir(self):
+                if attr_name.startswith('TP_'):
+                    # Add the field to the dictionary with the 'TP_' prefix removed
+                    # Check if the attribute exists in self.Obj
+                    if attr_name in self.Obj:
+                        # Check if the attribute value is already a list
+                        if isinstance(self.Obj[attr_name], list):
+                            self.Obj[attr_name].append(getattr(self, attr_name))
+                        else:
+                            # If the attribute value is not a list, create a new list and append to it
+                            self.Obj[attr_name] = [self.Obj[attr_name], getattr(self, attr_name)]
+                    else:
+                        # If the attribute does not exist in self.Obj, create a new list and append to it
+                        self.Obj[attr_name] = [getattr(self, attr_name)]
 
 class PlotV(FigureCanvas):
     def __init__(self,win,GeneratedTrials=None,parent=None,dpi=100,width=5, height=4):
@@ -879,7 +897,7 @@ class PlotV(FigureCanvas):
             choice_log_ratio[idx]=np.log(RightChoiceN / LeftChoiceN)
             reward_log_ratio[idx]=np.log(RightRewardN / LeftRewardN)
             WinStartN=WinStartN+StepSize
-        if self.MarchingType()=='log ratio':
+        if self.MarchingType=='log ratio':
             x=reward_log_ratio
             y=choice_log_ratio
             ax.set(xlabel='Log Reward_R/L',ylabel='Log Choice_R/L')
