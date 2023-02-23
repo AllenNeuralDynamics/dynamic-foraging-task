@@ -24,6 +24,7 @@ from pyOSC3.OSC3 import OSCStreamingClient
 from PyQt5.QtCore import *
 import traceback
 import subprocess
+import h5py
 
 class Window(QMainWindow, Ui_ForagingGUI):
     def __init__(self, parent=None):
@@ -169,6 +170,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 for child in self.Opto_dialog.findChildren(QtWidgets.QComboBox):
                     Obj[child.objectName()]=child.currentText()
 
+            
             # save behavor events
             if hasattr(self, 'GeneratedTrials'):
                 # Do something if self has the GeneratedTrials attribute
@@ -182,10 +184,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 for attr_name in dir(self.GeneratedTrials):
                     if attr_name.startswith('B_'):
                         # Add the field to the dictionary with the 'B_' prefix removed
-                        Obj[attr_name] = getattr(self.GeneratedTrials, attr_name)
-            savemat(self.SaveFile, Obj)
-
-            #self._save_dict_to_hdf5(Obj,self.SaveFile)
+                        #print(attr_name)
+                        #if attr_name=='B_RewardFamilies':
+                        #    pass
+                        #else:
+                            Obj[attr_name] = getattr(self.GeneratedTrials, attr_name)
+            savemat(self.SaveFile, Obj)           
 
     def _Open(self):
         fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior files (*.mat)")
@@ -300,9 +304,15 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Start.setStyleSheet("background-color : green;")
             self.NewSession.setStyleSheet("background-color : none")
             self.NewSession.setChecked(False)
-            #self.Start.setChecked()
         else:
             self.Start.setStyleSheet("background-color : none")
+            ''' # update graph when session is stopped
+            try:
+                time.sleep(self.GeneratedTrials.B_ITIHistory[-1]+3)
+                self.PlotM._Update(GeneratedTrials=self.GeneratedTrials)
+            except:
+                pass
+            '''
         # to see if we should start a new session
         if self.StartANewSession==1:
             GeneratedTrials=GenerateTrials(self)
@@ -353,7 +363,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 #generate a new trial
                 GeneratedTrials.GeneFinish=0
                 GeneratedTrials._GenerateATrial()
-
     def _OptogeneticsB(self):
         ''' optogenetics control in the main window'''
         if self.OptogeneticsB.currentText()=='on':
@@ -505,6 +514,8 @@ class GenerateTrials():
     def __init__(self,win):
         self.win=win
         self.B_RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
+        self.B_RewardFamilies = [[[float(x) for x in y] for y in z] for z in self.B_RewardFamilies]
+        self.B_RewardFamilies = np.array(self.B_RewardFamilies)
         self.B_CurrentTrialN=0
         self.B_LickPortN=2
         self.B_ANewBlock=np.array([1,1]).astype(int)
