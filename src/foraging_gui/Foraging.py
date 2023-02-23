@@ -737,6 +737,7 @@ class PlotV(FigureCanvas):
         self.RunLengthSetValue=win.RunLength.setValue
         self.WindowSize=win.WindowSize.text
         self.StepSize=win.StepSize.text
+        self.MarkerSize=3
 
     def _Update(self,GeneratedTrials=None):
         self.B_AnimalResponseHistory=GeneratedTrials.B_AnimalResponseHistory
@@ -789,6 +790,7 @@ class PlotV(FigureCanvas):
         self._UpdateAxis()
         self.draw()
     def _PlotChoice(self):
+        MarkerSize=self.MarkerSize
         ax1=self.ax1
         ax2=self.ax2
         ax1.cla()
@@ -830,24 +832,27 @@ class PlotV(FigureCanvas):
         LeftChoice=np.where(self.B_AnimalResponseHistory==0)
         RightChoice=np.where(self.B_AnimalResponseHistory==1)
         NoResponse=np.where(self.B_AnimalResponseHistory==2)
-      
-        LeftBait=np.where(self.B_BaitHistory[0][:-1]==True)
-        RightBait=np.where(self.B_BaitHistory[1][:-1]==True)
-        MarkerSize=3
-        # plot the upcoming trial start time
-        if self.B_CurrentTrialN>0:
-            NewTrialStart=np.array(self.B_BTime[-1])
-            NewTrialStart2=np.array(self.B_BTime[-1]+self.B_BTime[-1]/40)
-        else:
-            NewTrialStart=np.array(self.B_BTime[-1]+0.1)
-            NewTrialStart2=np.array(self.B_BTime[-1])
 
-        ax1.eventplot(NewTrialStart.reshape((1,)), lineoffsets=.5, linelengths=2, linewidth=2, color='k', label='UpcomingTrial', alpha=0.3)
-        ax2.eventplot(NewTrialStart.reshape((1,)), lineoffsets=.5, linelengths=2, linewidth=2, color='k', alpha=0.3)
-        if self.B_BaitHistory[0][-1]==True:
-            ax1.plot(NewTrialStart2,-0.2, 'kD',label='Bait',markersize=MarkerSize, alpha=0.4)
-        if self.B_BaitHistory[1][-1]==True:
-            ax1.plot(NewTrialStart2,1.2, 'kD',markersize=MarkerSize, alpha=0.4)
+        if self.B_BaitHistory.shape[1]>self.B_AnimalResponseHistory.shape[0]:
+            LeftBait=np.where(self.B_BaitHistory[0][:-1]==True)
+            RightBait=np.where(self.B_BaitHistory[1][:-1]==True)
+            
+            # plot the upcoming trial start time
+            if self.B_CurrentTrialN>0:
+                NewTrialStart=np.array(self.B_BTime[-1])
+                NewTrialStart2=np.array(self.B_BTime[-1]+self.B_BTime[-1]/40)
+            else:
+                NewTrialStart=np.array(self.B_BTime[-1]+0.1)
+                NewTrialStart2=np.array(self.B_BTime[-1])
+            ax1.eventplot(NewTrialStart.reshape((1,)), lineoffsets=.5, linelengths=2, linewidth=2, color='k', label='UpcomingTrial', alpha=0.3)
+            ax2.eventplot(NewTrialStart.reshape((1,)), lineoffsets=.5, linelengths=2, linewidth=2, color='k', alpha=0.3)
+            if self.B_BaitHistory[0][-1]==True:
+                ax1.plot(NewTrialStart2,-0.2, 'kD',label='Bait',markersize=MarkerSize, alpha=0.4)
+            if self.B_BaitHistory[1][-1]==True:
+                ax1.plot(NewTrialStart2,1.2, 'kD',markersize=MarkerSize, alpha=0.4)
+        else:
+            LeftBait=np.where(self.B_BaitHistory[0]==True)
+            RightBait=np.where(self.B_BaitHistory[1]==True)
         if np.size(LeftBait) !=0:
             ax1.plot(self.B_BTime[LeftBait], np.zeros(len(self.B_BTime[LeftBait]))-0.2, 'kD',markersize=MarkerSize, alpha=0.2)
         if np.size(RightBait) !=0:
