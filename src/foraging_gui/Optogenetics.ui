@@ -131,12 +131,7 @@
    </item>
    <item>
     <property name="text">
-     <string>After go cue</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Before go cue</string>
+     <string>Go cue</string>
     </property>
    </item>
    <item>
@@ -577,7 +572,7 @@
     </sizepolicy>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>8</number>
    </property>
    <item>
     <property name="text">
@@ -586,12 +581,7 @@
    </item>
    <item>
     <property name="text">
-     <string>After go cue</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Before go cue</string>
+     <string>Go cue</string>
     </property>
    </item>
    <item>
@@ -840,7 +830,7 @@
     </sizepolicy>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>8</number>
    </property>
    <item>
     <property name="text">
@@ -849,12 +839,7 @@
    </item>
    <item>
     <property name="text">
-     <string>After go cue</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Before go cue</string>
+     <string>Go cue</string>
     </property>
    </item>
    <item>
@@ -1082,12 +1067,7 @@
    </item>
    <item>
     <property name="text">
-     <string>After go cue</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Before go cue</string>
+     <string>Go cue</string>
     </property>
    </item>
    <item>
@@ -1678,7 +1658,7 @@
     </sizepolicy>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>8</number>
    </property>
    <item>
     <property name="text">
@@ -1687,12 +1667,7 @@
    </item>
    <item>
     <property name="text">
-     <string>After go cue</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Before go cue</string>
+     <string>Go cue</string>
     </property>
    </item>
    <item>
@@ -2145,12 +2120,7 @@
    </item>
    <item>
     <property name="text">
-     <string>After go cue</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Before go cue</string>
+     <string>Go cue</string>
     </property>
    </item>
    <item>
@@ -2454,7 +2424,7 @@
     </sizepolicy>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>8</number>
    </property>
    <item>
     <property name="text">
@@ -2463,12 +2433,7 @@
    </item>
    <item>
     <property name="text">
-     <string>After go cue</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Before go cue</string>
+     <string>Go cue</string>
     </property>
    </item>
    <item>
@@ -2721,12 +2686,7 @@
    </item>
    <item>
     <property name="text">
-     <string>After go cue</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Before go cue</string>
+     <string>Go cue</string>
     </property>
    </item>
    <item>

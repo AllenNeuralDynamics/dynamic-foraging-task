@@ -25,6 +25,7 @@ from PyQt5.QtCore import *
 import traceback
 import subprocess
 import h5py
+from itertools import accumulate
 
 class Window(QMainWindow, Ui_ForagingGUI):
     def __init__(self, parent=None):
@@ -38,6 +39,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._InitializeBonsai()
         self.threadpool=QThreadPool()
         self.threadpool2=QThreadPool()
+        self.threadpool3=QThreadPool()
         self.OpenOptogenetics=0
         self._Optogenetics() # open the optogenetics panel 
     def _InitializeBonsai(self):
@@ -170,16 +172,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 for child in self.Opto_dialog.findChildren(QtWidgets.QComboBox):
                     Obj[child.objectName()]=child.currentText()
 
-            
             # save behavor events
             if hasattr(self, 'GeneratedTrials'):
                 # Do something if self has the GeneratedTrials attribute
-                # Create an empty dictionary to store the fields with the 'B_' prefix and other behavior events
-                Obj['LeftLickTime']=self.GeneratedTrials.LeftLickTime
-                Obj['RightLickTime']=self.GeneratedTrials.RightLickTime
-                Obj['TrialStartTime']=self.GeneratedTrials.TrialStartTime
-                Obj['TrialEndTime']=self.GeneratedTrials.TrialEndTime
-                Obj['GoCueTime']=self.GeneratedTrials.GoCueTime
                 # Iterate over all attributes of the GeneratedTrials object
                 for attr_name in dir(self.GeneratedTrials):
                     if attr_name.startswith('B_'):
@@ -188,7 +183,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         #if attr_name=='B_RewardFamilies':
                         #    pass
                         #else:
-                            Obj[attr_name] = getattr(self.GeneratedTrials, attr_name)
+                        Obj[attr_name] = getattr(self.GeneratedTrials, attr_name)
             savemat(self.SaveFile, Obj)           
 
     def _Open(self):
@@ -247,9 +242,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     pass
         # this is a bug to use the scipy.io.loadmat or savemat (it will change the dimension of the nparray)
         self.GeneratedTrials.B_AnimalResponseHistory=self.GeneratedTrials.B_AnimalResponseHistory[0]
-        self.GeneratedTrials.TrialStartTime=self.GeneratedTrials.TrialStartTime[0]
-        self.GeneratedTrials.TrialEndTime=self.GeneratedTrials.TrialEndTime[0]
-        self.GeneratedTrials.GoCueTime=self.GeneratedTrials.GoCueTime[0]
+        self.GeneratedTrials.B_TrialStartTime=self.GeneratedTrials.B_TrialStartTime[0]
+        self.GeneratedTrials.B_TrialEndTime=self.GeneratedTrials.B_TrialEndTime[0]
+        self.GeneratedTrials.B_GoCueTime=self.GeneratedTrials.B_GoCueTime[0]
 
         PlotM=PlotV(win=self,GeneratedTrials=self.GeneratedTrials,width=5, height=4)
         layout=self.Visualization.layout()
@@ -267,7 +262,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         layout.addWidget(PlotM)
         PlotM._Update(GeneratedTrials=self.GeneratedTrials)
         
-
     def _Clear(self):
         for child in self.TrainingParameters.findChildren(QtWidgets.QLineEdit):
             child.clear()
@@ -297,7 +291,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.NewSession.setStyleSheet("background-color : none")
     def _thread_complete(self):
         self.ANewTrial=1
-
+    def _thread_complete2(self):
+        '''complete of receive licks'''
+        self.ToReceiveLicks=1
+    def _thread_complete3(self):
+        '''complete of update figures'''
+        self.ToUpdateFigure=1
     def _Start(self):
         if self.Start.isChecked():
             # change button color and mark the state change
@@ -321,6 +320,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             PlotM=PlotV(win=self,GeneratedTrials=GeneratedTrials,width=5, height=4)
             #generate the first trial outside the loop, only for new session
             self.ANewTrial=1
+            self.ToReceiveLicks=1
+            self.ToUpdateFigure=1
             GeneratedTrials._GenerateATrial()
         else:
             GeneratedTrials=self.GeneratedTrials
@@ -351,18 +352,26 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 #initiate the generated trial
                 GeneratedTrials._InitiateATrial(self.rig)
                 #get the response of the animal using a different thread
-                worker = Worker(GeneratedTrials._GetAnimalResponse,self.rig,self.rig3)
-                worker.signals.finished.connect(self._thread_complete)
-                self.threadpool.start(worker)
+                worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.rig,self.rig3)
+                worker1.signals.finished.connect(self._thread_complete)
+                self.threadpool.start(worker1)
                 #get the licks of the animal using a different thread
-                workerLick = Worker(GeneratedTrials._GetLicks,self.rig2)
-                self.threadpool2.start(workerLick) 
-                #update the visualization
+                if self.ToReceiveLicks==1:
+                    workerLick = Worker(GeneratedTrials._GetLicks,self.rig2)
+                    workerLick.signals.finished.connect(self._thread_complete2)
+                    self.threadpool2.start(workerLick)
+                    self.ToReceiveLicks=0 
                 PlotM._Update(GeneratedTrials=GeneratedTrials)
+                #if self.ToUpdateFigure==1:
+                #    workerPlot = Worker(PlotM._Update,GeneratedTrials=GeneratedTrials)
+                #    workerPlot.signals.finished.connect(self._thread_complete3)
+                #    self.threadpool3.start(workerPlot)
+                #   self.ToUpdateFigure=0
                 print(GeneratedTrials.B_CurrentTrialN)
                 #generate a new trial
                 GeneratedTrials.GeneFinish=0
                 GeneratedTrials._GenerateATrial()
+
     def _OptogeneticsB(self):
         ''' optogenetics control in the main window'''
         if self.OptogeneticsB.currentText()=='on':
@@ -466,7 +475,7 @@ class OptogeneticsDialog(QDialog,Ui_Optogenetics):
             eval('self.OffsetEnd_'+str(Numb)+'.setEnabled('+str(True)+')')
     def _Laser(self,Numb):
         ''' enable/disable items based on laser (blue/green/orange/red/NA)'''
-        Inactlabel=range(1,16)
+        Inactlabel=range(2,16)
         if eval('self.Laser_'+str(Numb)+'.currentText()')=='NA':
             Label=False
         else:
@@ -532,12 +541,12 @@ class GenerateTrials():
         self.B_CurrentRewarded=np.array([[False],[False]]).astype(bool) # whether to receive reward
         self.B_RewardedHistory=np.array([[],[]]).astype(bool)
         self.B_Time=[]
-        self.LeftLickTime=np.array([]).astype(float)
-        self.RightLickTime=np.array([]).astype(float)
-        self.TrialStartTime=np.array([]).astype(float)
-        self.TrialEndTime=np.array([]).astype(float)
-        self.GoCueTime=np.array([]).astype(float)
-        self.ResponseTime=win.ResponseTime.text
+        self.B_LeftLickTime=np.array([]).astype(float)
+        self.B_RightLickTime=np.array([]).astype(float)
+        self.B_TrialStartTime=np.array([]).astype(float)
+        self.B_TrialEndTime=np.array([]).astype(float)
+        self.B_GoCueTime=np.array([]).astype(float)
+        self.B_LaserOnTrial=[]
         self.Obj={}
         # get all of the training parameters of the current trial
         self._GetTrainingParameters(self.win)
@@ -601,13 +610,58 @@ class GenerateTrials():
             self.CurrentDelay=float(self.TP_DelayMax)
         self.B_ITIHistory.append(self.CurrentITI)
         self.B_DelayHistory.append(self.CurrentDelay)
-        self.B_ResponseTimeHistory.append(float(self.ResponseTime()))
-        # generate the optogenetics waveform of the next trial
-        
-        # send the waveform to Bonsai temporarily stored for using in the next trial 
-        # laser on/off of the next trial
-        # finish of this sectiom
+        self.B_ResponseTimeHistory.append(float(self.TP_ResponseTime))
+
+        if self.TP_OptogeneticsB=='on': # optogenetics is turned on
+            # select the current optogenetics condition
+            self._SelectOptogeneticsCondition()
+            if self.SelctedCondition!=0: 
+                self.LaserOn=1
+                self.B_LaserOnTrial.append(self.LaserOn) 
+                # generate the optogenetics waveform of the next trial
+                self._GetLaserWaveForm()
+                # send the waveform to Bonsai temporarily stored for using in the next trial 
+                # laser on/off of the next trial
+                # finish of this sectiom
+            else:
+                # this is the control trials
+                self.LaserOn=0
+                self.B_LaserOnTrial.append(self.LaserOn) 
+        else:
+            # optogenetics is turned off
+            self.LaserOn=0
+            self.B_LaserOnTrial.append(self.LaserOn)
         self.GeneFinish=1
+    def _GetLaserWaveForm(self):
+        '''Get the waveform of the laser. It dependens on color/duration/protocol(frequency/RD/pulse duration)/locations'''
+        N=self.SelctedCondition
+        Color=eval('self.TP_Laser_'+N)
+        Location=eval('self.TP_Location_'+N)
+        LaserPower=eval('self.TP_LaserPower_'+N)
+        Duration=eval('self.TP_Duration_'+N)
+
+
+    def _SelectOptogeneticsCondition(self):
+        '''To decide if this should be an optogenetics trial'''
+        # condition should be taken into account in the future
+        ConditionsOn=[]
+        Probabilities=[]
+        for attr_name in dir(self):
+            if attr_name.startswith('TP_Laser_'):
+                if getattr(self, attr_name) !='NA':
+                    parts = attr_name.split('_')
+                    ConditionsOn.append(parts[-1])
+                    Probabilities.append(float(eval('self.TP_Probability_'+parts[-1])))
+        self.ConditionsOn=ConditionsOn
+        self.Probabilities=Probabilities
+        ProAccu=list(accumulate(Probabilities))
+        b=random.uniform(0,1)
+        for i in range(len(ProAccu)):
+            if b <= ProAccu[i]:
+                self.SelctedCondition=self.ConditionsOn[i]
+                break
+            else:
+                self.SelctedCondition=0 # control is selected
 
     def _InitiateATrial(self,rig):
         # Determine if the current lick port should be baited. self.B_Baited can only be updated after receiving response of the animal, so this part cannot appear in the _GenerateATrial section
@@ -621,7 +675,7 @@ class GenerateTrials():
         rig.Right_Bait(int(self.CurrentBait[1]))
         rig.ITI(float(self.CurrentITI))
         rig.DelayTime(float(self.CurrentDelay))
-        rig.ResponseTime(float(self.ResponseTime()))
+        rig.ResponseTime(float(self.TP_ResponseTime))
         rig.start(1)
   
     def _GetAnimalResponse(self,rig,rig3):
@@ -648,7 +702,7 @@ class GenerateTrials():
         b=rig.receive()
         # go cue start time
         GoCueTime=rig3.receive()
-        self.GoCueTime=np.append(self.GoCueTime,GoCueTime[1])
+        self.B_GoCueTime=np.append(self.B_GoCueTime,GoCueTime[1])
 
         if a.address=='/TrialEndTime':
             TrialEndTime=a
@@ -685,8 +739,8 @@ class GenerateTrials():
         self.B_RewardedHistory=np.append(self.B_RewardedHistory,self.B_CurrentRewarded,axis=1)
         self.B_AnimalResponseHistory=np.append(self.B_AnimalResponseHistory,self.B_AnimalCurrentResponse)
         # get the trial end time at the end of the trial
-        self.TrialStartTime=np.append(self.TrialStartTime,TrialStartTime[1])
-        self.TrialEndTime=np.append(self.TrialEndTime,TrialEndTime[1])
+        self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime[1])
+        self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime[1])
         self.B_CurrentTrialN+=1
 
     def _GetLicks(self,rig2):
@@ -694,9 +748,9 @@ class GenerateTrials():
             QApplication.processEvents()
             Rec=rig2.receive()
             if Rec.address=='/LeftLickTime':
-                self.LeftLickTime=np.append(self.LeftLickTime,Rec[1])
+                self.B_LeftLickTime=np.append(self.B_LeftLickTime,Rec[1])
             elif Rec.address=='/RightLickTime':
-                self.RightLickTime=np.append(self.RightLickTime,Rec[1])
+                self.B_RightLickTime=np.append(self.B_RightLickTime,Rec[1])
 
     # get training parameters
     def _GetTrainingParameters(self,win):
@@ -763,13 +817,13 @@ class PlotV(FigureCanvas):
         self.B_CurrentTrialN=GeneratedTrials.B_CurrentTrialN
         self.B_RewardedHistory=GeneratedTrials.B_RewardedHistory
         self.B_CurrentTrialN=GeneratedTrials.B_CurrentTrialN
-        self.B_RightLickTime=GeneratedTrials.RightLickTime
-        self.B_LeftLickTime=GeneratedTrials.LeftLickTime
-        self.B_TrialStartTime=GeneratedTrials.TrialStartTime
-        self.B_TrialEndTime=GeneratedTrials.TrialEndTime
+        self.B_RightLickTime=GeneratedTrials.B_RightLickTime
+        self.B_LeftLickTime=GeneratedTrials.B_LeftLickTime
+        self.B_TrialStartTime=GeneratedTrials.B_TrialStartTime
+        self.B_TrialEndTime=GeneratedTrials.B_TrialEndTime
 
         if self.B_CurrentTrialN>0:
-            self.B_Time=self.B_TrialEndTime-GeneratedTrials.TrialStartTime[0]
+            self.B_Time=self.B_TrialEndTime-GeneratedTrials.B_TrialStartTime[0]
         else:
             self.B_Time=self.B_TrialEndTime
         self.B_BTime=self.B_Time.copy()
@@ -784,6 +838,7 @@ class PlotV(FigureCanvas):
         self._PlotChoice()
         self._PlotMatching()
         self._PlotLicks()
+        self.finish=1
     def _PlotBlockStructure(self):
         ax2=self.ax2
         ax2.cla()
@@ -864,6 +919,7 @@ class PlotV(FigureCanvas):
         else:
             LeftBait=np.where(self.B_BaitHistory[0]==True)
             RightBait=np.where(self.B_BaitHistory[1]==True)
+
         if np.size(LeftBait) !=0:
             ax1.plot(self.B_BTime[LeftBait], np.zeros(len(self.B_BTime[LeftBait]))-0.2, 'kD',markersize=MarkerSize, alpha=0.2)
         if np.size(RightBait) !=0:
@@ -963,7 +1019,6 @@ class PlotV(FigureCanvas):
         self.ax2.set_yticklabels(['L', 'R'])
         self.ax2.set_ylim(-0.15, 1.15)
         self.ax2.legend(loc='lower left', fontsize=8)
-
 class WorkerSignals(QObject):
     '''
     Defines the signals available from a running worker thread.
