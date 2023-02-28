@@ -35,6 +35,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.default_saveFolder='E:\\DynamicForagingGUI\\Behavior\\'
         self.StartANewSession=1 # to decide if should start a new session
         self.InitializeVisual=0
+        self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
         self.Visualization.setTitle(str(date.today()))
         self._InitializeBonsai()
         self.threadpool=QThreadPool()
@@ -122,7 +123,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Opto_dialog.show()
         else:
             self.Opto_dialog.hide()
-
     def _Camera(self):
         self.Camera_dialog = CameraDialog(self)
         self.Camera_dialog.show()
@@ -290,6 +290,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         else:
             self.NewSession.setStyleSheet("background-color : none")
     def _thread_complete(self):
+        '''complete of a trial'''
         self.ANewTrial=1
     def _thread_complete2(self):
         '''complete of receive licks'''
@@ -318,6 +319,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.GeneratedTrials=GeneratedTrials
             self.StartANewSession=0
             PlotM=PlotV(win=self,GeneratedTrials=GeneratedTrials,width=5, height=4)
+            PlotM.finish=1
             #generate the first trial outside the loop, only for new session
             self.ANewTrial=1
             self.ToReceiveLicks=1
@@ -325,7 +327,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
             GeneratedTrials._GenerateATrial()
         else:
             GeneratedTrials=self.GeneratedTrials
-
         if self.InitializeVisual==0: # only run once
             self.PlotM=PlotM
             layout=self.Visualization.layout()
@@ -341,8 +342,21 @@ class Window(QMainWindow, Ui_ForagingGUI):
             layout.addWidget(toolbar)
             layout.addWidget(PlotM)
             self.InitializeVisual=1
+            # create workers
+            worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.rig,self.rig3)
+            worker1.signals.finished.connect(self._thread_complete)
+            workerLick = Worker(GeneratedTrials._GetLicks,self.rig2)
+            workerLick.signals.finished.connect(self._thread_complete2)
+            workerPlot = Worker(PlotM._Update,GeneratedTrials=GeneratedTrials)
+            workerPlot.signals.finished.connect(self._thread_complete3)
+            self.worker1=worker1
+            self.workerLick=workerLick
+            self.workerPlot=workerPlot
         else:
             PlotM=self.PlotM
+            worker1=self.worker1
+            workerLick=self.workerLick
+            workerPlot=self.workerPlot
 
         # start the trial loop
         while self.Start.isChecked():
@@ -352,21 +366,20 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 #initiate the generated trial
                 GeneratedTrials._InitiateATrial(self.rig)
                 #get the response of the animal using a different thread
-                worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.rig,self.rig3)
-                worker1.signals.finished.connect(self._thread_complete)
                 self.threadpool.start(worker1)
                 #get the licks of the animal using a different thread
                 if self.ToReceiveLicks==1:
-                    workerLick = Worker(GeneratedTrials._GetLicks,self.rig2)
-                    workerLick.signals.finished.connect(self._thread_complete2)
                     self.threadpool2.start(workerLick)
-                    self.ToReceiveLicks=0 
-                PlotM._Update(GeneratedTrials=GeneratedTrials)
-                #if self.ToUpdateFigure==1:
-                #    workerPlot = Worker(PlotM._Update,GeneratedTrials=GeneratedTrials)
-                #    workerPlot.signals.finished.connect(self._thread_complete3)
-                #    self.threadpool3.start(workerPlot)
-                #   self.ToUpdateFigure=0
+                    self.ToReceiveLicks=0
+                # update figures. If the update is too slow, using a different process
+                if PlotM.finish==1 and self.FigureUpdateTooSlow==0:
+                    PlotM.finish=0
+                    PlotM._Update(GeneratedTrials=GeneratedTrials)
+                else:
+                    self.FigureUpdateTooSlow=1
+                    if self.ToUpdateFigure==1:
+                        self.threadpool3.start(workerPlot)
+                        self.ToUpdateFigure=0
                 print(GeneratedTrials.B_CurrentTrialN)
                 #generate a new trial
                 GeneratedTrials.GeneFinish=0
@@ -546,7 +559,10 @@ class GenerateTrials():
         self.B_TrialStartTime=np.array([]).astype(float)
         self.B_TrialEndTime=np.array([]).astype(float)
         self.B_GoCueTime=np.array([]).astype(float)
-        self.B_LaserOnTrial=[]
+        self.B_LaserOnTrial=[] # trials with laser on
+        self.B_LaserAmplitude=[]
+        self.B_LaserDuration=[]
+        self.B_LaserTrialNum=[] # B_LaserAmplitude and B_LaserDuration have values only on laser on trials, so we need to store the laser trial number
         self.Obj={}
         # get all of the training parameters of the current trial
         self._GetTrainingParameters(self.win)
@@ -633,13 +649,57 @@ class GenerateTrials():
             self.B_LaserOnTrial.append(self.LaserOn)
         self.GeneFinish=1
     def _GetLaserWaveForm(self):
-        '''Get the waveform of the laser. It dependens on color/duration/protocol(frequency/RD/pulse duration)/locations'''
+        '''Get the waveform of the laser. It dependens on color/duration/protocol(frequency/RD/pulse duration)/locations/laser power'''
         N=self.SelctedCondition
-        Color=eval('self.TP_Laser_'+N)
-        Location=eval('self.TP_Location_'+N)
-        LaserPower=eval('self.TP_LaserPower_'+N)
-        Duration=eval('self.TP_Duration_'+N)
+        # CLP, current laser parameter
+        self.CLP_Color=eval('self.TP_Laser_'+N)
+        self.CLP_Location=eval('self.TP_Location_'+N)
+        self.CLP_LaserPower=eval('self.TP_LaserPower_'+N)
+        self.CLP_Duration=eval('self.TP_Duration_'+N)
+        self.CLP_Protocol=eval('self.TP_Protocol_'+N)
+        self.CLP_Frequency=eval('self.TP_Frequency_'+N)
+        self.CLP_RampingDown=eval('self.TP_RD_'+N)
+        self.CLP_PulseDur=eval('self.TP_PulseDur_'+N)
+        self.CLP_LaserStart=eval('self.TP_LaserStart_'+N)
+        self.CLP_OffsetStart=float(eval('self.TP_OffsetStart_'+N))
+        self.CLP_LaserEnd=eval('self.TP_LaserEnd_'+N)
+        self.CLP_OffsetEnd=float(eval('self.TP_OffsetEnd_'+N)) # negative, backward; positive forward
+        # align to trial start
+        if (self.CLP_LaserStart=='Trial start' or self.CLP_LaserStart=='Go cue') and self.CLP_LaserEnd=='NA':
+            # the duration is determined by Duration
+            self.CLP_CurrentDuration=self.CLP_Duration
+        elif self.CLP_LaserStart=='Trial start' and self.CLP_LaserEnd=='Go cue':
+            # the duration is determined by CurrentITI, CurrentDelay, self.CLP_OffsetStart, self.CLP_OffsetEnd
+            # only positive CLP_OffsetStart is allowed
+            if self.CLP_OffsetStart<0:
+                self.win.WarningLabel.setText('Please set offset start to be positive!')
+                self.win.WarningLabel.setStyleSheet("color: red;")
+            self.CLP_CurrentDuration=self.CurrentITI+self.CurrentDelay-self.CLP_OffsetStart+self.CLP_OffsetEnd
+        elif self.CLP_LaserStart=='Go cue' and self.CLP_LaserEnd=='Trial start':
+            # The duration is inaccurate as it doesn't account for time outside of bonsai (can be solved in Bonsai)
+            # the duration is determined by TP_ResponseTime, self.CLP_OffsetStart, self.CLP_OffsetEnd
+            self.CLP_CurrentDuration=self.TP_ResponseTime-self.CLP_OffsetStart+self.CLP_OffsetEnd
+        self.B_LaserDuration.append(self.CLP_CurrentDuration)
+        # generate the waveform based on self.CLP_CurrentDuration and Protocol, Frequency, RampingDown, PulseDur
+        self._ProduceWaveForm()
 
+    def _ProduceWaveForm(self):
+        '''generate the waveform based on Duration and Protocol, Laser Power, Frequency, RampingDown and PulseDur'''
+        self._GetLaserAmplitude()
+        if self.CLP_Protocol=='Sine':
+            pass
+        elif self.CLP_Protocol=='Pulse':
+            pass
+        elif self.CLP_Protocol=='Constant':
+            pass
+        else:
+            self.win.WarningLabel.setText('Unidentified optogenetics protocol!')
+            self.win.WarningLabel.setStyleSheet("color: red;")
+
+    def __GetLaserAmplitude(self):
+        '''the voltage amplitude dependens on Protocol, Laser Power, Laser color<>'''
+        self.CurrentLaserAmplitude=1
+        self.B_LaserAmplitude.append(self.CurrentLaserAmplitude)
 
     def _SelectOptogeneticsCondition(self):
         '''To decide if this should be an optogenetics trial'''
@@ -836,7 +896,10 @@ class PlotV(FigureCanvas):
         self.MarchingType=GeneratedTrials.TP_MartchingType
         self._PlotBlockStructure()
         self._PlotChoice()
-        self._PlotMatching()
+        try:
+            self._PlotMatching()
+        except:
+            pass
         self._PlotLicks()
         self.finish=1
     def _PlotBlockStructure(self):
@@ -1065,7 +1128,7 @@ class Worker(QRunnable):
         self.args = args
         self.kwargs = kwargs
         self.signals = WorkerSignals()
-
+        self.setAutoDelete(False) 
         # Add the callback to our kwargs
         #self.kwargs['progress_callback'] = self.signals.progress
 

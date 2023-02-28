@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>1196</width>
-    <height>886</height>
+    <height>938</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -1584,6 +1584,28 @@
     </property>
     <property name="alignment">
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="WarningLabel">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>830</y>
+      <width>1151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="scaledContents">
+     <bool>false</bool>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
   </widget>
