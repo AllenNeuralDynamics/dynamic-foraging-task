@@ -42,3 +42,9 @@ class RigClient:
 
     def ResponseTime(self, value):
         self.send("/ResponseTime", value)
+    
+    def WaveForm1(self, value):
+        self.send("/WaveForm1", value)
+    
+    def WaveForm2(self, value):
+        self.send("/WaveForm2", value)

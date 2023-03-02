@@ -41,8 +41,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.threadpool=QThreadPool()
         self.threadpool2=QThreadPool()
         self.threadpool3=QThreadPool()
+        self.threadpool4=QThreadPool() # for generating a new trial
         self.OpenOptogenetics=0
-        self._Optogenetics() # open the optogenetics panel 
+        self._Optogenetics() # open the optogenetics panel
+
     def _InitializeBonsai(self):
         #os.system(" E:\\GitHub\\dynamic-foraging-task\\bonsai\\Bonsai.exe E:\\GitHub\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai  --start") 
         #workflow_file = "E:\\GitHub\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai"
@@ -54,16 +56,20 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.request_port = 4002
         self.client = OSCStreamingClient()  # Create client
         self.client.connect((self.ip, self.request_port))
-        self.rig = rigcontrol.RigClient(self.client)
+        self.Channel = rigcontrol.RigClient(self.client)
         self.request_port2 = 4003
         self.client2 = OSCStreamingClient()  # Create client
         self.client2.connect((self.ip, self.request_port2))
-        self.rig2 = rigcontrol.RigClient(self.client2)
+        self.Channel2 = rigcontrol.RigClient(self.client2)
         self.request_port3 = 4004
         self.client3 = OSCStreamingClient()  # Create client
         self.client3.connect((self.ip, self.request_port3))
-        self.rig3 = rigcontrol.RigClient(self.client3)
-
+        self.Channel3 = rigcontrol.RigClient(self.client3)
+        # specific for transfering optogenetics waveform
+        self.request_port4 = 4005
+        self.client4 = OSCStreamingClient()  # Create client
+        self.client4.connect((self.ip, self.request_port4))
+        self.Channel4 = rigcontrol.RigClient(self.client4)
     def connectSignalsSlots(self):
         self.action_About.triggered.connect(self._about)
         self.action_Camera.triggered.connect(self._Camera)
@@ -95,6 +101,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.client.close()
             self.client2.close()
             self.client3.close()
+            self.client4.close()
             print('Window closed')
         elif reply == QMessageBox.No:
             event.accept()
@@ -102,6 +109,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.client.close()
             self.client2.close()
             self.client3.close()
+            self.client4.close()
             print('Window closed')
         else:
             event.ignore()
@@ -298,6 +306,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _thread_complete3(self):
         '''complete of update figures'''
         self.ToUpdateFigure=1
+    def _thread_complete4(self):
+        '''complete of generating a trial'''
+        self.ToGenerateATrial=1
     def _Start(self):
         if self.Start.isChecked():
             # change button color and mark the state change
@@ -324,7 +335,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.ANewTrial=1
             self.ToReceiveLicks=1
             self.ToUpdateFigure=1
-            GeneratedTrials._GenerateATrial()
+            self.ToGenerateATrial=1
+            GeneratedTrials._GenerateATrial(self.Channel4)
         else:
             GeneratedTrials=self.GeneratedTrials
         if self.InitializeVisual==0: # only run once
@@ -343,20 +355,24 @@ class Window(QMainWindow, Ui_ForagingGUI):
             layout.addWidget(PlotM)
             self.InitializeVisual=1
             # create workers
-            worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.rig,self.rig3)
+            worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.Channel,self.Channel3)
             worker1.signals.finished.connect(self._thread_complete)
-            workerLick = Worker(GeneratedTrials._GetLicks,self.rig2)
+            workerLick = Worker(GeneratedTrials._GetLicks,self.Channel2)
             workerLick.signals.finished.connect(self._thread_complete2)
             workerPlot = Worker(PlotM._Update,GeneratedTrials=GeneratedTrials)
             workerPlot.signals.finished.connect(self._thread_complete3)
+            workerGenerateAtrial = Worker(GeneratedTrials._GenerateATrial,self.Channel4)
+            workerGenerateAtrial.signals.finished.connect(self._thread_complete4)
             self.worker1=worker1
             self.workerLick=workerLick
             self.workerPlot=workerPlot
+            self.workerGenerateAtrial=workerGenerateAtrial
         else:
             PlotM=self.PlotM
             worker1=self.worker1
             workerLick=self.workerLick
             workerPlot=self.workerPlot
+            workerGenerateAtrial=self.workerGenerateAtrial
 
         # start the trial loop
         while self.Start.isChecked():
@@ -364,7 +380,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             if self.ANewTrial==1 and GeneratedTrials.GeneFinish==1: 
                 self.ANewTrial=0     
                 #initiate the generated trial
-                GeneratedTrials._InitiateATrial(self.rig)
+                GeneratedTrials._InitiateATrial(self.Channel)
                 #get the response of the animal using a different thread
                 self.threadpool.start(worker1)
                 #get the licks of the animal using a different thread
@@ -383,7 +399,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 print(GeneratedTrials.B_CurrentTrialN)
                 #generate a new trial
                 GeneratedTrials.GeneFinish=0
-                GeneratedTrials._GenerateATrial()
+                GeneratedTrials._GenerateATrial(self.Channel4)
+                self.ToGenerateATrial=1
+                #self.threadpool4.start(workerGenerateAtrial)
 
     def _OptogeneticsB(self):
         ''' optogenetics control in the main window'''
@@ -562,11 +580,13 @@ class GenerateTrials():
         self.B_LaserOnTrial=[] # trials with laser on
         self.B_LaserAmplitude=[]
         self.B_LaserDuration=[]
-        self.B_LaserTrialNum=[] # B_LaserAmplitude and B_LaserDuration have values only on laser on trials, so we need to store the laser trial number
+        self.B_SelectedCondition=[]
+        #self.B_LaserTrialNum=[] # B_LaserAmplitude, B_LaserDuration, B_SelectedCondition have values only on laser on trials, so we need to store the laser trial number
+        
         self.Obj={}
         # get all of the training parameters of the current trial
         self._GetTrainingParameters(self.win)
-    def _GenerateATrial(self):
+    def _GenerateATrial(self,Channel4):
         # get all of the training parameters of the current trial
         self._GetTrainingParameters(self.win)
         # save all of the parameters in each trial
@@ -636,8 +656,8 @@ class GenerateTrials():
                 self.B_LaserOnTrial.append(self.LaserOn) 
                 # generate the optogenetics waveform of the next trial
                 self._GetLaserWaveForm()
-                # send the waveform to Bonsai temporarily stored for using in the next trial 
-                # laser on/off of the next trial
+                # send the waveform to Bonsai temporarily stored for using in the next trial
+                Channel4.WaveForm1(self.my_wave)
                 # finish of this sectiom
             else:
                 # this is the control trials
@@ -647,6 +667,9 @@ class GenerateTrials():
             # optogenetics is turned off
             self.LaserOn=0
             self.B_LaserOnTrial.append(self.LaserOn)
+            self.B_LaserAmplitude.append(0)
+            self.B_LaserDuration.append(0)
+            self.B_SelectedCondition.append(0)
         self.GeneFinish=1
     def _GetLaserWaveForm(self):
         '''Get the waveform of the laser. It dependens on color/duration/protocol(frequency/RD/pulse duration)/locations/laser power'''
@@ -655,15 +678,16 @@ class GenerateTrials():
         self.CLP_Color=eval('self.TP_Laser_'+N)
         self.CLP_Location=eval('self.TP_Location_'+N)
         self.CLP_LaserPower=eval('self.TP_LaserPower_'+N)
-        self.CLP_Duration=eval('self.TP_Duration_'+N)
+        self.CLP_Duration=float(eval('self.TP_Duration_'+N))
         self.CLP_Protocol=eval('self.TP_Protocol_'+N)
-        self.CLP_Frequency=eval('self.TP_Frequency_'+N)
-        self.CLP_RampingDown=eval('self.TP_RD_'+N)
+        self.CLP_Frequency=float(eval('self.TP_Frequency_'+N))
+        self.CLP_RampingDown=float(eval('self.TP_RD_'+N))
         self.CLP_PulseDur=eval('self.TP_PulseDur_'+N)
         self.CLP_LaserStart=eval('self.TP_LaserStart_'+N)
         self.CLP_OffsetStart=float(eval('self.TP_OffsetStart_'+N))
         self.CLP_LaserEnd=eval('self.TP_LaserEnd_'+N)
         self.CLP_OffsetEnd=float(eval('self.TP_OffsetEnd_'+N)) # negative, backward; positive forward
+        self.CLP_SampleFrequency=float(self.TP_SampleFrequency)
         # align to trial start
         if (self.CLP_LaserStart=='Trial start' or self.CLP_LaserStart=='Go cue') and self.CLP_LaserEnd=='NA':
             # the duration is determined by Duration
@@ -678,25 +702,76 @@ class GenerateTrials():
         elif self.CLP_LaserStart=='Go cue' and self.CLP_LaserEnd=='Trial start':
             # The duration is inaccurate as it doesn't account for time outside of bonsai (can be solved in Bonsai)
             # the duration is determined by TP_ResponseTime, self.CLP_OffsetStart, self.CLP_OffsetEnd
-            self.CLP_CurrentDuration=self.TP_ResponseTime-self.CLP_OffsetStart+self.CLP_OffsetEnd
+            self.CLP_CurrentDuration=float(self.TP_ResponseTime)-self.CLP_OffsetStart+self.CLP_OffsetEnd
+        else:
+            pass
         self.B_LaserDuration.append(self.CLP_CurrentDuration)
         # generate the waveform based on self.CLP_CurrentDuration and Protocol, Frequency, RampingDown, PulseDur
         self._ProduceWaveForm()
 
     def _ProduceWaveForm(self):
-        '''generate the waveform based on Duration and Protocol, Laser Power, Frequency, RampingDown and PulseDur'''
+        '''generate the waveform based on Duration and Protocol, Laser Power, Frequency, RampingDown, PulseDur and the sample frequency'''
         self._GetLaserAmplitude()
         if self.CLP_Protocol=='Sine':
-            pass
+            resolution=self.CLP_SampleFrequency*self.CLP_CurrentDuration # how many datapoints to generate
+            cycles=self.CLP_CurrentDuration*self.CLP_Frequency # how many sine cycles
+            length = np.pi * 2 * cycles
+            self.my_wave = self.CurrentLaserAmplitude*(1+np.sin(np.arange(0, length, length / resolution)))/2
+            # add ramping down
+            if self.CLP_RampingDown>self.CLP_CurrentDuration:
+                self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
+                self.win.WarningLabel.setStyleSheet("color: red;")
+            else:
+                Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
+                RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
+                RampingDown = np.concatenate((Constant, RD), axis=0)
+                self.my_wave=self.my_wave*RampingDown
         elif self.CLP_Protocol=='Pulse':
-            pass
+            if self.CLP_PulseDur=='NA':
+                self.win.WarningLabel.setText('Pulse duration is NA!')
+                self.win.WarningLabel.setStyleSheet("color: red;")
+            else:
+                self.CLP_PulseDur=float(self.CLP_PulseDur)
+                PointsEachPulse=int(self.CLP_SampleFrequency*self.CLP_PulseDur)
+                PulseIntervalPoints=int(1/self.CLP_Frequency*self.CLP_SampleFrequency-PointsEachPulse)
+                if PulseIntervalPoints<0:
+                    self.win.WarningLabel.setText('Pulse frequency and pulse duration are not compatible!')
+                    self.win.WarningLabel.setStyleSheet("color: red;")
+                TotalPoints=int(self.CLP_SampleFrequency*self.CLP_CurrentDuration)
+                PulseNumber=np.floor(self.CLP_CurrentDuration*self.CLP_Frequency) # a potential bug
+                EachPulse=self.CurrentLaserAmplitude*np.ones(PointsEachPulse)
+                PulseInterval=np.zeros(PulseIntervalPoints)
+                WaveFormEachCycle=np.concatenate((EachPulse, PulseInterval), axis=0)
+                self.my_wave=np.empty(0)
+                for i in range(int(PulseNumber-1)):
+                    self.my_wave=np.concatenate((self.my_wave, WaveFormEachCycle), axis=0)
+                self.my_wave=np.concatenate((self.my_wave, EachPulse), axis=0)
+                self.my_wave=np.concatenate((self.my_wave, np.zeros(TotalPoints-np.shape(self.my_wave)[0])), axis=0)
         elif self.CLP_Protocol=='Constant':
-            pass
+            resolution=self.CLP_SampleFrequency*self.CLP_CurrentDuration # how many datapoints to generate
+            self.my_wave=self.CurrentLaserAmplitude*np.ones(int(resolution))
+            # add ramping down
+            if self.CLP_RampingDown>self.CLP_CurrentDuration:
+                self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
+                self.win.WarningLabel.setStyleSheet("color: red;")
+            else:
+                Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
+                RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
+                RampingDown = np.concatenate((Constant, RD), axis=0)
+                self.my_wave=self.my_wave*RampingDown
+
         else:
             self.win.WarningLabel.setText('Unidentified optogenetics protocol!')
             self.win.WarningLabel.setStyleSheet("color: red;")
 
-    def __GetLaserAmplitude(self):
+        '''
+        # test
+        import matplotlib.pyplot as plt
+        plt.plot(np.arange(0, length, length / resolution), self.my_wave)   
+        plt.show()
+        '''
+
+    def _GetLaserAmplitude(self):
         '''the voltage amplitude dependens on Protocol, Laser Power, Laser color<>'''
         self.CurrentLaserAmplitude=1
         self.B_LaserAmplitude.append(self.CurrentLaserAmplitude)
@@ -722,8 +797,8 @@ class GenerateTrials():
                 break
             else:
                 self.SelctedCondition=0 # control is selected
-
-    def _InitiateATrial(self,rig):
+        self.B_SelectedCondition.append(self.SelctedCondition)
+    def _InitiateATrial(self,Channel1):
         # Determine if the current lick port should be baited. self.B_Baited can only be updated after receiving response of the animal, so this part cannot appear in the _GenerateATrial section
         self.CurrentBait=self.B_CurrentRewardProb>np.random.random(2)
         if (self.TP_Task in ['Coupled Baiting','Uncoupled Baiting']):
@@ -731,14 +806,14 @@ class GenerateTrials():
         self.B_Baited=  self.CurrentBait.copy()
         self.B_BaitHistory=np.append(self.B_BaitHistory, self.CurrentBait.reshape(2,1),axis=1)
 
-        rig.Left_Bait(int(self.CurrentBait[0]))
-        rig.Right_Bait(int(self.CurrentBait[1]))
-        rig.ITI(float(self.CurrentITI))
-        rig.DelayTime(float(self.CurrentDelay))
-        rig.ResponseTime(float(self.TP_ResponseTime))
-        rig.start(1)
+        Channel1.Left_Bait(int(self.CurrentBait[0]))
+        Channel1.Right_Bait(int(self.CurrentBait[1]))
+        Channel1.ITI(float(self.CurrentITI))
+        Channel1.DelayTime(float(self.CurrentDelay))
+        Channel1.ResponseTime(float(self.TP_ResponseTime))
+        Channel1.start(1)
   
-    def _GetAnimalResponse(self,rig,rig3):
+    def _GetAnimalResponse(self,Channel1,Channel3):
         '''
         # random forager
         self.B_AnimalCurrentResponse=random.choice(range(2))
@@ -755,13 +830,13 @@ class GenerateTrials():
             self.B_AnimalCurrentResponse=2
         '''
         # get the trial start time
-        TrialStartTime=rig.receive()
+        TrialStartTime=Channel1.receive()
         # reset the baited state of chosen side; get the reward state
-        a=rig.receive()
+        a=Channel1.receive()
         # can not use self.CurrentBait to decide if this current trial is rewarded or not as a new trial was already generated before this
-        b=rig.receive()
+        b=Channel1.receive()
         # go cue start time
-        GoCueTime=rig3.receive()
+        GoCueTime=Channel3.receive()
         self.B_GoCueTime=np.append(self.B_GoCueTime,GoCueTime[1])
 
         if a.address=='/TrialEndTime':
@@ -803,10 +878,10 @@ class GenerateTrials():
         self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime[1])
         self.B_CurrentTrialN+=1
 
-    def _GetLicks(self,rig2):
-        while ~rig2.msgs.empty():
+    def _GetLicks(self,Channel2):
+        while ~Channel2.msgs.empty():
             QApplication.processEvents()
-            Rec=rig2.receive()
+            Rec=Channel2.receive()
             if Rec.address=='/LeftLickTime':
                 self.B_LeftLickTime=np.append(self.B_LeftLickTime,Rec[1])
             elif Rec.address=='/RightLickTime':

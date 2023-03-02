@@ -23,6 +23,7 @@ class Ui_ForagingGUI(object):
         ForagingGUI.setSizePolicy(sizePolicy)
         ForagingGUI.setAutoFillBackground(True)
         ForagingGUI.setStyleSheet("")
+        ForagingGUI.setDockNestingEnabled(False)
         self.centralwidget = QtWidgets.QWidget(ForagingGUI)
         self.centralwidget.setObjectName("centralwidget")
         self.line = QtWidgets.QFrame(self.centralwidget)

@@ -287,7 +287,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Equal">
                     <Operand xsi:type="StringProperty">
-                      <Value>Left</Value>
+                      <Value>NoReward</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -326,7 +326,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="NotEqual">
                     <Operand xsi:type="StringProperty">
-                      <Value>Left</Value>
+                      <Value>NoReward</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -1235,6 +1235,22 @@ def process(value):
                 <osc:Address>/RightLickTime</osc:Address>
               </Builder>
             </Expression>
+            <Expression xsi:type="osc:ReceiveMessage">
+              <osc:Address>/WaveForm1</osc:Address>
+              <osc:TypeTag>f</osc:TypeTag>
+              <osc:Connection>BonsaiOSC4</osc:Connection>
+            </Expression>
+            <Expression xsi:type="rx:PublishSubject">
+              <Name>WaveForm1</Name>
+            </Expression>
+            <Expression xsi:type="osc:ReceiveMessage">
+              <osc:Address>/WaveForm2</osc:Address>
+              <osc:TypeTag>f</osc:TypeTag>
+              <osc:Connection>BonsaiOSC4</osc:Connection>
+            </Expression>
+            <Expression xsi:type="rx:PublishSubject">
+              <Name>WaveForm2</Name>
+            </Expression>
           </Nodes>
           <Edges>
             <Edge From="4" To="5" Label="Source1" />
@@ -1250,6 +1266,8 @@ def process(value):
             <Edge From="22" To="23" Label="Source1" />
             <Edge From="24" To="25" Label="Source1" />
             <Edge From="26" To="27" Label="Source1" />
+            <Edge From="28" To="29" Label="Source1" />
+            <Edge From="30" To="31" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
