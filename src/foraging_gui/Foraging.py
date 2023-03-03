@@ -581,6 +581,8 @@ class GenerateTrials():
         self.B_LaserAmplitude=[]
         self.B_LaserDuration=[]
         self.B_SelectedCondition=[]
+        self.NextWaveForm=1 # waveform stored for later use
+        self.CurrentWaveForm=1 # the current waveform to trigger the optogenetics
         #self.B_LaserTrialNum=[] # B_LaserAmplitude, B_LaserDuration, B_SelectedCondition have values only on laser on trials, so we need to store the laser trial number
         
         self.Obj={}
@@ -647,29 +649,48 @@ class GenerateTrials():
         self.B_ITIHistory.append(self.CurrentITI)
         self.B_DelayHistory.append(self.CurrentDelay)
         self.B_ResponseTimeHistory.append(float(self.TP_ResponseTime))
-
-        if self.TP_OptogeneticsB=='on': # optogenetics is turned on
-            # select the current optogenetics condition
-            self._SelectOptogeneticsCondition()
-            if self.SelctedCondition!=0: 
-                self.LaserOn=1
-                self.B_LaserOnTrial.append(self.LaserOn) 
-                # generate the optogenetics waveform of the next trial
-                self._GetLaserWaveForm()
-                # send the waveform to Bonsai temporarily stored for using in the next trial
-                Channel4.WaveForm1(self.my_wave)
-                # finish of this sectiom
+        # optogenetics section
+        try:
+            if self.TP_OptogeneticsB=='on': # optogenetics is turned on
+                # select the current optogenetics condition
+                self._SelectOptogeneticsCondition()
+                if self.SelctedCondition!=0: 
+                    self.LaserOn=1
+                    self.B_LaserOnTrial.append(self.LaserOn) 
+                    # generate the optogenetics waveform of the next trial
+                    self._GetLaserWaveForm()
+                    # send the waveform to Bonsai temporarily stored for using in the next trial
+                    #WaveForm_Number_Location
+                    for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
+                        if self.CurrentLaserAmplitude[i]!=0:
+                            eval('Channel4.WaveForm' + str(self.NextWaveForm)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')'+')')
+                            FinishOfWaveForm=Channel4.receive()
+                    if self.NextWaveForm==1:
+                        self.NextWaveForm=2
+                    elif self.NextWaveForm==2:
+                        self.NextWaveForm=1
+                    # finish of this sectiom
+                else:
+                    # this is the control trial
+                    self.LaserOn=0
+                    self.B_LaserOnTrial.append(self.LaserOn) 
             else:
-                # this is the control trials
+                # optogenetics is turned off
                 self.LaserOn=0
-                self.B_LaserOnTrial.append(self.LaserOn) 
-        else:
+                self.B_LaserOnTrial.append(self.LaserOn)
+                self.B_LaserAmplitude.append([0,0])
+                self.B_LaserDuration.append(0)
+                self.B_SelectedCondition.append(0)
+        except Exception as e:
             # optogenetics is turned off
             self.LaserOn=0
             self.B_LaserOnTrial.append(self.LaserOn)
-            self.B_LaserAmplitude.append(0)
-            self.B_LaserDuration.append(0)
+            self.B_LaserAmplitude.append([0,0]) # corresponding to two locations
+            self.B_LaserDuration.append(0) # corresponding to two locations
             self.B_SelectedCondition.append(0)
+            # Catch the exception and print error information
+            print("An error occurred:")
+            print(traceback.format_exc())
         self.GeneFinish=1
     def _GetLaserWaveForm(self):
         '''Get the waveform of the laser. It dependens on color/duration/protocol(frequency/RD/pulse duration)/locations/laser power'''
@@ -707,16 +728,21 @@ class GenerateTrials():
             pass
         self.B_LaserDuration.append(self.CLP_CurrentDuration)
         # generate the waveform based on self.CLP_CurrentDuration and Protocol, Frequency, RampingDown, PulseDur
-        self._ProduceWaveForm()
-
-    def _ProduceWaveForm(self):
-        '''generate the waveform based on Duration and Protocol, Laser Power, Frequency, RampingDown, PulseDur and the sample frequency'''
         self._GetLaserAmplitude()
+        # dimension of self.CurrentLaserAmplitude indicates how many locations do we have
+        for i in range(len(self.CurrentLaserAmplitude)):
+            if self.CurrentLaserAmplitude[i]!=0:
+                # in some cases the other paramters except the amplitude could also be different
+                self._ProduceWaveForm(self.CurrentLaserAmplitude[i])
+                setattr(self, 'WaveFormLocation_' + str(i+1), self.my_wave)
+
+    def _ProduceWaveForm(self,Amplitude):
+        '''generate the waveform based on Duration and Protocol, Laser Power, Frequency, RampingDown, PulseDur and the sample frequency'''
         if self.CLP_Protocol=='Sine':
             resolution=self.CLP_SampleFrequency*self.CLP_CurrentDuration # how many datapoints to generate
             cycles=self.CLP_CurrentDuration*self.CLP_Frequency # how many sine cycles
             length = np.pi * 2 * cycles
-            self.my_wave = self.CurrentLaserAmplitude*(1+np.sin(np.arange(0, length, length / resolution)))/2
+            self.my_wave = Amplitude*(1+np.sin(np.arange(0, length, length / resolution)))/2
             # add ramping down
             if self.CLP_RampingDown>self.CLP_CurrentDuration:
                 self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
@@ -739,7 +765,7 @@ class GenerateTrials():
                     self.win.WarningLabel.setStyleSheet("color: red;")
                 TotalPoints=int(self.CLP_SampleFrequency*self.CLP_CurrentDuration)
                 PulseNumber=np.floor(self.CLP_CurrentDuration*self.CLP_Frequency) # a potential bug
-                EachPulse=self.CurrentLaserAmplitude*np.ones(PointsEachPulse)
+                EachPulse=Amplitude*np.ones(PointsEachPulse)
                 PulseInterval=np.zeros(PulseIntervalPoints)
                 WaveFormEachCycle=np.concatenate((EachPulse, PulseInterval), axis=0)
                 self.my_wave=np.empty(0)
@@ -749,7 +775,7 @@ class GenerateTrials():
                 self.my_wave=np.concatenate((self.my_wave, np.zeros(TotalPoints-np.shape(self.my_wave)[0])), axis=0)
         elif self.CLP_Protocol=='Constant':
             resolution=self.CLP_SampleFrequency*self.CLP_CurrentDuration # how many datapoints to generate
-            self.my_wave=self.CurrentLaserAmplitude*np.ones(int(resolution))
+            self.my_wave=Amplitude*np.ones(int(resolution))
             # add ramping down
             if self.CLP_RampingDown>self.CLP_CurrentDuration:
                 self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
@@ -759,7 +785,6 @@ class GenerateTrials():
                 RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
                 RampingDown = np.concatenate((Constant, RD), axis=0)
                 self.my_wave=self.my_wave*RampingDown
-
         else:
             self.win.WarningLabel.setText('Unidentified optogenetics protocol!')
             self.win.WarningLabel.setStyleSheet("color: red;")
@@ -770,10 +795,17 @@ class GenerateTrials():
         plt.plot(np.arange(0, length, length / resolution), self.my_wave)   
         plt.show()
         '''
-
     def _GetLaserAmplitude(self):
-        '''the voltage amplitude dependens on Protocol, Laser Power, Laser color<>'''
-        self.CurrentLaserAmplitude=1
+        '''the voltage amplitude dependens on Protocol, Laser Power, Laser color, and the stimulation locations<>'''
+        if self.CLP_Location=='Left':
+            self.CurrentLaserAmplitude=[1,0]
+        elif self.CLP_Location=='Right':
+            self.CurrentLaserAmplitude=[0,1]
+        elif self.CLP_Location=='Both':
+            self.CurrentLaserAmplitude=[1,1]
+        else:
+            self.win.WarningLabel.setText('No stimulation location defined!')
+            self.win.WarningLabel.setStyleSheet("color: red;")
         self.B_LaserAmplitude.append(self.CurrentLaserAmplitude)
 
     def _SelectOptogeneticsCondition(self):
@@ -798,6 +830,7 @@ class GenerateTrials():
             else:
                 self.SelctedCondition=0 # control is selected
         self.B_SelectedCondition.append(self.SelctedCondition)
+
     def _InitiateATrial(self,Channel1):
         # Determine if the current lick port should be baited. self.B_Baited can only be updated after receiving response of the animal, so this part cannot appear in the _GenerateATrial section
         self.CurrentBait=self.B_CurrentRewardProb>np.random.random(2)
@@ -812,7 +845,20 @@ class GenerateTrials():
         Channel1.DelayTime(float(self.CurrentDelay))
         Channel1.ResponseTime(float(self.TP_ResponseTime))
         Channel1.start(1)
-  
+        # if this is an optogenetics trial
+        if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:
+            if self.CurrentWaveForm==1:
+                # permit triggering waveform 1 after an event
+                pass
+            elif self.CurrentWaveForm==2:
+                # permit triggering waveform 2 after an event
+                pass
+            # change the position of the CurrentWaveForm and the NextWaveForm 
+            self.CurrentWaveForm=self.NextWaveForm
+        else:
+            # 'Do not trigger the waveform'
+            pass
+
     def _GetAnimalResponse(self,Channel1,Channel3):
         '''
         # random forager

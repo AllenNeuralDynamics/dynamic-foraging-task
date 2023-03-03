@@ -380,7 +380,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>NA</string>
+    <string>0.002</string>
    </property>
    <property name="readOnly">
     <bool>false</bool>
@@ -1500,7 +1500,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>NA</string>
+    <string>0.002</string>
    </property>
    <property name="readOnly">
     <bool>false</bool>
@@ -1969,7 +1969,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>NA</string>
+    <string>0.002</string>
    </property>
    <property name="readOnly">
     <bool>false</bool>
@@ -2545,7 +2545,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>NA</string>
+    <string>0.002</string>
    </property>
    <property name="readOnly">
     <bool>false</bool>
