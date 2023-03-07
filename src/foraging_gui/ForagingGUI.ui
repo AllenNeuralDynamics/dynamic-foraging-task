@@ -1048,7 +1048,7 @@
     <widget class="QLabel" name="label_51">
      <property name="geometry">
       <rect>
-       <x>308</x>
+       <x>520</x>
        <y>205</y>
        <width>67</width>
        <height>16</height>
@@ -1067,7 +1067,7 @@
     <widget class="QLineEdit" name="StopIgnores">
      <property name="geometry">
       <rect>
-       <x>381</x>
+       <x>592</x>
        <y>205</y>
        <width>80</width>
        <height>20</height>
@@ -1307,6 +1307,38 @@
      </property>
      <property name="value">
       <double>0.030000000000000</double>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_56">
+     <property name="geometry">
+      <rect>
+       <x>255</x>
+       <y>205</y>
+       <width>121</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Reward consume time=</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="RewardConsumeTime">
+     <property name="geometry">
+      <rect>
+       <x>381</x>
+       <y>205</y>
+       <width>80</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>3</string>
      </property>
     </widget>
    </widget>

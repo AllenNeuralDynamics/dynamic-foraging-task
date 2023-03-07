@@ -76,3 +76,12 @@ class RigClient:
     # waveform 2, location 2
     def WaveForm2_2(self, value):
         self.send("/WaveForm2_2", value)
+
+    def LeftValue(self, value):
+        self.send("/LeftValueSize", value)
+
+    def RightValue(self, value):
+        self.send("/RightValueSize", value)
+
+    def RewardConsumeTime(self, value):
+        self.send("/RewardConsumeTime", value)

@@ -377,7 +377,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # start the trial loop
         while self.Start.isChecked():
             QApplication.processEvents()
-            if self.ANewTrial==1 and self.ToGenerateATrial==1: #GeneratedTrials.GeneFinish==1: 
+            if self.ANewTrial==1 and self.ToGenerateATrial==1: #and GeneratedTrials.GeneFinish==1: 
                 self.ANewTrial=0     
                 #initiate the generated trial
                 GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
@@ -399,6 +399,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 print(GeneratedTrials.B_CurrentTrialN)
                 #generate a new trial
                 GeneratedTrials.GeneFinish=0
+                self.ToGenerateATrial=0
                 #GeneratedTrials._GenerateATrial(self.Channel4)
                 #self.ToGenerateATrial=1
                 self.threadpool4.start(workerGenerateAtrial)
@@ -916,7 +917,10 @@ class GenerateTrials():
             Channel1.TriggerITIStart_Wave2(int(0))
             for i in range(len(self.CurrentLaserAmplitude)):
                 eval('Channel1.Trigger_Location'+str(i+1)+'(int(0))')
-
+        
+        Channel1.LeftValue(float(self.TP_LeftValue)*1000)
+        Channel1.RightValue(float(self.TP_RightValue)*1000)
+        Channel1.RewardConsumeTime(float(self.TP_RewardConsumeTime))
         Channel1.Left_Bait(int(self.CurrentBait[0]))
         Channel1.Right_Bait(int(self.CurrentBait[1]))
         Channel1.ITI(float(self.CurrentITI))
