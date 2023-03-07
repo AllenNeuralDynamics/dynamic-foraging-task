@@ -43,6 +43,24 @@ class RigClient:
     def ResponseTime(self, value):
         self.send("/ResponseTime", value)
     
+    def TriggerITIStart_Wave1(self, value):
+        self.send("/TriggerITIStart_Wave1", value)
+
+    def TriggerITIStart_Wave2(self, value):
+        self.send("/TriggerITIStart_Wave2", value)
+    
+    def Trigger_Location1(self, value): # location 1
+        self.send("/Trigger_Location1", value)
+
+    def Trigger_Location2(self, value): # location 2
+        self.send("/Trigger_Location2", value)
+
+    def TriggerGoCue_Wave1(self, value): # location 1
+        self.send("/TriggerGoCue_Wave1", value)
+
+    def TriggerGoCue_Wave2(self, value): # location 2
+        self.send("/TriggerGoCue_Wave2", value)
+
     # waveform 1, location 1
     def WaveForm1_1(self, value):
         self.send("/WaveForm1_1", value)

@@ -1180,4 +1180,4 @@ class Ui_Optogenetics(object):
         self.ConditionP_4.setText(_translate("Optogenetics", "1"))
         self.label4_1.setText(_translate("Optogenetics", "Laser="))
         self.label1_16.setText(_translate("Optogenetics", "Sample frequency="))
-        self.SampleFrequency.setText(_translate("Optogenetics", "6000"))
+        self.SampleFrequency.setText(_translate("Optogenetics", "5000"))

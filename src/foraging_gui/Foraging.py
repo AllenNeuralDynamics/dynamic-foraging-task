@@ -377,10 +377,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # start the trial loop
         while self.Start.isChecked():
             QApplication.processEvents()
-            if self.ANewTrial==1 and GeneratedTrials.GeneFinish==1: 
+            if self.ANewTrial==1 and self.ToGenerateATrial==1: #GeneratedTrials.GeneFinish==1: 
                 self.ANewTrial=0     
                 #initiate the generated trial
-                GeneratedTrials._InitiateATrial(self.Channel)
+                GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
                 #get the response of the animal using a different thread
                 self.threadpool.start(worker1)
                 #get the licks of the animal using a different thread
@@ -399,9 +399,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 print(GeneratedTrials.B_CurrentTrialN)
                 #generate a new trial
                 GeneratedTrials.GeneFinish=0
-                GeneratedTrials._GenerateATrial(self.Channel4)
-                self.ToGenerateATrial=1
-                #self.threadpool4.start(workerGenerateAtrial)
+                #GeneratedTrials._GenerateATrial(self.Channel4)
+                #self.ToGenerateATrial=1
+                self.threadpool4.start(workerGenerateAtrial)
 
     def _OptogeneticsB(self):
         ''' optogenetics control in the main window'''
@@ -663,8 +663,8 @@ class GenerateTrials():
                     #WaveForm_Number_Location
                     for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
                         if self.CurrentLaserAmplitude[i]!=0:
-                            eval('Channel4.WaveForm' + str(self.NextWaveForm)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')'+')')
-                            FinishOfWaveForm=Channel4.receive()
+                            eval('Channel4.WaveForm' + str(self.NextWaveForm)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
+                            #FinishOfWaveForm=Channel4.receive()
                     if self.NextWaveForm==1:
                         self.NextWaveForm=2
                     elif self.NextWaveForm==2:
@@ -681,6 +681,7 @@ class GenerateTrials():
                 self.B_LaserAmplitude.append([0,0])
                 self.B_LaserDuration.append(0)
                 self.B_SelectedCondition.append(0)
+                self.CurrentLaserAmplitude=[0,0]
         except Exception as e:
             # optogenetics is turned off
             self.LaserOn=0
@@ -688,6 +689,7 @@ class GenerateTrials():
             self.B_LaserAmplitude.append([0,0]) # corresponding to two locations
             self.B_LaserDuration.append(0) # corresponding to two locations
             self.B_SelectedCondition.append(0)
+            self.CurrentLaserAmplitude=[0,0]
             # Catch the exception and print error information
             print("An error occurred:")
             print(traceback.format_exc())
@@ -744,14 +746,21 @@ class GenerateTrials():
             length = np.pi * 2 * cycles
             self.my_wave = Amplitude*(1+np.sin(np.arange(0, length, length / resolution)))/2
             # add ramping down
-            if self.CLP_RampingDown>self.CLP_CurrentDuration:
-                self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
-                self.win.WarningLabel.setStyleSheet("color: red;")
-            else:
-                Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
-                RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
-                RampingDown = np.concatenate((Constant, RD), axis=0)
-                self.my_wave=self.my_wave*RampingDown
+            if self.CLP_RampingDown>0:
+                if self.CLP_RampingDown>self.CLP_CurrentDuration:
+                    self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
+                    self.win.WarningLabel.setStyleSheet("color: red;")
+                else:
+                    Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
+                    RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
+                    RampingDown = np.concatenate((Constant, RD), axis=0)
+                    self.my_wave=self.my_wave*RampingDown
+            # add offset
+            if self.CLP_OffsetStart>0:
+                OffsetPoints=int(self.CLP_SampleFrequency*self.CLP_OffsetStart)
+                Offset=np.zeros(OffsetPoints)
+                self.my_wave=np.concatenate((Offset,self.my_wave),axis=0)
+
         elif self.CLP_Protocol=='Pulse':
             if self.CLP_PulseDur=='NA':
                 self.win.WarningLabel.setText('Pulse duration is NA!')
@@ -764,27 +773,44 @@ class GenerateTrials():
                     self.win.WarningLabel.setText('Pulse frequency and pulse duration are not compatible!')
                     self.win.WarningLabel.setStyleSheet("color: red;")
                 TotalPoints=int(self.CLP_SampleFrequency*self.CLP_CurrentDuration)
-                PulseNumber=np.floor(self.CLP_CurrentDuration*self.CLP_Frequency) # a potential bug
+                PulseNumber=np.floor(self.CLP_CurrentDuration*self.CLP_Frequency) 
                 EachPulse=Amplitude*np.ones(PointsEachPulse)
                 PulseInterval=np.zeros(PulseIntervalPoints)
                 WaveFormEachCycle=np.concatenate((EachPulse, PulseInterval), axis=0)
                 self.my_wave=np.empty(0)
-                for i in range(int(PulseNumber-1)):
-                    self.my_wave=np.concatenate((self.my_wave, WaveFormEachCycle), axis=0)
+                # pulse number should be greater than 0
+                if PulseNumber>1:
+                    for i in range(int(PulseNumber-1)):
+                        self.my_wave=np.concatenate((self.my_wave, WaveFormEachCycle), axis=0)
+                else:
+                    self.win.WarningLabel.setText('Pulse number is less than 1!')
+                    self.win.WarningLabel.setStyleSheet("color: red;")
+                    return
                 self.my_wave=np.concatenate((self.my_wave, EachPulse), axis=0)
                 self.my_wave=np.concatenate((self.my_wave, np.zeros(TotalPoints-np.shape(self.my_wave)[0])), axis=0)
+                # add offset
+                if self.CLP_OffsetStart>0:
+                    OffsetPoints=int(self.CLP_SampleFrequency*self.CLP_OffsetStart)
+                    Offset=np.zeros(OffsetPoints)
+                    self.my_wave=np.concatenate((Offset,self.my_wave),axis=0)
         elif self.CLP_Protocol=='Constant':
             resolution=self.CLP_SampleFrequency*self.CLP_CurrentDuration # how many datapoints to generate
             self.my_wave=Amplitude*np.ones(int(resolution))
+            if self.CLP_RampingDown>0:
             # add ramping down
-            if self.CLP_RampingDown>self.CLP_CurrentDuration:
-                self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
-                self.win.WarningLabel.setStyleSheet("color: red;")
-            else:
-                Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
-                RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
-                RampingDown = np.concatenate((Constant, RD), axis=0)
-                self.my_wave=self.my_wave*RampingDown
+                if self.CLP_RampingDown>self.CLP_CurrentDuration:
+                    self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
+                    self.win.WarningLabel.setStyleSheet("color: red;")
+                else:
+                    Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
+                    RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
+                    RampingDown = np.concatenate((Constant, RD), axis=0)
+                    self.my_wave=self.my_wave*RampingDown
+            # add offset
+            if self.CLP_OffsetStart>0:
+                OffsetPoints=int(self.CLP_SampleFrequency*self.CLP_OffsetStart)
+                Offset=np.zeros(OffsetPoints)
+                self.my_wave=np.concatenate((Offset,self.my_wave),axis=0)
         else:
             self.win.WarningLabel.setText('Unidentified optogenetics protocol!')
             self.win.WarningLabel.setStyleSheet("color: red;")
@@ -831,7 +857,7 @@ class GenerateTrials():
                 self.SelctedCondition=0 # control is selected
         self.B_SelectedCondition.append(self.SelctedCondition)
 
-    def _InitiateATrial(self,Channel1):
+    def _InitiateATrial(self,Channel1,Channel4):
         # Determine if the current lick port should be baited. self.B_Baited can only be updated after receiving response of the animal, so this part cannot appear in the _GenerateATrial section
         self.CurrentBait=self.B_CurrentRewardProb>np.random.random(2)
         if (self.TP_Task in ['Coupled Baiting','Uncoupled Baiting']):
@@ -839,25 +865,65 @@ class GenerateTrials():
         self.B_Baited=  self.CurrentBait.copy()
         self.B_BaitHistory=np.append(self.B_BaitHistory, self.CurrentBait.reshape(2,1),axis=1)
 
+        # if this is an optogenetics trial
+        if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:
+            if self.CurrentWaveForm==1:
+                # permit triggering waveform 1 after an event
+                # waveform start event
+                if self.CLP_LaserStart=='Trial start':
+                    Channel1.TriggerITIStart_Wave1(int(1))
+                    Channel1.TriggerITIStart_Wave2(int(0))
+                    Channel1.TriggerGoCue_Wave1(int(0))
+                    Channel1.TriggerGoCue_Wave2(int(0))
+                elif self.CLP_LaserStart=='Go cue':
+                    Channel1.TriggerGoCue_Wave1(int(1))
+                    Channel1.TriggerGoCue_Wave2(int(0))
+                    Channel1.TriggerITIStart_Wave1(int(0))
+                    Channel1.TriggerITIStart_Wave2(int(0))
+                else:
+                    self.win.WarningLabel.setText('Unindentified optogenetics start event!')
+                    self.win.WarningLabel.setStyleSheet("color: red;")
+            elif self.CurrentWaveForm==2:
+                # permit triggering waveform 2 after an event
+                # waveform start event
+                if self.CLP_LaserStart=='Trial start':
+                    Channel1.TriggerITIStart_Wave1(int(0))
+                    Channel1.TriggerITIStart_Wave2(int(1))
+                    Channel1.TriggerGoCue_Wave1(int(0))
+                    Channel1.TriggerGoCue_Wave2(int(0))
+                elif self.CLP_LaserStart=='Go cue':
+                    Channel1.TriggerGoCue_Wave1(int(0))
+                    Channel1.TriggerGoCue_Wave2(int(1))
+                    Channel1.TriggerITIStart_Wave1(int(0))
+                    Channel1.TriggerITIStart_Wave2(int(0))
+                else:
+                    self.win.WarningLabel.setText('Unindentified optogenetics start event!')
+                    self.win.WarningLabel.setStyleSheet("color: red;")
+            # location of optogenetics
+            # dimension of self.CurrentLaserAmplitude indicates how many locations do we have
+            for i in range(len(self.CurrentLaserAmplitude)):
+                if self.CurrentLaserAmplitude[i]!=0:
+                    eval('Channel1.Trigger_Location'+str(i+1)+'(int(1))')
+                else:
+                    eval('Channel1.Trigger_Location'+str(i+1)+'(int(0))')
+            # change the position of the CurrentWaveForm and the NextWaveForm 
+            self.CurrentWaveForm=self.NextWaveForm
+        else:
+            # 'Do not trigger the waveform'
+            Channel1.TriggerGoCue_Wave1(int(0))
+            Channel1.TriggerGoCue_Wave2(int(0))
+            Channel1.TriggerITIStart_Wave1(int(0))
+            Channel1.TriggerITIStart_Wave2(int(0))
+            for i in range(len(self.CurrentLaserAmplitude)):
+                eval('Channel1.Trigger_Location'+str(i+1)+'(int(0))')
+
         Channel1.Left_Bait(int(self.CurrentBait[0]))
         Channel1.Right_Bait(int(self.CurrentBait[1]))
         Channel1.ITI(float(self.CurrentITI))
         Channel1.DelayTime(float(self.CurrentDelay))
         Channel1.ResponseTime(float(self.TP_ResponseTime))
         Channel1.start(1)
-        # if this is an optogenetics trial
-        if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:
-            if self.CurrentWaveForm==1:
-                # permit triggering waveform 1 after an event
-                pass
-            elif self.CurrentWaveForm==2:
-                # permit triggering waveform 2 after an event
-                pass
-            # change the position of the CurrentWaveForm and the NextWaveForm 
-            self.CurrentWaveForm=self.NextWaveForm
-        else:
-            # 'Do not trigger the waveform'
-            pass
+
 
     def _GetAnimalResponse(self,Channel1,Channel3):
         '''
