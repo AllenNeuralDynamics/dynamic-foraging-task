@@ -1188,7 +1188,7 @@
     <widget class="QPushButton" name="GiveLeft">
      <property name="geometry">
       <rect>
-       <x>260</x>
+       <x>510</x>
        <y>48</y>
        <width>80</width>
        <height>23</height>
@@ -1204,7 +1204,7 @@
     <widget class="QPushButton" name="GiveRight">
      <property name="geometry">
       <rect>
-       <x>470</x>
+       <x>800</x>
        <y>48</y>
        <width>80</width>
        <height>23</height>
@@ -1257,6 +1257,44 @@
       <rect>
        <x>169</x>
        <y>50</y>
+       <width>80</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="decimals">
+      <number>3</number>
+     </property>
+     <property name="singleStep">
+      <double>0.005000000000000</double>
+     </property>
+     <property name="value">
+      <double>0.030000000000000</double>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="GiveWaterL">
+     <property name="geometry">
+      <rect>
+       <x>592</x>
+       <y>48</y>
+       <width>80</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="decimals">
+      <number>3</number>
+     </property>
+     <property name="singleStep">
+      <double>0.005000000000000</double>
+     </property>
+     <property name="value">
+      <double>0.030000000000000</double>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="GiveWaterR">
+     <property name="geometry">
+      <rect>
+       <x>883</x>
+       <y>48</y>
        <width>80</width>
        <height>20</height>
       </rect>

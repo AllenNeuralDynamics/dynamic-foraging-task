@@ -416,11 +416,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.action_Optogenetics.setChecked(False)
             self.Opto_dialog.hide()
     def _GiveLeft(self):
-        self.Channel.LeftValue(float(self.LeftValue.text())*1000) 
+        self.Channel.LeftValue(float(self.GiveWaterL.text())*1000) 
         self.Channel3.ManualWater_Left(int(1))
+        self.Channel.RightValue(float(self.LeftValue.text())*1000)
     def _GiveRight(self):
-        self.Channel.RightValue(float(self.RightValue.text())*1000)
+        self.Channel.RightValue(float(self.GiveWaterR.text())*1000)
         self.Channel3.ManualWater_Right(int(1))
+        self.Channel.RightValue(float(self.RightValue.text())*1000)
 class OptogeneticsDialog(QDialog,Ui_Optogenetics):
     '''Optogenetics dialog'''
     def __init__(self, parent=None):
