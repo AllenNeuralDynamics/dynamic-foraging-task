@@ -89,6 +89,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.Save.clicked.connect(self._Save)
         self.Clear.clicked.connect(self._Clear)
         self.Start.clicked.connect(self._Start)
+        self.GiveLeft.clicked.connect(self._GiveLeft)
+        self.GiveRight.clicked.connect(self._GiveRight)
         self.NewSession.clicked.connect(self._NewSession)
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
 
@@ -413,7 +415,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
         else:
             self.action_Optogenetics.setChecked(False)
             self.Opto_dialog.hide()
-
+    def _GiveLeft(self):
+        self.Channel.LeftValue(float(self.LeftValue.text())*1000) 
+        self.Channel3.ManualWater_Left(int(1))
+    def _GiveRight(self):
+        self.Channel.RightValue(float(self.RightValue.text())*1000)
+        self.Channel3.ManualWater_Right(int(1))
 class OptogeneticsDialog(QDialog,Ui_Optogenetics):
     '''Optogenetics dialog'''
     def __init__(self, parent=None):
