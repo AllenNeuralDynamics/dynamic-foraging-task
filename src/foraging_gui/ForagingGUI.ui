@@ -1198,7 +1198,7 @@
       <string>Give left</string>
      </property>
      <property name="checkable">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
     </widget>
     <widget class="QPushButton" name="GiveRight">
@@ -1214,7 +1214,7 @@
       <string>Give right</string>
      </property>
      <property name="checkable">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
     </widget>
     <widget class="QPushButton" name="AutoReward">
