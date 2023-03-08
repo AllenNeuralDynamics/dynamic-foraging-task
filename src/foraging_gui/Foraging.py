@@ -578,6 +578,9 @@ class GenerateTrials():
         self.B_TrialStartTime=np.array([]).astype(float)
         self.B_TrialEndTime=np.array([]).astype(float)
         self.B_GoCueTime=np.array([]).astype(float)
+        self.B_LeftRewardDeliveryTime=np.array([]).astype(float)
+        self.B_RightRewardDeliveryTime=np.array([]).astype(float)
+        self.B_RewardOutcomeTime=np.array([]).astype(float)
         self.B_LaserOnTrial=[] # trials with laser on
         self.B_LaserAmplitude=[]
         self.B_LaserDuration=[]
@@ -957,11 +960,11 @@ class GenerateTrials():
 
         if a.address=='/TrialEndTime':
             TrialEndTime=a
-        elif a.address=='/TrialEnd':
+        elif a.address=='/RewardOutcome':
             TrialOutcome=a
         if b.address=='/TrialEndTime':
             TrialEndTime=b
-        elif b.address=='/TrialEnd':
+        elif b.address=='/RewardOutcome':
             TrialOutcome=b
         if TrialOutcome[1]=='NoResponse':
             self.B_AnimalCurrentResponse=2
@@ -995,6 +998,7 @@ class GenerateTrials():
         self.B_CurrentTrialN+=1
 
     def _GetLicks(self,Channel2):
+        '''Get licks and reward delivery time'''
         while ~Channel2.msgs.empty():
             QApplication.processEvents()
             Rec=Channel2.receive()
@@ -1002,6 +1006,12 @@ class GenerateTrials():
                 self.B_LeftLickTime=np.append(self.B_LeftLickTime,Rec[1])
             elif Rec.address=='/RightLickTime':
                 self.B_RightLickTime=np.append(self.B_RightLickTime,Rec[1])
+            elif Rec.address=='/LeftRewardDeliveryTime':
+                self.B_LeftRewardDeliveryTime=np.append(self.B_LeftRewardDeliveryTime,Rec[1])
+            elif Rec.address=='/RightRewardDeliveryTime':
+                self.B_RightRewardDeliveryTime=np.append(self.B_RightRewardDeliveryTime,Rec[1])
+            elif Rec.address=='/RewardOutcomeTime':
+                self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,Rec[1]) # time when we know the reward outcome (no reponse, left reward/no reward, right reward/no reward)
 
     # get training parameters
     def _GetTrainingParameters(self,win):
