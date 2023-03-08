@@ -1753,6 +1753,9 @@
    <addaction name="action_MotorStage"/>
   </widget>
   <action name="action_Calibration">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>resources/Water2.png</normaloff>resources/Water2.png</iconset>
@@ -1762,6 +1765,9 @@
    </property>
   </action>
   <action name="action_Camera">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>resources/camera-icon-21.png</normaloff>resources/camera-icon-21.png</iconset>
@@ -1863,6 +1869,9 @@
    </property>
   </action>
   <action name="action_MotorStage">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>resources/Motor.png</normaloff>resources/Motor.png</iconset>
@@ -1873,7 +1882,7 @@
   </action>
   <action name="action_Manipulator">
    <property name="checkable">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="icon">
     <iconset>
