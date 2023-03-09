@@ -1669,8 +1669,10 @@
      <string>Tools</string>
     </property>
     <addaction name="action_Calibration"/>
+    <addaction name="actionLaser_Calibration"/>
     <addaction name="action_Camera"/>
     <addaction name="action_Snipping"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -1735,7 +1737,8 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="action_Optogenetics"/>
+   <addaction name="action_Camera"/>
+   <addaction name="action_MotorStage"/>
    <addaction name="action_Manipulator"/>
   </widget>
   <widget class="QToolBar" name="toolBar_3">
@@ -1748,9 +1751,9 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="action_Camera"/>
+   <addaction name="action_Optogenetics"/>
+   <addaction name="actionLaser_Calibration"/>
    <addaction name="action_Calibration"/>
-   <addaction name="action_MotorStage"/>
   </widget>
   <action name="action_Calibration">
    <property name="checkable">
@@ -1761,7 +1764,7 @@
      <normaloff>resources/Water2.png</normaloff>resources/Water2.png</iconset>
    </property>
    <property name="text">
-    <string>Calibration</string>
+    <string>Water Calibration</string>
    </property>
   </action>
   <action name="action_Camera">
@@ -1915,6 +1918,18 @@
   <action name="action_HideLines">
    <property name="text">
     <string>Hide lines</string>
+   </property>
+  </action>
+  <action name="actionLaser_Calibration">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>resources/Laser3.png</normaloff>resources/Laser3.png</iconset>
+   </property>
+   <property name="text">
+    <string>Laser Calibration</string>
    </property>
   </action>
  </widget>

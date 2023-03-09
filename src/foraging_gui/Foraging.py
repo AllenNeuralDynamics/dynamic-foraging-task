@@ -7,14 +7,10 @@ from PyQt5.QtCore import QThreadPool
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from ForagingGUI import Ui_ForagingGUI
-from Camera import Ui_Camera
-from MotorStage import Ui_MotorStage
-from Manipulator import Ui_Manipulator
 import rigcontrol
 from pyOSC3.OSC3 import OSCStreamingClient
 from Visualization import PlotV
-from Dialogs import OptogeneticsDialog
-from Dialogs import WaterCalibrationDialog
+from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog
 from MyFunctions import GenerateTrials, Worker
 #import subprocess
 #import h5py
@@ -39,6 +35,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.threadpool4=QThreadPool() # for generating a new trial
         self.OpenOptogenetics=0
         self.WaterCalibration=0
+        self.LaserCalibration=0
+        self.Camera=0
+        self.MotorStage=0
+        self.Manipulator=0
         self._Optogenetics() # open the optogenetics panel
 
     def _InitializeBonsai(self):
@@ -73,6 +73,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.action_Manipulator.triggered.connect(self._Manipulator)
         self.action_MotorStage.triggered.connect(self._MotorStage)
         self.action_Calibration.triggered.connect(self._WaterCalibration)
+        self.actionLaser_Calibration.triggered.connect(self._LaserCalibration)
         self.action_Snipping.triggered.connect(self._Snipping)
         self.action_Open.triggered.connect(self._Open)
         self.action_Save.triggered.connect(self._Save)
@@ -130,14 +131,29 @@ class Window(QMainWindow, Ui_ForagingGUI):
         else:
             self.Opto_dialog.hide()
     def _Camera(self):
-        self.Camera_dialog = CameraDialog(self)
-        self.Camera_dialog.show()
+        if self.Camera==0:
+            self.Camera_dialog = CameraDialog(self)
+            self.Camera=1
+        if self.action_Camera.isChecked()==True:
+            self.Camera_dialog.show()
+        else:
+            self.Camera_dialog.hide()
     def _Manipulator(self):
-        self.ManipulatoB_dialog = ManipulatorDialog(self)
-        self.ManipulatoB_dialog.show()
+        if self.Manipulator==0:
+            self.ManipulatoB_dialog = ManipulatorDialog(self)
+            self.Manipulator=1
+        if self.action_Manipulator.isChecked()==True:
+            self.ManipulatoB_dialog.show()
+        else:
+            self.ManipulatoB_dialog.hide()
     def _MotorStage(self):
-        self.MotorStage_dialog = MotorStageDialog(self)
-        self.MotorStage_dialog.show()
+        if self.MotorStage==0:
+            self.MotorStage_dialog = MotorStageDialog(self)
+            self.MotorStage=1
+        if self.action_MotorStage.isChecked()==True:
+            self.MotorStage_dialog.show()
+        else:
+            self.MotorStage_dialog.hide()
     def _WaterCalibration(self):
         if self.WaterCalibration==0:
             self.WaterCalibration_dialog = WaterCalibrationDialog(self,self)
@@ -146,6 +162,15 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.WaterCalibration_dialog.show()
         else:
             self.WaterCalibration_dialog.hide()
+    def _LaserCalibration(self):
+        if self.LaserCalibration==0:
+            self.LaserCalibration_dialog = LaserCalibrationDialog(self)
+            self.LaserCalibration=1
+        if self.actionLaser_Calibration.isChecked()==True:
+            self.LaserCalibration_dialog.show()
+        else:
+            self.LaserCalibration_dialog.hide()
+
     def _about(self):
         QMessageBox.about(
             self,
@@ -424,22 +449,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.Channel.RightValue(float(self.GiveWaterR.text())*1000)
         self.Channel3.ManualWater_Right(int(1))
         self.Channel.RightValue(float(self.RightValue.text())*1000)
-
-class CameraDialog(QDialog,Ui_Camera):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setupUi(self)
-
-class ManipulatorDialog(QDialog,Ui_Manipulator):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setupUi(self)
-
-class MotorStageDialog(QDialog,Ui_MotorStage):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setupUi(self)
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
