@@ -1751,9 +1751,9 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="action_Calibration"/>
    <addaction name="action_Optogenetics"/>
    <addaction name="actionLaser_Calibration"/>
-   <addaction name="action_Calibration"/>
   </widget>
   <action name="action_Calibration">
    <property name="checkable">

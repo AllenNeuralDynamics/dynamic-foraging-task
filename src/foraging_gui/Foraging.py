@@ -406,7 +406,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         while self.Start.isChecked():
             QApplication.processEvents()
             if self.ANewTrial==1 and self.ToGenerateATrial==1: #and GeneratedTrials.GeneFinish==1: 
-                self.ANewTrial=0     
+                self.ANewTrial=0
+                print(GeneratedTrials.B_CurrentTrialN)     
                 #initiate the generated trial
                 GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
                 #get the response of the animal using a different thread
@@ -424,7 +425,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     if self.ToUpdateFigure==1:
                         self.threadpool3.start(workerPlot)
                         self.ToUpdateFigure=0
-                print(GeneratedTrials.B_CurrentTrialN)
                 #generate a new trial
                 GeneratedTrials.GeneFinish=0
                 self.ToGenerateATrial=0

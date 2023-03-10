@@ -594,9 +594,9 @@ class Ui_ForagingGUI(object):
         self.toolBar.addAction(self.action_Camera)
         self.toolBar.addAction(self.action_MotorStage)
         self.toolBar.addAction(self.action_Manipulator)
+        self.toolBar_3.addAction(self.action_Calibration)
         self.toolBar_3.addAction(self.action_Optogenetics)
         self.toolBar_3.addAction(self.actionLaser_Calibration)
-        self.toolBar_3.addAction(self.action_Calibration)
 
         self.retranslateUi(ForagingGUI)
         self.Task.setCurrentIndex(0)

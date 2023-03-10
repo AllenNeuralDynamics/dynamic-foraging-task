@@ -91,3 +91,10 @@ class RigClient:
     
     def ManualWater_Right(self, value):
         self.send("/ManualWater_Right", value)
+
+    def Location1_Size(self, value):
+        self.send("/Location1Size", value)
+    
+    def Location2_Size(self, value):
+        self.send("/Location2Size", value)
+        

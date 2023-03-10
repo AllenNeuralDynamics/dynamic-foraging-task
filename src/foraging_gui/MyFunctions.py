@@ -122,6 +122,8 @@ class GenerateTrials():
                     for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
                         if self.CurrentLaserAmplitude[i]!=0:
                             eval('Channel4.WaveForm' + str(self.NextWaveForm)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
+                            print('Channel4.WaveForm' + str(self.NextWaveForm)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
+                            setattr(self, f"Location{i+1}_Size", getattr(self, f"WaveFormLocation_{i+1}").size)
                             #FinishOfWaveForm=Channel4.receive()
                     if self.NextWaveForm==1:
                         self.NextWaveForm=2
@@ -132,6 +134,10 @@ class GenerateTrials():
                     # this is the control trial
                     self.LaserOn=0
                     self.B_LaserOnTrial.append(self.LaserOn) 
+                    self.B_LaserAmplitude.append([0,0])
+                    self.B_LaserDuration.append(0)
+                    self.B_SelectedCondition.append(0)
+                    self.CurrentLaserAmplitude=[0,0]
             else:
                 # optogenetics is turned off
                 self.LaserOn=0
@@ -282,11 +288,11 @@ class GenerateTrials():
     def _GetLaserAmplitude(self):
         '''the voltage amplitude dependens on Protocol, Laser Power, Laser color, and the stimulation locations<>'''
         if self.CLP_Location=='Left':
-            self.CurrentLaserAmplitude=[1,0]
+            self.CurrentLaserAmplitude=[5,0]
         elif self.CLP_Location=='Right':
-            self.CurrentLaserAmplitude=[0,1]
+            self.CurrentLaserAmplitude=[0,5]
         elif self.CLP_Location=='Both':
-            self.CurrentLaserAmplitude=[1,1]
+            self.CurrentLaserAmplitude=[5,5]
         else:
             self.win.WarningLabel.setText('No stimulation location defined!')
             self.win.WarningLabel.setStyleSheet("color: red;")
@@ -364,6 +370,9 @@ class GenerateTrials():
                     eval('Channel1.Trigger_Location'+str(i+1)+'(int(1))')
                 else:
                     eval('Channel1.Trigger_Location'+str(i+1)+'(int(0))')
+            # send the waveform size
+            Channel1.Location1_Size(int(self.Location1_Size))
+            Channel1.Location2_Size(int(self.Location2_Size))
             # change the position of the CurrentWaveForm and the NextWaveForm 
             self.CurrentWaveForm=self.NextWaveForm
         else:
@@ -374,6 +383,8 @@ class GenerateTrials():
             Channel1.TriggerITIStart_Wave2(int(0))
             for i in range(len(self.CurrentLaserAmplitude)):
                 eval('Channel1.Trigger_Location'+str(i+1)+'(int(0))')
+            Channel1.Location1_Size(int(5000))
+            Channel1.Location2_Size(int(5000))
         
         Channel1.LeftValue(float(self.TP_LeftValue)*1000)
         Channel1.RightValue(float(self.TP_RightValue)*1000)
