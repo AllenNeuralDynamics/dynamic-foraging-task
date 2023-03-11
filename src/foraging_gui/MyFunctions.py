@@ -1,5 +1,5 @@
 
-import random, traceback
+import random, traceback, math
 import numpy as np
 from itertools import accumulate
 from PyQt5 import QtWidgets
@@ -121,8 +121,9 @@ class GenerateTrials():
                     #WaveForm_Number_Location
                     for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
                         if self.CurrentLaserAmplitude[i]!=0:
+                            #eval('Channel4.WaveForm' + str(self.NextWaveForm)+'_'+str(i+1)+'(np.array('+'self.WaveFormLocation_'+str(i+1)+',\'b\''+'))')
                             eval('Channel4.WaveForm' + str(self.NextWaveForm)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
-                            print('Channel4.WaveForm' + str(self.NextWaveForm)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
+                            #print('Channel4.WaveForm' + str(self.NextWaveForm)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
                             setattr(self, f"Location{i+1}_Size", getattr(self, f"WaveFormLocation_{i+1}").size)
                             #FinishOfWaveForm=Channel4.receive()
                     if self.NextWaveForm==1:
@@ -208,7 +209,7 @@ class GenerateTrials():
             resolution=self.CLP_SampleFrequency*self.CLP_CurrentDuration # how many datapoints to generate
             cycles=self.CLP_CurrentDuration*self.CLP_Frequency # how many sine cycles
             length = np.pi * 2 * cycles
-            self.my_wave = Amplitude*(1+np.sin(np.arange(0, length, length / resolution)))/2
+            self.my_wave = Amplitude*(1+np.sin(np.arange(0+1.5*math.pi, length+1.5*math.pi, length / resolution)))/2
             # add ramping down
             if self.CLP_RampingDown>0:
                 if self.CLP_RampingDown>self.CLP_CurrentDuration:

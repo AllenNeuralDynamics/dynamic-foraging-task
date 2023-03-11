@@ -1,7 +1,6 @@
 import queue
 from enum import Enum
 from pyOSC3.OSC3 import OSCMessage
-
 class RigClient:
     def __init__(self, client):
         self.client = client
@@ -64,18 +63,29 @@ class RigClient:
     # waveform 1, location 1
     def WaveForm1_1(self, value):
         self.send("/WaveForm1_1", value)
-    
+        #message = OSCMessage("/WaveForm1_1")
+        #message.append(value,'b')
+        #self.client.sendOSC(message)
     # waveform 2, location 1
     def WaveForm2_1(self, value):
         self.send("/WaveForm2_1", value)
+        #message = OSCMessage("/WaveForm2_1")
+        #message.append(value,'b')
+        #self.client.sendOSC(message)
 
     # waveform 1, location 2
     def WaveForm1_2(self, value):
         self.send("/WaveForm1_2", value)
+        #message = OSCMessage("/WaveForm1_2")
+        #message.append(value,'b')
+        #self.client.sendOSC(message)
 
     # waveform 2, location 2
     def WaveForm2_2(self, value):
         self.send("/WaveForm2_2", value)
+        #message = OSCMessage("/WaveForm2_2")
+        #message.append(value,'b')
+        #self.client.sendOSC(message)
 
     def LeftValue(self, value):
         self.send("/LeftValueSize", value)
