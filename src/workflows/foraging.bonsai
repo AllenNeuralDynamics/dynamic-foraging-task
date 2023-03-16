@@ -287,7 +287,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Equal">
                     <Operand xsi:type="StringProperty">
-                      <Value>Left</Value>
+                      <Value>NoReward</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -326,7 +326,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="NotEqual">
                     <Operand xsi:type="StringProperty">
-                      <Value>Left</Value>
+                      <Value>NoReward</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -1060,47 +1060,8 @@ def process(value):
             <Expression xsi:type="MulticastSubject">
               <Name>BehaviorCommands</Name>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="SubscribeSubject">
-                <Name>TrialStart</Name>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="cf:BehaviorCommand">
-                <cf:Type>ClearOutput</cf:Type>
-                <cf:Mask>Port0</cf:Mask>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="MulticastSubject">
-                <Name>BehaviorCommands</Name>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="SubscribeSubject">
-                <Name>GoCue</Name>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="cf:BehaviorCommand">
-                <cf:Type>SetOutput</cf:Type>
-                <cf:Mask>Port0</cf:Mask>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="MulticastSubject">
-                <Name>BehaviorCommands</Name>
-              </Builder>
-            </Expression>
             <Expression xsi:type="SubscribeSubject">
               <Name>LeftValueSize</Name>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="IntProperty">
-                  <Value>5000</Value>
-                </Combinator>
-              </Builder>
             </Expression>
             <Expression xsi:type="cf:BehaviorCommand">
               <cf:Type>PulsePeriod</cf:Type>
@@ -1109,26 +1070,8 @@ def process(value):
             <Expression xsi:type="MulticastSubject">
               <Name>BehaviorCommands</Name>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="cf:BehaviorCommand">
-                <cf:Type>ClearOutput</cf:Type>
-                <cf:Mask>Poke0Led</cf:Mask>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="MulticastSubject">
-                <Name>BehaviorCommands</Name>
-              </Builder>
-            </Expression>
             <Expression xsi:type="SubscribeSubject">
               <Name>RightValueSize</Name>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="IntProperty">
-                  <Value>5000</Value>
-                </Combinator>
-              </Builder>
             </Expression>
             <Expression xsi:type="cf:BehaviorCommand">
               <cf:Type>PulsePeriod</cf:Type>
@@ -1137,16 +1080,93 @@ def process(value):
             <Expression xsi:type="MulticastSubject">
               <Name>BehaviorCommands</Name>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="cf:BehaviorCommand">
-                <cf:Type>ClearOutput</cf:Type>
-                <cf:Mask>Poke1Led</cf:Mask>
-              </Builder>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>Start</Name>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="MulticastSubject">
-                <Name>BehaviorCommands</Name>
-              </Builder>
+            <Expression xsi:type="cf:BehaviorCommand">
+              <cf:Type>SetOutput</cf:Type>
+              <cf:Mask>Digital0</cf:Mask>
+            </Expression>
+            <Expression xsi:type="MulticastSubject">
+              <Name>BehaviorCommands</Name>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="rx:Delay">
+                <rx:DueTime>PT1S</rx:DueTime>
+              </Combinator>
+            </Expression>
+            <Expression xsi:type="cf:BehaviorCommand">
+              <cf:Type>ClearOutput</cf:Type>
+              <cf:Mask>Digital0</cf:Mask>
+            </Expression>
+            <Expression xsi:type="MulticastSubject">
+              <Name>BehaviorCommands</Name>
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>DelayStart</Name>
+            </Expression>
+            <Expression xsi:type="cf:BehaviorCommand">
+              <cf:Type>SetOutput</cf:Type>
+              <cf:Mask>Digital1</cf:Mask>
+            </Expression>
+            <Expression xsi:type="MulticastSubject">
+              <Name>BehaviorCommands</Name>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="rx:Delay">
+                <rx:DueTime>PT1S</rx:DueTime>
+              </Combinator>
+            </Expression>
+            <Expression xsi:type="cf:BehaviorCommand">
+              <cf:Type>ClearOutput</cf:Type>
+              <cf:Mask>Digital1</cf:Mask>
+            </Expression>
+            <Expression xsi:type="MulticastSubject">
+              <Name>BehaviorCommands</Name>
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>GoCue</Name>
+            </Expression>
+            <Expression xsi:type="cf:BehaviorCommand">
+              <cf:Type>SetOutput</cf:Type>
+              <cf:Mask>Digital2</cf:Mask>
+            </Expression>
+            <Expression xsi:type="MulticastSubject">
+              <Name>BehaviorCommands</Name>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="rx:Delay">
+                <rx:DueTime>PT1S</rx:DueTime>
+              </Combinator>
+            </Expression>
+            <Expression xsi:type="cf:BehaviorCommand">
+              <cf:Type>ClearOutput</cf:Type>
+              <cf:Mask>Digital2</cf:Mask>
+            </Expression>
+            <Expression xsi:type="MulticastSubject">
+              <Name>BehaviorCommands</Name>
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>TrialEnd</Name>
+            </Expression>
+            <Expression xsi:type="cf:BehaviorCommand">
+              <cf:Type>SetOutput</cf:Type>
+              <cf:Mask>Digital3</cf:Mask>
+            </Expression>
+            <Expression xsi:type="MulticastSubject">
+              <Name>BehaviorCommands</Name>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="rx:Delay">
+                <rx:DueTime>PT1S</rx:DueTime>
+              </Combinator>
+            </Expression>
+            <Expression xsi:type="cf:BehaviorCommand">
+              <cf:Type>ClearOutput</cf:Type>
+              <cf:Mask>Digital3</cf:Mask>
+            </Expression>
+            <Expression xsi:type="MulticastSubject">
+              <Name>BehaviorCommands</Name>
             </Expression>
             <Expression xsi:type="rx:BehaviorSubject" TypeArguments="sys:Boolean">
               <rx:Name>GoCue</rx:Name>
@@ -1236,6 +1256,16 @@ def process(value):
             <Edge From="86" To="87" Label="Source1" />
             <Edge From="87" To="88" Label="Source1" />
             <Edge From="88" To="89" Label="Source1" />
+            <Edge From="90" To="91" Label="Source1" />
+            <Edge From="91" To="92" Label="Source1" />
+            <Edge From="92" To="93" Label="Source1" />
+            <Edge From="93" To="94" Label="Source1" />
+            <Edge From="94" To="95" Label="Source1" />
+            <Edge From="96" To="97" Label="Source1" />
+            <Edge From="97" To="98" Label="Source1" />
+            <Edge From="98" To="99" Label="Source1" />
+            <Edge From="99" To="100" Label="Source1" />
+            <Edge From="100" To="101" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
@@ -1728,7 +1758,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="IntProperty">
-                      <Value>1</Value>
+                      <Value>0</Value>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -1784,7 +1814,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="IntProperty">
-                      <Value>1</Value>
+                      <Value>0</Value>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -1853,7 +1883,7 @@ def process(value):
                       <mx:SampleRate>5000</mx:SampleRate>
                       <mx:ActiveEdge>Rising</mx:ActiveEdge>
                       <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                      <mx:BufferSize>25002</mx:BufferSize>
+                      <mx:BufferSize>5000</mx:BufferSize>
                       <mx:Channels>
                         <mx:AnalogOutputChannelConfiguration>
                           <mx:ChannelName>Out</mx:ChannelName>
@@ -1903,7 +1933,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="IntProperty">
-                      <Value>1</Value>
+                      <Value>0</Value>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -1971,7 +2001,7 @@ def process(value):
                       <mx:SampleRate>5000</mx:SampleRate>
                       <mx:ActiveEdge>Rising</mx:ActiveEdge>
                       <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                      <mx:BufferSize>25002</mx:BufferSize>
+                      <mx:BufferSize>5000</mx:BufferSize>
                       <mx:Channels>
                         <mx:AnalogOutputChannelConfiguration>
                           <mx:ChannelName>Out</mx:ChannelName>
@@ -2112,7 +2142,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="IntProperty">
-                      <Value>1</Value>
+                      <Value>0</Value>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -2181,7 +2211,7 @@ def process(value):
                       <mx:SampleRate>5000</mx:SampleRate>
                       <mx:ActiveEdge>Rising</mx:ActiveEdge>
                       <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                      <mx:BufferSize>25002</mx:BufferSize>
+                      <mx:BufferSize>5000</mx:BufferSize>
                       <mx:Channels>
                         <mx:AnalogOutputChannelConfiguration>
                           <mx:ChannelName>Out</mx:ChannelName>
@@ -2223,7 +2253,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="IntProperty">
-                      <Value>1</Value>
+                      <Value>0</Value>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -2291,7 +2321,7 @@ def process(value):
                       <mx:SampleRate>5000</mx:SampleRate>
                       <mx:ActiveEdge>Rising</mx:ActiveEdge>
                       <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                      <mx:BufferSize>25002</mx:BufferSize>
+                      <mx:BufferSize>5000</mx:BufferSize>
                       <mx:Channels>
                         <mx:AnalogOutputChannelConfiguration>
                           <mx:ChannelName>Out</mx:ChannelName>
@@ -2424,7 +2454,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="IntProperty">
-                      <Value>1</Value>
+                      <Value>0</Value>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -2493,7 +2523,7 @@ def process(value):
                       <mx:SampleRate>5000</mx:SampleRate>
                       <mx:ActiveEdge>Rising</mx:ActiveEdge>
                       <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                      <mx:BufferSize>25002</mx:BufferSize>
+                      <mx:BufferSize>5000</mx:BufferSize>
                       <mx:Channels>
                         <mx:AnalogOutputChannelConfiguration>
                           <mx:ChannelName>Out</mx:ChannelName>
@@ -2543,7 +2573,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="IntProperty">
-                      <Value>1</Value>
+                      <Value>0</Value>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -2611,7 +2641,7 @@ def process(value):
                       <mx:SampleRate>5000</mx:SampleRate>
                       <mx:ActiveEdge>Rising</mx:ActiveEdge>
                       <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                      <mx:BufferSize>25002</mx:BufferSize>
+                      <mx:BufferSize>5000</mx:BufferSize>
                       <mx:Channels>
                         <mx:AnalogOutputChannelConfiguration>
                           <mx:ChannelName>Out</mx:ChannelName>
@@ -2744,7 +2774,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="IntProperty">
-                      <Value>1</Value>
+                      <Value>0</Value>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -2813,7 +2843,7 @@ def process(value):
                       <mx:SampleRate>5000</mx:SampleRate>
                       <mx:ActiveEdge>Rising</mx:ActiveEdge>
                       <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                      <mx:BufferSize>25002</mx:BufferSize>
+                      <mx:BufferSize>5000</mx:BufferSize>
                       <mx:Channels>
                         <mx:AnalogOutputChannelConfiguration>
                           <mx:ChannelName>Out</mx:ChannelName>
@@ -2863,7 +2893,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="IntProperty">
-                      <Value>1</Value>
+                      <Value>0</Value>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -2931,7 +2961,7 @@ def process(value):
                       <mx:SampleRate>5000</mx:SampleRate>
                       <mx:ActiveEdge>Rising</mx:ActiveEdge>
                       <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                      <mx:BufferSize>25002</mx:BufferSize>
+                      <mx:BufferSize>5000</mx:BufferSize>
                       <mx:Channels>
                         <mx:AnalogOutputChannelConfiguration>
                           <mx:ChannelName>Out</mx:ChannelName>
