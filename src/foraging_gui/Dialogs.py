@@ -79,12 +79,12 @@ class OptogeneticsDialog(QDialog,Ui_Optogenetics):
             eval('self.label'+str(Numb)+'_'+str(Inactlabel2)+'.setEnabled('+str(True)+')')
             eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(True)+')')
             eval('self.label'+str(Numb)+'_'+str(Inactlabel3)+'.setEnabled('+str(False)+')')
-            eval('self.RD_'+str(Numb)+'.setEnabled('+str(True)+')')
+            eval('self.RD_'+str(Numb)+'.setEnabled('+str(False)+')')
         if eval('self.Protocol_'+str(Numb)+'.currentText()')=='Constant':
             eval('self.label'+str(Numb)+'_'+str(Inactlabel1)+'.setEnabled('+str(False)+')')
             eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(False)+')')
             eval('self.label'+str(Numb)+'_'+str(Inactlabel2)+'.setEnabled('+str(False)+')')
-            eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(True)+')')
+            eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(False)+')')
             eval('self.label'+str(Numb)+'_'+str(Inactlabel3)+'.setEnabled('+str(True)+')')
             eval('self.RD_'+str(Numb)+'.setEnabled('+str(True)+')')
         if eval('self.LaserStart_'+str(Numb)+'.currentText()')=='NA':

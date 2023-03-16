@@ -30,6 +30,7 @@ class GenerateTrials():
         self.B_LeftLickTime=np.array([]).astype(float)
         self.B_RightLickTime=np.array([]).astype(float)
         self.B_TrialStartTime=np.array([]).astype(float)
+        self.B_DelayStartTime=np.array([]).astype(float)
         self.B_TrialEndTime=np.array([]).astype(float)
         self.B_GoCueTime=np.array([]).astype(float)
         self.B_LeftRewardDeliveryTime=np.array([]).astype(float)
@@ -122,10 +123,13 @@ class GenerateTrials():
                     for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
                         if self.CurrentLaserAmplitude[i]!=0:
                             #eval('Channel4.WaveForm' + str(self.NextWaveForm)+'_'+str(i+1)+'(np.array('+'self.WaveFormLocation_'+str(i+1)+',\'b\''+'))')
+                            #eval('Channel4.WaveForm' + str(self.NextWaveForm)+'_'+str(i+1)+'('+'self.WaveFormLocation_'+str(i+1)+')')
                             eval('Channel4.WaveForm' + str(self.NextWaveForm)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
-                            #print('Channel4.WaveForm' + str(self.NextWaveForm)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
-                            setattr(self, f"Location{i+1}_Size", getattr(self, f"WaveFormLocation_{i+1}").size)
                             #FinishOfWaveForm=Channel4.receive()
+                            setattr(self, f"Location{i+1}_Size", getattr(self, f"WaveFormLocation_{i+1}").size)
+                        else:
+                            setattr(self, f"Location{i+1}_Size", 100) # arbitrary number 
+                            
                     if self.NextWaveForm==1:
                         self.NextWaveForm=2
                     elif self.NextWaveForm==2:
@@ -225,6 +229,7 @@ class GenerateTrials():
                 OffsetPoints=int(self.CLP_SampleFrequency*self.CLP_OffsetStart)
                 Offset=np.zeros(OffsetPoints)
                 self.my_wave=np.concatenate((Offset,self.my_wave),axis=0)
+            self.my_wave=np.append(self.my_wave,[0,0])
 
         elif self.CLP_Protocol=='Pulse':
             if self.CLP_PulseDur=='NA':
@@ -258,6 +263,7 @@ class GenerateTrials():
                     OffsetPoints=int(self.CLP_SampleFrequency*self.CLP_OffsetStart)
                     Offset=np.zeros(OffsetPoints)
                     self.my_wave=np.concatenate((Offset,self.my_wave),axis=0)
+                self.my_wave=np.append(self.my_wave,[0,0])
         elif self.CLP_Protocol=='Constant':
             resolution=self.CLP_SampleFrequency*self.CLP_CurrentDuration # how many datapoints to generate
             self.my_wave=Amplitude*np.ones(int(resolution))
@@ -276,6 +282,7 @@ class GenerateTrials():
                 OffsetPoints=int(self.CLP_SampleFrequency*self.CLP_OffsetStart)
                 Offset=np.zeros(OffsetPoints)
                 self.my_wave=np.concatenate((Offset,self.my_wave),axis=0)
+            self.my_wave=np.append(self.my_wave,[0,0])
         else:
             self.win.WarningLabel.setText('Unidentified optogenetics protocol!')
             self.win.WarningLabel.setStyleSheet("color: red;")
@@ -416,6 +423,8 @@ class GenerateTrials():
         '''
         # get the trial start time
         TrialStartTime=Channel1.receive()
+        # get the delay start time
+        DelayStartTime=Channel1.receive()
         # reset the baited state of chosen side; get the reward state
         a=Channel1.receive()
         # can not use self.CurrentBait to decide if this current trial is rewarded or not as a new trial was already generated before this
@@ -460,6 +469,7 @@ class GenerateTrials():
         self.B_AnimalResponseHistory=np.append(self.B_AnimalResponseHistory,self.B_AnimalCurrentResponse)
         # get the trial end time at the end of the trial
         self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime[1])
+        self.B_DelayStartTime=np.append(self.B_DelayStartTime,DelayStartTime[1])
         self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime[1])
         self.B_CurrentTrialN+=1
 

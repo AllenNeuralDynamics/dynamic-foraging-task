@@ -12,6 +12,8 @@ from pyOSC3.OSC3 import OSCStreamingClient
 from Visualization import PlotV
 from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog
 from MyFunctions import GenerateTrials, Worker
+import warnings
+warnings.filterwarnings("ignore")
 #import subprocess
 #import h5py
 #from scipy import stats
@@ -279,6 +281,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # this is a bug to use the scipy.io.loadmat or savemat (it will change the dimension of the nparray)
         self.GeneratedTrials.B_AnimalResponseHistory=self.GeneratedTrials.B_AnimalResponseHistory[0]
         self.GeneratedTrials.B_TrialStartTime=self.GeneratedTrials.B_TrialStartTime[0]
+        self.GeneratedTrials.B_DelayStartTime=self.GeneratedTrials.B_DelayStartTime[0]
         self.GeneratedTrials.B_TrialEndTime=self.GeneratedTrials.B_TrialEndTime[0]
         self.GeneratedTrials.B_GoCueTime=self.GeneratedTrials.B_GoCueTime[0]
 
