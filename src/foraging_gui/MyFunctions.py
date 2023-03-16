@@ -9,8 +9,8 @@ class GenerateTrials():
     def __init__(self,win):
         self.win=win
         self.B_RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
-        self.B_RewardFamilies = [[[float(x) for x in y] for y in z] for z in self.B_RewardFamilies]
-        self.B_RewardFamilies = np.array(self.B_RewardFamilies)
+        #self.B_RewardFamilies = [[[float(x) for x in y] for y in z] for z in self.B_RewardFamilies]
+        #self.B_RewardFamilies = np.array(self.B_RewardFamilies)
         self.B_CurrentTrialN=0
         self.B_LickPortN=2
         self.B_ANewBlock=np.array([1,1]).astype(int)

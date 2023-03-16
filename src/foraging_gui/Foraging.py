@@ -218,10 +218,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     if attr_name.startswith('B_'):
                         # Add the field to the dictionary with the 'B_' prefix removed
                         #print(attr_name)
-                        #if attr_name=='B_RewardFamilies':
-                        #    pass
-                        #else:
-                        Obj[attr_name] = getattr(self.GeneratedTrials, attr_name)
+                        if attr_name=='B_RewardFamilies':
+                            pass
+                        else:
+                            Obj[attr_name] = getattr(self.GeneratedTrials, attr_name)
             savemat(self.SaveFile, Obj)           
 
     def _Open(self):
