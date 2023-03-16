@@ -393,7 +393,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Equal">
                     <Operand xsi:type="StringProperty">
-                      <Value>NoReward</Value>
+                      <Value>Right</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -431,7 +431,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="NotEqual">
                     <Operand xsi:type="StringProperty">
-                      <Value>NoReward</Value>
+                      <Value>Right</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -1743,7 +1743,7 @@ def process(value):
 @returns(bool)
 def process(value):
 
-  if value ==1:
+  if value ==1 or value ==2:
      v = True
   else:
      v = False
@@ -2055,7 +2055,7 @@ def process(value):
 @returns(bool)
 def process(value):
 
-  if value ==1:
+  if value ==1 or value ==2:
      v = True
   else:
      v = False
@@ -2375,7 +2375,7 @@ def process(value):
 @returns(bool)
 def process(value):
 
-  if value ==1:
+  if value ==1 or value ==2:
      v = True
   else:
      v = False
@@ -2695,7 +2695,7 @@ def process(value):
 @returns(bool)
 def process(value):
 
-  if value ==1:
+  if value ==1 or value ==2:
      v = True
   else:
      v = False

@@ -158,7 +158,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.MotorStage_dialog.hide()
     def _WaterCalibration(self):
         if self.WaterCalibration==0:
-            self.WaterCalibration_dialog = WaterCalibrationDialog(self,self)
+            self.WaterCalibration_dialog = WaterCalibrationDialog(MainWindow=self)
             self.WaterCalibration=1
         if self.action_Calibration.isChecked()==True:
             self.WaterCalibration_dialog.show()
@@ -166,7 +166,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.WaterCalibration_dialog.hide()
     def _LaserCalibration(self):
         if self.LaserCalibration==0:
-            self.LaserCalibration_dialog = LaserCalibrationDialog(self)
+            self.LaserCalibration_dialog = LaserCalibrationDialog(MainWindow=self)
             self.LaserCalibration=1
         if self.actionLaser_Calibration.isChecked()==True:
             self.LaserCalibration_dialog.show()

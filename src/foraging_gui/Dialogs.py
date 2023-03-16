@@ -7,6 +7,7 @@ from Camera import Ui_Camera
 from MotorStage import Ui_MotorStage
 from Manipulator import Ui_Manipulator
 from CalibrationLaser import Ui_CalibrationLaser
+from MyFunctions import GenerateTrials
 
 class OptogeneticsDialog(QDialog,Ui_Optogenetics):
     '''Optogenetics dialog'''
@@ -234,6 +235,79 @@ class MotorStageDialog(QDialog,Ui_MotorStage):
         self.setupUi(self)
 
 class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
-    def __init__(self, parent=None):
+    def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
+        self.MainWindow=MainWindow
         self.setupUi(self)
+        self._connectSignalsSlots()
+    def _connectSignalsSlots(self):
+        self.Open.clicked.connect(self._Open)
+        self.KeepOpen.clicked.connect(self._KeepOpen)
+        self.Laser_1.currentIndexChanged.connect(self._Laser_1)
+        self.Protocol_1.activated.connect(self._activated_1)
+        self.Protocol_1.currentIndexChanged.connect(self._activated_1)
+    def _Laser_1(self):
+        self._Laser(1)
+    def _activated_1(self):
+        self._activated(1)
+    def _activated(self,Numb):
+        '''enable/disable items based on protocols and laser start/end'''
+        Inactlabel1=15 # pulse duration
+        Inactlabel2=13 # frequency
+        Inactlabel3=14 # Ramping down
+        if eval('self.Protocol_'+str(Numb)+'.currentText()')=='Sine':
+            eval('self.label'+str(Numb)+'_'+str(Inactlabel1)+'.setEnabled('+str(False)+')')
+            eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(False)+')')
+            eval('self.label'+str(Numb)+'_'+str(Inactlabel2)+'.setEnabled('+str(True)+')')
+            eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(True)+')')
+            eval('self.label'+str(Numb)+'_'+str(Inactlabel3)+'.setEnabled('+str(True)+')')
+            eval('self.RD_'+str(Numb)+'.setEnabled('+str(True)+')')
+        if eval('self.Protocol_'+str(Numb)+'.currentText()')=='Pulse':
+            eval('self.label'+str(Numb)+'_'+str(Inactlabel1)+'.setEnabled('+str(True)+')')
+            eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(True)+')')
+            eval('self.label'+str(Numb)+'_'+str(Inactlabel2)+'.setEnabled('+str(True)+')')
+            eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(True)+')')
+            eval('self.label'+str(Numb)+'_'+str(Inactlabel3)+'.setEnabled('+str(False)+')')
+            eval('self.RD_'+str(Numb)+'.setEnabled('+str(False)+')')
+        if eval('self.Protocol_'+str(Numb)+'.currentText()')=='Constant':
+            eval('self.label'+str(Numb)+'_'+str(Inactlabel1)+'.setEnabled('+str(False)+')')
+            eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(False)+')')
+            eval('self.label'+str(Numb)+'_'+str(Inactlabel2)+'.setEnabled('+str(False)+')')
+            eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(False)+')')
+            eval('self.label'+str(Numb)+'_'+str(Inactlabel3)+'.setEnabled('+str(True)+')')
+            eval('self.RD_'+str(Numb)+'.setEnabled('+str(True)+')')
+    def _Laser(self,Numb):
+        ''' enable/disable items based on laser (blue/green/orange/red/NA)'''
+        Inactlabel=[2,3,5,12,13,14,15]
+        if eval('self.Laser_'+str(Numb)+'.currentText()')=='NA':
+            Label=False
+        else:
+            Label=True
+        eval('self.Location_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.LaserPower_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.Duration_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.Protocol_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.RD_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        for i in Inactlabel:
+            eval('self.label'+str(Numb)+'_'+str(i)+'.setEnabled('+str(Label)+')')
+        if eval('self.Laser_'+str(Numb)+'.currentText()')!='NA':    
+            eval('self._activated_'+str(Numb)+'()')
+
+    def _Open(self):
+        if self.Open.isChecked():
+            # change button color
+            GeneratedTrials=GenerateTrials(self)
+            GeneratedTrials._GenerateATrial(self.Channel4)
+            self.Open.setStyleSheet("background-color : green;")
+        else:
+            # change button color
+            self.Open.setStyleSheet("background-color : none")
+    def _KeepOpen(self):
+        if self.KeepOpen.isChecked():
+            # change button color
+            self.KeepOpen.setStyleSheet("background-color : green;")
+        else:
+            # change button color
+            self.KeepOpen.setStyleSheet("background-color : none")
