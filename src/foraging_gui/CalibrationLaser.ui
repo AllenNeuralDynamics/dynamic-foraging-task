@@ -558,7 +558,7 @@
     <rect>
      <x>860</x>
      <y>40</y>
-     <width>131</width>
+     <width>151</width>
      <height>20</height>
     </rect>
    </property>
@@ -569,7 +569,7 @@
     </sizepolicy>
    </property>
    <property name="text">
-    <string>Laser power measured=</string>
+    <string>Laser power measured (mw)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -581,7 +581,7 @@
   <widget class="QLineEdit" name="LaserPowerMeasured">
    <property name="geometry">
     <rect>
-     <x>1000</x>
+     <x>1020</x>
      <y>40</y>
      <width>41</width>
      <height>20</height>
@@ -600,7 +600,7 @@
   <widget class="QPushButton" name="Save">
    <property name="geometry">
     <rect>
-     <x>870</x>
+     <x>890</x>
      <y>80</y>
      <width>171</width>
      <height>23</height>

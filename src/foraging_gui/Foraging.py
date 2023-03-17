@@ -3,7 +3,7 @@ import numpy as np
 from datetime import date,timedelta,datetime
 from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import QThreadPool
+from PyQt5.QtCore import QThreadPool,Qt
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from ForagingGUI import Ui_ForagingGUI
@@ -127,7 +127,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _Optogenetics(self):
         '''will be triggered when the optogenetics icon is pressed'''
         if self.OpenOptogenetics==0:
-            self.Opto_dialog = OptogeneticsDialog(self)
+            self.Opto_dialog = OptogeneticsDialog(MainWindow=self)
             self.OpenOptogenetics=1
         if self.action_Optogenetics.isChecked()==True:
             self.Opto_dialog.show()
@@ -135,7 +135,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Opto_dialog.hide()
     def _Camera(self):
         if self.Camera==0:
-            self.Camera_dialog = CameraDialog(self)
+            self.Camera_dialog = CameraDialog(MainWindow=self)
             self.Camera=1
         if self.action_Camera.isChecked()==True:
             self.Camera_dialog.show()
@@ -143,20 +143,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Camera_dialog.hide()
     def _Manipulator(self):
         if self.Manipulator==0:
-            self.ManipulatoB_dialog = ManipulatorDialog(self)
+            self.ManipulatoB_dialog = ManipulatorDialog(MainWindow=self)
             self.Manipulator=1
         if self.action_Manipulator.isChecked()==True:
             self.ManipulatoB_dialog.show()
         else:
             self.ManipulatoB_dialog.hide()
-    def _MotorStage(self):
-        if self.MotorStage==0:
-            self.MotorStage_dialog = MotorStageDialog(self)
-            self.MotorStage=1
-        if self.action_MotorStage.isChecked()==True:
-            self.MotorStage_dialog.show()
-        else:
-            self.MotorStage_dialog.hide()
     def _WaterCalibration(self):
         if self.WaterCalibration==0:
             self.WaterCalibration_dialog = WaterCalibrationDialog(MainWindow=self)
@@ -173,7 +165,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.LaserCalibration_dialog.show()
         else:
             self.LaserCalibration_dialog.hide()
-
+    def _MotorStage(self):
+        if self.MotorStage==0:
+            self.MotorStage_dialog = MotorStageDialog(MainWindow=self)
+            self.MotorStage=1
+        if self.action_MotorStage.isChecked()==True:
+            self.MotorStage_dialog.show()
+        else:
+            self.MotorStage_dialog.hide()
     def _about(self):
         QMessageBox.about(
             self,
@@ -185,6 +184,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             "<p>Analysis</p>"
             "<p></p>",
         )
+   
     def _Save(self):
         SaveFile=self.default_saveFolder+self.AnimalName.text()+'_'+str(date.today())+'.mat'
         N=0

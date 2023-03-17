@@ -14,7 +14,12 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MotorStage(object):
     def setupUi(self, MotorStage):
         MotorStage.setObjectName("MotorStage")
-        MotorStage.resize(400, 300)
+        MotorStage.resize(1170, 300)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(MotorStage.sizePolicy().hasHeightForWidth())
+        MotorStage.setSizePolicy(sizePolicy)
 
         self.retranslateUi(MotorStage)
         QtCore.QMetaObject.connectSlotsByName(MotorStage)

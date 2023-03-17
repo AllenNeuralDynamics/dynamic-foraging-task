@@ -9,11 +9,11 @@ from Manipulator import Ui_Manipulator
 from CalibrationLaser import Ui_CalibrationLaser
 from MyFunctions import Worker
 import numpy as np
-from PyQt5.QtCore import QThreadPool
+from PyQt5.QtCore import QThreadPool,Qt
 from datetime import datetime
 class OptogeneticsDialog(QDialog,Ui_Optogenetics):
     '''Optogenetics dialog'''
-    def __init__(self, parent=None):
+    def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
         self.setupUi(self)
         self._connectSignalsSlots()
@@ -222,19 +222,20 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
 
 
 class CameraDialog(QDialog,Ui_Camera):
-    def __init__(self, parent=None):
+    def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
         self.setupUi(self)
 
 class ManipulatorDialog(QDialog,Ui_Manipulator):
-    def __init__(self, parent=None):
+    def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
         self.setupUi(self)
 
 class MotorStageDialog(QDialog,Ui_MotorStage):
-    def __init__(self, parent=None):
+    def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
         self.setupUi(self)
+        self.MainWindow=MainWindow
 
 class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
     def __init__(self, MainWindow, parent=None):
