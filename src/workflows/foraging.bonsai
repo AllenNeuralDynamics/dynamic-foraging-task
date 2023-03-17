@@ -287,7 +287,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Equal">
                     <Operand xsi:type="StringProperty">
-                      <Value>NoReward</Value>
+                      <Value>Left</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -326,7 +326,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="NotEqual">
                     <Operand xsi:type="StringProperty">
-                      <Value>NoReward</Value>
+                      <Value>Left</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -393,7 +393,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Equal">
                     <Operand xsi:type="StringProperty">
-                      <Value>NoReward</Value>
+                      <Value>Right</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -431,7 +431,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="NotEqual">
                     <Operand xsi:type="StringProperty">
-                      <Value>NoReward</Value>
+                      <Value>Right</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -1859,7 +1859,7 @@ def process(value):
                       <mx:SampleRate>5000</mx:SampleRate>
                       <mx:ActiveEdge>Rising</mx:ActiveEdge>
                       <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                      <mx:BufferSize>10002</mx:BufferSize>
+                      <mx:BufferSize>50002</mx:BufferSize>
                       <mx:Channels>
                         <mx:AnalogOutputChannelConfiguration>
                           <mx:ChannelName>Out</mx:ChannelName>
@@ -1909,7 +1909,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="IntProperty">
-                      <Value>1</Value>
+                      <Value>0</Value>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -1977,7 +1977,7 @@ def process(value):
                       <mx:SampleRate>5000</mx:SampleRate>
                       <mx:ActiveEdge>Rising</mx:ActiveEdge>
                       <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                      <mx:BufferSize>10002</mx:BufferSize>
+                      <mx:BufferSize>100</mx:BufferSize>
                       <mx:Channels>
                         <mx:AnalogOutputChannelConfiguration>
                           <mx:ChannelName>Out</mx:ChannelName>
@@ -2187,7 +2187,7 @@ def process(value):
                       <mx:SampleRate>5000</mx:SampleRate>
                       <mx:ActiveEdge>Rising</mx:ActiveEdge>
                       <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                      <mx:BufferSize>10002</mx:BufferSize>
+                      <mx:BufferSize>50002</mx:BufferSize>
                       <mx:Channels>
                         <mx:AnalogOutputChannelConfiguration>
                           <mx:ChannelName>Out</mx:ChannelName>
@@ -2229,7 +2229,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="IntProperty">
-                      <Value>1</Value>
+                      <Value>0</Value>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -2297,7 +2297,7 @@ def process(value):
                       <mx:SampleRate>5000</mx:SampleRate>
                       <mx:ActiveEdge>Rising</mx:ActiveEdge>
                       <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                      <mx:BufferSize>10002</mx:BufferSize>
+                      <mx:BufferSize>100</mx:BufferSize>
                       <mx:Channels>
                         <mx:AnalogOutputChannelConfiguration>
                           <mx:ChannelName>Out</mx:ChannelName>
@@ -2499,7 +2499,7 @@ def process(value):
                       <mx:SampleRate>5000</mx:SampleRate>
                       <mx:ActiveEdge>Rising</mx:ActiveEdge>
                       <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                      <mx:BufferSize>10002</mx:BufferSize>
+                      <mx:BufferSize>50002</mx:BufferSize>
                       <mx:Channels>
                         <mx:AnalogOutputChannelConfiguration>
                           <mx:ChannelName>Out</mx:ChannelName>
@@ -2549,7 +2549,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="IntProperty">
-                      <Value>1</Value>
+                      <Value>0</Value>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -2617,7 +2617,7 @@ def process(value):
                       <mx:SampleRate>5000</mx:SampleRate>
                       <mx:ActiveEdge>Rising</mx:ActiveEdge>
                       <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                      <mx:BufferSize>10002</mx:BufferSize>
+                      <mx:BufferSize>100</mx:BufferSize>
                       <mx:Channels>
                         <mx:AnalogOutputChannelConfiguration>
                           <mx:ChannelName>Out</mx:ChannelName>
@@ -2819,7 +2819,7 @@ def process(value):
                       <mx:SampleRate>5000</mx:SampleRate>
                       <mx:ActiveEdge>Rising</mx:ActiveEdge>
                       <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                      <mx:BufferSize>10002</mx:BufferSize>
+                      <mx:BufferSize>50002</mx:BufferSize>
                       <mx:Channels>
                         <mx:AnalogOutputChannelConfiguration>
                           <mx:ChannelName>Out</mx:ChannelName>
@@ -2869,7 +2869,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="IntProperty">
-                      <Value>1</Value>
+                      <Value>0</Value>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -2937,7 +2937,7 @@ def process(value):
                       <mx:SampleRate>5000</mx:SampleRate>
                       <mx:ActiveEdge>Rising</mx:ActiveEdge>
                       <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                      <mx:BufferSize>10002</mx:BufferSize>
+                      <mx:BufferSize>100</mx:BufferSize>
                       <mx:Channels>
                         <mx:AnalogOutputChannelConfiguration>
                           <mx:ChannelName>Out</mx:ChannelName>

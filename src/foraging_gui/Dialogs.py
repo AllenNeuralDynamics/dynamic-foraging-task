@@ -7,7 +7,10 @@ from Camera import Ui_Camera
 from MotorStage import Ui_MotorStage
 from Manipulator import Ui_Manipulator
 from CalibrationLaser import Ui_CalibrationLaser
+from MyFunctions import Worker
 import numpy as np
+from PyQt5.QtCore import QThreadPool
+from datetime import datetime
 class OptogeneticsDialog(QDialog,Ui_Optogenetics):
     '''Optogenetics dialog'''
     def __init__(self, parent=None):
@@ -239,9 +242,17 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
         self.MainWindow=MainWindow
         self.setupUi(self)
         self._connectSignalsSlots()
+        self.SleepComplete=1
+        self.SleepComplete2=0
+        self.Initialize1=0
+        self.Initialize2=0
+        self.threadpool1=QThreadPool()
+        self.threadpool2=QThreadPool()
     def _connectSignalsSlots(self):
         self.Open.clicked.connect(self._Open)
         self.KeepOpen.clicked.connect(self._KeepOpen)
+        self.CopyFromOpto.clicked.connect(self._CopyFromOpto)
+        self.Save.clicked.connect(self._Save)
         self.Laser_1.currentIndexChanged.connect(self._Laser_1)
         self.Protocol_1.activated.connect(self._activated_1)
         self.Protocol_1.currentIndexChanged.connect(self._activated_1)
@@ -299,15 +310,15 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
         '''Get the waveform of the laser. It dependens on color/duration/protocol(frequency/RD/pulse duration)/locations/laser power'''
         N=str(1)
         # CLP, current laser parameter
-        self.CLP_Color=eval('self.TP_Laser_'+N)
-        self.CLP_Location=eval('self.TP_Location_'+N)
-        self.CLP_LaserPower=eval('self.TP_LaserPower_'+N)
-        self.CLP_Duration=float(eval('self.TP_Duration_'+N))
-        self.CLP_Protocol=eval('self.TP_Protocol_'+N)
-        self.CLP_Frequency=float(eval('self.TP_Frequency_'+N))
-        self.CLP_RampingDown=float(eval('self.TP_RD_'+N))
-        self.CLP_PulseDur=eval('self.TP_PulseDur_'+N)
-        self.CLP_SampleFrequency=float(self.TP_SampleFrequency)
+        self.CLP_Color=eval('self.LC_Laser_'+N)
+        self.CLP_Location=eval('self.LC_Location_'+N)
+        self.CLP_LaserPower=eval('self.LC_LaserPower_'+N)
+        self.CLP_Duration=float(eval('self.LC_Duration_'+N))
+        self.CLP_Protocol=eval('self.LC_Protocol_'+N)
+        self.CLP_Frequency=float(eval('self.LC_Frequency_'+N))
+        self.CLP_RampingDown=float(eval('self.LC_RD_'+N))
+        self.CLP_PulseDur=eval('self.LC_PulseDur_'+N)
+        self.CLP_SampleFrequency=float(self.LC_SampleFrequency)
         self.CLP_CurrentDuration=self.CLP_Duration
         # generate the waveform based on self.CLP_CurrentDuration and Protocol, Frequency, RampingDown, PulseDur
         self._GetLaserAmplitude()
@@ -317,6 +328,13 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
                 # in some cases the other paramters except the amplitude could also be different
                 self._ProduceWaveForm(self.CurrentLaserAmplitude[i])
                 setattr(self, 'WaveFormLocation_' + str(i+1), self.my_wave)
+                # send waveforms
+                setattr(self, f"Location{i+1}_Size", getattr(self, f"WaveFormLocation_{i+1}").size)
+                eval('self.MainWindow.Channel.Trigger_Location'+str(i+1)+'(int(1))')
+                eval('self.MainWindow.Channel4.WaveForm' + str(1)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
+            else:
+                setattr(self, f"Location{i+1}_Size", 100) # arbitrary number \
+                eval('self.MainWindow.Channel.Trigger_Location'+str(i+1)+'(int(0))')
 
     def _ProduceWaveForm(self,Amplitude):
         '''generate the waveform based on Duration and Protocol, Laser Power, Frequency, RampingDown, PulseDur and the sample frequency'''
@@ -383,12 +401,6 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
             self.win.WarningLabel.setText('Unidentified optogenetics protocol!')
             self.win.WarningLabel.setStyleSheet("color: red;")
 
-        '''
-        # test
-        import matplotlib.pyplot as plt
-        plt.plot(np.arange(0, length, length / resolution), self.my_wave)   
-        plt.show()
-        '''
     def _GetLaserAmplitude(self):
         '''the voltage amplitude dependens on Protocol, Laser Power, Laser color, and the stimulation locations<>'''
         if self.CLP_Location=='Left':
@@ -404,69 +416,137 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
     # get training parameters
     def _GetTrainingParameters(self,win):
         '''Get training parameters'''
+        Prefix='LC' # laser calibration
         # Iterate over each container to find child widgets and store their values in self
         for container in [win.LaserCalibration_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit, QtWidgets.QDoubleSpinBox)):
                 # Set an attribute in self with the name 'TP_' followed by the child's object name
                 # and store the child's text value
-                setattr(self, 'TP_'+child.objectName(), child.text())
+                setattr(self, Prefix+'_'+child.objectName(), child.text())
             # Iterate over each child of the container that is a QComboBox
             for child in container.findChildren(QtWidgets.QComboBox):
                 # Set an attribute in self with the name 'TP_' followed by the child's object name
                 # and store the child's current text value
-                setattr(self, 'TP_'+child.objectName(), child.currentText())
+                setattr(self, Prefix+'_'+child.objectName(), child.currentText())
             # Iterate over each child of the container that is a QPushButton
             for child in container.findChildren(QtWidgets.QPushButton):
                 # Set an attribute in self with the name 'TP_' followed by the child's object name
                 # and store whether the child is checked or not
-                setattr(self, 'TP_'+child.objectName(), child.isChecked())
+                setattr(self, Prefix+'_'+child.objectName(), child.isChecked())
     def _InitiateATrial(self):
         self.MainWindow.Channel.TriggerITIStart_Wave1(int(1))
         self.MainWindow.Channel.TriggerITIStart_Wave2(int(0))
         self.MainWindow.Channel.TriggerGoCue_Wave1(int(0))
         self.MainWindow.Channel.TriggerGoCue_Wave2(int(0))
-        # dimension of self.CurrentLaserAmplitude indicates how many locations do we have
-        for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
-            if self.CurrentLaserAmplitude[i]!=0:
-                setattr(self, f"Location{i+1}_Size", getattr(self, f"WaveFormLocation_{i+1}").size)
-                eval('self.MainWindow.Channel.Trigger_Location'+str(i+1)+'(int(1))')
-                eval('self.MainWindow.Channel4.WaveForm' + str(1)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
-            else:
-                setattr(self, f"Location{i+1}_Size", 100) # arbitrary number \
-                eval('self.MainWindow.Channel.Trigger_Location'+str(i+1)+'(int(0))')
         # send the waveform size
         self.MainWindow.Channel.Location1_Size(int(self.Location1_Size))
         self.MainWindow.Channel.Location2_Size(int(self.Location2_Size))
         self.MainWindow.Channel.start(2)
+    def _CopyFromOpto(self):
+        '''Copy the optogenetics parameters'''
+        N=[]
+        for i in range(100):
+            variable_name = "Laser_" + str(i)
+            if hasattr(self.MainWindow.Opto_dialog,variable_name):
+                current_text = self.MainWindow.Opto_dialog.__getattribute__(variable_name).currentText()
+                if current_text !='NA':
+                    N=i
+                    break
+        if N==[]:
+            return
+        self.Duration_1.setText(self.MainWindow.Opto_dialog.__getattribute__("Duration_" + str(N)).text())
+        self.Frequency_1.setText(self.MainWindow.Opto_dialog.__getattribute__("Frequency_" + str(N)).text())
+        self.RD_1.setText(self.MainWindow.Opto_dialog.__getattribute__("RD_" + str(N)).text())
+        self.PulseDur_1.setText(self.MainWindow.Opto_dialog.__getattribute__("PulseDur_" + str(N)).text())
+        self.Laser_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Laser_" + str(N)).currentIndex())
+        self.Location_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Location_" + str(N)).currentIndex())
+        self.LaserPower_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("LaserPower_" + str(N)).currentIndex())
+        self.Protocol_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Protocol_" + str(N)).currentIndex())
+    def _Save(self):
+        '''Save the measured laser power'''
+        self.Save.setStyleSheet("background-color : green;")
+        QApplication.processEvents()
+        self._GetTrainingParameters(self.MainWindow)
+        for attr_name in dir(self):
+            if attr_name.startswith('LC_'):
+                if hasattr(self,'LCM_'+attr_name[3:]): # LCM means measured laser power from calibration
+                    self.__getattribute__('LCM_'+attr_name[3:]).append(getattr(self,attr_name))
+                else:
+                    setattr(self,'LCM_'+attr_name[3:],[getattr(self,attr_name)])
+        # save the measure time
+        if hasattr(self,'LCM_MeasureTime'):
+            current_time = datetime.now()
+            date_str = current_time.strftime("%Y-%m-%d")
+            time_str = current_time.strftime("%H:%M:%S")
+            self.LCM_MeasureTime.append([date_str+' '+time_str])
+        else:
+            current_time = datetime.now()
+            date_str = current_time.strftime("%Y-%m-%d")
+            time_str = current_time.strftime("%H:%M:%S")
+            self.LCM_MeasureTime=[date_str+' '+time_str]
+        time.sleep(1)
+        self.Save.setStyleSheet("background-color : none")
+        self.Save.setChecked(False)
+
+    def _Sleep(self,SleepTime):
+        time.sleep(SleepTime)
+    def _thread_complete(self):
+        self.SleepComplete=1
+    def _thread_complete2(self):
+        self.SleepComplete2=1
     def _Open(self):
+        '''Open the laser only once'''
         if self.Open.isChecked():
             # change button color
             self.Open.setStyleSheet("background-color : green;")
+            QApplication.processEvents()
             self._GetTrainingParameters(self.MainWindow)
             self._GetLaserWaveForm()
+            self.worker2 = Worker(self._Sleep,float(self.LC_Duration_1))
+            self.worker2.signals.finished.connect(self._thread_complete2)
+            time.sleep(1)
             self._InitiateATrial()
+            self.SleepStart=1
+            while 1:
+                QApplication.processEvents()
+                if  self.SleepStart==1: # only run once
+                    self.SleepStart=0
+                    self.threadpool2.start(self.worker2)
+                if self.Open.isChecked()==False or self.SleepComplete2==1:
+                    break 
             self.Open.setStyleSheet("background-color : none")
+            self.Open.setChecked(False)
         else:
             # change button color
             self.Open.setStyleSheet("background-color : none")
+            self.Open.setChecked(False)
     def _KeepOpen(self):
+        '''Keep the laser open'''
         if self.KeepOpen.isChecked():
             # change button color
             self.KeepOpen.setStyleSheet("background-color : green;")
             self._GetTrainingParameters(self.MainWindow)
-            self.TP_Duration_1=10
-            self.TP_RD_1=0
+            self.LC_RD_1=0 # set RM to zero
             self._GetLaserWaveForm()
+            if self.Initialize1==0:
+                self.worker1 = Worker(self._Sleep,float(self.LC_Duration_1))
+                self.worker1.signals.finished.connect(self._thread_complete)
+                self.Initialize1=1
             time.sleep(1)
             while 1:
                 QApplication.processEvents()
-                if self.KeepOpen.isChecked():
+                if  self.SleepComplete==1:
+                    self.SleepComplete=0
                     self._InitiateATrial()
-                    time.sleep(self.TP_Duration_1)
-                else:
+                    self.threadpool1.start(self.worker1)
+                    #time.sleep(float(self.TP_Duration_1)+0.1)
+                    #time.sleep(0.1)
+                if self.KeepOpen.isChecked()==False:
                     break
-            self.Open.setStyleSheet("background-color : none")
+            self.KeepOpen.setStyleSheet("background-color : none")
+            self.KeepOpen.setChecked(False)
         else:
             # change button color
             self.KeepOpen.setStyleSheet("background-color : none")
+            self.KeepOpen.setChecked(False)

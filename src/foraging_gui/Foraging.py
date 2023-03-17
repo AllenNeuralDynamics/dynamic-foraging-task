@@ -42,6 +42,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.MotorStage=0
         self.Manipulator=0
         self._Optogenetics() # open the optogenetics panel
+        self._LaserCalibration() # to open the laser calibration panel
 
     def _InitializeBonsai(self):
         #os.system(" E:\\GitHub\\dynamic-foraging-task\\bonsai\\Bonsai.exe E:\\GitHub\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai  --start") 
@@ -200,28 +201,40 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     Obj=self.GeneratedTrials.Obj
             else:
                 Obj={}
+            # save training parameters
             for child in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)+self.centralwidget.findChildren(QtWidgets.QLineEdit):
                 Obj[child.objectName()]=child.text()
             for child in self.centralwidget.findChildren(QtWidgets.QComboBox):
                 Obj[child.objectName()]=child.currentText()
+            # save optogenetics parameters
             if 'Opto_dialog' in self.__dict__:
                 for child in self.Opto_dialog.findChildren(QtWidgets.QDoubleSpinBox)+self.Opto_dialog.findChildren(QtWidgets.QLineEdit):
                     Obj[child.objectName()]=child.text()
                 for child in self.Opto_dialog.findChildren(QtWidgets.QComboBox):
                     Obj[child.objectName()]=child.currentText()
-
+            # save optogenetics calibration parameters
+            if 'LaserCalibration_dialog' in self.__dict__:
+                for child in self.LaserCalibration_dialog.findChildren(QtWidgets.QDoubleSpinBox)+self.LaserCalibration_dialog.findChildren(QtWidgets.QLineEdit):
+                    Obj[child.objectName()]=child.text()
+                for child in self.LaserCalibration_dialog.findChildren(QtWidgets.QComboBox):
+                    Obj[child.objectName()]=child.currentText()
             # save behavor events
             if hasattr(self, 'GeneratedTrials'):
                 # Do something if self has the GeneratedTrials attribute
                 # Iterate over all attributes of the GeneratedTrials object
                 for attr_name in dir(self.GeneratedTrials):
                     if attr_name.startswith('B_'):
-                        # Add the field to the dictionary with the 'B_' prefix removed
-                        #print(attr_name)
                         if attr_name=='B_RewardFamilies':
                             pass
                         else:
                             Obj[attr_name] = getattr(self.GeneratedTrials, attr_name)
+            # save laser calibration results 
+            if hasattr(self, 'LaserCalibration_dialog'):
+                # Do something if self has the GeneratedTrials attribute
+                # Iterate over all attributes of the GeneratedTrials object
+                for attr_name in dir(self.LaserCalibration_dialog):
+                    if attr_name.startswith('LCM_'):
+                        Obj[attr_name] = getattr(self.LaserCalibration_dialog, attr_name)
             savemat(self.SaveFile, Obj)           
 
     def _Open(self):
@@ -232,7 +245,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))}
             widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
             widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))})  # update optogenetics parameters from the loaded file
-
+            if hasattr(self, 'LaserCalibration_dialog'):
+                widget_dict.update({w.objectName(): w for w in self.LaserCalibration_dialog.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))})  # update laser calibration parameters from the loaded file
             for key in widget_dict.keys():
                 if key in Obj:
                     widget = widget_dict[key]
@@ -278,6 +292,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     setattr(self.GeneratedTrials, attr_name, value)
                 except:
                     pass
+        if self.GeneratedTrials.B_AnimalResponseHistory.size==0:
+            return
         # this is a bug to use the scipy.io.loadmat or savemat (it will change the dimension of the nparray)
         self.GeneratedTrials.B_AnimalResponseHistory=self.GeneratedTrials.B_AnimalResponseHistory[0]
         self.GeneratedTrials.B_TrialStartTime=self.GeneratedTrials.B_TrialStartTime[0]
