@@ -66,24 +66,24 @@ class RigClient:
         #value=np.random.rand(2,441)
         self.send("/WaveForm1_1", value)
         #message = OSCMessage("/WaveForm1_1")
-        #message.append(value,'b')
-        #self.client.sendOSC(message)
-        # waveform 2, location 1
+        #message.append(value.tobytes(),'b')
+        #return self.client.sendOSC(message)
+    # waveform 2, location 1
     def WaveForm2_1(self, value):
-        #value=np.random.rand(2,441)
+        #value=np.random.rand(1,441)
         self.send("/WaveForm2_1", value)
         #message = OSCMessage("/WaveForm2_1")
-        #message.append(value,'b')
-        #self.client.sendOSC(message)
+        #message.append(value.tobytes(),'b')
+        #return self.client.sendOSC(message)
 
     # waveform 1, location 2
     def WaveForm1_2(self, value):
-        #value=np.random.rand(2,441)
+        #value=np.random.rand(1,441)
         self.send("/WaveForm1_2", value)
         
         #message = OSCMessage("/WaveForm1_2")
-        #message.append(value,'b')
-        #self.client.sendOSC(message)
+        #message.append(value.tobytes(),'b')
+        #return self.client.sendOSC(message)
 
     # waveform 2, location 2
     def WaveForm2_2(self, value):
@@ -91,8 +91,8 @@ class RigClient:
         self.send("/WaveForm2_2", value)
         
         #message = OSCMessage("/WaveForm2_2")
-        #message.append(value,'b')
-        #self.client.sendOSC(message)
+        #message.append(value.tobytes(),'b')
+        #return self.client.sendOSC(message)
 
     def LeftValue(self, value):
         self.send("/LeftValueSize", value)

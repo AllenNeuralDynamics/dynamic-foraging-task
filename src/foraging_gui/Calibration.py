@@ -97,7 +97,7 @@ class Ui_WaterCalibration(object):
 
     def retranslateUi(self, WaterCalibration):
         _translate = QtCore.QCoreApplication.translate
-        WaterCalibration.setWindowTitle(_translate("WaterCalibration", "Calibration"))
+        WaterCalibration.setWindowTitle(_translate("WaterCalibration", "Water calibration"))
         self.label_3.setText(_translate("WaterCalibration", "Open left (s)="))
         self.label_4.setText(_translate("WaterCalibration", "Open right (s)="))
         self.label_5.setText(_translate("WaterCalibration", "Interval left (s)="))

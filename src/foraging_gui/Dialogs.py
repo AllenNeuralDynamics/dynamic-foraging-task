@@ -1,14 +1,13 @@
-import time
-from PyQt5.QtWidgets import QApplication
+import time,math
 from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout
+from PyQt5 import QtWidgets
 from Optogenetics import Ui_Optogenetics
 from Calibration import Ui_WaterCalibration
 from Camera import Ui_Camera
 from MotorStage import Ui_MotorStage
 from Manipulator import Ui_Manipulator
 from CalibrationLaser import Ui_CalibrationLaser
-from MyFunctions import GenerateTrials
-
+import numpy as np
 class OptogeneticsDialog(QDialog,Ui_Optogenetics):
     '''Optogenetics dialog'''
     def __init__(self, parent=None):
@@ -276,6 +275,7 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
             eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(False)+')')
             eval('self.label'+str(Numb)+'_'+str(Inactlabel3)+'.setEnabled('+str(True)+')')
             eval('self.RD_'+str(Numb)+'.setEnabled('+str(True)+')')
+    
     def _Laser(self,Numb):
         ''' enable/disable items based on laser (blue/green/orange/red/NA)'''
         Inactlabel=[2,3,5,12,13,14,15]
@@ -294,13 +294,159 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
             eval('self.label'+str(Numb)+'_'+str(i)+'.setEnabled('+str(Label)+')')
         if eval('self.Laser_'+str(Numb)+'.currentText()')!='NA':    
             eval('self._activated_'+str(Numb)+'()')
+    
+    def _GetLaserWaveForm(self):
+        '''Get the waveform of the laser. It dependens on color/duration/protocol(frequency/RD/pulse duration)/locations/laser power'''
+        N=str(1)
+        # CLP, current laser parameter
+        self.CLP_Color=eval('self.TP_Laser_'+N)
+        self.CLP_Location=eval('self.TP_Location_'+N)
+        self.CLP_LaserPower=eval('self.TP_LaserPower_'+N)
+        self.CLP_Duration=float(eval('self.TP_Duration_'+N))
+        self.CLP_Protocol=eval('self.TP_Protocol_'+N)
+        self.CLP_Frequency=float(eval('self.TP_Frequency_'+N))
+        self.CLP_RampingDown=float(eval('self.TP_RD_'+N))
+        self.CLP_PulseDur=eval('self.TP_PulseDur_'+N)
+        self.CLP_SampleFrequency=float(self.TP_SampleFrequency)
+        self.CLP_CurrentDuration=self.CLP_Duration
+        # generate the waveform based on self.CLP_CurrentDuration and Protocol, Frequency, RampingDown, PulseDur
+        self._GetLaserAmplitude()
+        # dimension of self.CurrentLaserAmplitude indicates how many locations do we have
+        for i in range(len(self.CurrentLaserAmplitude)):
+            if self.CurrentLaserAmplitude[i]!=0:
+                # in some cases the other paramters except the amplitude could also be different
+                self._ProduceWaveForm(self.CurrentLaserAmplitude[i])
+                setattr(self, 'WaveFormLocation_' + str(i+1), self.my_wave)
 
+    def _ProduceWaveForm(self,Amplitude):
+        '''generate the waveform based on Duration and Protocol, Laser Power, Frequency, RampingDown, PulseDur and the sample frequency'''
+        if self.CLP_Protocol=='Sine':
+            resolution=self.CLP_SampleFrequency*self.CLP_CurrentDuration # how many datapoints to generate
+            cycles=self.CLP_CurrentDuration*self.CLP_Frequency # how many sine cycles
+            length = np.pi * 2 * cycles
+            self.my_wave = Amplitude*(1+np.sin(np.arange(0+1.5*math.pi, length+1.5*math.pi, length / resolution)))/2
+            # add ramping down
+            if self.CLP_RampingDown>0:
+                if self.CLP_RampingDown>self.CLP_CurrentDuration:
+                    self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
+                    self.win.WarningLabel.setStyleSheet("color: red;")
+                else:
+                    Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
+                    RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
+                    RampingDown = np.concatenate((Constant, RD), axis=0)
+                    self.my_wave=self.my_wave*RampingDown
+            self.my_wave=np.append(self.my_wave,[0,0])
+
+        elif self.CLP_Protocol=='Pulse':
+            if self.CLP_PulseDur=='NA':
+                self.win.WarningLabel.setText('Pulse duration is NA!')
+                self.win.WarningLabel.setStyleSheet("color: red;")
+            else:
+                self.CLP_PulseDur=float(self.CLP_PulseDur)
+                PointsEachPulse=int(self.CLP_SampleFrequency*self.CLP_PulseDur)
+                PulseIntervalPoints=int(1/self.CLP_Frequency*self.CLP_SampleFrequency-PointsEachPulse)
+                if PulseIntervalPoints<0:
+                    self.win.WarningLabel.setText('Pulse frequency and pulse duration are not compatible!')
+                    self.win.WarningLabel.setStyleSheet("color: red;")
+                TotalPoints=int(self.CLP_SampleFrequency*self.CLP_CurrentDuration)
+                PulseNumber=np.floor(self.CLP_CurrentDuration*self.CLP_Frequency) 
+                EachPulse=Amplitude*np.ones(PointsEachPulse)
+                PulseInterval=np.zeros(PulseIntervalPoints)
+                WaveFormEachCycle=np.concatenate((EachPulse, PulseInterval), axis=0)
+                self.my_wave=np.empty(0)
+                # pulse number should be greater than 0
+                if PulseNumber>1:
+                    for i in range(int(PulseNumber-1)):
+                        self.my_wave=np.concatenate((self.my_wave, WaveFormEachCycle), axis=0)
+                else:
+                    self.win.WarningLabel.setText('Pulse number is less than 1!')
+                    self.win.WarningLabel.setStyleSheet("color: red;")
+                    return
+                self.my_wave=np.concatenate((self.my_wave, EachPulse), axis=0)
+                self.my_wave=np.concatenate((self.my_wave, np.zeros(TotalPoints-np.shape(self.my_wave)[0])), axis=0)
+                self.my_wave=np.append(self.my_wave,[0,0])
+        elif self.CLP_Protocol=='Constant':
+            resolution=self.CLP_SampleFrequency*self.CLP_CurrentDuration # how many datapoints to generate
+            self.my_wave=Amplitude*np.ones(int(resolution))
+            if self.CLP_RampingDown>0:
+            # add ramping down
+                if self.CLP_RampingDown>self.CLP_CurrentDuration:
+                    self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
+                    self.win.WarningLabel.setStyleSheet("color: red;")
+                else:
+                    Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
+                    RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
+                    RampingDown = np.concatenate((Constant, RD), axis=0)
+                    self.my_wave=self.my_wave*RampingDown
+            self.my_wave=np.append(self.my_wave,[0,0])
+        else:
+            self.win.WarningLabel.setText('Unidentified optogenetics protocol!')
+            self.win.WarningLabel.setStyleSheet("color: red;")
+
+        '''
+        # test
+        import matplotlib.pyplot as plt
+        plt.plot(np.arange(0, length, length / resolution), self.my_wave)   
+        plt.show()
+        '''
+    def _GetLaserAmplitude(self):
+        '''the voltage amplitude dependens on Protocol, Laser Power, Laser color, and the stimulation locations<>'''
+        if self.CLP_Location=='Left':
+            self.CurrentLaserAmplitude=[5,0]
+        elif self.CLP_Location=='Right':
+            self.CurrentLaserAmplitude=[0,5]
+        elif self.CLP_Location=='Both':
+            self.CurrentLaserAmplitude=[5,5]
+        else:
+            self.win.WarningLabel.setText('No stimulation location defined!')
+            self.win.WarningLabel.setStyleSheet("color: red;")
+   
+    # get training parameters
+    def _GetTrainingParameters(self,win):
+        '''Get training parameters'''
+        # Iterate over each container to find child widgets and store their values in self
+        for container in [win.LaserCalibration_dialog]:
+            # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
+            for child in container.findChildren((QtWidgets.QLineEdit, QtWidgets.QDoubleSpinBox)):
+                # Set an attribute in self with the name 'TP_' followed by the child's object name
+                # and store the child's text value
+                setattr(self, 'TP_'+child.objectName(), child.text())
+            # Iterate over each child of the container that is a QComboBox
+            for child in container.findChildren(QtWidgets.QComboBox):
+                # Set an attribute in self with the name 'TP_' followed by the child's object name
+                # and store the child's current text value
+                setattr(self, 'TP_'+child.objectName(), child.currentText())
+            # Iterate over each child of the container that is a QPushButton
+            for child in container.findChildren(QtWidgets.QPushButton):
+                # Set an attribute in self with the name 'TP_' followed by the child's object name
+                # and store whether the child is checked or not
+                setattr(self, 'TP_'+child.objectName(), child.isChecked())
+    def _InitiateATrial(self):
+        self.MainWindow.Channel.TriggerITIStart_Wave1(int(1))
+        self.MainWindow.Channel.TriggerITIStart_Wave2(int(0))
+        self.MainWindow.Channel.TriggerGoCue_Wave1(int(0))
+        self.MainWindow.Channel.TriggerGoCue_Wave2(int(0))
+        # dimension of self.CurrentLaserAmplitude indicates how many locations do we have
+        for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
+            if self.CurrentLaserAmplitude[i]!=0:
+                setattr(self, f"Location{i+1}_Size", getattr(self, f"WaveFormLocation_{i+1}").size)
+                eval('self.MainWindow.Channel.Trigger_Location'+str(i+1)+'(int(1))')
+                eval('self.MainWindow.Channel4.WaveForm' + str(1)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
+            else:
+                setattr(self, f"Location{i+1}_Size", 100) # arbitrary number \
+                eval('self.MainWindow.Channel.Trigger_Location'+str(i+1)+'(int(0))')
+        # send the waveform size
+        self.MainWindow.Channel.Location1_Size(int(self.Location1_Size))
+        self.MainWindow.Channel.Location2_Size(int(self.Location2_Size))
+        self.MainWindow.Channel.start(2)
     def _Open(self):
         if self.Open.isChecked():
             # change button color
-            GeneratedTrials=GenerateTrials(self)
-            GeneratedTrials._GenerateATrial(self.Channel4)
             self.Open.setStyleSheet("background-color : green;")
+            self._GetTrainingParameters(self.MainWindow)
+            self._GetLaserWaveForm()
+            self._InitiateATrial()
+            self.Open.setStyleSheet("background-color : none")
         else:
             # change button color
             self.Open.setStyleSheet("background-color : none")
@@ -308,6 +454,19 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
         if self.KeepOpen.isChecked():
             # change button color
             self.KeepOpen.setStyleSheet("background-color : green;")
+            self._GetTrainingParameters(self.MainWindow)
+            self.TP_Duration_1=10
+            self.TP_RD_1=0
+            self._GetLaserWaveForm()
+            time.sleep(1)
+            while 1:
+                QApplication.processEvents()
+                if self.KeepOpen.isChecked():
+                    self._InitiateATrial()
+                    time.sleep(self.TP_Duration_1)
+                else:
+                    break
+            self.Open.setStyleSheet("background-color : none")
         else:
             # change button color
             self.KeepOpen.setStyleSheet("background-color : none")
