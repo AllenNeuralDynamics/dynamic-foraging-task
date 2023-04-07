@@ -15,6 +15,7 @@ class Ui_ForagingGUI(object):
     def setupUi(self, ForagingGUI):
         ForagingGUI.setObjectName("ForagingGUI")
         ForagingGUI.setWindowModality(QtCore.Qt.NonModal)
+        ForagingGUI.setEnabled(True)
         ForagingGUI.resize(1196, 938)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -389,6 +390,7 @@ class Ui_ForagingGUI(object):
         self.Start.setChecked(False)
         self.Start.setObjectName("Start")
         self.NewSession = QtWidgets.QPushButton(self.centralwidget)
+        self.NewSession.setEnabled(False)
         self.NewSession.setGeometry(QtCore.QRect(810, 20, 75, 23))
         self.NewSession.setCheckable(True)
         self.NewSession.setObjectName("NewSession")
