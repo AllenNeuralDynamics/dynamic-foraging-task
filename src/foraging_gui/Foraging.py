@@ -97,21 +97,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
 
     def closeEvent(self, event):
-        # stop the current session
-        self.Start.setStyleSheet("background-color : green;")
-        self.Start.setStyleSheet("background-color : none")
-        self.Start.setChecked(False)
-        # waiting for the finish of the last trial
-        if self.ANewTrial==0:
-            self.WarningLabel.setText('Waiting for the finish of the last trial!')
-            self.WarningLabel.setStyleSheet("color: red;")
-            while 1:
-                QApplication.processEvents()
-                if self.ANewTrial==1:
-                    self.WarningLabel.setText('')
-                    self.WarningLabel.setStyleSheet("color: red;")
-                    break
-
+        self._StopCurrentSession() # stop the current session first
         reply = QMessageBox.question(self, 'Foraging Close', 'Do you want to save the result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
             self._Save()
@@ -207,21 +193,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         )
    
     def _Save(self):
-        # stop the current session
-        self.Start.setStyleSheet("background-color : green;")
-        self.Start.setStyleSheet("background-color : none")
-        self.Start.setChecked(False)
-        # waiting for the finish of the last trial
-        if self.ANewTrial==0:
-            self.WarningLabel.setText('Waiting for the finish of the last trial!')
-            self.WarningLabel.setStyleSheet("color: red;")
-            while 1:
-                QApplication.processEvents()
-                if self.ANewTrial==1:
-                    self.WarningLabel.setText('')
-                    self.WarningLabel.setStyleSheet("color: red;")
-                    break
-
+        self._StopCurrentSession() # stop the current session first
         SaveFile=self.default_saveFolder+self.AnimalName.text()+'_'+str(date.today())+'.mat'
         N=0
         while 1:
@@ -274,6 +246,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             savemat(self.SaveFile, Obj)           
 
     def _Open(self):
+        self._StopCurrentSession() # stop current session first
         fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior files (*.mat)")
         if fname:
             Obj = loadmat(fname)
@@ -387,6 +360,22 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 pass
         else:
             self.NewSession.setStyleSheet("background-color : none")
+
+    def _StopCurrentSession(self):
+        # stop the current session
+        self.Start.setStyleSheet("background-color : green;")
+        self.Start.setStyleSheet("background-color : none")
+        self.Start.setChecked(False)
+        # waiting for the finish of the last trial
+        if self.ANewTrial==0:
+            self.WarningLabel.setText('Waiting for the finish of the last trial!')
+            self.WarningLabel.setStyleSheet("color: red;")
+            while 1:
+                QApplication.processEvents()
+                if self.ANewTrial==1:
+                    self.WarningLabel.setText('')
+                    self.WarningLabel.setStyleSheet("color: red;")
+                    break
     def _thread_complete(self):
         '''complete of a trial'''
         self.ANewTrial=1
