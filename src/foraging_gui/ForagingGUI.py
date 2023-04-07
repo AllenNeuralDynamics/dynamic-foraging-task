@@ -390,7 +390,7 @@ class Ui_ForagingGUI(object):
         self.Start.setChecked(False)
         self.Start.setObjectName("Start")
         self.NewSession = QtWidgets.QPushButton(self.centralwidget)
-        self.NewSession.setEnabled(False)
+        self.NewSession.setEnabled(True)
         self.NewSession.setGeometry(QtCore.QRect(810, 20, 75, 23))
         self.NewSession.setCheckable(True)
         self.NewSession.setObjectName("NewSession")

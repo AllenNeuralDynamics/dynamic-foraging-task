@@ -475,8 +475,8 @@ class GenerateTrials():
 
     def _GetLicks(self,Channel2):
         '''Get licks and reward delivery time'''
-        while ~Channel2.msgs.empty():
-            QApplication.processEvents()
+        while not Channel2.msgs.empty():
+            #QApplication.processEvents()
             Rec=Channel2.receive()
             if Rec.address=='/LeftLickTime':
                 self.B_LeftLickTime=np.append(self.B_LeftLickTime,Rec[1])

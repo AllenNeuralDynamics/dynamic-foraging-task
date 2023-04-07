@@ -27,15 +27,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.connectSignalsSlots()
         self.default_saveFolder='E:\\DynamicForagingGUI\\Behavior\\'
         self.StartANewSession=1 # to decide if should start a new session
-        self.InitializeVisual=0
+        self.ToInitializeVisual=1
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
+        self.ANewTrial=1
         self.Visualization.setTitle(str(date.today()))
         self._InitializeBonsai()
-        self.threadpool=QThreadPool()
-        self.threadpool2=QThreadPool()
-        self.threadpool3=QThreadPool()
+        self.threadpool=QThreadPool() # get animal response
+        self.threadpool2=QThreadPool() # get animal lick
+        self.threadpool3=QThreadPool() # visualization
         self.threadpool4=QThreadPool() # for generating a new trial
-        self.threadpool5=QThreadPool() # for starting the trial loop
+        #self.threadpool5=QThreadPool() # for starting the trial loop
         self.OpenOptogenetics=0
         self.WaterCalibration=0
         self.LaserCalibration=0
@@ -96,6 +97,21 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
 
     def closeEvent(self, event):
+        # stop the current session
+        self.Start.setStyleSheet("background-color : green;")
+        self.Start.setStyleSheet("background-color : none")
+        self.Start.setChecked(False)
+        # waiting for the finish of the last trial
+        if self.ANewTrial==0:
+            self.WarningLabel.setText('Waiting for the finish of the last trial!')
+            self.WarningLabel.setStyleSheet("color: red;")
+            while 1:
+                QApplication.processEvents()
+                if self.ANewTrial==1:
+                    self.WarningLabel.setText('')
+                    self.WarningLabel.setStyleSheet("color: red;")
+                    break
+
         reply = QMessageBox.question(self, 'Foraging Close', 'Do you want to save the result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
             self._Save()
@@ -105,6 +121,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.client2.close()
             self.client3.close()
             self.client4.close()
+            self.threadpool.cancel()
+            self.threadpool2.cancel()
+            self.threadpool3.cancel()
+            self.threadpool4.cancel()
             print('Window closed')
         elif reply == QMessageBox.No:
             event.accept()
@@ -187,6 +207,21 @@ class Window(QMainWindow, Ui_ForagingGUI):
         )
    
     def _Save(self):
+        # stop the current session
+        self.Start.setStyleSheet("background-color : green;")
+        self.Start.setStyleSheet("background-color : none")
+        self.Start.setChecked(False)
+        # waiting for the finish of the last trial
+        if self.ANewTrial==0:
+            self.WarningLabel.setText('Waiting for the finish of the last trial!')
+            self.WarningLabel.setStyleSheet("color: red;")
+            while 1:
+                QApplication.processEvents()
+                if self.ANewTrial==1:
+                    self.WarningLabel.setText('')
+                    self.WarningLabel.setStyleSheet("color: red;")
+                    break
+
         SaveFile=self.default_saveFolder+self.AnimalName.text()+'_'+str(date.today())+'.mat'
         N=0
         while 1:
@@ -243,29 +278,37 @@ class Window(QMainWindow, Ui_ForagingGUI):
         if fname:
             Obj = loadmat(fname)
             self.Obj = Obj
+            self.NewSession.setChecked(False)
+            self.NewSession.click() # click the NewSession button to trigger the save dialog
+            self.NewSession.setDisabled(True) # You must start a NewSession after loading a new file, and you can't continue that session
             widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))}
             widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
             widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))})  # update optogenetics parameters from the loaded file
             if hasattr(self, 'LaserCalibration_dialog'):
                 widget_dict.update({w.objectName(): w for w in self.LaserCalibration_dialog.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))})  # update laser calibration parameters from the loaded file
-            for key in widget_dict.keys():
-                if key in Obj:
-                    widget = widget_dict[key]
-                    value=Obj[key]
-                    if len(value)==0:
-                        value=np.array([''], dtype='<U1')
-                    if isinstance(widget, QtWidgets.QLineEdit):
-                        widget.setText(value[-1])
-                    elif isinstance(widget, QtWidgets.QComboBox):
-                        index = widget.findText(value[-1])
-                        if index != -1:
-                            widget.setCurrentIndex(index)
-                    elif isinstance(widget, QtWidgets.QDoubleSpinBox):
-                        widget.setValue(float(value[-1]))
-                else:
-                    widget = widget_dict[key]
-                    if not isinstance(widget, QtWidgets.QComboBox):
-                        widget.clear()
+            try:
+                for key in widget_dict.keys():
+                    if key in Obj:
+                        widget = widget_dict[key]
+                        value=Obj[key]
+                        if len(value)==0:
+                            value=np.array([''], dtype='<U1')
+                        if isinstance(widget, QtWidgets.QLineEdit):
+                            widget.setText(value[-1])
+                        elif isinstance(widget, QtWidgets.QComboBox):
+                            index = widget.findText(value[-1])
+                            if index != -1:
+                                widget.setCurrentIndex(index)
+                        elif isinstance(widget, QtWidgets.QDoubleSpinBox):
+                            widget.setValue(float(value[-1]))
+                    else:
+                        widget = widget_dict[key]
+                        if not isinstance(widget, QtWidgets.QComboBox):
+                            widget.clear()
+            except Exception as e:
+                # Catch the exception and print error information
+                print("An error occurred:")
+                print(traceback.format_exc())
             try:
                 # visualization when loading the data
                 self._LoadVisualization()
@@ -276,8 +319,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
-        self.NewSession.click()
-        self.InitializeVisual=0
+        self.ToInitializeVisual=1
         Obj=self.Obj
         self.GeneratedTrials=GenerateTrials(self)
         # Iterate over all attributes of the GeneratedTrials object
@@ -358,6 +400,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         '''complete of generating a trial'''
         self.ToGenerateATrial=1
     def _Start(self):
+        self.NewSession.setDisabled(False)
         if self.Start.isChecked():
             # change button color and mark the state change
             self.Start.setStyleSheet("background-color : green;")
@@ -372,22 +415,33 @@ class Window(QMainWindow, Ui_ForagingGUI):
             except:
                 pass
             '''
+        # waiting for the finish of the last trial
+        if self.StartANewSession==1 and self.ANewTrial==0:
+            self.WarningLabel.setText('Waiting for the finish of the last trial!')
+            self.WarningLabel.setStyleSheet("color: red;")
+            while 1:
+                QApplication.processEvents()
+                if self.ANewTrial==1:
+                    self.WarningLabel.setText('')
+                    self.WarningLabel.setStyleSheet("color: red;")
+                    break
+
         # to see if we should start a new session
-        if self.StartANewSession==1:
+        if self.StartANewSession==1 and self.ANewTrial==1:
             GeneratedTrials=GenerateTrials(self)
             self.GeneratedTrials=GeneratedTrials
             self.StartANewSession=0
             PlotM=PlotV(win=self,GeneratedTrials=GeneratedTrials,width=5, height=4)
             PlotM.finish=1
             #generate the first trial outside the loop, only for new session
-            self.ANewTrial=1
             self.ToReceiveLicks=1
             self.ToUpdateFigure=1
             self.ToGenerateATrial=1
+            self.ToInitializeVisual=1
             GeneratedTrials._GenerateATrial(self.Channel4)
         else:
             GeneratedTrials=self.GeneratedTrials
-        if self.InitializeVisual==0: # only run once
+        if self.ToInitializeVisual==1: # only run once
             self.PlotM=PlotM
             layout=self.Visualization.layout()
             if layout is not None:
@@ -401,7 +455,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             toolbar.setMaximumWidth(300)
             layout.addWidget(toolbar)
             layout.addWidget(PlotM)
-            self.InitializeVisual=1
+            self.ToInitializeVisual=0
             # create workers
             worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.Channel,self.Channel3)
             worker1.signals.finished.connect(self._thread_complete)
@@ -428,8 +482,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # start the trial loop
         while self.Start.isChecked():
             QApplication.processEvents()
-            if self.ANewTrial==1 and self.ToGenerateATrial==1: #and GeneratedTrials.GeneFinish==1: \
-                self.ANewTrial=0
+            if self.ANewTrial==1 and self.ToGenerateATrial==1 and self.Start.isChecked(): #and GeneratedTrials.GeneFinish==1: \
+                self.ANewTrial=0 # can start a new trial when we receive the trial end signal from Bonsai
                 #self.threadpool5.start(workerStartTrialLoop)
                 print(GeneratedTrials.B_CurrentTrialN)     
                 #initiate the generated trial
@@ -440,7 +494,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 if self.ToReceiveLicks==1:
                     self.threadpool2.start(workerLick)
                     self.ToReceiveLicks=0
-                # update figures. If the update is too slow, using a different process
+                # update figures. If the update is too slow, using a different thread
                 if PlotM.finish==1 and self.FigureUpdateTooSlow==0:
                     PlotM.finish=0
                     PlotM._Update(GeneratedTrials=GeneratedTrials)
@@ -452,8 +506,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 #generate a new trial
                 GeneratedTrials.GeneFinish=0
                 self.ToGenerateATrial=0
-                #GeneratedTrials._GenerateATrial(self.Channel4)
-                #self.ToGenerateATrial=1
                 self.threadpool4.start(workerGenerateAtrial)
     '''
     def _StartTrialLoop(self,GeneratedTrials,PlotM,worker1,workerLick,workerPlot,workerGenerateAtrial):
