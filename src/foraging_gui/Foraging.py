@@ -36,7 +36,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.threadpool2=QThreadPool() # get animal lick
         self.threadpool3=QThreadPool() # visualization
         self.threadpool4=QThreadPool() # for generating a new trial
-        #self.threadpool5=QThreadPool() # for starting the trial loop
+        self.threadpool5=QThreadPool() # for starting the trial loop
         self.OpenOptogenetics=0
         self.WaterCalibration=0
         self.LaserCalibration=0
@@ -454,76 +454,51 @@ class Window(QMainWindow, Ui_ForagingGUI):
             workerPlot.signals.finished.connect(self._thread_complete3)
             workerGenerateAtrial = Worker(GeneratedTrials._GenerateATrial,self.Channel4)
             workerGenerateAtrial.signals.finished.connect(self._thread_complete4)
-            #workerStartTrialLoop = Worker(self._StartTrialLoop,GeneratedTrials,PlotM,worker1,workerLick,workerPlot,workerGenerateAtrial)
+            workerStartTrialLoop = Worker(self._StartTrialLoop,GeneratedTrials,PlotM,worker1,workerLick,workerPlot,workerGenerateAtrial)
             self.worker1=worker1
             self.workerLick=workerLick
             self.workerPlot=workerPlot
             self.workerGenerateAtrial=workerGenerateAtrial
-            #self.workerStartTrialLoop=workerStartTrialLoop
+            self.workerStartTrialLoop=workerStartTrialLoop
         else:
             PlotM=self.PlotM
             worker1=self.worker1
             workerLick=self.workerLick
             workerPlot=self.workerPlot
             workerGenerateAtrial=self.workerGenerateAtrial
-            #workerStartTrialLoop=self.workerStartTrialLoop
+            workerStartTrialLoop=self.workerStartTrialLoop
+        
+        #self.threadpool2.start(workerLick)
+        self.threadpool5.start(workerStartTrialLoop) # do not use QApplication.processEvents()
 
-        # start the trial loop
+    def _StartTrialLoop(self,GeneratedTrials,PlotM,worker1,workerLick,workerPlot,workerGenerateAtrial):
         while self.Start.isChecked():
-            QApplication.processEvents()
             if self.ANewTrial==1 and self.ToGenerateATrial==1 and self.Start.isChecked(): #and GeneratedTrials.GeneFinish==1: \
                 self.ANewTrial=0 # can start a new trial when we receive the trial end signal from Bonsai
-                #self.threadpool5.start(workerStartTrialLoop)
                 print(GeneratedTrials.B_CurrentTrialN)     
                 #initiate the generated trial
                 GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
                 #get the response of the animal using a different thread
                 self.threadpool.start(worker1)
                 #get the licks of the animal using a different thread
-                if self.ToReceiveLicks==1:
-                    self.threadpool2.start(workerLick)
-                    self.ToReceiveLicks=0
-                # update figures. If the update is too slow, using a different thread
+                #if self.ToReceiveLicks==1:
+                #    self.threadpool2.start(workerLick)
+                #    self.ToReceiveLicks=0
+                GeneratedTrials._GetLicks(self.Channel2)
+                # update figures. If the update is too slow, using a different thread               
                 if PlotM.finish==1 and self.FigureUpdateTooSlow==0:
                     PlotM.finish=0
                     PlotM._Update(GeneratedTrials=GeneratedTrials)
                 else:
                     self.FigureUpdateTooSlow=1
                     if self.ToUpdateFigure==1:
-                        self.threadpool3.start(workerPlot)
                         self.ToUpdateFigure=0
+                        self.threadpool3.start(workerPlot)
                 #generate a new trial
                 GeneratedTrials.GeneFinish=0
                 self.ToGenerateATrial=0
                 self.threadpool4.start(workerGenerateAtrial)
-    '''
-    def _StartTrialLoop(self,GeneratedTrials,PlotM,worker1,workerLick,workerPlot,workerGenerateAtrial):
-        print(GeneratedTrials.B_CurrentTrialN)     
-        #initiate the generated trial
-        GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
-        #get the response of the animal using a different thread
-        self.threadpool.start(worker1)
-        #get the licks of the animal using a different thread
-        if self.ToReceiveLicks==1:
-            self.threadpool2.start(workerLick)
-            self.ToReceiveLicks=0
-        # update figures. If the update is too slow, using a different process
-        if PlotM.finish==1 and self.FigureUpdateTooSlow==0:
-            PlotM.finish=0
-            PlotM._Update(GeneratedTrials=GeneratedTrials)
-        else:
-            self.FigureUpdateTooSlow=1
-            if self.ToUpdateFigure==1:
-                self.threadpool3.start(workerPlot)
-                self.ToUpdateFigure=0
-        #generate a new trial
-        GeneratedTrials.GeneFinish=0
-        self.ToGenerateATrial=0
-        #GeneratedTrials._GenerateATrial(self.Channel4)
-        #self.ToGenerateATrial=1
-        self.threadpool4.start(workerGenerateAtrial)
-    '''
-
+            
     def _OptogeneticsB(self):
         ''' optogenetics control in the main window'''
         if self.OptogeneticsB.currentText()=='on':

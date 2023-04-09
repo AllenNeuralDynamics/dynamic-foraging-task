@@ -1,5 +1,5 @@
 
-import random, traceback, math
+import random, traceback, math,time
 import numpy as np
 from itertools import accumulate
 from PyQt5 import QtWidgets
@@ -475,8 +475,9 @@ class GenerateTrials():
 
     def _GetLicks(self,Channel2):
         '''Get licks and reward delivery time'''
+        #while self.win.Start.isChecked():
+        #    time.sleep(0.01)
         while not Channel2.msgs.empty():
-            #QApplication.processEvents()
             Rec=Channel2.receive()
             if Rec.address=='/LeftLickTime':
                 self.B_LeftLickTime=np.append(self.B_LeftLickTime,Rec[1])
