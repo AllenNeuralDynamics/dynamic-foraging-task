@@ -20,7 +20,9 @@ class PlotV(FigureCanvas):
         self.StepSize=win.StepSize.text
         self.MarkerSize=3
 
-    def _Update(self,GeneratedTrials=None):
+    def _Update(self,GeneratedTrials=None,Channel=None):
+        if Channel is not None:
+            GeneratedTrials._GetLicks(Channel)
         self.B_AnimalResponseHistory=GeneratedTrials.B_AnimalResponseHistory
         self.B_LickPortN=GeneratedTrials.B_LickPortN
         self.B_RewardProHistory=GeneratedTrials.B_RewardProHistory
@@ -37,11 +39,11 @@ class PlotV(FigureCanvas):
         self.B_LeftLickTime=GeneratedTrials.B_LeftLickTime
         self.B_TrialStartTime=GeneratedTrials.B_TrialStartTime
         self.B_TrialEndTime=GeneratedTrials.B_TrialEndTime
-
+        self.B_RewardOutcomeTime=GeneratedTrials.B_RewardOutcomeTime
         if self.B_CurrentTrialN>0:
-            self.B_Time=self.B_TrialEndTime-GeneratedTrials.B_TrialStartTime[0]
+            self.B_Time=self.B_RewardOutcomeTime-GeneratedTrials.B_TrialStartTime[0]
         else:
-            self.B_Time=self.B_TrialEndTime
+            self.B_Time=self.B_RewardOutcomeTime
         self.B_BTime=self.B_Time.copy()
         try:
             Delta=self.B_TrialEndTime[-1]-self.B_TrialStartTime[0]
@@ -113,7 +115,7 @@ class PlotV(FigureCanvas):
                 ResponseHistoryF[i+1-kernel_size]=np.nanmean(ResponseHistoryT[i+1-kernel_size:i+1])
                 RewardedHistoryF[i+1-kernel_size]=np.nanmean(RewardedHistoryT[i+1-kernel_size:i+1])
                 SuccessHistoryF[i+1-kernel_size]=np.nanmean(SuccessHistoryT[i+1-kernel_size:i+1])
-                
+
         LeftChoice=np.where(self.B_AnimalResponseHistory==0)
         RightChoice=np.where(self.B_AnimalResponseHistory==1)
         NoResponse=np.where(self.B_AnimalResponseHistory==2)

@@ -450,11 +450,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
             worker1.signals.finished.connect(self._thread_complete)
             workerLick = Worker(GeneratedTrials._GetLicks,self.Channel2)
             workerLick.signals.finished.connect(self._thread_complete2)
-            workerPlot = Worker(PlotM._Update,GeneratedTrials=GeneratedTrials)
+            workerPlot = Worker(PlotM._Update,GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
             workerPlot.signals.finished.connect(self._thread_complete3)
             workerGenerateAtrial = Worker(GeneratedTrials._GenerateATrial,self.Channel4)
             workerGenerateAtrial.signals.finished.connect(self._thread_complete4)
-            workerStartTrialLoop = Worker(self._StartTrialLoop,GeneratedTrials,PlotM,worker1,workerLick,workerPlot,workerGenerateAtrial)
+            workerStartTrialLoop = Worker(self._StartTrialLoop,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
             self.worker1=worker1
             self.workerLick=workerLick
             self.workerPlot=workerPlot
@@ -468,11 +468,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
         
-        #self.threadpool2.start(workerLick)
-        self.threadpool5.start(workerStartTrialLoop) # do not use QApplication.processEvents()
+        self.threadpool5.start(workerStartTrialLoop) # I just found the QApplication.processEvents() was better to reduce delay time between trial end the the next trial start
+        # _GetLicks also receive LeftRewardDeliveryTime, RightRewardDeliveryTime and RewardOutcomeTime. 
+        GeneratedTrials._GetLicks(self.Channel2)
 
-    def _StartTrialLoop(self,GeneratedTrials,PlotM,worker1,workerLick,workerPlot,workerGenerateAtrial):
+    def _StartTrialLoop(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         while self.Start.isChecked():
+            QApplication.processEvents()
             if self.ANewTrial==1 and self.ToGenerateATrial==1 and self.Start.isChecked(): #and GeneratedTrials.GeneFinish==1: \
                 self.ANewTrial=0 # can start a new trial when we receive the trial end signal from Bonsai
                 print(GeneratedTrials.B_CurrentTrialN)     
@@ -480,20 +482,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
                 #get the response of the animal using a different thread
                 self.threadpool.start(worker1)
-                #get the licks of the animal using a different thread
-                #if self.ToReceiveLicks==1:
-                #    self.threadpool2.start(workerLick)
-                #    self.ToReceiveLicks=0
-                GeneratedTrials._GetLicks(self.Channel2)
-                # update figures. If the update is too slow, using a different thread               
-                if PlotM.finish==1 and self.FigureUpdateTooSlow==0:
-                    PlotM.finish=0
-                    PlotM._Update(GeneratedTrials=GeneratedTrials)
-                else:
-                    self.FigureUpdateTooSlow=1
-                    if self.ToUpdateFigure==1:
-                        self.ToUpdateFigure=0
-                        self.threadpool3.start(workerPlot)
+                #receive licks and update figures
+                if self.ToUpdateFigure==1:
+                    self.ToUpdateFigure=0
+                    self.threadpool3.start(workerPlot)
                 #generate a new trial
                 GeneratedTrials.GeneFinish=0
                 self.ToGenerateATrial=0
