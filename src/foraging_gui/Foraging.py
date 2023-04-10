@@ -210,10 +210,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
             else:
                 Obj={}
             # save training parameters
-            for child in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)+self.centralwidget.findChildren(QtWidgets.QLineEdit):
+            for child in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)+self.centralwidget.findChildren(QtWidgets.QLineEdit)+self.centralwidget.findChildren(QtWidgets.QSpinBox):
                 Obj[child.objectName()]=child.text()
             for child in self.centralwidget.findChildren(QtWidgets.QComboBox):
                 Obj[child.objectName()]=child.currentText()
+            
             # save optogenetics parameters
             if 'Opto_dialog' in self.__dict__:
                 for child in self.Opto_dialog.findChildren(QtWidgets.QDoubleSpinBox)+self.Opto_dialog.findChildren(QtWidgets.QLineEdit):
@@ -251,10 +252,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
         if fname:
             Obj = loadmat(fname)
             self.Obj = Obj
+            self.NewSession.setDisabled(False)
             self.NewSession.setChecked(False)
             self.NewSession.click() # click the NewSession button to trigger the save dialog
             self.NewSession.setDisabled(True) # You must start a NewSession after loading a new file, and you can't continue that session
-            widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))}
+            widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
             widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
             widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))})  # update optogenetics parameters from the loaded file
             if hasattr(self, 'LaserCalibration_dialog'):
@@ -274,6 +276,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                                 widget.setCurrentIndex(index)
                         elif isinstance(widget, QtWidgets.QDoubleSpinBox):
                             widget.setValue(float(value[-1]))
+                        elif isinstance(widget, QtWidgets.QSpinBox):
+                            widget.setValue(int(value[-1]))
                     else:
                         widget = widget_dict[key]
                         if not isinstance(widget, QtWidgets.QComboBox):
@@ -361,6 +365,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
         else:
             self.NewSession.setStyleSheet("background-color : none")
 
+    def _AskSave(self):
+        reply = QMessageBox.question(self, 'New Session:', 'Do you want to save the result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+        if reply == QMessageBox.Yes:
+            self._Save()
+            print('Saved')
+        elif reply == QMessageBox.No:
+            pass
+        else:
+            pass
+        
     def _StopCurrentSession(self):
         # stop the current session
         self.Start.setStyleSheet("background-color : green;")
