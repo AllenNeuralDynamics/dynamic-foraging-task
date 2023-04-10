@@ -203,7 +203,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         while 1:
             if os.path.isfile(SaveFile):
                 N=N+1
-                SaveFile=self.default_saveFolder+self.AnimalName.text()+'_'+str(date.today())+'_'+str(N)+'.mat'
+                SaveFile=self.default_saveFolder+self.AnimalName.text()+'\\'+self.AnimalName.text()+'_'+str(date.today())+'_'+str(N)+'.mat'
             else:
                 break
         self.SaveFile = QFileDialog.getSaveFileName(self, 'Save File',SaveFile)[0]
