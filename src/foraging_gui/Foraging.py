@@ -53,15 +53,19 @@ class Window(QMainWindow, Ui_ForagingGUI):
         #output = result.stdout.decode()
         #workflow_id = re.search(r"Workflow started with ID: (.+)", output).group(1)
         #print(f"Workflow started with ID {workflow_id}")
+
+        # normal behavior events
         self.ip = "127.0.0.1"
         self.request_port = 4002
-        self.client = OSCStreamingClient()  # Create client
+        self.client = OSCStreamingClient()  # Create client 
         self.client.connect((self.ip, self.request_port))
         self.Channel = rigcontrol.RigClient(self.client)
+        # licks, LeftRewardDeliveryTime and RightRewardDeliveryTime 
         self.request_port2 = 4003
-        self.client2 = OSCStreamingClient()  # Create client
+        self.client2 = OSCStreamingClient()  
         self.client2.connect((self.ip, self.request_port2))
         self.Channel2 = rigcontrol.RigClient(self.client2)
+        # manually give water
         self.request_port3 = 4004
         self.client3 = OSCStreamingClient()  # Create client
         self.client3.connect((self.ip, self.request_port3))
@@ -194,6 +198,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
    
     def _Save(self):
         self._StopCurrentSession() # stop the current session first
+        # this should be improved in the future. Need to get the last LeftRewardDeliveryTime and RightRewardDeliveryTime
+        if hasattr(self, 'GeneratedTrials'):
+            self.GeneratedTrials._GetLicks(self.Channel2)
         SaveFile=self.default_saveFolder+self.AnimalName.text()+'\\'+self.AnimalName.text()+'_'+str(date.today())+'.mat'
         SaveFolder=self.default_saveFolder+self.AnimalName.text()+'\\'
         if not os.path.exists(SaveFolder):
@@ -328,6 +335,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.GeneratedTrials.B_DelayStartTime=self.GeneratedTrials.B_DelayStartTime[0]
         self.GeneratedTrials.B_TrialEndTime=self.GeneratedTrials.B_TrialEndTime[0]
         self.GeneratedTrials.B_GoCueTime=self.GeneratedTrials.B_GoCueTime[0]
+        self.GeneratedTrials.B_RewardOutcomeTime=self.GeneratedTrials.B_RewardOutcomeTime[0]
 
         PlotM=PlotV(win=self,GeneratedTrials=self.GeneratedTrials,width=5, height=4)
         layout=self.Visualization.layout()
@@ -436,7 +444,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     self.WarningLabel.setText('')
                     self.WarningLabel.setStyleSheet("color: red;")
                     break
-
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
             GeneratedTrials=GenerateTrials(self)
@@ -489,11 +496,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             workerPlot=self.workerPlot
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
-        
         self.threadpool5.start(workerStartTrialLoop) # I just found the QApplication.processEvents() was better to reduce delay time between trial end the the next trial start
-        # _GetLicks also receive LeftRewardDeliveryTime, RightRewardDeliveryTime and RewardOutcomeTime. 
-        GeneratedTrials._GetLicks(self.Channel2)
-
+        
     def _StartTrialLoop(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         while self.Start.isChecked():
             QApplication.processEvents()
@@ -512,7 +516,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 GeneratedTrials.GeneFinish=0
                 self.ToGenerateATrial=0
                 self.threadpool4.start(workerGenerateAtrial)
-            
     def _OptogeneticsB(self):
         ''' optogenetics control in the main window'''
         if self.OptogeneticsB.currentText()=='on':

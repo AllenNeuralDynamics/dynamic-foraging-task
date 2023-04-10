@@ -421,56 +421,53 @@ class GenerateTrials():
         if np.random.random(1)<0.1: # no response
             self.B_AnimalCurrentResponse=2
         '''
-        # get the trial start time
-        TrialStartTime=Channel1.receive()
-        # get the delay start time
-        DelayStartTime=Channel1.receive()
-        # reset the baited state of chosen side; get the reward state
-        a=Channel1.receive()
-        # can not use self.CurrentBait to decide if this current trial is rewarded or not as a new trial was already generated before this
-        b=Channel1.receive()
-        # go cue start time
-        GoCueTime=Channel3.receive()
-        self.B_GoCueTime=np.append(self.B_GoCueTime,GoCueTime[1])
 
-        if a.address=='/TrialEndTime':
-            TrialEndTime=a
-        elif a.address=='/RewardOutcome':
-            TrialOutcome=a
-        if b.address=='/TrialEndTime':
-            TrialEndTime=b
-        elif b.address=='/RewardOutcome':
-            TrialOutcome=b
-        if TrialOutcome[1]=='NoResponse':
-            self.B_AnimalCurrentResponse=2
-            self.B_CurrentRewarded[0]=False
-            self.B_CurrentRewarded[1]=False
-        elif TrialOutcome[1]=='RewardLeft':
-            self.B_AnimalCurrentResponse=0
-            self.B_Baited[0]=False
-            self.B_CurrentRewarded[1]=False
-            self.B_CurrentRewarded[0]=True  
-        elif TrialOutcome[1]=='ErrorLeft':
-            self.B_AnimalCurrentResponse=0
-            self.B_Baited[0]=False
-            self.B_CurrentRewarded[0]=False
-            self.B_CurrentRewarded[1]=False
-        elif TrialOutcome[1]=='RewardRight':
-            self.B_AnimalCurrentResponse=1
-            self.B_Baited[1]=False
-            self.B_CurrentRewarded[0]=False
-            self.B_CurrentRewarded[1]=True
-        elif TrialOutcome[1]=='ErrorRight':
-            self.B_AnimalCurrentResponse=1
-            self.B_Baited[1]=False
-            self.B_CurrentRewarded[0]=False
-            self.B_CurrentRewarded[1]=False
-        self.B_RewardedHistory=np.append(self.B_RewardedHistory,self.B_CurrentRewarded,axis=1)
-        self.B_AnimalResponseHistory=np.append(self.B_AnimalResponseHistory,self.B_AnimalCurrentResponse)
+        for i in range(6):
+            Rec=Channel1.receive()
+            if Rec.address=='/TrialStartTime':
+                TrialStartTime=Rec[1]
+            elif Rec.address=='/DelayStartTime':
+                DelayStartTime=Rec[1]
+            elif Rec.address=='/GoCueTime':
+                self.B_GoCueTime=np.append(self.B_GoCueTime,Rec[1])
+            elif Rec.address=='/RewardOutcomeTime':
+                RewardOutcomeTime=Rec[1]
+            elif Rec.address=='/RewardOutcome':
+                TrialOutcome=Rec[1]
+                if TrialOutcome=='NoResponse':
+                    self.B_AnimalCurrentResponse=2
+                    self.B_CurrentRewarded[0]=False
+                    self.B_CurrentRewarded[1]=False
+                elif TrialOutcome=='RewardLeft':
+                    self.B_AnimalCurrentResponse=0
+                    self.B_Baited[0]=False
+                    self.B_CurrentRewarded[1]=False
+                    self.B_CurrentRewarded[0]=True  
+                elif TrialOutcome=='ErrorLeft':
+                    self.B_AnimalCurrentResponse=0
+                    self.B_Baited[0]=False
+                    self.B_CurrentRewarded[0]=False
+                    self.B_CurrentRewarded[1]=False
+                elif TrialOutcome=='RewardRight':
+                    self.B_AnimalCurrentResponse=1
+                    self.B_Baited[1]=False
+                    self.B_CurrentRewarded[0]=False
+                    self.B_CurrentRewarded[1]=True
+                elif TrialOutcome=='ErrorRight':
+                    self.B_AnimalCurrentResponse=1
+                    self.B_Baited[1]=False
+                    self.B_CurrentRewarded[0]=False
+                    self.B_CurrentRewarded[1]=False
+                self.B_RewardedHistory=np.append(self.B_RewardedHistory,self.B_CurrentRewarded,axis=1)
+                self.B_AnimalResponseHistory=np.append(self.B_AnimalResponseHistory,self.B_AnimalCurrentResponse)
+            elif Rec.address=='/TrialEndTime':
+                TrialEndTime=Rec[1]
+
         # get the trial end time at the end of the trial
-        self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime[1])
-        self.B_DelayStartTime=np.append(self.B_DelayStartTime,DelayStartTime[1])
-        self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime[1])
+        self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime)
+        self.B_DelayStartTime=np.append(self.B_DelayStartTime,DelayStartTime)
+        self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime)
+        self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,RewardOutcomeTime)
         self.B_CurrentTrialN+=1
 
     def _GetLicks(self,Channel2):
@@ -487,9 +484,6 @@ class GenerateTrials():
                 self.B_LeftRewardDeliveryTime=np.append(self.B_LeftRewardDeliveryTime,Rec[1])
             elif Rec.address=='/RightRewardDeliveryTime':
                 self.B_RightRewardDeliveryTime=np.append(self.B_RightRewardDeliveryTime,Rec[1])
-            elif Rec.address=='/RewardOutcomeTime':
-                self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,Rec[1]) # time when we know the reward outcome (no reponse, left reward/no reward, right reward/no reward)
-
     # get training parameters
     def _GetTrainingParameters(self,win):
         '''Get training parameters'''
