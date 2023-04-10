@@ -651,7 +651,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="cf:BehaviorEvent">
                     <cf:Type>Input</cf:Type>
-                    <cf:Mask>Port1</cf:Mask>
+                    <cf:Mask>Port0</cf:Mask>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
                 </Nodes>
@@ -689,7 +689,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="cf:BehaviorEvent">
                     <cf:Type>Input</cf:Type>
-                    <cf:Mask>Port0</cf:Mask>
+                    <cf:Mask>Port1</cf:Mask>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
                 </Nodes>
@@ -1129,7 +1129,7 @@ def process(value):
             </Expression>
             <Expression xsi:type="cf:BehaviorCommand">
               <cf:Type>SetOutput</cf:Type>
-              <cf:Mask>Digital0</cf:Mask>
+              <cf:Mask>Digital2</cf:Mask>
             </Expression>
             <Expression xsi:type="MulticastSubject">
               <Name>BehaviorCommands</Name>
@@ -1141,7 +1141,7 @@ def process(value):
             </Expression>
             <Expression xsi:type="cf:BehaviorCommand">
               <cf:Type>ClearOutput</cf:Type>
-              <cf:Mask>Digital0</cf:Mask>
+              <cf:Mask>Digital2</cf:Mask>
             </Expression>
             <Expression xsi:type="MulticastSubject">
               <Name>BehaviorCommands</Name>
