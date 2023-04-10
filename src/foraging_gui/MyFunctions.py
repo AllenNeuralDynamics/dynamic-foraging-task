@@ -484,6 +484,10 @@ class GenerateTrials():
                 self.B_LeftRewardDeliveryTime=np.append(self.B_LeftRewardDeliveryTime,Rec[1])
             elif Rec.address=='/RightRewardDeliveryTime':
                 self.B_RightRewardDeliveryTime=np.append(self.B_RightRewardDeliveryTime,Rec[1])
+    def _DeletePreviousLicks(self,Channel2):
+        '''Delete licks from the previous session'''
+        while not Channel2.msgs.empty():
+            Rec=Channel2.receive()
     # get training parameters
     def _GetTrainingParameters(self,win):
         '''Get training parameters'''

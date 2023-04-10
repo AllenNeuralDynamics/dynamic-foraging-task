@@ -457,6 +457,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.ToGenerateATrial=1
             self.ToInitializeVisual=1
             GeneratedTrials._GenerateATrial(self.Channel4)
+            # delete licks from the previous session
+            GeneratedTrials._DeletePreviousLicks(self.Channel2)
         else:
             GeneratedTrials=self.GeneratedTrials
         if self.ToInitializeVisual==1: # only run once
