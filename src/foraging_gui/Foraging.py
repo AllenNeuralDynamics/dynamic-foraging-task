@@ -194,7 +194,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
    
     def _Save(self):
         self._StopCurrentSession() # stop the current session first
-        SaveFile=self.default_saveFolder+self.AnimalName.text()+'_'+str(date.today())+'.mat'
+        SaveFile=self.default_saveFolder+self.AnimalName.text()+'\\'+self.AnimalName.text()+'_'+str(date.today())+'.mat'
+        SaveFolder=self.default_saveFolder+self.AnimalName.text()+'\\'
+        if not os.path.exists(SaveFolder):
+            os.makedirs(SaveFolder)
+            print(f"Created new folder: {SaveFolder}")
         N=0
         while 1:
             if os.path.isfile(SaveFile):
@@ -248,7 +252,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
     def _Open(self):
         self._StopCurrentSession() # stop current session first
-        fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior files (*.mat)")
+        SaveFolder=self.default_saveFolder+self.AnimalName.text()+'\\'
+        if not os.path.exists(SaveFolder):
+            fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior files (*.mat)")
+        else:
+            fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder+'\\'+self.AnimalName.text()+'\\', "Behavior files (*.mat)")
         if fname:
             Obj = loadmat(fname)
             self.Obj = Obj
