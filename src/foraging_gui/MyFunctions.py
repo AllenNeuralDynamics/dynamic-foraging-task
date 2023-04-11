@@ -8,7 +8,7 @@ from PyQt5.QtCore import *
 class GenerateTrials():
     def __init__(self,win):
         self.win=win
-        self.B_RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
+        self.B_RewardFamilies=self.win.RewardFamilies
         #self.B_RewardFamilies = [[[float(x) for x in y] for y in z] for z in self.B_RewardFamilies]
         #self.B_RewardFamilies = np.array(self.B_RewardFamilies)
         self.B_CurrentTrialN=0
@@ -90,6 +90,8 @@ class GenerateTrials():
                     self.B_BlockLenHistory[i].append(self.BlockLen)
                     self.B_ANewBlock[i]=0
         self.B_RewardProHistory=np.append(self.B_RewardProHistory,self.B_CurrentRewardProb.reshape(self.B_LickPortN,1),axis=1)
+        # show reward pairs and current reward probability
+        self.win.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.B_CurrentRewardProb,2)))
         # decide if block transition will happen at the next trial
         for i in range(len(self.B_ANewBlock)):
             if self.B_CurrentTrialN>=sum(self.B_BlockLenHistory[i]):
@@ -98,6 +100,7 @@ class GenerateTrials():
         if self.TP_NextBlock:
             self.B_ANewBlock[:]=1
             self.win.NextBlock.setChecked(False)
+            self.win.NextBlock.setStyleSheet("background-color : none")
         # to decide if it's a auto water trial
         self._CheckAutoWater()
         # to decide if we should stop the session

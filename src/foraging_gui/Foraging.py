@@ -1,9 +1,9 @@
 import sys, os,traceback
 import numpy as np
 from datetime import date,timedelta,datetime
-from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout
+from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout,QLineEdit
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import QThreadPool,Qt
+from PyQt5.QtCore import QThreadPool,Qt,QMetaObject
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from ForagingGUI import Ui_ForagingGUI
@@ -45,7 +45,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.Manipulator=0
         self._Optogenetics() # open the optogenetics panel
         self._LaserCalibration() # to open the laser calibration panel
-
+        self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
+        self._ShowRewardPairs() # show reward pairs
     def _InitializeBonsai(self):
         #os.system(" E:\\GitHub\\dynamic-foraging-task\\bonsai\\Bonsai.exe E:\\GitHub\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai  --start") 
         #workflow_file = "E:\\GitHub\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai"
@@ -99,10 +100,32 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.GiveRight.clicked.connect(self._GiveRight)
         self.NewSession.clicked.connect(self._NewSession)
         self.AutoReward.clicked.connect(self._AutoReward)
+        self.NextBlock.clicked.connect(self._NextBlock)
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
+        self.BaseRewardSum.textChanged.connect(self._ShowRewardPairs)
+        self.RewardFamily.textChanged.connect(self._ShowRewardPairs)
+        self.RewardPairsN.textChanged.connect(self._ShowRewardPairs)
+        self.BaseRewardSum.returnPressed.connect(self._ShowRewardPairs)
+        self.RewardFamily.returnPressed.connect(self._ShowRewardPairs)
+        self.RewardPairsN.returnPressed.connect(self._ShowRewardPairs)
+        #self.ShowNotes.returnPressed.connect(self._Notes)
         #self.AnimalName.returnPressed.connect(self._Test)
         self.AnimalName.textChanged.connect(self._Test)
-        
+        self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
+    def _ShowRewardPairs(self):
+        '''Show reward pairs'''
+        try: 
+            self.RewardPairs=self.RewardFamilies[int(self.RewardFamily.text())-1][:int(self.RewardPairsN.text())]
+            self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.BaseRewardSum.text())
+            if hasattr(self, 'GeneratedTrials'):
+                self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.GeneratedTrials.B_CurrentRewardProb,2))) 
+            else:
+                self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: ') 
+        except Exception as e:
+        #    # Catch the exception and print error information
+            print("An error occurred:")
+            print(traceback.format_exc())
+
     def _Test(self):
         # Turn the newly changed parameter to red
         pass
@@ -227,6 +250,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             else:
                 Obj={}
             # save training parameters
+            for child in self.centralwidget.findChildren(QtWidgets.QTextEdit):
+                Obj[child.objectName()]=child.toPlainText()
             for child in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)+self.centralwidget.findChildren(QtWidgets.QLineEdit)+self.centralwidget.findChildren(QtWidgets.QSpinBox):
                 Obj[child.objectName()]=child.text()
             for child in self.centralwidget.findChildren(QtWidgets.QComboBox):
@@ -277,9 +302,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.NewSession.setChecked(False)
             self.NewSession.click() # click the NewSession button to trigger the save dialog
             self.NewSession.setDisabled(True) # You must start a NewSession after loading a new file, and you can't continue that session
-            widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+            widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
             widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
             widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))})  # update optogenetics parameters from the loaded file
+            
             if hasattr(self, 'LaserCalibration_dialog'):
                 widget_dict.update({w.objectName(): w for w in self.LaserCalibration_dialog.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))})  # update laser calibration parameters from the loaded file
             try:
@@ -299,6 +325,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                             widget.setValue(float(value[-1]))
                         elif isinstance(widget, QtWidgets.QSpinBox):
                             widget.setValue(int(value[-1]))
+                        elif isinstance(widget, QtWidgets.QTextEdit):
+                             widget.setText(value[-1])
                     else:
                         widget = widget_dict[key]
                         if not isinstance(widget, QtWidgets.QComboBox):
@@ -373,7 +401,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.AutoReward.setStyleSheet("background-color : green;")
         else:
             self.AutoReward.setStyleSheet("background-color : none")
-
+    def _NextBlock(self):
+        if self.NextBlock.isChecked():
+            self.NextBlock.setStyleSheet("background-color : green;")
+        else:
+            self.NextBlock.setStyleSheet("background-color : none")
     def _NewSession(self):
         if self.NewSession.isChecked():
             reply = QMessageBox.question(self, 'New Session:', 'Do you want to save the result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
