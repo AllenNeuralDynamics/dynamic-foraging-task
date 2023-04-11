@@ -1,7 +1,7 @@
 import sys, os,traceback
 import numpy as np
 from datetime import date,timedelta,datetime
-from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout,QLineEdit
+from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout,QLineEdit,QWidget,QSizePolicy
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QThreadPool,Qt,QMetaObject
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
