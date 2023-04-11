@@ -388,10 +388,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
         PlotM._Update(GeneratedTrials=self.GeneratedTrials)
         
     def _Clear(self):
-        for child in self.TrainingParameters.findChildren(QtWidgets.QLineEdit):
-            child.clear()
-        for child in self.centralwidget.findChildren(QtWidgets.QLineEdit):
-            child.clear()
+        reply = QMessageBox.question(self, 'Clear parameters:', 'Do you want to clear training parameters?',QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        if reply == QMessageBox.Yes:
+            for child in self.TrainingParameters.findChildren(QtWidgets.QLineEdit):
+                child.clear()
+            for child in self.centralwidget.findChildren(QtWidgets.QLineEdit):
+                child.clear()
+        else:
+            pass
 
     def _New(self):
         self._Clear()
@@ -586,6 +590,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setAttribute(Qt.AA_EnableHighDpiScaling)
+    app.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
     win = Window()
     win.show()
     # Run your application's event loop and stop after closing all windows
