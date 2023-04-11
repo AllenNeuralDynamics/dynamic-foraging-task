@@ -40,6 +40,7 @@ class GenerateTrials():
         self.B_LaserAmplitude=[]
         self.B_LaserDuration=[]
         self.B_SelectedCondition=[]
+        self.B_AutoWaterTrial=[] # to indicate if it is a trial with outo water.
         self.NextWaveForm=1 # waveform stored for later use
         self.CurrentWaveForm=1 # the current waveform to trigger the optogenetics
         #self.B_LaserTrialNum=[] # B_LaserAmplitude, B_LaserDuration, B_SelectedCondition have values only on laser on trials, so we need to store the laser trial number
@@ -97,7 +98,10 @@ class GenerateTrials():
         if self.TP_NextBlock:
             self.B_ANewBlock[:]=1
             self.win.NextBlock.setChecked(False)
-        
+        # to decide if it's a auto water trial
+        self._CheckAutoWater()
+        # to decide if we should stop the session
+        self._CheckStop()
         # get the ITI time and delay time
         self.CurrentITI = float(np.random.exponential(float(self.TP_ITIBeta),1)+float(self.TP_ITIMin))
         if self.CurrentITI>float(self.TP_ITIMax):
@@ -163,6 +167,33 @@ class GenerateTrials():
             print("An error occurred:")
             print(traceback.format_exc())
         self.GeneFinish=1
+    
+    def _CheckStop(self):
+        StopIgnore=int(self.win.StopIgnores.text())
+        if np.shape(self.B_AnimalResponseHistory)[0]>=StopIgnore:
+            if np.all(self.B_AnimalResponseHistory[-StopIgnore:]==2):
+                self.Stop=1
+                self.win.Start.setStyleSheet("background-color : none")
+                self.win.Start.setChecked(False)
+            else:
+                self.Stop=0
+        else:
+            self.Stop=0
+    def _CheckAutoWater(self):
+        '''Check if it should be an auto water trial'''
+        if self.win.AutoReward.isChecked:
+            UnrewardedN=int(self.win.Unrewarded.text())
+            IgnoredN=int(self.win.Ignored.text())
+            if np.shape(self.B_AnimalResponseHistory)[0]>=IgnoredN or np.shape(self.B_RewardedHistory[0])[0]>=UnrewardedN:
+                if np.all(self.B_AnimalResponseHistory[-IgnoredN:]==2) or (np.all(self.B_RewardedHistory[0][-UnrewardedN:]==False) and np.all(self.B_RewardedHistory[1][-UnrewardedN:]==False)):
+                    self.CurrentAutoReward=1
+                else:
+                    self.CurrentAutoReward=0
+            else:
+                self.CurrentAutoReward=0
+        else:
+            self.CurrentAutoReward=0
+        self.B_AutoWaterTrial.append(self.CurrentAutoReward)
     def _GetLaserWaveForm(self):
         '''Get the waveform of the laser. It dependens on color/duration/protocol(frequency/RD/pulse duration)/locations/laser power'''
         N=self.SelctedCondition
@@ -429,6 +460,10 @@ class GenerateTrials():
             elif Rec.address=='/DelayStartTime':
                 DelayStartTime=Rec[1]
             elif Rec.address=='/GoCueTime':
+                # give auto water after Co cue
+                if self.CurrentAutoReward==1:
+                    self._GiveLeft()
+                    self._GiveRight()
                 self.B_GoCueTime=np.append(self.B_GoCueTime,Rec[1])
             elif Rec.address=='/RewardOutcomeTime':
                 RewardOutcomeTime=Rec[1]
@@ -469,6 +504,18 @@ class GenerateTrials():
         self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime)
         self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,RewardOutcomeTime)
         self.B_CurrentTrialN+=1
+    
+    def _GiveLeft(self):
+        '''manually give left water'''
+        self.win.Channel.LeftValue(float(self.win.LeftValue.text())*1000*float(self.win.Multiplier.text())) 
+        self.win.Channel3.ManualWater_Left(int(1))
+        self.win.Channel.LeftValue(float(self.win.LeftValue.text())*1000)
+
+    def _GiveRight(self):
+        '''manually give right water'''
+        self.win.Channel.RightValue(float(self.win.RightValue.text())*1000*float(self.win.Multiplier.text()))
+        self.win.Channel3.ManualWater_Right(int(1))
+        self.win.Channel.RightValue(float(self.win.RightValue.text())*1000)
 
     def _GetLicks(self,Channel2):
         '''Get licks and reward delivery time'''

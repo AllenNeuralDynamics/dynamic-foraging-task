@@ -98,8 +98,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.GiveLeft.clicked.connect(self._GiveLeft)
         self.GiveRight.clicked.connect(self._GiveRight)
         self.NewSession.clicked.connect(self._NewSession)
+        self.AutoReward.clicked.connect(self._AutoReward)
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
-
+        #self.AnimalName.returnPressed.connect(self._Test)
+        self.AnimalName.textChanged.connect(self._Test)
+        
+    def _Test(self):
+        # Turn the newly changed parameter to red
+        pass
     def closeEvent(self, event):
         self._StopCurrentSession() # stop the current session first
         reply = QMessageBox.question(self, 'Foraging Close', 'Do you want to save the result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
@@ -358,8 +364,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
             child.clear()
         for child in self.centralwidget.findChildren(QtWidgets.QLineEdit):
             child.clear()
+
     def _New(self):
         self._Clear()
+
+    def _AutoReward(self):
+        if self.AutoReward.isChecked():
+            self.AutoReward.setStyleSheet("background-color : green;")
+        else:
+            self.AutoReward.setStyleSheet("background-color : none")
+
     def _NewSession(self):
         if self.NewSession.isChecked():
             reply = QMessageBox.question(self, 'New Session:', 'Do you want to save the result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
@@ -528,10 +542,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.action_Optogenetics.setChecked(False)
             self.Opto_dialog.hide()
     def _GiveLeft(self):
+        '''manually give left water'''
         self.Channel.LeftValue(float(self.GiveWaterL.text())*1000) 
         self.Channel3.ManualWater_Left(int(1))
         self.Channel.LeftValue(float(self.LeftValue.text())*1000)
     def _GiveRight(self):
+        '''manually give right water'''
         self.Channel.RightValue(float(self.GiveWaterR.text())*1000)
         self.Channel3.ManualWater_Right(int(1))
         self.Channel.RightValue(float(self.RightValue.text())*1000)
