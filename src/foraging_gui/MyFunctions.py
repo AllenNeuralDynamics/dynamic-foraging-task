@@ -11,7 +11,7 @@ class GenerateTrials():
         self.B_RewardFamilies=self.win.RewardFamilies
         #self.B_RewardFamilies = [[[float(x) for x in y] for y in z] for z in self.B_RewardFamilies]
         #self.B_RewardFamilies = np.array(self.B_RewardFamilies)
-        self.B_CurrentTrialN=0
+        self.B_CurrentTrialN=0 # trial number starts from 0
         self.B_LickPortN=2
         self.B_ANewBlock=np.array([1,1]).astype(int)
         self.B_RewardProHistory=np.array([[],[]]).astype(int)
@@ -54,6 +54,11 @@ class GenerateTrials():
             self._GetTrainingParameters(self.win)
         # save all of the parameters in each trial
         self._SaveParameters()
+        # get basic information 
+        self._GetBasic()
+        # check block transition
+        self._CheckBlockTransition()
+        # determine the current reward probability
         self.RewardPairs=self.B_RewardFamilies[int(self.TP_RewardFamily)-1][:int(self.TP_RewardPairsN)]
         self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.TP_BaseRewardSum)
         # determine the reward probability of the next trial based on tasks
@@ -109,15 +114,6 @@ class GenerateTrials():
                 self.win.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProbPoolUncoupled,2))+'\n\n'+'Current pair: '+str(np.round(self.B_CurrentRewardProb,2)))
         except:
             print('Can not show reward pairs')
-        # decide if block transition will happen at the next trial
-        for i in range(len(self.B_ANewBlock)):
-            if self.B_CurrentTrialN>=sum(self.BlockLenHistory[i]):
-                self.B_ANewBlock[i]=1
-        # transition to the next block when NextBlock button is clicked
-        if self.TP_NextBlock:
-            self.B_ANewBlock[:]=1
-            self.win.NextBlock.setChecked(False)
-            self.win.NextBlock.setStyleSheet("background-color : none")
         # to decide if it's a auto water trial
         self._CheckAutoWater()
         # to decide if we should stop the session
@@ -187,9 +183,25 @@ class GenerateTrials():
             print("An error occurred:")
             print(traceback.format_exc())
         self.GeneFinish=1
-    
+
+    def _CheckBlockTransition(self):
+        # transition to the next block when NextBlock button is clicked
+        if self.TP_NextBlock:
+            self.B_ANewBlock[:]=1
+            self.win.NextBlock.setChecked(False)
+            self.win.NextBlock.setStyleSheet("background-color : none")
+        # decide if block transition will happen at the next trial
+        for i in range(len(self.B_ANewBlock)):
+            if self.B_CurrentTrialN+1>=sum(self.BlockLenHistory[i]):
+                self.B_ANewBlock[i]=1
+
+    def _GetBasic(self):
+        pass
+        # finish trial
+        # reward trial number of this block
+        # overall reward rate
     def _CheckStop(self):
-        '''Stop if there are many ingoral trials or if the maximam trial is exceeded'''
+        '''Stop if there are many ingoral trials or if the maximam trial is exceeded MaxTrial'''
         StopIgnore=int(self.win.StopIgnores.text())-1
         MaxTrial=int(self.win.MaxTrial.text())-2 # trial number starts from 0
         if np.shape(self.B_AnimalResponseHistory)[0]>=StopIgnore:

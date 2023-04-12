@@ -598,9 +598,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
         '''complete of generating a trial'''
         self.ToGenerateATrial=1
     def _Start(self):
-        self.keyPressEvent()
         self.NewSession.setDisabled(False)
         if self.Start.isChecked():
+            self.keyPressEvent()
             # change button color and mark the state change
             self.Start.setStyleSheet("background-color : green;")
             self.NewSession.setStyleSheet("background-color : none")
@@ -685,7 +685,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             QApplication.processEvents()
             if self.ANewTrial==1 and self.ToGenerateATrial==1 and self.Start.isChecked(): #and GeneratedTrials.GeneFinish==1: \
                 self.ANewTrial=0 # can start a new trial when we receive the trial end signal from Bonsai
-                print(GeneratedTrials.B_CurrentTrialN)     
+                print(GeneratedTrials.B_CurrentTrialN+1)     
                 #initiate the generated trial
                 GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
                 #get the response of the animal using a different thread

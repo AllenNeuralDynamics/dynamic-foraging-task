@@ -914,6 +914,9 @@
      </property>
     </widget>
     <widget class="QLabel" name="label_16">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>731</x>
@@ -939,6 +942,9 @@
      </property>
     </widget>
     <widget class="QLineEdit" name="EarlyLickPulishment">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>883</x>
@@ -1112,6 +1118,9 @@
      </property>
     </widget>
     <widget class="QLabel" name="label_43">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>731</x>
@@ -1137,6 +1146,9 @@
      </property>
     </widget>
     <widget class="QLineEdit" name="ITIIncrease">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>883</x>
