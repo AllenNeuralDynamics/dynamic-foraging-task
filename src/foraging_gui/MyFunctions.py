@@ -114,7 +114,7 @@ class GenerateTrials():
                 self.win.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProbPoolUncoupled,2))+'\n\n'+'Current pair: '+str(np.round(self.B_CurrentRewardProb,2)))
         except:
             print('Can not show reward pairs')
-        # to decide if it's a auto water trial
+        # to decide if it's an auto water trial
         self._CheckAutoWater()
         # to decide if we should stop the session
         self._CheckStop()
@@ -185,11 +185,20 @@ class GenerateTrials():
         self.GeneFinish=1
 
     def _CheckBlockTransition(self):
+        '''Check if we should perform a block change for the next trial. 
+        If you change the block length parameter, it only takes effect 
+        after the current block is completed'''
         # transition to the next block when NextBlock button is clicked
         if self.TP_NextBlock:
             self.B_ANewBlock[:]=1
             self.win.NextBlock.setChecked(False)
             self.win.NextBlock.setStyleSheet("background-color : none")
+            # update the BlockLenHistory
+            for i in range(len(self.B_ANewBlock)):
+                if len(self.BlockLenHistory[i])==1:
+                    self.BlockLenHistory[i][-1]=self.B_CurrentTrialN+1
+                elif len(self.BlockLenHistory[i])>1:
+                    self.BlockLenHistory[i][-1]=self.B_CurrentTrialN+1-sum(self.BlockLenHistory[i][:-1])
         # decide if block transition will happen at the next trial
         for i in range(len(self.B_ANewBlock)):
             if self.B_CurrentTrialN+1>=sum(self.BlockLenHistory[i]):
@@ -198,6 +207,8 @@ class GenerateTrials():
     def _GetBasic(self):
         pass
         # finish trial
+        #self.B_AnimalResponseHistory
+        # current block length
         # reward trial number of this block
         # overall reward rate
     def _CheckStop(self):
