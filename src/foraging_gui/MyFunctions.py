@@ -109,9 +109,9 @@ class GenerateTrials():
         # show reward pairs and current reward probability
         try:
             if (self.TP_Task in ['Coupled Baiting','Coupled Without Baiting']):
-                self.win.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.B_CurrentRewardProb,2)))
+                self.win.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.B_RewardProHistory[:,self.B_CurrentTrialN],2)))
             elif (self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']):
-                self.win.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProbPoolUncoupled,2))+'\n\n'+'Current pair: '+str(np.round(self.B_CurrentRewardProb,2)))
+                self.win.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProbPoolUncoupled,2))+'\n\n'+'Current pair: '+str(np.round(self.B_RewardProHistory[:,self.B_CurrentTrialN],2)))
         except:
             print('Can not show reward pairs')
         # to decide if it's an auto water trial
