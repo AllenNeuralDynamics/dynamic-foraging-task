@@ -119,6 +119,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
     
     def keyPressEvent(self, event):
         '''Enter press to allow change of parameters'''
+        # Get the parameters before change
+        if hasattr(self, 'GeneratedTrials'):
+            Parameters=self.GeneratedTrials
+        else:
+            Parameters=self
         if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
             # handle the return key press event here
             print("Parameter changes confirmed!")
@@ -132,6 +137,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     if child.objectName()=='qt_spinbox_lineedit':
                         continue
                     child.setStyleSheet('color: black;')
+                    child.setStyleSheet('background-color: white;')
+                    if child.objectName()=='AnimalName':
+                        continue
+                    # check valid for empty condition
+                    try:
+                        # it's valid float
+                        float(child.text())
+                    except ValueError:
+                        # Invalid float. Do not change the parameter
+                        child.setText(getattr(Parameters, 'TP_'+child.objectName()))
             # update the current training parameters
             self._GetTrainingParameters()
     
@@ -147,20 +162,24 @@ class Window(QMainWindow, Ui_ForagingGUI):
             for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
                 if child.objectName()=='qt_spinbox_lineedit':
                     continue
-                if child.objectName()=='AnimalName':
-                    child.setStyleSheet('color: red;')
-                    continue
                 if getattr(Parameters, 'TP_'+child.objectName())!=child.text():
-                    child.setStyleSheet('color: red;')
-                    try:
-                        # it's valid float
-                        float(child.text())
-                        self.UpdateParameters=0 # Changes are not allowed until press is typed
-                    except ValueError:
-                        # Invalid float. Do not change the parameter
-                        child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                        child.setStyleSheet('color: black;')
-                        self.UpdateParameters=1
+                    if child.objectName()=='AnimalName':
+                        child.setStyleSheet('color: red;')
+                        continue
+                    if child.text()=='': # If it's empty, changing the background color and waiting for the confirming
+                        self.UpdateParameters=0
+                        child.setStyleSheet('background-color: red;')
+                    else:
+                        child.setStyleSheet('color: red;')
+                        try:
+                            # it's valid float
+                            float(child.text())
+                            self.UpdateParameters=0 # Changes are not allowed until press is typed
+                        except ValueError:
+                            # Invalid float. Do not change the parameter
+                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))
+                            child.setStyleSheet('color: black;')
+                            self.UpdateParameters=1
         
     def _GetTrainingParameters(self):
         '''Get training parameters'''
