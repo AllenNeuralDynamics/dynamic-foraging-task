@@ -598,6 +598,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         '''complete of generating a trial'''
         self.ToGenerateATrial=1
     def _Start(self):
+        self.keyPressEvent()
         self.NewSession.setDisabled(False)
         if self.Start.isChecked():
             # change button color and mark the state change
