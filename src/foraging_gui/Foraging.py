@@ -47,7 +47,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._LaserCalibration() # to open the laser calibration panel
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self._ShowRewardPairs() # show reward pairs
-        self.resize(200,4000)
     def _InitializeBonsai(self):
         #os.system(" E:\\GitHub\\dynamic-foraging-task\\bonsai\\Bonsai.exe E:\\GitHub\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai  --start") 
         #workflow_file = "E:\\GitHub\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai"
@@ -596,8 +595,6 @@ if __name__ == "__main__":
     QApplication.setAttribute(Qt.AA_DisableHighDpiScaling,False)
     QApplication.setAttribute(Qt.AA_Use96Dpi,False)
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
-    #QApplication.setHighDpiScaleFactor(1.5)
-    #QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
     app = QApplication(sys.argv)
     win = Window()
     win.show()
