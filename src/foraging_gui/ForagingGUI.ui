@@ -12,7 +12,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1346</width>
+    <width>1489</width>
     <height>938</height>
    </rect>
   </property>
@@ -40,7 +40,7 @@
      <rect>
       <x>10</x>
       <y>50</y>
-      <width>1011</width>
+      <width>1191</width>
       <height>16</height>
      </rect>
     </property>
@@ -177,8 +177,8 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>440</y>
-      <width>1021</width>
+      <y>490</y>
+      <width>1191</width>
       <height>16</height>
      </rect>
     </property>
@@ -199,9 +199,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>463</y>
-      <width>1026</width>
-      <height>264</height>
+      <y>510</y>
+      <width>1191</width>
+      <height>261</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -212,8 +212,8 @@
     </property>
     <property name="maximumSize">
      <size>
-      <width>1026</width>
-      <height>264</height>
+      <width>2000</width>
+      <height>400</height>
      </size>
     </property>
     <property name="title">
@@ -512,6 +512,9 @@
      </property>
     </widget>
     <widget class="QLabel" name="label_9">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>731</x>
@@ -1259,7 +1262,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>20</string>
+      <string>200</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_46">
@@ -1303,7 +1306,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>10</string>
+      <string>100</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_49">
@@ -1776,6 +1779,50 @@
       <string>3</string>
      </property>
     </widget>
+    <widget class="QLabel" name="label_20">
+     <property name="geometry">
+      <rect>
+       <x>973</x>
+       <y>75</y>
+       <width>101</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Uncoupled reward=</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="UncoupledReward">
+     <property name="geometry">
+      <rect>
+       <x>1080</x>
+       <y>75</y>
+       <width>91</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>0.1,0.3,0.7</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QLineEdit" name="AnimalName">
     <property name="geometry">
@@ -1914,8 +1961,8 @@
      <rect>
       <x>10</x>
       <y>70</y>
-      <width>1021</width>
-      <height>361</height>
+      <width>1191</width>
+      <height>411</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -2108,7 +2155,7 @@
     <property name="geometry">
      <rect>
       <x>90</x>
-      <y>740</y>
+      <y>797</y>
       <width>80</width>
       <height>20</height>
      </rect>
@@ -2134,7 +2181,7 @@
     <property name="geometry">
      <rect>
       <x>3</x>
-      <y>740</y>
+      <y>797</y>
       <width>81</width>
       <height>20</height>
      </rect>
@@ -2186,10 +2233,10 @@
    <widget class="QGroupBox" name="infor">
     <property name="geometry">
      <rect>
-      <x>1040</x>
+      <x>1230</x>
       <y>20</y>
       <width>251</width>
-      <height>701</height>
+      <height>751</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -2205,7 +2252,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>490</y>
+       <y>440</y>
        <width>231</width>
        <height>141</height>
       </rect>
@@ -2258,9 +2305,9 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>30</y>
+       <y>600</y>
        <width>231</width>
-       <height>251</height>
+       <height>141</height>
       </rect>
      </property>
      <property name="sizePolicy">
@@ -2278,7 +2325,7 @@
         <x>0</x>
         <y>20</y>
         <width>231</width>
-        <height>231</height>
+        <height>121</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -2302,7 +2349,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1346</width>
+     <width>1489</width>
      <height>21</height>
     </rect>
    </property>

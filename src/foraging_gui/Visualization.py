@@ -26,7 +26,6 @@ class PlotV(FigureCanvas):
         self.B_AnimalResponseHistory=GeneratedTrials.B_AnimalResponseHistory
         self.B_LickPortN=GeneratedTrials.B_LickPortN
         self.B_RewardProHistory=GeneratedTrials.B_RewardProHistory
-        self.B_BlockLenHistory=GeneratedTrials.B_BlockLenHistory
         self.B_BaitHistory=GeneratedTrials.B_BaitHistory
         self.B_ITIHistory=GeneratedTrials.B_ITIHistory
         self.B_DelayHistory=GeneratedTrials.B_DelayHistory

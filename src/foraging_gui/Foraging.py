@@ -108,6 +108,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.BaseRewardSum.returnPressed.connect(self._ShowRewardPairs)
         self.RewardFamily.returnPressed.connect(self._ShowRewardPairs)
         self.RewardPairsN.returnPressed.connect(self._ShowRewardPairs)
+        self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
+        self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         #self.ShowNotes.returnPressed.connect(self._Notes)
         #self.AnimalName.returnPressed.connect(self._Test)
         self.AnimalName.textChanged.connect(self._Test)
@@ -115,13 +117,54 @@ class Window(QMainWindow, Ui_ForagingGUI):
         #self.setFixedSize(2000,4800)
     def _ShowRewardPairs(self):
         '''Show reward pairs'''
-        try: 
-            self.RewardPairs=self.RewardFamilies[int(self.RewardFamily.text())-1][:int(self.RewardPairsN.text())]
-            self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.BaseRewardSum.text())
-            if hasattr(self, 'GeneratedTrials'):
-                self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.GeneratedTrials.B_CurrentRewardProb,2))) 
-            else:
-                self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: ') 
+        if self.Task.currentText() in ['Coupled Baiting','Coupled Without Baiting']:
+            self.label_6.setEnabled(True)
+            self.label_7.setEnabled(True)
+            self.label_8.setEnabled(True)
+            self.BaseRewardSum.setEnabled(True)
+            self.RewardPairsN.setEnabled(True)
+            self.RewardFamily.setEnabled(True)
+            self.label_20.setEnabled(False)
+            self.UncoupledReward.setEnabled(False)
+        elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
+            self.label_6.setEnabled(False)
+            self.label_7.setEnabled(False)
+            self.label_8.setEnabled(False)
+            self.BaseRewardSum.setEnabled(False)
+            self.RewardPairsN.setEnabled(False)
+            self.RewardFamily.setEnabled(False)
+            self.label_20.setEnabled(True)
+            self.UncoupledReward.setEnabled(True)
+        try:
+            if self.Task.currentText() in ['Coupled Baiting','Coupled Without Baiting']:
+                self.RewardPairs=self.RewardFamilies[int(self.RewardFamily.text())-1][:int(self.RewardPairsN.text())]
+                self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.BaseRewardSum.text())
+                if hasattr(self, 'GeneratedTrials'):
+                    self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.GeneratedTrials.B_CurrentRewardProb,2))) 
+                else:
+                    self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: ') 
+            elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
+                string=self.UncoupledReward.text()
+                if '[' in string and ']' in string:
+                    if ',' in string:
+                        # string format is '[0.1, 0.3, 0.7]'
+                        RewardProbPool = np.fromstring(string.strip('[]'), sep=',')
+                    else:
+                        # string format is '[0.1 0.3 0.7]'
+                        RewardProbPool = np.fromstring(string.strip('[]'), sep=' ')
+                elif ',' in string:
+                    # string format is '0.1,0.3,0.7'
+                    RewardProbPool = np.fromstring(string, sep=',')
+                elif ' ' in string:
+                    # string format is '0.1 0.3 0.7'
+                    RewardProbPool = np.fromstring(string, sep=' ')
+                else:
+                    print("Invalid string format")
+                self.RewardProb=RewardProbPool
+                if hasattr(self, 'GeneratedTrials'):
+                    self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.GeneratedTrials.B_CurrentRewardProb,2))) 
+                else:
+                    self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: ') 
         except Exception as e:
         #    # Catch the exception and print error information
             print("An error occurred:")

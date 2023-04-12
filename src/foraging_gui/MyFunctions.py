@@ -15,7 +15,7 @@ class GenerateTrials():
         self.B_LickPortN=2
         self.B_ANewBlock=np.array([1,1]).astype(int)
         self.B_RewardProHistory=np.array([[],[]]).astype(int)
-        self.B_BlockLenHistory=[[],[]]
+        self.BlockLenHistory=[[],[]]
         self.B_BaitHistory=np.array([[],[]]).astype(bool)
         self.B_ITIHistory=[]
         self.B_DelayHistory=[]
@@ -70,14 +70,31 @@ class GenerateTrials():
             if self.BlockLen>float(self.TP_BlockMax):
                 self.BlockLen=int(self.TP_BlockMax)
             for i in range(len(self.B_ANewBlock)):
-                self.B_BlockLenHistory[i].append(self.BlockLen)
+                self.BlockLenHistory[i].append(self.BlockLen)
             self.B_ANewBlock=np.array([0,0])
         elif (self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting'])  and any(self.B_ANewBlock==1):
             # get the reward probabilities pool
             for i in range(len(self.B_ANewBlock)):
                 if self.B_ANewBlock[i]==1:
-                    RewardProbPool=np.append(self.RewardProb,np.fliplr(self.RewardProb),axis=0)
-                    RewardProbPool=RewardProbPool[:,i]
+                    #RewardProbPool=np.append(self.RewardProb,np.fliplr(self.RewardProb),axis=0)
+                    #RewardProbPool=RewardProbPool[:,i]
+                    string=self.win.UncoupledReward.text()
+                    if '[' in string and ']' in string:
+                        if ',' in string:
+                            # string format is '[0.1, 0.3, 0.7]'
+                            RewardProbPool = np.fromstring(string.strip('[]'), sep=',')
+                        else:
+                            # string format is '[0.1 0.3 0.7]'
+                            RewardProbPool = np.fromstring(string.strip('[]'), sep=' ')
+                    elif ',' in string:
+                        # string format is '0.1,0.3,0.7'
+                        RewardProbPool = np.fromstring(string, sep=',')
+                    elif ' ' in string:
+                        # string format is '0.1 0.3 0.7'
+                        RewardProbPool = np.fromstring(string, sep=' ')
+                    else:
+                        print("Invalid string format")
+                    self.RewardProbPoolUncoupled=RewardProbPool.copy()
                     # exclude the previous reward probabilities
                     if self.B_RewardProHistory.size!=0:
                         RewardProbPool=RewardProbPool[RewardProbPool!=self.B_RewardProHistory[i,-1]]
@@ -87,14 +104,20 @@ class GenerateTrials():
                     self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta),1)+float(self.TP_BlockMin)))
                     if self.BlockLen>float(self.TP_BlockMax):
                         self.BlockLen=int(self.TP_BlockMax)
-                    self.B_BlockLenHistory[i].append(self.BlockLen)
+                    self.BlockLenHistory[i].append(self.BlockLen)
                     self.B_ANewBlock[i]=0
         self.B_RewardProHistory=np.append(self.B_RewardProHistory,self.B_CurrentRewardProb.reshape(self.B_LickPortN,1),axis=1)
         # show reward pairs and current reward probability
-        self.win.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.B_CurrentRewardProb,2)))
+        try:
+            if (self.TP_Task in ['Coupled Baiting','Coupled Without Baiting']):
+                self.win.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.B_CurrentRewardProb,2)))
+            elif (self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']):
+                self.win.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProbPoolUncoupled,2))+'\n\n'+'Current pair: '+str(np.round(self.B_CurrentRewardProb,2)))
+        except:
+            print('Can not show reward pairs')
         # decide if block transition will happen at the next trial
         for i in range(len(self.B_ANewBlock)):
-            if self.B_CurrentTrialN>=sum(self.B_BlockLenHistory[i]):
+            if self.B_CurrentTrialN>=sum(self.BlockLenHistory[i]):
                 self.B_ANewBlock[i]=1
         # transition to the next block when NextBlock button is clicked
         if self.TP_NextBlock:
