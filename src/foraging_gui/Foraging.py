@@ -29,7 +29,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
-        self.ANewTrial=1
+        self.ANewTrial=1 # permission to start a new trial
+        self.UpdateParameters=1 # permission to update parameters
         self.Visualization.setTitle(str(date.today()))
         self._InitializeBonsai()
         self.threadpool=QThreadPool() # get animal response
@@ -47,6 +48,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._LaserCalibration() # to open the laser calibration panel
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self._ShowRewardPairs() # show reward pairs
+        self._GetTrainingParameters() # get initial training parameters
     def _InitializeBonsai(self):
         #os.system(" E:\\GitHub\\dynamic-foraging-task\\bonsai\\Bonsai.exe E:\\GitHub\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai  --start") 
         #workflow_file = "E:\\GitHub\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai"
@@ -110,11 +112,77 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.RewardPairsN.returnPressed.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
-        #self.ShowNotes.returnPressed.connect(self._Notes)
         #self.AnimalName.returnPressed.connect(self._Test)
         self.AnimalName.textChanged.connect(self._Test)
         self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
-        #self.setFixedSize(2000,4800)
+        # check the change of all of the Line
+        for child in self.TrainingParameters.findChildren(QtWidgets.QSpinBox)+self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)+self.centralwidget.findChildren(QtWidgets.QLineEdit):
+            child.textChanged.connect(self._CheckTextChange)
+    
+    def keyPressEvent(self, event):
+        '''Enter press to allow change of parameters'''
+        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
+            # handle the return key press event here
+            print("Return key pressed!")
+            # prevent the default behavior of the return key press event
+            event.accept()
+            self.UpdateParameters=1 # Changes are allowed
+            # change color to black
+            for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
+                # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
+                for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
+                    if child.objectName()=='qt_spinbox_lineedit':
+                        continue
+                    child.setStyleSheet('color: black;')
+            # update the current training parameters
+            self._GetTrainingParameters()
+    
+    def _CheckTextChange(self):
+        '''Check if the text change is reasonable'''
+        # Get the parameters before change
+        if hasattr(self, 'GeneratedTrials'):
+            Parameters=self.GeneratedTrials
+        else:
+            Parameters=self
+        for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
+            # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
+            for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
+                if child.objectName()=='qt_spinbox_lineedit':
+                    continue
+                if getattr(Parameters, 'TP_'+child.objectName())!=child.text():
+                    child.setStyleSheet('color: red;')
+                    try:
+                        # it's valid float
+                        float(child.text())
+                        self.UpdateParameters=0 # Changes are not allowed until press is typed
+                    except ValueError:
+                        # Invalid float. Do not change the parameter
+                        child.setText(getattr(Parameters, 'TP_'+child.objectName()))
+                        child.setStyleSheet('color: black;')
+                        self.UpdateParameters=1
+        
+    def _GetTrainingParameters(self):
+        '''Get training parameters'''
+        # Iterate over each container to find child widgets and store their values in self
+        for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
+            # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
+            for child in container.findChildren((QtWidgets.QLineEdit, QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
+                if child.objectName()=='qt_spinbox_lineedit':
+                    continue
+                # Set an attribute in self with the name 'TP_' followed by the child's object name
+                # and store the child's text value
+                setattr(self, 'TP_'+child.objectName(), child.text())
+            # Iterate over each child of the container that is a QComboBox
+            for child in container.findChildren(QtWidgets.QComboBox):
+                # Set an attribute in self with the name 'TP_' followed by the child's object name
+                # and store the child's current text value
+                setattr(self, 'TP_'+child.objectName(), child.currentText())
+            # Iterate over each child of the container that is a QPushButton
+            for child in container.findChildren(QtWidgets.QPushButton):
+                # Set an attribute in self with the name 'TP_' followed by the child's object name
+                # and store whether the child is checked or not
+                setattr(self, 'TP_'+child.objectName(), child.isChecked())
+
     def _ShowRewardPairs(self):
         '''Show reward pairs'''
         if self.Task.currentText() in ['Coupled Baiting','Coupled Without Baiting']:
@@ -144,23 +212,15 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 else:
                     self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: ') 
             elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
-                string=self.UncoupledReward.text()
-                if '[' in string and ']' in string:
-                    if ',' in string:
-                        # string format is '[0.1, 0.3, 0.7]'
-                        RewardProbPool = np.fromstring(string.strip('[]'), sep=',')
-                    else:
-                        # string format is '[0.1 0.3 0.7]'
-                        RewardProbPool = np.fromstring(string.strip('[]'), sep=' ')
-                elif ',' in string:
-                    # string format is '0.1,0.3,0.7'
-                    RewardProbPool = np.fromstring(string, sep=',')
-                elif ' ' in string:
-                    # string format is '0.1 0.3 0.7'
-                    RewardProbPool = np.fromstring(string, sep=' ')
-                else:
-                    print("Invalid string format")
-                self.RewardProb=RewardProbPool
+                input_string=self.UncoupledReward.text()
+                # remove any square brackets and spaces from the string
+                input_string = input_string.replace('[','').replace(']','').replace(',', ' ')
+                # split the remaining string into a list of individual numbers
+                num_list = input_string.split()
+                # convert each number in the list to a float
+                num_list = [float(num) for num in num_list]
+                # create a numpy array from the list of numbers
+                self.RewardProb=np.array(num_list)
                 if hasattr(self, 'GeneratedTrials'):
                     self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.GeneratedTrials.B_CurrentRewardProb,2))) 
                 else:

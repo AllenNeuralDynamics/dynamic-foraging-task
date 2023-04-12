@@ -49,8 +49,9 @@ class GenerateTrials():
         # get all of the training parameters of the current trial
         self._GetTrainingParameters(self.win)
     def _GenerateATrial(self,Channel4):
-        # get all of the training parameters of the current trial
-        self._GetTrainingParameters(self.win)
+        if self.win.UpdateParameters==1:
+            # get all of the training parameters of the current trial
+            self._GetTrainingParameters(self.win)
         # save all of the parameters in each trial
         self._SaveParameters()
         self.RewardPairs=self.B_RewardFamilies[int(self.TP_RewardFamily)-1][:int(self.TP_RewardPairsN)]
@@ -78,22 +79,15 @@ class GenerateTrials():
                 if self.B_ANewBlock[i]==1:
                     #RewardProbPool=np.append(self.RewardProb,np.fliplr(self.RewardProb),axis=0)
                     #RewardProbPool=RewardProbPool[:,i]
-                    string=self.win.UncoupledReward.text()
-                    if '[' in string and ']' in string:
-                        if ',' in string:
-                            # string format is '[0.1, 0.3, 0.7]'
-                            RewardProbPool = np.fromstring(string.strip('[]'), sep=',')
-                        else:
-                            # string format is '[0.1 0.3 0.7]'
-                            RewardProbPool = np.fromstring(string.strip('[]'), sep=' ')
-                    elif ',' in string:
-                        # string format is '0.1,0.3,0.7'
-                        RewardProbPool = np.fromstring(string, sep=',')
-                    elif ' ' in string:
-                        # string format is '0.1 0.3 0.7'
-                        RewardProbPool = np.fromstring(string, sep=' ')
-                    else:
-                        print("Invalid string format")
+                    input_string=self.win.UncoupledReward.text()
+                    # remove any square brackets and spaces from the string
+                    input_string = input_string.replace('[','').replace(']','').replace(',', ' ')
+                    # split the remaining string into a list of individual numbers
+                    num_list = input_string.split()
+                    # convert each number in the list to a float
+                    num_list = [float(num) for num in num_list]
+                    # create a numpy array from the list of numbers
+                    RewardProbPool=np.array(num_list)
                     self.RewardProbPoolUncoupled=RewardProbPool.copy()
                     # exclude the previous reward probabilities
                     if self.B_RewardProHistory.size!=0:
@@ -567,7 +561,9 @@ class GenerateTrials():
         # Iterate over each container to find child widgets and store their values in self
         for container in [win.TrainingParameters, win.centralwidget, win.Opto_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
-            for child in container.findChildren((QtWidgets.QLineEdit, QtWidgets.QDoubleSpinBox)):
+            for child in container.findChildren((QtWidgets.QLineEdit, QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
+                if child.objectName()=='qt_spinbox_lineedit':
+                    continue
                 # Set an attribute in self with the name 'TP_' followed by the child's object name
                 # and store the child's text value
                 setattr(self, 'TP_'+child.objectName(), child.text())
