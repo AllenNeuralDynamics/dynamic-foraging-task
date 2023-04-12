@@ -2,7 +2,7 @@ import sys, os,traceback
 import numpy as np
 from datetime import date,timedelta,datetime
 from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout,QLineEdit,QWidget,QSizePolicy
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets,QtGui,QtCore
 from PyQt5.QtCore import QThreadPool,Qt,QMetaObject
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
@@ -24,7 +24,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
-        self.connectSignalsSlots()
         self.default_saveFolder='E:\\DynamicForagingGUI\\Behavior\\'
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
@@ -49,6 +48,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self._ShowRewardPairs() # show reward pairs
         self._GetTrainingParameters() # get initial training parameters
+        self.connectSignalsSlots()
     def _InitializeBonsai(self):
         #os.system(" E:\\GitHub\\dynamic-foraging-task\\bonsai\\Bonsai.exe E:\\GitHub\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai  --start") 
         #workflow_file = "E:\\GitHub\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai"
@@ -113,18 +113,27 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
-        # check the change of all of the Line
-        for child in self.TrainingParameters.findChildren(QtWidgets.QSpinBox)+self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)+self.centralwidget.findChildren(QtWidgets.QLineEdit):
-            child.textChanged.connect(self._CheckTextChange)
-    
-    def keyPressEvent(self, event):
+        # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
+        for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
+            # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
+            for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):        
+                child.textChanged.connect(self._CheckTextChange)
+        # Opto_dialog can not detect natural enter press, so returnPressed is used here. 
+        for container in [self.Opto_dialog]:
+            # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
+            for child in container.findChildren((QtWidgets.QLineEdit)):        
+                child.returnPressed.connect(self.keyPressEvent)
+
+    def keyPressEvent(self, event=None):
         '''Enter press to allow change of parameters'''
         # Get the parameters before change
         if hasattr(self, 'GeneratedTrials'):
             Parameters=self.GeneratedTrials
         else:
             Parameters=self
-        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
+        if event==None:
+            event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, Qt.Key_Return, Qt.KeyboardModifiers())
+        if (event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter):
             # handle the return key press event here
             print("Parameter changes confirmed!")
             # prevent the default behavior of the return key press event
