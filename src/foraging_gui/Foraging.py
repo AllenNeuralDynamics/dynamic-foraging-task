@@ -47,6 +47,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._LaserCalibration() # to open the laser calibration panel
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self._ShowRewardPairs() # show reward pairs
+        self.resize(200,4000)
     def _InitializeBonsai(self):
         #os.system(" E:\\GitHub\\dynamic-foraging-task\\bonsai\\Bonsai.exe E:\\GitHub\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai  --start") 
         #workflow_file = "E:\\GitHub\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai"
@@ -112,6 +113,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         #self.AnimalName.returnPressed.connect(self._Test)
         self.AnimalName.textChanged.connect(self._Test)
         self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
+        #self.setFixedSize(2000,4800)
     def _ShowRewardPairs(self):
         '''Show reward pairs'''
         try: 
@@ -589,9 +591,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.Channel.RightValue(float(self.RightValue.text())*1000)
 
 if __name__ == "__main__":
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling,1)
+    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps,True)
+    QApplication.setAttribute(Qt.AA_DisableHighDpiScaling,False)
+    QApplication.setAttribute(Qt.AA_Use96Dpi,False)
+    QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
+    #QApplication.setHighDpiScaleFactor(1.5)
+    #QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
     app = QApplication(sys.argv)
-    app.setAttribute(Qt.AA_EnableHighDpiScaling)
-    app.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
     win = Window()
     win.show()
     # Run your application's event loop and stop after closing all windows
