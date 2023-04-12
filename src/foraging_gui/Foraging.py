@@ -112,8 +112,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.RewardPairsN.returnPressed.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
-        #self.AnimalName.returnPressed.connect(self._Test)
-        self.AnimalName.textChanged.connect(self._Test)
         self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
         # check the change of all of the Line
         for child in self.TrainingParameters.findChildren(QtWidgets.QSpinBox)+self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)+self.centralwidget.findChildren(QtWidgets.QLineEdit):
@@ -123,7 +121,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         '''Enter press to allow change of parameters'''
         if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
             # handle the return key press event here
-            print("Return key pressed!")
+            print("Parameter changes confirmed!")
             # prevent the default behavior of the return key press event
             event.accept()
             self.UpdateParameters=1 # Changes are allowed
@@ -148,6 +146,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
                 if child.objectName()=='qt_spinbox_lineedit':
+                    continue
+                if child.objectName()=='AnimalName':
+                    child.setStyleSheet('color: red;')
                     continue
                 if getattr(Parameters, 'TP_'+child.objectName())!=child.text():
                     child.setStyleSheet('color: red;')
@@ -229,10 +230,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         #    # Catch the exception and print error information
             print("An error occurred:")
             print(traceback.format_exc())
-
-    def _Test(self):
-        # Turn the newly changed parameter to red
-        pass
     def closeEvent(self, event):
         self._StopCurrentSession() # stop the current session first
         reply = QMessageBox.question(self, 'Foraging Close', 'Do you want to save the result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
