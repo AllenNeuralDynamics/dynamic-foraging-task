@@ -190,8 +190,8 @@ class GenerateTrials():
     
     def _CheckStop(self):
         '''Stop if there are many ingoral trials or if the maximam trial is exceeded'''
-        StopIgnore=int(self.win.StopIgnores.text())
-        MaxTrial=int(self.win.MaxTrial.text())
+        StopIgnore=int(self.win.StopIgnores.text())-1
+        MaxTrial=int(self.win.MaxTrial.text())-2 # trial number starts from 0
         if np.shape(self.B_AnimalResponseHistory)[0]>=StopIgnore:
             if np.all(self.B_AnimalResponseHistory[-StopIgnore:]==2):
                 self.Stop=1
@@ -199,7 +199,7 @@ class GenerateTrials():
                 self.Stop=0
         else:
             self.Stop=0
-        if self.B_CurrentTrialN>MaxTrial-2:
+        if self.B_CurrentTrialN>MaxTrial: 
             self.Stop=1
 
         if  self.Stop==1:           
