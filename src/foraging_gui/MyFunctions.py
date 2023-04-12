@@ -189,16 +189,22 @@ class GenerateTrials():
         self.GeneFinish=1
     
     def _CheckStop(self):
+        '''Stop if there are many ingoral trials or if the maximam trial is exceeded'''
         StopIgnore=int(self.win.StopIgnores.text())
+        MaxTrial=int(self.win.MaxTrial.text())
         if np.shape(self.B_AnimalResponseHistory)[0]>=StopIgnore:
             if np.all(self.B_AnimalResponseHistory[-StopIgnore:]==2):
                 self.Stop=1
-                self.win.Start.setStyleSheet("background-color : none")
-                self.win.Start.setChecked(False)
             else:
                 self.Stop=0
         else:
             self.Stop=0
+        if self.B_CurrentTrialN>MaxTrial-2:
+            self.Stop=1
+
+        if  self.Stop==1:           
+            self.win.Start.setStyleSheet("background-color : none")
+            self.win.Start.setChecked(False)
     def _CheckAutoWater(self):
         '''Check if it should be an auto water trial'''
         if self.win.AutoReward.isChecked:
