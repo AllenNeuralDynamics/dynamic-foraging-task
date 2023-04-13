@@ -104,13 +104,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.AutoReward.clicked.connect(self._AutoReward)
         self.NextBlock.clicked.connect(self._NextBlock)
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
-        self.BaseRewardSum.textChanged.connect(self._ShowRewardPairs)
-        self.RewardFamily.textChanged.connect(self._ShowRewardPairs)
-        self.RewardPairsN.textChanged.connect(self._ShowRewardPairs)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
-        self.BaseRewardSum.returnPressed.connect(self._ShowRewardPairs)
-        self.RewardFamily.returnPressed.connect(self._ShowRewardPairs)
-        self.RewardPairsN.returnPressed.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
@@ -146,9 +140,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
                     if child.objectName()=='qt_spinbox_lineedit':
                         continue
+                    if child.isEnabled()==False:
+                        continue
                     child.setStyleSheet('color: black;')
                     child.setStyleSheet('background-color: white;')
-                    if child.objectName()=='AnimalName' or child.objectName()=='UncoupledReward':
+                    if child.objectName()=='AnimalName' and child.text()=='':
+                        child.setText(getattr(Parameters, 'TP_'+child.objectName()))
+                    if child.objectName()=='UncoupledReward':
+                        Correct=self._CheckFormat(child)
+                        if Correct ==0: # incorrect format; don't change
+                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
                     # check valid for empty condition
                     try:
@@ -175,33 +176,81 @@ class Window(QMainWindow, Ui_ForagingGUI):
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
-                if child.objectName()=='qt_spinbox_lineedit':
+                if child.objectName()=='qt_spinbox_lineedit' or child.isEnabled()==False: # I don't understand where the qt_spinbox_lineedit comes from. 
                     continue
-                if getattr(Parameters, 'TP_'+child.objectName())!=child.text():
+                if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
+                    self.Continue=0
                     if child.objectName()=='AnimalName' or child.objectName()=='UncoupledReward':
                         child.setStyleSheet('color: red;')
-                        continue
+                        self.Continue=1
                     if child.text()=='': # If it's empty, changing the background color and waiting for the confirming
                         self.UpdateParameters=0
                         child.setStyleSheet('background-color: red;')
-                    else:
-                        child.setStyleSheet('color: red;')
-                        try:
-                            # it's valid float
-                            float(child.text())
-                            self.UpdateParameters=0 # Changes are not allowed until press is typed
-                        except ValueError:
-                            # Invalid float. Do not change the parameter
-                            if isinstance(child, QtWidgets.QDoubleSpinBox):
-                                child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
-                            elif isinstance(child, QtWidgets.QSpinBox):
-                                child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
-                            else:
-                                child.setText(getattr(Parameters, 'TP_'+child.objectName()))
+                        self.Continue=1
+                    if (child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum') and (child.text()!=''):
+                        Correct=self._CheckFormat(child)
+                        if Correct ==0: # incorrect format; don't change
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                            child.setStyleSheet('color: black;')
-                            self.UpdateParameters=1
-        
+                        self._ShowRewardPairs()
+                    if self.Continue==1:
+                        continue
+                    child.setStyleSheet('color: red;')
+                    try:
+                        # it's valid float
+                        float(child.text())
+                        self.UpdateParameters=0 # Changes are not allowed until press is typed
+                    except ValueError:
+                        # Invalid float. Do not change the parameter
+                        if isinstance(child, QtWidgets.QDoubleSpinBox):
+                            child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
+                        elif isinstance(child, QtWidgets.QSpinBox):
+                            child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
+                        else:
+                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))
+                        child.setText(getattr(Parameters, 'TP_'+child.objectName()))
+                        child.setStyleSheet('color: black;')
+                        self.UpdateParameters=1
+                else:
+                    child.setStyleSheet('color: black;')
+                    child.setStyleSheet('background-color: white;')
+    def _CheckFormat(self,child):
+        '''Check if the input format is correct'''
+        if child.objectName()=='RewardFamily': # When we change the RewardFamily, sometimes the RewardPairsN is larger than available reward pairs in this family. 
+            try:
+                self.RewardFamilies[int(self.RewardFamily.text())-1]
+                if int(self.RewardPairsN.text())>len(self.RewardFamilies[int(self.RewardFamily.text())-1]):
+                    self.RewardPairsN.setText(str(len(self.RewardFamilies[int(self.RewardFamily.text())-1])))
+                return 1
+            except:
+                return 0
+        if child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum':
+            try:
+                self.RewardPairs=self.RewardFamilies[int(self.RewardFamily.text())-1][:int(self.RewardPairsN.text())]
+                if int(self.RewardPairsN.text())>len(self.RewardFamilies[int(self.RewardFamily.text())-1]):
+                    return 0
+                else:
+                    return 1
+            except Exception as e: 
+                return 0
+        if child.objectName()=='UncoupledReward':
+            try:
+                input_string=self.UncoupledReward.text()
+                if input_string=='': # do not permit empty uncoupled reward
+                    return 0
+                # remove any square brackets and spaces from the string
+                input_string = input_string.replace('[','').replace(']','').replace(',', ' ')
+                # split the remaining string into a list of individual numbers
+                num_list = input_string.split()
+                # convert each number in the list to a float
+                num_list = [float(num) for num in num_list]
+                # create a numpy array from the list of numbers
+                self.RewardProb=np.array(num_list)
+                return 1
+            except Exception as e: 
+                return 0
+        else:
+            return 1
+
     def _GetTrainingParameters(self):
         '''Get training parameters'''
         # Iterate over each container to find child widgets and store their values in self
@@ -267,7 +316,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 else:
                     self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: ') 
         except Exception as e:
-        #    # Catch the exception and print error information
+            # Catch the exception and print error information
             print("An error occurred:")
             print(traceback.format_exc())
     def closeEvent(self, event):
@@ -531,10 +580,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _Clear(self):
         reply = QMessageBox.question(self, 'Clear parameters:', 'Do you want to clear training parameters?',QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
-            for child in self.TrainingParameters.findChildren(QtWidgets.QLineEdit):
-                child.clear()
-            for child in self.centralwidget.findChildren(QtWidgets.QLineEdit):
-                child.clear()
+            for child in self.TrainingParameters.findChildren(QtWidgets.QLineEdit)+ self.centralwidget.findChildren(QtWidgets.QLineEdit):
+                if child.isEnabled():
+                    child.clear()
         else:
             pass
 
@@ -690,7 +738,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
             workerPlot=self.workerPlot
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
-        self.threadpool5.start(workerStartTrialLoop) # I just found the QApplication.processEvents() was better to reduce delay time between trial end the the next trial start
+        
+        self.test=1
+        if self.test==1:
+            self._StartTrialLoop(GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
+        else:
+            self.threadpool5.start(workerStartTrialLoop) # I just found the QApplication.processEvents() was better to reduce delay time between trial end the the next trial start
+
     def _StartTrialLoop(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         while self.Start.isChecked():
             QApplication.processEvents()
@@ -708,7 +762,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 #generate a new trial
                 GeneratedTrials.GeneFinish=0
                 self.ToGenerateATrial=0
-                self.threadpool4.start(workerGenerateAtrial)
+                if self.test==1:
+                    self.threadpool4.start(workerGenerateAtrial)
+                else:
+                    GeneratedTrials._GenerateATrial(self.Channel4)
     def _OptogeneticsB(self):
         ''' optogenetics control in the main window'''
         if self.OptogeneticsB.currentText()=='on':
