@@ -187,6 +187,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         self.UpdateParameters=0
                         child.setStyleSheet('background-color: red;')
                         self.Continue=1
+                    if child.objectName()=='RunLength' or child.objectName()=='WindowSize' or child.objectName()=='StepSize':
+                        if child.text()=='':
+                            child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
+                            child.setStyleSheet('color: black;')
+                            child.setStyleSheet('background-color: white;')
                     if (child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum') and (child.text()!=''):
                         Correct=self._CheckFormat(child)
                         if Correct ==0: # incorrect format; don't change

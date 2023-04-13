@@ -17,7 +17,9 @@ class PlotV(FigureCanvas):
         self.RunLength=win.RunLength.text
         self.RunLengthSetValue=win.RunLength.setValue
         self.WindowSize=win.WindowSize.text
+        self.WindowSizeSetValue=win.WindowSize.setValue
         self.StepSize=win.StepSize.text
+        self.StepSizeSetValue=win.StepSize.setValue
         self.MarkerSize=3
 
     def _Update(self,GeneratedTrials=None,Channel=None):
@@ -86,8 +88,12 @@ class PlotV(FigureCanvas):
         RightChoice_UnRewarded=np.where(np.logical_and(self.B_AnimalResponseHistory==1, self.B_RewardedHistory[1]==False))
 
         # running average of choice
-        kernel_size = int(self.RunLength())
-        if kernel_size==1:
+        if self.RunLength()!='':
+            kernel_size = int(self.RunLength())
+            if kernel_size==1:
+                kernel_size=2
+                self.RunLengthSetValue(2)
+        else:
             kernel_size=2
             self.RunLengthSetValue(2)
 
@@ -164,8 +170,23 @@ class PlotV(FigureCanvas):
     def _PlotMatching(self):
         ax=self.ax3
         ax.cla()
-        WindowSize=int(self.WindowSize())
-        StepSize=int(self.StepSize())
+        if self.WindowSize()!='':
+            WindowSize=int(self.WindowSize())
+            if WindowSize==0 or WindowSize==1:
+                WindowSize=100
+                self.WindowSizeSetValue(100)
+        else:
+            WindowSize=100
+            self.WindowSizeSetValue(100)
+        if self.StepSize()!='': 
+            StepSize=int(self.StepSize())
+            if StepSize==0 or StepSize==1:
+                StepSize=10
+                self.StepSizeSetValue(10)
+        else:
+            StepSize=10
+            self.StepSizeSetValue(10)
+
         if self.B_CurrentTrialN<1:
             return
         NumberOfDots = int((np.ptp(self.B_Time)-WindowSize)/StepSize)
