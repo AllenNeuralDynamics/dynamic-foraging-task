@@ -690,8 +690,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             workerPlot=self.workerPlot
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
-        #self.threadpool5.start(workerStartTrialLoop) # I just found the QApplication.processEvents() was better to reduce delay time between trial end the the next trial start
-        self._StartTrialLoop(GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
+        self.threadpool5.start(workerStartTrialLoop) # I just found the QApplication.processEvents() was better to reduce delay time between trial end the the next trial start
     def _StartTrialLoop(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         while self.Start.isChecked():
             QApplication.processEvents()
@@ -709,9 +708,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 #generate a new trial
                 GeneratedTrials.GeneFinish=0
                 self.ToGenerateATrial=0
-                #self.threadpool4.start(workerGenerateAtrial)
-                GeneratedTrials._GenerateATrial(self.Channel4)
-                self.ToGenerateATrial=1
+                self.threadpool4.start(workerGenerateAtrial)
     def _OptogeneticsB(self):
         ''' optogenetics control in the main window'''
         if self.OptogeneticsB.currentText()=='on':
