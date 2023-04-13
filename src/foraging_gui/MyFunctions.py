@@ -219,9 +219,9 @@ class GenerateTrials():
             elif len(self.BlockLenHistory[i])>1:
                 self.BS_CurrentBlockTrialN[i]=self.B_CurrentTrialN+1-sum(self.BlockLenHistory[i][:-1])
         self.BS_CurrentBlockLen=self.BlockLenHistory
-        self.BS_RewardedTrialN_LeftBlock=self.BlockLenHistory[0][-1]
-        self.BS_RewardedTrialN_RightBlock=self.BlockLenHistory[1][-1]
-        
+        #self.BS_RewardedTrialN_LeftBlock=self.BlockLenHistory[0][-1]
+        #self.BS_RewardedTrialN_RightBlock=self.BlockLenHistory[1][-1]
+
         # finish trial
         # current block length
         # reward trial number of this block
