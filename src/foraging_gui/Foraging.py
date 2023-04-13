@@ -107,6 +107,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.BaseRewardSum.textChanged.connect(self._ShowRewardPairs)
         self.RewardFamily.textChanged.connect(self._ShowRewardPairs)
         self.RewardPairsN.textChanged.connect(self._ShowRewardPairs)
+        self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         self.BaseRewardSum.returnPressed.connect(self._ShowRewardPairs)
         self.RewardFamily.returnPressed.connect(self._ShowRewardPairs)
         self.RewardPairsN.returnPressed.connect(self._ShowRewardPairs)
@@ -147,15 +148,20 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         continue
                     child.setStyleSheet('color: black;')
                     child.setStyleSheet('background-color: white;')
-                    if child.objectName()=='AnimalName':
+                    if child.objectName()=='AnimalName' or child.objectName()=='UncoupledReward':
                         continue
                     # check valid for empty condition
                     try:
                         # it's valid float
                         float(child.text())
                     except ValueError:
-                        # Invalid float. Do not change the parameter
-                        child.setText(getattr(Parameters, 'TP_'+child.objectName()))
+                        if isinstance(child, QtWidgets.QDoubleSpinBox):
+                            child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
+                        elif isinstance(child, QtWidgets.QSpinBox):
+                            child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
+                        else:
+                            # Invalid float. Do not change the parameter
+                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))
             # update the current training parameters
             self._GetTrainingParameters()
     
@@ -172,7 +178,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 if child.objectName()=='qt_spinbox_lineedit':
                     continue
                 if getattr(Parameters, 'TP_'+child.objectName())!=child.text():
-                    if child.objectName()=='AnimalName':
+                    if child.objectName()=='AnimalName' or child.objectName()=='UncoupledReward':
                         child.setStyleSheet('color: red;')
                         continue
                     if child.text()=='': # If it's empty, changing the background color and waiting for the confirming
@@ -186,6 +192,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
                             self.UpdateParameters=0 # Changes are not allowed until press is typed
                         except ValueError:
                             # Invalid float. Do not change the parameter
+                            if isinstance(child, QtWidgets.QDoubleSpinBox):
+                                child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
+                            elif isinstance(child, QtWidgets.QSpinBox):
+                                child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
+                            else:
+                                child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                             child.setStyleSheet('color: black;')
                             self.UpdateParameters=1
@@ -678,7 +690,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             workerPlot=self.workerPlot
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
-        self.threadpool5.start(workerStartTrialLoop) # I just found the QApplication.processEvents() was better to reduce delay time between trial end the the next trial start
+        #self.threadpool5.start(workerStartTrialLoop) # I just found the QApplication.processEvents() was better to reduce delay time between trial end the the next trial start
+        self._StartTrialLoop(GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
     def _StartTrialLoop(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         while self.Start.isChecked():
             QApplication.processEvents()
@@ -696,7 +709,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 #generate a new trial
                 GeneratedTrials.GeneFinish=0
                 self.ToGenerateATrial=0
-                self.threadpool4.start(workerGenerateAtrial)
+                #self.threadpool4.start(workerGenerateAtrial)
+                GeneratedTrials._GenerateATrial(self.Channel4)
+                self.ToGenerateATrial=1
     def _OptogeneticsB(self):
         ''' optogenetics control in the main window'''
         if self.OptogeneticsB.currentText()=='on':

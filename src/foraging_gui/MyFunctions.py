@@ -205,9 +205,24 @@ class GenerateTrials():
                 self.B_ANewBlock[i]=1
 
     def _GetBasic(self):
-        pass
+        '''Get basic session information'''
+        self.BS_AllTrialN=np.shape(self.B_AnimalResponseHistory)[0]
+        self.BS_FinisheTrialN=np.sum(self.B_AnimalResponseHistory!=2)
+        self.BS_RewardTrialN=np.sum(self.B_RewardedHistory==True)
+        self.BS_LeftRewardTrialN=np.sum(self.B_RewardedHistory[0]==True)
+        self.BS_RightRewardTrialN=np.sum(self.B_RewardedHistory[1]==True)
+        # current trial numbers in the current block; BS_CurrentBlockTrialN
+        self.BS_CurrentBlockTrialN=[[],[]]
+        for i in range(len(self.B_ANewBlock)):
+            if len(self.BlockLenHistory[i])==1:
+                self.BS_CurrentBlockTrialN[i]=self.B_CurrentTrialN+1
+            elif len(self.BlockLenHistory[i])>1:
+                self.BS_CurrentBlockTrialN[i]=self.B_CurrentTrialN+1-sum(self.BlockLenHistory[i][:-1])
+        self.BS_CurrentBlockLen=self.BlockLenHistory
+        self.BS_RewardedTrialN_LeftBlock=self.BlockLenHistory[0][-1]
+        self.BS_RewardedTrialN_RightBlock=self.BlockLenHistory[1][-1]
+        
         # finish trial
-        #self.B_AnimalResponseHistory
         # current block length
         # reward trial number of this block
         # overall reward rate
