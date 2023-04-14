@@ -294,17 +294,25 @@ class GenerateTrials():
 
     def _CheckStop(self):
         '''Stop if there are many ingoral trials or if the maximam trial is exceeded MaxTrial'''
-        StopIgnore=int(self.win.StopIgnores.text())-1
-        MaxTrial=int(self.win.MaxTrial.text())-2 # trial number starts from 0
+        StopIgnore=int(self.TP_StopIgnores)-1
+        MaxTrial=int(self.TP_MaxTrial)-2 # trial number starts from 0
         if np.shape(self.B_AnimalResponseHistory)[0]>=StopIgnore:
             if np.all(self.B_AnimalResponseHistory[-StopIgnore:]==2):
                 self.Stop=1
+                self.win.WarningLabelStop.setText('Stop because ignore trials exceed or equal: '+self.TP_StopIgnores)
+                self.win.WarningLabelStop.setStyleSheet("color: red;")
             else:
                 self.Stop=0
+                self.win.WarningLabelStop.setText('')
+                self.win.WarningLabelStop.setStyleSheet("color: gray;")
+        elif self.B_CurrentTrialN>MaxTrial: 
+            self.Stop=1
+            self.win.WarningLabelStop.setText('Stop because maximum trials exceed or equal: '+self.TP_MaxTrial)
+            self.win.WarningLabelStop.setStyleSheet("color: red;")
         else:
             self.Stop=0
-        if self.B_CurrentTrialN>MaxTrial: 
-            self.Stop=1
+            self.win.WarningLabelStop.setText('')
+            self.win.WarningLabelStop.setStyleSheet("color: gray;")
 
         if  self.Stop==1:           
             self.win.Start.setStyleSheet("background-color : none")
@@ -312,17 +320,27 @@ class GenerateTrials():
     def _CheckAutoWater(self):
         '''Check if it should be an auto water trial'''
         if self.win.AutoReward.isChecked:
-            UnrewardedN=int(self.win.Unrewarded.text())
-            IgnoredN=int(self.win.Ignored.text())
+            UnrewardedN=int(self.TP_Unrewarded)
+            IgnoredN=int(self.TP_Ignored)
             if np.shape(self.B_AnimalResponseHistory)[0]>=IgnoredN or np.shape(self.B_RewardedHistory[0])[0]>=UnrewardedN:
-                if np.all(self.B_AnimalResponseHistory[-IgnoredN:]==2) or (np.all(self.B_RewardedHistory[0][-UnrewardedN:]==False) and np.all(self.B_RewardedHistory[1][-UnrewardedN:]==False)):
+                if np.all(self.B_AnimalResponseHistory[-IgnoredN:]==2) and np.shape(self.B_AnimalResponseHistory)[0]>=IgnoredN:
                     self.CurrentAutoReward=1
+                    self.win.WarningLabelAutoWater.setText('Auto water because ignored trials exceed: '+self.TP_Ignored)
+                    self.win.WarningLabelAutoWater.setStyleSheet("color: red;")
+                elif (np.all(self.B_RewardedHistory[0][-UnrewardedN:]==False) and np.all(self.B_RewardedHistory[1][-UnrewardedN:]==False) and np.shape(self.B_RewardedHistory[0])[0]>=UnrewardedN):
+                    self.CurrentAutoReward=1
+                    self.win.WarningLabelAutoWater.setText('Auto water because unrewarded trials exceed: '+self.TP_Unrewarded)
+                    self.win.WarningLabelAutoWater.setStyleSheet("color: red;")
                 else:
                     self.CurrentAutoReward=0
             else:
                 self.CurrentAutoReward=0
         else:
             self.CurrentAutoReward=0
+
+        if self.CurrentAutoReward==0:
+            self.win.WarningLabelAutoWater.setText('')
+            self.win.WarningLabelAutoWater.setStyleSheet("color: gray;")
         self.B_AutoWaterTrial.append(self.CurrentAutoReward)
     def _GetLaserWaveForm(self):
         '''Get the waveform of the laser. It dependens on color/duration/protocol(frequency/RD/pulse duration)/locations/laser power'''
@@ -531,7 +549,7 @@ class GenerateTrials():
                     Channel1.TriggerITIStart_Wave2(int(0))
                 else:
                     self.win.WarningLabel.setText('Unindentified optogenetics start event!')
-                    self.win.WarningLabel.setStyleSheet("color: red;")
+                    self.win.WarningLabel.setStyleSheet("color: gray;")
             # location of optogenetics
             # dimension of self.CurrentLaserAmplitude indicates how many locations do we have
             for i in range(len(self.CurrentLaserAmplitude)):
