@@ -144,6 +144,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         continue
                     child.setStyleSheet('color: black;')
                     child.setStyleSheet('background-color: white;')
+                    if child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
+                        continue
                     if child.objectName()=='AnimalName' and child.text()=='':
                         child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                     if child.objectName()=='UncoupledReward':
@@ -180,7 +182,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     continue
                 if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                     self.Continue=0
-                    if child.objectName()=='AnimalName' or child.objectName()=='UncoupledReward':
+                    if child.objectName()=='AnimalName' or child.objectName()=='UncoupledReward' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
                         child.setStyleSheet('color: red;')
                         self.Continue=1
                     if child.text()=='': # If it's empty, changing the background color and waiting for the confirming
@@ -422,6 +424,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
    
     def _Save(self):
         self._StopCurrentSession() # stop the current session first
+        if self.WeightBefore.text()=='' or self.WeightAfter.text()=='' or self.ExtraWater.text()=='':
+            response = QMessageBox.question(self,'Save without weight or extra water:', "Do you want to save without weight or extra water information provided?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
+            if response==QMessageBox.Yes:
+                pass
+                self.WarningLabel.setText('Saving without weight or extra water!')
+                self.WarningLabel.setStyleSheet("color: red;")
+            elif response==QMessageBox.No:
+                return
+            elif response==QMessageBox.Cancel:
+                return
         # this should be improved in the future. Need to get the last LeftRewardDeliveryTime and RightRewardDeliveryTime
         if hasattr(self, 'GeneratedTrials'):
             self.GeneratedTrials._GetLicks(self.Channel2)
@@ -438,6 +450,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
             else:
                 break
         self.SaveFile = QFileDialog.getSaveFileName(self, 'Save File',SaveFile)[0]
+        if self.SaveFile == '':
+            self.WarningLabel.setText('Discard saving!')
+            self.WarningLabel.setStyleSheet("color: red;")
         if self.SaveFile != '':
             if hasattr(self, 'GeneratedTrials'):
                 if hasattr(self.GeneratedTrials, 'Obj'):
@@ -695,7 +710,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     break
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
-            self.Other_SessionStartTime=datetime.now()
+            self.WarningLabel.setText('')
+            self.WarningLabel.setStyleSheet("color: gray;")
+            self.SessionStartTime=datetime.now()
+            self.Other_SessionStartTime=str(self.SessionStartTime) # for saving
             GeneratedTrials=GenerateTrials(self)
             self.GeneratedTrials=GeneratedTrials
             self.StartANewSession=0

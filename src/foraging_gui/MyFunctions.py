@@ -378,14 +378,17 @@ class GenerateTrials():
         except:
             print('Can not show reward pairs')
         # session start time
-        SessionStartTime=self.win.Other_SessionStartTime
-        self.win.Other_CurrentTime=datetime.now()
-        tdelta = self.win.Other_CurrentTime - SessionStartTime
+        SessionStartTime=self.win.SessionStartTime
+        self.win.CurrentTime=datetime.now()
+        self.win.Other_CurrentTime=str(self.win.CurrentTime)
+        tdelta = self.win.CurrentTime - SessionStartTime
         self.win.Other_RunningTime=tdelta.seconds // 60
         SessionStartTimeHM = SessionStartTime.strftime('%H:%M')
-        CurrentTimeHM = self.win.Other_CurrentTime.strftime('%H:%M')
-        self.win.infor.setTitle('Session started: '+SessionStartTimeHM+ '  Current: '+CurrentTimeHM+ '  Run: '+str(self.win.Other_RunningTime)+'m')
-        self.win.Basic.setTitle('Current trial: ' + str(self.B_CurrentTrialN+1))
+        CurrentTimeHM = self.win.CurrentTime.strftime('%H:%M')
+        self.win.Other_inforTitle='Session started: '+SessionStartTimeHM+ '  Current: '+CurrentTimeHM+ '  Run: '+str(self.win.Other_RunningTime)+'m'
+        self.win.Other_BasicTitle='Current trial: ' + str(self.B_CurrentTrialN+1)
+        self.win.infor.setTitle(self.win.Other_inforTitle)
+        self.win.Basic.setTitle(self.win.Other_BasicTitle)
         # show basic session statistics    
         if self.B_CurrentTrialN>=0 and self.B_CurrentTrialN<1:
             self.win.ShowBasic.setText(   

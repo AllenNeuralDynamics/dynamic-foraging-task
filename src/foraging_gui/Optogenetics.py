@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Optogenetics(object):
     def setupUi(self, Optogenetics):
         Optogenetics.setObjectName("Optogenetics")
-        Optogenetics.resize(1273, 554)
+        Optogenetics.resize(1382, 554)
         self.Laser_1 = QtWidgets.QComboBox(Optogenetics)
         self.Laser_1.setGeometry(QtCore.QRect(90, 20, 80, 20))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
