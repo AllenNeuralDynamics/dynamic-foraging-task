@@ -1879,6 +1879,50 @@
       <string>1000</string>
      </property>
     </widget>
+    <widget class="QLineEdit" name="MaxTime">
+     <property name="geometry">
+      <rect>
+       <x>1080</x>
+       <y>205</y>
+       <width>80</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>120</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_58">
+     <property name="geometry">
+      <rect>
+       <x>983</x>
+       <y>205</y>
+       <width>91</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>max time (min)=</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
    </widget>
    <widget class="QLineEdit" name="AnimalName">
     <property name="geometry">
@@ -2263,7 +2307,7 @@
      <rect>
       <x>1230</x>
       <y>20</y>
-      <width>251</width>
+      <width>271</width>
       <height>851</height>
      </rect>
     </property>
@@ -2281,7 +2325,7 @@
       <rect>
        <x>10</x>
        <y>440</y>
-       <width>231</width>
+       <width>251</width>
        <height>141</height>
       </rect>
      </property>
@@ -2302,7 +2346,7 @@
        <rect>
         <x>10</x>
         <y>20</y>
-        <width>201</width>
+        <width>231</width>
         <height>101</height>
        </rect>
       </property>
@@ -2334,7 +2378,7 @@
       <rect>
        <x>10</x>
        <y>600</y>
-       <width>231</width>
+       <width>251</width>
        <height>141</height>
       </rect>
      </property>
@@ -2352,7 +2396,7 @@
        <rect>
         <x>0</x>
         <y>20</y>
-        <width>231</width>
+        <width>251</width>
         <height>121</height>
        </rect>
       </property>
@@ -2375,7 +2419,7 @@
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>231</width>
+       <width>251</width>
        <height>391</height>
       </rect>
      </property>
@@ -2396,7 +2440,7 @@
        <rect>
         <x>10</x>
         <y>20</y>
-        <width>201</width>
+        <width>231</width>
         <height>361</height>
        </rect>
       </property>
@@ -2498,7 +2542,7 @@
      <rect>
       <x>1230</x>
       <y>780</y>
-      <width>251</width>
+      <width>271</width>
       <height>91</height>
      </rect>
     </property>

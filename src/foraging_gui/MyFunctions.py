@@ -210,6 +210,10 @@ class GenerateTrials():
 
     def _GetBasic(self):
         '''Get basic session information'''
+        if len(self.B_TrialEndTime)>=1:
+            self.BS_CurrentRunningTime=self.B_TrialEndTime[-1]-self.B_TrialStartTime[0]# time interval between the recent trial end and first trial start
+        else:
+            self.BS_CurrentRunningTime=0
         self.BS_AllTrialN=np.shape(self.B_AnimalResponseHistory)[0]
         self.BS_FinisheTrialN=np.sum(self.B_AnimalResponseHistory!=2)
         self.BS_RespondedRate=self.BS_FinisheTrialN/self.BS_AllTrialN
@@ -296,6 +300,11 @@ class GenerateTrials():
         '''Stop if there are many ingoral trials or if the maximam trial is exceeded MaxTrial'''
         StopIgnore=int(self.TP_StopIgnores)-1
         MaxTrial=int(self.TP_MaxTrial)-2 # trial number starts from 0
+        MaxTime=float(self.TP_MaxTime)*60 # convert minutes to seconds
+        if hasattr(self, 'BS_CurrentRunningTime'): 
+            pass
+        else:
+            self.BS_CurrentRunningTime=0
         if np.shape(self.B_AnimalResponseHistory)[0]>=StopIgnore:
             if np.all(self.B_AnimalResponseHistory[-StopIgnore:]==2):
                 self.Stop=1
@@ -308,6 +317,10 @@ class GenerateTrials():
         elif self.B_CurrentTrialN>MaxTrial: 
             self.Stop=1
             self.win.WarningLabelStop.setText('Stop because maximum trials exceed or equal: '+self.TP_MaxTrial)
+            self.win.WarningLabelStop.setStyleSheet("color: red;")
+        elif self.BS_CurrentRunningTime>MaxTime:
+            self.Stop=1
+            self.win.WarningLabelStop.setText('Stop because running time exceeds or equals: '+self.TP_MaxTime+'m')
             self.win.WarningLabelStop.setStyleSheet("color: red;")
         else:
             self.Stop=0
