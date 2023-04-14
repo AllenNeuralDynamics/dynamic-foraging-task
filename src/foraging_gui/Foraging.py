@@ -474,6 +474,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                             pass
                         else:
                             Obj[attr_name] = getattr(self.GeneratedTrials, attr_name)
+            # save other events, e.g. session start time
+            for attr_name in dir(self):
+                if attr_name.startswith('Other_'):
+                    Obj[attr_name] = getattr(self, attr_name)
             # save laser calibration results 
             if hasattr(self, 'LaserCalibration_dialog'):
                 # Do something if self has the GeneratedTrials attribute
@@ -691,6 +695,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     break
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
+            self.Other_SessionStartTime=datetime.now()
             GeneratedTrials=GenerateTrials(self)
             self.GeneratedTrials=GeneratedTrials
             self.StartANewSession=0
@@ -744,7 +749,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
         
-        self.test=1
+        self.test=0
         if self.test==1:
             self._StartTrialLoop(GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
         else:

@@ -1,5 +1,6 @@
 
 import random, traceback, math,time
+from datetime import datetime
 import numpy as np
 from itertools import accumulate
 from PyQt5 import QtWidgets
@@ -43,6 +44,21 @@ class GenerateTrials():
         self.B_AutoWaterTrial=[] # to indicate if it is a trial with outo water.
         self.NextWaveForm=1 # waveform stored for later use
         self.CurrentWaveForm=1 # the current waveform to trigger the optogenetics
+        self.Start_Delay_LeftLicks=[]
+        self.Start_Delay_RightLicks=[]
+        self.Delay_GoCue_LeftLicks=[]
+        self.Delay_GoCue_RightLicks=[]
+        self.GoCue_NextStart_LeftLicks=[]
+        self.GoCue_NextStart_RightLicks=[]
+        self.GoCue_GoCue1_LeftLicks=[]
+        self.GoCue_GoCue1_RightLicks=[]
+        self.Start_GoCue_LeftLicks=[]
+        self.Start_GoCue_RightLicks=[]
+        self.Start_GoCue_DD=[]
+        self.Start_Delay_DD=[]
+        self.Delay_GoCue_DD=[]
+        self.GoCue_GoCue1_DD=[]
+        self.GoCue_NextStart_DD=[]
         #self.B_LaserTrialNum=[] # B_LaserAmplitude, B_LaserDuration, B_SelectedCondition have values only on laser on trials, so we need to store the laser trial number
         
         self.Obj={}
@@ -54,6 +70,9 @@ class GenerateTrials():
             self._GetTrainingParameters(self.win)
         # save all of the parameters in each trial
         self._SaveParameters()
+        # get licks information. Starting from the second trial, and counting licks of the last completed trial
+        if self.B_CurrentTrialN>=1: 
+            self._LickSta([self.B_CurrentTrialN-1])
         # get basic information
         if self.B_CurrentTrialN>=0: 
             self._GetBasic()
@@ -240,38 +259,111 @@ class GenerateTrials():
         # double dipping 
         # foraging efficiency
         '''Some complex calculations can be separated from _GenerateATrial using different threads'''
+
     def _LickSta(self,Trials=None):
-        '''Perform lick stats for the current trial'''
-        if Trials==None:
+        '''Perform lick stats for the input trials'''
+        if Trials==None: # could receive multiple trials
             Trials=self.B_CurrentTrialN-1
+        # combine all of the left and right licks
+        self.AllLicksInd=np.concatenate((np.zeros(len(self.B_LeftLickTime)),np.ones(len(self.B_RightLickTime))))
+        self.AllLicksTime=np.concatenate((self.B_LeftLickTime,self.B_RightLickTime))
+        # get the sort index
+        sort_index = np.argsort(self.AllLicksTime)
+        # sort the lick times
+        self.AllLicksTimeSorted = np.sort(self.AllLicksTime)
+        self.AllLicksIndSorted=self.AllLicksInd[sort_index]
+        LeftLicksInd=self.AllLicksIndSorted==0
+        RightLicksInd=self.AllLicksIndSorted==1
         for i in Trials:
+            # this only works when the current trial exceeds 2; the length of GoCue_NextStart_LeftLicks is one less than that of trial length
+            if self.B_CurrentTrialN>=2:
+                CurrentGoCue_NextStart=(self.B_GoCueTime[i-1],self.B_TrialStartTime[i])
+                Ind_GoCue_NextStart=(self.AllLicksTimeSorted >= CurrentGoCue_NextStart[0]) &  (self.AllLicksTimeSorted < CurrentGoCue_NextStart[1])
+                Ind_GoCue_NextStart_Left=Ind_GoCue_NextStart & LeftLicksInd
+                Ind_GoCue_NextStart_Right=Ind_GoCue_NextStart & RightLicksInd
+                self.GoCue_NextStart_LeftLicks.append(sum(Ind_GoCue_NextStart_Left))
+                self.GoCue_NextStart_RightLicks.append(sum(Ind_GoCue_NextStart_Right))
+                # double dipping
+                GoCue_NextStart_DD=self._GetDoubleDipping(self.AllLicksIndSorted[Ind_GoCue_NextStart])
+                self.GoCue_NextStart_DD.append(GoCue_NextStart_DD)
+                self.DD_TrialsN_GoCue_NextStart=sum(np.array(self.GoCue_NextStart_DD)!=0)
+                self.DDRate_GoCue_NextStart=self.DD_TrialsN_GoCue_NextStart/len(self.GoCue_NextStart_DD)
+                # double dipping per finish trial
+                Len=len(self.GoCue_NextStart_DD)
+                RespondedTrial=np.where(self.B_AnimalResponseHistory[:Len]!=2)[0]
+                if RespondedTrial.size>0:
+                    self.DD_PerTrial_GoCue_NextStart=np.round(sum(np.array(self.GoCue_NextStart_DD)[RespondedTrial])/len(np.array(self.GoCue_NextStart_DD)[RespondedTrial]),2)
+                else:
+                    self.DD_PerTrial_GoCue_NextStart='nan'
+            CurrentStart_GoCue=(self.B_TrialStartTime[i],self.B_GoCueTime[i])
             CurrentStart_Delay=(self.B_TrialStartTime[i],self.B_DelayStartTime[i])
             CurrentDelay_GoCue=(self.B_DelayStartTime[i],self.B_GoCueTime[i])
-            CurrentGoCue_NextStart=(self.B_GoCueTime[i],self.B_TrialStartTime[i+1])
-            CurrentGoCue_GoCue1=(self.B_GoCueTime[i],self.B_GoCueTime[i+1]+1)
+            CurrentGoCue_GoCue1=(self.B_GoCueTime[i],self.B_GoCueTime[i]+1)
             # licks in different intervals
-            Ind_LeftLick_Start_Delay=(self.B_LeftLickTime >= CurrentStart_Delay[0]) &  (self.B_LeftLickTime < CurrentStart_Delay[1])
-            Ind_RighLick_Start_Delay=(self.B_RightLickTime >= CurrentStart_Delay[0]) &  (self.B_RightLickTime < CurrentStart_Delay[1])
-            Ind_LeftLick_Delay_GoCue=(self.B_LeftLickTime >= CurrentDelay_GoCue[0]) &  (self.B_LeftLickTime < CurrentDelay_GoCue[1])
-            Ind_RighLick_Delay_GoCue=(self.B_RightLickTime >= CurrentDelay_GoCue[0]) &  (self.B_RightLickTime < CurrentDelay_GoCue[1])
-            Ind_LeftLick_GoCue_NextStart=(self.B_LeftLickTime >= CurrentGoCue_NextStart[0]) &  (self.B_LeftLickTime < CurrentGoCue_NextStart[1])
-            Ind_RighLick_GoCue_NextStart=(self.B_RightLickTime >= CurrentGoCue_NextStart[0]) &  (self.B_RightLickTime < CurrentGoCue_NextStart[1])
-            Ind_LeftLick_GoCue_GoCue1=(self.B_LeftLickTime >= CurrentGoCue_GoCue1[0]) &  (self.B_LeftLickTime < CurrentGoCue_GoCue1[1])
-            Ind_RighLick_GoCue_GoCue1=(self.B_RightLickTime >= CurrentGoCue_GoCue1[0]) &  (self.B_RightLickTime < CurrentGoCue_GoCue1[1])
+            Ind_Start_GoCue=(self.AllLicksTimeSorted >= CurrentStart_GoCue[0]) &  (self.AllLicksTimeSorted < CurrentStart_GoCue[1])
+            Ind_Start_Delay=(self.AllLicksTimeSorted >= CurrentStart_Delay[0]) &  (self.AllLicksTimeSorted < CurrentStart_Delay[1])
+            Ind_Delay_GoCue=(self.AllLicksTimeSorted >= CurrentDelay_GoCue[0]) &  (self.AllLicksTimeSorted < CurrentDelay_GoCue[1])
+            Ind_GoCue_GoCue1=(self.AllLicksTimeSorted >= CurrentGoCue_GoCue1[0]) &  (self.AllLicksTimeSorted < CurrentGoCue_GoCue1[1])
+            Ind_Start_GoCue_Left=Ind_Start_GoCue & LeftLicksInd
+            Ind_Start_GoCue_Right=Ind_Start_GoCue & RightLicksInd
+            Ind_Start_Delay_Left=Ind_Start_Delay & LeftLicksInd # left lick in this interval
+            Ind_Start_Delay_Right=Ind_Start_Delay & RightLicksInd # right lick in this interval
+            Ind_Delay_GoCue_Left=Ind_Delay_GoCue & LeftLicksInd
+            Ind_Delay_GoCue_Right=Ind_Delay_GoCue & RightLicksInd
+            Ind_GoCue_GoCue1_Left=Ind_GoCue_GoCue1 & LeftLicksInd
+            Ind_GoCue_GoCue1_Right=Ind_GoCue_GoCue1 & RightLicksInd
+            # licks in different intervals
+            self.Start_GoCue_LeftLicks.append(sum(Ind_Start_GoCue_Left))
+            self.Start_GoCue_RightLicks.append(sum(Ind_Start_GoCue_Right))
+            self.Start_Delay_LeftLicks.append(sum(Ind_Start_Delay_Left))
+            self.Start_Delay_RightLicks.append(sum(Ind_Start_Delay_Right))
+            self.Delay_GoCue_LeftLicks.append(sum(Ind_Delay_GoCue_Left))
+            self.Delay_GoCue_RightLicks.append(sum(Ind_Delay_GoCue_Right))
+            self.GoCue_GoCue1_LeftLicks.append(sum(Ind_GoCue_GoCue1_Left))
+            self.GoCue_GoCue1_RightLicks.append(sum(Ind_GoCue_GoCue1_Right))
+            # double dipping in different intervals
+            Start_GoCue_DD=self._GetDoubleDipping(self.AllLicksIndSorted[Ind_Start_GoCue]) # double dipping numbers
+            Start_Delay_DD=self._GetDoubleDipping(self.AllLicksIndSorted[Ind_Start_Delay])
+            Delay_GoCue_DD=self._GetDoubleDipping(self.AllLicksIndSorted[Ind_Delay_GoCue])
+            GoCue_GoCue1_DD=self._GetDoubleDipping(self.AllLicksIndSorted[Ind_GoCue_GoCue1])
+            self.Start_GoCue_DD.append(Start_GoCue_DD)
+            self.Start_Delay_DD.append(Start_Delay_DD)
+            self.Delay_GoCue_DD.append(Delay_GoCue_DD)
+            self.GoCue_GoCue1_DD.append(GoCue_GoCue1_DD)
+        # fraction of early licking trials in different time interval
+        self.EarlyLickingTrialsN_Start_Delay=sum(np.logical_or(np.array(self.Start_Delay_LeftLicks)!=0, np.array(self.Start_Delay_RightLicks)!=0))
+        self.EarlyLickingTrialsN_Delay_GoCue=sum(np.logical_or(np.array(self.Delay_GoCue_LeftLicks)!=0, np.array(self.Delay_GoCue_RightLicks)!=0))
+        self.EarlyLickingTrialsN_Start_GoCue=sum(np.logical_or(np.array(self.Start_GoCue_LeftLicks)!=0, np.array(self.Start_GoCue_RightLicks)!=0))
+        self.EarlyLickingRate_Start_Delay=self.EarlyLickingTrialsN_Start_Delay/len(self.Start_Delay_LeftLicks)
+        self.EarlyLickingRate_Delay_GoCue=self.EarlyLickingTrialsN_Delay_GoCue/len(self.Delay_GoCue_LeftLicks)
+        self.EarlyLickingRate_Start_GoCue=self.EarlyLickingTrialsN_Start_GoCue/len(self.Start_GoCue_LeftLicks)
+        # fraction of double dipping trials in different time interval
+        self.DD_TrialsN_Start_Delay=sum(np.array(self.Start_Delay_DD)!=0)
+        self.DD_TrialsN_Delay_GoCue=sum(np.array(self.Delay_GoCue_DD)!=0)
+        self.DD_TrialsN_GoCue_GoCue1=sum(np.array(self.GoCue_GoCue1_DD)!=0)
+        self.DD_TrialsN_Start_CoCue=sum(np.array(self.Start_GoCue_DD)!=0)
 
-            self.Start_Delay_LeftLicks.append(sum(Ind_LeftLick_Start_Delay))
-            self.Start_Delay_RightLicks.append(sum(Ind_RighLick_Start_Delay))
-            self.Delay_GoCue_LeftLicks.append(sum(Ind_LeftLick_Delay_GoCue))
-            self.Delay_GoCue_RightLicks.append(sum(Ind_RighLick_Delay_GoCue))
-            self.GoCue_NextStart_LeftLicks.append(sum(Ind_LeftLick_GoCue_NextStart))
-            self.GoCue_NextStart_RightLicks.append(sum(Ind_RighLick_GoCue_NextStart))
-            self.GoCue_GoCue1_LeftLicks.append(sum(Ind_LeftLick_GoCue_GoCue1))
-            self.GoCue_GoCue1_RightLicks.append(sum(Ind_RighLick_GoCue_GoCue1))
-            # double dipping
-            self.B_LeftLickTime[Ind_LeftLick_Start_Delay]+self.B_RightLickTime[Ind_RighLick_Start_Delay]
-                       
+        self.DDRate_Start_Delay=self.DD_TrialsN_Start_Delay/len(self.Start_Delay_DD)
+        self.DDRate_Delay_GoCue=self.DD_TrialsN_Delay_GoCue/len(self.Delay_GoCue_DD)
+        self.DDRate_GoCue_GoCue1=self.DD_TrialsN_GoCue_GoCue1/len(self.GoCue_GoCue1_DD)
+        self.DDRate_Start_CoCue=self.DD_TrialsN_Start_CoCue/len(self.Start_GoCue_DD)
 
+        # double dipping per finish trial
+        Len=len(self.Start_GoCue_DD)
+        RespondedTrial=np.where(self.B_AnimalResponseHistory[:Len]!=2)[0]
+        if RespondedTrial.size>0:
+            self.DD_PerTrial_Start_GoCue=np.round(sum(np.array(self.Start_GoCue_DD)[RespondedTrial])/len(np.array(self.Start_GoCue_DD)[RespondedTrial]),2)
+            self.DD_PerTrial_GoCue_GoCue1=np.round(sum(np.array(self.GoCue_GoCue1_DD)[RespondedTrial])/len(np.array(self.GoCue_GoCue1_DD)[RespondedTrial]),2)
+        else:
+            self.DD_PerTrial_Start_GoCue='nan'
+            self.DD_PerTrial_GoCue_GoCue1='nan'
 
+        
+        
+    def _GetDoubleDipping(self,LicksIndex):
+        '''get the number of double dipping. e.g. 0 1 0 will result in 2 double dipping''' 
+        DoubleDipping=np.sum(np.diff(LicksIndex)!=0)
+        return DoubleDipping
     def _ForagingEfficiency(self):
         pass
 
@@ -285,17 +377,73 @@ class GenerateTrials():
                 self.win.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProbPoolUncoupled,2))+'\n\n'+'Current pair: '+str(np.round(self.B_RewardProHistory[:,self.B_CurrentTrialN],2)))
         except:
             print('Can not show reward pairs')
-        # show basic session statistics
-        if self.B_CurrentTrialN>=0:
-            self.win.ShowBasic.setText('\nCurrent trial: ' + str(self.B_CurrentTrialN+1)+'\n\n'
-                                       'Current left block: ' + str(self.BS_CurrentBlockTrialN[0]) + '\\' +  str(self.BS_CurrentBlockLen[0])+'\n'
-                                       'Current right block: ' + str(self.BS_CurrentBlockTrialN[1]) + '\\' +  str(self.BS_CurrentBlockLen[1])+'\n\n'
-                                       'Responded trial: ' + str(self.BS_FinisheTrialN) + '\\'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
-                                       'Reward Trial: ' + str(self.BS_RewardTrialN) + '\\' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
-                                       'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '\\' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
-                                       'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '\\' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n'
+        # session start time
+        SessionStartTime=self.win.Other_SessionStartTime
+        self.win.Other_CurrentTime=datetime.now()
+        tdelta = self.win.Other_CurrentTime - SessionStartTime
+        self.win.Other_RunningTime=tdelta.seconds // 60
+        SessionStartTimeHM = SessionStartTime.strftime('%H:%M')
+        CurrentTimeHM = self.win.Other_CurrentTime.strftime('%H:%M')
+        self.win.infor.setTitle('Session started: '+SessionStartTimeHM+ '  Current: '+CurrentTimeHM+ '  Run: '+str(self.win.Other_RunningTime)+'m')
+        self.win.Basic.setTitle('Current trial: ' + str(self.B_CurrentTrialN+1))
+        # show basic session statistics    
+        if self.B_CurrentTrialN>=0 and self.B_CurrentTrialN<1:
+            self.win.ShowBasic.setText(   
+                                        'Current left block: ' + str(self.BS_CurrentBlockTrialN[0]) + '/' +  str(self.BS_CurrentBlockLen[0])+'\n'
+                                        'Current right block: ' + str(self.BS_CurrentBlockTrialN[1]) + '/' +  str(self.BS_CurrentBlockLen[1])+'\n\n'
+                                        'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
+                                        'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
+                                        'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
+                                        'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n'
+                                        )
+        elif self.B_CurrentTrialN>=1 and self.B_CurrentTrialN<2:
+            self.win.ShowBasic.setText( 
+                                       'Current left block: ' + str(self.BS_CurrentBlockTrialN[0]) + '/' +  str(self.BS_CurrentBlockLen[0])+'\n'
+                                       'Current right block: ' + str(self.BS_CurrentBlockTrialN[1]) + '/' +  str(self.BS_CurrentBlockLen[1])+'\n\n'
+                                       'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
+                                       'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
+                                       'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
+                                       'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n\n'
+                                       
+                                       'Early licking (EL)\n'
+                                        '  Frac of EL trial start_goCue: ' + str(self.EarlyLickingTrialsN_Start_GoCue) + '/' + str(len(self.Start_GoCue_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Start_GoCue,2))+')' +'\n'
+                                        '  Frac of EL trial start_delay: ' + str(self.EarlyLickingTrialsN_Start_Delay) + '/' + str(len(self.Start_Delay_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Start_Delay,2))+')' +'\n'
+                                        '  Frac of EL trial delay_goCue: ' + str(self.EarlyLickingTrialsN_Delay_GoCue) + '/' + str(len(self.Delay_GoCue_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Delay_GoCue,2))+')' +'\n'
+                                        '  Left/Right early licks start_goCue: ' + str(sum(self.Start_GoCue_LeftLicks)) + '/' + str(sum(self.Start_GoCue_RightLicks)) + ' ('+str(np.round(np.array(sum(self.Start_GoCue_LeftLicks))/np.array(sum(self.Start_GoCue_RightLicks)),2))+')' +'\n\n'
+                                       
+                                       'Double dipping (DD)\n'
+                                       '  Frac of DD trial start_goCue: ' + str(self.DD_TrialsN_Start_CoCue) + '/' + str(len(self.Start_GoCue_DD)) + ' ('+str(np.round(self.DDRate_Start_CoCue,2))+')' +'\n'
+                                       '  Frac of DD trial start_delay: ' + str(self.DD_TrialsN_Start_Delay) + '/' + str(len(self.Start_Delay_DD)) + ' ('+str(np.round(self.DDRate_Start_Delay,2))+')' +'\n'
+                                       '  Frac of DD trial delay_goCue: ' + str(self.DD_TrialsN_Delay_GoCue) + '/' + str(len(self.Delay_GoCue_DD)) + ' ('+str(np.round(self.DDRate_Delay_GoCue,2))+')' +'\n'
+                                       '  Frac of DD trial goCue_goCue1: ' + str(self.DD_TrialsN_GoCue_GoCue1) + '/' + str(len(self.GoCue_GoCue1_DD)) + ' ('+str(np.round(self.DDRate_GoCue_GoCue1,2))+')' +'\n'
+                                       '  DD per finish trial start_goCue: ' + str(self.DD_PerTrial_Start_GoCue)+'\n'
+                                       '  DD per finish trial goCue_goCue1: ' + str(self.DD_PerTrial_GoCue_GoCue1)+'\n'
                                        )
-
+        elif self.B_CurrentTrialN>=2:
+            self.win.ShowBasic.setText( 
+                                       'Current left block: ' + str(self.BS_CurrentBlockTrialN[0]) + '/' +  str(self.BS_CurrentBlockLen[0])+'\n'
+                                       'Current right block: ' + str(self.BS_CurrentBlockTrialN[1]) + '/' +  str(self.BS_CurrentBlockLen[1])+'\n\n'
+                                       'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
+                                       'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
+                                       'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
+                                       'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n\n'
+                                       
+                                       'Early licking (EL)\n'
+                                       '  Frac of EL trial start_goCue: ' + str(self.EarlyLickingTrialsN_Start_GoCue) + '/' + str(len(self.Start_GoCue_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Start_GoCue,2))+')' +'\n'
+                                       '  Frac of EL trial start_delay: ' + str(self.EarlyLickingTrialsN_Start_Delay) + '/' + str(len(self.Start_Delay_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Start_Delay,2))+')' +'\n'
+                                       '  Frac of EL trial delay_goCue: ' + str(self.EarlyLickingTrialsN_Delay_GoCue) + '/' + str(len(self.Delay_GoCue_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Delay_GoCue,2))+')' +'\n'
+                                       '  Left/Right early licks start_goCue: ' + str(sum(self.Start_GoCue_LeftLicks)) + '/' + str(sum(self.Start_GoCue_RightLicks)) + ' ('+str(np.round(np.array(sum(self.Start_GoCue_LeftLicks))/np.array(sum(self.Start_GoCue_RightLicks)),2))+')' +'\n\n'
+                                       
+                                       'Double dipping (DD)\n'
+                                       '  Frac of DD trial start_goCue: ' + str(self.DD_TrialsN_Start_CoCue) + '/' + str(len(self.Start_GoCue_DD)) + ' ('+str(np.round(self.DDRate_Start_CoCue,2))+')' +'\n'
+                                       '  Frac of DD trial start_delay: ' + str(self.DD_TrialsN_Start_Delay) + '/' + str(len(self.Start_Delay_DD)) + ' ('+str(np.round(self.DDRate_Start_Delay,2))+')' +'\n'
+                                       '  Frac of DD trial delay_goCue: ' + str(self.DD_TrialsN_Delay_GoCue) + '/' + str(len(self.Delay_GoCue_DD)) + ' ('+str(np.round(self.DDRate_Delay_GoCue,2))+')' +'\n'
+                                       '  Frac of DD trial goCue_goCue1: ' + str(self.DD_TrialsN_GoCue_GoCue1) + '/' + str(len(self.GoCue_GoCue1_DD)) + ' ('+str(np.round(self.DDRate_GoCue_GoCue1,2))+')' +'\n'
+                                       '  Frac of DD trial goCue_nextStart: ' + str(self.DD_TrialsN_GoCue_NextStart) + '/' + str(len(self.GoCue_NextStart_DD)) + ' ('+str(np.round(self.DDRate_GoCue_NextStart,2))+')' +'\n'
+                                       '  DD per finish trial start_goCue: ' + str(self.DD_PerTrial_Start_GoCue)+'\n'
+                                       '  DD per finish trial goCue_goCue1: ' + str(self.DD_PerTrial_GoCue_GoCue1)+'\n'
+                                       '  DD per finish trial goCue_nextStart: ' + str(self.DD_PerTrial_GoCue_NextStart)+'\n'
+                                       )
     def _CheckStop(self):
         '''Stop if there are many ingoral trials or if the maximam trial is exceeded MaxTrial'''
         StopIgnore=int(self.TP_StopIgnores)-1
