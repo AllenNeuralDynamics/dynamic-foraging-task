@@ -11,7 +11,7 @@ class GenerateTrials():
         self.B_RewardFamilies=self.win.RewardFamilies
         #self.B_RewardFamilies = [[[float(x) for x in y] for y in z] for z in self.B_RewardFamilies]
         #self.B_RewardFamilies = np.array(self.B_RewardFamilies)
-        self.B_CurrentTrialN=0 # trial number starts from 0
+        self.B_CurrentTrialN=-1 # trial number starts from 0; Update when trial starts
         self.B_LickPortN=2
         self.B_ANewBlock=np.array([1,1]).astype(int)
         self.B_RewardProHistory=np.array([[],[]]).astype(int)
@@ -54,81 +54,26 @@ class GenerateTrials():
             self._GetTrainingParameters(self.win)
         # save all of the parameters in each trial
         self._SaveParameters()
-        # get basic information 
-        self._GetBasic()
+        # get basic information
+        if self.B_CurrentTrialN>=0: 
+            self._GetBasic()
         # check block transition
         self._CheckBlockTransition()
-        # determine the current reward probability
-        self.RewardPairs=self.B_RewardFamilies[int(self.TP_RewardFamily)-1][:int(self.TP_RewardPairsN)]
-        self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.TP_BaseRewardSum)
-        # determine the reward probability of the next trial based on tasks
-        if (self.TP_Task in ['Coupled Baiting','Coupled Without Baiting']) and any(self.B_ANewBlock==1):
-            # get the reward probabilities pool
-            RewardProbPool=np.append(self.RewardProb,np.fliplr(self.RewardProb),axis=0)
-            # exclude the previous reward probabilities
-            if self.B_RewardProHistory.size!=0:
-                RewardProbPool=RewardProbPool[RewardProbPool!=self.B_RewardProHistory[:,-1]]
-                RewardProbPool=RewardProbPool.reshape(int(RewardProbPool.size/self.B_LickPortN),self.B_LickPortN)
-            # get the reward probabilities of the current block
-            self.B_CurrentRewardProb=RewardProbPool[random.choice(range(np.shape(RewardProbPool)[0]))]
-            # randomly draw a block length between Min and Max
-            self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta),1)+float(self.TP_BlockMin)))
-            if self.BlockLen>float(self.TP_BlockMax):
-                self.BlockLen=int(self.TP_BlockMax)
-            for i in range(len(self.B_ANewBlock)):
-                self.BlockLenHistory[i].append(self.BlockLen)
-            self.B_ANewBlock=np.array([0,0])
-        elif (self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting'])  and any(self.B_ANewBlock==1):
-            # get the reward probabilities pool
-            for i in range(len(self.B_ANewBlock)):
-                if self.B_ANewBlock[i]==1:
-                    #RewardProbPool=np.append(self.RewardProb,np.fliplr(self.RewardProb),axis=0)
-                    #RewardProbPool=RewardProbPool[:,i]
-                    input_string=self.win.UncoupledReward.text()
-                    # remove any square brackets and spaces from the string
-                    input_string = input_string.replace('[','').replace(']','').replace(',', ' ')
-                    # split the remaining string into a list of individual numbers
-                    num_list = input_string.split()
-                    # convert each number in the list to a float
-                    num_list = [float(num) for num in num_list]
-                    # create a numpy array from the list of numbers
-                    RewardProbPool=np.array(num_list)
-                    self.RewardProbPoolUncoupled=RewardProbPool.copy()
-                    # exclude the previous reward probabilities
-                    if self.B_RewardProHistory.size!=0:
-                        RewardProbPool=RewardProbPool[RewardProbPool!=self.B_RewardProHistory[i,-1]]
-                    # get the reward probabilities of the current block
-                    self.B_CurrentRewardProb[i]=RewardProbPool[random.choice(range(np.shape(RewardProbPool)[0]))]
-                    # randomly draw a block length between Min and Max
-                    self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta),1)+float(self.TP_BlockMin)))
-                    if self.BlockLen>float(self.TP_BlockMax):
-                        self.BlockLen=int(self.TP_BlockMax)
-                    self.BlockLenHistory[i].append(self.BlockLen)
-                    self.B_ANewBlock[i]=0
-        self.B_RewardProHistory=np.append(self.B_RewardProHistory,self.B_CurrentRewardProb.reshape(self.B_LickPortN,1),axis=1)
-        # show reward pairs and current reward probability
-        try:
-            if (self.TP_Task in ['Coupled Baiting','Coupled Without Baiting']):
-                self.win.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.B_RewardProHistory[:,self.B_CurrentTrialN],2)))
-            elif (self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']):
-                self.win.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProbPoolUncoupled,2))+'\n\n'+'Current pair: '+str(np.round(self.B_RewardProHistory[:,self.B_CurrentTrialN],2)))
-        except:
-            print('Can not show reward pairs')
-        # to decide if it's an auto water trial
+        # Get reward probability and other trial related parameters
+        self._SelectTrainingParameter()
+        # Show session/trial related information
+        self._ShowInformation()
+        # to decide if it's an auto water trial. will give water in _GetAnimalResponse
         self._CheckAutoWater()
         # to decide if we should stop the session
         self._CheckStop()
-        # get the ITI time and delay time
-        self.CurrentITI = float(np.random.exponential(float(self.TP_ITIBeta),1)+float(self.TP_ITIMin))
-        if self.CurrentITI>float(self.TP_ITIMax):
-            self.CurrentITI=float(self.TP_ITIMax)
-        self.CurrentDelay = float(np.random.exponential(float(self.TP_DelayBeta),1)+float(self.TP_DelayMin))
-        if self.CurrentDelay>float(self.TP_DelayMax):
-            self.CurrentDelay=float(self.TP_DelayMax)
-        self.B_ITIHistory.append(self.CurrentITI)
-        self.B_DelayHistory.append(self.CurrentDelay)
-        self.B_ResponseTimeHistory.append(float(self.TP_ResponseTime))
         # optogenetics section
+        self._PerformOptogenetics()
+        # finish to generate the next trial
+        self.GeneFinish=1
+
+    def _PerformOptogenetics(self):
+        '''Optogenetics section to generate optogenetics parameters and send waveform to Bonsai'''
         try:
             if self.TP_OptogeneticsB=='on': # optogenetics is turned on
                 # select the current optogenetics condition
@@ -182,7 +127,66 @@ class GenerateTrials():
             # Catch the exception and print error information
             print("An error occurred:")
             print(traceback.format_exc())
-        self.GeneFinish=1
+
+    def _SelectTrainingParameter(self):
+        '''Select the training parameter of the next trial'''
+        # determine the reward probability of the next trial based on tasks
+        if (self.TP_Task in ['Coupled Baiting','Coupled Without Baiting']) and any(self.B_ANewBlock==1):
+            self.RewardPairs=self.B_RewardFamilies[int(self.TP_RewardFamily)-1][:int(self.TP_RewardPairsN)]
+            self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.TP_BaseRewardSum)
+            # get the reward probabilities pool
+            RewardProbPool=np.append(self.RewardProb,np.fliplr(self.RewardProb),axis=0)
+            # exclude the previous reward probabilities
+            if self.B_RewardProHistory.size!=0:
+                RewardProbPool=RewardProbPool[RewardProbPool!=self.B_RewardProHistory[:,-1]]
+                RewardProbPool=RewardProbPool.reshape(int(RewardProbPool.size/self.B_LickPortN),self.B_LickPortN)
+            # get the reward probabilities of the current block
+            self.B_CurrentRewardProb=RewardProbPool[random.choice(range(np.shape(RewardProbPool)[0]))]
+            # randomly draw a block length between Min and Max
+            self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta),1)+float(self.TP_BlockMin)))
+            if self.BlockLen>float(self.TP_BlockMax):
+                self.BlockLen=int(self.TP_BlockMax)
+            for i in range(len(self.B_ANewBlock)):
+                self.BlockLenHistory[i].append(self.BlockLen)
+            self.B_ANewBlock=np.array([0,0])
+        elif (self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting'])  and any(self.B_ANewBlock==1):
+            # get the reward probabilities pool
+            for i in range(len(self.B_ANewBlock)):
+                if self.B_ANewBlock[i]==1:
+                    #RewardProbPool=np.append(self.RewardProb,np.fliplr(self.RewardProb),axis=0)
+                    #RewardProbPool=RewardProbPool[:,i]
+                    input_string=self.win.UncoupledReward.text()
+                    # remove any square brackets and spaces from the string
+                    input_string = input_string.replace('[','').replace(']','').replace(',', ' ')
+                    # split the remaining string into a list of individual numbers
+                    num_list = input_string.split()
+                    # convert each number in the list to a float
+                    num_list = [float(num) for num in num_list]
+                    # create a numpy array from the list of numbers
+                    RewardProbPool=np.array(num_list)
+                    self.RewardProbPoolUncoupled=RewardProbPool.copy()
+                    # exclude the previous reward probabilities
+                    if self.B_RewardProHistory.size!=0:
+                        RewardProbPool=RewardProbPool[RewardProbPool!=self.B_RewardProHistory[i,-1]]
+                    # get the reward probabilities of the current block
+                    self.B_CurrentRewardProb[i]=RewardProbPool[random.choice(range(np.shape(RewardProbPool)[0]))]
+                    # randomly draw a block length between Min and Max
+                    self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta),1)+float(self.TP_BlockMin)))
+                    if self.BlockLen>float(self.TP_BlockMax):
+                        self.BlockLen=int(self.TP_BlockMax)
+                    self.BlockLenHistory[i].append(self.BlockLen)
+                    self.B_ANewBlock[i]=0
+        self.B_RewardProHistory=np.append(self.B_RewardProHistory,self.B_CurrentRewardProb.reshape(self.B_LickPortN,1),axis=1)
+        # get the ITI time and delay time
+        self.CurrentITI = float(np.random.exponential(float(self.TP_ITIBeta),1)+float(self.TP_ITIMin))
+        if self.CurrentITI>float(self.TP_ITIMax):
+            self.CurrentITI=float(self.TP_ITIMax)
+        self.CurrentDelay = float(np.random.exponential(float(self.TP_DelayBeta),1)+float(self.TP_DelayMin))
+        if self.CurrentDelay>float(self.TP_DelayMax):
+            self.CurrentDelay=float(self.TP_DelayMax)
+        self.B_ITIHistory.append(self.CurrentITI)
+        self.B_DelayHistory.append(self.CurrentDelay)
+        self.B_ResponseTimeHistory.append(float(self.TP_ResponseTime))
 
     def _CheckBlockTransition(self):
         '''Check if we should perform a block change for the next trial. 
@@ -208,24 +212,86 @@ class GenerateTrials():
         '''Get basic session information'''
         self.BS_AllTrialN=np.shape(self.B_AnimalResponseHistory)[0]
         self.BS_FinisheTrialN=np.sum(self.B_AnimalResponseHistory!=2)
+        self.BS_RespondedRate=self.BS_FinisheTrialN/self.BS_AllTrialN
         self.BS_RewardTrialN=np.sum(self.B_RewardedHistory==True)
         self.BS_LeftRewardTrialN=np.sum(self.B_RewardedHistory[0]==True)
         self.BS_RightRewardTrialN=np.sum(self.B_RewardedHistory[1]==True)
+        self.BS_LeftChoiceN=np.sum(self.B_AnimalResponseHistory==0)
+        self.BS_RightChoiceN=np.sum(self.B_AnimalResponseHistory==1)
+        self.BS_OverallRewardRate=self.BS_RewardTrialN/(self.B_CurrentTrialN+1)
+        self.BS_LeftChoiceRewardRate=self.BS_LeftRewardTrialN/self.BS_LeftChoiceN
+        self.BS_RightChoiceRewardRate=self.BS_RightRewardTrialN/self.BS_RightChoiceN
         # current trial numbers in the current block; BS_CurrentBlockTrialN
         self.BS_CurrentBlockTrialN=[[],[]]
+        self.BS_CurrentBlockLen=[self.BlockLenHistory[0][-1], self.BlockLenHistory[1][-1]]
         for i in range(len(self.B_ANewBlock)):
             if len(self.BlockLenHistory[i])==1:
                 self.BS_CurrentBlockTrialN[i]=self.B_CurrentTrialN+1
             elif len(self.BlockLenHistory[i])>1:
                 self.BS_CurrentBlockTrialN[i]=self.B_CurrentTrialN+1-sum(self.BlockLenHistory[i][:-1])
-        self.BS_CurrentBlockLen=self.BlockLenHistory
-        #self.BS_RewardedTrialN_LeftBlock=self.BlockLenHistory[0][-1]
-        #self.BS_RewardedTrialN_RightBlock=self.BlockLenHistory[1][-1]
+        Len=np.shape(self.B_RewardedHistory)[1]
+        self.BS_RewardedTrialN_CurrentLeftBlock=np.sum(self.B_RewardedHistory[0][(Len-self.BS_CurrentBlockTrialN[0]+1):]==True)
+        self.BS_RewardedTrialN_CurrentRightBlock=np.sum(self.B_RewardedHistory[1][(Len-self.BS_CurrentBlockTrialN[1]+1):]==True)
+        # early licking rate
+        # double dipping 
+        # foraging efficiency
+        '''Some complex calculations can be separated from _GenerateATrial using different threads'''
+    def _LickSta(self,Trials=None):
+        '''Perform lick stats for the current trial'''
+        if Trials==None:
+            Trials=self.B_CurrentTrialN-1
+        for i in Trials:
+            CurrentStart_Delay=(self.B_TrialStartTime[i],self.B_DelayStartTime[i])
+            CurrentDelay_GoCue=(self.B_DelayStartTime[i],self.B_GoCueTime[i])
+            CurrentGoCue_NextStart=(self.B_GoCueTime[i],self.B_TrialStartTime[i+1])
+            CurrentGoCue_GoCue1=(self.B_GoCueTime[i],self.B_GoCueTime[i+1]+1)
+            # licks in different intervals
+            Ind_LeftLick_Start_Delay=(self.B_LeftLickTime >= CurrentStart_Delay[0]) &  (self.B_LeftLickTime < CurrentStart_Delay[1])
+            Ind_RighLick_Start_Delay=(self.B_RightLickTime >= CurrentStart_Delay[0]) &  (self.B_RightLickTime < CurrentStart_Delay[1])
+            Ind_LeftLick_Delay_GoCue=(self.B_LeftLickTime >= CurrentDelay_GoCue[0]) &  (self.B_LeftLickTime < CurrentDelay_GoCue[1])
+            Ind_RighLick_Delay_GoCue=(self.B_RightLickTime >= CurrentDelay_GoCue[0]) &  (self.B_RightLickTime < CurrentDelay_GoCue[1])
+            Ind_LeftLick_GoCue_NextStart=(self.B_LeftLickTime >= CurrentGoCue_NextStart[0]) &  (self.B_LeftLickTime < CurrentGoCue_NextStart[1])
+            Ind_RighLick_GoCue_NextStart=(self.B_RightLickTime >= CurrentGoCue_NextStart[0]) &  (self.B_RightLickTime < CurrentGoCue_NextStart[1])
+            Ind_LeftLick_GoCue_GoCue1=(self.B_LeftLickTime >= CurrentGoCue_GoCue1[0]) &  (self.B_LeftLickTime < CurrentGoCue_GoCue1[1])
+            Ind_RighLick_GoCue_GoCue1=(self.B_RightLickTime >= CurrentGoCue_GoCue1[0]) &  (self.B_RightLickTime < CurrentGoCue_GoCue1[1])
 
-        # finish trial
-        # current block length
-        # reward trial number of this block
-        # overall reward rate
+            self.Start_Delay_LeftLicks.append(sum(Ind_LeftLick_Start_Delay))
+            self.Start_Delay_RightLicks.append(sum(Ind_RighLick_Start_Delay))
+            self.Delay_GoCue_LeftLicks.append(sum(Ind_LeftLick_Delay_GoCue))
+            self.Delay_GoCue_RightLicks.append(sum(Ind_RighLick_Delay_GoCue))
+            self.GoCue_NextStart_LeftLicks.append(sum(Ind_LeftLick_GoCue_NextStart))
+            self.GoCue_NextStart_RightLicks.append(sum(Ind_RighLick_GoCue_NextStart))
+            self.GoCue_GoCue1_LeftLicks.append(sum(Ind_LeftLick_GoCue_GoCue1))
+            self.GoCue_GoCue1_RightLicks.append(sum(Ind_RighLick_GoCue_GoCue1))
+            # double dipping
+            self.B_LeftLickTime[Ind_LeftLick_Start_Delay]+self.B_RightLickTime[Ind_RighLick_Start_Delay]
+                       
+
+
+    def _ForagingEfficiency(self):
+        pass
+
+    def _ShowInformation(self):
+        '''Show session/trial related information in the information section'''
+        # show reward pairs and current reward probability
+        try:
+            if (self.TP_Task in ['Coupled Baiting','Coupled Without Baiting']):
+                self.win.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.B_RewardProHistory[:,self.B_CurrentTrialN],2)))
+            elif (self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']):
+                self.win.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProbPoolUncoupled,2))+'\n\n'+'Current pair: '+str(np.round(self.B_RewardProHistory[:,self.B_CurrentTrialN],2)))
+        except:
+            print('Can not show reward pairs')
+        # show basic session statistics
+        if self.B_CurrentTrialN>=0:
+            self.win.ShowBasic.setText('\nCurrent trial: ' + str(self.B_CurrentTrialN+1)+'\n\n'
+                                       'Current left block: ' + str(self.BS_CurrentBlockTrialN[0]) + '\\' +  str(self.BS_CurrentBlockLen[0])+'\n'
+                                       'Current right block: ' + str(self.BS_CurrentBlockTrialN[1]) + '\\' +  str(self.BS_CurrentBlockLen[1])+'\n\n'
+                                       'Responded trial: ' + str(self.BS_FinisheTrialN) + '\\'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
+                                       'Reward Trial: ' + str(self.BS_RewardTrialN) + '\\' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
+                                       'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '\\' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
+                                       'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '\\' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n'
+                                       )
+
     def _CheckStop(self):
         '''Stop if there are many ingoral trials or if the maximam trial is exceeded MaxTrial'''
         StopIgnore=int(self.win.StopIgnores.text())-1
@@ -567,8 +633,7 @@ class GenerateTrials():
         self.B_DelayStartTime=np.append(self.B_DelayStartTime,DelayStartTime)
         self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime)
         self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,RewardOutcomeTime)
-        self.B_CurrentTrialN+=1
-    
+
     def _GiveLeft(self):
         '''manually give left water'''
         self.win.Channel.LeftValue(float(self.win.LeftValue.text())*1000*float(self.win.Multiplier.text())) 
