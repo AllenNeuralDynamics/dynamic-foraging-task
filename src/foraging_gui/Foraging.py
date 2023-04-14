@@ -755,7 +755,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             QApplication.processEvents()
             if self.ANewTrial==1 and self.ToGenerateATrial==1 and self.Start.isChecked(): #and GeneratedTrials.GeneFinish==1: \
                 self.ANewTrial=0 # can start a new trial when we receive the trial end signal from Bonsai
-                print(GeneratedTrials.B_CurrentTrialN)     
+                GeneratedTrials.B_CurrentTrialN+=1
+                print('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))     
                 #initiate the generated trial
                 GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
                 #get the response of the animal using a different thread
@@ -768,9 +769,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 GeneratedTrials.GeneFinish=0
                 self.ToGenerateATrial=0
                 if self.test==1:
-                    self.threadpool4.start(workerGenerateAtrial)
-                else:
+                    self.ToGenerateATrial=1
                     GeneratedTrials._GenerateATrial(self.Channel4)
+                else:
+                    self.threadpool4.start(workerGenerateAtrial)
     def _OptogeneticsB(self):
         ''' optogenetics control in the main window'''
         if self.OptogeneticsB.currentText()=='on':
