@@ -161,6 +161,10 @@ class GenerateTrials():
                 RewardProbPool=RewardProbPool.reshape(int(RewardProbPool.size/self.B_LickPortN),self.B_LickPortN)
             # get the reward probabilities of the current block
             self.B_CurrentRewardProb=RewardProbPool[random.choice(range(np.shape(RewardProbPool)[0]))]
+            # forced change of block identity (L->R; R->L)
+            if self.B_RewardProHistory.shape[1]>0:
+                if (self.B_CurrentRewardProb[0]>self.B_CurrentRewardProb[1])==(self.B_RewardProHistory[0,-1]>self.B_RewardProHistory[1,-1]):
+                    self.B_CurrentRewardProb=self.B_CurrentRewardProb[::-1]
             # randomly draw a block length between Min and Max
             self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta),1)+float(self.TP_BlockMin)))
             if self.BlockLen>float(self.TP_BlockMax):
