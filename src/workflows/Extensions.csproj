@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Bonsai.Core" Version="2.7.1" />
+    <PackageReference Include="Bonsai.Osc" Version="2.7.0" />
   </ItemGroup>
 
 </Project>
