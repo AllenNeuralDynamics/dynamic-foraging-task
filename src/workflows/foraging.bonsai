@@ -1008,65 +1008,86 @@
                 </Edges>
               </Workflow>
             </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>RewardDeliveryLeft</Name>
-            </Expression>
-            <Expression xsi:type="cf:BehaviorCommand">
-              <cf:Type>ToggleOutput</cf:Type>
-              <cf:Mask>Poke0Valve</cf:Mask>
-            </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>BehaviorCommands</Name>
-            </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>RewardDeliveryRight</Name>
-            </Expression>
-            <Expression xsi:type="cf:BehaviorCommand">
-              <cf:Type>ToggleOutput</cf:Type>
-              <cf:Mask>Poke1Valve</cf:Mask>
-            </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>BehaviorCommands</Name>
-            </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>ManualWater_Left</Name>
-            </Expression>
-            <Expression xsi:type="cf:BehaviorCommand">
-              <cf:Type>ToggleOutput</cf:Type>
-              <cf:Mask>Poke0Valve</cf:Mask>
-            </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>BehaviorCommands</Name>
-            </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>ManualWater_Right</Name>
-            </Expression>
-            <Expression xsi:type="cf:BehaviorCommand">
-              <cf:Type>ToggleOutput</cf:Type>
-              <cf:Mask>Poke1Valve</cf:Mask>
-            </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>BehaviorCommands</Name>
-            </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>LeftValueSize</Name>
-            </Expression>
-            <Expression xsi:type="cf:BehaviorCommand">
-              <cf:Type>PulsePeriod</cf:Type>
-              <cf:Mask>Poke0Valve</cf:Mask>
-            </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>BehaviorCommands</Name>
-            </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>RightValueSize</Name>
-            </Expression>
-            <Expression xsi:type="cf:BehaviorCommand">
-              <cf:Type>PulsePeriod</cf:Type>
-              <cf:Mask>Poke1Valve</cf:Mask>
-            </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>BehaviorCommands</Name>
+            <Expression xsi:type="GroupWorkflow">
+              <Name>RewardControl</Name>
+              <Workflow>
+                <Nodes>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>RewardDeliveryLeft</Name>
+                  </Expression>
+                  <Expression xsi:type="cf:BehaviorCommand">
+                    <cf:Type>ToggleOutput</cf:Type>
+                    <cf:Mask>Poke0Valve</cf:Mask>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>BehaviorCommands</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>RewardDeliveryRight</Name>
+                  </Expression>
+                  <Expression xsi:type="cf:BehaviorCommand">
+                    <cf:Type>ToggleOutput</cf:Type>
+                    <cf:Mask>Poke1Valve</cf:Mask>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>BehaviorCommands</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>ManualWater_Left</Name>
+                  </Expression>
+                  <Expression xsi:type="cf:BehaviorCommand">
+                    <cf:Type>ToggleOutput</cf:Type>
+                    <cf:Mask>Poke0Valve</cf:Mask>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>BehaviorCommands</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>ManualWater_Right</Name>
+                  </Expression>
+                  <Expression xsi:type="cf:BehaviorCommand">
+                    <cf:Type>ToggleOutput</cf:Type>
+                    <cf:Mask>Poke1Valve</cf:Mask>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>BehaviorCommands</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>LeftValueSize</Name>
+                  </Expression>
+                  <Expression xsi:type="cf:BehaviorCommand">
+                    <cf:Type>PulsePeriod</cf:Type>
+                    <cf:Mask>Poke0Valve</cf:Mask>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>BehaviorCommands</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>RightValueSize</Name>
+                  </Expression>
+                  <Expression xsi:type="cf:BehaviorCommand">
+                    <cf:Type>PulsePeriod</cf:Type>
+                    <cf:Mask>Poke1Valve</cf:Mask>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>BehaviorCommands</Name>
+                  </Expression>
+                </Nodes>
+                <Edges>
+                  <Edge From="0" To="1" Label="Source1" />
+                  <Edge From="1" To="2" Label="Source1" />
+                  <Edge From="3" To="4" Label="Source1" />
+                  <Edge From="4" To="5" Label="Source1" />
+                  <Edge From="6" To="7" Label="Source1" />
+                  <Edge From="7" To="8" Label="Source1" />
+                  <Edge From="9" To="10" Label="Source1" />
+                  <Edge From="10" To="11" Label="Source1" />
+                  <Edge From="12" To="13" Label="Source1" />
+                  <Edge From="13" To="14" Label="Source1" />
+                  <Edge From="15" To="16" Label="Source1" />
+                  <Edge From="16" To="17" Label="Source1" />
+                </Edges>
+              </Workflow>
             </Expression>
             <Expression xsi:type="SubscribeSubject">
               <Name>Start</Name>
@@ -1156,12 +1177,6 @@
             <Expression xsi:type="MulticastSubject">
               <Name>BehaviorCommands</Name>
             </Expression>
-            <Expression xsi:type="rx:BehaviorSubject" TypeArguments="sys:Boolean">
-              <rx:Name>GoCue</rx:Name>
-            </Expression>
-            <Expression xsi:type="rx:BehaviorSubject" TypeArguments="sys:Boolean">
-              <rx:Name>DelayStart</rx:Name>
-            </Expression>
             <Expression xsi:type="rx:PublishSubject" TypeArguments="sys:Object">
               <rx:Name>TrialEnd</rx:Name>
             </Expression>
@@ -1171,40 +1186,34 @@
             <Expression xsi:type="rx:PublishSubject" TypeArguments="sys:Object">
               <rx:Name>RewardDeliveryRight</rx:Name>
             </Expression>
+            <Expression xsi:type="rx:PublishSubject" TypeArguments="sys:Boolean">
+              <rx:Name>GoCue</rx:Name>
+            </Expression>
+            <Expression xsi:type="rx:PublishSubject" TypeArguments="sys:Boolean">
+              <rx:Name>DelayStart</rx:Name>
+            </Expression>
           </Nodes>
           <Edges>
-            <Edge From="2" To="3" Label="Source1" />
             <Edge From="3" To="4" Label="Source1" />
+            <Edge From="4" To="5" Label="Source1" />
             <Edge From="5" To="6" Label="Source1" />
             <Edge From="6" To="7" Label="Source1" />
-            <Edge From="8" To="9" Label="Source1" />
+            <Edge From="7" To="8" Label="Source1" />
             <Edge From="9" To="10" Label="Source1" />
+            <Edge From="10" To="11" Label="Source1" />
             <Edge From="11" To="12" Label="Source1" />
             <Edge From="12" To="13" Label="Source1" />
-            <Edge From="14" To="15" Label="Source1" />
+            <Edge From="13" To="14" Label="Source1" />
             <Edge From="15" To="16" Label="Source1" />
+            <Edge From="16" To="17" Label="Source1" />
             <Edge From="17" To="18" Label="Source1" />
             <Edge From="18" To="19" Label="Source1" />
-            <Edge From="20" To="21" Label="Source1" />
+            <Edge From="19" To="20" Label="Source1" />
             <Edge From="21" To="22" Label="Source1" />
             <Edge From="22" To="23" Label="Source1" />
             <Edge From="23" To="24" Label="Source1" />
             <Edge From="24" To="25" Label="Source1" />
-            <Edge From="26" To="27" Label="Source1" />
-            <Edge From="27" To="28" Label="Source1" />
-            <Edge From="28" To="29" Label="Source1" />
-            <Edge From="29" To="30" Label="Source1" />
-            <Edge From="30" To="31" Label="Source1" />
-            <Edge From="32" To="33" Label="Source1" />
-            <Edge From="33" To="34" Label="Source1" />
-            <Edge From="34" To="35" Label="Source1" />
-            <Edge From="35" To="36" Label="Source1" />
-            <Edge From="36" To="37" Label="Source1" />
-            <Edge From="38" To="39" Label="Source1" />
-            <Edge From="39" To="40" Label="Source1" />
-            <Edge From="40" To="41" Label="Source1" />
-            <Edge From="41" To="42" Label="Source1" />
-            <Edge From="42" To="43" Label="Source1" />
+            <Edge From="25" To="26" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
