@@ -3,7 +3,6 @@
                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                  xmlns:scr="clr-namespace:Bonsai.Scripting.Expressions;assembly=Bonsai.Scripting.Expressions"
                  xmlns:rx="clr-namespace:Bonsai.Reactive;assembly=Bonsai.Core"
-                 xmlns:ipy="clr-namespace:Bonsai.Scripting.IronPython;assembly=Bonsai.Scripting.IronPython"
                  xmlns:harp="clr-namespace:Bonsai.Harp;assembly=Bonsai.Harp"
                  xmlns:wie="clr-namespace:Bonsai.Windows.Input;assembly=Bonsai.Windows.Input"
                  xmlns:cf="clr-namespace:Bonsai.Harp.CF;assembly=Bonsai.Harp.CF"
@@ -11,6 +10,7 @@
                  xmlns:osc="clr-namespace:Bonsai.Osc;assembly=Bonsai.Osc"
                  xmlns:al="clr-namespace:Bonsai.Audio;assembly=Bonsai.Audio"
                  xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                 xmlns:ipy="clr-namespace:Bonsai.Scripting.IronPython;assembly=Bonsai.Scripting.IronPython"
                  xmlns:dsp="clr-namespace:Bonsai.Dsp;assembly=Bonsai.Dsp"
                  xmlns:mx="clr-namespace:Bonsai.DAQmx;assembly=Bonsai.DAQmx"
                  xmlns="https://bonsai-rx.org/2018/workflow">
@@ -23,7 +23,7 @@
         <Name>ResponseTime</Name>
       </Expression>
       <Expression xsi:type="scr:ExpressionTransform">
-        <scr:Expression>TimeSpan.fromSeconds(it)</scr:Expression>
+        <scr:Expression>TimeSpan.FromSeconds(it)</scr:Expression>
       </Expression>
       <Expression xsi:type="PropertyMapping">
         <PropertyMappings>
@@ -34,7 +34,7 @@
         <Name>ITI</Name>
       </Expression>
       <Expression xsi:type="scr:ExpressionTransform">
-        <scr:Expression>TimeSpan.fromSeconds(it)</scr:Expression>
+        <scr:Expression>TimeSpan.FromSeconds(it)</scr:Expression>
       </Expression>
       <Expression xsi:type="PropertyMapping">
         <PropertyMappings>
@@ -48,20 +48,10 @@
             <Expression xsi:type="WorkflowInput">
               <Name>Source1</Name>
             </Expression>
-            <Expression xsi:type="ipy:PythonSelectMany">
-              <ipy:Name>StartATrial</ipy:Name>
-              <ipy:Script>import random
-
-@returns(bool)
-def process(value):
-
-  if value ==1:
-     v = True
-  else:
-     v = False
-
-  yield v
-</ipy:Script>
+            <Expression xsi:type="Equal">
+              <Operand xsi:type="IntProperty">
+                <Value>1</Value>
+              </Operand>
             </Expression>
             <Expression xsi:type="rx:Condition">
               <Workflow>
@@ -102,7 +92,7 @@ def process(value):
         <Name>DelayTime</Name>
       </Expression>
       <Expression xsi:type="scr:ExpressionTransform">
-        <scr:Expression>TimeSpan.fromSeconds(it)</scr:Expression>
+        <scr:Expression>TimeSpan.FromSeconds(it)</scr:Expression>
       </Expression>
       <Expression xsi:type="PropertyMapping">
         <PropertyMappings>
