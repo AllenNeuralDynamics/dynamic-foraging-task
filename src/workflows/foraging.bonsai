@@ -566,16 +566,18 @@ def process(value):
             <Expression xsi:type="rx:BehaviorSubject" TypeArguments="harp:HarpMessage">
               <rx:Name>BehaviorCommands</rx:Name>
             </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="harp:Device">
-                <harp:DeviceState>Active</harp:DeviceState>
-                <harp:DumpRegisters>true</harp:DumpRegisters>
-                <harp:LedState>On</harp:LedState>
-                <harp:VisualIndicators>On</harp:VisualIndicators>
-                <harp:Heartbeat>Disable</harp:Heartbeat>
-                <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                <harp:PortName>COM4</harp:PortName>
-              </Combinator>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="harp:Device">
+                  <harp:DeviceState>Active</harp:DeviceState>
+                  <harp:DumpRegisters>true</harp:DumpRegisters>
+                  <harp:LedState>On</harp:LedState>
+                  <harp:VisualIndicators>On</harp:VisualIndicators>
+                  <harp:Heartbeat>Disable</harp:Heartbeat>
+                  <harp:IgnoreErrors>false</harp:IgnoreErrors>
+                  <harp:PortName>COM4</harp:PortName>
+                </Combinator>
+              </Builder>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
               <Name>BehaviorEvents</Name>
@@ -3060,6 +3062,12 @@ def process(value):
             </Edges>
           </Workflow>
         </Builder>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="io:StartProcess">
+          <io:FileName>../../allen_env/scripts/python.exe</io:FileName>
+          <io:Arguments>../foraging_gui/Foraging.py</io:Arguments>
+        </Combinator>
       </Expression>
     </Nodes>
     <Edges>
