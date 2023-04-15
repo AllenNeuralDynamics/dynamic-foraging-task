@@ -328,7 +328,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             print(traceback.format_exc())
     def closeEvent(self, event):
         self._StopCurrentSession() # stop the current session first
-        reply = QMessageBox.question(self, 'Foraging Close', 'Do you want to save the result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+        reply = QMessageBox.question(self, 'Foraging Close', 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
             self._Save()
             event.accept()
@@ -353,7 +353,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         else:
             event.ignore()
     def _Exit(self):
-        response = QMessageBox.question(self,'Save and Exit:', "Do you want to save the result?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
+        response = QMessageBox.question(self,'Save and Exit:', "Do you want to save the current result?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
         if response==QMessageBox.Yes:
             self._Save()
             self.close()
@@ -505,6 +505,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _Open(self):
         self._StopCurrentSession() # stop current session first
         SaveFolder=self.default_saveFolder+self.AnimalName.text()+'\\'
+        self.NewSession.setChecked(True)
+        Reply=self._NewSession()
+        if Reply == QMessageBox.Yes or Reply == QMessageBox.No:
+            self.NewSession.setDisabled(True) # You must start a NewSession after loading a new file, and you can't continue that session
+        elif Reply == QMessageBox.Cancel:
+            return
+        
         if not os.path.exists(SaveFolder):
             fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior files (*.mat)")
         else:
@@ -512,10 +519,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         if fname:
             Obj = loadmat(fname)
             self.Obj = Obj
-            self.NewSession.setDisabled(False)
-            self.NewSession.setChecked(False)
-            self.NewSession.click() # click the NewSession button to trigger the save dialog
-            self.NewSession.setDisabled(True) # You must start a NewSession after loading a new file, and you can't continue that session
             widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
             widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
             widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))})  # update optogenetics parameters from the loaded file
@@ -556,6 +559,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 # Catch the exception and print error information
                 print("An error occurred:")
                 print(traceback.format_exc())
+        else:
+            self.NewSession.setDisabled(False)
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
@@ -584,6 +589,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.GeneratedTrials.B_TrialEndTime=self.GeneratedTrials.B_TrialEndTime[0]
         self.GeneratedTrials.B_GoCueTime=self.GeneratedTrials.B_GoCueTime[0]
         self.GeneratedTrials.B_RewardOutcomeTime=self.GeneratedTrials.B_RewardOutcomeTime[0]
+        #self.GeneratedTrials._GenerateATrial(self.Channel4)
 
         PlotM=PlotV(win=self,GeneratedTrials=self.GeneratedTrials,width=5, height=4)
         layout=self.Visualization.layout()
@@ -625,7 +631,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.NextBlock.setStyleSheet("background-color : none")
     def _NewSession(self):
         if self.NewSession.isChecked():
-            reply = QMessageBox.question(self, 'New Session:', 'Do you want to save the result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+            reply = QMessageBox.question(self, 'New Session:', 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
             if reply == QMessageBox.Yes:
                 self.NewSession.setStyleSheet("background-color : green;")
                 self.Start.setStyleSheet("background-color : none")
@@ -643,9 +649,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 pass
         else:
             self.NewSession.setStyleSheet("background-color : none")
+            reply=QMessageBox.Cancel
+        return reply
 
     def _AskSave(self):
-        reply = QMessageBox.question(self, 'New Session:', 'Do you want to save the result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+        reply = QMessageBox.question(self, 'New Session:', 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
             self._Save()
             print('Saved')
