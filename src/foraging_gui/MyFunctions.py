@@ -465,7 +465,7 @@ class GenerateTrials():
                 self.Stop=0
                 self.win.WarningLabelStop.setText('')
                 self.win.WarningLabelStop.setStyleSheet("color: gray;")
-        elif self.B_CurrentTrialN>MaxTrial: 
+        if self.B_CurrentTrialN>MaxTrial: 
             self.Stop=1
             self.win.WarningLabelStop.setText('Stop because maximum trials exceed or equal: '+self.TP_MaxTrial)
             self.win.WarningLabelStop.setStyleSheet("color: red;")
