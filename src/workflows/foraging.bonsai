@@ -593,7 +593,7 @@
                 <wie:SuppressRepetitions>false</wie:SuppressRepetitions>
               </Combinator>
             </Expression>
-            <Expression xsi:type="rx:BehaviorSubject">
+            <Expression xsi:type="rx:PublishSubject">
               <Name>LeftKeyPress</Name>
             </Expression>
             <Expression xsi:type="Combinator">
@@ -607,7 +607,7 @@
                 <wie:SuppressRepetitions>false</wie:SuppressRepetitions>
               </Combinator>
             </Expression>
-            <Expression xsi:type="rx:BehaviorSubject">
+            <Expression xsi:type="rx:PublishSubject">
               <Name>RightKeyPress</Name>
             </Expression>
             <Expression xsi:type="Combinator">
