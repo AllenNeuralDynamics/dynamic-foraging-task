@@ -530,7 +530,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 for key in widget_dict.keys():
                     if key in Obj:
                         widget = widget_dict[key]
-                        value=Obj[key]
+                        try: # load the paramter used by last trial
+                            value=np.array([Obj['TP_'+key][-2]])
+                        except:
+                            value=Obj[key]
                         if len(value)==0:
                             value=np.array([''], dtype='<U1')
                         if isinstance(widget, QtWidgets.QLineEdit):
