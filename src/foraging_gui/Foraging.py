@@ -122,7 +122,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def keyPressEvent(self, event=None):
         '''Enter press to allow change of parameters'''
         # Get the parameters before change
-        if hasattr(self, 'GeneratedTrials'):
+        if hasattr(self, 'GeneratedTrials') and self.ToInitializeVisual==0: # use the current GUI paramters when no session starts running
             Parameters=self.GeneratedTrials
         else:
             Parameters=self
@@ -144,10 +144,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         continue
                     child.setStyleSheet('color: black;')
                     child.setStyleSheet('background-color: white;')
-                    if child.objectName()=='AnimalName' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
-                        continue
                     if child.objectName()=='AnimalName' and child.text()=='':
                         child.setText(getattr(Parameters, 'TP_'+child.objectName()))
+                        continue
+                    if child.objectName()=='AnimalName' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
                         continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
