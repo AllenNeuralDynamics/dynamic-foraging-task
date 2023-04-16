@@ -516,7 +516,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         if not os.path.exists(SaveFolder):
             fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior files (*.mat)")
         else:
-            fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder+'\\'+self.AnimalName.text()+'\\', "Behavior files (*.mat)")
+            fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior files (*.mat)")
+            #fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder+'\\'+self.AnimalName.text()+'\\', "Behavior files (*.mat)")
         if fname:
             Obj = loadmat(fname)
             self.Obj = Obj
