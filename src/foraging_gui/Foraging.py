@@ -144,10 +144,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         continue
                     child.setStyleSheet('color: black;')
                     child.setStyleSheet('background-color: white;')
-                    if child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
+                    if child.objectName()=='AnimalName' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
                         continue
                     if child.objectName()=='AnimalName' and child.text()=='':
                         child.setText(getattr(Parameters, 'TP_'+child.objectName()))
+                        continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
                         if Correct ==0: # incorrect format; don't change
