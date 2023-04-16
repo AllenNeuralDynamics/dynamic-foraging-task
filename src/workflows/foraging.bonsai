@@ -703,12 +703,24 @@
               <Property Name="Value" />
             </Expression>
             <Expression xsi:type="Combinator">
-              <Combinator xsi:type="StringProperty" />
+              <Combinator xsi:type="StringProperty">
+                <Value>C:\Data</Value>
+              </Combinator>
             </Expression>
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="rx:Take">
                 <rx:Count>1</rx:Count>
               </Combinator>
+            </Expression>
+            <Expression xsi:type="scr:ExpressionTransform">
+              <scr:Expression>DateTime.Now.ToString("dd_MM_yyyy_HH_mm_ss")</scr:Expression>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="rx:Zip" />
+            </Expression>
+            <Expression xsi:type="Format">
+              <Format>{0}\{1}</Format>
+              <Selector>Item1,Item2</Selector>
             </Expression>
             <Expression xsi:type="rx:AsyncSubject">
               <Name>RootPath</Name>
@@ -720,7 +732,7 @@
               <Name>RootPath</Name>
             </Expression>
             <Expression xsi:type="Format">
-              <Format>{0}/RewardOutcome.csv</Format>
+              <Format>{0}\RewardOutcome.csv</Format>
               <Selector>it</Selector>
             </Expression>
             <Expression xsi:type="PropertyMapping">
@@ -729,7 +741,7 @@
               </PropertyMappings>
             </Expression>
             <Expression xsi:type="io:CsvWriter">
-              <io:FileName>RewardOutcome.csv</io:FileName>
+              <io:FileName>C:\Data\16_04_2023_10_35_18\RewardOutcome.csv</io:FileName>
               <io:Append>false</io:Append>
               <io:Overwrite>true</io:Overwrite>
               <io:Suffix>None</io:Suffix>
@@ -778,7 +790,7 @@
               <rx:KeySelector>Address</rx:KeySelector>
             </Expression>
             <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogOscDemux.bonsai">
-              <LogName>FromBonsaiOSC</LogName>
+              <LogName>FromBonsaiOSC1</LogName>
             </Expression>
             <Expression xsi:type="SubscribeSubject">
               <Name>ToBonsaiOSC2</Name>
@@ -818,12 +830,14 @@
             <Edge From="0" To="1" Label="Source1" />
             <Edge From="1" To="2" Label="Source1" />
             <Edge From="2" To="3" Label="Source1" />
-            <Edge From="4" To="8" Label="Source1" />
+            <Edge From="2" To="4" Label="Source1" />
+            <Edge From="3" To="4" Label="Source2" />
+            <Edge From="4" To="5" Label="Source1" />
             <Edge From="5" To="6" Label="Source1" />
-            <Edge From="6" To="7" Label="Source1" />
-            <Edge From="7" To="8" Label="Source2" />
+            <Edge From="7" To="11" Label="Source1" />
+            <Edge From="8" To="9" Label="Source1" />
             <Edge From="9" To="10" Label="Source1" />
-            <Edge From="10" To="11" Label="Source1" />
+            <Edge From="10" To="11" Label="Source2" />
             <Edge From="12" To="13" Label="Source1" />
             <Edge From="13" To="14" Label="Source1" />
             <Edge From="15" To="16" Label="Source1" />
@@ -839,6 +853,8 @@
             <Edge From="30" To="31" Label="Source1" />
             <Edge From="31" To="32" Label="Source1" />
             <Edge From="33" To="34" Label="Source1" />
+            <Edge From="34" To="35" Label="Source1" />
+            <Edge From="36" To="37" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
