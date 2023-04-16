@@ -19,8 +19,9 @@ dynamic = ["version"]
 dependencies = [
     'numpy',
     'scipy',
+    'matplotlib',
     'PyQt5',
-    'pyOSC3'
+    'pandas'
 ]
 
 [tool.setuptools.packages.find]

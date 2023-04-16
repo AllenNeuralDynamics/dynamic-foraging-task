@@ -81,7 +81,7 @@ def process(value):
             </Expression>
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="rx:Delay">
-                <rx:DueTime>PT1S</rx:DueTime>
+                <rx:DueTime>PT1.096S</rx:DueTime>
               </Combinator>
             </Expression>
             <Expression xsi:type="WorkflowOutput" />
@@ -287,7 +287,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Equal">
                     <Operand xsi:type="StringProperty">
-                      <Value>NoReward</Value>
+                      <Value>Left</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -326,7 +326,7 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="NotEqual">
                     <Operand xsi:type="StringProperty">
-                      <Value>NoReward</Value>
+                      <Value>Left</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />

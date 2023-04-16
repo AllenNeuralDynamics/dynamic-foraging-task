@@ -1,0 +1,7 @@
+
+numpy
+scipy
+matplotlib
+PyQt5
+pandas
+git+https://github.com/glopesdev/pyosc3.git@master
