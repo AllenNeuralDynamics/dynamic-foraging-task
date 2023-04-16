@@ -624,7 +624,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>30</string>
+      <string>20</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_12">
@@ -822,7 +822,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>30</string>
+      <string>1</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_15">
@@ -866,7 +866,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>1</string>
+      <string>0</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_17">
@@ -1026,7 +1026,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>30</string>
+      <string>1</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_42">
@@ -1114,7 +1114,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>1</string>
+      <string>8</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_43">
