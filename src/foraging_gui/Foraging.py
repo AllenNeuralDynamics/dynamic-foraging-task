@@ -512,12 +512,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.NewSession.setDisabled(True) # You must start a NewSession after loading a new file, and you can't continue that session
         elif Reply == QMessageBox.Cancel:
             return
-        
-        if not os.path.exists(SaveFolder):
-            fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior files (*.mat)")
-        else:
-            fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior files (*.mat)")
-            #fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder+'\\'+self.AnimalName.text()+'\\', "Behavior files (*.mat)")
+
+        fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior files (*.mat)")
         if fname:
             Obj = loadmat(fname)
             self.Obj = Obj
@@ -636,7 +632,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.NextBlock.setStyleSheet("background-color : none")
     def _NewSession(self):
         if self.NewSession.isChecked():
-            reply = QMessageBox.question(self, 'New Session:', 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+            if self.ToInitializeVisual==0: # Do not ask to save when no session starts running
+                reply = QMessageBox.question(self, 'New Session:', 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+            else:
+                reply=QMessageBox.No
             if reply == QMessageBox.Yes:
                 self.NewSession.setStyleSheet("background-color : green;")
                 self.Start.setStyleSheet("background-color : none")
