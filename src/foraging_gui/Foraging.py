@@ -24,7 +24,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
-        self.default_saveFolder='E:\\DynamicForagingGUI\\Behavior\\'
+        self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
