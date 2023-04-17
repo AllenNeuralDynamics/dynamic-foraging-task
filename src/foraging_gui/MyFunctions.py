@@ -363,7 +363,6 @@ class GenerateTrials():
             self.DD_PerTrial_GoCue_GoCue1='nan'
 
         
-        
     def _GetDoubleDipping(self,LicksIndex):
         '''get the number of double dipping. e.g. 0 1 0 will result in 2 double dipping''' 
         DoubleDipping=np.sum(np.diff(LicksIndex)!=0)
@@ -487,7 +486,7 @@ class GenerateTrials():
             self.win.Start.setChecked(False)
     def _CheckAutoWater(self):
         '''Check if it should be an auto water trial'''
-        if self.win.AutoReward.isChecked:
+        if self.win.AutoReward.isChecked():
             UnrewardedN=int(self.TP_Unrewarded)
             IgnoredN=int(self.TP_Ignored)
             if np.shape(self.B_AnimalResponseHistory)[0]>=IgnoredN or np.shape(self.B_RewardedHistory[0])[0]>=UnrewardedN:
