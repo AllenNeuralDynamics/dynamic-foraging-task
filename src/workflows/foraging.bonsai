@@ -85,7 +85,7 @@
               </Combinator>
             </Expression>
             <Expression xsi:type="osc:ReceiveMessage">
-              <osc:Address>/</osc:Address>
+              <osc:Address />
               <osc:TypeTag />
               <osc:Connection>BonsaiOSC</osc:Connection>
             </Expression>
@@ -93,7 +93,7 @@
               <Name>FromBonsaiOSC</Name>
             </Expression>
             <Expression xsi:type="osc:ReceiveMessage">
-              <osc:Address>/</osc:Address>
+              <osc:Address />
               <osc:TypeTag />
               <osc:Connection>BonsaiOSC2</osc:Connection>
             </Expression>
@@ -101,7 +101,7 @@
               <Name>FromBonsaiOSC2</Name>
             </Expression>
             <Expression xsi:type="osc:ReceiveMessage">
-              <osc:Address>/</osc:Address>
+              <osc:Address />
               <osc:TypeTag />
               <osc:Connection>BonsaiOSC4</osc:Connection>
             </Expression>
@@ -109,7 +109,7 @@
               <Name>FromBonsaiOSC4</Name>
             </Expression>
             <Expression xsi:type="osc:ReceiveMessage">
-              <osc:Address>/</osc:Address>
+              <osc:Address />
               <osc:TypeTag />
               <osc:Connection>BonsaiOSC3</osc:Connection>
             </Expression>
@@ -121,28 +121,28 @@
             </Expression>
             <Expression xsi:type="osc:SendMessage">
               <osc:Connection>BonsaiOSC</osc:Connection>
-              <osc:Address>/</osc:Address>
+              <osc:Address />
             </Expression>
             <Expression xsi:type="rx:PublishSubject" TypeArguments="osc:Message">
               <rx:Name>ToBonsaiOSC2</rx:Name>
             </Expression>
             <Expression xsi:type="osc:SendMessage">
               <osc:Connection>BonsaiOSC2</osc:Connection>
-              <osc:Address>/</osc:Address>
+              <osc:Address />
             </Expression>
             <Expression xsi:type="rx:PublishSubject" TypeArguments="osc:Message">
               <rx:Name>ToBonsaiOSC3</rx:Name>
             </Expression>
             <Expression xsi:type="osc:SendMessage">
               <osc:Connection>BonsaiOSC3</osc:Connection>
-              <osc:Address>/</osc:Address>
+              <osc:Address />
             </Expression>
             <Expression xsi:type="rx:PublishSubject" TypeArguments="osc:Message">
               <rx:Name>ToBonsaiOSC4</rx:Name>
             </Expression>
             <Expression xsi:type="osc:SendMessage">
               <osc:Connection>BonsaiOSC4</osc:Connection>
-              <osc:Address>/</osc:Address>
+              <osc:Address />
             </Expression>
           </Nodes>
           <Edges>
