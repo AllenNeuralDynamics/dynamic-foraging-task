@@ -191,6 +191,10 @@ class GenerateTrials():
                     # exclude the previous reward probabilities
                     if self.B_RewardProHistory.size!=0:
                         RewardProbPool=RewardProbPool[RewardProbPool!=self.B_RewardProHistory[i,-1]]
+                    # exclude pairs with small reward size (temporarily)
+                    if i==1:
+                        if self.B_CurrentRewardProb[0]==0.1:
+                            RewardProbPool=RewardProbPool[RewardProbPool!=0.1]
                     # get the reward probabilities of the current block
                     self.B_CurrentRewardProb[i]=RewardProbPool[random.choice(range(np.shape(RewardProbPool)[0]))]
                     # randomly draw a block length between Min and Max
