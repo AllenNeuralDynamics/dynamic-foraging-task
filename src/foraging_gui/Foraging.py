@@ -25,6 +25,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         super().__init__(parent)
         self.setupUi(self)
         self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
+        self.default_saveFolder='E:\\DynamicForagingGUI\\BehaviorData\\'
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
@@ -46,6 +47,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._Optogenetics() # open the optogenetics panel
         self._LaserCalibration() # to open the laser calibration panel
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
+        self.WaterPerRewardedTrial=0.005 
         self._ShowRewardPairs() # show reward pairs
         self._GetTrainingParameters() # get initial training parameters
         self.connectSignalsSlots()
@@ -107,6 +109,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
+        self.TotalWater.textChanged.connect(self._SuggestedWater)
         self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
@@ -147,7 +150,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     if child.objectName()=='AnimalName' and child.text()=='':
                         child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
-                    if child.objectName()=='AnimalName' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
+                    if child.objectName()=='TotalWater' or child.objectName()=='AnimalName' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
                         continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
@@ -258,6 +261,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 return 0
         else:
             return 1
+        
+    def _SuggestedWater(self):
+        '''Change suggested water based on total water'''
+        try:
+            self.T_SuggestedWater=float(self.TotalWater.text())-float(self.GeneratedTrials.BS_TotalReward)
+            self.SuggestedWater.setText(str(np.round(self.T_SuggestedWater,3)))
+        except:
+            self.SuggestedWater.setText(self.TotalWater.text())
 
     def _GetTrainingParameters(self):
         '''Get training parameters'''

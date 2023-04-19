@@ -245,6 +245,7 @@ class GenerateTrials():
         self.BS_FinisheTrialN=np.sum(self.B_AnimalResponseHistory!=2)
         self.BS_RespondedRate=self.BS_FinisheTrialN/self.BS_AllTrialN
         self.BS_RewardTrialN=np.sum(self.B_RewardedHistory==True)
+        self.BS_TotalReward=float(self.BS_RewardTrialN)*float(self.win.WaterPerRewardedTrial)
         self.BS_LeftRewardTrialN=np.sum(self.B_RewardedHistory[0]==True)
         self.BS_RightRewardTrialN=np.sum(self.B_RewardedHistory[1]==True)
         self.BS_LeftChoiceN=np.sum(self.B_AnimalResponseHistory==0)
@@ -263,6 +264,10 @@ class GenerateTrials():
         Len=np.shape(self.B_RewardedHistory)[1]
         self.BS_RewardedTrialN_CurrentLeftBlock=np.sum(self.B_RewardedHistory[0][(Len-self.BS_CurrentBlockTrialN[0]+1):]==True)
         self.BS_RewardedTrialN_CurrentRightBlock=np.sum(self.B_RewardedHistory[1][(Len-self.BS_CurrentBlockTrialN[1]+1):]==True)
+        # update suggested reward
+        if self.win.TotalWater.text()!='':
+            self.B_SuggestedWater=float(self.win.TotalWater.text())-float(self.BS_TotalReward)
+            self.win.SuggestedWater.setText(str(self.B_SuggestedWater))
         # early licking rate
         # double dipping 
         # foraging efficiency
@@ -396,6 +401,7 @@ class GenerateTrials():
         self.win.Other_BasicTitle='Current trial: ' + str(self.B_CurrentTrialN+1)
         self.win.infor.setTitle(self.win.Other_inforTitle)
         self.win.Basic.setTitle(self.win.Other_BasicTitle)
+
         # show basic session statistics    
         if self.B_CurrentTrialN>=0 and self.B_CurrentTrialN<1:
             self.win.ShowBasic.setText(   
@@ -403,6 +409,7 @@ class GenerateTrials():
                                         'Current right block: ' + str(self.BS_CurrentBlockTrialN[1]) + '/' +  str(self.BS_CurrentBlockLen[1])+'\n\n'
                                         'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                                         'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
+                                        'Total Reward (ml): '+ str(self.BS_RewardTrialN) + '*' + str(self.win.WaterPerRewardedTrial) + '='+str(np.round(self.BS_TotalReward,3)) +'\n'
                                         'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
                                         'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n'
                                         )
@@ -412,6 +419,7 @@ class GenerateTrials():
                                        'Current right block: ' + str(self.BS_CurrentBlockTrialN[1]) + '/' +  str(self.BS_CurrentBlockLen[1])+'\n\n'
                                        'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                                        'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
+                                       'Total Reward (ml): '+ str(self.BS_RewardTrialN) + '*' + str(self.win.WaterPerRewardedTrial) + '='+str(np.round(self.BS_TotalReward,3)) +'\n'
                                        'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
                                        'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n\n'
                                        
@@ -435,6 +443,7 @@ class GenerateTrials():
                                        'Current right block: ' + str(self.BS_CurrentBlockTrialN[1]) + '/' +  str(self.BS_CurrentBlockLen[1])+'\n\n'
                                        'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                                        'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
+                                       'Total Reward (ml): '+ str(self.BS_RewardTrialN) + '*' + str(self.win.WaterPerRewardedTrial) + '='+str(np.round(self.BS_TotalReward,3)) +'\n'
                                        'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
                                        'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n\n'
                                        
