@@ -2663,7 +2663,7 @@ def process(value):
                     <osc:Address>/LeftValueSize</osc:Address>
                     <osc:TypeTag>f</osc:TypeTag>
                   </Expression>
-                  <Expression xsi:type="rx:PublishSubject">
+                  <Expression xsi:type="rx:BehaviorSubject">
                     <Name>LeftValueSize</Name>
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
@@ -2733,7 +2733,7 @@ def process(value):
                     <osc:Address>/ITI</osc:Address>
                     <osc:TypeTag>f</osc:TypeTag>
                   </Expression>
-                  <Expression xsi:type="rx:PublishSubject">
+                  <Expression xsi:type="rx:BehaviorSubject">
                     <Name>ITI</Name>
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
@@ -2743,7 +2743,7 @@ def process(value):
                     <osc:Address>/DelayTime</osc:Address>
                     <osc:TypeTag>f</osc:TypeTag>
                   </Expression>
-                  <Expression xsi:type="rx:PublishSubject">
+                  <Expression xsi:type="rx:BehaviorSubject">
                     <Name>DelayTime</Name>
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
@@ -2753,7 +2753,7 @@ def process(value):
                     <osc:Address>/ResponseTime</osc:Address>
                     <osc:TypeTag>f</osc:TypeTag>
                   </Expression>
-                  <Expression xsi:type="rx:PublishSubject">
+                  <Expression xsi:type="rx:BehaviorSubject">
                     <Name>ResponseTime</Name>
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
