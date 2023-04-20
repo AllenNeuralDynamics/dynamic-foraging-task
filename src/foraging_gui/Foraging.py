@@ -1,4 +1,4 @@
-import sys, os,traceback
+import sys, os,traceback,json
 import numpy as np
 from datetime import date,timedelta,datetime
 from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout,QLineEdit,QWidget,QSizePolicy
@@ -24,8 +24,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
-        self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
-        self.default_saveFolder='E:\\DynamicForagingGUI\\BehaviorData\\'
+        self.SettingFile=os.path.join(os.path.expanduser("~"), "Documents")+'\\'+'ForagingSettings\\ForagingSettings.json'
+        try:
+            # Open the JSON settings file
+            with open(self.SettingFile, 'r') as f:
+                Settings = json.load(f)
+            self.default_saveFolder=Settings['default_saveFolder']
+        except:
+            self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
