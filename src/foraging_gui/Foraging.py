@@ -25,6 +25,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         super().__init__(parent)
         self.setupUi(self)
         self.SettingFile=os.path.join(os.path.expanduser("~"), "Documents")+'\\'+'ForagingSettings\\ForagingSettings.json'
+
         try:
             # Open the JSON settings file
             with open(self.SettingFile, 'r') as f:
@@ -32,6 +33,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.default_saveFolder=Settings['default_saveFolder']
         except:
             self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
+        
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
