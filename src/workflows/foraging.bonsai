@@ -16,11 +16,13 @@
                  xmlns="https://bonsai-rx.org/2018/workflow">
   <Workflow>
     <Nodes>
-      <Expression xsi:type="Combinator">
-        <Combinator xsi:type="io:StartProcess">
-          <io:FileName>../../allen_env/scripts/python.exe</io:FileName>
-          <io:Arguments>../foraging_gui/Foraging.py</io:Arguments>
-        </Combinator>
+      <Expression xsi:type="Disable">
+        <Builder xsi:type="Combinator">
+          <Combinator xsi:type="io:StartProcess">
+            <io:FileName>/d/Anaconda3/envs/ForagingInstallTest3/python</io:FileName>
+            <io:Arguments>/e/GitHub/dynamic-foraging-task/src/foraging_gui/Foraging.py</io:Arguments>
+          </Combinator>
+        </Builder>
       </Expression>
       <Expression xsi:type="GroupWorkflow">
         <Name>Init</Name>
@@ -221,7 +223,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:Delay">
-                      <rx:DueTime>PT1S</rx:DueTime>
+                      <rx:DueTime>PT1.994S</rx:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -339,7 +341,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:Timer">
-                      <rx:DueTime>PT2S</rx:DueTime>
+                      <rx:DueTime>PT1S</rx:DueTime>
                       <rx:Period>PT0S</rx:Period>
                     </Combinator>
                   </Expression>
@@ -501,7 +503,7 @@
                     <Workflow>
                       <Nodes>
                         <Expression xsi:type="SubscribeSubject">
-                          <Name>IsLeftRewarded</Name>
+                          <Name>IsRightRewarded</Name>
                         </Expression>
                         <Expression xsi:type="rx:Condition">
                           <Workflow>
@@ -517,7 +519,7 @@
                           </Workflow>
                         </Expression>
                         <Expression xsi:type="MulticastSubject">
-                          <Name>RewardDeliveryLeft</Name>
+                          <Name>RewardDeliveryRight</Name>
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="StringProperty">
@@ -747,7 +749,7 @@
               </PropertyMappings>
             </Expression>
             <Expression xsi:type="io:CsvWriter">
-              <io:FileName>C:\Data\20_04_2023_16_41_54\RewardOutcome.csv</io:FileName>
+              <io:FileName>C:\Data\20_04_2023_15_56_05\RewardOutcome.csv</io:FileName>
               <io:Append>false</io:Append>
               <io:Overwrite>true</io:Overwrite>
               <io:Suffix>None</io:Suffix>
@@ -2517,18 +2519,16 @@ def process(value):
             <Expression xsi:type="rx:BehaviorSubject" TypeArguments="harp:HarpMessage">
               <rx:Name>BehaviorCommands</rx:Name>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="harp:Device">
-                  <harp:DeviceState>Active</harp:DeviceState>
-                  <harp:DumpRegisters>true</harp:DumpRegisters>
-                  <harp:LedState>On</harp:LedState>
-                  <harp:VisualIndicators>On</harp:VisualIndicators>
-                  <harp:Heartbeat>Disable</harp:Heartbeat>
-                  <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                  <harp:PortName>COM4</harp:PortName>
-                </Combinator>
-              </Builder>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="harp:Device">
+                <harp:DeviceState>Active</harp:DeviceState>
+                <harp:DumpRegisters>true</harp:DumpRegisters>
+                <harp:LedState>On</harp:LedState>
+                <harp:VisualIndicators>On</harp:VisualIndicators>
+                <harp:Heartbeat>Disable</harp:Heartbeat>
+                <harp:IgnoreErrors>false</harp:IgnoreErrors>
+                <harp:PortName>COM4</harp:PortName>
+              </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
               <Name>BehaviorEvents</Name>
@@ -2828,7 +2828,7 @@ def process(value):
                     <Name>FromBonsaiOSC</Name>
                   </Expression>
                   <Expression xsi:type="osc:Parse">
-                    <osc:Address>/RightValueSize</osc:Address>
+                    <osc:Address>/Location2Size</osc:Address>
                     <osc:TypeTag>i</osc:TypeTag>
                   </Expression>
                   <Expression xsi:type="rx:PublishSubject">
@@ -2958,7 +2958,7 @@ def process(value):
                     <Name>FromBonsaiOSC3</Name>
                   </Expression>
                   <Expression xsi:type="osc:Parse">
-                    <osc:Address>/ManualWater_Right</osc:Address>
+                    <osc:Address>/ManualWater_Left</osc:Address>
                     <osc:TypeTag>i</osc:TypeTag>
                   </Expression>
                   <Expression xsi:type="rx:PublishSubject">
@@ -2968,7 +2968,7 @@ def process(value):
                     <Name>FromBonsaiOSC3</Name>
                   </Expression>
                   <Expression xsi:type="osc:Parse">
-                    <osc:Address>/ManualWater_Left</osc:Address>
+                    <osc:Address>/ManualWater_Right</osc:Address>
                     <osc:TypeTag>i</osc:TypeTag>
                   </Expression>
                   <Expression xsi:type="rx:PublishSubject">
