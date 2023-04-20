@@ -543,6 +543,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
             try:
                 for key in widget_dict.keys():
                     if key in Obj:
+                        # skip some keys
+                        if key=='ExtraWater':
+                            self.ExtraWater.setText('')
+                            continue
                         widget = widget_dict[key]
                         try: # load the paramter used by last trial
                             value=np.array([Obj['TP_'+key][-2]])

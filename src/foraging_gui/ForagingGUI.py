@@ -1117,7 +1117,7 @@ class Ui_ForagingGUI(object):
         self.WeightAfter.setText("")
         self.WeightAfter.setObjectName("WeightAfter")
         self.label_23 = QtWidgets.QLabel(self.groupBox_2)
-        self.label_23.setGeometry(QtCore.QRect(150, 70, 81, 20))
+        self.label_23.setGeometry(QtCore.QRect(140, 70, 91, 20))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
