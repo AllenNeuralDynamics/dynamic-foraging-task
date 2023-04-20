@@ -1,14 +1,6 @@
-import sys
-import time
-
-#sys.path.append('E:\BonsaiBehavior-master\BonsaiBehavior-master\DynamicForaging_v4')
 import rigcontrol
-from datetime import datetime
-from pyOSC3.OSC3 import OSCStreamingClient
+from pyOSC3.OSC3 import OSCStreamingClient, OSCMessage
 
-
-def default_handler(address, *args):
-    print(f"DEFAULT {address}: {args}")
 
 ip = "127.0.0.1"
 request_port = 4002
@@ -21,22 +13,24 @@ request_port = 4003
 client2 = OSCStreamingClient()  # Create client
 client2.connect((ip, request_port))
 rig2 = rigcontrol.RigClient(client2)
+print("Starting....")
 
-rig.Left_Bait(0)
 rig.Right_Bait(0)
 rig.ITI(1.0)
 rig.DelayTime(1.0)
 rig.ResponseTime(2.0)
 rig.start(1)
 
-a=rig.receive()
-b=rig.receive()
-e=rig2.receive()
-f=rig2.receive()
-print(a)
 
-if a[1]=='ErrorRight':
-    print(1)
+rig.client.sendOSC(OSCMessage("/StartTest", "StartPlease"))
+
+a = rig.receive()
+b = rig.receive()
+e = rig2.receive()
+f = rig2.receive()
+
+if a[1] == 0:
+    rig.client.sendOSC(OSCMessage("/EndTest", "EndPlease"))
+
 client.close()
 client2.close()
-
