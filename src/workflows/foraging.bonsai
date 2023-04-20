@@ -26,23 +26,23 @@
         <Name>Init</Name>
         <Workflow>
           <Nodes>
-            <Expression xsi:type="rx:PublishSubject" TypeArguments="sys:Object">
-              <rx:Name>TrialEnd</rx:Name>
-            </Expression>
-            <Expression xsi:type="rx:PublishSubject" TypeArguments="sys:Object">
-              <rx:Name>RewardDeliveryLeft</rx:Name>
-            </Expression>
-            <Expression xsi:type="rx:PublishSubject" TypeArguments="sys:Object">
-              <rx:Name>RewardDeliveryRight</rx:Name>
-            </Expression>
-            <Expression xsi:type="rx:PublishSubject" TypeArguments="sys:Boolean">
-              <rx:Name>GoCue</rx:Name>
-            </Expression>
-            <Expression xsi:type="rx:PublishSubject" TypeArguments="sys:Boolean">
-              <rx:Name>DelayStart</rx:Name>
-            </Expression>
             <Expression xsi:type="rx:BehaviorSubject" TypeArguments="sys:String">
               <rx:Name>RewardOutcome</rx:Name>
+            </Expression>
+            <Expression xsi:type="rx:BehaviorSubject" TypeArguments="sys:Object">
+              <rx:Name>RewardDeliveryLeft</rx:Name>
+            </Expression>
+            <Expression xsi:type="rx:BehaviorSubject" TypeArguments="sys:Object">
+              <rx:Name>RewardDeliveryRight</rx:Name>
+            </Expression>
+            <Expression xsi:type="rx:BehaviorSubject" TypeArguments="sys:Object">
+              <rx:Name>TrialEnd</rx:Name>
+            </Expression>
+            <Expression xsi:type="rx:BehaviorSubject" TypeArguments="sys:Boolean">
+              <rx:Name>DelayStart</rx:Name>
+            </Expression>
+            <Expression xsi:type="rx:BehaviorSubject" TypeArguments="sys:Boolean">
+              <rx:Name>GoCue</rx:Name>
             </Expression>
           </Nodes>
           <Edges />
@@ -334,7 +334,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:Timer">
-                      <rx:DueTime>PT1S</rx:DueTime>
+                      <rx:DueTime>PT2S</rx:DueTime>
                       <rx:Period>PT0S</rx:Period>
                     </Combinator>
                   </Expression>
@@ -741,7 +741,7 @@
               </PropertyMappings>
             </Expression>
             <Expression xsi:type="io:CsvWriter">
-              <io:FileName>C:\Data\16_04_2023_10_35_18\RewardOutcome.csv</io:FileName>
+              <io:FileName>C:\Data\20_04_2023_16_41_54\RewardOutcome.csv</io:FileName>
               <io:Append>false</io:Append>
               <io:Overwrite>true</io:Overwrite>
               <io:Suffix>None</io:Suffix>
