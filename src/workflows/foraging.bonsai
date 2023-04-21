@@ -18,11 +18,13 @@
                  xmlns="https://bonsai-rx.org/2018/workflow">
   <Workflow>
     <Nodes>
-      <Expression xsi:type="Combinator">
-        <Combinator xsi:type="io:StartProcess">
-          <io:FileName>../../allen_env/scripts/python.exe</io:FileName>
-          <io:Arguments>"C:\Users\neurogears\Documents\git\AllenND\raw_workflow\dynamic-foraging-task\src\foraging_gui\Foraging.py"</io:Arguments>
-        </Combinator>
+      <Expression xsi:type="Disable">
+        <Builder xsi:type="Combinator">
+          <Combinator xsi:type="io:StartProcess">
+            <io:FileName>../../allen_env/scripts/python.exe</io:FileName>
+            <io:Arguments>"C:\Users\neurogears\Documents\git\AllenND\raw_workflow\dynamic-foraging-task\src\foraging_gui\Foraging.py"</io:Arguments>
+          </Combinator>
+        </Builder>
       </Expression>
       <Expression xsi:type="GroupWorkflow">
         <Name>Init</Name>
@@ -223,7 +225,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:Delay">
-                      <rx:DueTime>PT3.334S</rx:DueTime>
+                      <rx:DueTime>PT2.069S</rx:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -749,7 +751,7 @@
               </PropertyMappings>
             </Expression>
             <Expression xsi:type="io:CsvWriter">
-              <io:FileName>C:\Data\21_04_2023_19_40_12\RewardOutcome.csv</io:FileName>
+              <io:FileName>C:\Data\21_04_2023_12_06_40\RewardOutcome.csv</io:FileName>
               <io:Append>false</io:Append>
               <io:Overwrite>true</io:Overwrite>
               <io:Suffix>None</io:Suffix>
@@ -3074,27 +3076,6 @@ def process(value):
                     <Name>Timestamps</Name>
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
-                    <Name>LeftLickTime</Name>
-                  </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:WithLatestFrom" />
-                  </Expression>
-                  <Expression xsi:type="MemberSelector">
-                    <Selector>Item2</Selector>
-                  </Expression>
-                  <Expression xsi:type="scr:ExpressionTransform">
-                    <scr:Expression>new(it as Seconds)</scr:Expression>
-                  </Expression>
-                  <Expression xsi:type="osc:Format">
-                    <osc:Address>/LeftLickTime</osc:Address>
-                  </Expression>
-                  <Expression xsi:type="MulticastSubject">
-                    <Name>ToBonsaiOSC2</Name>
-                  </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>Timestamps</Name>
-                  </Expression>
-                  <Expression xsi:type="SubscribeSubject">
                     <Name>RightLickTime</Name>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -3132,27 +3113,6 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="MulticastSubject">
                     <Name>ToBonsaiOSC2</Name>
-                  </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>RewardOutcome</Name>
-                  </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>Timestamps</Name>
-                  </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:WithLatestFrom" />
-                  </Expression>
-                  <Expression xsi:type="MemberSelector">
-                    <Selector>Item2</Selector>
-                  </Expression>
-                  <Expression xsi:type="scr:ExpressionTransform">
-                    <scr:Expression>new(it as Seconds)</scr:Expression>
-                  </Expression>
-                  <Expression xsi:type="osc:Format">
-                    <osc:Address>/RewardOutcome</osc:Address>
-                  </Expression>
-                  <Expression xsi:type="MulticastSubject">
-                    <Name>ToBonsaiOSC</Name>
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
                     <Name>Timestamps</Name>
@@ -3275,7 +3235,7 @@ def process(value):
                     <scr:Expression>new(it as Seconds)</scr:Expression>
                   </Expression>
                   <Expression xsi:type="osc:Format">
-                    <osc:Address>/LeftKeyPressTime</osc:Address>
+                    <osc:Address>/LeftLickTime</osc:Address>
                   </Expression>
                   <Expression xsi:type="MulticastSubject">
                     <Name>ToBonsaiOSC2</Name>
@@ -3296,7 +3256,7 @@ def process(value):
                     <scr:Expression>new(it as Seconds)</scr:Expression>
                   </Expression>
                   <Expression xsi:type="osc:Format">
-                    <osc:Address>/RightKeyPressTime</osc:Address>
+                    <osc:Address>/RightLickTime</osc:Address>
                   </Expression>
                   <Expression xsi:type="MulticastSubject">
                     <Name>ToBonsaiOSC2</Name>
@@ -3343,6 +3303,13 @@ def process(value):
                   <Expression xsi:type="MulticastSubject">
                     <Name>ToBonsaiOSC2</Name>
                   </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>RewardOutcome</Name>
+                  </Expression>
+                  <Expression xsi:type="osc:SendMessage">
+                    <osc:Connection>BonsaiOSC</osc:Connection>
+                    <osc:Address>/RewardOutcome</osc:Address>
+                  </Expression>
                 </Nodes>
                 <Edges>
                   <Edge From="0" To="2" Label="Source2" />
@@ -3363,8 +3330,8 @@ def process(value):
                   <Edge From="17" To="18" Label="Source1" />
                   <Edge From="18" To="19" Label="Source1" />
                   <Edge From="19" To="20" Label="Source1" />
-                  <Edge From="21" To="23" Label="Source1" />
-                  <Edge From="22" To="23" Label="Source2" />
+                  <Edge From="21" To="23" Label="Source2" />
+                  <Edge From="22" To="23" Label="Source1" />
                   <Edge From="23" To="24" Label="Source1" />
                   <Edge From="24" To="25" Label="Source1" />
                   <Edge From="25" To="26" Label="Source1" />
@@ -3411,18 +3378,7 @@ def process(value):
                   <Edge From="73" To="74" Label="Source1" />
                   <Edge From="74" To="75" Label="Source1" />
                   <Edge From="75" To="76" Label="Source1" />
-                  <Edge From="77" To="79" Label="Source2" />
-                  <Edge From="78" To="79" Label="Source1" />
-                  <Edge From="79" To="80" Label="Source1" />
-                  <Edge From="80" To="81" Label="Source1" />
-                  <Edge From="81" To="82" Label="Source1" />
-                  <Edge From="82" To="83" Label="Source1" />
-                  <Edge From="84" To="86" Label="Source2" />
-                  <Edge From="85" To="86" Label="Source1" />
-                  <Edge From="86" To="87" Label="Source1" />
-                  <Edge From="87" To="88" Label="Source1" />
-                  <Edge From="88" To="89" Label="Source1" />
-                  <Edge From="89" To="90" Label="Source1" />
+                  <Edge From="77" To="78" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
