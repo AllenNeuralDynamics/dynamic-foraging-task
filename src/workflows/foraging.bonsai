@@ -13,16 +13,16 @@
                  xmlns:harp="clr-namespace:Bonsai.Harp;assembly=Bonsai.Harp"
                  xmlns:wie="clr-namespace:Bonsai.Windows.Input;assembly=Bonsai.Windows.Input"
                  xmlns:dsp="clr-namespace:Bonsai.Dsp;assembly=Bonsai.Dsp"
+                 xmlns:p1="clr-namespace:Bonsai.Design;assembly=Bonsai.Design"
+                 xmlns:viz="clr-namespace:Bonsai.Design.Visualizers;assembly=Bonsai.Design.Visualizers"
                  xmlns="https://bonsai-rx.org/2018/workflow">
   <Workflow>
     <Nodes>
-      <Expression xsi:type="Disable">
-        <Builder xsi:type="Combinator">
+      <Expression xsi:type="Combinator">
           <Combinator xsi:type="io:StartProcess">
-            <io:FileName>/d/Anaconda3/envs/ForagingInstallTest3/python</io:FileName>
-            <io:Arguments>/e/GitHub/dynamic-foraging-task/src/foraging_gui/Foraging.py</io:Arguments>
+          <io:FileName>../../allen_env/scripts/python.exe</io:FileName>
+          <io:Arguments>../foraging_gui/Foraging.py</io:Arguments>
           </Combinator>
-        </Builder>
       </Expression>
       <Expression xsi:type="GroupWorkflow">
         <Name>Init</Name>
@@ -118,28 +118,28 @@
             <Expression xsi:type="rx:PublishSubject">
               <Name>FromBonsaiOSC3</Name>
             </Expression>
-            <Expression xsi:type="rx:PublishSubject" TypeArguments="osc:Message">
+            <Expression xsi:type="rx:BehaviorSubject" TypeArguments="osc:Message">
               <rx:Name>ToBonsaiOSC</rx:Name>
             </Expression>
             <Expression xsi:type="osc:SendMessage">
               <osc:Connection>BonsaiOSC</osc:Connection>
               <osc:Address />
             </Expression>
-            <Expression xsi:type="rx:PublishSubject" TypeArguments="osc:Message">
+            <Expression xsi:type="rx:BehaviorSubject" TypeArguments="osc:Message">
               <rx:Name>ToBonsaiOSC2</rx:Name>
             </Expression>
             <Expression xsi:type="osc:SendMessage">
               <osc:Connection>BonsaiOSC2</osc:Connection>
               <osc:Address />
             </Expression>
-            <Expression xsi:type="rx:PublishSubject" TypeArguments="osc:Message">
+            <Expression xsi:type="rx:BehaviorSubject" TypeArguments="osc:Message">
               <rx:Name>ToBonsaiOSC3</rx:Name>
             </Expression>
             <Expression xsi:type="osc:SendMessage">
               <osc:Connection>BonsaiOSC3</osc:Connection>
               <osc:Address />
             </Expression>
-            <Expression xsi:type="rx:PublishSubject" TypeArguments="osc:Message">
+            <Expression xsi:type="rx:BehaviorSubject" TypeArguments="osc:Message">
               <rx:Name>ToBonsaiOSC4</rx:Name>
             </Expression>
             <Expression xsi:type="osc:SendMessage">
@@ -3439,6 +3439,119 @@ def process(value):
             </Edges>
           </Workflow>
         </Builder>
+      </Expression>
+      <Expression xsi:type="GroupWorkflow">
+        <Name>Debug</Name>
+        <Workflow>
+          <Nodes>
+            <Expression xsi:type="GroupWorkflow">
+              <Name>ToOsc</Name>
+              <Workflow>
+                <Nodes>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>ToBonsaiOSC</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>ToBonsaiOSC2</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>ToBonsaiOSC3</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>ToBonsaiOSC4</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:Merge" />
+                  </Expression>
+                  <Expression xsi:type="WorkflowOutput" />
+                </Nodes>
+                <Edges>
+                  <Edge From="0" To="4" Label="Source4" />
+                  <Edge From="1" To="4" Label="Source3" />
+                  <Edge From="2" To="4" Label="Source2" />
+                  <Edge From="3" To="4" Label="Source1" />
+                  <Edge From="4" To="5" Label="Source1" />
+                </Edges>
+              </Workflow>
+            </Expression>
+            <Expression xsi:type="VisualizerMapping">
+              <VisualizerType xsi:type="TypeMapping" TypeArguments="p1:ObjectTextVisualizer" />
+            </Expression>
+            <Expression xsi:type="GroupWorkflow">
+              <Name>FromOsc</Name>
+              <Workflow>
+                <Nodes>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>FromBonsaiOSC</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>FromBonsaiOSC2</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>FromBonsaiOSC3</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>FromBonsaiOSC4</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:Merge" />
+                  </Expression>
+                  <Expression xsi:type="WorkflowOutput" />
+                </Nodes>
+                <Edges>
+                  <Edge From="0" To="4" Label="Source4" />
+                  <Edge From="1" To="4" Label="Source3" />
+                  <Edge From="2" To="4" Label="Source2" />
+                  <Edge From="3" To="4" Label="Source1" />
+                  <Edge From="4" To="5" Label="Source1" />
+                </Edges>
+              </Workflow>
+            </Expression>
+            <Expression xsi:type="VisualizerMapping">
+              <VisualizerType xsi:type="TypeMapping" TypeArguments="p1:ObjectTextVisualizer" />
+            </Expression>
+            <Expression xsi:type="viz:TableLayoutPanelBuilder">
+              <viz:ColumnCount>2</viz:ColumnCount>
+              <viz:RowCount>1</viz:RowCount>
+              <viz:ColumnStyles />
+              <viz:RowStyles />
+              <viz:CellSpans />
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>Timestamps</Name>
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>DelayStart</Name>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="rx:WithLatestFrom" />
+            </Expression>
+            <Expression xsi:type="MemberSelector">
+              <Selector>Item2</Selector>
+            </Expression>
+            <Expression xsi:type="scr:ExpressionTransform">
+              <scr:Expression>new(it as Seconds)</scr:Expression>
+            </Expression>
+            <Expression xsi:type="osc:Format">
+              <osc:Address>/DelayStartTime</osc:Address>
+            </Expression>
+            <Expression xsi:type="MulticastSubject">
+              <Name>ToBonsaiOSC</Name>
+            </Expression>
+          </Nodes>
+          <Edges>
+            <Edge From="0" To="1" Label="Source1" />
+            <Edge From="1" To="4" Label="Source2" />
+            <Edge From="2" To="3" Label="Source1" />
+            <Edge From="3" To="4" Label="Source1" />
+            <Edge From="5" To="7" Label="Source2" />
+            <Edge From="6" To="7" Label="Source1" />
+            <Edge From="7" To="8" Label="Source1" />
+            <Edge From="8" To="9" Label="Source1" />
+            <Edge From="9" To="10" Label="Source1" />
+            <Edge From="10" To="11" Label="Source1" />
+          </Edges>
+        </Workflow>
       </Expression>
     </Nodes>
     <Edges />
