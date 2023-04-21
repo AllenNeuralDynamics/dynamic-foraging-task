@@ -8,30 +8,14 @@
   <Workflow>
     <Nodes>
       <Expression xsi:type="ExternalizedMapping">
-        <Property Name="EventName" />
         <Property Name="InputStream" />
         <Property Name="TargetStream" />
+        <Property Name="Address" />
       </Expression>
       <Expression xsi:type="rx:Defer">
         <Name>EventOscFormatter</Name>
         <Workflow>
           <Nodes>
-            <Expression xsi:type="ExternalizedMapping">
-              <Property Name="Value" DisplayName="EventName" />
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="StringProperty">
-                <Value>DelayStartTime</Value>
-              </Combinator>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:Take">
-                <rx:Count>1</rx:Count>
-              </Combinator>
-            </Expression>
-            <Expression xsi:type="rx:AsyncSubject">
-              <Name>Address</Name>
-            </Expression>
             <Expression xsi:type="SubscribeSubject">
               <Name>Timestamps</Name>
             </Expression>
@@ -39,7 +23,7 @@
               <Property Name="Name" DisplayName="InputStream" />
             </Expression>
             <Expression xsi:type="SubscribeSubject">
-              <Name>DelayStart</Name>
+              <Name>Start</Name>
             </Expression>
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="rx:WithLatestFrom" />
@@ -50,23 +34,14 @@
             <Expression xsi:type="scr:ExpressionTransform">
               <scr:Expression>new(it as Seconds)</scr:Expression>
             </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>Address</Name>
-            </Expression>
-            <Expression xsi:type="Format">
-              <Format>/{0}</Format>
-              <Selector>it</Selector>
-            </Expression>
-            <Expression xsi:type="PropertyMapping">
-              <PropertyMappings>
-                <Property Name="Address" />
-              </PropertyMappings>
-            </Expression>
-            <Expression xsi:type="osc:Format">
-              <osc:Address>/</osc:Address>
-            </Expression>
             <Expression xsi:type="ExternalizedMapping">
               <Property Name="Name" DisplayName="TargetStream" />
+            </Expression>
+            <Expression xsi:type="ExternalizedMapping">
+              <Property Name="Address" />
+            </Expression>
+            <Expression xsi:type="osc:Format">
+              <osc:Address>/TrialStartTime</osc:Address>
             </Expression>
             <Expression xsi:type="MulticastSubject">
               <Name>ToBonsaiOSC</Name>
@@ -74,21 +49,16 @@
             <Expression xsi:type="WorkflowOutput" />
           </Nodes>
           <Edges>
-            <Edge From="0" To="1" Label="Source1" />
+            <Edge From="0" To="3" Label="Source2" />
             <Edge From="1" To="2" Label="Source1" />
             <Edge From="2" To="3" Label="Source1" />
-            <Edge From="4" To="7" Label="Source2" />
-            <Edge From="5" To="6" Label="Source1" />
-            <Edge From="6" To="7" Label="Source1" />
-            <Edge From="7" To="8" Label="Source1" />
+            <Edge From="3" To="4" Label="Source1" />
+            <Edge From="4" To="5" Label="Source1" />
+            <Edge From="5" To="8" Label="Source1" />
+            <Edge From="6" To="9" Label="Source2" />
+            <Edge From="7" To="8" Label="Source2" />
             <Edge From="8" To="9" Label="Source1" />
-            <Edge From="9" To="13" Label="Source1" />
-            <Edge From="10" To="11" Label="Source1" />
-            <Edge From="11" To="12" Label="Source1" />
-            <Edge From="12" To="13" Label="Source2" />
-            <Edge From="13" To="15" Label="Source1" />
-            <Edge From="14" To="15" Label="Source2" />
-            <Edge From="15" To="16" Label="Source1" />
+            <Edge From="9" To="10" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
