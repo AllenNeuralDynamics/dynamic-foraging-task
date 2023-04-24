@@ -14,6 +14,16 @@ from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,Manip
 from MyFunctions import GenerateTrials, Worker
 import warnings
 warnings.filterwarnings("ignore")
+
+import json 
+
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
+
+
 #import subprocess
 #import h5py
 #from scipy import stats
@@ -24,7 +34,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
-        self.default_saveFolder='E:\\DynamicForagingGUI\\Behavior\\'
+        self.default_saveFolder= r'E:\DynamicForagingGUI\Behavior'
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
@@ -424,8 +434,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
    
     def _Save(self):
         self._StopCurrentSession() # stop the current session first
-        if self.WeightBefore.text()=='' or self.WeightAfter.text()=='' or self.ExtraWater.text()=='':
-            response = QMessageBox.question(self,'Save without weight or extra water:', "Do you want to save without weight or extra water information provided?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
+        if self.WeightBefore.text() =='' or self.WeightAfter.text()=='' or self.ExtraWater.text()=='':
+            response = QMessageBox.question(self,'Save without weight or extra water:', 
+                                            "Do you want to save without weight or extra water information provided?", 
+                                            QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
             if response==QMessageBox.Yes:
                 pass
                 self.WarningLabel.setText('Saving without weight or extra water!')
@@ -434,31 +446,26 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 return
             elif response==QMessageBox.Cancel:
                 return
-        # this should be improved in the future. Need to get the last LeftRewardDeliveryTime and RightRewardDeliveryTime
-        if hasattr(self, 'GeneratedTrials'):
-            self.GeneratedTrials._GetLicks(self.Channel2)
-        SaveFile=self.default_saveFolder+self.AnimalName.text()+'\\'+self.AnimalName.text()+'_'+str(date.today())+'.mat'
-        SaveFolder=self.default_saveFolder+self.AnimalName.text()+'\\'
-        if not os.path.exists(SaveFolder):
-            os.makedirs(SaveFolder)
-            print(f"Created new folder: {SaveFolder}")
+        
+        ParamsFile = os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.json')
+        DataFile = os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.mat')
+        if not os.path.exists(os.path.dirname(ParamsFile)):
+            os.makedirs(os.path.dirname(ParamsFile))
+            print(f"Created new folder: {os.path.dirname(ParamsFile)}")
         N=0
         while 1:
-            if os.path.isfile(SaveFile):
+            if os.path.isfile(ParamsFile):
                 N=N+1
-                SaveFile=self.default_saveFolder+self.AnimalName.text()+'\\'+self.AnimalName.text()+'_'+str(date.today())+'_'+str(N)+'.mat'
+                ParamsFile= os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_{N}.json')
+                DataFile = os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_{N}.mat')
             else:
                 break
-        self.SaveFile = QFileDialog.getSaveFileName(self, 'Save File',SaveFile)[0]
-        if self.SaveFile == '':
+        self.ParamsFile = QFileDialog.getSaveFileName(self, 'Save File', ParamsFile)[0]
+        if self.ParamsFile == '':
             self.WarningLabel.setText('Discard saving!')
             self.WarningLabel.setStyleSheet("color: red;")
-        if self.SaveFile != '':
-            if hasattr(self, 'GeneratedTrials'):
-                if hasattr(self.GeneratedTrials, 'Obj'):
-                    Obj=self.GeneratedTrials.Obj
-            else:
-                Obj={}
+        if self.ParamsFile != '':
+            Obj={}
             # save training parameters
             for child in self.centralwidget.findChildren(QtWidgets.QTextEdit):
                 Obj[child.objectName()]=child.toPlainText()
@@ -479,20 +486,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     Obj[child.objectName()]=child.text()
                 for child in self.LaserCalibration_dialog.findChildren(QtWidgets.QComboBox):
                     Obj[child.objectName()]=child.currentText()
-            # save behavor events
-            if hasattr(self, 'GeneratedTrials'):
-                # Do something if self has the GeneratedTrials attribute
-                # Iterate over all attributes of the GeneratedTrials object
-                for attr_name in dir(self.GeneratedTrials):
-                    if attr_name.startswith('B_'):
-                        if attr_name=='B_RewardFamilies':
-                            pass
-                        else:
-                            Obj[attr_name] = getattr(self.GeneratedTrials, attr_name)
-            # save other events, e.g. session start time
-            for attr_name in dir(self):
-                if attr_name.startswith('Other_'):
-                    Obj[attr_name] = getattr(self, attr_name)
+        
             # save laser calibration results 
             if hasattr(self, 'LaserCalibration_dialog'):
                 # Do something if self has the GeneratedTrials attribute
@@ -500,18 +494,52 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 for attr_name in dir(self.LaserCalibration_dialog):
                     if attr_name.startswith('LCM_'):
                         Obj[attr_name] = getattr(self.LaserCalibration_dialog, attr_name)
-            savemat(self.SaveFile, Obj)           
+            
+            #savemat(self.SaveFile, Obj)  
+            with open(self.ParamsFile, "w") as outfile:
+                outfile.write(json.dumps(Obj, indent=4, cls=NumpyEncoder))     
+
+            # save behavor events to a separate file
+            if hasattr(self, 'GeneratedTrials'):
+
+                # this should be improved in the future. Need to get the last LeftRewardDeliveryTime and RightRewardDeliveryTime
+                self.GeneratedTrials._GetLicks(self.Channel2)
+                self.DataFile = DataFile
+
+                Obj2 = self.GeneratedTrials.Obj
+
+                # Do something if self has the GeneratedTrials attribute
+                # Iterate over all attributes of the GeneratedTrials object
+                for attr_name in dir(self.GeneratedTrials):
+                    if attr_name.startswith('B_'):
+                        if attr_name=='B_RewardFamilies':
+                            pass
+                        else:
+                            Obj2[attr_name] = getattr(self.GeneratedTrials, attr_name)
+
+                # save other events, e.g. session start time
+                for attr_name in dir(self):
+                    if attr_name.startswith('Other_'):
+                        Obj2[attr_name] = getattr(self, attr_name)
+
+                savemat(self.DataFile, Obj2)    
 
     def _Open(self):
         self._StopCurrentSession() # stop current session first
-        SaveFolder=self.default_saveFolder+self.AnimalName.text()+'\\'
+        SaveFolder = os.path.join(self.default_saveFolder, self.AnimalName.text())
         if not os.path.exists(SaveFolder):
-            fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior files (*.mat)")
+            fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior files (*.json)")
         else:
-            fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder+'\\'+self.AnimalName.text()+'\\', "Behavior files (*.mat)")
+            fname, _ = QFileDialog.getOpenFileName(self, 'Open file', os.path.join(self.default_saveFolder, self.AnimalName.text()), "Behavior files (*.json)")
         if fname:
-            Obj = loadmat(fname)
+            #Obj = loadmat(fname)
+
+            f = open (fname, "r")
+            Obj = json.loads(f.read())
+            f.close()
+
             self.Obj = Obj
+
             self.NewSession.setDisabled(False)
             self.NewSession.setChecked(False)
             self.NewSession.click() # click the NewSession button to trigger the save dialog
@@ -525,22 +553,32 @@ class Window(QMainWindow, Ui_ForagingGUI):
             try:
                 for key in widget_dict.keys():
                     if key in Obj:
+                        
                         widget = widget_dict[key]
                         value=Obj[key]
+
+                        print(f'{key} : {value}')
+
                         if len(value)==0:
                             value=np.array([''], dtype='<U1')
                         if isinstance(widget, QtWidgets.QLineEdit):
-                            widget.setText(value[-1])
+                            try:
+                                widget.setText(value)
+                            except TypeError:
+                                pass
                         elif isinstance(widget, QtWidgets.QComboBox):
-                            index = widget.findText(value[-1])
+                            index = widget.findText(value)
                             if index != -1:
                                 widget.setCurrentIndex(index)
                         elif isinstance(widget, QtWidgets.QDoubleSpinBox):
-                            widget.setValue(float(value[-1]))
+                            widget.setValue(float(value))
                         elif isinstance(widget, QtWidgets.QSpinBox):
-                            widget.setValue(int(value[-1]))
+                            widget.setValue(int(value))
                         elif isinstance(widget, QtWidgets.QTextEdit):
-                             widget.setText(value[-1])
+                            try:
+                                widget.setText(value)
+                            except TypeError:
+                                pass
                     else:
                         widget = widget_dict[key]
                         if not isinstance(widget, QtWidgets.QComboBox):
