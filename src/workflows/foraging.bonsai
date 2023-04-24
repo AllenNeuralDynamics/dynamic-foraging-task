@@ -2428,6 +2428,7 @@ def process(value):
               <Name>BehaviorEvents</Name>
             </Expression>
             <Expression xsi:type="beh:Parse">
+              <harp:MessageType>Write</harp:MessageType>
               <harp:Register xsi:type="beh:TimestampedOutputSet" />
             </Expression>
             <Expression xsi:type="MemberSelector">
@@ -2491,6 +2492,7 @@ def process(value):
               <Name>BehaviorEvents</Name>
             </Expression>
             <Expression xsi:type="beh:Parse">
+              <harp:MessageType>Write</harp:MessageType>
               <harp:Register xsi:type="beh:TimestampedOutputSet" />
             </Expression>
             <Expression xsi:type="MemberSelector">
@@ -2554,6 +2556,7 @@ def process(value):
               <Name>BehaviorEvents</Name>
             </Expression>
             <Expression xsi:type="beh:Parse">
+              <harp:MessageType>Write</harp:MessageType>
               <harp:Register xsi:type="beh:TimestampedOutputSet" />
             </Expression>
             <Expression xsi:type="MemberSelector">
@@ -2617,6 +2620,7 @@ def process(value):
               <Name>BehaviorEvents</Name>
             </Expression>
             <Expression xsi:type="beh:Parse">
+              <harp:MessageType>Write</harp:MessageType>
               <harp:Register xsi:type="beh:TimestampedOutputSet" />
             </Expression>
             <Expression xsi:type="MemberSelector">
