@@ -6,6 +6,9 @@ from itertools import accumulate
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import *
+
+import sys
+
 class GenerateTrials():
     def __init__(self,win):
         self.win=win
