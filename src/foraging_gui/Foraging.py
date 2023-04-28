@@ -21,9 +21,6 @@ warnings.filterwarnings("ignore")
 #from PyQt5.uic import loadUi
 #from threading import Event
 
-
-
-    
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.ndarray):
@@ -34,7 +31,6 @@ def dump_single_line(obj, fp):
     for key, value in obj.items():
         fp.write(json.dumps({key: value}, indent=None, cls=NumpyEncoder, separators=(',', ':')))
         fp.write('\n')
-
 
 class Window(QMainWindow, Ui_ForagingGUI):
     def __init__(self, parent=None):
@@ -543,9 +539,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 savemat(self.SaveFile, Obj) 
             elif self.SaveFile.endswith('.json'):
                 with open(self.SaveFile, "w") as outfile:
-                    #json.dump(Obj, outfile, indent=1, cls=NumpyEncoder,separators=(',', ': \n'))
-                    json.dump(Obj, outfile, indent=4,  cls=NumpyEncoder)
-                    #dump_single_line(Obj, outfile)
+                    json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
                       
     def _Open(self):
         self._StopCurrentSession() # stop current session first

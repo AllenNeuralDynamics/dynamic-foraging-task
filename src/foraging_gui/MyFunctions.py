@@ -783,19 +783,19 @@ class GenerateTrials():
 
         for i in range(6):
             Rec=Channel1.receive()
-            if Rec.address=='/TrialStartTime':
+            if Rec[0]=='/TrialStartTime':
                 TrialStartTime=Rec[1]
-            elif Rec.address=='/DelayStartTime':
+            elif Rec[0]=='/DelayStartTime':
                 DelayStartTime=Rec[1]
-            elif Rec.address=='/GoCueTime':
+            elif Rec[0]=='/GoCueTime':
                 # give auto water after Co cue
                 if self.CurrentAutoReward==1:
                     self._GiveLeft()
                     self._GiveRight()
                 self.B_GoCueTime=np.append(self.B_GoCueTime,Rec[1])
-            elif Rec.address=='/RewardOutcomeTime':
+            elif Rec[0]=='/RewardOutcomeTime':
                 RewardOutcomeTime=Rec[1]
-            elif Rec.address=='/RewardOutcome':
+            elif Rec[0]=='/RewardOutcome':
                 TrialOutcome=Rec[1]
                 if TrialOutcome=='NoResponse':
                     self.B_AnimalCurrentResponse=2
@@ -823,7 +823,7 @@ class GenerateTrials():
                     self.B_CurrentRewarded[1]=False
                 self.B_RewardedHistory=np.append(self.B_RewardedHistory,self.B_CurrentRewarded,axis=1)
                 self.B_AnimalResponseHistory=np.append(self.B_AnimalResponseHistory,self.B_AnimalCurrentResponse)
-            elif Rec.address=='/TrialEndTime':
+            elif Rec[0]=='/TrialEndTime':
                 TrialEndTime=Rec[1]
 
         # get the trial end time at the end of the trial
@@ -850,13 +850,13 @@ class GenerateTrials():
         #    time.sleep(0.01)
         while not Channel2.msgs.empty():
             Rec=Channel2.receive()
-            if Rec.address=='/LeftLickTime':
+            if Rec[0]=='/LeftLickTime':
                 self.B_LeftLickTime=np.append(self.B_LeftLickTime,Rec[1])
-            elif Rec.address=='/RightLickTime':
+            elif Rec[0]=='/RightLickTime':
                 self.B_RightLickTime=np.append(self.B_RightLickTime,Rec[1])
-            elif Rec.address=='/LeftRewardDeliveryTime':
+            elif Rec[0]=='/LeftRewardDeliveryTime':
                 self.B_LeftRewardDeliveryTime=np.append(self.B_LeftRewardDeliveryTime,Rec[1])
-            elif Rec.address=='/RightRewardDeliveryTime':
+            elif Rec[0]=='/RightRewardDeliveryTime':
                 self.B_RightRewardDeliveryTime=np.append(self.B_RightRewardDeliveryTime,Rec[1])
     def _DeletePreviousLicks(self,Channel2):
         '''Delete licks from the previous session'''
