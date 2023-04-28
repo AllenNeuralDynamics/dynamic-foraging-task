@@ -13,12 +13,28 @@ from Visualization import PlotV
 from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog
 from MyFunctions import GenerateTrials, Worker
 import warnings
+import json 
 warnings.filterwarnings("ignore")
 #import subprocess
 #import h5py
 #from scipy import stats
 #from PyQt5.uic import loadUi
 #from threading import Event
+
+
+
+    
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
+
+def dump_single_line(obj, fp):
+    for key, value in obj.items():
+        fp.write(json.dumps({key: value}, indent=None, cls=NumpyEncoder, separators=(',', ':')))
+        fp.write('\n')
+
 
 class Window(QMainWindow, Ui_ForagingGUI):
     def __init__(self, parent=None):
@@ -455,19 +471,22 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # this should be improved in the future. Need to get the last LeftRewardDeliveryTime and RightRewardDeliveryTime
         if hasattr(self, 'GeneratedTrials'):
             self.GeneratedTrials._GetLicks(self.Channel2)
-        SaveFile=self.default_saveFolder+self.AnimalName.text()+'\\'+self.AnimalName.text()+'_'+str(date.today())+'.mat'
-        SaveFolder=self.default_saveFolder+self.AnimalName.text()+'\\'
-        if not os.path.exists(SaveFolder):
-            os.makedirs(SaveFolder)
-            print(f"Created new folder: {SaveFolder}")
+        
+        #ParamsFile = os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.json')
+        SaveFileMat = os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.mat')
+        SaveFileJson= os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.json')
+        if not os.path.exists(os.path.dirname(SaveFileMat)):
+            os.makedirs(os.path.dirname(SaveFileMat))
+            print(f"Created new folder: {os.path.dirname(SaveFileMat)}")
         N=0
         while 1:
-            if os.path.isfile(SaveFile):
+            if os.path.isfile(SaveFileMat) or os.path.isfile(SaveFileJson):
                 N=N+1
-                SaveFile=self.default_saveFolder+self.AnimalName.text()+'\\'+self.AnimalName.text()+'_'+str(date.today())+'_'+str(N)+'.mat'
+                SaveFileMat=os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_{N}.mat')
+                SaveFileJson=os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_{N}.json')
             else:
                 break
-        self.SaveFile = QFileDialog.getSaveFileName(self, 'Save File',SaveFile)[0]
+        self.SaveFile = QFileDialog.getSaveFileName(self, 'Save File',SaveFileMat,"MAT files (*.mat);;JSON files (*.json)")[0]
         if self.SaveFile == '':
             self.WarningLabel.setText('Discard saving!')
             self.WarningLabel.setStyleSheet("color: red;")
@@ -518,8 +537,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 for attr_name in dir(self.LaserCalibration_dialog):
                     if attr_name.startswith('LCM_'):
                         Obj[attr_name] = getattr(self.LaserCalibration_dialog, attr_name)
-            savemat(self.SaveFile, Obj)           
-
+            # save Json or mat
+            if self.SaveFile.endswith('.mat'):
+            # Save data to a .mat file
+                savemat(self.SaveFile, Obj) 
+            elif self.SaveFile.endswith('.json'):
+                with open(self.SaveFile, "w") as outfile:
+                    #json.dump(Obj, outfile, indent=1, cls=NumpyEncoder,separators=(',', ': \n'))
+                    #json.dump(Obj, outfile, indent=4,  cls=NumpyEncoder)
+                    dump_single_line(Obj, outfile)
+                      
     def _Open(self):
         self._StopCurrentSession() # stop current session first
         SaveFolder=self.default_saveFolder+self.AnimalName.text()+'\\'
@@ -531,6 +558,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             return
 
         fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior files (*.mat)")
+
+
         if fname:
             Obj = loadmat(fname)
             self.Obj = Obj
