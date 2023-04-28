@@ -476,8 +476,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         SaveFileMat = os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.mat')
         SaveFileJson= os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.json')
         if not os.path.exists(os.path.dirname(SaveFileJson)):
-            os.makedirs(os.path.dirname(SaveFileMat))
-            print(f"Created new folder: {os.path.dirname(SaveFileMat)}")
+            os.makedirs(os.path.dirname(SaveFileJson))
+            print(f"Created new folder: {os.path.dirname(SaveFileJson)}")
         N=0
         while 1:
             if os.path.isfile(SaveFileMat) or os.path.isfile(SaveFileJson):
@@ -486,7 +486,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 SaveFileJson=os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_{N}.json')
             else:
                 break
-        self.SaveFile = QFileDialog.getSaveFileName(self, 'Save File',SaveFileMat,"JSON files (*.json);;MAT files (*.mat)")[0]
+        self.SaveFile = QFileDialog.getSaveFileName(self, 'Save File',SaveFileJson,"JSON files (*.json);;MAT files (*.mat)")[0]
         if self.SaveFile == '':
             self.WarningLabel.setText('Discard saving!')
             self.WarningLabel.setStyleSheet("color: red;")
@@ -581,13 +581,15 @@ class Window(QMainWindow, Ui_ForagingGUI):
                             continue
                         widget = widget_dict[key]
                         try: # load the paramter used by last trial
-                            Tag=0
                             value=np.array([Obj['TP_'+key][-2]])
-                        except:
-                            Tag=1
+                            Tag=0
+                        except: # sometimes we only have training parameters, no behavior parameters
                             value=Obj[key]
+                            Tag=1
                         if len(value)==0:
                             value=np.array([''], dtype='<U1')
+                            Tag=0
+                        if type(value)==np.ndarray:
                             Tag=0
                         if isinstance(widget, QtWidgets.QLineEdit):
                             if Tag==0:
