@@ -475,7 +475,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         #ParamsFile = os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.json')
         SaveFileMat = os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.mat')
         SaveFileJson= os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.json')
-        if not os.path.exists(os.path.dirname(SaveFileMat)):
+        if not os.path.exists(os.path.dirname(SaveFileJson)):
             os.makedirs(os.path.dirname(SaveFileMat))
             print(f"Created new folder: {os.path.dirname(SaveFileMat)}")
         N=0
@@ -486,7 +486,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 SaveFileJson=os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_{N}.json')
             else:
                 break
-        self.SaveFile = QFileDialog.getSaveFileName(self, 'Save File',SaveFileMat,"MAT files (*.mat);;JSON files (*.json)")[0]
+        self.SaveFile = QFileDialog.getSaveFileName(self, 'Save File',SaveFileMat,"JSON files (*.json);;MAT files (*.mat)")[0]
         if self.SaveFile == '':
             self.WarningLabel.setText('Discard saving!')
             self.WarningLabel.setStyleSheet("color: red;")
@@ -544,12 +544,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
             elif self.SaveFile.endswith('.json'):
                 with open(self.SaveFile, "w") as outfile:
                     #json.dump(Obj, outfile, indent=1, cls=NumpyEncoder,separators=(',', ': \n'))
-                    #json.dump(Obj, outfile, indent=4,  cls=NumpyEncoder)
-                    dump_single_line(Obj, outfile)
+                    json.dump(Obj, outfile, indent=4,  cls=NumpyEncoder)
+                    #dump_single_line(Obj, outfile)
                       
     def _Open(self):
         self._StopCurrentSession() # stop current session first
-        SaveFolder=self.default_saveFolder+self.AnimalName.text()+'\\'
         self.NewSession.setChecked(True)
         Reply=self._NewSession()
         if Reply == QMessageBox.Yes or Reply == QMessageBox.No:
@@ -557,11 +556,15 @@ class Window(QMainWindow, Ui_ForagingGUI):
         elif Reply == QMessageBox.Cancel:
             return
 
-        fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior files (*.mat)")
-
-
+        fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior JSON files (*.json);;Behavior MAT files (*.mat)")
+        self.fname=fname
         if fname:
-            Obj = loadmat(fname)
+            if fname.endswith('.mat'):
+                Obj = loadmat(fname)
+            elif fname.endswith('.json'):
+                f = open (fname, "r")
+                Obj = json.loads(f.read())
+                f.close()
             self.Obj = Obj
             widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
             widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
@@ -578,23 +581,41 @@ class Window(QMainWindow, Ui_ForagingGUI):
                             continue
                         widget = widget_dict[key]
                         try: # load the paramter used by last trial
+                            Tag=0
                             value=np.array([Obj['TP_'+key][-2]])
                         except:
+                            Tag=1
                             value=Obj[key]
                         if len(value)==0:
                             value=np.array([''], dtype='<U1')
+                            Tag=0
                         if isinstance(widget, QtWidgets.QLineEdit):
-                            widget.setText(value[-1])
+                            if Tag==0:
+                                widget.setText(value[-1])
+                            elif Tag==1:
+                                widget.setText(value)
                         elif isinstance(widget, QtWidgets.QComboBox):
-                            index = widget.findText(value[-1])
+                            if Tag==0:
+                                index = widget.findText(value[-1])
+                            elif Tag==1:
+                                index = widget.findText(value)
                             if index != -1:
                                 widget.setCurrentIndex(index)
                         elif isinstance(widget, QtWidgets.QDoubleSpinBox):
-                            widget.setValue(float(value[-1]))
+                            if Tag==0:
+                                widget.setValue(float(value[-1]))
+                            elif Tag==1:
+                                widget.setValue(float(value))
                         elif isinstance(widget, QtWidgets.QSpinBox):
-                            widget.setValue(int(value[-1]))
+                            if Tag==0:
+                                widget.setValue(int(value[-1]))
+                            elif Tag==1:
+                                widget.setValue(int(value))
                         elif isinstance(widget, QtWidgets.QTextEdit):
-                             widget.setText(value[-1])
+                            if Tag==0:
+                                widget.setText(value[-1])
+                            elif Tag==1:
+                                widget.setText(value)
                     else:
                         widget = widget_dict[key]
                         if not isinstance(widget, QtWidgets.QComboBox):
@@ -610,6 +631,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 # Catch the exception and print error information
                 print("An error occurred:")
                 print(traceback.format_exc())
+                # delete GeneratedTrials
+                del self.GeneratedTrials
         else:
             self.NewSession.setDisabled(False)
 
@@ -627,21 +650,27 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         value = Obj[attr_name][-1]
                     else:
                         value = Obj[attr_name]
+                    # transfer list to numpy array
+                    if type(getattr(self.GeneratedTrials,attr_name))== np.ndarray:
+                        value=np.array(value)
                     # Set the attribute in the GeneratedTrials object
                     setattr(self.GeneratedTrials, attr_name, value)
                 except:
                     pass
         if self.GeneratedTrials.B_AnimalResponseHistory.size==0:
+            del self.GeneratedTrials
             return
-        # this is a bug to use the scipy.io.loadmat or savemat (it will change the dimension of the nparray)
-        self.GeneratedTrials.B_AnimalResponseHistory=self.GeneratedTrials.B_AnimalResponseHistory[0]
-        self.GeneratedTrials.B_TrialStartTime=self.GeneratedTrials.B_TrialStartTime[0]
-        self.GeneratedTrials.B_DelayStartTime=self.GeneratedTrials.B_DelayStartTime[0]
-        self.GeneratedTrials.B_TrialEndTime=self.GeneratedTrials.B_TrialEndTime[0]
-        self.GeneratedTrials.B_GoCueTime=self.GeneratedTrials.B_GoCueTime[0]
-        self.GeneratedTrials.B_RewardOutcomeTime=self.GeneratedTrials.B_RewardOutcomeTime[0]
-        #self.GeneratedTrials._GenerateATrial(self.Channel4)
-
+        # for mat file
+        if self.fname.endswith('.mat'):
+            # this is a bug to use the scipy.io.loadmat or savemat (it will change the dimension of the nparray)
+            self.GeneratedTrials.B_AnimalResponseHistory=self.GeneratedTrials.B_AnimalResponseHistory[0]
+            self.GeneratedTrials.B_TrialStartTime=self.GeneratedTrials.B_TrialStartTime[0]
+            self.GeneratedTrials.B_DelayStartTime=self.GeneratedTrials.B_DelayStartTime[0]
+            self.GeneratedTrials.B_TrialEndTime=self.GeneratedTrials.B_TrialEndTime[0]
+            self.GeneratedTrials.B_GoCueTime=self.GeneratedTrials.B_GoCueTime[0]
+            self.GeneratedTrials.B_RewardOutcomeTime=self.GeneratedTrials.B_RewardOutcomeTime[0]
+            #self.GeneratedTrials._GenerateATrial(self.Channel4)
+            
         PlotM=PlotV(win=self,GeneratedTrials=self.GeneratedTrials,width=5, height=4)
         layout=self.Visualization.layout()
         if layout is not None:
