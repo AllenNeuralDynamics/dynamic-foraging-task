@@ -34,8 +34,14 @@ class GenerateTrials():
         self.B_DelayStartTime=np.array([]).astype(float)
         self.B_TrialEndTime=np.array([]).astype(float)
         self.B_GoCueTime=np.array([]).astype(float)
+        self.B_TrialStartTimeHarp=np.array([]).astype(float)
+        self.B_DelayStartTimeHarp=np.array([]).astype(float)
+        self.B_TrialEndTimeHarp=np.array([]).astype(float)
+        self.B_GoCueTimeHarp=np.array([]).astype(float)
         self.B_LeftRewardDeliveryTime=np.array([]).astype(float)
         self.B_RightRewardDeliveryTime=np.array([]).astype(float)
+        self.B_LeftRewardDeliveryTimeHarp=np.array([]).astype(float)
+        self.B_RightRewardDeliveryTimeHarp=np.array([]).astype(float)
         self.B_RewardOutcomeTime=np.array([]).astype(float)
         self.B_LaserOnTrial=[] # trials with laser on
         self.B_LaserAmplitude=[]
@@ -781,8 +787,9 @@ class GenerateTrials():
             self.B_AnimalCurrentResponse=2
         '''
 
-        for i in range(6):
+        for i in range(10):
             Rec=Channel1.receive()
+
             if Rec[0]=='/TrialStartTime':
                 TrialStartTime=Rec[1]
             elif Rec[0]=='/DelayStartTime':
@@ -792,7 +799,7 @@ class GenerateTrials():
                 if self.CurrentAutoReward==1:
                     self._GiveLeft()
                     self._GiveRight()
-                self.B_GoCueTime=np.append(self.B_GoCueTime,Rec[1])
+                GoCueTime=Rec[1]
             elif Rec[0]=='/RewardOutcomeTime':
                 RewardOutcomeTime=Rec[1]
             elif Rec[0]=='/RewardOutcome':
@@ -825,11 +832,25 @@ class GenerateTrials():
                 self.B_AnimalResponseHistory=np.append(self.B_AnimalResponseHistory,self.B_AnimalCurrentResponse)
             elif Rec[0]=='/TrialEndTime':
                 TrialEndTime=Rec[1]
+            elif Rec[0]=='/TrialStartTimeHarp':
+                TrialStartTimeHarp=Rec[1]
+            elif Rec[0]=='/DelayStartTimeHarp':
+                DelayStartTimeHarp=Rec[1]
+            elif Rec[0]=='/GoCueTimeHarp':
+                GoCueTimeHarp=Rec[1]
+            elif Rec[0]=='/TrialEndTimeHarp':
+                TrialEndTimeHarp=Rec[1]
+        # get the trial end time at the end of the trial
+        self.B_TrialStartTimeHarp=np.append(self.B_TrialStartTimeHarp,TrialStartTimeHarp)
+        self.B_DelayStartTimeHarp=np.append(self.B_DelayStartTimeHarp,DelayStartTimeHarp)
+        self.B_TrialEndTimeHarp=np.append(self.B_TrialEndTimeHarp,TrialEndTimeHarp)
+        self.B_GoCueTimeHarp=np.append(self.B_GoCueTimeHarp,GoCueTimeHarp)
 
         # get the trial end time at the end of the trial
         self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime)
         self.B_DelayStartTime=np.append(self.B_DelayStartTime,DelayStartTime)
         self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime)
+        self.B_GoCueTime=np.append(self.B_GoCueTime,GoCueTime)
         self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,RewardOutcomeTime)
 
     def _GiveLeft(self):
@@ -858,6 +879,11 @@ class GenerateTrials():
                 self.B_LeftRewardDeliveryTime=np.append(self.B_LeftRewardDeliveryTime,Rec[1])
             elif Rec[0]=='/RightRewardDeliveryTime':
                 self.B_RightRewardDeliveryTime=np.append(self.B_RightRewardDeliveryTime,Rec[1])
+            elif Rec[0]=='/LeftRewardDeliveryTimeHarp':
+                self.B_RightRewardDeliveryTimeHarp=np.append(self.B_RightRewardDeliveryTimeHarp,Rec[1])
+            elif Rec[0]=='/RightRewardDeliveryTimeHarp':
+                self.B_RightRewardDeliveryTimeHarp=np.append(self.B_RightRewardDeliveryTimeHarp,Rec[1])
+            
     def _DeletePreviousLicks(self,Channel2):
         '''Delete licks from the previous session'''
         while not Channel2.msgs.empty():
