@@ -56,8 +56,8 @@
         <Y>3</Y>
       </Location>
       <Size>
-        <Width>1201</Width>
-        <Height>890</Height>
+        <Width>270</Width>
+        <Height>297</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -322,8 +322,8 @@
         <Y>3</Y>
       </Location>
       <Size>
-        <Width>1201</Width>
-        <Height>903</Height>
+        <Width>270</Width>
+        <Height>297</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -684,8 +684,8 @@
         <Y>3</Y>
       </Location>
       <Size>
-        <Width>1201</Width>
-        <Height>903</Height>
+        <Width>270</Width>
+        <Height>297</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -1178,7 +1178,7 @@
         <Y>3</Y>
       </Location>
       <Size>
-        <Width>1201</Width>
+        <Width>1363</Width>
         <Height>903</Height>
       </Size>
       <WindowState>Normal</WindowState>
@@ -1214,8 +1214,8 @@
             <Y>3</Y>
           </Location>
           <Size>
-            <Width>1201</Width>
-            <Height>903</Height>
+            <Width>270</Width>
+            <Height>297</Height>
           </Size>
           <WindowState>Normal</WindowState>
         </EditorDialogSettings>
@@ -2241,12 +2241,6 @@
           <Height>279</Height>
         </Size>
         <WindowState>Normal</WindowState>
-        <VisualizerTypeName>Bonsai.Design.Visualizers.BooleanTimeSeriesVisualizer</VisualizerTypeName>
-        <VisualizerSettings>
-          <BooleanTimeSeriesVisualizer>
-            <Capacity>640</Capacity>
-          </BooleanTimeSeriesVisualizer>
-        </VisualizerSettings>
         <EditorDialogSettings>
           <Visible>false</Visible>
           <Location>
@@ -2628,7 +2622,7 @@
         <Y>3</Y>
       </Location>
       <Size>
-        <Width>1201</Width>
+        <Width>1506</Width>
         <Height>903</Height>
       </Size>
       <WindowState>Normal</WindowState>
@@ -3002,8 +2996,8 @@
         <Y>3</Y>
       </Location>
       <Size>
-        <Width>1201</Width>
-        <Height>903</Height>
+        <Width>270</Width>
+        <Height>297</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -3026,7 +3020,7 @@
             <Y>3</Y>
           </Location>
           <Size>
-            <Width>1201</Width>
+            <Width>1506</Width>
             <Height>903</Height>
           </Size>
           <WindowState>Normal</WindowState>
@@ -4048,7 +4042,7 @@
             <Y>3</Y>
           </Location>
           <Size>
-            <Width>1201</Width>
+            <Width>1506</Width>
             <Height>903</Height>
           </Size>
           <WindowState>Normal</WindowState>
