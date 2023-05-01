@@ -14,7 +14,7 @@ from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,Manip
 from MyFunctions import GenerateTrials, Worker
 import warnings
 import json 
-#warnings.filterwarnings("ignore")
+warnings.filterwarnings("ignore")
 #import subprocess
 #import h5py
 #from scipy import stats
