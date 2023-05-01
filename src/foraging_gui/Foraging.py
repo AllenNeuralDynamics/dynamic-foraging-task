@@ -88,8 +88,15 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.client4 = OSCStreamingClient()  # Create client
         self.client4.connect((self.ip, self.request_port4))
         self.Channel4 = rigcontrol.RigClient(self.client4)
-
-        
+        # clear previous events
+        while not self.Channel.msgs.empty():
+            self.Channel.receive()
+        while not self.Channel2.msgs.empty():
+            self.Channel2.receive()
+        while not self.Channel3.msgs.empty():
+            self.Channel3.receive()
+        while not self.Channel4.msgs.empty():
+            self.Channel4.receive()
     def connectSignalsSlots(self):
         '''Define callbacks'''
         self.action_About.triggered.connect(self._about)
