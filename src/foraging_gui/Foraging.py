@@ -15,11 +15,7 @@ from MyFunctions import GenerateTrials, Worker
 import warnings
 import json 
 warnings.filterwarnings("ignore")
-#import subprocess
-#import h5py
-#from scipy import stats
-#from PyQt5.uic import loadUi
-#from threading import Event
+
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -70,13 +66,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._GetTrainingParameters() # get initial training parameters
         self.connectSignalsSlots()
     def _InitializeBonsai(self):
-        #os.system(" E:\\GitHub\\dynamic-foraging-task\\bonsai\\Bonsai.exe E:\\GitHub\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai  --start") 
-        #workflow_file = "E:\\GitHub\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai"
-        #result=subprocess.run(["E:\\GitHub\\dynamic-foraging-task\\bonsai\\Bonsai.exe", "workflows", "--start", workflow_file], check=True)
-        #output = result.stdout.decode()
-        #workflow_id = re.search(r"Workflow started with ID: (.+)", output).group(1)
-        #print(f"Workflow started with ID {workflow_id}")
-
+        '''Initianizing osc messages'''
         # normal behavior events
         self.ip = "127.0.0.1"
         self.request_port = 4002
@@ -99,6 +89,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.client4.connect((self.ip, self.request_port4))
         self.Channel4 = rigcontrol.RigClient(self.client4)
     def connectSignalsSlots(self):
+        '''Define callbacks'''
         self.action_About.triggered.connect(self._about)
         self.action_Camera.triggered.connect(self._Camera)
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
