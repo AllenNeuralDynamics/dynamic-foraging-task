@@ -14,7 +14,7 @@ from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,Manip
 from MyFunctions import GenerateTrials, Worker
 import warnings
 import json 
-warnings.filterwarnings("ignore")
+#warnings.filterwarnings("ignore")
 
 
 class NumpyEncoder(json.JSONEncoder):
@@ -357,7 +357,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
             print("An error occurred:")
             print(traceback.format_exc())
     def closeEvent(self, event):
+        # disable close icon
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.show()
         self._StopCurrentSession() # stop the current session first
+         # enable close icon
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, True)
+        self.show()
         reply = QMessageBox.question(self, 'Foraging Close', 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
             self._Save()
@@ -786,6 +792,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Start.setStyleSheet("background-color : green;")
             self.NewSession.setStyleSheet("background-color : none")
             self.NewSession.setChecked(False)
+            self.WarningLabel.setText('Saving without weight or extra water!')
+            self.WarningLabel.setStyleSheet("color: red;")
         else:
             self.Start.setStyleSheet("background-color : none")
             ''' # update graph when session is stopped
