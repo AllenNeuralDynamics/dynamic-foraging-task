@@ -882,10 +882,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 #get the response of the animal using a different thread
                 self.threadpool.start(worker1)
                 #receive licks and update figures
-                #if self.ToUpdateFigure==1:
-                #    self.ToUpdateFigure=0
-                 #   self.threadpool3.start(workerPlot)
-                self.PlotM._Update(GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
+                if self.ToUpdateFigure==1:
+                    self.ToUpdateFigure=0
+                    self.threadpool3.start(workerPlot)
                 #generate a new trial
                 GeneratedTrials.GeneFinish=0
                 self.ToGenerateATrial=0
