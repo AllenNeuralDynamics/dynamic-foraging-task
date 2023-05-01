@@ -14,7 +14,7 @@ from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,Manip
 from MyFunctions import GenerateTrials, Worker
 import warnings
 import json 
-warnings.filterwarnings("ignore")
+#warnings.filterwarnings("ignore")
 #import subprocess
 #import h5py
 #from scipy import stats
@@ -471,18 +471,24 @@ class Window(QMainWindow, Ui_ForagingGUI):
         #ParamsFile = os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.json')
         SaveFileMat = os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.mat')
         SaveFileJson= os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.json')
+        SaveFileParJson= os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_par.json')
         if not os.path.exists(os.path.dirname(SaveFileJson)):
             os.makedirs(os.path.dirname(SaveFileJson))
             print(f"Created new folder: {os.path.dirname(SaveFileJson)}")
         N=0
         while 1:
-            if os.path.isfile(SaveFileMat) or os.path.isfile(SaveFileJson):
+            if os.path.isfile(SaveFileMat) or os.path.isfile(SaveFileJson)or os.path.isfile(SaveFileParJson):
                 N=N+1
                 SaveFileMat=os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_{N}.mat')
                 SaveFileJson=os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_{N}.json')
+                SaveFileParJson=os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_{N}_par.json')
             else:
                 break
-        self.SaveFile = QFileDialog.getSaveFileName(self, 'Save File',SaveFileJson,"JSON files (*.json);;MAT files (*.mat)")[0]
+        Names = QFileDialog.getSaveFileName(self, 'Save File',SaveFileJson,"JSON files (*.json);;MAT files (*.mat);;JSON parameters (*_par.json)")
+        if Names[1]=='JSON parameters (*_par.json)':
+            self.SaveFile=Names[0].replace('.json', '_par.json')
+        else:
+            self.SaveFile=Names[0]
         if self.SaveFile == '':
             self.WarningLabel.setText('Discard saving!')
             self.WarningLabel.setStyleSheet("color: red;")
@@ -512,6 +518,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     Obj[child.objectName()]=child.text()
                 for child in self.LaserCalibration_dialog.findChildren(QtWidgets.QComboBox):
                     Obj[child.objectName()]=child.currentText()
+            Obj2=Obj.copy()
             # save behavor events
             if hasattr(self, 'GeneratedTrials'):
                 # Do something if self has the GeneratedTrials attribute
@@ -537,6 +544,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
             if self.SaveFile.endswith('.mat'):
             # Save data to a .mat file
                 savemat(self.SaveFile, Obj) 
+            elif self.SaveFile.endswith('par.json'):
+                with open(self.SaveFile, "w") as outfile:
+                    json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
             elif self.SaveFile.endswith('.json'):
                 with open(self.SaveFile, "w") as outfile:
                     json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
@@ -550,7 +560,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         elif Reply == QMessageBox.Cancel:
             return
 
-        fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior JSON files (*.json);;Behavior MAT files (*.mat)")
+        fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
         self.fname=fname
         if fname:
             if fname.endswith('.mat'):
