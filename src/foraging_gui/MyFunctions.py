@@ -249,7 +249,10 @@ class GenerateTrials():
             self.BS_CurrentRunningTime=0
         self.BS_AllTrialN=np.shape(self.B_AnimalResponseHistory)[0]
         self.BS_FinisheTrialN=np.sum(self.B_AnimalResponseHistory!=2)
-        self.BS_RespondedRate=self.BS_FinisheTrialN/self.BS_AllTrialN
+        if self.BS_AllTrialN==0:  
+            self.BS_RespondedRate=np.nan
+        else:
+            self.BS_RespondedRate=self.BS_FinisheTrialN/self.BS_AllTrialN
         self.BS_RewardTrialN=np.sum(self.B_RewardedHistory==True)
         self.BS_TotalReward=float(self.BS_RewardTrialN)*float(self.win.WaterPerRewardedTrial)
         self.BS_LeftRewardTrialN=np.sum(self.B_RewardedHistory[0]==True)
@@ -257,8 +260,14 @@ class GenerateTrials():
         self.BS_LeftChoiceN=np.sum(self.B_AnimalResponseHistory==0)
         self.BS_RightChoiceN=np.sum(self.B_AnimalResponseHistory==1)
         self.BS_OverallRewardRate=self.BS_RewardTrialN/(self.B_CurrentTrialN+1)
-        self.BS_LeftChoiceRewardRate=self.BS_LeftRewardTrialN/self.BS_LeftChoiceN
-        self.BS_RightChoiceRewardRate=self.BS_RightRewardTrialN/self.BS_RightChoiceN
+        if self.BS_LeftChoiceN==0:
+            self.BS_LeftChoiceRewardRate=np.nan
+        else:
+            self.BS_LeftChoiceRewardRate=self.BS_LeftRewardTrialN/self.BS_LeftChoiceN
+        if self.BS_RightChoiceN==0:
+            self.BS_RightChoiceRewardRate=np.nan
+        else:
+            self.BS_RightChoiceRewardRate=self.BS_RightRewardTrialN/self.BS_RightChoiceN
         # current trial numbers in the current block; BS_CurrentBlockTrialN
         self.BS_CurrentBlockTrialN=[[],[]]
         self.BS_CurrentBlockLen=[self.BlockLenHistory[0][-1], self.BlockLenHistory[1][-1]]
@@ -376,7 +385,11 @@ class GenerateTrials():
         else:
             self.DD_PerTrial_Start_GoCue='nan'
             self.DD_PerTrial_GoCue_GoCue1='nan'
-
+        # licks ration
+        if sum(self.Start_GoCue_RightLicks)==0:
+            self.Start_CoCue_LeftRightRatio=np.nan
+        else:
+            self.Start_CoCue_LeftRightRatio=np.array(sum(self.Start_GoCue_LeftLicks))/np.array(sum(self.Start_GoCue_RightLicks))
         
     def _GetDoubleDipping(self,LicksIndex):
         '''get the number of double dipping. e.g. 0 1 0 will result in 2 double dipping''' 
@@ -433,7 +446,7 @@ class GenerateTrials():
                                         '  Frac of EL trial start_goCue: ' + str(self.EarlyLickingTrialsN_Start_GoCue) + '/' + str(len(self.Start_GoCue_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Start_GoCue,2))+')' +'\n'
                                         '  Frac of EL trial start_delay: ' + str(self.EarlyLickingTrialsN_Start_Delay) + '/' + str(len(self.Start_Delay_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Start_Delay,2))+')' +'\n'
                                         '  Frac of EL trial delay_goCue: ' + str(self.EarlyLickingTrialsN_Delay_GoCue) + '/' + str(len(self.Delay_GoCue_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Delay_GoCue,2))+')' +'\n'
-                                        '  Left/Right early licks start_goCue: ' + str(sum(self.Start_GoCue_LeftLicks)) + '/' + str(sum(self.Start_GoCue_RightLicks)) + ' ('+str(np.round(np.array(sum(self.Start_GoCue_LeftLicks))/np.array(sum(self.Start_GoCue_RightLicks)),2))+')' +'\n\n'
+                                        '  Left/Right early licks start_goCue: ' + str(sum(self.Start_GoCue_LeftLicks)) + '/' + str(sum(self.Start_GoCue_RightLicks)) + ' ('+str(np.round(self.Start_CoCue_LeftRightRatio,2))+')' +'\n\n'
                                        
                                        'Double dipping (DD)\n'
                                        '  Frac of DD trial start_goCue: ' + str(self.DD_TrialsN_Start_CoCue) + '/' + str(len(self.Start_GoCue_DD)) + ' ('+str(np.round(self.DDRate_Start_CoCue,2))+')' +'\n'
@@ -457,7 +470,7 @@ class GenerateTrials():
                                        '  Frac of EL trial start_goCue: ' + str(self.EarlyLickingTrialsN_Start_GoCue) + '/' + str(len(self.Start_GoCue_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Start_GoCue,2))+')' +'\n'
                                        '  Frac of EL trial start_delay: ' + str(self.EarlyLickingTrialsN_Start_Delay) + '/' + str(len(self.Start_Delay_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Start_Delay,2))+')' +'\n'
                                        '  Frac of EL trial delay_goCue: ' + str(self.EarlyLickingTrialsN_Delay_GoCue) + '/' + str(len(self.Delay_GoCue_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Delay_GoCue,2))+')' +'\n'
-                                       '  Left/Right early licks start_goCue: ' + str(sum(self.Start_GoCue_LeftLicks)) + '/' + str(sum(self.Start_GoCue_RightLicks)) + ' ('+str(np.round(np.array(sum(self.Start_GoCue_LeftLicks))/np.array(sum(self.Start_GoCue_RightLicks)),2))+')' +'\n\n'
+                                       '  Left/Right early licks start_goCue: ' + str(sum(self.Start_GoCue_LeftLicks)) + '/' + str(sum(self.Start_GoCue_RightLicks)) + ' ('+str(np.round(self.Start_CoCue_LeftRightRatio,2))+')' +'\n\n'
                                        
                                        'Double dipping (DD)\n'
                                        '  Frac of DD trial start_goCue: ' + str(self.DD_TrialsN_Start_CoCue) + '/' + str(len(self.Start_GoCue_DD)) + ' ('+str(np.round(self.DDRate_Start_CoCue,2))+')' +'\n'

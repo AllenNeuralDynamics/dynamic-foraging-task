@@ -117,9 +117,14 @@ class PlotV(FigureCanvas):
         # running average of response fraction
         for i in range(len(self.B_AnimalResponseHistory)):
             if i>=kernel_size-1:
-                ResponseHistoryF[i+1-kernel_size]=np.nanmean(ResponseHistoryT[i+1-kernel_size:i+1])
-                RewardedHistoryF[i+1-kernel_size]=np.nanmean(RewardedHistoryT[i+1-kernel_size:i+1])
-                SuccessHistoryF[i+1-kernel_size]=np.nanmean(SuccessHistoryT[i+1-kernel_size:i+1])
+                if all(np.isnan(ResponseHistoryT[i+1-kernel_size:i+1])):
+                    ResponseHistoryF[i+1-kernel_size]=np.nan
+                    RewardedHistoryF[i+1-kernel_size]=np.nan
+                    SuccessHistoryF[i+1-kernel_size]=np.nan
+                else:
+                    ResponseHistoryF[i+1-kernel_size]=np.nanmean(ResponseHistoryT[i+1-kernel_size:i+1])
+                    RewardedHistoryF[i+1-kernel_size]=np.nanmean(RewardedHistoryT[i+1-kernel_size:i+1])
+                    SuccessHistoryF[i+1-kernel_size]=np.nanmean(SuccessHistoryT[i+1-kernel_size:i+1])
 
         LeftChoice=np.where(self.B_AnimalResponseHistory==0)
         RightChoice=np.where(self.B_AnimalResponseHistory==1)
