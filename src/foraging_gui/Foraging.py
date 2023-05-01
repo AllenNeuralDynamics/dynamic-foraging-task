@@ -14,7 +14,7 @@ from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,Manip
 from MyFunctions import GenerateTrials, Worker
 import warnings
 import json 
-#warnings.filterwarnings("ignore")
+warnings.filterwarnings("ignore")
 #import subprocess
 #import h5py
 #from scipy import stats
@@ -864,7 +864,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
         
-        self.test=1
+        self.test=0
         if self.test==1:
             self._StartTrialLoop(GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
         else:
