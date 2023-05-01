@@ -278,7 +278,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:Delay">
-                      <rx:DueTime>PT1.574S</rx:DueTime>
+                      <rx:DueTime>PT1.612S</rx:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -2639,7 +2639,7 @@ def process(value):
             </Expression>
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="rx:Delay">
-                <rx:DueTime>PT1S</rx:DueTime>
+                <rx:DueTime>PT0.005S</rx:DueTime>
               </Combinator>
             </Expression>
             <Expression xsi:type="cf:BehaviorCommand">
