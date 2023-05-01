@@ -14,7 +14,7 @@ from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,Manip
 from MyFunctions import GenerateTrials, Worker
 import warnings
 import json 
-warnings.filterwarnings("ignore")
+#warnings.filterwarnings("ignore")
 #import subprocess
 #import h5py
 #from scipy import stats
@@ -864,7 +864,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
         
-        self.test=0
+        self.test=1
         if self.test==1:
             self._StartTrialLoop(GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
         else:
@@ -882,9 +882,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 #get the response of the animal using a different thread
                 self.threadpool.start(worker1)
                 #receive licks and update figures
-                if self.ToUpdateFigure==1:
-                    self.ToUpdateFigure=0
-                    self.threadpool3.start(workerPlot)
+                #if self.ToUpdateFigure==1:
+                #    self.ToUpdateFigure=0
+                 #   self.threadpool3.start(workerPlot)
+                self.PlotM._Update(GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
                 #generate a new trial
                 GeneratedTrials.GeneFinish=0
                 self.ToGenerateATrial=0
