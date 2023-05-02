@@ -792,8 +792,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Start.setStyleSheet("background-color : green;")
             self.NewSession.setStyleSheet("background-color : none")
             self.NewSession.setChecked(False)
-            self.WarningLabel.setText('Saving without weight or extra water!')
-            self.WarningLabel.setStyleSheet("color: red;")
+            self.WarningLabel.setText('')
+            self.WarningLabel.setStyleSheet("color: none;")
         else:
             self.Start.setStyleSheet("background-color : none")
             ''' # update graph when session is stopped
