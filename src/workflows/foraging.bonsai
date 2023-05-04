@@ -278,7 +278,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:Delay">
-                      <rx:DueTime>PT2.9S</rx:DueTime>
+                      <rx:DueTime>PT3.089S</rx:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -346,7 +346,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:Delay">
-                      <rx:DueTime>PT0.92S</rx:DueTime>
+                      <rx:DueTime>PT1S</rx:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -2773,180 +2773,264 @@ def process(value):
             <Expression xsi:type="MulticastSubject">
               <Name>ToBonsaiOSC</Name>
             </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>BehaviorEvents</Name>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="SubscribeSubject">
+                <Name>BehaviorEvents</Name>
+              </Builder>
             </Expression>
-            <Expression xsi:type="beh:Parse">
-              <harp:MessageType>Write</harp:MessageType>
-              <harp:Register xsi:type="beh:TimestampedOutputToggle" />
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="beh:Parse">
+                <harp:MessageType>Write</harp:MessageType>
+                <harp:Register xsi:type="beh:TimestampedOutputToggle" />
+              </Builder>
             </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Value</Selector>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="MemberSelector">
+                <Selector>Value</Selector>
+              </Builder>
             </Expression>
-            <Expression xsi:type="BitwiseAnd">
-              <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalOutputs">
-                <Value>DOPort0</Value>
-              </Operand>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="BitwiseAnd">
+                <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalOutputs">
+                  <Value>DOPort0</Value>
+                </Operand>
+              </Builder>
             </Expression>
-            <Expression xsi:type="GreaterThan">
-              <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
-                <Value>0</Value>
-              </Operand>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="GreaterThan">
+                <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
+                  <Value>0</Value>
+                </Operand>
+              </Builder>
             </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:DistinctUntilChanged" />
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="rx:DistinctUntilChanged" />
+              </Builder>
             </Expression>
-            <Expression xsi:type="rx:Condition">
-              <Workflow>
-                <Nodes>
-                  <Expression xsi:type="WorkflowInput">
-                    <Name>Source1</Name>
-                  </Expression>
-                  <Expression xsi:type="WorkflowOutput" />
-                </Nodes>
-                <Edges>
-                  <Edge From="0" To="1" Label="Source1" />
-                </Edges>
-              </Workflow>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="rx:Condition">
+                <Workflow>
+                  <Nodes>
+                    <Expression xsi:type="WorkflowInput">
+                      <Name>Source1</Name>
+                    </Expression>
+                    <Expression xsi:type="WorkflowOutput" />
+                  </Nodes>
+                  <Edges>
+                    <Edge From="0" To="1" Label="Source1" />
+                  </Edges>
+                </Workflow>
+              </Builder>
             </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:WithLatestFrom" />
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="rx:WithLatestFrom" />
+              </Builder>
             </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Item2.Seconds</Selector>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="MemberSelector">
+                <Selector>Item2.Seconds</Selector>
+              </Builder>
             </Expression>
-            <Expression xsi:type="scr:ExpressionTransform">
-              <scr:Expression>new(it as Seconds)</scr:Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="scr:ExpressionTransform">
+                <scr:Expression>new(it as Seconds)</scr:Expression>
+              </Builder>
             </Expression>
-            <Expression xsi:type="osc:Format">
-              <osc:Address>/LeftRewardDeliveryTimeHarp</osc:Address>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="osc:Format">
+                <osc:Address>/LeftRewardDeliveryTimeHarp</osc:Address>
+              </Builder>
             </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>ToBonsaiOSC2</Name>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="MulticastSubject">
+                <Name>ToBonsaiOSC2</Name>
+              </Builder>
             </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>BehaviorEvents</Name>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="SubscribeSubject">
+                <Name>BehaviorEvents</Name>
+              </Builder>
             </Expression>
-            <Expression xsi:type="beh:Parse">
-              <harp:MessageType>Write</harp:MessageType>
-              <harp:Register xsi:type="beh:TimestampedOutputToggle" />
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="beh:Parse">
+                <harp:MessageType>Write</harp:MessageType>
+                <harp:Register xsi:type="beh:TimestampedOutputToggle" />
+              </Builder>
             </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Value</Selector>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="MemberSelector">
+                <Selector>Value</Selector>
+              </Builder>
             </Expression>
-            <Expression xsi:type="BitwiseAnd">
-              <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalOutputs">
-                <Value>DOPort1</Value>
-              </Operand>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="BitwiseAnd">
+                <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalOutputs">
+                  <Value>DOPort1</Value>
+                </Operand>
+              </Builder>
             </Expression>
-            <Expression xsi:type="GreaterThan">
-              <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
-                <Value>0</Value>
-              </Operand>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="GreaterThan">
+                <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
+                  <Value>0</Value>
+                </Operand>
+              </Builder>
             </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:DistinctUntilChanged" />
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="rx:DistinctUntilChanged" />
+              </Builder>
             </Expression>
-            <Expression xsi:type="rx:Condition">
-              <Workflow>
-                <Nodes>
-                  <Expression xsi:type="WorkflowInput">
-                    <Name>Source1</Name>
-                  </Expression>
-                  <Expression xsi:type="WorkflowOutput" />
-                </Nodes>
-                <Edges>
-                  <Edge From="0" To="1" Label="Source1" />
-                </Edges>
-              </Workflow>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="rx:Condition">
+                <Workflow>
+                  <Nodes>
+                    <Expression xsi:type="WorkflowInput">
+                      <Name>Source1</Name>
+                    </Expression>
+                    <Expression xsi:type="WorkflowOutput" />
+                  </Nodes>
+                  <Edges>
+                    <Edge From="0" To="1" Label="Source1" />
+                  </Edges>
+                </Workflow>
+              </Builder>
             </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:WithLatestFrom" />
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="rx:WithLatestFrom" />
+              </Builder>
             </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Item2.Seconds</Selector>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="MemberSelector">
+                <Selector>Item2.Seconds</Selector>
+              </Builder>
             </Expression>
-            <Expression xsi:type="scr:ExpressionTransform">
-              <scr:Expression>new(it as Seconds)</scr:Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="scr:ExpressionTransform">
+                <scr:Expression>new(it as Seconds)</scr:Expression>
+              </Builder>
             </Expression>
-            <Expression xsi:type="osc:Format">
-              <osc:Address>/RightRewardDeliveryTimeHarp</osc:Address>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="osc:Format">
+                <osc:Address>/RightRewardDeliveryTimeHarp</osc:Address>
+              </Builder>
             </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>ToBonsaiOSC2</Name>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="MulticastSubject">
+                <Name>ToBonsaiOSC2</Name>
+              </Builder>
             </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>GoCue</Name>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="SubscribeSubject">
+                <Name>GoCue</Name>
+              </Builder>
             </Expression>
-            <Expression xsi:type="cf:BehaviorCommand">
-              <cf:Type>ToggleOutput</cf:Type>
-              <cf:Mask>Port2</cf:Mask>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="cf:BehaviorCommand">
+                <cf:Type>ToggleOutput</cf:Type>
+                <cf:Mask>Port2</cf:Mask>
+              </Builder>
             </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>BehaviorCommands</Name>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="MulticastSubject">
+                <Name>BehaviorCommands</Name>
+              </Builder>
             </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="IntProperty">
-                <Value>1</Value>
-              </Combinator>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="IntProperty">
+                  <Value>1</Value>
+                </Combinator>
+              </Builder>
             </Expression>
-            <Expression xsi:type="cf:BehaviorCommand">
-              <cf:Type>PulsePeriod</cf:Type>
-              <cf:Mask>Port2</cf:Mask>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="cf:BehaviorCommand">
+                <cf:Type>PulsePeriod</cf:Type>
+                <cf:Mask>Port2</cf:Mask>
+              </Builder>
             </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>BehaviorCommands</Name>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="MulticastSubject">
+                <Name>BehaviorCommands</Name>
+              </Builder>
             </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>BehaviorEvents</Name>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="SubscribeSubject">
+                <Name>BehaviorEvents</Name>
+              </Builder>
             </Expression>
-            <Expression xsi:type="beh:Parse">
-              <harp:MessageType>Write</harp:MessageType>
-              <harp:Register xsi:type="beh:TimestampedOutputToggle" />
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="beh:Parse">
+                <harp:MessageType>Write</harp:MessageType>
+                <harp:Register xsi:type="beh:TimestampedOutputToggle" />
+              </Builder>
             </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Value</Selector>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="MemberSelector">
+                <Selector>Value</Selector>
+              </Builder>
             </Expression>
-            <Expression xsi:type="BitwiseAnd">
-              <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalOutputs">
-                <Value>DOPort2</Value>
-              </Operand>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="BitwiseAnd">
+                <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalOutputs">
+                  <Value>DOPort2</Value>
+                </Operand>
+              </Builder>
             </Expression>
-            <Expression xsi:type="GreaterThan">
-              <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
-                <Value>0</Value>
-              </Operand>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="GreaterThan">
+                <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
+                  <Value>0</Value>
+                </Operand>
+              </Builder>
             </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:DistinctUntilChanged" />
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="rx:DistinctUntilChanged" />
+              </Builder>
             </Expression>
-            <Expression xsi:type="rx:Condition">
-              <Workflow>
-                <Nodes>
-                  <Expression xsi:type="WorkflowInput">
-                    <Name>Source1</Name>
-                  </Expression>
-                  <Expression xsi:type="WorkflowOutput" />
-                </Nodes>
-                <Edges>
-                  <Edge From="0" To="1" Label="Source1" />
-                </Edges>
-              </Workflow>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="rx:Condition">
+                <Workflow>
+                  <Nodes>
+                    <Expression xsi:type="WorkflowInput">
+                      <Name>Source1</Name>
+                    </Expression>
+                    <Expression xsi:type="WorkflowOutput" />
+                  </Nodes>
+                  <Edges>
+                    <Edge From="0" To="1" Label="Source1" />
+                  </Edges>
+                </Workflow>
+              </Builder>
             </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:WithLatestFrom" />
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="rx:WithLatestFrom" />
+              </Builder>
             </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Item2.Seconds</Selector>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="MemberSelector">
+                <Selector>Item2.Seconds</Selector>
+              </Builder>
             </Expression>
-            <Expression xsi:type="scr:ExpressionTransform">
-              <scr:Expression>new(it as Seconds)</scr:Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="scr:ExpressionTransform">
+                <scr:Expression>new(it as Seconds)</scr:Expression>
+              </Builder>
             </Expression>
-            <Expression xsi:type="osc:Format">
-              <osc:Address>/LeftRewardDeliveryTimeHarp</osc:Address>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="osc:Format">
+                <osc:Address>/LeftRewardDeliveryTimeHarp</osc:Address>
+              </Builder>
             </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>ToBonsaiOSC2</Name>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="MulticastSubject">
+                <Name>ToBonsaiOSC2</Name>
+              </Builder>
             </Expression>
           </Nodes>
           <Edges>
@@ -3176,7 +3260,7 @@ def process(value):
             </Expression>
             <Expression xsi:type="cf:BehaviorEvent">
               <cf:Type>RegisterInputs</cf:Type>
-              <cf:Mask>Port0</cf:Mask>
+              <cf:Mask>Port1</cf:Mask>
             </Expression>
             <Expression xsi:type="MemberSelector">
               <Selector>Seconds</Selector>
