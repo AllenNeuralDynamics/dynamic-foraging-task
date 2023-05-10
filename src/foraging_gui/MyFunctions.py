@@ -802,7 +802,6 @@ class GenerateTrials():
 
         for i in range(10):
             Rec=Channel1.receive()
-
             if Rec[0]=='/TrialStartTime':
                 TrialStartTime=Rec[1]
             elif Rec[0]=='/DelayStartTime':
@@ -853,13 +852,13 @@ class GenerateTrials():
                 GoCueTimeHarp=Rec[1]
             elif Rec[0]=='/TrialEndTimeHarp':
                 TrialEndTimeHarp=Rec[1]
-        # get the trial end time at the end of the trial
+        # get the event harp time
         self.B_TrialStartTimeHarp=np.append(self.B_TrialStartTimeHarp,TrialStartTimeHarp)
         self.B_DelayStartTimeHarp=np.append(self.B_DelayStartTimeHarp,DelayStartTimeHarp)
         self.B_TrialEndTimeHarp=np.append(self.B_TrialEndTimeHarp,TrialEndTimeHarp)
         self.B_GoCueTimeHarp=np.append(self.B_GoCueTimeHarp,GoCueTimeHarp)
 
-        # get the trial end time at the end of the trial
+        # get the event time
         self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime)
         self.B_DelayStartTime=np.append(self.B_DelayStartTime,DelayStartTime)
         self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime)

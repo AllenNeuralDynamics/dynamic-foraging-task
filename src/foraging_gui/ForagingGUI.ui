@@ -57,7 +57,7 @@
    <widget class="QComboBox" name="Task">
     <property name="geometry">
      <rect>
-      <x>533</x>
+      <x>703</x>
       <y>20</y>
       <width>152</width>
       <height>20</height>
@@ -105,7 +105,7 @@
    <widget class="QComboBox" name="Tower">
     <property name="geometry">
      <rect>
-      <x>690</x>
+      <x>860</x>
       <y>20</y>
       <width>112</width>
       <height>20</height>
@@ -2869,6 +2869,50 @@
       <string/>
      </property>
     </widget>
+   </widget>
+   <widget class="QLabel" name="label_74">
+    <property name="geometry">
+     <rect>
+      <x>526</x>
+      <y>20</y>
+      <width>71</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>Experimenter:</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="Experimenter">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>20</y>
+      <width>71</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>Xinxin Yin</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

@@ -97,6 +97,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Channel3.receive()
         while not self.Channel4.msgs.empty():
             self.Channel4.receive()
+
     def connectSignalsSlots(self):
         '''Define callbacks'''
         self.action_About.triggered.connect(self._about)
@@ -168,7 +169,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     if child.objectName()=='AnimalName' and child.text()=='':
                         child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
-                    if child.objectName()=='TotalWater' or child.objectName()=='AnimalName' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
+                    if child.objectName()=='Experimenter' or child.objectName()=='TotalWater' or child.objectName()=='AnimalName' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
                         continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
@@ -204,7 +205,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     continue
                 if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                     self.Continue=0
-                    if child.objectName()=='AnimalName' or child.objectName()=='UncoupledReward' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
+                    if child.objectName()=='Experimenter' or child.objectName()=='AnimalName' or child.objectName()=='UncoupledReward' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
                         child.setStyleSheet('color: red;')
                         self.Continue=1
                     if child.text()=='': # If it's empty, changing the background color and waiting for the confirming
