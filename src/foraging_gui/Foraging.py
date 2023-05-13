@@ -14,7 +14,7 @@ from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,Manip
 from MyFunctions import GenerateTrials, Worker
 import warnings
 import json 
-#warnings.filterwarnings("ignore")
+warnings.filterwarnings("ignore")
 
 
 class NumpyEncoder(json.JSONEncoder):
@@ -22,11 +22,6 @@ class NumpyEncoder(json.JSONEncoder):
         if isinstance(obj, np.ndarray):
             return obj.tolist()
         return json.JSONEncoder.default(self, obj)
-
-def dump_single_line(obj, fp):
-    for key, value in obj.items():
-        fp.write(json.dumps({key: value}, indent=None, cls=NumpyEncoder, separators=(',', ':')))
-        fp.write('\n')
 
 class Window(QMainWindow, Ui_ForagingGUI):
     def __init__(self, parent=None):

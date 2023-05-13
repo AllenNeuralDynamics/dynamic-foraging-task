@@ -11,7 +11,8 @@ class RigClient:
     def msg_handler(self, address, *args):
         msg = OSCMessage(address, args)
         CurrentMessage=[msg.address,args[1][0],msg.values()[2],msg.values()[3]]
-        self.msgs.put(CurrentMessage)
+        #self.msgs.put([CurrentMessage])
+        self.msgs.put([msg,args])
         print(CurrentMessage)
 
     def send(self, address="", *args):

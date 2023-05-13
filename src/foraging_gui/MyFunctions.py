@@ -802,20 +802,20 @@ class GenerateTrials():
 
         for i in range(10):
             Rec=Channel1.receive()
-            if Rec[0]=='/TrialStartTime':
-                TrialStartTime=Rec[1]
-            elif Rec[0]=='/DelayStartTime':
-                DelayStartTime=Rec[1]
-            elif Rec[0]=='/GoCueTime':
+            if Rec[0].address=='/TrialStartTime':
+                TrialStartTime=Rec[1][1][0]
+            elif Rec[0].address=='/DelayStartTime':
+                DelayStartTime=Rec[1][1][0]
+            elif Rec[0].address=='/GoCueTime':
                 # give auto water after Co cue
                 if self.CurrentAutoReward==1:
                     self._GiveLeft()
                     self._GiveRight()
-                GoCueTime=Rec[1]
-            elif Rec[0]=='/RewardOutcomeTime':
-                RewardOutcomeTime=Rec[1]
-            elif Rec[0]=='/RewardOutcome':
-                TrialOutcome=Rec[1]
+                GoCueTime=Rec[1][1][0]
+            elif Rec[0].address=='/RewardOutcomeTime':
+                RewardOutcomeTime=Rec[1][1][0]
+            elif Rec[0].address=='/RewardOutcome':
+                TrialOutcome=Rec[1][1][0]
                 if TrialOutcome=='NoResponse':
                     self.B_AnimalCurrentResponse=2
                     self.B_CurrentRewarded[0]=False
@@ -842,16 +842,16 @@ class GenerateTrials():
                     self.B_CurrentRewarded[1]=False
                 self.B_RewardedHistory=np.append(self.B_RewardedHistory,self.B_CurrentRewarded,axis=1)
                 self.B_AnimalResponseHistory=np.append(self.B_AnimalResponseHistory,self.B_AnimalCurrentResponse)
-            elif Rec[0]=='/TrialEndTime':
-                TrialEndTime=Rec[1]
-            elif Rec[0]=='/TrialStartTimeHarp':
-                TrialStartTimeHarp=Rec[1]
-            elif Rec[0]=='/DelayStartTimeHarp':
-                DelayStartTimeHarp=Rec[1]
-            elif Rec[0]=='/GoCueTimeHarp':
-                GoCueTimeHarp=Rec[1]
-            elif Rec[0]=='/TrialEndTimeHarp':
-                TrialEndTimeHarp=Rec[1]
+            elif Rec[0].address=='/TrialEndTime':
+                TrialEndTime=Rec[1][1][0]
+            elif Rec[0].address=='/TrialStartTimeHarp':
+                TrialStartTimeHarp=Rec[1][1][0]
+            elif Rec[0].address=='/DelayStartTimeHarp':
+                DelayStartTimeHarp=Rec[1][1][0]
+            elif Rec[0].address=='/GoCueTimeHarp':
+                GoCueTimeHarp=Rec[1][1][0]
+            elif Rec[0].address=='/TrialEndTimeHarp':
+                TrialEndTimeHarp=Rec[1][1][0]
         # get the event harp time
         self.B_TrialStartTimeHarp=np.append(self.B_TrialStartTimeHarp,TrialStartTimeHarp)
         self.B_DelayStartTimeHarp=np.append(self.B_DelayStartTimeHarp,DelayStartTimeHarp)
@@ -883,19 +883,20 @@ class GenerateTrials():
         #    time.sleep(0.01)
         while not Channel2.msgs.empty():
             Rec=Channel2.receive()
-            if Rec[0]=='/LeftLickTime':
-                self.B_LeftLickTime=np.append(self.B_LeftLickTime,Rec[1])
-            elif Rec[0]=='/RightLickTime':
-                self.B_RightLickTime=np.append(self.B_RightLickTime,Rec[1])
-            elif Rec[0]=='/LeftRewardDeliveryTime':
-                self.B_LeftRewardDeliveryTime=np.append(self.B_LeftRewardDeliveryTime,Rec[1])
-            elif Rec[0]=='/RightRewardDeliveryTime':
-                self.B_RightRewardDeliveryTime=np.append(self.B_RightRewardDeliveryTime,Rec[1])
-            elif Rec[0]=='/LeftRewardDeliveryTimeHarp':
-                self.B_RightRewardDeliveryTimeHarp=np.append(self.B_RightRewardDeliveryTimeHarp,Rec[1])
-            elif Rec[0]=='/RightRewardDeliveryTimeHarp':
-                self.B_RightRewardDeliveryTimeHarp=np.append(self.B_RightRewardDeliveryTimeHarp,Rec[1])
-            
+            if Rec[0].address=='/LeftLickTime':
+                self.B_LeftLickTime=np.append(self.B_LeftLickTime,Rec[1][1][0])
+            elif Rec[0].address=='/RightLickTime':
+                self.B_RightLickTime=np.append(self.B_RightLickTime,Rec[1][1][0])
+            elif Rec[0].address=='/LeftRewardDeliveryTime':
+                self.B_LeftRewardDeliveryTime=np.append(self.B_LeftRewardDeliveryTime,Rec[1][1][0])
+            elif Rec[0].address=='/RightRewardDeliveryTime':
+                self.B_RightRewardDeliveryTime=np.append(self.B_RightRewardDeliveryTime,Rec[1][1][0])
+            elif Rec[0].address=='/LeftRewardDeliveryTimeHarp':
+                self.B_RightRewardDeliveryTimeHarp=np.append(self.B_RightRewardDeliveryTimeHarp,Rec[1][1][0])
+            elif Rec[0].address=='/RightRewardDeliveryTimeHarp':
+                self.B_RightRewardDeliveryTimeHarp=np.append(self.B_RightRewardDeliveryTimeHarp,Rec[1][1][0])
+
+                    
     def _DeletePreviousLicks(self,Channel2):
         '''Delete licks from the previous session'''
         while not Channel2.msgs.empty():
