@@ -4,6 +4,7 @@
                  xmlns:io="clr-namespace:Bonsai.IO;assembly=Bonsai.System"
                  xmlns:rx="clr-namespace:Bonsai.Reactive;assembly=Bonsai.Core"
                  xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                 xmlns:gl="clr-namespace:Bonsai.Shaders;assembly=Bonsai.Shaders"
                  xmlns:osc="clr-namespace:Bonsai.Osc;assembly=Bonsai.Osc"
                  xmlns:scr="clr-namespace:Bonsai.Scripting.Expressions;assembly=Bonsai.Scripting.Expressions"
                  xmlns:ipy="clr-namespace:Bonsai.Scripting.IronPython;assembly=Bonsai.Scripting.IronPython"
@@ -48,6 +49,43 @@
             </Expression>
             <Expression xsi:type="rx:BehaviorSubject" TypeArguments="sys:Boolean">
               <rx:Name>GoCue</rx:Name>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="gl:CreateWindow">
+                <gl:Width>640</gl:Width>
+                <gl:Height>480</gl:Height>
+                <gl:VSync>On</gl:VSync>
+                <gl:SwapSync>false</gl:SwapSync>
+                <gl:ClearColor>Black</gl:ClearColor>
+                <gl:ClearMask>DepthBufferBit ColorBufferBit</gl:ClearMask>
+                <gl:CursorVisible>true</gl:CursorVisible>
+                <gl:Location xsi:nil="true" />
+                <gl:WindowBorder>Hidden</gl:WindowBorder>
+                <gl:WindowState>Minimized</gl:WindowState>
+                <gl:DisplayDevice>Primary</gl:DisplayDevice>
+                <gl:TargetRenderFrequency>60</gl:TargetRenderFrequency>
+                <gl:TargetUpdateFrequency xsi:nil="true" />
+                <gl:RenderState />
+                <gl:GraphicsMode>
+                  <gl:ColorFormat>
+                    <gl:Red>8</gl:Red>
+                    <gl:Green>8</gl:Green>
+                    <gl:Blue>8</gl:Blue>
+                    <gl:Alpha>8</gl:Alpha>
+                  </gl:ColorFormat>
+                  <gl:Depth>16</gl:Depth>
+                  <gl:Stencil>0</gl:Stencil>
+                  <gl:Samples>0</gl:Samples>
+                  <gl:AccumulatorFormat>
+                    <gl:Red>0</gl:Red>
+                    <gl:Green>0</gl:Green>
+                    <gl:Blue>0</gl:Blue>
+                    <gl:Alpha>0</gl:Alpha>
+                  </gl:AccumulatorFormat>
+                  <gl:Buffers>2</gl:Buffers>
+                  <gl:Stereo>false</gl:Stereo>
+                </gl:GraphicsMode>
+              </Combinator>
             </Expression>
           </Nodes>
           <Edges />
@@ -236,8 +274,8 @@
                     <Property Name="DueTime" />
                   </Expression>
                   <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:Delay">
-                      <rx:DueTime>PT1.73S</rx:DueTime>
+                    <Combinator xsi:type="gl:Delay">
+                      <gl:DueTime>PT1.73S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -284,8 +322,8 @@
                     <Property Name="DueTime" />
                   </Expression>
                   <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:Delay">
-                      <rx:DueTime>PT0.239S</rx:DueTime>
+                    <Combinator xsi:type="gl:Delay">
+                      <gl:DueTime>PT0.239S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -354,9 +392,9 @@
                     <Property Name="DueTime" />
                   </Expression>
                   <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:Timer">
-                      <rx:DueTime>PT1S</rx:DueTime>
-                      <rx:Period>PT0S</rx:Period>
+                    <Combinator xsi:type="gl:Timer">
+                      <gl:DueTime>PT1S</gl:DueTime>
+                      <gl:Period>PT0S</gl:Period>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -651,8 +689,8 @@
                     <Property Name="DueTime" />
                   </Expression>
                   <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:Delay">
-                      <rx:DueTime>PT3S</rx:DueTime>
+                    <Combinator xsi:type="gl:Delay">
+                      <gl:DueTime>PT3S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -2387,8 +2425,8 @@ def process(value):
               <Name>BehaviorCommands</Name>
             </Expression>
             <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:Delay">
-                <rx:DueTime>PT1S</rx:DueTime>
+              <Combinator xsi:type="gl:Delay">
+                <gl:DueTime>PT1S</gl:DueTime>
               </Combinator>
             </Expression>
             <Expression xsi:type="cf:BehaviorCommand">
@@ -2460,8 +2498,8 @@ def process(value):
               <Name>BehaviorCommands</Name>
             </Expression>
             <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:Delay">
-                <rx:DueTime>PT1S</rx:DueTime>
+              <Combinator xsi:type="gl:Delay">
+                <gl:DueTime>PT1S</gl:DueTime>
               </Combinator>
             </Expression>
             <Expression xsi:type="cf:BehaviorCommand">
@@ -2533,8 +2571,8 @@ def process(value):
               <Name>BehaviorCommands</Name>
             </Expression>
             <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:Delay">
-                <rx:DueTime>PT1S</rx:DueTime>
+              <Combinator xsi:type="gl:Delay">
+                <gl:DueTime>PT1S</gl:DueTime>
               </Combinator>
             </Expression>
             <Expression xsi:type="cf:BehaviorCommand">
@@ -2708,8 +2746,8 @@ def process(value):
               <Name>BehaviorCommands</Name>
             </Expression>
             <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:Delay">
-                <rx:DueTime>PT0.005S</rx:DueTime>
+              <Combinator xsi:type="gl:Delay">
+                <gl:DueTime>PT0.005S</gl:DueTime>
               </Combinator>
             </Expression>
             <Expression xsi:type="cf:BehaviorCommand">
@@ -4042,8 +4080,8 @@ def process(value):
                 <Combinator xsi:type="rx:TakeUntil" />
               </Expression>
               <Expression xsi:type="Combinator">
-                <Combinator xsi:type="rx:Delay">
-                  <rx:DueTime>PT5S</rx:DueTime>
+                <Combinator xsi:type="gl:Delay">
+                  <gl:DueTime>PT5S</gl:DueTime>
                 </Combinator>
               </Expression>
               <Expression xsi:type="Combinator">
