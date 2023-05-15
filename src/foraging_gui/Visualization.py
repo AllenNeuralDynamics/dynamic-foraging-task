@@ -41,6 +41,9 @@ class PlotV(FigureCanvas):
         self.B_TrialStartTime=GeneratedTrials.B_TrialStartTime
         self.B_TrialEndTime=GeneratedTrials.B_TrialEndTime
         self.B_RewardOutcomeTime=GeneratedTrials.B_RewardOutcomeTime
+        self.MarchingType=GeneratedTrials.TP_MartchingType
+
+        
         if self.B_CurrentTrialN>0:
             self.B_Time=self.B_RewardOutcomeTime-GeneratedTrials.B_TrialStartTime[0]
         else:
@@ -52,14 +55,16 @@ class PlotV(FigureCanvas):
         except:
             self.B_BTime=np.append(self.B_BTime,2)
 
-        self.MarchingType=GeneratedTrials.TP_MartchingType
-        self._PlotBlockStructure()
-        self._PlotChoice()
+        try:
+            self._PlotBlockStructure()
+            self._PlotChoice()
+            self._PlotLicks()
+        except:
+            pass
         try:
             self._PlotMatching()
         except:
             pass
-        self._PlotLicks()
         self.finish=1
     def _PlotBlockStructure(self):
         ax2=self.ax2
