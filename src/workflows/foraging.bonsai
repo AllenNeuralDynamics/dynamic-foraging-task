@@ -275,7 +275,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT2.851S</gl:DueTime>
+                      <gl:DueTime>PT5.419S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -323,7 +323,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT0.536S</gl:DueTime>
+                      <gl:DueTime>PT0.12S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -3056,7 +3056,7 @@ def process(value):
                 <harp:VisualIndicators>On</harp:VisualIndicators>
                 <harp:Heartbeat>Disabled</harp:Heartbeat>
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                <harp:PortName>COM4</harp:PortName>
+                <harp:PortName>COM6</harp:PortName>
               </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
@@ -3134,7 +3134,7 @@ def process(value):
             </Expression>
             <Expression xsi:type="BitwiseAnd">
               <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalInputs">
-                <Value>DI2</Value>
+                <Value>DI0</Value>
               </Operand>
             </Expression>
             <Expression xsi:type="GreaterThan">
