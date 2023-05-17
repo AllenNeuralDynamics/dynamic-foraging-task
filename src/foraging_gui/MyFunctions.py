@@ -896,7 +896,6 @@ class GenerateTrials():
             elif Rec[0].address=='/RightRewardDeliveryTimeHarp':
                 self.B_RightRewardDeliveryTimeHarp=np.append(self.B_RightRewardDeliveryTimeHarp,Rec[1][1][0])
 
-                    
     def _DeletePreviousLicks(self,Channel2):
         '''Delete licks from the previous session'''
         while not Channel2.msgs.empty():
