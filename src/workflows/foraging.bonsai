@@ -2900,7 +2900,7 @@ def process(value):
             <Expression xsi:type="beh:CreateMessage">
               <harp:Payload xsi:type="beh:CreateOutputPulseEnablePayload">
                 <harp:MessageType>Write</harp:MessageType>
-                <beh:Value>DOPort2</beh:Value>
+                <beh:Value>DOPort2 SupplyPort0 SupplyPort1 SupplyPort2</beh:Value>
               </harp:Payload>
             </Expression>
             <Expression xsi:type="MulticastSubject">
