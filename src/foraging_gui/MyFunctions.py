@@ -868,12 +868,14 @@ class GenerateTrials():
     def _GiveLeft(self):
         '''manually give left water'''
         self.win.Channel.LeftValue(float(self.win.LeftValue.text())*1000*float(self.win.Multiplier.text())) 
+        time.sleep(0.01) 
         self.win.Channel3.ManualWater_Left(int(1))
         self.win.Channel.LeftValue(float(self.win.LeftValue.text())*1000)
 
     def _GiveRight(self):
         '''manually give right water'''
         self.win.Channel.RightValue(float(self.win.RightValue.text())*1000*float(self.win.Multiplier.text()))
+        time.sleep(0.01) 
         self.win.Channel3.ManualWater_Right(int(1))
         self.win.Channel.RightValue(float(self.win.RightValue.text())*1000)
 
