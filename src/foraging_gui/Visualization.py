@@ -4,6 +4,7 @@ import pandas as pd
 from matplotlib.figure import Figure
 from matplotlib.gridspec import GridSpec
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from scipy import stats
 
 class PlotV(FigureCanvas):
     def __init__(self,win,GeneratedTrials=None,parent=None,dpi=100,width=5, height=4):
@@ -59,11 +60,11 @@ class PlotV(FigureCanvas):
             self._PlotBlockStructure()
             self._PlotChoice()
             self._PlotLicks()
-        except:
+        except ValueError:
             pass
         try:
             self._PlotMatching()
-        except:
+        except ValueError:
             pass
         self.finish=1
     def _PlotBlockStructure(self):
@@ -74,7 +75,7 @@ class PlotV(FigureCanvas):
             ax2.plot(self.B_Time, self.B_RewardProHistory[1],color='b', label='p_R',alpha=1)
             Fraction=self.B_RewardProHistory[1]/self.B_RewardProHistory.sum(axis=0)
             ax2.plot(self.B_Time,Fraction,color='y',label='p_R_frac',alpha=0.5)
-        except:
+        except ValueError:
             Len=len(self.B_Time)
             ax2.plot(self.B_Time, self.B_RewardProHistory[0][0:Len],color='r', label='p_L',alpha=1)
             ax2.plot(self.B_Time, self.B_RewardProHistory[1][0:Len],color='b', label='p_R',alpha=1)
@@ -170,8 +171,8 @@ class PlotV(FigureCanvas):
         if np.size(NoResponse) !=0:
             ax1.plot(self.B_Time[NoResponse], np.zeros(len(self.B_Time[NoResponse]))+.5, 'Xk',label='NoResponse',markersize=MarkerSize,alpha=0.2)
         if self.B_CurrentTrialN>kernel_size:
-            ax2.plot(self.B_Time[kernel_size-1:],ResponseHistoryF[:-kernel_size+1],'k',label='Choice_frac')
-            ax2.plot(self.B_Time[kernel_size-1:],RewardedHistoryF[:-kernel_size+1],'g',label='reward_frac')
+            ax2.plot(self.B_Time[kernel_size-1:],ResponseHistoryF[:-kernel_size+1],'k',label='Choice_frac',linewidth=2,alpha=1)
+            ax2.plot(self.B_Time[kernel_size-1:],RewardedHistoryF[:-kernel_size+1],'g',label='reward_frac',linewidth=2,alpha=1)
             ax2.plot(self.B_Time[kernel_size-1:],SuccessHistoryF[:-kernel_size+1],'c',label='succuss_frac', alpha=0.2)
         self._UpdateAxis()
         self.draw()
@@ -216,8 +217,9 @@ class PlotV(FigureCanvas):
             RightRewardN=sum(self.B_RewardedHistory[1,CuI]==1)    
             choice_R_frac[idx]=LeftChoiceN/(LeftChoiceN+RightChoiceN)
             reward_R_frac[idx]=LeftRewardN/(LeftRewardN+RightRewardN)
-            choice_log_ratio[idx]=np.log(RightChoiceN / LeftChoiceN)
-            reward_log_ratio[idx]=np.log(RightRewardN / LeftRewardN)
+            if RightChoiceN and LeftChoiceN and RightRewardN and LeftRewardN:
+                choice_log_ratio[idx]=np.log(RightChoiceN / LeftChoiceN)
+                reward_log_ratio[idx]=np.log(RightRewardN / LeftRewardN)
             WinStartN=WinStartN+StepSize
         if self.MarchingType=='log ratio':
             x=reward_log_ratio
@@ -245,7 +247,7 @@ class PlotV(FigureCanvas):
             ax.set_title(f'Matching slope = {slope:.2f}, bias_R = {intercept:.2f}', fontsize=10)
             ax.legend(loc='upper left', fontsize=8)
             ax.axis('equal')
-        except:
+        except ValueError:
             pass
         self.draw()
         #range(np.min(self.B_Time),np.max(self.B_Time),periods = numberofpoints * int(self.DotsPerWindow()))

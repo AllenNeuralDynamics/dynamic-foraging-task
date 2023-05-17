@@ -14,7 +14,7 @@ from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,Manip
 from MyFunctions import GenerateTrials, Worker
 import warnings
 import json 
-warnings.filterwarnings("ignore")
+#warnings.filterwarnings("ignore")
 
 
 class NumpyEncoder(json.JSONEncoder):
@@ -33,7 +33,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             with open(self.SettingFile, 'r') as f:
                 Settings = json.load(f)
             self.default_saveFolder=Settings['default_saveFolder']
-        except:
+        except ValueError:
             self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
@@ -246,7 +246,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 if int(self.RewardPairsN.text())>len(self.RewardFamilies[int(self.RewardFamily.text())-1]):
                     self.RewardPairsN.setText(str(len(self.RewardFamilies[int(self.RewardFamily.text())-1])))
                 return 1
-            except:
+            except ValueError:
                 return 0
         if child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum':
             try:
@@ -281,7 +281,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         try:
             self.T_SuggestedWater=float(self.TotalWater.text())-float(self.GeneratedTrials.BS_TotalReward)
             self.SuggestedWater.setText(str(np.round(self.T_SuggestedWater,3)))
-        except:
+        except ValueError:
             self.SuggestedWater.setText(self.TotalWater.text())
 
     def _GetTrainingParameters(self):

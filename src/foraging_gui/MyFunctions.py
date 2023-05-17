@@ -1,5 +1,5 @@
 
-import random, traceback, math,time
+import random, traceback, math,time,sys
 from datetime import datetime
 import numpy as np
 from itertools import accumulate
@@ -1000,7 +1000,7 @@ class Worker(QRunnable):
         # Retrieve args/kwargs here; and fire processing using them
         try:
             result = self.fn(*self.args, **self.kwargs)
-        except:
+        except ValueError:
             traceback.print_exc()
             exctype, value = sys.exc_info()[:2]
             self.signals.error.emit((exctype, value, traceback.format_exc()))
