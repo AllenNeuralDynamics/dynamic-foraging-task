@@ -14,7 +14,7 @@ from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,Manip
 from MyFunctions import GenerateTrials, Worker
 import warnings
 import json 
-#warnings.filterwarnings("ignore")
+warnings.filterwarnings("ignore")
 
 
 class NumpyEncoder(json.JSONEncoder):
@@ -908,16 +908,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Opto_dialog.hide()
     def _GiveLeft(self):
         '''manually give left water'''
-        self.Channel.LeftValue(float(self.GiveWaterL.text())*1000)
+        self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
         time.sleep(0.01) 
         self.Channel3.ManualWater_Left(int(1))
-        self.Channel.LeftValue(float(self.LeftValue.text())*1000)
+        self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
     def _GiveRight(self):
         '''manually give right water'''
-        self.Channel.RightValue(float(self.GiveWaterR.text())*1000)
+        self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
         time.sleep(0.01) 
         self.Channel3.ManualWater_Right(int(1))
-        self.Channel.RightValue(float(self.RightValue.text())*1000)
+        self.Channel.RightValue(float(self.TP_RightValue)*1000)
 
 if __name__ == "__main__":
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling,1)
