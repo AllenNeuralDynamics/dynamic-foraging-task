@@ -4,6 +4,7 @@
                  xmlns:io="clr-namespace:Bonsai.IO;assembly=Bonsai.System"
                  xmlns:rx="clr-namespace:Bonsai.Reactive;assembly=Bonsai.Core"
                  xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                 xmlns:gl="clr-namespace:Bonsai.Shaders;assembly=Bonsai.Shaders"
                  xmlns:osc="clr-namespace:Bonsai.Osc;assembly=Bonsai.Osc"
                  xmlns:scr="clr-namespace:Bonsai.Scripting.Expressions;assembly=Bonsai.Scripting.Expressions"
                  xmlns:ipy="clr-namespace:Bonsai.Scripting.IronPython;assembly=Bonsai.Scripting.IronPython"
@@ -48,6 +49,43 @@
             </Expression>
             <Expression xsi:type="rx:BehaviorSubject" TypeArguments="sys:Boolean">
               <rx:Name>GoCue</rx:Name>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="gl:CreateWindow">
+                <gl:Width>640</gl:Width>
+                <gl:Height>480</gl:Height>
+                <gl:VSync>On</gl:VSync>
+                <gl:SwapSync>false</gl:SwapSync>
+                <gl:ClearColor>Black</gl:ClearColor>
+                <gl:ClearMask>DepthBufferBit ColorBufferBit</gl:ClearMask>
+                <gl:CursorVisible>true</gl:CursorVisible>
+                <gl:Location xsi:nil="true" />
+                <gl:WindowBorder>Hidden</gl:WindowBorder>
+                <gl:WindowState>Minimized</gl:WindowState>
+                <gl:DisplayDevice>Primary</gl:DisplayDevice>
+                <gl:TargetRenderFrequency>60</gl:TargetRenderFrequency>
+                <gl:TargetUpdateFrequency xsi:nil="true" />
+                <gl:RenderState />
+                <gl:GraphicsMode>
+                  <gl:ColorFormat>
+                    <gl:Red>8</gl:Red>
+                    <gl:Green>8</gl:Green>
+                    <gl:Blue>8</gl:Blue>
+                    <gl:Alpha>8</gl:Alpha>
+                  </gl:ColorFormat>
+                  <gl:Depth>16</gl:Depth>
+                  <gl:Stencil>0</gl:Stencil>
+                  <gl:Samples>0</gl:Samples>
+                  <gl:AccumulatorFormat>
+                    <gl:Red>0</gl:Red>
+                    <gl:Green>0</gl:Green>
+                    <gl:Blue>0</gl:Blue>
+                    <gl:Alpha>0</gl:Alpha>
+                  </gl:AccumulatorFormat>
+                  <gl:Buffers>2</gl:Buffers>
+                  <gl:Stereo>false</gl:Stereo>
+                </gl:GraphicsMode>
+              </Combinator>
             </Expression>
           </Nodes>
           <Edges />
@@ -236,8 +274,8 @@
                     <Property Name="DueTime" />
                   </Expression>
                   <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:Delay">
-                      <rx:DueTime>PT1.73S</rx:DueTime>
+                    <Combinator xsi:type="gl:Delay">
+                      <gl:DueTime>PT5.419S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -284,8 +322,8 @@
                     <Property Name="DueTime" />
                   </Expression>
                   <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:Delay">
-                      <rx:DueTime>PT0.239S</rx:DueTime>
+                    <Combinator xsi:type="gl:Delay">
+                      <gl:DueTime>PT0.12S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -354,9 +392,9 @@
                     <Property Name="DueTime" />
                   </Expression>
                   <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:Timer">
-                      <rx:DueTime>PT1S</rx:DueTime>
-                      <rx:Period>PT0S</rx:Period>
+                    <Combinator xsi:type="gl:Timer">
+                      <gl:DueTime>PT1S</gl:DueTime>
+                      <gl:Period>PT0S</gl:Period>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -651,8 +689,8 @@
                     <Property Name="DueTime" />
                   </Expression>
                   <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:Delay">
-                      <rx:DueTime>PT3S</rx:DueTime>
+                    <Combinator xsi:type="gl:Delay">
+                      <gl:DueTime>PT3S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -2387,8 +2425,8 @@ def process(value):
               <Name>BehaviorCommands</Name>
             </Expression>
             <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:Delay">
-                <rx:DueTime>PT1S</rx:DueTime>
+              <Combinator xsi:type="gl:Delay">
+                <gl:DueTime>PT1S</gl:DueTime>
               </Combinator>
             </Expression>
             <Expression xsi:type="cf:BehaviorCommand">
@@ -2460,8 +2498,8 @@ def process(value):
               <Name>BehaviorCommands</Name>
             </Expression>
             <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:Delay">
-                <rx:DueTime>PT1S</rx:DueTime>
+              <Combinator xsi:type="gl:Delay">
+                <gl:DueTime>PT1S</gl:DueTime>
               </Combinator>
             </Expression>
             <Expression xsi:type="cf:BehaviorCommand">
@@ -2533,8 +2571,8 @@ def process(value):
               <Name>BehaviorCommands</Name>
             </Expression>
             <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:Delay">
-                <rx:DueTime>PT1S</rx:DueTime>
+              <Combinator xsi:type="gl:Delay">
+                <gl:DueTime>PT1S</gl:DueTime>
               </Combinator>
             </Expression>
             <Expression xsi:type="cf:BehaviorCommand">
@@ -2697,78 +2735,39 @@ def process(value):
             <Expression xsi:type="MulticastSubject">
               <Name>ToBonsaiOSC2</Name>
             </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>GoCue</Name>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="SubscribeSubject">
+                <Name>GoCue</Name>
+              </Builder>
             </Expression>
-            <Expression xsi:type="cf:BehaviorCommand">
-              <cf:Type>SetOutput</cf:Type>
-              <cf:Mask>Port2</cf:Mask>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="cf:BehaviorCommand">
+                <cf:Type>SetOutput</cf:Type>
+                <cf:Mask>Port2</cf:Mask>
+              </Builder>
             </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>BehaviorCommands</Name>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="MulticastSubject">
+                <Name>BehaviorCommands</Name>
+              </Builder>
             </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:Delay">
-                <rx:DueTime>PT0.005S</rx:DueTime>
-              </Combinator>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="gl:Delay">
+                  <gl:DueTime>PT0.005S</gl:DueTime>
+                </Combinator>
+              </Builder>
             </Expression>
-            <Expression xsi:type="cf:BehaviorCommand">
-              <cf:Type>ClearOutput</cf:Type>
-              <cf:Mask>Port2</cf:Mask>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="cf:BehaviorCommand">
+                <cf:Type>ClearOutput</cf:Type>
+                <cf:Mask>Port2</cf:Mask>
+              </Builder>
             </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>BehaviorCommands</Name>
-            </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>BehaviorEvents</Name>
-            </Expression>
-            <Expression xsi:type="beh:Parse">
-              <harp:MessageType>Write</harp:MessageType>
-              <harp:Register xsi:type="beh:TimestampedOutputSet" />
-            </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Value</Selector>
-            </Expression>
-            <Expression xsi:type="BitwiseAnd">
-              <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalOutputs">
-                <Value>DOPort2</Value>
-              </Operand>
-            </Expression>
-            <Expression xsi:type="GreaterThan">
-              <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
-                <Value>0</Value>
-              </Operand>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:DistinctUntilChanged" />
-            </Expression>
-            <Expression xsi:type="rx:Condition">
-              <Workflow>
-                <Nodes>
-                  <Expression xsi:type="WorkflowInput">
-                    <Name>Source1</Name>
-                  </Expression>
-                  <Expression xsi:type="WorkflowOutput" />
-                </Nodes>
-                <Edges>
-                  <Edge From="0" To="1" Label="Source1" />
-                </Edges>
-              </Workflow>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:WithLatestFrom" />
-            </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Item2.Seconds</Selector>
-            </Expression>
-            <Expression xsi:type="scr:ExpressionTransform">
-              <scr:Expression>new(it as Seconds)</scr:Expression>
-            </Expression>
-            <Expression xsi:type="osc:Format">
-              <osc:Address>/GoCueTimeHarp</osc:Address>
-            </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>ToBonsaiOSC</Name>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="MulticastSubject">
+                <Name>BehaviorCommands</Name>
+              </Builder>
             </Expression>
             <Expression xsi:type="Disable">
               <Builder xsi:type="SubscribeSubject">
@@ -2778,7 +2777,7 @@ def process(value):
             <Expression xsi:type="Disable">
               <Builder xsi:type="beh:Parse">
                 <harp:MessageType>Write</harp:MessageType>
-                <harp:Register xsi:type="beh:TimestampedOutputToggle" />
+                <harp:Register xsi:type="beh:TimestampedOutputSet" />
               </Builder>
             </Expression>
             <Expression xsi:type="Disable">
@@ -2845,49 +2844,88 @@ def process(value):
                 <Name>ToBonsaiOSC</Name>
               </Builder>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="beh:CreateMessage">
-                <harp:Payload xsi:type="beh:CreateOutputPulseEnablePayload">
-                  <harp:MessageType>Write</harp:MessageType>
-                  <beh:Value>DOPort2</beh:Value>
-                </harp:Payload>
-              </Builder>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>BehaviorEvents</Name>
+            </Expression>
+            <Expression xsi:type="beh:Parse">
+              <harp:MessageType>Write</harp:MessageType>
+              <harp:Register xsi:type="beh:TimestampedOutputToggle" />
+            </Expression>
+            <Expression xsi:type="MemberSelector">
+              <Selector>Value</Selector>
+            </Expression>
+            <Expression xsi:type="BitwiseAnd">
+              <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalOutputs">
+                <Value>DOPort2</Value>
+              </Operand>
+            </Expression>
+            <Expression xsi:type="GreaterThan">
+              <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
+                <Value>0</Value>
+              </Operand>
             </Expression>
             <Expression xsi:type="Disable">
-              <Builder xsi:type="MulticastSubject">
-                <Name>BehaviorCommands</Name>
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="rx:DistinctUntilChanged" />
               </Builder>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="beh:CreateMessage">
-                <harp:Payload xsi:type="beh:CreatePulseDOPort2Payload">
-                  <harp:MessageType>Write</harp:MessageType>
-                  <beh:Value>10</beh:Value>
-                </harp:Payload>
-              </Builder>
+            <Expression xsi:type="rx:Condition">
+              <Workflow>
+                <Nodes>
+                  <Expression xsi:type="WorkflowInput">
+                    <Name>Source1</Name>
+                  </Expression>
+                  <Expression xsi:type="WorkflowOutput" />
+                </Nodes>
+                <Edges>
+                  <Edge From="0" To="1" Label="Source1" />
+                </Edges>
+              </Workflow>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="MulticastSubject">
-                <Name>BehaviorCommands</Name>
-              </Builder>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="rx:WithLatestFrom" />
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="SubscribeSubject">
-                <Name>GoCue</Name>
-              </Builder>
+            <Expression xsi:type="MemberSelector">
+              <Selector>Item2.Seconds</Selector>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="beh:CreateMessage">
-                <harp:Payload xsi:type="beh:CreateOutputTogglePayload">
-                  <harp:MessageType>Write</harp:MessageType>
-                  <beh:Value>DOPort2</beh:Value>
-                </harp:Payload>
-              </Builder>
+            <Expression xsi:type="scr:ExpressionTransform">
+              <scr:Expression>new(it as Seconds)</scr:Expression>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="MulticastSubject">
-                <Name>BehaviorCommands</Name>
-              </Builder>
+            <Expression xsi:type="osc:Format">
+              <osc:Address>/GoCueTimeHarp</osc:Address>
+            </Expression>
+            <Expression xsi:type="MulticastSubject">
+              <Name>ToBonsaiOSC</Name>
+            </Expression>
+            <Expression xsi:type="beh:CreateMessage">
+              <harp:Payload xsi:type="beh:CreateOutputPulseEnablePayload">
+                <harp:MessageType>Write</harp:MessageType>
+                <beh:Value>DOPort2</beh:Value>
+              </harp:Payload>
+            </Expression>
+            <Expression xsi:type="MulticastSubject">
+              <Name>BehaviorCommands</Name>
+            </Expression>
+            <Expression xsi:type="beh:CreateMessage">
+              <harp:Payload xsi:type="beh:CreatePulseDOPort2Payload">
+                <harp:MessageType>Write</harp:MessageType>
+                <beh:Value>10</beh:Value>
+              </harp:Payload>
+            </Expression>
+            <Expression xsi:type="MulticastSubject">
+              <Name>BehaviorCommands</Name>
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>GoCue</Name>
+            </Expression>
+            <Expression xsi:type="beh:CreateMessage">
+              <harp:Payload xsi:type="beh:CreateOutputTogglePayload">
+                <harp:MessageType>Write</harp:MessageType>
+                <beh:Value>DOPort2</beh:Value>
+              </harp:Payload>
+            </Expression>
+            <Expression xsi:type="MulticastSubject">
+              <Name>BehaviorCommands</Name>
             </Expression>
           </Nodes>
           <Edges>
@@ -3018,7 +3056,7 @@ def process(value):
                 <harp:VisualIndicators>On</harp:VisualIndicators>
                 <harp:Heartbeat>Disabled</harp:Heartbeat>
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                <harp:PortName>COM4</harp:PortName>
+                <harp:PortName>COM6</harp:PortName>
               </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
@@ -3096,7 +3134,7 @@ def process(value):
             </Expression>
             <Expression xsi:type="BitwiseAnd">
               <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalInputs">
-                <Value>DI2</Value>
+                <Value>DI0</Value>
               </Operand>
             </Expression>
             <Expression xsi:type="GreaterThan">

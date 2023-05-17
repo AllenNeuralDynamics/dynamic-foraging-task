@@ -491,6 +491,7 @@ class GenerateTrials():
             pass
         else:
             self.BS_CurrentRunningTime=0
+
         if np.shape(self.B_AnimalResponseHistory)[0]>=StopIgnore:
             if np.all(self.B_AnimalResponseHistory[-StopIgnore:]==2):
                 self.Stop=1
@@ -500,7 +501,7 @@ class GenerateTrials():
                 self.Stop=0
                 self.win.WarningLabelStop.setText('')
                 self.win.WarningLabelStop.setStyleSheet("color: gray;")
-        if self.B_CurrentTrialN>MaxTrial: 
+        elif self.B_CurrentTrialN>MaxTrial: 
             self.Stop=1
             self.win.WarningLabelStop.setText('Stop because maximum trials exceed or equal: '+self.TP_MaxTrial)
             self.win.WarningLabelStop.setStyleSheet("color: red;")
@@ -512,7 +513,6 @@ class GenerateTrials():
             self.Stop=0
             self.win.WarningLabelStop.setText('')
             self.win.WarningLabelStop.setStyleSheet("color: gray;")
-
         if  self.Stop==1:           
             self.win.Start.setStyleSheet("background-color : none")
             self.win.Start.setChecked(False)
