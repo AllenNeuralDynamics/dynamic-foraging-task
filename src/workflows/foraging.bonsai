@@ -2662,9 +2662,6 @@ def process(value):
                 <Value>0</Value>
               </Operand>
             </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:DistinctUntilChanged" />
-            </Expression>
             <Expression xsi:type="rx:Condition">
               <Workflow>
                 <Nodes>
@@ -2713,9 +2710,6 @@ def process(value):
                 <Value>0</Value>
               </Operand>
             </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:DistinctUntilChanged" />
-            </Expression>
             <Expression xsi:type="rx:Condition">
               <Workflow>
                 <Nodes>
@@ -2763,11 +2757,6 @@ def process(value):
               <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
                 <Value>0</Value>
               </Operand>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="rx:DistinctUntilChanged" />
-              </Builder>
             </Expression>
             <Expression xsi:type="rx:Condition">
               <Workflow>
@@ -2874,7 +2863,7 @@ def process(value):
             <Edge From="56" To="57" Label="Source1" />
             <Edge From="58" To="59" Label="Source1" />
             <Edge From="59" To="60" Label="Source1" />
-            <Edge From="59" To="65" Label="Source2" />
+            <Edge From="59" To="64" Label="Source2" />
             <Edge From="60" To="61" Label="Source1" />
             <Edge From="61" To="62" Label="Source1" />
             <Edge From="62" To="63" Label="Source1" />
@@ -2883,10 +2872,10 @@ def process(value):
             <Edge From="65" To="66" Label="Source1" />
             <Edge From="66" To="67" Label="Source1" />
             <Edge From="67" To="68" Label="Source1" />
-            <Edge From="68" To="69" Label="Source1" />
+            <Edge From="69" To="70" Label="Source1" />
             <Edge From="70" To="71" Label="Source1" />
+            <Edge From="70" To="75" Label="Source2" />
             <Edge From="71" To="72" Label="Source1" />
-            <Edge From="71" To="77" Label="Source2" />
             <Edge From="72" To="73" Label="Source1" />
             <Edge From="73" To="74" Label="Source1" />
             <Edge From="74" To="75" Label="Source1" />
@@ -2894,23 +2883,20 @@ def process(value):
             <Edge From="76" To="77" Label="Source1" />
             <Edge From="77" To="78" Label="Source1" />
             <Edge From="78" To="79" Label="Source1" />
-            <Edge From="79" To="80" Label="Source1" />
             <Edge From="80" To="81" Label="Source1" />
+            <Edge From="81" To="82" Label="Source1" />
+            <Edge From="81" To="86" Label="Source2" />
             <Edge From="82" To="83" Label="Source1" />
             <Edge From="83" To="84" Label="Source1" />
-            <Edge From="83" To="89" Label="Source2" />
             <Edge From="84" To="85" Label="Source1" />
             <Edge From="85" To="86" Label="Source1" />
             <Edge From="86" To="87" Label="Source1" />
             <Edge From="87" To="88" Label="Source1" />
             <Edge From="88" To="89" Label="Source1" />
             <Edge From="89" To="90" Label="Source1" />
-            <Edge From="90" To="91" Label="Source1" />
             <Edge From="91" To="92" Label="Source1" />
             <Edge From="92" To="93" Label="Source1" />
             <Edge From="94" To="95" Label="Source1" />
-            <Edge From="95" To="96" Label="Source1" />
-            <Edge From="97" To="98" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
