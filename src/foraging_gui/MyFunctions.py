@@ -894,7 +894,7 @@ class GenerateTrials():
             elif Rec[0].address=='/RightRewardDeliveryTime':
                 self.B_RightRewardDeliveryTime=np.append(self.B_RightRewardDeliveryTime,Rec[1][1][0])
             elif Rec[0].address=='/LeftRewardDeliveryTimeHarp':
-                self.B_RightRewardDeliveryTimeHarp=np.append(self.B_RightRewardDeliveryTimeHarp,Rec[1][1][0])
+                self.B_LeftRewardDeliveryTimeHarp=np.append(self.B_LeftRewardDeliveryTimeHarp,Rec[1][1][0])
             elif Rec[0].address=='/RightRewardDeliveryTimeHarp':
                 self.B_RightRewardDeliveryTimeHarp=np.append(self.B_RightRewardDeliveryTimeHarp,Rec[1][1][0])
 

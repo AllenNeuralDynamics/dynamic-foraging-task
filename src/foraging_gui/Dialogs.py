@@ -134,6 +134,11 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         super().__init__(parent)
         self.setupUi(self)
         self.MainWindow=MainWindow
+        #self.threadpoolL=QThreadPool() # calibration for left valve
+        #self.threadpoolR=QThreadPool() # calibration for right valve
+        #self.OpenLeftTag=0
+        #self.OpenRightTag=0
+        self.FinishLeftValve=0
         self._connectSignalsSlots()
     def _connectSignalsSlots(self):
         self.OpenLeft.clicked.connect(self._OpenLeft)
@@ -174,9 +179,26 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
             self.MainWindow.Channel3.ManualWater_Right(int(1))
             # set the default valve open time
             self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
-
+    """
+    def _thread_completeLeft(self):
+        '''Finish of left valve calibration'''
+        self.FinishLeftValve=1
+        print(self.FinishLeftValve)
     def _OpenLeft(self):
         '''Calibration of left valve'''
+        if self.OpenLeftTag==0:
+            workerLeft = Worker(self._OpenLeftThread,self.MainWindow.Channel)
+            workerLeft.signals.finished.connect(self._thread_completeLeft)
+            self.workerLeft=workerLeft
+            self.OpenLeftTag=1
+        else:
+            workerLeft=self.workerLeft
+        if self.OpenLeft.isChecked() and self.FinishLeftValve==1:
+            self.FinishLeftValve=0
+            self.threadpoolL.start(workerLeft)
+    """
+    def _OpenLeft(self):    
+        '''Calibration of left valve in a different thread'''
         if self.OpenLeft.isChecked():
             # change button color
             self.OpenLeft.setStyleSheet("background-color : green;")
