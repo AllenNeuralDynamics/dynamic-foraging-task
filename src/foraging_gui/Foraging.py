@@ -582,7 +582,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 for key in widget_dict.keys():
                     if key in Obj:
                         # skip some keys
-                        if key=='ExtraWater':
+                        if key=='ExtraWater' or key=='WeightBefore' or key=='WeightAfter' or key=='SuggestedWater':
                             self.ExtraWater.setText('')
                             continue
                         widget = widget_dict[key]
