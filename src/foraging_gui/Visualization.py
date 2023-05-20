@@ -60,11 +60,11 @@ class PlotV(FigureCanvas):
             self._PlotBlockStructure()
             self._PlotChoice()
             self._PlotLicks()
-        except ValueError:
+        except:
             pass
         try:
             self._PlotMatching()
-        except ValueError:
+        except:
             pass
         self.finish=1
     def _PlotBlockStructure(self):
