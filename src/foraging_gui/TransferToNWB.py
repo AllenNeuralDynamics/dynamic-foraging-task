@@ -252,7 +252,7 @@ else:
     B_RightLickTime=obj.B_RightLickTime
 
 LeftRewardDeliveryTime = TimeSeries(
-    name="LeftRewardDeliveryTime",
+    name="left_reward_delivery_time",
     unit="second",
     data=np.ones(len(B_LeftRewardDeliveryTime)).tolist(),
     timestamps=B_LeftRewardDeliveryTime,
@@ -260,7 +260,7 @@ LeftRewardDeliveryTime = TimeSeries(
 )
 nwbfile.add_acquisition(LeftRewardDeliveryTime)
 RightRewardDeliveryTime = TimeSeries(
-    name="RightRewardDeliveryTime",
+    name="right_reward_delivery_time",
     unit="second",
     timestamps=np.ones(len(B_RightRewardDeliveryTime)).tolist(),
     data=B_RightRewardDeliveryTime,
@@ -268,7 +268,7 @@ RightRewardDeliveryTime = TimeSeries(
 )
 nwbfile.add_acquisition(RightRewardDeliveryTime)
 LeftLickTime = TimeSeries(
-    name="LeftLickTime",
+    name="left_lick_time",
     unit="second",
     timestamps=B_LeftLickTime,
     data=np.ones(len(B_LeftLickTime)).tolist(),
@@ -276,7 +276,7 @@ LeftLickTime = TimeSeries(
 )
 nwbfile.add_acquisition(LeftLickTime)
 RightLickTime = TimeSeries(
-    name="RightLickTime",
+    name="right_lick_time",
     unit="second",
     timestamps=B_RightLickTime,
     data=np.ones(len(B_RightLickTime)).tolist(),
