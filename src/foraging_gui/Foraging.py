@@ -33,7 +33,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             with open(self.SettingFile, 'r') as f:
                 Settings = json.load(f)
             self.default_saveFolder=Settings['default_saveFolder']
-        except ValueError:
+        except:
             self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
@@ -175,7 +175,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     try:
                         # it's valid float
                         float(child.text())
-                    except ValueError:
+                    except:
                         if isinstance(child, QtWidgets.QDoubleSpinBox):
                             child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
                         elif isinstance(child, QtWidgets.QSpinBox):
@@ -224,7 +224,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         # it's valid float
                         float(child.text())
                         self.UpdateParameters=0 # Changes are not allowed until press is typed
-                    except ValueError:
+                    except:
                         # Invalid float. Do not change the parameter
                         if isinstance(child, QtWidgets.QDoubleSpinBox):
                             child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
@@ -246,7 +246,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 if int(self.RewardPairsN.text())>len(self.RewardFamilies[int(self.RewardFamily.text())-1]):
                     self.RewardPairsN.setText(str(len(self.RewardFamilies[int(self.RewardFamily.text())-1])))
                 return 1
-            except ValueError:
+            except:
                 return 0
         if child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum':
             try:
@@ -281,7 +281,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         try:
             self.T_SuggestedWater=float(self.TotalWater.text())-float(self.GeneratedTrials.BS_TotalReward)
             self.SuggestedWater.setText(str(np.round(self.T_SuggestedWater,3)))
-        except ValueError:
+        except:
             self.SuggestedWater.setText(self.TotalWater.text())
 
     def _GetTrainingParameters(self):
