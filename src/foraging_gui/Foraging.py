@@ -369,10 +369,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.client2.close()
             self.client3.close()
             self.client4.close()
-            self.threadpool.cancel()
-            self.threadpool2.cancel()
-            self.threadpool3.cancel()
-            self.threadpool4.cancel()
             print('Window closed')
         elif reply == QMessageBox.No:
             event.accept()
