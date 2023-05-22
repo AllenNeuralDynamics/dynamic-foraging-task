@@ -1,5 +1,5 @@
 """
-Transfer current Json format from Bonsai behavior control to NWB format
+Transfer current Json/mat format from Bonsai behavior control to NWB format
 """
 from uuid import uuid4
 import numpy as np, json,os,datetime
