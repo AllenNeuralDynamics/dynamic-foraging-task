@@ -217,6 +217,11 @@ class GenerateTrials():
         self.CurrentDelay = float(np.random.exponential(float(self.TP_DelayBeta),1)+float(self.TP_DelayMin))
         if self.CurrentDelay>float(self.TP_DelayMax):
             self.CurrentDelay=float(self.TP_DelayMax)
+        # extremely important. Currently, the shaders timer does not allow delay close to zero. 
+        if self.CurrentITI<0.05:
+            self.CurrentITI=0.05
+        if self.CurrentDelay<0.05:
+            self.CurrentDelay=0.05
         self.B_ITIHistory.append(self.CurrentITI)
         self.B_DelayHistory.append(self.CurrentDelay)
         self.B_ResponseTimeHistory.append(float(self.TP_ResponseTime))
