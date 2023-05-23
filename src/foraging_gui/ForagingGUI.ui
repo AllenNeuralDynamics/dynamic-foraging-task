@@ -2966,6 +2966,7 @@
     <addaction name="action_Manipulator"/>
     <addaction name="action_Start"/>
     <addaction name="action_NewSession"/>
+    <addaction name="actionConnectBonsai"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="title">
@@ -3219,6 +3220,11 @@
    </property>
    <property name="text">
     <string>Laser Calibration</string>
+   </property>
+  </action>
+  <action name="actionConnectBonsai">
+   <property name="text">
+    <string>ConnectBonsai</string>
    </property>
   </action>
  </widget>

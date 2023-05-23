@@ -44,9 +44,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
         try: 
             self._InitializeBonsai()
             self.InitializeBonsaiSuccessfully=1
-            
         except:
             self.InitializeBonsaiSuccessfully=0
+            self.WarningLabel.setText('Start without bonsai connected!')
+            self.WarningLabel.setStyleSheet("color: red;")
         self.threadpool=QThreadPool() # get animal response
         self.threadpool2=QThreadPool() # get animal lick
         self.threadpool3=QThreadPool() # visualization
@@ -97,7 +98,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Channel3.receive()
         while not self.Channel4.msgs.empty():
             self.Channel4.receive()
-
+        self.WarningLabel.setText('')
+        self.WarningLabel.setStyleSheet("color: gray;")
+        self.InitializeBonsaiSuccessfully=1
     def connectSignalsSlots(self):
         '''Define callbacks'''
         self.action_About.triggered.connect(self._about)
@@ -115,6 +118,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.action_Clear.triggered.connect(self._Clear)
         self.action_Start.triggered.connect(self.Start.click)
         self.action_NewSession.triggered.connect(self.NewSession.click)
+        self.actionConnectBonsai.triggered.connect(self._InitializeBonsai)
         self.Load.clicked.connect(self._Open)
         self.Save.clicked.connect(self._Save)
         self.Clear.clicked.connect(self._Clear)
