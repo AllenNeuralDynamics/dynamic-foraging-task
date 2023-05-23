@@ -41,7 +41,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.ANewTrial=1 # permission to start a new trial
         self.UpdateParameters=1 # permission to update parameters
         self.Visualization.setTitle(str(date.today()))
-        self._InitializeBonsai()
+        try: 
+            self._InitializeBonsai()
+            self.InitializeBonsaiSuccessfully=1
+            
+        except:
+            self.InitializeBonsaiSuccessfully=0
         self.threadpool=QThreadPool() # get animal response
         self.threadpool2=QThreadPool() # get animal lick
         self.threadpool3=QThreadPool() # visualization
@@ -365,18 +370,20 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self._Save()
             event.accept()
             self.Start.setChecked(False)
-            self.client.close()
-            self.client2.close()
-            self.client3.close()
-            self.client4.close()
+            if self.InitializeBonsaiSuccessfully==1:
+                self.client.close()
+                self.client2.close()
+                self.client3.close()
+                self.client4.close()
             print('Window closed')
         elif reply == QMessageBox.No:
             event.accept()
             self.Start.setChecked(False)
-            self.client.close()
-            self.client2.close()
-            self.client3.close()
-            self.client4.close()
+            if self.InitializeBonsaiSuccessfully==1:
+                self.client.close()
+                self.client2.close()
+                self.client3.close()
+                self.client4.close()
             print('Window closed')
         else:
             event.ignore()

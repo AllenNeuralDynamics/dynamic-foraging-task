@@ -242,7 +242,6 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         # set the default valve open time
         self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
 
-
 class CameraDialog(QDialog,Ui_Camera):
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
@@ -465,6 +464,7 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
         # send the waveform size
         self.MainWindow.Channel.Location1_Size(int(self.Location1_Size))
         self.MainWindow.Channel.Location2_Size(int(self.Location2_Size))
+        # start(1) for running main trial structure; start(2) for running optogenetics
         self.MainWindow.Channel.start(2)
     def _CopyFromOpto(self):
         '''Copy the optogenetics parameters'''
