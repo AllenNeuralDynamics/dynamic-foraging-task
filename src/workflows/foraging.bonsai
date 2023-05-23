@@ -275,7 +275,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT1.684S</gl:DueTime>
+                      <gl:DueTime>PT1.286S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -2664,7 +2664,7 @@ def process(value):
             <Expression xsi:type="beh:CreateMessage">
               <harp:Payload xsi:type="beh:CreatePulseDOPort2Payload">
                 <harp:MessageType>Write</harp:MessageType>
-                <beh:Value>50</beh:Value>
+                <beh:Value>5</beh:Value>
               </harp:Payload>
             </Expression>
             <Expression xsi:type="MulticastSubject">
