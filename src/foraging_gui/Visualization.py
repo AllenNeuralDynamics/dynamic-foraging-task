@@ -247,11 +247,12 @@ class PlotV(FigureCanvas):
             ax.set_title(f'Matching slope = {slope:.2f}, bias_R = {intercept:.2f}', fontsize=10)
             ax.legend(loc='upper left', fontsize=8)
             ax.axis('equal')
+            ax.set_xlim([fit_x.min()-2, fit_x.max()+2])
+            ax.set_ylim([fit_y.min()-2, fit_y.max()+2])
         except ValueError:
             pass
         self.draw()
-        #range(np.min(self.B_Time),np.max(self.B_Time),periods = numberofpoints * int(self.DotsPerWindow()))
-        #win_centers = pd.date_range(start = np.min(self.B_Time), end = np.max(self.B_Time),periods = numberofpoints * int(self.DotsPerWindow()))
+
     def _PlotLicks(self):
         if self.B_CurrentTrialN<1:
             return
