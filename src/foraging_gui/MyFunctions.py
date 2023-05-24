@@ -65,6 +65,7 @@ class GenerateTrials():
         self.Delay_GoCue_DD=[]
         self.GoCue_GoCue1_DD=[]
         self.GoCue_NextStart_DD=[]
+        self.B_StartType=[] # 1: normal trials with delay; 3: optogenetics trials without delay
         #self.B_LaserTrialNum=[] # B_LaserAmplitude, B_LaserDuration, B_SelectedCondition have values only on laser on trials, so we need to store the laser trial number
         
         self.Obj={}
@@ -93,11 +94,11 @@ class GenerateTrials():
         # to decide if we should stop the session
         self._CheckStop()
         # optogenetics section
-        self._PerformOptogenetics()
+        self._PerformOptogenetics(Channel4)
         # finish to generate the next trial
         self.GeneFinish=1
 
-    def _PerformOptogenetics(self):
+    def _PerformOptogenetics(self,Channel4):
         '''Optogenetics section to generate optogenetics parameters and send waveform to Bonsai'''
         try:
             if self.TP_OptogeneticsB=='on': # optogenetics is turned on
@@ -785,7 +786,14 @@ class GenerateTrials():
         Channel1.ITI(float(self.CurrentITI))
         Channel1.DelayTime(float(self.CurrentDelay))
         Channel1.ResponseTime(float(self.TP_ResponseTime))
-        Channel1.start(1)
+        if self.win.OptogeneticsB.currentText()=='on':
+            Channel1.start(3)
+            self.CurrentStartType=3
+            self.B_StartType.append(self.CurrentStartType)
+        else:
+            Channel1.start(1)
+            self.CurrentStartType=1
+            self.B_StartType.append(self.CurrentStartType)
 
 
     def _GetAnimalResponse(self,Channel1,Channel3):
@@ -804,8 +812,13 @@ class GenerateTrials():
         if np.random.random(1)<0.1: # no response
             self.B_AnimalCurrentResponse=2
         '''
-
-        for i in range(10):
+        if self.CurrentStartType==3: # no delay timestamp
+            ReceiveN=8
+            DelayStartTimeHarp=-999 # -999 means a placeholder
+            DelayStartTime=-999
+        elif self.CurrentStartType==1:
+            ReceiveN=10
+        for i in range(ReceiveN):
             Rec=Channel1.receive()
             if Rec[0].address=='/TrialStartTime':
                 TrialStartTime=Rec[1][1][0]

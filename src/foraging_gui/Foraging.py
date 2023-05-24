@@ -910,9 +910,21 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self._Optogenetics() # press the optogenetics icon
             self.action_Optogenetics.setChecked(True)
             self.Opto_dialog.show()
+            self.label_18.setEnabled(False)
+            self.label_15.setEnabled(False)
+            self.label_17.setEnabled(False)
+            self.DelayBeta.setEnabled(False)
+            self.DelayMin.setEnabled(False)
+            self.DelayMax.setEnabled(False)
         else:
             self.action_Optogenetics.setChecked(False)
             self.Opto_dialog.hide()
+            self.label_18.setEnabled(True)
+            self.label_15.setEnabled(True)
+            self.label_17.setEnabled(True)
+            self.DelayBeta.setEnabled(True)
+            self.DelayMin.setEnabled(True)
+            self.DelayMax.setEnabled(True)
     def _GiveLeft(self):
         '''manually give left water'''
         self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
