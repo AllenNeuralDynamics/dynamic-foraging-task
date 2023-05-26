@@ -727,11 +727,10 @@ class GenerateTrials():
         if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:
             # permit triggering waveform 1 after an event
             # waveform start event
-            for i in range(1):
-            #for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
+            for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
                 if self.CurrentLaserAmplitude[i]!=0:
                     eval('Channel4.WaveForm' + str(1)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
-                    FinishOfWaveForm=Channel4.receive()
+            FinishOfWaveForm=Channel4.receive()        
             if self.CLP_LaserStart=='Trial start':
                 Channel1.TriggerITIStart_Wave1(int(1))
                 Channel1.TriggerITIStart_Wave2(int(0))
