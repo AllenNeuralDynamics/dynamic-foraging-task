@@ -115,7 +115,7 @@ class GenerateTrials():
                         if self.CurrentLaserAmplitude[i]!=0:
                             #eval('Channel4.WaveForm' + str(self.NextWaveForm)+'_'+str(i+1)+'(np.array('+'self.WaveFormLocation_'+str(i+1)+',\'b\''+'))')
                             #eval('Channel4.WaveForm' + str(self.NextWaveForm)+'_'+str(i+1)+'('+'self.WaveFormLocation_'+str(i+1)+')')
-                            eval('Channel4.WaveForm' + str(self.NextWaveForm)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
+                            #eval('Channel4.WaveForm' + str(self.NextWaveForm)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
                             #FinishOfWaveForm=Channel4.receive()
                             setattr(self, f"Location{i+1}_Size", getattr(self, f"WaveFormLocation_{i+1}").size)
                         else:
@@ -574,7 +574,9 @@ class GenerateTrials():
             if self.CLP_OffsetStart<0:
                 self.win.WarningLabel.setText('Please set offset start to be positive!')
                 self.win.WarningLabel.setStyleSheet("color: red;")
-            self.CLP_CurrentDuration=self.CurrentITI+self.CurrentDelay-self.CLP_OffsetStart+self.CLP_OffsetEnd
+            #self.CLP_CurrentDuration=self.CurrentITI+self.CurrentDelay-self.CLP_OffsetStart+self.CLP_OffsetEnd
+            # there is no delay for optogenetics trials 
+            self.CLP_CurrentDuration=self.CurrentITI-self.CLP_OffsetStart+self.CLP_OffsetEnd
         elif self.CLP_LaserStart=='Go cue' and self.CLP_LaserEnd=='Trial start':
             # The duration is inaccurate as it doesn't account for time outside of bonsai (can be solved in Bonsai)
             # the duration is determined by TP_ResponseTime, self.CLP_OffsetStart, self.CLP_OffsetEnd
@@ -723,38 +725,26 @@ class GenerateTrials():
 
         # if this is an optogenetics trial
         if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:
-            if self.CurrentWaveForm==1:
-                # permit triggering waveform 1 after an event
-                # waveform start event
-                if self.CLP_LaserStart=='Trial start':
-                    Channel1.TriggerITIStart_Wave1(int(1))
-                    Channel1.TriggerITIStart_Wave2(int(0))
-                    Channel1.TriggerGoCue_Wave1(int(0))
-                    Channel1.TriggerGoCue_Wave2(int(0))
-                elif self.CLP_LaserStart=='Go cue':
-                    Channel1.TriggerGoCue_Wave1(int(1))
-                    Channel1.TriggerGoCue_Wave2(int(0))
-                    Channel1.TriggerITIStart_Wave1(int(0))
-                    Channel1.TriggerITIStart_Wave2(int(0))
-                else:
-                    self.win.WarningLabel.setText('Unindentified optogenetics start event!')
-                    self.win.WarningLabel.setStyleSheet("color: red;")
-            elif self.CurrentWaveForm==2:
-                # permit triggering waveform 2 after an event
-                # waveform start event
-                if self.CLP_LaserStart=='Trial start':
-                    Channel1.TriggerITIStart_Wave1(int(0))
-                    Channel1.TriggerITIStart_Wave2(int(1))
-                    Channel1.TriggerGoCue_Wave1(int(0))
-                    Channel1.TriggerGoCue_Wave2(int(0))
-                elif self.CLP_LaserStart=='Go cue':
-                    Channel1.TriggerGoCue_Wave1(int(0))
-                    Channel1.TriggerGoCue_Wave2(int(1))
-                    Channel1.TriggerITIStart_Wave1(int(0))
-                    Channel1.TriggerITIStart_Wave2(int(0))
-                else:
-                    self.win.WarningLabel.setText('Unindentified optogenetics start event!')
-                    self.win.WarningLabel.setStyleSheet("color: gray;")
+            # permit triggering waveform 1 after an event
+            # waveform start event
+            for i in range(1):
+            #for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
+                if self.CurrentLaserAmplitude[i]!=0:
+                    eval('Channel4.WaveForm' + str(1)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
+                    FinishOfWaveForm=Channel4.receive()
+            if self.CLP_LaserStart=='Trial start':
+                Channel1.TriggerITIStart_Wave1(int(1))
+                Channel1.TriggerITIStart_Wave2(int(0))
+                Channel1.TriggerGoCue_Wave1(int(0))
+                Channel1.TriggerGoCue_Wave2(int(0))
+            elif self.CLP_LaserStart=='Go cue':
+                Channel1.TriggerGoCue_Wave1(int(1))
+                Channel1.TriggerGoCue_Wave2(int(0))
+                Channel1.TriggerITIStart_Wave1(int(0))
+                Channel1.TriggerITIStart_Wave2(int(0))
+            else:
+                self.win.WarningLabel.setText('Unindentified optogenetics start event!')
+                self.win.WarningLabel.setStyleSheet("color: red;")
             # location of optogenetics
             # dimension of self.CurrentLaserAmplitude indicates how many locations do we have
             for i in range(len(self.CurrentLaserAmplitude)):

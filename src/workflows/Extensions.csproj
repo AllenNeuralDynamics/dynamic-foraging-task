@@ -7,6 +7,7 @@
   <ItemGroup>
     <PackageReference Include="Bonsai.Core" Version="2.7.1" />
     <PackageReference Include="Bonsai.Osc" Version="2.7.0" />
+    <PackageReference Include="Bonsai.DAQmx" Version="0.2.1-alpha1" />
   </ItemGroup>
 
 </Project>
