@@ -725,12 +725,7 @@ class GenerateTrials():
 
         # if this is an optogenetics trial
         if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:
-            # permit triggering waveform 1 after an event
-            # waveform start event
-            for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
-                if self.CurrentLaserAmplitude[i]!=0:
-                    eval('Channel4.WaveForm' + str(1)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
-            FinishOfWaveForm=Channel4.receive()        
+            # permit triggering waveform 1 after an event     
             if self.CLP_LaserStart=='Trial start':
                 Channel1.TriggerITIStart_Wave1(int(1))
                 Channel1.TriggerITIStart_Wave2(int(0))
@@ -756,6 +751,11 @@ class GenerateTrials():
             Channel1.Location2_Size(int(self.Location2_Size))
             # change the position of the CurrentWaveForm and the NextWaveForm 
             self.CurrentWaveForm=self.NextWaveForm
+
+            for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
+                if self.CurrentLaserAmplitude[i]!=0:
+                    eval('Channel4.WaveForm' + str(1)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
+            FinishOfWaveForm=Channel4.receive()  
         else:
             # 'Do not trigger the waveform'
             Channel1.TriggerGoCue_Wave1(int(0))
@@ -766,6 +766,8 @@ class GenerateTrials():
                 eval('Channel1.Trigger_Location'+str(i+1)+'(int(0))')
             Channel1.Location1_Size(int(5000))
             Channel1.Location2_Size(int(5000))
+                    # waveform start event
+ 
         
         Channel1.LeftValue(float(self.TP_LeftValue)*1000)
         Channel1.RightValue(float(self.TP_RightValue)*1000)
