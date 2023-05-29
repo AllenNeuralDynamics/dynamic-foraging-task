@@ -379,6 +379,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.client2.close()
                 self.client3.close()
                 self.client4.close()
+            self.Opto_dialog.close()
             print('Window closed')
         elif reply == QMessageBox.No:
             event.accept()
@@ -389,6 +390,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.client3.close()
                 self.client4.close()
             print('Window closed')
+            self.Opto_dialog.close()
         else:
             event.ignore()
     def _Exit(self):

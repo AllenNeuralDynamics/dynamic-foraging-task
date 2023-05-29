@@ -723,7 +723,7 @@ class GenerateTrials():
         self.B_Baited=  self.CurrentBait.copy()
         self.B_BaitHistory=np.append(self.B_BaitHistory, self.CurrentBait.reshape(2,1),axis=1)
 
-        # if this is an optogenetics trial
+        # send optogenetics waveform of the upcoming trial if this is an optogenetics trial
         if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:
             # permit triggering waveform 1 after an event     
             if self.CLP_LaserStart=='Trial start':
@@ -766,9 +766,7 @@ class GenerateTrials():
                 eval('Channel1.Trigger_Location'+str(i+1)+'(int(0))')
             Channel1.Location1_Size(int(5000))
             Channel1.Location2_Size(int(5000))
-                    # waveform start event
- 
-        
+
         Channel1.LeftValue(float(self.TP_LeftValue)*1000)
         Channel1.RightValue(float(self.TP_RightValue)*1000)
         Channel1.RewardConsumeTime(float(self.TP_RewardConsumeTime))
@@ -785,7 +783,6 @@ class GenerateTrials():
             Channel1.start(1)
             self.CurrentStartType=1
             self.B_StartType.append(self.CurrentStartType)
-
 
     def _GetAnimalResponse(self,Channel1,Channel3):
         '''
