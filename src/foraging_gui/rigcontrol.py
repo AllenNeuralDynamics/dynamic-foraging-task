@@ -119,4 +119,8 @@ class RigClient:
 
     def TriggerSource(self, value):
         self.send("/TriggerSource", value)
+
+    def OptogeneticsCalibration(self, value):
+        self.send("/OptogeneticsCalibration", value)
+        
         

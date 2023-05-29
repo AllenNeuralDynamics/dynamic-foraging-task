@@ -83,7 +83,7 @@ class Ui_ForagingGUI(object):
         self.line_2.setObjectName("line_2")
         self.TrainingParameters = QtWidgets.QGroupBox(self.centralwidget)
         self.TrainingParameters.setEnabled(True)
-        self.TrainingParameters.setGeometry(QtCore.QRect(10, 510, 1191, 261))
+        self.TrainingParameters.setGeometry(QtCore.QRect(10, 510, 1191, 271))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)

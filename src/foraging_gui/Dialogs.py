@@ -342,22 +342,20 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
         self.CLP_PulseDur=eval('self.LC_PulseDur_'+N)
         self.CLP_SampleFrequency=float(self.LC_SampleFrequency)
         self.CLP_CurrentDuration=self.CLP_Duration
+        self.CLP_InputVoltage=float(self.voltage.text())
         # generate the waveform based on self.CLP_CurrentDuration and Protocol, Frequency, RampingDown, PulseDur
         self._GetLaserAmplitude()
         # dimension of self.CurrentLaserAmplitude indicates how many locations do we have
         for i in range(len(self.CurrentLaserAmplitude)):
-            if self.CurrentLaserAmplitude[i]!=0:
-                # in some cases the other paramters except the amplitude could also be different
-                self._ProduceWaveForm(self.CurrentLaserAmplitude[i])
-                setattr(self, 'WaveFormLocation_' + str(i+1), self.my_wave)
-                # send waveforms
-                setattr(self, f"Location{i+1}_Size", getattr(self, f"WaveFormLocation_{i+1}").size)
-                eval('self.MainWindow.Channel.Trigger_Location'+str(i+1)+'(int(1))')
-                eval('self.MainWindow.Channel4.WaveForm' + str(1)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
-            else:
-                setattr(self, f"Location{i+1}_Size", 100) # arbitrary number \
-                eval('self.MainWindow.Channel.Trigger_Location'+str(i+1)+'(int(0))')
-
+            # in some cases the other paramters except the amplitude could also be different
+            self._ProduceWaveForm(self.CurrentLaserAmplitude[i])
+            setattr(self, 'WaveFormLocation_' + str(i+1), self.my_wave)
+            # send waveforms
+            setattr(self, f"Location{i+1}_Size", getattr(self, f"WaveFormLocation_{i+1}").size)
+            # send the waveform size
+            eval('self.MainWindow.Channel.Location'+str(i+1)+'_Size'+'(int(self.Location'+str(i+1)+'_Size))')
+            eval('self.MainWindow.Channel4.WaveForm' + str(1)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
+        FinishOfWaveForm=self.MainWindow.Channel4.receive()  
     def _ProduceWaveForm(self,Amplitude):
         '''generate the waveform based on Duration and Protocol, Laser Power, Frequency, RampingDown, PulseDur and the sample frequency'''
         if self.CLP_Protocol=='Sine':
@@ -376,7 +374,6 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
                     RampingDown = np.concatenate((Constant, RD), axis=0)
                     self.my_wave=self.my_wave*RampingDown
             self.my_wave=np.append(self.my_wave,[0,0])
-
         elif self.CLP_Protocol=='Pulse':
             if self.CLP_PulseDur=='NA':
                 self.win.WarningLabel.setText('Pulse duration is NA!')
@@ -426,11 +423,11 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
     def _GetLaserAmplitude(self):
         '''the voltage amplitude dependens on Protocol, Laser Power, Laser color, and the stimulation locations<>'''
         if self.CLP_Location=='Left':
-            self.CurrentLaserAmplitude=[5,0]
+            self.CurrentLaserAmplitude=[self.CLP_InputVoltage,0]
         elif self.CLP_Location=='Right':
-            self.CurrentLaserAmplitude=[0,5]
+            self.CurrentLaserAmplitude=[0,self.CLP_InputVoltage]
         elif self.CLP_Location=='Both':
-            self.CurrentLaserAmplitude=[5,5]
+            self.CurrentLaserAmplitude=[self.CLP_InputVoltage,self.CLP_InputVoltage]
         else:
             self.win.WarningLabel.setText('No stimulation location defined!')
             self.win.WarningLabel.setStyleSheet("color: red;")
@@ -457,15 +454,11 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
                 # and store whether the child is checked or not
                 setattr(self, Prefix+'_'+child.objectName(), child.isChecked())
     def _InitiateATrial(self):
-        self.MainWindow.Channel.TriggerITIStart_Wave1(int(1))
-        self.MainWindow.Channel.TriggerITIStart_Wave2(int(0))
-        self.MainWindow.Channel.TriggerGoCue_Wave1(int(0))
-        self.MainWindow.Channel.TriggerGoCue_Wave2(int(0))
-        # send the waveform size
-        self.MainWindow.Channel.Location1_Size(int(self.Location1_Size))
-        self.MainWindow.Channel.Location2_Size(int(self.Location2_Size))
-        # start(1) for running main trial structure; start(2) for running optogenetics
-        self.MainWindow.Channel.start(2)
+        '''Initiate calibration in bonsai'''
+        # send the trigger source. It's '/Dev1/PFI0' ( P2.0 of NIdaq USB6002) by default 
+        self.MainWindow.Channel.TriggerSource('/Dev1/PFI0')
+        # start generating waveform in bonsai
+        self.MainWindow.Channel.OptogeneticsCalibration(int(1))
     def _CopyFromOpto(self):
         '''Copy the optogenetics parameters'''
         N=[]
@@ -521,14 +514,15 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
     def _Open(self):
         '''Open the laser only once'''
         if self.Open.isChecked():
-            # change button color
+            self.SleepComplete2=0
+            # change button color and disable the open button
+            self.Open.setEnabled(False)
             self.Open.setStyleSheet("background-color : green;")
             QApplication.processEvents()
             self._GetTrainingParameters(self.MainWindow)
             self._GetLaserWaveForm()
-            self.worker2 = Worker(self._Sleep,float(self.LC_Duration_1))
+            self.worker2 = Worker(self._Sleep,float(self.LC_Duration_1)+1)
             self.worker2.signals.finished.connect(self._thread_complete2)
-            time.sleep(1)
             self._InitiateATrial()
             self.SleepStart=1
             while 1:
@@ -540,10 +534,12 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
                     break 
             self.Open.setStyleSheet("background-color : none")
             self.Open.setChecked(False)
+            self.Open.setEnabled(True)
         else:
             # change button color
             self.Open.setStyleSheet("background-color : none")
             self.Open.setChecked(False)
+            self.Open.setEnabled(True)
     def _KeepOpen(self):
         '''Keep the laser open'''
         if self.KeepOpen.isChecked():
