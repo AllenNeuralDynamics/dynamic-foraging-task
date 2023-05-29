@@ -109,23 +109,6 @@ class GenerateTrials():
                     self.B_LaserOnTrial.append(self.LaserOn) 
                     # generate the optogenetics waveform of the next trial
                     self._GetLaserWaveForm()
-                    # send the waveform to Bonsai temporarily stored for using in the next trial
-                    #WaveForm_Number_Location
-                    for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
-                        if self.CurrentLaserAmplitude[i]!=0:
-                            #eval('Channel4.WaveForm' + str(self.NextWaveForm)+'_'+str(i+1)+'(np.array('+'self.WaveFormLocation_'+str(i+1)+',\'b\''+'))')
-                            #eval('Channel4.WaveForm' + str(self.NextWaveForm)+'_'+str(i+1)+'('+'self.WaveFormLocation_'+str(i+1)+')')
-                            #eval('Channel4.WaveForm' + str(self.NextWaveForm)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
-                            #FinishOfWaveForm=Channel4.receive()
-                            setattr(self, f"Location{i+1}_Size", getattr(self, f"WaveFormLocation_{i+1}").size)
-                        else:
-                            setattr(self, f"Location{i+1}_Size", 100) # arbitrary number 
-                            
-                    if self.NextWaveForm==1:
-                        self.NextWaveForm=2
-                    elif self.NextWaveForm==2:
-                        self.NextWaveForm=1
-                    # finish of this sectiom
                 else:
                     # this is the control trial
                     self.LaserOn=0
@@ -588,10 +571,10 @@ class GenerateTrials():
         self._GetLaserAmplitude()
         # dimension of self.CurrentLaserAmplitude indicates how many locations do we have
         for i in range(len(self.CurrentLaserAmplitude)):
-            if self.CurrentLaserAmplitude[i]!=0:
-                # in some cases the other paramters except the amplitude could also be different
-                self._ProduceWaveForm(self.CurrentLaserAmplitude[i])
-                setattr(self, 'WaveFormLocation_' + str(i+1), self.my_wave)
+            # in some cases the other paramters except the amplitude could also be different
+            self._ProduceWaveForm(self.CurrentLaserAmplitude[i])
+            setattr(self, 'WaveFormLocation_' + str(i+1), self.my_wave)
+            setattr(self, f"Location{i+1}_Size", getattr(self, f"WaveFormLocation_{i+1}").size)
 
     def _ProduceWaveForm(self,Amplitude):
         '''generate the waveform based on Duration and Protocol, Laser Power, Frequency, RampingDown, PulseDur and the sample frequency'''
@@ -713,6 +696,8 @@ class GenerateTrials():
                 break
             else:
                 self.SelctedCondition=0 # control is selected
+        if self.CLP_Location=='NA':
+            self.SelctedCondition=0
         self.B_SelectedCondition.append(self.SelctedCondition)
 
     def _InitiateATrial(self,Channel1,Channel4):
@@ -724,48 +709,20 @@ class GenerateTrials():
         self.B_BaitHistory=np.append(self.B_BaitHistory, self.CurrentBait.reshape(2,1),axis=1)
 
         # send optogenetics waveform of the upcoming trial if this is an optogenetics trial
-        if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:
-            # permit triggering waveform 1 after an event     
+        if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:     
             if self.CLP_LaserStart=='Trial start':
-                Channel1.TriggerITIStart_Wave1(int(1))
-                Channel1.TriggerITIStart_Wave2(int(0))
-                Channel1.TriggerGoCue_Wave1(int(0))
-                Channel1.TriggerGoCue_Wave2(int(0))
+                Channel1.TriggerSource('/Dev1/PFI0') # corresponding to P2.0 of NIdaq USB6002
             elif self.CLP_LaserStart=='Go cue':
-                Channel1.TriggerGoCue_Wave1(int(1))
-                Channel1.TriggerGoCue_Wave2(int(0))
-                Channel1.TriggerITIStart_Wave1(int(0))
-                Channel1.TriggerITIStart_Wave2(int(0))
+                Channel1.TriggerSource('/Dev1/PFI1') # corresponding to P1.1 of NIdaq USB6002
             else:
                 self.win.WarningLabel.setText('Unindentified optogenetics start event!')
                 self.win.WarningLabel.setStyleSheet("color: red;")
-            # location of optogenetics
-            # dimension of self.CurrentLaserAmplitude indicates how many locations do we have
-            for i in range(len(self.CurrentLaserAmplitude)):
-                if self.CurrentLaserAmplitude[i]!=0:
-                    eval('Channel1.Trigger_Location'+str(i+1)+'(int(1))')
-                else:
-                    eval('Channel1.Trigger_Location'+str(i+1)+'(int(0))')
             # send the waveform size
             Channel1.Location1_Size(int(self.Location1_Size))
             Channel1.Location2_Size(int(self.Location2_Size))
-            # change the position of the CurrentWaveForm and the NextWaveForm 
-            self.CurrentWaveForm=self.NextWaveForm
-
             for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
-                if self.CurrentLaserAmplitude[i]!=0:
-                    eval('Channel4.WaveForm' + str(1)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
+                eval('Channel4.WaveForm' + str(1)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
             FinishOfWaveForm=Channel4.receive()  
-        else:
-            # 'Do not trigger the waveform'
-            Channel1.TriggerGoCue_Wave1(int(0))
-            Channel1.TriggerGoCue_Wave2(int(0))
-            Channel1.TriggerITIStart_Wave1(int(0))
-            Channel1.TriggerITIStart_Wave2(int(0))
-            for i in range(len(self.CurrentLaserAmplitude)):
-                eval('Channel1.Trigger_Location'+str(i+1)+'(int(0))')
-            Channel1.Location1_Size(int(5000))
-            Channel1.Location2_Size(int(5000))
 
         Channel1.LeftValue(float(self.TP_LeftValue)*1000)
         Channel1.RightValue(float(self.TP_RightValue)*1000)

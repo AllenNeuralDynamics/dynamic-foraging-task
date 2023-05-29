@@ -116,4 +116,7 @@ class RigClient:
     
     def Location2_Size(self, value):
         self.send("/Location2Size", value)
+
+    def TriggerSource(self, value):
+        self.send("/TriggerSource", value)
         
