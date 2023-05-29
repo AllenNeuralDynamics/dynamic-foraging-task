@@ -103,11 +103,6 @@
      <string>Right</string>
     </property>
    </item>
-   <item>
-    <property name="text">
-     <string>NA</string>
-    </property>
-   </item>
   </widget>
   <widget class="QComboBox" name="LaserStart_1">
    <property name="geometry">
@@ -1368,11 +1363,6 @@
      <string>Right</string>
     </property>
    </item>
-   <item>
-    <property name="text">
-     <string>NA</string>
-    </property>
-   </item>
   </widget>
   <widget class="QLabel" name="label2_5">
    <property name="enabled">
@@ -1737,11 +1727,6 @@
    <item>
     <property name="text">
      <string>Right</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>NA</string>
     </property>
    </item>
   </widget>

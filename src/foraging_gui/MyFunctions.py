@@ -696,8 +696,6 @@ class GenerateTrials():
                 break
             else:
                 self.SelctedCondition=0 # control is selected
-        if self.CLP_Location=='NA':
-            self.SelctedCondition=0
         self.B_SelectedCondition.append(self.SelctedCondition)
 
     def _InitiateATrial(self,Channel1,Channel4):

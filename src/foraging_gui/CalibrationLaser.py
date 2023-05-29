@@ -50,7 +50,6 @@ class Ui_CalibrationLaser(object):
         self.Location_1.addItem("")
         self.Location_1.addItem("")
         self.Location_1.addItem("")
-        self.Location_1.addItem("")
         self.label1_12 = QtWidgets.QLabel(CalibrationLaser)
         self.label1_12.setGeometry(QtCore.QRect(214, 80, 51, 20))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
@@ -111,7 +110,6 @@ class Ui_CalibrationLaser(object):
         sizePolicy.setHeightForWidth(self.Laser_1.sizePolicy().hasHeightForWidth())
         self.Laser_1.setSizePolicy(sizePolicy)
         self.Laser_1.setObjectName("Laser_1")
-        self.Laser_1.addItem("")
         self.Laser_1.addItem("")
         self.Laser_1.addItem("")
         self.Laser_1.addItem("")
@@ -270,7 +268,7 @@ class Ui_CalibrationLaser(object):
         self.label1_6.setObjectName("label1_6")
 
         self.retranslateUi(CalibrationLaser)
-        self.Location_1.setCurrentIndex(1)
+        self.Location_1.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(CalibrationLaser)
 
     def retranslateUi(self, CalibrationLaser):
@@ -283,7 +281,6 @@ class Ui_CalibrationLaser(object):
         self.Location_1.setItemText(0, _translate("CalibrationLaser", "Both"))
         self.Location_1.setItemText(1, _translate("CalibrationLaser", "Left"))
         self.Location_1.setItemText(2, _translate("CalibrationLaser", "Right"))
-        self.Location_1.setItemText(3, _translate("CalibrationLaser", "NA"))
         self.label1_12.setText(_translate("CalibrationLaser", "protocol="))
         self.label1_14.setText(_translate("CalibrationLaser", "RD (s)="))
         self.LaserPower_1.setItemText(0, _translate("CalibrationLaser", "NA"))
@@ -299,7 +296,6 @@ class Ui_CalibrationLaser(object):
         self.Laser_1.setItemText(1, _translate("CalibrationLaser", "Red"))
         self.Laser_1.setItemText(2, _translate("CalibrationLaser", "Orange"))
         self.Laser_1.setItemText(3, _translate("CalibrationLaser", "Green"))
-        self.Laser_1.setItemText(4, _translate("CalibrationLaser", "NA"))
         self.label1_1.setText(_translate("CalibrationLaser", "Laser="))
         self.PulseDur_1.setText(_translate("CalibrationLaser", "0.002"))
         self.label1_13.setText(_translate("CalibrationLaser", "frequency="))
