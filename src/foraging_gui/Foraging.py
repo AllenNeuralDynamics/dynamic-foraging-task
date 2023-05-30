@@ -27,7 +27,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
-        self.SettingFile=os.path.join(os.path.expanduser("~"), "Documents")+'\\'+'ForagingSettings\\ForagingSettings.json'
+        self.SettingFile=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'ForagingSettings.json')
+        self.LaserCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'LaserCalibration.json')
         try:
             # Open the JSON settings file
             with open(self.SettingFile, 'r') as f:
@@ -35,6 +36,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.default_saveFolder=Settings['default_saveFolder']
         except:
             self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
+        
+        if os.path.exists(self.LaserCalibrationFiles):
+            with open(self.LaserCalibrationFiles, 'r') as f:
+                self.LaserCalibration = json.load(f)
+                sorted_dates = sorted(self.LaserCalibration.keys(), key=lambda x: datetime.strptime(x, '%Y-%m-%d'))
+                self.RecentLaserCalibration=self.LaserCalibration[sorted_dates[-1]]
+                self.RecentCalibrationDate=sorted_dates[-1]
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
@@ -877,7 +885,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
         
-        self.test=0
+        self.test=1
         if self.test==1:
             self._StartTrialLoop(GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
         else:

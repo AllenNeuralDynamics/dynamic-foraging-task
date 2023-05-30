@@ -17,11 +17,24 @@ class OptogeneticsDialog(QDialog,Ui_Optogenetics):
         super().__init__(parent)
         self.setupUi(self)
         self._connectSignalsSlots()
+        self.MainWindow=MainWindow
+        self._Laser_1()
+        self._Laser_2()
+        self._Laser_3()
+        self._Laser_4()
+        if hasattr(self.MainWindow,'RecentCalibrationDate'):
+            self.RecentCalibration.setText(self.MainWindow.RecentCalibrationDate)
+        else:
+            self.RecentCalibration.setText('NA')
     def _connectSignalsSlots(self):
         self.Laser_1.currentIndexChanged.connect(self._Laser_1)
         self.Laser_2.currentIndexChanged.connect(self._Laser_2)
         self.Laser_3.currentIndexChanged.connect(self._Laser_3)
         self.Laser_4.currentIndexChanged.connect(self._Laser_4)
+        self.Laser_1.activated.connect(self._Laser_1)
+        self.Laser_2.activated.connect(self._Laser_2)
+        self.Laser_3.activated.connect(self._Laser_3)
+        self.Laser_4.activated.connect(self._Laser_4)
         self.Protocol_1.activated.connect(self._activated_1)
         self.Protocol_2.activated.connect(self._activated_2)
         self.Protocol_3.activated.connect(self._activated_3)
@@ -30,7 +43,14 @@ class OptogeneticsDialog(QDialog,Ui_Optogenetics):
         self.Protocol_2.currentIndexChanged.connect(self._activated_2)
         self.Protocol_3.currentIndexChanged.connect(self._activated_3)
         self.Protocol_4.currentIndexChanged.connect(self._activated_4)
-        
+        self.Protocol_1.activated.connect(self._Laser_1)
+        self.Protocol_2.activated.connect(self._Laser_2)
+        self.Protocol_3.activated.connect(self._Laser_3)
+        self.Protocol_4.activated.connect(self._Laser_4)
+        self.Protocol_1.currentIndexChanged.connect(self._Laser_1)
+        self.Protocol_2.currentIndexChanged.connect(self._Laser_2)
+        self.Protocol_3.currentIndexChanged.connect(self._Laser_3)
+        self.Protocol_4.currentIndexChanged.connect(self._Laser_4)
         self.LaserStart_1.activated.connect(self._activated_1)
         self.LaserStart_2.activated.connect(self._activated_2)
         self.LaserStart_3.activated.connect(self._activated_3)
@@ -109,6 +129,31 @@ class OptogeneticsDialog(QDialog,Ui_Optogenetics):
             Label=False
         else:
             Label=True
+            Color=eval('self.Laser_'+str(Numb)+'.currentText()')
+            Ptotocol=eval('self.Protocol_'+str(Numb)+'.currentText()')
+            if hasattr(self.MainWindow,'RecentLaserCalibration'):
+                if Color in self.MainWindow.RecentLaserCalibration.keys():
+                    if Ptotocol in self.MainWindow.RecentLaserCalibration[Color].keys():
+                        Items=[]
+                        for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Ptotocol]['LaserPowerVoltage'])):
+                            Items.append(str(self.MainWindow.RecentLaserCalibration[Color][Ptotocol]['LaserPowerVoltage'][i]))
+                        eval('self.LaserPower_'+str(Numb)+'.clear()')
+                        eval('self.LaserPower_'+str(Numb)+'.addItems(Items)')
+                        self.MainWindow.WarningLabel.setText('')
+                        self.MainWindow.WarningLabel.setStyleSheet("color: gray;")
+                    else:
+                        eval('self.LaserPower_'+str(Numb)+'.clear()')
+                        self.MainWindow.WarningLabel.setText('No calibration for this protocol identified!')
+                        self.MainWindow.WarningLabel.setStyleSheet("color: red;")
+                else:
+                    eval('self.LaserPower_'+str(Numb)+'.clear()')
+                    self.MainWindow.WarningLabel.setText('No calibration for this laser identified!')
+                    self.MainWindow.WarningLabel.setStyleSheet("color: red;")
+            else:
+                eval('self.LaserPower_'+str(Numb)+'.clear()')
+                self.MainWindow.WarningLabel.setText('No calibration for this laser identified!')
+                self.MainWindow.WarningLabel.setStyleSheet("color: red;")
+
         eval('self.Location_'+str(Numb)+'.setEnabled('+str(Label)+')')
         eval('self.LaserPower_'+str(Numb)+'.setEnabled('+str(Label)+')')
         eval('self.Probability_'+str(Numb)+'.setEnabled('+str(Label)+')')
@@ -161,7 +206,6 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
             self.MainWindow.Channel3.ManualWater_Left(int(1))
             # set the default valve open time
             self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
-
 
     def _OpenRightForever(self):
         if self.OpenRightForever.isChecked():
@@ -495,7 +539,7 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
             current_time = datetime.now()
             date_str = current_time.strftime("%Y-%m-%d")
             time_str = current_time.strftime("%H:%M:%S")
-            self.LCM_MeasureTime.append([date_str+' '+time_str])
+            self.LCM_MeasureTime.append(date_str+' '+time_str)
         else:
             current_time = datetime.now()
             date_str = current_time.strftime("%Y-%m-%d")

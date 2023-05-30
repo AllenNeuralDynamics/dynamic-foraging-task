@@ -664,12 +664,19 @@ class GenerateTrials():
         '''
     def _GetLaserAmplitude(self):
         '''the voltage amplitude dependens on Protocol, Laser Power, Laser color, and the stimulation locations<>'''
+        if self.CLP_LaserPower=='':
+            self.CurrentLaserAmplitude=[0,0]
+            self.win.WarningLabel.setText('No laser amplitude defined!')
+            self.win.WarningLabel.setStyleSheet("color: red;")
+            return
+        LaserPowerAmp=eval(self.CLP_LaserPower)
         if self.CLP_Location=='Left':
-            self.CurrentLaserAmplitude=[5,0]
+            self.CLP_LaserPower
+            self.CurrentLaserAmplitude=[LaserPowerAmp[1],0]
         elif self.CLP_Location=='Right':
-            self.CurrentLaserAmplitude=[0,5]
+            self.CurrentLaserAmplitude=[0,LaserPowerAmp[2]]
         elif self.CLP_Location=='Both':
-            self.CurrentLaserAmplitude=[5,5]
+            self.CurrentLaserAmplitude=[LaserPowerAmp[1],LaserPowerAmp[2]]
         else:
             self.win.WarningLabel.setText('No stimulation location defined!')
             self.win.WarningLabel.setStyleSheet("color: red;")
