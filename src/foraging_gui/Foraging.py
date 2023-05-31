@@ -29,20 +29,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.setupUi(self)
         self.SettingFile=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'ForagingSettings.json')
         self.LaserCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'LaserCalibration.json')
-        try:
-            # Open the JSON settings file
-            with open(self.SettingFile, 'r') as f:
-                Settings = json.load(f)
-            self.default_saveFolder=Settings['default_saveFolder']
-        except:
-            self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
-        
-        if os.path.exists(self.LaserCalibrationFiles):
-            with open(self.LaserCalibrationFiles, 'r') as f:
-                self.LaserCalibration = json.load(f)
-                sorted_dates = sorted(self.LaserCalibration.keys(), key=lambda x: datetime.strptime(x, '%Y-%m-%d'))
-                self.RecentLaserCalibration=self.LaserCalibration[sorted_dates[-1]]
-                self.RecentCalibrationDate=sorted_dates[-1]
+        self._GetSettings()
+        self._GetLaserCalibration()
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
@@ -74,6 +62,33 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._ShowRewardPairs() # show reward pairs
         self._GetTrainingParameters() # get initial training parameters
         self.connectSignalsSlots()
+
+    def _GetLaserCalibration(self):
+        '''Get the laser calibration'''
+        if os.path.exists(self.LaserCalibrationFiles):
+            with open(self.LaserCalibrationFiles, 'r') as f:
+                self.LaserCalibrationResults = json.load(f)
+                #sorted_dates = sorted(self.LaserCalibrationResults.keys(), key=lambda x: datetime.strptime(x, '%Y-%m-%d'))
+                sorted_dates = sorted(self.LaserCalibrationResults.keys(), key=self._custom_sort_key)
+                self.RecentLaserCalibration=self.LaserCalibrationResults[sorted_dates[-1]]
+                self.RecentCalibrationDate=sorted_dates[-1]
+
+    def _custom_sort_key(self,key):
+        if '_' in key:
+            date_part, number_part = key.rsplit('_', 1)
+            return (date_part, int(number_part))
+        else:
+            return (key, 0)
+
+    def _GetSettings(self):
+        '''Get default settings'''
+        try:
+            # Open the JSON settings file
+            with open(self.SettingFile, 'r') as f:
+                Settings = json.load(f)
+            self.default_saveFolder=Settings['default_saveFolder']
+        except:
+            self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
     def _InitializeBonsai(self):
         '''Initianizing osc messages'''
         # normal behavior events

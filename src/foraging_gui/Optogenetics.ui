@@ -219,7 +219,7 @@
   <widget class="QLabel" name="label1_12">
    <property name="geometry">
     <rect>
-     <x>603</x>
+     <x>590</x>
      <y>50</y>
      <width>51</width>
      <height>20</height>
@@ -238,7 +238,7 @@
   <widget class="QComboBox" name="Protocol_1">
    <property name="geometry">
     <rect>
-     <x>660</x>
+     <x>647</x>
      <y>50</y>
      <width>80</width>
      <height>20</height>
@@ -298,30 +298,17 @@
     <string>0.25</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="Frequency_1">
-   <property name="geometry">
-    <rect>
-     <x>837</x>
-     <y>50</y>
-     <width>41</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>40</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="label1_13">
    <property name="geometry">
     <rect>
-     <x>760</x>
+     <x>740</x>
      <y>50</y>
-     <width>71</width>
+     <width>81</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>frequency=</string>
+    <string>frequency (Hz)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -408,7 +395,7 @@
     <rect>
      <x>442</x>
      <y>20</y>
-     <width>80</width>
+     <width>101</width>
      <height>20</height>
     </rect>
    </property>
@@ -417,6 +404,9 @@
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
+   </property>
+   <property name="editable">
+    <bool>false</bool>
    </property>
    <item>
     <property name="text">
@@ -1101,22 +1091,6 @@
     </property>
    </item>
   </widget>
-  <widget class="QLineEdit" name="Frequency_2">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>837</x>
-     <y>160</y>
-     <width>41</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>40</string>
-   </property>
-  </widget>
   <widget class="QLineEdit" name="ConditionP_2">
    <property name="enabled">
     <bool>false</bool>
@@ -1207,7 +1181,7 @@
     <rect>
      <x>442</x>
      <y>131</y>
-     <width>80</width>
+     <width>101</width>
      <height>20</height>
     </rect>
    </property>
@@ -1270,7 +1244,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>603</x>
+     <x>590</x>
      <y>160</y>
      <width>51</width>
      <height>20</height>
@@ -1449,7 +1423,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>660</x>
+     <x>647</x>
      <y>160</y>
      <width>80</width>
      <height>20</height>
@@ -1510,28 +1484,6 @@
    </property>
    <property name="text">
     <string>5</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label2_13">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>760</x>
-     <y>160</y>
-     <width>71</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>frequency=</string>
-   </property>
-   <property name="textFormat">
-    <enum>Qt::AutoText</enum>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QComboBox" name="Condition_3">
@@ -1774,7 +1726,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>660</x>
+     <x>647</x>
      <y>260</y>
      <width>80</width>
      <height>20</height>
@@ -1801,28 +1753,6 @@
      <string>Constant</string>
     </property>
    </item>
-  </widget>
-  <widget class="QLabel" name="label3_13">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>760</x>
-     <y>260</y>
-     <width>71</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>frequency=</string>
-   </property>
-   <property name="textFormat">
-    <enum>Qt::AutoText</enum>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
   </widget>
   <widget class="QLabel" name="label3_10">
    <property name="enabled">
@@ -1960,22 +1890,6 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="Frequency_3">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>837</x>
-     <y>260</y>
-     <width>41</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>40</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="label3_3">
    <property name="enabled">
     <bool>false</bool>
@@ -2042,7 +1956,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>603</x>
+     <x>590</x>
      <y>260</y>
      <width>51</width>
      <height>20</height>
@@ -2278,7 +2192,7 @@
     <rect>
      <x>442</x>
      <y>231</y>
-     <width>80</width>
+     <width>101</width>
      <height>20</height>
     </rect>
    </property>
@@ -2536,28 +2450,6 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QLabel" name="label4_13">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>760</x>
-     <y>359</y>
-     <width>71</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>frequency=</string>
-   </property>
-   <property name="textFormat">
-    <enum>Qt::AutoText</enum>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
   <widget class="QLabel" name="label4_14">
    <property name="enabled">
     <bool>false</bool>
@@ -2586,7 +2478,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>603</x>
+     <x>590</x>
      <y>359</y>
      <width>51</width>
      <height>20</height>
@@ -2839,7 +2731,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>660</x>
+     <x>647</x>
      <y>359</y>
      <width>80</width>
      <height>20</height>
@@ -2949,22 +2841,6 @@
     </property>
    </item>
   </widget>
-  <widget class="QLineEdit" name="Frequency_4">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>837</x>
-     <y>359</y>
-     <width>41</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>40</string>
-   </property>
-  </widget>
   <widget class="QLineEdit" name="Duration_4">
    <property name="enabled">
     <bool>false</bool>
@@ -3033,7 +2909,7 @@
     <rect>
      <x>442</x>
      <y>330</y>
-     <width>80</width>
+     <width>101</width>
      <height>20</height>
     </rect>
    </property>
@@ -3204,6 +3080,199 @@
    <property name="text">
     <string>Recent calibration=</string>
    </property>
+  </widget>
+  <widget class="QComboBox" name="Frequency_1">
+   <property name="geometry">
+    <rect>
+     <x>830</x>
+     <y>50</y>
+     <width>51</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="editable">
+    <bool>true</bool>
+   </property>
+   <item>
+    <property name="text">
+     <string>40</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string/>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string/>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label2_13">
+   <property name="geometry">
+    <rect>
+     <x>740</x>
+     <y>160</y>
+     <width>81</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>frequency (Hz)=</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="Frequency_2">
+   <property name="geometry">
+    <rect>
+     <x>830</x>
+     <y>160</y>
+     <width>51</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="editable">
+    <bool>true</bool>
+   </property>
+   <item>
+    <property name="text">
+     <string>40</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string/>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string/>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label3_13">
+   <property name="geometry">
+    <rect>
+     <x>740</x>
+     <y>260</y>
+     <width>81</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>frequency (Hz)=</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="Frequency_3">
+   <property name="geometry">
+    <rect>
+     <x>830</x>
+     <y>260</y>
+     <width>51</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="editable">
+    <bool>true</bool>
+   </property>
+   <item>
+    <property name="text">
+     <string>40</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string/>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string/>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label4_13">
+   <property name="geometry">
+    <rect>
+     <x>740</x>
+     <y>360</y>
+     <width>81</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>frequency (Hz)=</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="Frequency_4">
+   <property name="geometry">
+    <rect>
+     <x>830</x>
+     <y>360</y>
+     <width>51</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="editable">
+    <bool>true</bool>
+   </property>
+   <item>
+    <property name="text">
+     <string>40</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string/>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string/>
+    </property>
+   </item>
   </widget>
  </widget>
  <resources/>

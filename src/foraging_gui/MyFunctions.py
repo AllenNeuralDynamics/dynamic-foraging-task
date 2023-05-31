@@ -539,7 +539,8 @@ class GenerateTrials():
         self.CLP_LaserPower=eval('self.TP_LaserPower_'+N)
         self.CLP_Duration=float(eval('self.TP_Duration_'+N))
         self.CLP_Protocol=eval('self.TP_Protocol_'+N)
-        self.CLP_Frequency=float(eval('self.TP_Frequency_'+N))
+        if not self.CLP_Protocol=='Constant':
+            self.CLP_Frequency=float(eval('self.TP_Frequency_'+N))
         self.CLP_RampingDown=float(eval('self.TP_RD_'+N))
         self.CLP_PulseDur=eval('self.TP_PulseDur_'+N)
         self.CLP_LaserStart=eval('self.TP_LaserStart_'+N)
@@ -604,6 +605,11 @@ class GenerateTrials():
             if self.CLP_PulseDur=='NA':
                 self.win.WarningLabel.setText('Pulse duration is NA!')
                 self.win.WarningLabel.setStyleSheet("color: red;")
+                self.CLP_PulseDur=0
+            elif self.CLP_Frequency=='':
+                self.win.WarningLabel.setText('Pulse frequency is NA!')
+                self.win.WarningLabel.setStyleSheet("color: red;")
+                self.CLP_Frequency=0
             else:
                 self.CLP_PulseDur=float(self.CLP_PulseDur)
                 PointsEachPulse=int(self.CLP_SampleFrequency*self.CLP_PulseDur)
