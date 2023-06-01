@@ -42,9 +42,9 @@ class PlotV(FigureCanvas):
         self.B_TrialStartTime=GeneratedTrials.B_TrialStartTime
         self.B_TrialEndTime=GeneratedTrials.B_TrialEndTime
         self.B_RewardOutcomeTime=GeneratedTrials.B_RewardOutcomeTime
+        self.B_LaserOnTrial=np.array(GeneratedTrials.B_LaserOnTrial)
         self.MarchingType=GeneratedTrials.TP_MartchingType
 
-        
         if self.B_CurrentTrialN>0:
             self.B_Time=self.B_RewardOutcomeTime-GeneratedTrials.B_TrialStartTime[0]
         else:
@@ -91,7 +91,7 @@ class PlotV(FigureCanvas):
         LeftChoice_UnRewarded=np.where(np.logical_and(self.B_AnimalResponseHistory==0,self.B_RewardedHistory[0]==False))
         RightChoice_Rewarded=np.where(np.logical_and(self.B_AnimalResponseHistory==1,self.B_RewardedHistory[1]==True))
         RightChoice_UnRewarded=np.where(np.logical_and(self.B_AnimalResponseHistory==1, self.B_RewardedHistory[1]==False))
-
+        Optogenetics_On=np.where(self.B_LaserOnTrial[:-1]==1)
         # running average of choice
         if self.RunLength()!='':
             kernel_size = int(self.RunLength())
@@ -152,10 +152,14 @@ class PlotV(FigureCanvas):
                 ax1.plot(NewTrialStart2,-0.2, 'kD',label='Bait',markersize=MarkerSize, alpha=0.4)
             if self.B_BaitHistory[1][-1]==True:
                 ax1.plot(NewTrialStart2,1.2, 'kD',markersize=MarkerSize, alpha=0.4)
+            if self.B_LaserOnTrial[-1]==1:
+                ax1.plot(NewTrialStart2,1.5, 'bo',markersize=MarkerSize,markerfacecolor = (0, 0, 1, 1), alpha=1)
         else:
             LeftBait=np.where(self.B_BaitHistory[0]==True)
             RightBait=np.where(self.B_BaitHistory[1]==True)
 
+        if np.size(Optogenetics_On) !=0:
+            ax1.plot(self.B_BTime[Optogenetics_On], np.zeros(len(self.B_BTime[Optogenetics_On]))+1.5, 'bo',markerfacecolor = (0, 0, 1, 1),label='Optogenetics',markersize=MarkerSize, alpha=1)
         if np.size(LeftBait) !=0:
             ax1.plot(self.B_BTime[LeftBait], np.zeros(len(self.B_BTime[LeftBait]))-0.2, 'kD',markersize=MarkerSize, alpha=0.2)
         if np.size(RightBait) !=0:
