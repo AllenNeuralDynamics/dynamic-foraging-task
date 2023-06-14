@@ -225,10 +225,29 @@ class GenerateTrials():
                     self.BlockLenHistory[i][-1]=self.B_CurrentTrialN+1
                 elif len(self.BlockLenHistory[i])>1:
                     self.BlockLenHistory[i][-1]=self.B_CurrentTrialN+1-sum(self.BlockLenHistory[i][:-1])
+
+        
+        # min rewards to perform transition
+        if self.B_CurrentTrialN>0:
+            self.AllRewardThisBlock=self.BS_RewardedTrialN_CurrentLeftBlock+self.BS_RewardedTrialN_CurrentRightBlock
+        else:
+            self.AllRewardThisBlock=-1
         # decide if block transition will happen at the next trial
         for i in range(len(self.B_ANewBlock)):
             if self.B_CurrentTrialN+1>=sum(self.BlockLenHistory[i]):
                 self.B_ANewBlock[i]=1
+        if self.B_ANewBlock[0]==1 and self.B_ANewBlock[1]==1 and self.AllRewardThisBlock!=-1:
+            if self.AllRewardThisBlock<float(self.TP_BlockMinReward):
+                # do not switch
+                self.B_ANewBlock[0]=0
+                self.B_ANewBlock[1]=0
+                # update the BlockLenHistory
+                for i in range(len(self.B_ANewBlock)):
+                    if len(self.BlockLenHistory[i])==1:
+                        self.BlockLenHistory[i][-1]=self.B_CurrentTrialN+1
+                    elif len(self.BlockLenHistory[i])>1:
+                        self.BlockLenHistory[i][-1]=self.B_CurrentTrialN+1-sum(self.BlockLenHistory[i][:-1]) 
+
 
     def _GetBasic(self):
         '''Get basic session information'''
@@ -838,6 +857,17 @@ class GenerateTrials():
         self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime)
         self.B_GoCueTime=np.append(self.B_GoCueTime,GoCueTime)
         self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,RewardOutcomeTime)
+        
+        if float(self.TP_BlockMin)==1 and float(self.TP_BlockMax)==1 and float(self.TP_BlockMinReward)==1:
+            RewardPro=[self.B_RewardProHistory[0][self.B_CurrentTrialN],self.B_RewardProHistory[1][self.B_CurrentTrialN]]
+            if TrialOutcome=='RewardLeft' or TrialOutcome=='RewardRight':
+                # change block
+                self.B_RewardProHistory[1][self.B_CurrentTrialN+1]=RewardPro[0]
+                self.B_RewardProHistory[0][self.B_CurrentTrialN+1]=RewardPro[1]
+                
+            else:
+                self.B_RewardProHistory[1][self.B_CurrentTrialN+1]=RewardPro[1]
+                self.B_RewardProHistory[0][self.B_CurrentTrialN+1]=RewardPro[0]
 
     def _GiveLeft(self):
         '''manually give left water'''

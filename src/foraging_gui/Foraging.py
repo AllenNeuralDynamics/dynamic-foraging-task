@@ -905,6 +905,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self._StartTrialLoop(GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
         else:
             self.threadpool5.start(workerStartTrialLoop) # I just found the QApplication.processEvents() was better to reduce delay time between trial end the the next trial start
+            
 
     def _StartTrialLoop(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         while self.Start.isChecked():

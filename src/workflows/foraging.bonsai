@@ -275,7 +275,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT1.832S</gl:DueTime>
+                      <gl:DueTime>PT4.104S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -323,7 +323,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT1S</gl:DueTime>
+                      <gl:DueTime>PT0.874S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -3098,7 +3098,7 @@ def process(value):
                   <Expression xsi:type="beh:CreateMessage">
                     <harp:Payload xsi:type="beh:CreatePulseDO0Payload">
                       <harp:MessageType>Write</harp:MessageType>
-                      <beh:Value>1832</beh:Value>
+                      <beh:Value>4103</beh:Value>
                     </harp:Payload>
                   </Expression>
                   <Expression xsi:type="MulticastSubject">
@@ -3149,7 +3149,7 @@ def process(value):
                   <Expression xsi:type="beh:CreateMessage">
                     <harp:Payload xsi:type="beh:CreatePulseDO1Payload">
                       <harp:MessageType>Write</harp:MessageType>
-                      <beh:Value>1000</beh:Value>
+                      <beh:Value>874</beh:Value>
                     </harp:Payload>
                   </Expression>
                   <Expression xsi:type="MulticastSubject">
@@ -3346,7 +3346,7 @@ def process(value):
                 <harp:VisualIndicators>On</harp:VisualIndicators>
                 <harp:Heartbeat>Disabled</harp:Heartbeat>
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                <harp:PortName>COM7</harp:PortName>
+                <harp:PortName>COM3</harp:PortName>
               </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
@@ -4609,136 +4609,138 @@ def process(value):
           </Edges>
         </Workflow>
       </Expression>
-      <Expression xsi:type="GroupWorkflow">
-        <Name>Optogenetics2</Name>
-        <Workflow>
-          <Nodes>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>WaveForm1_1</Name>
-            </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>Location1Size</Name>
-            </Expression>
-            <Expression xsi:type="PropertyMapping">
-              <PropertyMappings>
-                <Property Name="BufferSize" />
-              </PropertyMappings>
-            </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>WaveForm1_2</Name>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:Zip" />
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="dsp:Concat">
-                <dsp:Axis>0</dsp:Axis>
-              </Combinator>
-            </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>TriggerSource</Name>
-            </Expression>
-            <Expression xsi:type="PropertyMapping">
-              <PropertyMappings>
-                <Property Name="TriggerSource" />
-              </PropertyMappings>
-            </Expression>
-            <Expression xsi:type="rx:SelectMany">
-              <Workflow>
-                <Nodes>
-                  <Expression xsi:type="WorkflowInput">
-                    <Name>Source1</Name>
-                  </Expression>
-                  <Expression xsi:type="ExternalizedMapping">
-                    <Property Name="BufferSize" />
-                    <Property Name="TriggerSource" />
-                  </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="p2:TriggeredAnalogOutput">
-                      <p2:SignalSource />
-                      <p2:TriggerSource>/Dev1/PFI0</p2:TriggerSource>
-                      <p2:SampleRate>5000</p2:SampleRate>
-                      <p2:ActiveEdge>Rising</p2:ActiveEdge>
-                      <p2:SampleMode>FiniteSamples</p2:SampleMode>
-                      <p2:BufferSize>50002</p2:BufferSize>
-                      <p2:Channels>
-                        <p2:AnalogOutputChannelConfiguration>
-                          <p2:ChannelName />
-                          <p2:MinimumValue>-10</p2:MinimumValue>
-                          <p2:MaximumValue>10</p2:MaximumValue>
-                          <p2:PhysicalChannel>Dev1/ao0</p2:PhysicalChannel>
-                          <p2:VoltageUnits>Volts</p2:VoltageUnits>
-                        </p2:AnalogOutputChannelConfiguration>
-                        <p2:AnalogOutputChannelConfiguration>
-                          <p2:ChannelName />
-                          <p2:MinimumValue>-10</p2:MinimumValue>
-                          <p2:MaximumValue>10</p2:MaximumValue>
-                          <p2:PhysicalChannel>Dev1/ao1</p2:PhysicalChannel>
-                          <p2:VoltageUnits>Volts</p2:VoltageUnits>
-                        </p2:AnalogOutputChannelConfiguration>
-                      </p2:Channels>
-                    </Combinator>
-                  </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="IntProperty">
-                      <Value>1</Value>
-                    </Combinator>
-                  </Expression>
-                  <Expression xsi:type="osc:Format">
-                    <osc:Address>/FinishOfWave1_1</osc:Address>
-                  </Expression>
-                  <Expression xsi:type="MulticastSubject">
-                    <Name>ToBonsaiOSC4</Name>
-                  </Expression>
-                  <Expression xsi:type="WorkflowOutput" />
-                </Nodes>
-                <Edges>
-                  <Edge From="0" To="2" Label="Source2" />
-                  <Edge From="1" To="2" Label="Source2" />
-                  <Edge From="2" To="3" Label="Source1" />
-                  <Edge From="3" To="4" Label="Source1" />
-                  <Edge From="4" To="5" Label="Source1" />
-                  <Edge From="5" To="6" Label="Source1" />
-                </Edges>
-              </Workflow>
-            </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>OptogeneticsCalibration</Name>
-            </Expression>
-            <Expression xsi:type="beh:CreateMessage">
-              <harp:Payload xsi:type="beh:CreatePulseDO0Payload">
-                <harp:MessageType>Write</harp:MessageType>
-                <beh:Value>10</beh:Value>
-              </harp:Payload>
-            </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>BehaviorCommands</Name>
-            </Expression>
-            <Expression xsi:type="beh:CreateMessage">
-              <harp:Payload xsi:type="beh:CreateOutputTogglePayload">
-                <harp:MessageType>Write</harp:MessageType>
-                <beh:Value>DO0</beh:Value>
-              </harp:Payload>
-            </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>BehaviorCommands</Name>
-            </Expression>
-          </Nodes>
-          <Edges>
-            <Edge From="0" To="4" Label="Source1" />
-            <Edge From="1" To="2" Label="Source1" />
-            <Edge From="2" To="8" Label="Source2" />
-            <Edge From="3" To="4" Label="Source2" />
-            <Edge From="4" To="5" Label="Source1" />
-            <Edge From="5" To="8" Label="Source1" />
-            <Edge From="6" To="7" Label="Source1" />
-            <Edge From="7" To="8" Label="Source3" />
-            <Edge From="9" To="10" Label="Source1" />
-            <Edge From="10" To="11" Label="Source1" />
-            <Edge From="11" To="12" Label="Source1" />
-            <Edge From="12" To="13" Label="Source1" />
-          </Edges>
-        </Workflow>
+      <Expression xsi:type="Disable">
+        <Builder xsi:type="GroupWorkflow">
+          <Name>Optogenetics2</Name>
+          <Workflow>
+            <Nodes>
+              <Expression xsi:type="SubscribeSubject">
+                <Name>WaveForm1_1</Name>
+              </Expression>
+              <Expression xsi:type="SubscribeSubject">
+                <Name>Location1Size</Name>
+              </Expression>
+              <Expression xsi:type="PropertyMapping">
+                <PropertyMappings>
+                  <Property Name="BufferSize" />
+                </PropertyMappings>
+              </Expression>
+              <Expression xsi:type="SubscribeSubject">
+                <Name>WaveForm1_2</Name>
+              </Expression>
+              <Expression xsi:type="Combinator">
+                <Combinator xsi:type="rx:Zip" />
+              </Expression>
+              <Expression xsi:type="Combinator">
+                <Combinator xsi:type="dsp:Concat">
+                  <dsp:Axis>0</dsp:Axis>
+                </Combinator>
+              </Expression>
+              <Expression xsi:type="SubscribeSubject">
+                <Name>TriggerSource</Name>
+              </Expression>
+              <Expression xsi:type="PropertyMapping">
+                <PropertyMappings>
+                  <Property Name="TriggerSource" />
+                </PropertyMappings>
+              </Expression>
+              <Expression xsi:type="rx:SelectMany">
+                <Workflow>
+                  <Nodes>
+                    <Expression xsi:type="WorkflowInput">
+                      <Name>Source1</Name>
+                    </Expression>
+                    <Expression xsi:type="ExternalizedMapping">
+                      <Property Name="BufferSize" />
+                      <Property Name="TriggerSource" />
+                    </Expression>
+                    <Expression xsi:type="Combinator">
+                      <Combinator xsi:type="p2:TriggeredAnalogOutput">
+                        <p2:SignalSource />
+                        <p2:TriggerSource>/Dev1/PFI0</p2:TriggerSource>
+                        <p2:SampleRate>5000</p2:SampleRate>
+                        <p2:ActiveEdge>Rising</p2:ActiveEdge>
+                        <p2:SampleMode>FiniteSamples</p2:SampleMode>
+                        <p2:BufferSize>50002</p2:BufferSize>
+                        <p2:Channels>
+                          <p2:AnalogOutputChannelConfiguration>
+                            <p2:ChannelName />
+                            <p2:MinimumValue>-10</p2:MinimumValue>
+                            <p2:MaximumValue>10</p2:MaximumValue>
+                            <p2:PhysicalChannel>Dev1/ao0</p2:PhysicalChannel>
+                            <p2:VoltageUnits>Volts</p2:VoltageUnits>
+                          </p2:AnalogOutputChannelConfiguration>
+                          <p2:AnalogOutputChannelConfiguration>
+                            <p2:ChannelName />
+                            <p2:MinimumValue>-10</p2:MinimumValue>
+                            <p2:MaximumValue>10</p2:MaximumValue>
+                            <p2:PhysicalChannel>Dev1/ao1</p2:PhysicalChannel>
+                            <p2:VoltageUnits>Volts</p2:VoltageUnits>
+                          </p2:AnalogOutputChannelConfiguration>
+                        </p2:Channels>
+                      </Combinator>
+                    </Expression>
+                    <Expression xsi:type="Combinator">
+                      <Combinator xsi:type="IntProperty">
+                        <Value>1</Value>
+                      </Combinator>
+                    </Expression>
+                    <Expression xsi:type="osc:Format">
+                      <osc:Address>/FinishOfWave1_1</osc:Address>
+                    </Expression>
+                    <Expression xsi:type="MulticastSubject">
+                      <Name>ToBonsaiOSC4</Name>
+                    </Expression>
+                    <Expression xsi:type="WorkflowOutput" />
+                  </Nodes>
+                  <Edges>
+                    <Edge From="0" To="2" Label="Source2" />
+                    <Edge From="1" To="2" Label="Source2" />
+                    <Edge From="2" To="3" Label="Source1" />
+                    <Edge From="3" To="4" Label="Source1" />
+                    <Edge From="4" To="5" Label="Source1" />
+                    <Edge From="5" To="6" Label="Source1" />
+                  </Edges>
+                </Workflow>
+              </Expression>
+              <Expression xsi:type="SubscribeSubject">
+                <Name>OptogeneticsCalibration</Name>
+              </Expression>
+              <Expression xsi:type="beh:CreateMessage">
+                <harp:Payload xsi:type="beh:CreatePulseDO0Payload">
+                  <harp:MessageType>Write</harp:MessageType>
+                  <beh:Value>10</beh:Value>
+                </harp:Payload>
+              </Expression>
+              <Expression xsi:type="MulticastSubject">
+                <Name>BehaviorCommands</Name>
+              </Expression>
+              <Expression xsi:type="beh:CreateMessage">
+                <harp:Payload xsi:type="beh:CreateOutputTogglePayload">
+                  <harp:MessageType>Write</harp:MessageType>
+                  <beh:Value>DO0</beh:Value>
+                </harp:Payload>
+              </Expression>
+              <Expression xsi:type="MulticastSubject">
+                <Name>BehaviorCommands</Name>
+              </Expression>
+            </Nodes>
+            <Edges>
+              <Edge From="0" To="4" Label="Source1" />
+              <Edge From="1" To="2" Label="Source1" />
+              <Edge From="2" To="8" Label="Source2" />
+              <Edge From="3" To="4" Label="Source2" />
+              <Edge From="4" To="5" Label="Source1" />
+              <Edge From="5" To="8" Label="Source1" />
+              <Edge From="6" To="7" Label="Source1" />
+              <Edge From="7" To="8" Label="Source3" />
+              <Edge From="9" To="10" Label="Source1" />
+              <Edge From="10" To="11" Label="Source1" />
+              <Edge From="11" To="12" Label="Source1" />
+              <Edge From="12" To="13" Label="Source1" />
+            </Edges>
+          </Workflow>
+        </Builder>
       </Expression>
     </Nodes>
     <Edges />
