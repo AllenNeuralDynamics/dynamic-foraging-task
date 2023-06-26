@@ -43,6 +43,7 @@ class PlotV(FigureCanvas):
         self.B_TrialEndTime=GeneratedTrials.B_TrialEndTime
         self.B_RewardOutcomeTime=GeneratedTrials.B_RewardOutcomeTime
         self.B_LaserOnTrial=np.array(GeneratedTrials.B_LaserOnTrial)
+        self.B_AutoWaterTrial=GeneratedTrials.B_AutoWaterTrial
         self.MarchingType=GeneratedTrials.TP_MartchingType
 
         if self.B_CurrentTrialN>0:
@@ -138,7 +139,8 @@ class PlotV(FigureCanvas):
         if self.B_BaitHistory.shape[1]>self.B_AnimalResponseHistory.shape[0]:
             LeftBait=np.where(self.B_BaitHistory[0][:-1]==True)
             RightBait=np.where(self.B_BaitHistory[1][:-1]==True)
-            
+            LeftAutoWater=np.where(self.B_AutoWaterTrial[0][:-1]==1)
+            RightAutoWater=np.where(self.B_AutoWaterTrial[1][:-1]==1)
             # plot the upcoming trial start time
             if self.B_CurrentTrialN>0:
                 NewTrialStart=np.array(self.B_BTime[-1])
@@ -154,9 +156,20 @@ class PlotV(FigureCanvas):
                 ax1.plot(NewTrialStart2,1.2, 'kD',markersize=MarkerSize, alpha=0.4)
             if self.B_LaserOnTrial[-1]==1:
                 ax1.plot(NewTrialStart2,1.5, 'bo',markersize=MarkerSize,markerfacecolor = (0, 0, 1, 1), alpha=1)
+            if self.B_AutoWaterTrial[0][-1]==1:
+                ax1.plot(NewTrialStart2,0.4, 'bo',markerfacecolor = (0, 1, 0, 1),label='AutoWater',markersize=MarkerSize)
+            if self.B_AutoWaterTrial[1][-1]==1:
+                ax1.plot(NewTrialStart2,0.6, 'bo',markerfacecolor = (0, 1, 0, 1),label='AutoWater',markersize=MarkerSize)
         else:
             LeftBait=np.where(self.B_BaitHistory[0]==True)
             RightBait=np.where(self.B_BaitHistory[1]==True)
+            LeftAutoWater=np.where(self.B_AutoWaterTrial[0]==1)
+            RightAutoWater=np.where(self.B_AutoWaterTrial[1]==1)
+        
+        if np.size(LeftAutoWater) !=0:
+            ax1.plot(self.B_BTime[LeftAutoWater], np.zeros(len(self.B_BTime[LeftAutoWater]))+0.4, 'bo',markerfacecolor = (0, 1, 0, 1),markersize=MarkerSize)
+        if np.size(RightAutoWater) !=0:
+            ax1.plot(self.B_BTime[RightAutoWater], np.zeros(len(self.B_BTime[RightAutoWater]))+0.6, 'bo',markerfacecolor =(0, 1, 0, 1),markersize=MarkerSize)
 
         if np.size(Optogenetics_On) !=0:
             ax1.plot(self.B_BTime[Optogenetics_On], np.zeros(len(self.B_BTime[Optogenetics_On]))+1.5, 'bo',markerfacecolor = (0, 0, 1, 1),label='Optogenetics',markersize=MarkerSize, alpha=1)

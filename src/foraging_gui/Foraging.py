@@ -878,7 +878,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             layout.addWidget(PlotM)
             self.ToInitializeVisual=0
             # create workers
-            worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.Channel,self.Channel3)
+            worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.Channel,self.Channel3,self.Channel4)
             worker1.signals.finished.connect(self._thread_complete)
             workerLick = Worker(GeneratedTrials._GetLicks,self.Channel2)
             workerLick.signals.finished.connect(self._thread_complete2)
@@ -900,13 +900,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
         
-        self.test=0
+        self.test=1
         if self.test==1:
             self._StartTrialLoop(GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
         else:
             self.threadpool5.start(workerStartTrialLoop) # I just found the QApplication.processEvents() was better to reduce delay time between trial end the the next trial start
             
-
     def _StartTrialLoop(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         while self.Start.isChecked():
             QApplication.processEvents()
@@ -919,17 +918,25 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 #get the response of the animal using a different thread
                 self.threadpool.start(worker1)
                 #receive licks and update figures
-                if self.ToUpdateFigure==1:
-                    self.ToUpdateFigure=0
-                    self.threadpool3.start(workerPlot)
+                if self.test==1:
+                    self.PlotM._Update(GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
+                else:
+                    if self.ToUpdateFigure==1:
+                        self.ToUpdateFigure=0
+                        self.threadpool3.start(workerPlot)
                 #generate a new trial
                 GeneratedTrials.GeneFinish=0
-                self.ToGenerateATrial=0
-                if self.test==1:
-                    self.ToGenerateATrial=1
-                    GeneratedTrials._GenerateATrial(self.Channel4)
+                if (not self.GeneratedTrials.TP_AutoReward)  or int(self.GeneratedTrials.TP_BlockMinReward)>0:
+                    self.ToGenerateATrial=0
+                    if self.test==1:
+                        self.ToGenerateATrial=1
+                        if GeneratedTrials.GeneFinish==0:
+                            GeneratedTrials._GenerateATrial(self.Channel4)
+                    else:
+                        if GeneratedTrials.GeneFinish==0:
+                            self.threadpool4.start(workerGenerateAtrial)
                 else:
-                    self.threadpool4.start(workerGenerateAtrial)
+                    self.ToGenerateATrial==1
     def _OptogeneticsB(self):
         ''' optogenetics control in the main window'''
         if self.OptogeneticsB.currentText()=='on':

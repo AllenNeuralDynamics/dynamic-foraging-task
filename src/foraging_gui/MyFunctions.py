@@ -47,7 +47,7 @@ class GenerateTrials():
         self.B_LaserAmplitude=[]
         self.B_LaserDuration=[]
         self.B_SelectedCondition=[]
-        self.B_AutoWaterTrial=[] # to indicate if it is a trial with outo water.
+        self.B_AutoWaterTrial=np.array([[],[]]).astype(bool) # to indicate if it is a trial with outo water.
         self.NextWaveForm=1 # waveform stored for later use
         self.CurrentWaveForm=1 # the current waveform to trigger the optogenetics
         self.Start_Delay_LeftLicks=[]
@@ -66,6 +66,8 @@ class GenerateTrials():
         self.GoCue_GoCue1_DD=[]
         self.GoCue_NextStart_DD=[]
         self.B_StartType=[] # 1: normal trials with delay; 3: optogenetics trials without delay
+        self.GeneFinish=1
+        self.GetResponseFinish=1
         #self.B_LaserTrialNum=[] # B_LaserAmplitude, B_LaserDuration, B_SelectedCondition have values only on laser on trials, so we need to store the laser trial number
         
         self.Obj={}
@@ -242,10 +244,9 @@ class GenerateTrials():
                 # update the BlockLenHistory
                 for i in range(len(self.B_ANewBlock)):
                     if len(self.BlockLenHistory[i])==1:
-                        self.BlockLenHistory[i][-1]=self.B_CurrentTrialN+1
+                        self.BlockLenHistory[i][-1]=self.B_CurrentTrialN+2
                     elif len(self.BlockLenHistory[i])>1:
-                        self.BlockLenHistory[i][-1]=self.B_CurrentTrialN+1-sum(self.BlockLenHistory[i][:-1]) 
-
+                        self.BlockLenHistory[i][-1]=self.B_CurrentTrialN+2-sum(self.BlockLenHistory[i][:-1]) 
     def _GetBasic(self):
         '''Get basic session information'''
         if len(self.B_TrialEndTime)>=1:
@@ -422,7 +423,10 @@ class GenerateTrials():
         SessionStartTimeHM = SessionStartTime.strftime('%H:%M')
         CurrentTimeHM = self.win.CurrentTime.strftime('%H:%M')
         self.win.Other_inforTitle='Session started: '+SessionStartTimeHM+ '  Current: '+CurrentTimeHM+ '  Run: '+str(self.win.Other_RunningTime)+'m'
-        self.win.Other_BasicTitle='Current trial: ' + str(self.B_CurrentTrialN+1)
+        if self.TP_AutoReward and self.win.Start.isChecked():
+            self.win.Other_BasicTitle='Current trial: ' + str(self.B_CurrentTrialN+2)
+        else:
+            self.win.Other_BasicTitle='Current trial: ' + str(self.B_CurrentTrialN+1)
         self.win.infor.setTitle(self.win.Other_inforTitle)
         self.win.Basic.setTitle(self.win.Other_BasicTitle)
 
@@ -523,9 +527,14 @@ class GenerateTrials():
             self.win.Start.setChecked(False)
     def _CheckAutoWater(self):
         '''Check if it should be an auto water trial'''
-        if self.win.AutoReward.isChecked():
+        #if self.win.AutoReward.isChecked():
+        if self.TP_AutoReward:
             UnrewardedN=int(self.TP_Unrewarded)
             IgnoredN=int(self.TP_Ignored)
+            if UnrewardedN<=0:
+                UnrewardedN=1
+            if IgnoredN<=0:
+                IgnoredN=1
             if np.shape(self.B_AnimalResponseHistory)[0]>=IgnoredN or np.shape(self.B_RewardedHistory[0])[0]>=UnrewardedN:
                 if np.all(self.B_AnimalResponseHistory[-IgnoredN:]==2) and np.shape(self.B_AnimalResponseHistory)[0]>=IgnoredN:
                     self.CurrentAutoReward=1
@@ -545,7 +554,17 @@ class GenerateTrials():
         if self.CurrentAutoReward==0:
             self.win.WarningLabelAutoWater.setText('')
             self.win.WarningLabelAutoWater.setStyleSheet("color: gray;")
-        self.B_AutoWaterTrial.append(self.CurrentAutoReward)
+        if self.CurrentAutoReward==1:
+            if self.B_CurrentRewardProb[0]>self.B_CurrentRewardProb[1]:
+                self.CurrentAutoRewardTrial=[1,0]
+            elif self.B_CurrentRewardProb[0]<self.B_CurrentRewardProb[1]:
+                self.CurrentAutoRewardTrial=[0,1]
+            else:
+                self.CurrentAutoRewardTrial=[1,1]
+        else:
+            self.CurrentAutoRewardTrial=[0,0]
+        self.B_AutoWaterTrial=np.append(self.B_AutoWaterTrial, np.array(self.CurrentAutoRewardTrial).reshape(2,1),axis=1)
+
     def _GetLaserWaveForm(self):
         '''Get the waveform of the laser. It dependens on color/duration/protocol(frequency/RD/pulse duration)/locations/laser power'''
         N=self.SelctedCondition
@@ -768,7 +787,7 @@ class GenerateTrials():
             self.CurrentStartType=1
             self.B_StartType.append(self.CurrentStartType)
 
-    def _GetAnimalResponse(self,Channel1,Channel3):
+    def _GetAnimalResponse(self,Channel1,Channel3,Channel4):
         '''
         # random forager
         self.B_AnimalCurrentResponse=random.choice(range(2))
@@ -798,8 +817,9 @@ class GenerateTrials():
                 DelayStartTime=Rec[1][1][0]
             elif Rec[0].address=='/GoCueTime':
                 # give auto water after Co cue
-                if self.CurrentAutoReward==1:
+                if self.CurrentAutoRewardTrial[0]==1:
                     self._GiveLeft()
+                elif self.CurrentAutoRewardTrial[1]==1:
                     self._GiveRight()
                 GoCueTime=Rec[1][1][0]
             elif Rec[0].address=='/RewardOutcomeTime':
@@ -855,6 +875,12 @@ class GenerateTrials():
         self.B_GoCueTime=np.append(self.B_GoCueTime,GoCueTime)
         self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,RewardOutcomeTime)
         
+        #if self.win.AutoReward.isChecked():
+        if self.TP_AutoReward or int(self.TP_BlockMinReward)>0:
+            if self.GeneFinish==0:
+                self._GenerateATrial(Channel4)
+        self.GetResponseFinish=1
+        '''
         if float(self.TP_BlockMin)==1 and float(self.TP_BlockMax)==1 and float(self.TP_BlockMinReward)==1:
             RewardPro=[self.B_RewardProHistory[0][self.B_CurrentTrialN],self.B_RewardProHistory[1][self.B_CurrentTrialN]]
             if TrialOutcome=='RewardLeft' or TrialOutcome=='RewardRight':
@@ -868,7 +894,7 @@ class GenerateTrials():
                 self.B_RewardProHistory[0][self.B_CurrentTrialN+1]=RewardPro[0]
                 self.B_CurrentRewardProb[1]=RewardPro[1]
                 self.B_CurrentRewardProb[0]=RewardPro[0]
-                
+        '''
     def _GiveLeft(self):
         '''manually give left water'''
         self.win.Channel.LeftValue(float(self.win.LeftValue.text())*1000*float(self.win.Multiplier.text())) 
