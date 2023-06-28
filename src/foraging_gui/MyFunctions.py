@@ -575,11 +575,16 @@ class GenerateTrials():
                 self.CurrentAutoReward=1
             else:
                 if np.shape(self.B_AnimalResponseHistory)[0]>=IgnoredN or np.shape(self.B_RewardedHistory[0])[0]>=UnrewardedN:
+                    # auto reward is considered as reward
+                    B_RewardedHistory=self.B_RewardedHistory.copy()
+                    Ind=range(len(self.B_RewardedHistory[0]))
+                    for i in range(len(self.B_RewardedHistory)):
+                        B_RewardedHistory[i]=np.logical_or(self.B_RewardedHistory[i],self.B_AutoWaterTrial[i][Ind])
                     if np.all(self.B_AnimalResponseHistory[-IgnoredN:]==2) and np.shape(self.B_AnimalResponseHistory)[0]>=IgnoredN:
                         self.CurrentAutoReward=1
                         self.win.WarningLabelAutoWater.setText('Auto water because ignored trials exceed: '+self.TP_Ignored)
                         self.win.WarningLabelAutoWater.setStyleSheet("color: red;")
-                    elif (np.all(self.B_RewardedHistory[0][-UnrewardedN:]==False) and np.all(self.B_RewardedHistory[1][-UnrewardedN:]==False) and np.shape(self.B_RewardedHistory[0])[0]>=UnrewardedN):
+                    elif (np.all(B_RewardedHistory[0][-UnrewardedN:]==False) and np.all(B_RewardedHistory[1][-UnrewardedN:]==False) and np.shape(B_RewardedHistory[0])[0]>=UnrewardedN):
                         self.CurrentAutoReward=1
                         self.win.WarningLabelAutoWater.setText('Auto water because unrewarded trials exceed: '+self.TP_Unrewarded)
                         self.win.WarningLabelAutoWater.setStyleSheet("color: red;")
@@ -788,7 +793,6 @@ class GenerateTrials():
                 for i in range(len(self.CurrentBait)):
                     if self.CurrentBait[i]==True:
                         self.CurrentAutoRewardTrial[i]=1
-            self.B_Baited=np.full(len(self.B_Baited),False)
             if self.TP_AutoWaterType=='Both':
                 self.CurrentAutoRewardTrial=[1,1]
             if self.TP_AutoWaterType=='High pro':
@@ -798,10 +802,12 @@ class GenerateTrials():
                     self.CurrentAutoRewardTrial=[0,1]
                 else:
                     self.CurrentAutoRewardTrial=[1,1]
+            #self.B_Baited=np.full(len(self.B_Baited),False)
             # make it no baited reward for auto reward side
             for i in range(len(self.CurrentAutoRewardTrial)):
                 if self.CurrentAutoRewardTrial[i]==1:
                     self.CurrentBait[i]=0
+                    self.B_Baited[i]=False
         else:
             self.CurrentAutoRewardTrial=[0,0]
         self.B_AutoWaterTrial=np.append(self.B_AutoWaterTrial, np.array(self.CurrentAutoRewardTrial).reshape(2,1),axis=1)

@@ -157,9 +157,9 @@ class PlotV(FigureCanvas):
             if self.B_LaserOnTrial[-1]==1:
                 ax1.plot(NewTrialStart2,1.5, 'bo',markersize=MarkerSize,markerfacecolor = (0, 0, 1, 1), alpha=1)
             if self.B_AutoWaterTrial[0][-1]==1:
-                ax1.plot(NewTrialStart2,0.4, 'bo',markerfacecolor = (0, 1, 0, 1),label='AutoWater',markersize=MarkerSize)
+                ax1.plot(NewTrialStart2,0.4, 'bo',markerfacecolor = (0, 1, 0, 1),markersize=MarkerSize)
             if self.B_AutoWaterTrial[1][-1]==1:
-                ax1.plot(NewTrialStart2,0.6, 'bo',markerfacecolor = (0, 1, 0, 1),label='AutoWater',markersize=MarkerSize)
+                ax1.plot(NewTrialStart2,0.6, 'bo',markerfacecolor = (0, 1, 0, 1),markersize=MarkerSize)
         else:
             LeftBait=np.where(self.B_BaitHistory[0]==True)
             RightBait=np.where(self.B_BaitHistory[1]==True)
@@ -167,7 +167,7 @@ class PlotV(FigureCanvas):
             RightAutoWater=np.where(self.B_AutoWaterTrial[1]==1)
         
         if np.size(LeftAutoWater) !=0:
-            ax1.plot(self.B_BTime[LeftAutoWater], np.zeros(len(self.B_BTime[LeftAutoWater]))+0.4, 'bo',markerfacecolor = (0, 1, 0, 1),markersize=MarkerSize,label='AutoWater')
+            ax1.plot(self.B_BTime[LeftAutoWater], np.zeros(len(self.B_BTime[LeftAutoWater]))+0.4, 'bo',markerfacecolor = (0, 1, 0, 1),markersize=MarkerSize)
         if np.size(RightAutoWater) !=0:
             ax1.plot(self.B_BTime[RightAutoWater], np.zeros(len(self.B_BTime[RightAutoWater]))+0.6, 'bo',markerfacecolor =(0, 1, 0, 1),markersize=MarkerSize,label='AutoWater')
 
