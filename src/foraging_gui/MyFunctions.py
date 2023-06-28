@@ -590,20 +590,6 @@ class GenerateTrials():
         else:
             self.CurrentAutoReward=0
 
-        if self.CurrentAutoReward==0:
-            self.win.WarningLabelAutoWater.setText('')
-            self.win.WarningLabelAutoWater.setStyleSheet("color: gray;")
-        if self.CurrentAutoReward==1:
-            if self.B_CurrentRewardProb[0]>self.B_CurrentRewardProb[1]:
-                self.CurrentAutoRewardTrial=[1,0]
-            elif self.B_CurrentRewardProb[0]<self.B_CurrentRewardProb[1]:
-                self.CurrentAutoRewardTrial=[0,1]
-            else:
-                self.CurrentAutoRewardTrial=[1,1]
-        else:
-            self.CurrentAutoRewardTrial=[0,0]
-        self.B_AutoWaterTrial=np.append(self.B_AutoWaterTrial, np.array(self.CurrentAutoRewardTrial).reshape(2,1),axis=1)
-
     def _GetLaserWaveForm(self):
         '''Get the waveform of the laser. It dependens on color/duration/protocol(frequency/RD/pulse duration)/locations/laser power'''
         N=self.SelctedCondition
@@ -792,6 +778,33 @@ class GenerateTrials():
              self.CurrentBait= self.CurrentBait | self.B_Baited
         self.B_Baited=  self.CurrentBait.copy()
         self.B_BaitHistory=np.append(self.B_BaitHistory, self.CurrentBait.reshape(2,1),axis=1)
+        # determine auto water
+        if self.CurrentAutoReward==0:
+            self.win.WarningLabelAutoWater.setText('')
+            self.win.WarningLabelAutoWater.setStyleSheet("color: gray;")
+        if self.CurrentAutoReward==1:
+            self.CurrentAutoRewardTrial=[0,0]
+            if self.TP_AutoWaterType=='Natural':
+                for i in range(len(self.CurrentBait)):
+                    if self.CurrentBait[i]==True:
+                        self.CurrentAutoRewardTrial[i]=1
+            self.B_Baited=np.full(len(self.B_Baited),False)
+            if self.TP_AutoWaterType=='Both':
+                self.CurrentAutoRewardTrial=[1,1]
+            if self.TP_AutoWaterType=='High pro':
+                if self.B_CurrentRewardProb[0]>self.B_CurrentRewardProb[1]:
+                    self.CurrentAutoRewardTrial=[1,0]
+                elif self.B_CurrentRewardProb[0]<self.B_CurrentRewardProb[1]:
+                    self.CurrentAutoRewardTrial=[0,1]
+                else:
+                    self.CurrentAutoRewardTrial=[1,1]
+            # make it no baited reward for auto reward side
+            for i in range(len(self.CurrentAutoRewardTrial)):
+                if self.CurrentAutoRewardTrial[i]==1:
+                    self.CurrentBait[i]=0
+        else:
+            self.CurrentAutoRewardTrial=[0,0]
+        self.B_AutoWaterTrial=np.append(self.B_AutoWaterTrial, np.array(self.CurrentAutoRewardTrial).reshape(2,1),axis=1)
 
         # send optogenetics waveform of the upcoming trial if this is an optogenetics trial
         if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:     

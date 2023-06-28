@@ -167,9 +167,9 @@ class PlotV(FigureCanvas):
             RightAutoWater=np.where(self.B_AutoWaterTrial[1]==1)
         
         if np.size(LeftAutoWater) !=0:
-            ax1.plot(self.B_BTime[LeftAutoWater], np.zeros(len(self.B_BTime[LeftAutoWater]))+0.4, 'bo',markerfacecolor = (0, 1, 0, 1),markersize=MarkerSize)
+            ax1.plot(self.B_BTime[LeftAutoWater], np.zeros(len(self.B_BTime[LeftAutoWater]))+0.4, 'bo',markerfacecolor = (0, 1, 0, 1),markersize=MarkerSize,label='AutoWater')
         if np.size(RightAutoWater) !=0:
-            ax1.plot(self.B_BTime[RightAutoWater], np.zeros(len(self.B_BTime[RightAutoWater]))+0.6, 'bo',markerfacecolor =(0, 1, 0, 1),markersize=MarkerSize)
+            ax1.plot(self.B_BTime[RightAutoWater], np.zeros(len(self.B_BTime[RightAutoWater]))+0.6, 'bo',markerfacecolor =(0, 1, 0, 1),markersize=MarkerSize,label='AutoWater')
 
         if np.size(Optogenetics_On) !=0:
             ax1.plot(self.B_BTime[Optogenetics_On], np.zeros(len(self.B_BTime[Optogenetics_On]))+1.5, 'bo',markerfacecolor = (0, 0, 1, 1),label='Optogenetics',markersize=MarkerSize, alpha=1)
