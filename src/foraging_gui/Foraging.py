@@ -55,6 +55,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.Camera=0
         self.MotorStage=0
         self.Manipulator=0
+        self.NewTrialRewardOrder=0
         self._Optogenetics() # open the optogenetics panel
         self._LaserCalibration() # to open the laser calibration panel
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
@@ -926,7 +927,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         self.threadpool3.start(workerPlot)
                 #generate a new trial
                 GeneratedTrials.GeneFinish=0
-                if (not self.GeneratedTrials.TP_AutoReward)  or int(self.GeneratedTrials.TP_BlockMinReward)>0:
+                if not (self.GeneratedTrials.TP_AutoReward  or int(self.GeneratedTrials.TP_BlockMinReward)>0):
+                    # generate new trial and get reward
+                    self.NewTrialRewardOrder=1
                     self.ToGenerateATrial=0
                     if self.test==1:
                         self.ToGenerateATrial=1
@@ -936,7 +939,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         if GeneratedTrials.GeneFinish==0:
                             self.threadpool4.start(workerGenerateAtrial)
                 else:
+                    # get reward and generate new trial
+                    self.NewTrialRewardOrder=0
                     self.ToGenerateATrial==1
+
     def _OptogeneticsB(self):
         ''' optogenetics control in the main window'''
         if self.OptogeneticsB.currentText()=='on':

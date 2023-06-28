@@ -82,13 +82,22 @@ class GenerateTrials():
         # get licks information. Starting from the second trial, and counting licks of the last completed trial
         if self.B_CurrentTrialN>=1: 
             self._LickSta([self.B_CurrentTrialN-1])
-        # get basic information
-        if self.B_CurrentTrialN>=0: 
-            self._GetBasic()
-        # check block transition
-        self._CheckBlockTransition()
+        if self.win.NewTrialRewardOrder==1:
+            # get basic information
+            if self.B_CurrentTrialN>=0: 
+                self._GetBasic()
+            # check block transition
+            self._CheckBlockTransition()
+        else:
+            # check block transition
+            self._CheckBlockTransition()
+            # get basic information
+            if self.B_CurrentTrialN>=0: 
+                self._GetBasic()
         # Get reward probability and other trial related parameters
         self._SelectTrainingParameter()
+        if self.TP_NextBlock and self.B_CurrentTrialN>=0:
+            self._GetBasic()
         # Show session/trial related information
         self._ShowInformation()
         # to decide if it's an auto water trial. will give water in _GetAnimalResponse
@@ -221,32 +230,66 @@ class GenerateTrials():
             self.B_ANewBlock[:]=1
             self.win.NextBlock.setChecked(False)
             self.win.NextBlock.setStyleSheet("background-color : none")
-            # update the BlockLenHistory
-            for i in range(len(self.B_ANewBlock)):
-                if len(self.BlockLenHistory[i])==1:
-                    self.BlockLenHistory[i][-1]=self.B_CurrentTrialN+1
-                elif len(self.BlockLenHistory[i])>1:
-                    self.BlockLenHistory[i][-1]=self.B_CurrentTrialN+1-sum(self.BlockLenHistory[i][:-1])
+            self._UpdateBlockLen([0,1],1)
+        if self.win.NewTrialRewardOrder==1:
+            Delta=1
+        else:
+            Delta=2
         # decide if block transition will happen at the next trial
         for i in range(len(self.B_ANewBlock)):
             if self.B_CurrentTrialN+1>=sum(self.BlockLenHistory[i]):
                 self.B_ANewBlock[i]=1
-        # min rewards to perform transition
-        if self.B_CurrentTrialN>0:
-            self.AllRewardThisBlock=self.BS_RewardedTrialN_CurrentLeftBlock+self.BS_RewardedTrialN_CurrentRightBlock
+        if not self.TP_NextBlock:
+            # min rewards to perform transition
+            if self.B_CurrentTrialN>0:
+                self._GetCurrentBlockReward()
+            else:
+                self.AllRewardThisBlock=-1
+            if self.TP_Task in ['Coupled Baiting','Coupled Without Baiting']:
+                if self.B_ANewBlock[0]==1 and self.B_ANewBlock[1]==1 and self.AllRewardThisBlock!=-1:
+                    if self.AllRewardThisBlock<float(self.TP_BlockMinReward):
+                        # do not switch
+                        self.B_ANewBlock[0]=0
+                        self.B_ANewBlock[1]=0
+                        self._UpdateBlockLen([0,1],Delta)
+            elif self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']:
+                if self.B_ANewBlock[0]==1 and self.BS_RewardedTrialN_CurrentLeftBlock<float(self.TP_BlockMinReward) and self.AllRewardThisBlock!=-1:
+                    # do not switch
+                    self.B_ANewBlock[0]=0
+                    self._UpdateBlockLen([0],Delta)
+                if self.B_ANewBlock[1]==1 and self.BS_RewardedTrialN_CurrentRightBlock<float(self.TP_BlockMinReward) and self.AllRewardThisBlock!=-1:
+                    # do not switch
+                    self.B_ANewBlock[1]=0
+                    self._UpdateBlockLen([1],Delta)
+
+    def _GetCurrentBlockReward(self):
+        '''Get the reward length of the current block'''
+        self.BS_CurrentBlockTrialN=[[],[]]
+        self.BS_CurrentBlockLen=[self.BlockLenHistory[0][-1], self.BlockLenHistory[1][-1]]
+        if self.win.NewTrialRewardOrder==1:
+        # show current trial
+            Delta=1 
         else:
-            self.AllRewardThisBlock=-1
-        if self.B_ANewBlock[0]==1 and self.B_ANewBlock[1]==1 and self.AllRewardThisBlock!=-1:
-            if self.AllRewardThisBlock<float(self.TP_BlockMinReward):
-                # do not switch
-                self.B_ANewBlock[0]=0
-                self.B_ANewBlock[1]=0
-                # update the BlockLenHistory
-                for i in range(len(self.B_ANewBlock)):
-                    if len(self.BlockLenHistory[i])==1:
-                        self.BlockLenHistory[i][-1]=self.B_CurrentTrialN+2
-                    elif len(self.BlockLenHistory[i])>1:
-                        self.BlockLenHistory[i][-1]=self.B_CurrentTrialN+2-sum(self.BlockLenHistory[i][:-1]) 
+        # show next trial
+            Delta=2
+        for i in range(len(self.B_ANewBlock)):
+            if len(self.BlockLenHistory[i])==1:
+                self.BS_CurrentBlockTrialN[i]=self.B_CurrentTrialN+Delta
+            elif len(self.BlockLenHistory[i])>1:
+                self.BS_CurrentBlockTrialN[i]=self.B_CurrentTrialN+Delta-sum(self.BlockLenHistory[i][:-1])
+        Len=np.shape(self.B_RewardedHistory)[1]
+        self.BS_RewardedTrialN_CurrentLeftBlock=np.sum(self.B_RewardedHistory[0][(Len-self.BS_CurrentBlockTrialN[0]+1):]==True)
+        self.BS_RewardedTrialN_CurrentRightBlock=np.sum(self.B_RewardedHistory[1][(Len-self.BS_CurrentBlockTrialN[1]+1):]==True)
+        self.AllRewardThisBlock=self.BS_RewardedTrialN_CurrentLeftBlock+self.BS_RewardedTrialN_CurrentRightBlock
+
+    def _UpdateBlockLen(self,Ind,delta):
+        # update the BlockLenHistory
+        for i in Ind:
+            if len(self.BlockLenHistory[i])==1:
+                self.BlockLenHistory[i][-1]=self.B_CurrentTrialN+delta
+            elif len(self.BlockLenHistory[i])>1:
+                self.BlockLenHistory[i][-1]=self.B_CurrentTrialN+delta-sum(self.BlockLenHistory[i][:-1])  
+
     def _GetBasic(self):
         '''Get basic session information'''
         if len(self.B_TrialEndTime)>=1:
@@ -275,16 +318,7 @@ class GenerateTrials():
         else:
             self.BS_RightChoiceRewardRate=self.BS_RightRewardTrialN/self.BS_RightChoiceN
         # current trial numbers in the current block; BS_CurrentBlockTrialN
-        self.BS_CurrentBlockTrialN=[[],[]]
-        self.BS_CurrentBlockLen=[self.BlockLenHistory[0][-1], self.BlockLenHistory[1][-1]]
-        for i in range(len(self.B_ANewBlock)):
-            if len(self.BlockLenHistory[i])==1:
-                self.BS_CurrentBlockTrialN[i]=self.B_CurrentTrialN+1
-            elif len(self.BlockLenHistory[i])>1:
-                self.BS_CurrentBlockTrialN[i]=self.B_CurrentTrialN+1-sum(self.BlockLenHistory[i][:-1])
-        Len=np.shape(self.B_RewardedHistory)[1]
-        self.BS_RewardedTrialN_CurrentLeftBlock=np.sum(self.B_RewardedHistory[0][(Len-self.BS_CurrentBlockTrialN[0]+1):]==True)
-        self.BS_RewardedTrialN_CurrentRightBlock=np.sum(self.B_RewardedHistory[1][(Len-self.BS_CurrentBlockTrialN[1]+1):]==True)
+        self._GetCurrentBlockReward()
         # update suggested reward
         if self.win.TotalWater.text()!='':
             self.B_SuggestedWater=float(self.win.TotalWater.text())-float(self.BS_TotalReward)
@@ -423,7 +457,7 @@ class GenerateTrials():
         SessionStartTimeHM = SessionStartTime.strftime('%H:%M')
         CurrentTimeHM = self.win.CurrentTime.strftime('%H:%M')
         self.win.Other_inforTitle='Session started: '+SessionStartTimeHM+ '  Current: '+CurrentTimeHM+ '  Run: '+str(self.win.Other_RunningTime)+'m'
-        if self.TP_AutoReward and self.win.Start.isChecked():
+        if (self.TP_AutoReward  or int(self.TP_BlockMinReward)>0) and self.win.Start.isChecked():
             self.win.Other_BasicTitle='Current trial: ' + str(self.B_CurrentTrialN+2)
         else:
             self.win.Other_BasicTitle='Current trial: ' + str(self.B_CurrentTrialN+1)
@@ -532,22 +566,27 @@ class GenerateTrials():
             UnrewardedN=int(self.TP_Unrewarded)
             IgnoredN=int(self.TP_Ignored)
             if UnrewardedN<=0:
-                UnrewardedN=1
-            if IgnoredN<=0:
-                IgnoredN=1
-            if np.shape(self.B_AnimalResponseHistory)[0]>=IgnoredN or np.shape(self.B_RewardedHistory[0])[0]>=UnrewardedN:
-                if np.all(self.B_AnimalResponseHistory[-IgnoredN:]==2) and np.shape(self.B_AnimalResponseHistory)[0]>=IgnoredN:
-                    self.CurrentAutoReward=1
-                    self.win.WarningLabelAutoWater.setText('Auto water because ignored trials exceed: '+self.TP_Ignored)
-                    self.win.WarningLabelAutoWater.setStyleSheet("color: red;")
-                elif (np.all(self.B_RewardedHistory[0][-UnrewardedN:]==False) and np.all(self.B_RewardedHistory[1][-UnrewardedN:]==False) and np.shape(self.B_RewardedHistory[0])[0]>=UnrewardedN):
-                    self.CurrentAutoReward=1
-                    self.win.WarningLabelAutoWater.setText('Auto water because unrewarded trials exceed: '+self.TP_Unrewarded)
-                    self.win.WarningLabelAutoWater.setStyleSheet("color: red;")
+                self.CurrentAutoReward=1
+                self.win.WarningLabelAutoWater.setText('Auto water because unrewarded trials exceed: '+self.TP_Unrewarded)
+                self.win.WarningLabelAutoWater.setStyleSheet("color: red;")
+            elif  IgnoredN <=0:
+                self.win.WarningLabelAutoWater.setText('Auto water because ignored trials exceed: '+self.TP_Ignored)
+                self.win.WarningLabelAutoWater.setStyleSheet("color: red;")
+                self.CurrentAutoReward=1
+            else:
+                if np.shape(self.B_AnimalResponseHistory)[0]>=IgnoredN or np.shape(self.B_RewardedHistory[0])[0]>=UnrewardedN:
+                    if np.all(self.B_AnimalResponseHistory[-IgnoredN:]==2) and np.shape(self.B_AnimalResponseHistory)[0]>=IgnoredN:
+                        self.CurrentAutoReward=1
+                        self.win.WarningLabelAutoWater.setText('Auto water because ignored trials exceed: '+self.TP_Ignored)
+                        self.win.WarningLabelAutoWater.setStyleSheet("color: red;")
+                    elif (np.all(self.B_RewardedHistory[0][-UnrewardedN:]==False) and np.all(self.B_RewardedHistory[1][-UnrewardedN:]==False) and np.shape(self.B_RewardedHistory[0])[0]>=UnrewardedN):
+                        self.CurrentAutoReward=1
+                        self.win.WarningLabelAutoWater.setText('Auto water because unrewarded trials exceed: '+self.TP_Unrewarded)
+                        self.win.WarningLabelAutoWater.setStyleSheet("color: red;")
+                    else:
+                        self.CurrentAutoReward=0
                 else:
                     self.CurrentAutoReward=0
-            else:
-                self.CurrentAutoReward=0
         else:
             self.CurrentAutoReward=0
 
