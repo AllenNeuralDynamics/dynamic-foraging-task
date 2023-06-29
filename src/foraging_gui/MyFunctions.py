@@ -570,7 +570,6 @@ class GenerateTrials():
             self.win.Other_BasicTitle='Current trial: ' + str(self.B_CurrentTrialN+1)
         self.win.infor.setTitle(self.win.Other_inforTitle)
         self.win.Basic.setTitle(self.win.Other_BasicTitle)
-
         # show basic session statistics    
         if self.B_CurrentTrialN>=0 and self.B_CurrentTrialN<1:
             self.win.ShowBasic.setText(   
