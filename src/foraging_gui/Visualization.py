@@ -102,7 +102,7 @@ class PlotV(FigureCanvas):
         else:
             kernel_size=2
             self.RunLengthSetValue(2)
-
+        self.kernel_size=kernel_size
         ResponseHistoryT=self.B_AnimalResponseHistory.copy()
         ResponseHistoryT[ResponseHistoryT==2]=np.nan
         ResponseHistoryF=ResponseHistoryT.copy()
@@ -131,7 +131,7 @@ class PlotV(FigureCanvas):
                     ResponseHistoryF[i+1-kernel_size]=np.nanmean(ResponseHistoryT[i+1-kernel_size:i+1])
                     RewardedHistoryF[i+1-kernel_size]=np.nanmean(RewardedHistoryT[i+1-kernel_size:i+1])
                     SuccessHistoryF[i+1-kernel_size]=np.nanmean(SuccessHistoryT[i+1-kernel_size:i+1])
-
+        self.ResponseHistoryF=ResponseHistoryF
         LeftChoice=np.where(self.B_AnimalResponseHistory==0)
         RightChoice=np.where(self.B_AnimalResponseHistory==1)
         NoResponse=np.where(self.B_AnimalResponseHistory==2)

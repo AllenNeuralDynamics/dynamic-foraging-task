@@ -156,6 +156,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
+        self.AdvancedBlockAuto.currentIndexChanged.connect(self._AdvancedBlockAuto)
         self.TotalWater.textChanged.connect(self._SuggestedWater)
         self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
@@ -168,7 +169,18 @@ class Window(QMainWindow, Ui_ForagingGUI):
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit)):        
                 child.returnPressed.connect(self.keyPressEvent)
-
+    def _AdvancedBlockAuto(self):
+        '''enable/disable some fields in the AdvancedBlockAuto'''
+        if self.AdvancedBlockAuto.currentText()=='off':
+            self.label_54.setEnabled(False)
+            self.label_60.setEnabled(False)
+            self.SwitchThr.setEnabled(False)
+            self.PointsInARow.setEnabled(False)
+        else:
+            self.label_54.setEnabled(True)
+            self.label_60.setEnabled(True)
+            self.SwitchThr.setEnabled(True)
+            self.PointsInARow.setEnabled(True)
     def keyPressEvent(self, event=None):
         '''Enter press to allow change of parameters'''
         # Get the parameters before change
@@ -853,6 +865,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.StartANewSession=0
             PlotM=PlotV(win=self,GeneratedTrials=GeneratedTrials,width=5, height=4)
             PlotM.finish=1
+            self.PlotM=PlotM
             #generate the first trial outside the loop, only for new session
             self.ToReceiveLicks=1
             self.ToUpdateFigure=1
@@ -901,7 +914,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
         
-        self.test=0
+        self.test=1
         if self.test==1:
             self._StartTrialLoop(GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
         else:

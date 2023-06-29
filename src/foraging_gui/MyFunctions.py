@@ -225,6 +225,8 @@ class GenerateTrials():
         '''Check if we should perform a block change for the next trial. 
         If you change the block length parameter, it only takes effect 
         after the current block is completed'''
+        # Check advanced block swith
+        self._CheckAdvancedBlockSwitch()
         # transition to the next block when NextBlock button is clicked
         if self.TP_NextBlock:
             self.B_ANewBlock[:]=1
@@ -234,6 +236,8 @@ class GenerateTrials():
         if self.win.NewTrialRewardOrder==1:
             Delta=1
         else:
+            Delta=2
+        if self.AdvancedBlockSwitchPermitted==0:
             Delta=2
         # decide if block transition will happen at the next trial
         for i in range(len(self.B_ANewBlock)):
@@ -246,21 +250,124 @@ class GenerateTrials():
             else:
                 self.AllRewardThisBlock=-1
             if self.TP_Task in ['Coupled Baiting','Coupled Without Baiting']:
-                if self.B_ANewBlock[0]==1 and self.B_ANewBlock[1]==1 and self.AllRewardThisBlock!=-1:
-                    if self.AllRewardThisBlock<float(self.TP_BlockMinReward):
+                if np.all(self.B_ANewBlock==1) and self.AllRewardThisBlock!=-1:
+                    if self.AllRewardThisBlock<float(self.TP_BlockMinReward) or self.AdvancedBlockSwitchPermitted==0:
                         # do not switch
-                        self.B_ANewBlock[0]=0
-                        self.B_ANewBlock[1]=0
-                        self._UpdateBlockLen([0,1],Delta)
+                        self.B_ANewBlock=np.zeros_like(self.B_ANewBlock)
+                        self._UpdateBlockLen(range(len(self.B_ANewBlock)),Delta)
             elif self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']:
-                if self.B_ANewBlock[0]==1 and self.BS_RewardedTrialN_CurrentLeftBlock<float(self.TP_BlockMinReward) and self.AllRewardThisBlock!=-1:
-                    # do not switch
-                    self.B_ANewBlock[0]=0
-                    self._UpdateBlockLen([0],Delta)
-                if self.B_ANewBlock[1]==1 and self.BS_RewardedTrialN_CurrentRightBlock<float(self.TP_BlockMinReward) and self.AllRewardThisBlock!=-1:
-                    # do not switch
-                    self.B_ANewBlock[1]=0
-                    self._UpdateBlockLen([1],Delta)
+                for i in range(len(self.B_ANewBlock)):
+                    if self.B_ANewBlock[i]==1 and (self.BS_RewardedTrialN_CurrentBlock[i]<float(self.TP_BlockMinReward) or self.AdvancedBlockSwitchPermitted==0) and self.AllRewardThisBlock!=-1:
+                        # do not switch
+                        self.B_ANewBlock[i]=0
+                        self._UpdateBlockLen([i],Delta)
+    def _CheckAdvancedBlockSwitch(self):
+        '''Check if we can switch to a different block'''
+        if self.TP_AdvancedBlockAuto=='off':
+            self.AdvancedBlockSwitchPermitted=1
+            return
+        kernel_size=int(self.TP_RunLength)
+        if self.B_CurrentTrialN>kernel_size:
+            # get the current block length
+            self._GetCurrentBlockLen()
+            # calculate the choice fraction of current block
+            # get the choice fraction
+            ChoiceFraction=self._GetChoiceFrac()
+            CurrentEffectiveBlockLen=min(self.CurrentBlockLen)# for decoupled task, the block length is different
+            if CurrentEffectiveBlockLen>len(ChoiceFraction):
+                self.AdvancedBlockSwitchPermitted=1
+                return
+            ChoiceFractionCurrentBlock=ChoiceFraction[-CurrentEffectiveBlockLen:]
+            # decide the current high rewrad side and threshold(for 2 reward probability)
+            Delta=abs((self.B_CurrentRewardProb[0]-self.B_CurrentRewardProb[1])*float(self.TP_SwitchThr))
+            if self.B_CurrentRewardProb[0]>self.B_CurrentRewardProb[1]:
+                # it's the left side with high reward probability
+                # decide the threshold 
+                Threshold=[0,self.B_CurrentRewardProb[0]-Delta]
+            elif self.B_CurrentRewardProb[0]<self.B_CurrentRewardProb[1]:
+                # it's the right side with high reward probability
+                # decide the threshold 
+                Threshold=[self.B_CurrentRewardProb[0]+Delta,1]
+            else:
+                self.AdvancedBlockSwitchPermitted=1
+                return
+            # Get consecutive points that exceed a threshold
+            OkPoints=np.zeros_like(ChoiceFractionCurrentBlock)
+            Ind=np.where(np.logical_and(ChoiceFractionCurrentBlock>=Threshold[0], ChoiceFractionCurrentBlock<=Threshold[1]))
+            OkPoints[Ind]=1
+            consecutive_lengths,consecutive_indices=self._consecutive_length(OkPoints,1)
+            if consecutive_lengths.size==0:
+                self.AdvancedBlockSwitchPermitted=0
+                return
+            # determine if we can switch
+            if self.TP_PointsInARow=='':
+                self.AdvancedBlockSwitchPermitted=1
+                return
+            if self.TP_AdvancedBlockAuto=='now':
+                # the courrent condition is qualified
+                if len(OkPoints) in consecutive_indices[consecutive_lengths>float(self.TP_PointsInARow)][:,1]+1:
+                    self.AdvancedBlockSwitchPermitted=1
+                else:
+                    self.AdvancedBlockSwitchPermitted=0
+            elif self.TP_AdvancedBlockAuto=='once':
+                # it happens before
+                if np.any(consecutive_lengths>float(self.TP_PointsInARow)):
+                    self.AdvancedBlockSwitchPermitted=1
+                else:
+                    self.AdvancedBlockSwitchPermitted=0
+            else:
+                self.AdvancedBlockSwitchPermitted=1
+        else:
+            self.AdvancedBlockSwitchPermitted=1
+
+    def _consecutive_length(self,arr, target):
+        '''Get the consecutive length and index of a target'''
+        consecutive_lengths = []
+        consecutive_indices = []
+        count = 0
+        start_index = None
+
+        for i, num in enumerate(arr):
+            if num == target:
+                if count == 0:
+                    start_index = i
+                count += 1
+            else:
+                if count > 0:
+                    consecutive_lengths.append(count)
+                    consecutive_indices.append((start_index, i - 1))
+                count = 0
+                start_index = None
+
+        if count > 0:
+            consecutive_lengths.append(count)
+            consecutive_indices.append((start_index, len(arr) - 1))
+        else:
+            if start_index is not None:
+                consecutive_lengths.append(count + 1)
+                consecutive_indices.append((start_index, start_index))
+        return np.array(consecutive_lengths), np.array(consecutive_indices)
+    
+    def _GetCurrentBlockLen(self):
+        '''Get the trial length of the current block'''
+        self.CurrentBlockLen=[]
+        for i in range(len(self.B_RewardProHistory)):
+            self.CurrentBlockLen.append(self.B_RewardProHistory.shape[1]-1-np.max(np.where(self.B_RewardProHistory[i]!=self.B_CurrentRewardProb[i])))
+    def _GetChoiceFrac(self):
+        '''Get the fraction of right choices with running average'''
+        kernel_size=int(self.TP_RunLength)
+        ResponseHistoryT=self.B_AnimalResponseHistory.copy()
+        ResponseHistoryT[ResponseHistoryT==2]=np.nan
+        ResponseHistoryF=ResponseHistoryT.copy()
+        # running average of response fraction
+        for i in range(len(self.B_AnimalResponseHistory)):
+            if i>=kernel_size-1:
+                if all(np.isnan(ResponseHistoryT[i+1-kernel_size:i+1])):
+                    ResponseHistoryF[i+1-kernel_size]=np.nan
+                else:
+                    ResponseHistoryF[i+1-kernel_size]=np.nanmean(ResponseHistoryT[i+1-kernel_size:i+1])
+        ChoiceFraction=ResponseHistoryF[:-kernel_size+1]
+        return ChoiceFraction
 
     def _GetCurrentBlockReward(self):
         '''Get the reward length of the current block'''
@@ -281,7 +388,7 @@ class GenerateTrials():
         self.BS_RewardedTrialN_CurrentLeftBlock=np.sum(self.B_RewardedHistory[0][(Len-self.BS_CurrentBlockTrialN[0]+1):]==True)
         self.BS_RewardedTrialN_CurrentRightBlock=np.sum(self.B_RewardedHistory[1][(Len-self.BS_CurrentBlockTrialN[1]+1):]==True)
         self.AllRewardThisBlock=self.BS_RewardedTrialN_CurrentLeftBlock+self.BS_RewardedTrialN_CurrentRightBlock
-
+        self.BS_RewardedTrialN_CurrentBlock=[self.BS_RewardedTrialN_CurrentLeftBlock,self.BS_RewardedTrialN_CurrentRightBlock]
     def _UpdateBlockLen(self,Ind,delta):
         # update the BlockLenHistory
         for i in Ind:
