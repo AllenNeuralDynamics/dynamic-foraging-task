@@ -230,8 +230,6 @@ class GenerateTrials():
             self._update_block_len([0,1])
         # decide if block transition will happen at the next trial
         for i in range(len(self.B_ANewBlock)):
-            print(self.B_CurrentTrialN)
-            print(sum(self.BlockLenHistory[i]))
             if self.B_CurrentTrialN>=sum(self.BlockLenHistory[i]):
                 self.B_ANewBlock[i]=1
         if not self.TP_NextBlock:
@@ -600,8 +598,10 @@ class GenerateTrials():
         CurrentTimeHM = self.win.CurrentTime.strftime('%H:%M')
         self.win.Other_inforTitle='Session started: '+SessionStartTimeHM+ '  Current: '+CurrentTimeHM+ '  Run: '+str(self.win.Other_RunningTime)+'m'
         if (self.TP_AutoReward  or int(self.TP_BlockMinReward)>0) and self.win.Start.isChecked():
+            # show the next trial
             self.win.Other_BasicTitle='Current trial: ' + str(self.B_CurrentTrialN+2)
         else:
+            # show the current trial
             self.win.Other_BasicTitle='Current trial: ' + str(self.B_CurrentTrialN+1)
         self.win.infor.setTitle(self.win.Other_inforTitle)
         self.win.Basic.setTitle(self.win.Other_BasicTitle)
