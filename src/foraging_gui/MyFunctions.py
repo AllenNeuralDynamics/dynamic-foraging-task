@@ -74,6 +74,7 @@ class GenerateTrials():
         # get all of the training parameters of the current trial
         self._GetTrainingParameters(self.win)
     def _GenerateATrial(self,Channel4):
+        self.finish_select_par=0
         if self.win.UpdateParameters==1:
             # get all of the training parameters of the current trial
             self._GetTrainingParameters(self.win)
@@ -82,26 +83,19 @@ class GenerateTrials():
         # get licks information. Starting from the second trial, and counting licks of the last completed trial
         if self.B_CurrentTrialN>=1: 
             self._LickSta([self.B_CurrentTrialN-1])
-        if self.win.NewTrialRewardOrder==1:
-            # get basic information
-            if self.B_CurrentTrialN>=0: 
-                self._GetBasic()
-            # check block transition
-            self._CheckBlockTransition()
-        else:
-            # check block transition
-            self._CheckBlockTransition()
-            # get basic information
-            if self.B_CurrentTrialN>=0: 
-                self._GetBasic()
-        # Get reward probability and other trial related parameters
-        self._SelectTrainingParameter()
-        if self.TP_NextBlock and self.B_CurrentTrialN>=0:
-            self._GetBasic()
-        # Show session/trial related information
-        self._ShowInformation()
         # to decide if it's an auto water trial. will give water in _GetAnimalResponse
         self._CheckAutoWater()
+        # check block transition
+        self._CheckBlockTransition()
+        # Get reward probability and other trial related parameters
+        self._SelectTrainingParameter()
+        self.finish_select_par=1
+        # get basic information
+        if self.B_CurrentTrialN>=0:
+            self._GetBasic()
+        # Show session/trial related information
+        if self.win.Start.isChecked():
+            self._ShowInformation()
         # to decide if we should stop the session
         self._CheckStop()
         # optogenetics section
@@ -232,21 +226,20 @@ class GenerateTrials():
             self.B_ANewBlock[:]=1
             self.win.NextBlock.setChecked(False)
             self.win.NextBlock.setStyleSheet("background-color : none")
-            self._UpdateBlockLen([0,1],1)
-        if self.win.NewTrialRewardOrder==1:
-            Delta=1
-        else:
-            Delta=2
-        if self.AdvancedBlockSwitchPermitted==0:
-            Delta=2
+            #self._UpdateBlockLen([0,1],1)
+            self._update_block_len([0,1])
         # decide if block transition will happen at the next trial
         for i in range(len(self.B_ANewBlock)):
-            if self.B_CurrentTrialN+1>=sum(self.BlockLenHistory[i]):
+            print(self.B_CurrentTrialN)
+            print(sum(self.BlockLenHistory[i]))
+            if self.B_CurrentTrialN>=sum(self.BlockLenHistory[i]):
                 self.B_ANewBlock[i]=1
         if not self.TP_NextBlock:
             # min rewards to perform transition
             if self.B_CurrentTrialN>0:
-                self._GetCurrentBlockReward()
+                # get the rewarded trial number of the current finished trial.
+                CountAutoWater=1
+                self._GetCurrentBlockReward(1,CountAutoWater)
             else:
                 self.AllRewardThisBlock=-1
             if self.TP_Task in ['Coupled Baiting','Coupled Without Baiting']:
@@ -254,13 +247,35 @@ class GenerateTrials():
                     if self.AllRewardThisBlock<float(self.TP_BlockMinReward) or self.AdvancedBlockSwitchPermitted==0:
                         # do not switch
                         self.B_ANewBlock=np.zeros_like(self.B_ANewBlock)
-                        self._UpdateBlockLen(range(len(self.B_ANewBlock)),Delta)
+                        #self._UpdateBlockLen(range(len(self.B_ANewBlock)),Delta)
+                        self._update_block_len(range(len(self.B_ANewBlock)))
             elif self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']:
                 for i in range(len(self.B_ANewBlock)):
                     if self.B_ANewBlock[i]==1 and (self.BS_RewardedTrialN_CurrentBlock[i]<float(self.TP_BlockMinReward) or self.AdvancedBlockSwitchPermitted==0) and self.AllRewardThisBlock!=-1:
                         # do not switch
                         self.B_ANewBlock[i]=0
-                        self._UpdateBlockLen([i],Delta)
+                        #self._UpdateBlockLen([i],Delta)
+                        self._update_block_len([i])
+
+    def _update_block_len(self,ind):
+        '''Get the block length and update the block length history'''
+        block_len_history = []
+        for i in range(max(ind)+1):
+            block_len_history.append([])  # Create an empty list for each block
+        for i in ind:
+            start_val = self.B_RewardProHistory[i][0]
+            count = 0
+            for j in range(len(self.B_RewardProHistory[i])):
+                if self.B_RewardProHistory[i][j] == start_val:
+                    count += 1
+                else:
+                    block_len_history[i].append(count)
+                    start_val = self.B_RewardProHistory[i][j]
+                    count = 1
+            # Append the count of the last block to block_len_history
+            block_len_history[i].append(count)
+        self.BlockLenHistory=block_len_history     
+        
     def _CheckAdvancedBlockSwitch(self):
         '''Check if we can switch to a different block'''
         if self.TP_AdvancedBlockAuto=='off':
@@ -353,6 +368,7 @@ class GenerateTrials():
         self.CurrentBlockLen=[]
         for i in range(len(self.B_RewardProHistory)):
             self.CurrentBlockLen.append(self.B_RewardProHistory.shape[1]-1-np.max(np.where(self.B_RewardProHistory[i]!=self.B_CurrentRewardProb[i])))
+    
     def _GetChoiceFrac(self):
         '''Get the fraction of right choices with running average'''
         kernel_size=int(self.TP_RunLength)
@@ -369,26 +385,40 @@ class GenerateTrials():
         ChoiceFraction=ResponseHistoryF[:-kernel_size+1]
         return ChoiceFraction
 
-    def _GetCurrentBlockReward(self):
+    def _GetCurrentBlockReward(self,NewTrialRewardOrder,CountAutoWater=0):
         '''Get the reward length of the current block'''
         self.BS_CurrentBlockTrialN=[[],[]]
+        index=[[],[]]
         self.BS_CurrentBlockLen=[self.BlockLenHistory[0][-1], self.BlockLenHistory[1][-1]]
-        if self.win.NewTrialRewardOrder==1:
-        # show current trial
-            Delta=1 
-        else:
-        # show next trial
-            Delta=2
-        for i in range(len(self.B_ANewBlock)):
-            if len(self.BlockLenHistory[i])==1:
-                self.BS_CurrentBlockTrialN[i]=self.B_CurrentTrialN+Delta
-            elif len(self.BlockLenHistory[i])>1:
-                self.BS_CurrentBlockTrialN[i]=self.B_CurrentTrialN+Delta-sum(self.BlockLenHistory[i][:-1])
-        Len=np.shape(self.B_RewardedHistory)[1]
-        self.BS_RewardedTrialN_CurrentLeftBlock=np.sum(self.B_RewardedHistory[0][(Len-self.BS_CurrentBlockTrialN[0]+1):]==True)
-        self.BS_RewardedTrialN_CurrentRightBlock=np.sum(self.B_RewardedHistory[1][(Len-self.BS_CurrentBlockTrialN[1]+1):]==True)
+        if self.finish_select_par==1:
+            if NewTrialRewardOrder==1:
+            # show current finished trial
+                B_RewardProHistory=self.B_RewardProHistory[:,:-1].copy() 
+            else:
+            # show next trial
+                B_RewardProHistory=self.B_RewardProHistory.copy() 
+        elif self.finish_select_par==0:
+            if NewTrialRewardOrder==1:
+                # show current finished trial
+                B_RewardProHistory=self.B_RewardProHistory.copy() 
+            else:
+                print('error: no next trial parameters generated')
+        B_RewardedHistory=self.B_RewardedHistory.copy()
+        if CountAutoWater==1:
+            # auto reward is considered as reward
+            Ind=range(len(self.B_RewardedHistory[0]))
+            for i in range(len(self.B_RewardedHistory)):
+                B_RewardedHistory[i]=np.logical_or(self.B_RewardedHistory[i],self.B_AutoWaterTrial[i][Ind])
+        # get the block length and index of the current trial
+        for i in range(len(B_RewardProHistory)): 
+            length,indexN=self._consecutive_length(B_RewardProHistory[i], B_RewardProHistory[i][-1])
+            self.BS_CurrentBlockTrialN[i]=length[-1]
+            index[i]=indexN[-1]
+        self.BS_RewardedTrialN_CurrentLeftBlock=np.sum(B_RewardedHistory[0][index[0][0]:index[0][1]+1]==True)
+        self.BS_RewardedTrialN_CurrentRightBlock=np.sum(B_RewardedHistory[1][index[1][0]:index[1][1]+1]==True)
         self.AllRewardThisBlock=self.BS_RewardedTrialN_CurrentLeftBlock+self.BS_RewardedTrialN_CurrentRightBlock
         self.BS_RewardedTrialN_CurrentBlock=[self.BS_RewardedTrialN_CurrentLeftBlock,self.BS_RewardedTrialN_CurrentRightBlock]
+
     def _UpdateBlockLen(self,Ind,delta):
         # update the BlockLenHistory
         for i in Ind:
@@ -425,7 +455,12 @@ class GenerateTrials():
         else:
             self.BS_RightChoiceRewardRate=self.BS_RightRewardTrialN/self.BS_RightChoiceN
         # current trial numbers in the current block; BS_CurrentBlockTrialN
-        self._GetCurrentBlockReward()
+        if self.win.NewTrialRewardOrder==1:
+            # show current finished trial
+            self._GetCurrentBlockReward(1)
+        else:
+            # show next trial
+            self._GetCurrentBlockReward(0)
         # update suggested reward
         if self.win.TotalWater.text()!='':
             self.B_SuggestedWater=float(self.win.TotalWater.text())-float(self.BS_TotalReward)
