@@ -418,6 +418,7 @@ class GenerateTrials():
         for i in range(len(self.BS_CurrentBlockLen)):
             if self.BS_CurrentBlockTrialN[i]>self.BS_CurrentBlockLen[i]:
                 self._update_block_len([i])
+                self.BS_CurrentBlockLen[i]=self.BlockLenHistory[i][-1]
 
     def _GetBasic(self):
         '''Get basic session information'''
