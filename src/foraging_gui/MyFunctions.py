@@ -230,7 +230,7 @@ class GenerateTrials():
             self._update_block_len([0,1])
         # decide if block transition will happen at the next trial
         for i in range(len(self.B_ANewBlock)):
-            if self.B_CurrentTrialN>=sum(self.BlockLenHistory[i]):
+            if self.B_CurrentTrialN+1>=sum(self.BlockLenHistory[i]):
                 self.B_ANewBlock[i]=1
         if not self.TP_NextBlock:
             # min rewards to perform transition
@@ -254,13 +254,11 @@ class GenerateTrials():
                         self.B_ANewBlock[i]=0
                         #self._UpdateBlockLen([i],Delta)
                         self._update_block_len([i])
-
     def _update_block_len(self,ind):
         '''Get the block length and update the block length history'''
-        block_len_history = []
-        for i in range(max(ind)+1):
-            block_len_history.append([])  # Create an empty list for each block
+        block_len_history = self.BlockLenHistory.copy()
         for i in ind:
+            block_len_history[i]=[]
             start_val = self.B_RewardProHistory[i][0]
             count = 0
             for j in range(len(self.B_RewardProHistory[i])):
@@ -416,14 +414,10 @@ class GenerateTrials():
         self.BS_RewardedTrialN_CurrentRightBlock=np.sum(B_RewardedHistory[1][index[1][0]:index[1][1]+1]==True)
         self.AllRewardThisBlock=self.BS_RewardedTrialN_CurrentLeftBlock+self.BS_RewardedTrialN_CurrentRightBlock
         self.BS_RewardedTrialN_CurrentBlock=[self.BS_RewardedTrialN_CurrentLeftBlock,self.BS_RewardedTrialN_CurrentRightBlock]
-
-    def _UpdateBlockLen(self,Ind,delta):
-        # update the BlockLenHistory
-        for i in Ind:
-            if len(self.BlockLenHistory[i])==1:
-                self.BlockLenHistory[i][-1]=self.B_CurrentTrialN+delta
-            elif len(self.BlockLenHistory[i])>1:
-                self.BlockLenHistory[i][-1]=self.B_CurrentTrialN+delta-sum(self.BlockLenHistory[i][:-1])  
+        # update block length history
+        for i in range(len(self.BS_CurrentBlockLen)):
+            if self.BS_CurrentBlockTrialN[i]>self.BS_CurrentBlockLen[i]:
+                self._update_block_len([i])
 
     def _GetBasic(self):
         '''Get basic session information'''

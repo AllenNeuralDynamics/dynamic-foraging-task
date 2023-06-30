@@ -914,7 +914,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
         
-        self.test=0
+        self.test=1
         if self.test==1:
             self._StartTrialLoop(GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
         else:
