@@ -139,7 +139,7 @@ class GenerateTrials():
             self.B_SelectedCondition.append(0)
             self.CurrentLaserAmplitude=[0,0]
             # Catch the exception and print error information
-            print("An error occurred:")
+            print("An error occurred:",str(e))
             print(traceback.format_exc())
 
     def _SelectTrainingParameter(self):
@@ -581,7 +581,8 @@ class GenerateTrials():
                 self.win.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.B_RewardProHistory[:,self.B_CurrentTrialN],2)))
             elif (self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']):
                 self.win.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProbPoolUncoupled,2))+'\n\n'+'Current pair: '+str(np.round(self.B_RewardProHistory[:,self.B_CurrentTrialN],2)))
-        except:
+        except Exception as e:
+            print('An error',str(e))
             print('Can not show reward pairs')
         # session start time
         SessionStartTime=self.win.SessionStartTime
@@ -1224,7 +1225,8 @@ class Worker(QRunnable):
         # Retrieve args/kwargs here; and fire processing using them
         try:
             result = self.fn(*self.args, **self.kwargs)
-        except ValueError:
+        except ValueError as e:
+            print("An error occurred:",str(e))
             traceback.print_exc()
             exctype, value = sys.exc_info()[:2]
             self.signals.error.emit((exctype, value, traceback.format_exc()))

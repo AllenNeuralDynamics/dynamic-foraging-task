@@ -14,7 +14,7 @@ from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,Manip
 from MyFunctions import GenerateTrials, Worker
 import warnings
 import json 
-warnings.filterwarnings("ignore")
+#warnings.filterwarnings("ignore")
 
 
 class NumpyEncoder(json.JSONEncoder):
@@ -1000,4 +1000,6 @@ if __name__ == "__main__":
     win = Window()
     win.show()
     # Run your application's event loop and stop after closing all windows
-    sys.exit(app.exec())
+    #sys.exit(app.exec())
+    app.exec()
+

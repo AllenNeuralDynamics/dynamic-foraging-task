@@ -2605,49 +2605,37 @@ def process(value):
                       </Edges>
                     </Workflow>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="rx:BehaviorSubject" TypeArguments="harp:HarpMessage">
-                      <rx:Name>SoundCardCommands</rx:Name>
-                    </Builder>
+                  <Expression xsi:type="rx:BehaviorSubject" TypeArguments="harp:HarpMessage">
+                    <rx:Name>SoundCardCommands</rx:Name>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="Combinator">
-                      <Combinator xsi:type="p1:Device">
-                        <harp:OperationMode>Active</harp:OperationMode>
-                        <harp:OperationLed>On</harp:OperationLed>
-                        <harp:DumpRegisters>true</harp:DumpRegisters>
-                        <harp:VisualIndicators>On</harp:VisualIndicators>
-                        <harp:Heartbeat>Disabled</harp:Heartbeat>
-                        <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                        <harp:PortName>COM8</harp:PortName>
-                      </Combinator>
-                    </Builder>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="p1:Device">
+                      <harp:OperationMode>Active</harp:OperationMode>
+                      <harp:OperationLed>On</harp:OperationLed>
+                      <harp:DumpRegisters>true</harp:DumpRegisters>
+                      <harp:VisualIndicators>On</harp:VisualIndicators>
+                      <harp:Heartbeat>Disabled</harp:Heartbeat>
+                      <harp:IgnoreErrors>false</harp:IgnoreErrors>
+                      <harp:PortName>COM8</harp:PortName>
+                    </Combinator>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="rx:BehaviorSubject">
-                      <Name>SoundCardEvents</Name>
-                    </Builder>
+                  <Expression xsi:type="rx:BehaviorSubject">
+                    <Name>SoundCardEvents</Name>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="Combinator">
-                      <Combinator xsi:type="io:StartProcess">
-                        <io:FileName>C:\Users\xinxin.yin\Documents\HarpSoundCard\Interface\toSoundCard.exe</io:FileName>
-                        <io:Arguments>chirp.bin 4 0 192000</io:Arguments>
-                      </Combinator>
-                    </Builder>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="io:StartProcess">
+                      <io:FileName>C:\Users\xinxin.yin\Documents\HarpSoundCard\Interface\toSoundCard.exe</io:FileName>
+                      <io:Arguments>i02_Samples.bin 4 0 192000</io:Arguments>
+                    </Combinator>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="p1:CreateMessage">
-                      <harp:Payload xsi:type="p1:CreatePlaySoundOrFrequencyPayload">
-                        <harp:MessageType>Write</harp:MessageType>
-                        <p1:Value>4</p1:Value>
-                      </harp:Payload>
-                    </Builder>
+                  <Expression xsi:type="p1:CreateMessage">
+                    <harp:Payload xsi:type="p1:CreatePlaySoundOrFrequencyPayload">
+                      <harp:MessageType>Write</harp:MessageType>
+                      <p1:Value>4</p1:Value>
+                    </harp:Payload>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="MulticastSubject">
-                      <Name>SoundCardCommands</Name>
-                    </Builder>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>SoundCardCommands</Name>
                   </Expression>
                 </Nodes>
                 <Edges>
@@ -3372,45 +3360,33 @@ def process(value):
             <Expression xsi:type="rx:BehaviorSubject">
               <Name>Timestamps</Name>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="wie:KeyDown">
-                  <wie:Filter>L</wie:Filter>
-                  <wie:SuppressRepetitions>false</wie:SuppressRepetitions>
-                </Combinator>
-              </Builder>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="wie:KeyDown">
+                <wie:Filter>L</wie:Filter>
+                <wie:SuppressRepetitions>false</wie:SuppressRepetitions>
+              </Combinator>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="rx:PublishSubject">
-                <Name>LeftKeyPress</Name>
-              </Builder>
+            <Expression xsi:type="rx:PublishSubject">
+              <Name>LeftKeyPress</Name>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="StringProperty">
-                  <Value>Left</Value>
-                </Combinator>
-              </Builder>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="StringProperty">
+                <Value>Left</Value>
+              </Combinator>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="wie:KeyDown">
-                  <wie:Filter>R</wie:Filter>
-                  <wie:SuppressRepetitions>false</wie:SuppressRepetitions>
-                </Combinator>
-              </Builder>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="wie:KeyDown">
+                <wie:Filter>R</wie:Filter>
+                <wie:SuppressRepetitions>false</wie:SuppressRepetitions>
+              </Combinator>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="rx:PublishSubject">
-                <Name>RightKeyPress</Name>
-              </Builder>
+            <Expression xsi:type="rx:PublishSubject">
+              <Name>RightKeyPress</Name>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="StringProperty">
-                  <Value>Right</Value>
-                </Combinator>
-              </Builder>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="StringProperty">
+                <Value>Right</Value>
+              </Combinator>
             </Expression>
             <Expression xsi:type="SubscribeSubject">
               <Name>BehaviorEvents</Name>
@@ -4157,75 +4133,47 @@ def process(value):
                   <Expression xsi:type="MulticastSubject">
                     <Name>ToBonsaiOSC</Name>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="SubscribeSubject">
-                      <Name>Timestamps</Name>
-                    </Builder>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>Timestamps</Name>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="SubscribeSubject">
-                      <Name>LeftKeyPress</Name>
-                    </Builder>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>LeftKeyPress</Name>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="Combinator">
-                      <Combinator xsi:type="rx:WithLatestFrom" />
-                    </Builder>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:WithLatestFrom" />
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="MemberSelector">
-                      <Selector>Item2</Selector>
-                    </Builder>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Item2</Selector>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="scr:ExpressionTransform">
-                      <scr:Expression>new(it as Seconds)</scr:Expression>
-                    </Builder>
+                  <Expression xsi:type="scr:ExpressionTransform">
+                    <scr:Expression>new(it as Seconds)</scr:Expression>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="osc:Format">
-                      <osc:Address>/LeftLickTime</osc:Address>
-                    </Builder>
+                  <Expression xsi:type="osc:Format">
+                    <osc:Address>/LeftLickTime</osc:Address>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="MulticastSubject">
-                      <Name>ToBonsaiOSC2</Name>
-                    </Builder>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>ToBonsaiOSC2</Name>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="SubscribeSubject">
-                      <Name>Timestamps</Name>
-                    </Builder>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>Timestamps</Name>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="SubscribeSubject">
-                      <Name>RightKeyPress</Name>
-                    </Builder>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>RightKeyPress</Name>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="Combinator">
-                      <Combinator xsi:type="rx:WithLatestFrom" />
-                    </Builder>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:WithLatestFrom" />
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="MemberSelector">
-                      <Selector>Item2</Selector>
-                    </Builder>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Item2</Selector>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="scr:ExpressionTransform">
-                      <scr:Expression>new(it as Seconds)</scr:Expression>
-                    </Builder>
+                  <Expression xsi:type="scr:ExpressionTransform">
+                    <scr:Expression>new(it as Seconds)</scr:Expression>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="osc:Format">
-                      <osc:Address>/RightLickTime</osc:Address>
-                    </Builder>
+                  <Expression xsi:type="osc:Format">
+                    <osc:Address>/RightLickTime</osc:Address>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="MulticastSubject">
-                      <Name>ToBonsaiOSC2</Name>
-                    </Builder>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>ToBonsaiOSC2</Name>
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
                     <Name>Timestamps</Name>
