@@ -413,6 +413,7 @@ class GenerateTrials():
         self.BS_RewardedTrialN_CurrentLeftBlock=np.sum(B_RewardedHistory[0][index[0][0]:index[0][1]+1]==True)
         self.BS_RewardedTrialN_CurrentRightBlock=np.sum(B_RewardedHistory[1][index[1][0]:index[1][1]+1]==True)
         self.AllRewardThisBlock=self.BS_RewardedTrialN_CurrentLeftBlock+self.BS_RewardedTrialN_CurrentRightBlock
+        self.BS_TotalReward=float(self.AllRewardThisBlock)*float(self.win.WaterPerRewardedTrial)
         self.BS_RewardedTrialN_CurrentBlock=[self.BS_RewardedTrialN_CurrentLeftBlock,self.BS_RewardedTrialN_CurrentRightBlock]
         # update block length history
         for i in range(len(self.BS_CurrentBlockLen)):
@@ -433,7 +434,7 @@ class GenerateTrials():
         else:
             self.BS_RespondedRate=self.BS_FinisheTrialN/self.BS_AllTrialN
         self.BS_RewardTrialN=np.sum(self.B_RewardedHistory==True)
-        self.BS_TotalReward=float(self.BS_RewardTrialN)*float(self.win.WaterPerRewardedTrial)
+        #self.BS_TotalReward=float(self.BS_RewardTrialN)*float(self.win.WaterPerRewardedTrial)
         self.BS_LeftRewardTrialN=np.sum(self.B_RewardedHistory[0]==True)
         self.BS_RightRewardTrialN=np.sum(self.B_RewardedHistory[1]==True)
         self.BS_LeftChoiceN=np.sum(self.B_AnimalResponseHistory==0)

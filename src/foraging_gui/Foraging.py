@@ -1000,6 +1000,6 @@ if __name__ == "__main__":
     win = Window()
     win.show()
     # Run your application's event loop and stop after closing all windows
-    #sys.exit(app.exec())
-    app.exec()
+    sys.exit(app.exec())
+
 
