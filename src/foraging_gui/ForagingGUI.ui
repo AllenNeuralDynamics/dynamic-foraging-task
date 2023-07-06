@@ -3235,7 +3235,7 @@
   <action name="action_New">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/xinxin.yin/Downloads/materials-qt-designer-python (2)/sample_editor/ui/resources/file-new.png</normaloff>C:/Users/xinxin.yin/Downloads/materials-qt-designer-python (2)/sample_editor/ui/resources/file-new.png</iconset>
+     <normaloff>resources/file-new.png</normaloff>resources/file-new.png</iconset>
    </property>
    <property name="text">
     <string>&amp;New</string>
@@ -3247,7 +3247,7 @@
   <action name="action_Open">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/xinxin.yin/Downloads/materials-qt-designer-python (2)/sample_editor/ui/resources/file-open.png</normaloff>C:/Users/xinxin.yin/Downloads/materials-qt-designer-python (2)/sample_editor/ui/resources/file-open.png</iconset>
+     <normaloff>resources/file-open.png</normaloff>resources/file-open.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Open</string>
@@ -3264,7 +3264,7 @@
   <action name="action_Save">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/xinxin.yin/Downloads/materials-qt-designer-python (2)/sample_editor/ui/resources/file-save.png</normaloff>C:/Users/xinxin.yin/Downloads/materials-qt-designer-python (2)/sample_editor/ui/resources/file-save.png</iconset>
+     <normaloff>resources/file-save.png</normaloff>resources/file-save.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Save</string>
@@ -3276,7 +3276,7 @@
   <action name="action_Exit">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/xinxin.yin/Downloads/materials-qt-designer-python (2)/sample_editor/ui/resources/file-exit.png</normaloff>C:/Users/xinxin.yin/Downloads/materials-qt-designer-python (2)/sample_editor/ui/resources/file-exit.png</iconset>
+     <normaloff>resources/file-exit.png</normaloff>resources/file-exit.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Exit</string>
@@ -3285,7 +3285,7 @@
   <action name="action_Snipping">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/xinxin.yin/Downloads/materials-qt-designer-python (2)/sample_editor/ui/resources/edit-cut.png</normaloff>C:/Users/xinxin.yin/Downloads/materials-qt-designer-python (2)/sample_editor/ui/resources/edit-cut.png</iconset>
+     <normaloff>resources/edit-cut.png</normaloff>resources/edit-cut.png</iconset>
    </property>
    <property name="text">
     <string>Snipping</string>
@@ -3297,7 +3297,7 @@
   <action name="action_About">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/xinxin.yin/Downloads/materials-qt-designer-python (2)/sample_editor/ui/resources/help-content.png</normaloff>C:/Users/xinxin.yin/Downloads/materials-qt-designer-python (2)/sample_editor/ui/resources/help-content.png</iconset>
+     <normaloff>resources/help-content.png</normaloff>resources/help-content.png</iconset>
    </property>
    <property name="text">
     <string>About</string>
