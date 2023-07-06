@@ -275,7 +275,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT1S</gl:DueTime>
+                      <gl:DueTime>PT5.268S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -323,7 +323,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT0.05S</gl:DueTime>
+                      <gl:DueTime>PT0.664S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -690,7 +690,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT1S</gl:DueTime>
+                      <gl:DueTime>PT3S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -1093,7 +1093,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT1S</gl:DueTime>
+                      <gl:DueTime>PT3S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -2625,13 +2625,13 @@ def process(value):
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="io:StartProcess">
                       <io:FileName>C:\Users\xinxin.yin\Documents\HarpSoundCard\Interface\toSoundCard.exe</io:FileName>
-                      <io:Arguments>i02_Samples.bin 4 0 192000</io:Arguments>
+                      <io:Arguments>C:\Users\xinxin.yin\Documents\HarpSoundCard\Interface\toSoundCard\i02_Samples.bin 4 0 96000</io:Arguments>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="p1:CreateMessage">
                     <harp:Payload xsi:type="p1:CreatePlaySoundOrFrequencyPayload">
                       <harp:MessageType>Write</harp:MessageType>
-                      <p1:Value>4</p1:Value>
+                      <p1:Value>2</p1:Value>
                     </harp:Payload>
                   </Expression>
                   <Expression xsi:type="MulticastSubject">
@@ -2664,6 +2664,26 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
                     <Name>RightValueSize</Name>
+                  </Expression>
+                  <Expression xsi:type="cf:BehaviorCommand">
+                    <cf:Type>PulsePeriod</cf:Type>
+                    <cf:Mask>Poke1Valve</cf:Mask>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>BehaviorCommands</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>LeftValueSize1</Name>
+                  </Expression>
+                  <Expression xsi:type="cf:BehaviorCommand">
+                    <cf:Type>PulsePeriod</cf:Type>
+                    <cf:Mask>Poke0Valve</cf:Mask>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>BehaviorCommands</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>RightValueSize1</Name>
                   </Expression>
                   <Expression xsi:type="cf:BehaviorCommand">
                     <cf:Type>PulsePeriod</cf:Type>
@@ -2721,8 +2741,7 @@ def process(value):
                   <Edge From="3" To="4" Label="Source1" />
                   <Edge From="4" To="5" Label="Source1" />
                   <Edge From="6" To="7" Label="Source1" />
-                  <Edge From="7" To="9" Label="Source2" />
-                  <Edge From="8" To="9" Label="Source1" />
+                  <Edge From="7" To="8" Label="Source1" />
                   <Edge From="9" To="10" Label="Source1" />
                   <Edge From="10" To="11" Label="Source1" />
                   <Edge From="12" To="13" Label="Source1" />
@@ -2730,6 +2749,11 @@ def process(value):
                   <Edge From="14" To="15" Label="Source1" />
                   <Edge From="15" To="16" Label="Source1" />
                   <Edge From="16" To="17" Label="Source1" />
+                  <Edge From="18" To="19" Label="Source1" />
+                  <Edge From="19" To="21" Label="Source2" />
+                  <Edge From="20" To="21" Label="Source1" />
+                  <Edge From="21" To="22" Label="Source1" />
+                  <Edge From="22" To="23" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -3086,7 +3110,7 @@ def process(value):
                   <Expression xsi:type="beh:CreateMessage">
                     <harp:Payload xsi:type="beh:CreatePulseDO0Payload">
                       <harp:MessageType>Write</harp:MessageType>
-                      <beh:Value>1000</beh:Value>
+                      <beh:Value>5267</beh:Value>
                     </harp:Payload>
                   </Expression>
                   <Expression xsi:type="MulticastSubject">
@@ -3137,7 +3161,7 @@ def process(value):
                   <Expression xsi:type="beh:CreateMessage">
                     <harp:Payload xsi:type="beh:CreatePulseDO1Payload">
                       <harp:MessageType>Write</harp:MessageType>
-                      <beh:Value>50</beh:Value>
+                      <beh:Value>664</beh:Value>
                     </harp:Payload>
                   </Expression>
                   <Expression xsi:type="MulticastSubject">
@@ -3937,6 +3961,26 @@ def process(value):
                   <Expression xsi:type="rx:PublishSubject">
                     <Name>OptogeneticsCalibration</Name>
                   </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>FromBonsaiOSC3</Name>
+                  </Expression>
+                  <Expression xsi:type="osc:Parse">
+                    <osc:Address>/LeftValueSize1</osc:Address>
+                    <osc:TypeTag>f</osc:TypeTag>
+                  </Expression>
+                  <Expression xsi:type="rx:BehaviorSubject">
+                    <Name>LeftValueSize1</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>ToBonsaiOSC3</Name>
+                  </Expression>
+                  <Expression xsi:type="osc:Parse">
+                    <osc:Address>/RightValueSize1</osc:Address>
+                    <osc:TypeTag>f</osc:TypeTag>
+                  </Expression>
+                  <Expression xsi:type="rx:BehaviorSubject">
+                    <Name>RightValueSize1</Name>
+                  </Expression>
                 </Nodes>
                 <Edges>
                   <Edge From="0" To="1" Label="Source1" />
@@ -4003,6 +4047,10 @@ def process(value):
                   <Edge From="84" To="85" Label="Source1" />
                   <Edge From="86" To="87" Label="Source1" />
                   <Edge From="87" To="88" Label="Source1" />
+                  <Edge From="89" To="90" Label="Source1" />
+                  <Edge From="90" To="91" Label="Source1" />
+                  <Edge From="92" To="93" Label="Source1" />
+                  <Edge From="93" To="94" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>

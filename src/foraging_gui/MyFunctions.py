@@ -102,7 +102,6 @@ class GenerateTrials():
         self._PerformOptogenetics(Channel4)
         # finish to generate the next trial
         self.GeneFinish=1
-
     def _PerformOptogenetics(self,Channel4):
         '''Optogenetics section to generate optogenetics parameters and send waveform to Bonsai'''
         try:
@@ -413,7 +412,6 @@ class GenerateTrials():
         self.BS_RewardedTrialN_CurrentLeftBlock=np.sum(B_RewardedHistory[0][index[0][0]:index[0][1]+1]==True)
         self.BS_RewardedTrialN_CurrentRightBlock=np.sum(B_RewardedHistory[1][index[1][0]:index[1][1]+1]==True)
         self.AllRewardThisBlock=self.BS_RewardedTrialN_CurrentLeftBlock+self.BS_RewardedTrialN_CurrentRightBlock
-        self.BS_TotalReward=float(self.AllRewardThisBlock)*float(self.win.WaterPerRewardedTrial)
         self.BS_RewardedTrialN_CurrentBlock=[self.BS_RewardedTrialN_CurrentLeftBlock,self.BS_RewardedTrialN_CurrentRightBlock]
         # update block length history
         for i in range(len(self.BS_CurrentBlockLen)):
@@ -434,7 +432,13 @@ class GenerateTrials():
         else:
             self.BS_RespondedRate=self.BS_FinisheTrialN/self.BS_AllTrialN
         self.BS_RewardTrialN=np.sum(self.B_RewardedHistory==True)
-        #self.BS_TotalReward=float(self.BS_RewardTrialN)*float(self.win.WaterPerRewardedTrial)
+        B_RewardedHistory=self.B_RewardedHistory.copy()
+        # auto reward is considered as reward
+        Ind=range(len(self.B_RewardedHistory[0]))
+        for i in range(len(self.B_RewardedHistory)):
+            B_RewardedHistory[i]=np.logical_or(self.B_RewardedHistory[i],self.B_AutoWaterTrial[i][Ind])
+        self.BS_RewardN=np.sum(B_RewardedHistory[0]==True)+np.sum(B_RewardedHistory[1]==True)
+        self.BS_TotalReward=float(self.BS_RewardN)*float(self.win.WaterPerRewardedTrial)
         self.BS_LeftRewardTrialN=np.sum(self.B_RewardedHistory[0]==True)
         self.BS_RightRewardTrialN=np.sum(self.B_RewardedHistory[1]==True)
         self.BS_LeftChoiceN=np.sum(self.B_AnimalResponseHistory==0)
@@ -609,7 +613,7 @@ class GenerateTrials():
                                         'Current right block: ' + str(self.BS_CurrentBlockTrialN[1]) + '/' +  str(self.BS_CurrentBlockLen[1])+'\n\n'
                                         'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                                         'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
-                                        'Total Reward (ml): '+ str(self.BS_RewardTrialN) + '*' + str(self.win.WaterPerRewardedTrial) + '='+str(np.round(self.BS_TotalReward,3)) +'\n'
+                                        'Total Reward (ml): '+ str(self.BS_RewardN) + '*' + str(self.win.WaterPerRewardedTrial) + '='+str(np.round(self.BS_TotalReward,3)) +'\n'
                                         'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
                                         'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n'
                                         )
@@ -619,7 +623,7 @@ class GenerateTrials():
                                        'Current right block: ' + str(self.BS_CurrentBlockTrialN[1]) + '/' +  str(self.BS_CurrentBlockLen[1])+'\n\n'
                                        'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                                        'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
-                                       'Total Reward (ml): '+ str(self.BS_RewardTrialN) + '*' + str(self.win.WaterPerRewardedTrial) + '='+str(np.round(self.BS_TotalReward,3)) +'\n'
+                                       'Total Reward (ml): '+ str(self.BS_RewardN) + '*' + str(self.win.WaterPerRewardedTrial) + '='+str(np.round(self.BS_TotalReward,3)) +'\n'
                                        'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
                                        'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n\n'
                                        
@@ -643,7 +647,7 @@ class GenerateTrials():
                                        'Current right block: ' + str(self.BS_CurrentBlockTrialN[1]) + '/' +  str(self.BS_CurrentBlockLen[1])+'\n\n'
                                        'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                                        'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
-                                       'Total Reward (ml): '+ str(self.BS_RewardTrialN) + '*' + str(self.win.WaterPerRewardedTrial) + '='+str(np.round(self.BS_TotalReward,3)) +'\n'
+                                       'Total Reward (ml): '+ str(self.BS_RewardN) + '*' + str(self.win.WaterPerRewardedTrial) + '='+str(np.round(self.BS_TotalReward,3)) +'\n'
                                        'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
                                        'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n\n'
                                        
@@ -999,6 +1003,12 @@ class GenerateTrials():
         if np.random.random(1)<0.1: # no response
             self.B_AnimalCurrentResponse=2
         '''
+        # set the valve time of auto water
+        if self.CurrentAutoRewardTrial[0]==1:
+            self._set_valve_time_left(Channel3)
+        if self.CurrentAutoRewardTrial[1]==1:
+            self._set_valve_time_right(Channel3)
+            
         if self.CurrentStartType==3: # no delay timestamp
             ReceiveN=8
             DelayStartTimeHarp=-999 # -999 means a placeholder
@@ -1012,11 +1022,6 @@ class GenerateTrials():
             elif Rec[0].address=='/DelayStartTime':
                 DelayStartTime=Rec[1][1][0]
             elif Rec[0].address=='/GoCueTime':
-                # give auto water after Co cue
-                if self.CurrentAutoRewardTrial[0]==1:
-                    self._GiveLeft()
-                elif self.CurrentAutoRewardTrial[1]==1:
-                    self._GiveRight()
                 GoCueTime=Rec[1][1][0]
             elif Rec[0].address=='/RewardOutcomeTime':
                 RewardOutcomeTime=Rec[1][1][0]
@@ -1055,6 +1060,11 @@ class GenerateTrials():
             elif Rec[0].address=='/DelayStartTimeHarp':
                 DelayStartTimeHarp=Rec[1][1][0]
             elif Rec[0].address=='/GoCueTimeHarp':
+                # give auto water after Co cue
+                if self.CurrentAutoRewardTrial[0]==1:
+                    Channel3.ManualWater_Left(int(1))
+                if self.CurrentAutoRewardTrial[1]==1:
+                    Channel3.ManualWater_Right(int(1))
                 GoCueTimeHarp=Rec[1][1][0]
             elif Rec[0].address=='/TrialEndTimeHarp':
                 TrialEndTimeHarp=Rec[1][1][0]
@@ -1070,40 +1080,28 @@ class GenerateTrials():
         self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime)
         self.B_GoCueTime=np.append(self.B_GoCueTime,GoCueTime)
         self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,RewardOutcomeTime)
-        
-        #if self.win.AutoReward.isChecked():
-        if self.TP_AutoReward or int(self.TP_BlockMinReward)>0:
-            if self.GeneFinish==0:
-                self._GenerateATrial(Channel4)
         self.GetResponseFinish=1
-        '''
-        if float(self.TP_BlockMin)==1 and float(self.TP_BlockMax)==1 and float(self.TP_BlockMinReward)==1:
-            RewardPro=[self.B_RewardProHistory[0][self.B_CurrentTrialN],self.B_RewardProHistory[1][self.B_CurrentTrialN]]
-            if TrialOutcome=='RewardLeft' or TrialOutcome=='RewardRight':
-                # change block
-                self.B_RewardProHistory[1][self.B_CurrentTrialN+1]=RewardPro[0]
-                self.B_RewardProHistory[0][self.B_CurrentTrialN+1]=RewardPro[1]
-                self.B_CurrentRewardProb[1]=RewardPro[0]
-                self.B_CurrentRewardProb[0]=RewardPro[1]
-            else:
-                self.B_RewardProHistory[1][self.B_CurrentTrialN+1]=RewardPro[1]
-                self.B_RewardProHistory[0][self.B_CurrentTrialN+1]=RewardPro[0]
-                self.B_CurrentRewardProb[1]=RewardPro[1]
-                self.B_CurrentRewardProb[0]=RewardPro[0]
-        '''
-    def _GiveLeft(self):
-        '''manually give left water'''
-        self.win.Channel.LeftValue(float(self.win.LeftValue.text())*1000*float(self.win.Multiplier.text())) 
-        time.sleep(0.01) 
-        self.win.Channel3.ManualWater_Left(int(1))
-        self.win.Channel.LeftValue(float(self.win.LeftValue.text())*1000)
+        
+    def _set_valve_time_left(self,channel3,LeftValue=0.01,Multiplier=1):
+        '''set the left valve time'''
+        channel3.LeftValue1(LeftValue*1000*Multiplier) 
+    def _set_valve_time_right(self,channel3,RightValue=0.01,Multiplier=1):
+        '''set the right valve time'''
+        channel3.RightValue1(RightValue*1000*Multiplier)
 
-    def _GiveRight(self):
-        '''manually give right water'''
-        self.win.Channel.RightValue(float(self.win.RightValue.text())*1000*float(self.win.Multiplier.text()))
+    def _GiveLeft(self,channel3):
+        '''manually give left water'''
+        channel3.LeftValue1(float(self.win.LeftValue.text())*1000*float(self.win.Multiplier.text())) 
         time.sleep(0.01) 
-        self.win.Channel3.ManualWater_Right(int(1))
-        self.win.Channel.RightValue(float(self.win.RightValue.text())*1000)
+        channel3.ManualWater_Left(int(1))
+        channel3.LeftValue1(float(self.win.LeftValue.text())*1000)
+
+    def _GiveRight(self,channel3):
+        '''manually give right water'''
+        channel3.RightValue1(float(self.win.RightValue.text())*1000*float(self.win.Multiplier.text()))
+        time.sleep(0.01) 
+        channel3.ManualWater_Right(int(1))
+        channel3.RightValue1(float(self.win.RightValue.text())*1000)
 
     def _GetLicks(self,Channel2):
         '''Get licks and reward delivery time'''
@@ -1227,8 +1225,6 @@ class Worker(QRunnable):
         try:
             result = self.fn(*self.args, **self.kwargs)
         except ValueError as e:
-            print("An error occurred:",str(e))
-            traceback.print_exc()
             exctype, value = sys.exc_info()[:2]
             self.signals.error.emit((exctype, value, traceback.format_exc()))
         else:

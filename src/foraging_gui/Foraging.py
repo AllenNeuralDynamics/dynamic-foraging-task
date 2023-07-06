@@ -40,7 +40,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         try: 
             self._InitializeBonsai()
             self.InitializeBonsaiSuccessfully=1
-        except:
+        except Exception as e:
+            print('An error occurred:', str(e))
             self.InitializeBonsaiSuccessfully=0
             self.WarningLabel.setText('Start without bonsai connected!')
             self.WarningLabel.setStyleSheet("color: red;")
@@ -88,7 +89,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             with open(self.SettingFile, 'r') as f:
                 Settings = json.load(f)
             self.default_saveFolder=Settings['default_saveFolder']
-        except:
+        except Exception as e:
+            print('An error occurred:', str(e))
             self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
     def _InitializeBonsai(self):
         '''Initianizing osc messages'''
@@ -121,7 +123,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         while not self.Channel3.msgs.empty():
             self.Channel3.receive()
         while not self.Channel4.msgs.empty():
-            self.Channel4.receive()
+            self.rrrrrrr.receive()
         self.WarningLabel.setText('')
         self.WarningLabel.setStyleSheet("color: gray;")
         self.InitializeBonsaiSuccessfully=1
@@ -220,7 +222,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     try:
                         # it's valid float
                         float(child.text())
-                    except:
+                    except Exception as e:
+                        print('An error occurred:', str(e))
                         if isinstance(child, QtWidgets.QDoubleSpinBox):
                             child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
                         elif isinstance(child, QtWidgets.QSpinBox):
@@ -269,7 +272,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         # it's valid float
                         float(child.text())
                         self.UpdateParameters=0 # Changes are not allowed until press is typed
-                    except:
+                    except Exception as e:
+                        print('An error occurred:', str(e))
                         # Invalid float. Do not change the parameter
                         if isinstance(child, QtWidgets.QDoubleSpinBox):
                             child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
@@ -291,7 +295,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 if int(self.RewardPairsN.text())>len(self.RewardFamilies[int(self.RewardFamily.text())-1]):
                     self.RewardPairsN.setText(str(len(self.RewardFamilies[int(self.RewardFamily.text())-1])))
                 return 1
-            except:
+            except Exception as e:
+                print('An error occurred:', str(e))
                 return 0
         if child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum':
             try:
@@ -301,6 +306,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 else:
                     return 1
             except Exception as e: 
+                print('An error occurred:', str(e))
                 return 0
         if child.objectName()=='UncoupledReward':
             try:
@@ -317,6 +323,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.RewardProb=np.array(num_list)
                 return 1
             except Exception as e: 
+                print('An error occurred:', str(e))
                 return 0
         else:
             return 1
@@ -326,7 +333,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         try:
             self.T_SuggestedWater=float(self.TotalWater.text())-float(self.GeneratedTrials.BS_TotalReward)
             self.SuggestedWater.setText(str(np.round(self.T_SuggestedWater,3)))
-        except:
+        except Exception as e:
+            print('An error occurred:', str(e))
             self.SuggestedWater.setText(self.TotalWater.text())
 
     def _GetTrainingParameters(self):
@@ -395,8 +403,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: ') 
         except Exception as e:
             # Catch the exception and print error information
-            print("An error occurred:")
-            print(traceback.format_exc())
+            print("An error occurred:",str(e))
     def closeEvent(self, event):
         # disable close icon
         self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
@@ -546,6 +553,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             else:
                 Obj={}
             # save training parameters
+            for child in self.centralwidget.findChildren(QtWidgets.QPushButton):
+                Obj[child.objectName()]=child.isChecked()
             for child in self.centralwidget.findChildren(QtWidgets.QTextEdit):
                 Obj[child.objectName()]=child.toPlainText()
             for child in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)+self.centralwidget.findChildren(QtWidgets.QLineEdit)+self.centralwidget.findChildren(QtWidgets.QSpinBox):
@@ -617,12 +626,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 Obj = json.loads(f.read())
                 f.close()
             self.Obj = Obj
-            widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+            widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
             widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
             widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))})  # update optogenetics parameters from the loaded file
-            
             if hasattr(self, 'LaserCalibration_dialog'):
                 widget_dict.update({w.objectName(): w for w in self.LaserCalibration_dialog.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))})  # update laser calibration parameters from the loaded file
+            
             try:
                 for key in widget_dict.keys():
                     if key in Obj:
@@ -637,9 +646,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         except: # sometimes we only have training parameters, no behavior parameters
                             value=Obj[key]
                             Tag=1
-                        if len(value)==0:
-                            value=np.array([''], dtype='<U1')
-                            Tag=0
+                        if isinstance(widget, QtWidgets.QPushButton):
+                            pass
+                        if type(value)==bool:
+                            Tag=1
+                        else:
+                            if len(value)==0:
+                                value=np.array([''], dtype='<U1')
+                                Tag=0
                         if type(value)==np.ndarray:
                             Tag=0
                         if isinstance(widget, QtWidgets.QLineEdit):
@@ -669,9 +683,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
                                 widget.setText(value[-1])
                             elif Tag==1:
                                 widget.setText(value)
+                        elif isinstance(widget, QtWidgets.QPushButton):
+                            if key=='AutoReward':
+                                if Tag==0:
+                                    widget.setChecked(bool(value[-1]))
+                                elif Tag==1:
+                                    widget.setChecked(value)
+                                self._AutoReward()
                     else:
                         widget = widget_dict[key]
-                        if not isinstance(widget, QtWidgets.QComboBox):
+                        if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
                             widget.clear()
             except Exception as e:
                 # Catch the exception and print error information
@@ -682,7 +703,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self._LoadVisualization()
             except Exception as e:
                 # Catch the exception and print error information
-                print("An error occurred:")
+                print("An error occurred:",str(e))
                 print(traceback.format_exc())
                 # delete GeneratedTrials
                 del self.GeneratedTrials
@@ -815,6 +836,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     break
     def _thread_complete(self):
         '''complete of a trial'''
+        if self.NewTrialRewardOrder==0:
+            self.GeneratedTrials._GenerateATrial(self.Channel4)
         self.ANewTrial=1
     def _thread_complete2(self):
         '''complete of receive licks'''
@@ -876,6 +899,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             GeneratedTrials._DeletePreviousLicks(self.Channel2)
         else:
             GeneratedTrials=self.GeneratedTrials
+
         if self.ToInitializeVisual==1: # only run once
             self.PlotM=PlotM
             layout=self.Visualization.layout()
@@ -901,11 +925,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
             workerGenerateAtrial = Worker(GeneratedTrials._GenerateATrial,self.Channel4)
             workerGenerateAtrial.signals.finished.connect(self._thread_complete4)
             workerStartTrialLoop = Worker(self._StartTrialLoop,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
+            workerStartTrialLoop1 = Worker(self._StartTrialLoop1,GeneratedTrials)
             self.worker1=worker1
             self.workerLick=workerLick
             self.workerPlot=workerPlot
             self.workerGenerateAtrial=workerGenerateAtrial
             self.workerStartTrialLoop=workerStartTrialLoop
+            self.workerStartTrialLoop1=workerStartTrialLoop1
         else:
             PlotM=self.PlotM
             worker1=self.worker1
@@ -913,24 +939,54 @@ class Window(QMainWindow, Ui_ForagingGUI):
             workerPlot=self.workerPlot
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
+            workerStartTrialLoop1=self.workerStartTrialLoop1
         
-        self.test=0
+        self._StartTrialLoop(GeneratedTrials,worker1)
+        '''
+        self.test=1
         if self.test==1:
             self._StartTrialLoop(GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
         else:
-            self.threadpool5.start(workerStartTrialLoop) # I just found the QApplication.processEvents() was better to reduce delay time between trial end the the next trial start
-            
-    def _StartTrialLoop(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
+            self.threadpool5.start(workerStartTrialLoop) # I just found the QApplication.processEvents() was better to reduce delay time between trial end the the next trial start 
+        '''
+    def _StartTrialLoop(self,GeneratedTrials,worker1):
         while self.Start.isChecked():
             QApplication.processEvents()
-            if self.ANewTrial==1 and self.ToGenerateATrial==1 and self.Start.isChecked(): #and GeneratedTrials.GeneFinish==1: \
+            if self.ANewTrial==1 and self.Start.isChecked(): 
                 self.ANewTrial=0 # can start a new trial when we receive the trial end signal from Bonsai
                 GeneratedTrials.B_CurrentTrialN+=1
-                print('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))     
+                print('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
+                if not (self.GeneratedTrials.TP_AutoReward  or int(self.GeneratedTrials.TP_BlockMinReward)>0):
+                    # generate new trial and get reward
+                    self.NewTrialRewardOrder=1
+                else:
+                    # get reward and generate new trial
+                    self.NewTrialRewardOrder=0     
                 #initiate the generated trial
                 GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
+                #receive licks and update figures
+                self.PlotM._Update(GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
                 #get the response of the animal using a different thread
                 self.threadpool.start(worker1)
+                #generate a new trial
+                if self.NewTrialRewardOrder==1:
+                    GeneratedTrials._GenerateATrial(self.Channel4)
+
+    def _StartTrialLoop1(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
+        while self.Start.isChecked():
+            QApplication.processEvents()
+            if self.ANewTrial==1 and self.ToGenerateATrial==1 and self.Start.isChecked(): 
+                self.ANewTrial=0 # can start a new trial when we receive the trial end signal from Bonsai
+                GeneratedTrials.B_CurrentTrialN+=1
+                print('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
+                if not (self.GeneratedTrials.TP_AutoReward  or int(self.GeneratedTrials.TP_BlockMinReward)>0):
+                    # generate new trial and get reward
+                    self.NewTrialRewardOrder=1
+                else:
+                    # get reward and generate new trial
+                    self.NewTrialRewardOrder=0     
+                #initiate the generated trial
+                GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
                 #receive licks and update figures
                 if self.test==1:
                     self.PlotM._Update(GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
@@ -938,24 +994,25 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     if self.ToUpdateFigure==1:
                         self.ToUpdateFigure=0
                         self.threadpool3.start(workerPlot)
-                #generate a new trial
-                GeneratedTrials.GeneFinish=0
-                if not (self.GeneratedTrials.TP_AutoReward  or int(self.GeneratedTrials.TP_BlockMinReward)>0):
-                    # generate new trial and get reward
-                    self.NewTrialRewardOrder=1
-                    self.ToGenerateATrial=0
-                    if self.test==1:
-                        self.ToGenerateATrial=1
-                        if GeneratedTrials.GeneFinish==0:
-                            GeneratedTrials._GenerateATrial(self.Channel4)
-                    else:
-                        if GeneratedTrials.GeneFinish==0:
-                            self.threadpool4.start(workerGenerateAtrial)
+                #get the response of the animal using a different thread
+                self.threadpool.start(worker1)
+                '''
+                if self.test==1:
+                    self.ANewTrial=1
+                    GeneratedTrials.GetResponseFinish=0
+                    GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3,self.Channel4)
                 else:
-                    # get reward and generate new trial
-                    self.NewTrialRewardOrder=0
-                    self.ToGenerateATrial==1
-
+                    GeneratedTrials.GetResponseFinish=0
+                    self.threadpool.start(worker1)
+                '''
+                #generate a new trial
+                if self.test==1:
+                    self.ToGenerateATrial=1
+                    GeneratedTrials._GenerateATrial(self.Channel4)
+                else:
+                    self.ToGenerateATrial=0
+                    self.threadpool4.start(workerGenerateAtrial)
+                
     def _OptogeneticsB(self):
         ''' optogenetics control in the main window'''
         if self.OptogeneticsB.currentText()=='on':
@@ -1001,5 +1058,3 @@ if __name__ == "__main__":
     win.show()
     # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())
-
-

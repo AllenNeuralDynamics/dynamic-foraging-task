@@ -51,37 +51,33 @@ class PlotV(FigureCanvas):
         else:
             self.B_Time=self.B_RewardOutcomeTime
         self.B_BTime=self.B_Time.copy()
-        try:
+        if self.B_TrialEndTime.size!=0:
             Delta=self.B_TrialEndTime[-1]-self.B_TrialStartTime[0]
             self.B_BTime=np.append(self.B_BTime,Delta+0.02*Delta)
-        except:
+        else:
             self.B_BTime=np.append(self.B_BTime,2)
 
         try:
             self._PlotBlockStructure()
             self._PlotChoice()
             self._PlotLicks()
-        except:
+        except Exception as e:
+            print('An error occurred:2', str(e))
             pass
         try:
             self._PlotMatching()
-        except:
+        except Exception as e:
+            print('An error occurred:3', str(e))
             pass
         self.finish=1
     def _PlotBlockStructure(self):
         ax2=self.ax2
         ax2.cla()
-        try:
-            ax2.plot(self.B_Time, self.B_RewardProHistory[0],color='r', label='p_L',alpha=1)
-            ax2.plot(self.B_Time, self.B_RewardProHistory[1],color='b', label='p_R',alpha=1)
-            Fraction=self.B_RewardProHistory[1]/self.B_RewardProHistory.sum(axis=0)
-            ax2.plot(self.B_Time,Fraction,color='y',label='p_R_frac',alpha=0.5)
-        except ValueError:
-            Len=len(self.B_Time)
-            ax2.plot(self.B_Time, self.B_RewardProHistory[0][0:Len],color='r', label='p_L',alpha=1)
-            ax2.plot(self.B_Time, self.B_RewardProHistory[1][0:Len],color='b', label='p_R',alpha=1)
-            Fraction=self.B_RewardProHistory[1]/self.B_RewardProHistory.sum(axis=0)
-            ax2.plot(self.B_Time,Fraction[0:Len],color='y',label='p_R_frac',alpha=0.5)
+        Len=len(self.B_Time)
+        ax2.plot(self.B_Time, self.B_RewardProHistory[0][0:Len],color='r', label='p_L',alpha=1)
+        ax2.plot(self.B_Time, self.B_RewardProHistory[1][0:Len],color='b', label='p_R',alpha=1)
+        Fraction=self.B_RewardProHistory[1]/self.B_RewardProHistory.sum(axis=0)
+        ax2.plot(self.B_Time,Fraction[0:Len],color='y',label='p_R_frac',alpha=0.5)
         self.draw()
     def _PlotChoice(self):
         MarkerSize=self.MarkerSize
@@ -266,7 +262,8 @@ class PlotV(FigureCanvas):
             ax.axis('equal')
             ax.set_xlim([fit_x.min()-2, fit_x.max()+2])
             ax.set_ylim([fit_y.min()-2, fit_y.max()+2])
-        except ValueError:
+        except Exception as e:
+            print('An error occurred:5', str(e))
             pass
         self.draw()
 

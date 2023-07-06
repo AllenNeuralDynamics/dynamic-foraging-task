@@ -102,6 +102,12 @@ class RigClient:
     def RightValue(self, value):
         self.send("/RightValueSize", value)
 
+    def LeftValue1(self, value):
+        self.send("/LeftValueSize1", value)
+
+    def RightValue1(self, value):
+        self.send("/RightValueSize1", value)
+
     def RewardConsumeTime(self, value):
         self.send("/RewardConsumeTime", value)
 
