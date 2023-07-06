@@ -400,10 +400,17 @@ class GenerateTrials():
                 print('error: no next trial parameters generated')
         B_RewardedHistory=self.B_RewardedHistory.copy()
         if CountAutoWater==1:
-            # auto reward is considered as reward
-            Ind=range(len(self.B_RewardedHistory[0]))
-            for i in range(len(self.B_RewardedHistory)):
-                B_RewardedHistory[i]=np.logical_or(self.B_RewardedHistory[i],self.B_AutoWaterTrial[i][Ind])
+            if self.TP_IncludeAutoReward=='yes':
+                # auto reward is considered as reward
+                Ind=range(len(self.B_RewardedHistory[0]))
+                for i in range(len(self.B_RewardedHistory)):
+                    B_RewardedHistory[i]=np.logical_or(self.B_RewardedHistory[i],self.B_AutoWaterTrial[i][Ind])
+            elif self.TP_IncludeAutoReward=='no':
+                # auto reward is not considered as reward
+                Ind=range(len(self.B_RewardedHistory[0]))
+                for i in range(len(self.B_RewardedHistory)):
+                    possible_reward=np.logical_or(self.B_BaitHistory[i][Ind],self.B_AutoWaterTrial[i][Ind])
+                    B_RewardedHistory[i]=np.logical_and(self.B_AnimalResponseHistory[Ind]==i,possible_reward)
         # get the block length and index of the current trial
         for i in range(len(B_RewardProHistory)): 
             length,indexN=self._consecutive_length(B_RewardProHistory[i], B_RewardProHistory[i][-1])
@@ -1081,7 +1088,7 @@ class GenerateTrials():
         self.B_GoCueTime=np.append(self.B_GoCueTime,GoCueTime)
         self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,RewardOutcomeTime)
         self.GetResponseFinish=1
-        
+
     def _set_valve_time_left(self,channel3,LeftValue=0.01,Multiplier=1):
         '''set the left valve time'''
         channel3.LeftValue1(LeftValue*1000*Multiplier) 

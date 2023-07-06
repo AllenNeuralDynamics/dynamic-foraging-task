@@ -263,7 +263,7 @@ class PlotV(FigureCanvas):
             ax.set_xlim([fit_x.min()-2, fit_x.max()+2])
             ax.set_ylim([fit_y.min()-2, fit_y.max()+2])
         except Exception as e:
-            print('An error occurred:5', str(e))
+            #print('An error occurred:5', str(e))
             pass
         self.draw()
 
