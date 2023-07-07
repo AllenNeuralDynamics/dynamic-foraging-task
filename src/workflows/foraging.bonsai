@@ -2629,11 +2629,8 @@ def process(value):
                     </Builder>
                   </Expression>
                   <Expression xsi:type="Disable">
-                    <Builder xsi:type="Combinator">
-                      <Combinator xsi:type="io:StartProcess">
-                        <io:FileName>C:\Users\xinxin.yin\Documents\HarpSoundCard\Interface\toSoundCard.exe</io:FileName>
-                        <io:Arguments>C:\Users\xinxin.yin\Documents\HarpSoundCard\Interface\toSoundCard\i02_Samples.bin 4 0 96000</io:Arguments>
-                      </Combinator>
+                    <Builder xsi:type="SubscribeSubject">
+                      <Name>GoCue</Name>
                     </Builder>
                   </Expression>
                   <Expression xsi:type="Disable">
@@ -2649,6 +2646,27 @@ def process(value):
                       <Name>SoundCardCommands</Name>
                     </Builder>
                   </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="Combinator">
+                      <Combinator xsi:type="io:StartProcess">
+                        <io:FileName>C:\Users\xinxin.yin\Documents\HarpSoundCard\Interface\toSoundCard.exe</io:FileName>
+                        <io:Arguments>C:\Users\xinxin.yin\Documents\HarpSoundCard\Interface\toSoundCard\i02_Samples.bin 4 0 96000</io:Arguments>
+                      </Combinator>
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="p1:CreateMessage">
+                      <Payload xsi:type="p1:CreatePlaySoundOrFrequencyPayload" xmlns="clr-namespace:Bonsai.Harp;assembly=Bonsai.Harp">
+                        <MessageType>Write</MessageType>
+                        <p1:Value>2</p1:Value>
+                      </Payload>
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="MulticastSubject">
+                      <Name>SoundCardCommands</Name>
+                    </Builder>
+                  </Expression>
                 </Nodes>
                 <Edges>
                   <Edge From="0" To="1" Label="Source1" />
@@ -2657,6 +2675,8 @@ def process(value):
                   <Edge From="5" To="6" Label="Source1" />
                   <Edge From="7" To="8" Label="Source1" />
                   <Edge From="8" To="9" Label="Source1" />
+                  <Edge From="10" To="11" Label="Source1" />
+                  <Edge From="11" To="12" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -3378,7 +3398,7 @@ def process(value):
                 <harp:VisualIndicators>On</harp:VisualIndicators>
                 <harp:Heartbeat>Disabled</harp:Heartbeat>
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                <harp:PortName>COM3</harp:PortName>
+                <harp:PortName>COM4</harp:PortName>
               </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
