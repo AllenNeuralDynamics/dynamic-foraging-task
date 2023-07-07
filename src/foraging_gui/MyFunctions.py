@@ -362,7 +362,10 @@ class GenerateTrials():
         '''Get the trial length of the current block'''
         self.CurrentBlockLen=[]
         for i in range(len(self.B_RewardProHistory)):
-            self.CurrentBlockLen.append(self.B_RewardProHistory.shape[1]-1-np.max(np.where(self.B_RewardProHistory[i]!=self.B_CurrentRewardProb[i])))
+            if np.all(self.B_RewardProHistory[i]!=self.B_CurrentRewardProb[i])==False:
+                self.CurrentBlockLen.append(self.B_RewardProHistory.shape[1])
+            else:
+                self.CurrentBlockLen.append(self.B_RewardProHistory.shape[1]-1-np.max(np.where(self.B_RewardProHistory[i]!=self.B_CurrentRewardProb[i])))
     
     def _GetChoiceFrac(self):
         '''Get the fraction of right choices with running average'''

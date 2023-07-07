@@ -3255,6 +3255,14 @@ def process(value):
             <Expression xsi:type="rx:PublishSubject">
               <Name>ITIEndTime</Name>
             </Expression>
+            <Expression xsi:type="harp:CreateMessage">
+              <harp:Payload xsi:type="harp:CreateMessagePayload">
+                <harp:MessageType>Write</harp:MessageType>
+                <harp:Address>110</harp:Address>
+                <harp:PayloadType>U8</harp:PayloadType>
+                <harp:Value>4</harp:Value>
+              </harp:Payload>
+            </Expression>
           </Nodes>
           <Edges>
             <Edge From="2" To="3" Label="Source1" />
