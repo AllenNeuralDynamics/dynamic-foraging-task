@@ -77,7 +77,7 @@ class PlotV(FigureCanvas):
         ax2.plot(self.B_Time, self.B_RewardProHistory[0][0:Len],color='r', label='p_L',alpha=1)
         ax2.plot(self.B_Time, self.B_RewardProHistory[1][0:Len],color='b', label='p_R',alpha=1)
         Fraction=self.B_RewardProHistory[1]/self.B_RewardProHistory.sum(axis=0)
-        ax2.plot(self.B_Time,Fraction[0:Len],color='y',label='p_R_frac',alpha=0.5)
+        ax2.plot(self.B_Time,Fraction[0:Len],color='y',label='p_R_frac',alpha=0.8)
         self.draw()
     def _PlotChoice(self):
         MarkerSize=self.MarkerSize
@@ -184,9 +184,9 @@ class PlotV(FigureCanvas):
         if np.size(NoResponse) !=0:
             ax1.plot(self.B_Time[NoResponse], np.zeros(len(self.B_Time[NoResponse]))+.5, 'Xk',label='NoResponse',markersize=MarkerSize,alpha=0.2)
         if self.B_CurrentTrialN>kernel_size:
-            ax2.plot(self.B_Time[kernel_size-1:],ResponseHistoryF[:-kernel_size+1],'k',label='Choice_frac',linewidth=2,alpha=1)
-            ax2.plot(self.B_Time[kernel_size-1:],RewardedHistoryF[:-kernel_size+1],'g',label='reward_frac',linewidth=2,alpha=1)
-            ax2.plot(self.B_Time[kernel_size-1:],SuccessHistoryF[:-kernel_size+1],'c',label='succuss_frac', alpha=0.2)
+            ax2.plot(self.B_Time[kernel_size-1:],ResponseHistoryF[:-kernel_size+1],'k',label='Choice_frac',linewidth=2,alpha=0.8)
+            ax2.plot(self.B_Time[kernel_size-1:],RewardedHistoryF[:-kernel_size+1],'g',label='reward_frac',linewidth=1,alpha=0.8)
+            ax2.plot(self.B_Time[kernel_size-1:],SuccessHistoryF[:-kernel_size+1],'c',label='finish_frac', alpha=0.2)
         self._UpdateAxis()
         self.draw()
 
@@ -229,7 +229,8 @@ class PlotV(FigureCanvas):
             LeftRewardN=sum(self.B_RewardedHistory[0,CuI]==1)
             RightRewardN=sum(self.B_RewardedHistory[1,CuI]==1)    
             choice_R_frac[idx]=LeftChoiceN/(LeftChoiceN+RightChoiceN)
-            reward_R_frac[idx]=LeftRewardN/(LeftRewardN+RightRewardN)
+            if LeftRewardN+RightRewardN!=0:
+                reward_R_frac[idx]=LeftRewardN/(LeftRewardN+RightRewardN)
             if RightChoiceN and LeftChoiceN and RightRewardN and LeftRewardN:
                 choice_log_ratio[idx]=np.log(RightChoiceN / LeftChoiceN)
                 reward_log_ratio[idx]=np.log(RightRewardN / LeftRewardN)
