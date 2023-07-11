@@ -2656,10 +2656,10 @@ def process(value):
                   </Expression>
                   <Expression xsi:type="Disable">
                     <Builder xsi:type="p1:CreateMessage">
-                      <Payload xsi:type="p1:CreatePlaySoundOrFrequencyPayload" xmlns="clr-namespace:Bonsai.Harp;assembly=Bonsai.Harp">
-                        <MessageType>Write</MessageType>
+                      <harp:Payload xsi:type="p1:CreatePlaySoundOrFrequencyPayload">
+                        <harp:MessageType>Write</harp:MessageType>
                         <p1:Value>2</p1:Value>
-                      </Payload>
+                      </harp:Payload>
                     </Builder>
                   </Expression>
                   <Expression xsi:type="Disable">
@@ -3283,6 +3283,9 @@ def process(value):
                 <harp:Value>4</harp:Value>
               </harp:Payload>
             </Expression>
+            <Expression xsi:type="MulticastSubject">
+              <Name>BehaviorCommands</Name>
+            </Expression>
           </Nodes>
           <Edges>
             <Edge From="2" To="3" Label="Source1" />
@@ -3380,6 +3383,7 @@ def process(value):
             <Edge From="100" To="101" Label="Source1" />
             <Edge From="101" To="102" Label="Source1" />
             <Edge From="102" To="103" Label="Source1" />
+            <Edge From="104" To="105" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>

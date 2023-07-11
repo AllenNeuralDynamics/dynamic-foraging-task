@@ -27,6 +27,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
+        if len(sys.argv)==1:
+            self.setWindowTitle("Foraging")
+        else:
+            self.setWindowTitle("Foraging"+'_'+str(sys.argv[1]))
         self.SettingFile=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'ForagingSettings.json')
         self.LaserCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'LaserCalibration.json')
         self._GetSettings()
@@ -43,8 +47,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         except Exception as e:
             print('An error occurred:', str(e))
             self.InitializeBonsaiSuccessfully=0
-            self.WarningLabel.setText('Start without bonsai connected!')
-            self.WarningLabel.setStyleSheet("color: red;")
+            self.WarningLabel_2.setText('Start without bonsai connected!')
+            self.WarningLabel_2.setStyleSheet("color: red;")
         self.threadpool=QThreadPool() # get animal response
         self.threadpool2=QThreadPool() # get animal lick
         self.threadpool3=QThreadPool() # visualization
@@ -94,24 +98,53 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
     def _InitializeBonsai(self):
         '''Initianizing osc messages'''
-        # normal behavior events
         self.ip = "127.0.0.1"
-        self.request_port = 4002
+        if len(sys.argv)==1:
+            self.request_port = 4002
+            self.request_port2 = 4003
+            self.request_port3 = 4004
+            self.request_port4 = 4005
+        else:
+            bonsai_tag = int(sys.argv[1])
+            # determine ports for different bonsai_tag
+            if bonsai_tag==1:
+                self.request_port = 4002
+                self.request_port2 = 4003
+                self.request_port3 = 4004
+                self.request_port4 = 4005
+            elif bonsai_tag==2:
+                self.request_port = 4012
+                self.request_port2 = 4013
+                self.request_port3 = 4014
+                self.request_port4 = 4015
+            elif bonsai_tag==3:
+                self.request_port = 4022
+                self.request_port2 = 4023
+                self.request_port3 = 4024
+                self.request_port4 = 4025
+            elif bonsai_tag==4:
+                self.request_port = 4032
+                self.request_port2 = 4033
+                self.request_port3 = 4034
+                self.request_port4 = 4035
+            else:
+                self.request_port = 4002
+                self.request_port2 = 4003
+                self.request_port3 = 4004
+                self.request_port4 = 4005
+        # normal behavior events
         self.client = OSCStreamingClient()  # Create client 
         self.client.connect((self.ip, self.request_port))
         self.Channel = rigcontrol.RigClient(self.client)
         # licks, LeftRewardDeliveryTime and RightRewardDeliveryTime 
-        self.request_port2 = 4003
         self.client2 = OSCStreamingClient()  
         self.client2.connect((self.ip, self.request_port2))
         self.Channel2 = rigcontrol.RigClient(self.client2)
         # manually give water
-        self.request_port3 = 4004
         self.client3 = OSCStreamingClient()  # Create client
         self.client3.connect((self.ip, self.request_port3))
         self.Channel3 = rigcontrol.RigClient(self.client3)
         # specific for transfering optogenetics waveform
-        self.request_port4 = 4005
         self.client4 = OSCStreamingClient()  # Create client
         self.client4.connect((self.ip, self.request_port4))
         self.Channel4 = rigcontrol.RigClient(self.client4)
@@ -124,8 +157,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Channel3.receive()
         while not self.Channel4.msgs.empty():
             self.rrrrrrr.receive()
-        self.WarningLabel.setText('')
-        self.WarningLabel.setStyleSheet("color: gray;")
+        self.WarningLabel_2.setText('')
+        self.WarningLabel_2.setStyleSheet("color: gray;")
         self.InitializeBonsaiSuccessfully=1
     def connectSignalsSlots(self):
         '''Define callbacks'''
