@@ -275,7 +275,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT1S</gl:DueTime>
+                      <gl:DueTime>PT2.647S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -323,7 +323,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT0.05S</gl:DueTime>
+                      <gl:DueTime>PT1S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -690,7 +690,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT1S</gl:DueTime>
+                      <gl:DueTime>PT3S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -1093,7 +1093,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT1S</gl:DueTime>
+                      <gl:DueTime>PT3S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -3142,7 +3142,7 @@ def process(value):
                   <Expression xsi:type="beh:CreateMessage">
                     <harp:Payload xsi:type="beh:CreatePulseDO0Payload">
                       <harp:MessageType>Write</harp:MessageType>
-                      <beh:Value>1000</beh:Value>
+                      <beh:Value>2646</beh:Value>
                     </harp:Payload>
                   </Expression>
                   <Expression xsi:type="MulticastSubject">
@@ -3193,7 +3193,7 @@ def process(value):
                   <Expression xsi:type="beh:CreateMessage">
                     <harp:Payload xsi:type="beh:CreatePulseDO1Payload">
                       <harp:MessageType>Write</harp:MessageType>
-                      <beh:Value>50</beh:Value>
+                      <beh:Value>1000</beh:Value>
                     </harp:Payload>
                   </Expression>
                   <Expression xsi:type="MulticastSubject">

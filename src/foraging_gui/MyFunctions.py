@@ -235,8 +235,7 @@ class GenerateTrials():
             # min rewards to perform transition
             if self.B_CurrentTrialN>0:
                 # get the rewarded trial number of the current finished trial.
-                CountAutoWater=1
-                self._GetCurrentBlockReward(1,CountAutoWater)
+                self._GetCurrentBlockReward(1,CountAutoWater=0,UpdateBlockLen=1)
             else:
                 self.AllRewardThisBlock=-1
             if self.TP_Task in ['Coupled Baiting','Coupled Without Baiting']:
@@ -383,7 +382,7 @@ class GenerateTrials():
         ChoiceFraction=ResponseHistoryF[:-kernel_size+1]
         return ChoiceFraction
 
-    def _GetCurrentBlockReward(self,NewTrialRewardOrder,CountAutoWater=0):
+    def _GetCurrentBlockReward(self,NewTrialRewardOrder,CountAutoWater=0,UpdateBlockLen=0):
         '''Get the reward length of the current block'''
         self.BS_CurrentBlockTrialN=[[],[]]
         index=[[],[]]
@@ -423,11 +422,16 @@ class GenerateTrials():
         self.BS_RewardedTrialN_CurrentRightBlock=np.sum(B_RewardedHistory[1][index[1][0]:index[1][1]+1]==True)
         self.AllRewardThisBlock=self.BS_RewardedTrialN_CurrentLeftBlock+self.BS_RewardedTrialN_CurrentRightBlock
         self.BS_RewardedTrialN_CurrentBlock=[self.BS_RewardedTrialN_CurrentLeftBlock,self.BS_RewardedTrialN_CurrentRightBlock]
+        # for visualization
+        self.BS_CurrentBlockTrialNV=self.BS_CurrentBlockTrialN.copy()
+        self.BS_CurrentBlockLenV=self.BS_CurrentBlockLen.copy()
         # update block length history
         for i in range(len(self.BS_CurrentBlockLen)):
             if self.BS_CurrentBlockTrialN[i]>self.BS_CurrentBlockLen[i]:
-                self._update_block_len([i])
-                self.BS_CurrentBlockLen[i]=self.BlockLenHistory[i][-1]
+                self.BS_CurrentBlockLenV[i]=self.BS_CurrentBlockTrialNV[i]
+                if UpdateBlockLen==1:
+                    self._update_block_len([i])
+                    self.BS_CurrentBlockLen[i]=self.BlockLenHistory[i][-1]
 
     def _GetBasic(self):
         '''Get basic session information'''
@@ -619,8 +623,8 @@ class GenerateTrials():
         # show basic session statistics    
         if self.B_CurrentTrialN>=0 and self.B_CurrentTrialN<1:
             self.win.ShowBasic.setText(   
-                                        'Current left block: ' + str(self.BS_CurrentBlockTrialN[0]) + '/' +  str(self.BS_CurrentBlockLen[0])+'\n'
-                                        'Current right block: ' + str(self.BS_CurrentBlockTrialN[1]) + '/' +  str(self.BS_CurrentBlockLen[1])+'\n\n'
+                                        'Current left block: ' + str(self.BS_CurrentBlockTrialNV[0]) + '/' +  str(self.BS_CurrentBlockLenV[0])+'\n'
+                                        'Current right block: ' + str(self.BS_CurrentBlockTrialNV[1]) + '/' +  str(self.BS_CurrentBlockLenV[1])+'\n\n'
                                         'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                                         'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
                                         'Total Reward (ml): '+ str(self.BS_RewardN) + '*' + str(self.win.WaterPerRewardedTrial) + '='+str(np.round(self.BS_TotalReward,3)) +'\n'
@@ -629,8 +633,8 @@ class GenerateTrials():
                                         )
         elif self.B_CurrentTrialN>=1 and self.B_CurrentTrialN<2:
             self.win.ShowBasic.setText( 
-                                       'Current left block: ' + str(self.BS_CurrentBlockTrialN[0]) + '/' +  str(self.BS_CurrentBlockLen[0])+'\n'
-                                       'Current right block: ' + str(self.BS_CurrentBlockTrialN[1]) + '/' +  str(self.BS_CurrentBlockLen[1])+'\n\n'
+                                       'Current left block: ' + str(self.BS_CurrentBlockTrialNV[0]) + '/' +  str(self.BS_CurrentBlockLenV[0])+'\n'
+                                       'Current right block: ' + str(self.BS_CurrentBlockTrialNV[1]) + '/' +  str(self.BS_CurrentBlockLenV[1])+'\n\n'
                                        'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                                        'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
                                        'Total Reward (ml): '+ str(self.BS_RewardN) + '*' + str(self.win.WaterPerRewardedTrial) + '='+str(np.round(self.BS_TotalReward,3)) +'\n'
@@ -653,8 +657,8 @@ class GenerateTrials():
                                        )
         elif self.B_CurrentTrialN>=2:
             self.win.ShowBasic.setText( 
-                                       'Current left block: ' + str(self.BS_CurrentBlockTrialN[0]) + '/' +  str(self.BS_CurrentBlockLen[0])+'\n'
-                                       'Current right block: ' + str(self.BS_CurrentBlockTrialN[1]) + '/' +  str(self.BS_CurrentBlockLen[1])+'\n\n'
+                                       'Current left block: ' + str(self.BS_CurrentBlockTrialNV[0]) + '/' +  str(self.BS_CurrentBlockLenV[0])+'\n'
+                                       'Current right block: ' + str(self.BS_CurrentBlockTrialNV[1]) + '/' +  str(self.BS_CurrentBlockLenV[1])+'\n\n'
                                        'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                                        'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
                                        'Total Reward (ml): '+ str(self.BS_RewardN) + '*' + str(self.win.WaterPerRewardedTrial) + '='+str(np.round(self.BS_TotalReward,3)) +'\n'

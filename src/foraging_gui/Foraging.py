@@ -1086,6 +1086,7 @@ if __name__ == "__main__":
     QApplication.setAttribute(Qt.AA_DisableHighDpiScaling,False)
     QApplication.setAttribute(Qt.AA_Use96Dpi,False)
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
+    
     app = QApplication(sys.argv)
     win = Window()
     win.show()
