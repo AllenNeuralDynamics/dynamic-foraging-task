@@ -238,6 +238,7 @@ class GenerateTrials():
                 self._GetCurrentBlockReward(1,CountAutoWater=0,UpdateBlockLen=1)
             else:
                 self.AllRewardThisBlock=-1
+                self.BS_RewardedTrialN_CurrentBlock=[0,0]
             if self.TP_Task in ['Coupled Baiting','Coupled Without Baiting']:
                 if np.all(self.B_ANewBlock==1) and self.AllRewardThisBlock!=-1:
                     if self.AllRewardThisBlock<float(self.TP_BlockMinReward) or self.AdvancedBlockSwitchPermitted==0:
