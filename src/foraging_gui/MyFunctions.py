@@ -160,7 +160,10 @@ class GenerateTrials():
                 if (self.B_CurrentRewardProb[0]>self.B_CurrentRewardProb[1])==(self.B_RewardProHistory[0,-1]>self.B_RewardProHistory[1,-1]):
                     self.B_CurrentRewardProb=self.B_CurrentRewardProb[::-1]
             # randomly draw a block length between Min and Max
-            self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta),1)+float(self.TP_BlockMin)))
+            if self.TP_Randomness=='Exponential':
+                self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta),1)+float(self.TP_BlockMin)))
+            elif self.TP_Randomness=='Even':
+                self.BlockLen=  np.array(np.random.randint(float(self.TP_BlockMin), float(self.TP_BlockMax)+1))
             if self.BlockLen>float(self.TP_BlockMax):
                 self.BlockLen=int(self.TP_BlockMax)
             for i in range(len(self.B_ANewBlock)):
@@ -192,17 +195,26 @@ class GenerateTrials():
                     # get the reward probabilities of the current block
                     self.B_CurrentRewardProb[i]=RewardProbPool[random.choice(range(np.shape(RewardProbPool)[0]))]
                     # randomly draw a block length between Min and Max
-                    self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta),1)+float(self.TP_BlockMin)))
+                    if self.TP_Randomness=='Exponential':
+                        self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta),1)+float(self.TP_BlockMin)))
+                    elif self.TP_Randomness=='Even':
+                        self.BlockLen=  np.array(np.random.randint(float(self.TP_BlockMin), float(self.TP_BlockMax)+1))
                     if self.BlockLen>float(self.TP_BlockMax):
                         self.BlockLen=int(self.TP_BlockMax)
                     self.BlockLenHistory[i].append(self.BlockLen)
                     self.B_ANewBlock[i]=0
         self.B_RewardProHistory=np.append(self.B_RewardProHistory,self.B_CurrentRewardProb.reshape(self.B_LickPortN,1),axis=1)
         # get the ITI time and delay time
-        self.CurrentITI = float(np.random.exponential(float(self.TP_ITIBeta),1)+float(self.TP_ITIMin))
+        if self.TP_Randomness=='Exponential':
+            self.CurrentITI = float(np.random.exponential(float(self.TP_ITIBeta),1)+float(self.TP_ITIMin))
+        elif self.TP_Randomness=='Even':
+            self.CurrentITI = random.uniform(float(self.TP_ITIMin),float(self.TP_ITIMax))
         if self.CurrentITI>float(self.TP_ITIMax):
             self.CurrentITI=float(self.TP_ITIMax)
-        self.CurrentDelay = float(np.random.exponential(float(self.TP_DelayBeta),1)+float(self.TP_DelayMin))
+        if self.TP_Randomness=='Exponential':
+            self.CurrentDelay = float(np.random.exponential(float(self.TP_DelayBeta),1)+float(self.TP_DelayMin))
+        elif self.TP_Randomness=='Even':
+            self.CurrentDelay=random.uniform(float(self.TP_DelayMin),float(self.TP_DelayMax))
         if self.CurrentDelay>float(self.TP_DelayMax):
             self.CurrentDelay=float(self.TP_DelayMax)
         # extremely important. Currently, the shaders timer does not allow delay close to zero. 

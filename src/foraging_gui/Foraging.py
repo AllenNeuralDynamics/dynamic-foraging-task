@@ -193,6 +193,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._AdvancedBlockAuto)
         self.TotalWater.textChanged.connect(self._SuggestedWater)
+        self.Randomness.currentIndexChanged.connect(self._Randomness)
         self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
@@ -204,6 +205,22 @@ class Window(QMainWindow, Ui_ForagingGUI):
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit)):        
                 child.returnPressed.connect(self.keyPressEvent)
+    def _Randomness(self):
+        '''enable/disable some fields in the Block/Delay Period/ITI'''
+        if self.Randomness.currentText()=='Exponential':
+            self.label_14.setEnabled(True)
+            self.label_18.setEnabled(True)
+            self.label_39.setEnabled(True)
+            self.BlockBeta.setEnabled(True)
+            self.DelayBeta.setEnabled(True)
+            self.ITIBeta.setEnabled(True)
+        elif self.Randomness.currentText()=='Even':
+            self.label_14.setEnabled(False)
+            self.label_18.setEnabled(False)
+            self.label_39.setEnabled(False)
+            self.BlockBeta.setEnabled(False)
+            self.DelayBeta.setEnabled(False)
+            self.ITIBeta.setEnabled(False)
     def _AdvancedBlockAuto(self):
         '''enable/disable some fields in the AdvancedBlockAuto'''
         if self.AdvancedBlockAuto.currentText()=='off':
@@ -1003,7 +1020,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.threadpool.start(worker1)
                 #generate a new trial
                 if self.NewTrialRewardOrder==1:
-                    GeneratedTrials._GenerateATrial(self.Channel4)
+                    GeneratedTrials._GenerateATrial(self.Channel4)     
 
     def _StartTrialLoop1(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         while self.Start.isChecked():

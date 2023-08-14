@@ -228,7 +228,7 @@
     <widget class="QLabel" name="label_5">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>112</x>
        <y>23</y>
        <width>72</width>
        <height>16</height>
@@ -241,7 +241,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Training stage:</string>
+      <string>training stage=</string>
      </property>
      <property name="textFormat">
       <enum>Qt::AutoText</enum>
@@ -250,7 +250,7 @@
     <widget class="QComboBox" name="TrainingStage">
      <property name="geometry">
       <rect>
-       <x>169</x>
+       <x>191</x>
        <y>23</y>
        <width>80</width>
        <height>20</height>
@@ -313,7 +313,7 @@
     <widget class="QLabel" name="label_2">
      <property name="geometry">
       <rect>
-       <x>133</x>
+       <x>155</x>
        <y>49</y>
        <width>30</width>
        <height>16</height>
@@ -341,7 +341,7 @@
     <widget class="QLabel" name="label_3">
      <property name="geometry">
       <rect>
-       <x>308</x>
+       <x>330</x>
        <y>49</y>
        <width>67</width>
        <height>23</height>
@@ -388,7 +388,7 @@
     <widget class="QLabel" name="label_6">
      <property name="geometry">
       <rect>
-       <x>133</x>
+       <x>155</x>
        <y>75</y>
        <width>30</width>
        <height>16</height>
@@ -413,7 +413,7 @@
     <widget class="QLineEdit" name="BaseRewardSum">
      <property name="geometry">
       <rect>
-       <x>169</x>
+       <x>191</x>
        <y>75</y>
        <width>80</width>
        <height>20</height>
@@ -432,7 +432,7 @@
     <widget class="QLabel" name="label_7">
      <property name="geometry">
       <rect>
-       <x>308</x>
+       <x>330</x>
        <y>75</y>
        <width>67</width>
        <height>16</height>
@@ -457,7 +457,7 @@
     <widget class="QLineEdit" name="RewardFamily">
      <property name="geometry">
       <rect>
-       <x>381</x>
+       <x>403</x>
        <y>75</y>
        <width>80</width>
        <height>20</height>
@@ -476,7 +476,7 @@
     <widget class="QLabel" name="label_8">
      <property name="geometry">
       <rect>
-       <x>520</x>
+       <x>542</x>
        <y>75</y>
        <width>66</width>
        <height>16</height>
@@ -501,7 +501,7 @@
     <widget class="QLineEdit" name="RewardPairsN">
      <property name="geometry">
       <rect>
-       <x>592</x>
+       <x>614</x>
        <y>75</y>
        <width>80</width>
        <height>20</height>
@@ -515,56 +515,6 @@
      </property>
      <property name="text">
       <string>1</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_9">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>731</x>
-       <y>75</y>
-       <width>146</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>bias check (1:hard; 0.5:soft)=</string>
-     </property>
-     <property name="textFormat">
-      <enum>Qt::AutoText</enum>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="BiasCheck">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>883</x>
-       <y>75</y>
-       <width>80</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>0.5</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_10">
@@ -592,7 +542,7 @@
     <widget class="QLabel" name="label_14">
      <property name="geometry">
       <rect>
-       <x>133</x>
+       <x>155</x>
        <y>101</y>
        <width>30</width>
        <height>16</height>
@@ -617,7 +567,7 @@
     <widget class="QLineEdit" name="BlockBeta">
      <property name="geometry">
       <rect>
-       <x>169</x>
+       <x>191</x>
        <y>101</y>
        <width>80</width>
        <height>20</height>
@@ -636,7 +586,7 @@
     <widget class="QLabel" name="label_12">
      <property name="geometry">
       <rect>
-       <x>308</x>
+       <x>330</x>
        <y>101</y>
        <width>67</width>
        <height>16</height>
@@ -661,7 +611,7 @@
     <widget class="QLineEdit" name="BlockMin">
      <property name="geometry">
       <rect>
-       <x>381</x>
+       <x>403</x>
        <y>101</y>
        <width>80</width>
        <height>20</height>
@@ -680,7 +630,7 @@
     <widget class="QLabel" name="label_11">
      <property name="geometry">
       <rect>
-       <x>520</x>
+       <x>542</x>
        <y>101</y>
        <width>66</width>
        <height>16</height>
@@ -705,7 +655,7 @@
     <widget class="QLineEdit" name="BlockMax">
      <property name="geometry">
       <rect>
-       <x>592</x>
+       <x>614</x>
        <y>101</y>
        <width>80</width>
        <height>20</height>
@@ -724,7 +674,7 @@
     <widget class="QLabel" name="label_13">
      <property name="geometry">
       <rect>
-       <x>731</x>
+       <x>711</x>
        <y>101</y>
        <width>146</width>
        <height>16</height>
@@ -749,7 +699,7 @@
     <widget class="QLineEdit" name="BlockMinReward">
      <property name="geometry">
       <rect>
-       <x>883</x>
+       <x>863</x>
        <y>101</y>
        <width>80</width>
        <height>20</height>
@@ -790,7 +740,7 @@
     <widget class="QLabel" name="label_18">
      <property name="geometry">
       <rect>
-       <x>133</x>
+       <x>155</x>
        <y>127</y>
        <width>30</width>
        <height>16</height>
@@ -815,7 +765,7 @@
     <widget class="QLineEdit" name="DelayBeta">
      <property name="geometry">
       <rect>
-       <x>169</x>
+       <x>191</x>
        <y>127</y>
        <width>80</width>
        <height>20</height>
@@ -834,7 +784,7 @@
     <widget class="QLabel" name="label_15">
      <property name="geometry">
       <rect>
-       <x>308</x>
+       <x>330</x>
        <y>127</y>
        <width>67</width>
        <height>16</height>
@@ -859,7 +809,7 @@
     <widget class="QLineEdit" name="DelayMin">
      <property name="geometry">
       <rect>
-       <x>381</x>
+       <x>403</x>
        <y>127</y>
        <width>80</width>
        <height>20</height>
@@ -878,7 +828,7 @@
     <widget class="QLabel" name="label_17">
      <property name="geometry">
       <rect>
-       <x>520</x>
+       <x>542</x>
        <y>127</y>
        <width>66</width>
        <height>16</height>
@@ -903,7 +853,7 @@
     <widget class="QLineEdit" name="DelayMax">
      <property name="geometry">
       <rect>
-       <x>592</x>
+       <x>614</x>
        <y>127</y>
        <width>80</width>
        <height>20</height>
@@ -944,7 +894,7 @@
     <widget class="QLabel" name="label_39">
      <property name="geometry">
       <rect>
-       <x>133</x>
+       <x>155</x>
        <y>153</y>
        <width>30</width>
        <height>16</height>
@@ -969,7 +919,7 @@
     <widget class="QLineEdit" name="ITIBeta">
      <property name="geometry">
       <rect>
-       <x>169</x>
+       <x>191</x>
        <y>153</y>
        <width>80</width>
        <height>20</height>
@@ -988,7 +938,7 @@
     <widget class="QLabel" name="label_42">
      <property name="geometry">
       <rect>
-       <x>308</x>
+       <x>330</x>
        <y>153</y>
        <width>67</width>
        <height>16</height>
@@ -1013,7 +963,7 @@
     <widget class="QLineEdit" name="ITIMin">
      <property name="geometry">
       <rect>
-       <x>381</x>
+       <x>403</x>
        <y>153</y>
        <width>80</width>
        <height>20</height>
@@ -1032,7 +982,7 @@
     <widget class="QLabel" name="label_41">
      <property name="geometry">
       <rect>
-       <x>520</x>
+       <x>542</x>
        <y>153</y>
        <width>66</width>
        <height>16</height>
@@ -1057,7 +1007,7 @@
     <widget class="QLineEdit" name="ITIMax">
      <property name="geometry">
       <rect>
-       <x>592</x>
+       <x>614</x>
        <y>153</y>
        <width>80</width>
        <height>20</height>
@@ -1079,7 +1029,7 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>731</x>
+       <x>711</x>
        <y>153</y>
        <width>146</width>
        <height>16</height>
@@ -1107,7 +1057,7 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>883</x>
+       <x>863</x>
        <y>153</y>
        <width>80</width>
        <height>20</height>
@@ -1148,7 +1098,7 @@
     <widget class="QLabel" name="label_48">
      <property name="geometry">
       <rect>
-       <x>520</x>
+       <x>542</x>
        <y>179</y>
        <width>67</width>
        <height>16</height>
@@ -1173,7 +1123,7 @@
     <widget class="QLineEdit" name="Multiplier">
      <property name="geometry">
       <rect>
-       <x>592</x>
+       <x>614</x>
        <y>179</y>
        <width>80</width>
        <height>20</height>
@@ -1192,7 +1142,7 @@
     <widget class="QLabel" name="label_45">
      <property name="geometry">
       <rect>
-       <x>811</x>
+       <x>791</x>
        <y>179</y>
        <width>66</width>
        <height>16</height>
@@ -1217,7 +1167,7 @@
     <widget class="QLineEdit" name="Unrewarded">
      <property name="geometry">
       <rect>
-       <x>883</x>
+       <x>863</x>
        <y>179</y>
        <width>80</width>
        <height>20</height>
@@ -1302,7 +1252,7 @@
     <widget class="QLabel" name="label_50">
      <property name="geometry">
       <rect>
-       <x>133</x>
+       <x>155</x>
        <y>205</y>
        <width>30</width>
        <height>16</height>
@@ -1327,7 +1277,7 @@
     <widget class="QLineEdit" name="ResponseTime">
      <property name="geometry">
       <rect>
-       <x>169</x>
+       <x>191</x>
        <y>205</y>
        <width>80</width>
        <height>20</height>
@@ -1346,7 +1296,7 @@
     <widget class="QLabel" name="label_51">
      <property name="geometry">
       <rect>
-       <x>520</x>
+       <x>542</x>
        <y>205</y>
        <width>67</width>
        <height>16</height>
@@ -1371,7 +1321,7 @@
     <widget class="QLineEdit" name="StopIgnores">
      <property name="geometry">
       <rect>
-       <x>592</x>
+       <x>614</x>
        <y>205</y>
        <width>80</width>
        <height>20</height>
@@ -1412,7 +1362,7 @@
     <widget class="QLabel" name="label_53">
      <property name="geometry">
       <rect>
-       <x>133</x>
+       <x>155</x>
        <y>232</y>
        <width>30</width>
        <height>16</height>
@@ -1440,7 +1390,7 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>169</x>
+       <x>191</x>
        <y>232</y>
        <width>80</width>
        <height>20</height>
@@ -1474,7 +1424,7 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>310</x>
+       <x>332</x>
        <y>231</y>
        <width>67</width>
        <height>20</height>
@@ -1502,7 +1452,7 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>381</x>
+       <x>403</x>
        <y>232</y>
        <width>80</width>
        <height>20</height>
@@ -1521,7 +1471,7 @@
     <widget class="QPushButton" name="NextBlock">
      <property name="geometry">
       <rect>
-       <x>883</x>
+       <x>863</x>
        <y>231</y>
        <width>75</width>
        <height>23</height>
@@ -1543,7 +1493,7 @@
     <widget class="QPushButton" name="GiveLeft">
      <property name="geometry">
       <rect>
-       <x>510</x>
+       <x>532</x>
        <y>48</y>
        <width>80</width>
        <height>23</height>
@@ -1565,7 +1515,7 @@
     <widget class="QPushButton" name="GiveRight">
      <property name="geometry">
       <rect>
-       <x>800</x>
+       <x>780</x>
        <y>48</y>
        <width>80</width>
        <height>23</height>
@@ -1587,7 +1537,7 @@
     <widget class="QPushButton" name="AutoReward">
      <property name="geometry">
       <rect>
-       <x>169</x>
+       <x>191</x>
        <y>179</y>
        <width>80</width>
        <height>20</height>
@@ -1609,7 +1559,7 @@
     <widget class="QDoubleSpinBox" name="RightValue">
      <property name="geometry">
       <rect>
-       <x>381</x>
+       <x>403</x>
        <y>50</y>
        <width>80</width>
        <height>20</height>
@@ -1634,7 +1584,7 @@
     <widget class="QDoubleSpinBox" name="LeftValue">
      <property name="geometry">
       <rect>
-       <x>169</x>
+       <x>191</x>
        <y>50</y>
        <width>80</width>
        <height>20</height>
@@ -1659,7 +1609,7 @@
     <widget class="QDoubleSpinBox" name="GiveWaterL">
      <property name="geometry">
       <rect>
-       <x>592</x>
+       <x>614</x>
        <y>48</y>
        <width>80</width>
        <height>20</height>
@@ -1684,7 +1634,7 @@
     <widget class="QDoubleSpinBox" name="GiveWaterR">
      <property name="geometry">
       <rect>
-       <x>883</x>
+       <x>863</x>
        <y>48</y>
        <width>80</width>
        <height>20</height>
@@ -1709,7 +1659,7 @@
     <widget class="QLabel" name="label_56">
      <property name="geometry">
       <rect>
-       <x>255</x>
+       <x>277</x>
        <y>205</y>
        <width>121</width>
        <height>20</height>
@@ -1734,7 +1684,7 @@
     <widget class="QLineEdit" name="RewardConsumeTime">
      <property name="geometry">
       <rect>
-       <x>381</x>
+       <x>403</x>
        <y>205</y>
        <width>80</width>
        <height>20</height>
@@ -1753,7 +1703,7 @@
     <widget class="QLabel" name="label_20">
      <property name="geometry">
       <rect>
-       <x>973</x>
+       <x>756</x>
        <y>75</y>
        <width>101</width>
        <height>20</height>
@@ -1766,7 +1716,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Uncoupled reward=</string>
+      <string>uncoupled reward=</string>
      </property>
      <property name="textFormat">
       <enum>Qt::AutoText</enum>
@@ -1778,7 +1728,7 @@
     <widget class="QLineEdit" name="UncoupledReward">
      <property name="geometry">
       <rect>
-       <x>1080</x>
+       <x>863</x>
        <y>75</y>
        <width>91</width>
        <height>20</height>
@@ -1797,7 +1747,7 @@
     <widget class="QLabel" name="label_57">
      <property name="geometry">
       <rect>
-       <x>810</x>
+       <x>790</x>
        <y>205</y>
        <width>67</width>
        <height>16</height>
@@ -1822,7 +1772,7 @@
     <widget class="QLineEdit" name="MaxTrial">
      <property name="geometry">
       <rect>
-       <x>883</x>
+       <x>863</x>
        <y>205</y>
        <width>80</width>
        <height>20</height>
@@ -1885,7 +1835,7 @@
     <widget class="QComboBox" name="AutoWaterType">
      <property name="geometry">
       <rect>
-       <x>380</x>
+       <x>402</x>
        <y>179</y>
        <width>80</width>
        <height>20</height>
@@ -1916,7 +1866,7 @@
     <widget class="QLabel" name="label_59">
      <property name="geometry">
       <rect>
-       <x>308</x>
+       <x>330</x>
        <y>180</y>
        <width>67</width>
        <height>16</height>
@@ -1944,7 +1894,7 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>507</x>
+       <x>529</x>
        <y>229</y>
        <width>81</width>
        <height>20</height>
@@ -1972,7 +1922,7 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>592</x>
+       <x>614</x>
        <y>230</y>
        <width>80</width>
        <height>20</height>
@@ -2042,11 +1992,84 @@
       </property>
      </item>
     </widget>
+    <widget class="QLabel" name="label_9">
+     <property name="geometry">
+      <rect>
+       <x>316</x>
+       <y>23</y>
+       <width>81</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>randomness=</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="Randomness">
+     <property name="geometry">
+      <rect>
+       <x>403</x>
+       <y>23</y>
+       <width>80</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <item>
+      <property name="text">
+       <string>Exponential</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Even</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QLabel" name="label_16">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>23</y>
+       <width>80</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>High level:</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+    </widget>
    </widget>
    <widget class="QLineEdit" name="AnimalName">
     <property name="geometry">
      <rect>
-      <x>350</x>
+      <x>330</x>
       <y>20</y>
       <width>71</width>
       <height>20</height>
@@ -2590,7 +2613,7 @@
    <widget class="QLineEdit" name="ID">
     <property name="geometry">
      <rect>
-      <x>450</x>
+      <x>430</x>
       <y>20</y>
       <width>71</width>
       <height>20</height>
@@ -2609,7 +2632,7 @@
    <widget class="QLabel" name="label_72">
     <property name="geometry">
      <rect>
-      <x>426</x>
+      <x>406</x>
       <y>20</y>
       <width>21</width>
       <height>20</height>
@@ -2634,7 +2657,7 @@
    <widget class="QLabel" name="label_73">
     <property name="geometry">
      <rect>
-      <x>313</x>
+      <x>293</x>
       <y>20</y>
       <width>31</width>
       <height>20</height>
@@ -3032,7 +3055,7 @@
    <widget class="QLabel" name="label_74">
     <property name="geometry">
      <rect>
-      <x>526</x>
+      <x>506</x>
       <y>20</y>
       <width>71</width>
       <height>20</height>
@@ -3057,9 +3080,9 @@
    <widget class="QLineEdit" name="Experimenter">
     <property name="geometry">
      <rect>
-      <x>600</x>
+      <x>580</x>
       <y>20</y>
-      <width>71</width>
+      <width>101</width>
       <height>20</height>
      </rect>
     </property>
