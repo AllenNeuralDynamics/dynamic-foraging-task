@@ -301,4 +301,20 @@ class PlotWaterCalibration(FigureCanvas):
             self.win.VisuCalibration.setTitle('Last calibration date:'+self.MainWindow.RecentWaterCalibrationDate)
         all_dates=self.WaterCalibrationResults.keys()
         for current_date in all_dates:
-            self.WaterCalibrationResults[current_date]
+            all_valves=self.WaterCalibrationResults[current_date].keys()
+            for current_valve in all_valves:
+                X=[]
+                Y=[]
+                average_water=[]
+                all_valve_opentime=self.WaterCalibrationResults[current_date][current_valve]
+                for current_valve_opentime in all_valve_opentime:
+                    X.append(current_valve_opentime)
+                    all_valve_openinterval=self.WaterCalibrationResults[current_date][current_valve][current_valve_opentime]
+                    for current_valve_openinterval in all_valve_openinterval:
+                        all_cycle=self.WaterCalibrationResults[current_date][current_valve][current_valve_opentime][current_valve_openinterval]
+                        for current_cycle in all_cycle:
+                            total_water=np.nanmean(self.WaterCalibrationResults[current_date][current_valve][current_valve_opentime][current_valve_openinterval][current_cycle])
+                            if total_water != '':
+                                average_water.append(total_water)
+                    Y.append(np.nanmean(average_water))
+                self.ax1.plot(X, Y, 'ko')

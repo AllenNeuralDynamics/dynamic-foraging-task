@@ -352,7 +352,7 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
             layout.addWidget(toolbar)
             layout.addWidget(PlotM)
             self.ToInitializeVisual=0
-        PlotM._Update()
+        self.PlotM._Update()
 
     def _OpenLeftForever(self):
         if self.OpenLeftForever.isChecked():
