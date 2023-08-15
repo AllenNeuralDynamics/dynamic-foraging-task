@@ -33,8 +33,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.setWindowTitle("Foraging"+'_'+str(sys.argv[1]))
         self.SettingFile=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'ForagingSettings.json')
         self.LaserCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'LaserCalibration.json')
+        self.WaterCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibration.json')
         self._GetSettings()
         self._GetLaserCalibration()
+        self._GetWaterCalibration()
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
@@ -78,6 +80,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 sorted_dates = sorted(self.LaserCalibrationResults.keys(), key=self._custom_sort_key)
                 self.RecentLaserCalibration=self.LaserCalibrationResults[sorted_dates[-1]]
                 self.RecentCalibrationDate=sorted_dates[-1]
+    
+    def _GetWaterCalibration(self):
+        '''Get the laser calibration'''
+        if os.path.exists(self.WaterCalibrationFiles):
+            with open(self.WaterCalibrationFiles, 'r') as f:
+                self.WaterCalibrationResults = json.load(f)
+                #sorted_dates = sorted(self.LaserCalibrationResults.keys(), key=lambda x: datetime.strptime(x, '%Y-%m-%d'))
+                sorted_dates = sorted(self.WaterCalibrationResults.keys(), key=self._custom_sort_key)
+                self.RecentWaterCalibration=self.WaterCalibrationResults[sorted_dates[-1]]
+                self.RecentWaterCalibrationDate=sorted_dates[-1]
 
     def _custom_sort_key(self,key):
         if '_' in key:

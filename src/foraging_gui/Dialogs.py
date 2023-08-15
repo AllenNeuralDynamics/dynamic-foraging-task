@@ -11,6 +11,8 @@ from MyFunctions import Worker
 import numpy as np
 from PyQt5.QtCore import QThreadPool,Qt
 from datetime import datetime
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from Visualization import PlotWaterCalibration
 class OptogeneticsDialog(QDialog,Ui_Optogenetics):
     '''Optogenetics dialog'''
     def __init__(self, MainWindow, parent=None):
@@ -245,12 +247,110 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         #self.OpenLeftTag=0
         #self.OpenRightTag=0
         self.FinishLeftValve=0
+        if not hasattr(self.MainWindow,'WaterCalibrationResults'):
+            self.MainWindow.LaserCalibrationResults={}
+            self.WaterCalibrationResults={}
+        else:
+            self.WaterCalibrationResults=self.MainWindow.WaterCalibrationResults
         self._connectSignalsSlots()
+        self.ToInitializeVisual=1
+        self._UpdateFigure()
     def _connectSignalsSlots(self):
         self.OpenLeft.clicked.connect(self._OpenLeft)
         self.OpenRight.clicked.connect(self._OpenRight)
         self.OpenLeftForever.clicked.connect(self._OpenLeftForever)
         self.OpenRightForever.clicked.connect(self._OpenRightForever)
+        self.SaveLeft.clicked.connect(self._SaveLeft)
+        self.SaveRight.clicked.connect(self._SaveRight)
+        self.CalibrationType.currentIndexChanged.connect(self._CalibrationType)
+        self.StartCalibratingLeft.clicked.connect(self._StartCalibratingLeft)
+        self.StartCalibratingRight.clicked.connect(self._StartCalibratingRight)
+    def _SaveLeft(self):
+        '''save the calibration result of the single point calibration (left valve)'''
+        self.SaveLeft.setStyleSheet("background-color : green;")
+        QApplication.processEvents()
+        valve='Left'
+        valve_open_time=str(float(self.OpenLeftTime.text()))
+        cycle=str(float(self.CycleLeft.text()))
+        try:
+            total_water=float(self.TotalWaterSingleLeft.text())  
+        except:
+            total_water=''
+        self._Save(valve=valve,valve_open_time=valve_open_time,cycle=cycle,total_water=total_water)
+        self.SaveLeft.setStyleSheet("background-color : none")
+        self.SaveLeft.setChecked(False)
+    def _SaveRight(self):
+        '''save the calibration result of the single point calibration (right valve)'''
+        self.SaveRight.setStyleSheet("background-color : green;")
+        QApplication.processEvents()
+        valve='Right'
+        valve_open_time=str(float(self.OpenRightTime.text()))
+        cycle=str(float(self.CycleRight.text()))
+        try:
+            total_water=float(self.TotalWaterSingleRight.text()) 
+        except:
+            total_water=''
+        self._Save(valve=valve,valve_open_time=valve_open_time,cycle=cycle,total_water=total_water)
+        self.SaveRight.setStyleSheet("background-color : none")
+        self.SaveRight.setChecked(False)
+    def _CalibrationType(self):
+        '''change the calibration parameters based on the calibration type'''
+        pass
+    def _StartCalibratingLeft(self):
+        '''start the calibration loop of left valve'''
+        pass
+    def _StartCalibratingRight(self):
+        '''start the calibration loop of right valve'''
+        pass
+    def _Save(self,valve,valve_open_time,cycle,total_water):
+        '''save the calibrated result and update the figure'''
+        if total_water=='':
+            return
+        WaterCalibrationResults=self.WaterCalibrationResults.copy()
+        current_time = datetime.now()
+        date_str = current_time.strftime("%Y-%m-%d")
+        # Check and assign items to the nested dictionary
+        if date_str not in WaterCalibrationResults:
+            WaterCalibrationResults[date_str] = {}
+        if valve not in WaterCalibrationResults[date_str]:
+            WaterCalibrationResults[date_str][valve] = {}
+        if valve_open_time not in WaterCalibrationResults[date_str][valve]:
+            WaterCalibrationResults[date_str][valve][valve_open_time] = {}
+        if cycle not in WaterCalibrationResults[date_str][valve][valve_open_time]:
+            WaterCalibrationResults[date_str][valve][valve_open_time][cycle] = {}
+        
+        if WaterCalibrationResults[date_str][valve][valve_open_time][cycle]=={}:
+            WaterCalibrationResults[date_str][valve][valve_open_time][cycle]=[total_water]
+        else:
+            WaterCalibrationResults[date_str][valve][valve_open_time][cycle].append(total_water)
+        self.WaterCalibrationResults=WaterCalibrationResults.copy()
+        # save to the json file
+        if not os.path.exists(os.path.dirname(self.MainWindow.WaterCalibrationFiles)):
+            os.makedirs(os.path.dirname(self.MainWindow.WaterCalibrationFiles))
+        with open(self.MainWindow.WaterCalibrationFiles, "w") as file:
+            json.dump(WaterCalibrationResults, file,indent=4)
+        # update the figure
+        self._UpdateFigure()
+    def _UpdateFigure(self):
+        '''plot the calibration result'''
+        if self.ToInitializeVisual==1: # only run once
+            PlotM=PlotWaterCalibration(win=self)
+            self.PlotM=PlotM
+            layout=self.VisuCalibration.layout()
+            if layout is not None:
+                for i in reversed(range(layout.count())):
+                    layout.itemAt(i).widget().setParent(None)
+                layout.invalidate()
+            if layout is None:
+                layout=QVBoxLayout(self.VisuCalibration)
+            toolbar = NavigationToolbar(PlotM, self)
+            toolbar.setMaximumHeight(20)
+            toolbar.setMaximumWidth(300)
+            layout.addWidget(toolbar)
+            layout.addWidget(PlotM)
+            self.ToInitializeVisual=0
+        PlotM._Update()
+
     def _OpenLeftForever(self):
         if self.OpenLeftForever.isChecked():
             # change button color

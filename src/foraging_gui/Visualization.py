@@ -287,3 +287,18 @@ class PlotV(FigureCanvas):
         self.ax2.set_yticklabels(['L', 'R'])
         self.ax2.set_ylim(-0.15, 1.15)
         self.ax2.legend(loc='lower left', fontsize=8)
+
+class PlotWaterCalibration(FigureCanvas):
+    def __init__(self,win,dpi=100,width=5, height=4):
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        gs = GridSpec(10, 30, wspace = 3, hspace = 0.1, bottom = 0.1, top = 0.95, left = 0.04, right = 0.98)
+        self.ax1 = self.fig.add_subplot(gs[1:10, 0:25])
+        FigureCanvas.__init__(self, self.fig)
+        self.win=win
+        self.WaterCalibrationResults=self.win.WaterCalibrationResults
+    def _Update(self):
+        if hasattr(self.win,'RecentWaterCalibrationDate'):
+            self.win.VisuCalibration.setTitle('Last calibration date:'+self.MainWindow.RecentWaterCalibrationDate)
+        all_dates=self.WaterCalibrationResults.keys()
+        for current_date in all_dates:
+            self.WaterCalibrationResults[current_date]
