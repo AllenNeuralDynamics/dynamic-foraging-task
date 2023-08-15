@@ -271,12 +271,13 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         QApplication.processEvents()
         valve='Left'
         valve_open_time=str(float(self.OpenLeftTime.text()))
+        valve_open_interval=str(float(self.IntervalLeft.text()))
         cycle=str(float(self.CycleLeft.text()))
         try:
             total_water=float(self.TotalWaterSingleLeft.text())  
         except:
             total_water=''
-        self._Save(valve=valve,valve_open_time=valve_open_time,cycle=cycle,total_water=total_water)
+        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water)
         self.SaveLeft.setStyleSheet("background-color : none")
         self.SaveLeft.setChecked(False)
     def _SaveRight(self):
@@ -285,12 +286,13 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         QApplication.processEvents()
         valve='Right'
         valve_open_time=str(float(self.OpenRightTime.text()))
+        valve_open_interval=str(float(self.IntervalRight.text()))
         cycle=str(float(self.CycleRight.text()))
         try:
             total_water=float(self.TotalWaterSingleRight.text()) 
         except:
             total_water=''
-        self._Save(valve=valve,valve_open_time=valve_open_time,cycle=cycle,total_water=total_water)
+        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water)
         self.SaveRight.setStyleSheet("background-color : none")
         self.SaveRight.setChecked(False)
     def _CalibrationType(self):
@@ -302,7 +304,7 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
     def _StartCalibratingRight(self):
         '''start the calibration loop of right valve'''
         pass
-    def _Save(self,valve,valve_open_time,cycle,total_water):
+    def _Save(self,valve,valve_open_time,valve_open_interval,cycle,total_water):
         '''save the calibrated result and update the figure'''
         if total_water=='':
             return
@@ -316,13 +318,14 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
             WaterCalibrationResults[date_str][valve] = {}
         if valve_open_time not in WaterCalibrationResults[date_str][valve]:
             WaterCalibrationResults[date_str][valve][valve_open_time] = {}
-        if cycle not in WaterCalibrationResults[date_str][valve][valve_open_time]:
-            WaterCalibrationResults[date_str][valve][valve_open_time][cycle] = {}
-        
-        if WaterCalibrationResults[date_str][valve][valve_open_time][cycle]=={}:
-            WaterCalibrationResults[date_str][valve][valve_open_time][cycle]=[total_water]
+        if valve_open_interval not in WaterCalibrationResults[date_str][valve][valve_open_time]:
+            WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval] = {}
+        if cycle not in WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval]:
+            WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle] = {}
+        if WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle]=={}:
+            WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle]=[total_water]
         else:
-            WaterCalibrationResults[date_str][valve][valve_open_time][cycle].append(total_water)
+            WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle].append(total_water)
         self.WaterCalibrationResults=WaterCalibrationResults.copy()
         # save to the json file
         if not os.path.exists(os.path.dirname(self.MainWindow.WaterCalibrationFiles)):
