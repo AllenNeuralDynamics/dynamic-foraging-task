@@ -289,32 +289,65 @@ class PlotV(FigureCanvas):
         self.ax2.legend(loc='lower left', fontsize=8)
 
 class PlotWaterCalibration(FigureCanvas):
-    def __init__(self,win,dpi=100,width=5, height=4):
+    def __init__(self,water_win,dpi=100,width=5, height=4):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         gs = GridSpec(10, 30, wspace = 3, hspace = 0.1, bottom = 0.1, top = 0.95, left = 0.04, right = 0.98)
-        self.ax1 = self.fig.add_subplot(gs[1:10, 0:25])
+        self.ax1 = self.fig.add_subplot(gs[0:9, 1:30])
         FigureCanvas.__init__(self, self.fig)
-        self.win=win
-        self.WaterCalibrationResults=self.win.WaterCalibrationResults
+        self.water_win=water_win
+        self.WaterCalibrationResults=self.water_win.WaterCalibrationResults
+    def _UpdateKeysSpecificCalibration(self):
+        '''update the fields of specific calibration'''
+        current_item = self.water_win.showspecificcali.currentText()
+        self.water_win.showspecificcali.clear()
+        sorted_dates = sorted(self.WaterCalibrationResults.keys(),reverse=True)
+        sorted_dates.insert(0,'NA')
+        self.water_win.showspecificcali.addItems(sorted_dates)
+        # remain the item unchanged
+        for i in range(self.water_win.showspecificcali.count()):
+            if current_item==self.water_win.showspecificcali.itemText(i):
+                self.water_win.showspecificcali.setCurrentIndex(i)
     def _Update(self):
-        if hasattr(self.win,'RecentWaterCalibrationDate'):
-            self.win.VisuCalibration.setTitle('Last calibration date:'+self.MainWindow.RecentWaterCalibrationDate)
-        all_dates=self.WaterCalibrationResults.keys()
+        '''update the calibration figure'''
+        self._UpdateKeysSpecificCalibration()
+        self.ax1.cla()
+        if hasattr(self.water_win.MainWindow,'RecentWaterCalibrationDate'):
+            self.water_win.VisuCalibration.setTitle('Last calibration date:'+self.water_win.MainWindow.RecentWaterCalibrationDate)
+        sorted_dates = sorted(self.WaterCalibrationResults.keys())
+        showrecent=int(self.water_win.showrecent.text())
+        if showrecent<=0:
+            showrecent=1
+        if showrecent>len(sorted_dates):
+            showrecent=len(sorted_dates)
+        all_dates=sorted_dates[-showrecent:]
+        # use the selected date if showspecificcali is not NA
+        if self.water_win.showspecificcali.currentText()!='NA':
+            all_dates=[self.water_win.showspecificcali.currentText()]
         for current_date in all_dates:
             all_valves=self.WaterCalibrationResults[current_date].keys()
             for current_valve in all_valves:
                 X=[]
                 Y=[]
-                average_water=[]
-                all_valve_opentime=self.WaterCalibrationResults[current_date][current_valve]
+                all_valve_opentime=self.WaterCalibrationResults[current_date][current_valve].keys()
                 for current_valve_opentime in all_valve_opentime:
+                    average_water=[]
                     X.append(current_valve_opentime)
-                    all_valve_openinterval=self.WaterCalibrationResults[current_date][current_valve][current_valve_opentime]
+                    all_valve_openinterval=self.WaterCalibrationResults[current_date][current_valve][current_valve_opentime].keys()
                     for current_valve_openinterval in all_valve_openinterval:
-                        all_cycle=self.WaterCalibrationResults[current_date][current_valve][current_valve_opentime][current_valve_openinterval]
+                        all_cycle=self.WaterCalibrationResults[current_date][current_valve][current_valve_opentime][current_valve_openinterval].keys()
                         for current_cycle in all_cycle:
                             total_water=np.nanmean(self.WaterCalibrationResults[current_date][current_valve][current_valve_opentime][current_valve_openinterval][current_cycle])
                             if total_water != '':
-                                average_water.append(total_water)
+                                average_water.append(total_water/float(current_cycle))
                     Y.append(np.nanmean(average_water))
-                self.ax1.plot(X, Y, 'ko')
+                sorted_X=sorted(map(float, X))
+                sorted_indices = sorted(range(len(X)), key=lambda i: float(X[i]))
+                sorted_Y = [Y[i] for i in sorted_indices]
+                if current_valve=='Left':
+                    self.ax1.plot(sorted_X, sorted_Y, 'o-',label=current_date+'_left valve')
+                elif current_valve=='Right':
+                    self.ax1.plot(sorted_X, sorted_Y, 'o--',label=current_date+'_right valve')
+        self.ax1.set_xlabel('valve open time(s)')
+        self.ax1.set_ylabel('water(g)')
+        self.ax1.legend(loc='lower right', fontsize=8)
+        self.draw()

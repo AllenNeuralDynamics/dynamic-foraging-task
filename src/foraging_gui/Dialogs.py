@@ -265,6 +265,23 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         self.CalibrationType.currentIndexChanged.connect(self._CalibrationType)
         self.StartCalibratingLeft.clicked.connect(self._StartCalibratingLeft)
         self.StartCalibratingRight.clicked.connect(self._StartCalibratingRight)
+        self.Continue.clicked.connect(self._Continue)
+        self.showrecent.textChanged.connect(self._Showrecent)
+        self.showspecificcali.activated.connect(self._ShowSpecifcDay)
+    def _Showrecent(self):
+        '''update the calibration figure'''
+        self._UpdateFigure()
+    def _ShowSpecifcDay(self):
+        '''update the calibration figure'''
+        self._UpdateFigure()
+        
+    def _Continue(self):
+        '''Change the color of the continue button'''
+        if self.Continue.isChecked():
+            self.Continue.setStyleSheet("background-color : green;")
+        else:
+            self.Continue.setStyleSheet("background-color : none")
+
     def _SaveLeft(self):
         '''save the calibration result of the single point calibration (left valve)'''
         self.SaveLeft.setStyleSheet("background-color : green;")
@@ -297,13 +314,222 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         self.SaveRight.setChecked(False)
     def _CalibrationType(self):
         '''change the calibration parameters based on the calibration type'''
-        pass
+        if self.CalibrationType.currentText()=='Monthly':
+            self.TimeLeftMin.setText('0.005')
+            self.TimeLeftMax.setText('0.08')
+            self.StrideLeft.setText('0.005')
+            self.TimeRightMin.setText('0.005')
+            self.TimeRightMax.setText('0.08')
+            self.StrideRight.setText('0.005')
+        elif self.CalibrationType.currentText()=='Biweekly':
+            self.TimeLeftMin.setText('0.02')
+            self.TimeLeftMax.setText('0.06')
+            self.StrideLeft.setText('0.01')
+            self.TimeRightMin.setText('0.02')
+            self.TimeRightMax.setText('0.06')
+            self.StrideRight.setText('0.01')
     def _StartCalibratingLeft(self):
         '''start the calibration loop of left valve'''
-        pass
+        if self.StartCalibratingLeft.isChecked():
+            # change button color
+            self.StartCalibratingLeft.setStyleSheet("background-color : green;")
+            QApplication.processEvents()
+            # disable the right valve calibration
+            self.StartCalibratingRight.setEnabled(False)
+            self.label_15.setEnabled(False)
+            self.label_14.setEnabled(False)
+            self.label_17.setEnabled(False)
+            self.label_18.setEnabled(False)
+            self.label_22.setEnabled(False)
+            self.label_16.setEnabled(False)
+            self.TimeRightMin.setEnabled(False)
+            self.TimeRightMax.setEnabled(False)
+            self.StrideRight.setEnabled(False)
+            self.CycleCaliRight.setEnabled(False)
+            self.IntervalRight_2.setEnabled(False)
+            self.TotalWaterRight.setEnabled(False)
+            # check the continue button
+            self.Continue.setChecked(True)
+            self.Continue.setStyleSheet("background-color : green;")
+        else:
+            self.StartCalibratingLeft.setStyleSheet("background-color : none")
+            self.Warning.setText('Calibration was terminated!')
+            self.Warning.setStyleSheet("color: red;")
+        
+        for current_valve_opentime in np.arange(float(self.TimeLeftMin.text()),float(self.TimeLeftMax.text()),float(self.StrideLeft.text())):
+            QApplication.processEvents()
+            if not self.StartCalibratingLeft.isChecked():
+                break
+            if self.Continue.isChecked():
+                # start the open/close/delay cycle
+                for i in range(int(self.CycleCaliLeft.text())):
+                    QApplication.processEvents()
+                    if self.StartCalibratingLeft.isChecked():
+                        # print the current calibration value
+                        self.Warning.setText('You are calibrating Right valve: '+ str(current_valve_opentime)+'   Current cycle:'+str(i+1)+'/'+self.CycleCaliLeft.text())
+                        self.Warning.setStyleSheet("color: red;")
+                        # set the valve open time
+                        self.MainWindow.Channel.LeftValue(float(current_valve_opentime)*1000) 
+                        # open the valve
+                        self.MainWindow.Channel3.ManualWater_Left(int(1))
+                        # delay
+                        time.sleep(current_valve_opentime+float(self.IntervalLeft_2.text()))
+                    else:
+                        break
+            self.Continue.setChecked(False)
+            self.Continue.setStyleSheet("background-color : none")
+            if i==range(int(self.CycleCaliLeft.text()))[-1]:
+                self.Warning.setText('Finish calibrating left valve: '+ str(current_valve_opentime)+'\nPlease enter the measured water and click the \"Continue\" button to start calibrating the next value')
+            self.Warning.setStyleSheet("color: red;")
+            # Waiting for the continue button to be clicked
+            continuetag=1
+            while 1:
+                QApplication.processEvents()
+                if not self.StartCalibratingLeft.isChecked():
+                    break
+                if self.Continue.isChecked():
+                    # save the calibration data after the current calibration is completed
+                    if i==range(int(self.CycleCaliLeft.text()))[-1]:
+                        # save the data
+                        valve='Left'
+                        valve_open_time=str(float(current_valve_opentime))
+                        valve_open_interval=str(float(self.IntervalLeft_2.text()))
+                        cycle=str(float(self.CycleCaliLeft.text()))
+                        if self.TotalWaterLeft.text()=='':
+                            self.Warning.setText('Please enter the measured total water and click the continue button again!')
+                            continuetag=0
+                            self.Continue.setChecked(False)
+                            self.Continue.setStyleSheet("background-color : none")
+                        else:
+                            continuetag=1
+                            total_water=float(self.TotalWaterLeft.text())
+                            self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water)
+                    if continuetag==1:
+                        break
+        # calibration complete indication
+        if current_valve_opentime==np.arange(float(self.TimeLeftMin.text()),float(self.TimeLeftMax.text()),float(self.StrideLeft.text()))[-1]:
+            self.Warning.setText('Calibration is complete!')
+            self._UpdateFigure()
+        # set the default valve open time
+        self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
+        # enable the right valve calibration
+        self.StartCalibratingRight.setEnabled(True)
+        self.label_15.setEnabled(True)
+        self.label_14.setEnabled(True)
+        self.label_17.setEnabled(True)
+        self.label_18.setEnabled(True)
+        self.label_22.setEnabled(True)
+        self.label_13.setEnabled(True)
+        self.TimeRightMin.setEnabled(True)
+        self.TimeRightMax.setEnabled(True)
+        self.StrideRight.setEnabled(True)
+        self.CycleCaliRight.setEnabled(True)
+        self.IntervalRight_2.setEnabled(True)
+        self.TotalWaterRight.setEnabled(True) 
+        # change the color to be normal
+        self.StartCalibratingLeft.setStyleSheet("background-color : none")
+        self.StartCalibratingLeft.setChecked(False)
     def _StartCalibratingRight(self):
         '''start the calibration loop of right valve'''
-        pass
+        if self.StartCalibratingRight.isChecked():
+            # change button color
+            self.StartCalibratingRight.setStyleSheet("background-color : green;")
+            QApplication.processEvents()
+            # disable the left valve calibration
+            self.StartCalibratingLeft.setEnabled(False)
+            self.label_9.setEnabled(False)
+            self.label_10.setEnabled(False)
+            self.label_11.setEnabled(False)
+            self.label_12.setEnabled(False)
+            self.label_23.setEnabled(False)
+            self.label_13.setEnabled(False)
+            self.TimeLeftMin.setEnabled(False)
+            self.TimeLeftMax.setEnabled(False)
+            self.StrideLeft.setEnabled(False)
+            self.CycleCaliLeft.setEnabled(False)
+            self.IntervalLeft_2.setEnabled(False)
+            self.TotalWaterLeft.setEnabled(False)
+            # check the continue button
+            self.Continue.setChecked(True)
+            self.Continue.setStyleSheet("background-color : green;")
+        else:
+            self.StartCalibratingRight.setStyleSheet("background-color : none")
+            self.Warning.setText('Calibration was terminated!')
+            self.Warning.setStyleSheet("color: red;")
+        for current_valve_opentime in np.arange(float(self.TimeRightMin.text()),float(self.TimeRightMax.text()),float(self.StrideRight.text())):
+            QApplication.processEvents()
+            if not self.StartCalibratingRight.isChecked():
+                break
+            if self.Continue.isChecked():
+                # start the open/close/delay cycle
+                for i in range(int(self.CycleCaliRight.text())):
+                    QApplication.processEvents()
+                    if self.StartCalibratingRight.isChecked():
+                        # print the current calibration value
+                        self.Warning.setText('You are calibrating Right valve: '+ str(current_valve_opentime)+'   Current cycle:'+str(i+1)+'/'+self.CycleCaliRight.text())
+                        self.Warning.setStyleSheet("color: red;")
+                        # set the valve open time
+                        self.MainWindow.Channel.RightValue(float(current_valve_opentime)*1000) 
+                        # open the valve
+                        self.MainWindow.Channel3.ManualWater_Right(int(1))
+                        # delay
+                        time.sleep(current_valve_opentime+float(self.IntervalRight_2.text()))
+                    else:
+                        break
+            self.Continue.setChecked(False)
+            self.Continue.setStyleSheet("background-color : none")
+            if i==range(int(self.CycleCaliRight.text()))[-1]:
+                self.Warning.setText('Finish calibrating Right valve: '+ str(current_valve_opentime)+'\nPlease enter the measured water and click the \"Continue\" button to start calibrating the next value')
+                self.Warning.setStyleSheet("color: red;")
+            # Waiting for the continue button to be clicked
+            continuetag=1
+            while 1:
+                QApplication.processEvents()
+                if not self.StartCalibratingRight.isChecked():
+                    break
+                if self.Continue.isChecked():
+                    # save the calibration data after the current calibration is completed
+                    if i==range(int(self.CycleCaliRight.text()))[-1]:
+                        # save the data
+                        valve='Right'
+                        valve_open_time=str(float(current_valve_opentime))
+                        valve_open_interval=str(float(self.IntervalRight_2.text()))
+                        cycle=str(float(self.CycleCaliRight.text()))
+                        if self.TotalWaterRight.text()=='':
+                            self.Warning.setText('Please enter the measured total water and click the continue button again!')
+                            continuetag=0
+                            self.Continue.setChecked(False)
+                            self.Continue.setStyleSheet("background-color : none")
+                        else:
+                            continuetag=1
+                            total_water=float(self.TotalWaterRight.text())
+                            self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water)
+                    if continuetag==1:
+                        break
+
+        # calibration complete indication
+        if current_valve_opentime==np.arange(float(self.TimeRightMin.text()),float(self.TimeRightMax.text()),float(self.StrideRight.text()))[-1]:
+            self.Warning.setText('Calibration is complete!')
+            self._UpdateFigure()
+        # set the default valve open time
+        self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
+        # enable the left valve calibration
+        self.StartCalibratingLeft.setEnabled(True)
+        self.label_9.setEnabled(True)
+        self.label_10.setEnabled(True)
+        self.label_11.setEnabled(True)
+        self.label_12.setEnabled(True)
+        self.label_23.setEnabled(True)
+        self.label_13.setEnabled(True)
+        self.TimeLeftMin.setEnabled(True)
+        self.TimeLeftMax.setEnabled(True)
+        self.StrideLeft.setEnabled(True)
+        self.CycleCaliLeft.setEnabled(True)
+        self.IntervalLeft_2.setEnabled(True)
+        self.TotalWaterLeft.setEnabled(True) 
+        # change the color to be normal
+        self.StartCalibratingRight.setStyleSheet("background-color : none")
+        self.StartCalibratingRight.setChecked(False)
     def _Save(self,valve,valve_open_time,valve_open_interval,cycle,total_water):
         '''save the calibrated result and update the figure'''
         if total_water=='':
@@ -337,7 +563,7 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
     def _UpdateFigure(self):
         '''plot the calibration result'''
         if self.ToInitializeVisual==1: # only run once
-            PlotM=PlotWaterCalibration(win=self)
+            PlotM=PlotWaterCalibration(water_win=self)
             self.PlotM=PlotM
             layout=self.VisuCalibration.layout()
             if layout is not None:
