@@ -35,8 +35,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.LaserCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'LaserCalibration.json')
         self.WaterCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibration.json')
         self._GetSettings()
-        self._GetLaserCalibration()
-        self._GetWaterCalibration()
+        try:
+            self._GetLaserCalibration()
+        except:
+            pass
+        try:
+            self._GetWaterCalibration()
+        except:
+            pass
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures

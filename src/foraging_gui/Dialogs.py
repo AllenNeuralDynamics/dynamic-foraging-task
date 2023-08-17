@@ -926,6 +926,17 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
         self.Capture.setStyleSheet("background-color : green;")
         QApplication.processEvents()
         self._GetTrainingParameters(self.MainWindow)
+        self.Warning.setText('')
+        if self.Location_1.currentText()=='Both':
+            self.Warning.setText('Data not saved! Please choose left or right, not both!')
+            self.Warning.setStyleSheet("color: red;")
+            self.Warning.setAlignment(Qt.AlignCenter)
+            return
+        if self.LaserPowerMeasured.text()=='':
+            self.Warning.setText('Data not saved! Please enter power measured!')
+            self.Warning.setStyleSheet("color: red;")
+            self.Warning.setAlignment(Qt.AlignCenter)
+            return
         for attr_name in dir(self):
             if attr_name.startswith('LC_'):
                 if hasattr(self,'LCM_'+attr_name[3:]): # LCM means measured laser power from calibration
@@ -955,6 +966,13 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
             LaserCalibrationResults={}
         else:
             LaserCalibrationResults=self.MainWindow.LaserCalibrationResults
+        try:
+            self.LCM_MeasureTime.copy()
+        except:
+            self.Warning.setText('Data not saved! Please Capture the power first!')
+            self.Warning.setStyleSheet("color: red;")
+            self.Warning.setAlignment(Qt.AlignCenter)
+            return
         # delete invalid indices
         LCM_MeasureTime=self.LCM_MeasureTime.copy()
         LCM_Laser_1=self.LCM_Laser_1.copy()
@@ -1072,6 +1090,12 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
             os.makedirs(os.path.dirname(self.MainWindow.LaserCalibrationFiles))
         with open(self.MainWindow.LaserCalibrationFiles, "w") as file:
             json.dump(LaserCalibrationResults, file,indent=4)
+        self.Warning.setText('')
+        if LaserCalibrationResults=={}:
+            self.Warning.setText('Data not saved! Please enter power measured!')
+            self.Warning.setStyleSheet("color: red;")
+            self.Warning.setAlignment(Qt.AlignCenter)
+            return
         self.MainWindow.LaserCalibrationResults=LaserCalibrationResults
         self.MainWindow._GetLaserCalibration()
         self.MainWindow.Opto_dialog._Laser_1()
