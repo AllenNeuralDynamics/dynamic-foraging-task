@@ -928,12 +928,12 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
         self._GetTrainingParameters(self.MainWindow)
         self.Warning.setText('')
         if self.Location_1.currentText()=='Both':
-            self.Warning.setText('Data not saved! Please choose left or right, not both!')
+            self.Warning.setText('Data not captured! Please choose left or right, not both!')
             self.Warning.setStyleSheet("color: red;")
             self.Warning.setAlignment(Qt.AlignCenter)
             return
         if self.LaserPowerMeasured.text()=='':
-            self.Warning.setText('Data not saved! Please enter power measured!')
+            self.Warning.setText('Data not captured! Please enter power measured!')
             self.Warning.setStyleSheet("color: red;")
             self.Warning.setAlignment(Qt.AlignCenter)
             return
