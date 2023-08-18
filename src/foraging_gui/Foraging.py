@@ -28,12 +28,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.setupUi(self)
         if len(sys.argv)==1:
             self.setWindowTitle("Foraging")
+            self.SettingFile=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'ForagingSettings.json')
+            self.LaserCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'LaserCalibration.json')
+            self.WaterCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibration.json')
+            self.WaterCalibrationParFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibrationPar.json')
         else:
             self.setWindowTitle("Foraging"+'_'+str(sys.argv[1]))
-        self.SettingFile=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'ForagingSettings.json')
-        self.LaserCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'LaserCalibration.json')
-        self.WaterCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibration.json')
-        self.WaterCalibrationParFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibrationPar.json')
+            self.SettingFile=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'ForagingSettings.json')
+            self.LaserCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'LaserCalibration_'+str(sys.argv[1])+'.json')
+            self.WaterCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibration_'+str(sys.argv[1])+'.json')
+            self.WaterCalibrationParFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibrationPar_'+str(sys.argv[1])+'.json')
         self._GetSettings()
         try:
             self._GetLaserCalibration()
