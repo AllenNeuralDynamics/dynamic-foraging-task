@@ -16,8 +16,8 @@
   <widget class="QDoubleSpinBox" name="OpenRightTime">
    <property name="geometry">
     <rect>
-     <x>390</x>
-     <y>100</y>
+     <x>434</x>
+     <y>130</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -35,8 +35,8 @@
   <widget class="QDoubleSpinBox" name="OpenLeftTime">
    <property name="geometry">
     <rect>
-     <x>390</x>
-     <y>60</y>
+     <x>434</x>
+     <y>90</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -54,8 +54,8 @@
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>312</x>
-     <y>60</y>
+     <x>356</x>
+     <y>90</y>
      <width>71</width>
      <height>23</height>
     </rect>
@@ -73,8 +73,8 @@
   <widget class="QLabel" name="label_4">
    <property name="geometry">
     <rect>
-     <x>296</x>
-     <y>100</y>
+     <x>340</x>
+     <y>130</y>
      <width>91</width>
      <height>23</height>
     </rect>
@@ -92,8 +92,8 @@
   <widget class="QDoubleSpinBox" name="IntervalLeft">
    <property name="geometry">
     <rect>
-     <x>600</x>
-     <y>60</y>
+     <x>650</x>
+     <y>90</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -111,8 +111,8 @@
   <widget class="QLabel" name="label_5">
    <property name="geometry">
     <rect>
-     <x>502</x>
-     <y>60</y>
+     <x>552</x>
+     <y>90</y>
      <width>91</width>
      <height>23</height>
     </rect>
@@ -130,8 +130,8 @@
   <widget class="QLabel" name="label_6">
    <property name="geometry">
     <rect>
-     <x>502</x>
-     <y>100</y>
+     <x>552</x>
+     <y>130</y>
      <width>91</width>
      <height>23</height>
     </rect>
@@ -149,8 +149,8 @@
   <widget class="QDoubleSpinBox" name="IntervalRight">
    <property name="geometry">
     <rect>
-     <x>600</x>
-     <y>100</y>
+     <x>650</x>
+     <y>130</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -168,8 +168,8 @@
   <widget class="QLabel" name="label_7">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>60</y>
+     <x>163</x>
+     <y>90</y>
      <width>71</width>
      <height>23</height>
     </rect>
@@ -187,8 +187,8 @@
   <widget class="QLabel" name="label_8">
    <property name="geometry">
     <rect>
-     <x>142</x>
-     <y>100</y>
+     <x>165</x>
+     <y>130</y>
      <width>71</width>
      <height>23</height>
     </rect>
@@ -206,8 +206,8 @@
   <widget class="QLineEdit" name="CycleLeft">
    <property name="geometry">
     <rect>
-     <x>217</x>
-     <y>60</y>
+     <x>240</x>
+     <y>90</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -219,8 +219,8 @@
   <widget class="QLineEdit" name="CycleRight">
    <property name="geometry">
     <rect>
-     <x>217</x>
-     <y>100</y>
+     <x>240</x>
+     <y>130</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -233,7 +233,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>60</y>
+     <y>90</y>
      <width>80</width>
      <height>23</height>
     </rect>
@@ -249,7 +249,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>100</y>
+     <y>130</y>
      <width>80</width>
      <height>23</height>
     </rect>
@@ -264,8 +264,8 @@
   <widget class="QPushButton" name="OpenLeftForever">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>160</y>
+     <x>49</x>
+     <y>50</y>
      <width>121</width>
      <height>23</height>
     </rect>
@@ -281,7 +281,7 @@
    <property name="geometry">
     <rect>
      <x>200</x>
-     <y>160</y>
+     <y>50</y>
      <width>121</width>
      <height>23</height>
     </rect>
@@ -297,7 +297,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>310</y>
+     <y>290</y>
      <width>121</width>
      <height>31</height>
     </rect>
@@ -313,7 +313,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>352</y>
+     <y>332</y>
      <width>121</width>
      <height>31</height>
     </rect>
@@ -329,7 +329,7 @@
    <property name="geometry">
     <rect>
      <x>240</x>
-     <y>400</y>
+     <y>380</y>
      <width>121</width>
      <height>61</height>
     </rect>
@@ -344,9 +344,9 @@
   <widget class="QGroupBox" name="VisuCalibration">
    <property name="geometry">
     <rect>
-     <x>50</x>
+     <x>30</x>
      <y>490</y>
-     <width>981</width>
+     <width>1011</width>
      <height>291</height>
     </rect>
    </property>
@@ -454,7 +454,7 @@
    <property name="geometry">
     <rect>
      <x>190</x>
-     <y>316</y>
+     <y>296</y>
      <width>71</width>
      <height>23</height>
     </rect>
@@ -473,7 +473,7 @@
    <property name="geometry">
     <rect>
      <x>360</x>
-     <y>316</y>
+     <y>296</y>
      <width>71</width>
      <height>23</height>
     </rect>
@@ -492,7 +492,7 @@
    <property name="geometry">
     <rect>
      <x>530</x>
-     <y>316</y>
+     <y>296</y>
      <width>71</width>
      <height>23</height>
     </rect>
@@ -511,7 +511,7 @@
    <property name="geometry">
     <rect>
      <x>670</x>
-     <y>316</y>
+     <y>296</y>
      <width>71</width>
      <height>23</height>
     </rect>
@@ -530,7 +530,7 @@
    <property name="geometry">
     <rect>
      <x>35</x>
-     <y>400</y>
+     <y>380</y>
      <width>91</width>
      <height>23</height>
     </rect>
@@ -549,7 +549,7 @@
    <property name="geometry">
     <rect>
      <x>360</x>
-     <y>356</y>
+     <y>336</y>
      <width>71</width>
      <height>23</height>
     </rect>
@@ -568,7 +568,7 @@
    <property name="geometry">
     <rect>
      <x>190</x>
-     <y>356</y>
+     <y>336</y>
      <width>71</width>
      <height>23</height>
     </rect>
@@ -587,7 +587,7 @@
    <property name="geometry">
     <rect>
      <x>35</x>
-     <y>440</y>
+     <y>420</y>
      <width>91</width>
      <height>23</height>
     </rect>
@@ -606,7 +606,7 @@
    <property name="geometry">
     <rect>
      <x>670</x>
-     <y>356</y>
+     <y>336</y>
      <width>71</width>
      <height>23</height>
     </rect>
@@ -625,7 +625,7 @@
    <property name="geometry">
     <rect>
      <x>530</x>
-     <y>356</y>
+     <y>336</y>
      <width>71</width>
      <height>23</height>
     </rect>
@@ -644,7 +644,7 @@
    <property name="geometry">
     <rect>
      <x>266</x>
-     <y>316</y>
+     <y>296</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -657,7 +657,7 @@
    <property name="geometry">
     <rect>
      <x>266</x>
-     <y>356</y>
+     <y>336</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -670,7 +670,7 @@
    <property name="geometry">
     <rect>
      <x>436</x>
-     <y>316</y>
+     <y>296</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -683,7 +683,7 @@
    <property name="geometry">
     <rect>
      <x>436</x>
-     <y>356</y>
+     <y>336</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -696,7 +696,7 @@
    <property name="geometry">
     <rect>
      <x>605</x>
-     <y>316</y>
+     <y>296</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -709,7 +709,7 @@
    <property name="geometry">
     <rect>
      <x>605</x>
-     <y>356</y>
+     <y>336</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -722,7 +722,7 @@
    <property name="geometry">
     <rect>
      <x>746</x>
-     <y>316</y>
+     <y>296</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -735,7 +735,7 @@
    <property name="geometry">
     <rect>
      <x>746</x>
-     <y>356</y>
+     <y>336</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -748,7 +748,7 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>400</y>
+     <y>380</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -761,7 +761,7 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>440</y>
+     <y>420</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -773,9 +773,9 @@
   <widget class="QLabel" name="Warning">
    <property name="geometry">
     <rect>
-     <x>412</x>
-     <y>404</y>
-     <width>611</width>
+     <x>482</x>
+     <y>384</y>
+     <width>541</width>
      <height>51</height>
     </rect>
    </property>
@@ -801,8 +801,8 @@
   <widget class="QLabel" name="label_19">
    <property name="geometry">
     <rect>
-     <x>695</x>
-     <y>100</y>
+     <x>755</x>
+     <y>130</y>
      <width>91</width>
      <height>23</height>
     </rect>
@@ -820,8 +820,8 @@
   <widget class="QLineEdit" name="TotalWaterSingleLeft">
    <property name="geometry">
     <rect>
-     <x>790</x>
-     <y>60</y>
+     <x>850</x>
+     <y>90</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -833,8 +833,8 @@
   <widget class="QLabel" name="label_20">
    <property name="geometry">
     <rect>
-     <x>695</x>
-     <y>60</y>
+     <x>755</x>
+     <y>90</y>
      <width>91</width>
      <height>23</height>
     </rect>
@@ -852,8 +852,8 @@
   <widget class="QLineEdit" name="TotalWaterSingleRight">
    <property name="geometry">
     <rect>
-     <x>790</x>
-     <y>100</y>
+     <x>850</x>
+     <y>130</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -865,8 +865,8 @@
   <widget class="QPushButton" name="SaveLeft">
    <property name="geometry">
     <rect>
-     <x>890</x>
-     <y>60</y>
+     <x>950</x>
+     <y>90</y>
      <width>80</width>
      <height>23</height>
     </rect>
@@ -881,8 +881,8 @@
   <widget class="QPushButton" name="SaveRight">
    <property name="geometry">
     <rect>
-     <x>890</x>
-     <y>100</y>
+     <x>950</x>
+     <y>130</y>
      <width>80</width>
      <height>23</height>
     </rect>
@@ -898,7 +898,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>260</y>
+     <y>240</y>
      <width>91</width>
      <height>23</height>
     </rect>
@@ -917,7 +917,7 @@
    <property name="geometry">
     <rect>
      <x>150</x>
-     <y>257</y>
+     <y>237</y>
      <width>91</width>
      <height>28</height>
     </rect>
@@ -943,7 +943,7 @@
    <property name="geometry">
     <rect>
      <x>852</x>
-     <y>356</y>
+     <y>336</y>
      <width>91</width>
      <height>23</height>
     </rect>
@@ -962,7 +962,7 @@
    <property name="geometry">
     <rect>
      <x>950</x>
-     <y>356</y>
+     <y>336</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -981,7 +981,7 @@
    <property name="geometry">
     <rect>
      <x>852</x>
-     <y>316</y>
+     <y>296</y>
      <width>91</width>
      <height>23</height>
     </rect>
@@ -1000,7 +1000,7 @@
    <property name="geometry">
     <rect>
      <x>950</x>
-     <y>316</y>
+     <y>296</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -1015,6 +1015,104 @@
     <double>0.500000000000000</double>
    </property>
   </widget>
+  <widget class="QPushButton" name="SaveCalibrationPar">
+   <property name="geometry">
+    <rect>
+     <x>870</x>
+     <y>240</y>
+     <width>161</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Save calibration parameters</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>20</y>
+     <width>1011</width>
+     <height>161</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Single value calibration</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_2">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>210</y>
+     <width>1011</width>
+     <height>251</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Multi-value calibration</string>
+   </property>
+  </widget>
+  <zorder>groupBox_2</zorder>
+  <zorder>groupBox</zorder>
+  <zorder>OpenRightTime</zorder>
+  <zorder>OpenLeftTime</zorder>
+  <zorder>label_3</zorder>
+  <zorder>label_4</zorder>
+  <zorder>IntervalLeft</zorder>
+  <zorder>label_5</zorder>
+  <zorder>label_6</zorder>
+  <zorder>IntervalRight</zorder>
+  <zorder>label_7</zorder>
+  <zorder>label_8</zorder>
+  <zorder>CycleLeft</zorder>
+  <zorder>CycleRight</zorder>
+  <zorder>OpenLeft</zorder>
+  <zorder>OpenRight</zorder>
+  <zorder>OpenLeftForever</zorder>
+  <zorder>OpenRightForever</zorder>
+  <zorder>StartCalibratingLeft</zorder>
+  <zorder>StartCalibratingRight</zorder>
+  <zorder>Continue</zorder>
+  <zorder>VisuCalibration</zorder>
+  <zorder>label_9</zorder>
+  <zorder>label_10</zorder>
+  <zorder>label_11</zorder>
+  <zorder>label_12</zorder>
+  <zorder>label_13</zorder>
+  <zorder>label_14</zorder>
+  <zorder>label_15</zorder>
+  <zorder>label_16</zorder>
+  <zorder>label_17</zorder>
+  <zorder>label_18</zorder>
+  <zorder>TimeLeftMin</zorder>
+  <zorder>TimeRightMin</zorder>
+  <zorder>TimeLeftMax</zorder>
+  <zorder>TimeRightMax</zorder>
+  <zorder>StrideLeft</zorder>
+  <zorder>StrideRight</zorder>
+  <zorder>CycleCaliLeft</zorder>
+  <zorder>CycleCaliRight</zorder>
+  <zorder>TotalWaterLeft</zorder>
+  <zorder>TotalWaterRight</zorder>
+  <zorder>Warning</zorder>
+  <zorder>label_19</zorder>
+  <zorder>TotalWaterSingleLeft</zorder>
+  <zorder>label_20</zorder>
+  <zorder>TotalWaterSingleRight</zorder>
+  <zorder>SaveLeft</zorder>
+  <zorder>SaveRight</zorder>
+  <zorder>label_21</zorder>
+  <zorder>CalibrationType</zorder>
+  <zorder>label_22</zorder>
+  <zorder>IntervalRight_2</zorder>
+  <zorder>label_23</zorder>
+  <zorder>IntervalLeft_2</zorder>
+  <zorder>SaveCalibrationPar</zorder>
  </widget>
  <resources/>
  <connections/>

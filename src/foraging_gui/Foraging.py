@@ -16,7 +16,6 @@ import warnings
 import json 
 #warnings.filterwarnings("ignore")
 
-
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.ndarray):
@@ -34,6 +33,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.SettingFile=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'ForagingSettings.json')
         self.LaserCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'LaserCalibration.json')
         self.WaterCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibration.json')
+        self.WaterCalibrationParFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibrationPar.json')
         self._GetSettings()
         try:
             self._GetLaserCalibration()
@@ -78,7 +78,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.connectSignalsSlots()
 
     def _GetLaserCalibration(self):
-        '''Get the laser calibration'''
+        '''Get the laser calibration results'''
         if os.path.exists(self.LaserCalibrationFiles):
             with open(self.LaserCalibrationFiles, 'r') as f:
                 self.LaserCalibrationResults = json.load(f)
@@ -88,7 +88,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.RecentCalibrationDate=sorted_dates[-1]
     
     def _GetWaterCalibration(self):
-        '''Get the laser calibration'''
+        '''Get the laser calibration results'''
         if os.path.exists(self.WaterCalibrationFiles):
             with open(self.WaterCalibrationFiles, 'r') as f:
                 self.WaterCalibrationResults = json.load(f)
@@ -124,6 +124,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.request_port4 = 4005
         else:
             bonsai_tag = int(sys.argv[1])
+            self.bonsai_tag=bonsai_tag
             # determine ports for different bonsai_tag
             if bonsai_tag==1:
                 self.request_port = 4002

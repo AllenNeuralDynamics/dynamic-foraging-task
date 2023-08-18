@@ -255,6 +255,10 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         self._connectSignalsSlots()
         self.ToInitializeVisual=1
         self._UpdateFigure()
+        if hasattr(self.MainWindow,'bonsai_tag'):
+            self.setWindowTitle("Water Calibration: Tower "+'_'+str(self.MainWindow.bonsai_tag))
+        else:
+            self.setWindowTitle('Water Calibration') 
     def _connectSignalsSlots(self):
         self.OpenLeft.clicked.connect(self._OpenLeft)
         self.OpenRight.clicked.connect(self._OpenRight)
@@ -268,6 +272,32 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         self.Continue.clicked.connect(self._Continue)
         self.showrecent.textChanged.connect(self._Showrecent)
         self.showspecificcali.activated.connect(self._ShowSpecifcDay)
+        self.SaveCalibrationPar.clicked.connect(self._SaveCalibrationPar)
+    def _SaveCalibrationPar(self):
+        '''save the calibration parameters'''
+        # load the pre-stored calibration parameters
+        self._LoadCaliPar()
+        # get the current calibration parameters
+        CalibrationType=self.CalibrationType.currentText()
+        Keys=['TimeLeftMin','TimeLeftMax','StrideLeft','TimeRightMin','TimeRightMax','StrideRight','IntervalLeft_2','IntervalRight_2']
+        widget_dict = {w.objectName(): w for w in self.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+        for K in Keys:
+            for key in widget_dict.keys():
+                try:
+                    if key==K:
+                        widget = widget_dict[key]
+                        self.WaterCalibrationPar[CalibrationType][K]=widget.text()
+                except:
+                    print('Water calibration parameters saved incorrectly!')
+        # save
+        if not os.path.exists(os.path.dirname(self.MainWindow.WaterCalibrationParFiles)):
+            os.makedirs(os.path.dirname(self.MainWindow.WaterCalibrationParFiles))
+        with open(self.MainWindow.WaterCalibrationParFiles, "w") as file:
+            json.dump(self.WaterCalibrationPar, file,indent=4) 
+        self.SaveCalibrationPar.setChecked(False)
+        self.Warning
+        self.Warning.setText('Calibration parameters saved for calibration type: '+CalibrationType)
+        self.Warning.setStyleSheet("color: red;")
     def _Showrecent(self):
         '''update the calibration figure'''
         self._UpdateFigure()
@@ -314,20 +344,55 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         self.SaveRight.setChecked(False)
     def _CalibrationType(self):
         '''change the calibration parameters based on the calibration type'''
-        if self.CalibrationType.currentText()=='Monthly':
-            self.TimeLeftMin.setText('0.005')
-            self.TimeLeftMax.setText('0.08')
-            self.StrideLeft.setText('0.005')
-            self.TimeRightMin.setText('0.005')
-            self.TimeRightMax.setText('0.08')
-            self.StrideRight.setText('0.005')
-        elif self.CalibrationType.currentText()=='Biweekly':
-            self.TimeLeftMin.setText('0.02')
-            self.TimeLeftMax.setText('0.06')
-            self.StrideLeft.setText('0.01')
-            self.TimeRightMin.setText('0.02')
-            self.TimeRightMax.setText('0.06')
-            self.StrideRight.setText('0.01')
+        # load the pre-stored calibration parameters
+        self._LoadCaliPar()
+        # set calibration parameters
+        CalibrationType=self.CalibrationType.currentText()
+        Keys=['TimeLeftMin','TimeLeftMax','StrideLeft','TimeRightMin','TimeRightMax','StrideRight','IntervalLeft_2','IntervalRight_2']
+        widget_dict = {w.objectName(): w for w in self.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+        # set attributes
+        for K in Keys:
+            for key in widget_dict.keys():
+                try:
+                    if key==K:
+                        widget = widget_dict[key]
+                        widget.setText(str(self.WaterCalibrationPar[CalibrationType][K]))
+                except:
+                    print('Water calibration parameters uploaded incorrectly!')
+    def _LoadCaliPar(self):
+        '''load the pre-stored calibration parameters'''
+        self.WaterCalibrationPar={}
+        self.WaterCalibrationPar['Monthly']={}
+        self.WaterCalibrationPar['Biweekly']={}
+        if os.path.exists(self.MainWindow.WaterCalibrationParFiles):
+            with open(self.MainWindow.WaterCalibrationParFiles, 'r') as f:
+                self.WaterCalibrationPar = json.load(f)
+        # if no parameters are stored, store default parameters
+        SaveTag=0
+        if self.WaterCalibrationPar['Monthly']=={}:
+            self.WaterCalibrationPar['Monthly']['TimeLeftMin']=0.005
+            self.WaterCalibrationPar['Monthly']['TimeLeftMax']=0.08
+            self.WaterCalibrationPar['Monthly']['StrideLeft']=0.005
+            self.WaterCalibrationPar['Monthly']['TimeRightMin']=0.005
+            self.WaterCalibrationPar['Monthly']['TimeRightMax']=0.08
+            self.WaterCalibrationPar['Monthly']['StrideRight']=0.005
+            self.WaterCalibrationPar['Monthly']['IntervalLeft_2']=0.5
+            SaveTag=1
+        if self.WaterCalibrationPar['Biweekly']=={}:
+            self.WaterCalibrationPar['Biweekly']['TimeLeftMin']=0.02
+            self.WaterCalibrationPar['Biweekly']['TimeLeftMax']=0.06
+            self.WaterCalibrationPar['Biweekly']['StrideLeft']=0.01
+            self.WaterCalibrationPar['Biweekly']['TimeRightMin']=0.02
+            self.WaterCalibrationPar['Biweekly']['TimeRightMax']=0.06
+            self.WaterCalibrationPar['Biweekly']['StrideRight']=0.01
+            self.WaterCalibrationPar['Biweekly']['IntervalLeft_2']=0.5
+            SaveTag=1
+        if SaveTag==1:
+            if not os.path.exists(os.path.dirname(self.MainWindow.WaterCalibrationParFiles)):
+                os.makedirs(os.path.dirname(self.MainWindow.WaterCalibrationParFiles))
+            with open(self.MainWindow.WaterCalibrationParFiles, "w") as file:
+                json.dump(self.WaterCalibrationPar, file,indent=4)
+
     def _StartCalibratingLeft(self):
         '''start the calibration loop of left valve'''
         if self.StartCalibratingLeft.isChecked():
@@ -406,10 +471,14 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
                             self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water)
                     if continuetag==1:
                         break
-        # calibration complete indication
-        if current_valve_opentime==np.arange(float(self.TimeLeftMin.text()),float(self.TimeLeftMax.text()),float(self.StrideLeft.text()))[-1]:
-            self.Warning.setText('Calibration is complete!')
-            self._UpdateFigure()
+        try: 
+            # calibration complete indication
+            if current_valve_opentime==np.arange(float(self.TimeLeftMin.text()),float(self.TimeLeftMax.text()),float(self.StrideLeft.text()))[-1]:
+                self.Warning.setText('Calibration is complete!')
+                self._UpdateFigure()
+        except:
+            self.Warning.setText('Calibration is not complete! Parameters error!')
+            self.Warning.setStyleSheet("color: red;")
         # set the default valve open time
         self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
         # enable the right valve calibration

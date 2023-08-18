@@ -298,6 +298,7 @@ class PlotWaterCalibration(FigureCanvas):
         self.WaterCalibrationResults=self.water_win.WaterCalibrationResults
     def _UpdateKeysSpecificCalibration(self):
         '''update the fields of specific calibration'''
+        self.WaterCalibrationResults=self.water_win.WaterCalibrationResults
         current_item = self.water_win.showspecificcali.currentText()
         self.water_win.showspecificcali.clear()
         sorted_dates = sorted(self.WaterCalibrationResults.keys(),reverse=True)
@@ -309,6 +310,7 @@ class PlotWaterCalibration(FigureCanvas):
                 self.water_win.showspecificcali.setCurrentIndex(i)
     def _Update(self):
         '''update the calibration figure'''
+        self.WaterCalibrationResults=self.water_win.WaterCalibrationResults
         self._UpdateKeysSpecificCalibration()
         self.ax1.cla()
         if hasattr(self.water_win.MainWindow,'RecentWaterCalibrationDate'):
