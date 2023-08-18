@@ -71,6 +71,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.NewTrialRewardOrder=0
         self._Optogenetics() # open the optogenetics panel
         self._LaserCalibration() # to open the laser calibration panel
+        self._WaterCalibration() # to open the water calibration panel
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self.WaterPerRewardedTrial=0.005 
         self._ShowRewardPairs() # show reward pairs
@@ -658,13 +659,27 @@ class Window(QMainWindow, Ui_ForagingGUI):
             for attr_name in dir(self):
                 if attr_name.startswith('Other_'):
                     Obj[attr_name] = getattr(self, attr_name)
-            # save laser calibration results 
+            # save laser calibration results (only for the calibration session)
             if hasattr(self, 'LaserCalibration_dialog'):
                 # Do something if self has the GeneratedTrials attribute
                 # Iterate over all attributes of the GeneratedTrials object
                 for attr_name in dir(self.LaserCalibration_dialog):
                     if attr_name.startswith('LCM_'):
                         Obj[attr_name] = getattr(self.LaserCalibration_dialog, attr_name)
+            # save laser calibration results from the json file
+            if hasattr(self, 'LaserCalibrationResults'):
+                self._GetLaserCalibration()
+                try:
+                    Obj['LaserCalibrationResults']=self.LaserCalibrationResults
+                except:
+                    pass
+            # save water calibration results
+            if hasattr(self, 'WaterCalibrationResults'):
+                self._GetWaterCalibration()
+                try:
+                    Obj['WaterCalibrationResults']=self.WaterCalibrationResults
+                except:
+                    pass
             # save Json or mat
             if self.SaveFile.endswith('.mat'):
             # Save data to a .mat file
