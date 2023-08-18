@@ -270,6 +270,7 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         self.StartCalibratingLeft.clicked.connect(self._StartCalibratingLeft)
         self.StartCalibratingRight.clicked.connect(self._StartCalibratingRight)
         self.Continue.clicked.connect(self._Continue)
+        self.EmergencyStop.clicked.connect(self._EmergencyStop)
         self.showrecent.textChanged.connect(self._Showrecent)
         self.showspecificcali.activated.connect(self._ShowSpecifcDay)
         self.SaveCalibrationPar.clicked.connect(self._SaveCalibrationPar)
@@ -311,6 +312,12 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
             self.Continue.setStyleSheet("background-color : green;")
         else:
             self.Continue.setStyleSheet("background-color : none")
+    def _EmergencyStop(self):
+        '''Change the color of the EmergencyStop button'''
+        if self.EmergencyStop.isChecked():
+            self.EmergencyStop.setStyleSheet("background-color : green;")
+        else:
+            self.EmergencyStop.setStyleSheet("background-color : none")
 
     def _SaveLeft(self):
         '''save the calibration result of the single point calibration (left valve)'''
@@ -421,59 +428,79 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
             self.Warning.setText('Calibration was terminated!')
             self.Warning.setStyleSheet("color: red;")
         
+
         for current_valve_opentime in np.arange(float(self.TimeLeftMin.text()),float(self.TimeLeftMax.text()),float(self.StrideLeft.text())):
-            QApplication.processEvents()
-            if not self.StartCalibratingLeft.isChecked():
-                break
-            if self.Continue.isChecked():
-                # start the open/close/delay cycle
-                for i in range(int(self.CycleCaliLeft.text())):
-                    QApplication.processEvents()
-                    if self.StartCalibratingLeft.isChecked():
-                        # print the current calibration value
-                        self.Warning.setText('You are calibrating Right valve: '+ str(current_valve_opentime)+'   Current cycle:'+str(i+1)+'/'+self.CycleCaliLeft.text())
-                        self.Warning.setStyleSheet("color: red;")
-                        # set the valve open time
-                        self.MainWindow.Channel.LeftValue(float(current_valve_opentime)*1000) 
-                        # open the valve
-                        self.MainWindow.Channel3.ManualWater_Left(int(1))
-                        # delay
-                        time.sleep(current_valve_opentime+float(self.IntervalLeft_2.text()))
-                    else:
-                        break
-            self.Continue.setChecked(False)
-            self.Continue.setStyleSheet("background-color : none")
-            if i==range(int(self.CycleCaliLeft.text()))[-1]:
-                self.Warning.setText('Finish calibrating left valve: '+ str(current_valve_opentime)+'\nPlease enter the measured water and click the \"Continue\" button to start calibrating the next value')
-            self.Warning.setStyleSheet("color: red;")
-            # Waiting for the continue button to be clicked
-            continuetag=1
             while 1:
-                QApplication.processEvents()
                 if not self.StartCalibratingLeft.isChecked():
                     break
                 if self.Continue.isChecked():
-                    # save the calibration data after the current calibration is completed
-                    if i==range(int(self.CycleCaliLeft.text()))[-1]:
-                        # save the data
-                        valve='Left'
-                        valve_open_time=str(float(current_valve_opentime))
-                        valve_open_interval=str(float(self.IntervalLeft_2.text()))
-                        cycle=str(float(self.CycleCaliLeft.text()))
-                        if self.TotalWaterLeft.text()=='':
-                            self.Warning.setText('Please enter the measured total water and click the continue button again!')
-                            continuetag=0
-                            self.Continue.setChecked(False)
-                            self.Continue.setStyleSheet("background-color : none")
+                    # start the open/close/delay cycle
+                    for i in range(int(self.CycleCaliLeft.text())):
+                        QApplication.processEvents()
+                        while 1:
+                            QApplication.processEvents()
+                            if (not self.EmergencyStop.isChecked()) or (not self.StartCalibratingLeft.isChecked()):
+                                break
+                        if self.StartCalibratingLeft.isChecked():
+                            # print the current calibration value
+                            self.Warning.setText('You are calibrating Right valve: '+ str(current_valve_opentime)+'   Current cycle:'+str(i+1)+'/'+self.CycleCaliLeft.text())
+                            self.Warning.setStyleSheet("color: red;")
+                            # set the valve open time
+                            self.MainWindow.Channel.LeftValue(float(current_valve_opentime)*1000) 
+                            # open the valve
+                            self.MainWindow.Channel3.ManualWater_Left(int(1))
+                            # delay
+                            time.sleep(current_valve_opentime+float(self.IntervalLeft_2.text()))
                         else:
-                            continuetag=1
-                            total_water=float(self.TotalWaterLeft.text())
-                            self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water)
-                    if continuetag==1:
+                            break
+                self.Continue.setChecked(False)
+                self.Continue.setStyleSheet("background-color : none")
+                if i==range(int(self.CycleCaliLeft.text()))[-1]:
+                    self.Warning.setText('Finish calibrating left valve: '+ str(current_valve_opentime)+'\nPlease enter the measured water and click the \"Continue\" button to start calibrating the next value.\nOr enter a negative value to repeat the current calibration.')
+                self.Warning.setStyleSheet("color: red;")
+                # Waiting for the continue button to be clicked
+                continuetag=1
+                while 1:
+                    QApplication.processEvents()
+                    if not self.StartCalibratingLeft.isChecked():
                         break
+                    if self.Continue.isChecked():
+                        # save the calibration data after the current calibration is completed
+                        if i==range(int(self.CycleCaliLeft.text()))[-1]:
+                            # save the data
+                            valve='Left'
+                            valve_open_time=str(float(current_valve_opentime))
+                            valve_open_interval=str(float(self.IntervalLeft_2.text()))
+                            cycle=str(float(self.CycleCaliLeft.text()))
+                            if self.TotalWaterLeft.text()=='':
+                                self.Warning.setText('Please enter the measured total water and click the continue button again!\nOr enter a negative value to repeat the current calibration.')
+                                continuetag=0
+                                self.Continue.setChecked(False)
+                                self.Continue.setStyleSheet("background-color : none")
+                            else:
+                                try:
+                                    continuetag=1
+                                    total_water=float(self.TotalWaterLeft.text())
+                                    self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water)
+                                    # clear the total water
+                                    self.TotalWaterLeft.setText('')
+                                except:
+                                    continuetag=0
+                                    self.Warning.setText('Please enter the correct total water(mg) and click the continue button again!\nOr enter a negative value to repeat the current calibration.')
+                        if continuetag==1:
+                            break
+                # Repeat current calibration when negative value is entered
+                QApplication.processEvents()
+                try:
+                    if total_water=='' or total_water<=0:
+                        pass
+                    else:
+                        break
+                except:
+                    break
         try: 
             # calibration complete indication
-            if current_valve_opentime==np.arange(float(self.TimeLeftMin.text()),float(self.TimeLeftMax.text()),float(self.StrideLeft.text()))[-1]:
+            if self.StartCalibratingLeft.isChecked() and current_valve_opentime==np.arange(float(self.TimeLeftMin.text()),float(self.TimeLeftMax.text()),float(self.StrideLeft.text()))[-1]:
                 self.Warning.setText('Calibration is complete!')
                 self._UpdateFigure()
         except:
@@ -526,60 +553,84 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
             self.Warning.setText('Calibration was terminated!')
             self.Warning.setStyleSheet("color: red;")
         for current_valve_opentime in np.arange(float(self.TimeRightMin.text()),float(self.TimeRightMax.text()),float(self.StrideRight.text())):
-            QApplication.processEvents()
-            if not self.StartCalibratingRight.isChecked():
-                break
-            if self.Continue.isChecked():
-                # start the open/close/delay cycle
-                for i in range(int(self.CycleCaliRight.text())):
-                    QApplication.processEvents()
-                    if self.StartCalibratingRight.isChecked():
-                        # print the current calibration value
-                        self.Warning.setText('You are calibrating Right valve: '+ str(current_valve_opentime)+'   Current cycle:'+str(i+1)+'/'+self.CycleCaliRight.text())
-                        self.Warning.setStyleSheet("color: red;")
-                        # set the valve open time
-                        self.MainWindow.Channel.RightValue(float(current_valve_opentime)*1000) 
-                        # open the valve
-                        self.MainWindow.Channel3.ManualWater_Right(int(1))
-                        # delay
-                        time.sleep(current_valve_opentime+float(self.IntervalRight_2.text()))
-                    else:
-                        break
-            self.Continue.setChecked(False)
-            self.Continue.setStyleSheet("background-color : none")
-            if i==range(int(self.CycleCaliRight.text()))[-1]:
-                self.Warning.setText('Finish calibrating Right valve: '+ str(current_valve_opentime)+'\nPlease enter the measured water and click the \"Continue\" button to start calibrating the next value')
-                self.Warning.setStyleSheet("color: red;")
-            # Waiting for the continue button to be clicked
-            continuetag=1
             while 1:
                 QApplication.processEvents()
                 if not self.StartCalibratingRight.isChecked():
                     break
                 if self.Continue.isChecked():
-                    # save the calibration data after the current calibration is completed
-                    if i==range(int(self.CycleCaliRight.text()))[-1]:
-                        # save the data
-                        valve='Right'
-                        valve_open_time=str(float(current_valve_opentime))
-                        valve_open_interval=str(float(self.IntervalRight_2.text()))
-                        cycle=str(float(self.CycleCaliRight.text()))
-                        if self.TotalWaterRight.text()=='':
-                            self.Warning.setText('Please enter the measured total water and click the continue button again!')
-                            continuetag=0
-                            self.Continue.setChecked(False)
-                            self.Continue.setStyleSheet("background-color : none")
+                    # start the open/close/delay cycle
+                    for i in range(int(self.CycleCaliRight.text())):
+                        QApplication.processEvents()
+                        while 1:
+                            QApplication.processEvents()
+                            if (not self.EmergencyStop.isChecked()) or (not self.StartCalibratingRight.isChecked()):
+                                break
+                        if self.StartCalibratingRight.isChecked():
+                            # print the current calibration value
+                            self.Warning.setText('You are calibrating Right valve: '+ str(current_valve_opentime)+'   Current cycle:'+str(i+1)+'/'+self.CycleCaliRight.text())
+                            self.Warning.setStyleSheet("color: red;")
+                            # set the valve open time
+                            self.MainWindow.Channel.RightValue(float(current_valve_opentime)*1000) 
+                            # open the valve
+                            self.MainWindow.Channel3.ManualWater_Right(int(1))
+                            # delay
+                            time.sleep(current_valve_opentime+float(self.IntervalRight_2.text()))
                         else:
-                            continuetag=1
-                            total_water=float(self.TotalWaterRight.text())
-                            self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water)
-                    if continuetag==1:
+                            break
+                self.Continue.setChecked(False)
+                self.Continue.setStyleSheet("background-color : none")
+                if i==range(int(self.CycleCaliRight.text()))[-1]:
+                    self.Warning.setText('Finish calibrating Right valve: '+ str(current_valve_opentime)+'\nPlease enter the measured water and click the \"Continue\" button to start calibrating the next value.\nOr enter a negative value to repeat the current calibration.')
+                    self.Warning.setStyleSheet("color: red;")
+                # Waiting for the continue button to be clicked
+                continuetag=1
+                while 1:
+                    QApplication.processEvents()
+                    if not self.StartCalibratingRight.isChecked():
                         break
+                    if self.Continue.isChecked():
+                        # save the calibration data after the current calibration is completed
+                        if i==range(int(self.CycleCaliRight.text()))[-1]:
+                            # save the data
+                            valve='Right'
+                            valve_open_time=str(float(current_valve_opentime))
+                            valve_open_interval=str(float(self.IntervalRight_2.text()))
+                            cycle=str(float(self.CycleCaliRight.text()))
+                            if self.TotalWaterRight.text()=='':
+                                self.Warning.setText('Please enter the measured total water and click the continue button again!\nOr enter a negative value to repeat the current calibration.')
+                                continuetag=0
+                                self.Continue.setChecked(False)
+                                self.Continue.setStyleSheet("background-color : none")
+                            else:
+                                try:
+                                    continuetag=1
+                                    total_water=float(self.TotalWaterRight.text())
+                                    self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water)
+                                    # clear the total water
+                                    self.TotalWaterRight.setText('')
+                                except:
+                                    continuetag=0
+                                    self.Warning.setText('Please enter the correct total water(mg) and click the continue button again!\nOr enter a negative value to repeat the current calibration.')
+                        if continuetag==1:
+                            break
+                # Repeat current calibration when negative value is entered
+                QApplication.processEvents()
+                try:
+                    if total_water=='' or total_water<=0:
+                        pass
+                    else:
+                        break
+                except:
+                    break
+        try: 
+            # calibration complete indication
+            if self.StartCalibratingRight.isChecked() and current_valve_opentime==np.arange(float(self.TimeRightMin.text()),float(self.TimeRightMax.text()),float(self.StrideRight.text()))[-1]:
+                self.Warning.setText('Calibration is complete!')
+                self._UpdateFigure()
+        except:
+            self.Warning.setText('Calibration is not complete! Parameters error!')
+            self.Warning.setStyleSheet("color: red;")
 
-        # calibration complete indication
-        if current_valve_opentime==np.arange(float(self.TimeRightMin.text()),float(self.TimeRightMax.text()),float(self.StrideRight.text()))[-1]:
-            self.Warning.setText('Calibration is complete!')
-            self._UpdateFigure()
         # set the default valve open time
         self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
         # enable the left valve calibration

@@ -175,7 +175,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         while not self.Channel3.msgs.empty():
             self.Channel3.receive()
         while not self.Channel4.msgs.empty():
-            self.rrrrrrr.receive()
+            self.Channel4.receive()
         self.WarningLabel_2.setText('')
         self.WarningLabel_2.setStyleSheet("color: gray;")
         self.InitializeBonsaiSuccessfully=1

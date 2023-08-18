@@ -328,7 +328,7 @@
   <widget class="QPushButton" name="Continue">
    <property name="geometry">
     <rect>
-     <x>240</x>
+     <x>220</x>
      <y>380</y>
      <width>121</width>
      <height>61</height>
@@ -536,7 +536,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>total water(g)=</string>
+    <string>total water(mg)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -593,7 +593,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>total water(g)=</string>
+    <string>total water(mg)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -773,7 +773,7 @@
   <widget class="QLabel" name="Warning">
    <property name="geometry">
     <rect>
-     <x>482</x>
+     <x>360</x>
      <y>384</y>
      <width>541</width>
      <height>51</height>
@@ -1057,6 +1057,22 @@
     <string>Multi-value calibration</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="EmergencyStop">
+   <property name="geometry">
+    <rect>
+     <x>910</x>
+     <y>380</y>
+     <width>121</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Emergency stop</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+  </widget>
   <zorder>groupBox_2</zorder>
   <zorder>groupBox</zorder>
   <zorder>OpenRightTime</zorder>
@@ -1113,6 +1129,7 @@
   <zorder>label_23</zorder>
   <zorder>IntervalLeft_2</zorder>
   <zorder>SaveCalibrationPar</zorder>
+  <zorder>EmergencyStop</zorder>
  </widget>
  <resources/>
  <connections/>

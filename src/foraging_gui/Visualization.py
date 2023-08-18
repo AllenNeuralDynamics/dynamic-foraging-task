@@ -350,6 +350,6 @@ class PlotWaterCalibration(FigureCanvas):
                 elif current_valve=='Right':
                     self.ax1.plot(sorted_X, sorted_Y, 'o--',label=current_date+'_right valve')
         self.ax1.set_xlabel('valve open time(s)')
-        self.ax1.set_ylabel('water(g)')
+        self.ax1.set_ylabel('water(mg)')
         self.ax1.legend(loc='lower right', fontsize=8)
         self.draw()
