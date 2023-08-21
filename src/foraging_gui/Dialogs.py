@@ -414,12 +414,14 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
             self.label_18.setEnabled(False)
             self.label_22.setEnabled(False)
             self.label_16.setEnabled(False)
+            self.label_25.setEnabled(False)
             self.TimeRightMin.setEnabled(False)
             self.TimeRightMax.setEnabled(False)
             self.StrideRight.setEnabled(False)
             self.CycleCaliRight.setEnabled(False)
             self.IntervalRight_2.setEnabled(False)
             self.TotalWaterRight.setEnabled(False)
+            self.TubeWeightRight.setEnabled(False)
             # check the continue button
             self.Continue.setChecked(True)
             self.Continue.setStyleSheet("background-color : green;")
@@ -456,7 +458,7 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
                 self.Continue.setChecked(False)
                 self.Continue.setStyleSheet("background-color : none")
                 if i==range(int(self.CycleCaliLeft.text()))[-1]:
-                    self.Warning.setText('Finish calibrating left valve: '+ str(current_valve_opentime)+'\nPlease enter the measured water and click the \"Continue\" button to start calibrating the next value.\nOr enter a negative value to repeat the current calibration.')
+                    self.Warning.setText('Finish calibrating left valve: '+ str(current_valve_opentime)+'\nPlease enter the measured water and click the \"Continue\" button to start \ncalibrating the next value.Or enter a negative value to repeat the current \ncalibration.')
                 self.Warning.setStyleSheet("color: red;")
                 # Waiting for the continue button to be clicked
                 continuetag=1
@@ -481,12 +483,18 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
                                 try:
                                     continuetag=1
                                     total_water=float(self.TotalWaterLeft.text())
-                                    self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water)
+                                    tube_weight=self.TubeWeightLeft.text()
+                                    if tube_weight=='':
+                                        tube_weight=0
+                                    else:
+                                        tube_weight=float(tube_weight)
+                                    self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water,tube_weight=tube_weight)
                                     # clear the total water
                                     self.TotalWaterLeft.setText('')
+                                    self.TubeWeightLeft.setText('')
                                 except:
                                     continuetag=0
-                                    self.Warning.setText('Please enter the correct total water(mg) and click the continue button again!\nOr enter a negative value to repeat the current calibration.')
+                                    self.Warning.setText('Please enter the correct total water/tube weight(mg) and click the continue button again!\nOr enter a negative value to repeat the current calibration.')
                         if continuetag==1:
                             break
                 # Repeat current calibration when negative value is entered
@@ -516,12 +524,14 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         self.label_18.setEnabled(True)
         self.label_22.setEnabled(True)
         self.label_13.setEnabled(True)
+        self.label_25.setEnabled(True)
         self.TimeRightMin.setEnabled(True)
         self.TimeRightMax.setEnabled(True)
         self.StrideRight.setEnabled(True)
         self.CycleCaliRight.setEnabled(True)
         self.IntervalRight_2.setEnabled(True)
-        self.TotalWaterRight.setEnabled(True) 
+        self.TotalWaterRight.setEnabled(True)
+        self.TubeWeightRight.setEnabled(True) 
         # change the color to be normal
         self.StartCalibratingLeft.setStyleSheet("background-color : none")
         self.StartCalibratingLeft.setChecked(False)
@@ -539,12 +549,14 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
             self.label_12.setEnabled(False)
             self.label_23.setEnabled(False)
             self.label_13.setEnabled(False)
+            self.label_24.setEnabled(False)
             self.TimeLeftMin.setEnabled(False)
             self.TimeLeftMax.setEnabled(False)
             self.StrideLeft.setEnabled(False)
             self.CycleCaliLeft.setEnabled(False)
             self.IntervalLeft_2.setEnabled(False)
             self.TotalWaterLeft.setEnabled(False)
+            self.TubeWeightLeft.setEnabled(False)
             # check the continue button
             self.Continue.setChecked(True)
             self.Continue.setStyleSheet("background-color : green;")
@@ -605,12 +617,18 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
                                 try:
                                     continuetag=1
                                     total_water=float(self.TotalWaterRight.text())
-                                    self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water)
+                                    tube_weight=self.TubeWeightRight.text()
+                                    if tube_weight=='':
+                                        tube_weight=0
+                                    else:
+                                        tube_weight=float(tube_weight)
+                                    self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water,tube_weight=tube_weight)
                                     # clear the total water
                                     self.TotalWaterRight.setText('')
+                                    self.TubeWeightRight.setText('')
                                 except:
                                     continuetag=0
-                                    self.Warning.setText('Please enter the correct total water(mg) and click the continue button again!\nOr enter a negative value to repeat the current calibration.')
+                                    self.Warning.setText('Please enter the correct total water/tube weight(mg) and click the continue button again!\nOr enter a negative value to repeat the current calibration.')
                         if continuetag==1:
                             break
                 # Repeat current calibration when negative value is entered
@@ -641,19 +659,23 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         self.label_12.setEnabled(True)
         self.label_23.setEnabled(True)
         self.label_13.setEnabled(True)
+        self.label_24.setEnabled(True)
         self.TimeLeftMin.setEnabled(True)
         self.TimeLeftMax.setEnabled(True)
         self.StrideLeft.setEnabled(True)
         self.CycleCaliLeft.setEnabled(True)
         self.IntervalLeft_2.setEnabled(True)
         self.TotalWaterLeft.setEnabled(True) 
+        self.TubeWeightLeft.setEnabled(True)
         # change the color to be normal
         self.StartCalibratingRight.setStyleSheet("background-color : none")
         self.StartCalibratingRight.setChecked(False)
-    def _Save(self,valve,valve_open_time,valve_open_interval,cycle,total_water):
+    def _Save(self,valve,valve_open_time,valve_open_interval,cycle,total_water,tube_weight):
         '''save the calibrated result and update the figure'''
-        if total_water=='':
+        if total_water=='' or tube_weight=='':
             return
+        # total water equals to total water minus tube weight
+        total_water=total_water-tube_weight
         WaterCalibrationResults=self.WaterCalibrationResults.copy()
         current_time = datetime.now()
         date_str = current_time.strftime("%Y-%m-%d")
