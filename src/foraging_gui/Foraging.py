@@ -320,6 +320,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
             for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
                 if child.objectName()=='qt_spinbox_lineedit' or child.isEnabled()==False: # I don't understand where the qt_spinbox_lineedit comes from. 
                     continue
+                if (child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum') and (child.text()!=''):
+                    Correct=self._CheckFormat(child)
+                    if Correct ==0: # incorrect format; don't change
+                        child.setText(getattr(Parameters, 'TP_'+child.objectName()))
+                    self._ShowRewardPairs()
                 if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                     self.Continue=0
                     if child.objectName()=='Experimenter' or child.objectName()=='AnimalName' or child.objectName()=='UncoupledReward' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
@@ -334,11 +339,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
                             child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
                             child.setStyleSheet('color: black;')
                             child.setStyleSheet('background-color: white;')
-                    if (child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum') and (child.text()!=''):
-                        Correct=self._CheckFormat(child)
-                        if Correct ==0: # incorrect format; don't change
-                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                        self._ShowRewardPairs()
                     if self.Continue==1:
                         continue
                     child.setStyleSheet('color: red;')

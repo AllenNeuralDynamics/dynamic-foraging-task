@@ -107,6 +107,11 @@
       <string>Uncoupled Without Baiting</string>
      </property>
     </item>
+    <item>
+     <property name="text">
+      <string>RewardN</string>
+     </property>
+    </item>
    </widget>
    <widget class="QComboBox" name="Tower">
     <property name="geometry">
@@ -1793,7 +1798,7 @@
       <rect>
        <x>863</x>
        <y>75</y>
-       <width>91</width>
+       <width>81</width>
        <height>20</height>
       </rect>
      </property>
