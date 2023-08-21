@@ -429,7 +429,7 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
             self.Warning.setStyleSheet("color: red;")
         
 
-        for current_valve_opentime in np.arange(float(self.TimeLeftMin.text()),float(self.TimeLeftMax.text()),float(self.StrideLeft.text())):
+        for current_valve_opentime in np.arange(float(self.TimeLeftMin.text()),float(self.TimeLeftMax.text())+0.0001,float(self.StrideLeft.text())):
             while 1:
                 if not self.StartCalibratingLeft.isChecked():
                     break
@@ -500,7 +500,7 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
                     break
         try: 
             # calibration complete indication
-            if self.StartCalibratingLeft.isChecked() and current_valve_opentime==np.arange(float(self.TimeLeftMin.text()),float(self.TimeLeftMax.text()),float(self.StrideLeft.text()))[-1]:
+            if self.StartCalibratingLeft.isChecked() and current_valve_opentime==np.arange(float(self.TimeLeftMin.text()),float(self.TimeLeftMax.text())+0.0001,float(self.StrideLeft.text()))[-1]:
                 self.Warning.setText('Calibration is complete!')
                 self._UpdateFigure()
         except:
@@ -552,7 +552,7 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
             self.StartCalibratingRight.setStyleSheet("background-color : none")
             self.Warning.setText('Calibration was terminated!')
             self.Warning.setStyleSheet("color: red;")
-        for current_valve_opentime in np.arange(float(self.TimeRightMin.text()),float(self.TimeRightMax.text()),float(self.StrideRight.text())):
+        for current_valve_opentime in np.arange(float(self.TimeRightMin.text()),float(self.TimeRightMax.text())+0.0001,float(self.StrideRight.text())):
             while 1:
                 QApplication.processEvents()
                 if not self.StartCalibratingRight.isChecked():
@@ -624,7 +624,7 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
                     break
         try: 
             # calibration complete indication
-            if self.StartCalibratingRight.isChecked() and current_valve_opentime==np.arange(float(self.TimeRightMin.text()),float(self.TimeRightMax.text()),float(self.StrideRight.text()))[-1]:
+            if self.StartCalibratingRight.isChecked() and current_valve_opentime==np.arange(float(self.TimeRightMin.text()),float(self.TimeRightMax.text())+0.0001,float(self.StrideRight.text()))[-1]:
                 self.Warning.setText('Calibration is complete!')
                 self._UpdateFigure()
         except:
