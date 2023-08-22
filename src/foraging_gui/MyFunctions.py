@@ -69,7 +69,6 @@ class GenerateTrials():
         self.GeneFinish=1
         self.GetResponseFinish=1
         #self.B_LaserTrialNum=[] # B_LaserAmplitude, B_LaserDuration, B_SelectedCondition have values only on laser on trials, so we need to store the laser trial number
-        
         self.Obj={}
         # get all of the training parameters of the current trial
         self._GetTrainingParameters(self.win)
@@ -245,7 +244,7 @@ class GenerateTrials():
                 self.B_ANewBlock[i]=1
         if not self.TP_NextBlock:
             # min rewards to perform transition
-            if self.B_CurrentTrialN>0:
+            if self.B_CurrentTrialN>=0:
                 # get the rewarded trial number of the current finished trial.
                 self._GetCurrentBlockReward(1,CountAutoWater=0,UpdateBlockLen=1)
             else:
