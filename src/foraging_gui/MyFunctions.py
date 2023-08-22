@@ -144,7 +144,7 @@ class GenerateTrials():
     def _SelectTrainingParameter(self):
         '''Select the training parameter of the next trial'''
         # determine the reward probability of the next trial based on tasks
-        if (self.TP_Task in ['Coupled Baiting','Coupled Without Baiting']) and any(self.B_ANewBlock==1):
+        if (self.TP_Task in ['Coupled Baiting','Coupled Without Baiting','RewardN']) and any(self.B_ANewBlock==1):
             self.RewardPairs=self.B_RewardFamilies[int(self.TP_RewardFamily)-1][:int(self.TP_RewardPairsN)]
             self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.TP_BaseRewardSum)
             # get the reward probabilities pool
@@ -251,7 +251,7 @@ class GenerateTrials():
             else:
                 self.AllRewardThisBlock=-1
                 self.BS_RewardedTrialN_CurrentBlock=[0,0]
-            if self.TP_Task in ['Coupled Baiting','Coupled Without Baiting']:
+            if self.TP_Task in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
                 if np.all(self.B_ANewBlock==1) and self.AllRewardThisBlock!=-1:
                     if self.AllRewardThisBlock<float(self.TP_BlockMinReward) or self.AdvancedBlockSwitchPermitted==0:
                         # do not switch
@@ -609,7 +609,7 @@ class GenerateTrials():
         '''Show session/trial related information in the information section'''
         # show reward pairs and current reward probability
         try:
-            if (self.TP_Task in ['Coupled Baiting','Coupled Without Baiting']):
+            if (self.TP_Task in ['Coupled Baiting','Coupled Without Baiting','RewardN']):
                 self.win.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.B_RewardProHistory[:,self.B_CurrentTrialN],2)))
             elif (self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']):
                 self.win.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProbPoolUncoupled,2))+'\n\n'+'Current pair: '+str(np.round(self.B_RewardProHistory[:,self.B_CurrentTrialN],2)))

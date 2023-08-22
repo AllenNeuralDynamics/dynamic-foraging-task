@@ -490,6 +490,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
             # move auto-reward
             self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 101, 80, 20))
             self.label_26.setGeometry(QtCore.QRect(929, 101, 146, 16))
+            # set block length to the default value
+            self.BlockMin.setText('20')
+            self.BlockMax.setText('60')
         elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
             border_color = "rgb(100, 100, 100,80)"
             border_style = "1px solid " + border_color
@@ -537,6 +540,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
             # move auto-reward
             self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 101, 80, 20))
             self.label_26.setGeometry(QtCore.QRect(929, 101, 146, 16))
+            # set block length to the default value
+            self.BlockMin.setText('20')
+            self.BlockMax.setText('60')
         elif self.Task.currentText() in ['RewardN']:
             self.label_6.setEnabled(True)
             self.label_7.setEnabled(True)
@@ -576,7 +582,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
             # move auto-reward
             self.IncludeAutoReward.setGeometry(QtCore.QRect(403, 101, 80, 20))
             self.label_26.setGeometry(QtCore.QRect(250, 101, 146, 16))
-
+            # set block length to be 1
+            self.BlockMin.setText('1')
+            self.BlockMax.setText('1')
         self._Randomness()
 
     def _ShowRewardPairs(self):
