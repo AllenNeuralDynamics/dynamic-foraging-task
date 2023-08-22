@@ -483,6 +483,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.BlockMax.setStyleSheet("color: black;""border: 1px solid gray;")
             # change name of min reward each block
             self.label_13.setText('min reward each block=')
+            self.BlockMinReward.setText('0')
+            # change the position of RewardN=/min reward each block=
+            self.BlockMinReward.setGeometry(QtCore.QRect(863, 101, 80, 20))
+            self.label_13.setGeometry(QtCore.QRect(711, 101, 146, 16))
+            # move auto-reward
+            self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 101, 80, 20))
+            self.label_26.setGeometry(QtCore.QRect(929, 101, 146, 16))
         elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
             border_color = "rgb(100, 100, 100,80)"
             border_style = "1px solid " + border_color
@@ -523,21 +530,28 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.BlockMax.setStyleSheet("color: black;""border: 1px solid gray;")
             # change name of min reward each block
             self.label_13.setText('min reward each block=')
+            self.BlockMinReward.setText('0')
+            # change the position of RewardN=/min reward each block=
+            self.BlockMinReward.setGeometry(QtCore.QRect(863, 101, 80, 20))
+            self.label_13.setGeometry(QtCore.QRect(711, 101, 146, 16))
+            # move auto-reward
+            self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 101, 80, 20))
+            self.label_26.setGeometry(QtCore.QRect(929, 101, 146, 16))
         elif self.Task.currentText() in ['RewardN']:
-            self.label_6.setEnabled(False)
-            self.label_7.setEnabled(False)
-            self.label_8.setEnabled(False)
-            self.BaseRewardSum.setEnabled(False)
-            self.RewardPairsN.setEnabled(False)
-            self.RewardFamily.setEnabled(False)
+            self.label_6.setEnabled(True)
+            self.label_7.setEnabled(True)
+            self.label_8.setEnabled(True)
+            self.BaseRewardSum.setEnabled(True)
+            self.RewardPairsN.setEnabled(True)
+            self.RewardFamily.setEnabled(True)
             self.label_20.setEnabled(False)
             self.UncoupledReward.setEnabled(False)
-            self.label_6.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.label_7.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.label_8.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.BaseRewardSum.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.RewardPairsN.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.RewardFamily.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.label_6.setStyleSheet("color: black;")
+            self.label_7.setStyleSheet("color: black;")
+            self.label_8.setStyleSheet("color: black;")
+            self.BaseRewardSum.setStyleSheet("color: black;""border: 1px solid gray;")
+            self.RewardPairsN.setStyleSheet("color: black;""border: 1px solid gray;")
+            self.RewardFamily.setStyleSheet("color: black;""border: 1px solid gray;")
             self.label_20.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             self.UncoupledReward.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             # block
@@ -555,12 +569,20 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.BlockMax.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             # change name of min reward each block
             self.label_13.setText('RewardN=')
+            self.BlockMinReward.setText('5')
+            # change the position of RewardN=/min reward each block=
+            self.BlockMinReward.setGeometry(QtCore.QRect(191, 101, 80, 20))
+            self.label_13.setGeometry(QtCore.QRect(40, 101, 146, 16))
+            # move auto-reward
+            self.IncludeAutoReward.setGeometry(QtCore.QRect(403, 101, 80, 20))
+            self.label_26.setGeometry(QtCore.QRect(250, 101, 146, 16))
+
         self._Randomness()
 
     def _ShowRewardPairs(self):
         '''Show reward pairs'''
         try:
-            if self.Task.currentText() in ['Coupled Baiting','Coupled Without Baiting']:
+            if self.Task.currentText() in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
                 self.RewardPairs=self.RewardFamilies[int(self.RewardFamily.text())-1][:int(self.RewardPairsN.text())]
                 self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.BaseRewardSum.text())
                 if hasattr(self, 'GeneratedTrials'):
