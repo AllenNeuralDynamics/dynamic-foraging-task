@@ -32,12 +32,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.LaserCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'LaserCalibration.json')
             self.WaterCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibration.json')
             self.WaterCalibrationParFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibrationPar.json')
+            self.TrainingStageFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'TrainingStagePar.json')
         else:
             self.setWindowTitle("Foraging"+'_'+str(sys.argv[1]))
             self.SettingFile=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'ForagingSettings.json')
             self.LaserCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'LaserCalibration_'+str(sys.argv[1])+'.json')
             self.WaterCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibration_'+str(sys.argv[1])+'.json')
             self.WaterCalibrationParFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibrationPar_'+str(sys.argv[1])+'.json')
+            self.TrainingStageFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'TrainingStagePar_'+str(sys.argv[1])+'.json') 
         self._GetSettings()
         try:
             self._GetLaserCalibration()
@@ -82,6 +84,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._GetTrainingParameters() # get initial training parameters
         self.connectSignalsSlots()
         self._Task()
+        self._TrainingStage()
+        self.keyPressEvent()
     def _GetLaserCalibration(self):
         '''Get the laser calibration results'''
         if os.path.exists(self.LaserCalibrationFiles):
@@ -219,6 +223,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._AdvancedBlockAuto)
         self.TotalWater.textChanged.connect(self._SuggestedWater)
         self.Randomness.currentIndexChanged.connect(self._Randomness)
+        self.TrainingStage.currentIndexChanged.connect(self._TrainingStage)
+        self.TrainingStage.activated.connect(self._TrainingStage)
+        self.SaveTraining.clicked.connect(self._SaveTraining)
         self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
@@ -230,6 +237,123 @@ class Window(QMainWindow, Ui_ForagingGUI):
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit)):        
                 child.returnPressed.connect(self.keyPressEvent)
+    def _TrainingStage(self):
+        '''Change the parameters automatically based on training stage and task'''
+        self.WarningLabel_SaveTrainingStage.setText('')
+        self.WarningLabel_SaveTrainingStage.setStyleSheet("color: none;")
+        # load the prestored training stage parameters
+        self._LoadTrainingPar()
+        # set the training parameters in the GUI
+        widget_dict = {w.objectName(): w for w in self.TrainingParameters.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+        Task=self.Task.currentText()
+        CurrentTrainingStage=self.TrainingStage.currentText()
+        try:
+            for key in widget_dict.keys():
+                if Task not in self.TrainingStagePar:
+                    continue
+                elif CurrentTrainingStage not in self.TrainingStagePar[Task]:
+                    continue
+                if key in self.TrainingStagePar[Task][CurrentTrainingStage]:
+                    # skip some keys
+                    if key=='ExtraWater' or key=='WeightBefore' or key=='WeightAfter' or key=='SuggestedWater':
+                        self.ExtraWater.setText('')
+                        continue
+                    widget = widget_dict[key]
+                    try: # load the paramter used by last trial
+                        value=np.array([self.TrainingStagePar[Task][CurrentTrainingStage][key]])
+                        Tag=0
+                    except: # sometimes we only have training parameters, no behavior parameters
+                        value=self.TrainingStagePar[Task][CurrentTrainingStage][key]
+                        Tag=1
+                    if isinstance(widget, QtWidgets.QPushButton):
+                        pass
+                    if type(value)==bool:
+                        Tag=1
+                    else:
+                        if len(value)==0:
+                            value=np.array([''], dtype='<U1')
+                            Tag=0
+                    if type(value)==np.ndarray:
+                        Tag=0
+                    if isinstance(widget, QtWidgets.QLineEdit):
+                        if Tag==0:
+                            widget.setText(value[-1])
+                        elif Tag==1:
+                            widget.setText(value)
+                    elif isinstance(widget, QtWidgets.QComboBox):
+                        if Tag==0:
+                            index = widget.findText(value[-1])
+                        elif Tag==1:
+                            index = widget.findText(value)
+                        if index != -1:
+                            widget.setCurrentIndex(index)
+                    elif isinstance(widget, QtWidgets.QDoubleSpinBox):
+                        if Tag==0:
+                            widget.setValue(float(value[-1]))
+                        elif Tag==1:
+                            widget.setValue(float(value))
+                    elif isinstance(widget, QtWidgets.QSpinBox):
+                        if Tag==0:
+                            widget.setValue(int(value[-1]))
+                        elif Tag==1:
+                            widget.setValue(int(value))
+                    elif isinstance(widget, QtWidgets.QTextEdit):
+                        if Tag==0:
+                            widget.setText(value[-1])
+                        elif Tag==1:
+                            widget.setText(value)
+                    elif isinstance(widget, QtWidgets.QPushButton):
+                        if key=='AutoReward':
+                            if Tag==0:
+                                widget.setChecked(bool(value[-1]))
+                            elif Tag==1:
+                                widget.setChecked(value)
+                            self._AutoReward()
+                else:
+                    widget = widget_dict[key]
+                    if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
+                        widget.clear()
+        except Exception as e:
+            # Catch the exception and print error information
+            print("An error occurred:")
+            print(traceback.format_exc())
+        
+    def _SaveTraining(self):
+        '''Save the training stage parameters'''
+        # load the pre-stored training stage parameters
+        self._LoadTrainingPar()
+        # get the current training stage parameters
+        widget_dict = {w.objectName(): w for w in self.TrainingParameters.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+        Task=self.Task.currentText()
+        CurrentTrainingStage=self.TrainingStage.currentText()
+        for key in widget_dict.keys():
+            widget = widget_dict[key]
+            if Task not in self.TrainingStagePar:
+                self.TrainingStagePar[Task]={}
+            if CurrentTrainingStage not in self.TrainingStagePar[Task]:
+                self.TrainingStagePar[Task][CurrentTrainingStage]={}
+            if isinstance(widget, QtWidgets.QPushButton):
+                self.TrainingStagePar[Task][CurrentTrainingStage][widget.objectName()]=widget.isChecked()
+            elif isinstance(widget, QtWidgets.QTextEdit):
+                self.TrainingStagePar[Task][CurrentTrainingStage][widget.objectName()]=widget.toPlainText()
+            elif isinstance(widget, QtWidgets.QDoubleSpinBox) or isinstance(widget, QtWidgets.QLineEdit)  or isinstance(widget, QtWidgets.QSpinBox):
+                self.TrainingStagePar[Task][CurrentTrainingStage][widget.objectName()]=widget.text()
+            elif isinstance(widget, QtWidgets.QComboBox):
+                self.TrainingStagePar[Task][CurrentTrainingStage][widget.objectName()]=widget.currentText()
+        # save
+        if not os.path.exists(os.path.dirname(self.TrainingStageFiles)):
+            os.makedirs(os.path.dirname(self.TrainingStageFiles))
+        with open(self.TrainingStageFiles, "w") as file:
+            json.dump(self.TrainingStagePar, file,indent=4) 
+        self.WarningLabel_SaveTrainingStage.setText('Training stage parameters were saved!')
+        self.WarningLabel_SaveTrainingStage.setStyleSheet("color: red;")
+        self.SaveTraining.setChecked(False)
+    def _LoadTrainingPar(self):
+        '''load the training stage parameters'''
+        self.TrainingStagePar={}
+        if os.path.exists(self.TrainingStageFiles):
+            with open(self.TrainingStageFiles, 'r') as f:
+                self.TrainingStagePar = json.load(f)
     def _Randomness(self):
         '''enable/disable some fields in the Block/Delay Period/ITI'''
         if self.Randomness.currentText()=='Exponential':
@@ -1073,6 +1197,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
         '''complete of generating a trial'''
         self.ToGenerateATrial=1
     def _Start(self):
+        '''start trial loop'''
+        self.WarningLabel_SaveTrainingStage.setText('')
+        self.WarningLabel_SaveTrainingStage.setStyleSheet("color: none;")
         self.NewSession.setDisabled(False)
         if self.Start.isChecked():
             self.keyPressEvent()
