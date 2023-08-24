@@ -430,7 +430,6 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
             self.Warning.setText('Calibration was terminated!')
             self.Warning.setStyleSheet("color: red;")
         
-
         for current_valve_opentime in np.arange(float(self.TimeLeftMin.text()),float(self.TimeLeftMax.text())+0.0001,float(self.StrideLeft.text())):
             while 1:
                 if not self.StartCalibratingLeft.isChecked():
@@ -488,7 +487,8 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
                                         tube_weight=0
                                     else:
                                         tube_weight=float(tube_weight)
-                                    self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water,tube_weight=tube_weight)
+                                    if total_water>=0:
+                                        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water,tube_weight=tube_weight)
                                     # clear the total water
                                     self.TotalWaterLeft.setText('')
                                     self.TubeWeightLeft.setText('')
@@ -622,7 +622,8 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
                                         tube_weight=0
                                     else:
                                         tube_weight=float(tube_weight)
-                                    self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water,tube_weight=tube_weight)
+                                    if total_water>=0:
+                                        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water,tube_weight=tube_weight)
                                     # clear the total water
                                     self.TotalWaterRight.setText('')
                                     self.TubeWeightRight.setText('')
