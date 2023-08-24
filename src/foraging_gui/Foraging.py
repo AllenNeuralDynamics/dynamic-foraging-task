@@ -26,21 +26,22 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
+        
+        self.SettingFolder=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings")
+        self.SettingFile=os.path.join(self.SettingFolder,'ForagingSettings.json')
+        self._GetSettings()
         if len(sys.argv)==1:
             self.setWindowTitle("Foraging")
-            self.SettingFile=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'ForagingSettings.json')
-            self.LaserCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'LaserCalibration.json')
-            self.WaterCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibration.json')
-            self.WaterCalibrationParFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibrationPar.json')
-            self.TrainingStageFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'TrainingStagePar.json') # The training phase is shared and not differentiated by tower
+            self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration.json')
+            self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration.json')
+            self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar.json')
+            self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json') # The training phase is shared and not differentiated by tower
         else:
             self.setWindowTitle("Foraging"+'_'+str(sys.argv[1]))
-            self.SettingFile=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'ForagingSettings.json')
-            self.LaserCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'LaserCalibration_'+str(sys.argv[1])+'.json')
-            self.WaterCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibration_'+str(sys.argv[1])+'.json')
-            self.WaterCalibrationParFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibrationPar_'+str(sys.argv[1])+'.json')
-            self.TrainingStageFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'TrainingStagePar.json')
-        self._GetSettings()
+            self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration_'+str(sys.argv[1])+'.json')
+            self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration_'+str(sys.argv[1])+'.json')
+            self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_'+str(sys.argv[1])+'.json')
+            self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json')
         try:
             self._GetLaserCalibration()
         except:
@@ -116,13 +117,34 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _GetSettings(self):
         '''Get default settings'''
         try:
-            # Open the JSON settings file
-            with open(self.SettingFile, 'r') as f:
-                Settings = json.load(f)
-            self.default_saveFolder=Settings['default_saveFolder']
-        except Exception as e:
-            print('An error occurred:', str(e))
+            if os.path.exists(self.SettingFile):
+                # Open the JSON settings file
+                with open(self.SettingFile, 'r') as f:
+                    Settings = json.load(f)
+                if 'default_saveFolder' in Settings:
+                    self.default_saveFolder=Settings['default_saveFolder']
+                else:
+                    self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
+                if 'current_box' in Settings:
+                    self.current_box=Settings['current_box']
+                else:
+                    self.current_box=''
+            else:
+                self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
+                self.current_box=''
+        except:
             self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
+            self.current_box=''
+        if len(sys.argv)==1:
+            towertag=''
+        else:
+            towertag=str(sys.argv[1])
+        if self.current_box in ['Green','Blue','Red','Yellow']:
+            self.current_box=self.current_box+'-'+towertag
+        # set the current tower automatically
+        index = self.Tower.findText(self.current_box)
+        if index != -1:
+            self.Tower.setCurrentIndex(index)
     def _InitializeBonsai(self):
         '''Initianizing osc messages'''
         self.ip = "127.0.0.1"
