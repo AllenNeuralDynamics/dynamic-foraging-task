@@ -724,35 +724,37 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         self.PlotM._Update()
 
     def _OpenLeftForever(self):
+        '''Open the left valve forever'''
         if self.OpenLeftForever.isChecked():
             # change button color
             self.OpenLeftForever.setStyleSheet("background-color : green;")
             # set the valve open time
-            self.MainWindow.Channel.LeftValue(float(10000)*1000) 
+            self.MainWindow.Channel.LeftValue(float(1000)*1000) 
             # open the valve
             self.MainWindow.Channel3.ManualWater_Left(int(1))
         else:
             # change button color
             self.OpenLeftForever.setStyleSheet("background-color : none")
             # close the valve 
-            self.MainWindow.Channel.LeftValue(float(0.1)*1000)
+            self.MainWindow.Channel.LeftValue(float(0.001)*1000)
             self.MainWindow.Channel3.ManualWater_Left(int(1))
             # set the default valve open time
             self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
 
     def _OpenRightForever(self):
+        '''Open the right valve forever'''
         if self.OpenRightForever.isChecked():
             # change button color
             self.OpenRightForever.setStyleSheet("background-color : green;")
             # set the valve open time
-            self.MainWindow.Channel.RightValue(float(10000)*1000) 
+            self.MainWindow.Channel.RightValue(float(1000)*1000) 
             # open the valve
             self.MainWindow.Channel3.ManualWater_Right(int(1))
         else:
             # change button color
             self.OpenRightForever.setStyleSheet("background-color : none")
             # close the valve 
-            self.MainWindow.Channel.RightValue(float(0.1)*1000)
+            self.MainWindow.Channel.RightValue(float(0.001)*1000)
             self.MainWindow.Channel3.ManualWater_Right(int(1))
             # set the default valve open time
             self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)

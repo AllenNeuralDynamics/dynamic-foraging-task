@@ -32,14 +32,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.LaserCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'LaserCalibration.json')
             self.WaterCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibration.json')
             self.WaterCalibrationParFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibrationPar.json')
-            self.TrainingStageFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'TrainingStagePar.json')
+            self.TrainingStageFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'TrainingStagePar.json') # The training phase is shared and not differentiated by tower
         else:
             self.setWindowTitle("Foraging"+'_'+str(sys.argv[1]))
             self.SettingFile=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'ForagingSettings.json')
             self.LaserCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'LaserCalibration_'+str(sys.argv[1])+'.json')
             self.WaterCalibrationFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibration_'+str(sys.argv[1])+'.json')
             self.WaterCalibrationParFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'WaterCalibrationPar_'+str(sys.argv[1])+'.json')
-            self.TrainingStageFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'TrainingStagePar_'+str(sys.argv[1])+'.json') 
+            self.TrainingStageFiles=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings",'TrainingStagePar.json')
         self._GetSettings()
         try:
             self._GetLaserCalibration()
