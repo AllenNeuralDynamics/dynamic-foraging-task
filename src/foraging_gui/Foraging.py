@@ -627,6 +627,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
             self.BlockMin.setStyleSheet("color: black;""border: 1px solid gray;")
             self.BlockMax.setStyleSheet("color: black;""border: 1px solid gray;")
+            self.label_27.setEnabled(False)
+            self.InitiallyInactiveN.setEnabled(False)
+            self.label_27.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.InitiallyInactiveN.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             # change name of min reward each block
             self.label_13.setText('min reward each block=')
             self.BlockMinReward.setText('0')
@@ -677,6 +681,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
             self.BlockMin.setStyleSheet("color: black;""border: 1px solid gray;")
             self.BlockMax.setStyleSheet("color: black;""border: 1px solid gray;")
+            self.label_27.setEnabled(False)
+            self.InitiallyInactiveN.setEnabled(False)
+            self.label_27.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.InitiallyInactiveN.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             # change name of min reward each block
             self.label_13.setText('min reward each block=')
             self.BlockMinReward.setText('0')
@@ -719,6 +727,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.BlockBeta.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             self.BlockMin.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             self.BlockMax.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            # block; no reward when initially active
+            self.label_27.setEnabled(True)
+            self.InitiallyInactiveN.setEnabled(True)
+            self.label_27.setStyleSheet("color: black;")
+            self.InitiallyInactiveN.setStyleSheet("color: black;""border: 1px solid gray;")
             # change name of min reward each block
             self.label_13.setText('RewardN=')
             self.BlockMinReward.setText('5')
@@ -726,11 +739,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.BlockMinReward.setGeometry(QtCore.QRect(191, 101, 80, 20))
             self.label_13.setGeometry(QtCore.QRect(40, 101, 146, 16))
             # move auto-reward
-            self.IncludeAutoReward.setGeometry(QtCore.QRect(403, 101, 80, 20))
-            self.label_26.setGeometry(QtCore.QRect(250, 101, 146, 16))
+            self.IncludeAutoReward.setGeometry(QtCore.QRect(614, 101, 80, 20))
+            self.label_26.setGeometry(QtCore.QRect(460, 101, 146, 16))
             # set block length to be 1
             self.BlockMin.setText('1')
             self.BlockMax.setText('1')
+            
+
         self._Randomness()
 
     def _ShowRewardPairs(self):
@@ -793,6 +808,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         else:
             event.ignore()
     def _Exit(self):
+        '''Close the GUI'''
         response = QMessageBox.question(self,'Save and Exit:', "Do you want to save the current result?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
         if response==QMessageBox.Yes:
             self._Save()
@@ -800,6 +816,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         elif response==QMessageBox.No:
             self.close()
     def _Snipping(self):
+        '''Open the snipping tool'''
         os.system("start %windir%\system32\SnippingTool.exe") 
     def _Optogenetics(self):
         '''will be triggered when the optogenetics icon is pressed'''
@@ -811,6 +828,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         else:
             self.Opto_dialog.hide()
     def _Camera(self):
+        '''Open the camera. It's not available now'''
         if self.Camera==0:
             self.Camera_dialog = CameraDialog(MainWindow=self)
             self.Camera=1
