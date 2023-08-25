@@ -180,7 +180,6 @@ class GenerateTrials():
         else:
             return np.max(length)
 
-
     def _SelectTrainingParameter(self):
         '''Select the training parameter of the next trial'''
         # determine the reward probability of the next trial based on tasks
@@ -993,10 +992,8 @@ class GenerateTrials():
         # For task rewardN, if this is the "initial N trials" of the active side, no bait will be be given.
         if self.BaitPermitted is False:
             # no reward in the active side
-            if self.B_CurrentRewardProb[0]>self.B_CurrentRewardProb[1]:
-                self.CurrentBait[0]=False
-            else:
-                self.CurrentBait[1]=False
+            max_index = np.argmax(self.B_CurrentRewardProb)
+            self.CurrentBait[max_index]=False
         self.B_Baited=  self.CurrentBait.copy()
         self.B_BaitHistory=np.append(self.B_BaitHistory, self.CurrentBait.reshape(2,1),axis=1)
         # determine auto water
