@@ -744,8 +744,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
             # set block length to be 1
             self.BlockMin.setText('1')
             self.BlockMax.setText('1')
-            
-
         self._Randomness()
 
     def _ShowRewardPairs(self):

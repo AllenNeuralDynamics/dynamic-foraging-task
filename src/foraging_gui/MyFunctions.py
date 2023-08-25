@@ -88,6 +88,8 @@ class GenerateTrials():
         self._CheckBlockTransition()
         # Get reward probability and other trial related parameters
         self._SelectTrainingParameter()
+        # check if bait is permitted at the current trial
+        self._CheckBaitPermitted()
         self.finish_select_par=1
         # get basic information
         if self.B_CurrentTrialN>=0:
@@ -139,6 +141,45 @@ class GenerateTrials():
             # Catch the exception and print error information
             print("An error occurred:",str(e))
             print(traceback.format_exc())
+    def _CheckBaitPermitted(self):
+        '''Check if bait is permitted of the current trial'''
+        #For task rewardN, if this is the "initial N trials" of the active side, no bait will be be given.
+        if self.TP_Task=='RewardN':
+            # get the maximum consecutive selection of the active side of the current block
+            MaxCLen=self._GetMaximumConSelection()
+            if MaxCLen>=float(self.TP_InitiallyInactiveN):
+                self.BaitPermitted=True
+            else:
+                self.BaitPermitted=False
+        else:
+            self.BaitPermitted=True
+        if self.BaitPermitted==False:
+            self.win.WarningLabelRewardN.setText('The active side has no reward due to consecutive \nselections('+str(MaxCLen)+')<'+self.TP_InitiallyInactiveN)
+            self.win.WarningLabelRewardN.setStyleSheet("color: red;")
+        else:
+            self.win.WarningLabelRewardN.setText('')
+            self.win.WarningLabelRewardN.setStyleSheet("color: gray;")
+    def _GetMaximumConSelection(self):
+        '''get the maximum consecutive selection of the active side of the current block'''
+        B_RewardProHistory=self.B_RewardProHistory[:,range(len(self.B_AnimalResponseHistory))].copy()
+        if B_RewardProHistory.shape[1]==0:
+            return 0
+        # get the block length and index of the current trial
+        index=[[],[]]
+        for i in range(B_RewardProHistory.shape[0]): 
+            length,indexN=self._consecutive_length(B_RewardProHistory[i], B_RewardProHistory[i][-1])
+            self.BS_CurrentBlockTrialN[i]=length[-1]
+            index[i]=indexN[-1]
+        # get the active side
+        max_index = np.argmax(B_RewardProHistory[:,-1])
+        # get the consecutive choice of the active side
+        length,indexN=self._consecutive_length(self.B_AnimalResponseHistory[index[0][0]:index[0][1]+1],max_index)
+        # Get the maximum number of consecutive selections for the active side
+        if len(length)==0:
+            return 0
+        else:
+            return np.max(length)
+
 
     def _SelectTrainingParameter(self):
         '''Select the training parameter of the next trial'''
@@ -422,11 +463,11 @@ class GenerateTrials():
             elif self.TP_IncludeAutoReward=='no':
                 # auto reward is not considered as reward
                 Ind=range(len(self.B_RewardedHistory[0]))
-                for i in range(len(self.B_RewardedHistory)):
+                for i in range(len(self.B_RewardedHistory)): 
                     possible_reward=np.logical_or(self.B_BaitHistory[i][Ind],self.B_AutoWaterTrial[i][Ind])
                     B_RewardedHistory[i]=np.logical_and(self.B_AnimalResponseHistory[Ind]==i,possible_reward)
         # get the block length and index of the current trial
-        for i in range(len(B_RewardProHistory)): 
+        for i in range(B_RewardProHistory.shape[0]) : 
             length,indexN=self._consecutive_length(B_RewardProHistory[i], B_RewardProHistory[i][-1])
             self.BS_CurrentBlockTrialN[i]=length[-1]
             index[i]=indexN[-1]
@@ -949,6 +990,13 @@ class GenerateTrials():
         self.CurrentBait=self.B_CurrentRewardProb>np.random.random(2)
         if (self.TP_Task in ['Coupled Baiting','Uncoupled Baiting']):
              self.CurrentBait= self.CurrentBait | self.B_Baited
+        # For task rewardN, if this is the "initial N trials" of the active side, no bait will be be given.
+        if self.BaitPermitted is False:
+            # no reward in the active side
+            if self.B_CurrentRewardProb[0]>self.B_CurrentRewardProb[1]:
+                self.CurrentBait[0]=False
+            else:
+                self.CurrentBait[1]=False
         self.B_Baited=  self.CurrentBait.copy()
         self.B_BaitHistory=np.append(self.B_BaitHistory, self.CurrentBait.reshape(2,1),axis=1)
         # determine auto water
