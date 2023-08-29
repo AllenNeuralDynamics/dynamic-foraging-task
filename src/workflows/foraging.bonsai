@@ -252,7 +252,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT5.023S</gl:DueTime>
+                      <gl:DueTime>PT1.288S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -292,7 +292,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT0.061S</gl:DueTime>
+                      <gl:DueTime>PT0.656S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -378,7 +378,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Timer">
-                      <gl:DueTime>PT1S</gl:DueTime>
+                      <gl:DueTime>PT3S</gl:DueTime>
                       <gl:Period>PT0S</gl:Period>
                     </Combinator>
                   </Expression>
@@ -689,7 +689,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT3S</gl:DueTime>
+                      <gl:DueTime>PT1S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -781,7 +781,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Timer">
-                      <gl:DueTime>PT1S</gl:DueTime>
+                      <gl:DueTime>PT3S</gl:DueTime>
                       <gl:Period>PT0S</gl:Period>
                     </Combinator>
                   </Expression>
@@ -1092,7 +1092,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT3S</gl:DueTime>
+                      <gl:DueTime>PT1S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -2759,76 +2759,6 @@
                   <Expression xsi:type="MulticastSubject">
                     <Name>ToBonsaiOSC</Name>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="SubscribeSubject">
-                      <Name>LeftKeyPress</Name>
-                    </Builder>
-                  </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="SubscribeSubject">
-                      <Name>Timestamps</Name>
-                    </Builder>
-                  </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="Combinator">
-                      <Combinator xsi:type="rx:WithLatestFrom" />
-                    </Builder>
-                  </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="MemberSelector">
-                      <Selector>Item2</Selector>
-                    </Builder>
-                  </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="scr:ExpressionTransform">
-                      <scr:Expression>new(it as Seconds)</scr:Expression>
-                    </Builder>
-                  </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="osc:Format">
-                      <osc:Address>/LeftLickTime</osc:Address>
-                    </Builder>
-                  </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="MulticastSubject">
-                      <Name>ToBonsaiOSC2</Name>
-                    </Builder>
-                  </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="SubscribeSubject">
-                      <Name>RightKeyPress</Name>
-                    </Builder>
-                  </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="SubscribeSubject">
-                      <Name>Timestamps</Name>
-                    </Builder>
-                  </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="Combinator">
-                      <Combinator xsi:type="rx:WithLatestFrom" />
-                    </Builder>
-                  </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="MemberSelector">
-                      <Selector>Item2</Selector>
-                    </Builder>
-                  </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="scr:ExpressionTransform">
-                      <scr:Expression>new(it as Seconds)</scr:Expression>
-                    </Builder>
-                  </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="osc:Format">
-                      <osc:Address>/RightLickTime</osc:Address>
-                    </Builder>
-                  </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="MulticastSubject">
-                      <Name>ToBonsaiOSC2</Name>
-                    </Builder>
-                  </Expression>
                   <Expression xsi:type="SubscribeSubject">
                     <Name>RewardDeliveryRight</Name>
                   </Expression>
@@ -2880,6 +2810,76 @@
                   <Expression xsi:type="MulticastSubject">
                     <Name>ToBonsaiOSC</Name>
                   </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="SubscribeSubject">
+                      <Name>RightKeyPress</Name>
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="SubscribeSubject">
+                      <Name>Timestamps</Name>
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="Combinator">
+                      <Combinator xsi:type="rx:WithLatestFrom" />
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="MemberSelector">
+                      <Selector>Item2</Selector>
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="scr:ExpressionTransform">
+                      <scr:Expression>new(it as Seconds)</scr:Expression>
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="osc:Format">
+                      <osc:Address>/RightLickTime</osc:Address>
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="MulticastSubject">
+                      <Name>ToBonsaiOSC2</Name>
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="SubscribeSubject">
+                      <Name>LeftKeyPress</Name>
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="SubscribeSubject">
+                      <Name>Timestamps</Name>
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="Combinator">
+                      <Combinator xsi:type="rx:WithLatestFrom" />
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="MemberSelector">
+                      <Selector>Item2</Selector>
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="scr:ExpressionTransform">
+                      <scr:Expression>new(it as Seconds)</scr:Expression>
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="osc:Format">
+                      <osc:Address>/LeftLickTime</osc:Address>
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="MulticastSubject">
+                      <Name>ToBonsaiOSC2</Name>
+                    </Builder>
+                  </Expression>
                 </Nodes>
                 <Edges>
                   <Edge From="0" To="1" Label="Source1" />
@@ -2928,18 +2928,18 @@
                   <Edge From="51" To="52" Label="Source1" />
                   <Edge From="52" To="53" Label="Source1" />
                   <Edge From="53" To="54" Label="Source1" />
-                  <Edge From="55" To="57" Label="Source1" />
-                  <Edge From="56" To="57" Label="Source2" />
-                  <Edge From="57" To="58" Label="Source1" />
-                  <Edge From="58" To="59" Label="Source1" />
-                  <Edge From="59" To="60" Label="Source1" />
+                  <Edge From="55" To="56" Label="Source1" />
+                  <Edge From="56" To="57" Label="Source1" />
+                  <Edge From="58" To="60" Label="Source1" />
+                  <Edge From="59" To="60" Label="Source2" />
                   <Edge From="60" To="61" Label="Source1" />
-                  <Edge From="62" To="64" Label="Source1" />
-                  <Edge From="63" To="64" Label="Source2" />
-                  <Edge From="64" To="65" Label="Source1" />
-                  <Edge From="65" To="66" Label="Source1" />
-                  <Edge From="66" To="67" Label="Source1" />
+                  <Edge From="61" To="62" Label="Source1" />
+                  <Edge From="62" To="63" Label="Source1" />
+                  <Edge From="63" To="64" Label="Source1" />
+                  <Edge From="65" To="67" Label="Source1" />
+                  <Edge From="66" To="67" Label="Source2" />
                   <Edge From="67" To="68" Label="Source1" />
+                  <Edge From="68" To="69" Label="Source1" />
                   <Edge From="69" To="70" Label="Source1" />
                   <Edge From="70" To="71" Label="Source1" />
                 </Edges>

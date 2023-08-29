@@ -286,7 +286,7 @@ class GenerateTrials():
             # min rewards to perform transition
             if self.B_CurrentTrialN>=0:
                 # get the rewarded trial number of the current finished trial.
-                self._GetCurrentBlockReward(1,CountAutoWater=0,UpdateBlockLen=1)
+                self._GetCurrentBlockReward(1,CountAutoWater=1,UpdateBlockLen=1)
             else:
                 self.AllRewardThisBlock=-1
                 self.BS_RewardedTrialN_CurrentBlock=[0,0]
@@ -455,16 +455,15 @@ class GenerateTrials():
         B_RewardedHistory=self.B_RewardedHistory.copy()
         if CountAutoWater==1:
             if self.TP_IncludeAutoReward=='yes':
-                # auto reward is considered as reward
+                # auto reward is considered as reward no matter the animal's choice. B_RewardedHistory and B_AutoWaterTrial cannot both be True
                 Ind=range(len(self.B_RewardedHistory[0]))
                 for i in range(len(self.B_RewardedHistory)):
                     B_RewardedHistory[i]=np.logical_or(self.B_RewardedHistory[i],self.B_AutoWaterTrial[i][Ind])
             elif self.TP_IncludeAutoReward=='no':
-                # auto reward is not considered as reward
+                # auto reward is not considered as reward (auto reward only is considered reward when the animal makes a choice). Reward is determined by the animal's response history and the bait history
                 Ind=range(len(self.B_RewardedHistory[0]))
                 for i in range(len(self.B_RewardedHistory)): 
-                    possible_reward=np.logical_or(self.B_BaitHistory[i][Ind],self.B_AutoWaterTrial[i][Ind])
-                    B_RewardedHistory[i]=np.logical_and(self.B_AnimalResponseHistory[Ind]==i,possible_reward)
+                    B_RewardedHistory[i]=np.logical_and(self.B_AnimalResponseHistory[Ind]==i,self.B_BaitHistory[i][Ind])
         # get the block length and index of the current trial
         for i in range(B_RewardProHistory.shape[0]) : 
             length,indexN=self._consecutive_length(B_RewardProHistory[i], B_RewardProHistory[i][-1])
