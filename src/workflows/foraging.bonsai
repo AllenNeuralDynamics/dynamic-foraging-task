@@ -16,6 +16,7 @@
                  xmlns:ipy="clr-namespace:Bonsai.Scripting.IronPython;assembly=Bonsai.Scripting.IronPython"
                  xmlns:mx="clr-namespace:Bonsai.DAQmx;assembly=Bonsai.DAQmx"
                  xmlns:p2="clr-namespace:Bonsai.DAQmx;assembly=Extensions"
+                 xmlns:spk="clr-namespace:Bonsai.Spinnaker;assembly=Bonsai.Spinnaker"
                  xmlns="https://bonsai-rx.org/2018/workflow">
   <Workflow>
     <Nodes>
@@ -4715,6 +4716,108 @@ def process(value):
               <Edge From="6" To="7" Label="Source1" />
               <Edge From="7" To="8" Label="Source1" />
               <Edge From="8" To="9" Label="Source1" />
+            </Edges>
+          </Workflow>
+        </Builder>
+      </Expression>
+      <Expression xsi:type="Disable">
+        <Builder xsi:type="GroupWorkflow">
+          <Name>Camera</Name>
+          <Description>Camera</Description>
+          <Workflow>
+            <Nodes>
+              <Expression xsi:type="rx:BehaviorSubject" TypeArguments="harp:HarpMessage">
+                <rx:Name>Commands</rx:Name>
+              </Expression>
+              <Expression xsi:type="Combinator">
+                <Combinator xsi:type="beh:Device">
+                  <harp:OperationMode>Active</harp:OperationMode>
+                  <harp:OperationLed>On</harp:OperationLed>
+                  <harp:DumpRegisters>true</harp:DumpRegisters>
+                  <harp:VisualIndicators>On</harp:VisualIndicators>
+                  <harp:Heartbeat>Disabled</harp:Heartbeat>
+                  <harp:IgnoreErrors>false</harp:IgnoreErrors>
+                  <harp:PortName>COM8</harp:PortName>
+                </Combinator>
+              </Expression>
+              <Expression xsi:type="rx:PublishSubject">
+                <Name>Events</Name>
+              </Expression>
+              <Expression xsi:type="Combinator">
+                <Combinator xsi:type="spk:SpinnakerCapture">
+                  <spk:Index xsi:nil="true" />
+                  <spk:SerialNumber>23022717</spk:SerialNumber>
+                  <spk:ColorProcessing>Default</spk:ColorProcessing>
+                </Combinator>
+              </Expression>
+              <Expression xsi:type="SubscribeSubject">
+                <Name>Events</Name>
+              </Expression>
+              <Expression xsi:type="beh:Parse">
+                <harp:Register xsi:type="beh:TimestampedCamera1Frame" />
+              </Expression>
+              <Expression xsi:type="MemberSelector">
+                <Selector>Seconds</Selector>
+              </Expression>
+              <Expression xsi:type="Combinator">
+                <Combinator xsi:type="rx:Zip" />
+              </Expression>
+              <Expression xsi:type="Combinator">
+                <Combinator xsi:type="harp:CreateTimestamped" />
+              </Expression>
+              <Expression xsi:type="beh:CreateMessage">
+                <harp:MessageType>Write</harp:MessageType>
+                <harp:Payload xsi:type="beh:CreateCamera1FrequencyPayload">
+                  <beh:Camera1Frequency>1</beh:Camera1Frequency>
+                </harp:Payload>
+              </Expression>
+              <Expression xsi:type="MulticastSubject">
+                <Name>Commands</Name>
+              </Expression>
+              <Expression xsi:type="Combinator">
+                <Combinator xsi:type="wie:KeyDown">
+                  <wie:Filter>A</wie:Filter>
+                  <wie:SuppressRepetitions>false</wie:SuppressRepetitions>
+                </Combinator>
+              </Expression>
+              <Expression xsi:type="beh:CreateMessage">
+                <harp:MessageType>Write</harp:MessageType>
+                <harp:Payload xsi:type="beh:CreateStartCamerasPayload">
+                  <beh:StartCameras>None</beh:StartCameras>
+                </harp:Payload>
+              </Expression>
+              <Expression xsi:type="MulticastSubject">
+                <Name>Commands</Name>
+              </Expression>
+              <Expression xsi:type="Combinator">
+                <Combinator xsi:type="wie:KeyDown">
+                  <wie:Filter>S</wie:Filter>
+                  <wie:SuppressRepetitions>false</wie:SuppressRepetitions>
+                </Combinator>
+              </Expression>
+              <Expression xsi:type="beh:CreateMessage">
+                <harp:MessageType>Write</harp:MessageType>
+                <harp:Payload xsi:type="beh:CreateStopCamerasPayload">
+                  <beh:StopCameras>None</beh:StopCameras>
+                </harp:Payload>
+              </Expression>
+              <Expression xsi:type="MulticastSubject">
+                <Name>Commands</Name>
+              </Expression>
+            </Nodes>
+            <Edges>
+              <Edge From="0" To="1" Label="Source1" />
+              <Edge From="1" To="2" Label="Source1" />
+              <Edge From="3" To="7" Label="Source1" />
+              <Edge From="4" To="5" Label="Source1" />
+              <Edge From="5" To="6" Label="Source1" />
+              <Edge From="6" To="7" Label="Source2" />
+              <Edge From="7" To="8" Label="Source1" />
+              <Edge From="9" To="10" Label="Source1" />
+              <Edge From="11" To="12" Label="Source1" />
+              <Edge From="12" To="13" Label="Source1" />
+              <Edge From="14" To="15" Label="Source1" />
+              <Edge From="15" To="16" Label="Source1" />
             </Edges>
           </Workflow>
         </Builder>
