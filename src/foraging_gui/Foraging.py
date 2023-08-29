@@ -37,7 +37,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar.json')
             self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json') # The training phase is shared and not differentiated by tower
         else:
-            self.setWindowTitle("Foraging"+'_'+str(sys.argv[1]))
+            if self.current_box=='':
+                self.setWindowTitle("Foraging"+'_'+str(sys.argv[1]))
+            else:
+                self.setWindowTitle("Foraging"+'_'+self.current_box)
             self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration_'+str(sys.argv[1])+'.json')
             self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration_'+str(sys.argv[1])+'.json')
             self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_'+str(sys.argv[1])+'.json')

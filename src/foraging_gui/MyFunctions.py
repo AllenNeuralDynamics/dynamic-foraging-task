@@ -460,7 +460,7 @@ class GenerateTrials():
                 for i in range(len(self.B_RewardedHistory)):
                     B_RewardedHistory[i]=np.logical_or(self.B_RewardedHistory[i],self.B_AutoWaterTrial[i][Ind])
             elif self.TP_IncludeAutoReward=='no':
-                # auto reward is not considered as reward (auto reward only is considered reward when the animal makes a choice). Reward is determined by the animal's response history and the bait history
+                # auto reward is not considered as reward (auto reward is considered reward only when the animal makes a choice). Reward is determined by the animal's response history and the bait history
                 Ind=range(len(self.B_RewardedHistory[0]))
                 for i in range(len(self.B_RewardedHistory)): 
                     B_RewardedHistory[i]=np.logical_and(self.B_AnimalResponseHistory[Ind]==i,self.B_BaitHistory[i][Ind])
