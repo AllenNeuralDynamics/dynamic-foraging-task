@@ -631,6 +631,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.InitiallyInactiveN.setEnabled(False)
             self.label_27.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             self.InitiallyInactiveN.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
             # change name of min reward each block
             self.label_13.setText('min reward each block=')
             self.BlockMinReward.setText('0')
@@ -685,6 +686,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.InitiallyInactiveN.setEnabled(False)
             self.label_27.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             self.InitiallyInactiveN.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
             # change name of min reward each block
             self.label_13.setText('min reward each block=')
             self.BlockMinReward.setText('0')
@@ -732,6 +734,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.InitiallyInactiveN.setEnabled(True)
             self.label_27.setStyleSheet("color: black;")
             self.InitiallyInactiveN.setStyleSheet("color: black;""border: 1px solid gray;")
+            self.InitiallyInactiveN.setGeometry(QtCore.QRect(403, 101, 80, 20))
             # change name of min reward each block
             self.label_13.setText('RewardN=')
             self.BlockMinReward.setText('5')
