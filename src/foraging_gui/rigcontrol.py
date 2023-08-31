@@ -129,4 +129,24 @@ class RigClient:
     def OptogeneticsCalibration(self, value):
         self.send("/OptogeneticsCalibration", value)
         
-        
+    def CameraControl(self, value):
+        self.send("/cameracontrol", value)    
+
+    def CameraFrequency(self, value):
+        self.send("/camerafrequency", value)
+
+    def SideCameraFile(self, value):
+        # save file name of the SideCamera
+        self.send("/sidecamerafile", value)    
+    
+    def BottomCameraFile(self, value):
+        # save file name of the BottomCamera
+        self.send("/bottomcamerafile", value) 
+
+    def SideCameraCSV(self, value):
+        # save file name of the SideCamera csv
+        self.send("/sidecameracsv", value)
+
+    def BottomCameraCSV(self, value):
+        # save file name of the BottomCamera csv
+        self.send("/bottomcameracsv", value) 

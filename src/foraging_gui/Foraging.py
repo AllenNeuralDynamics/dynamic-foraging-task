@@ -82,6 +82,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._Optogenetics() # open the optogenetics panel
         self._LaserCalibration() # to open the laser calibration panel
         self._WaterCalibration() # to open the water calibration panel
+        self._Camera()
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self.WaterPerRewardedTrial=0.005 
         self._ShowRewardPairs() # show reward pairs
@@ -132,9 +133,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     self.current_box=Settings['current_box']
                 else:
                     self.current_box=''
+                if 'video_folder' in Settings:
+                    self.video_folder=Settings['video_folder']
+                else:
+                    self.video_folder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
             else:
                 self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
                 self.current_box=''
+                self.video_folder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
         except:
             self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
             self.current_box=''
@@ -930,28 +936,20 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     Obj=self.GeneratedTrials.Obj
             else:
                 Obj={}
-            # save training parameters
-            for child in self.centralwidget.findChildren(QtWidgets.QPushButton):
-                Obj[child.objectName()]=child.isChecked()
-            for child in self.centralwidget.findChildren(QtWidgets.QTextEdit):
-                Obj[child.objectName()]=child.toPlainText()
-            for child in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)+self.centralwidget.findChildren(QtWidgets.QLineEdit)+self.centralwidget.findChildren(QtWidgets.QSpinBox):
-                Obj[child.objectName()]=child.text()
-            for child in self.centralwidget.findChildren(QtWidgets.QComboBox):
-                Obj[child.objectName()]=child.currentText()
+
+            widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+            widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
+            self._Concat(widget_dict,Obj,'None')
+            if hasattr(self, 'LaserCalibration_dialog'):
+                widget_dict_LaserCalibration={w.objectName(): w for w in self.LaserCalibration_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))} 
+                self._Concat(widget_dict_LaserCalibration,Obj,'LaserCalibration_dialog')
+            if hasattr(self, 'Opto_dialog'):
+                widget_dict_opto={w.objectName(): w for w in self.Opto_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+                self._Concat(widget_dict_opto,Obj,'Opto_dialog')
+            if hasattr(self, 'Camera_dialog'):
+                widget_dict_camera={w.objectName(): w for w in self.Camera_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+                self._Concat(widget_dict_camera,Obj,'Camera_dialog')
             
-            # save optogenetics parameters
-            if 'Opto_dialog' in self.__dict__:
-                for child in self.Opto_dialog.findChildren(QtWidgets.QDoubleSpinBox)+self.Opto_dialog.findChildren(QtWidgets.QLineEdit):
-                    Obj[child.objectName()]=child.text()
-                for child in self.Opto_dialog.findChildren(QtWidgets.QComboBox):
-                    Obj[child.objectName()]=child.currentText()
-            # save optogenetics calibration parameters
-            if 'LaserCalibration_dialog' in self.__dict__:
-                for child in self.LaserCalibration_dialog.findChildren(QtWidgets.QDoubleSpinBox)+self.LaserCalibration_dialog.findChildren(QtWidgets.QLineEdit):
-                    Obj[child.objectName()]=child.text()
-                for child in self.LaserCalibration_dialog.findChildren(QtWidgets.QComboBox):
-                    Obj[child.objectName()]=child.currentText()
             Obj2=Obj.copy()
             # save behavor events
             if hasattr(self, 'GeneratedTrials'):
@@ -998,7 +996,33 @@ class Window(QMainWindow, Ui_ForagingGUI):
             elif self.SaveFile.endswith('.json'):
                 with open(self.SaveFile, "w") as outfile:
                     json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
-                      
+                    
+    def _Concat(self,widget_dict,Obj,keyname):
+        '''Help manage save different dialogs'''
+        if keyname=='None':
+            for key in widget_dict.keys():
+                widget = widget_dict[key]
+                if isinstance(widget, QtWidgets.QPushButton):
+                    Obj[widget.objectName()]=widget.isChecked()
+                elif isinstance(widget, QtWidgets.QTextEdit):
+                    Obj[widget.objectName()]=widget.toPlainText()
+                elif isinstance(widget, QtWidgets.QDoubleSpinBox) or isinstance(widget, QtWidgets.QLineEdit)  or isinstance(widget, QtWidgets.QSpinBox):
+                    Obj[widget.objectName()]=widget.text()
+                elif isinstance(widget, QtWidgets.QComboBox):
+                    Obj[widget.objectName()]=widget.currentText()
+        else:
+            Obj[keyname]={}
+            for key in widget_dict.keys():
+                widget = widget_dict[key]
+                if isinstance(widget, QtWidgets.QPushButton):
+                    Obj[keyname][widget.objectName()]=widget.isChecked()
+                elif isinstance(widget, QtWidgets.QTextEdit):
+                    Obj[keyname][widget.objectName()]=widget.toPlainText()
+                elif isinstance(widget, QtWidgets.QDoubleSpinBox) or isinstance(widget, QtWidgets.QLineEdit)  or isinstance(widget, QtWidgets.QSpinBox):
+                    Obj[keyname][widget.objectName()]=widget.text()
+                elif isinstance(widget, QtWidgets.QComboBox):
+                    Obj[keyname][widget.objectName()]=widget.currentText()
+        return Obj
     def _Open(self):
         self._StopCurrentSession() # stop current session first
         self.NewSession.setChecked(True)
@@ -1007,7 +1031,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.NewSession.setDisabled(True) # You must start a NewSession after loading a new file, and you can't continue that session
         elif Reply == QMessageBox.Cancel:
             return
-
         fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
         self.fname=fname
         if fname:
@@ -1022,21 +1045,36 @@ class Window(QMainWindow, Ui_ForagingGUI):
             widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
             widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))})  # update optogenetics parameters from the loaded file
             if hasattr(self, 'LaserCalibration_dialog'):
-                widget_dict.update({w.objectName(): w for w in self.LaserCalibration_dialog.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))})  # update laser calibration parameters from the loaded file
-            
+                widget_dict.update({w.objectName(): w for w in self.LaserCalibration_dialog.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))})  
+            if hasattr(self, 'Opto_dialog'):
+                widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))})
+            if hasattr(self, 'Camera_dialog'):
+                widget_dict.update({w.objectName(): w for w in self.Camera_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))})
             try:
                 for key in widget_dict.keys():
-                    if key in Obj:
+                    try:
+                        widget = widget_dict[key]
+                        if widget.parent().objectName()=='Optogenetics':
+                            CurrentObj=Obj['Opto_dialog']
+                        elif widget.parent().objectName()=='Camera':
+                            CurrentObj=Obj['Camera_dialog']
+                        elif widget.parent().objectName()=='CalibrationLaser':
+                            CurrentObj=Obj['LaserCalibration_dialog']
+                        else:
+                            CurrentObj=Obj.copy()
+                    except:
+                        continue
+                    if key in CurrentObj:
                         # skip some keys
                         if key=='ExtraWater' or key=='WeightBefore' or key=='WeightAfter' or key=='SuggestedWater':
                             self.ExtraWater.setText('')
                             continue
                         widget = widget_dict[key]
                         try: # load the paramter used by last trial
-                            value=np.array([Obj['TP_'+key][-2]])
+                            value=np.array([CurrentObj['TP_'+key][-2]])
                             Tag=0
                         except: # sometimes we only have training parameters, no behavior parameters
-                            value=Obj[key]
+                            value=CurrentObj[key]
                             Tag=1
                         if isinstance(widget, QtWidgets.QPushButton):
                             pass
@@ -1076,12 +1114,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
                             elif Tag==1:
                                 widget.setText(value)
                         elif isinstance(widget, QtWidgets.QPushButton):
+                            if Tag==0:
+                                widget.setChecked(bool(value[-1]))
+                            elif Tag==1:
+                                widget.setChecked(value)
                             if key=='AutoReward':
-                                if Tag==0:
-                                    widget.setChecked(bool(value[-1]))
-                                elif Tag==1:
-                                    widget.setChecked(value)
                                 self._AutoReward()
+                            if key=='NextBlock':
+                                self._NextBlock()
                     else:
                         widget = widget_dict[key]
                         if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
