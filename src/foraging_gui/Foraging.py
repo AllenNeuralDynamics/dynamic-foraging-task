@@ -907,22 +907,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.GeneratedTrials._GetLicks(self.Channel2)
         
         #ParamsFile = os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.json')
-        SaveFileMat = os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.mat')
-        SaveFileJson= os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.json')
-        SaveFileParJson= os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_par.json')
-        if not os.path.exists(os.path.dirname(SaveFileJson)):
-            os.makedirs(os.path.dirname(SaveFileJson))
-            print(f"Created new folder: {os.path.dirname(SaveFileJson)}")
-        N=0
-        while 1:
-            if os.path.isfile(SaveFileMat) or os.path.isfile(SaveFileJson)or os.path.isfile(SaveFileParJson):
-                N=N+1
-                SaveFileMat=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_{N}.mat')
-                SaveFileJson=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_{N}.json')
-                SaveFileParJson=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_{N}_par.json')
-            else:
-                break
-        Names = QFileDialog.getSaveFileName(self, 'Save File',SaveFileJson,"JSON files (*.json);;MAT files (*.mat);;JSON parameters (*_par.json)")
+        self._GetSaveFileName()
+        Names = QFileDialog.getSaveFileName(self, 'Save File',self.SaveFileJson,"JSON files (*.json);;MAT files (*.mat);;JSON parameters (*_par.json)")
         if Names[1]=='JSON parameters (*_par.json)':
             self.SaveFile=Names[0].replace('.json', '_par.json')
         else:
@@ -936,7 +922,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     Obj=self.GeneratedTrials.Obj
             else:
                 Obj={}
-
             widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
             widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
             self._Concat(widget_dict,Obj,'None')
@@ -996,7 +981,27 @@ class Window(QMainWindow, Ui_ForagingGUI):
             elif self.SaveFile.endswith('.json'):
                 with open(self.SaveFile, "w") as outfile:
                     json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
-                    
+
+    def _GetSaveFileName(self):
+        '''Get the name of the save file'''
+        SaveFileMat = os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.mat')
+        SaveFileJson= os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.json')
+        SaveFileParJson= os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_par.json')
+        if not os.path.exists(os.path.dirname(SaveFileJson)):
+            os.makedirs(os.path.dirname(SaveFileJson))
+            print(f"Created new folder: {os.path.dirname(SaveFileJson)}")
+        N=0
+        while 1:
+            if os.path.isfile(SaveFileMat) or os.path.isfile(SaveFileJson)or os.path.isfile(SaveFileParJson):
+                N=N+1
+                SaveFileMat=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_{N}.mat')
+                SaveFileJson=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_{N}.json')
+                SaveFileParJson=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_{N}_par.json')
+            else:
+                break
+        self.SaveFileMat=SaveFileMat
+        self.SaveFileJson=SaveFileJson
+        self.SaveFileParJson=SaveFileParJson
     def _Concat(self,widget_dict,Obj,keyname):
         '''Help manage save different dialogs'''
         if keyname=='None':

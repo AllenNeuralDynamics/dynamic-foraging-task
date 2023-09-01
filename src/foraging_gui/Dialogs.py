@@ -1,4 +1,4 @@
-import time,math,json,os
+import time,math,json,os,psutil
 from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout
 from PyQt5 import QtWidgets
 from Optogenetics import Ui_Optogenetics
@@ -871,6 +871,88 @@ class CameraDialog(QDialog,Ui_Camera):
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
         self.setupUi(self)
+        self.MainWindow=MainWindow
+        self._connectSignalsSlots()
+    def _connectSignalsSlots(self):
+        self.StartCamera.clicked.connect(self._StartCamera)
+    def _StartCamera(self):
+        '''Start/stop the camera'''
+        if self.StartCamera.isChecked():
+            self.StartCamera.setStyleSheet("background-color : green;")
+            self.MainWindow.Channel.CameraFrequency(int(self.FrameRate.text()))
+            # save the video data
+            if self.CollectVideo.currentText()=='Yes':
+                Re=self._SaveVideoData()
+            if self.CollectVideo.currentText()=='No' or Re==False:
+                video_folder=self.MainWindow.video_folder
+                video_folder=os.path.join(video_folder,'Tmp')
+                if not os.path.exists(video_folder):
+                    os.makedirs(video_folder)
+                side_camera_file=os.path.join(video_folder,'side_camera.avi')
+                bottom_camera_file=os.path.join(video_folder,'bottom_camera.avi')
+                side_camera_csv=os.path.join(video_folder,'side_camera.csv')
+                bottom_camera_csv=os.path.join(video_folder,'bottom_camera.csv')
+                self.MainWindow.Channel.SideCameraFile(side_camera_file)
+                self.MainWindow.Channel.BottomCameraFile(bottom_camera_file)
+                self.MainWindow.Channel.SideCameraCSV(side_camera_csv)
+                self.MainWindow.Channel.BottomCameraCSV(bottom_camera_csv)
+            # start the video triggers
+            self.MainWindow.Channel.CameraControl(int(1))
+        else:
+            self.StartCamera.setStyleSheet("background-color : none")
+            self.MainWindow.Channel.CameraControl(int(2))
+    def _SaveVideoData(self):
+        '''Save the video data'''
+        self.MainWindow._GetSaveFileName()
+        video_folder=self.MainWindow.video_folder
+        video_folder=os.path.join(video_folder,self.MainWindow.Tower.currentText(),self.MainWindow.AnimalName.text())
+        if not os.path.exists(video_folder):
+            os.makedirs(video_folder)
+        base_name=os.path.splitext(os.path.basename(self.MainWindow.SaveFileJson))[0]
+        
+        side_camera_file=os.path.join(video_folder,base_name+'_side_camera.avi')
+        bottom_camera_file=os.path.join(video_folder,base_name+'_bottom_camera.avi')
+        side_camera_csv=os.path.join(video_folder,base_name+'_side_camera.csv')
+        bottom_camera_csv=os.path.join(video_folder,base_name+'_bottom_camera.csv')
+        if is_file_in_use(side_camera_file) or is_file_in_use(bottom_camera_file) or is_file_in_use(side_camera_csv) or is_file_in_use(bottom_camera_csv):              
+            self.WarningLabelFileIsInUse.setText('File is in use. Please restart the bonsai!')
+            self.WarningLabelFileIsInUse.setStyleSheet("color: red;")
+            return False
+        else:
+            self.WarningLabelFileIsInUse.setText('')
+        N=0
+        while 1:
+            if os.path.isfile(side_camera_file) or os.path.isfile(bottom_camera_file) or os.path.isfile(side_camera_csv) or os.path.isfile(bottom_camera_csv):
+                N=N+1
+                side_camera_file=os.path.join(video_folder,base_name+'_'+str(N)+'_side_camera.avi')
+                bottom_camera_file=os.path.join(video_folder,base_name+'_'+str(N)+'_bottom_camera.avi')
+                side_camera_csv=os.path.join(video_folder,base_name+'_'+str(N)+'_side_camera.csv')
+                bottom_camera_csv=os.path.join(video_folder,base_name+'_'+str(N)+'_bottom_camera.csv')
+            else:
+                break
+        if is_file_in_use(side_camera_file) or is_file_in_use(bottom_camera_file) or is_file_in_use(side_camera_csv) or is_file_in_use(bottom_camera_csv):
+            self.WarningLabelFileIsInUse.setText('File is in use. Please restart the bonsai!')
+            self.WarningLabelFileIsInUse.setStyleSheet("color: red;")
+            return False
+        else:
+            self.WarningLabelFileIsInUse.setText('')
+        self.MainWindow.Channel.SideCameraFile(side_camera_file)
+        self.MainWindow.Channel.BottomCameraFile(bottom_camera_file)
+        self.MainWindow.Channel.SideCameraCSV(side_camera_csv)
+        self.MainWindow.Channel.BottomCameraCSV(bottom_camera_csv)
+        self.MainWindow.TP_side_camera_file=side_camera_file
+        self.MainWindow.TP_bottom_camera_file=bottom_camera_file
+        self.MainWindow.TP_side_camera_csv=side_camera_csv
+        self.MainWindow.TP_bottom_camera_csv=bottom_camera_csv
+        return True
+def is_file_in_use(file_path):
+    '''check if the file is open'''
+    if os.path.exists(file_path):
+        try:
+            os.rename(file_path, file_path)
+            return False
+        except OSError as e:
+            return True
 
 class ManipulatorDialog(QDialog,Ui_Manipulator):
     def __init__(self, MainWindow, parent=None):

@@ -4,4 +4,5 @@ scipy
 matplotlib
 PyQt5
 pandas
+psutil
 git+https://github.com/glopesdev/pyosc3.git@master
