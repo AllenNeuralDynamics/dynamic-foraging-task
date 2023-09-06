@@ -59,7 +59,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.ANewTrial=1 # permission to start a new trial
         self.UpdateParameters=1 # permission to update parameters
         self.Visualization.setTitle(str(date.today()))
-        self.loggingstarted=0
+        self.loggingstarted=-1
         try: 
             self._InitializeBonsai()
             self.InitializeBonsaiSuccessfully=1
@@ -96,6 +96,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
         if log_folder is None:
+            # formal logging
+            loggingtype=0
             self._GetSaveFileName()
             log_folder=os.path.join(self.log_folder,self.Tower.currentText(),self.AnimalName.text())
             base_name=os.path.splitext(os.path.basename(self.SaveFileJson))[0]
@@ -103,6 +105,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
             log_folder=os.path.join(log_folder,base_name,formatted_datetime)
         else:
+            # temporary logging
+            loggingtype=1
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
             log_folder=os.path.join(log_folder,formatted_datetime)
@@ -112,8 +116,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
         Rec=self.Channel.receive()
         if Rec[0].address=='/loggerstarted':
             pass
-        self.loggingstarted=1
-
+        if loggingtype==0:
+            # formal logging
+            self.loggingstarted=0
+        elif loggingtype==1:
+            # temporary logging
+            self.loggingstarted=1
+        return log_folder
     def _GetLaserCalibration(self):
         '''Get the laser calibration results'''
         if os.path.exists(self.LaserCalibrationFiles):
@@ -1009,6 +1018,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
             elif self.SaveFile.endswith('.json'):
                 with open(self.SaveFile, "w") as outfile:
                     json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
+            # close the camera
+            if self.Camera_dialog.AutoControl.currentText()=='Yes':
+                self.Camera_dialog.StartCamera.setChecked(False)
+                self.Camera_dialog._StartCamera()
 
     def _GetSaveFileName(self):
         '''Get the name of the save file'''
@@ -1350,7 +1363,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.WarningLabel.setText('')
             self.WarningLabel.setStyleSheet("color: gray;")
             # start a new logging
-            self._restartlogging()
+            self.TP_log_folder=self._restartlogging()
+            # start the camera during the begginning of each session
+            if self.Camera_dialog.AutoControl.currentText()=='Yes':
+                self.Camera_dialog.StartCamera.setChecked(True)
+                self.Camera_dialog._StartCamera()
             self.SessionStartTime=datetime.now()
             self.Other_SessionStartTime=str(self.SessionStartTime) # for saving
             GeneratedTrials=GenerateTrials(self)

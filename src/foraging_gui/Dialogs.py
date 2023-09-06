@@ -1,4 +1,4 @@
-import time,math,json,os,psutil
+import time,math,json,os,shutil,subprocess
 from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout
 from PyQt5 import QtWidgets
 from Optogenetics import Ui_Optogenetics
@@ -875,16 +875,76 @@ class CameraDialog(QDialog,Ui_Camera):
         self._connectSignalsSlots()
     def _connectSignalsSlots(self):
         self.StartCamera.clicked.connect(self._StartCamera)
+        self.ClearTemporaryVideo.clicked.connect(self._ClearTemporaryVideo)
+        self.AutoControl.currentIndexChanged.connect(self._AutoControl)
+        self.RestartLogging.clicked.connect(self._RestartLogging)
+        self.OpenSaveFolder.clicked.connect(self._OpenSaveFolder)
 
+    def _OpenSaveFolder(self):
+        '''Open the log/save folder of the camera'''
+        if hasattr(self.MainWindow,'TP_log_folder'):
+            try:
+                subprocess.Popen(['explorer', self.MainWindow.TP_log_folder])
+            except:
+                self.WarningLabelOpenSave.setText('No logging folder found!')
+                self.WarningLabelOpenSave.setStyleSheet("color: red;")
+        else:
+            self.WarningLabelOpenSave.setText('No logging folder found!')
+            self.WarningLabelOpenSave.setStyleSheet("color: red;")
+    def _RestartLogging(self):
+        '''Restart the logging (create a new logging folder)'''
+        if self.CollectVideo.currentText()=='Yes':
+            self.MainWindow.TP_log_folder=self.MainWindow._restartlogging()
+        else:
+            self.MainWindow.TP_log_folder=self.MainWindow._restartlogging(self.MainWindow.temporary_video_folder)
+        self.WarningLabelLogging.setText('Logging has restarted!')
+        self.WarningLabelLogging.setStyleSheet("color: red;")
+
+    def _AutoControl(self):
+        '''Trigger the camera during the start of a new behavior session'''
+        if self.AutoControl.currentText()=='Yes':
+            #self.StartCamera.setEnabled(False)
+            self.label_8.setEnabled(False)
+            self.CollectVideo.setEnabled(False)
+            self.RestartLogging.setEnabled(False)
+            self.StartCamera.setChecked(False)
+            self._StartCamera()
+            index = self.CollectVideo.findText('Yes')
+            if index != -1:
+                self.CollectVideo.setCurrentIndex(index)
+        else:
+            #self.StartCamera.setEnabled(True)
+            self.label_8.setEnabled(True)
+            self.CollectVideo.setEnabled(True)
+            self.RestartLogging.setEnabled(True)
+            index = self.CollectVideo.findText('No')
+            if index != -1:
+                self.CollectVideo.setCurrentIndex(index)
+            
+    def _ClearTemporaryVideo(self):
+        '''Clear temporary video files'''
+        try:
+            # Remove a directory and its contents (recursively)
+            if os.path.exists(self.MainWindow.temporary_video_folder):
+                shutil.rmtree(self.MainWindow.temporary_video_folder)
+                print(f"Directory '{self.MainWindow.temporary_video_folder}' and its contents removed successfully.")
+            else:
+                print(f"Directory '{self.MainWindow.temporary_video_folder}' does not exist.")
+        except:
+            pass
     def _StartCamera(self):
         '''Start/stop the camera'''
         if self.StartCamera.isChecked():
             self.StartCamera.setStyleSheet("background-color : green;")
             self.MainWindow.Channel.CameraFrequency(int(self.FrameRate.text()))
-            if self.CollectVideo.currentText()=='Yes':
-                self.MainWindow._restartlogging()
-            else:
-                self.MainWindow._restartlogging(self.MainWindow.temporary_video_folder)
+            if self.AutoControl.currentText()=='No':
+                # Do not restart logging when automatic control is "yes" as logging will start in behavior control
+                if self.CollectVideo.currentText()=='Yes':
+                    self.MainWindow.TP_log_folder=self.MainWindow._restartlogging()
+                else:
+                    if self.MainWindow.loggingstarted!=1:
+                        # Start logging if the temporary logging is not started
+                        self.MainWindow.TP_log_folder=self.MainWindow._restartlogging(self.MainWindow.temporary_video_folder)
             '''
             # This part was dropped due to the new logging method
             # save the video data
@@ -906,9 +966,23 @@ class CameraDialog(QDialog,Ui_Camera):
             '''
             # start the video triggers
             self.MainWindow.Channel.CameraControl(int(1))
+            self.MainWindow.WarningLabelCamera.setText('Camera is on!')
+            self.MainWindow.WarningLabelCamera.setStyleSheet("color: red;")
+            self.WarningLabelCameraOn.setText('Camera is on!')
+            self.WarningLabelCameraOn.setStyleSheet("color: red;")
+            self.WarningLabelLogging.setText('')
+            self.WarningLabelLogging.setStyleSheet("color: None;")
+            self.WarningLabelOpenSave.setText('')
         else:
             self.StartCamera.setStyleSheet("background-color : none")
             self.MainWindow.Channel.CameraControl(int(2))
+            self.MainWindow.WarningLabelCamera.setText('Camera is off!')
+            self.MainWindow.WarningLabelCamera.setStyleSheet("color: red;")
+            self.WarningLabelCameraOn.setText('Camera is off!')
+            self.WarningLabelCameraOn.setStyleSheet("color: red;")
+            self.WarningLabelLogging.setText('')
+            self.WarningLabelLogging.setStyleSheet("color: None;")
+            self.WarningLabelOpenSave.setText('')
     
     def _SaveVideoData(self):
         '''Save the video data'''
