@@ -891,11 +891,14 @@ class CameraDialog(QDialog,Ui_Camera):
         else:
             self.WarningLabelOpenSave.setText('No logging folder found!')
             self.WarningLabelOpenSave.setStyleSheet("color: red;")
+
     def _RestartLogging(self):
         '''Restart the logging (create a new logging folder)'''
         if self.CollectVideo.currentText()=='Yes':
+            # formal logging
             self.MainWindow.TP_log_folder=self.MainWindow._restartlogging()
         else:
+            # temporary logging
             self.MainWindow.TP_log_folder=self.MainWindow._restartlogging(self.MainWindow.temporary_video_folder)
         self.WarningLabelLogging.setText('Logging has restarted!')
         self.WarningLabelLogging.setStyleSheet("color: red;")
@@ -932,6 +935,7 @@ class CameraDialog(QDialog,Ui_Camera):
                 print(f"Directory '{self.MainWindow.temporary_video_folder}' does not exist.")
         except:
             pass
+
     def _StartCamera(self):
         '''Start/stop the camera'''
         if self.StartCamera.isChecked():

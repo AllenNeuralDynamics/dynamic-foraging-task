@@ -1,4 +1,4 @@
-import sys, os,traceback,json,time
+import sys, os,traceback,json,time,subprocess
 import numpy as np
 from datetime import date,timedelta,datetime
 from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout,QLineEdit,QWidget,QSizePolicy
@@ -294,6 +294,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.TrainingStage.currentIndexChanged.connect(self._TrainingStage)
         self.TrainingStage.activated.connect(self._TrainingStage)
         self.SaveTraining.clicked.connect(self._SaveTraining)
+        self.actionTemporary_Logging.triggered.connect(self._startTemporaryLogging)
+        self.actionFormal_logging.triggered.connect(self._startFormalLogging)
+        self.actionOpen_logging_folder.triggered.connect(self._OpenLoggingFolder)
+        self.actionOpen_behavior_folder.triggered.connect(self._OpenBehaviorFolder)
         self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
@@ -305,6 +309,23 @@ class Window(QMainWindow, Ui_ForagingGUI):
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit)):        
                 child.returnPressed.connect(self.keyPressEvent)
+    def _OpenBehaviorFolder(self):
+        '''Open the the current behavior folder'''
+        self._GetSaveFileName()
+        folder_name=os.path.dirname(self.SaveFileJson)
+        try:
+            subprocess.Popen(['explorer', folder_name])
+        except:
+            pass
+    def _OpenLoggingFolder(self):
+        '''Open the logging folder'''
+        self.Camera_dialog._OpenSaveFolder()
+    def _startTemporaryLogging(self):
+        '''Restart the temporary logging'''
+        self.TP_log_folder=self._restartlogging(self.temporary_video_folder)
+    def _startFormalLogging(self):
+        '''Restart the formal logging'''
+        self.TP_log_folder=self._restartlogging()
     def _TrainingStage(self):
         '''Change the parameters automatically based on training stage and task'''
         self.WarningLabel_SaveTrainingStage.setText('')

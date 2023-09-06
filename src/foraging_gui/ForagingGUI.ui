@@ -3374,7 +3374,6 @@
     </property>
     <addaction name="action_Calibration"/>
     <addaction name="actionLaser_Calibration"/>
-    <addaction name="action_Camera"/>
     <addaction name="action_Snipping"/>
     <addaction name="separator"/>
    </widget>
@@ -3412,12 +3411,23 @@
     <property name="title">
      <string>Control</string>
     </property>
+    <widget class="QMenu" name="actionRestartLogging_2">
+     <property name="title">
+      <string>Restart logging</string>
+     </property>
+     <addaction name="actionTemporary_Logging"/>
+     <addaction name="actionFormal_logging"/>
+     <addaction name="actionOpen_logging_folder"/>
+    </widget>
     <addaction name="action_Optogenetics"/>
+    <addaction name="action_Camera"/>
     <addaction name="action_MotorStage"/>
     <addaction name="action_Manipulator"/>
+    <addaction name="actionConnectBonsai"/>
     <addaction name="action_Start"/>
     <addaction name="action_NewSession"/>
-    <addaction name="actionConnectBonsai"/>
+    <addaction name="actionRestartLogging_2"/>
+    <addaction name="actionOpen_behavior_folder"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="sizePolicy">
@@ -3666,7 +3676,7 @@
   </action>
   <action name="action_NewSession">
    <property name="text">
-    <string>New Session</string>
+    <string>New session</string>
    </property>
   </action>
   <action name="action_HideLines">
@@ -3688,7 +3698,27 @@
   </action>
   <action name="actionConnectBonsai">
    <property name="text">
-    <string>ConnectBonsai</string>
+    <string>Connect bonsai</string>
+   </property>
+  </action>
+  <action name="actionTemporary_Logging">
+   <property name="text">
+    <string>Temporary logging</string>
+   </property>
+  </action>
+  <action name="actionFormal_logging">
+   <property name="text">
+    <string>Formal logging</string>
+   </property>
+  </action>
+  <action name="actionOpen_logging_folder">
+   <property name="text">
+    <string>Open logging folder</string>
+   </property>
+  </action>
+  <action name="actionOpen_behavior_folder">
+   <property name="text">
+    <string>Open behavior folder</string>
    </property>
   </action>
  </widget>
