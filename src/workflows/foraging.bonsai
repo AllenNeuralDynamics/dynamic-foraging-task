@@ -2,150 +2,23 @@
 <WorkflowBuilder Version="2.8.0"
                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                  xmlns:rx="clr-namespace:Bonsai.Reactive;assembly=Bonsai.Core"
-                 xmlns:io="clr-namespace:Bonsai.IO;assembly=Bonsai.System"
-                 xmlns:osc="clr-namespace:Bonsai.Osc;assembly=Bonsai.Osc"
                  xmlns:dsp="clr-namespace:Bonsai.Dsp;assembly=Bonsai.Dsp"
                  xmlns:p1="clr-namespace:Bonsai.DAQmx;assembly=Extensions"
+                 xmlns:osc="clr-namespace:Bonsai.Osc;assembly=Bonsai.Osc"
                  xmlns:beh="clr-namespace:Harp.Behavior;assembly=Harp.Behavior"
                  xmlns:harp="clr-namespace:Bonsai.Harp;assembly=Bonsai.Harp"
-                 xmlns:ipy="clr-namespace:Bonsai.Scripting.IronPython;assembly=Bonsai.Scripting.IronPython"
-                 xmlns:mx="clr-namespace:Bonsai.DAQmx;assembly=Bonsai.DAQmx"
                  xmlns:scr="clr-namespace:Bonsai.Scripting.Expressions;assembly=Bonsai.Scripting.Expressions"
                  xmlns:wie="clr-namespace:Bonsai.Windows.Input;assembly=Bonsai.Windows.Input"
                  xmlns:sys="clr-namespace:System;assembly=mscorlib"
                  xmlns:al="clr-namespace:Bonsai.Audio;assembly=Bonsai.Audio"
                  xmlns:p2="clr-namespace:Harp.SoundCard;assembly=Harp.SoundCard"
                  xmlns:gl="clr-namespace:Bonsai.Shaders;assembly=Bonsai.Shaders"
-                 xmlns:spk="clr-namespace:Bonsai.Spinnaker;assembly=Bonsai.Spinnaker"
+                 xmlns:io="clr-namespace:Bonsai.IO;assembly=Bonsai.System"
                  xmlns:cv="clr-namespace:Bonsai.Vision;assembly=Bonsai.Vision"
+                 xmlns:spk="clr-namespace:Bonsai.Spinnaker;assembly=Bonsai.Spinnaker"
                  xmlns="https://bonsai-rx.org/2018/workflow">
   <Workflow>
     <Nodes>
-      <Expression xsi:type="Disable">
-        <Builder xsi:type="rx:Defer">
-          <Name>UnitTest</Name>
-          <Workflow>
-            <Nodes>
-              <Expression xsi:type="Combinator">
-                <Combinator xsi:type="io:StartProcess">
-                  <io:FileName>../../allen_env/scripts/python.exe</io:FileName>
-                  <io:Arguments>../foraging_gui/Test.py</io:Arguments>
-                </Combinator>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>FromBonsaiOSC</Name>
-              </Expression>
-              <Expression xsi:type="osc:Parse">
-                <osc:Address>/StartTest</osc:Address>
-                <osc:TypeTag>s</osc:TypeTag>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>Echo</Name>
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>0</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="osc:Format">
-                      <osc:Address>/Test</osc:Address>
-                    </Expression>
-                    <Expression xsi:type="MulticastSubject">
-                      <Name>ToBonsaiOSC</Name>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="StringProperty">
-                        <Value>Hi</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="osc:Format">
-                      <osc:Address>/Test2</osc:Address>
-                    </Expression>
-                    <Expression xsi:type="MulticastSubject">
-                      <Name>ToBonsaiOSC</Name>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>0</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="osc:Format">
-                      <osc:Address>/Test</osc:Address>
-                    </Expression>
-                    <Expression xsi:type="MulticastSubject">
-                      <Name>ToBonsaiOSC2</Name>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="StringProperty">
-                        <Value>HiBack</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="osc:Format">
-                      <osc:Address>/Test2</osc:Address>
-                    </Expression>
-                    <Expression xsi:type="MulticastSubject">
-                      <Name>ToBonsaiOSC2</Name>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="2" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source1" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                    <Edge From="5" To="6" Label="Source1" />
-                    <Edge From="6" To="7" Label="Source1" />
-                    <Edge From="7" To="8" Label="Source1" />
-                    <Edge From="8" To="9" Label="Source1" />
-                    <Edge From="9" To="10" Label="Source1" />
-                    <Edge From="10" To="11" Label="Source1" />
-                    <Edge From="11" To="12" Label="Source1" />
-                    <Edge From="12" To="13" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>FromBonsaiOSC</Name>
-              </Expression>
-              <Expression xsi:type="osc:Parse">
-                <osc:Address>/EndTest</osc:Address>
-                <osc:TypeTag>s</osc:TypeTag>
-              </Expression>
-              <Expression xsi:type="Combinator">
-                <Combinator xsi:type="rx:TakeUntil" />
-              </Expression>
-              <Expression xsi:type="Combinator">
-                <Combinator xsi:type="rx:Delay">
-                  <rx:DueTime>PT5S</rx:DueTime>
-                </Combinator>
-              </Expression>
-              <Expression xsi:type="Combinator">
-                <Combinator xsi:type="StringProperty">
-                  <Value>Passed Test!</Value>
-                </Combinator>
-              </Expression>
-              <Expression xsi:type="WorkflowOutput" />
-            </Nodes>
-            <Edges>
-              <Edge From="1" To="2" Label="Source1" />
-              <Edge From="2" To="3" Label="Source1" />
-              <Edge From="3" To="6" Label="Source1" />
-              <Edge From="4" To="5" Label="Source1" />
-              <Edge From="5" To="6" Label="Source2" />
-              <Edge From="6" To="7" Label="Source1" />
-              <Edge From="7" To="8" Label="Source1" />
-              <Edge From="8" To="9" Label="Source1" />
-            </Edges>
-          </Workflow>
-        </Builder>
-      </Expression>
       <Expression xsi:type="Disable">
         <Builder xsi:type="GroupWorkflow">
           <Name>Optogenetics2</Name>
@@ -275,1381 +148,6 @@
               <Edge From="10" To="11" Label="Source1" />
               <Edge From="11" To="12" Label="Source1" />
               <Edge From="12" To="13" Label="Source1" />
-            </Edges>
-          </Workflow>
-        </Builder>
-      </Expression>
-      <Expression xsi:type="Disable">
-        <Builder xsi:type="GroupWorkflow">
-          <Name>Optogenetics</Name>
-          <Workflow>
-            <Nodes>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>Start</Name>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>TriggerITIStart_Wave1</Name>
-              </Expression>
-              <Expression xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="Value" />
-                </PropertyMappings>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>TriggerITI_Wave1</Name>
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="ExternalizedMapping">
-                      <Property Name="Value" />
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>1</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="ipy:PythonSelectMany">
-                      <ipy:Name>StartTrigger</ipy:Name>
-                      <ipy:Script>import random
-
-@returns(bool)
-def process(value):
-
-  if value ==1 or value ==2:
-     v = True
-  else:
-     v = False
-
-  yield v
-</ipy:Script>
-                    </Expression>
-                    <Expression xsi:type="rx:Condition">
-                      <Workflow>
-                        <Nodes>
-                          <Expression xsi:type="WorkflowInput">
-                            <Name>Source1</Name>
-                          </Expression>
-                          <Expression xsi:type="WorkflowOutput" />
-                        </Nodes>
-                        <Edges>
-                          <Edge From="0" To="1" Label="Source1" />
-                        </Edges>
-                      </Workflow>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="2" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source1" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>Trigger_Location1</Name>
-              </Expression>
-              <Expression xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="Value" />
-                </PropertyMappings>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>Trigger_Location1</Name>
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="ExternalizedMapping">
-                      <Property Name="Value" />
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>1</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="ipy:PythonSelectMany">
-                      <ipy:Name>StartTrigger</ipy:Name>
-                      <ipy:Script>import random
-
-@returns(bool)
-def process(value):
-
-  if value ==1:
-     v = True
-  else:
-     v = False
-
-  yield v
-</ipy:Script>
-                    </Expression>
-                    <Expression xsi:type="rx:Condition">
-                      <Workflow>
-                        <Nodes>
-                          <Expression xsi:type="WorkflowInput">
-                            <Name>Source1</Name>
-                          </Expression>
-                          <Expression xsi:type="WorkflowOutput" />
-                        </Nodes>
-                        <Edges>
-                          <Edge From="0" To="1" Label="Source1" />
-                        </Edges>
-                      </Workflow>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="2" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source1" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>Location1Size</Name>
-              </Expression>
-              <Expression xsi:type="Combinator">
-                <Combinator xsi:type="IntProperty">
-                  <Value>100</Value>
-                </Combinator>
-              </Expression>
-              <Expression xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="BufferSize" />
-                </PropertyMappings>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>Wave1_Location1</Name>
-                <Description />
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="SubscribeSubject">
-                      <Name>WaveForm1_1</Name>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="ExternalizedMapping">
-                      <Property Name="BufferSize" />
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="mx:AnalogOutput">
-                        <mx:SignalSource />
-                        <mx:SampleRate>5000</mx:SampleRate>
-                        <mx:ActiveEdge>Rising</mx:ActiveEdge>
-                        <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                        <mx:BufferSize>100</mx:BufferSize>
-                        <mx:Channels>
-                          <mx:AnalogOutputChannelConfiguration>
-                            <mx:ChannelName>Out</mx:ChannelName>
-                            <mx:MinimumValue>-10</mx:MinimumValue>
-                            <mx:MaximumValue>10</mx:MaximumValue>
-                            <mx:PhysicalChannel>Dev1/ao0</mx:PhysicalChannel>
-                            <mx:VoltageUnits>Volts</mx:VoltageUnits>
-                          </mx:AnalogOutputChannelConfiguration>
-                        </mx:Channels>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>1</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="osc:SendMessage">
-                      <osc:Connection>BonsaiOSC4</osc:Connection>
-                      <osc:Address>/FinishOfWave1_1</osc:Address>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="3" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source2" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                    <Edge From="5" To="6" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>Trigger_Location2</Name>
-              </Expression>
-              <Expression xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="Value" />
-                </PropertyMappings>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>Trigger_Location2</Name>
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="ExternalizedMapping">
-                      <Property Name="Value" />
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>1</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="ipy:PythonSelectMany">
-                      <ipy:Name>StartTrigger</ipy:Name>
-                      <ipy:Script>import random
-
-@returns(bool)
-def process(value):
-
-  if value ==1:
-     v = True
-  else:
-     v = False
-
-  yield v
-</ipy:Script>
-                    </Expression>
-                    <Expression xsi:type="rx:Condition">
-                      <Workflow>
-                        <Nodes>
-                          <Expression xsi:type="WorkflowInput">
-                            <Name>Source1</Name>
-                          </Expression>
-                          <Expression xsi:type="WorkflowOutput" />
-                        </Nodes>
-                        <Edges>
-                          <Edge From="0" To="1" Label="Source1" />
-                        </Edges>
-                      </Workflow>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="2" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source1" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>Location2Size</Name>
-              </Expression>
-              <Expression xsi:type="Combinator">
-                <Combinator xsi:type="IntProperty">
-                  <Value>100</Value>
-                </Combinator>
-              </Expression>
-              <Expression xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="BufferSize" />
-                </PropertyMappings>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>Wave1_Location2</Name>
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="SubscribeSubject">
-                      <Name>WaveForm1_2</Name>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="ExternalizedMapping">
-                      <Property Name="BufferSize" />
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="mx:AnalogOutput">
-                        <mx:SignalSource />
-                        <mx:SampleRate>5000</mx:SampleRate>
-                        <mx:ActiveEdge>Rising</mx:ActiveEdge>
-                        <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                        <mx:BufferSize>100</mx:BufferSize>
-                        <mx:Channels>
-                          <mx:AnalogOutputChannelConfiguration>
-                            <mx:ChannelName>Out</mx:ChannelName>
-                            <mx:MinimumValue>-10</mx:MinimumValue>
-                            <mx:MaximumValue>10</mx:MaximumValue>
-                            <mx:PhysicalChannel>Dev1/ao1</mx:PhysicalChannel>
-                            <mx:VoltageUnits>Volts</mx:VoltageUnits>
-                          </mx:AnalogOutputChannelConfiguration>
-                        </mx:Channels>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>1</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="osc:SendMessage">
-                      <osc:Connection>BonsaiOSC4</osc:Connection>
-                      <osc:Address>/FinishOfWave1_2</osc:Address>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="3" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source2" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                    <Edge From="5" To="6" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>Start</Name>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>TriggerITIStart_Wave2</Name>
-              </Expression>
-              <Expression xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="Value" />
-                </PropertyMappings>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>TriggerITI_Wave2</Name>
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="ExternalizedMapping">
-                      <Property Name="Value" />
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>0</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="ipy:PythonSelectMany">
-                      <ipy:Name>StartTrigger</ipy:Name>
-                      <ipy:Script>import random
-
-@returns(bool)
-def process(value):
-
-  if value ==1 or value ==2:
-     v = True
-  else:
-     v = False
-
-  yield v
-</ipy:Script>
-                    </Expression>
-                    <Expression xsi:type="rx:Condition">
-                      <Workflow>
-                        <Nodes>
-                          <Expression xsi:type="WorkflowInput">
-                            <Name>Source1</Name>
-                          </Expression>
-                          <Expression xsi:type="WorkflowOutput" />
-                        </Nodes>
-                        <Edges>
-                          <Edge From="0" To="1" Label="Source1" />
-                        </Edges>
-                      </Workflow>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="2" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source1" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>Trigger_Location1</Name>
-              </Expression>
-              <Expression xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="Value" />
-                </PropertyMappings>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>Trigger_Location1</Name>
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="ExternalizedMapping">
-                      <Property Name="Value" />
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>1</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="ipy:PythonSelectMany">
-                      <ipy:Name>StartTrigger</ipy:Name>
-                      <ipy:Script>import random
-
-@returns(bool)
-def process(value):
-
-  if value ==1:
-     v = True
-  else:
-     v = False
-
-  yield v
-</ipy:Script>
-                    </Expression>
-                    <Expression xsi:type="rx:Condition">
-                      <Workflow>
-                        <Nodes>
-                          <Expression xsi:type="WorkflowInput">
-                            <Name>Source1</Name>
-                          </Expression>
-                          <Expression xsi:type="WorkflowOutput" />
-                        </Nodes>
-                        <Edges>
-                          <Edge From="0" To="1" Label="Source1" />
-                        </Edges>
-                      </Workflow>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="2" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source1" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>Location1Size</Name>
-              </Expression>
-              <Expression xsi:type="Combinator">
-                <Combinator xsi:type="IntProperty">
-                  <Value>100</Value>
-                </Combinator>
-              </Expression>
-              <Expression xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="BufferSize" />
-                </PropertyMappings>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>Wave2_Location1</Name>
-                <Description />
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="SubscribeSubject">
-                      <Name>WaveForm2_1</Name>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="ExternalizedMapping">
-                      <Property Name="BufferSize" />
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="mx:AnalogOutput">
-                        <mx:SignalSource />
-                        <mx:SampleRate>5000</mx:SampleRate>
-                        <mx:ActiveEdge>Rising</mx:ActiveEdge>
-                        <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                        <mx:BufferSize>100</mx:BufferSize>
-                        <mx:Channels>
-                          <mx:AnalogOutputChannelConfiguration>
-                            <mx:ChannelName>Out</mx:ChannelName>
-                            <mx:MinimumValue>-10</mx:MinimumValue>
-                            <mx:MaximumValue>10</mx:MaximumValue>
-                            <mx:PhysicalChannel>Dev1/ao0</mx:PhysicalChannel>
-                            <mx:VoltageUnits>Volts</mx:VoltageUnits>
-                          </mx:AnalogOutputChannelConfiguration>
-                        </mx:Channels>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>1</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="osc:SendMessage">
-                      <osc:Connection>BonsaiOSC4</osc:Connection>
-                      <osc:Address>/FinishOfWave2_1</osc:Address>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="3" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source2" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                    <Edge From="5" To="6" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>Trigger_Location2</Name>
-              </Expression>
-              <Expression xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="Value" />
-                </PropertyMappings>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>Trigger_Location2</Name>
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="ExternalizedMapping">
-                      <Property Name="Value" />
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>1</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="ipy:PythonSelectMany">
-                      <ipy:Name>StartTrigger</ipy:Name>
-                      <ipy:Script>import random
-
-@returns(bool)
-def process(value):
-
-  if value ==1:
-     v = True
-  else:
-     v = False
-
-  yield v
-</ipy:Script>
-                    </Expression>
-                    <Expression xsi:type="rx:Condition">
-                      <Workflow>
-                        <Nodes>
-                          <Expression xsi:type="WorkflowInput">
-                            <Name>Source1</Name>
-                          </Expression>
-                          <Expression xsi:type="WorkflowOutput" />
-                        </Nodes>
-                        <Edges>
-                          <Edge From="0" To="1" Label="Source1" />
-                        </Edges>
-                      </Workflow>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="2" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source1" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>Location2Size</Name>
-              </Expression>
-              <Expression xsi:type="Combinator">
-                <Combinator xsi:type="IntProperty">
-                  <Value>100</Value>
-                </Combinator>
-              </Expression>
-              <Expression xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="BufferSize" />
-                </PropertyMappings>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>Wave2_Location2</Name>
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="SubscribeSubject">
-                      <Name>WaveForm2_2</Name>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="ExternalizedMapping">
-                      <Property Name="BufferSize" />
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="mx:AnalogOutput">
-                        <mx:SignalSource />
-                        <mx:SampleRate>5000</mx:SampleRate>
-                        <mx:ActiveEdge>Rising</mx:ActiveEdge>
-                        <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                        <mx:BufferSize>100</mx:BufferSize>
-                        <mx:Channels>
-                          <mx:AnalogOutputChannelConfiguration>
-                            <mx:ChannelName>Out</mx:ChannelName>
-                            <mx:MinimumValue>-10</mx:MinimumValue>
-                            <mx:MaximumValue>10</mx:MaximumValue>
-                            <mx:PhysicalChannel>Dev1/ao1</mx:PhysicalChannel>
-                            <mx:VoltageUnits>Volts</mx:VoltageUnits>
-                          </mx:AnalogOutputChannelConfiguration>
-                        </mx:Channels>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>1</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="osc:SendMessage">
-                      <osc:Connection>BonsaiOSC4</osc:Connection>
-                      <osc:Address>/FinishOfWave2_2</osc:Address>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="3" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source2" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                    <Edge From="5" To="6" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>GoCue</Name>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>TriggerGoCue_Wave1</Name>
-              </Expression>
-              <Expression xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="Value" />
-                </PropertyMappings>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>TriggerGoCue_Wave1</Name>
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="ExternalizedMapping">
-                      <Property Name="Value" />
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>0</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="ipy:PythonSelectMany">
-                      <ipy:Name>StartTrigger</ipy:Name>
-                      <ipy:Script>import random
-
-@returns(bool)
-def process(value):
-
-  if value ==1 or value ==2:
-     v = True
-  else:
-     v = False
-
-  yield v
-</ipy:Script>
-                    </Expression>
-                    <Expression xsi:type="rx:Condition">
-                      <Workflow>
-                        <Nodes>
-                          <Expression xsi:type="WorkflowInput">
-                            <Name>Source1</Name>
-                          </Expression>
-                          <Expression xsi:type="WorkflowOutput" />
-                        </Nodes>
-                        <Edges>
-                          <Edge From="0" To="1" Label="Source1" />
-                        </Edges>
-                      </Workflow>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="2" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source1" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>Trigger_Location1</Name>
-              </Expression>
-              <Expression xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="Value" />
-                </PropertyMappings>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>Trigger_Location1</Name>
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="ExternalizedMapping">
-                      <Property Name="Value" />
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>1</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="ipy:PythonSelectMany">
-                      <ipy:Name>StartTrigger</ipy:Name>
-                      <ipy:Script>import random
-
-@returns(bool)
-def process(value):
-
-  if value ==1:
-     v = True
-  else:
-     v = False
-
-  yield v
-</ipy:Script>
-                    </Expression>
-                    <Expression xsi:type="rx:Condition">
-                      <Workflow>
-                        <Nodes>
-                          <Expression xsi:type="WorkflowInput">
-                            <Name>Source1</Name>
-                          </Expression>
-                          <Expression xsi:type="WorkflowOutput" />
-                        </Nodes>
-                        <Edges>
-                          <Edge From="0" To="1" Label="Source1" />
-                        </Edges>
-                      </Workflow>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="2" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source1" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>Location1Size</Name>
-              </Expression>
-              <Expression xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="BufferSize" />
-                </PropertyMappings>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>Wave1_Location1</Name>
-                <Description />
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="SubscribeSubject">
-                      <Name>WaveForm1_1</Name>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="ExternalizedMapping">
-                      <Property Name="BufferSize" />
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="mx:AnalogOutput">
-                        <mx:SignalSource />
-                        <mx:SampleRate>5000</mx:SampleRate>
-                        <mx:ActiveEdge>Rising</mx:ActiveEdge>
-                        <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                        <mx:BufferSize>25002</mx:BufferSize>
-                        <mx:Channels>
-                          <mx:AnalogOutputChannelConfiguration>
-                            <mx:ChannelName>Out</mx:ChannelName>
-                            <mx:MinimumValue>-10</mx:MinimumValue>
-                            <mx:MaximumValue>10</mx:MaximumValue>
-                            <mx:PhysicalChannel>Dev1/ao0</mx:PhysicalChannel>
-                            <mx:VoltageUnits>Volts</mx:VoltageUnits>
-                          </mx:AnalogOutputChannelConfiguration>
-                        </mx:Channels>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>1</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="osc:SendMessage">
-                      <osc:Connection>BonsaiOSC4</osc:Connection>
-                      <osc:Address>/FinishOfWave1_1</osc:Address>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="3" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source2" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                    <Edge From="5" To="6" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>Trigger_Location2</Name>
-              </Expression>
-              <Expression xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="Value" />
-                </PropertyMappings>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>Trigger_Location2</Name>
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="ExternalizedMapping">
-                      <Property Name="Value" />
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>1</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="ipy:PythonSelectMany">
-                      <ipy:Name>StartTrigger</ipy:Name>
-                      <ipy:Script>import random
-
-@returns(bool)
-def process(value):
-
-  if value ==1:
-     v = True
-  else:
-     v = False
-
-  yield v
-</ipy:Script>
-                    </Expression>
-                    <Expression xsi:type="rx:Condition">
-                      <Workflow>
-                        <Nodes>
-                          <Expression xsi:type="WorkflowInput">
-                            <Name>Source1</Name>
-                          </Expression>
-                          <Expression xsi:type="WorkflowOutput" />
-                        </Nodes>
-                        <Edges>
-                          <Edge From="0" To="1" Label="Source1" />
-                        </Edges>
-                      </Workflow>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="2" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source1" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>Location2Size</Name>
-              </Expression>
-              <Expression xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="BufferSize" />
-                </PropertyMappings>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>Wave1_Location2</Name>
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="SubscribeSubject">
-                      <Name>WaveForm1_2</Name>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="ExternalizedMapping">
-                      <Property Name="BufferSize" />
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="mx:AnalogOutput">
-                        <mx:SignalSource />
-                        <mx:SampleRate>5000</mx:SampleRate>
-                        <mx:ActiveEdge>Rising</mx:ActiveEdge>
-                        <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                        <mx:BufferSize>25002</mx:BufferSize>
-                        <mx:Channels>
-                          <mx:AnalogOutputChannelConfiguration>
-                            <mx:ChannelName>Out</mx:ChannelName>
-                            <mx:MinimumValue>-10</mx:MinimumValue>
-                            <mx:MaximumValue>10</mx:MaximumValue>
-                            <mx:PhysicalChannel>Dev1/ao1</mx:PhysicalChannel>
-                            <mx:VoltageUnits>Volts</mx:VoltageUnits>
-                          </mx:AnalogOutputChannelConfiguration>
-                        </mx:Channels>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>1</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="osc:SendMessage">
-                      <osc:Connection>BonsaiOSC4</osc:Connection>
-                      <osc:Address>/FinishOfWave1_2</osc:Address>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="3" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source2" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                    <Edge From="5" To="6" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>GoCue</Name>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>TriggerGoCue_Wave2</Name>
-              </Expression>
-              <Expression xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="Value" />
-                </PropertyMappings>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>TriggerGoCue_Wave2</Name>
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="ExternalizedMapping">
-                      <Property Name="Value" />
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>0</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="ipy:PythonSelectMany">
-                      <ipy:Name>StartTrigger</ipy:Name>
-                      <ipy:Script>import random
-
-@returns(bool)
-def process(value):
-
-  if value ==1 or value ==2:
-     v = True
-  else:
-     v = False
-
-  yield v
-</ipy:Script>
-                    </Expression>
-                    <Expression xsi:type="rx:Condition">
-                      <Workflow>
-                        <Nodes>
-                          <Expression xsi:type="WorkflowInput">
-                            <Name>Source1</Name>
-                          </Expression>
-                          <Expression xsi:type="WorkflowOutput" />
-                        </Nodes>
-                        <Edges>
-                          <Edge From="0" To="1" Label="Source1" />
-                        </Edges>
-                      </Workflow>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="2" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source1" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>Trigger_Location1</Name>
-              </Expression>
-              <Expression xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="Value" />
-                </PropertyMappings>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>Trigger_Location1</Name>
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="ExternalizedMapping">
-                      <Property Name="Value" />
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>1</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="ipy:PythonSelectMany">
-                      <ipy:Name>StartTrigger</ipy:Name>
-                      <ipy:Script>import random
-
-@returns(bool)
-def process(value):
-
-  if value ==1:
-     v = True
-  else:
-     v = False
-
-  yield v
-</ipy:Script>
-                    </Expression>
-                    <Expression xsi:type="rx:Condition">
-                      <Workflow>
-                        <Nodes>
-                          <Expression xsi:type="WorkflowInput">
-                            <Name>Source1</Name>
-                          </Expression>
-                          <Expression xsi:type="WorkflowOutput" />
-                        </Nodes>
-                        <Edges>
-                          <Edge From="0" To="1" Label="Source1" />
-                        </Edges>
-                      </Workflow>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="2" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source1" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>Location1Size</Name>
-              </Expression>
-              <Expression xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="BufferSize" />
-                </PropertyMappings>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>Wave2_Location1</Name>
-                <Description />
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="SubscribeSubject">
-                      <Name>WaveForm2_1</Name>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="ExternalizedMapping">
-                      <Property Name="BufferSize" />
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="mx:AnalogOutput">
-                        <mx:SignalSource />
-                        <mx:SampleRate>5000</mx:SampleRate>
-                        <mx:ActiveEdge>Rising</mx:ActiveEdge>
-                        <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                        <mx:BufferSize>25002</mx:BufferSize>
-                        <mx:Channels>
-                          <mx:AnalogOutputChannelConfiguration>
-                            <mx:ChannelName>Out</mx:ChannelName>
-                            <mx:MinimumValue>-10</mx:MinimumValue>
-                            <mx:MaximumValue>10</mx:MaximumValue>
-                            <mx:PhysicalChannel>Dev1/ao0</mx:PhysicalChannel>
-                            <mx:VoltageUnits>Volts</mx:VoltageUnits>
-                          </mx:AnalogOutputChannelConfiguration>
-                        </mx:Channels>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>1</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="osc:SendMessage">
-                      <osc:Connection>BonsaiOSC4</osc:Connection>
-                      <osc:Address>/FinishOfWave2_1</osc:Address>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="3" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source2" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                    <Edge From="5" To="6" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>Trigger_Location2</Name>
-              </Expression>
-              <Expression xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="Value" />
-                </PropertyMappings>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>Trigger_Location2</Name>
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="ExternalizedMapping">
-                      <Property Name="Value" />
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>1</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="ipy:PythonSelectMany">
-                      <ipy:Name>StartTrigger</ipy:Name>
-                      <ipy:Script>import random
-
-@returns(bool)
-def process(value):
-
-  if value ==1:
-     v = True
-  else:
-     v = False
-
-  yield v
-</ipy:Script>
-                    </Expression>
-                    <Expression xsi:type="rx:Condition">
-                      <Workflow>
-                        <Nodes>
-                          <Expression xsi:type="WorkflowInput">
-                            <Name>Source1</Name>
-                          </Expression>
-                          <Expression xsi:type="WorkflowOutput" />
-                        </Nodes>
-                        <Edges>
-                          <Edge From="0" To="1" Label="Source1" />
-                        </Edges>
-                      </Workflow>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="2" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source1" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>Location2Size</Name>
-              </Expression>
-              <Expression xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="BufferSize" />
-                </PropertyMappings>
-              </Expression>
-              <Expression xsi:type="rx:SelectMany">
-                <Name>Wave2_Location2</Name>
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="SubscribeSubject">
-                      <Name>WaveForm2_2</Name>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="rx:Take">
-                        <rx:Count>1</rx:Count>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="ExternalizedMapping">
-                      <Property Name="BufferSize" />
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="mx:AnalogOutput">
-                        <mx:SignalSource />
-                        <mx:SampleRate>5000</mx:SampleRate>
-                        <mx:ActiveEdge>Rising</mx:ActiveEdge>
-                        <mx:SampleMode>FiniteSamples</mx:SampleMode>
-                        <mx:BufferSize>25002</mx:BufferSize>
-                        <mx:Channels>
-                          <mx:AnalogOutputChannelConfiguration>
-                            <mx:ChannelName>Out</mx:ChannelName>
-                            <mx:MinimumValue>-10</mx:MinimumValue>
-                            <mx:MaximumValue>10</mx:MaximumValue>
-                            <mx:PhysicalChannel>Dev1/ao1</mx:PhysicalChannel>
-                            <mx:VoltageUnits>Volts</mx:VoltageUnits>
-                          </mx:AnalogOutputChannelConfiguration>
-                        </mx:Channels>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="IntProperty">
-                        <Value>1</Value>
-                      </Combinator>
-                    </Expression>
-                    <Expression xsi:type="osc:SendMessage">
-                      <osc:Connection>BonsaiOSC4</osc:Connection>
-                      <osc:Address>/FinishOfWave2_2</osc:Address>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="3" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source2" />
-                    <Edge From="3" To="4" Label="Source1" />
-                    <Edge From="4" To="5" Label="Source1" />
-                    <Edge From="5" To="6" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Expression>
-            </Nodes>
-            <Edges>
-              <Edge From="0" To="3" Label="Source1" />
-              <Edge From="1" To="2" Label="Source1" />
-              <Edge From="2" To="3" Label="Source2" />
-              <Edge From="3" To="6" Label="Source1" />
-              <Edge From="3" To="13" Label="Source1" />
-              <Edge From="4" To="5" Label="Source1" />
-              <Edge From="5" To="6" Label="Source2" />
-              <Edge From="6" To="10" Label="Source1" />
-              <Edge From="7" To="8" Label="Source1" />
-              <Edge From="8" To="9" Label="Source1" />
-              <Edge From="9" To="10" Label="Source2" />
-              <Edge From="11" To="12" Label="Source1" />
-              <Edge From="12" To="13" Label="Source2" />
-              <Edge From="13" To="17" Label="Source1" />
-              <Edge From="14" To="15" Label="Source1" />
-              <Edge From="15" To="16" Label="Source1" />
-              <Edge From="16" To="17" Label="Source2" />
-              <Edge From="18" To="21" Label="Source1" />
-              <Edge From="19" To="20" Label="Source1" />
-              <Edge From="20" To="21" Label="Source2" />
-              <Edge From="21" To="24" Label="Source1" />
-              <Edge From="21" To="31" Label="Source1" />
-              <Edge From="22" To="23" Label="Source1" />
-              <Edge From="23" To="24" Label="Source2" />
-              <Edge From="24" To="28" Label="Source1" />
-              <Edge From="25" To="26" Label="Source1" />
-              <Edge From="26" To="27" Label="Source1" />
-              <Edge From="27" To="28" Label="Source2" />
-              <Edge From="29" To="30" Label="Source1" />
-              <Edge From="30" To="31" Label="Source2" />
-              <Edge From="31" To="35" Label="Source1" />
-              <Edge From="32" To="33" Label="Source1" />
-              <Edge From="33" To="34" Label="Source1" />
-              <Edge From="34" To="35" Label="Source2" />
-              <Edge From="36" To="39" Label="Source1" />
-              <Edge From="37" To="38" Label="Source1" />
-              <Edge From="38" To="39" Label="Source2" />
-              <Edge From="39" To="42" Label="Source1" />
-              <Edge From="39" To="48" Label="Source1" />
-              <Edge From="40" To="41" Label="Source1" />
-              <Edge From="41" To="42" Label="Source2" />
-              <Edge From="42" To="45" Label="Source1" />
-              <Edge From="43" To="44" Label="Source1" />
-              <Edge From="44" To="45" Label="Source2" />
-              <Edge From="46" To="47" Label="Source1" />
-              <Edge From="47" To="48" Label="Source2" />
-              <Edge From="48" To="51" Label="Source1" />
-              <Edge From="49" To="50" Label="Source1" />
-              <Edge From="50" To="51" Label="Source2" />
-              <Edge From="52" To="55" Label="Source1" />
-              <Edge From="53" To="54" Label="Source1" />
-              <Edge From="54" To="55" Label="Source2" />
-              <Edge From="55" To="58" Label="Source1" />
-              <Edge From="55" To="64" Label="Source1" />
-              <Edge From="56" To="57" Label="Source1" />
-              <Edge From="57" To="58" Label="Source2" />
-              <Edge From="58" To="61" Label="Source1" />
-              <Edge From="59" To="60" Label="Source1" />
-              <Edge From="60" To="61" Label="Source2" />
-              <Edge From="62" To="63" Label="Source1" />
-              <Edge From="63" To="64" Label="Source2" />
-              <Edge From="64" To="67" Label="Source1" />
-              <Edge From="65" To="66" Label="Source1" />
-              <Edge From="66" To="67" Label="Source2" />
             </Edges>
           </Workflow>
         </Builder>
@@ -4680,447 +3178,12 @@ def process(value):
           <Edges />
         </Workflow>
       </Expression>
-      <Expression xsi:type="GroupWorkflow">
-        <Name>Camera</Name>
-        <Description>Camera</Description>
-        <Workflow>
-          <Nodes>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>Camerafrequency</Name>
-            </Expression>
-            <Expression xsi:type="beh:Format">
-              <harp:MessageType>Write</harp:MessageType>
-              <harp:Register xsi:type="beh:Camera1Frequency" />
-            </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>BehaviorCommands</Name>
-            </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>Cameracontrol</Name>
-            </Expression>
-            <Expression xsi:type="Equal">
-              <Operand xsi:type="IntProperty">
-                <Value>1</Value>
-              </Operand>
-            </Expression>
-            <Expression xsi:type="rx:Condition">
-              <Workflow>
-                <Nodes>
-                  <Expression xsi:type="WorkflowInput">
-                    <Name>Source1</Name>
-                  </Expression>
-                  <Expression xsi:type="WorkflowOutput" />
-                </Nodes>
-                <Edges>
-                  <Edge From="0" To="1" Label="Source1" />
-                </Edges>
-              </Workflow>
-            </Expression>
-            <Expression xsi:type="beh:CreateMessage">
-              <harp:MessageType>Write</harp:MessageType>
-              <harp:Payload xsi:type="beh:CreateStartCamerasPayload">
-                <beh:StartCameras>CameraOutput1</beh:StartCameras>
-              </harp:Payload>
-            </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>BehaviorCommands</Name>
-            </Expression>
-            <Expression xsi:type="Equal">
-              <Operand xsi:type="IntProperty">
-                <Value>2</Value>
-              </Operand>
-            </Expression>
-            <Expression xsi:type="rx:Condition">
-              <Workflow>
-                <Nodes>
-                  <Expression xsi:type="WorkflowInput">
-                    <Name>Source1</Name>
-                  </Expression>
-                  <Expression xsi:type="WorkflowOutput" />
-                </Nodes>
-                <Edges>
-                  <Edge From="0" To="1" Label="Source1" />
-                </Edges>
-              </Workflow>
-            </Expression>
-            <Expression xsi:type="beh:CreateMessage">
-              <harp:MessageType>Write</harp:MessageType>
-              <harp:Payload xsi:type="beh:CreateStopCamerasPayload">
-                <beh:StopCameras>CameraOutput1</beh:StopCameras>
-              </harp:Payload>
-            </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>BehaviorCommands</Name>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="spk:SpinnakerCapture">
-                  <spk:Index xsi:nil="true" />
-                  <spk:SerialNumber>21077123</spk:SerialNumber>
-                  <spk:ColorProcessing>Default</spk:ColorProcessing>
-                </Combinator>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="SubscribeSubject">
-                <Name>BehaviorEvents</Name>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="beh:Parse">
-                <harp:Register xsi:type="beh:TimestampedCamera1Frame" />
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="MemberSelector">
-                <Selector>Seconds</Selector>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="rx:Zip" />
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="harp:CreateTimestamped" />
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="SubscribeSubject">
-                <Name>Bottomcameracsv</Name>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="FileName" />
-                </PropertyMappings>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="io:CsvWriter">
-                <io:FileName>H:\TestImaging\image.csv</io:FileName>
-                <io:Append>false</io:Append>
-                <io:Overwrite>true</io:Overwrite>
-                <io:Suffix>None</io:Suffix>
-                <io:IncludeHeader>false</io:IncludeHeader>
-                <io:Selector>Seconds,Value.ChunkData.FrameID,Value.ChunkData.Timestamp,Value.ChunkData.Gain,Value.ChunkData.ExposureTime</io:Selector>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="MemberSelector">
-                <Selector>Value.Image</Selector>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="SubscribeSubject">
-                <Name>Bottomcamerafile</Name>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="FileName" />
-                </PropertyMappings>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="cv:VideoWriter">
-                  <cv:FileName>H:\TestImaging\test.avi</cv:FileName>
-                  <cv:Suffix>None</cv:Suffix>
-                  <cv:Buffered>true</cv:Buffered>
-                  <cv:Overwrite>true</cv:Overwrite>
-                  <cv:FourCC>FMP4</cv:FourCC>
-                  <cv:FrameRate>200</cv:FrameRate>
-                  <cv:FrameSize>
-                    <cv:Width>0</cv:Width>
-                    <cv:Height>0</cv:Height>
-                  </cv:FrameSize>
-                  <cv:ResizeInterpolation>NearestNeighbor</cv:ResizeInterpolation>
-                </Combinator>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="spk:SpinnakerCapture">
-                <spk:Index xsi:nil="true" />
-                <spk:SerialNumber>21077123</spk:SerialNumber>
-                <spk:ColorProcessing>Default</spk:ColorProcessing>
-              </Combinator>
-            </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>BehaviorEvents</Name>
-            </Expression>
-            <Expression xsi:type="beh:Parse">
-              <harp:Register xsi:type="beh:TimestampedCamera1Frame" />
-            </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Seconds</Selector>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:Zip" />
-            </Expression>
-            <Expression xsi:type="rx:PublishSubject">
-              <Name>BottomCameraFrames</Name>
-            </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>BottomCameraFrames</Name>
-            </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Item1.ChunkData.FrameID</Selector>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="dsp:Difference">
-                <dsp:Order>1</dsp:Order>
-              </Combinator>
-            </Expression>
-            <Expression xsi:type="Subtract">
-              <Operand xsi:type="DoubleProperty">
-                <Value>1</Value>
-              </Operand>
-            </Expression>
-            <Expression xsi:type="rx:Accumulate" />
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="spk:SpinnakerCapture">
-                  <spk:Index xsi:nil="true" />
-                  <spk:SerialNumber>21077123</spk:SerialNumber>
-                  <spk:ColorProcessing>Default</spk:ColorProcessing>
-                </Combinator>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="SubscribeSubject">
-                <Name>BehaviorEvents</Name>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="beh:Parse">
-                <harp:Register xsi:type="beh:TimestampedCamera1Frame" />
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="MemberSelector">
-                <Selector>Seconds</Selector>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="rx:Zip" />
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="rx:PublishSubject">
-                <Name>SideCameraFrames</Name>
-              </Builder>
-            </Expression>
-          </Nodes>
-          <Edges>
-            <Edge From="0" To="1" Label="Source1" />
-            <Edge From="1" To="2" Label="Source1" />
-            <Edge From="3" To="4" Label="Source1" />
-            <Edge From="3" To="8" Label="Source1" />
-            <Edge From="4" To="5" Label="Source1" />
-            <Edge From="5" To="6" Label="Source1" />
-            <Edge From="6" To="7" Label="Source1" />
-            <Edge From="8" To="9" Label="Source1" />
-            <Edge From="9" To="10" Label="Source1" />
-            <Edge From="10" To="11" Label="Source1" />
-            <Edge From="12" To="16" Label="Source1" />
-            <Edge From="13" To="14" Label="Source1" />
-            <Edge From="14" To="15" Label="Source1" />
-            <Edge From="15" To="16" Label="Source2" />
-            <Edge From="16" To="17" Label="Source1" />
-            <Edge From="17" To="20" Label="Source1" />
-            <Edge From="18" To="19" Label="Source1" />
-            <Edge From="19" To="20" Label="Source2" />
-            <Edge From="20" To="21" Label="Source1" />
-            <Edge From="21" To="24" Label="Source1" />
-            <Edge From="22" To="23" Label="Source1" />
-            <Edge From="23" To="24" Label="Source2" />
-            <Edge From="25" To="29" Label="Source1" />
-            <Edge From="26" To="27" Label="Source1" />
-            <Edge From="27" To="28" Label="Source1" />
-            <Edge From="28" To="29" Label="Source2" />
-            <Edge From="29" To="30" Label="Source1" />
-            <Edge From="31" To="32" Label="Source1" />
-            <Edge From="32" To="33" Label="Source1" />
-            <Edge From="33" To="34" Label="Source1" />
-            <Edge From="34" To="35" Label="Source1" />
-            <Edge From="36" To="40" Label="Source1" />
-            <Edge From="37" To="38" Label="Source1" />
-            <Edge From="38" To="39" Label="Source1" />
-            <Edge From="39" To="40" Label="Source2" />
-            <Edge From="40" To="41" Label="Source1" />
-          </Edges>
-        </Workflow>
-      </Expression>
       <Expression xsi:type="Disable">
         <Builder xsi:type="Combinator">
           <Combinator xsi:type="io:StartProcess">
             <io:FileName>../../allen_env/scripts/python.exe</io:FileName>
             <io:Arguments>"C:\Users\neurogears\Documents\git\AllenND\raw_workflow\dynamic-foraging-task\src\foraging_gui\Foraging.py"</io:Arguments>
           </Combinator>
-        </Builder>
-      </Expression>
-      <Expression xsi:type="Disable">
-        <Builder xsi:type="GroupWorkflow">
-          <Name>Logging</Name>
-          <Workflow>
-            <Nodes>
-              <Expression xsi:type="ExternalizedMapping">
-                <Property Name="Value" />
-              </Expression>
-              <Expression xsi:type="Combinator">
-                <Combinator xsi:type="StringProperty">
-                  <Value>C:\Data_animal_jhghjgjg</Value>
-                </Combinator>
-              </Expression>
-              <Expression xsi:type="Combinator">
-                <Combinator xsi:type="rx:Take">
-                  <rx:Count>1</rx:Count>
-                </Combinator>
-              </Expression>
-              <Expression xsi:type="scr:ExpressionTransform">
-                <scr:Expression>DateTime.Now.ToString("dd_MM_yyyy_HH_mm_ss")</scr:Expression>
-              </Expression>
-              <Expression xsi:type="Combinator">
-                <Combinator xsi:type="rx:Zip" />
-              </Expression>
-              <Expression xsi:type="Format">
-                <Format>{0}\{1}</Format>
-                <Selector>Item1,Item2</Selector>
-              </Expression>
-              <Expression xsi:type="rx:AsyncSubject">
-                <Name>RootPath</Name>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>ToBonsaiOSC</Name>
-              </Expression>
-              <Expression xsi:type="rx:GroupBy">
-                <rx:KeySelector>Address</rx:KeySelector>
-              </Expression>
-              <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogOscDemux.bonsai">
-                <LogName>ToBonsaiOSC</LogName>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>ToBonsaiOSC2</Name>
-              </Expression>
-              <Expression xsi:type="rx:GroupBy">
-                <rx:KeySelector>Address</rx:KeySelector>
-              </Expression>
-              <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogOscDemux.bonsai">
-                <LogName>ToBonsaiOSC2</LogName>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>ToBonsaiOSC3</Name>
-              </Expression>
-              <Expression xsi:type="rx:GroupBy">
-                <rx:KeySelector>Address</rx:KeySelector>
-              </Expression>
-              <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogOscDemux.bonsai">
-                <LogName>ToBonsaiOSC3</LogName>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>ToBonsaiOSC4</Name>
-              </Expression>
-              <Expression xsi:type="rx:GroupBy">
-                <rx:KeySelector>Address</rx:KeySelector>
-              </Expression>
-              <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogOscDemux.bonsai">
-                <LogName>ToBonsaiOSC4</LogName>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>FromBonsaiOSC</Name>
-              </Expression>
-              <Expression xsi:type="rx:GroupBy">
-                <rx:KeySelector>Address</rx:KeySelector>
-              </Expression>
-              <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogOscDemux.bonsai">
-                <LogName>FromBonsaiOSC</LogName>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>FromBonsaiOSC2</Name>
-              </Expression>
-              <Expression xsi:type="rx:GroupBy">
-                <rx:KeySelector>Address</rx:KeySelector>
-              </Expression>
-              <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogOscDemux.bonsai">
-                <LogName>FromBonsaiOSC2</LogName>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>FromBonsaiOSC3</Name>
-              </Expression>
-              <Expression xsi:type="rx:GroupBy">
-                <rx:KeySelector>Address</rx:KeySelector>
-              </Expression>
-              <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogOscDemux.bonsai">
-                <LogName>FromBonsaiOSC3</LogName>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>FromBonsaiOSC4</Name>
-              </Expression>
-              <Expression xsi:type="rx:GroupBy">
-                <rx:KeySelector>Address</rx:KeySelector>
-              </Expression>
-              <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogOscDemux.bonsai">
-                <LogName>FromBonsaiOSC4</LogName>
-              </Expression>
-              <Expression xsi:type="SubscribeSubject">
-                <Name>BehaviorEvents</Name>
-              </Expression>
-              <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogHarpDemux.bonsai">
-                <LogName>BehaviorEvents</LogName>
-              </Expression>
-              <Expression xsi:type="Disable">
-                <Builder xsi:type="SubscribeSubject">
-                  <Name>SoundCardEvents</Name>
-                </Builder>
-              </Expression>
-              <Expression xsi:type="Disable">
-                <Builder xsi:type="IncludeWorkflow" Path="Extensions\LogHarpDemux.bonsai">
-                  <LogName>SoundCardEvents</LogName>
-                </Builder>
-              </Expression>
-              <Expression xsi:type="Combinator">
-                <Combinator xsi:type="StringProperty">
-                  <Value>./data</Value>
-                </Combinator>
-              </Expression>
-              <Expression xsi:type="rx:BehaviorSubject">
-                <Name>BasePath</Name>
-              </Expression>
-            </Nodes>
-            <Edges>
-              <Edge From="0" To="1" Label="Source1" />
-              <Edge From="1" To="2" Label="Source1" />
-              <Edge From="2" To="3" Label="Source1" />
-              <Edge From="2" To="4" Label="Source1" />
-              <Edge From="3" To="4" Label="Source2" />
-              <Edge From="4" To="5" Label="Source1" />
-              <Edge From="5" To="6" Label="Source1" />
-              <Edge From="7" To="8" Label="Source1" />
-              <Edge From="8" To="9" Label="Source1" />
-              <Edge From="10" To="11" Label="Source1" />
-              <Edge From="11" To="12" Label="Source1" />
-              <Edge From="13" To="14" Label="Source1" />
-              <Edge From="14" To="15" Label="Source1" />
-              <Edge From="16" To="17" Label="Source1" />
-              <Edge From="17" To="18" Label="Source1" />
-              <Edge From="19" To="20" Label="Source1" />
-              <Edge From="20" To="21" Label="Source1" />
-              <Edge From="22" To="23" Label="Source1" />
-              <Edge From="23" To="24" Label="Source1" />
-              <Edge From="25" To="26" Label="Source1" />
-              <Edge From="26" To="27" Label="Source1" />
-              <Edge From="28" To="29" Label="Source1" />
-              <Edge From="29" To="30" Label="Source1" />
-              <Edge From="31" To="32" Label="Source1" />
-              <Edge From="33" To="34" Label="Source1" />
-              <Edge From="35" To="36" Label="Source1" />
-            </Edges>
-          </Workflow>
         </Builder>
       </Expression>
       <Expression xsi:type="SubscribeSubject">
@@ -5281,62 +3344,6 @@ def process(value):
                 <LogName>SoundCardEvents</LogName>
               </Builder>
             </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>BottomCameraFrames</Name>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="harp:CreateTimestamped" />
-            </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>RootPath</Name>
-            </Expression>
-            <Expression xsi:type="Format">
-              <Format>{0}/Video/bottom_camera.csv</Format>
-              <Selector />
-            </Expression>
-            <Expression xsi:type="PropertyMapping">
-              <PropertyMappings>
-                <Property Name="FileName" />
-              </PropertyMappings>
-            </Expression>
-            <Expression xsi:type="io:CsvWriter">
-              <io:FileName>H:\TestImaging\Tower_EphysRig3\XY_05\XY_05_2023-09-06_2\2023-09-06_14-00-43/Video/side_camera.csv</io:FileName>
-              <io:Append>false</io:Append>
-              <io:Overwrite>true</io:Overwrite>
-              <io:Suffix>None</io:Suffix>
-              <io:IncludeHeader>false</io:IncludeHeader>
-              <io:Selector>Seconds,Value.ChunkData.FrameID,Value.ChunkData.Timestamp,Value.ChunkData.Gain,Value.ChunkData.ExposureTime</io:Selector>
-            </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Value.Image</Selector>
-            </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>RootPath</Name>
-            </Expression>
-            <Expression xsi:type="Format">
-              <Format>{0}/Video/bottom_camera.avi</Format>
-              <Selector />
-            </Expression>
-            <Expression xsi:type="PropertyMapping">
-              <PropertyMappings>
-                <Property Name="FileName" />
-              </PropertyMappings>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="cv:VideoWriter">
-                <cv:FileName>H:\TestImaging\Tower_EphysRig3\XY_05\XY_05_2023-09-06_2\2023-09-06_14-00-43/Video/side_camera.avi</cv:FileName>
-                <cv:Suffix>None</cv:Suffix>
-                <cv:Buffered>true</cv:Buffered>
-                <cv:Overwrite>true</cv:Overwrite>
-                <cv:FourCC>RAW</cv:FourCC>
-                <cv:FrameRate>200</cv:FrameRate>
-                <cv:FrameSize>
-                  <cv:Width>0</cv:Width>
-                  <cv:Height>0</cv:Height>
-                </cv:FrameSize>
-                <cv:ResizeInterpolation>NearestNeighbor</cv:ResizeInterpolation>
-              </Combinator>
-            </Expression>
             <Expression xsi:type="Disable">
               <Builder xsi:type="SubscribeSubject">
                 <Name>SideCameraFrames</Name>
@@ -5415,6 +3422,84 @@ def process(value):
                 </Combinator>
               </Builder>
             </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="SubscribeSubject">
+                <Name>BottomCameraFrames</Name>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="harp:CreateTimestamped" />
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="SubscribeSubject">
+                <Name>RootPath</Name>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Format">
+                <Format>{0}/Video/bottom_camera.csv</Format>
+                <Selector />
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="PropertyMapping">
+                <PropertyMappings>
+                  <Property Name="FileName" />
+                </PropertyMappings>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="io:CsvWriter">
+                <io:FileName>C:\Users\xinxin.yin\Documents\temporaryvideo\2023-09-06_14-07-18/Video/bottom_camera.csv</io:FileName>
+                <io:Append>false</io:Append>
+                <io:Overwrite>true</io:Overwrite>
+                <io:Suffix>None</io:Suffix>
+                <io:IncludeHeader>false</io:IncludeHeader>
+                <io:Selector>Seconds,Value.ChunkData.FrameID,Value.ChunkData.Timestamp,Value.ChunkData.Gain,Value.ChunkData.ExposureTime</io:Selector>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="MemberSelector">
+                <Selector>Value.Image</Selector>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="SubscribeSubject">
+                <Name>RootPath</Name>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Format">
+                <Format>{0}/Video/bottom_camera.avi</Format>
+                <Selector />
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="PropertyMapping">
+                <PropertyMappings>
+                  <Property Name="FileName" />
+                </PropertyMappings>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="cv:VideoWriter">
+                  <cv:FileName>C:\Users\xinxin.yin\Documents\temporaryvideo\2023-09-06_14-07-18/Video/bottom_camera.avi</cv:FileName>
+                  <cv:Suffix>None</cv:Suffix>
+                  <cv:Buffered>true</cv:Buffered>
+                  <cv:Overwrite>true</cv:Overwrite>
+                  <cv:FourCC>RAW</cv:FourCC>
+                  <cv:FrameRate>200</cv:FrameRate>
+                  <cv:FrameSize>
+                    <cv:Width>0</cv:Width>
+                    <cv:Height>0</cv:Height>
+                  </cv:FrameSize>
+                  <cv:ResizeInterpolation>NearestNeighbor</cv:ResizeInterpolation>
+                </Combinator>
+              </Builder>
+            </Expression>
           </Nodes>
           <Edges>
             <Edge From="0" To="1" Label="Source1" />
@@ -5476,13 +3561,291 @@ def process(value):
       <Expression xsi:type="Combinator">
         <Combinator xsi:type="rx:Repeat" />
       </Expression>
+      <Expression xsi:type="Disable">
+        <Builder xsi:type="GroupWorkflow">
+          <Name>Camera</Name>
+          <Description>Camera</Description>
+          <Workflow>
+            <Nodes>
+              <Expression xsi:type="SubscribeSubject">
+                <Name>Camerafrequency</Name>
+              </Expression>
+              <Expression xsi:type="beh:Format">
+                <harp:MessageType>Write</harp:MessageType>
+                <harp:Register xsi:type="beh:Camera1Frequency" />
+              </Expression>
+              <Expression xsi:type="MulticastSubject">
+                <Name>BehaviorCommands</Name>
+              </Expression>
+              <Expression xsi:type="SubscribeSubject">
+                <Name>Cameracontrol</Name>
+              </Expression>
+              <Expression xsi:type="Equal">
+                <Operand xsi:type="IntProperty">
+                  <Value>1</Value>
+                </Operand>
+              </Expression>
+              <Expression xsi:type="rx:Condition">
+                <Workflow>
+                  <Nodes>
+                    <Expression xsi:type="WorkflowInput">
+                      <Name>Source1</Name>
+                    </Expression>
+                    <Expression xsi:type="WorkflowOutput" />
+                  </Nodes>
+                  <Edges>
+                    <Edge From="0" To="1" Label="Source1" />
+                  </Edges>
+                </Workflow>
+              </Expression>
+              <Expression xsi:type="beh:CreateMessage">
+                <harp:MessageType>Write</harp:MessageType>
+                <harp:Payload xsi:type="beh:CreateStartCamerasPayload">
+                  <beh:StartCameras>CameraOutput1</beh:StartCameras>
+                </harp:Payload>
+              </Expression>
+              <Expression xsi:type="MulticastSubject">
+                <Name>BehaviorCommands</Name>
+              </Expression>
+              <Expression xsi:type="Equal">
+                <Operand xsi:type="IntProperty">
+                  <Value>2</Value>
+                </Operand>
+              </Expression>
+              <Expression xsi:type="rx:Condition">
+                <Workflow>
+                  <Nodes>
+                    <Expression xsi:type="WorkflowInput">
+                      <Name>Source1</Name>
+                    </Expression>
+                    <Expression xsi:type="WorkflowOutput" />
+                  </Nodes>
+                  <Edges>
+                    <Edge From="0" To="1" Label="Source1" />
+                  </Edges>
+                </Workflow>
+              </Expression>
+              <Expression xsi:type="beh:CreateMessage">
+                <harp:MessageType>Write</harp:MessageType>
+                <harp:Payload xsi:type="beh:CreateStopCamerasPayload">
+                  <beh:StopCameras>CameraOutput1</beh:StopCameras>
+                </harp:Payload>
+              </Expression>
+              <Expression xsi:type="MulticastSubject">
+                <Name>BehaviorCommands</Name>
+              </Expression>
+              <Expression xsi:type="Disable">
+                <Builder xsi:type="Combinator">
+                  <Combinator xsi:type="spk:SpinnakerCapture">
+                    <spk:Index xsi:nil="true" />
+                    <spk:SerialNumber>21077123</spk:SerialNumber>
+                    <spk:ColorProcessing>Default</spk:ColorProcessing>
+                  </Combinator>
+                </Builder>
+              </Expression>
+              <Expression xsi:type="Disable">
+                <Builder xsi:type="SubscribeSubject">
+                  <Name>BehaviorEvents</Name>
+                </Builder>
+              </Expression>
+              <Expression xsi:type="Disable">
+                <Builder xsi:type="beh:Parse">
+                  <harp:Register xsi:type="beh:TimestampedCamera1Frame" />
+                </Builder>
+              </Expression>
+              <Expression xsi:type="Disable">
+                <Builder xsi:type="MemberSelector">
+                  <Selector>Seconds</Selector>
+                </Builder>
+              </Expression>
+              <Expression xsi:type="Disable">
+                <Builder xsi:type="Combinator">
+                  <Combinator xsi:type="rx:Zip" />
+                </Builder>
+              </Expression>
+              <Expression xsi:type="Disable">
+                <Builder xsi:type="Combinator">
+                  <Combinator xsi:type="harp:CreateTimestamped" />
+                </Builder>
+              </Expression>
+              <Expression xsi:type="Disable">
+                <Builder xsi:type="SubscribeSubject">
+                  <Name>Bottomcameracsv</Name>
+                </Builder>
+              </Expression>
+              <Expression xsi:type="Disable">
+                <Builder xsi:type="PropertyMapping">
+                  <PropertyMappings>
+                    <Property Name="FileName" />
+                  </PropertyMappings>
+                </Builder>
+              </Expression>
+              <Expression xsi:type="Disable">
+                <Builder xsi:type="io:CsvWriter">
+                  <io:FileName>H:\TestImaging\image.csv</io:FileName>
+                  <io:Append>false</io:Append>
+                  <io:Overwrite>true</io:Overwrite>
+                  <io:Suffix>None</io:Suffix>
+                  <io:IncludeHeader>false</io:IncludeHeader>
+                  <io:Selector>Seconds,Value.ChunkData.FrameID,Value.ChunkData.Timestamp,Value.ChunkData.Gain,Value.ChunkData.ExposureTime</io:Selector>
+                </Builder>
+              </Expression>
+              <Expression xsi:type="Disable">
+                <Builder xsi:type="MemberSelector">
+                  <Selector>Value.Image</Selector>
+                </Builder>
+              </Expression>
+              <Expression xsi:type="Disable">
+                <Builder xsi:type="SubscribeSubject">
+                  <Name>Bottomcamerafile</Name>
+                </Builder>
+              </Expression>
+              <Expression xsi:type="Disable">
+                <Builder xsi:type="PropertyMapping">
+                  <PropertyMappings>
+                    <Property Name="FileName" />
+                  </PropertyMappings>
+                </Builder>
+              </Expression>
+              <Expression xsi:type="Disable">
+                <Builder xsi:type="Combinator">
+                  <Combinator xsi:type="cv:VideoWriter">
+                    <cv:FileName>H:\TestImaging\test.avi</cv:FileName>
+                    <cv:Suffix>None</cv:Suffix>
+                    <cv:Buffered>true</cv:Buffered>
+                    <cv:Overwrite>true</cv:Overwrite>
+                    <cv:FourCC>FMP4</cv:FourCC>
+                    <cv:FrameRate>200</cv:FrameRate>
+                    <cv:FrameSize>
+                      <cv:Width>0</cv:Width>
+                      <cv:Height>0</cv:Height>
+                    </cv:FrameSize>
+                    <cv:ResizeInterpolation>NearestNeighbor</cv:ResizeInterpolation>
+                  </Combinator>
+                </Builder>
+              </Expression>
+              <Expression xsi:type="Combinator">
+                <Combinator xsi:type="spk:SpinnakerCapture">
+                  <spk:Index xsi:nil="true" />
+                  <spk:SerialNumber>21077123</spk:SerialNumber>
+                  <spk:ColorProcessing>Default</spk:ColorProcessing>
+                </Combinator>
+              </Expression>
+              <Expression xsi:type="SubscribeSubject">
+                <Name>BehaviorEvents</Name>
+              </Expression>
+              <Expression xsi:type="beh:Parse">
+                <harp:Register xsi:type="beh:TimestampedCamera1Frame" />
+              </Expression>
+              <Expression xsi:type="MemberSelector">
+                <Selector>Seconds</Selector>
+              </Expression>
+              <Expression xsi:type="Combinator">
+                <Combinator xsi:type="rx:Zip" />
+              </Expression>
+              <Expression xsi:type="rx:PublishSubject">
+                <Name>BottomCameraFrames</Name>
+              </Expression>
+              <Expression xsi:type="SubscribeSubject">
+                <Name>BottomCameraFrames</Name>
+              </Expression>
+              <Expression xsi:type="MemberSelector">
+                <Selector>Item1.ChunkData.FrameID</Selector>
+              </Expression>
+              <Expression xsi:type="Combinator">
+                <Combinator xsi:type="dsp:Difference">
+                  <dsp:Order>1</dsp:Order>
+                </Combinator>
+              </Expression>
+              <Expression xsi:type="Subtract">
+                <Operand xsi:type="DoubleProperty">
+                  <Value>1</Value>
+                </Operand>
+              </Expression>
+              <Expression xsi:type="rx:Accumulate" />
+              <Expression xsi:type="Disable">
+                <Builder xsi:type="Combinator">
+                  <Combinator xsi:type="spk:SpinnakerCapture">
+                    <spk:Index xsi:nil="true" />
+                    <spk:SerialNumber>21077123</spk:SerialNumber>
+                    <spk:ColorProcessing>Default</spk:ColorProcessing>
+                  </Combinator>
+                </Builder>
+              </Expression>
+              <Expression xsi:type="Disable">
+                <Builder xsi:type="SubscribeSubject">
+                  <Name>BehaviorEvents</Name>
+                </Builder>
+              </Expression>
+              <Expression xsi:type="Disable">
+                <Builder xsi:type="beh:Parse">
+                  <harp:Register xsi:type="beh:TimestampedCamera1Frame" />
+                </Builder>
+              </Expression>
+              <Expression xsi:type="Disable">
+                <Builder xsi:type="MemberSelector">
+                  <Selector>Seconds</Selector>
+                </Builder>
+              </Expression>
+              <Expression xsi:type="Disable">
+                <Builder xsi:type="Combinator">
+                  <Combinator xsi:type="rx:Zip" />
+                </Builder>
+              </Expression>
+              <Expression xsi:type="Disable">
+                <Builder xsi:type="rx:PublishSubject">
+                  <Name>SideCameraFrames</Name>
+                </Builder>
+              </Expression>
+            </Nodes>
+            <Edges>
+              <Edge From="0" To="1" Label="Source1" />
+              <Edge From="1" To="2" Label="Source1" />
+              <Edge From="3" To="4" Label="Source1" />
+              <Edge From="3" To="8" Label="Source1" />
+              <Edge From="4" To="5" Label="Source1" />
+              <Edge From="5" To="6" Label="Source1" />
+              <Edge From="6" To="7" Label="Source1" />
+              <Edge From="8" To="9" Label="Source1" />
+              <Edge From="9" To="10" Label="Source1" />
+              <Edge From="10" To="11" Label="Source1" />
+              <Edge From="12" To="16" Label="Source1" />
+              <Edge From="13" To="14" Label="Source1" />
+              <Edge From="14" To="15" Label="Source1" />
+              <Edge From="15" To="16" Label="Source2" />
+              <Edge From="16" To="17" Label="Source1" />
+              <Edge From="17" To="20" Label="Source1" />
+              <Edge From="18" To="19" Label="Source1" />
+              <Edge From="19" To="20" Label="Source2" />
+              <Edge From="20" To="21" Label="Source1" />
+              <Edge From="21" To="24" Label="Source1" />
+              <Edge From="22" To="23" Label="Source1" />
+              <Edge From="23" To="24" Label="Source2" />
+              <Edge From="25" To="29" Label="Source1" />
+              <Edge From="26" To="27" Label="Source1" />
+              <Edge From="27" To="28" Label="Source1" />
+              <Edge From="28" To="29" Label="Source2" />
+              <Edge From="29" To="30" Label="Source1" />
+              <Edge From="31" To="32" Label="Source1" />
+              <Edge From="32" To="33" Label="Source1" />
+              <Edge From="33" To="34" Label="Source1" />
+              <Edge From="34" To="35" Label="Source1" />
+              <Edge From="36" To="40" Label="Source1" />
+              <Edge From="37" To="38" Label="Source1" />
+              <Edge From="38" To="39" Label="Source1" />
+              <Edge From="39" To="40" Label="Source2" />
+              <Edge From="40" To="41" Label="Source1" />
+            </Edges>
+          </Workflow>
+        </Builder>
+      </Expression>
     </Nodes>
     <Edges>
+      <Edge From="8" To="9" Label="Source1" />
+      <Edge From="9" To="10" Label="Source1" />
+      <Edge From="10" To="11" Label="Source1" />
+      <Edge From="11" To="12" Label="Source1" />
       <Edge From="12" To="13" Label="Source1" />
-      <Edge From="13" To="14" Label="Source1" />
-      <Edge From="14" To="15" Label="Source1" />
-      <Edge From="15" To="16" Label="Source1" />
-      <Edge From="16" To="17" Label="Source1" />
     </Edges>
   </Workflow>
 </WorkflowBuilder>
