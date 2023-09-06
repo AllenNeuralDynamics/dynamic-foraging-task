@@ -100,6 +100,7 @@ class Ui_Camera(object):
         self.WarningLabelFileIsInUse.setObjectName("WarningLabelFileIsInUse")
 
         self.retranslateUi(Camera)
+        self.AutoControl.setCurrentIndex(1)
         self.CollectVideo.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(Camera)
 

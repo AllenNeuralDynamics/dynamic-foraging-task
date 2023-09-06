@@ -59,6 +59,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.ANewTrial=1 # permission to start a new trial
         self.UpdateParameters=1 # permission to update parameters
         self.Visualization.setTitle(str(date.today()))
+        self.loggingstarted=0
         try: 
             self._InitializeBonsai()
             self.InitializeBonsaiSuccessfully=1
@@ -91,6 +92,28 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._Task()
         self._TrainingStage()
         self.keyPressEvent()
+    
+    def _restartlogging(self,log_folder=None):
+        '''Restarting logging'''
+        if log_folder is None:
+            self._GetSaveFileName()
+            log_folder=os.path.join(self.log_folder,self.Tower.currentText(),self.AnimalName.text())
+            base_name=os.path.splitext(os.path.basename(self.SaveFileJson))[0]
+            current_time = datetime.now()
+            formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+            log_folder=os.path.join(log_folder,base_name,formatted_datetime)
+        else:
+            current_time = datetime.now()
+            formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+            log_folder=os.path.join(log_folder,formatted_datetime)
+        # stop the logging first
+        self.Channel.StopLogging('s')
+        self.Channel.StartLogging(log_folder)
+        Rec=self.Channel.receive()
+        if Rec[0].address=='/loggerstarted':
+            pass
+        self.loggingstarted=1
+
     def _GetLaserCalibration(self):
         '''Get the laser calibration results'''
         if os.path.exists(self.LaserCalibrationFiles):
@@ -133,14 +156,19 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     self.current_box=Settings['current_box']
                 else:
                     self.current_box=''
-                if 'video_folder' in Settings:
-                    self.video_folder=Settings['video_folder']
+                if 'log_folder' in Settings:
+                    self.log_folder=Settings['log_folder']
                 else:
-                    self.video_folder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
+                    self.log_folder=os.path.join(os.path.expanduser("~"), "Documents",'log')
+                if 'temporary_video_folder' in Settings:
+                    self.temporary_video_folder=Settings['log_folder']
+                else:
+                    self.temporary_video_folder=os.path.join(os.path.expanduser("~"), "Documents",'temporaryvideo')
             else:
                 self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
                 self.current_box=''
-                self.video_folder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
+                self.log_folder=os.path.join(os.path.expanduser("~"), "Documents",'log')
+                self.temporary_video_folder=os.path.join(os.path.expanduser("~"), "Documents",'temporaryvideo')
         except:
             self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
             self.current_box=''
@@ -1321,6 +1349,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         if self.StartANewSession==1 and self.ANewTrial==1:
             self.WarningLabel.setText('')
             self.WarningLabel.setStyleSheet("color: gray;")
+            # start a new logging
+            self._restartlogging()
             self.SessionStartTime=datetime.now()
             self.Other_SessionStartTime=str(self.SessionStartTime) # for saving
             GeneratedTrials=GenerateTrials(self)

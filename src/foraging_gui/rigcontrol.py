@@ -150,3 +150,11 @@ class RigClient:
     def BottomCameraCSV(self, value):
         # save file name of the BottomCamera csv
         self.send("/bottomcameracsv", value) 
+
+    def StopLogging(self,value):
+        # stop the logging
+        self.send("/stoplogging", value) 
+
+    def StartLogging(self,value):
+        # start the logging
+        self.send("/startlogging", value) 

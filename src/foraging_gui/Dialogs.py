@@ -875,11 +875,18 @@ class CameraDialog(QDialog,Ui_Camera):
         self._connectSignalsSlots()
     def _connectSignalsSlots(self):
         self.StartCamera.clicked.connect(self._StartCamera)
+
     def _StartCamera(self):
         '''Start/stop the camera'''
         if self.StartCamera.isChecked():
             self.StartCamera.setStyleSheet("background-color : green;")
             self.MainWindow.Channel.CameraFrequency(int(self.FrameRate.text()))
+            if self.CollectVideo.currentText()=='Yes':
+                self.MainWindow._restartlogging()
+            else:
+                self.MainWindow._restartlogging(self.MainWindow.temporary_video_folder)
+            '''
+            # This part was dropped due to the new logging method
             # save the video data
             if self.CollectVideo.currentText()=='Yes':
                 Re=self._SaveVideoData()
@@ -896,11 +903,13 @@ class CameraDialog(QDialog,Ui_Camera):
                 self.MainWindow.Channel.BottomCameraFile(bottom_camera_file)
                 self.MainWindow.Channel.SideCameraCSV(side_camera_csv)
                 self.MainWindow.Channel.BottomCameraCSV(bottom_camera_csv)
+            '''
             # start the video triggers
             self.MainWindow.Channel.CameraControl(int(1))
         else:
             self.StartCamera.setStyleSheet("background-color : none")
             self.MainWindow.Channel.CameraControl(int(2))
+    
     def _SaveVideoData(self):
         '''Save the video data'''
         self.MainWindow._GetSaveFileName()
@@ -945,6 +954,7 @@ class CameraDialog(QDialog,Ui_Camera):
         self.MainWindow.TP_side_camera_csv=side_camera_csv
         self.MainWindow.TP_bottom_camera_csv=bottom_camera_csv
         return True
+    
 def is_file_in_use(file_path):
     '''check if the file is open'''
     if os.path.exists(file_path):
