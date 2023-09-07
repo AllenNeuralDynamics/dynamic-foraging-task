@@ -92,6 +92,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._Task()
         self._TrainingStage()
         self.keyPressEvent()
+        self._WaterVolumnManage2()
     
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
@@ -298,6 +299,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.actionFormal_logging.triggered.connect(self._startFormalLogging)
         self.actionOpen_logging_folder.triggered.connect(self._OpenLoggingFolder)
         self.actionOpen_behavior_folder.triggered.connect(self._OpenBehaviorFolder)
+        self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
+        self.RightValue.textChanged.connect(self._WaterVolumnManage1)
+        self.GiveWaterL.textChanged.connect(self._WaterVolumnManage1)
+        self.LeftValue_volumn.textChanged.connect(self._WaterVolumnManage2)
+        self.RightValue_volumn.textChanged.connect(self._WaterVolumnManage2)
+        self.GiveWaterL_volumn.textChanged.connect(self._WaterVolumnManage2)
         self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
@@ -309,6 +316,112 @@ class Window(QMainWindow, Ui_ForagingGUI):
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit)):        
                 child.returnPressed.connect(self.keyPressEvent)
+    def _WaterVolumnManage1(self):
+        '''Change the water volumn based on the valve open time'''
+        self.LeftValue.textChanged.disconnect(self._WaterVolumnManage1)
+        self.RightValue.textChanged.disconnect(self._WaterVolumnManage1)
+        self.GiveWaterL.textChanged.disconnect(self._WaterVolumnManage1)
+        self.LeftValue_volumn.textChanged.disconnect(self._WaterVolumnManage2)
+        self.RightValue_volumn.textChanged.disconnect(self._WaterVolumnManage2)
+        self.GiveWaterL_volumn.textChanged.disconnect(self._WaterVolumnManage2)
+        # use the latest calibration result
+        if hasattr(self, 'WaterCalibration_dialog'):
+            if hasattr(self.WaterCalibration_dialog, 'PlotM'):
+                if  hasattr(self.WaterCalibration_dialog.PlotM, 'FittingResults'):
+                    FittingResults=self.WaterCalibration_dialog.PlotM.FittingResults
+                    tag=1
+        if tag==1:
+            self._GetLatestFitting(FittingResults)
+            self._ValvetimeVolumnTransformation(widget2=self.LeftValue_volumn,widget1=self.LeftValue,direction=1,valve='Left')
+            self._ValvetimeVolumnTransformation(widget2=self.RightValue_volumn,widget1=self.RightValue,direction=1,valve='Right')
+            self._ValvetimeVolumnTransformation(widget2=self.GiveWaterL_volumn,widget1=self.GiveWaterL,direction=1,valve='Left')
+            self._ValvetimeVolumnTransformation(widget2=self.GiveWaterR_volumn,widget1=self.GiveWaterR,direction=1,valve='Right')
+            self.LeftValue_volumn.setEnabled(True)
+            self.RightValue_volumn.setEnabled(True)
+            self.GiveWaterL_volumn.setEnabled(True)
+            self.GiveWaterR_volumn.setEnabled(True)
+            self.label_28.setEnabled(True)
+            self.label_29.setEnabled(True)
+        else:
+            self.LeftValue_volumn.setEnabled(False)
+            self.RightValue_volumn.setEnabled(False)
+            self.GiveWaterL_volumn.setEnabled(False)
+            self.GiveWaterR_volumn.setEnabled(False)
+            self.label_28.setEnabled(False)
+            self.label_29.setEnabled(False)
+        self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
+        self.RightValue.textChanged.connect(self._WaterVolumnManage1)
+        self.GiveWaterL.textChanged.connect(self._WaterVolumnManage1)
+        self.LeftValue_volumn.textChanged.connect(self._WaterVolumnManage2)
+        self.RightValue_volumn.textChanged.connect(self._WaterVolumnManage2)
+        self.GiveWaterL_volumn.textChanged.connect(self._WaterVolumnManage2)
+    def _WaterVolumnManage2(self):
+        '''Change the valve open time based on the water volumn'''
+        self.LeftValue.textChanged.disconnect(self._WaterVolumnManage1)
+        self.RightValue.textChanged.disconnect(self._WaterVolumnManage1)
+        self.GiveWaterL.textChanged.disconnect(self._WaterVolumnManage1)
+        self.LeftValue_volumn.textChanged.disconnect(self._WaterVolumnManage2)
+        self.RightValue_volumn.textChanged.disconnect(self._WaterVolumnManage2)
+        self.GiveWaterL_volumn.textChanged.disconnect(self._WaterVolumnManage2)
+        # use the latest calibration result
+        if hasattr(self, 'WaterCalibration_dialog'):
+            if hasattr(self.WaterCalibration_dialog, 'PlotM'):
+                if  hasattr(self.WaterCalibration_dialog.PlotM, 'FittingResults'):
+                    FittingResults=self.WaterCalibration_dialog.PlotM.FittingResults
+                    tag=1
+        if tag==1:
+            self._GetLatestFitting(FittingResults)
+            self._ValvetimeVolumnTransformation(widget1=self.LeftValue_volumn,widget2=self.LeftValue,direction=-1,valve='Left')
+            self._ValvetimeVolumnTransformation(widget1=self.RightValue_volumn,widget2=self.RightValue,direction=-1,valve='Right')
+            self._ValvetimeVolumnTransformation(widget1=self.GiveWaterL_volumn,widget2=self.GiveWaterL,direction=-1,valve='Left')
+            self._ValvetimeVolumnTransformation(widget1=self.GiveWaterR_volumn,widget2=self.GiveWaterR,direction=-1,valve='Right')
+        else:
+            self.LeftValue_volumn.setEnabled(False)
+            self.RightValue_volumn.setEnabled(False)
+            self.GiveWaterL_volumn.setEnabled(False)
+            self.GiveWaterR_volumn.setEnabled(False)
+            self.label_28.setEnabled(False)
+            self.label_29.setEnabled(False)
+        self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
+        self.RightValue.textChanged.connect(self._WaterVolumnManage1)
+        self.GiveWaterL.textChanged.connect(self._WaterVolumnManage1)
+        self.LeftValue_volumn.textChanged.connect(self._WaterVolumnManage2)
+        self.RightValue_volumn.textChanged.connect(self._WaterVolumnManage2)
+        self.GiveWaterL_volumn.textChanged.connect(self._WaterVolumnManage2)
+
+    def _ValvetimeVolumnTransformation(self,widget1,widget2,direction,valve):
+        '''Transformation between valve open time the the water volumn'''
+        # widget1 is the source widget and widget2 is the target widget
+        if valve not in self.latest_fitting:
+            # disable the widget
+            if direction==1:
+                widget2.setEnabled(False)
+            elif direction==-1:
+                widget1.setEnabled(False)
+            return
+        else:
+            widget2.setEnabled(True)
+            widget1.setEnabled(True)
+        if direction==1:
+            widget2.setValue(float(widget1.text())*self.latest_fitting[valve][0]+self.latest_fitting[valve][1])
+        elif direction==-1:
+            widget2.setValue((float(widget1.text())-self.latest_fitting[valve][1])/self.latest_fitting[valve][0])
+
+
+    def _GetLatestFitting(self,FittingResults):
+        '''Get the latest fitting results from water calibration'''
+        latest_fitting={}
+        sorted_dates = sorted(FittingResults.keys(), key=self._custom_sort_key)
+        sorted_dates=sorted_dates[::-1]
+        for current_date in sorted_dates:
+            if 'Left' in FittingResults[current_date]:
+                latest_fitting['Left']=FittingResults[current_date]['Left']
+                break
+        for current_date in sorted_dates:
+            if 'Right' in FittingResults[current_date]:
+                latest_fitting['Right']=FittingResults[current_date]['Right']
+                break
+        self.latest_fitting=latest_fitting
     def _OpenBehaviorFolder(self):
         '''Open the the current behavior folder'''
         self._GetSaveFileName()

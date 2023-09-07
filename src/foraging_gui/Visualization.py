@@ -296,6 +296,7 @@ class PlotWaterCalibration(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         self.water_win=water_win
         self.WaterCalibrationResults=self.water_win.WaterCalibrationResults
+        self.FittingResults={}
     def _UpdateKeysSpecificCalibration(self):
         '''update the fields of specific calibration'''
         self.WaterCalibrationResults=self.water_win.WaterCalibrationResults
@@ -325,31 +326,59 @@ class PlotWaterCalibration(FigureCanvas):
         # use the selected date if showspecificcali is not NA
         if self.water_win.showspecificcali.currentText()!='NA':
             all_dates=[self.water_win.showspecificcali.currentText()]
-        for current_date in all_dates:
+        #all_dates represents dates to plot
+        for current_date in sorted_dates:
             all_valves=self.WaterCalibrationResults[current_date].keys()
             for current_valve in all_valves:
-                X=[]
-                Y=[]
-                all_valve_opentime=self.WaterCalibrationResults[current_date][current_valve].keys()
-                for current_valve_opentime in all_valve_opentime:
-                    average_water=[]
-                    X.append(current_valve_opentime)
-                    all_valve_openinterval=self.WaterCalibrationResults[current_date][current_valve][current_valve_opentime].keys()
-                    for current_valve_openinterval in all_valve_openinterval:
-                        all_cycle=self.WaterCalibrationResults[current_date][current_valve][current_valve_opentime][current_valve_openinterval].keys()
-                        for current_cycle in all_cycle:
-                            total_water=np.nanmean(self.WaterCalibrationResults[current_date][current_valve][current_valve_opentime][current_valve_openinterval][current_cycle])
-                            if total_water != '':
-                                average_water.append(total_water/float(current_cycle))
-                    Y.append(np.nanmean(average_water))
-                sorted_X=sorted(map(float, X))
-                sorted_indices = sorted(range(len(X)), key=lambda i: float(X[i]))
-                sorted_Y = [Y[i] for i in sorted_indices]
-                if current_valve=='Left':
-                    self.ax1.plot(sorted_X, sorted_Y, 'o-',label=current_date+'_left valve')
-                elif current_valve=='Right':
-                    self.ax1.plot(sorted_X, sorted_Y, 'o--',label=current_date+'_right valve')
+                sorted_X,sorted_Y=self._GetWaterCalibration(self.WaterCalibrationResults,current_date,current_valve)
+                if current_date in all_dates:
+                    if current_valve=='Left':
+                        line=self.ax1.plot(sorted_X, sorted_Y, 'o-',label=current_date+'_left valve')
+                    elif current_valve=='Right':
+                        line=self.ax1.plot(sorted_X, sorted_Y, 'o--',label=current_date+'_right valve')
+                    # fit the curve
+                    color=line[0].get_color()
+                    slope, intercept=self._PlotFitting(sorted_X,sorted_Y,color,Plot=1)
+                else:
+                    slope, intercept=self._PlotFitting(sorted_X,sorted_Y,'r',Plot=0)
+                # save fitting results
+                if current_date not in self.FittingResults:
+                    self.FittingResults[current_date]={}
+                if current_valve not in self.FittingResults[current_date]:
+                    self.FittingResults[current_date][current_valve]={}
+                self.FittingResults[current_date][current_valve]=[slope,intercept]
+
         self.ax1.set_xlabel('valve open time(s)')
         self.ax1.set_ylabel('water(mg)')
         self.ax1.legend(loc='lower right', fontsize=8)
         self.draw()
+
+    def _PlotFitting(self,x,y,color,Plot):
+        '''fit with linear regression and plot'''           
+        slope, intercept, r_value, p_value, _ = stats.linregress(x, y)
+        fit_x = np.array(x)
+        fit_y = np.array(x) * slope + intercept
+        if Plot==1:
+            self.ax1.plot(fit_x, fit_y,color=color,linestyle='--')
+        return slope, intercept
+    
+    def _GetWaterCalibration(self,WaterCalibrationResults,current_date,current_valve):
+        '''Get the water calibration results from a specific date and valve'''
+        X=[]
+        Y=[]
+        all_valve_opentime=WaterCalibrationResults[current_date][current_valve].keys()
+        for current_valve_opentime in all_valve_opentime:
+            average_water=[]
+            X.append(current_valve_opentime)
+            all_valve_openinterval=WaterCalibrationResults[current_date][current_valve][current_valve_opentime].keys()
+            for current_valve_openinterval in all_valve_openinterval:
+                all_cycle=WaterCalibrationResults[current_date][current_valve][current_valve_opentime][current_valve_openinterval].keys()
+                for current_cycle in all_cycle:
+                    total_water=np.nanmean(WaterCalibrationResults[current_date][current_valve][current_valve_opentime][current_valve_openinterval][current_cycle])
+                    if total_water != '':
+                        average_water.append(total_water/float(current_cycle))
+            Y.append(np.nanmean(average_water))
+        sorted_X=sorted(map(float, X))
+        sorted_indices = sorted(range(len(X)), key=lambda i: float(X[i]))
+        sorted_Y = [Y[i] for i in sorted_indices]
+        return sorted_X,sorted_Y
