@@ -504,27 +504,27 @@ class GenerateTrials():
             B_RewardedHistory[i]=np.logical_or(self.B_RewardedHistory[i],self.B_AutoWaterTrial[i][Ind])
         self.BS_RewardN=np.sum(B_RewardedHistory[0]==True)+np.sum(B_RewardedHistory[1]==True)
         
-        TP_LeftValue_volumn=[]
-        for s in self.Obj['TP_LeftValue_volumn']:
+        TP_LeftValue_volume=[]
+        for s in self.Obj['TP_LeftValue_volume']:
             try:
                 float_value = float(s)
-                TP_LeftValue_volumn.append(float_value)
+                TP_LeftValue_volume.append(float_value)
             except ValueError:
-                TP_LeftValue_volumn.append(0)
-        TP_LeftValue_volumn=np.array(TP_LeftValue_volumn)
-        TP_LeftValue_volumn=TP_LeftValue_volumn[0:len(B_RewardedHistory[0])]
+                TP_LeftValue_volume.append(0)
+        TP_LeftValue_volume=np.array(TP_LeftValue_volume)
+        TP_LeftValue_volume=TP_LeftValue_volume[0:len(B_RewardedHistory[0])]
 
-        TP_RightValue_volumn=[]
-        for s in self.Obj['TP_RightValue_volumn']:
+        TP_RightValue_volume=[]
+        for s in self.Obj['TP_RightValue_volume']:
             try:
                 float_value = float(s)
-                TP_RightValue_volumn.append(float_value)
+                TP_RightValue_volume.append(float_value)
             except ValueError:
-                TP_RightValue_volumn.append(0)
-        TP_RightValue_volumn=np.array(TP_RightValue_volumn)
-        TP_RightValue_volumn=TP_RightValue_volumn[0:len(B_RewardedHistory[1])]
+                TP_RightValue_volume.append(0)
+        TP_RightValue_volume=np.array(TP_RightValue_volume)
+        TP_RightValue_volume=TP_RightValue_volume[0:len(B_RewardedHistory[1])]
 
-        self.BS_TotalReward=np.sum((B_RewardedHistory[0]==True).astype(int)*TP_LeftValue_volumn+(B_RewardedHistory[1]==True).astype(int)*TP_RightValue_volumn)
+        self.BS_TotalReward=np.sum((B_RewardedHistory[0]==True).astype(int)*TP_LeftValue_volume+(B_RewardedHistory[1]==True).astype(int)*TP_RightValue_volume)
         #self.BS_TotalReward=float(self.BS_RewardN)*float(self.win.WaterPerRewardedTrial)
         self.BS_LeftRewardTrialN=np.sum(self.B_RewardedHistory[0]==True)
         self.BS_RightRewardTrialN=np.sum(self.B_RewardedHistory[1]==True)

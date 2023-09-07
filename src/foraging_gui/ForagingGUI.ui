@@ -2214,7 +2214,7 @@
       <string>2</string>
      </property>
     </widget>
-    <widget class="QDoubleSpinBox" name="GiveWaterL_volumn">
+    <widget class="QDoubleSpinBox" name="GiveWaterL_volume">
      <property name="geometry">
       <rect>
        <x>614</x>
@@ -2239,7 +2239,7 @@
       <double>3.000000000000000</double>
      </property>
     </widget>
-    <widget class="QDoubleSpinBox" name="GiveWaterR_volumn">
+    <widget class="QDoubleSpinBox" name="GiveWaterR_volume">
      <property name="geometry">
       <rect>
        <x>862</x>
@@ -2264,7 +2264,7 @@
       <double>3.000000000000000</double>
      </property>
     </widget>
-    <widget class="QDoubleSpinBox" name="RightValue_volumn">
+    <widget class="QDoubleSpinBox" name="RightValue_volume">
      <property name="geometry">
       <rect>
        <x>402</x>
@@ -2289,7 +2289,7 @@
       <double>3.000000000000000</double>
      </property>
     </widget>
-    <widget class="QDoubleSpinBox" name="LeftValue_volumn">
+    <widget class="QDoubleSpinBox" name="LeftValue_volume">
      <property name="geometry">
       <rect>
        <x>190</x>
