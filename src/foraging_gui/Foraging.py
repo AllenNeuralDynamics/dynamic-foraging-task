@@ -355,6 +355,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.LeftValue_volumn.textChanged.connect(self._WaterVolumnManage2)
         self.RightValue_volumn.textChanged.connect(self._WaterVolumnManage2)
         self.GiveWaterL_volumn.textChanged.connect(self._WaterVolumnManage2)
+        
     def _WaterVolumnManage2(self):
         '''Change the valve open time based on the water volumn'''
         self.LeftValue.textChanged.disconnect(self._WaterVolumnManage1)
@@ -406,7 +407,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
             widget2.setValue(float(widget1.text())*self.latest_fitting[valve][0]+self.latest_fitting[valve][1])
         elif direction==-1:
             widget2.setValue((float(widget1.text())-self.latest_fitting[valve][1])/self.latest_fitting[valve][0])
-
 
     def _GetLatestFitting(self,FittingResults):
         '''Get the latest fitting results from water calibration'''
