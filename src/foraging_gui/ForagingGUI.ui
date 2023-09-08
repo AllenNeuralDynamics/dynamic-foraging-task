@@ -3517,6 +3517,7 @@
     <addaction name="action_Save"/>
     <addaction name="action_Exit"/>
     <addaction name="action_Clear"/>
+    <addaction name="actionForce_save"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="sizePolicy">
@@ -3875,6 +3876,11 @@
   <action name="actionOpen_behavior_folder">
    <property name="text">
     <string>Open behavior folder</string>
+   </property>
+  </action>
+  <action name="actionForce_save">
+   <property name="text">
+    <string>Force save</string>
    </property>
   </action>
  </widget>

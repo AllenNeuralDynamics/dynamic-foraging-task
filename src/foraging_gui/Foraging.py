@@ -269,6 +269,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.action_Snipping.triggered.connect(self._Snipping)
         self.action_Open.triggered.connect(self._Open)
         self.action_Save.triggered.connect(self._Save)
+        self.actionForce_save.triggered.connect(self._ForceSave)
         self.action_Exit.triggered.connect(self._Exit)
         self.action_New.triggered.connect(self._New)
         self.action_Clear.triggered.connect(self._Clear)
@@ -316,6 +317,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit)):        
                 child.returnPressed.connect(self.keyPressEvent)
+    def _ForceSave(self):
+        '''Save whether the current trial is complete or not'''
+        self._Save(ForceSave=1)
     def _WaterVolumnManage1(self):
         '''Change the water volume based on the valve open time'''
         self.LeftValue.textChanged.disconnect(self._WaterVolumnManage1)
@@ -1061,8 +1065,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
             "<p></p>",
         )
    
-    def _Save(self):
-        self._StopCurrentSession() # stop the current session first
+    def _Save(self,ForceSave=0):
+        if ForceSave==0:
+            self._StopCurrentSession() # stop the current session first
         if self.WeightBefore.text()=='' or self.WeightAfter.text()=='' or self.ExtraWater.text()=='':
             response = QMessageBox.question(self,'Save without weight or extra water:', "Do you want to save without weight or extra water information provided?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
             if response==QMessageBox.Yes:
@@ -1661,6 +1666,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         time.sleep(0.01) 
         self.Channel3.ManualWater_Left(int(1))
         self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
+
     def _GiveRight(self):
         '''manually give right water'''
         self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
