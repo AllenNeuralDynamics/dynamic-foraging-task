@@ -1,4 +1,4 @@
-import sys, os,traceback,json,time,subprocess
+import sys, os,traceback,json,time,subprocess,math
 import numpy as np
 from datetime import date,timedelta,datetime
 from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout,QLineEdit,QWidget,QSizePolicy
@@ -17,11 +17,19 @@ import json
 #warnings.filterwarnings("ignore")
 
 class NumpyEncoder(json.JSONEncoder):
+    #def default(self, obj):
+    #    if isinstance(obj, np.ndarray):
+    #        return obj.tolist()
+    #   return json.JSONEncoder.default(self, obj)
     def default(self, obj):
         if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        return json.JSONEncoder.default(self, obj)
-
+            return obj.tolist()  # Convert NumPy array to a list
+        if isinstance(obj, np.integer):
+            return int(obj)  # Convert np.int32 to a regular int
+        if isinstance(obj, np.float64) and np.isnan(obj):
+            return 'NaN'  # Represent NaN as a string
+        return super(NumpyEncoder, self).default(obj)
+    
 class Window(QMainWindow, Ui_ForagingGUI):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -171,7 +179,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 else:
                     self.log_folder=os.path.join(os.path.expanduser("~"), "Documents",'log')
                 if 'temporary_video_folder' in Settings:
-                    self.temporary_video_folder=Settings['log_folder']
+                    self.temporary_video_folder=Settings['temporary_video_folder']
                 else:
                     self.temporary_video_folder=os.path.join(os.path.expanduser("~"), "Documents",'temporaryvideo')
             else:
@@ -1096,6 +1104,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             if hasattr(self, 'GeneratedTrials'):
                 if hasattr(self.GeneratedTrials, 'Obj'):
                     Obj=self.GeneratedTrials.Obj
+                else:
+                    Obj={}
             else:
                 Obj={}
             widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
@@ -1117,11 +1127,18 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 # Do something if self has the GeneratedTrials attribute
                 # Iterate over all attributes of the GeneratedTrials object
                 for attr_name in dir(self.GeneratedTrials):
-                    if attr_name.startswith('B_'):
-                        if attr_name=='B_RewardFamilies':
+                    if attr_name.startswith('B_') or attr_name.startswith('BS_'):
+                        if attr_name=='B_RewardFamilies' and self.SaveFile.endswith('.mat'):
                             pass
                         else:
-                            Obj[attr_name] = getattr(self.GeneratedTrials, attr_name)
+                            Value=getattr(self.GeneratedTrials, attr_name)
+                            try:
+                                if math.isnan(Value):
+                                    Obj[attr_name]='nan'
+                                else:
+                                    Obj[attr_name]=Value
+                            except:
+                                Obj[attr_name]=Value
             # save other events, e.g. session start time
             for attr_name in dir(self):
                 if attr_name.startswith('Other_'):
@@ -1251,7 +1268,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         continue
                     if key in CurrentObj:
                         # skip some keys
-                        if key=='ExtraWater' or key=='WeightBefore' or key=='WeightAfter' or key=='SuggestedWater':
+                        if key=='ExtraWater' or key=='WeightBefore' or key=='WeightAfter' or key=='SuggestedWater' or key=='Start':
                             self.ExtraWater.setText('')
                             continue
                         widget = widget_dict[key]

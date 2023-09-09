@@ -548,6 +548,7 @@ class GenerateTrials():
             self._GetCurrentBlockReward(0)
         # update suggested reward
         if self.win.TotalWater.text()!='':
+            # self.BS_TotalReward: normal rewards and auto rewards
             self.B_SuggestedWater=float(self.win.TotalWater.text())-float(self.BS_TotalReward)/1000
             self.win.SuggestedWater.setText(str(self.B_SuggestedWater))
         # early licking rate
