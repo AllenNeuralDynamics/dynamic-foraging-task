@@ -549,8 +549,8 @@ class GenerateTrials():
         # update suggested reward
         if self.win.TotalWater.text()!='':
             # self.BS_TotalReward: normal rewards and auto rewards
-            self.B_SuggestedWater=float(self.win.TotalWater.text())-float(self.BS_TotalReward)/1000
-            self.win.SuggestedWater.setText(str(self.B_SuggestedWater))
+            self.B_SuggestedWater=float(self.win.TotalWater.text())-float(self.BS_TotalReward)/1000-np.sum(self.win.ManualWaterVolume)
+            self.win.SuggestedWater.setText(str(np.round(self.B_SuggestedWater,3)))
         # early licking rate
         # double dipping 
         # foraging efficiency

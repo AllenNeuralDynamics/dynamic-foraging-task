@@ -101,7 +101,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._TrainingStage()
         self.keyPressEvent()
         self._WaterVolumnManage2()
-    
+        self.ManualWaterVolume=[0,0]
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
         if log_folder is None:
@@ -1683,6 +1683,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
         time.sleep(0.01) 
         self.Channel3.ManualWater_Left(int(1))
         self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
+        self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+float(self.TP_GiveWaterL_volume)/1000
+        self._UpdateSuggestedWater(float(self.TP_GiveWaterL_volume)/1000)
+    
 
     def _GiveRight(self):
         '''manually give right water'''
@@ -1690,6 +1693,29 @@ class Window(QMainWindow, Ui_ForagingGUI):
         time.sleep(0.01) 
         self.Channel3.ManualWater_Right(int(1))
         self.Channel.RightValue(float(self.TP_RightValue)*1000)
+        self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
+        self._UpdateSuggestedWater(float(self.TP_GiveWaterR_volume)/1000)
+
+    def _UpdateSuggestedWater(self,ManualWater=0):
+        '''Update the suggested water from the manually give water'''
+        Tag=0
+        if self.TotalWater.text()!='':
+            # self.BS_TotalReward: normal rewards and auto rewards
+            if hasattr(self,'GeneratedTrials'):
+                if hasattr(self.GeneratedTrials,'BS_TotalReward'):
+                    self.B_SuggestedWater=float(self.TotalWater.text())-float(self.GeneratedTrials.BS_TotalReward)/1000-np.sum(self.ManualWaterVolume)
+                    self.SuggestedWater.setText(str(np.round(self.B_SuggestedWater,3)))
+                else:
+                    Tag=1
+            else:
+                Tag=1
+            if Tag==1:
+                if self.SuggestedWater.text()=='':
+                    SuggestedWater=float(self.TotalWater.text())
+                else:
+                    SuggestedWater=float(self.SuggestedWater.text())
+                self.B_SuggestedWater=SuggestedWater-ManualWater
+                self.SuggestedWater.setText(str(np.round(self.B_SuggestedWater,3)))
 
 if __name__ == "__main__":
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling,1)
