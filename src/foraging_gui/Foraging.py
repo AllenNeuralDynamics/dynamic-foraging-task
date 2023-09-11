@@ -804,7 +804,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             if self.Randomness.currentText()=='Exponential':
                 self.BlockBeta.setEnabled(True)
                 self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
-                self.label_14.setStyleSheet("color: black;")
+                self.label_14.setStyleSheet("color: black;background-color: rgba(0, 0, 0, 0)")
             else:
                 self.BlockBeta.setEnabled(False)
                 self.BlockBeta.setStyleSheet("color: gray;""border: 1px solid gray;")
@@ -850,9 +850,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.label_6.setStyleSheet("color: gray;")
             self.label_7.setStyleSheet("color: gray;")
             self.label_8.setStyleSheet("color: gray;")
-            self.BaseRewardSum.setStyleSheet(f"color: gray;border: 1px solid gray;border:{border_style};")
-            self.RewardPairsN.setStyleSheet(f"color: gray;border: 1px solid gray;border:{border_style};")
-            self.RewardFamily.setStyleSheet(f"color: gray;border: 1px solid gray;border:{border_style};")
+            self.BaseRewardSum.setStyleSheet(f"color: gray;background-color: rgba(0, 0, 0, 0);border: 1px solid gray;border:{border_style};")
+            self.RewardPairsN.setStyleSheet(f"color: gray;background-color: rgba(0, 0, 0, 0);border: 1px solid gray;border:{border_style};")
+            self.RewardFamily.setStyleSheet(f"color: gray;background-color: rgba(0, 0, 0, 0);border: 1px solid gray;border:{border_style};")
             self.label_20.setStyleSheet("color: black;")
             self.UncoupledReward.setStyleSheet("color: black;""border: 1px solid gray;")
             # block
