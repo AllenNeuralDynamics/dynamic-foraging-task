@@ -1051,7 +1051,7 @@
                 <harp:VisualIndicators>On</harp:VisualIndicators>
                 <harp:Heartbeat>Disabled</harp:Heartbeat>
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                <harp:PortName>COM18</harp:PortName>
+                <harp:PortName>COM8</harp:PortName>
               </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
@@ -1316,46 +1316,34 @@
                       </Edges>
                     </Workflow>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="rx:BehaviorSubject" TypeArguments="harp:HarpMessage">
-                      <rx:Name>SoundCardCommands</rx:Name>
-                    </Builder>
+                  <Expression xsi:type="rx:BehaviorSubject" TypeArguments="harp:HarpMessage">
+                    <rx:Name>SoundCardCommands</rx:Name>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="Combinator">
-                      <Combinator xsi:type="p2:Device">
-                        <harp:OperationMode>Active</harp:OperationMode>
-                        <harp:OperationLed>On</harp:OperationLed>
-                        <harp:DumpRegisters>true</harp:DumpRegisters>
-                        <harp:VisualIndicators>On</harp:VisualIndicators>
-                        <harp:Heartbeat>Disabled</harp:Heartbeat>
-                        <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                        <harp:PortName>COM8</harp:PortName>
-                      </Combinator>
-                    </Builder>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="p2:Device">
+                      <harp:OperationMode>Active</harp:OperationMode>
+                      <harp:OperationLed>On</harp:OperationLed>
+                      <harp:DumpRegisters>true</harp:DumpRegisters>
+                      <harp:VisualIndicators>On</harp:VisualIndicators>
+                      <harp:Heartbeat>Disabled</harp:Heartbeat>
+                      <harp:IgnoreErrors>false</harp:IgnoreErrors>
+                      <harp:PortName>COM9</harp:PortName>
+                    </Combinator>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="rx:BehaviorSubject">
-                      <Name>SoundCardEvents</Name>
-                    </Builder>
+                  <Expression xsi:type="rx:BehaviorSubject">
+                    <Name>SoundCardEvents</Name>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="SubscribeSubject">
-                      <Name>GoCue</Name>
-                    </Builder>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>GoCue</Name>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="p2:CreateMessage">
-                      <harp:MessageType>Write</harp:MessageType>
-                      <harp:Payload xsi:type="p2:CreatePlaySoundOrFrequencyPayload">
-                        <p2:PlaySoundOrFrequency>4</p2:PlaySoundOrFrequency>
-                      </harp:Payload>
-                    </Builder>
+                  <Expression xsi:type="p2:CreateMessage">
+                    <harp:MessageType>Write</harp:MessageType>
+                    <harp:Payload xsi:type="p2:CreatePlaySoundOrFrequencyPayload">
+                      <p2:PlaySoundOrFrequency>4</p2:PlaySoundOrFrequency>
+                    </harp:Payload>
                   </Expression>
-                  <Expression xsi:type="Disable">
-                    <Builder xsi:type="MulticastSubject">
-                      <Name>SoundCardCommands</Name>
-                    </Builder>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>SoundCardCommands</Name>
                   </Expression>
                 </Nodes>
                 <Edges>
@@ -1864,22 +1852,81 @@
             <Expression xsi:type="MulticastSubject">
               <Name>BehaviorCommands</Name>
             </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>SoundCardEvents</Name>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="harp:FilterMessageType">
+                <harp:FilterType>Include</harp:FilterType>
+                <harp:MessageType>Event</harp:MessageType>
+              </Combinator>
+            </Expression>
+            <Expression xsi:type="p2:Parse">
+              <harp:Register xsi:type="p2:TimestampedPlaySoundOrFrequency" />
+            </Expression>
+            <Expression xsi:type="osc:Format">
+              <osc:Address>/GoCueTimeHarp</osc:Address>
+            </Expression>
+            <Expression xsi:type="MulticastSubject">
+              <Name>ToBonsaiOSC</Name>
+            </Expression>
             <Expression xsi:type="Disable">
               <Builder xsi:type="SubscribeSubject">
-                <Name>SoundCardEvents</Name>
+                <Name>BehaviorEvents</Name>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="beh:Parse">
+                <harp:Register xsi:type="beh:TimestampedOutputToggle" />
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="MemberSelector">
+                <Selector>Value</Selector>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="BitwiseAnd">
+                <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalOutputs">
+                  <Value>DOPort2</Value>
+                </Operand>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="GreaterThan">
+                <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
+                  <Value>0</Value>
+                </Operand>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="rx:Condition">
+                <Workflow>
+                  <Nodes>
+                    <Expression xsi:type="WorkflowInput">
+                      <Name>Source1</Name>
+                    </Expression>
+                    <Expression xsi:type="WorkflowOutput" />
+                  </Nodes>
+                  <Edges>
+                    <Edge From="0" To="1" Label="Source1" />
+                  </Edges>
+                </Workflow>
               </Builder>
             </Expression>
             <Expression xsi:type="Disable">
               <Builder xsi:type="Combinator">
-                <Combinator xsi:type="harp:FilterMessageType">
-                  <harp:FilterType>Include</harp:FilterType>
-                  <harp:MessageType>Event</harp:MessageType>
-                </Combinator>
+                <Combinator xsi:type="rx:WithLatestFrom" />
               </Builder>
             </Expression>
             <Expression xsi:type="Disable">
-              <Builder xsi:type="p2:Parse">
-                <harp:Register xsi:type="p2:TimestampedPlaySoundOrFrequency" />
+              <Builder xsi:type="MemberSelector">
+                <Selector>Item2.Seconds</Selector>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="scr:ExpressionTransform">
+                <scr:Expression>new(it as Seconds)</scr:Expression>
               </Builder>
             </Expression>
             <Expression xsi:type="Disable">
@@ -1891,53 +1938,6 @@
               <Builder xsi:type="MulticastSubject">
                 <Name>ToBonsaiOSC</Name>
               </Builder>
-            </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>BehaviorEvents</Name>
-            </Expression>
-            <Expression xsi:type="beh:Parse">
-              <harp:Register xsi:type="beh:TimestampedOutputToggle" />
-            </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Value</Selector>
-            </Expression>
-            <Expression xsi:type="BitwiseAnd">
-              <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalOutputs">
-                <Value>DOPort2</Value>
-              </Operand>
-            </Expression>
-            <Expression xsi:type="GreaterThan">
-              <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
-                <Value>0</Value>
-              </Operand>
-            </Expression>
-            <Expression xsi:type="rx:Condition">
-              <Workflow>
-                <Nodes>
-                  <Expression xsi:type="WorkflowInput">
-                    <Name>Source1</Name>
-                  </Expression>
-                  <Expression xsi:type="WorkflowOutput" />
-                </Nodes>
-                <Edges>
-                  <Edge From="0" To="1" Label="Source1" />
-                </Edges>
-              </Workflow>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:WithLatestFrom" />
-            </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Item2.Seconds</Selector>
-            </Expression>
-            <Expression xsi:type="scr:ExpressionTransform">
-              <scr:Expression>new(it as Seconds)</scr:Expression>
-            </Expression>
-            <Expression xsi:type="osc:Format">
-              <osc:Address>/GoCueTimeHarp</osc:Address>
-            </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>ToBonsaiOSC</Name>
             </Expression>
           </Nodes>
           <Edges>
@@ -3334,94 +3334,6 @@
             <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogHarpDemux.bonsai">
               <LogName>BehaviorEvents</LogName>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="SubscribeSubject">
-                <Name>SoundCardEvents</Name>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="IncludeWorkflow" Path="Extensions\LogHarpDemux.bonsai">
-                <LogName>SoundCardEvents</LogName>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="SubscribeSubject">
-                <Name>SideCameraFrames</Name>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="harp:CreateTimestamped" />
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="SubscribeSubject">
-                <Name>RootPath</Name>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Format">
-                <Format>{0}/Video/side_camera.csv</Format>
-                <Selector />
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="FileName" />
-                </PropertyMappings>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="io:CsvWriter">
-                <io:FileName>H:\TestImaging\Tower_EphysRig3\XY_05\XY_05_2023-09-06_2\2023-09-06_14-00-43/Video/side_camera.csv</io:FileName>
-                <io:Append>false</io:Append>
-                <io:Overwrite>true</io:Overwrite>
-                <io:Suffix>None</io:Suffix>
-                <io:IncludeHeader>false</io:IncludeHeader>
-                <io:Selector>Seconds,Value.ChunkData.FrameID,Value.ChunkData.Timestamp,Value.ChunkData.Gain,Value.ChunkData.ExposureTime</io:Selector>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="MemberSelector">
-                <Selector>Value.Image</Selector>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="SubscribeSubject">
-                <Name>RootPath</Name>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Format">
-                <Format>{0}/Video/side_camera.avi</Format>
-                <Selector />
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="PropertyMapping">
-                <PropertyMappings>
-                  <Property Name="FileName" />
-                </PropertyMappings>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="cv:VideoWriter">
-                  <cv:FileName>H:\TestImaging\Tower_EphysRig3\XY_05\XY_05_2023-09-06_2\2023-09-06_14-00-43/Video/side_camera.avi</cv:FileName>
-                  <cv:Suffix>None</cv:Suffix>
-                  <cv:Buffered>true</cv:Buffered>
-                  <cv:Overwrite>true</cv:Overwrite>
-                  <cv:FourCC>RAW</cv:FourCC>
-                  <cv:FrameRate>200</cv:FrameRate>
-                  <cv:FrameSize>
-                    <cv:Width>0</cv:Width>
-                    <cv:Height>0</cv:Height>
-                  </cv:FrameSize>
-                  <cv:ResizeInterpolation>NearestNeighbor</cv:ResizeInterpolation>
-                </Combinator>
-              </Builder>
-            </Expression>
             <Expression xsi:type="SubscribeSubject">
               <Name>BottomCameraFrames</Name>
             </Expression>
@@ -3441,7 +3353,7 @@
               </PropertyMappings>
             </Expression>
             <Expression xsi:type="io:CsvWriter">
-              <io:FileName>C:\Users\xinxin.yin\Documents\temporaryvideo\2023-09-06_15-14-32/Video/bottom_camera.csv</io:FileName>
+              <io:FileName>E:\VideoTmp\2023-09-11_12-36-24/Video/bottom_camera.csv</io:FileName>
               <io:Append>false</io:Append>
               <io:Overwrite>true</io:Overwrite>
               <io:Suffix>None</io:Suffix>
@@ -3465,7 +3377,7 @@
             </Expression>
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="cv:VideoWriter">
-                <cv:FileName>C:\Users\xinxin.yin\Documents\temporaryvideo\2023-09-06_15-14-32/Video/bottom_camera.avi</cv:FileName>
+                <cv:FileName>E:\VideoTmp\2023-09-11_12-36-24/Video/bottom_camera.avi</cv:FileName>
                 <cv:Suffix>None</cv:Suffix>
                 <cv:Buffered>true</cv:Buffered>
                 <cv:Overwrite>true</cv:Overwrite>
@@ -3477,6 +3389,68 @@
                 </cv:FrameSize>
                 <cv:ResizeInterpolation>NearestNeighbor</cv:ResizeInterpolation>
               </Combinator>
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>SideCameraFrames</Name>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="harp:CreateTimestamped" />
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>RootPath</Name>
+            </Expression>
+            <Expression xsi:type="Format">
+              <Format>{0}/Video/side_camera.csv</Format>
+              <Selector />
+            </Expression>
+            <Expression xsi:type="PropertyMapping">
+              <PropertyMappings>
+                <Property Name="FileName" />
+              </PropertyMappings>
+            </Expression>
+            <Expression xsi:type="io:CsvWriter">
+              <io:FileName>E:\VideoTmp\2023-09-11_12-36-24/Video/side_camera.csv</io:FileName>
+              <io:Append>false</io:Append>
+              <io:Overwrite>true</io:Overwrite>
+              <io:Suffix>None</io:Suffix>
+              <io:IncludeHeader>false</io:IncludeHeader>
+              <io:Selector>Seconds,Value.ChunkData.FrameID,Value.ChunkData.Timestamp,Value.ChunkData.Gain,Value.ChunkData.ExposureTime</io:Selector>
+            </Expression>
+            <Expression xsi:type="MemberSelector">
+              <Selector>Value.Image</Selector>
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>RootPath</Name>
+            </Expression>
+            <Expression xsi:type="Format">
+              <Format>{0}/Video/side_camera.avi</Format>
+              <Selector />
+            </Expression>
+            <Expression xsi:type="PropertyMapping">
+              <PropertyMappings>
+                <Property Name="FileName" />
+              </PropertyMappings>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="cv:VideoWriter">
+                <cv:FileName>E:\VideoTmp\2023-09-11_12-36-24/Video/side_camera.avi</cv:FileName>
+                <cv:Suffix>None</cv:Suffix>
+                <cv:Buffered>true</cv:Buffered>
+                <cv:Overwrite>true</cv:Overwrite>
+                <cv:FourCC>RAW</cv:FourCC>
+                <cv:FrameRate>200</cv:FrameRate>
+                <cv:FrameSize>
+                  <cv:Width>0</cv:Width>
+                  <cv:Height>0</cv:Height>
+                </cv:FrameSize>
+                <cv:ResizeInterpolation>NearestNeighbor</cv:ResizeInterpolation>
+              </Combinator>
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>SoundCardEvents</Name>
+            </Expression>
+            <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogHarpDemux.bonsai">
+              <LogName>SoundCardEvents</LogName>
             </Expression>
           </Nodes>
           <Edges>
@@ -3510,26 +3484,26 @@
             <Edge From="36" To="37" Label="Source1" />
             <Edge From="38" To="39" Label="Source1" />
             <Edge From="40" To="41" Label="Source1" />
+            <Edge From="41" To="45" Label="Source1" />
             <Edge From="42" To="43" Label="Source1" />
-            <Edge From="43" To="47" Label="Source1" />
-            <Edge From="44" To="45" Label="Source1" />
+            <Edge From="43" To="44" Label="Source1" />
+            <Edge From="44" To="45" Label="Source2" />
             <Edge From="45" To="46" Label="Source1" />
-            <Edge From="46" To="47" Label="Source2" />
+            <Edge From="46" To="50" Label="Source1" />
             <Edge From="47" To="48" Label="Source1" />
-            <Edge From="48" To="52" Label="Source1" />
-            <Edge From="49" To="50" Label="Source1" />
-            <Edge From="50" To="51" Label="Source1" />
-            <Edge From="51" To="52" Label="Source2" />
+            <Edge From="48" To="49" Label="Source1" />
+            <Edge From="49" To="50" Label="Source2" />
+            <Edge From="51" To="52" Label="Source1" />
+            <Edge From="52" To="56" Label="Source1" />
             <Edge From="53" To="54" Label="Source1" />
-            <Edge From="54" To="58" Label="Source1" />
-            <Edge From="55" To="56" Label="Source1" />
+            <Edge From="54" To="55" Label="Source1" />
+            <Edge From="55" To="56" Label="Source2" />
             <Edge From="56" To="57" Label="Source1" />
-            <Edge From="57" To="58" Label="Source2" />
+            <Edge From="57" To="61" Label="Source1" />
             <Edge From="58" To="59" Label="Source1" />
-            <Edge From="59" To="63" Label="Source1" />
-            <Edge From="60" To="61" Label="Source1" />
-            <Edge From="61" To="62" Label="Source1" />
-            <Edge From="62" To="63" Label="Source2" />
+            <Edge From="59" To="60" Label="Source1" />
+            <Edge From="60" To="61" Label="Source2" />
+            <Edge From="62" To="63" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
@@ -3704,7 +3678,7 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="spk:SpinnakerCapture">
                 <spk:Index xsi:nil="true" />
-                <spk:SerialNumber>21077123</spk:SerialNumber>
+                <spk:SerialNumber>23022730</spk:SerialNumber>
                 <spk:ColorProcessing>Default</spk:ColorProcessing>
               </Combinator>
             </Expression>
@@ -3740,39 +3714,27 @@
               </Operand>
             </Expression>
             <Expression xsi:type="rx:Accumulate" />
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="spk:SpinnakerCapture">
-                  <spk:Index xsi:nil="true" />
-                  <spk:SerialNumber>21077123</spk:SerialNumber>
-                  <spk:ColorProcessing>Default</spk:ColorProcessing>
-                </Combinator>
-              </Builder>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="spk:SpinnakerCapture">
+                <spk:Index xsi:nil="true" />
+                <spk:SerialNumber>23022717</spk:SerialNumber>
+                <spk:ColorProcessing>Default</spk:ColorProcessing>
+              </Combinator>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="SubscribeSubject">
-                <Name>BehaviorEvents</Name>
-              </Builder>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>BehaviorEvents</Name>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="beh:Parse">
-                <harp:Register xsi:type="beh:TimestampedCamera1Frame" />
-              </Builder>
+            <Expression xsi:type="beh:Parse">
+              <harp:Register xsi:type="beh:TimestampedCamera1Frame" />
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="MemberSelector">
-                <Selector>Seconds</Selector>
-              </Builder>
+            <Expression xsi:type="MemberSelector">
+              <Selector>Seconds</Selector>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="rx:Zip" />
-              </Builder>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="rx:Zip" />
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="rx:PublishSubject">
-                <Name>SideCameraFrames</Name>
-              </Builder>
+            <Expression xsi:type="rx:PublishSubject">
+              <Name>SideCameraFrames</Name>
             </Expression>
           </Nodes>
           <Edges>

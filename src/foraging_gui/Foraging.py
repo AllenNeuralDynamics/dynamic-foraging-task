@@ -311,9 +311,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
         self.RightValue.textChanged.connect(self._WaterVolumnManage1)
         self.GiveWaterL.textChanged.connect(self._WaterVolumnManage1)
+        self.GiveWaterR.textChanged.connect(self._WaterVolumnManage1)
         self.LeftValue_volume.textChanged.connect(self._WaterVolumnManage2)
         self.RightValue_volume.textChanged.connect(self._WaterVolumnManage2)
         self.GiveWaterL_volume.textChanged.connect(self._WaterVolumnManage2)
+        self.GiveWaterR_volume.textChanged.connect(self._WaterVolumnManage2)
         self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
@@ -333,9 +335,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.LeftValue.textChanged.disconnect(self._WaterVolumnManage1)
         self.RightValue.textChanged.disconnect(self._WaterVolumnManage1)
         self.GiveWaterL.textChanged.disconnect(self._WaterVolumnManage1)
+        self.GiveWaterR.textChanged.disconnect(self._WaterVolumnManage1)
         self.LeftValue_volume.textChanged.disconnect(self._WaterVolumnManage2)
         self.RightValue_volume.textChanged.disconnect(self._WaterVolumnManage2)
         self.GiveWaterL_volume.textChanged.disconnect(self._WaterVolumnManage2)
+        self.GiveWaterR_volume.textChanged.disconnect(self._WaterVolumnManage2)
         # use the latest calibration result
         if hasattr(self, 'WaterCalibration_dialog'):
             if hasattr(self.WaterCalibration_dialog, 'PlotM'):
@@ -364,18 +368,22 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
         self.RightValue.textChanged.connect(self._WaterVolumnManage1)
         self.GiveWaterL.textChanged.connect(self._WaterVolumnManage1)
+        self.GiveWaterR.textChanged.connect(self._WaterVolumnManage1)
         self.LeftValue_volume.textChanged.connect(self._WaterVolumnManage2)
         self.RightValue_volume.textChanged.connect(self._WaterVolumnManage2)
         self.GiveWaterL_volume.textChanged.connect(self._WaterVolumnManage2)
+        self.GiveWaterR_volume.textChanged.connect(self._WaterVolumnManage2)
 
     def _WaterVolumnManage2(self):
         '''Change the valve open time based on the water volume'''
         self.LeftValue.textChanged.disconnect(self._WaterVolumnManage1)
         self.RightValue.textChanged.disconnect(self._WaterVolumnManage1)
         self.GiveWaterL.textChanged.disconnect(self._WaterVolumnManage1)
+        self.GiveWaterR.textChanged.disconnect(self._WaterVolumnManage1)
         self.LeftValue_volume.textChanged.disconnect(self._WaterVolumnManage2)
         self.RightValue_volume.textChanged.disconnect(self._WaterVolumnManage2)
         self.GiveWaterL_volume.textChanged.disconnect(self._WaterVolumnManage2)
+        self.GiveWaterR_volume.textChanged.disconnect(self._WaterVolumnManage2)
         # use the latest calibration result
         if hasattr(self, 'WaterCalibration_dialog'):
             if hasattr(self.WaterCalibration_dialog, 'PlotM'):
@@ -398,27 +406,32 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
         self.RightValue.textChanged.connect(self._WaterVolumnManage1)
         self.GiveWaterL.textChanged.connect(self._WaterVolumnManage1)
+        self.GiveWaterR.textChanged.connect(self._WaterVolumnManage1)
         self.LeftValue_volume.textChanged.connect(self._WaterVolumnManage2)
         self.RightValue_volume.textChanged.connect(self._WaterVolumnManage2)
         self.GiveWaterL_volume.textChanged.connect(self._WaterVolumnManage2)
+        self.GiveWaterR_volume.textChanged.connect(self._WaterVolumnManage2)
 
     def _ValvetimeVolumnTransformation(self,widget1,widget2,direction,valve):
         '''Transformation between valve open time the the water volume'''
         # widget1 is the source widget and widget2 is the target widget
-        if valve not in self.latest_fitting:
-            # disable the widget
+        try:
+            if valve not in self.latest_fitting:
+                # disable the widget
+                if direction==1:
+                    widget2.setEnabled(False)
+                elif direction==-1:
+                    widget1.setEnabled(False)
+                return
+            else:
+                widget2.setEnabled(True)
+                widget1.setEnabled(True)
             if direction==1:
-                widget2.setEnabled(False)
+                widget2.setValue(float(widget1.text())*self.latest_fitting[valve][0]+self.latest_fitting[valve][1])
             elif direction==-1:
-                widget1.setEnabled(False)
-            return
-        else:
-            widget2.setEnabled(True)
-            widget1.setEnabled(True)
-        if direction==1:
-            widget2.setValue(float(widget1.text())*self.latest_fitting[valve][0]+self.latest_fitting[valve][1])
-        elif direction==-1:
-            widget2.setValue((float(widget1.text())-self.latest_fitting[valve][1])/self.latest_fitting[valve][0])
+                widget2.setValue((float(widget1.text())-self.latest_fitting[valve][1])/self.latest_fitting[valve][0])
+        except:
+            pass
 
     def _GetLatestFitting(self,FittingResults):
         '''Get the latest fitting results from water calibration'''
