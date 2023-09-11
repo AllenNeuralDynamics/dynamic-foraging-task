@@ -828,11 +828,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.label_13.setText('min reward each block=')
             self.BlockMinReward.setText('0')
             # change the position of RewardN=/min reward each block=
-            self.BlockMinReward.setGeometry(QtCore.QRect(863, 101, 80, 20))
-            self.label_13.setGeometry(QtCore.QRect(711, 101, 146, 16))
+            self.BlockMinReward.setGeometry(QtCore.QRect(863, 128, 80, 20))
+            self.label_13.setGeometry(QtCore.QRect(711, 128, 146, 16))
             # move auto-reward
-            self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 101, 80, 20))
-            self.label_26.setGeometry(QtCore.QRect(929, 101, 146, 16))
+            self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 128, 80, 20))
+            self.label_26.setGeometry(QtCore.QRect(929, 128, 146, 16))
             # set block length to the default value
             self.BlockMin.setText('20')
             self.BlockMax.setText('60')
@@ -883,11 +883,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.label_13.setText('min reward each block=')
             self.BlockMinReward.setText('0')
             # change the position of RewardN=/min reward each block=
-            self.BlockMinReward.setGeometry(QtCore.QRect(863, 101, 80, 20))
-            self.label_13.setGeometry(QtCore.QRect(711, 101, 146, 16))
+            self.BlockMinReward.setGeometry(QtCore.QRect(863, 128, 80, 20))
+            self.label_13.setGeometry(QtCore.QRect(711, 128, 146, 16))
             # move auto-reward
-            self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 101, 80, 20))
-            self.label_26.setGeometry(QtCore.QRect(929, 101, 146, 16))
+            self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 128, 80, 20))
+            self.label_26.setGeometry(QtCore.QRect(929, 128, 146, 16))
             # set block length to the default value
             self.BlockMin.setText('20')
             self.BlockMax.setText('60')
@@ -926,16 +926,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.InitiallyInactiveN.setEnabled(True)
             self.label_27.setStyleSheet("color: black;")
             self.InitiallyInactiveN.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.InitiallyInactiveN.setGeometry(QtCore.QRect(403, 101, 80, 20))
+            self.InitiallyInactiveN.setGeometry(QtCore.QRect(403, 128, 80, 20))
             # change name of min reward each block
             self.label_13.setText('RewardN=')
             self.BlockMinReward.setText('5')
             # change the position of RewardN=/min reward each block=
-            self.BlockMinReward.setGeometry(QtCore.QRect(191, 101, 80, 20))
-            self.label_13.setGeometry(QtCore.QRect(40, 101, 146, 16))
+            self.BlockMinReward.setGeometry(QtCore.QRect(191, 128, 80, 20))
+            self.label_13.setGeometry(QtCore.QRect(40, 128, 146, 16))
             # move auto-reward
-            self.IncludeAutoReward.setGeometry(QtCore.QRect(614, 101, 80, 20))
-            self.label_26.setGeometry(QtCore.QRect(460, 101, 146, 16))
+            self.IncludeAutoReward.setGeometry(QtCore.QRect(614, 128, 80, 20))
+            self.label_26.setGeometry(QtCore.QRect(460, 128, 146, 16))
             # set block length to be 1
             self.BlockMin.setText('1')
             self.BlockMax.setText('1')
