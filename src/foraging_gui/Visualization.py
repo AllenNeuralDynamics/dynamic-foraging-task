@@ -335,7 +335,7 @@ class PlotWaterCalibration(FigureCanvas):
                     if current_valve=='Left':
                         line=self.ax1.plot(sorted_X, sorted_Y, 'o-',label=current_date+'_left valve')
                     elif current_valve=='Right':
-                        line=self.ax1.plot(sorted_X, sorted_Y, 'o--',label=current_date+'_right valve')
+                        line=self.ax1.plot(sorted_X, sorted_Y, 'o-',label=current_date+'_right valve')
                     # fit the curve
                     color=line[0].get_color()
                     slope, intercept=self._PlotFitting(sorted_X,sorted_Y,color,Plot=1)
