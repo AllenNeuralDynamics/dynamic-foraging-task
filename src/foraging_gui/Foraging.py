@@ -104,8 +104,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.ManualWaterVolume=[0,0]
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
-        # stop the current session
-        self._StopCurrentSession()
+        # stop the current session except it is a new session
+        if self.StartANewSession==1 and self.ANewTrial==1:
+            pass
+        else:
+            self._StopCurrentSession()
         if log_folder is None:
             # formal logging
             loggingtype=0
