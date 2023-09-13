@@ -18,6 +18,7 @@ class GenerateTrials():
         self.B_RewardProHistory=np.array([[],[]]).astype(int)
         self.BlockLenHistory=[[],[]]
         self.B_BaitHistory=np.array([[],[]]).astype(bool)
+        self.B_CurrentRewardProbRandomNumber=[]
         self.B_ITIHistory=[]
         self.B_DelayHistory=[]
         self.B_ResponseTimeHistory=[]
@@ -1008,7 +1009,9 @@ class GenerateTrials():
 
     def _InitiateATrial(self,Channel1,Channel4):
         # Determine if the current lick port should be baited. self.B_Baited can only be updated after receiving response of the animal, so this part cannot appear in the _GenerateATrial section
-        self.CurrentBait=self.B_CurrentRewardProb>np.random.random(2)
+        RandomNumber=np.random.random(2)
+        self.B_CurrentRewardProbRandomNumber.append(RandomNumber)
+        self.CurrentBait=self.B_CurrentRewardProb>RandomNumber
         if (self.TP_Task in ['Coupled Baiting','Uncoupled Baiting']):
              self.CurrentBait= self.CurrentBait | self.B_Baited
         # For task rewardN, if this is the "initial N trials" of the active side, no bait will be be given.
