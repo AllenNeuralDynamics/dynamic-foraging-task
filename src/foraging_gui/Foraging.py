@@ -102,6 +102,70 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.keyPressEvent()
         self._WaterVolumnManage2()
         self.ManualWaterVolume=[0,0]
+    def connectSignalsSlots(self):
+        '''Define callbacks'''
+        self.action_About.triggered.connect(self._about)
+        self.action_Camera.triggered.connect(self._Camera)
+        self.action_Optogenetics.triggered.connect(self._Optogenetics)
+        self.action_Manipulator.triggered.connect(self._Manipulator)
+        self.action_MotorStage.triggered.connect(self._MotorStage)
+        self.action_Calibration.triggered.connect(self._WaterCalibration)
+        self.actionLaser_Calibration.triggered.connect(self._LaserCalibration)
+        self.action_Snipping.triggered.connect(self._Snipping)
+        self.action_Open.triggered.connect(self._Open)
+        self.action_Save.triggered.connect(self._Save)
+        self.actionForce_save.triggered.connect(self._ForceSave)
+        self.action_Exit.triggered.connect(self._Exit)
+        self.action_New.triggered.connect(self._New)
+        self.action_Clear.triggered.connect(self._Clear)
+        self.action_Start.triggered.connect(self.Start.click)
+        self.action_NewSession.triggered.connect(self.NewSession.click)
+        self.actionConnectBonsai.triggered.connect(self._InitializeBonsai)
+        self.Load.clicked.connect(self._Open)
+        self.Save.clicked.connect(self._Save)
+        self.Clear.clicked.connect(self._Clear)
+        self.Start.clicked.connect(self._Start)
+        self.GiveLeft.clicked.connect(self._GiveLeft)
+        self.GiveRight.clicked.connect(self._GiveRight)
+        self.NewSession.clicked.connect(self._NewSession)
+        self.AutoReward.clicked.connect(self._AutoReward)
+        self.NextBlock.clicked.connect(self._NextBlock)
+        self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
+        self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
+        self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
+        self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
+        self.Task.currentIndexChanged.connect(self._Task)
+        self.AdvancedBlockAuto.currentIndexChanged.connect(self._AdvancedBlockAuto)
+        self.TotalWater.textChanged.connect(self._SuggestedWater)
+        self.Randomness.currentIndexChanged.connect(self._Randomness)
+        self.TrainingStage.currentIndexChanged.connect(self._TrainingStage)
+        self.TrainingStage.activated.connect(self._TrainingStage)
+        self.SaveTraining.clicked.connect(self._SaveTraining)
+        self.actionTemporary_Logging.triggered.connect(self._startTemporaryLogging)
+        self.actionFormal_logging.triggered.connect(self._startFormalLogging)
+        self.actionOpen_logging_folder.triggered.connect(self._OpenLoggingFolder)
+        self.actionOpen_behavior_folder.triggered.connect(self._OpenBehaviorFolder)
+        self.actionOpenSettingFolder.triggered.connect(self._OpenSettingFolder)
+        self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
+        self.RightValue.textChanged.connect(self._WaterVolumnManage1)
+        self.GiveWaterL.textChanged.connect(self._WaterVolumnManage1)
+        self.GiveWaterR.textChanged.connect(self._WaterVolumnManage1)
+        self.LeftValue_volume.textChanged.connect(self._WaterVolumnManage2)
+        self.RightValue_volume.textChanged.connect(self._WaterVolumnManage2)
+        self.GiveWaterL_volume.textChanged.connect(self._WaterVolumnManage2)
+        self.GiveWaterR_volume.textChanged.connect(self._WaterVolumnManage2)
+        self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
+        # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
+        for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
+            # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
+            for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):        
+                child.textChanged.connect(self._CheckTextChange)
+        # Opto_dialog can not detect natural enter press, so returnPressed is used here. 
+        for container in [self.Opto_dialog]:
+            # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
+            for child in container.findChildren((QtWidgets.QLineEdit)):        
+                child.returnPressed.connect(self.keyPressEvent)
+
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
         # stop the current session except it is a new session
@@ -270,68 +334,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.WarningLabel_2.setText('')
         self.WarningLabel_2.setStyleSheet("color: gray;")
         self.InitializeBonsaiSuccessfully=1
-    def connectSignalsSlots(self):
-        '''Define callbacks'''
-        self.action_About.triggered.connect(self._about)
-        self.action_Camera.triggered.connect(self._Camera)
-        self.action_Optogenetics.triggered.connect(self._Optogenetics)
-        self.action_Manipulator.triggered.connect(self._Manipulator)
-        self.action_MotorStage.triggered.connect(self._MotorStage)
-        self.action_Calibration.triggered.connect(self._WaterCalibration)
-        self.actionLaser_Calibration.triggered.connect(self._LaserCalibration)
-        self.action_Snipping.triggered.connect(self._Snipping)
-        self.action_Open.triggered.connect(self._Open)
-        self.action_Save.triggered.connect(self._Save)
-        self.actionForce_save.triggered.connect(self._ForceSave)
-        self.action_Exit.triggered.connect(self._Exit)
-        self.action_New.triggered.connect(self._New)
-        self.action_Clear.triggered.connect(self._Clear)
-        self.action_Start.triggered.connect(self.Start.click)
-        self.action_NewSession.triggered.connect(self.NewSession.click)
-        self.actionConnectBonsai.triggered.connect(self._InitializeBonsai)
-        self.Load.clicked.connect(self._Open)
-        self.Save.clicked.connect(self._Save)
-        self.Clear.clicked.connect(self._Clear)
-        self.Start.clicked.connect(self._Start)
-        self.GiveLeft.clicked.connect(self._GiveLeft)
-        self.GiveRight.clicked.connect(self._GiveRight)
-        self.NewSession.clicked.connect(self._NewSession)
-        self.AutoReward.clicked.connect(self._AutoReward)
-        self.NextBlock.clicked.connect(self._NextBlock)
-        self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
-        self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
-        self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
-        self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
-        self.Task.currentIndexChanged.connect(self._Task)
-        self.AdvancedBlockAuto.currentIndexChanged.connect(self._AdvancedBlockAuto)
-        self.TotalWater.textChanged.connect(self._SuggestedWater)
-        self.Randomness.currentIndexChanged.connect(self._Randomness)
-        self.TrainingStage.currentIndexChanged.connect(self._TrainingStage)
-        self.TrainingStage.activated.connect(self._TrainingStage)
-        self.SaveTraining.clicked.connect(self._SaveTraining)
-        self.actionTemporary_Logging.triggered.connect(self._startTemporaryLogging)
-        self.actionFormal_logging.triggered.connect(self._startFormalLogging)
-        self.actionOpen_logging_folder.triggered.connect(self._OpenLoggingFolder)
-        self.actionOpen_behavior_folder.triggered.connect(self._OpenBehaviorFolder)
-        self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
-        self.RightValue.textChanged.connect(self._WaterVolumnManage1)
-        self.GiveWaterL.textChanged.connect(self._WaterVolumnManage1)
-        self.GiveWaterR.textChanged.connect(self._WaterVolumnManage1)
-        self.LeftValue_volume.textChanged.connect(self._WaterVolumnManage2)
-        self.RightValue_volume.textChanged.connect(self._WaterVolumnManage2)
-        self.GiveWaterL_volume.textChanged.connect(self._WaterVolumnManage2)
-        self.GiveWaterR_volume.textChanged.connect(self._WaterVolumnManage2)
-        self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
-        # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
-        for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
-            # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
-            for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):        
-                child.textChanged.connect(self._CheckTextChange)
-        # Opto_dialog can not detect natural enter press, so returnPressed is used here. 
-        for container in [self.Opto_dialog]:
-            # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
-            for child in container.findChildren((QtWidgets.QLineEdit)):        
-                child.returnPressed.connect(self.keyPressEvent)
+    def _OpenSettingFolder(self):
+        '''Open the setting folder'''
+        try:
+            subprocess.Popen(['explorer', self.SettingFolder])
+        except:
+            pass
     def _ForceSave(self):
         '''Save whether the current trial is complete or not'''
         self._Save(ForceSave=1)

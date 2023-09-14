@@ -3596,7 +3596,7 @@
     <property name="title">
      <string>Settings</string>
     </property>
-    <addaction name="actionPreferences"/>
+    <addaction name="actionOpenSettingFolder"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools"/>
@@ -3816,9 +3816,9 @@
     <string>Manipulator</string>
    </property>
   </action>
-  <action name="actionPreferences">
+  <action name="actionOpenSettingFolder">
    <property name="text">
-    <string>Preferences</string>
+    <string>Open setting folder</string>
    </property>
   </action>
   <action name="action_Clear">
