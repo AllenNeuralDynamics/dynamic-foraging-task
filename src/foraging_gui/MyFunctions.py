@@ -160,6 +160,7 @@ class GenerateTrials():
         else:
             self.win.WarningLabelRewardN.setText('')
             self.win.WarningLabelRewardN.setStyleSheet("color: gray;")
+
     def _GetMaximumConSelection(self):
         '''get the maximum consecutive selection of the active side of the current block'''
         B_RewardProHistory=self.B_RewardProHistory[:,range(len(self.B_AnimalResponseHistory))].copy()
@@ -175,6 +176,9 @@ class GenerateTrials():
         max_index = np.argmax(B_RewardProHistory[:,-1])
         # get the consecutive choice of the active side
         length,indexN=self._consecutive_length(self.B_AnimalResponseHistory[index[0][0]:index[0][1]+1],max_index)
+        # reset to 0 during the first trial of block transition
+        if self.B_RewardProHistory[0,-1]!=self.B_RewardProHistory[0,-2] or self.B_RewardProHistory[1,-1]!=self.B_RewardProHistory[1,-2]:
+            return 0
         # Get the maximum number of consecutive selections for the active side
         if len(length)==0:
             return 0
