@@ -1074,6 +1074,25 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
         self.Laser_1.currentIndexChanged.connect(self._Laser_1)
         self.Protocol_1.activated.connect(self._activated_1)
         self.Protocol_1.currentIndexChanged.connect(self._activated_1)
+        self.Flush_DO0.clicked.connect(self._FLush_DO0)
+        self.Flush_DO1.clicked.connect(self._FLush_DO1)
+        self.Flush_DO2.clicked.connect(self._FLush_DO2)
+        self.Flush_DO3.clicked.connect(self._FLush_DO3)
+        self.Flush_Port2.clicked.connect(self._FLush_Port2)
+    def _FLush_DO0(self):
+        self.MainWindow.Channel.DO0(int(1))
+        self.MainWindow.Channel.receive()
+    def _FLush_DO1(self):
+        self.MainWindow.Channel.DO1(int(1))
+    def _FLush_DO2(self):
+        self.MainWindow.Channel.DO2(int(1))
+        self.MainWindow.Channel.receive()
+    def _FLush_DO3(self):
+        self.MainWindow.Channel.DO3(int(1))
+        self.MainWindow.Channel.receive()
+    def _FLush_Port2(self):
+        self.MainWindow.Channel.Port2(int(1))
+
     def _Laser_1(self):
         self._Laser(1)
     def _activated_1(self):

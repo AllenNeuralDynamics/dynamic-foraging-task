@@ -158,3 +158,23 @@ class RigClient:
     def StartLogging(self,value):
         # start the logging
         self.send("/startlogging", value) 
+
+    def DO0(self,value):
+        # open DO0
+        self.send("/DO0", value) 
+
+    def DO1(self,value):
+        # open DO1
+        self.send("/DO1", value) 
+
+    def DO2(self,value):
+        # open DO2
+        self.send("/DO2", value) 
+    
+    def DO3(self,value):
+        # open DO3
+        self.send("/DO3", value) 
+
+    def Port2(self,value):
+        # open Port2
+        self.send("/Port2", value) 
