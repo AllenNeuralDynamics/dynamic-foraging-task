@@ -2,8 +2,8 @@
 [dynamic-foraging-task](#Dynamic-Foraging-Task)
 - [Prerequisites](#Prerequisites)
 - [Deployment](#Deployment)
-  - Bonsai
-  - Python GUI
+  - [Bonsai](#Bonsai)
+  - [Python GUI](#Python GUI)
 - Output json format
 - Information flow
 - Usage of Python GUI
