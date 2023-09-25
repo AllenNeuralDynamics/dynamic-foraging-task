@@ -1,7 +1,7 @@
-# Dynamic Foraging Task
-[dynamic-foraging-task](#Dynamic Foraging Task)
+# Dynamic-Foraging-Task
+[dynamic-foraging-task](#Dynamic-Foraging-Task)
 - [Prerequisites](##Prerequisites)
-- Deployment
+- [Deployment](##Deployment)
   - Bonsai
   - Python GUI
 - Output json format
@@ -17,12 +17,18 @@
   - Motor stage
 
 ## Prerequisites
+
 ## Deployment
+
 ### Bonsai
 ### Python GUI
+
 ## Output json file
+
 ## Information flow
+
 ## Usage of Python GUI
+
 ### Menu
 ### Toolbars
 ### Training parameters
