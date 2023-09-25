@@ -3,7 +3,7 @@
 - [Prerequisites](#Prerequisites)
 - [Deployment](#Deployment)
   - [Bonsai](#Bonsai)
-  - [Python GUI](#Python GUI)
+  - [Python GUI](#Python)
 - Output json format
 - Information flow
 - Usage of Python GUI
