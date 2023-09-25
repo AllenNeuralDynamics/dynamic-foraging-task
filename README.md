@@ -1,7 +1,7 @@
 # Dynamic-Foraging-Task
 [dynamic-foraging-task](#Dynamic-Foraging-Task)
-- [Prerequisites](##Prerequisites)
-- [Deployment](##Deployment)
+- [Prerequisites](#Prerequisites)
+- [Deployment](#Deployment)
   - Bonsai
   - Python GUI
 - Output json format
