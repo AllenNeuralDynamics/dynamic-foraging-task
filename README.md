@@ -1,6 +1,6 @@
 # Dynamic Foraging Task
-dynamic-foraging-task
-- Prerequisites
+[dynamic-foraging-task](#Dynamic Foraging Task)
+- [Prerequisites](##Prerequisites)
 - Deployment
   - Bonsai
   - Python GUI
