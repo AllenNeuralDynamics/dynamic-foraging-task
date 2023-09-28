@@ -1263,7 +1263,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.NewSession.setDisabled(True) # You must start a NewSession after loading a new file, and you can't continue that session
         elif Reply == QMessageBox.Cancel:
             return
-        fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
+        fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder+'\\'+self.Tower.currentText(), "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
         self.fname=fname
         if fname:
             if fname.endswith('.mat'):
@@ -1371,6 +1371,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 print(traceback.format_exc())
                 # delete GeneratedTrials
                 del self.GeneratedTrials
+            # show basic information
+            if 'Other_inforTitle' in Obj:
+                self.infor.setTitle(Obj['Other_inforTitle'])
+            if 'Other_BasicTitle' in Obj:
+                self.Basic.setTitle(Obj['Other_BasicTitle'])
+            if 'Other_BasicText' in Obj:
+                self.ShowBasic.setText(Obj['Other_BasicText'])
         else:
             self.NewSession.setDisabled(False)
 
