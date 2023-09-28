@@ -882,9 +882,9 @@ class CameraDialog(QDialog,Ui_Camera):
 
     def _OpenSaveFolder(self):
         '''Open the log/save folder of the camera'''
-        if hasattr(self.MainWindow,'TP_log_folder'):
+        if hasattr(self.MainWindow,'Ot_log_folder'):
             try:
-                subprocess.Popen(['explorer', self.MainWindow.TP_log_folder])
+                subprocess.Popen(['explorer', self.MainWindow.Ot_log_folder])
             except:
                 self.WarningLabelOpenSave.setText('No logging folder found!')
                 self.WarningLabelOpenSave.setStyleSheet("color: red;")
@@ -896,10 +896,10 @@ class CameraDialog(QDialog,Ui_Camera):
         '''Restart the logging (create a new logging folder)'''
         if self.CollectVideo.currentText()=='Yes':
             # formal logging
-            self.MainWindow.TP_log_folder=self.MainWindow._restartlogging()
+            self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
         else:
             # temporary logging
-            self.MainWindow.TP_log_folder=self.MainWindow._restartlogging(self.MainWindow.temporary_video_folder)
+            self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging(self.MainWindow.temporary_video_folder)
         self.WarningLabelLogging.setText('Logging has restarted!')
         self.WarningLabelLogging.setStyleSheet("color: red;")
 
@@ -944,11 +944,11 @@ class CameraDialog(QDialog,Ui_Camera):
             if self.AutoControl.currentText()=='No':
                 # Do not restart logging when automatic control is "yes" as logging will start in behavior control
                 if self.CollectVideo.currentText()=='Yes':
-                    self.MainWindow.TP_log_folder=self.MainWindow._restartlogging()
+                    self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
                 else:
                     if self.MainWindow.loggingstarted!=1:
                         # Start logging if the temporary logging is not started
-                        self.MainWindow.TP_log_folder=self.MainWindow._restartlogging(self.MainWindow.temporary_video_folder)
+                        self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging(self.MainWindow.temporary_video_folder)
             '''
             # This part was dropped due to the new logging method
             # save the video data

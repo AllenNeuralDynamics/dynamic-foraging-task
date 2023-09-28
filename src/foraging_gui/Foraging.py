@@ -473,10 +473,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.Camera_dialog._OpenSaveFolder()
     def _startTemporaryLogging(self):
         '''Restart the temporary logging'''
-        self.TP_log_folder=self._restartlogging(self.temporary_video_folder)
+        self.Ot_log_folder=self._restartlogging(self.temporary_video_folder)
     def _startFormalLogging(self):
         '''Restart the formal logging'''
-        self.TP_log_folder=self._restartlogging()
+        self.Ot_log_folder=self._restartlogging()
     def _TrainingStage(self):
         '''Change the parameters automatically based on training stage and task'''
         self.WarningLabel_SaveTrainingStage.setText('')
@@ -1190,6 +1190,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     Obj['WaterCalibrationResults']=self.WaterCalibrationResults
                 except:
                     pass
+            # save ohter fields start with Ot_
+            for attr_name in dir(self):
+                if attr_name.startswith('Ot_'):
+                    Obj[attr_name]=getattr(self, attr_name)
             # save Json or mat
             if self.SaveFile.endswith('.mat'):
             # Save data to a .mat file
@@ -1545,7 +1549,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.WarningLabel.setText('')
             self.WarningLabel.setStyleSheet("color: gray;")
             # start a new logging
-            self.TP_log_folder=self._restartlogging()
+            self.Ot_log_folder=self._restartlogging()
             # start the camera during the begginning of each session
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
                 self.Camera_dialog.StartCamera.setChecked(True)

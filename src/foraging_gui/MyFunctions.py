@@ -1248,7 +1248,8 @@ class GenerateTrials():
                 # Set an attribute in self with the name 'TP_' followed by the child's object name
                 # and store whether the child is checked or not
                 setattr(self, 'TP_'+child.objectName(), child.isChecked())
-
+        # log folder
+        self.TP_log_folder=win.Ot_log_folder
     def _SaveParameters(self):
          for attr_name in dir(self):
                 if attr_name.startswith('TP_'):
