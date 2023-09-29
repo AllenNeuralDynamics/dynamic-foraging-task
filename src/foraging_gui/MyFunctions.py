@@ -1233,7 +1233,7 @@ class GenerateTrials():
         for container in [win.TrainingParameters, win.centralwidget, win.Opto_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit, QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
-                if child.objectName()=='qt_spinbox_lineedit':
+                if child.objectName()=='qt_spinbox_lineedit' or child.objectName()=='':
                     continue
                 # Set an attribute in self with the name 'TP_' followed by the child's object name
                 # and store the child's text value
