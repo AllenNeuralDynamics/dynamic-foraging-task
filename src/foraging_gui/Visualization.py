@@ -382,3 +382,37 @@ class PlotWaterCalibration(FigureCanvas):
         sorted_indices = sorted(range(len(X)), key=lambda i: float(X[i]))
         sorted_Y = [Y[i] for i in sorted_indices]
         return sorted_X,sorted_Y
+
+class PlotLickDistribution(FigureCanvas):
+    def __init__(self,GeneratedTrials=None,dpi=100,width=5, height=4):
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        gs = GridSpec(10, 31, wspace = 3, hspace = 0.1, bottom = 0.1, top = 0.95, left = 0.04, right = 0.98)
+        self.ax1 = self.fig.add_subplot(gs[1:9, 2:11])
+        self.ax2 = self.fig.add_subplot(gs[1:9, 12:21])
+        self.ax3 = self.fig.add_subplot(gs[1:9, 22:31])
+        self.ax1.get_shared_y_axes().join(self.ax1, self.ax2,self.ax3)
+        self.ax1.get_shared_x_axes().join(self.ax1, self.ax2,self.ax3)
+        self.ax2.set_yticks([])
+        self.ax3.set_yticks([])
+        FigureCanvas.__init__(self, self.fig)
+    def _Update(self,GeneratedTrials=None):
+        self.ax1.cla()
+        self.ax2.cla()
+        self.ax3.cla()
+        self.ax2.set_yticks([])
+        self.ax3.set_yticks([])
+        self.ax1.set_title('Left licks', fontsize=8)
+        self.ax2.set_title('Right licks', fontsize=8)
+        self.ax3.set_title('All licks', fontsize=8)
+        if GeneratedTrials==None:
+            return
+        # Custom x-axis values
+        custom_x_values = np.linspace(-0.1, 0.1, 40)
+        self.ax1.hist(np.diff(GeneratedTrials.B_LeftLickTime), bins=custom_x_values, color='red', alpha=0.7,label='Left licks')
+        self.ax2.hist(np.diff(GeneratedTrials.B_RightLickTime), bins=custom_x_values, color='blue', alpha=0.7,label='Right licks')
+        AllLicks=np.concatenate((GeneratedTrials.B_LeftLickTime,GeneratedTrials.B_RightLickTime))
+        self.ax3.hist(np.diff(np.sort(AllLicks)), bins=custom_x_values, color='black', alpha=0.7,label='All licks')
+        self.ax1.set_xlim(-0.01, 0.1)
+        self.ax2.set_xlabel('time (s)')
+        self.ax1.set_ylabel('counts')
+        self.draw() 

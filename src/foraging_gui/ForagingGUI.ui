@@ -3556,6 +3556,7 @@
     <property name="title">
      <string>Visualization</string>
     </property>
+    <addaction name="actionLicks_sta"/>
     <addaction name="action_HideLines"/>
    </widget>
    <widget class="QMenu" name="menuOptogenetics">
@@ -3881,6 +3882,14 @@
   <action name="actionForce_save">
    <property name="text">
     <string>Force save</string>
+   </property>
+  </action>
+  <action name="actionLicks_sta">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Licks distribution</string>
    </property>
   </action>
  </widget>

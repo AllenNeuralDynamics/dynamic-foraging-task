@@ -5,3 +5,4 @@ pyuic5 -o Optogenetics.py Optogenetics.ui
 pyuic5 -o Manipulator.py Manipulator.ui
 pyuic5 -o Calibration.py Calibration.ui
 pyuic5 -o CalibrationLaser.py CalibrationLaser.ui
+pyuic5 -o LicksDistribution.py LicksDistribution.ui

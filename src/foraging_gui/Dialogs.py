@@ -6,6 +6,7 @@ from Calibration import Ui_WaterCalibration
 from Camera import Ui_Camera
 from MotorStage import Ui_MotorStage
 from Manipulator import Ui_Manipulator
+from LicksDistribution import Ui_LickDistribution
 from CalibrationLaser import Ui_CalibrationLaser
 from MyFunctions import Worker
 import numpy as np
@@ -13,6 +14,14 @@ from PyQt5.QtCore import QThreadPool,Qt
 from datetime import datetime
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from Visualization import PlotWaterCalibration
+
+class LickStaDialog(QDialog,Ui_LickDistribution):
+    '''Lick statistics dialog'''
+    def __init__(self, MainWindow, parent=None):
+        super().__init__(parent)
+        self.setupUi(self)
+        self.MainWindow=MainWindow
+
 class OptogeneticsDialog(QDialog,Ui_Optogenetics):
     '''Optogenetics dialog'''
     def __init__(self, MainWindow, parent=None):

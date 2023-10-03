@@ -9,8 +9,8 @@ from scipy.io import savemat, loadmat
 from ForagingGUI import Ui_ForagingGUI
 import rigcontrol
 from pyOSC3.OSC3 import OSCStreamingClient
-from Visualization import PlotV
-from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog
+from Visualization import PlotV,PlotLickDistribution
+from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog,LickStaDialog
 from MyFunctions import GenerateTrials, Worker
 import warnings
 import json 
@@ -88,6 +88,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.MotorStage=0
         self.Manipulator=0
         self.NewTrialRewardOrder=0
+        self.LickSta=0
+        self.LickSta_ToInitializeVisual=1
         self._Optogenetics() # open the optogenetics panel
         self._LaserCalibration() # to open the laser calibration panel
         self._WaterCalibration() # to open the water calibration panel
@@ -101,6 +103,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._TrainingStage()
         self.keyPressEvent()
         self._WaterVolumnManage2()
+        self._LickSta()
         self.ManualWaterVolume=[0,0]
     def connectSignalsSlots(self):
         '''Define callbacks'''
@@ -109,6 +112,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
         self.action_Manipulator.triggered.connect(self._Manipulator)
         self.action_MotorStage.triggered.connect(self._MotorStage)
+        self.actionLicks_sta.triggered.connect(self._LickSta)
         self.action_Calibration.triggered.connect(self._WaterCalibration)
         self.actionLaser_Calibration.triggered.connect(self._LaserCalibration)
         self.action_Snipping.triggered.connect(self._Snipping)
@@ -1087,6 +1091,36 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.MotorStage_dialog.show()
         else:
             self.MotorStage_dialog.hide()
+    def _LickSta(self):
+        '''Licks statistics'''
+        if self.LickSta==0:
+            self.LickSta_dialog = LickStaDialog(MainWindow=self)
+            self.LickSta=1
+            self.LickSta_dialog.setWindowTitle("Licks statistics")
+        if self.actionLicks_sta.isChecked()==True:
+            self.LickSta_dialog.show()
+        else:
+            self.LickSta_dialog.hide()
+        if self.LickSta_ToInitializeVisual==1: # only run once
+            PlotLick=PlotLickDistribution()
+            self.PlotLick=PlotLick
+            layout=self.LickSta_dialog.VisuLicksStatistics.layout()
+            if layout is not None:
+                for i in reversed(range(layout.count())):
+                    layout.itemAt(i).widget().setParent(None)
+                layout.invalidate()
+            if layout is None:
+                layout=QVBoxLayout(self.LickSta_dialog.VisuLicksStatistics)
+            toolbar = NavigationToolbar(PlotLick, self)
+            toolbar.setMaximumHeight(20)
+            toolbar.setMaximumWidth(300)
+            layout.addWidget(toolbar)
+            layout.addWidget(PlotLick)
+            self.LickSta_ToInitializeVisual=0
+        try:
+            self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
+        except:
+            pass
     def _about(self):
         QMessageBox.about(
             self,
@@ -1431,7 +1465,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         layout.addWidget(toolbar)
         layout.addWidget(PlotM)
         PlotM._Update(GeneratedTrials=self.GeneratedTrials)
-        
+        self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
     def _Clear(self):
         reply = QMessageBox.question(self, 'Clear parameters:', 'Do you want to clear training parameters?',QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
@@ -1646,6 +1680,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
                 #receive licks and update figures
                 self.PlotM._Update(GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
+                # update licks statistics
+                if self.actionLicks_sta.isChecked():
+                    self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
                 #get the response of the animal using a different thread
                 self.threadpool.start(worker1)
                 #generate a new trial
