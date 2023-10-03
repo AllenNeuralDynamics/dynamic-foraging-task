@@ -7,8 +7,8 @@
                  xmlns:scr="clr-namespace:Bonsai.Scripting.Expressions;assembly=Bonsai.Scripting.Expressions"
                  xmlns:harp="clr-namespace:Bonsai.Harp;assembly=Bonsai.Harp"
                  xmlns:beh="clr-namespace:Harp.Behavior;assembly=Harp.Behavior"
-                 xmlns:wie="clr-namespace:Bonsai.Windows.Input;assembly=Bonsai.Windows.Input"
                  xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                 xmlns:wie="clr-namespace:Bonsai.Windows.Input;assembly=Bonsai.Windows.Input"
                  xmlns:al="clr-namespace:Bonsai.Audio;assembly=Bonsai.Audio"
                  xmlns:p1="clr-namespace:Harp.SoundCard;assembly=Harp.SoundCard"
                  xmlns:gl="clr-namespace:Bonsai.Shaders;assembly=Bonsai.Shaders"
@@ -824,47 +824,75 @@
                   <Expression xsi:type="MulticastSubject">
                     <Name>ToBonsaiOSC</Name>
                   </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>RightKeyPress</Name>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="SubscribeSubject">
+                      <Name>RightKeyPress</Name>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>Timestamps</Name>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="SubscribeSubject">
+                      <Name>Timestamps</Name>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:WithLatestFrom" />
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="Combinator">
+                      <Combinator xsi:type="rx:WithLatestFrom" />
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="MemberSelector">
-                    <Selector>Item2</Selector>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="MemberSelector">
+                      <Selector>Item2</Selector>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="scr:ExpressionTransform">
-                    <scr:Expression>new(it as Seconds)</scr:Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="scr:ExpressionTransform">
+                      <scr:Expression>new(it as Seconds)</scr:Expression>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="osc:Format">
-                    <osc:Address>/RightLickTime</osc:Address>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="osc:Format">
+                      <osc:Address>/RightLickTime</osc:Address>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="MulticastSubject">
-                    <Name>ToBonsaiOSC2</Name>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="MulticastSubject">
+                      <Name>ToBonsaiOSC2</Name>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>LeftKeyPress</Name>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="SubscribeSubject">
+                      <Name>LeftKeyPress</Name>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>Timestamps</Name>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="SubscribeSubject">
+                      <Name>Timestamps</Name>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:WithLatestFrom" />
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="Combinator">
+                      <Combinator xsi:type="rx:WithLatestFrom" />
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="MemberSelector">
-                    <Selector>Item2</Selector>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="MemberSelector">
+                      <Selector>Item2</Selector>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="scr:ExpressionTransform">
-                    <scr:Expression>new(it as Seconds)</scr:Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="scr:ExpressionTransform">
+                      <scr:Expression>new(it as Seconds)</scr:Expression>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="osc:Format">
-                    <osc:Address>/LeftLickTime</osc:Address>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="osc:Format">
+                      <osc:Address>/LeftLickTime</osc:Address>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="MulticastSubject">
-                    <Name>ToBonsaiOSC2</Name>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="MulticastSubject">
+                      <Name>ToBonsaiOSC2</Name>
+                    </Builder>
                   </Expression>
                 </Nodes>
                 <Edges>
@@ -968,33 +996,45 @@
             <Expression xsi:type="rx:BehaviorSubject">
               <Name>Timestamps</Name>
             </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="wie:KeyDown">
-                <wie:Filter>L</wie:Filter>
-                <wie:SuppressRepetitions>false</wie:SuppressRepetitions>
-              </Combinator>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="wie:KeyDown">
+                  <wie:Filter>L</wie:Filter>
+                  <wie:SuppressRepetitions>false</wie:SuppressRepetitions>
+                </Combinator>
+              </Builder>
             </Expression>
-            <Expression xsi:type="rx:PublishSubject">
-              <Name>LeftKeyPress</Name>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="rx:PublishSubject">
+                <Name>LeftKeyPress</Name>
+              </Builder>
             </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="StringProperty">
-                <Value>Left</Value>
-              </Combinator>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="StringProperty">
+                  <Value>Left</Value>
+                </Combinator>
+              </Builder>
             </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="wie:KeyDown">
-                <wie:Filter>R</wie:Filter>
-                <wie:SuppressRepetitions>false</wie:SuppressRepetitions>
-              </Combinator>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="wie:KeyDown">
+                  <wie:Filter>R</wie:Filter>
+                  <wie:SuppressRepetitions>false</wie:SuppressRepetitions>
+                </Combinator>
+              </Builder>
             </Expression>
-            <Expression xsi:type="rx:PublishSubject">
-              <Name>RightKeyPress</Name>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="rx:PublishSubject">
+                <Name>RightKeyPress</Name>
+              </Builder>
             </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="StringProperty">
-                <Value>Right</Value>
-              </Combinator>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="StringProperty">
+                  <Value>Right</Value>
+                </Combinator>
+              </Builder>
             </Expression>
             <Expression xsi:type="SubscribeSubject">
               <Name>BehaviorEvents</Name>
@@ -3585,7 +3625,7 @@
                     <Expression xsi:type="Combinator">
                       <Combinator xsi:type="p2:TriggeredAnalogOutput">
                         <p2:SignalSource />
-                        <p2:TriggerSource>/Dev2/PFI0</p2:TriggerSource>
+                        <p2:TriggerSource>/Dev1/PFI0</p2:TriggerSource>
                         <p2:SampleRate>5000</p2:SampleRate>
                         <p2:ActiveEdge>Rising</p2:ActiveEdge>
                         <p2:SampleMode>FiniteSamples</p2:SampleMode>
@@ -3595,14 +3635,14 @@
                             <p2:ChannelName />
                             <p2:MinimumValue>-10</p2:MinimumValue>
                             <p2:MaximumValue>10</p2:MaximumValue>
-                            <p2:PhysicalChannel>Dev2/ao0</p2:PhysicalChannel>
+                            <p2:PhysicalChannel>Dev1/ao0</p2:PhysicalChannel>
                             <p2:VoltageUnits>Volts</p2:VoltageUnits>
                           </p2:AnalogOutputChannelConfiguration>
                           <p2:AnalogOutputChannelConfiguration>
                             <p2:ChannelName />
                             <p2:MinimumValue>-10</p2:MinimumValue>
                             <p2:MaximumValue>10</p2:MaximumValue>
-                            <p2:PhysicalChannel>Dev2/ao1</p2:PhysicalChannel>
+                            <p2:PhysicalChannel>Dev1/ao1</p2:PhysicalChannel>
                             <p2:VoltageUnits>Volts</p2:VoltageUnits>
                           </p2:AnalogOutputChannelConfiguration>
                         </p2:Channels>
