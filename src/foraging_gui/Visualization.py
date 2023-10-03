@@ -407,12 +407,12 @@ class PlotLickDistribution(FigureCanvas):
         if GeneratedTrials==None:
             return
         # Custom x-axis values
-        custom_x_values = np.linspace(-0.1, 0.1, 40)
+        custom_x_values = np.linspace(-0.3, 0.3, 100)
         self.ax1.hist(np.diff(GeneratedTrials.B_LeftLickTime), bins=custom_x_values, color='red', alpha=0.7,label='Left licks')
         self.ax2.hist(np.diff(GeneratedTrials.B_RightLickTime), bins=custom_x_values, color='blue', alpha=0.7,label='Right licks')
         AllLicks=np.concatenate((GeneratedTrials.B_LeftLickTime,GeneratedTrials.B_RightLickTime))
         self.ax3.hist(np.diff(np.sort(AllLicks)), bins=custom_x_values, color='black', alpha=0.7,label='All licks')
-        self.ax1.set_xlim(-0.01, 0.1)
+        self.ax1.set_xlim(-0.01, 0.3)
         self.ax2.set_xlabel('time (s)')
         self.ax1.set_ylabel('counts')
         self.draw() 
