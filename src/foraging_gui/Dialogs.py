@@ -1174,9 +1174,8 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
             # in some cases the other paramters except the amplitude could also be different
             self._ProduceWaveForm(self.CurrentLaserAmplitude[i])
             setattr(self, 'WaveFormLocation_' + str(i+1), self.my_wave)
-            # send waveforms
             setattr(self, f"Location{i+1}_Size", getattr(self, f"WaveFormLocation_{i+1}").size)
-            # send the waveform size
+            #send waveform and send the waveform size
             eval('self.MainWindow.Channel.Location'+str(i+1)+'_Size'+'(int(self.Location'+str(i+1)+'_Size))')
             eval('self.MainWindow.Channel4.WaveForm' + str(1)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
         FinishOfWaveForm=self.MainWindow.Channel4.receive()  
