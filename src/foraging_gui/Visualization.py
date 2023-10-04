@@ -386,33 +386,58 @@ class PlotWaterCalibration(FigureCanvas):
 class PlotLickDistribution(FigureCanvas):
     def __init__(self,GeneratedTrials=None,dpi=100,width=5, height=4):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
-        gs = GridSpec(10, 31, wspace = 3, hspace = 0.1, bottom = 0.1, top = 0.95, left = 0.04, right = 0.98)
+        gs = GridSpec(10, 51, wspace = 3, hspace = 0.1, bottom = 0.1, top = 0.95, left = 0.04, right = 0.98)
         self.ax1 = self.fig.add_subplot(gs[1:9, 2:11])
         self.ax2 = self.fig.add_subplot(gs[1:9, 12:21])
         self.ax3 = self.fig.add_subplot(gs[1:9, 22:31])
-        self.ax1.get_shared_y_axes().join(self.ax1, self.ax2,self.ax3)
-        self.ax1.get_shared_x_axes().join(self.ax1, self.ax2,self.ax3)
+        self.ax4 = self.fig.add_subplot(gs[1:9, 32:41])
+        self.ax5 = self.fig.add_subplot(gs[1:9, 42:51])
+
+        self.ax1.get_shared_y_axes().join(self.ax1, self.ax2,self.ax3,self.ax4,self.ax5)
+        self.ax1.get_shared_x_axes().join(self.ax1, self.ax2,self.ax3,self.ax4,self.ax5)
         self.ax2.set_yticks([])
         self.ax3.set_yticks([])
+        self.ax4.set_yticks([])
+        self.ax5.set_yticks([])
+        
         FigureCanvas.__init__(self, self.fig)
     def _Update(self,GeneratedTrials=None):
         self.ax1.cla()
         self.ax2.cla()
         self.ax3.cla()
+        self.ax4.cla()
+        self.ax5.cla()
         self.ax2.set_yticks([])
         self.ax3.set_yticks([])
+        self.ax4.set_yticks([])
+        self.ax5.set_yticks([]) 
         self.ax1.set_title('Left licks', fontsize=8)
         self.ax2.set_title('Right licks', fontsize=8)
-        self.ax3.set_title('All licks', fontsize=8)
+        self.ax3.set_title('Left to right licks', fontsize=8)
+        self.ax4.set_title('Right to left licks', fontsize=8)
+        self.ax5.set_title('All licks', fontsize=8)
         if GeneratedTrials==None:
             return
         # Custom x-axis values
         custom_x_values = np.linspace(-0.3, 0.3, 100)
         self.ax1.hist(np.diff(GeneratedTrials.B_LeftLickTime), bins=custom_x_values, color='red', alpha=0.7,label='Left licks')
         self.ax2.hist(np.diff(GeneratedTrials.B_RightLickTime), bins=custom_x_values, color='blue', alpha=0.7,label='Right licks')
+        LeftLicksIndex=np.zeros_like(GeneratedTrials.B_LeftLickTime)
+        RightLicksIndex=np.ones_like(GeneratedTrials.B_RightLickTime)
         AllLicks=np.concatenate((GeneratedTrials.B_LeftLickTime,GeneratedTrials.B_RightLickTime))
-        self.ax3.hist(np.diff(np.sort(AllLicks)), bins=custom_x_values, color='black', alpha=0.7,label='All licks')
+        AllLicksIndex=np.concatenate((LeftLicksIndex,RightLicksIndex))
+        AllLicksSorted=np.sort(AllLicks)
+        AllLicksSortedDiff=np.diff(AllLicksSorted)
+        SortedIndex=np.argsort(AllLicks)
+        AllLicksIndexSorted=AllLicksIndex[SortedIndex]
+        AllLicksIndexSortedDiff=np.diff(AllLicksIndexSorted)
+        LeftToRightLicks=AllLicksSortedDiff[AllLicksIndexSortedDiff==1]
+        RightToLeftLicks=AllLicksSortedDiff[AllLicksIndexSortedDiff==-1]
+        self.ax3.hist(LeftToRightLicks, bins=custom_x_values, color='black', alpha=0.7,label='Left to right licks')
+        self.ax4.hist(RightToLeftLicks, bins=custom_x_values, color='black', alpha=0.7,label='Right to left licks')
+        self.ax5.hist(AllLicksSortedDiff, bins=custom_x_values, color='black', alpha=0.7,label='All licks')
+
         self.ax1.set_xlim(-0.01, 0.3)
-        self.ax2.set_xlabel('time (s)')
+        self.ax3.set_xlabel('time (s)')
         self.ax1.set_ylabel('counts')
         self.draw() 
