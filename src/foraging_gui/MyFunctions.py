@@ -1056,9 +1056,9 @@ class GenerateTrials():
         # send optogenetics waveform of the upcoming trial if this is an optogenetics trial
         if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:     
             if self.CLP_LaserStart=='Trial start':
-                Channel1.TriggerSource('/Dev1/PFI0') # corresponding to P2.0 of NIdaq USB6002
+                Channel1.TriggerSource('/Dev2/PFI0') # corresponding to P2.0 of NIdaq USB6002
             elif self.CLP_LaserStart=='Go cue':
-                Channel1.TriggerSource('/Dev1/PFI1') # corresponding to P1.1 of NIdaq USB6002
+                Channel1.TriggerSource('/Dev2/PFI1') # corresponding to P1.1 of NIdaq USB6002
             else:
                 self.win.WarningLabel.setText('Unindentified optogenetics start event!')
                 self.win.WarningLabel.setStyleSheet("color: red;")

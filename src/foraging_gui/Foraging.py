@@ -702,42 +702,45 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     if Correct ==0: # incorrect format; don't change
                         child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                     self._ShowRewardPairs()
-                if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
-                    self.Continue=0
-                    if child.objectName()=='Experimenter' or child.objectName()=='AnimalName' or child.objectName()=='UncoupledReward' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
+                try:
+                    if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
+                        self.Continue=0
+                        if child.objectName()=='Experimenter' or child.objectName()=='AnimalName' or child.objectName()=='UncoupledReward' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
+                            child.setStyleSheet('color: red;')
+                            self.Continue=1
+                        if child.text()=='': # If it's empty, changing the background color and waiting for the confirming
+                            self.UpdateParameters=0
+                            child.setStyleSheet('background-color: red;')
+                            self.Continue=1
+                        if child.objectName()=='RunLength' or child.objectName()=='WindowSize' or child.objectName()=='StepSize':
+                            if child.text()=='':
+                                child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
+                                child.setStyleSheet('color: black;')
+                                child.setStyleSheet('background-color: white;')
+                        if self.Continue==1:
+                            continue
                         child.setStyleSheet('color: red;')
-                        self.Continue=1
-                    if child.text()=='': # If it's empty, changing the background color and waiting for the confirming
-                        self.UpdateParameters=0
-                        child.setStyleSheet('background-color: red;')
-                        self.Continue=1
-                    if child.objectName()=='RunLength' or child.objectName()=='WindowSize' or child.objectName()=='StepSize':
-                        if child.text()=='':
-                            child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
-                            child.setStyleSheet('color: black;')
-                            child.setStyleSheet('background-color: white;')
-                    if self.Continue==1:
-                        continue
-                    child.setStyleSheet('color: red;')
-                    try:
-                        # it's valid float
-                        float(child.text())
-                        self.UpdateParameters=0 # Changes are not allowed until press is typed
-                    except Exception as e:
-                        print('An error occurred:', str(e))
-                        # Invalid float. Do not change the parameter
-                        if isinstance(child, QtWidgets.QDoubleSpinBox):
-                            child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
-                        elif isinstance(child, QtWidgets.QSpinBox):
-                            child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
-                        else:
+                        try:
+                            # it's valid float
+                            float(child.text())
+                            self.UpdateParameters=0 # Changes are not allowed until press is typed
+                        except Exception as e:
+                            print('An error occurred:', str(e))
+                            # Invalid float. Do not change the parameter
+                            if isinstance(child, QtWidgets.QDoubleSpinBox):
+                                child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
+                            elif isinstance(child, QtWidgets.QSpinBox):
+                                child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
+                            else:
+                                child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                        child.setText(getattr(Parameters, 'TP_'+child.objectName()))
+                            child.setStyleSheet('color: black;')
+                            self.UpdateParameters=1
+                    else:
                         child.setStyleSheet('color: black;')
-                        self.UpdateParameters=1
-                else:
-                    child.setStyleSheet('color: black;')
-                    child.setStyleSheet('background-color: white;')
+                        child.setStyleSheet('background-color: white;')
+                except:
+                    pass
     def _CheckFormat(self,child):
         '''Check if the input format is correct'''
         if child.objectName()=='RewardFamily': # When we change the RewardFamily, sometimes the RewardPairsN is larger than available reward pairs in this family. 
@@ -1280,6 +1283,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             Obj[keyname]={}
             for key in widget_dict.keys():
                 widget = widget_dict[key]
+                if key=='Frequency_1':
+                    pass
                 if isinstance(widget, QtWidgets.QPushButton):
                     Obj[keyname][widget.objectName()]=widget.isChecked()
                 elif isinstance(widget, QtWidgets.QTextEdit):
