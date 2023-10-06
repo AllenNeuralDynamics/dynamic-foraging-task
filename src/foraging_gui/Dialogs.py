@@ -1443,7 +1443,10 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
                                 LaserCalibrationResults[current_date_name][current_color][current_protocol] = {}
                             if current_frequency not in LaserCalibrationResults[current_date_name][current_color][current_protocol]:
                                 LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency] = {}
-                            LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]['LaserPowerVoltage']=Items
+                            if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]:
+                                LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]['LaserPowerVoltage']=Items
+                            else:
+                                LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]['LaserPowerVoltage']=LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]['LaserPowerVoltage']+Items
                     elif current_protocol=='Constant' or current_protocol=='Pulse':
                             input_voltages= self._extract_elements(LCM_voltage,current_protocol_ind)
                             input_voltages_unique=list(set(input_voltages))
@@ -1469,11 +1472,17 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
                                 LaserCalibrationResults[current_date_name][current_color] = {}
                             if current_protocol not in LaserCalibrationResults[current_date_name][current_color]:
                                 LaserCalibrationResults[current_date_name][current_color][current_protocol] = {}
-                            LaserCalibrationResults[current_date_name][current_color][current_protocol]['LaserPowerVoltage']=Items
+                            if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol]:
+                                LaserCalibrationResults[current_date_name][current_color][current_protocol]['LaserPowerVoltage']=Items
+                            else:
+                                LaserCalibrationResults[current_date_name][current_color][current_protocol]['LaserPowerVoltage']=LaserCalibrationResults[current_date_name][current_color][current_protocol]['LaserPowerVoltage']+Items
                             if current_protocol=='Constant':# copy results of constant to pulse 
                                 if 'Pulse' not in LaserCalibrationResults[current_date_name][current_color]:
                                     LaserCalibrationResults[current_date_name][current_color]['Pulse'] = {}
-                                LaserCalibrationResults[current_date_name][current_color]['Pulse']['LaserPowerVoltage']=Items
+                                if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color]['Pulse']:
+                                    LaserCalibrationResults[current_date_name][current_color]['Pulse']['LaserPowerVoltage']=Items
+                                else:
+                                    LaserCalibrationResults[current_date_name][current_color]['Pulse']['LaserPowerVoltage']=LaserCalibrationResults[current_date_name][current_color]['Pulse']['LaserPowerVoltage']+Items
         # save to json file
         if not os.path.exists(os.path.dirname(self.MainWindow.LaserCalibrationFiles)):
             os.makedirs(os.path.dirname(self.MainWindow.LaserCalibrationFiles))
