@@ -6,7 +6,6 @@
 - [Deployment](#deployment)
   - [Bonsai](#bonsai)
   - [Python GUI](#python-gui)
-- [Output JSON Format](#output-json-format)
 - [Information Flow](#information-flow)
 - [Usage of Python GUI](#usage-of-python-gui)
   - [Menu](#menu)
@@ -17,6 +16,8 @@
   - [Optogenetics](#optogenetics)
   - [Camera](#camera)
   - [Motor Stage](#motor-stage)
+- [Output JSON Format](#output-json-format)
+- [Development](#development)
 
 ## Prerequisites
 ### Software
@@ -58,11 +59,47 @@
 
 ### Menu
 
-(Your content here)
+#### File
+- **New**:Clear the training parameters 
+- **Open**:Open an existing session and visualization
+- **Save**:Save the current session into json/mat format
+- **Exit**:Close the current GUI
+- **Clear**:Clear the training parameters
+- **Force Save**:Save the current session whether completed or not
+#### Tools
+- **Water calibration**:Open the water calibration dialogue
+- **Laser calibration**:Open the laser calibration dialogue
+- **Snipping**:Open the snipping tools
+#### Visualization
+- **Lick distribution**:Open the lick analysis dialogue
+#### Control
+- **Optogenetics**:Open the optogenetics dialogue
+- **Camera**:Open the camera dialogue
+- **Motor stage**:Open the Newscale stage dialogue to control the movement of lick sprouts
+- **Manipulator**:Open the Newscale stage to control the movement of probe
+- **Connect bonsai**:Connect the bonsai through OSC message
+- **Start**:Start the GUI
+- **New session**:Restart a new session
+- **Restart logging**:
+  - **Temporary logging**:Logging to a temporary folder (determined by the **temporary_video_folder** in the **ForagingSettings.json** )
+  - **Formal logging**:Logging to a standard folder structure (determined by the **log_folder** in the **ForagingSettings.json** )
+  - **Openg logging folder**:Open the current logging folder
+- **Open behavior folder**:Open the folder to save the current behavior Json file
+#### Settings
+- **Open setting folder**: Open the default settings folder
+#### Help
 
-### Toolbars
-
-(Your content here)
+### Toolbars (copy of some useful functions from the Menu)
+- **New**
+- **Open**
+- **Save**
+- **Snipping**
+- **Camera**
+- **Motor stage**
+- **Manipulator**
+- **Water calibration**
+- **Optogenetics**
+- **Laser calibration**
 
 ### Training Parameters
 
@@ -147,3 +184,5 @@
 - **B_RightRewardDeliveryTime**:'The reward delivery time of the right lick port'
 - **B_LeftLickTime**:'The time of left licks'
 - **B_RightLickTime**:'The time of left licks'
+  
+## Development
