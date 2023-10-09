@@ -1,39 +1,73 @@
-# Dynamic-Foraging-Task
-[Dynamic-Foraging-Task](#Dynamic-Foraging-Task)
-- [Prerequisites](#Prerequisites)
-- [Deployment](#Deployment)
-  - [Bonsai](#Bonsai)
-  - [Python GUI](#Python GUI)
-- [Output json format](#Output json file)
-- [Information flow](#Information flow)
-- [Usage of Python GUI](#Usage of Python GUI)
-  - [Menu](#Menu)
-  - [Toolbars](#Toolbars)
-  - [Training parameters](#Training parameters)
-  - [Water calibration](#Water calibration)
-  - [Laser calibration](#Laser calibration)
-  - [Optogenetics](#Optogenetics)
-  - [Camera](#Camera)
-  - [Motor stage](#Motor stage)
+# Dynamic Foraging Task
+- [Dynamic Foraging Task](#dynamic-foraging-task)
+- [Prerequisites](#prerequisites)
+- [Deployment](#deployment)
+  - [Bonsai](#bonsai)
+  - [Python GUI](#python-gui)
+- [Output JSON Format](#output-json-format)
+- [Information Flow](#information-flow)
+- [Usage of Python GUI](#usage-of-python-gui)
+  - [Menu](#menu)
+  - [Toolbars](#toolbars)
+  - [Training Parameters](#training-parameters)
+  - [Water Calibration](#water-calibration)
+  - [Laser Calibration](#laser-calibration)
+  - [Optogenetics](#optogenetics)
+  - [Camera](#camera)
+  - [Motor Stage](#motor-stage)
 
 ## Prerequisites
+
+(Your content here)
 
 ## Deployment
 
 ### Bonsai
+
+(Your content here)
+
 ### Python GUI
 
-## Output json file
+(Your content here)
 
-## Information flow
+## Output JSON Format
+
+(Your content here)
+
+## Information Flow
+
+(Your content here)
 
 ## Usage of Python GUI
 
 ### Menu
+
+(Your content here)
+
 ### Toolbars
-### Training parameters
-### Water calibration
-### Laser calibration
+
+(Your content here)
+
+### Training Parameters
+
+(Your content here)
+
+### Water Calibration
+
+(Your content here)
+
+### Laser Calibration
+
+(Your content here)
+
 ### Optogenetics
+
+(Your content here)
+
 ### Camera
-### Motor stage
+
+(Your content here)
+
+### Motor Stage
+
+(Your content here)
