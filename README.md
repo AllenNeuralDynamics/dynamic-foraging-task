@@ -121,7 +121,21 @@
 - **sum (base reward probability)**: The total reward probability.
 - **family**: Currently, we use four reward families [[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]].
 - **#of pairs**: Number of reward pairs you want to show under that family.
-- **uncoupled reward**: Reward probabilities used by **Uncoupled Without Baiting** and **Uncoupled Baiting**. The reward probability of 0.1 cannot occur on both sides at the same time. 
+- **uncoupled reward**: Reward probabilities used by **Uncoupled Without Baiting** and **Uncoupled Baiting**. The reward probability of 0.1 cannot occur on both sides at the same time.
+- **beta (Block)**: The beta used in the exponential distribution.
+- **min (Block)**: Minimum block length permitted.
+- **max (Block)**: Maximum block length permitted.
+- **min reward each block**: Minimum reward allowed to transfer to the next block (The left and right blocks are independent under the uncoupled tasks).
+- **include auto reward**: Include/exclude the auto reward when calculating the **min reward each block**.
+- **RewardN**: The minimum reward amount to enter the next block under the **RewardN** task.
+- **Initially inactive N**: A reward is available only when the animal chooses the side with the higher reward probability consecutively for **N** times (specific for **RewardN** task).
+- **beta (delay)**: The beta used in the exponential distribution in the delay epoch. If the animal licks during the delay epoch, the delay will begin again.
+- **min (delay)**: The minimum delay epoch time.
+- **max (delay)**: The maximum delay epoch time.
+- **beta (ITI)**: The beta used in the exponential distribution in the inter trial interval (ITI).
+- **min (ITI)**: The minimum ITI time.
+- **max (ITI)**: The maximum ITI time.
+- **On (Auto water)**: 
 ### Water Calibration
 
 (Your content here)
