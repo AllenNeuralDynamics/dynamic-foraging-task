@@ -51,7 +51,8 @@
 
 ## Information Flow
 
-(Your content here)
+![image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/109394934/8b669d0d-c6aa-4abc-a41a-309ce6200fc0)
+
 
 ## Usage of Python GUI
 
@@ -83,10 +84,10 @@
 
 (Your content here)
 
-## Output JSON Format
+### Motor Stage
 
 (Your content here)
 
-### Motor Stage
+## Output JSON Format
 
 (Your content here)
