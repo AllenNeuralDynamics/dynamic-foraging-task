@@ -89,15 +89,15 @@
 (Your content here)
 
 ## Output NWB Format
-### task structure
+### Task structure
 - **animal_response**:'The response of the animal. 0, left choice; 1, right choice; 2, no response'
 - **rewarded_historyL**:'The reward history of left lick port'
 - **rewarded_historyR**: 'The reward history of right lick port'
 - **delay_start_time**: 'The delay start time'
 - **goCue_start_time**: 'The go cue start time'
 - **reward_outcome_time**: 'The reward outcome time (reward/no reward/no response)'
-### training paramters 
-#### behavior structure
+### Training paramters 
+#### Behavior structure
 - **bait_left**:'Whether the current left lickport has a bait or not'
 - **bait_right**:'Whether the current right lickport has a bait or not'
 - **base_reward_probability_sum**:'The summation of left and right reward probability'
@@ -105,12 +105,12 @@
 - **reward_probabilityR**:'The reward probability of right lick port'
 - **left_valve_open_time**:'The left valve open time'
 - **right_valve_open_time**:'The right valve open time'
-#### block
+#### Block
 - **block_beta**:'The beta of exponential distribution to generate the block length'
 - **block_min**:'The minimum length allowed for each block'
 - **block_max**:'The maxmum length allowed for each block'
 - **min_reward_each_block**:'The minimum reward allowed for each block'
-#### delay duration
+#### Delay duration
 - **delay_beta**:'The beta of exponential distribution to generate the delay duration(s)'
 - **delay_min**:'The minimum duration(s) allowed for each delay'
 - **delay_max**:'The maxmum duration(s) allowed for each delay'
@@ -120,13 +120,13 @@
 - **ITI_min**:'The minimum duration(s) allowed for each ITI'
 - **ITI_max**:'The maxmum duration(s) allowed for each ITI'
 - **ITI_duration**:'The expected time duration between trial start and ITI start'
-#### response duration
+#### Response duration
 - **response_duration**:'The maximum time that the animal must make a choce in order to get a reward'
-#### reward consumption duration
+#### Reward consumption duration
 - **reward_consumption_duration**:'The duration for the animal to consume the reward'
-#### auto water
+#### Auto water
 - **auto_water**:'Whether the current trial was a auto water trial or not'
-#### optogenetics
+#### Optogenetics
 - **laser_on_trial**:'Trials with laser stimulation'
 - **laser_wavelength**:'The wavelength of laser or LED'
 - **laser_location**:'The target brain areas'
@@ -142,8 +142,7 @@
 - **laser_frequency**:'The laser waveform frequency'
 - **laser_rampingdown**:'The ramping down time of the laser'
 - **laser_pulse_duration**:'The pulse duration for Pulse protocol'
-
-### left/right lick time; give left/right reward time
+#### Left/right lick time; give left/right reward time
 - **B_LeftRewardDeliveryTime**:'The reward delivery time of the left lick port'
 - **B_RightRewardDeliveryTime**:'The reward delivery time of the right lick port'
 - **B_LeftLickTime**:'The time of left licks'
