@@ -15,6 +15,7 @@
   - [Laser Calibration](#laser-calibration)
   - [Optogenetics](#optogenetics)
   - [Camera](#camera)
+  - [Visualization](#Visualization)
   - [Motor Stage](#motor-stage)
 - [Output JSON Format](#output-json-format)
 - [Development](#development)
@@ -60,31 +61,31 @@
 ### Menu
 
 #### File
-- **New**:Clear the training parameters 
-- **Open**:Open an existing session and visualization
-- **Save**:Save the current session into json/mat format
-- **Exit**:Close the current GUI
-- **Clear**:Clear the training parameters
-- **Force Save**:Save the current session whether completed or not
+- **New**: Clear the training parameters 
+- **Open**: Open an existing session and visualization
+- **Save**: Save the current session into json/mat format
+- **Exit**: Close the current GUI
+- **Clear**: Clear the training parameters
+- **Force Save**:S ave the current session whether completed or not
 #### Tools
-- **Water calibration**:Open the water calibration dialogue
-- **Laser calibration**:Open the laser calibration dialogue
-- **Snipping**:Open the snipping tools
+- **Water calibration**: Open the water calibration dialogue
+- **Laser calibration**: Open the laser calibration dialogue
+- **Snipping**: Open the snipping tools
 #### Visualization
-- **Lick distribution**:Open the lick analysis dialogue
+- **Lick distribution**: Open the lick analysis dialogue
 #### Control
-- **Optogenetics**:Open the optogenetics dialogue
-- **Camera**:Open the camera dialogue
-- **Motor stage**:Open the Newscale stage dialogue to control the movement of lick sprouts
-- **Manipulator**:Open the Newscale stage to control the movement of probe
-- **Connect bonsai**:Connect the bonsai through OSC message
-- **Start**:Start the GUI
-- **New session**:Restart a new session
+- **Optogenetics**: Open the optogenetics dialogue
+- **Camera**: Open the camera dialogue
+- **Motor stage**: Open the Newscale stage dialogue to control the movement of lick sprouts
+- **Manipulator**: Open the Newscale stage to control the movement of probe
+- **Connect bonsai**: Connect the bonsai through OSC message
+- **Start**: Start the GUI
+- **New session**: Restart a new session
 - **Restart logging**:
-  - **Temporary logging**:Logging to a temporary folder (determined by the **temporary_video_folder** in the **ForagingSettings.json** )
-  - **Formal logging**:Logging to a standard folder structure (determined by the **log_folder** in the **ForagingSettings.json** )
-  - **Openg logging folder**:Open the current logging folder
-- **Open behavior folder**:Open the folder to save the current behavior Json file
+  - **Temporary logging**: Logging to a temporary folder (determined by the **temporary_video_folder** in the **ForagingSettings.json** )
+  - **Formal logging**: Logging to a standard folder structure (determined by the **log_folder** in the **ForagingSettings.json** )
+  - **Openg logging folder**: Open the current logging folder
+- **Open behavior folder**: Open the folder to save the current behavior Json file
 #### Settings
 - **Open setting folder**: Open the default settings folder
 #### Help
@@ -102,9 +103,25 @@
 - **Laser calibration**
 
 ### Training Parameters
-
-(Your content here)
-
+#### Animal/task/tower information
+- **Name**: The animal name used by individual users.
+- **ID**: The animal ID.
+- **Experimenter**: The experimenter who run this session.
+- **Task**: There are currently five tasks supported (**Coupled Baiting**;**Uncoupled Baiting**;**Coupled Without Baiting**;**Uncoupled Without Baiting**;**RewardN**).
+- **Tower**: The current tower (can be set by **current_box** in **ForagingSettings.json**).
+#### Trial related parameters
+- **training stage**: Select the training stage parameters. These parameters can be saved in **TrainingStagePar.json** through "**Save training**" button. They are task dependent. 
+- **randomness**: There are **exponential** and **even distribution** available. This random generator will be applied to generate **Block length**/**ITI**/**Delay period**.
+- **L(s)**: The left valve open time. The **L(s)** and **L(ul)** are dependent on each other, and the relationship is determined by the water calibration.
+- **L(ul)**: The estimated water volume given by the left valve under the **L(s)**.
+- **R(s)**: Similar as the **L(s)**, but for right valve.
+- **R(ul)**: Similar as the **L(ul)**, but for left valve.
+- **Give left**: Manually give water to the left valve
+- **Give right**: Manually give water to the right valve
+- **sum (base reward probability)**: The total reward probability.
+- **family**: Currently, we use four reward families [[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]].
+- **#of pairs**: Number of reward pairs you want to show under that family.
+- **uncoupled reward**: Reward probabilities used by **Uncoupled Without Baiting** and **Uncoupled Baiting**. The reward probability of 0.1 cannot occur on both sides at the same time. 
 ### Water Calibration
 
 (Your content here)
