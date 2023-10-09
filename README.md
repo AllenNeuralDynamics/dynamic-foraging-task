@@ -1,6 +1,8 @@
 # Dynamic Foraging Task
 - [Dynamic Foraging Task](#dynamic-foraging-task)
 - [Prerequisites](#prerequisites)
+  - Software(#Software)
+  - Hardware(#Hardware)
 - [Deployment](#deployment)
   - [Bonsai](#bonsai)
   - [Python GUI](#python-gui)
@@ -17,9 +19,14 @@
   - [Motor Stage](#motor-stage)
 
 ## Prerequisites
-
-(Your content here)
-
+# Software
+-Windows 10 or 11
+-ftdp driver(https://ftdichip.com/drivers/)
+-NI-DAQmax 19.0 for running optogenetics(https://www.ni.com/en/support/downloads/drivers/download.ni-daq-mx.html#484356)
+-Spinnaker SDK version 1.29.0.5 for using FLIR camera(https://www.flir.com/products/spinnaker-sdk/)
+# Hardware
+-Harp behavior board
+-Harp sound card
 ## Deployment
 
 ### Bonsai
