@@ -22,7 +22,7 @@
   - [Add a widget](#add-a-widget)
   - [Create a dialogue](#create-a-dialogue)
   - [Add a new task](#add-a-new-task)
-  - [Automat training](#automat-training)
+  - [Automate training](#automate-training)
     - [standards](#standards)
     - [control](#control)
     - [visualization](#visualization)
