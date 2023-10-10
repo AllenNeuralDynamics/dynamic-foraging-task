@@ -60,7 +60,7 @@
 
 ## Code structure and information Flow
 
-![image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/109394934/8b669d0d-c6aa-4abc-a41a-309ce6200fc0)
+![image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/109394934/cabee33d-6ccb-476c-b8ae-7d6b73e5c93a)
 
 
 ## Usage of Python GUI
