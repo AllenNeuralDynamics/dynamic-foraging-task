@@ -91,7 +91,7 @@ The blow is an example session.
 - **Manipulator**: Open the Newscale stage to control the movement of probe
 - **Connect bonsai**: Connect the bonsai through OSC message
 - **Start**: Start the GUI
-- **New session**: Restart a new session
+- **New session**: Restart a session
 - **Restart logging**:
   - **Temporary logging**: Logging to a temporary folder (determined by the **temporary_video_folder** in the **ForagingSettings.json** )
   - **Formal logging**: Logging to a standard folder structure (determined by the **log_folder** in the **ForagingSettings.json** )
