@@ -30,8 +30,8 @@
 ## Prerequisites
 ### Software
 - Windows 10 or 11
-- [ftdi driver](https://ftdichip.com/drivers/) (serial port drivers for HARP devices)
-- [NI-DAQmax 19.0](https://www.ni.com/en/support/downloads/drivers/download.ni-daq-mx.html#484356) (for running optogenetics through NI-daq)
+- [ftdi driver](https://ftdichip.com/drivers/) (serial sprout drivers for HARP devices)
+- [NI-DAQmax 19.0](https://www.ni.com/en/supsprout/downloads/drivers/download.ni-daq-mx.html#484356) (for running optogenetics through NI-daq)
 - [Spinnaker SDK version 1.29.0.5](https://www.flir.com/products/spinnaker-sdk/) (driver for FLIR camera)
 - Python package:
   - numpy
@@ -118,7 +118,7 @@ The blow is an example session.
 - **Name**: The animal name used by individual users.
 - **ID**: The animal ID.
 - **Experimenter**: The experimenter running this session.
-- **Task**: There are currently five tasks supported (**Coupled Baiting**;**Uncoupled Baiting**;**Coupled Without Baiting**;**Uncoupled Without Baiting**;**RewardN**).
+- **Task**: There are currently five tasks supsprouted (**Coupled Baiting**;**Uncoupled Baiting**;**Coupled Without Baiting**;**Uncoupled Without Baiting**;**RewardN**).
 - **Tower**: The current tower (can be set by **current_box** in **ForagingSettings.json**).
 #### Trial related parameters
 - **training stage**: Select the training stage parameters. These parameters can be saved in **TrainingStagePar.json** through "**Save training**" button. They are task dependent. 
@@ -199,18 +199,18 @@ The blow is an example session.
 ## Output NWB Format
 ### Task structure
 - **animal_response**:'The response of the animal. 0, left choice; 1, right choice; 2, no response'
-- **rewarded_historyL**:'The reward history of left lick port'
-- **rewarded_historyR**: 'The reward history of right lick port'
+- **rewarded_historyL**:'The reward history of left lick sprout'
+- **rewarded_historyR**: 'The reward history of right lick sprout'
 - **delay_start_time**: 'The delay start time'
 - **goCue_start_time**: 'The go cue start time'
 - **reward_outcome_time**: 'The reward outcome time (reward/no reward/no response)'
 ### Training paramters 
 #### Behavior structure
-- **bait_left**:'Whether the current left lickport has a bait or not'
-- **bait_right**:'Whether the current right lickport has a bait or not'
+- **bait_left**:'Whether the current left licksprout has a bait or not'
+- **bait_right**:'Whether the current right licksprout has a bait or not'
 - **base_reward_probability_sum**:'The summation of left and right reward probability'
-- **reward_probabilityL**:'The reward probability of left lick port'
-- **reward_probabilityR**:'The reward probability of right lick port'
+- **reward_probabilityL**:'The reward probability of left lick sprout'
+- **reward_probabilityR**:'The reward probability of right lick sprout'
 - **left_valve_open_time**:'The left valve open time'
 - **right_valve_open_time**:'The right valve open time'
 #### Block
@@ -251,8 +251,8 @@ The blow is an example session.
 - **laser_rampingdown**:'The ramping down time of the laser'
 - **laser_pulse_duration**:'The pulse duration for Pulse protocol'
 #### Left/right lick time; give left/right reward time
-- **B_LeftRewardDeliveryTime**:'The reward delivery time of the left lick port'
-- **B_RightRewardDeliveryTime**:'The reward delivery time of the right lick port'
+- **B_LeftRewardDeliveryTime**:'The reward delivery time of the left lick sprout'
+- **B_RightRewardDeliveryTime**:'The reward delivery time of the right lick sprout'
 - **B_LeftLickTime**:'The time of left licks'
 - **B_RightLickTime**:'The time of left licks'
   
