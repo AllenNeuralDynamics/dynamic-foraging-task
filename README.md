@@ -64,6 +64,9 @@
 
 
 ## Usage of Python GUI
+The blow is an example session.
+![MicrosoftTeams-image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/109394934/1852c841-2f5f-4307-b32e-f204e89b290a)
+
 
 ### Menu
 
@@ -155,7 +158,15 @@
 - **auto (Advanced block)**: The block change will also be dependent on the choice of the animal when it is turned on. It's allowed to go to the next block only when there are consecutive points (**points in a row**) that cross the threshold (**switch thr**). 
 - **switch thr**: The block switch threshold (only active after the auto is turned on). 
 - **points in a row**: Consecutive points that cross the threshold (only active after the auto is turned on). 
-- **Next block**: It will jump to the next block when it is clicked. 
+- **Next block**: It will jump to the next block when it is clicked.
+#### Weight and water
+- **Weight before (g)**: Enter the mouse weight before starting training.
+- **Weight after (g)**: Enter the mouse weight after training is completed.
+- **Total water (ml)**: Total volume of water you plan to give the mouse.
+- **Suggested (ml)**: Suggested water to give the mouse after training (Based on **total water** and estimated water consumption in the session).
+- **Extra water (ml)**: Enter the water given to the mouse after training.
+#### Information
+
 ### Water Calibration
 
 (Your content here)
