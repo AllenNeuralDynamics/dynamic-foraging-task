@@ -40,7 +40,7 @@
   - PyQt5
   - pandas
   - [pyosc3](https://github.com/glopesdev/pyosc3.git@master)
-
+- [Qt designer](https://build-system.fman.io/qt-designer-download) (For GUI development only)
 ### Hardware
 - Harp behavior board 
 - Harp sound card
@@ -257,6 +257,15 @@ The blow is an example session.
 - **B_RightLickTime**:'The time of left licks'
   
 ## Development
+The user interface of the GUI was designed based on Qt-designer. [Here](https://realpython.com/qt-designer-python/) is a good introduction about how to use Qt-designer. 
 ### Add a widget
+- Widgets can be dragged directly into a window or dialog.
+- Qt-designer will create a UI file, and then change the UI file to python through commander **pyuic5 -o test.py test.ui**. I put all of these commanders to **dynamic-foraging-task\src\foraging_gui\UI2Python.sh**
+- Define callbacks in python to interact with the Widget.
 ### Create a dialogue
-### Add a new task]
+- Create a dialogue window.
+- Add widgets to the new dialogue.
+- Transfer UI files to python.
+- Import the python class generated from the UI file and then define callbacks to interact with the dialogue.
+### Add a new task
+If the new task structure is similar to the current foraging workflow, we can change the **dynamic-foraging-task\src\foraging_gui\MyFunctions\GenerateTrials** to add a new task. Otherwise, we still need to change the bonsai workflow.
