@@ -162,11 +162,19 @@ The blow is an example session.
 #### Weight and water
 - **Weight before (g)**: Enter the mouse weight before starting training.
 - **Weight after (g)**: Enter the mouse weight after training is completed.
-- **Total water (ml)**: Total volume of water you plan to give the mouse.
+- **Total water (ml)**: Total volume of water you plan to give the mouse (manually given reward and automatic reward are also included).
 - **Suggested (ml)**: Suggested water to give the mouse after training (Based on **total water** and estimated water consumption in the session).
 - **Extra water (ml)**: Enter the water given to the mouse after training.
 #### Information
-
+- **Current left block**: current trial number of the current left block/length of current left block.
+- **Current right block**: current trial number of the current right block/length of current right block.
+- **Responded trial**: number of responded trial/number of total trial. A trial is regarded as a responded trial if the animal licks one of the lick sprouts within the response time (**RT**).
+- **Reward trial**: number of reward trials/number of total trial.
+- **Total Reward**: Estimated total reward (excluding the manually given reward). 
+- **Left choice rewarded**:
+- **Right choice rewarded**:
+- **Early licking**: Statistics of early licking rate in different behavior epochs.
+- **Double dipping**: Double dipping statistics in different behavior epochs and conditions. 
 ### Water Calibration
 
 (Your content here)
