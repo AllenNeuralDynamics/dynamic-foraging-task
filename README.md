@@ -19,6 +19,13 @@
   - [Motor Stage](#motor-stage)
 - [Output JSON Format](#output-json-format)
 - [Development](#development)
+  - [Add a widget](#add-a-widget)
+  - [Create a dialogue](#create-a-dialogue)
+  - [Add a new task](#add-a-new-task)
+  - [Automat training](#automat-training)
+    - [standards](#standards)
+    - [control](#control)
+    - [visualization](#visualization)
 
 ## Prerequisites
 ### Software
@@ -35,7 +42,7 @@
   - [pyosc3](https://github.com/glopesdev/pyosc3.git@master)
 
 ### Hardware
-- Harp behavior board
+- Harp behavior board 
 - Harp sound card
 - Sound amplifier
 - Harp synchronization board
@@ -51,7 +58,7 @@
 
 - Run the **Foraging.py** in the folder **dynamic-foraging-task\src\foraging_gui** to start the GUI
 
-## Information Flow
+## Code structure and information Flow
 
 ![image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/109394934/8b669d0d-c6aa-4abc-a41a-309ce6200fc0)
 
@@ -230,3 +237,6 @@
 - **B_RightLickTime**:'The time of left licks'
   
 ## Development
+### Add a widget
+### Create a dialogue
+### Add a new task]
