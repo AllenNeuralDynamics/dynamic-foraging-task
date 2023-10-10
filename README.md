@@ -113,7 +113,7 @@
 #### Animal/task/tower information
 - **Name**: The animal name used by individual users.
 - **ID**: The animal ID.
-- **Experimenter**: The experimenter who run this session.
+- **Experimenter**: The experimenter running this session.
 - **Task**: There are currently five tasks supported (**Coupled Baiting**;**Uncoupled Baiting**;**Coupled Without Baiting**;**Uncoupled Without Baiting**;**RewardN**).
 - **Tower**: The current tower (can be set by **current_box** in **ForagingSettings.json**).
 #### Trial related parameters
