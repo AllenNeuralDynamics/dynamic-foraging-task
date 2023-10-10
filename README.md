@@ -135,7 +135,20 @@
 - **beta (ITI)**: The beta used in the exponential distribution in the inter trial interval (ITI).
 - **min (ITI)**: The minimum ITI time.
 - **max (ITI)**: The maximum ITI time.
-- **On (Auto water)**: 
+- **On (Auto water)**: If the auto water button is clicked, auto water will be given based on **type**, **multiplier**, and conditions (**unrewarded** and **ignored**).
+- **type**: Natural, water will be given to sides with baited reward in the auto water trial. High pro, water will be given to the side with the higher probability. Both, water will be given to both sides.
+- **multiplier**: Auto water volume is scaled by **multiplier**.
+- **unrewarded**: It will be an auto water trial if unreward trials exceed **unrewarded**.
+- **ignored**: It will be an auto water trial if ignored trials exceed **ignored**.
+- **RT**: Response time. The animal can receive a reward only if it responds within the response time.
+- **Reward consume time**: The extra time for the animal to consume the reward. If there is no reward, it will pause for the same duration once the outcome is determined.
+- **stop ignores>**: The session will stop if the number of ignored trials surpasses the limit.
+- **max trial**: The session will stop if the number of trials surpasses the limit.
+- **max time (min)**: The session will stop if the running time of the session surpasses the limit.
+- **auto (Advanced block)**: The block change will also be dependent on the choice of the animal when it is turned on. It's allowed to go to the next block only when there are consecutive **"points in a row"** points that cross the threshold. 
+- **switch thr**: The block switch threshold (only active after the auto is turned on). 
+- **points in a row**: Consecutive points that cross the threshold (only active after the auto is turned on). 
+- **Next block**: It will jump to the next block when it is clicked. 
 ### Water Calibration
 
 (Your content here)
