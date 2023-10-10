@@ -145,7 +145,7 @@
 - **stop ignores>**: The session will stop if the number of ignored trials surpasses the limit.
 - **max trial**: The session will stop if the number of trials surpasses the limit.
 - **max time (min)**: The session will stop if the running time of the session surpasses the limit.
-- **auto (Advanced block)**: The block change will also be dependent on the choice of the animal when it is turned on. It's allowed to go to the next block only when there are consecutive **"points in a row"** points that cross the threshold. 
+- **auto (Advanced block)**: The block change will also be dependent on the choice of the animal when it is turned on. It's allowed to go to the next block only when there are consecutive points (**points in a row**) that cross the threshold (**switch thr**). 
 - **switch thr**: The block switch threshold (only active after the auto is turned on). 
 - **points in a row**: Consecutive points that cross the threshold (only active after the auto is turned on). 
 - **Next block**: It will jump to the next block when it is clicked. 
