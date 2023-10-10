@@ -66,7 +66,7 @@
 - **Save**: Save the current session into json/mat format
 - **Exit**: Close the current GUI
 - **Clear**: Clear the training parameters
-- **Force Save**:S ave the current session whether completed or not
+- **Force Save**: Save the current session whether completed or not
 #### Tools
 - **Water calibration**: Open the water calibration dialogue
 - **Laser calibration**: Open the laser calibration dialogue
