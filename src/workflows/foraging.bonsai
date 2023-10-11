@@ -978,7 +978,7 @@
                 <harp:VisualIndicators>On</harp:VisualIndicators>
                 <harp:Heartbeat>Disabled</harp:Heartbeat>
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                <harp:PortName>COM8</harp:PortName>
+                <harp:PortName>COM18</harp:PortName>
               </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
@@ -1254,7 +1254,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Disabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM9</harp:PortName>
+                      <harp:PortName>COM14</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject">
@@ -1647,7 +1647,7 @@
             <Expression xsi:type="beh:CreateMessage">
               <harp:MessageType>Write</harp:MessageType>
               <harp:Payload xsi:type="beh:CreatePulseDOPort2Payload">
-                <beh:PulseDOPort2>5</beh:PulseDOPort2>
+                <beh:PulseDOPort2>50</beh:PulseDOPort2>
               </harp:Payload>
             </Expression>
             <Expression xsi:type="MulticastSubject">
@@ -2000,11 +2000,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-<<<<<<< HEAD
-                      <gl:DueTime>PT1.135S</gl:DueTime>
-=======
-                      <gl:DueTime>PT3.523S</gl:DueTime>
->>>>>>> 36f73d08f0c1b7465e769a1574d31b39eeadc881
+                      <gl:DueTime>PT2.631S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -2044,11 +2040,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-<<<<<<< HEAD
-                      <gl:DueTime>PT0.063S</gl:DueTime>
-=======
-                      <gl:DueTime>PT0.245S</gl:DueTime>
->>>>>>> 36f73d08f0c1b7465e769a1574d31b39eeadc881
+                      <gl:DueTime>PT0.862S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -3610,40 +3602,24 @@
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="p2:TriggeredAnalogOutput">
                       <p2:SignalSource />
-<<<<<<< HEAD
                       <p2:TriggerSource>/Dev2/PFI0</p2:TriggerSource>
                       <p2:SampleRate>5000</p2:SampleRate>
                       <p2:ActiveEdge>Rising</p2:ActiveEdge>
                       <p2:SampleMode>FiniteSamples</p2:SampleMode>
                       <p2:BufferSize>50002</p2:BufferSize>
-=======
-                      <p2:TriggerSource>/Dev1/PFI0</p2:TriggerSource>
-                      <p2:SampleRate>5000</p2:SampleRate>
-                      <p2:ActiveEdge>Rising</p2:ActiveEdge>
-                      <p2:SampleMode>FiniteSamples</p2:SampleMode>
-                      <p2:BufferSize>17616</p2:BufferSize>
->>>>>>> 36f73d08f0c1b7465e769a1574d31b39eeadc881
                       <p2:Channels>
                         <p2:AnalogOutputChannelConfiguration>
                           <p2:ChannelName />
                           <p2:MinimumValue>-10</p2:MinimumValue>
                           <p2:MaximumValue>10</p2:MaximumValue>
-<<<<<<< HEAD
                           <p2:PhysicalChannel>Dev2/ao0</p2:PhysicalChannel>
-=======
-                          <p2:PhysicalChannel>Dev1/ao0</p2:PhysicalChannel>
->>>>>>> 36f73d08f0c1b7465e769a1574d31b39eeadc881
                           <p2:VoltageUnits>Volts</p2:VoltageUnits>
                         </p2:AnalogOutputChannelConfiguration>
                         <p2:AnalogOutputChannelConfiguration>
                           <p2:ChannelName />
                           <p2:MinimumValue>-10</p2:MinimumValue>
                           <p2:MaximumValue>10</p2:MaximumValue>
-<<<<<<< HEAD
                           <p2:PhysicalChannel>Dev2/ao1</p2:PhysicalChannel>
-=======
-                          <p2:PhysicalChannel>Dev1/ao1</p2:PhysicalChannel>
->>>>>>> 36f73d08f0c1b7465e769a1574d31b39eeadc881
                           <p2:VoltageUnits>Volts</p2:VoltageUnits>
                         </p2:AnalogOutputChannelConfiguration>
                       </p2:Channels>
