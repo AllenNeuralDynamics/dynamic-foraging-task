@@ -2968,7 +2968,11 @@
         <Y>3</Y>
       </Location>
       <Size>
+<<<<<<< HEAD
         <Width>1087</Width>
+=======
+        <Width>1134</Width>
+>>>>>>> 36f73d08f0c1b7465e769a1574d31b39eeadc881
         <Height>903</Height>
       </Size>
       <WindowState>Normal</WindowState>

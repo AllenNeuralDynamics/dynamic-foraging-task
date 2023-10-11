@@ -39,6 +39,7 @@ class GenerateTrials():
         self.B_DelayStartTimeHarp=np.array([]).astype(float)
         self.B_TrialEndTimeHarp=np.array([]).astype(float)
         self.B_GoCueTimeHarp=np.array([]).astype(float)
+        self.B_DOPort2Output=np.array([]).astype(float)
         self.B_LeftRewardDeliveryTime=np.array([]).astype(float)
         self.B_RightRewardDeliveryTime=np.array([]).astype(float)
         self.B_LeftRewardDeliveryTimeHarp=np.array([]).astype(float)
@@ -977,11 +978,11 @@ class GenerateTrials():
         LaserPowerAmp=eval(self.CLP_LaserPower)
         if self.CLP_Location=='Left':
             self.CLP_LaserPower
-            self.CurrentLaserAmplitude=[LaserPowerAmp[1],0]
+            self.CurrentLaserAmplitude=[LaserPowerAmp[0],0]
         elif self.CLP_Location=='Right':
-            self.CurrentLaserAmplitude=[0,LaserPowerAmp[2]]
+            self.CurrentLaserAmplitude=[0,LaserPowerAmp[0]]
         elif self.CLP_Location=='Both':
-            self.CurrentLaserAmplitude=[LaserPowerAmp[1],LaserPowerAmp[2]]
+            self.CurrentLaserAmplitude=[LaserPowerAmp[0],LaserPowerAmp[0]]
         else:
             self.win.WarningLabel.setText('No stimulation location defined!')
             self.win.WarningLabel.setStyleSheet("color: red;")
@@ -1109,11 +1110,11 @@ class GenerateTrials():
             self._set_valve_time_right(Channel3,float(self.win.RightValue.text()),float(self.win.Multiplier.text()))
             
         if self.CurrentStartType==3: # no delay timestamp
-            ReceiveN=8
+            ReceiveN=9
             DelayStartTimeHarp=-999 # -999 means a placeholder
             DelayStartTime=-999
         elif self.CurrentStartType==1:
-            ReceiveN=10
+            ReceiveN=11
         for i in range(ReceiveN):
             Rec=Channel1.receive()
             if Rec[0].address=='/TrialStartTime':
@@ -1167,12 +1168,14 @@ class GenerateTrials():
                 GoCueTimeHarp=Rec[1][1][0]
             elif Rec[0].address=='/TrialEndTimeHarp':
                 TrialEndTimeHarp=Rec[1][1][0]
+            elif Rec[0].address=='/DOPort2Output': #this port is used to trigger optogenetics aligned to Go cue
+                B_DOPort2Output=Rec[1][1][0]
         # get the event harp time
         self.B_TrialStartTimeHarp=np.append(self.B_TrialStartTimeHarp,TrialStartTimeHarp)
         self.B_DelayStartTimeHarp=np.append(self.B_DelayStartTimeHarp,DelayStartTimeHarp)
         self.B_TrialEndTimeHarp=np.append(self.B_TrialEndTimeHarp,TrialEndTimeHarp)
         self.B_GoCueTimeHarp=np.append(self.B_GoCueTimeHarp,GoCueTimeHarp)
-
+        self.B_DOPort2Output=np.append(self.B_DOPort2Output,B_DOPort2Output)
         # get the event time
         self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime)
         self.B_DelayStartTime=np.append(self.B_DelayStartTime,DelayStartTime)

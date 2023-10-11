@@ -978,7 +978,7 @@
                 <harp:VisualIndicators>On</harp:VisualIndicators>
                 <harp:Heartbeat>Disabled</harp:Heartbeat>
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                <harp:PortName>COM18</harp:PortName>
+                <harp:PortName>COM8</harp:PortName>
               </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
@@ -1254,7 +1254,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Disabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM14</harp:PortName>
+                      <harp:PortName>COM9</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject">
@@ -1797,74 +1797,52 @@
             <Expression xsi:type="MulticastSubject">
               <Name>ToBonsaiOSC</Name>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="SubscribeSubject">
-                <Name>BehaviorEvents</Name>
-              </Builder>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>BehaviorEvents</Name>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="beh:Parse">
-                <harp:Register xsi:type="beh:TimestampedOutputToggle" />
-              </Builder>
+            <Expression xsi:type="beh:Parse">
+              <harp:Register xsi:type="beh:TimestampedOutputToggle" />
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="MemberSelector">
-                <Selector>Value</Selector>
-              </Builder>
+            <Expression xsi:type="MemberSelector">
+              <Selector>Value</Selector>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="BitwiseAnd">
-                <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalOutputs">
-                  <Value>DOPort2</Value>
-                </Operand>
-              </Builder>
+            <Expression xsi:type="BitwiseAnd">
+              <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalOutputs">
+                <Value>DOPort2</Value>
+              </Operand>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="GreaterThan">
-                <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
-                  <Value>0</Value>
-                </Operand>
-              </Builder>
+            <Expression xsi:type="GreaterThan">
+              <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
+                <Value>0</Value>
+              </Operand>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="rx:Condition">
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="WorkflowInput">
-                      <Name>Source1</Name>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Builder>
+            <Expression xsi:type="rx:Condition">
+              <Workflow>
+                <Nodes>
+                  <Expression xsi:type="WorkflowInput">
+                    <Name>Source1</Name>
+                  </Expression>
+                  <Expression xsi:type="WorkflowOutput" />
+                </Nodes>
+                <Edges>
+                  <Edge From="0" To="1" Label="Source1" />
+                </Edges>
+              </Workflow>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="rx:WithLatestFrom" />
-              </Builder>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="rx:WithLatestFrom" />
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="MemberSelector">
-                <Selector>Item2.Seconds</Selector>
-              </Builder>
+            <Expression xsi:type="MemberSelector">
+              <Selector>Item2.Seconds</Selector>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="scr:ExpressionTransform">
-                <scr:Expression>new(it as Seconds)</scr:Expression>
-              </Builder>
+            <Expression xsi:type="scr:ExpressionTransform">
+              <scr:Expression>new(it as Seconds)</scr:Expression>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="osc:Format">
-                <osc:Address>/GoCueTimeHarp</osc:Address>
-              </Builder>
+            <Expression xsi:type="osc:Format">
+              <osc:Address>/DOPort2Output</osc:Address>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="MulticastSubject">
-                <Name>ToBonsaiOSC</Name>
-              </Builder>
+            <Expression xsi:type="MulticastSubject">
+              <Name>ToBonsaiOSC</Name>
             </Expression>
           </Nodes>
           <Edges>
@@ -2022,7 +2000,11 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
+<<<<<<< HEAD
                       <gl:DueTime>PT1.135S</gl:DueTime>
+=======
+                      <gl:DueTime>PT3.523S</gl:DueTime>
+>>>>>>> 36f73d08f0c1b7465e769a1574d31b39eeadc881
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -2062,7 +2044,11 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
+<<<<<<< HEAD
                       <gl:DueTime>PT0.063S</gl:DueTime>
+=======
+                      <gl:DueTime>PT0.245S</gl:DueTime>
+>>>>>>> 36f73d08f0c1b7465e769a1574d31b39eeadc881
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -3624,24 +3610,40 @@
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="p2:TriggeredAnalogOutput">
                       <p2:SignalSource />
+<<<<<<< HEAD
                       <p2:TriggerSource>/Dev2/PFI0</p2:TriggerSource>
                       <p2:SampleRate>5000</p2:SampleRate>
                       <p2:ActiveEdge>Rising</p2:ActiveEdge>
                       <p2:SampleMode>FiniteSamples</p2:SampleMode>
                       <p2:BufferSize>50002</p2:BufferSize>
+=======
+                      <p2:TriggerSource>/Dev1/PFI0</p2:TriggerSource>
+                      <p2:SampleRate>5000</p2:SampleRate>
+                      <p2:ActiveEdge>Rising</p2:ActiveEdge>
+                      <p2:SampleMode>FiniteSamples</p2:SampleMode>
+                      <p2:BufferSize>17616</p2:BufferSize>
+>>>>>>> 36f73d08f0c1b7465e769a1574d31b39eeadc881
                       <p2:Channels>
                         <p2:AnalogOutputChannelConfiguration>
                           <p2:ChannelName />
                           <p2:MinimumValue>-10</p2:MinimumValue>
                           <p2:MaximumValue>10</p2:MaximumValue>
+<<<<<<< HEAD
                           <p2:PhysicalChannel>Dev2/ao0</p2:PhysicalChannel>
+=======
+                          <p2:PhysicalChannel>Dev1/ao0</p2:PhysicalChannel>
+>>>>>>> 36f73d08f0c1b7465e769a1574d31b39eeadc881
                           <p2:VoltageUnits>Volts</p2:VoltageUnits>
                         </p2:AnalogOutputChannelConfiguration>
                         <p2:AnalogOutputChannelConfiguration>
                           <p2:ChannelName />
                           <p2:MinimumValue>-10</p2:MinimumValue>
                           <p2:MaximumValue>10</p2:MaximumValue>
+<<<<<<< HEAD
                           <p2:PhysicalChannel>Dev2/ao1</p2:PhysicalChannel>
+=======
+                          <p2:PhysicalChannel>Dev1/ao1</p2:PhysicalChannel>
+>>>>>>> 36f73d08f0c1b7465e769a1574d31b39eeadc881
                           <p2:VoltageUnits>Volts</p2:VoltageUnits>
                         </p2:AnalogOutputChannelConfiguration>
                       </p2:Channels>
