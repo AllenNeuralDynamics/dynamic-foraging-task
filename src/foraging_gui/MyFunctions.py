@@ -1104,9 +1104,9 @@ class GenerateTrials():
         '''
         # set the valve time of auto water
         if self.CurrentAutoRewardTrial[0]==1:
-            self._set_valve_time_left(Channel3)
+            self._set_valve_time_left(Channel3,float(self.win.LeftValue.text()),float(self.win.Multiplier.text()))
         if self.CurrentAutoRewardTrial[1]==1:
-            self._set_valve_time_right(Channel3)
+            self._set_valve_time_right(Channel3,float(self.win.RightValue.text()),float(self.win.Multiplier.text()))
             
         if self.CurrentStartType==3: # no delay timestamp
             ReceiveN=8

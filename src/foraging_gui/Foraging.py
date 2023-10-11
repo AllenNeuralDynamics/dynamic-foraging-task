@@ -464,6 +464,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 latest_fitting['Right']=FittingResults[current_date]['Right']
                 break
         self.latest_fitting=latest_fitting
+
     def _OpenBehaviorFolder(self):
         '''Open the the current behavior folder'''
         self._GetSaveFileName()
@@ -1765,7 +1766,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+float(self.TP_GiveWaterL_volume)/1000
         self._UpdateSuggestedWater(float(self.TP_GiveWaterL_volume)/1000)
     
-
     def _GiveRight(self):
         '''manually give right water'''
         self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)

@@ -2022,7 +2022,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT3.846S</gl:DueTime>
+                      <gl:DueTime>PT1.135S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -2062,7 +2062,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT1S</gl:DueTime>
+                      <gl:DueTime>PT0.063S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -3628,7 +3628,7 @@
                       <p2:SampleRate>5000</p2:SampleRate>
                       <p2:ActiveEdge>Rising</p2:ActiveEdge>
                       <p2:SampleMode>FiniteSamples</p2:SampleMode>
-                      <p2:BufferSize>25002</p2:BufferSize>
+                      <p2:BufferSize>50002</p2:BufferSize>
                       <p2:Channels>
                         <p2:AnalogOutputChannelConfiguration>
                           <p2:ChannelName />
