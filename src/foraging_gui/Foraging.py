@@ -81,6 +81,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.threadpool3=QThreadPool() # visualization
         self.threadpool4=QThreadPool() # for generating a new trial
         self.threadpool5=QThreadPool() # for starting the trial loop
+        self.threadpool_workertimer=QThreadPool() # for timing
         self.OpenOptogenetics=0
         self.WaterCalibration=0
         self.LaserCalibration=0
@@ -90,6 +91,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.NewTrialRewardOrder=0
         self.LickSta=0
         self.LickSta_ToInitializeVisual=1
+        self.finish_Timer=1 # for photometry baseline recordings
+        self.PhotometryRun=0 # 1. Photometry has been run; 0. Photometry has not been carried out.
         self._Optogenetics() # open the optogenetics panel
         self._LaserCalibration() # to open the laser calibration panel
         self._WaterCalibration() # to open the water calibration panel
@@ -1584,6 +1587,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.Start.setChecked(False)
                 self.StartANewSession=1
                 self.CreateNewFolder=1
+                self.PhotometryRun=0
                 self.Channel.StopLogging('s')
                 print('Saved')
             elif reply == QMessageBox.No:
@@ -1592,6 +1596,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.Start.setChecked(False)
                 self.StartANewSession=1
                 self.CreateNewFolder=1
+                self.PhotometryRun=0
                 self.Channel.StopLogging('s')
             else:
                 self.NewSession.setChecked(False)
@@ -1640,6 +1645,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _thread_complete4(self):
         '''complete of generating a trial'''
         self.ToGenerateATrial=1
+    def _thread_complete_timer(self):
+        '''complete of _Timer'''
+        self.finish_Timer=1
+    def _Timer(self,Time):
+        '''sleep some time'''
+        time.sleep(Time)
     def _Start(self):
         '''start trial loop'''
         self._ConnectBonsai()
@@ -1745,6 +1756,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
             workerStartTrialLoop1=self.workerStartTrialLoop1
+        # collecting the base signal for photometry. Only run once
+        if self.PhtotometryB.currentText()=='on' and self.PhotometryRun==0:
+            self.finish_Timer=0
+            self.PhotometryRun=1
+            workertimer = Worker(self._Timer,float(self.baselinetime.text())*60)
+            workertimer.signals.finished.connect(self._thread_complete_timer)
+            self.threadpool_workertimer.start(workertimer)
         
         self._StartTrialLoop(GeneratedTrials,worker1)
         '''
@@ -1757,7 +1775,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _StartTrialLoop(self,GeneratedTrials,worker1):
         while self.Start.isChecked():
             QApplication.processEvents()
-            if self.ANewTrial==1 and self.Start.isChecked(): 
+            if self.ANewTrial==1 and self.Start.isChecked() and self.finish_Timer==1: 
                 self.ANewTrial=0 # can start a new trial when we receive the trial end signal from Bonsai
                 GeneratedTrials.B_CurrentTrialN+=1
                 print('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))

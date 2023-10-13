@@ -3516,8 +3516,8 @@
    <widget class="QLabel" name="label_61">
     <property name="geometry">
      <rect>
-      <x>193</x>
-      <y>830</y>
+      <x>2</x>
+      <y>870</y>
       <width>81</width>
       <height>20</height>
      </rect>
@@ -3541,8 +3541,8 @@
    <widget class="QComboBox" name="PhtotometryB">
     <property name="geometry">
      <rect>
-      <x>280</x>
-      <y>830</y>
+      <x>89</x>
+      <y>870</y>
       <width>80</width>
       <height>20</height>
      </rect>
@@ -3567,8 +3567,8 @@
    <widget class="QLabel" name="label_47">
     <property name="geometry">
      <rect>
-      <x>373</x>
-      <y>830</y>
+      <x>183</x>
+      <y>870</y>
       <width>101</width>
       <height>20</height>
      </rect>
@@ -3592,8 +3592,8 @@
    <widget class="QLineEdit" name="baselinetime">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>830</y>
+      <x>290</x>
+      <y>870</y>
       <width>80</width>
       <height>20</height>
      </rect>
