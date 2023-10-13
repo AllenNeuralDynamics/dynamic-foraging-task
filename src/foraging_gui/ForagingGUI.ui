@@ -3170,6 +3170,34 @@
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
      </property>
     </widget>
+    <widget class="QLabel" name="WarningLabelInitializeBonsai">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>331</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">
@@ -3575,17 +3603,17 @@
      </property>
      <addaction name="actionTemporary_Logging"/>
      <addaction name="actionFormal_logging"/>
-     <addaction name="actionOpen_logging_folder"/>
     </widget>
     <addaction name="action_Optogenetics"/>
     <addaction name="action_Camera"/>
     <addaction name="action_MotorStage"/>
     <addaction name="action_Manipulator"/>
-    <addaction name="actionConnectBonsai"/>
     <addaction name="action_Start"/>
     <addaction name="action_NewSession"/>
+    <addaction name="actionConnectBonsai"/>
     <addaction name="actionRestartLogging_2"/>
     <addaction name="actionOpen_behavior_folder"/>
+    <addaction name="actionOpen_logging_folder"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="sizePolicy">
