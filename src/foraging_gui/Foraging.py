@@ -120,6 +120,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.action_Open.triggered.connect(self._Open)
         self.action_Save.triggered.connect(self._Save)
         self.actionForce_save.triggered.connect(self._ForceSave)
+        self.SaveContinue.triggered.connect(self._SaveContinue)
         self.action_Exit.triggered.connect(self._Exit)
         self.action_New.triggered.connect(self._New)
         self.action_Clear.triggered.connect(self._Clear)
@@ -357,6 +358,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _ForceSave(self):
         '''Save whether the current trial is complete or not'''
         self._Save(ForceSave=1)
+    def _SaveContinue(self):
+        '''Do not restart a session after saving'''
+        self._Save(SaveContinue=1)
     def _WaterVolumnManage1(self):
         '''Change the water volume based on the valve open time'''
         self.LeftValue.textChanged.disconnect(self._WaterVolumnManage1)
@@ -1154,7 +1158,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             "<p></p>",
         )
    
-    def _Save(self,ForceSave=0):
+    def _Save(self,ForceSave=0,SaveContinue=0):
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
         if self.WeightBefore.text()=='' or self.WeightAfter.text()=='' or self.ExtraWater.text()=='':
@@ -1270,12 +1274,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
                 self.Camera_dialog.StartCamera.setChecked(False)
                 self.Camera_dialog._StartCamera()
-            # must start a new session 
-            self.NewSession.setStyleSheet("background-color : green;")
-            self.NewSession.setDisabled(True) 
-            self.StartANewSession=1
-            self.CreateNewFolder=1
-            self.Channel.StopLogging('s')
+            if SaveContinue==0:
+                # must start a new session 
+                self.NewSession.setStyleSheet("background-color : green;")
+                self.NewSession.setDisabled(True) 
+                self.StartANewSession=1
+                self.CreateNewFolder=1
+                self.Channel.StopLogging('s')
 
 
     def _GetSaveFolder(self,CTrainingFolder=1,CHarpFolder=1,CVideoFolder=1,CPhotometryFolder=1,CEphysFolder=1):

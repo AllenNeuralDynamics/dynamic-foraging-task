@@ -3546,6 +3546,7 @@
     <addaction name="action_Exit"/>
     <addaction name="action_Clear"/>
     <addaction name="actionForce_save"/>
+    <addaction name="SaveContinue"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="sizePolicy">
@@ -3918,6 +3919,11 @@
    </property>
    <property name="text">
     <string>Licks distribution</string>
+   </property>
+  </action>
+  <action name="SaveContinue">
+   <property name="text">
+    <string>Save (without restarting a session)</string>
    </property>
   </action>
  </widget>
