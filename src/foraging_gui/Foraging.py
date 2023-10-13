@@ -481,7 +481,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
             folder_name=os.path.dirname(self.SaveFileJson)
             subprocess.Popen(['explorer', folder_name])
         except:
-            pass
+            try:
+                AnimalFolder=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text())
+                subprocess.Popen(['explorer', AnimalFolder])
+            except:
+                pass
     def _OpenLoggingFolder(self):
         '''Open the logging folder'''
         self.Camera_dialog._OpenSaveFolder()
@@ -1266,6 +1270,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
                 self.Camera_dialog.StartCamera.setChecked(False)
                 self.Camera_dialog._StartCamera()
+            # must start a new session 
+            self.NewSession.setStyleSheet("background-color : green;")
+            self.NewSession.setDisabled(True) 
+            self.StartANewSession=1
+            self.CreateNewFolder=1
+            self.Channel.StopLogging('s')
+
 
     def _GetSaveFolder(self,CTrainingFolder=1,CHarpFolder=1,CVideoFolder=1,CPhotometryFolder=1,CEphysFolder=1):
         '''The new data storage structure. Each session forms an independent folder. Training data, Harp register events, video data, photometry data and ephys data are in different subfolders'''
