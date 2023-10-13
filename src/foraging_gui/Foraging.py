@@ -81,6 +81,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.threadpool3=QThreadPool() # visualization
         self.threadpool4=QThreadPool() # for generating a new trial
         self.threadpool5=QThreadPool() # for starting the trial loop
+        self.threadpool_workertimer=QThreadPool() # for timing
         self.OpenOptogenetics=0
         self.WaterCalibration=0
         self.LaserCalibration=0
@@ -90,6 +91,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.NewTrialRewardOrder=0
         self.LickSta=0
         self.LickSta_ToInitializeVisual=1
+        self.finish_Timer=1 # for photometry baseline recordings
+        self.PhotometryRun=0 # 1. Photometry has been run; 0. Photometry has not been carried out.
         self._Optogenetics() # open the optogenetics panel
         self._LaserCalibration() # to open the laser calibration panel
         self._WaterCalibration() # to open the water calibration panel
@@ -104,6 +107,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.keyPressEvent()
         self._WaterVolumnManage2()
         self._LickSta()
+        self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
     def connectSignalsSlots(self):
         '''Define callbacks'''
@@ -119,12 +123,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.action_Open.triggered.connect(self._Open)
         self.action_Save.triggered.connect(self._Save)
         self.actionForce_save.triggered.connect(self._ForceSave)
+        self.SaveContinue.triggered.connect(self._SaveContinue)
         self.action_Exit.triggered.connect(self._Exit)
         self.action_New.triggered.connect(self._New)
         self.action_Clear.triggered.connect(self._Clear)
         self.action_Start.triggered.connect(self.Start.click)
         self.action_NewSession.triggered.connect(self.NewSession.click)
-        self.actionConnectBonsai.triggered.connect(self._InitializeBonsai)
+        self.actionConnectBonsai.triggered.connect(self._ConnectBonsai)
         self.Load.clicked.connect(self._Open)
         self.Save.clicked.connect(self._Save)
         self.Clear.clicked.connect(self._Clear)
@@ -169,7 +174,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit)):        
                 child.returnPressed.connect(self.keyPressEvent)
-
+    def _ConnectBonsai(self):
+        '''Connect bonsai'''
+        if self.InitializeBonsaiSuccessfully==0:
+            try:
+                self._InitializeBonsai()
+                self.InitializeBonsaiSuccessfully=1
+            except:
+                self.WarningLabelInitializeBonsai.setText('Please open bonsai!')
+                self.WarningLabelInitializeBonsai.setStyleSheet("color: red;")
+                self.InitializeBonsaiSuccessfully=0
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
         # stop the current session except it is a new session
@@ -180,12 +194,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
         if log_folder is None:
             # formal logging
             loggingtype=0
-            self._GetSaveFileName()
-            log_folder=os.path.join(self.log_folder,self.Tower.currentText(),self.AnimalName.text())
-            base_name=os.path.splitext(os.path.basename(self.SaveFileJson))[0]
-            current_time = datetime.now()
-            formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-            log_folder=os.path.join(log_folder,base_name,formatted_datetime)
+            if self.CreateNewFolder==1:
+                self._GetSaveFolder()
+                self.CreateNewFolder=0
+            log_folder=self.HarpFolder
         else:
             # temporary logging
             loggingtype=1
@@ -205,6 +217,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             # temporary logging
             self.loggingstarted=1
         return log_folder
+    
     def _GetLaserCalibration(self):
         '''Get the laser calibration results'''
         if os.path.exists(self.LaserCalibrationFiles):
@@ -337,6 +350,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Channel4.receive()
         self.WarningLabel_2.setText('')
         self.WarningLabel_2.setStyleSheet("color: gray;")
+        self.WarningLabelInitializeBonsai.setText('')
         self.InitializeBonsaiSuccessfully=1
     def _OpenSettingFolder(self):
         '''Open the setting folder'''
@@ -347,6 +361,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _ForceSave(self):
         '''Save whether the current trial is complete or not'''
         self._Save(ForceSave=1)
+    def _SaveContinue(self):
+        '''Do not restart a session after saving'''
+        self._Save(SaveContinue=1)
     def _WaterVolumnManage1(self):
         '''Change the water volume based on the valve open time'''
         self.LeftValue.textChanged.disconnect(self._WaterVolumnManage1)
@@ -467,12 +484,15 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
     def _OpenBehaviorFolder(self):
         '''Open the the current behavior folder'''
-        self._GetSaveFileName()
-        folder_name=os.path.dirname(self.SaveFileJson)
         try:
+            folder_name=os.path.dirname(self.SaveFileJson)
             subprocess.Popen(['explorer', folder_name])
         except:
-            pass
+            try:
+                AnimalFolder=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text())
+                subprocess.Popen(['explorer', AnimalFolder])
+            except:
+                pass
     def _OpenLoggingFolder(self):
         '''Open the logging folder'''
         self.Camera_dialog._OpenSaveFolder()
@@ -1039,6 +1059,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
         response = QMessageBox.question(self,'Save and Exit:', "Do you want to save the current result?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
         if response==QMessageBox.Yes:
             self._Save()
+            try:
+                self.Channel.StopLogging('s')
+            except:
+                pass
             self.close()
         elif response==QMessageBox.No:
             self.close()
@@ -1137,7 +1161,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             "<p></p>",
         )
    
-    def _Save(self,ForceSave=0):
+    def _Save(self,ForceSave=0,SaveContinue=0):
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
         if self.WeightBefore.text()=='' or self.WeightAfter.text()=='' or self.ExtraWater.text()=='':
@@ -1155,7 +1179,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.GeneratedTrials._GetLicks(self.Channel2)
         
         #ParamsFile = os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.json')
-        self._GetSaveFileName()
+        #self._GetSaveFileName()
+        # Create new folders
+        if self.CreateNewFolder==1:
+            self._GetSaveFolder()
+            self.CreateNewFolder=0
+        if not os.path.exists(os.path.dirname(self.SaveFileJson)):
+            os.makedirs(os.path.dirname(self.SaveFileJson))
+            print(f"Created new folder: {os.path.dirname(self.SaveFileJson)}")
         Names = QFileDialog.getSaveFileName(self, 'Save File',self.SaveFileJson,"JSON files (*.json);;MAT files (*.mat);;JSON parameters (*_par.json)")
         if Names[1]=='JSON parameters (*_par.json)':
             self.SaveFile=Names[0].replace('.json', '_par.json')
@@ -1246,9 +1277,57 @@ class Window(QMainWindow, Ui_ForagingGUI):
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
                 self.Camera_dialog.StartCamera.setChecked(False)
                 self.Camera_dialog._StartCamera()
+            if SaveContinue==0:
+                # must start a new session 
+                self.NewSession.setStyleSheet("background-color : green;")
+                self.NewSession.setDisabled(True) 
+                self.StartANewSession=1
+                self.CreateNewFolder=1
+                self.Channel.StopLogging('s')
 
+
+    def _GetSaveFolder(self,CTrainingFolder=1,CHarpFolder=1,CVideoFolder=1,CPhotometryFolder=1,CEphysFolder=1):
+        '''The new data storage structure. Each session forms an independent folder. Training data, Harp register events, video data, photometry data and ephys data are in different subfolders'''
+        current_time = datetime.now()
+        formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+        self.SessionFolder=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{formatted_datetime}')
+        # Training folder
+        self.TrainingFolder=os.path.join(self.SessionFolder,'TrainingFolder')
+        self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.AnimalName.text()}_{formatted_datetime}.mat')
+        self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.AnimalName.text()}_{formatted_datetime}.json')
+        self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.AnimalName.text()}_{formatted_datetime}_par.json')
+        # Harp folder
+        self.HarpFolder=os.path.join(self.SessionFolder,'HarpFolder')
+        # video data
+        self.VideoFolder=os.path.join(self.SessionFolder,'VideoFolder')
+        # photometry folder
+        self.PhotometryFolder=os.path.join(self.SessionFolder,'PhotometryFolder')
+        # ephys folder
+        self.EphysFolder=os.path.join(self.SessionFolder,'EphysFolder')
+
+        # create folders
+        if CTrainingFolder==1:
+            if not os.path.exists(self.TrainingFolder):
+                os.makedirs(self.TrainingFolder)
+                print(f"Created new folder: {self.TrainingFolder}")
+        if CHarpFolder==1:
+            if not os.path.exists(self.HarpFolder):
+                os.makedirs(self.HarpFolder)
+                print(f"Created new folder: {self.HarpFolder}")
+        if CVideoFolder==1:
+            if not os.path.exists(self.VideoFolder):
+                os.makedirs(self.VideoFolder)
+                print(f"Created new folder: {self.VideoFolder}")
+        if CPhotometryFolder==1:
+            if not os.path.exists(self.PhotometryFolder):
+                os.makedirs(self.PhotometryFolder)
+                print(f"Created new folder: {self.PhotometryFolder}")
+        if CEphysFolder==1:
+            if not os.path.exists(self.EphysFolder):
+                os.makedirs(self.EphysFolder)
+                print(f"Created new folder: {self.EphysFolder}")
     def _GetSaveFileName(self):
-        '''Get the name of the save file'''
+        '''Get the name of the save file. This is an old data structure and has been deprecated.'''
         SaveFileMat = os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.mat')
         SaveFileJson= os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.json')
         SaveFileParJson= os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_par.json')
@@ -1267,6 +1346,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.SaveFileMat=SaveFileMat
         self.SaveFileJson=SaveFileJson
         self.SaveFileParJson=SaveFileParJson
+
     def _Concat(self,widget_dict,Obj,keyname):
         '''Help manage save different dialogs'''
         if keyname=='None':
@@ -1506,12 +1586,18 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self._Save()
                 self.Start.setChecked(False)
                 self.StartANewSession=1
+                self.CreateNewFolder=1
+                self.PhotometryRun=0
+                self.Channel.StopLogging('s')
                 print('Saved')
             elif reply == QMessageBox.No:
                 self.NewSession.setStyleSheet("background-color : green;")
                 self.Start.setStyleSheet("background-color : none")
                 self.Start.setChecked(False)
                 self.StartANewSession=1
+                self.CreateNewFolder=1
+                self.PhotometryRun=0
+                self.Channel.StopLogging('s')
             else:
                 self.NewSession.setChecked(False)
                 pass
@@ -1559,8 +1645,18 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _thread_complete4(self):
         '''complete of generating a trial'''
         self.ToGenerateATrial=1
+    def _thread_complete_timer(self):
+        '''complete of _Timer'''
+        self.finish_Timer=1
+    def _Timer(self,Time):
+        '''sleep some time'''
+        time.sleep(Time)
     def _Start(self):
         '''start trial loop'''
+        self._ConnectBonsai()
+        if self.InitializeBonsaiSuccessfully==0:
+            return
+        self.WarningLabelInitializeBonsai.setText('')
         self.WarningLabel_SaveTrainingStage.setText('')
         self.WarningLabel_SaveTrainingStage.setStyleSheet("color: none;")
         self.NewSession.setDisabled(False)
@@ -1660,6 +1756,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
             workerStartTrialLoop1=self.workerStartTrialLoop1
+        # collecting the base signal for photometry. Only run once
+        if self.PhtotometryB.currentText()=='on' and self.PhotometryRun==0:
+            self.finish_Timer=0
+            self.PhotometryRun=1
+            workertimer = Worker(self._Timer,float(self.baselinetime.text())*60)
+            workertimer.signals.finished.connect(self._thread_complete_timer)
+            self.threadpool_workertimer.start(workertimer)
         
         self._StartTrialLoop(GeneratedTrials,worker1)
         '''
@@ -1672,7 +1775,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _StartTrialLoop(self,GeneratedTrials,worker1):
         while self.Start.isChecked():
             QApplication.processEvents()
-            if self.ANewTrial==1 and self.Start.isChecked(): 
+            if self.ANewTrial==1 and self.Start.isChecked() and self.finish_Timer==1: 
                 self.ANewTrial=0 # can start a new trial when we receive the trial end signal from Bonsai
                 GeneratedTrials.B_CurrentTrialN+=1
                 print('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
