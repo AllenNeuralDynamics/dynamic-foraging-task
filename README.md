@@ -52,6 +52,7 @@
 ### Bonsai
 
 - Run **setup.cmd** in the **dynamic-foraging-task\bonsai** folder to install the bonsai and related packages (you only need to do it once).
+- Update the firmware of Harp behavior board. Please follow the instruction [here](https://harp-tech.org/docs/articles/firmware.html)(only need to do it once).
 - Run the foraging bonsai workflow in the folder **dynamic-foraging-task\src\workflows** to start Bonsai.
 
 ### Python GUI
