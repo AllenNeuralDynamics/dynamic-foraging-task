@@ -1,7 +1,7 @@
 
 numpy
 scipy
-matplotlib
+matplotlib==3.5.3
 PyQt5
 pandas
 psutil
