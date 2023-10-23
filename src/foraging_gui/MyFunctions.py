@@ -196,8 +196,7 @@ class GenerateTrials():
             RewardProbPool=np.append(self.RewardProb,np.fliplr(self.RewardProb),axis=0)
             # exclude the previous reward probabilities
             if self.B_RewardProHistory.size!=0:
-                RewardProbPool=RewardProbPool[RewardProbPool!=self.B_RewardProHistory[:,-1]]
-                RewardProbPool=RewardProbPool.reshape(int(RewardProbPool.size/self.B_LickPortN),self.B_LickPortN)
+                RewardProbPool=RewardProbPool[np.any(RewardProbPool!=self.B_RewardProHistory[:,-1],axis=1)]
             # get the reward probabilities of the current block
             self.B_CurrentRewardProb=RewardProbPool[random.choice(range(np.shape(RewardProbPool)[0]))]
             # forced change of block identity (L->R; R->L)
