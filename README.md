@@ -60,7 +60,7 @@
 - Run the **Foraging.py** in the folder **dynamic-foraging-task\src\foraging_gui** to start the GUI
 
 ## Code structure and information Flow
-![image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/109394934/754c9f3b-9be2-484a-9091-3f8a0bca0e68)
+![image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/109394934/b8549072-5648-4afd-a508-8d38d7bf6549)
 
 
 
