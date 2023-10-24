@@ -196,8 +196,8 @@ class GenerateTrials():
             RewardProbPool=np.append(self.RewardProb,np.fliplr(self.RewardProb),axis=0)
             # exclude the previous reward probabilities
             if self.B_RewardProHistory.size!=0:
-                RewardProbPool=RewardProbPool[RewardProbPool!=self.B_RewardProHistory[:,-1]]
-                RewardProbPool=RewardProbPool.reshape(int(RewardProbPool.size/self.B_LickPortN),self.B_LickPortN)
+                RewardProbPool=RewardProbPool[np.any(RewardProbPool!=self.B_RewardProHistory[:,-1],axis=1)]
+                RewardProbPool=RewardProbPool[np.any(RewardProbPool!=self.B_RewardProHistory[:,-1][::-1],axis=1)]
             # get the reward probabilities of the current block
             self.B_CurrentRewardProb=RewardProbPool[random.choice(range(np.shape(RewardProbPool)[0]))]
             # forced change of block identity (L->R; R->L)
@@ -238,6 +238,11 @@ class GenerateTrials():
                             RewardProbPool=RewardProbPool[RewardProbPool!=0.1]
                     # get the reward probabilities of the current block
                     self.B_CurrentRewardProb[i]=RewardProbPool[random.choice(range(np.shape(RewardProbPool)[0]))]
+                    # "if one spout was assigned a reward probability greater than or equal to the reward probability of the other spout for 3 consecutive blocks, the probability of that spout was set to 0.1 to encourage switching behavior and limit the creation of a direction bias"
+                    if np.shape(self.BlockLenHistory[i])[0]>=3:
+                        total_trial=np.sum(self.BlockLenHistory[i][-3:])
+                        if np.all(self.B_RewardProHistory[i][-total_trial:]>self.B_RewardProHistory[1-i][-total_trial:]):
+                            self.B_CurrentRewardProb[i]=0.1
                     # randomly draw a block length between Min and Max
                     if self.TP_Randomness=='Exponential':
                         self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta),1)+float(self.TP_BlockMin)))
@@ -247,6 +252,8 @@ class GenerateTrials():
                         self.BlockLen=int(self.TP_BlockMax)
                     self.BlockLenHistory[i].append(self.BlockLen)
                     self.B_ANewBlock[i]=0
+
+                    
         self.B_RewardProHistory=np.append(self.B_RewardProHistory,self.B_CurrentRewardProb.reshape(self.B_LickPortN,1),axis=1)
         # get the ITI time and delay time
         if self.TP_Randomness=='Exponential':
