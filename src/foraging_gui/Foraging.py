@@ -1793,6 +1793,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 if GeneratedTrials.CurrentSimulation==True:
                     GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3,self.Channel4)
                     self.ANewTrial=1
+                    self.NewTrialRewardOrder=1
                 else:
                     #get the response of the animal using a different thread
                     self.threadpool.start(worker1)
