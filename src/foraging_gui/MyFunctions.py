@@ -572,9 +572,9 @@ class GenerateTrials():
             p_Rs=self.B_RewardProHistory[1][:Len]
             random_number_L= np.concatenate(self.B_CurrentRewardProbRandomNumber,axis=0)[0::2][:Len]
             random_number_R= np.concatenate(self.B_CurrentRewardProbRandomNumber,axis=0)[1::2][:Len]
-            if (self.TP_Task in ['Coupled Baiting','Coupled Without Baiting']):
+            if (self.TP_Task in ['Coupled Baiting','Uncoupled Baiting']):
                 self.B_for_eff_optimal, self.B_for_eff_optimal_random_seed=self.foraging_eff(reward_rate,p_Ls,p_Rs,random_number_L,random_number_R)
-            elif (self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']):
+            elif (self.TP_Task in ['Coupled Without Baiting','Uncoupled Without Baiting']):
                 self.B_for_eff_optimal, self.B_for_eff_optimal_random_seed=self.foraging_eff_no_baiting(reward_rate,p_Ls,p_Rs,random_number_L,random_number_R)
             else:
                 self.B_for_eff_optimal=np.nan
