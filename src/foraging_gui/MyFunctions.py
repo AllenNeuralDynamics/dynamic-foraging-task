@@ -563,10 +563,93 @@ class GenerateTrials():
             # self.BS_TotalReward: normal rewards and auto rewards
             self.B_SuggestedWater=float(self.win.TotalWater.text())-float(self.BS_TotalReward)/1000-np.sum(self.win.ManualWaterVolume)
             self.win.SuggestedWater.setText(str(np.round(self.B_SuggestedWater,3)))
-        # early licking rate
-        # double dipping 
         # foraging efficiency
-        '''Some complex calculations can be separated from _GenerateATrial using different threads'''
+        Len=np.shape(self.B_RewardedHistory)[1]
+        if Len>0:
+            reward_rate=np.sum(self.B_RewardedHistory)/Len
+            p_Ls=self.B_RewardProHistory[0][:Len]
+            p_Rs=self.B_RewardProHistory[1][:Len]
+            random_number_L= np.concatenate(self.B_CurrentRewardProbRandomNumber,axis=0)[0::2][:Len]
+            random_number_R= np.concatenate(self.B_CurrentRewardProbRandomNumber,axis=0)[1::2][:Len]
+            if (self.TP_Task in ['Coupled Baiting','Coupled Without Baiting']):
+                self.B_for_eff_optimal, self.B_for_eff_optimal_random_seed=self.foraging_eff(reward_rate,p_Ls,p_Rs,random_number_L,random_number_R)
+            elif (self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']):
+                self.B_for_eff_optimal, self.B_for_eff_optimal_random_seed=self.foraging_eff_no_baiting(reward_rate,p_Ls,p_Rs,random_number_L,random_number_R)
+            else:
+                self.B_for_eff_optimal=np.nan
+                self.B_for_eff_optimal_random_seed=np.nan
+            '''Some complex calculations can be separated from _GenerateATrial using different threads'''
+            
+                
+
+    def foraging_eff_no_baiting(self,reward_rate, p_Ls, p_Rs, random_number_L=None, random_number_R=None):  # Calculate foraging efficiency (only for 2lp)
+        '''from Han'''    
+        # --- Optimal-aver (use optimal expectation as 100% efficiency) ---
+        for_eff_optimal = reward_rate / np.nanmean(np.max([p_Ls, p_Rs], axis=0))
+        
+        if random_number_L is None:
+            return for_eff_optimal, np.nan
+            
+        # --- Optimal-actual (uses the actual random numbers by simulation)
+        reward_refills = np.vstack([p_Ls >= random_number_L, p_Rs >= random_number_R])
+        optimal_choices = np.argmax([p_Ls, p_Rs], axis=0)  # Greedy choice, assuming the agent knows the groundtruth
+        optimal_rewards = reward_refills[0][optimal_choices==0].sum() + reward_refills[1][optimal_choices==1].sum()
+        for_eff_optimal_random_seed = reward_rate / (optimal_rewards / len(optimal_choices))
+        
+        return for_eff_optimal, for_eff_optimal_random_seed
+
+    def foraging_eff(self,reward_rate, p_Ls, p_Rs, random_number_L=None, random_number_R=None):  # Calculate foraging efficiency (only for 2lp)
+        '''from Han'''        
+        # --- Optimal-aver (use optimal expectation as 100% efficiency) ---
+        p_stars = np.zeros_like(p_Ls)
+        for i, (p_L, p_R) in enumerate(zip(p_Ls, p_Rs)):   # Sum over all ps 
+            p_max = np.max([p_L, p_R])
+            p_min = np.min([p_L, p_R])
+            if p_min == 0 or p_max >= 1:
+                p_stars[i] = p_max
+            else:
+                m_star = np.floor(np.log(1-p_max)/np.log(1-p_min))
+                p_stars[i] = p_max + (1-(1-p_min)**(m_star + 1)-p_max**2)/(m_star+1)
+
+        for_eff_optimal = reward_rate / np.nanmean(p_stars)
+        
+        if random_number_L is None:
+            return for_eff_optimal, np.nan
+            
+        # --- Optimal-actual (uses the actual random numbers by simulation)
+        block_trans = np.where(np.diff(np.hstack([np.inf, p_Ls, np.inf])))[0].tolist()
+        reward_refills = [p_Ls >= random_number_L, p_Rs >= random_number_R]
+        reward_optimal_random_seed = 0
+        
+        # Generate optimal choice pattern
+        for b_start, b_end in zip(block_trans[:-1], block_trans[1:]):
+            p_max = np.max([p_Ls[b_start], p_Rs[b_start]])
+            p_min = np.min([p_Ls[b_start], p_Rs[b_start]])
+            side_max = np.argmax([p_Ls[b_start], p_Rs[b_start]])
+            
+            # Get optimal choice pattern and expected optimal rate
+            if p_min == 0 or p_max >= 1:
+                this_choice = np.array([1] * (b_end-b_start))  # Greedy is obviously optimal
+            else:
+                m_star = np.floor(np.log(1-p_max)/np.log(1-p_min))
+                this_choice = np.array((([1]*int(m_star)+[0]) * (1+int((b_end-b_start)/(m_star+1)))) [:b_end-b_start])
+                
+            # Do simulation, using optimal choice pattern and actual random numbers
+            reward_refill = np.vstack([reward_refills[1 - side_max][b_start:b_end], 
+                            reward_refills[side_max][b_start:b_end]]).astype(int)  # Max = 1, Min = 0
+            reward_remain = [0,0]
+            for t in range(b_end - b_start):
+                reward_available = reward_remain | reward_refill[:, t]
+                reward_optimal_random_seed += reward_available[this_choice[t]]
+                reward_remain = reward_available.copy()
+                reward_remain[this_choice[t]] = 0
+            
+            if reward_optimal_random_seed:                
+                for_eff_optimal_random_seed = reward_rate / (reward_optimal_random_seed / len(p_Ls))
+            else:
+                for_eff_optimal_random_seed = np.nan
+        
+        return for_eff_optimal, for_eff_optimal_random_seed
 
     def _LickSta(self,Trials=None):
         '''Perform lick stats for the input trials'''
@@ -744,12 +827,13 @@ class GenerateTrials():
         elif self.B_CurrentTrialN>=2:
             Other_BasicText=('Current left block: ' + str(self.BS_CurrentBlockTrialNV[0]) + '/' +  str(self.BS_CurrentBlockLenV[0])+'\n'
                         'Current right block: ' + str(self.BS_CurrentBlockTrialNV[1]) + '/' +  str(self.BS_CurrentBlockLenV[1])+'\n\n'
+                        'Foraging eff optimal: '+ str(self.B_for_eff_optimal)+'\n'
+                        'Foraging eff optimal random seed: '+ str(self.B_for_eff_optimal_random_seed)+'\n\n'
                         'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                         'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
                         'Total Reward (ul): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
                         'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
                         'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n\n'
-                        
                         'Early licking (EL)\n'
                         '  Frac of EL trial start_goCue: ' + str(self.EarlyLickingTrialsN_Start_GoCue) + '/' + str(len(self.Start_GoCue_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Start_GoCue,2))+')' +'\n'
                         '  Frac of EL trial start_delay: ' + str(self.EarlyLickingTrialsN_Start_Delay) + '/' + str(len(self.Start_Delay_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Start_Delay,2))+')' +'\n'
