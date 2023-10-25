@@ -194,16 +194,16 @@ class GenerateTrials():
             self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.TP_BaseRewardSum)
             # get the reward probabilities pool
             RewardProbPool=np.append(self.RewardProb,np.fliplr(self.RewardProb),axis=0)
-            # exclude the previous reward probabilities
             if self.B_RewardProHistory.size!=0:
+                # exclude the previous reward probabilities
                 RewardProbPool=RewardProbPool[np.any(RewardProbPool!=self.B_RewardProHistory[:,-1],axis=1)]
-                RewardProbPool=RewardProbPool[np.any(RewardProbPool!=self.B_RewardProHistory[:,-1][::-1],axis=1)]
+                # exclude blocks with the same identity/order (forced change of block identity (L->R; R->L))
+                if self.B_RewardProHistory[0,-1]!=self.B_RewardProHistory[1,-1]:
+                    RewardProbPool=RewardProbPool[(RewardProbPool[:,0]>RewardProbPool[:,1])!=(self.B_RewardProHistory[0,-1]>self.B_RewardProHistory[1,-1])]
+            # Remove duplicates
+            RewardProbPool = np.unique(RewardProbPool, axis=0)
             # get the reward probabilities of the current block
             self.B_CurrentRewardProb=RewardProbPool[random.choice(range(np.shape(RewardProbPool)[0]))]
-            # forced change of block identity (L->R; R->L)
-            if self.B_RewardProHistory.shape[1]>0:
-                if (self.B_CurrentRewardProb[0]>self.B_CurrentRewardProb[1])==(self.B_RewardProHistory[0,-1]>self.B_RewardProHistory[1,-1]):
-                    self.B_CurrentRewardProb=self.B_CurrentRewardProb[::-1]
             # randomly draw a block length between Min and Max
             if self.TP_Randomness=='Exponential':
                 self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta),1)+float(self.TP_BlockMin)))
