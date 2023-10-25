@@ -1054,15 +1054,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Opto_dialog.close()
         else:
             event.ignore()
+
     def _Exit(self):
         '''Close the GUI'''
         response = QMessageBox.question(self,'Save and Exit:', "Do you want to save the current result?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
         if response==QMessageBox.Yes:
             self._Save()
-            try:
-                self.Channel.StopLogging('s')
-            except:
-                pass
             self.close()
         elif response==QMessageBox.No:
             self.close()
@@ -1792,8 +1789,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 # update licks statistics
                 if self.actionLicks_sta.isChecked():
                     self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
-                #get the response of the animal using a different thread
-                self.threadpool.start(worker1)
+                
+                if GeneratedTrials.CurrentSimulation==True:
+                    GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3,self.Channel4)
+                    self.ANewTrial=1
+                else:
+                    #get the response of the animal using a different thread
+                    self.threadpool.start(worker1)
                 #generate a new trial
                 if self.NewTrialRewardOrder==1:
                     GeneratedTrials._GenerateATrial(self.Channel4)     

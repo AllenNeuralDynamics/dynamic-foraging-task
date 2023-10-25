@@ -46,6 +46,7 @@ class GenerateTrials():
         self.B_RightRewardDeliveryTimeHarp=np.array([]).astype(float)
         self.B_RewardOutcomeTime=np.array([]).astype(float)
         self.B_LaserOnTrial=[] # trials with laser on
+        self.B_SimulationSession=[]
         self.B_LaserAmplitude=[]
         self.B_LaserDuration=[]
         self.B_SelectedCondition=[]
@@ -580,8 +581,6 @@ class GenerateTrials():
                 self.B_for_eff_optimal_random_seed=np.nan
             '''Some complex calculations can be separated from _GenerateATrial using different threads'''
             
-                
-
     def foraging_eff_no_baiting(self,reward_rate, p_Ls, p_Rs, random_number_L=None, random_number_R=None):  # Calculate foraging efficiency (only for 2lp)
         '''from Han'''    
         # --- Optimal-aver (use optimal expectation as 100% efficiency) ---
@@ -827,8 +826,8 @@ class GenerateTrials():
         elif self.B_CurrentTrialN>=2:
             Other_BasicText=('Current left block: ' + str(self.BS_CurrentBlockTrialNV[0]) + '/' +  str(self.BS_CurrentBlockLenV[0])+'\n'
                         'Current right block: ' + str(self.BS_CurrentBlockTrialNV[1]) + '/' +  str(self.BS_CurrentBlockLenV[1])+'\n\n'
-                        'Foraging eff optimal: '+ str(self.B_for_eff_optimal)+'\n'
-                        'Foraging eff optimal random seed: '+ str(self.B_for_eff_optimal_random_seed)+'\n\n'
+                        'Foraging eff optimal: '+str(np.round(self.B_for_eff_optimal,2))+'\n'
+                        'Foraging eff optimal random seed: '+ str(np.round(self.B_for_eff_optimal_random_seed,2))+'\n\n'
                         'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                         'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
                         'Total Reward (ul): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
@@ -1145,55 +1144,125 @@ class GenerateTrials():
             self.CurrentAutoRewardTrial=[0,0]
         self.B_AutoWaterTrial=np.append(self.B_AutoWaterTrial, np.array(self.CurrentAutoRewardTrial).reshape(2,1),axis=1)
 
-        # send optogenetics waveform of the upcoming trial if this is an optogenetics trial
-        if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:     
-            if self.CLP_LaserStart=='Trial start':
-                Channel1.TriggerSource('/Dev2/PFI0') # corresponding to P2.0 of NIdaq USB6002
-            elif self.CLP_LaserStart=='Go cue':
-                Channel1.TriggerSource('/Dev2/PFI1') # corresponding to P1.1 of NIdaq USB6002
-            else:
-                self.win.WarningLabel.setText('Unindentified optogenetics start event!')
-                self.win.WarningLabel.setStyleSheet("color: red;")
-            # send the waveform size
-            Channel1.Location1_Size(int(self.Location1_Size))
-            Channel1.Location2_Size(int(self.Location2_Size))
-            for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
-                eval('Channel4.WaveForm' + str(1)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
-            FinishOfWaveForm=Channel4.receive()  
+        self._CheckSimulationSession()
+        if self.CurrentSimulation==False: # run simulation if it's true
+            # send optogenetics waveform of the upcoming trial if this is an optogenetics trial
+            if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:     
+                if self.CLP_LaserStart=='Trial start':
+                    Channel1.TriggerSource('/Dev2/PFI0') # corresponding to P2.0 of NIdaq USB6002
+                elif self.CLP_LaserStart=='Go cue':
+                    Channel1.TriggerSource('/Dev2/PFI1') # corresponding to P1.1 of NIdaq USB6002
+                else:
+                    self.win.WarningLabel.setText('Unindentified optogenetics start event!')
+                    self.win.WarningLabel.setStyleSheet("color: red;")
+                # send the waveform size
+                Channel1.Location1_Size(int(self.Location1_Size))
+                Channel1.Location2_Size(int(self.Location2_Size))
+                for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
+                    eval('Channel4.WaveForm' + str(1)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
+                FinishOfWaveForm=Channel4.receive()  
 
-        Channel1.LeftValue(float(self.TP_LeftValue)*1000)
-        Channel1.RightValue(float(self.TP_RightValue)*1000)
-        Channel1.RewardConsumeTime(float(self.TP_RewardConsumeTime))
-        Channel1.Left_Bait(int(self.CurrentBait[0]))
-        Channel1.Right_Bait(int(self.CurrentBait[1]))
-        Channel1.ITI(float(self.CurrentITI))
-        Channel1.DelayTime(float(self.CurrentDelay))
-        Channel1.ResponseTime(float(self.TP_ResponseTime))
-        if self.win.OptogeneticsB.currentText()=='on':
-            Channel1.start(3)
-            self.CurrentStartType=3
-            self.B_StartType.append(self.CurrentStartType)
+            Channel1.LeftValue(float(self.TP_LeftValue)*1000)
+            Channel1.RightValue(float(self.TP_RightValue)*1000)
+            Channel1.RewardConsumeTime(float(self.TP_RewardConsumeTime))
+            Channel1.Left_Bait(int(self.CurrentBait[0]))
+            Channel1.Right_Bait(int(self.CurrentBait[1]))
+            Channel1.ITI(float(self.CurrentITI))
+            Channel1.DelayTime(float(self.CurrentDelay))
+            Channel1.ResponseTime(float(self.TP_ResponseTime))
+            if self.win.OptogeneticsB.currentText()=='on':
+                Channel1.start(3)
+                self.CurrentStartType=3
+                self.B_StartType.append(self.CurrentStartType)
+            else:
+                Channel1.start(1)
+                self.CurrentStartType=1
+                self.B_StartType.append(self.CurrentStartType)
+    def _CheckSimulationSession(self):
+        '''To check if this is a simulation session'''
+        if self.win.actionWin_stay_lose_switch.isChecked()==True:
+            self.CurrentSimulation=True
+            self.B_SimulationSession.append(True)
         else:
-            Channel1.start(1)
-            self.CurrentStartType=1
-            self.B_StartType.append(self.CurrentStartType)
+            self.CurrentSimulation=False
+            self.B_SimulationSession.append(False)
+            
+    def _SimulateResponse(self):
+        '''Simulate animal's response'''
+        # random forager
+        #self.B_AnimalCurrentResponse=random.choice(range(2))
+        # win stay, lose switch forager
+        if self.win.actionWin_stay_lose_switch.isChecked()==True:
+            if self.B_CurrentTrialN>=2:
+                if np.random.random(1)<0.1: # no response
+                    self.B_AnimalCurrentResponse=2
+                else:
+                    if any(self.B_RewardedHistory[:,-1]==1):# win
+                        self.B_AnimalCurrentResponse=self.B_AnimalResponseHistory[-1]
+                    elif any(self.B_RewardedHistory[:,-1]==0) and self.B_AnimalResponseHistory[-1]!=2:# lose
+                        self.B_AnimalCurrentResponse=1-self.B_AnimalResponseHistory[-1]
+                    else: # no response
+                        self.B_AnimalCurrentResponse=random.choice(range(2))
+            else:
+                self.B_AnimalCurrentResponse=random.choice(range(2))
+        if self.B_AnimalCurrentResponse==2:
+            self.B_CurrentRewarded[0]=False
+            self.B_CurrentRewarded[1]=False
+        elif self.B_AnimalCurrentResponse==0 and self.CurrentBait[0]==True:
+            self.B_Baited[0]=False
+            self.B_CurrentRewarded[1]=False
+            self.B_CurrentRewarded[0]=True  
+        elif self.B_AnimalCurrentResponse==0 and self.CurrentBait[0]==False:
+            self.B_Baited[0]=False
+            self.B_CurrentRewarded[0]=False
+            self.B_CurrentRewarded[1]=False
+        elif self.B_AnimalCurrentResponse==1 and self.CurrentBait[1]==True:
+            self.B_Baited[1]=False
+            self.B_CurrentRewarded[0]=False
+            self.B_CurrentRewarded[1]=True
+        elif self.B_AnimalCurrentResponse==1 and self.CurrentBait[1]==False:
+            self.B_Baited[1]=False
+            self.B_CurrentRewarded[0]=False
+            self.B_CurrentRewarded[1]=False
+
+        self.B_AnimalResponseHistory=np.append(self.B_AnimalResponseHistory,self.B_AnimalCurrentResponse)
+        self.B_RewardedHistory=np.append(self.B_RewardedHistory,self.B_CurrentRewarded,axis=1)
+
+        TN=np.shape(self.B_TrialStartTimeHarp)[0]
+        if TN==0:
+            TrialStartTimeHarp=0
+        else:
+            TrialStartTimeHarp=self.B_TrialStartTimeHarp[TN-1]+self.B_ITIHistory[TN-1]+self.B_DelayHistory[TN-1]+self.B_ResponseTimeHistory[TN-1]+float(self.Obj['TP_RewardConsumeTime'][TN-1])
+        
+        DelayStartTimeHarp=TrialStartTimeHarp+self.B_ITIHistory[TN]
+        GoCueTimeHarp=DelayStartTimeHarp+self.B_DelayHistory[TN]
+        TrialEndTimeHarp=GoCueTimeHarp+self.B_ResponseTimeHistory[TN]+float(self.Obj['TP_RewardConsumeTime'][TN])
+        B_DOPort2Output=GoCueTimeHarp
+        TrialStartTime=TrialStartTimeHarp
+        DelayStartTime=DelayStartTimeHarp
+        TrialEndTime=TrialEndTimeHarp
+        GoCueTime=GoCueTimeHarp
+        RewardOutcomeTime=TrialEndTimeHarp
+        # get the event harp time
+        self.B_TrialStartTimeHarp=np.append(self.B_TrialStartTimeHarp,TrialStartTimeHarp)
+        self.B_DelayStartTimeHarp=np.append(self.B_DelayStartTimeHarp,DelayStartTimeHarp)
+        self.B_TrialEndTimeHarp=np.append(self.B_TrialEndTimeHarp,TrialEndTimeHarp)
+        self.B_GoCueTimeHarp=np.append(self.B_GoCueTimeHarp,GoCueTimeHarp)
+        self.B_DOPort2Output=np.append(self.B_DOPort2Output,B_DOPort2Output)
+        # get the event time
+        self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime)
+        self.B_DelayStartTime=np.append(self.B_DelayStartTime,DelayStartTime)
+        self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime)
+        self.B_GoCueTime=np.append(self.B_GoCueTime,GoCueTime)
+        self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,RewardOutcomeTime)
+        self.GetResponseFinish=1
 
     def _GetAnimalResponse(self,Channel1,Channel3,Channel4):
-        '''
-        # random forager
-        self.B_AnimalCurrentResponse=random.choice(range(2))
-        # win stay, lose switch forager
-        if self.B_CurrentTrialN>=2:
-            if any(self.B_RewardedHistory[:,-1]==1):# win
-                self.B_AnimalCurrentResponse=self.B_AnimalResponseHistory[-1]
-            elif any(self.B_RewardedHistory[:,-1]==0) and self.B_AnimalResponseHistory[-1]!=2:# lose
-                self.B_AnimalCurrentResponse=1-self.B_AnimalResponseHistory[-1]
-            else: # no response
-                self.B_AnimalCurrentResponse=random.choice(range(2))
-
-        if np.random.random(1)<0.1: # no response
-            self.B_AnimalCurrentResponse=2
-        '''
+        '''Get the animal's response'''
+        self._CheckSimulationSession()
+        if self.CurrentSimulation==True:
+            self._SimulateResponse()
+            return
         # set the valve time of auto water
         if self.CurrentAutoRewardTrial[0]==1:
             self._set_valve_time_left(Channel3,float(self.win.LeftValue.text()),float(self.win.Multiplier.text()))

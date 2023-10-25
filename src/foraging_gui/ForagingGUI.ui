@@ -3653,10 +3653,20 @@
     <property name="title">
      <string>Tools</string>
     </property>
+    <widget class="QMenu" name="menuSimulation">
+     <property name="tearOffEnabled">
+      <bool>false</bool>
+     </property>
+     <property name="title">
+      <string>Simulation</string>
+     </property>
+     <addaction name="actionWin_stay_lose_switch"/>
+    </widget>
     <addaction name="action_Calibration"/>
     <addaction name="actionLaser_Calibration"/>
     <addaction name="action_Snipping"/>
     <addaction name="separator"/>
+    <addaction name="menuSimulation"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="sizePolicy">
@@ -4019,6 +4029,14 @@
   <action name="SaveContinue">
    <property name="text">
     <string>Save (without restarting a session)</string>
+   </property>
+  </action>
+  <action name="actionWin_stay_lose_switch">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Win-stay lose-switch</string>
    </property>
   </action>
  </widget>
