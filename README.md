@@ -82,6 +82,7 @@ The blow is an example session.
 - **Water calibration**: Open the water calibration dialogue
 - **Laser calibration**: Open the laser calibration dialogue
 - **Snipping**: Open the snipping tools
+- **Simulation**: When one of the simulation methods is selected, it will run the simulation when the **Start** button is pressed.
 #### Visualization
 - **Lick distribution**: Open the lick analysis dialogue
 #### Control
