@@ -1180,7 +1180,7 @@ class GenerateTrials():
                 self.B_StartType.append(self.CurrentStartType)
     def _CheckSimulationSession(self):
         '''To check if this is a simulation session'''
-        if self.win.actionWin_stay_lose_switch.isChecked()==True:
+        if self.win.actionWin_stay_lose_switch.isChecked()==True or  self.win.actionRandom_choice.isChecked()==True:
             self.CurrentSimulation=True
             self.B_SimulationSession.append(True)
         else:
@@ -1189,8 +1189,7 @@ class GenerateTrials():
             
     def _SimulateResponse(self):
         '''Simulate animal's response'''
-        # random forager
-        #self.B_AnimalCurrentResponse=random.choice(range(2))
+
         # win stay, lose switch forager
         if self.win.actionWin_stay_lose_switch.isChecked()==True:
             if self.B_CurrentTrialN>=2:
@@ -1205,6 +1204,13 @@ class GenerateTrials():
                         self.B_AnimalCurrentResponse=random.choice(range(2))
             else:
                 self.B_AnimalCurrentResponse=random.choice(range(2))
+        # random forager
+        elif self.win.actionRandom_choice.isChecked()==True:
+            if np.random.random(1)<0.1: # no response
+                self.B_AnimalCurrentResponse=2
+            else:
+                self.B_AnimalCurrentResponse=random.choice(range(2))
+
         if self.B_AnimalCurrentResponse==2:
             self.B_CurrentRewarded[0]=False
             self.B_CurrentRewarded[1]=False

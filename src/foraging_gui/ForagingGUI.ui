@@ -3661,6 +3661,7 @@
       <string>Simulation</string>
      </property>
      <addaction name="actionWin_stay_lose_switch"/>
+     <addaction name="actionRandom_choice"/>
     </widget>
     <addaction name="action_Calibration"/>
     <addaction name="actionLaser_Calibration"/>
@@ -4046,6 +4047,14 @@
    </property>
    <property name="text">
     <string>Drawing after stopping</string>
+   </property>
+  </action>
+  <action name="actionRandom_choice">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Random choice</string>
    </property>
   </action>
  </widget>
