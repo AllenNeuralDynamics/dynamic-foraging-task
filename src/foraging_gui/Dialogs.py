@@ -7,6 +7,7 @@ from Camera import Ui_Camera
 from MotorStage import Ui_MotorStage
 from Manipulator import Ui_Manipulator
 from LicksDistribution import Ui_LickDistribution
+from TimeDistribution import Ui_TimeDistribution
 from CalibrationLaser import Ui_CalibrationLaser
 from MyFunctions import Worker
 import numpy as np
@@ -17,6 +18,13 @@ from Visualization import PlotWaterCalibration
 
 class LickStaDialog(QDialog,Ui_LickDistribution):
     '''Lick statistics dialog'''
+    def __init__(self, MainWindow, parent=None):
+        super().__init__(parent)
+        self.setupUi(self)
+        self.MainWindow=MainWindow
+
+class TimeDistributionDialog(QDialog,Ui_TimeDistribution):
+    '''Simulated distribution of ITI/Delay/Block length'''
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
         self.setupUi(self)

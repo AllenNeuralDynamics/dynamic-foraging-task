@@ -582,7 +582,7 @@ class GenerateTrials():
             '''Some complex calculations can be separated from _GenerateATrial using different threads'''
             
     def foraging_eff_no_baiting(self,reward_rate, p_Ls, p_Rs, random_number_L=None, random_number_R=None):  # Calculate foraging efficiency (only for 2lp)
-        '''from Han'''    
+        '''Calculating the foraging efficiency of no baiting tasks (Code is from Han)'''    
         # --- Optimal-aver (use optimal expectation as 100% efficiency) ---
         for_eff_optimal = reward_rate / np.nanmean(np.max([p_Ls, p_Rs], axis=0))
         
@@ -598,7 +598,7 @@ class GenerateTrials():
         return for_eff_optimal, for_eff_optimal_random_seed
 
     def foraging_eff(self,reward_rate, p_Ls, p_Rs, random_number_L=None, random_number_R=None):  # Calculate foraging efficiency (only for 2lp)
-        '''from Han'''        
+        '''Calculating the foraging efficiency of baiting tasks (Code is from Han)'''        
         # --- Optimal-aver (use optimal expectation as 100% efficiency) ---
         p_stars = np.zeros_like(p_Ls)
         for i, (p_L, p_R) in enumerate(zip(p_Ls, p_Rs)):   # Sum over all ps 

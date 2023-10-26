@@ -3693,6 +3693,7 @@
      <string>Visualization</string>
     </property>
     <addaction name="actionLicks_sta"/>
+    <addaction name="actionTime_distribution"/>
     <addaction name="action_HideLines"/>
    </widget>
    <widget class="QMenu" name="menuOptogenetics">
@@ -4055,6 +4056,14 @@
    </property>
    <property name="text">
     <string>Random choice</string>
+   </property>
+  </action>
+  <action name="actionTime_distribution">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Time distribution</string>
    </property>
   </action>
  </widget>

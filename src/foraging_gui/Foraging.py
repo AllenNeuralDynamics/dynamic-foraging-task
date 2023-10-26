@@ -9,8 +9,8 @@ from scipy.io import savemat, loadmat
 from ForagingGUI import Ui_ForagingGUI
 import rigcontrol
 from pyOSC3.OSC3 import OSCStreamingClient
-from Visualization import PlotV,PlotLickDistribution
-from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog,LickStaDialog
+from Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
+from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog,LickStaDialog,TimeDistributionDialog
 from MyFunctions import GenerateTrials, Worker
 import warnings
 import json 
@@ -91,6 +91,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.NewTrialRewardOrder=0
         self.LickSta=0
         self.LickSta_ToInitializeVisual=1
+        self.TimeDistribution=0
+        self.TimeDistribution_ToInitializeVisual=1
         self.finish_Timer=1 # for photometry baseline recordings
         self.PhotometryRun=0 # 1. Photometry has been run; 0. Photometry has not been carried out.
         self._Optogenetics() # open the optogenetics panel
@@ -117,6 +119,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.action_Manipulator.triggered.connect(self._Manipulator)
         self.action_MotorStage.triggered.connect(self._MotorStage)
         self.actionLicks_sta.triggered.connect(self._LickSta)
+        self.actionTime_distribution.triggered.connect(self._TimeDistribution)
         self.action_Calibration.triggered.connect(self._WaterCalibration)
         self.actionLaser_Calibration.triggered.connect(self._LaserCalibration)
         self.action_Snipping.triggered.connect(self._Snipping)
@@ -657,6 +660,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.PointsInARow.setEnabled(True)
     def keyPressEvent(self, event=None):
         '''Enter press to allow change of parameters'''
+        try:
+            if self.actionTime_distribution.isChecked()==True:
+                self.PlotTime._Update(self)
+        except:
+            pass
         # Get the parameters before change
         if hasattr(self, 'GeneratedTrials') and self.ToInitializeVisual==0: # use the current GUI paramters when no session starts running
             Parameters=self.GeneratedTrials
@@ -1116,6 +1124,38 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.MotorStage_dialog.show()
         else:
             self.MotorStage_dialog.hide()
+
+    def _TimeDistribution(self):
+        '''Plot simulated ITI/delay/block distribution'''
+        if self.TimeDistribution==0:
+            self.TimeDistribution_dialog = TimeDistributionDialog(MainWindow=self)
+            self.TimeDistribution=1
+            self.TimeDistribution_dialog.setWindowTitle("Simulated time distribution")
+        if self.actionTime_distribution.isChecked()==True:
+            self.TimeDistribution_dialog.show()
+        else:
+            self.TimeDistribution_dialog.hide()
+        if self.TimeDistribution_ToInitializeVisual==1: # only run once
+            PlotTime=PlotTimeDistribution()
+            self.PlotTime=PlotTime
+            layout=self.TimeDistribution_dialog.VisualizeTimeDist.layout()
+            if layout is not None:
+                for i in reversed(range(layout.count())):
+                    layout.itemAt(i).widget().setParent(None)
+                layout.invalidate()
+            if layout is None:
+                layout=QVBoxLayout(self.TimeDistribution_dialog.VisualizeTimeDist)
+            toolbar = NavigationToolbar(PlotTime, self)
+            toolbar.setMaximumHeight(20)
+            toolbar.setMaximumWidth(300)
+            layout.addWidget(toolbar)
+            layout.addWidget(PlotTime)
+            self.TimeDistribution_ToInitializeVisual=0
+        try:
+            self.PlotTime._Update(self)
+        except:
+            pass
+
     def _LickSta(self):
         '''Licks statistics'''
         if self.LickSta==0:

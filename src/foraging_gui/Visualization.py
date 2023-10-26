@@ -6,6 +6,7 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from scipy import stats
 
+
 class PlotV(FigureCanvas):
     def __init__(self,win,GeneratedTrials=None,parent=None,dpi=100,width=5, height=4):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
@@ -441,3 +442,62 @@ class PlotLickDistribution(FigureCanvas):
         self.ax3.set_xlabel('time (s)')
         self.ax1.set_ylabel('counts')
         self.draw() 
+
+class PlotTimeDistribution(FigureCanvas):
+    '''Plot the simulated distribution of ITI/Delay/Block length'''
+    def __init__(self,GeneratedTrials=None,dpi=100,width=5, height=4):
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        gs = GridSpec(10, 31, wspace = 3, hspace = 0.1, bottom = 0.1, top = 0.95, left = 0.04, right = 0.98)
+        self.ax1 = self.fig.add_subplot(gs[1:9, 2:11])
+        self.ax2 = self.fig.add_subplot(gs[1:9, 12:21])
+        self.ax3 = self.fig.add_subplot(gs[1:9, 22:31])
+        FigureCanvas.__init__(self, self.fig)
+    def _Update(self,win):
+        # randomly draw a block length between Min and Max
+        SampleMethods=win.Randomness.currentText()
+        # block length
+        Min=float(win.BlockMin.text())
+        Max=float(win.BlockMax.text())
+        Beta=float(win.BlockBeta.text())
+        DataType='int'
+        SampledBlockLen=self._Sample(Min=Min,Max=Max,SampleMethods=SampleMethods,Beta=Beta,DataType=DataType)
+        # ITI 
+        Min=float(win.ITIMin.text())
+        Max=float(win.ITIMax.text())
+        Beta=float(win.ITIBeta.text())
+        DataType='float'
+        SampledITI=self._Sample(Min=Min,Max=Max,SampleMethods=SampleMethods,Beta=Beta,DataType=DataType)
+        # Delay
+        Min=float(win.DelayMin.text())
+        Max=float(win.DelayMax.text())
+        Beta=float(win.DelayBeta.text())
+        DataType='float'
+        SampledDelay=self._Sample(Min=Min,Max=Max,SampleMethods=SampleMethods,Beta=Beta,DataType=DataType)
+        self.ax1.cla()
+        self.ax2.cla()
+        self.ax3.cla()
+        Re1=self.ax1.hist(SampledBlockLen,bins=100)
+        Re2=self.ax2.hist(SampledITI,bins=100)
+        Re3=self.ax3.hist(SampledDelay,bins=100)
+        self.ax1.set_xlabel('Block length (trial)')
+        self.ax1.set_ylabel('counts')
+        self.ax1.set_title('block length \n(average='+str(np.round(np.nanmean(SampledBlockLen),2))+')',fontsize=10)
+        self.ax2.set_title('ITI time \n(average='+str(np.round(np.nanmean(SampledITI),2))+')',fontsize=10)
+        self.ax3.set_title('Delay time \n(average='+str(np.round(np.nanmean(SampledDelay),2))+')',fontsize=10)
+        self.ax1.plot([np.nanmean(SampledBlockLen),np.nanmean(SampledBlockLen)],[0,np.max(Re1[0])],label='Average')
+        self.ax2.plot([np.nanmean(SampledITI),np.nanmean(SampledITI)],[0,np.max(Re2[0])])
+        self.ax3.plot([np.nanmean(SampledDelay),np.nanmean(SampledDelay)],[0,np.max(Re3[0])])
+        self.ax1.legend(loc='upper right', fontsize=8)
+        self.ax2.set_xlabel('time (s)')
+        self.ax3.set_xlabel('time (s)')
+        self.draw() 
+
+    def _Sample(self,Min,Max,SampleMethods,SampleTime=100000,Beta=None,DataType='float'):
+        if SampleMethods=='Exponential':
+            Sampled = np.random.exponential(Beta,SampleTime)+Min
+        elif SampleMethods=='Even':
+            Sampled = np.random.uniform(Min,Max,SampleTime)
+        Sampled[Sampled>Max]=Max
+        if DataType=='int':
+            Sampled=Sampled.astype(int)
+        return Sampled
