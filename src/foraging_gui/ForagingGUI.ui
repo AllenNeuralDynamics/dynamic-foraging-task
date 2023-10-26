@@ -3667,6 +3667,7 @@
     <addaction name="action_Snipping"/>
     <addaction name="separator"/>
     <addaction name="menuSimulation"/>
+    <addaction name="actionDrawing_after_stopping"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="sizePolicy">
@@ -4037,6 +4038,14 @@
    </property>
    <property name="text">
     <string>Win-stay lose-switch</string>
+   </property>
+  </action>
+  <action name="actionDrawing_after_stopping">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Drawing after stopping</string>
    </property>
   </action>
  </widget>

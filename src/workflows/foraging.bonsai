@@ -1254,7 +1254,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Disabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM21</harp:PortName>
+                      <harp:PortName>COM22</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject">
@@ -2000,7 +2000,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT4.545S</gl:DueTime>
+                      <gl:DueTime>PT8S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -2040,7 +2040,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT1.114S</gl:DueTime>
+                      <gl:DueTime>PT1.5S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">

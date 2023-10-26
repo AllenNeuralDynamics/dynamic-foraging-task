@@ -1762,6 +1762,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.threadpool_workertimer.start(workertimer)
         
         self._StartTrialLoop(GeneratedTrials,worker1)
+
+        if self.actionDrawing_after_stopping.isChecked()==True:
+            try:
+                self.PlotM._Update(GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
+            except:
+                pass
         '''
         self.test=1
         if self.test==1:
@@ -1785,7 +1791,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 #initiate the generated trial
                 GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
                 #receive licks and update figures
-                self.PlotM._Update(GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
+                if self.actionDrawing_after_stopping.isChecked()==False:
+                    self.PlotM._Update(GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
                 # update licks statistics
                 if self.actionLicks_sta.isChecked():
                     self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
