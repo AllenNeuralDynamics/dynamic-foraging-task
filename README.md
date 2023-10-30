@@ -102,9 +102,13 @@ The blow is an example session.
   - **Openg logging folder**: Open the current logging folder
 - **Open behavior folder**: Open the folder to save the current behavior Json file
 #### Settings
-- **Open setting folder**: Open the default settings folder. It should be located in Documents\ForagingSettings and named ForagingSettings.json.
-  - **default_saveFolder**: The default save location. The folder structure is default_saveFolder\Rig\Animal\Animal_year-month-day_hour-minute-second\. There are further five folders EphysFolder, HarpFolder, PhotometryFolder, TrainingFolder and VideoFolder for saving different data sources. Default: Documents
-  - **current_box**: To define the rig name. 
+- **Open setting folder**: Open the default settings folder. It is in Documents\ForagingSettings by default. There are different Json files to save different default parameters.
+  - **ForagingSettings.json**: General settings. 
+    - **default_saveFolder**: The default save location. The folder structure is default_saveFolder\Rig\Animal\Animal_year-month-day_hour-minute-second\. There are further five folders EphysFolder, HarpFolder, PhotometryFolder, TrainingFolder and VideoFolder for saving different data sources. Default: Documents
+    - **current_box**: To define the rig name.
+  - **WaterCalibration.json**: The water calibration results.
+  - **LaserCalibration.json**: The laser calibration results.
+  - **TrainingStagePar.json**: The training stage parameters in a task-dependent manner.
 #### Help
 
 ### Toolbars (copy of some useful functions from the Menu)
