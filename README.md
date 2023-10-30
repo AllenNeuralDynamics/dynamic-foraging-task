@@ -83,8 +83,11 @@ The blow is an example session.
 - **Laser calibration**: Open the laser calibration dialogue
 - **Snipping**: Open the snipping tools
 - **Simulation**: When one of the simulation methods is selected, it will run the simulation when the **Start** button is pressed.
+  - **Win-stay lose-switch**: Foragers employ a win-stay-lose-switch strategy.
+  - **Random**: Foragers randomly select a choice. 
 #### Visualization
-- **Lick distribution**: Open the lick analysis dialogue
+- **Lick distribution**: Open the lick analysis dialogue to display lick related statistics.
+- **Time distribution**: Display the simulated distribution of block length/ITI time/Delay time.
 #### Control
 - **Optogenetics**: Open the optogenetics dialogue
 - **Camera**: Open the camera dialogue
@@ -99,7 +102,9 @@ The blow is an example session.
   - **Openg logging folder**: Open the current logging folder
 - **Open behavior folder**: Open the folder to save the current behavior Json file
 #### Settings
-- **Open setting folder**: Open the default settings folder
+- **Open setting folder**: Open the default settings folder. It should be located in Documents\ForagingSettings and named ForagingSettings.json.
+  - **default_saveFolder**: The default save location. The folder structure is default_saveFolder\Rig\Animal\Animal_year-month-day_hour-minute-second\. There are further five folders EphysFolder, HarpFolder, PhotometryFolder, TrainingFolder and VideoFolder for saving different data sources. Default: Documents
+  - **current_box**: To define the rig name. 
 #### Help
 
 ### Toolbars (copy of some useful functions from the Menu)
@@ -165,7 +170,7 @@ The blow is an example session.
 - **Weight before (g)**: Enter the mouse weight before starting training.
 - **Weight after (g)**: Enter the mouse weight after training is completed.
 - **Total water (ml)**: Total volume of water you plan to give the mouse (manually given reward and automatic reward are also included).
-- **Suggested (ml)**: Suggested water to give the mouse after training (Based on **total water** and estimated water consumption in the session).
+- **Suggested (ml)**: Suggested water to give the mouse after training (Based on **total water** and estimated water consumption from all sources in the session).
 - **Extra water (ml)**: Enter the water given to the mouse after training.
 #### Information
 - **Current left block**: current trial number of the current left block/length of current left block.
