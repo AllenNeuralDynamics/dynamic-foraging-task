@@ -99,7 +99,7 @@ The blow is an example session.
 - **Restart logging**:
   - **Temporary logging**: Logging to a temporary folder (determined by the **temporary_video_folder** in the **ForagingSettings.json** )
   - **Formal logging**: Logging to a standard folder structure (determined by the **log_folder** in the **ForagingSettings.json** )
-  - **Openg logging folder**: Open the current logging folder
+- **Openg logging folder**: Open the current logging folder
 - **Open behavior folder**: Open the folder to save the current behavior Json file
 #### Settings
 - **Open setting folder**: Open the default settings folder. It is in Documents\ForagingSettings by default. There are different Json files to save different default parameters.
