@@ -44,6 +44,8 @@ class GenerateTrials():
         self.B_RightRewardDeliveryTime=np.array([]).astype(float)
         self.B_LeftRewardDeliveryTimeHarp=np.array([]).astype(float)
         self.B_RightRewardDeliveryTimeHarp=np.array([]).astype(float)
+        self.B_PhotometryRisingTimeHarp=np.array([]).astype(float)
+        self.B_PhotometryFallingTimeHarp=np.array([]).astype(float)
         self.B_RewardOutcomeTime=np.array([]).astype(float)
         self.B_LaserOnTrial=[] # trials with laser on
         self.B_SimulationSession=[]
@@ -1389,6 +1391,10 @@ class GenerateTrials():
                 self.B_LeftRewardDeliveryTimeHarp=np.append(self.B_LeftRewardDeliveryTimeHarp,Rec[1][1][0])
             elif Rec[0].address=='/RightRewardDeliveryTimeHarp':
                 self.B_RightRewardDeliveryTimeHarp=np.append(self.B_RightRewardDeliveryTimeHarp,Rec[1][1][0])
+            elif Rec[0].address=='/PhotometryRising':
+                self.B_PhotometryRisingTimeHarp=np.append(self.B_PhotometryRisingTimeHarp,Rec[1][1][0])
+            elif Rec[0].address=='/PhotometryFalling':
+                self.B_PhotometryFallingTimeHarp=np.append(self.B_PhotometryFallingTimeHarp,Rec[1][1][0])
 
     def _DeletePreviousLicks(self,Channel2):
         '''Delete licks from the previous session'''

@@ -13,7 +13,7 @@
     <x>0</x>
     <y>0</y>
     <width>1629</width>
-    <height>1031</height>
+    <height>1032</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -3606,6 +3606,78 @@
     </property>
     <property name="text">
      <string>10</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="StartExcitation">
+    <property name="geometry">
+     <rect>
+      <x>670</x>
+      <y>871</y>
+      <width>91</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>Start excitation</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="StartBleaching">
+    <property name="geometry">
+     <rect>
+      <x>780</x>
+      <y>870</y>
+      <width>91</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>Start bleaching</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="TeensyWarning">
+    <property name="geometry">
+     <rect>
+      <x>1240</x>
+      <y>860</y>
+      <width>361</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="scaledContents">
+     <bool>false</bool>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
     </property>
    </widget>
   </widget>

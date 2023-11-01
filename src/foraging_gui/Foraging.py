@@ -13,7 +13,9 @@ from Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
 from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog,LickStaDialog,TimeDistributionDialog
 from MyFunctions import GenerateTrials, Worker
 import warnings
-import json 
+import json, uuid
+import serial 
+
 #warnings.filterwarnings("ignore")
 
 class NumpyEncoder(json.JSONEncoder):
@@ -141,6 +143,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.GiveRight.clicked.connect(self._GiveRight)
         self.NewSession.clicked.connect(self._NewSession)
         self.AutoReward.clicked.connect(self._AutoReward)
+        self.StartExcitation.clicked.connect(self._StartExcitation)
+        self.StartBleaching.clicked.connect(self._StartBleaching)
         self.NextBlock.clicked.connect(self._NextBlock)
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
@@ -271,6 +275,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     self.temporary_video_folder=Settings['temporary_video_folder']
                 else:
                     self.temporary_video_folder=os.path.join(os.path.expanduser("~"), "Documents",'temporaryvideo')
+                if 'Teensy_COM' in Settings:
+                    self.Teensy_COM=Settings['Teensy_COM']
+                else:
+                    self.Teensy_COM=''
             else:
                 self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
                 self.current_box=''
@@ -279,6 +287,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         except:
             self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
             self.current_box=''
+            self.Teensy_COM=''
         if len(sys.argv)==1:
             towertag=''
         else:
@@ -1601,6 +1610,58 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _New(self):
         self._Clear()
 
+    def _StartExcitation(self):
+        if self.StartExcitation.isChecked():
+            self.StartExcitation.setStyleSheet("background-color : green;")
+            try:
+                ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
+                # Trigger Teensy with the above specified exp mode
+                ser.write(b'c')
+                ser.close()
+                self.TeensyWarning.setText('Start excitation!')
+                self.TeensyWarning.setStyleSheet("color: red;")
+            except:
+                self.TeensyWarning.setText('Error: start excitation!')
+                self.TeensyWarning.setStyleSheet("color: red;")
+        else:
+            self.StartExcitation.setStyleSheet("background-color : none")
+            try:
+                ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
+                # Trigger Teensy with the above specified exp mode
+                ser.write(b's')
+                ser.close()
+                self.TeensyWarning.setText('Stop excitation!')
+                self.TeensyWarning.setStyleSheet("color: red;")
+            except:
+                self.TeensyWarning.setText('Error: stop excitation!')
+                self.TeensyWarning.setStyleSheet("color: red;")
+    
+    def _StartBleaching(self):
+        if self.StartBleaching.isChecked():
+            self.StartBleaching.setStyleSheet("background-color : green;")
+            try:
+                ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
+                # Trigger Teensy with the above specified exp mode
+                ser.write(b'D')
+                ser.close()
+                self.TeensyWarning.setText('Start bleaching!')
+                self.TeensyWarning.setStyleSheet("color: red;")
+            except:
+                self.TeensyWarning.setText('Error: start bleaching!')
+                self.TeensyWarning.setStyleSheet("color: red;")
+        else:
+            self.StartBleaching.setStyleSheet("background-color : none")
+            try:
+                ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
+                # Trigger Teensy with the above specified exp mode
+                ser.write(b'S')
+                ser.close()
+                self.TeensyWarning.setText('Stop bleaching!')
+                self.TeensyWarning.setStyleSheet("color: red;")
+            except:
+                self.TeensyWarning.setText('Error: stop bleaching!')
+                self.TeensyWarning.setStyleSheet("color: red;")
+
     def _AutoReward(self):
         if self.AutoReward.isChecked():
             self.AutoReward.setStyleSheet("background-color : green;")
@@ -1726,6 +1787,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     break
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
+            # generate a new session id
+            self.Other_session_id=uuid.uuid4()
+            #self.Visualization.setTitle(str(date.today())+'  Session ID: '+str(self.Other_session_id))
             self.WarningLabel.setText('')
             self.WarningLabel.setStyleSheet("color: gray;")
             # start a new logging
@@ -1793,6 +1857,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
             workerStartTrialLoop1=self.workerStartTrialLoop1
+        
         # collecting the base signal for photometry. Only run once
         if self.PhtotometryB.currentText()=='on' and self.PhotometryRun==0:
             self.finish_Timer=0
