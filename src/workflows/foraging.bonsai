@@ -980,7 +980,7 @@
                 <harp:VisualIndicators>On</harp:VisualIndicators>
                 <harp:Heartbeat>Disabled</harp:Heartbeat>
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                <harp:PortName>COM18</harp:PortName>
+                <harp:PortName>COM25</harp:PortName>
               </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
@@ -1256,7 +1256,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Disabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM24</harp:PortName>
+                      <harp:PortName>COM23</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject">
@@ -6417,7 +6417,7 @@
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="p2:TriggeredAnalogOutput">
                       <p2:SignalSource />
-                      <p2:TriggerSource>/Dev2/PFI0</p2:TriggerSource>
+                      <p2:TriggerSource>/Dev1/PFI0</p2:TriggerSource>
                       <p2:SampleRate>5000</p2:SampleRate>
                       <p2:ActiveEdge>Rising</p2:ActiveEdge>
                       <p2:SampleMode>FiniteSamples</p2:SampleMode>
@@ -6427,14 +6427,14 @@
                           <p2:ChannelName />
                           <p2:MinimumValue>-10</p2:MinimumValue>
                           <p2:MaximumValue>10</p2:MaximumValue>
-                          <p2:PhysicalChannel>Dev2/ao0</p2:PhysicalChannel>
+                          <p2:PhysicalChannel>Dev1/ao0</p2:PhysicalChannel>
                           <p2:VoltageUnits>Volts</p2:VoltageUnits>
                         </p2:AnalogOutputChannelConfiguration>
                         <p2:AnalogOutputChannelConfiguration>
                           <p2:ChannelName />
                           <p2:MinimumValue>-10</p2:MinimumValue>
                           <p2:MaximumValue>10</p2:MaximumValue>
-                          <p2:PhysicalChannel>Dev2/ao1</p2:PhysicalChannel>
+                          <p2:PhysicalChannel>Dev1/ao1</p2:PhysicalChannel>
                           <p2:VoltageUnits>Volts</p2:VoltageUnits>
                         </p2:AnalogOutputChannelConfiguration>
                       </p2:Channels>

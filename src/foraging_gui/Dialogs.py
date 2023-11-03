@@ -1283,7 +1283,7 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
     def _InitiateATrial(self):
         '''Initiate calibration in bonsai'''
         # send the trigger source. It's '/Dev1/PFI0' ( P2.0 of NIdaq USB6002) by default 
-        self.MainWindow.Channel.TriggerSource('/Dev2/PFI0')
+        self.MainWindow.Channel.TriggerSource('/Dev1/PFI0')
         # start generating waveform in bonsai
         self.MainWindow.Channel.OptogeneticsCalibration(int(1))
     def _CopyFromOpto(self):
