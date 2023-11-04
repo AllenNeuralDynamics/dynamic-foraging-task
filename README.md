@@ -1,6 +1,6 @@
 # Dynamic Foraging Task
 
-A [Bonsai](https://bonsai-rx.org/) workflow for a lick-based foraging experiments, with a [PyQt](https://wiki.python.org/moin/PyQt) frontend for visualizing performance and modifying task parameters.
+A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments, with a [PyQt](https://wiki.python.org/moin/PyQt) frontend for visualizing performance and modifying task parameters.
 
 ## Table of contents
 - [Prerequisites](#prerequisites)
@@ -32,13 +32,13 @@ A [Bonsai](https://bonsai-rx.org/) workflow for a lick-based foraging experiment
 > [!IMPORTANT]
 > The exact versions of the NI-DAQ and Spinnaker libraries are needed for Bonsai package compatibility
 - [FTDI driver](https://ftdichip.com/drivers/) (for Harp devices)
-- [NI-DAQmax **version 19.0**](https://www.ni.com/en/supsprout/downloads/drivers/download.ni-daq-mx.html#484356) (for optogenetic stimulation via NI-DAQ cards)
+- [NI-DAQmax **version 19.0**](https://www.ni.com/en/support/downloads/drivers/download.ni-daq-mx.html#484356) (for optogenetic stimulation via NI-DAQ cards)
 - [Spinnaker SDK **version 1.29.0.5**](https://www.flir.com/products/spinnaker-sdk/) (driver for FLIR cameras)
 - Python packages:
-  - `numpy``
-  - `scipy``
-  - `matplotlib``
-  - `PyQt5``
+  - `numpy`
+  - `scipy`
+  - `matplotlib`
+  - `PyQt5`
   - `pandas`
   - [`pyosc3`](https://github.com/glopesdev/pyosc3.git@master)
 - [Qt designer](https://build-system.fman.io/qt-designer-download) (For GUI development only)
@@ -51,12 +51,12 @@ A [Bonsai](https://bonsai-rx.org/) workflow for a lick-based foraging experiment
 ## Deployment
 
 #### For initial installation:
-- Run **setup.cmd** in the **dynamic-foraging-task\bonsai** folder to install Bonsai and dependent packages.
+- Run `setup.cmd` in the `dynamic-foraging-task\bonsai` folder to install Bonsai and dependent packages.
 - Update the firmware of the Harp Behavior Board by following the instructions [here](https://harp-tech.org/docs/articles/firmware.html).
 - From the top-level directory of this repository, run `pip install .` in a fresh `conda` environment 
 
 #### To launch the software:
-- Run `foraging.bonsai` in **dynamic-foraging-task\src\workflows** to start Bonsai.
+- Run `foraging.bonsai` in `dynamic-foraging-task\src\workflows` to start Bonsai.
 - Activate the `conda` environment created above
 - Run `python dynamic-foraging-task\src\foraging_gui\Foraging.py` to start the GUI.
 
@@ -72,7 +72,7 @@ A [Bonsai](https://bonsai-rx.org/) workflow for a lick-based foraging experiment
 #### File
 - **New**: Clear the training parameters 
 - **Open**: Open an existing session and visualization
-- **Save**: Save the current session into JSON/MAT format
+- **Save**: Save the current session as a JSON file (or optionally a .mat file)
 - **Exit**: Close the GUI
 - **Clear**: Clear the training parameters
 - **Force Save**: Save the current session whether completed or not
