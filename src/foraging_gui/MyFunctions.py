@@ -928,7 +928,8 @@ class GenerateTrials():
         # CLP, current laser parameter
         self.CLP_Color=eval('self.TP_Laser_'+N)
         self.CLP_Location=eval('self.TP_Location_'+N)
-        self.CLP_LaserPower=eval('self.TP_LaserPower_'+N)
+        self.CLP_LaserPowerLeft=eval('self.TP_LaserPowerLeft_'+N)
+        self.CLP_LaserPowerRight=eval('self.TP_LaserPowerRight_'+N)
         self.CLP_Duration=float(eval('self.TP_Duration_'+N))
         self.CLP_Protocol=eval('self.TP_Protocol_'+N)
         if not self.CLP_Protocol=='Constant':
@@ -1062,19 +1063,29 @@ class GenerateTrials():
         '''
     def _GetLaserAmplitude(self):
         '''the voltage amplitude dependens on Protocol, Laser Power, Laser color, and the stimulation locations<>'''
-        if self.CLP_LaserPower=='':
-            self.CurrentLaserAmplitude=[0,0]
-            self.win.WarningLabel.setText('No laser amplitude defined!')
-            self.win.WarningLabel.setStyleSheet("color: red;")
-            return
-        LaserPowerAmp=eval(self.CLP_LaserPower)
+        self.CurrentLaserAmplitude=[0,0]
         if self.CLP_Location=='Left':
-            self.CLP_LaserPower
-            self.CurrentLaserAmplitude=[LaserPowerAmp[0],0]
+            if self.CLP_LaserPowerLeft=='':
+                self.win.WarningLabel.setText('No amplitude for left laser defined!')
+                self.win.WarningLabel.setStyleSheet("color: red;")
+            else:
+                LaserPowerAmpLeft=eval(self.CLP_LaserPowerLeft)
+                self.CurrentLaserAmplitude=[LaserPowerAmpLeft[0],0]
         elif self.CLP_Location=='Right':
-            self.CurrentLaserAmplitude=[0,LaserPowerAmp[0]]
+            if self.CLP_LaserPowerRight=='':
+                self.win.WarningLabel.setText('No amplitude for right laser defined!')
+                self.win.WarningLabel.setStyleSheet("color: red;")
+            else:
+                LaserPowerAmpRight=eval(self.CLP_LaserPowerRight)
+                self.CurrentLaserAmplitude=[0,LaserPowerAmpRight[0]]
         elif self.CLP_Location=='Both':
-            self.CurrentLaserAmplitude=[LaserPowerAmp[0],LaserPowerAmp[0]]
+            if  self.CLP_LaserPowerLeft=='' or self.CLP_Location=='Right':
+                self.win.WarningLabel.setText('No amplitude for left or right laser defined!')
+                self.win.WarningLabel.setStyleSheet("color: red;")
+            else:
+                LaserPowerAmpLeft=eval(self.CLP_LaserPowerLeft)
+                LaserPowerAmpRight=eval(self.CLP_LaserPowerRight)
+                self.CurrentLaserAmplitude=[LaserPowerAmpLeft[0],LaserPowerAmpRight[0]]
         else:
             self.win.WarningLabel.setText('No stimulation location defined!')
             self.win.WarningLabel.setStyleSheet("color: red;")

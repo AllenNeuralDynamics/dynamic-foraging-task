@@ -234,7 +234,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 sorted_dates = sorted(self.LaserCalibrationResults.keys(), key=self._custom_sort_key)
                 self.RecentLaserCalibration=self.LaserCalibrationResults[sorted_dates[-1]]
                 self.RecentCalibrationDate=sorted_dates[-1]
-    
+                
     def _GetWaterCalibration(self):
         '''Get the laser calibration results'''
         if os.path.exists(self.WaterCalibrationFiles):

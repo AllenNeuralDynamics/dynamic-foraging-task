@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1382</width>
-    <height>923</height>
+    <width>1442</width>
+    <height>630</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -187,7 +187,7 @@
   <widget class="QLabel" name="label1_5">
    <property name="geometry">
     <rect>
-     <x>697</x>
+     <x>978</x>
      <y>60</y>
      <width>67</width>
      <height>16</height>
@@ -206,7 +206,7 @@
   <widget class="QLineEdit" name="Duration_1">
    <property name="geometry">
     <rect>
-     <x>770</x>
+     <x>1051</x>
      <y>60</y>
      <width>41</width>
      <height>20</height>
@@ -269,7 +269,7 @@
   <widget class="QLabel" name="label1_4">
    <property name="geometry">
     <rect>
-     <x>553</x>
+     <x>834</x>
      <y>60</y>
      <width>61</width>
      <height>16</height>
@@ -288,7 +288,7 @@
   <widget class="QLineEdit" name="Probability_1">
    <property name="geometry">
     <rect>
-     <x>620</x>
+     <x>901</x>
      <y>60</y>
      <width>41</width>
      <height>20</height>
@@ -390,10 +390,10 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="LaserPower_1">
+  <widget class="QComboBox" name="LaserPowerLeft_1">
    <property name="geometry">
     <rect>
-     <x>442</x>
+     <x>470</x>
      <y>60</y>
      <width>101</width>
      <height>20</height>
@@ -442,14 +442,14 @@
   <widget class="QLabel" name="label1_3">
    <property name="geometry">
     <rect>
-     <x>369</x>
+     <x>345</x>
      <y>60</y>
-     <width>67</width>
-     <height>16</height>
+     <width>121</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>laser power=</string>
+    <string>laser power left (v,mw)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -608,7 +608,7 @@
   <widget class="QLabel" name="label1_6">
    <property name="geometry">
     <rect>
-     <x>843</x>
+     <x>1124</x>
      <y>60</y>
      <width>54</width>
      <height>16</height>
@@ -627,7 +627,7 @@
   <widget class="QComboBox" name="Condition_1">
    <property name="geometry">
     <rect>
-     <x>903</x>
+     <x>1184</x>
      <y>60</y>
      <width>80</width>
      <height>20</height>
@@ -681,7 +681,7 @@
   <widget class="QLineEdit" name="ConditionP_1">
    <property name="geometry">
     <rect>
-     <x>1089</x>
+     <x>1370</x>
      <y>60</y>
      <width>41</width>
      <height>20</height>
@@ -694,7 +694,7 @@
   <widget class="QLabel" name="label1_7">
    <property name="geometry">
     <rect>
-     <x>1020</x>
+     <x>1301</x>
      <y>60</y>
      <width>63</width>
      <height>16</height>
@@ -729,7 +729,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>903</x>
+     <x>1184</x>
      <y>171</y>
      <width>80</width>
      <height>20</height>
@@ -786,7 +786,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>620</x>
+     <x>901</x>
      <y>171</y>
      <width>41</width>
      <height>20</height>
@@ -945,7 +945,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>843</x>
+     <x>1124</x>
      <y>171</y>
      <width>54</width>
      <height>16</height>
@@ -1097,7 +1097,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>1089</x>
+     <x>1370</x>
      <y>171</y>
      <width>41</width>
      <height>20</height>
@@ -1113,14 +1113,14 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>369</x>
+     <x>345</x>
      <y>171</y>
-     <width>67</width>
-     <height>16</height>
+     <width>121</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>laser power=</string>
+    <string>laser power left (v,mw)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -1173,13 +1173,13 @@
     </property>
    </item>
   </widget>
-  <widget class="QComboBox" name="LaserPower_2">
+  <widget class="QComboBox" name="LaserPowerLeft_2">
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="geometry">
     <rect>
-     <x>442</x>
+     <x>470</x>
      <y>171</y>
      <width>101</width>
      <height>20</height>
@@ -1266,7 +1266,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>553</x>
+     <x>834</x>
      <y>171</y>
      <width>61</width>
      <height>16</height>
@@ -1344,7 +1344,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>697</x>
+     <x>978</x>
      <y>171</y>
      <width>67</width>
      <height>16</height>
@@ -1366,7 +1366,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>1020</x>
+     <x>1301</x>
      <y>171</y>
      <width>63</width>
      <height>16</height>
@@ -1476,7 +1476,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>770</x>
+     <x>1051</x>
      <y>171</y>
      <width>41</width>
      <height>20</height>
@@ -1492,7 +1492,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>903</x>
+     <x>1184</x>
      <y>271</y>
      <width>80</width>
      <height>20</height>
@@ -1549,7 +1549,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>770</x>
+     <x>1051</x>
      <y>271</y>
      <width>41</width>
      <height>20</height>
@@ -1565,7 +1565,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>697</x>
+     <x>978</x>
      <y>271</y>
      <width>67</width>
      <height>16</height>
@@ -1688,7 +1688,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>1020</x>
+     <x>1301</x>
      <y>271</y>
      <width>63</width>
      <height>16</height>
@@ -1795,7 +1795,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>843</x>
+     <x>1124</x>
      <y>271</y>
      <width>54</width>
      <height>16</height>
@@ -1839,7 +1839,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>1089</x>
+     <x>1370</x>
      <y>271</y>
      <width>41</width>
      <height>20</height>
@@ -1896,14 +1896,14 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>369</x>
+     <x>345</x>
      <y>271</y>
-     <width>67</width>
-     <height>16</height>
+     <width>121</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>laser power=</string>
+    <string>laser power left (v,mw)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -2064,7 +2064,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>553</x>
+     <x>834</x>
      <y>271</y>
      <width>61</width>
      <height>16</height>
@@ -2108,7 +2108,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>620</x>
+     <x>901</x>
      <y>271</y>
      <width>41</width>
      <height>20</height>
@@ -2184,13 +2184,13 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="LaserPower_3">
+  <widget class="QComboBox" name="LaserPowerLeft_3">
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="geometry">
     <rect>
-     <x>442</x>
+     <x>470</x>
      <y>271</y>
      <width>101</width>
      <height>20</height>
@@ -2421,7 +2421,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>620</x>
+     <x>901</x>
      <y>370</y>
      <width>41</width>
      <height>20</height>
@@ -2500,7 +2500,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>843</x>
+     <x>1124</x>
      <y>370</y>
      <width>54</width>
      <height>16</height>
@@ -2522,14 +2522,14 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>369</x>
+     <x>345</x>
      <y>370</y>
-     <width>67</width>
-     <height>16</height>
+     <width>121</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>laser power=</string>
+    <string>laser power left (v,mw)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -2608,7 +2608,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>1020</x>
+     <x>1301</x>
      <y>370</y>
      <width>63</width>
      <height>16</height>
@@ -2630,7 +2630,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>903</x>
+     <x>1184</x>
      <y>370</y>
      <width>80</width>
      <height>20</height>
@@ -2687,7 +2687,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>697</x>
+     <x>978</x>
      <y>370</y>
      <width>67</width>
      <height>16</height>
@@ -2847,7 +2847,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>770</x>
+     <x>1051</x>
      <y>370</y>
      <width>41</width>
      <height>20</height>
@@ -2885,7 +2885,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>553</x>
+     <x>834</x>
      <y>370</y>
      <width>61</width>
      <height>16</height>
@@ -2901,13 +2901,13 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="LaserPower_4">
+  <widget class="QComboBox" name="LaserPowerLeft_4">
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="geometry">
     <rect>
-     <x>442</x>
+     <x>470</x>
      <y>370</y>
      <width>101</width>
      <height>20</height>
@@ -2994,7 +2994,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>1089</x>
+     <x>1370</x>
      <y>370</y>
      <width>41</width>
      <height>20</height>
@@ -3017,20 +3017,20 @@
     <string>Laser=</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label1_16">
+  <widget class="QLabel" name="label1">
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>450</y>
-     <width>111</width>
+     <x>10</x>
+     <y>480</y>
+     <width>131</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>NI Sample frequency=</string>
+    <string>NIdaq sample frequency=</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="SampleFrequency">
@@ -3039,8 +3039,8 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>130</x>
-     <y>450</y>
+     <x>140</x>
+     <y>480</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -3247,27 +3247,452 @@
     <rect>
      <x>10</x>
      <y>30</y>
-     <width>1141</width>
-     <height>401</height>
+     <width>1411</width>
+     <height>431</height>
     </rect>
    </property>
    <property name="title">
     <string>GroupBox</string>
    </property>
+   <widget class="QComboBox" name="LaserPowerRight_1">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>30</y>
+      <width>101</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="editable">
+     <bool>false</bool>
+    </property>
+    <item>
+     <property name="text">
+      <string>0 mw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>1 mw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>1.5 mw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>2 mw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>2.5 mw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>3 mw</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="label1_16">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>30</y>
+      <width>141</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>laser power right (v,mw)=</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="LaserPowerRight_2">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>140</y>
+      <width>101</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <item>
+     <property name="text">
+      <string>0 mw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>1 mw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>1.5 mw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>2 mw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>2.5 mw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>3 mw</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="label2_16">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>547</x>
+      <y>140</y>
+      <width>151</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>laser power right (v, mw)=</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label3_16">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>567</x>
+      <y>240</y>
+      <width>131</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>laser power right (v,mw)=</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="LaserPowerRight_3">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>240</y>
+      <width>101</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <item>
+     <property name="text">
+      <string>0 mw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>1 mw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>1.5 mw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>2 mw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>2.5 mw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>3 mw</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="label4_16">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>557</x>
+      <y>340</y>
+      <width>141</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>laser power right (v,mw)=</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="LaserPowerRight_4">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>340</y>
+      <width>101</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <item>
+     <property name="text">
+      <string>0 mw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>1 mw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>1.5 mw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>2 mw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>2.5 mw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>3 mw</string>
+     </property>
+    </item>
+   </widget>
   </widget>
-  <widget class="QGroupBox" name="OptoCalibrationVisua">
+  <widget class="QLabel" name="label1_17">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>490</y>
-     <width>1141</width>
-     <height>401</height>
+     <x>20</x>
+     <y>530</y>
+     <width>131</width>
+     <height>20</height>
     </rect>
    </property>
-   <property name="title">
+   <property name="text">
+    <string>Latest calibration date=</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="LatestCalibrationDate">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>530</y>
+     <width>91</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
     <string/>
    </property>
   </widget>
+  <zorder>OptoPar</zorder>
+  <zorder>Laser_1</zorder>
+  <zorder>label1_2</zorder>
+  <zorder>Location_1</zorder>
+  <zorder>LaserStart_1</zorder>
+  <zorder>label1_8</zorder>
+  <zorder>label1_5</zorder>
+  <zorder>Duration_1</zorder>
+  <zorder>label1_12</zorder>
+  <zorder>Protocol_1</zorder>
+  <zorder>label1_4</zorder>
+  <zorder>Probability_1</zorder>
+  <zorder>label1_13</zorder>
+  <zorder>RD_1</zorder>
+  <zorder>label1_14</zorder>
+  <zorder>PulseDur_1</zorder>
+  <zorder>label1_15</zorder>
+  <zorder>LaserPowerLeft_1</zorder>
+  <zorder>label1_3</zorder>
+  <zorder>label1_9</zorder>
+  <zorder>OffsetStart_1</zorder>
+  <zorder>OffsetEnd_1</zorder>
+  <zorder>label1_11</zorder>
+  <zorder>label1_10</zorder>
+  <zorder>LaserEnd_1</zorder>
+  <zorder>label1_6</zorder>
+  <zorder>Condition_1</zorder>
+  <zorder>ConditionP_1</zorder>
+  <zorder>label1_7</zorder>
+  <zorder>label1_1</zorder>
+  <zorder>Condition_2</zorder>
+  <zorder>Probability_2</zorder>
+  <zorder>LaserEnd_2</zorder>
+  <zorder>RD_2</zorder>
+  <zorder>label2_10</zorder>
+  <zorder>label2_14</zorder>
+  <zorder>OffsetStart_2</zorder>
+  <zorder>label2_6</zorder>
+  <zorder>label2_15</zorder>
+  <zorder>label2_2</zorder>
+  <zorder>label2_11</zorder>
+  <zorder>LaserStart_2</zorder>
+  <zorder>ConditionP_2</zorder>
+  <zorder>label2_3</zorder>
+  <zorder>Laser_2</zorder>
+  <zorder>LaserPowerLeft_2</zorder>
+  <zorder>OffsetEnd_2</zorder>
+  <zorder>label2_12</zorder>
+  <zorder>label2_4</zorder>
+  <zorder>label2_8</zorder>
+  <zorder>Location_2</zorder>
+  <zorder>label2_5</zorder>
+  <zorder>label2_7</zorder>
+  <zorder>label2_9</zorder>
+  <zorder>label2_1</zorder>
+  <zorder>Protocol_2</zorder>
+  <zorder>PulseDur_2</zorder>
+  <zorder>Duration_2</zorder>
+  <zorder>Condition_3</zorder>
+  <zorder>Duration_3</zorder>
+  <zorder>label3_5</zorder>
+  <zorder>LaserEnd_3</zorder>
+  <zorder>Location_3</zorder>
+  <zorder>label3_7</zorder>
+  <zorder>RD_3</zorder>
+  <zorder>Protocol_3</zorder>
+  <zorder>label3_10</zorder>
+  <zorder>label3_1</zorder>
+  <zorder>label3_6</zorder>
+  <zorder>label3_11</zorder>
+  <zorder>ConditionP_3</zorder>
+  <zorder>label3_8</zorder>
+  <zorder>PulseDur_3</zorder>
+  <zorder>label3_3</zorder>
+  <zorder>label3_15</zorder>
+  <zorder>OffsetEnd_3</zorder>
+  <zorder>label3_12</zorder>
+  <zorder>label3_9</zorder>
+  <zorder>LaserStart_3</zorder>
+  <zorder>label3_4</zorder>
+  <zorder>label3_2</zorder>
+  <zorder>Probability_3</zorder>
+  <zorder>Laser_3</zorder>
+  <zorder>label3_14</zorder>
+  <zorder>LaserPowerLeft_3</zorder>
+  <zorder>OffsetStart_3</zorder>
+  <zorder>RD_4</zorder>
+  <zorder>Location_4</zorder>
+  <zorder>LaserEnd_4</zorder>
+  <zorder>label4_10</zorder>
+  <zorder>label4_2</zorder>
+  <zorder>Probability_4</zorder>
+  <zorder>PulseDur_4</zorder>
+  <zorder>label4_14</zorder>
+  <zorder>label4_12</zorder>
+  <zorder>label4_6</zorder>
+  <zorder>label4_3</zorder>
+  <zorder>LaserStart_4</zorder>
+  <zorder>label4_7</zorder>
+  <zorder>Condition_4</zorder>
+  <zorder>label4_5</zorder>
+  <zorder>label4_9</zorder>
+  <zorder>Protocol_4</zorder>
+  <zorder>label4_15</zorder>
+  <zorder>OffsetEnd_4</zorder>
+  <zorder>Laser_4</zorder>
+  <zorder>Duration_4</zorder>
+  <zorder>label4_8</zorder>
+  <zorder>label4_4</zorder>
+  <zorder>LaserPowerLeft_4</zorder>
+  <zorder>OffsetStart_4</zorder>
+  <zorder>label4_11</zorder>
+  <zorder>ConditionP_4</zorder>
+  <zorder>label4_1</zorder>
+  <zorder>label1</zorder>
+  <zorder>SampleFrequency</zorder>
+  <zorder>Frequency_1</zorder>
+  <zorder>label2_13</zorder>
+  <zorder>Frequency_2</zorder>
+  <zorder>label3_13</zorder>
+  <zorder>Frequency_3</zorder>
+  <zorder>label4_13</zorder>
+  <zorder>Frequency_4</zorder>
+  <zorder>label1_17</zorder>
+  <zorder>LatestCalibrationDate</zorder>
  </widget>
  <resources/>
  <connections/>

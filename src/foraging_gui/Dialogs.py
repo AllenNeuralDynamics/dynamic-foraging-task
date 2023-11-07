@@ -116,24 +116,38 @@ class OptogeneticsDialog(QDialog,Ui_Optogenetics):
         self._activated(4)
     def _Frequency(self,Numb):
         try:
-            Items=[]
+            ItemsLeft=[]
+            ItemsRight=[]
             Color=eval('self.Laser_'+str(Numb)+'.currentText()')
             Protocol=eval('self.Protocol_'+str(Numb)+'.currentText()')
             CurrentFrequency=eval('self.Frequency_'+str(Numb)+'.currentText()')
-            CurrentlaserPower=eval('self.LaserPower_'+str(Numb)+'.currentText()')
+            CurrentlaserPowerLeft=eval('self.LaserPowerLeft_'+str(Numb)+'.currentText()')
+            CurrentlaserPowerRight=eval('self.LaserPowerRight_'+str(Numb)+'.currentText()')
             if Protocol=='Sine':
-                for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['LaserPowerVoltage'])):
-                    Items.append(str(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['LaserPowerVoltage'][i]))
+                for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'])):
+                    ItemsLeft.append(str(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'][i]))
+                for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'])):
+                    ItemsRight.append(str(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'][i]))
+
             elif Protocol=='Constant' or Protocol=='Pulse':
-                for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['LaserPowerVoltage'])):
-                    Items.append(str(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['LaserPowerVoltage'][i]))
-            Items=sorted(Items)
-            eval('self.LaserPower_'+str(Numb)+'.clear()')
-            eval('self.LaserPower_'+str(Numb)+'.addItems(Items)')
-            if eval('self.LaserPower_'+str(Numb)+'.findText(CurrentlaserPower)'):
-                index = eval('self.LaserPower_'+str(Numb)+'.findText(CurrentlaserPower)')
+                for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'])):
+                    ItemsLeft.append(str(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'][i]))
+                for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'])):
+                    ItemsRight.append(str(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'][i]))
+            ItemsLeft=sorted(ItemsLeft)
+            ItemsRight=sorted(ItemsRight)
+            eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
+            eval('self.LaserPowerLeft_'+str(Numb)+'.addItems(ItemsLeft)')
+            if eval('self.LaserPowerLeft_'+str(Numb)+'.findText(CurrentlaserPowerLeft)'):
+                index = eval('self.LaserPowerLeft_'+str(Numb)+'.findText(CurrentlaserPowerLeft)')
                 if index != -1:
-                    eval('self.LaserPower_'+str(Numb)+'.setCurrentIndex(index)')
+                    eval('self.LaserPowerLeft_'+str(Numb)+'.setCurrentIndex(index)')
+            eval('self.LaserPowerRight_'+str(Numb)+'.clear()')
+            eval('self.LaserPowerRight_'+str(Numb)+'.addItems(ItemsRight)')
+            if eval('self.LaserPowerRight_'+str(Numb)+'.findText(CurrentlaserPowerRight)'):
+                index = eval('self.LaserPowerRight_'+str(Numb)+'.findText(CurrentlaserPowerRight)')
+                if index != -1:
+                    eval('self.LaserPowerRight_'+str(Numb)+'.setCurrentIndex(index)')
         except:
             pass
     def _activated(self,Numb):
@@ -181,7 +195,11 @@ class OptogeneticsDialog(QDialog,Ui_Optogenetics):
             eval('self.OffsetEnd_'+str(Numb)+'.setEnabled('+str(True)+')')
     def _Laser(self,Numb):
         ''' enable/disable items based on laser (blue/green/orange/red/NA)'''
-        Inactlabel=range(2,16)
+        try:
+            self.LatestCalibrationDate.setText(self.MainWindow.RecentCalibrationDate)
+        except:
+            pass
+        Inactlabel=range(2,17)
         if eval('self.Laser_'+str(Numb)+'.currentText()')=='NA':
             Label=False
         else:
@@ -202,36 +220,52 @@ class OptogeneticsDialog(QDialog,Ui_Optogenetics):
                             eval('self.Frequency_'+str(Numb)+'.addItems(ItemsFrequency)')
                             if not CurrentFrequency in Frequency:
                                 CurrentFrequency=eval('self.Frequency_'+str(Numb)+'.currentText()')
-                            Items=[]
-                            for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['LaserPowerVoltage'])):
-                                Items.append(str(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['LaserPowerVoltage'][i]))
-                            Items=sorted(Items)
-                            eval('self.LaserPower_'+str(Numb)+'.clear()')
-                            eval('self.LaserPower_'+str(Numb)+'.addItems(Items)')
+                            ItemsLeft=[]
+                            ItemsRight=[]
+                            for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'])):
+                                ItemsLeft.append(str(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'][i]))
+                            for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'])):
+                                ItemsRight.append(str(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'][i]))
+                            ItemsLeft=sorted(ItemsLeft)
+                            ItemsRight=sorted(ItemsRight)
+                            eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
+                            eval('self.LaserPowerLeft_'+str(Numb)+'.addItems(ItemsLeft)')
+                            eval('self.LaserPowerRight_'+str(Numb)+'.clear()')
+                            eval('self.LaserPowerRight_'+str(Numb)+'.addItems(ItemsRight)')
                         elif Protocol=='Constant' or Protocol=='Pulse':
-                            Items=[]
-                            for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Protocol]['LaserPowerVoltage'])):
-                                Items.append(str(self.MainWindow.RecentLaserCalibration[Color][Protocol]['LaserPowerVoltage'][i]))
-                            Items=sorted(Items)
-                            eval('self.LaserPower_'+str(Numb)+'.clear()')
-                            eval('self.LaserPower_'+str(Numb)+'.addItems(Items)')
+                            ItemsLeft=[]
+                            ItemsRight=[]
+                            for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Protocol]['Left']['LaserPowerVoltage'])):
+                                ItemsLeft.append(str(self.MainWindow.RecentLaserCalibration[Color][Protocol]['Left']['LaserPowerVoltage'][i]))
+                            for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Protocol]['Right']['LaserPowerVoltage'])):
+                                ItemsRight.append(str(self.MainWindow.RecentLaserCalibration[Color][Protocol]['Right']['LaserPowerVoltage'][i]))
+                            ItemsLeft=sorted(ItemsLeft)
+                            ItemsRight=sorted(ItemsRight)
+                            eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
+                            eval('self.LaserPowerLeft_'+str(Numb)+'.addItems(ItemsLeft)')
+                            eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
+                            eval('self.LaserPowerLeft_'+str(Numb)+'.addItems(ItemsRight)')
                         self.MainWindow.WarningLabel.setText('')
                         self.MainWindow.WarningLabel.setStyleSheet("color: gray;")
                     else:
-                        eval('self.LaserPower_'+str(Numb)+'.clear()')
+                        eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
+                        eval('self.LaserPowerRight_'+str(Numb)+'.clear()')
                         self.MainWindow.WarningLabel.setText('No calibration for this protocol identified!')
                         self.MainWindow.WarningLabel.setStyleSheet("color: red;")
                 else:
-                    eval('self.LaserPower_'+str(Numb)+'.clear()')
+                    eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
+                    eval('self.LaserPowerRight_'+str(Numb)+'.clear()')
                     self.MainWindow.WarningLabel.setText('No calibration for this laser identified!')
                     self.MainWindow.WarningLabel.setStyleSheet("color: red;")
             else:
-                eval('self.LaserPower_'+str(Numb)+'.clear()')
+                eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
+                eval('self.LaserPowerRight_'+str(Numb)+'.clear()')
                 self.MainWindow.WarningLabel.setText('No calibration for this laser identified!')
                 self.MainWindow.WarningLabel.setStyleSheet("color: red;")
 
         eval('self.Location_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.LaserPower_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.LaserPowerLeft_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.LaserPowerRight_'+str(Numb)+'.setEnabled('+str(Label)+')')
         eval('self.Probability_'+str(Numb)+'.setEnabled('+str(Label)+')')
         eval('self.Duration_'+str(Numb)+'.setEnabled('+str(Label)+')')
         eval('self.Condition_'+str(Numb)+'.setEnabled('+str(Label)+')')
@@ -471,7 +505,7 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
                                 break
                         if self.StartCalibratingLeft.isChecked():
                             # print the current calibration value
-                            self.Warning.setText('You are calibrating Right valve: '+ str(round(float(current_valve_opentime),4))+'   Current cycle:'+str(i+1)+'/'+self.CycleCaliLeft.text())
+                            self.Warning.setText('You are calibrating Left valve: '+ str(round(float(current_valve_opentime),4))+'   Current cycle:'+str(i+1)+'/'+self.CycleCaliLeft.text())
                             self.Warning.setStyleSheet("color: red;")
                             # set the valve open time
                             self.MainWindow.Channel.LeftValue(float(current_valve_opentime)*1000) 
@@ -1422,7 +1456,8 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
                             current_frequency_ind=[index for index, value in enumerate(Frequency) if value == current_frequency]
                             input_voltages= self._extract_elements(LCM_voltage,current_frequency_ind)
                             input_voltages_unique=list(set(input_voltages))
-                            Items=[]
+                            ItemsLeft=[]
+                            ItemsRight=[]
                             for n in range(len(input_voltages_unique)):
                                 current_voltage=input_voltages_unique[n]
                                 left_laser_ind=[]
@@ -1436,7 +1471,8 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
                                 right_measured_power=self._extract_elements(LCM_LaserPowerMeasured,right_laser_ind) 
                                 left_measured_power_mean=self._getmean(left_measured_power)
                                 right_measured_power_mean=self._getmean(right_measured_power)
-                                Items.append([float(current_voltage), left_measured_power_mean, right_measured_power_mean])
+                                ItemsLeft.append([float(current_voltage), left_measured_power_mean])
+                                ItemsRight.append([float(current_voltage), right_measured_power_mean])
                             # Check and assign items to the nested dictionary
                             if current_date_name not in LaserCalibrationResults:
                                 LaserCalibrationResults[current_date_name] = {}
@@ -1446,14 +1482,24 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
                                 LaserCalibrationResults[current_date_name][current_color][current_protocol] = {}
                             if current_frequency not in LaserCalibrationResults[current_date_name][current_color][current_protocol]:
                                 LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency] = {}
-                            if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]:
-                                LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]['LaserPowerVoltage']=Items
+                            if 'Left' not in LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]:
+                                LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]['Left'] = {}
+                            if 'Right' not in LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]:
+                                LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]['Right'] = {}
+                            if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]['Left']:
+                                LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]['Left']['LaserPowerVoltage']=ItemsLeft
                             else:
-                                LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]['LaserPowerVoltage']=LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]['LaserPowerVoltage']+Items
+                                LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]['Left']['LaserPowerVoltage']=self._unique(LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]['Left']['LaserPowerVoltage']+ItemsLeft)
+
+                            if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]['Right']:
+                                LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]['Right']['LaserPowerVoltage']=ItemsRight
+                            else:
+                                LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]['Right']['LaserPowerVoltage']=self._unique(LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency]['Right']['LaserPowerVoltage']+ItemsRight)
                     elif current_protocol=='Constant' or current_protocol=='Pulse':
                             input_voltages= self._extract_elements(LCM_voltage,current_protocol_ind)
                             input_voltages_unique=list(set(input_voltages))
-                            Items=[]
+                            ItemsLeft=[]
+                            ItemsRight=[]
                             for n in range(len(input_voltages_unique)):
                                 current_voltage=input_voltages_unique[n]
                                 left_laser_ind=[]
@@ -1467,7 +1513,8 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
                                 right_measured_power=self._extract_elements(LCM_LaserPowerMeasured,right_laser_ind) 
                                 left_measured_power_mean=self._getmean(left_measured_power)
                                 right_measured_power_mean=self._getmean(right_measured_power)
-                                Items.append([float(current_voltage), left_measured_power_mean, right_measured_power_mean])
+                                ItemsLeft.append([float(current_voltage), left_measured_power_mean])
+                                ItemsRight.append([float(current_voltage), right_measured_power_mean])
                             # Check and assign items to the nested dictionary
                             if current_date_name not in LaserCalibrationResults:
                                 LaserCalibrationResults[current_date_name] = {}
@@ -1475,17 +1522,35 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
                                 LaserCalibrationResults[current_date_name][current_color] = {}
                             if current_protocol not in LaserCalibrationResults[current_date_name][current_color]:
                                 LaserCalibrationResults[current_date_name][current_color][current_protocol] = {}
-                            if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol]:
-                                LaserCalibrationResults[current_date_name][current_color][current_protocol]['LaserPowerVoltage']=Items
+                            if 'Left' not in LaserCalibrationResults[current_date_name][current_color][current_protocol]:
+                                LaserCalibrationResults[current_date_name][current_color][current_protocol]['Left']={}
+                            if 'Right' not in LaserCalibrationResults[current_date_name][current_color][current_protocol]:
+                                LaserCalibrationResults[current_date_name][current_color][current_protocol]['Right']={}
+                            if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol]['Left']:
+                                LaserCalibrationResults[current_date_name][current_color][current_protocol]['Left']['LaserPowerVoltage']=ItemsLeft
                             else:
-                                LaserCalibrationResults[current_date_name][current_color][current_protocol]['LaserPowerVoltage']=LaserCalibrationResults[current_date_name][current_color][current_protocol]['LaserPowerVoltage']+Items
+                                LaserCalibrationResults[current_date_name][current_color][current_protocol]['Left']['LaserPowerVoltage']=self._unique(LaserCalibrationResults[current_date_name][current_color][current_protocol]['Left']['LaserPowerVoltage']+ItemsLeft)
+                            if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol]['Right']:
+                                LaserCalibrationResults[current_date_name][current_color][current_protocol]['Right']['LaserPowerVoltage']=ItemsRight
+                            else:
+                                LaserCalibrationResults[current_date_name][current_color][current_protocol]['Right']['LaserPowerVoltage']=self._unique(LaserCalibrationResults[current_date_name][current_color][current_protocol]['Right']['LaserPowerVoltage']+ItemsRight)
+                           
                             if current_protocol=='Constant':# copy results of constant to pulse 
                                 if 'Pulse' not in LaserCalibrationResults[current_date_name][current_color]:
                                     LaserCalibrationResults[current_date_name][current_color]['Pulse'] = {}
-                                if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color]['Pulse']:
-                                    LaserCalibrationResults[current_date_name][current_color]['Pulse']['LaserPowerVoltage']=Items
+                                if 'Left' not in LaserCalibrationResults[current_date_name][current_color]['Pulse']:
+                                    LaserCalibrationResults[current_date_name][current_color]['Pulse']['Left']={}
+                                if 'Right' not in LaserCalibrationResults[current_date_name][current_color]['Pulse']:
+                                    LaserCalibrationResults[current_date_name][current_color]['Pulse']['Right']={}
+                                if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color]['Pulse']['Left']:
+                                    LaserCalibrationResults[current_date_name][current_color]['Pulse']['Left']['LaserPowerVoltage']=ItemsLeft
                                 else:
-                                    LaserCalibrationResults[current_date_name][current_color]['Pulse']['LaserPowerVoltage']=LaserCalibrationResults[current_date_name][current_color]['Pulse']['LaserPowerVoltage']+Items
+                                    LaserCalibrationResults[current_date_name][current_color]['Pulse']['Left']['LaserPowerVoltage']=self._unique(LaserCalibrationResults[current_date_name][current_color]['Pulse']['Left']['LaserPowerVoltage']+ItemsLeft)
+                                if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color]['Pulse']['Right']:
+                                    LaserCalibrationResults[current_date_name][current_color]['Pulse']['Right']['LaserPowerVoltage']=ItemsRight
+                                else:
+                                    LaserCalibrationResults[current_date_name][current_color]['Pulse']['Right']['LaserPowerVoltage']=self._unique(LaserCalibrationResults[current_date_name][current_color]['Pulse']['Right']['LaserPowerVoltage']+ItemsRight)
+        
         # save to json file
         if not os.path.exists(os.path.dirname(self.MainWindow.LaserCalibrationFiles)):
             os.makedirs(os.path.dirname(self.MainWindow.LaserCalibrationFiles))
@@ -1506,6 +1571,16 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
         time.sleep(0.01)
         self.Save.setStyleSheet("background-color : none")
         self.Save.setChecked(False)
+    def _unique(self,input):
+        '''average the laser power with the same input voltage'''
+        items=[]
+        input_array=np.array(input)
+        voltage_unique=list(set(input_array[:,0]))
+        for current_votage in voltage_unique:
+            laser_power=input_array[ np.logical_and(input_array[:,0]==current_votage,input_array[:,1]!='NA') ][:,1]
+            mean_laser_power=self._getmean(list(laser_power))
+            items.append([float(current_votage), mean_laser_power])
+        return items
     def _extract_elements(self,my_list, indices):
         extracted_elements = [my_list[index] for index in indices]
         return extracted_elements
@@ -1513,9 +1588,14 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
         if List==[]:
             return 'NA'
         Sum=0
+        N=0
         for i in range(len(List)):
-            Sum=Sum+float(List[i])
-        Sum=Sum/len(List)
+            try:
+                Sum=Sum+float(List[i])
+                N=N+1
+            except:
+                pass
+        Sum=Sum/N
         return Sum
     def _Sleep(self,SleepTime):
         time.sleep(SleepTime)
