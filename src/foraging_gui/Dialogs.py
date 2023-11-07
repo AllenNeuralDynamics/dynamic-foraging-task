@@ -378,7 +378,7 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
             total_water=float(self.TotalWaterSingleLeft.text())  
         except:
             total_water=''
-        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water)
+        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water,tube_weight=0)
         self.SaveLeft.setStyleSheet("background-color : none")
         self.SaveLeft.setChecked(False)
     def _SaveRight(self):
@@ -393,7 +393,7 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
             total_water=float(self.TotalWaterSingleRight.text()) 
         except:
             total_water=''
-        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water)
+        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water,tube_weight=0)
         self.SaveRight.setStyleSheet("background-color : none")
         self.SaveRight.setChecked(False)
     def _CalibrationType(self):
@@ -769,7 +769,7 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         if total_water=='' or tube_weight=='':
             return
         # total water equals to total water minus tube weight
-        total_water=total_water-tube_weight
+        total_water=(total_water-tube_weight)*1000 # The input unit is g and converted to mg.
         WaterCalibrationResults=self.WaterCalibrationResults.copy()
         current_time = datetime.now()
         date_str = current_time.strftime("%Y-%m-%d")
