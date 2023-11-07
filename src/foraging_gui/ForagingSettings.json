@@ -1,4 +1,8 @@
 {
     "default_saveFolder": "E:\\DynamicForagingGUI\\BehaviorData\\",
-    "current_box":"Green"
+    "current_box":"Tower_EphysRig3",
+    "log_folder":"E:\\DynamicForagingGUI\\BehaviorData\\",
+    "Teensy_COM":"COM10",
+    "bonsai_path":"E:\\GitHub\\dynamic-foraging-task\\bonsai\\Bonsai.exe",
+    "bonsaiworkflow_path":"E:\\GitHub\\dynamic-foraging-task\\src\\foraging_gui\\foraging.bonsai"
 }

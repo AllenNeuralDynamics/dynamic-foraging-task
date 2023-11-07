@@ -15,6 +15,7 @@ from MyFunctions import GenerateTrials, Worker
 import warnings
 import json, uuid
 import serial 
+from subprocess import call
 
 #warnings.filterwarnings("ignore")
 
@@ -185,7 +186,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         '''Connect bonsai'''
         if self.InitializeBonsaiSuccessfully==0:
             try:
-                self._InitializeBonsai()
+                self._ConnectOSC()
                 self.InitializeBonsaiSuccessfully=1
             except:
                 self.WarningLabelInitializeBonsai.setText('Please open bonsai!')
@@ -234,7 +235,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 sorted_dates = sorted(self.LaserCalibrationResults.keys(), key=self._custom_sort_key)
                 self.RecentLaserCalibration=self.LaserCalibrationResults[sorted_dates[-1]]
                 self.RecentCalibrationDate=sorted_dates[-1]
-                
+
     def _GetWaterCalibration(self):
         '''Get the laser calibration results'''
         if os.path.exists(self.WaterCalibrationFiles):
@@ -279,15 +280,28 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     self.Teensy_COM=Settings['Teensy_COM']
                 else:
                     self.Teensy_COM=''
+                if 'bonsai_path' in Settings:
+                    self.bonsai_path=Settings['bonsai_path']
+                else:
+                    self.bonsai_path=os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe')
+                if 'bonsaiworkflow_path' in Settings:
+                    self.bonsaiworkflow_path=Settings['bonsaiworkflow_path']
+                else:
+                    self.bonsaiworkflow_path=os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai')
             else:
                 self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
                 self.current_box=''
                 self.log_folder=os.path.join(os.path.expanduser("~"), "Documents",'log')
                 self.temporary_video_folder=os.path.join(os.path.expanduser("~"), "Documents",'temporaryvideo')
+                self.Teensy_COM=''
+                self.bonsai_path=os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe')
+                self.bonsaiworkflow_path=os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai')
         except:
             self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
             self.current_box=''
             self.Teensy_COM=''
+            self.bonsai_path=os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe')
+            self.bonsaiworkflow_path=os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai')
         if len(sys.argv)==1:
             towertag=''
         else:
@@ -300,6 +314,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Tower.setCurrentIndex(index)
     def _InitializeBonsai(self):
         '''Initianizing osc messages'''
+        # open the bondai workflow and run
+        self._OpenBonsaiWorkflow()
+        time.sleep(3)
+        self._ConnectOSC()
+    def _ConnectOSC(self):
+        '''Connect the GUI and Bonsai through OSC messages'''    
+        # connect the bonsai workflow with the python GUI
         self.ip = "127.0.0.1"
         if len(sys.argv)==1:
             self.request_port = 4002
@@ -364,6 +385,24 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.WarningLabel_2.setStyleSheet("color: gray;")
         self.WarningLabelInitializeBonsai.setText('')
         self.InitializeBonsaiSuccessfully=1
+
+    def _OpenBonsaiWorkflow(self,runworkflow=1):
+        '''Open the bonsai workflow and run it'''
+        if len(sys.argv)==1:
+            SettingsBox='Settings_box1.csv'
+        else:
+            bonsai_tag = int(sys.argv[1])
+            if bonsai_tag==1:
+                SettingsBox='Settings_box1.csv'
+            elif bonsai_tag==2:
+                SettingsBox='Settings_box2.csv'
+            elif bonsai_tag==3:
+                SettingsBox='Settings_box3.csv'
+            elif bonsai_tag==4:
+                SettingsBox='Settings_box4.csv'
+        CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
+        subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+'C:\\Users\\xinxin.yin\\Documents\\ForagingSettings\\'+SettingsBox+ ' --start',cwd=CWD)
+
     def _OpenSettingFolder(self):
         '''Open the setting folder'''
         try:
@@ -1751,9 +1790,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
         time.sleep(Time)
     def _Start(self):
         '''start trial loop'''
-        self._ConnectBonsai()
+        
         if self.InitializeBonsaiSuccessfully==0:
-            return
+            self._ConnectBonsai()
+            if self.InitializeBonsaiSuccessfully==0:
+                return
         self.WarningLabelInitializeBonsai.setText('')
         self.WarningLabel_SaveTrainingStage.setText('')
         self.WarningLabel_SaveTrainingStage.setStyleSheet("color: none;")
