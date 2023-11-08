@@ -8,7 +8,7 @@ import math
 import numpy as np
 import serial 
 import rigcontrol
-from datetime import date,timedelta,datetime
+from datetime import date,datetime
 from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout,QLineEdit,QWidget,QSizePolicy
 from PyQt5 import QtWidgets,QtGui,QtCore
 from PyQt5.QtCore import QThreadPool,Qt,QMetaObject
