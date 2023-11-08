@@ -401,10 +401,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
             elif bonsai_tag==4:
                 SettingsBox='Settings_box4.csv'
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
-        if bonsai_tag==1:
-            subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox,cwd=CWD)
-        else:
+        if len(sys.argv)==1:
             subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
+        else:
+            if bonsai_tag==1:
+                subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox,cwd=CWD)
+            else:
+                subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
 
     def _OpenSettingFolder(self):
         '''Open the setting folder'''
@@ -1832,7 +1835,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
             # generate a new session id
-            self.Other_session_id=uuid.uuid4()
+            #self.Other_session_id=uuid.uuid4()
             #self.Visualization.setTitle(str(date.today())+'  Session ID: '+str(self.Other_session_id))
             self.WarningLabel.setText('')
             self.WarningLabel.setStyleSheet("color: gray;")

@@ -107,7 +107,7 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="osc:CreateTcpServer">
                 <osc:Name>BonsaiOSC</osc:Name>
-                <osc:Port>4002</osc:Port>
+                <osc:Port>4012</osc:Port>
                 <osc:NoDelay>false</osc:NoDelay>
                 <osc:AllowNatTraversal>true</osc:AllowNatTraversal>
               </Combinator>
@@ -131,7 +131,7 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="osc:CreateTcpServer">
                 <osc:Name>BonsaiOSC2</osc:Name>
-                <osc:Port>4003</osc:Port>
+                <osc:Port>4013</osc:Port>
                 <osc:NoDelay>false</osc:NoDelay>
                 <osc:AllowNatTraversal>true</osc:AllowNatTraversal>
               </Combinator>
@@ -155,7 +155,7 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="osc:CreateTcpServer">
                 <osc:Name>BonsaiOSC3</osc:Name>
-                <osc:Port>4004</osc:Port>
+                <osc:Port>4014</osc:Port>
                 <osc:NoDelay>false</osc:NoDelay>
                 <osc:AllowNatTraversal>true</osc:AllowNatTraversal>
               </Combinator>
@@ -179,7 +179,7 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="osc:CreateTcpServer">
                 <osc:Name>BonsaiOSC4</osc:Name>
-                <osc:Port>4005</osc:Port>
+                <osc:Port>4015</osc:Port>
                 <osc:NoDelay>false</osc:NoDelay>
                 <osc:AllowNatTraversal>true</osc:AllowNatTraversal>
               </Combinator>
@@ -6481,7 +6481,7 @@
         <Property Name="FileName" DisplayName="SettingsPath" />
       </Expression>
       <Expression xsi:type="io:CsvReader">
-        <io:FileName>C:\Users\xinxin.yin\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
+        <io:FileName>C:\Users\xinxin.yin\Documents\ForagingSettings\Settings_box2.csv</io:FileName>
         <io:ScanPattern>%s,%s</io:ScanPattern>
         <io:SkipRows>0</io:SkipRows>
       </Expression>
