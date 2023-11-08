@@ -6,7 +6,6 @@ import time
 import subprocess
 import math
 import numpy as np
-import uuid
 import serial 
 import rigcontrol
 from datetime import date,timedelta,datetime
@@ -1837,7 +1836,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
             # generate a new session id
-            #self.Other_session_id=uuid.uuid4()
             #self.Visualization.setTitle(str(date.today())+'  Session ID: '+str(self.Other_session_id))
             self.WarningLabel.setText('')
             self.WarningLabel.setStyleSheet("color: gray;")
