@@ -9,15 +9,24 @@ import numpy as np
 import serial 
 import rigcontrol
 from datetime import date,datetime
-from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout,QLineEdit,QWidget,QSizePolicy
-from PyQt5 import QtWidgets,QtGui,QtCore
-from PyQt5.QtCore import QThreadPool,Qt,QMetaObject
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
-from ForagingGUI import Ui_ForagingGUI
 from pyOSC3.OSC3 import OSCStreamingClient
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from PyQt5 import QtWidgets,QtGui,QtCore
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox,
+from PyQt5.QtWidgets import QFileDialog,QVBoxLayout,QLineEdit
+from PyQt5.QtCore import QThreadPool,Qt
+
+# These are dynamic-foraging-task modules that should be imported with absolute imports
+# rather than relative imports. For example:
+# from dynamic_foraging_task.Visualization import PlotV
+# not
+# from Visualization import PlotV
+from ForagingGUI import Ui_ForagingGUI
 from Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
-from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog,LickStaDialog,TimeDistributionDialog
+from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,
+from Dialogs import ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog,
+from Dialogs import LickStaDialog,TimeDistributionDialog
 from MyFunctions import GenerateTrials, Worker
 
 class NumpyEncoder(json.JSONEncoder):
