@@ -401,7 +401,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             elif bonsai_tag==4:
                 SettingsBox='Settings_box4.csv'
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
-        subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
+        if not bonsai_tag==1:
+            subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
 
     def _OpenSettingFolder(self):
         '''Open the setting folder'''
