@@ -6,7 +6,6 @@ import time
 import subprocess
 import math
 import numpy as np
-import warnings
 import uuid
 import serial 
 import rigcontrol
@@ -21,9 +20,6 @@ from pyOSC3.OSC3 import OSCStreamingClient
 from Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
 from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog,LickStaDialog,TimeDistributionDialog
 from MyFunctions import GenerateTrials, Worker
-from subprocess import call
-
-#warnings.filterwarnings("ignore")
 
 class NumpyEncoder(json.JSONEncoder):
     #def default(self, obj):
