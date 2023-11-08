@@ -1681,7 +1681,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
                 # Trigger Teensy with the above specified exp mode
-                ser.write(b'D')
+                ser.write(b'd')
                 ser.close()
                 self.TeensyWarning.setText('Start bleaching!')
                 self.TeensyWarning.setStyleSheet("color: red;")
@@ -1693,7 +1693,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
                 # Trigger Teensy with the above specified exp mode
-                ser.write(b'S')
+                ser.write(b's')
                 ser.close()
                 self.TeensyWarning.setText('Stop bleaching!')
                 self.TeensyWarning.setStyleSheet("color: red;")
