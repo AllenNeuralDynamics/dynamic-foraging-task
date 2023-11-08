@@ -1,5 +1,15 @@
-import sys, os,traceback,json,time,subprocess,math
+import sys
+import os
+import traceback
+import json
+import time
+import subprocess
+import math
 import numpy as np
+import warnings
+import uuid
+import serial 
+import rigcontrol
 from datetime import date,timedelta,datetime
 from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout,QLineEdit,QWidget,QSizePolicy
 from PyQt5 import QtWidgets,QtGui,QtCore
@@ -7,14 +17,10 @@ from PyQt5.QtCore import QThreadPool,Qt,QMetaObject
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from ForagingGUI import Ui_ForagingGUI
-import rigcontrol
 from pyOSC3.OSC3 import OSCStreamingClient
 from Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
 from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog,LickStaDialog,TimeDistributionDialog
 from MyFunctions import GenerateTrials, Worker
-import warnings
-import json, uuid
-import serial 
 from subprocess import call
 
 #warnings.filterwarnings("ignore")
