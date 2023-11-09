@@ -1,20 +1,27 @@
-import time,math,json,os,shutil,subprocess
-from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout
-from PyQt5 import QtWidgets
-from Optogenetics import Ui_Optogenetics
-from Calibration import Ui_WaterCalibration
-from Camera import Ui_Camera
-from MotorStage import Ui_MotorStage
-from Manipulator import Ui_Manipulator
-from LicksDistribution import Ui_LickDistribution
-from TimeDistribution import Ui_TimeDistribution
-from CalibrationLaser import Ui_CalibrationLaser
-from MyFunctions import Worker
-import numpy as np
-from PyQt5.QtCore import QThreadPool,Qt
+import time
+import math
+import json
+import os
+import shutil
+import subprocess
 from datetime import datetime
+import numpy as np
+
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout
+from PyQt5.QtCore import QThreadPool,Qt
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from Visualization import PlotWaterCalibration
+
+from foraging_gui.MyFunctions import Worker
+from foraging_gui.Visualization import PlotWaterCalibration
+from foraging_gui.Optogenetics import Ui_Optogenetics
+from foraging_gui.Calibration import Ui_WaterCalibration
+from foraging_gui.Camera import Ui_Camera
+from foraging_gui.MotorStage import Ui_MotorStage
+from foraging_gui.Manipulator import Ui_Manipulator
+from foraging_gui.LicksDistribution import Ui_LickDistribution
+from foraging_gui.TimeDistribution import Ui_TimeDistribution
+from foraging_gui.CalibrationLaser import Ui_CalibrationLaser
 
 class LickStaDialog(QDialog,Ui_LickDistribution):
     '''Lick statistics dialog'''
