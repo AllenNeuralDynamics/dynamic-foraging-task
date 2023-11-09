@@ -16,6 +16,8 @@ import warnings
 import json, uuid
 import serial 
 from subprocess import call
+from newscale.interfaces import NewScaleSerial
+from stage import Stage
 
 #warnings.filterwarnings("ignore")
 
@@ -112,6 +114,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.keyPressEvent()
         self._WaterVolumnManage2()
         self._LickSta()
+        self._InitianizeMotorStage()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
     def connectSignalsSlots(self):
@@ -171,7 +174,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.RightValue_volume.textChanged.connect(self._WaterVolumnManage2)
         self.GiveWaterL_volume.textChanged.connect(self._WaterVolumnManage2)
         self.GiveWaterR_volume.textChanged.connect(self._WaterVolumnManage2)
+        self.StageSerialNum.currentIndexChanged.connect(self._StageSerialNum)
+        self.StageSerialNum.activated.connect(self._StageSerialNum)
+        self.MoveXP.clicked.connect(self._MoveXP)
+        self.MoveYP.clicked.connect(self._MoveYP)
+        self.MoveZP.clicked.connect(self._MoveZP)
+        self.MoveXN.clicked.connect(self._MoveXN)
+        self.MoveYN.clicked.connect(self._MoveYN)
+        self.MoveZN.clicked.connect(self._MoveZN)
         self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
+
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
@@ -182,6 +194,94 @@ class Window(QMainWindow, Ui_ForagingGUI):
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit)):        
                 child.returnPressed.connect(self.keyPressEvent)
+    
+    
+    def _Move(self,axis,step):
+        '''Move stage'''
+        current_stage=self.stages[self.StageSerialNum.currentText()]
+        current_position=current_stage.get_position()
+        current_stage.set_speed(500)
+        current_stage.move_relative_1d(axis,step)
+        if axis=='x':
+            relative_postition=(step,0,0)
+        elif axis=='y':
+            relative_postition=(0,step,0)
+        elif axis=='z':
+            relative_postition=(0,0,step)
+        self._UpdatePosition(current_position,relative_postition)
+
+    def _MoveXP(self):
+        '''Move X positively'''
+        axis='x'
+        step=float(self.Step.text())
+        self._Move(axis,step)
+
+    def _MoveXN(self):
+        '''Move X negatively'''
+        axis='x'
+        step=float(self.Step.text())
+        self._Move(axis,-step)
+
+    def _MoveYP(self):
+        '''Move Y positively'''
+        axis='y'
+        step=float(self.Step.text())
+        self._Move(axis,step)
+    def _MoveYN(self):
+        '''Move Y negatively'''
+        axis='y'
+        step=float(self.Step.text())
+        self._Move(axis,-step)
+
+    def _MoveZP(self):
+        '''Move Z positively'''
+        axis='z'
+        step=float(self.Step.text())
+        self._Move(axis,step)
+        
+    def _MoveZN(self):
+        '''Move Z negatively'''
+        axis='z'
+        step=float(self.Step.text())
+        self._Move(axis,-step)
+
+    def _UpdatePosition(self,current_position,relative_postition):
+        '''Update the NewScale position'''
+        current_stage=self.stages[self.StageSerialNum.currentText()]
+        self.PositionX.setText(str(current_position[0]+relative_postition[0]))
+        self.PositionY.setText(str(current_position[1]+relative_postition[1]))
+        self.PositionZ.setText(str(current_position[2]+relative_postition[2]))
+
+    def _StageSerialNum(self):
+        '''connect to a stage'''
+        for instance in self.instances:
+            if instance.sn==self.StageSerialNum.currentText():
+                if hasattr(self, 'stages'):
+                    if instance.sn in self.stages:
+                        pass
+                    else:
+                        self._connect_stage(instance)
+                else:
+                    self._connect_stage(instance)
+
+    def _InitianizeMotorStage(self):
+        '''To initianize motor stage'''
+        self._scan_for_usb_stages()
+
+    def _scan_for_usb_stages(self):
+        '''Scan available stages'''
+        self.instances = NewScaleSerial.get_instances()
+        self.stage_names=[]
+        for instance in self.instances:
+            self.stage_names.append(instance.sn)
+        self.StageSerialNum.addItems(self.stage_names)
+
+    def _connect_stage(self,instance):
+        '''connect to a stage'''
+        self.stages = {}
+        self.stage = Stage(serial=instance)
+        self.stages[self.stage.name] = self.stage
+
     def _ConnectBonsai(self):
         '''Connect bonsai'''
         if self.InitializeBonsaiSuccessfully==0:
