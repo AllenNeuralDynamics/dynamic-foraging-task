@@ -1,11 +1,16 @@
-
-import random, traceback, math,time,sys
+import random
+import traceback
+import math
+import time
+import sys
 from datetime import datetime
-import numpy as np
 from itertools import accumulate
+
+import numpy as np
+
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import *
+
 class GenerateTrials():
     def __init__(self,win):
         self.win=win
