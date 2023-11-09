@@ -135,6 +135,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.SaveContinue.triggered.connect(self._SaveContinue)
         self.action_Exit.triggered.connect(self._Exit)
         self.action_New.triggered.connect(self._New)
+        self.actionScan_stages.triggered.connect(self._scan_for_usb_stages)
         self.action_Clear.triggered.connect(self._Clear)
         self.action_Start.triggered.connect(self.Start.click)
         self.action_NewSession.triggered.connect(self.NewSession.click)
@@ -182,6 +183,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.MoveXN.clicked.connect(self._MoveXN)
         self.MoveYN.clicked.connect(self._MoveYN)
         self.MoveZN.clicked.connect(self._MoveZN)
+        self.StageStop.clicked.connect(self._StageStop)
+        self.GetPositions.clicked.connect(self._GetPositions)
         self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
 
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
@@ -195,20 +198,37 @@ class Window(QMainWindow, Ui_ForagingGUI):
             for child in container.findChildren((QtWidgets.QLineEdit)):        
                 child.returnPressed.connect(self.keyPressEvent)
     
-    
+    def _GetPositions(self):
+        '''get the current position of the stage'''
+        if hasattr(self, 'current_stage'):
+            current_stage=self.current_stage
+            current_position=current_stage.get_position()
+            self._UpdatePosition(current_position,(0,0,0))
+                                
+    def _StageStop(self):
+        '''Halt the stage'''
+        if hasattr(self, 'current_stage'):
+            current_stage=self.current_stage
+            current_stage.halt()
+
     def _Move(self,axis,step):
         '''Move stage'''
-        current_stage=self.stages[self.StageSerialNum.currentText()]
-        current_position=current_stage.get_position()
-        current_stage.set_speed(500)
-        current_stage.move_relative_1d(axis,step)
-        if axis=='x':
-            relative_postition=(step,0,0)
-        elif axis=='y':
-            relative_postition=(0,step,0)
-        elif axis=='z':
-            relative_postition=(0,0,step)
-        self._UpdatePosition(current_position,relative_postition)
+        try:
+            if not hasattr(self, 'current_stage'):
+                return
+            current_stage=self.current_stage
+            current_position=current_stage.get_position()
+            current_stage.set_speed(500)
+            current_stage.move_relative_1d(axis,step)
+            if axis=='x':
+                relative_postition=(step,0,0)
+            elif axis=='y':
+                relative_postition=(0,step,0)
+            elif axis=='z':
+                relative_postition=(0,0,step)
+            self._UpdatePosition(current_position,relative_postition)
+        except:
+            pass
 
     def _MoveXP(self):
         '''Move X positively'''
@@ -227,6 +247,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         axis='y'
         step=float(self.Step.text())
         self._Move(axis,step)
+
     def _MoveYN(self):
         '''Move Y negatively'''
         axis='y'
@@ -238,7 +259,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         axis='z'
         step=float(self.Step.text())
         self._Move(axis,step)
-        
+
     def _MoveZN(self):
         '''Move Z negatively'''
         axis='z'
@@ -247,10 +268,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
     def _UpdatePosition(self,current_position,relative_postition):
         '''Update the NewScale position'''
-        current_stage=self.stages[self.StageSerialNum.currentText()]
-        self.PositionX.setText(str(current_position[0]+relative_postition[0]))
-        self.PositionY.setText(str(current_position[1]+relative_postition[1]))
-        self.PositionZ.setText(str(current_position[2]+relative_postition[2]))
+        NewPositions=[0,0,0]
+        for i in range(len(current_position)):
+            NewPositions[i]= current_position[i]+relative_postition[i]
+            if NewPositions[i]<0:
+                NewPositions[i]=0
+            elif NewPositions[i]>7500:
+                NewPositions[i]=7500
+        self.PositionX.setText(str(NewPositions[0]))
+        self.PositionY.setText(str(NewPositions[1]))
+        self.PositionZ.setText(str(NewPositions[2]))
 
     def _StageSerialNum(self):
         '''connect to a stage'''
@@ -263,24 +290,41 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         self._connect_stage(instance)
                 else:
                     self._connect_stage(instance)
+            else:
+                # only connect one stage for each GUI
+                instance.disconnect()
 
     def _InitianizeMotorStage(self):
         '''To initianize motor stage'''
         self._scan_for_usb_stages()
-
+        # use the default newscale stage
+        try:
+            if self.newscale_port!='':
+                index = self.StageSerialNum.findText(str(self.newscale_port))
+                if index != -1:
+                    self.StageSerialNum.setCurrentIndex(index)
+                else:
+                    self.Warning_Newscale.setText('Default Newsacle not found!')
+                    self.Warning_Newscale.setStyleSheet("color: red;")
+        except:
+            pass
     def _scan_for_usb_stages(self):
         '''Scan available stages'''
-        self.instances = NewScaleSerial.get_instances()
-        self.stage_names=[]
-        for instance in self.instances:
-            self.stage_names.append(instance.sn)
-        self.StageSerialNum.addItems(self.stage_names)
+        try:
+            self.instances = NewScaleSerial.get_instances()
+            self.stage_names=[]
+            for instance in self.instances:
+                self.stage_names.append(instance.sn)
+            self.StageSerialNum.addItems(self.stage_names)
+        except:
+            pass
 
     def _connect_stage(self,instance):
         '''connect to a stage'''
         self.stages = {}
         self.stage = Stage(serial=instance)
         self.stages[self.stage.name] = self.stage
+        self.current_stage=self.stage
 
     def _ConnectBonsai(self):
         '''Connect bonsai'''
@@ -292,6 +336,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.WarningLabelInitializeBonsai.setText('Please open bonsai!')
                 self.WarningLabelInitializeBonsai.setStyleSheet("color: red;")
                 self.InitializeBonsaiSuccessfully=0
+
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
         # stop the current session except it is a new session
@@ -388,6 +433,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     self.bonsaiworkflow_path=Settings['bonsaiworkflow_path']
                 else:
                     self.bonsaiworkflow_path=os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai')
+                if 'newscale_port' in Settings:
+                    self.newscale_port=Settings['newscale_port']
+                else:
+                    self.newscale_port=''
             else:
                 self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
                 self.current_box=''
@@ -396,12 +445,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.Teensy_COM=''
                 self.bonsai_path=os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe')
                 self.bonsaiworkflow_path=os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai')
+                self.newscale_port=''
         except:
             self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
             self.current_box=''
             self.Teensy_COM=''
             self.bonsai_path=os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe')
             self.bonsaiworkflow_path=os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai')
+            self.newscale_port=''
         if len(sys.argv)==1:
             towertag=''
         else:
@@ -819,6 +870,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.PlotTime._Update(self)
         except:
             pass
+        # move newscale stage
+        if hasattr(self,'current_stage'):
+            try:
+                self.current_stage.move_absolute_3d(float(self.PositionX.text()),float(self.PositionY.text()),float(self.PositionZ.text()))
+            except:
+                pass
         # Get the parameters before change
         if hasattr(self, 'GeneratedTrials') and self.ToInitializeVisual==0: # use the current GUI paramters when no session starts running
             Parameters=self.GeneratedTrials
@@ -888,7 +945,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 try:
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                         self.Continue=0
-                        if child.objectName()=='Experimenter' or child.objectName()=='AnimalName' or child.objectName()=='UncoupledReward' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
+                        if child.objectName()=='Experimenter' or child.objectName()=='AnimalName' or child.objectName()=='UncoupledReward' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater' or child.objectName()=='Step':
                             child.setStyleSheet('color: red;')
                             self.Continue=1
                         if child.text()=='': # If it's empty, changing the background color and waiting for the confirming
@@ -1689,6 +1746,17 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.Basic.setTitle(Obj['Other_BasicTitle'])
             if 'Other_BasicText' in Obj:
                 self.ShowBasic.setText(Obj['Other_BasicText'])
+            # Set newscale position to last position
+            if 'B_NewscalePositions' in Obj:
+                last_positions=Obj['B_NewscalePositions'][-1]
+                if hasattr(self,'current_stage'):
+                    try:
+                        self.current_stage.move_absolute_3d(float(last_positions[0]),float(last_positions[1]),float(last_positions[2]))
+                    except:
+                        pass
+            else:
+                pass
+                    
         else:
             self.NewSession.setDisabled(False)
 

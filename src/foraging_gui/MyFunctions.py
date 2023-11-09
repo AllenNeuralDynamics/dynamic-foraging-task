@@ -53,6 +53,7 @@ class GenerateTrials():
         self.B_LaserDuration=[]
         self.B_SelectedCondition=[]
         self.B_AutoWaterTrial=np.array([[],[]]).astype(bool) # to indicate if it is a trial with outo water.
+        self.B_NewscalePositions=[]
         self.NextWaveForm=1 # waveform stored for later use
         self.CurrentWaveForm=1 # the current waveform to trigger the optogenetics
         self.Start_Delay_LeftLicks=[]
@@ -852,6 +853,9 @@ class GenerateTrials():
                         '  DD per finish trial goCue_nextStart: ' + str(self.DD_PerTrial_GoCue_NextStart)+'\n')
             self.win.ShowBasic.setText(Other_BasicText)
             self.win.Other_BasicText=Other_BasicText
+            # newscale positions
+            if hasattr(self.win, 'current_stage'):
+                self.win._GetPositions()
     def _CheckStop(self):
         '''Stop if there are many ingoral trials or if the maximam trial is exceeded MaxTrial'''
         StopIgnore=int(self.TP_StopIgnores)-1
@@ -1361,6 +1365,9 @@ class GenerateTrials():
         self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime)
         self.B_GoCueTime=np.append(self.B_GoCueTime,GoCueTime)
         self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,RewardOutcomeTime)
+        # get the newscale positions
+        if hasattr(self.win, 'current_stage'):
+            self.B_NewscalePositions.append(self.win.current_stage.get_position())
         self.GetResponseFinish=1
 
     def _set_valve_time_left(self,channel3,LeftValue=0.01,Multiplier=1):
