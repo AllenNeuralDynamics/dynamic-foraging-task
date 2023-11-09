@@ -1,10 +1,8 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
+from scipy import stats
 from matplotlib.figure import Figure
 from matplotlib.gridspec import GridSpec
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from scipy import stats
 
 
 class PlotV(FigureCanvas):
