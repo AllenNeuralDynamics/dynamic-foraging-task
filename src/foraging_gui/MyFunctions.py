@@ -1365,9 +1365,6 @@ class GenerateTrials():
         self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime)
         self.B_GoCueTime=np.append(self.B_GoCueTime,GoCueTime)
         self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,RewardOutcomeTime)
-        # get the newscale positions
-        if hasattr(self.win, 'current_stage'):
-            self.B_NewscalePositions.append(self.win.current_stage.get_position())
         self.GetResponseFinish=1
 
     def _set_valve_time_left(self,channel3,LeftValue=0.01,Multiplier=1):
@@ -1446,21 +1443,23 @@ class GenerateTrials():
         except:
             pass
     def _SaveParameters(self):
-         for attr_name in dir(self):
-                if attr_name.startswith('TP_'):
-                    # Add the field to the dictionary with the 'TP_' prefix removed
-                    # Check if the attribute exists in self.Obj
-                    if attr_name in self.Obj:
-                        # Check if the attribute value is already a list
-                        if isinstance(self.Obj[attr_name], list):
-                            self.Obj[attr_name].append(getattr(self, attr_name))
-                        else:
-                            # If the attribute value is not a list, create a new list and append to it
-                            self.Obj[attr_name] = [self.Obj[attr_name], getattr(self, attr_name)]
+        for attr_name in dir(self):
+            if attr_name.startswith('TP_'):
+                # Add the field to the dictionary with the 'TP_' prefix removed
+                # Check if the attribute exists in self.Obj
+                if attr_name in self.Obj:
+                    # Check if the attribute value is already a list
+                    if isinstance(self.Obj[attr_name], list):
+                        self.Obj[attr_name].append(getattr(self, attr_name))
                     else:
-                        # If the attribute does not exist in self.Obj, create a new list and append to it
-                        self.Obj[attr_name] = [getattr(self, attr_name)]
-
+                        # If the attribute value is not a list, create a new list and append to it
+                        self.Obj[attr_name] = [self.Obj[attr_name], getattr(self, attr_name)]
+                else:
+                    # If the attribute does not exist in self.Obj, create a new list and append to it
+                    self.Obj[attr_name] = [getattr(self, attr_name)]
+        # get the newscale positions
+        if hasattr(self.win, 'current_stage'):
+            self.B_NewscalePositions.append(self.win.current_stage.get_position())
 class WorkerSignals(QObject):
     '''
     Defines the signals available from a running worker thread.
