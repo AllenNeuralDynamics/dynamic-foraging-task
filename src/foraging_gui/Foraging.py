@@ -16,6 +16,8 @@ from PyQt5 import QtWidgets,QtGui,QtCore
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 from PyQt5.QtWidgets import QFileDialog,QVBoxLayout,QLineEdit
 from PyQt5.QtCore import QThreadPool,Qt
+from newscale.interfaces import NewScaleSerial
+from stage import Stage
 
 import foraging_gui.rigcontrol
 from foraging_gui.ForagingGUI import Ui_ForagingGUI
