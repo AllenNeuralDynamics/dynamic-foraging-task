@@ -2,9 +2,9 @@ import time
 import traceback
 import sys
 
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt5.QtWidgets import QApplication,QMainWindow,QVBoxLayout,QLabel
+from PyQt5.QtWidgets import QPushButton,QWidget
+from PyQt5.QtCore import QObject, pyqtSignal, QRunnable,QThreadPool,QTimer
 
 class WorkerSignals(QObject):
     '''
