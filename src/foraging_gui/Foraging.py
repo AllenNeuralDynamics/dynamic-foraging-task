@@ -213,15 +213,15 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
-            # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
-            for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):        
+            # Iterate over each child that is a QLineEdit or QDoubleSpinBox
+            for child in container.findChildren((QtWidgets.QLineEdit,
+                QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):        
                 child.textChanged.connect(self._CheckTextChange)
         # Opto_dialog can not detect natural enter press, so returnPressed is used here. 
         for container in [self.Opto_dialog]:
-            # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
+            # Iterate over each child that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit)):        
-                child.returnPressed.connect(self.keyPressEvent)
-    
+                child.returnPressed.connect(self.keyPressEvent) 
     
     def _Move(self,axis,step):
         '''Move stage'''
@@ -254,6 +254,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         axis='y'
         step=float(self.Step.text())
         self._Move(axis,step)
+
     def _MoveYN(self):
         '''Move Y negatively'''
         axis='y'
@@ -319,6 +320,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.WarningLabelInitializeBonsai.setText('Please open bonsai!')
                 self.WarningLabelInitializeBonsai.setStyleSheet("color: red;")
                 self.InitializeBonsaiSuccessfully=0
+
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
         # stop the current session except it is a new session
@@ -358,7 +360,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         if os.path.exists(self.LaserCalibrationFiles):
             with open(self.LaserCalibrationFiles, 'r') as f:
                 self.LaserCalibrationResults = json.load(f)
-                sorted_dates = sorted(self.LaserCalibrationResults.keys(), key=self._custom_sort_key)
+                sorted_dates = sorted(self.LaserCalibrationResults.keys(),
+                    key=self._custom_sort_key)
                 self.RecentLaserCalibration=self.LaserCalibrationResults[sorted_dates[-1]]
                 self.RecentCalibrationDate=sorted_dates[-1]
 
@@ -367,7 +370,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         if os.path.exists(self.WaterCalibrationFiles):
             with open(self.WaterCalibrationFiles, 'r') as f:
                 self.WaterCalibrationResults = json.load(f)
-                sorted_dates = sorted(self.WaterCalibrationResults.keys(), key=self._custom_sort_key)
+                sorted_dates = sorted(self.WaterCalibrationResults.keys(), 
+                    key=self._custom_sort_key)
                 self.RecentWaterCalibration=self.WaterCalibrationResults[sorted_dates[-1]]
                 self.RecentWaterCalibrationDate=sorted_dates[-1]
 
@@ -388,7 +392,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 if 'default_saveFolder' in Settings:
                     self.default_saveFolder=Settings['default_saveFolder']
                 else:
-                    self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
+                    self.default_saveFolder=os.path.join(\
+                        os.path.expanduser("~"), "Documents")+'\\'
                 if 'current_box' in Settings:
                     self.current_box=Settings['current_box']
                 else:
@@ -396,11 +401,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 if 'log_folder' in Settings:
                     self.log_folder=Settings['log_folder']
                 else:
-                    self.log_folder=os.path.join(os.path.expanduser("~"), "Documents",'log')
+                    self.log_folder=os.path.join(os.path.expanduser("~"), 
+                        "Documents",'log')
                 if 'temporary_video_folder' in Settings:
                     self.temporary_video_folder=Settings['temporary_video_folder']
                 else:
-                    self.temporary_video_folder=os.path.join(os.path.expanduser("~"), "Documents",'temporaryvideo')
+                    self.temporary_video_folder=os.path.join(os.path.expanduser("~"), 
+                        "Documents",'temporaryvideo')
                 if 'Teensy_COM' in Settings:
                     self.Teensy_COM=Settings['Teensy_COM']
                 else:
@@ -408,25 +415,35 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 if 'bonsai_path' in Settings:
                     self.bonsai_path=Settings['bonsai_path']
                 else:
-                    self.bonsai_path=os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe')
+                    self.bonsai_path=os.path.join(\
+                        os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe')
                 if 'bonsaiworkflow_path' in Settings:
                     self.bonsaiworkflow_path=Settings['bonsaiworkflow_path']
                 else:
-                    self.bonsaiworkflow_path=os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai')
+                    self.bonsaiworkflow_path=os.path.join(os.path.dirname(os.getcwd()),
+                        'workflows','foraging.bonsai')
             else:
-                self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
+                self.default_saveFolder=os.path.join(os.path.expanduser("~"), 
+                    "Documents")+'\\'
                 self.current_box=''
-                self.log_folder=os.path.join(os.path.expanduser("~"), "Documents",'log')
-                self.temporary_video_folder=os.path.join(os.path.expanduser("~"), "Documents",'temporaryvideo')
+                self.log_folder=os.path.join(os.path.expanduser("~"), 
+                    "Documents",'log')
+                self.temporary_video_folder=os.path.join(\
+                    os.path.expanduser("~"), "Documents",'temporaryvideo')
                 self.Teensy_COM=''
-                self.bonsai_path=os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe')
-                self.bonsaiworkflow_path=os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai')
+                self.bonsai_path=os.path.join(\
+                    os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe')
+                self.bonsaiworkflow_path=os.path.join(\
+                    os.path.dirname(os.getcwd()),'workflows','foraging.bonsai')
         except:
-            self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
+            self.default_saveFolder=os.path.join(os.path.expanduser("~"), 
+                "Documents")+'\\'
             self.current_box=''
             self.Teensy_COM=''
-            self.bonsai_path=os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe')
-            self.bonsaiworkflow_path=os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai')
+            self.bonsai_path=os.path.join(\
+                os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe')
+            self.bonsaiworkflow_path=os.path.join(\
+                os.path.dirname(os.getcwd()),'workflows','foraging.bonsai')
         if len(sys.argv)==1:
             towertag=''
         else:
@@ -437,12 +454,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
         index = self.Tower.findText(self.current_box)
         if index != -1:
             self.Tower.setCurrentIndex(index)
+
     def _InitializeBonsai(self):
         '''Initianizing osc messages'''
         # open the bondai workflow and run
         self._OpenBonsaiWorkflow()
         time.sleep(3)
         self._ConnectOSC()
+
     def _ConnectOSC(self):
         '''Connect the GUI and Bonsai through OSC messages'''    
         # connect the bonsai workflow with the python GUI
@@ -527,12 +546,15 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 SettingsBox='Settings_box4.csv'
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
         if len(sys.argv)==1:
-            subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
+            subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '\
+                +'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
         else:
             if bonsai_tag==1:
-                subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox,cwd=CWD)
+                subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+\
+                    ' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox,cwd=CWD)
             else:
-                subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
+                subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+\
+                    ' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
 
     def _OpenSettingFolder(self):
         '''Open the setting folder'''
@@ -540,12 +562,15 @@ class Window(QMainWindow, Ui_ForagingGUI):
             subprocess.Popen(['explorer', self.SettingFolder])
         except:
             pass
+
     def _ForceSave(self):
         '''Save whether the current trial is complete or not'''
         self._Save(ForceSave=1)
+
     def _SaveContinue(self):
         '''Do not restart a session after saving'''
         self._Save(SaveContinue=1)
+
     def _WaterVolumnManage1(self):
         '''Change the water volume based on the valve open time'''
         self.LeftValue.textChanged.disconnect(self._WaterVolumnManage1)
@@ -564,10 +589,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     tag=1
         if tag==1:
             self._GetLatestFitting(FittingResults)
-            self._ValvetimeVolumnTransformation(widget2=self.LeftValue_volume,widget1=self.LeftValue,direction=1,valve='Left')
-            self._ValvetimeVolumnTransformation(widget2=self.RightValue_volume,widget1=self.RightValue,direction=1,valve='Right')
-            self._ValvetimeVolumnTransformation(widget2=self.GiveWaterL_volume,widget1=self.GiveWaterL,direction=1,valve='Left')
-            self._ValvetimeVolumnTransformation(widget2=self.GiveWaterR_volume,widget1=self.GiveWaterR,direction=1,valve='Right')
+            self._ValvetimeVolumnTransformation(widget2=self.LeftValue_volume,
+                widget1=self.LeftValue,direction=1,valve='Left')
+            self._ValvetimeVolumnTransformation(widget2=self.RightValue_volume,
+                widget1=self.RightValue,direction=1,valve='Right')
+            self._ValvetimeVolumnTransformation(widget2=self.GiveWaterL_volume,
+                widget1=self.GiveWaterL,direction=1,valve='Left')
+            self._ValvetimeVolumnTransformation(widget2=self.GiveWaterR_volume,
+                widget1=self.GiveWaterR,direction=1,valve='Right')
             self.LeftValue_volume.setEnabled(True)
             self.RightValue_volume.setEnabled(True)
             self.GiveWaterL_volume.setEnabled(True)
@@ -608,10 +637,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     tag=1
         if tag==1:
             self._GetLatestFitting(FittingResults)
-            self._ValvetimeVolumnTransformation(widget1=self.LeftValue_volume,widget2=self.LeftValue,direction=-1,valve='Left')
-            self._ValvetimeVolumnTransformation(widget1=self.RightValue_volume,widget2=self.RightValue,direction=-1,valve='Right')
-            self._ValvetimeVolumnTransformation(widget1=self.GiveWaterL_volume,widget2=self.GiveWaterL,direction=-1,valve='Left')
-            self._ValvetimeVolumnTransformation(widget1=self.GiveWaterR_volume,widget2=self.GiveWaterR,direction=-1,valve='Right')
+            self._ValvetimeVolumnTransformation(widget1=self.LeftValue_volume,
+                widget2=self.LeftValue,direction=-1,valve='Left')
+            self._ValvetimeVolumnTransformation(widget1=self.RightValue_volume,
+                widget2=self.RightValue,direction=-1,valve='Right')
+            self._ValvetimeVolumnTransformation(widget1=self.GiveWaterL_volume,
+                widget2=self.GiveWaterL,direction=-1,valve='Left')
+            self._ValvetimeVolumnTransformation(widget1=self.GiveWaterR_volume,
+                widget2=self.GiveWaterR,direction=-1,valve='Right')
         else:
             self.LeftValue_volume.setEnabled(False)
             self.RightValue_volume.setEnabled(False)
@@ -643,9 +676,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 widget2.setEnabled(True)
                 widget1.setEnabled(True)
             if direction==1:
-                widget2.setValue(float(widget1.text())*self.latest_fitting[valve][0]+self.latest_fitting[valve][1])
+                widget2.setValue(float(widget1.text())*self.latest_fitting[valve][0]\
+                    +self.latest_fitting[valve][1])
             elif direction==-1:
-                widget2.setValue((float(widget1.text())-self.latest_fitting[valve][1])/self.latest_fitting[valve][0])
+                widget2.setValue((float(widget1.text())-self.latest_fitting[valve][1])\
+                    /self.latest_fitting[valve][0])
         except:
             pass
 
@@ -671,7 +706,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             subprocess.Popen(['explorer', folder_name])
         except:
             try:
-                AnimalFolder=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text())
+                AnimalFolder=os.path.join(self.default_saveFolder, 
+                    self.Tower.currentText(),self.AnimalName.text())
                 subprocess.Popen(['explorer', AnimalFolder])
             except:
                 pass
@@ -691,7 +727,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # load the prestored training stage parameters
         self._LoadTrainingPar()
         # set the training parameters in the GUI
-        widget_dict = {w.objectName(): w for w in self.TrainingParameters.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+        widget_dict = {
+            w.objectName(): w for w in \
+            self.TrainingParameters.findChildren((\
+            QtWidgets.QPushButton,QtWidgets.QLineEdit,\
+            QtWidgets.QTextEdit, QtWidgets.QComboBox,\
+            QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))\
+            }
         Task=self.Task.currentText()
         CurrentTrainingStage=self.TrainingStage.currentText()
         try:
@@ -702,7 +744,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     continue
                 if key in self.TrainingStagePar[Task][CurrentTrainingStage]:
                     # skip some keys
-                    if key=='ExtraWater' or key=='WeightBefore' or key=='WeightAfter' or key=='SuggestedWater':
+                    if key=='ExtraWater' or key=='WeightBefore' or \
+                        key=='WeightAfter' or key=='SuggestedWater':
                         self.ExtraWater.setText('')
                         continue
                     widget = widget_dict[key]
@@ -758,7 +801,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                             self._AutoReward()
                 else:
                     widget = widget_dict[key]
-                    if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
+                    if not (isinstance(widget, QtWidgets.QComboBox) \
+                        or isinstance(widget, QtWidgets.QPushButton)):
                         widget.clear()
         except Exception as e:
             # Catch the exception and print error information
@@ -770,7 +814,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # load the pre-stored training stage parameters
         self._LoadTrainingPar()
         # get the current training stage parameters
-        widget_dict = {w.objectName(): w for w in self.TrainingParameters.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+        widget_dict = {
+            w.objectName(): w for w in self.TrainingParameters.findChildren((\
+            QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, \
+            QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))
+            }
         Task=self.Task.currentText()
         CurrentTrainingStage=self.TrainingStage.currentText()
         for key in widget_dict.keys():
@@ -783,7 +831,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.TrainingStagePar[Task][CurrentTrainingStage][widget.objectName()]=widget.isChecked()
             elif isinstance(widget, QtWidgets.QTextEdit):
                 self.TrainingStagePar[Task][CurrentTrainingStage][widget.objectName()]=widget.toPlainText()
-            elif isinstance(widget, QtWidgets.QDoubleSpinBox) or isinstance(widget, QtWidgets.QLineEdit)  or isinstance(widget, QtWidgets.QSpinBox):
+            elif isinstance(widget, QtWidgets.QDoubleSpinBox) \
+                or isinstance(widget, QtWidgets.QLineEdit)  \
+                or isinstance(widget, QtWidgets.QSpinBox):
                 self.TrainingStagePar[Task][CurrentTrainingStage][widget.objectName()]=widget.text()
             elif isinstance(widget, QtWidgets.QComboBox):
                 self.TrainingStagePar[Task][CurrentTrainingStage][widget.objectName()]=widget.currentText()
@@ -795,12 +845,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.WarningLabel_SaveTrainingStage.setText('Training stage parameters were saved!')
         self.WarningLabel_SaveTrainingStage.setStyleSheet("color: red;")
         self.SaveTraining.setChecked(False)
+
     def _LoadTrainingPar(self):
         '''load the training stage parameters'''
         self.TrainingStagePar={}
         if os.path.exists(self.TrainingStageFiles):
             with open(self.TrainingStageFiles, 'r') as f:
                 self.TrainingStagePar = json.load(f)
+
     def _Randomness(self):
         '''enable/disable some fields in the Block/Delay Period/ITI'''
         if self.Randomness.currentText()=='Exponential':
@@ -845,7 +897,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         except:
             pass
         # Get the parameters before change
-        if hasattr(self, 'GeneratedTrials') and self.ToInitializeVisual==0: # use the current GUI paramters when no session starts running
+        if hasattr(self, 'GeneratedTrials') and self.ToInitializeVisual==0: 
+            # use the current GUI paramters when no session starts running
             Parameters=self.GeneratedTrials
         else:
             Parameters=self
@@ -870,7 +923,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     if child.objectName()=='AnimalName' and child.text()=='':
                         child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
-                    if child.objectName()=='Experimenter' or child.objectName()=='TotalWater' or child.objectName()=='AnimalName' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
+                    if child.objectName()=='Experimenter'\
+                        or child.objectName()=='TotalWater'\
+                        or child.objectName()=='AnimalName'\
+                        or child.objectName()=='WeightBefore'\
+                        or child.objectName()=='WeightAfter'\
+                        or child.objectName()=='ExtraWater':
                         continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
@@ -903,9 +961,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
-                if child.objectName()=='qt_spinbox_lineedit' or child.isEnabled()==False: # I don't understand where the qt_spinbox_lineedit comes from. 
+                if child.objectName()=='qt_spinbox_lineedit' \
+                    or child.isEnabled()==False: 
+                    # I don't understand where the qt_spinbox_lineedit comes from. 
                     continue
-                if (child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum') and (child.text()!=''):
+                if (child.objectName()=='RewardFamily' \
+                    or child.objectName()=='RewardPairsN' \
+                    or child.objectName()=='BaseRewardSum') and (child.text()!=''):
                     Correct=self._CheckFormat(child)
                     if Correct ==0: # incorrect format; don't change
                         child.setText(getattr(Parameters, 'TP_'+child.objectName()))
@@ -913,14 +975,21 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 try:
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                         self.Continue=0
-                        if child.objectName()=='Experimenter' or child.objectName()=='AnimalName' or child.objectName()=='UncoupledReward' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
+                        if child.objectName()=='Experimenter' \
+                            or child.objectName()=='AnimalName' \
+                            or child.objectName()=='UncoupledReward' \
+                            or child.objectName()=='WeightBefore'  \
+                            or child.objectName()=='WeightAfter' \
+                            or child.objectName()=='ExtraWater':
                             child.setStyleSheet('color: red;')
                             self.Continue=1
                         if child.text()=='': # If it's empty, changing the background color and waiting for the confirming
                             self.UpdateParameters=0
                             child.setStyleSheet('background-color: red;')
                             self.Continue=1
-                        if child.objectName()=='RunLength' or child.objectName()=='WindowSize' or child.objectName()=='StepSize':
+                        if child.objectName()=='RunLength' \
+                            or child.objectName()=='WindowSize' \
+                            or child.objectName()=='StepSize':
                             if child.text()=='':
                                 child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
                                 child.setStyleSheet('color: black;')
@@ -931,7 +1000,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         try:
                             # it's valid float
                             float(child.text())
-                            self.UpdateParameters=0 # Changes are not allowed until press is typed
+                            self.UpdateParameters=0 
+                            # Changes are not allowed until press is typed
                         except Exception as e:
                             print('An error occurred:', str(e))
                             # Invalid float. Do not change the parameter
@@ -951,7 +1021,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     pass
     def _CheckFormat(self,child):
         '''Check if the input format is correct'''
-        if child.objectName()=='RewardFamily': # When we change the RewardFamily, sometimes the RewardPairsN is larger than available reward pairs in this family. 
+        if child.objectName()=='RewardFamily': 
+            # When we change the RewardFamily, sometimes the RewardPairsN is 
+            # larger than available reward pairs in this family. 
             try:
                 self.RewardFamilies[int(self.RewardFamily.text())-1]
                 if int(self.RewardPairsN.text())>len(self.RewardFamilies[int(self.RewardFamily.text())-1]):
@@ -960,7 +1032,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
             except Exception as e:
                 print('An error occurred:', str(e))
                 return 0
-        if child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum':
+        if child.objectName()=='RewardFamily' \
+            or child.objectName()=='RewardPairsN' \
+            or child.objectName()=='BaseRewardSum':
             try:
                 self.RewardPairs=self.RewardFamilies[int(self.RewardFamily.text())-1][:int(self.RewardPairsN.text())]
                 if int(self.RewardPairsN.text())>len(self.RewardFamilies[int(self.RewardFamily.text())-1]):
@@ -993,7 +1067,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _SuggestedWater(self):
         '''Change suggested water based on total water'''
         try:
-            self.T_SuggestedWater=float(self.TotalWater.text())-float(self.GeneratedTrials.BS_TotalReward)
+            self.T_SuggestedWater=float(self.TotalWater.text())-\
+                float(self.GeneratedTrials.BS_TotalReward)
             self.SuggestedWater.setText(str(np.round(self.T_SuggestedWater,3)))
         except Exception as e:
             print('An error occurred:', str(e))
@@ -1189,7 +1264,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.RewardPairs=self.RewardFamilies[int(self.RewardFamily.text())-1][:int(self.RewardPairsN.text())]
                 self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.BaseRewardSum.text())
                 if hasattr(self, 'GeneratedTrials'):
-                    self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2))) 
+                    self.ShowRewardPairs.setText('Reward pairs: '\
+                        +str(np.round(self.RewardProb,2))+'\n\n'+\
+                        'Current pair: '+str(np.round(\
+                        self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2))) 
                 else:
                     self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: ') 
             elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
