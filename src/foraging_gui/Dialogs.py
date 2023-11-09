@@ -771,6 +771,7 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         # change the color to be normal
         self.StartCalibratingRight.setStyleSheet("background-color : none")
         self.StartCalibratingRight.setChecked(False)
+
     def _Save(self,valve,valve_open_time,valve_open_interval,cycle,total_water,tube_weight):
         '''save the calibrated result and update the figure'''
         if total_water=='' or tube_weight=='':
@@ -803,6 +804,7 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
             json.dump(WaterCalibrationResults, file,indent=4)
         # update the figure
         self._UpdateFigure()
+
     def _UpdateFigure(self):
         '''plot the calibration result'''
         if self.ToInitializeVisual==1: # only run once
@@ -927,6 +929,7 @@ class CameraDialog(QDialog,Ui_Camera):
         self.setupUi(self)
         self.MainWindow=MainWindow
         self._connectSignalsSlots()
+
     def _connectSignalsSlots(self):
         self.StartCamera.clicked.connect(self._StartCamera)
         self.ClearTemporaryVideo.clicked.connect(self._ClearTemporaryVideo)

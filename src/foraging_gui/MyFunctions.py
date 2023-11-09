@@ -15,8 +15,6 @@ class GenerateTrials():
     def __init__(self,win):
         self.win=win
         self.B_RewardFamilies=self.win.RewardFamilies
-        #self.B_RewardFamilies = [[[float(x) for x in y] for y in z] for z in self.B_RewardFamilies]
-        #self.B_RewardFamilies = np.array(self.B_RewardFamilies)
         self.B_CurrentTrialN=-1 # trial number starts from 0; Update when trial starts
         self.B_LickPortN=2
         self.B_ANewBlock=np.array([1,1]).astype(int)
@@ -78,7 +76,6 @@ class GenerateTrials():
         self.B_StartType=[] # 1: normal trials with delay; 3: optogenetics trials without delay
         self.GeneFinish=1
         self.GetResponseFinish=1
-        #self.B_LaserTrialNum=[] # B_LaserAmplitude, B_LaserDuration, B_SelectedCondition have values only on laser on trials, so we need to store the laser trial number
         self.Obj={}
         # get all of the training parameters of the current trial
         self._GetTrainingParameters(self.win)
@@ -226,8 +223,6 @@ class GenerateTrials():
             # get the reward probabilities pool
             for i in range(len(self.B_ANewBlock)):
                 if self.B_ANewBlock[i]==1:
-                    #RewardProbPool=np.append(self.RewardProb,np.fliplr(self.RewardProb),axis=0)
-                    #RewardProbPool=RewardProbPool[:,i]
                     input_string=self.win.UncoupledReward.text()
                     # remove any square brackets and spaces from the string
                     input_string = input_string.replace('[','').replace(']','').replace(',', ' ')
@@ -545,7 +540,6 @@ class GenerateTrials():
         TP_RightValue_volume=TP_RightValue_volume[0:len(B_RewardedHistory[1])]
 
         self.BS_TotalReward=np.sum((B_RewardedHistory[0]==True).astype(int)*TP_LeftValue_volume+(B_RewardedHistory[1]==True).astype(int)*TP_RightValue_volume)
-        #self.BS_TotalReward=float(self.BS_RewardN)*float(self.win.WaterPerRewardedTrial)
         self.BS_LeftRewardTrialN=np.sum(self.B_RewardedHistory[0]==True)
         self.BS_RightRewardTrialN=np.sum(self.B_RewardedHistory[1]==True)
         self.BS_LeftChoiceN=np.sum(self.B_AnimalResponseHistory==0)
@@ -956,7 +950,6 @@ class GenerateTrials():
             if self.CLP_OffsetStart<0:
                 self.win.WarningLabel.setText('Please set offset start to be positive!')
                 self.win.WarningLabel.setStyleSheet("color: red;")
-            #self.CLP_CurrentDuration=self.CurrentITI+self.CurrentDelay-self.CLP_OffsetStart+self.CLP_OffsetEnd
             # there is no delay for optogenetics trials 
             self.CLP_CurrentDuration=self.CurrentITI-self.CLP_OffsetStart+self.CLP_OffsetEnd
         elif self.CLP_LaserStart=='Go cue' and self.CLP_LaserEnd=='Trial start':
