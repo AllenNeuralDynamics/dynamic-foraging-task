@@ -78,7 +78,7 @@ class PlotV(FigureCanvas):
         ax2.plot(self.B_Time, self.B_RewardProHistory[0][0:Len],color='r', label='p_L',alpha=1)
         ax2.plot(self.B_Time, self.B_RewardProHistory[1][0:Len],color='b', label='p_R',alpha=1)
         Fraction=self.B_RewardProHistory[1]/self.B_RewardProHistory.sum(axis=0)
-        ax2.plot(self.B_Time,Fraction[0:Len],color='y',label='p_R_frac',alpha=0.8)
+        ax2.plot(self.B_Time,Fraction[0:Len],linestyle=':',color='y',label='p_R_frac',alpha=0.8)
         self.draw()
     def _PlotChoice(self):
         MarkerSize=self.MarkerSize
