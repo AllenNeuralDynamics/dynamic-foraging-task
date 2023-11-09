@@ -1531,7 +1531,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.NewSession.setDisabled(True) 
                 self.StartANewSession=1
                 self.CreateNewFolder=1
-                self.Channel.StopLogging('s')
+                try:
+                    self.Channel.StopLogging('s')
+                except:
+                    pass
 
 
     def _GetSaveFolder(self,CTrainingFolder=1,CHarpFolder=1,CVideoFolder=1,CPhotometryFolder=1,CEphysFolder=1):
@@ -1899,7 +1902,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.StartANewSession=1
                 self.CreateNewFolder=1
                 self.PhotometryRun=0
-                self.Channel.StopLogging('s')
+                try:
+                    self.Channel.StopLogging('s')
+                except:
+                    pass
                 print('Saved')
             elif reply == QMessageBox.No:
                 self.NewSession.setStyleSheet("background-color : green;")
@@ -1908,7 +1914,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.StartANewSession=1
                 self.CreateNewFolder=1
                 self.PhotometryRun=0
-                self.Channel.StopLogging('s')
+                try:
+                    self.Channel.StopLogging('s')
+                except:
+                    pass
             else:
                 self.NewSession.setChecked(False)
                 pass
