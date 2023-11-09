@@ -157,7 +157,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._Task)
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._AdvancedBlockAuto)
-        self.TotalWater.textChanged.connect(self._SuggestedWater)
+        self.TotalWater.textChanged.connect(self._UpdateSuggestedWater)
         self.Randomness.currentIndexChanged.connect(self._Randomness)
         self.TrainingStage.currentIndexChanged.connect(self._TrainingStage)
         self.TrainingStage.activated.connect(self._TrainingStage)
@@ -1022,15 +1022,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         else:
             return 1
         
-    def _SuggestedWater(self):
-        '''Change suggested water based on total water'''
-        try:
-            self.T_SuggestedWater=float(self.TotalWater.text())-float(self.GeneratedTrials.BS_TotalReward)
-            self.SuggestedWater.setText(str(np.round(self.T_SuggestedWater,3)))
-        except Exception as e:
-            print('An error occurred:', str(e))
-            self.SuggestedWater.setText(self.TotalWater.text())
-
     def _GetTrainingParameters(self):
         '''Get training parameters'''
         # Iterate over each container to find child widgets and store their values in self
@@ -1973,7 +1964,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         time.sleep(Time)
     def _Start(self):
         '''start trial loop'''
-        
         if self.InitializeBonsaiSuccessfully==0:
             self._ConnectBonsai()
             if self.InitializeBonsaiSuccessfully==0:
@@ -2201,21 +2191,29 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.DelayMax.setEnabled(True)
     def _GiveLeft(self):
         '''manually give left water'''
+        if self.InitializeBonsaiSuccessfully==0:
+            self._ConnectBonsai()
+            if self.InitializeBonsaiSuccessfully==0:
+                return
         self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
         time.sleep(0.01) 
         self.Channel3.ManualWater_Left(int(1))
         self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
         self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+float(self.TP_GiveWaterL_volume)/1000
-        self._UpdateSuggestedWater(float(self.TP_GiveWaterL_volume)/1000)
+        self._UpdateSuggestedWater()
     
     def _GiveRight(self):
         '''manually give right water'''
+        if self.InitializeBonsaiSuccessfully==0:
+            self._ConnectBonsai()
+            if self.InitializeBonsaiSuccessfully==0:
+                return
         self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
         time.sleep(0.01) 
         self.Channel3.ManualWater_Right(int(1))
         self.Channel.RightValue(float(self.TP_RightValue)*1000)
         self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
-        self._UpdateSuggestedWater(float(self.TP_GiveWaterR_volume)/1000)
+        self._UpdateSuggestedWater()
 
     def _UpdateSuggestedWater(self,ManualWater=0):
         '''Update the suggested water from the manually give water'''
@@ -2232,11 +2230,15 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 Tag=1
             if Tag==1:
                 if self.SuggestedWater.text()=='':
-                    SuggestedWater=float(self.TotalWater.text())
-                else:
-                    SuggestedWater=float(self.SuggestedWater.text())
-                self.B_SuggestedWater=SuggestedWater-ManualWater
-                self.SuggestedWater.setText(str(np.round(self.B_SuggestedWater,3)))
+                    try:
+                        self.SuggestedWater.setText(self.TotalWater.text())
+                    except:
+                        pass
+                try:
+                    self.B_SuggestedWater=float(self.TotalWater.text())-np.sum(self.ManualWaterVolume)
+                    self.SuggestedWater.setText(str(np.round(self.B_SuggestedWater,3)))
+                except:
+                    pass
 
 if __name__ == "__main__":
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling,1)
