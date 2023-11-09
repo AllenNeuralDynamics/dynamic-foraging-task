@@ -9,7 +9,7 @@ from itertools import accumulate
 import numpy as np
 
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import *
+from PyQt5.QtCore import QObject, QRunnable, pyqtSlot
 
 class GenerateTrials():
     def __init__(self,win):
