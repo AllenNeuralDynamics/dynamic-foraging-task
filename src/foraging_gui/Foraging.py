@@ -290,15 +290,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         self._connect_stage(instance)
                 else:
                     self._connect_stage(instance)
-            else:
-                # only connect one stage for each GUI
-                instance.disconnect()
 
     def _InitianizeMotorStage(self):
         '''To initianize motor stage'''
         self._scan_for_usb_stages()
         # use the default newscale stage
         try:
+            self.newscale_port=eval('self.newscale_port'+'_tower'+str(self.bonsai_tag))
             if self.newscale_port!='':
                 index = self.StageSerialNum.findText(str(self.newscale_port))
                 if index != -1:
@@ -433,10 +431,22 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     self.bonsaiworkflow_path=Settings['bonsaiworkflow_path']
                 else:
                     self.bonsaiworkflow_path=os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai')
-                if 'newscale_port' in Settings:
-                    self.newscale_port=Settings['newscale_port']
+                if 'newscale_port_tower1' in Settings:
+                    self.newscale_port_tower1=Settings['newscale_port_tower1']
                 else:
-                    self.newscale_port=''
+                    self.newscale_port_tower1=''
+                if 'newscale_port_tower2' in Settings:
+                    self.newscale_port_tower2=Settings['newscale_port_tower2']
+                else:
+                    self.newscale_port_tower2=''
+                if 'newscale_port_tower3' in Settings:
+                    self.newscale_port_tower3=Settings['newscale_port_tower3']
+                else:
+                    self.newscale_port_tower3=''
+                if 'newscale_port_tower4' in Settings:
+                    self.newscale_port_tower4=Settings['newscale_port_tower4']
+                else:
+                    self.newscale_port_tower4=''
             else:
                 self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
                 self.current_box=''
@@ -445,14 +455,20 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.Teensy_COM=''
                 self.bonsai_path=os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe')
                 self.bonsaiworkflow_path=os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai')
-                self.newscale_port=''
+                self.newscale_port_tower1=''
+                self.newscale_port_tower2=''
+                self.newscale_port_tower3=''
+                self.newscale_port_tower4=''
         except:
             self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
             self.current_box=''
             self.Teensy_COM=''
             self.bonsai_path=os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe')
             self.bonsaiworkflow_path=os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai')
-            self.newscale_port=''
+            self.newscale_port_tower1=''
+            self.newscale_port_tower2=''
+            self.newscale_port_tower3=''
+            self.newscale_port_tower4=''
         if len(sys.argv)==1:
             towertag=''
         else:
@@ -474,6 +490,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # connect the bonsai workflow with the python GUI
         self.ip = "127.0.0.1"
         if len(sys.argv)==1:
+            self.bonsai_tag=1
             self.request_port = 4002
             self.request_port2 = 4003
             self.request_port3 = 4004
