@@ -1297,7 +1297,7 @@ class GenerateTrials():
             DelayStartTimeHarp=-999 # -999 means a placeholder
             DelayStartTime=-999
         elif self.CurrentStartType==1:
-            ReceiveN=11
+            ReceiveN=10
         for i in range(ReceiveN):
             Rec=Channel1.receive()
             if Rec[0].address=='/TrialStartTime':

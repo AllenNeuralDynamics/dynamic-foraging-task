@@ -107,7 +107,7 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="osc:CreateTcpServer">
                 <osc:Name>BonsaiOSC</osc:Name>
-                <osc:Port>4012</osc:Port>
+                <osc:Port>4002</osc:Port>
                 <osc:NoDelay>false</osc:NoDelay>
                 <osc:AllowNatTraversal>true</osc:AllowNatTraversal>
               </Combinator>
@@ -131,7 +131,7 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="osc:CreateTcpServer">
                 <osc:Name>BonsaiOSC2</osc:Name>
-                <osc:Port>4013</osc:Port>
+                <osc:Port>4003</osc:Port>
                 <osc:NoDelay>false</osc:NoDelay>
                 <osc:AllowNatTraversal>true</osc:AllowNatTraversal>
               </Combinator>
@@ -155,7 +155,7 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="osc:CreateTcpServer">
                 <osc:Name>BonsaiOSC3</osc:Name>
-                <osc:Port>4014</osc:Port>
+                <osc:Port>4004</osc:Port>
                 <osc:NoDelay>false</osc:NoDelay>
                 <osc:AllowNatTraversal>true</osc:AllowNatTraversal>
               </Combinator>
@@ -179,7 +179,7 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="osc:CreateTcpServer">
                 <osc:Name>BonsaiOSC4</osc:Name>
-                <osc:Port>4015</osc:Port>
+                <osc:Port>4005</osc:Port>
                 <osc:NoDelay>false</osc:NoDelay>
                 <osc:AllowNatTraversal>true</osc:AllowNatTraversal>
               </Combinator>
@@ -1869,53 +1869,6 @@
             <Expression xsi:type="MulticastSubject">
               <Name>ToBonsaiOSC</Name>
             </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>BehaviorEvents</Name>
-            </Expression>
-            <Expression xsi:type="beh:Parse">
-              <harp:Register xsi:type="beh:TimestampedOutputToggle" />
-            </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Value</Selector>
-            </Expression>
-            <Expression xsi:type="BitwiseAnd">
-              <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalOutputs">
-                <Value>DOPort2</Value>
-              </Operand>
-            </Expression>
-            <Expression xsi:type="GreaterThan">
-              <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
-                <Value>0</Value>
-              </Operand>
-            </Expression>
-            <Expression xsi:type="rx:Condition">
-              <Workflow>
-                <Nodes>
-                  <Expression xsi:type="WorkflowInput">
-                    <Name>Source1</Name>
-                  </Expression>
-                  <Expression xsi:type="WorkflowOutput" />
-                </Nodes>
-                <Edges>
-                  <Edge From="0" To="1" Label="Source1" />
-                </Edges>
-              </Workflow>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:WithLatestFrom" />
-            </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Item2.Seconds</Selector>
-            </Expression>
-            <Expression xsi:type="scr:ExpressionTransform">
-              <scr:Expression>new(it as Seconds)</scr:Expression>
-            </Expression>
-            <Expression xsi:type="osc:Format">
-              <osc:Address>/DOPort2Output</osc:Address>
-            </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>ToBonsaiOSC</Name>
-            </Expression>
             <Expression xsi:type="Disable">
               <Builder xsi:type="SubscribeSubject">
                 <Name>SoundCardEvents</Name>
@@ -2119,6 +2072,75 @@
             <Expression xsi:type="MulticastSubject">
               <Name>ToBonsaiOSC2</Name>
             </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="SubscribeSubject">
+                <Name>BehaviorEvents</Name>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="beh:Parse">
+                <harp:Register xsi:type="beh:TimestampedOutputToggle" />
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="MemberSelector">
+                <Selector>Value</Selector>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="BitwiseAnd">
+                <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalOutputs">
+                  <Value>DOPort2</Value>
+                </Operand>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="GreaterThan">
+                <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
+                  <Value>0</Value>
+                </Operand>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="rx:Condition">
+                <Workflow>
+                  <Nodes>
+                    <Expression xsi:type="WorkflowInput">
+                      <Name>Source1</Name>
+                    </Expression>
+                    <Expression xsi:type="WorkflowOutput" />
+                  </Nodes>
+                  <Edges>
+                    <Edge From="0" To="1" Label="Source1" />
+                  </Edges>
+                </Workflow>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="rx:WithLatestFrom" />
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="MemberSelector">
+                <Selector>Item2.Seconds</Selector>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="scr:ExpressionTransform">
+                <scr:Expression>new(it as Seconds)</scr:Expression>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="osc:Format">
+                <osc:Address>/DOPort2Output</osc:Address>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="MulticastSubject">
+                <Name>ToBonsaiOSC</Name>
+              </Builder>
+            </Expression>
           </Nodes>
           <Edges>
             <Edge From="2" To="3" Label="Source1" />
@@ -2221,23 +2243,23 @@
             <Edge From="109" To="110" Label="Source1" />
             <Edge From="111" To="112" Label="Source1" />
             <Edge From="112" To="113" Label="Source1" />
-            <Edge From="112" To="117" Label="Source2" />
-            <Edge From="113" To="114" Label="Source1" />
-            <Edge From="114" To="115" Label="Source1" />
+            <Edge From="112" To="114" Label="Source1" />
             <Edge From="115" To="116" Label="Source1" />
-            <Edge From="116" To="117" Label="Source1" />
             <Edge From="117" To="118" Label="Source1" />
             <Edge From="118" To="119" Label="Source1" />
+            <Edge From="118" To="124" Label="Source2" />
             <Edge From="119" To="120" Label="Source1" />
             <Edge From="120" To="121" Label="Source1" />
+            <Edge From="121" To="122" Label="Source1" />
             <Edge From="122" To="123" Label="Source1" />
             <Edge From="123" To="124" Label="Source1" />
-            <Edge From="123" To="125" Label="Source1" />
+            <Edge From="124" To="125" Label="Source1" />
+            <Edge From="125" To="126" Label="Source1" />
             <Edge From="126" To="127" Label="Source1" />
-            <Edge From="128" To="129" Label="Source1" />
+            <Edge From="127" To="128" Label="Source1" />
             <Edge From="129" To="130" Label="Source1" />
-            <Edge From="129" To="135" Label="Source2" />
             <Edge From="130" To="131" Label="Source1" />
+            <Edge From="130" To="136" Label="Source2" />
             <Edge From="131" To="132" Label="Source1" />
             <Edge From="132" To="133" Label="Source1" />
             <Edge From="133" To="134" Label="Source1" />
@@ -2246,10 +2268,10 @@
             <Edge From="136" To="137" Label="Source1" />
             <Edge From="137" To="138" Label="Source1" />
             <Edge From="138" To="139" Label="Source1" />
-            <Edge From="140" To="141" Label="Source1" />
+            <Edge From="139" To="140" Label="Source1" />
             <Edge From="141" To="142" Label="Source1" />
-            <Edge From="141" To="147" Label="Source2" />
             <Edge From="142" To="143" Label="Source1" />
+            <Edge From="142" To="147" Label="Source2" />
             <Edge From="143" To="144" Label="Source1" />
             <Edge From="144" To="145" Label="Source1" />
             <Edge From="145" To="146" Label="Source1" />
@@ -6481,7 +6503,7 @@
         <Property Name="FileName" DisplayName="SettingsPath" />
       </Expression>
       <Expression xsi:type="io:CsvReader">
-        <io:FileName>C:\Users\xinxin.yin\Documents\ForagingSettings\Settings_box2.csv</io:FileName>
+        <io:FileName>C:\Users\xinxin.yin\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
         <io:ScanPattern>%s,%s</io:ScanPattern>
         <io:SkipRows>0</io:SkipRows>
       </Expression>
