@@ -30,42 +30,57 @@ from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker
 
 class NumpyEncoder(json.JSONEncoder):
-    #def default(self, obj):
-    #    if isinstance(obj, np.ndarray):
-    #        return obj.tolist()
-    #   return json.JSONEncoder.default(self, obj)
+    '''
+        Documentation needed
+    '''
     def default(self, obj):
         if isinstance(obj, np.ndarray):
-            return obj.tolist()  # Convert NumPy array to a list
+            # Convert NumPy array to a list
+            return obj.tolist()  
         if isinstance(obj, np.integer):
-            return int(obj)  # Convert np.int32 to a regular int
+            # Convert np.int32 to a regular int
+            return int(obj)  
         if isinstance(obj, np.float64) and np.isnan(obj):
-            return 'NaN'  # Represent NaN as a string
+            # Represent NaN as a string
+            return 'NaN'  
         return super(NumpyEncoder, self).default(obj)
     
 class Window(QMainWindow, Ui_ForagingGUI):
+    '''
+        Documentation needed
+    '''
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setupUi(self)
-        
-        self.SettingFolder=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings")
-        self.SettingFile=os.path.join(self.SettingFolder,'ForagingSettings.json')
+        self.setupUi(self) 
+        self.SettingFolder=os.path.join(os.path.expanduser("~"), 
+            "Documents","ForagingSettings")
+        self.SettingFile=os.path.join(self.SettingFolder,
+            'ForagingSettings.json')
         self._GetSettings()
         if len(sys.argv)==1:
             self.setWindowTitle("Foraging")
-            self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration.json')
-            self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration.json')
-            self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar.json')
-            self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json') # The training phase is shared and not differentiated by tower
+            self.LaserCalibrationFiles=os.path.join(self.SettingFolder,
+                'LaserCalibration.json')
+            self.WaterCalibrationFiles=os.path.join(self.SettingFolder,
+                'WaterCalibration.json')
+            self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,
+                'WaterCalibrationPar.json')
+            # The training phase is shared and not differentiated by tower
+            self.TrainingStageFiles=os.path.join(self.SettingFolder,
+                'TrainingStagePar.json') 
         else:
             if self.current_box=='':
                 self.setWindowTitle("Foraging"+'_'+str(sys.argv[1]))
             else:
                 self.setWindowTitle("Foraging"+'_'+self.current_box)
-            self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration_'+str(sys.argv[1])+'.json')
-            self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration_'+str(sys.argv[1])+'.json')
-            self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_'+str(sys.argv[1])+'.json')
-            self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json')
+            self.LaserCalibrationFiles=os.path.join(self.SettingFolder,
+                'LaserCalibration_'+str(sys.argv[1])+'.json')
+            self.WaterCalibrationFiles=os.path.join(self.SettingFolder,
+                'WaterCalibration_'+str(sys.argv[1])+'.json')
+            self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,
+                'WaterCalibrationPar_'+str(sys.argv[1])+'.json')
+            self.TrainingStageFiles=os.path.join(self.SettingFolder,
+                'TrainingStagePar.json')
         try:
             self._GetLaserCalibration()
         except:
@@ -74,11 +89,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self._GetWaterCalibration()
         except:
             pass
-        self.StartANewSession=1 # to decide if should start a new session
+        self.StartANewSession=1     # to decide if should start a new session
         self.ToInitializeVisual=1
-        self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
-        self.ANewTrial=1 # permission to start a new trial
-        self.UpdateParameters=1 # permission to update parameters
+        self.FigureUpdateTooSlow=0  # using different process to update figures
+        self.ANewTrial=1            # permission to start a new trial
+        self.UpdateParameters=1     # permission to update parameters
         self.Visualization.setTitle(str(date.today()))
         self.loggingstarted=-1
         try: 
@@ -107,12 +122,15 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.TimeDistribution=0
         self.TimeDistribution_ToInitializeVisual=1
         self.finish_Timer=1 # for photometry baseline recordings
-        self.PhotometryRun=0 # 1. Photometry has been run; 0. Photometry has not been carried out.
+        self.PhotometryRun=0 # 1. Run Photometry; 0. No Photometry
         self._Optogenetics() # open the optogenetics panel
         self._LaserCalibration() # to open the laser calibration panel
         self._WaterCalibration() # to open the water calibration panel
         self._Camera()
-        self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
+        self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],
+                            [[8, 1], [1, 1]],
+                            [[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],
+                            [[6, 1],[3, 1],[1, 1]]]
         self.WaterPerRewardedTrial=0.005 
         self._ShowRewardPairs() # show reward pairs
         self._GetTrainingParameters() # get initial training parameters
@@ -125,6 +143,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._InitianizeMotorStage()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
+
     def connectSignalsSlots(self):
         '''Define callbacks'''
         self.action_About.triggered.connect(self._about)
@@ -158,7 +177,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.StartExcitation.clicked.connect(self._StartExcitation)
         self.StartBleaching.clicked.connect(self._StartBleaching)
         self.NextBlock.clicked.connect(self._NextBlock)
-        self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
+        self.OptogeneticsB.activated.connect(self._OptogeneticsB) # toggle opto
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
@@ -339,7 +358,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         if os.path.exists(self.LaserCalibrationFiles):
             with open(self.LaserCalibrationFiles, 'r') as f:
                 self.LaserCalibrationResults = json.load(f)
-                #sorted_dates = sorted(self.LaserCalibrationResults.keys(), key=lambda x: datetime.strptime(x, '%Y-%m-%d'))
                 sorted_dates = sorted(self.LaserCalibrationResults.keys(), key=self._custom_sort_key)
                 self.RecentLaserCalibration=self.LaserCalibrationResults[sorted_dates[-1]]
                 self.RecentCalibrationDate=sorted_dates[-1]
@@ -349,7 +367,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         if os.path.exists(self.WaterCalibrationFiles):
             with open(self.WaterCalibrationFiles, 'r') as f:
                 self.WaterCalibrationResults = json.load(f)
-                #sorted_dates = sorted(self.LaserCalibrationResults.keys(), key=lambda x: datetime.strptime(x, '%Y-%m-%d'))
                 sorted_dates = sorted(self.WaterCalibrationResults.keys(), key=self._custom_sort_key)
                 self.RecentWaterCalibration=self.WaterCalibrationResults[sorted_dates[-1]]
                 self.RecentWaterCalibrationDate=sorted_dates[-1]
