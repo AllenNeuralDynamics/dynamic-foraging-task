@@ -60,7 +60,7 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
   - In the command prompt, type: `setup.cmd`
 - Update the firmware of the Harp Behavior Board by following the instructions [here](https://harp-tech.org/docs/articles/firmware.html).
 - Create a `conda` environment, with python version 3.8
-  - [install `conda`](https://docs.conda.io/projects/conda/en/latest/user-guide/install/windows/html)
+  - install `conda` [instructions here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/windows/html)
   - Run `miniconda prompt`
   - Create an environment: `conda create -n foraging_environment python=3.8`
   - Activate the environment: `conda activate foraging_environment`
