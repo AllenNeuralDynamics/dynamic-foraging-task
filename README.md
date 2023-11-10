@@ -40,7 +40,9 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
   - `matplotlib`
   - `PyQt5`
   - `pandas`
+  - `pyserial`
   - [`pyosc3`](https://github.com/glopesdev/pyosc3.git@master)
+  - [`newscale`](https://github.com/AllenNeuralDynamics/python-newscale@axes-on-target)
 - [Qt designer](https://build-system.fman.io/qt-designer-download) (For GUI development only)
 ### Hardware
 - [Harp Behavior Board](https://github.com/harp-tech/device.behavior)
@@ -51,9 +53,21 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 ## Deployment
 
 #### For initial installation:
-- Run `setup.cmd` in the `dynamic-foraging-task\bonsai` folder to install Bonsai and dependent packages.
+- Clone reposity onto your computer
+  - `git clone https://github.com/AllenNeuralDynamics/dynamic-foraging-task.git`
+  - If you do not have git installed, use: https://gitforwindows.org
+- Install Bonsai on your computer
+  - Change to the `dynamic-foraging-task\bonsai` folder
+  - In the command prompt, type: `setup.cmd`
 - Update the firmware of the Harp Behavior Board by following the instructions [here](https://harp-tech.org/docs/articles/firmware.html).
-- From the top-level directory of this repository, run `pip install .` in a fresh `conda` environment 
+- Create a `conda` environment, with python version 3.8
+  - install `conda` [instructions here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/windows/html)
+  - Run `miniconda prompt`
+  - Create an environment: `conda create -n foraging_environment python=3.8`
+  - Activate the environment: `conda activate foraging_environment`
+- Use `pip` to install this repository:
+  - From the top-level directory run `pip install .`
+- Copy `Settings_box1.csv` to `Users\<username>\Documents\ForagingSettings`
 
 #### To launch the software:
 - Run `foraging.bonsai` in `dynamic-foraging-task\src\workflows` to start Bonsai.
