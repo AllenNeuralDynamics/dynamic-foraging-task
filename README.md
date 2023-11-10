@@ -40,7 +40,9 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
   - `matplotlib`
   - `PyQt5`
   - `pandas`
+  - `pyserial`
   - [`pyosc3`](https://github.com/glopesdev/pyosc3.git@master)
+  - [`newscale`](https://github.com/AllenNeuralDynamics/python-newscale@axes-on-target)
 - [Qt designer](https://build-system.fman.io/qt-designer-download) (For GUI development only)
 ### Hardware
 - [Harp Behavior Board](https://github.com/harp-tech/device.behavior)
