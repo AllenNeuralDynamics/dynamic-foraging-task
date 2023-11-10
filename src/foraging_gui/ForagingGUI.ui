@@ -3724,6 +3724,9 @@
      </property>
     </widget>
     <widget class="QComboBox" name="StageSerialNum">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>50</x>

@@ -281,15 +281,25 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
     def _StageSerialNum(self):
         '''connect to a stage'''
-        for instance in self.instances:
-            if instance.sn==self.StageSerialNum.currentText():
-                if hasattr(self, 'stages'):
-                    if instance.sn in self.stages:
-                        pass
-                    else:
+        # scan stages
+        try:
+            self.instances = NewScaleSerial.get_instances()
+        except:
+            pass
+        if hasattr(self,'current_stage'):
+            curent_stage_name=self.current_stage.name
+        else:
+            curent_stage_name=''
+        # connect to one stage
+        try:
+            for instance in self.instances:
+                if instance.sn==self.StageSerialNum.currentText():
+                    if curent_stage_name!=instance.sn:
                         self._connect_stage(instance)
                 else:
-                    self._connect_stage(instance)
+                    instance.io.close()
+        except:
+            pass
 
     def _InitianizeMotorStage(self):
         '''To initianize motor stage'''
@@ -319,10 +329,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
     def _connect_stage(self,instance):
         '''connect to a stage'''
-        self.stages = {}
-        self.stage = Stage(serial=instance)
-        self.stages[self.stage.name] = self.stage
-        self.current_stage=self.stage
+        self.current_stage=Stage(serial=instance)
 
     def _ConnectBonsai(self):
         '''Connect bonsai'''
