@@ -54,11 +54,18 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 
 #### For initial installation:
 - Clone reposity onto your computer
-  - git clone https://github.com/AllenNeuralDynamics/dynamic-foraging-task.git
+  - `git clone https://github.com/AllenNeuralDynamics/dynamic-foraging-task.git`
   - If you do not have git installed, use: https://gitforwindows.org
 - Run `setup.cmd` in the `dynamic-foraging-task\bonsai` folder to install Bonsai and dependent packages.
+  - In the command prompt, type: `setup.cmd`
 - Update the firmware of the Harp Behavior Board by following the instructions [here](https://harp-tech.org/docs/articles/firmware.html).
-- From the top-level directory of this repository, run `pip install .` in a fresh `conda` environment 
+- Create a `conda` environment, with python version 3.8
+  - [install `conda`](https://docs.conda.io/projects/conda/en/latest/user-guide/install/windows/html)
+  - Run `miniconda prompt`
+  - Create an environment: `conda create -n foraging_environment python=3.8`
+  - Activate the environment: `conda activate foraging_environment`
+- Use `pip` to install this repository:
+  - From the top-level directory run `pip install .`
 
 #### To launch the software:
 - Run `foraging.bonsai` in `dynamic-foraging-task\src\workflows` to start Bonsai.
