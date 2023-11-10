@@ -67,6 +67,7 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
   - Activate the environment: `conda activate foraging_environment`
 - Use `pip` to install this repository:
   - From the top-level directory run `pip install .`
+- Copy `Settings_box1.csv` to `Users\<username>\Documents\ForagingSettings`
 
 #### To launch the software:
 - Run `foraging.bonsai` in `dynamic-foraging-task\src\workflows` to start Bonsai.
