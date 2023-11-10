@@ -21,7 +21,10 @@ dependencies = [
     'scipy',
     'matplotlib',
     'PyQt5',
-    'pandas'
+    'pandas',
+    'pyserial',
+    "pyOSC3@git+https://github.com/glopesdev/pyosc3.git@master",
+    "newscale@git+https://github.com/AllenNeuralDynamics/python-newscale@axes-on-target"
 ]
 
 [tool.setuptools.packages.find]
