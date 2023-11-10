@@ -11,12 +11,10 @@ import rigcontrol
 from pyOSC3.OSC3 import OSCStreamingClient
 from Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
 from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog,LickStaDialog,TimeDistributionDialog
-from MyFunctions import GenerateTrials, Worker
-import warnings
-import json, uuid
+from MyFunctions import GenerateTrials, Worker,NewScaleSerialY
+import json
 import serial 
 from subprocess import call
-from newscale.interfaces import NewScaleSerial
 from stage import Stage
 
 #warnings.filterwarnings("ignore")
@@ -283,7 +281,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         '''connect to a stage'''
         # scan stages
         try:
-            self.instances = NewScaleSerial.get_instances()
+            self.instances = NewScaleSerialY.get_instances()
         except:
             pass
         if hasattr(self,'current_stage'):
@@ -297,7 +295,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     if curent_stage_name!=instance.sn:
                         self._connect_stage(instance)
                 else:
-                    instance.io.close()
+                    try:
+                        instance.io.close()
+                    except:
+                        pass
         except:
             pass
 
@@ -316,10 +317,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     self.Warning_Newscale.setStyleSheet("color: red;")
         except:
             pass
+
     def _scan_for_usb_stages(self):
         '''Scan available stages'''
         try:
-            self.instances = NewScaleSerial.get_instances()
+            self.instances = NewScaleSerialY.get_instances()
             self.stage_names=[]
             for instance in self.instances:
                 self.stage_names.append(instance.sn)
