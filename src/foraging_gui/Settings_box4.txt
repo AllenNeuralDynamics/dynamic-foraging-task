@@ -1,0 +1,6 @@
+Behavior,COM3
+Soundcard,COM25
+BonsaiOsc1,4032
+BonsaiOsc2,4033
+BonsaiOsc3,4034
+BonsaiOsc4,4035

@@ -273,8 +273,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             NewPositions[i]= current_position[i]+relative_postition[i]
             if NewPositions[i]<0:
                 NewPositions[i]=0
-            elif NewPositions[i]>7500:
-                NewPositions[i]=7500
+            elif NewPositions[i]>15000:
+                NewPositions[i]=15000
         self.PositionX.setText(str(NewPositions[0]))
         self.PositionY.setText(str(NewPositions[1]))
         self.PositionZ.setText(str(NewPositions[2]))
