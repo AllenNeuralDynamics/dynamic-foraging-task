@@ -44,7 +44,7 @@
         <Y>3</Y>
       </Location>
       <Size>
-        <Width>1050</Width>
+        <Width>1166</Width>
         <Height>660</Height>
       </Size>
       <WindowState>Normal</WindowState>
@@ -622,7 +622,7 @@
         <Y>3</Y>
       </Location>
       <Size>
-        <Width>1087</Width>
+        <Width>1166</Width>
         <Height>660</Height>
       </Size>
       <WindowState>Normal</WindowState>
@@ -828,7 +828,7 @@
             <Y>3</Y>
           </Location>
           <Size>
-            <Width>1087</Width>
+            <Width>1166</Width>
             <Height>660</Height>
           </Size>
           <WindowState>Normal</WindowState>

@@ -1487,10 +1487,10 @@ class NewScaleSerialY():
             self.io = pyserial_device
         elif usbxpress_device:
             self.t = 'usbxpress'
-            usbxpress_device.open()
+            #usbxpress_device.open()
             self.io = usbxpress_device
-        self.set_timeout(1)
-        self.set_baudrate(250000)
+        #self.set_timeout(1)
+        #self.set_baudrate(250000)
 
     @classmethod
     def get_instances(cls):

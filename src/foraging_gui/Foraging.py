@@ -113,6 +113,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._WaterVolumnManage2()
         self._LickSta()
         self._InitianizeMotorStage()
+        self._StageSerialNum()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
     def connectSignalsSlots(self):
@@ -173,8 +174,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.RightValue_volume.textChanged.connect(self._WaterVolumnManage2)
         self.GiveWaterL_volume.textChanged.connect(self._WaterVolumnManage2)
         self.GiveWaterR_volume.textChanged.connect(self._WaterVolumnManage2)
-        self.StageSerialNum.currentIndexChanged.connect(self._StageSerialNum)
-        self.StageSerialNum.activated.connect(self._StageSerialNum)
+        #self.StageSerialNum.currentIndexChanged.connect(self._StageSerialNum)
+        #self.StageSerialNum.activated.connect(self._StageSerialNum)
         self.MoveXP.clicked.connect(self._MoveXP)
         self.MoveYP.clicked.connect(self._MoveYP)
         self.MoveZP.clicked.connect(self._MoveZP)
@@ -291,14 +292,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # connect to one stage
         try:
             for instance in self.instances:
+                try:
+                    instance.io.close()
+                except:
+                    pass
                 if instance.sn==self.StageSerialNum.currentText():
                     if curent_stage_name!=instance.sn:
                         self._connect_stage(instance)
-                else:
-                    try:
-                        instance.io.close()
-                    except:
-                        pass
         except:
             pass
 
@@ -331,6 +331,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
     def _connect_stage(self,instance):
         '''connect to a stage'''
+        instance.io.open()
+        instance.set_timeout(1)
+        instance.set_baudrate(250000)
         self.current_stage=Stage(serial=instance)
 
     def _ConnectBonsai(self):
