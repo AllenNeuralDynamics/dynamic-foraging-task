@@ -17,14 +17,14 @@ from PyQt5 import QtWidgets,QtGui,QtCore
 from PyQt5.QtCore import QThreadPool,Qt
 from pyOSC3.OSC3 import OSCStreamingClient
 
-from foraging_gui.ForagingGUI import Ui_ForagingGUI
-import foraging_gui.rigcontrol as rigcontrol
-from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
-from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog
-from foraging_gui.Dialogs import ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog
-from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
-from foraging_gui.MyFunctions import GenerateTrials, Worker,NewScaleSerialY
-from foraging_gui.stage import Stage
+from ForagingGUI import Ui_ForagingGUI
+import rigcontrol
+from Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
+from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog
+from Dialogs import ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog
+from Dialogs import LickStaDialog,TimeDistributionDialog
+from MyFunctions import GenerateTrials, Worker,NewScaleSerialY
+from stage import Stage
 
 
 class NumpyEncoder(json.JSONEncoder):
