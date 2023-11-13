@@ -5,25 +5,27 @@ import json
 import time
 import subprocess
 import math
-import numpy as np
-import json
+from datetime import date, datetime
+
 import serial 
-from subprocess import call
-from datetime import date, timedelta, datetime
-from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout,QLineEdit,QWidget,QSizePolicy
-from PyQt5 import QtWidgets,QtGui,QtCore
-from PyQt5.QtCore import QThreadPool,Qt,QMetaObject
+import numpy as np
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PyQt5.QtWidgets import QFileDialog,QVBoxLayout,QLineEdit
+from PyQt5 import QtWidgets,QtGui,QtCore
+from PyQt5.QtCore import QThreadPool,Qt
+from pyOSC3.OSC3 import OSCStreamingClient
+
 from ForagingGUI import Ui_ForagingGUI
 import rigcontrol
-from pyOSC3.OSC3 import OSCStreamingClient
 from Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
-from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog,LickStaDialog,TimeDistributionDialog
+from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog
+from Dialogs import ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog
+from Dialogs import LickStaDialog,TimeDistributionDialog
 from MyFunctions import GenerateTrials, Worker,NewScaleSerialY
 from stage import Stage
 
-#warnings.filterwarnings("ignore")
 
 class NumpyEncoder(json.JSONEncoder):
     #def default(self, obj):
