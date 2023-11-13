@@ -63,11 +63,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
         try:
             self._GetLaserCalibration()
         except:
-            pass
+            print('Could not load laser calibration file (foraging.py), continuing')
         try:
             self._GetWaterCalibration()
         except:
-            pass
+            print('Could not load water calibration file (foraging.py), continuing')
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
@@ -79,7 +79,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self._InitializeBonsai()
             self.InitializeBonsaiSuccessfully=1
         except Exception as e:
-            print('An error occurred:', str(e))
+            print('An error occurred while initializing Bonsai:', str(e))
             self.InitializeBonsaiSuccessfully=0
             self.WarningLabel_2.setText('Start without bonsai connected!')
             self.WarningLabel_2.setStyleSheet("color: red;")
@@ -229,6 +229,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 relative_postition=(0,0,step)
             self._UpdatePosition(current_position,relative_postition)
         except:
+            # Need an informative error statement here
             pass
 
     def _MoveXP(self):
@@ -492,7 +493,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         if index != -1:
             self.Tower.setCurrentIndex(index)
     def _InitializeBonsai(self):
-        '''Initianizing osc messages'''
+        '''Initializing osc messages'''
         # open the bondai workflow and run
         self._OpenBonsaiWorkflow()
         time.sleep(3)
@@ -817,7 +818,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         widget.clear()
         except Exception as e:
             # Catch the exception and print error information
-            print("An error occurred:")
+            print("An error occurred (Foraging.py._TrainingStage):")
             print(traceback.format_exc())
         
     def _SaveTraining(self):
@@ -943,7 +944,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         # it's valid float
                         float(child.text())
                     except Exception as e:
-                        print('An error occurred:', str(e))
+                        print('An error occurred (Foraging.py):', str(e))
                         if isinstance(child, QtWidgets.QDoubleSpinBox):
                             child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
                         elif isinstance(child, QtWidgets.QSpinBox):
@@ -994,7 +995,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                             float(child.text())
                             self.UpdateParameters=0 # Changes are not allowed until press is typed
                         except Exception as e:
-                            print('An error occurred:', str(e))
+                            print('An error occurred when changing a parameter (Foraging.py):', str(e))
                             # Invalid float. Do not change the parameter
                             if isinstance(child, QtWidgets.QDoubleSpinBox):
                                 child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
@@ -1019,7 +1020,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     self.RewardPairsN.setText(str(len(self.RewardFamilies[int(self.RewardFamily.text())-1])))
                 return 1
             except Exception as e:
-                print('An error occurred:', str(e))
+                print('An error occurred when checking input formats (Foraging.py):', str(e))
                 return 0
         if child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum':
             try:
@@ -1029,7 +1030,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 else:
                     return 1
             except Exception as e: 
-                print('An error occurred:', str(e))
+                print('An error occurred when checking input formats (Foraging.py,2):', str(e))
                 return 0
         if child.objectName()=='UncoupledReward':
             try:
@@ -1046,7 +1047,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.RewardProb=np.array(num_list)
                 return 1
             except Exception as e: 
-                print('An error occurred:', str(e))
+                print('An error occurred when checking input formats (Foraging.py,3):', str(e))
                 return 0
         else:
             return 1
@@ -1260,7 +1261,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: ') 
         except Exception as e:
             # Catch the exception and print error information
-            print("An error occurred:",str(e))
+            print("An error occurred when plotting reward pairs (Foraging.py):",str(e))
     def closeEvent(self, event):
         # disable close icon
         self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
@@ -1749,14 +1750,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
                             widget.clear()
             except Exception as e:
                 # Catch the exception and print error information
-                print("An error occurred:")
+                print("An error occurred, line 1753:")
                 print(traceback.format_exc())
             try:
                 # visualization when loading the data
                 self._LoadVisualization()
             except Exception as e:
                 # Catch the exception and print error information
-                print("An error occurred:",str(e))
+                print("An error occurred during visualization, Foraging.py:",str(e))
                 print(traceback.format_exc())
                 # delete GeneratedTrials
                 del self.GeneratedTrials
