@@ -12,7 +12,6 @@ class RigClient:
     def msg_handler(self, address, *args):
         msg = OSCMessage(address, args)
         CurrentMessage=[msg.address,args[1][0],msg.values()[2],msg.values()[3]]
-        #self.msgs.put([CurrentMessage])
         self.msgs.put([msg,args])
         print(CurrentMessage)
 
@@ -22,8 +21,6 @@ class RigClient:
 
     def receive(self):
         return self.msgs.get(block=True)
-        #return self.msgs.get(block=False)
-        #return self.msgs.get(block=True, timeout=None)
     
     def receive2(self):
         return self.msgs.get(block=False)
@@ -67,31 +64,18 @@ class RigClient:
     # waveform 1, location 1
     def WaveForm1_1(self, value):
         self.send("/WaveForm1_1", value)
-        #message = OSCMessage("/WaveForm1_1")
-        #message.append(value.tobytes(),'b')
-        #return self.client.sendOSC(message)
+    
     # waveform 2, location 1
     def WaveForm2_1(self, value):
         self.send("/WaveForm2_1", value)
-        #message = OSCMessage("/WaveForm2_1")
-        #message.append(value.tobytes(),'b')
-        #return self.client.sendOSC(message)
 
     # waveform 1, location 2
     def WaveForm1_2(self, value):
         self.send("/WaveForm1_2", value)
-        
-        #message = OSCMessage("/WaveForm1_2")
-        #message.append(value.tobytes(),'b')
-        #return self.client.sendOSC(message)
 
     # waveform 2, location 2
     def WaveForm2_2(self, value):
         self.send("/WaveForm2_2", value)
-        
-        #message = OSCMessage("/WaveForm2_2")
-        #message.append(value.tobytes(),'b')
-        #return self.client.sendOSC(message)
 
     def LeftValue(self, value):
         self.send("/LeftValueSize", value)

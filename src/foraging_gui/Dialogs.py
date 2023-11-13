@@ -178,7 +178,6 @@ class OptogeneticsDialog(QDialog,Ui_Optogenetics):
             eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(True)+')')
             eval('self.label'+str(Numb)+'_'+str(Inactlabel3)+'.setEnabled('+str(False)+')')
             eval('self.RD_'+str(Numb)+'.setEnabled('+str(False)+')')
-            #eval('self.Frequency_'+str(Numb)+'.clear()')
             eval('self.Frequency_'+str(Numb)+'.setEditable(True)')
         if eval('self.Protocol_'+str(Numb)+'.currentText()')=='Constant':
             eval('self.label'+str(Numb)+'_'+str(Inactlabel1)+'.setEnabled('+str(False)+')')
@@ -297,10 +296,6 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         super().__init__(parent)
         self.setupUi(self)
         self.MainWindow=MainWindow
-        #self.threadpoolL=QThreadPool() # calibration for left valve
-        #self.threadpoolR=QThreadPool() # calibration for right valve
-        #self.OpenLeftTag=0
-        #self.OpenRightTag=0
         self.FinishLeftValve=0
         if not hasattr(self.MainWindow,'WaterCalibrationResults'):
             self.MainWindow.LaserCalibrationResults={}
@@ -1659,8 +1654,6 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
                     self.SleepComplete=0
                     self._InitiateATrial()
                     self.threadpool1.start(self.worker1)
-                    #time.sleep(float(self.TP_Duration_1)+0.1)
-                    #time.sleep(0.1)
                 if self.KeepOpen.isChecked()==False:
                     break
             self.KeepOpen.setStyleSheet("background-color : none")
