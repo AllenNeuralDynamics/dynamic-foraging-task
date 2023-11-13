@@ -12,16 +12,16 @@ from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QThreadPool,Qt
 
-from foraging_gui.Optogenetics import Ui_Optogenetics
-from foraging_gui.Calibration import Ui_WaterCalibration
-from foraging_gui.Camera import Ui_Camera
-from foraging_gui.MotorStage import Ui_MotorStage
-from foraging_gui.Manipulator import Ui_Manipulator
-from foraging_gui.LicksDistribution import Ui_LickDistribution
-from foraging_gui.TimeDistribution import Ui_TimeDistribution
-from foraging_gui.CalibrationLaser import Ui_CalibrationLaser
-from foraging_gui.MyFunctions import Worker
-from foraging_gui.Visualization import PlotWaterCalibration
+from Optogenetics import Ui_Optogenetics
+from Calibration import Ui_WaterCalibration
+from Camera import Ui_Camera
+from MotorStage import Ui_MotorStage
+from Manipulator import Ui_Manipulator
+from LicksDistribution import Ui_LickDistribution
+from TimeDistribution import Ui_TimeDistribution
+from CalibrationLaser import Ui_CalibrationLaser
+from MyFunctions import Worker
+from Visualization import PlotWaterCalibration
 
 
 class LickStaDialog(QDialog,Ui_LickDistribution):
