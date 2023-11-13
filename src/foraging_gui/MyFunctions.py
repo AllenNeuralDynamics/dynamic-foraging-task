@@ -10,7 +10,7 @@ import numpy as np
 from itertools import accumulate
 from serial.tools.list_ports import comports as list_comports
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import *
+from PyQt5 import QtCore
 
 
 if PLATFORM == 'win32':
@@ -1554,7 +1554,7 @@ class NewScaleSerialY():
                 data += c
                 if (c == '\r'): break
         return data
-class WorkerSignals(QObject):
+class WorkerSignals(QtCore.QObject):
     '''
     Defines the signals available from a running worker thread.
 
@@ -1573,13 +1573,13 @@ class WorkerSignals(QObject):
         int indicating % progress
 
     '''
-    finished = pyqtSignal()
-    error = pyqtSignal(tuple)
-    result = pyqtSignal(object)
-    progress = pyqtSignal(int)
+    finished = QtCore.pyqtSignal()
+    error = QtCore.pyqtSignal(tuple)
+    result = QtCore.pyqtSignal(object)
+    progress = QtCore.pyqtSignal(int)
 
 
-class Worker(QRunnable):
+class Worker(QtCore.QRunnable):
     '''
     Worker thread
 
@@ -1604,7 +1604,7 @@ class Worker(QRunnable):
         # Add the callback to our kwargs
         #self.kwargs['progress_callback'] = self.signals.progress
 
-    @pyqtSlot()
+    @QtCore.pyqtSlot()
     def run(self):
         '''
         Initialise the runner function with passed args, kwargs.
