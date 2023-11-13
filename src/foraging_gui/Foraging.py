@@ -1,6 +1,15 @@
-import sys, os,traceback,json,time,subprocess,math
+import sys
+import os
+import traceback
+import json
+import time
+import subprocess
+import math
 import numpy as np
-from datetime import date,timedelta,datetime
+import json
+import serial 
+from subprocess import call
+from datetime import date, timedelta, datetime
 from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout,QLineEdit,QWidget,QSizePolicy
 from PyQt5 import QtWidgets,QtGui,QtCore
 from PyQt5.QtCore import QThreadPool,Qt,QMetaObject
@@ -12,9 +21,6 @@ from pyOSC3.OSC3 import OSCStreamingClient
 from Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
 from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog,LickStaDialog,TimeDistributionDialog
 from MyFunctions import GenerateTrials, Worker,NewScaleSerialY
-import json
-import serial 
-from subprocess import call
 from stage import Stage
 
 #warnings.filterwarnings("ignore")
