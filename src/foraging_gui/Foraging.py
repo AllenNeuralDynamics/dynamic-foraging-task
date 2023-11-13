@@ -1529,15 +1529,15 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 try:
                     Obj['LaserCalibrationResults']=self.LaserCalibrationResults
                 except Exception as e:
-                    print('foraging._Save: Error, LaserCalibrationResults', str(e))
+                    print('foraging._Save: Error, LaserCalibrationResults ', str(e))
 
             # save water calibration results
             if hasattr(self, 'WaterCalibrationResults'):
                 self._GetWaterCalibration()
                 try:
                     Obj['WaterCalibrationResults']=self.WaterCalibrationResults
-                except:
-                    pass
+                except Exception as e:
+                    print('foraging._Save: Error, WaterCalibrationResults ',str(e))
             # save ohter fields start with Ot_
             for attr_name in dir(self):
                 if attr_name.startswith('Ot_'):
@@ -1564,8 +1564,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.CreateNewFolder=1
                 try:
                     self.Channel.StopLogging('s')
-                except:
-                    pass
+                except Exception as e:
+                    print('foraging._Save: Error, StopLogging ', str(e))
 
 
     def _GetSaveFolder(self,CTrainingFolder=1,CHarpFolder=1,CVideoFolder=1,CPhotometryFolder=1,CEphysFolder=1):
@@ -1696,7 +1696,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                             CurrentObj=Obj['LaserCalibration_dialog']
                         else:
                             CurrentObj=Obj.copy()
-                    except:
+                    except Exception as e:
+                        print('foraging._Open: Error,1 ',str(e))
                         continue
                     if key in CurrentObj:
                         # skip some keys
@@ -1708,6 +1709,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                             value=np.array([CurrentObj['TP_'+key][-2]])
                             Tag=0
                         except: # sometimes we only have training parameters, no behavior parameters
+                            print('foraging._Open: Error,2 ',str(e))
                             value=CurrentObj[key]
                             Tag=1
                         if isinstance(widget, QtWidgets.QPushButton):
@@ -1762,14 +1764,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
                             widget.clear()
             except Exception as e:
                 # Catch the exception and print error information
-                print("An error occurred, line 1753:")
+                print('foraging._Open: Error,3 ',str(e))
                 print(traceback.format_exc())
             try:
                 # visualization when loading the data
                 self._LoadVisualization()
             except Exception as e:
                 # Catch the exception and print error information
-                print("An error occurred during visualization, Foraging.py:",str(e))
+                print("foraging._Open: Error,4 ",str(e))
                 print(traceback.format_exc())
                 # delete GeneratedTrials
                 del self.GeneratedTrials
@@ -1786,8 +1788,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 if hasattr(self,'current_stage'):
                     try:
                         self.current_stage.move_absolute_3d(float(last_positions[0]),float(last_positions[1]),float(last_positions[2]))
-                    except:
-                        pass
+                    except Exception as e:
+                        print('foraging._Open: Error,5 ',str(e))
             else:
                 pass
                     
@@ -1813,8 +1815,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         value=np.array(value)
                     # Set the attribute in the GeneratedTrials object
                     setattr(self.GeneratedTrials, attr_name, value)
-                except:
-                    pass
+                except Exception as e:
+                    print('foraging._LoadVisualization: Error ', str(e))
         if self.GeneratedTrials.B_AnimalResponseHistory.size==0:
             del self.GeneratedTrials
             return
@@ -1866,7 +1868,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 ser.close()
                 self.TeensyWarning.setText('Start excitation!')
                 self.TeensyWarning.setStyleSheet("color: red;")
-            except:
+            except Exception as e:
+                print('foraging._StartExcitation: Error ' ,str(e))
                 self.TeensyWarning.setText('Error: start excitation!')
                 self.TeensyWarning.setStyleSheet("color: red;")
         else:
@@ -1878,7 +1881,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 ser.close()
                 self.TeensyWarning.setText('Stop excitation!')
                 self.TeensyWarning.setStyleSheet("color: red;")
-            except:
+            except Exception as e:
+                print('foraging._StartExcitation: Error,1 ', str(e))
                 self.TeensyWarning.setText('Error: stop excitation!')
                 self.TeensyWarning.setStyleSheet("color: red;")
     
@@ -1892,7 +1896,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 ser.close()
                 self.TeensyWarning.setText('Start bleaching!')
                 self.TeensyWarning.setStyleSheet("color: red;")
-            except:
+            except Exception as e:
+                print('foraging._StartBleaching: Error ',str(e))
                 self.TeensyWarning.setText('Error: start bleaching!')
                 self.TeensyWarning.setStyleSheet("color: red;")
         else:
@@ -1904,7 +1909,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 ser.close()
                 self.TeensyWarning.setText('Stop bleaching!')
                 self.TeensyWarning.setStyleSheet("color: red;")
-            except:
+            except Exception as e:
+                print('foraging._StartBleaching: Error ',str(e))
                 self.TeensyWarning.setText('Error: stop bleaching!')
                 self.TeensyWarning.setStyleSheet("color: red;")
 
@@ -1934,8 +1940,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.PhotometryRun=0
                 try:
                     self.Channel.StopLogging('s')
-                except:
-                    pass
+                except Exception as e:
+                    print('foraging._NewSession: Error ',str(e))
                 print('Saved')
             elif reply == QMessageBox.No:
                 self.NewSession.setStyleSheet("background-color : green;")
@@ -1946,8 +1952,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.PhotometryRun=0
                 try:
                     self.Channel.StopLogging('s')
-                except:
-                    pass
+                except Exception as e:
+                    print('foraging._NewSession: Error ',str(e))
             else:
                 self.NewSession.setChecked(False)
                 pass
@@ -2122,7 +2128,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         if self.actionDrawing_after_stopping.isChecked()==True:
             try:
                 self.PlotM._Update(GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
-            except:
+            except Exception as e:
+                print('foraging._Start: Error ',str(e))
                 pass
         '''
         self.test=1
@@ -2269,13 +2276,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 if self.SuggestedWater.text()=='':
                     try:
                         self.SuggestedWater.setText(self.TotalWater.text())
-                    except:
-                        pass
+                    except Exception as e:
+                        print('foraging._UpdateSuggestedWater: Error ',str(e))
                 try:
                     self.B_SuggestedWater=float(self.TotalWater.text())-np.sum(self.ManualWaterVolume)
                     self.SuggestedWater.setText(str(np.round(self.B_SuggestedWater,3)))
-                except:
-                    pass
+                except Exception as e:
+                    print('foraging._UpdateSuggestedWater: Error,2 ',str(e))
 
 if __name__ == "__main__":
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling,1)
