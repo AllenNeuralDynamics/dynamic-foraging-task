@@ -1,6 +1,17 @@
-import time,math,json,os,shutil,subprocess
+import time
+import math
+import json
+import os
+import shutil
+import subprocess
+from datetime import datetime
+
+import numpy as np
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout
 from PyQt5 import QtWidgets
+from PyQt5.QtCore import QThreadPool,Qt
+
 from Optogenetics import Ui_Optogenetics
 from Calibration import Ui_WaterCalibration
 from Camera import Ui_Camera
@@ -10,11 +21,8 @@ from LicksDistribution import Ui_LickDistribution
 from TimeDistribution import Ui_TimeDistribution
 from CalibrationLaser import Ui_CalibrationLaser
 from MyFunctions import Worker
-import numpy as np
-from PyQt5.QtCore import QThreadPool,Qt
-from datetime import datetime
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from Visualization import PlotWaterCalibration
+
 
 class LickStaDialog(QDialog,Ui_LickDistribution):
     '''Lick statistics dialog'''
