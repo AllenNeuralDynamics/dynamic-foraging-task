@@ -1,10 +1,8 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
+from scipy import stats
 from matplotlib.figure import Figure
 from matplotlib.gridspec import GridSpec
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from scipy import stats
 
 
 class PlotV(FigureCanvas):
@@ -216,7 +214,6 @@ class PlotV(FigureCanvas):
         NumberOfDots = int((np.ptp(self.B_Time)-WindowSize)/StepSize)
         if NumberOfDots<1:
             return
-        #WindowStart=np.linspace(np.min(self.B_Time),np.max(self.B_Time)-WindowSize,num=NumberOfDots)
         choice_R_frac = np.empty(NumberOfDots)
         choice_R_frac[:]=np.nan
         reward_R_frac = choice_R_frac.copy()
@@ -283,7 +280,6 @@ class PlotV(FigureCanvas):
         self.ax1.set_yticklabels(['L', 'R'])
         self.ax1.set_ylim(-0.6, 1.6)
         self.ax1.legend(loc='lower left', fontsize=8)
-        #self.ax1.axis('off')
         self.ax2.set_yticks([0,1])
         self.ax2.set_yticklabels(['L', 'R'])
         self.ax2.set_ylim(-0.15, 1.15)

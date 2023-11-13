@@ -1,6 +1,17 @@
-import time,math,json,os,shutil,subprocess
-from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout
+import time
+import math
+import json
+import os
+import shutil
+import subprocess
+from datetime import datetime
+
+import numpy as np
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout
 from PyQt5 import QtWidgets
+from PyQt5.QtCore import QThreadPool,Qt
+
 from Optogenetics import Ui_Optogenetics
 from Calibration import Ui_WaterCalibration
 from Camera import Ui_Camera
@@ -10,11 +21,8 @@ from LicksDistribution import Ui_LickDistribution
 from TimeDistribution import Ui_TimeDistribution
 from CalibrationLaser import Ui_CalibrationLaser
 from MyFunctions import Worker
-import numpy as np
-from PyQt5.QtCore import QThreadPool,Qt
-from datetime import datetime
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from Visualization import PlotWaterCalibration
+
 
 class LickStaDialog(QDialog,Ui_LickDistribution):
     '''Lick statistics dialog'''
@@ -170,7 +178,6 @@ class OptogeneticsDialog(QDialog,Ui_Optogenetics):
             eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(True)+')')
             eval('self.label'+str(Numb)+'_'+str(Inactlabel3)+'.setEnabled('+str(False)+')')
             eval('self.RD_'+str(Numb)+'.setEnabled('+str(False)+')')
-            #eval('self.Frequency_'+str(Numb)+'.clear()')
             eval('self.Frequency_'+str(Numb)+'.setEditable(True)')
         if eval('self.Protocol_'+str(Numb)+'.currentText()')=='Constant':
             eval('self.label'+str(Numb)+'_'+str(Inactlabel1)+'.setEnabled('+str(False)+')')
@@ -289,10 +296,6 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         super().__init__(parent)
         self.setupUi(self)
         self.MainWindow=MainWindow
-        #self.threadpoolL=QThreadPool() # calibration for left valve
-        #self.threadpoolR=QThreadPool() # calibration for right valve
-        #self.OpenLeftTag=0
-        #self.OpenRightTag=0
         self.FinishLeftValve=0
         if not hasattr(self.MainWindow,'WaterCalibrationResults'):
             self.MainWindow.LaserCalibrationResults={}
@@ -1651,8 +1654,6 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
                     self.SleepComplete=0
                     self._InitiateATrial()
                     self.threadpool1.start(self.worker1)
-                    #time.sleep(float(self.TP_Duration_1)+0.1)
-                    #time.sleep(0.1)
                 if self.KeepOpen.isChecked()==False:
                     break
             self.KeepOpen.setStyleSheet("background-color : none")

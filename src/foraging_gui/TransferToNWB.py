@@ -1,15 +1,19 @@
 """
 Transfer current Json/mat format from Bonsai behavior control to NWB format
 """
+import json
+import os
+import datetime
 from uuid import uuid4
-import numpy as np, json,os,datetime
-from pynwb import NWBHDF5IO, NWBFile, TimeSeries
-from pynwb.behavior import Position, SpatialSeries
-from pynwb.epoch import TimeIntervals
-from pynwb.file import Subject
+
+import numpy as np
 from scipy.io import loadmat
+from pynwb.file import Subject
+from pynwb import NWBHDF5IO, NWBFile, TimeSeries
+
 
 SaveFolder='H:\\NWBFile\\'
+
 
 ######## load the Json/Mat file #######
 fname='E:\BonsaiForaging\Data\LA30\LA30_2023-04-27.mat'

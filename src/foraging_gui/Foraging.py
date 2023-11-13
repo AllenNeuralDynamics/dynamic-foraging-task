@@ -1,29 +1,33 @@
-import sys, os,traceback,json,time,subprocess,math
+import sys
+import os
+import traceback
+import json
+import time
+import subprocess
+import math
+from datetime import date, datetime
+
+import serial 
 import numpy as np
-from datetime import date,timedelta,datetime
-from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout,QLineEdit,QWidget,QSizePolicy
-from PyQt5 import QtWidgets,QtGui,QtCore
-from PyQt5.QtCore import QThreadPool,Qt,QMetaObject
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PyQt5.QtWidgets import QFileDialog,QVBoxLayout,QLineEdit
+from PyQt5 import QtWidgets,QtGui,QtCore
+from PyQt5.QtCore import QThreadPool,Qt
+from pyOSC3.OSC3 import OSCStreamingClient
+
 from ForagingGUI import Ui_ForagingGUI
 import rigcontrol
-from pyOSC3.OSC3 import OSCStreamingClient
 from Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
-from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog,LickStaDialog,TimeDistributionDialog
+from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog
+from Dialogs import ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog
+from Dialogs import LickStaDialog,TimeDistributionDialog
 from MyFunctions import GenerateTrials, Worker,NewScaleSerialY
-import json
-import serial 
-from subprocess import call
 from stage import Stage
 
-#warnings.filterwarnings("ignore")
 
 class NumpyEncoder(json.JSONEncoder):
-    #def default(self, obj):
-    #    if isinstance(obj, np.ndarray):
-    #        return obj.tolist()
-    #   return json.JSONEncoder.default(self, obj)
     def default(self, obj):
         if isinstance(obj, np.ndarray):
             return obj.tolist()  # Convert NumPy array to a list
@@ -174,8 +178,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.RightValue_volume.textChanged.connect(self._WaterVolumnManage2)
         self.GiveWaterL_volume.textChanged.connect(self._WaterVolumnManage2)
         self.GiveWaterR_volume.textChanged.connect(self._WaterVolumnManage2)
-        #self.StageSerialNum.currentIndexChanged.connect(self._StageSerialNum)
-        #self.StageSerialNum.activated.connect(self._StageSerialNum)
         self.MoveXP.clicked.connect(self._MoveXP)
         self.MoveYP.clicked.connect(self._MoveYP)
         self.MoveZP.clicked.connect(self._MoveZP)
@@ -386,7 +388,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         if os.path.exists(self.LaserCalibrationFiles):
             with open(self.LaserCalibrationFiles, 'r') as f:
                 self.LaserCalibrationResults = json.load(f)
-                #sorted_dates = sorted(self.LaserCalibrationResults.keys(), key=lambda x: datetime.strptime(x, '%Y-%m-%d'))
                 sorted_dates = sorted(self.LaserCalibrationResults.keys(), key=self._custom_sort_key)
                 self.RecentLaserCalibration=self.LaserCalibrationResults[sorted_dates[-1]]
                 self.RecentCalibrationDate=sorted_dates[-1]
@@ -396,7 +397,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         if os.path.exists(self.WaterCalibrationFiles):
             with open(self.WaterCalibrationFiles, 'r') as f:
                 self.WaterCalibrationResults = json.load(f)
-                #sorted_dates = sorted(self.LaserCalibrationResults.keys(), key=lambda x: datetime.strptime(x, '%Y-%m-%d'))
                 sorted_dates = sorted(self.WaterCalibrationResults.keys(), key=self._custom_sort_key)
                 self.RecentWaterCalibration=self.WaterCalibrationResults[sorted_dates[-1]]
                 self.RecentWaterCalibrationDate=sorted_dates[-1]
@@ -1446,8 +1446,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         if hasattr(self, 'GeneratedTrials'):
             self.GeneratedTrials._GetLicks(self.Channel2)
         
-        #ParamsFile = os.path.join(self.default_saveFolder, self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.json')
-        #self._GetSaveFileName()
         # Create new folders
         if self.CreateNewFolder==1:
             self._GetSaveFolder()
@@ -1816,7 +1814,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.GeneratedTrials.B_TrialEndTime=self.GeneratedTrials.B_TrialEndTime[0]
             self.GeneratedTrials.B_GoCueTime=self.GeneratedTrials.B_GoCueTime[0]
             self.GeneratedTrials.B_RewardOutcomeTime=self.GeneratedTrials.B_RewardOutcomeTime[0]
-            #self.GeneratedTrials._GenerateATrial(self.Channel4)
             
         PlotM=PlotV(win=self,GeneratedTrials=self.GeneratedTrials,width=5, height=4)
         layout=self.Visualization.layout()
@@ -2031,8 +2028,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
             # generate a new session id
-            #self.Other_session_id=uuid.uuid4()
-            #self.Visualization.setTitle(str(date.today())+'  Session ID: '+str(self.Other_session_id))
             self.WarningLabel.setText('')
             self.WarningLabel.setStyleSheet("color: gray;")
             # start a new logging
