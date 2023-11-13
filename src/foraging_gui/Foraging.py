@@ -475,7 +475,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.newscale_port_tower2=''
                 self.newscale_port_tower3=''
                 self.newscale_port_tower4=''
-        except:
+        except Exception as e:
+            print('foraging._GetSettings: Error ',str(e))
             self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
             self.current_box=''
             self.Teensy_COM=''
@@ -597,8 +598,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         '''Open the setting folder'''
         try:
             subprocess.Popen(['explorer', self.SettingFolder])
-        except:
-            pass
+        except Exception as e:
+            print('foraging._OpenSettingFolder: Error ',str(e))
     def _ForceSave(self):
         '''Save whether the current trial is complete or not'''
         self._Save(ForceSave=1)
@@ -705,8 +706,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 widget2.setValue(float(widget1.text())*self.latest_fitting[valve][0]+self.latest_fitting[valve][1])
             elif direction==-1:
                 widget2.setValue((float(widget1.text())-self.latest_fitting[valve][1])/self.latest_fitting[valve][0])
-        except:
-            pass
+        except Exception as e:
+            print('foraging._ValvetimeVolumnTransformation: Error ',str(e))
 
     def _GetLatestFitting(self,FittingResults):
         '''Get the latest fitting results from water calibration'''
@@ -728,12 +729,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
         try:
             folder_name=os.path.dirname(self.SaveFileJson)
             subprocess.Popen(['explorer', folder_name])
-        except:
+        except Exception as e:
+            print('foraging._OpenBehaviorFolder: Error ',str(e))
             try:
                 AnimalFolder=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text())
                 subprocess.Popen(['explorer', AnimalFolder])
             except:
-                pass
+                print('foraging._OpenBehaviorFolder,2: Error ',str(e))
+
     def _OpenLoggingFolder(self):
         '''Open the logging folder'''
         self.Camera_dialog._OpenSaveFolder()
@@ -768,7 +771,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     try: # load the paramter used by last trial
                         value=np.array([self.TrainingStagePar[Task][CurrentTrainingStage][key]])
                         Tag=0
-                    except: # sometimes we only have training parameters, no behavior parameters
+                    # sometimes we only have training parameters, no behavior parameters
+                    except Exception as e:
+                        print('foraging._TrainingStage: Error ',str(e))
                         value=self.TrainingStagePar[Task][CurrentTrainingStage][key]
                         Tag=1
                     if isinstance(widget, QtWidgets.QPushButton):
@@ -821,7 +826,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         widget.clear()
         except Exception as e:
             # Catch the exception and print error information
-            print("An error occurred (Foraging.py._TrainingStage):")
+            print("foraging._TrainingStage: Error ",str(e))
             print(traceback.format_exc())
         
     def _SaveTraining(self):
@@ -947,7 +952,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         # it's valid float
                         float(child.text())
                     except Exception as e:
-                        print('An error occurred (Foraging.py):', str(e))
+                        print('foraging.keyPressEvent: Error ', str(e))
                         if isinstance(child, QtWidgets.QDoubleSpinBox):
                             child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
                         elif isinstance(child, QtWidgets.QSpinBox):
@@ -1012,8 +1017,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     else:
                         child.setStyleSheet('color: black;')
                         child.setStyleSheet('background-color: white;')
-                except:
-                    pass
+                except Exception as e:
+                    print('An error occured when changing a parameters (Foraging.py,2):',str(e))
+
     def _CheckFormat(self,child):
         '''Check if the input format is correct'''
         if child.objectName()=='RewardFamily': # When we change the RewardFamily, sometimes the RewardPairsN is larger than available reward pairs in this family. 
@@ -1023,7 +1029,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     self.RewardPairsN.setText(str(len(self.RewardFamilies[int(self.RewardFamily.text())-1])))
                 return 1
             except Exception as e:
-                print('An error occurred when checking input formats (Foraging.py):', str(e))
+                print('foraging._CheckFormat: Error ', str(e))
                 return 0
         if child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum':
             try:
@@ -1033,7 +1039,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 else:
                     return 1
             except Exception as e: 
-                print('An error occurred when checking input formats (Foraging.py,2):', str(e))
+                print('foraging._CheckFormat,2: Error ', str(e))
                 return 0
         if child.objectName()=='UncoupledReward':
             try:
@@ -1050,7 +1056,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.RewardProb=np.array(num_list)
                 return 1
             except Exception as e: 
-                print('An error occurred when checking input formats (Foraging.py,3):', str(e))
+                print('foraging._CheckFormat,3: Error ', str(e))
                 return 0
         else:
             return 1
@@ -1388,8 +1394,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.TimeDistribution_ToInitializeVisual=0
         try:
             self.PlotTime._Update(self)
-        except:
-            pass
+        except Exception as e:
+            print('foraging._TimeDistribution: Error', str(e))
 
     def _LickSta(self):
         '''Licks statistics'''
@@ -1419,8 +1425,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.LickSta_ToInitializeVisual=0
         try:
             self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
-        except:
-            pass
+        except Exception as e:
+            print('foraging._LickSta: Error' , str(e))
+
     def _about(self):
         QMessageBox.about(
             self,
@@ -1502,7 +1509,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                                     Obj[attr_name]='nan'
                                 else:
                                     Obj[attr_name]=Value
-                            except:
+                            except Exception as e:
+                                print('foraging._save: Error, casting to nan', str(e))
                                 Obj[attr_name]=Value
             # save other events, e.g. session start time
             for attr_name in dir(self):
@@ -1520,8 +1528,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self._GetLaserCalibration()
                 try:
                     Obj['LaserCalibrationResults']=self.LaserCalibrationResults
-                except:
-                    pass
+                except Exception as e:
+                    print('foraging._Save: Error, LaserCalibrationResults', str(e))
+
             # save water calibration results
             if hasattr(self, 'WaterCalibrationResults'):
                 self._GetWaterCalibration()
