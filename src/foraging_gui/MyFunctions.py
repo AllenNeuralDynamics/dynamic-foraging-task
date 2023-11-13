@@ -23,8 +23,6 @@ class GenerateTrials():
     def __init__(self,win):
         self.win=win
         self.B_RewardFamilies=self.win.RewardFamilies
-        #self.B_RewardFamilies = [[[float(x) for x in y] for y in z] for z in self.B_RewardFamilies]
-        #self.B_RewardFamilies = np.array(self.B_RewardFamilies)
         self.B_CurrentTrialN=-1 # trial number starts from 0; Update when trial starts
         self.B_LickPortN=2
         self.B_ANewBlock=np.array([1,1]).astype(int)
@@ -87,7 +85,6 @@ class GenerateTrials():
         self.B_StartType=[] # 1: normal trials with delay; 3: optogenetics trials without delay
         self.GeneFinish=1
         self.GetResponseFinish=1
-        #self.B_LaserTrialNum=[] # B_LaserAmplitude, B_LaserDuration, B_SelectedCondition have values only on laser on trials, so we need to store the laser trial number
         self.Obj={}
         # get all of the training parameters of the current trial
         self._GetTrainingParameters(self.win)
@@ -235,8 +232,6 @@ class GenerateTrials():
             # get the reward probabilities pool
             for i in range(len(self.B_ANewBlock)):
                 if self.B_ANewBlock[i]==1:
-                    #RewardProbPool=np.append(self.RewardProb,np.fliplr(self.RewardProb),axis=0)
-                    #RewardProbPool=RewardProbPool[:,i]
                     input_string=self.win.UncoupledReward.text()
                     # remove any square brackets and spaces from the string
                     input_string = input_string.replace('[','').replace(']','').replace(',', ' ')
@@ -305,7 +300,6 @@ class GenerateTrials():
             self.B_ANewBlock[:]=1
             self.win.NextBlock.setChecked(False)
             self.win.NextBlock.setStyleSheet("background-color : none")
-            #self._UpdateBlockLen([0,1],1)
             self._update_block_len([0,1])
         # decide if block transition will happen at the next trial
         for i in range(len(self.B_ANewBlock)):
@@ -324,14 +318,12 @@ class GenerateTrials():
                     if self.AllRewardThisBlock<float(self.TP_BlockMinReward) or self.AdvancedBlockSwitchPermitted==0:
                         # do not switch
                         self.B_ANewBlock=np.zeros_like(self.B_ANewBlock)
-                        #self._UpdateBlockLen(range(len(self.B_ANewBlock)),Delta)
                         self._update_block_len(range(len(self.B_ANewBlock)))
             elif self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']:
                 for i in range(len(self.B_ANewBlock)):
                     if self.B_ANewBlock[i]==1 and (self.BS_RewardedTrialN_CurrentBlock[i]<float(self.TP_BlockMinReward) or self.AdvancedBlockSwitchPermitted==0) and self.AllRewardThisBlock!=-1:
                         # do not switch
                         self.B_ANewBlock[i]=0
-                        #self._UpdateBlockLen([i],Delta)
                         self._update_block_len([i])
     def _update_block_len(self,ind):
         '''Get the block length and update the block length history'''
@@ -554,7 +546,6 @@ class GenerateTrials():
         TP_RightValue_volume=TP_RightValue_volume[0:len(B_RewardedHistory[1])]
 
         self.BS_TotalReward=np.sum((B_RewardedHistory[0]==True).astype(int)*TP_LeftValue_volume+(B_RewardedHistory[1]==True).astype(int)*TP_RightValue_volume)
-        #self.BS_TotalReward=float(self.BS_RewardN)*float(self.win.WaterPerRewardedTrial)
         self.BS_LeftRewardTrialN=np.sum(self.B_RewardedHistory[0]==True)
         self.BS_RightRewardTrialN=np.sum(self.B_RewardedHistory[1]==True)
         self.BS_LeftChoiceN=np.sum(self.B_AnimalResponseHistory==0)
@@ -577,7 +568,6 @@ class GenerateTrials():
             self._GetCurrentBlockReward(0)
         # update suggested reward
         if self.win.TotalWater.text()!='':
-            # self.BS_TotalReward: normal rewards and auto rewards
             self.B_SuggestedWater=float(self.win.TotalWater.text())-float(self.BS_TotalReward)/1000-np.sum(self.win.ManualWaterVolume)
             self.win.SuggestedWater.setText(str(np.round(self.B_SuggestedWater,3)))
         # foraging efficiency
@@ -905,7 +895,6 @@ class GenerateTrials():
             self.win.Start.setChecked(False)
     def _CheckAutoWater(self):
         '''Check if it should be an auto water trial'''
-        #if self.win.AutoReward.isChecked():
         if self.TP_AutoReward:
             UnrewardedN=int(self.TP_Unrewarded)
             IgnoredN=int(self.TP_Ignored)
@@ -968,7 +957,6 @@ class GenerateTrials():
             if self.CLP_OffsetStart<0:
                 self.win.WarningLabel.setText('Please set offset start to be positive!')
                 self.win.WarningLabel.setStyleSheet("color: red;")
-            #self.CLP_CurrentDuration=self.CurrentITI+self.CurrentDelay-self.CLP_OffsetStart+self.CLP_OffsetEnd
             # there is no delay for optogenetics trials 
             self.CLP_CurrentDuration=self.CurrentITI-self.CLP_OffsetStart+self.CLP_OffsetEnd
         elif self.CLP_LaserStart=='Go cue' and self.CLP_LaserEnd=='Trial start':
@@ -1164,7 +1152,6 @@ class GenerateTrials():
                     self.CurrentAutoRewardTrial=[0,1]
                 else:
                     self.CurrentAutoRewardTrial=[1,1]
-            #self.B_Baited=np.full(len(self.B_Baited),False)
             # make it no baited reward for auto reward side
             for i in range(len(self.CurrentAutoRewardTrial)):
                 if self.CurrentAutoRewardTrial[i]==1:
@@ -1403,8 +1390,6 @@ class GenerateTrials():
 
     def _GetLicks(self,Channel2):
         '''Get licks and reward delivery time'''
-        #while self.win.Start.isChecked():
-        #    time.sleep(0.01)
         while not Channel2.msgs.empty():
             Rec=Channel2.receive()
             if Rec[0].address=='/LeftLickTime':
@@ -1493,10 +1478,7 @@ class NewScaleSerialY():
             self.io = pyserial_device
         elif usbxpress_device:
             self.t = 'usbxpress'
-            #usbxpress_device.open()
             self.io = usbxpress_device
-        #self.set_timeout(1)
-        #self.set_baudrate(250000)
 
     @classmethod
     def get_instances(cls):
@@ -1602,7 +1584,6 @@ class Worker(QtCore.QRunnable):
         self.signals = WorkerSignals()
         self.setAutoDelete(False) 
         # Add the callback to our kwargs
-        #self.kwargs['progress_callback'] = self.signals.progress
 
     @QtCore.pyqtSlot()
     def run(self):
