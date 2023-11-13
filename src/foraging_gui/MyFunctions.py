@@ -1,17 +1,24 @@
-
-import random, traceback, math,time,sys
+import random
+import traceback
+import math
+import time
+import sys
+from sys import platform as PLATFORM
 from datetime import datetime
+
 import numpy as np
 from itertools import accumulate
+from serial.tools.list_ports import comports as list_comports
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import *
-from serial.tools.list_ports import comports as list_comports
-from sys import platform as PLATFORM
+
+
 if PLATFORM == 'win32':
     from newscale.usbxpress import USBXpressLib, USBXpressDevice
 VID_NEWSCALE = 0x10c4
 PID_NEWSCALE = 0xea61
+
 
 class GenerateTrials():
     def __init__(self,win):
