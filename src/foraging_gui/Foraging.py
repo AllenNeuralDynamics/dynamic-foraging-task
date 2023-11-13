@@ -78,6 +78,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         try: 
             self._InitializeBonsai()
             self.InitializeBonsaiSuccessfully=1
+            print('Bonsai started successfully')
         except Exception as e:
             print('An error occurred while initializing Bonsai:', str(e))
             self.InitializeBonsaiSuccessfully=0
@@ -228,8 +229,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
             elif axis=='z':
                 relative_postition=(0,0,step)
             self._UpdatePosition(current_position,relative_postition)
-        except:
+        except Exception as e:
             # Need an informative error statement here
+            print('Error, Foraging._Move()', str(e))
             pass
 
     def _MoveXP(self):
@@ -286,8 +288,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # scan stages
         try:
             self.instances = NewScaleSerialY.get_instances()
-        except:
-            pass
+        except Exception as e:
+            print('Error, Foraging._StageSerialNum()',str(e))
         if hasattr(self,'current_stage'):
             curent_stage_name=self.current_stage.name
         else:
@@ -297,13 +299,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
             for instance in self.instances:
                 try:
                     instance.io.close()
-                except:
-                    pass
+                except Exception as e:
+                    print('Error, Foraging._StageSerialNum(),2 ',str(e))
                 if instance.sn==self.StageSerialNum.currentText():
                     if curent_stage_name!=instance.sn:
                         self._connect_stage(instance)
-        except:
-            pass
+        except Exception as e:
+            print('Error, Foraging._StageSerialNum(),3 ',str(e))
 
     def _InitianizeMotorStage(self):
         '''To initianize motor stage'''
