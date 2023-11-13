@@ -8,7 +8,7 @@ from datetime import datetime
 
 import numpy as np
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox,QFileDialog,QVBoxLayout
+from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QThreadPool,Qt
 
