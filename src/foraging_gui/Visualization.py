@@ -61,12 +61,12 @@ class PlotV(FigureCanvas):
             self._PlotChoice()
             self._PlotLicks()
         except Exception as e:
-            print('An error occurred:2', str(e))
+            print('visualization.PlotV: ', str(e))
             pass
         try:
             self._PlotMatching()
         except Exception as e:
-            print('An error occurred:3', str(e))
+            print('visualization.PlotV,2: ', str(e))
             pass
         self.finish=1
     def _PlotBlockStructure(self):
@@ -262,7 +262,7 @@ class PlotV(FigureCanvas):
             ax.set_xlim([fit_x.min()-2, fit_x.max()+2])
             ax.set_ylim([fit_y.min()-2, fit_y.max()+2])
         except Exception as e:
-            #print('An error occurred:5', str(e))
+            print('visualization.PlotMatching: ',str(e))
             pass
         self.draw()
 
