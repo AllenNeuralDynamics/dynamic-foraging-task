@@ -63,11 +63,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json')
         try:
             self._GetLaserCalibration()
-        except:
+        except Exception as e:
             print('foraging.Window.__init__: Could not load laser calibration file, continuing')
+            logging.error(str(e))
         try:
             self._GetWaterCalibration()
-        except:
+        except Exception as e:
+            logging.error(str(e))
             print('foraging.Window.__init__: Could not load water calibration file, continuing')
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
@@ -80,8 +82,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self._InitializeBonsai()
             self.InitializeBonsaiSuccessfully=1
             print('Bonsai started successfully')
+            logging.info('Bonsai started successfully')
         except Exception as e:
             print('foraging.Window.__init__: An error occurred while initializing Bonsai:', str(e))
+            logging.error('Initializing Bonsai: {}'.format(str(e)))
             self.InitializeBonsaiSuccessfully=0
             self.WarningLabel_2.setText('Start without bonsai connected!')
             self.WarningLabel_2.setStyleSheet("color: red;")
