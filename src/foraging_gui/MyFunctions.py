@@ -155,7 +155,7 @@ class GenerateTrials():
             self.B_SelectedCondition.append(0)
             self.CurrentLaserAmplitude=[0,0]
             # Catch the exception and print error information
-            print("An error occurred:",str(e))
+            print("MyFunctions.PerformOptogenetics: ",str(e))
             print(traceback.format_exc())
     def _CheckBaitPermitted(self):
         '''Check if bait is permitted of the current trial'''
@@ -530,7 +530,8 @@ class GenerateTrials():
             try:
                 float_value = float(s)
                 TP_LeftValue_volume.append(float_value)
-            except ValueError:
+            except ValueError as e:
+                print('MyFunctions.GetBasic,l: ',str(e))
                 TP_LeftValue_volume.append(0)
         TP_LeftValue_volume=np.array(TP_LeftValue_volume)
         TP_LeftValue_volume=TP_LeftValue_volume[0:len(B_RewardedHistory[0])]
@@ -540,7 +541,8 @@ class GenerateTrials():
             try:
                 float_value = float(s)
                 TP_RightValue_volume.append(float_value)
-            except ValueError:
+            except ValueError as e:
+                print('MyFunctions.GetBasic,r: ',str(e))
                 TP_RightValue_volume.append(0)
         TP_RightValue_volume=np.array(TP_RightValue_volume)
         TP_RightValue_volume=TP_RightValue_volume[0:len(B_RewardedHistory[1])]
@@ -775,8 +777,7 @@ class GenerateTrials():
             elif (self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']):
                 self.win.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProbPoolUncoupled,2))+'\n\n'+'Current pair: '+str(np.round(self.B_RewardProHistory[:,self.B_CurrentTrialN],2)))
         except Exception as e:
-            print('An error',str(e))
-            print('Can not show reward pairs')
+            print('MyFunctions.ShowInformation: ',str(e))
         # session start time
         SessionStartTime=self.win.SessionStartTime
         self.win.CurrentTime=datetime.now()
@@ -1438,8 +1439,8 @@ class GenerateTrials():
         # log folder
         try:
             self.TP_log_folder=win.Ot_log_folder
-        except:
-            pass
+        except Exception as e:
+            print('MyFunctions.GetTrainingParameters: ',str(e))
     def _SaveParameters(self):
         for attr_name in dir(self):
             if attr_name.startswith('TP_'):
@@ -1597,6 +1598,7 @@ class Worker(QtCore.QRunnable):
         except ValueError as e:
             exctype, value = sys.exc_info()[:2]
             self.signals.error.emit((exctype, value, traceback.format_exc()))
+            print('MyFunctions.run: ',str(e))
         else:
             self.signals.result.emit(result)  # Return the result of the processing
         finally:
