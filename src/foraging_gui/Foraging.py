@@ -5,6 +5,7 @@ import json
 import time
 import subprocess
 import math
+import logging
 from datetime import date, datetime
 
 import serial 
@@ -2285,6 +2286,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     print('foraging._UpdateSuggestedWater: Error,2 ',str(e))
 
 if __name__ == "__main__":
+    # Start logging
+    logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
+    logging.info('Starting log')
+
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling,1)
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps,True)
     QApplication.setAttribute(Qt.AA_DisableHighDpiScaling,False)
