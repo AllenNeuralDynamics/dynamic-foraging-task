@@ -156,8 +156,9 @@ class OptogeneticsDialog(QDialog,Ui_Optogenetics):
                 index = eval('self.LaserPowerRight_'+str(Numb)+'.findText(CurrentlaserPowerRight)')
                 if index != -1:
                     eval('self.LaserPowerRight_'+str(Numb)+'.setCurrentIndex(index)')
-        except:
-            pass
+        except Exception as e:
+            print('dialogs._Frequency: Error ',str(e))
+
     def _activated(self,Numb):
         '''enable/disable items based on protocols and laser start/end'''
         Inactlabel1=15 # pulse duration
@@ -204,8 +205,8 @@ class OptogeneticsDialog(QDialog,Ui_Optogenetics):
         ''' enable/disable items based on laser (blue/green/orange/red/NA)'''
         try:
             self.LatestCalibrationDate.setText(self.MainWindow.RecentCalibrationDate)
-        except:
-            pass
+        except Exception as e:
+            print('dialogs._Laser: ',str(e))
         Inactlabel=range(2,17)
         if eval('self.Laser_'+str(Numb)+'.currentText()')=='NA':
             Label=False
@@ -338,7 +339,8 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
                     if key==K:
                         widget = widget_dict[key]
                         self.WaterCalibrationPar[CalibrationType][K]=widget.text()
-                except:
+                except Exception as e:
+                    print('dialogs._SaveCalibrationPar: ',str(e))
                     print('Water calibration parameters saved incorrectly!')
         # save
         if not os.path.exists(os.path.dirname(self.MainWindow.WaterCalibrationParFiles)):
@@ -349,6 +351,7 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         self.Warning
         self.Warning.setText('Calibration parameters saved for calibration type: '+CalibrationType)
         self.Warning.setStyleSheet("color: red;")
+
     def _Showrecent(self):
         '''update the calibration figure'''
         self._UpdateFigure()
@@ -379,8 +382,9 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         cycle=str(float(self.CycleLeft.text()))
         try:
             total_water=float(self.TotalWaterSingleLeft.text())  
-        except:
+        except Exception as e:
             total_water=''
+            print('dialogs._SaveLeft: ',str(e))
         self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water,tube_weight=0)
         self.SaveLeft.setStyleSheet("background-color : none")
         self.SaveLeft.setChecked(False)
@@ -394,8 +398,9 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         cycle=str(float(self.CycleRight.text()))
         try:
             total_water=float(self.TotalWaterSingleRight.text()) 
-        except:
+        except Exception as e:
             total_water=''
+            print('dialogs._SaveRight: ',str(e))
         self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water,tube_weight=0)
         self.SaveRight.setStyleSheet("background-color : none")
         self.SaveRight.setChecked(False)
@@ -414,8 +419,10 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
                     if key==K:
                         widget = widget_dict[key]
                         widget.setText(str(self.WaterCalibrationPar[CalibrationType][K]))
-                except:
+                except Exception as e:
+                    print('dialogs._CalibrationType: ',str(e))
                     print('Water calibration parameters uploaded incorrectly!')
+
     def _LoadCaliPar(self):
         '''load the pre-stored calibration parameters'''
         self.WaterCalibrationPar={}
@@ -562,7 +569,8 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
                                     else:
                                         self.WeightBeforeLeft.setText(self.TubeWeightLeft.text())
                                     self.TubeWeightLeft.setText('')
-                                except:
+                                except Exception as e:
+                                    print('dialogs._StartCalibratingLeft: ',str(e))
                                     continuetag=0
                                     self.Warning.setText('Please enter the correct weight after(mg)/weight before(mg) and click the continue button again!\nOr enter a negative value to repeat the current calibration.')
                         if continuetag==1:
@@ -574,14 +582,16 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
                         pass
                     else:
                         break
-                except:
+                except Exception as e:
+                    print('dialogs._StartCalibratingLeft,2: ',str(e))
                     break
         try: 
             # calibration complete indication
             if self.StartCalibratingLeft.isChecked() and current_valve_opentime==np.arange(float(self.TimeLeftMin.text()),float(self.TimeLeftMax.text())+0.0001,float(self.StrideLeft.text()))[-1]:
                 self.Warning.setText('Calibration is complete!')
                 self._UpdateFigure()
-        except:
+        except Exception as e:
+            print('dialogs._StartCalibratingLeft,3: ',str(e))
             self.Warning.setText('Calibration is not complete! Parameters error!')
             self.Warning.setStyleSheet("color: red;")
         # set the default valve open time
@@ -721,7 +731,8 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
                                     else:
                                         self.WeightBeforeRight.setText(self.TubeWeightRight.text())
                                     self.TubeWeightRight.setText('')
-                                except:
+                                except Exception as e:
+                                    print('dialogs.StartCalibratingRight: ',str(e))
                                     continuetag=0
                                     self.Warning.setText('Please enter the correct weight after(mg)/tube weight(mg) and click the continue button again!\nOr enter a negative value to repeat the current calibration.')
                         if continuetag==1:
@@ -733,14 +744,16 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
                         pass
                     else:
                         break
-                except:
+                except Exception as e:
+                    print('dialogs.StartCalibratingRight,2: ',str(e))
                     break
         try: 
             # calibration complete indication
             if self.StartCalibratingRight.isChecked() and current_valve_opentime==np.arange(float(self.TimeRightMin.text()),float(self.TimeRightMax.text())+0.0001,float(self.StrideRight.text()))[-1]:
                 self.Warning.setText('Calibration is complete!')
                 self._UpdateFigure()
-        except:
+        except Exception as e:
+            print('dialogs.StartCalibrationRight,3: ',str(e))
             self.Warning.setText('Calibration is not complete! Parameters error!')
             self.Warning.setStyleSheet("color: red;")
 
@@ -935,7 +948,8 @@ class CameraDialog(QDialog,Ui_Camera):
         if hasattr(self.MainWindow,'Ot_log_folder'):
             try:
                 subprocess.Popen(['explorer', self.MainWindow.Ot_log_folder])
-            except:
+            except Exception as e:
+                print('dialogs._OpenSaveFolder: ', str(e))
                 self.WarningLabelOpenSave.setText('No logging folder found!')
                 self.WarningLabelOpenSave.setStyleSheet("color: red;")
         else:
@@ -983,8 +997,8 @@ class CameraDialog(QDialog,Ui_Camera):
                 print(f"Directory '{self.MainWindow.temporary_video_folder}' and its contents removed successfully.")
             else:
                 print(f"Directory '{self.MainWindow.temporary_video_folder}' does not exist.")
-        except:
-            pass
+        except Exception as e:
+            print('dialogs.ClearTemporaryVideo: ',str(e))
 
     def _StartCamera(self):
         '''Start/stop the camera'''
@@ -1397,7 +1411,8 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
             LaserCalibrationResults=self.MainWindow.LaserCalibrationResults
         try:
             self.LCM_MeasureTime.copy()
-        except:
+        except Exception as e:
+            print('dialogs.Save: ',str(e))
             self.Warning.setText('Data not saved! Please Capture the power first!')
             self.Warning.setStyleSheet("color: red;")
             self.Warning.setAlignment(Qt.AlignCenter)
@@ -1596,8 +1611,9 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
             try:
                 Sum=Sum+float(List[i])
                 N=N+1
-            except:
-                pass
+            except Exception as e:
+                print('dialogs.getmean: ',str(e))
+
         Sum=Sum/N
         return Sum
     def _Sleep(self,SleepTime):
