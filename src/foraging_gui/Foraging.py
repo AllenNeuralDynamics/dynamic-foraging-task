@@ -2287,6 +2287,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
 if __name__ == "__main__":
     # Start logging
+    logging_filename= 'test_log.txt'
     logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
     logging.info('Starting log')
 
