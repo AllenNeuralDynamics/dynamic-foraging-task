@@ -28,8 +28,8 @@ if fname.endswith('.mat'):
             if Value.shape[0]==1:
                 try:
                     Value=Value.reshape(Value.shape[1],)
-                except:
-                    pass
+                except Exception as e:
+                    print('TransferToNWB: ',str(e))
             if Value.shape==(1,):
                 Obj[key]=Value.tolist()[0]
             else:
