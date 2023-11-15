@@ -64,13 +64,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
         try:
             self._GetLaserCalibration()
         except Exception as e:
-            print('foraging.Window.__init__: Could not load laser calibration file, continuing')
-            logging.error(str(e))
+            logging.error('Could not load laser calibration file: {}'.format(str(e)))
         try:
             self._GetWaterCalibration()
         except Exception as e:
-            logging.error(str(e))
-            print('foraging.Window.__init__: Could not load water calibration file, continuing')
+            logging.error('Could not load water calibration file: {}'.format(str(e)))
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
@@ -81,10 +79,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         try: 
             self._InitializeBonsai()
             self.InitializeBonsaiSuccessfully=1
-            print('Bonsai started successfully')
             logging.info('Bonsai started successfully')
         except Exception as e:
-            print('foraging.Window.__init__: An error occurred while initializing Bonsai:', str(e))
             logging.error('Initializing Bonsai: {}'.format(str(e)))
             self.InitializeBonsaiSuccessfully=0
             self.WarningLabel_2.setText('Start without bonsai connected!')
@@ -235,8 +231,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 relative_postition=(0,0,step)
             self._UpdatePosition(current_position,relative_postition)
         except Exception as e:
-            print('foraging._Move(): Error ', str(e))
-            pass
+            logging.error(str(e))
 
     def _MoveXP(self):
         '''Move X positively'''
@@ -293,7 +288,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         try:
             self.instances = NewScaleSerialY.get_instances()
         except Exception as e:
-            print('foraging._StageSerialNum: Error ',str(e))
+            logging.error(str(e))
         if hasattr(self,'current_stage'):
             curent_stage_name=self.current_stage.name
         else:
@@ -304,12 +299,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 try:
                     instance.io.close()
                 except Exception as e:
-                    print('foraging._StageSerialNum,2: Error ',str(e))
+                    logging.error(str(e))
                 if instance.sn==self.StageSerialNum.currentText():
                     if curent_stage_name!=instance.sn:
                         self._connect_stage(instance)
         except Exception as e:
-            print('foraging._StageSerialNum,3: Error ',str(e))
+            logging.error(str(e))
 
     def _InitianizeMotorStage(self):
         '''To initianize motor stage'''
@@ -325,8 +320,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     self.Warning_Newscale.setText('Default Newsacle not found!')
                     self.Warning_Newscale.setStyleSheet("color: red;")
         except Exception as e:
-            print('foraging._InitianizeMotorStage: Error ',str(e))
-            pass
+            logging.error('Initializing Motor stage: {}'.format(str(e)))
 
     def _scan_for_usb_stages(self):
         '''Scan available stages'''
@@ -337,7 +331,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.stage_names.append(instance.sn)
             self.StageSerialNum.addItems(self.stage_names)
         except Exception as e:
-            print('foraging._scan_for_usb_stages: Error ',str(e))
+            logging.error(str(e))
 
     def _connect_stage(self,instance):
         '''connect to a stage'''
@@ -2318,7 +2312,7 @@ def start_gui_log_file():
     logging_filename = os.path.join(logging_folder,filename)
 
     # Format the log file:
-    log_format = '%(asctime)s:%(levelname)s:%(filename)s:%(funcName)s:%(lineno)d:%(message)s'
+    log_format = '%(asctime)s:%(levelname)s:%(module)s:%(filename)s:%(funcName)s:line %(lineno)d:%(message)s'
     log_datefmt = '%I:%M:%S %p'
 
     # Start the log file
