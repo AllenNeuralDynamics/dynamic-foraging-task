@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 from scipy import stats
 from matplotlib.figure import Figure

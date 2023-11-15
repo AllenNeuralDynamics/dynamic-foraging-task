@@ -5,6 +5,7 @@ import time
 import sys
 from sys import platform as PLATFORM
 from datetime import datetime
+import logging
 
 import numpy as np
 from itertools import accumulate

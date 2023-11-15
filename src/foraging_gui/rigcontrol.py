@@ -1,4 +1,5 @@
 import queue
+import logging
 
 from pyOSC3.OSC3 import OSCMessage
 
