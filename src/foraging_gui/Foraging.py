@@ -2319,6 +2319,7 @@ def start_gui_log_file():
         datefmt=log_datefmt
         )
     logging.info('Starting logfile!')
+    logging.captureWarnings(True)
 
 if __name__ == "__main__":
     # Start logging
