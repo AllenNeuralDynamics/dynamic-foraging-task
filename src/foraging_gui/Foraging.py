@@ -2314,7 +2314,7 @@ def start_gui_log_file():
         tower_num = 0
 
     # Build logfile name
-    filename = 'tower_{}_gui_log_{}.txt'.format(tower_num,formated_datetime)
+    filename = 'tower_{}_gui_log_{}.txt'.format(tower_num,formatted_datetime)
     logging_filename = os.path.join(logging_folder,filename)
 
     # Start the log file
