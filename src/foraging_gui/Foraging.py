@@ -1819,7 +1819,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.ShowBasic.setText(Obj['Other_BasicText'])
             # Set newscale position to last position
             if 'B_NewscalePositions' in Obj:
-                last_positions=Obj['B_NewscalePositions'][-1]
+                try:
+                    last_positions=Obj['B_NewscalePositions'][-1]
+                except:
+                    pass
                 if hasattr(self,'current_stage'):
                     try:
                         self.current_stage.move_absolute_3d(float(last_positions[0]),float(last_positions[1]),float(last_positions[2]))
