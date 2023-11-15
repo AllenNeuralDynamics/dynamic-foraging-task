@@ -2289,30 +2289,58 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 except Exception as e:
                     print('foraging._UpdateSuggestedWater: Error,2 ',str(e))
 
-if __name__ == "__main__":
-    # Start logging
-
-    current_time = datetime.now()
-    formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+def start_gui_log_file():
+    '''
+        Starts a log file for the gui.
+        The log file is located at C:/Users/<username>/Documents/foraging_gui_logs
+        One log file is created for each time the GUI is started
+        The name of the gui file is tower_<tower num>_gui_log_<date and time>.txt
+        If no tower number is available, then tower_num = 0
+    '''
+    # Check if the log folder exists, if it doesn't make it
     logging_folder = os.path.join(os.path.expanduser("~"), "Documents",'foraging_gui_logs')
     if not os.path.exists(logging_folder):
         os.makedirs(logging_folder)
-    logging_filename = os.path.join(logging_folder,'gui_log_'+formatted_datetime+'.txt')
+
+    # Determine name of this log file
+    # Get current time
+    current_time = datetime.now()
+    formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+
+    # What tower is this for?
+    if len(sys.argv) >=2:
+        tower_num = sys.argv[1]
+    else:
+        tower_num = 0
+
+    # Build logfile name
+    filename = 'tower_{}_gui_log_{}.txt'.format(tower_num,formated_datetime)
+    logging_filename = os.path.join(logging_folder,filename)
+
+    # Start the log file
+    print('Starting a GUI log file at: ')
     print(logging_filename)
-
     logging.basicConfig(filename=logging_filename, level=logging.INFO)
-    logging.info('Starting log')
-    print(sys.argv)
-    logging.info(sys.argv)
+    logging.info('Starting logfile!')
 
+if __name__ == "__main__":
+    # Start logging
+    start_gui_log_file()
+
+    # Formating GUI graphics
+    logging.info('Setting QApplication attributes')
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling,1)
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps,True)
     QApplication.setAttribute(Qt.AA_DisableHighDpiScaling,False)
     QApplication.setAttribute(Qt.AA_Use96Dpi,False)
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
     
+    # Start Q, and Gui Window
+    logging.info('Starting QApplication and Window')
     app = QApplication(sys.argv)
     win = Window()
     win.show()
     # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())
+
+
