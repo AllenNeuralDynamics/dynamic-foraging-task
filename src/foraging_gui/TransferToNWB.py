@@ -29,7 +29,7 @@ if fname.endswith('.mat'):
                 try:
                     Value=Value.reshape(Value.shape[1],)
                 except Exception as e:
-                    print('TransferToNWB: ',str(e))
+                    logging.error(str(e))
             if Value.shape==(1,):
                 Obj[key]=Value.tolist()[0]
             else:
@@ -86,6 +86,7 @@ nwbfile.subject = Subject(
     weight=obj.WeightBefore,
 )
 print(nwbfile)
+logging.info(nwbfile)
 
 #######       Add trial     #######
 ## behavior events (including trial start/end time; left/right lick time; give left/right reward time) ##
