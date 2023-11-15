@@ -2317,10 +2317,18 @@ def start_gui_log_file():
     filename = 'tower_{}_gui_log_{}.txt'.format(tower_num,formatted_datetime)
     logging_filename = os.path.join(logging_folder,filename)
 
+    # Format the log file:
+    log_format = '%(asctime)s:%(levelname)s:%(filename)s:%(funcName)s:%(lineno)d:%(message)s'
+    log_datefmt = '%I:%M:%S %p'
+
     # Start the log file
     print('Starting a GUI log file at: ')
     print(logging_filename)
-    logging.basicConfig(filename=logging_filename, level=logging.INFO)
+    logging.basicConfig(format=log_format,
+        filename=logging_filename, 
+        level=logging.INFO,
+        datefmt=log_datefmt
+        )
     logging.info('Starting logfile!')
 
 if __name__ == "__main__":
