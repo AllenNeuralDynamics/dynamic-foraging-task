@@ -1,4 +1,5 @@
 import queue
+import logging
 
 from pyOSC3.OSC3 import OSCMessage
 
@@ -13,7 +14,7 @@ class RigClient:
         msg = OSCMessage(address, args)
         CurrentMessage=[msg.address,args[1][0],msg.values()[2],msg.values()[3]]
         self.msgs.put([msg,args])
-        print(CurrentMessage)
+        logging.info(CurrentMessage)
 
     def send(self, address="", *args):
         message = OSCMessage(address, *args)

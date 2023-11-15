@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 from scipy import stats
 from matplotlib.figure import Figure
@@ -61,13 +63,11 @@ class PlotV(FigureCanvas):
             self._PlotChoice()
             self._PlotLicks()
         except Exception as e:
-            print('An error occurred:2', str(e))
-            pass
+            logging.error(str(e))
         try:
             self._PlotMatching()
         except Exception as e:
-            print('An error occurred:3', str(e))
-            pass
+            logging.error(str(e))
         self.finish=1
     def _PlotBlockStructure(self):
         ax2=self.ax2
@@ -262,8 +262,7 @@ class PlotV(FigureCanvas):
             ax.set_xlim([fit_x.min()-2, fit_x.max()+2])
             ax.set_ylim([fit_y.min()-2, fit_y.max()+2])
         except Exception as e:
-            #print('An error occurred:5', str(e))
-            pass
+            logging.error(str(e))
         self.draw()
 
     def _PlotLicks(self):
@@ -294,6 +293,7 @@ class PlotWaterCalibration(FigureCanvas):
         self.water_win=water_win
         self.WaterCalibrationResults=self.water_win.WaterCalibrationResults
         self.FittingResults={}
+
     def _UpdateKeysSpecificCalibration(self):
         '''update the fields of specific calibration'''
         self.WaterCalibrationResults=self.water_win.WaterCalibrationResults
@@ -306,6 +306,7 @@ class PlotWaterCalibration(FigureCanvas):
         for i in range(self.water_win.showspecificcali.count()):
             if current_item==self.water_win.showspecificcali.itemText(i):
                 self.water_win.showspecificcali.setCurrentIndex(i)
+
     def _Update(self):
         '''update the calibration figure'''
         self.WaterCalibrationResults=self.water_win.WaterCalibrationResults
@@ -398,6 +399,7 @@ class PlotLickDistribution(FigureCanvas):
         self.ax5.set_yticks([])
         
         FigureCanvas.__init__(self, self.fig)
+
     def _Update(self,GeneratedTrials=None):
         self.ax1.cla()
         self.ax2.cla()
