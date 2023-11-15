@@ -2294,7 +2294,10 @@ if __name__ == "__main__":
 
     current_time = datetime.now()
     formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-    logging_filename = os.path.join(os.path.expanduser("~"), "Documents",'foraging_gui_logs','gui_log_'+formatted_datetime+'.txt')
+    logging_folder = os.path.join(os.path.expanduser("~"), "Documents",'foraging_gui_logs')
+    if not os.path.exists(logging_folder):
+        os.makedirs(logging_folder)
+    logging_filename = os.path.join(logging_folder,'gui_log_'+formatted_datetime+'.txt')
     print(logging_filename)
 
     logging.basicConfig(filename=logging_filename, level=logging.INFO)
