@@ -734,7 +734,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             try:
                 AnimalFolder=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text())
                 subprocess.Popen(['explorer', AnimalFolder])
-            except:
+            except Exception as e:
                 print('foraging._OpenBehaviorFolder,2: Error ',str(e))
 
     def _OpenLoggingFolder(self):
@@ -1708,7 +1708,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         try: # load the paramter used by last trial
                             value=np.array([CurrentObj['TP_'+key][-2]])
                             Tag=0
-                        except: # sometimes we only have training parameters, no behavior parameters
+                        except Exception as e: # sometimes we only have training parameters, no behavior parameters
                             print('foraging._Open: Error,2 ',str(e))
                             value=CurrentObj[key]
                             Tag=1
