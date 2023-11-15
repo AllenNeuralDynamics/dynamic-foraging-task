@@ -744,7 +744,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             try:
                 AnimalFolder=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text())
                 subprocess.Popen(['explorer', AnimalFolder])
-            except:
+            except Exception as e:
                 logging.error(str(e))
 
     def _OpenLoggingFolder(self):
@@ -924,14 +924,15 @@ class Window(QMainWindow, Ui_ForagingGUI):
         try:
             if self.actionTime_distribution.isChecked()==True:
                 self.PlotTime._Update(self)
-        except:
-            pass
+        except Exception as e:
+            logging.error(str(e))
+
         # move newscale stage
         if hasattr(self,'current_stage'):
             try:
                 self.current_stage.move_absolute_3d(float(self.PositionX.text()),float(self.PositionY.text()),float(self.PositionZ.text()))
-            except:
-                pass
+            except Exception as e:
+                logging.error(str(e))
         # Get the parameters before change
         if hasattr(self, 'GeneratedTrials') and self.ToInitializeVisual==0: # use the current GUI paramters when no session starts running
             Parameters=self.GeneratedTrials
@@ -1744,7 +1745,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         try: # load the paramter used by last trial
                             value=np.array([CurrentObj['TP_'+key][-2]])
                             Tag=0
-                        except: # sometimes we only have training parameters, no behavior parameters
+                        except Exception as e: # sometimes we only have training parameters, no behavior parameters
                             logging.error(str(e))
                             value=CurrentObj[key]
                             Tag=1
@@ -2062,13 +2063,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.WarningLabel.setStyleSheet("color: none;")
         else:
             self.Start.setStyleSheet("background-color : none")
-            ''' # update graph when session is stopped
-            try:
-                time.sleep(self.GeneratedTrials.B_ITIHistory[-1]+3)
-                self.PlotM._Update(GeneratedTrials=self.GeneratedTrials)
-            except:
-                pass
-            '''
+
         # waiting for the finish of the last trial
         if self.StartANewSession==1 and self.ANewTrial==0:
             self.WarningLabel.setText('Waiting for the finish of the last trial!')
