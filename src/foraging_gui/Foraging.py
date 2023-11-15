@@ -825,7 +825,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
                         widget.clear()
         except Exception as e:
-            # Catch the exception and print error information
+            # Catch the exception and log error information
             logging.error(str(e))
         
     def _SaveTraining(self):
@@ -922,7 +922,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
             event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, Qt.Key_Return, Qt.KeyboardModifiers())
         if (event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter):
             # handle the return key press event here
-            print("Parameter changes confirmed!")
             logging.info('parameter changes confirmed')
             # prevent the default behavior of the return key press event
             event.accept()
@@ -953,7 +952,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         float(child.text())
                     except Exception as e:
                         logging.error(str(e))
-                        print('foraging.keyPressEvent: Error ', str(e))
                         if isinstance(child, QtWidgets.QDoubleSpinBox):
                             child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
                         elif isinstance(child, QtWidgets.QSpinBox):
@@ -1004,7 +1002,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
                             float(child.text())
                             self.UpdateParameters=0 # Changes are not allowed until press is typed
                         except Exception as e:
-                            print('An error occurred when changing a parameter (Foraging.py):', str(e))
                             logging.error(str(e))
                             # Invalid float. Do not change the parameter
                             if isinstance(child, QtWidgets.QDoubleSpinBox):
@@ -1020,7 +1017,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         child.setStyleSheet('color: black;')
                         child.setStyleSheet('background-color: white;')
                 except Exception as e:
-                    print('An error occured when changing a parameters (Foraging.py,2):',str(e))
                     logging.error(str(e))
 
     def _CheckFormat(self,child):
@@ -1272,7 +1268,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 else:
                     self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: ') 
         except Exception as e:
-            # Catch the exception and print error information
+            # Catch the exception and log error information
             logging.error(str(e))
 
     def closeEvent(self, event):
@@ -1469,7 +1465,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.CreateNewFolder=0
         if not os.path.exists(os.path.dirname(self.SaveFileJson)):
             os.makedirs(os.path.dirname(self.SaveFileJson))
-            print(f"Created new folder: {os.path.dirname(self.SaveFileJson)}")
             logging.info(f"Created new folder: {os.path.dirname(self.SaveFileJson)}")
         Names = QFileDialog.getSaveFileName(self, 'Save File',self.SaveFileJson,"JSON files (*.json);;MAT files (*.mat);;JSON parameters (*_par.json)")
         if Names[1]=='JSON parameters (*_par.json)':
@@ -1598,28 +1593,24 @@ class Window(QMainWindow, Ui_ForagingGUI):
         if CTrainingFolder==1:
             if not os.path.exists(self.TrainingFolder):
                 os.makedirs(self.TrainingFolder)
-                print(f"Created new folder: {self.TrainingFolder}")
                 logging.info(f"Created new folder: {self.TrainingFolder}")
         if CHarpFolder==1:
             if not os.path.exists(self.HarpFolder):
                 os.makedirs(self.HarpFolder)
-                print(f"Created new folder: {self.HarpFolder}")
                 logging.info(f"Created new folder: {self.HarpFolder}")
         if CVideoFolder==1:
             if not os.path.exists(self.VideoFolder):
                 os.makedirs(self.VideoFolder)
-                print(f"Created new folder: {self.VideoFolder}")
                 logging.info(f"Created new folder: {self.VideoFolder}")
         if CPhotometryFolder==1:
             if not os.path.exists(self.PhotometryFolder):
                 os.makedirs(self.PhotometryFolder)
-                print(f"Created new folder: {self.PhotometryFolder}")
                 logging.info(f"Created new folder: {self.PhotometryFolder}")
         if CEphysFolder==1:
             if not os.path.exists(self.EphysFolder):
                 os.makedirs(self.EphysFolder)
-                print(f"Created new folder: {self.EphysFolder}")
                 logging.info(f"Created new folder: {self.EphysFolder}")
+
     def _GetSaveFileName(self):
         '''Get the name of the save file. This is an old data structure and has been deprecated.'''
         SaveFileMat = os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.mat')
@@ -1627,7 +1618,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         SaveFileParJson= os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_par.json')
         if not os.path.exists(os.path.dirname(SaveFileJson)):
             os.makedirs(os.path.dirname(SaveFileJson))
-            print(f"Created new folder: {os.path.dirname(SaveFileJson)}")
             logging.info(f"Created new folder: {os.path.dirname(SaveFileJson)}")
         N=0
         while 1:
