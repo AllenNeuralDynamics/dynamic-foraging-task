@@ -40,6 +40,7 @@ class NumpyEncoder(json.JSONEncoder):
     
 class Window(QMainWindow, Ui_ForagingGUI):
     def __init__(self, parent=None):
+        logging.info('Creating Window')
         super().__init__(parent)
         self.setupUi(self)
         
@@ -63,10 +64,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json')
         try:
             self._GetLaserCalibration()
+            logging.info('Loaded Laser Calibration')
         except Exception as e:
             logging.error('Could not load laser calibration file: {}'.format(str(e)))
         try:
             self._GetWaterCalibration()
+            logging.info('Loaded Water Calibration')
         except Exception as e:
             logging.error('Could not load water calibration file: {}'.format(str(e)))
         self.StartANewSession=1 # to decide if should start a new session
@@ -122,6 +125,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._StageSerialNum()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
+
     def connectSignalsSlots(self):
         '''Define callbacks'''
         self.action_About.triggered.connect(self._about)
@@ -498,13 +502,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
     def _InitializeBonsai(self):
         '''Initializing osc messages'''
+        logging.info('initializing Bonsai')
         # open the bondai workflow and run
         self._OpenBonsaiWorkflow()
         time.sleep(3)
         self._ConnectOSC()
+
     def _ConnectOSC(self):
         '''Connect the GUI and Bonsai through OSC messages'''    
         # connect the bonsai workflow with the python GUI
+        logging.info('connecting to GUI and Bonsai through OSC')
         self.ip = "127.0.0.1"
         if len(sys.argv)==1:
             self.bonsai_tag=1
@@ -600,12 +607,15 @@ class Window(QMainWindow, Ui_ForagingGUI):
             subprocess.Popen(['explorer', self.SettingFolder])
         except Exception as e:
             logging.error(str(e))
+
     def _ForceSave(self):
         '''Save whether the current trial is complete or not'''
         self._Save(ForceSave=1)
+
     def _SaveContinue(self):
         '''Do not restart a session after saving'''
         self._Save(SaveContinue=1)
+
     def _WaterVolumnManage1(self):
         '''Change the water volume based on the valve open time'''
         self.LeftValue.textChanged.disconnect(self._WaterVolumnManage1)
@@ -740,12 +750,15 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _OpenLoggingFolder(self):
         '''Open the logging folder'''
         self.Camera_dialog._OpenSaveFolder()
+
     def _startTemporaryLogging(self):
         '''Restart the temporary logging'''
         self.Ot_log_folder=self._restartlogging(self.temporary_video_folder)
+
     def _startFormalLogging(self):
         '''Restart the formal logging'''
         self.Ot_log_folder=self._restartlogging()
+
     def _TrainingStage(self):
         '''Change the parameters automatically based on training stage and task'''
         self.WarningLabel_SaveTrainingStage.setText('')
@@ -830,6 +843,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         
     def _SaveTraining(self):
         '''Save the training stage parameters'''
+        logging.info('Saving training stage parameters')
         # load the pre-stored training stage parameters
         self._LoadTrainingPar()
         # get the current training stage parameters
@@ -858,12 +872,15 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.WarningLabel_SaveTrainingStage.setText('Training stage parameters were saved!')
         self.WarningLabel_SaveTrainingStage.setStyleSheet("color: red;")
         self.SaveTraining.setChecked(False)
+
     def _LoadTrainingPar(self):
         '''load the training stage parameters'''
+        logging.info('loading training stage parameters')
         self.TrainingStagePar={}
         if os.path.exists(self.TrainingStageFiles):
             with open(self.TrainingStageFiles, 'r') as f:
                 self.TrainingStagePar = json.load(f)
+
     def _Randomness(self):
         '''enable/disable some fields in the Block/Delay Period/ITI'''
         if self.Randomness.currentText()=='Exponential':
@@ -888,6 +905,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 border_style = "1px solid " + border_color
                 self.BlockBeta.setStyleSheet(f"color: gray;border:{border_style};background-color: rgba(0, 0, 0, 0);")
                 self.label_14.setStyleSheet("color: gray;background-color: rgba(0, 0, 0, 0);")
+
     def _AdvancedBlockAuto(self):
         '''enable/disable some fields in the AdvancedBlockAuto'''
         if self.AdvancedBlockAuto.currentText()=='off':
@@ -900,6 +918,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.label_60.setEnabled(True)
             self.SwitchThr.setEnabled(True)
             self.PointsInARow.setEnabled(True)
+
     def keyPressEvent(self, event=None):
         '''Enter press to allow change of parameters'''
         try:
@@ -1081,6 +1100,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 # Set an attribute in self with the name 'TP_' followed by the child's object name
                 # and store whether the child is checked or not
                 setattr(self, 'TP_'+child.objectName(), child.isChecked())
+
     def _Task(self):
         '''hide and show some fields based on the task type'''
         self.label_43.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
@@ -1308,15 +1328,18 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
     def _Exit(self):
         '''Close the GUI'''
+        logging.info('closing the GUI')
         response = QMessageBox.question(self,'Save and Exit:', "Do you want to save the current result?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
         if response==QMessageBox.Yes:
             self._Save()
             self.close()
         elif response==QMessageBox.No:
             self.close()
+
     def _Snipping(self):
         '''Open the snipping tool'''
         os.system("start %windir%\system32\SnippingTool.exe") 
+
     def _Optogenetics(self):
         '''will be triggered when the optogenetics icon is pressed'''
         if self.OpenOptogenetics==0:
@@ -1326,6 +1349,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Opto_dialog.show()
         else:
             self.Opto_dialog.hide()
+
     def _Camera(self):
         '''Open the camera. It's not available now'''
         if self.Camera==0:
@@ -1335,6 +1359,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Camera_dialog.show()
         else:
             self.Camera_dialog.hide()
+
     def _Manipulator(self):
         if self.Manipulator==0:
             self.ManipulatoB_dialog = ManipulatorDialog(MainWindow=self)
@@ -1343,6 +1368,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.ManipulatoB_dialog.show()
         else:
             self.ManipulatoB_dialog.hide()
+
     def _WaterCalibration(self):
         if self.WaterCalibration==0:
             self.WaterCalibration_dialog = WaterCalibrationDialog(MainWindow=self)
@@ -1351,6 +1377,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.WaterCalibration_dialog.show()
         else:
             self.WaterCalibration_dialog.hide()
+
     def _LaserCalibration(self):
         if self.LaserCalibration==0:
             self.LaserCalibration_dialog = LaserCalibrationDialog(MainWindow=self)
@@ -1359,6 +1386,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.LaserCalibration_dialog.show()
         else:
             self.LaserCalibration_dialog.hide()
+
     def _MotorStage(self):
         if self.MotorStage==0:
             self.MotorStage_dialog = MotorStageDialog(MainWindow=self)
@@ -1443,6 +1471,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         )
    
     def _Save(self,ForceSave=0,SaveContinue=0):
+        logging.info('Saving current session, ForceSave={},SaveContinue={}'.format(ForceSave,SaveContinue))
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
         if self.WeightBefore.text()=='' or self.WeightAfter.text()=='' or self.ExtraWater.text()=='':
@@ -1451,10 +1480,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 pass
                 self.WarningLabel.setText('Saving without weight or extra water!')
                 self.WarningLabel.setStyleSheet("color: red;")
+                logging.info('saving without weight or extra water')
             elif response==QMessageBox.No:
+                logging.info('saving declined by user')
                 return
             elif response==QMessageBox.Cancel:
+                logging.info('saving canceled by user')
                 return
+
         # this should be improved in the future. Need to get the last LeftRewardDeliveryTime and RightRewardDeliveryTime
         if hasattr(self, 'GeneratedTrials'):
             self.GeneratedTrials._GetLicks(self.Channel2)
@@ -1926,6 +1959,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         else:
             self.NextBlock.setStyleSheet("background-color : none")
     def _NewSession(self):
+        logging.info('starting new session')
         if self.NewSession.isChecked():
             if self.ToInitializeVisual==0: # Do not ask to save when no session starts running
                 reply = QMessageBox.question(self, 'New Session:', 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
@@ -2133,6 +2167,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 logging.error(str(e))
 
     def _StartTrialLoop(self,GeneratedTrials,worker1):
+        logging.info('starting trial loop')
         while self.Start.isChecked():
             QApplication.processEvents()
             if self.ANewTrial==1 and self.Start.isChecked() and self.finish_Timer==1: 
@@ -2166,6 +2201,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     GeneratedTrials._GenerateATrial(self.Channel4)     
 
     def _StartTrialLoop1(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
+        logging.info('starting trial loop 1')
         while self.Start.isChecked():
             QApplication.processEvents()
             if self.ANewTrial==1 and self.ToGenerateATrial==1 and self.Start.isChecked(): 
