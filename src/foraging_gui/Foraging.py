@@ -2291,9 +2291,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
 if __name__ == "__main__":
     # Start logging
-    logging_filename= 'test_log.txt'
-    logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
+
+    current_time = datetime.now()
+    formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+    logging_filename = os.path.join(os.path.expanduser("~"), "Documents",'foraging_gui_logs','gui_log_'+formatted_datetime+'.txt')
+    print(logging_filename)
+
+    logging.basicConfig(filename=logging_filename, level=logging.INFO)
     logging.info('Starting log')
+    print(sys.argv)
+    logging.info(sys.argv)
 
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling,1)
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps,True)
