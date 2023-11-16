@@ -2046,6 +2046,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _Timer(self,Time):
         '''sleep some time'''
         time.sleep(Time)
+    
+    def _EnableDisableMetadata(self,state):
+        '''Enable or disable metadata fields'''
+        self.AnimalName.setEnabled(state)
+        self.ID.setEnabled(state)
+        self.Experimenter.setEnabled(state)
+        self.Tower.setEnabled(state)
+
     def _Start(self):
         '''start trial loop'''
         if self.InitializeBonsaiSuccessfully==0:
@@ -2064,9 +2072,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.NewSession.setChecked(False)
             self.WarningLabel.setText('')
             self.WarningLabel.setStyleSheet("color: none;")
+            # disable metadata fields
+            self._EnableDisableMetadata(False)
         else:
             self.Start.setStyleSheet("background-color : none")
-
+            # enable metadata fields
+            self._EnableDisableMetadata(True)
         # waiting for the finish of the last trial
         if self.StartANewSession==1 and self.ANewTrial==0:
             self.WarningLabel.setText('Waiting for the finish of the last trial!')
