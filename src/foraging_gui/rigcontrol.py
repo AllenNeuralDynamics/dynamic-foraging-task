@@ -38,6 +38,9 @@ class RigClient:
     def ITI(self, value):
         self.send("/ITI", value)
 
+    def RewardDelay(self,value):
+        self.send("/RewardDelay", value)
+
     def DelayTime(self, value):
         self.send("/DelayTime", value)
 

@@ -1323,7 +1323,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Disabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM25</harp:PortName>
+                      <harp:PortName>COM12</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject">
@@ -1397,6 +1397,22 @@
                   <Expression xsi:type="SubscribeSubject">
                     <Name>RewardDeliveryLeft</Name>
                   </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>RewardDelay</Name>
+                  </Expression>
+                  <Expression xsi:type="scr:ExpressionTransform">
+                    <scr:Expression>TimeSpan.FromSeconds(it)</scr:Expression>
+                  </Expression>
+                  <Expression xsi:type="PropertyMapping">
+                    <PropertyMappings>
+                      <Property Name="DueTime" />
+                    </PropertyMappings>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="gl:Delay">
+                      <gl:DueTime>PT1.089S</gl:DueTime>
+                    </Combinator>
+                  </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="IntProperty">
                       <Value>0</Value>
@@ -1419,6 +1435,22 @@
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
                     <Name>RewardDeliveryRight</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>RewardDelay</Name>
+                  </Expression>
+                  <Expression xsi:type="scr:ExpressionTransform">
+                    <scr:Expression>TimeSpan.FromSeconds(it)</scr:Expression>
+                  </Expression>
+                  <Expression xsi:type="PropertyMapping">
+                    <PropertyMappings>
+                      <Property Name="DueTime" />
+                    </PropertyMappings>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="gl:Delay">
+                      <gl:DueTime>PT1.089S</gl:DueTime>
+                    </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="IntProperty">
@@ -1447,16 +1479,24 @@
                   <Edge From="6" To="7" Label="Source2" />
                   <Edge From="7" To="8" Label="Source1" />
                   <Edge From="8" To="9" Label="Source1" />
-                  <Edge From="10" To="13" Label="Source1" />
-                  <Edge From="11" To="12" Label="Source1" />
-                  <Edge From="12" To="13" Label="Source2" />
+                  <Edge From="10" To="17" Label="Source1" />
+                  <Edge From="11" To="15" Label="Source1" />
+                  <Edge From="12" To="13" Label="Source1" />
                   <Edge From="13" To="14" Label="Source1" />
-                  <Edge From="14" To="15" Label="Source1" />
-                  <Edge From="16" To="19" Label="Source1" />
+                  <Edge From="14" To="15" Label="Source2" />
+                  <Edge From="15" To="16" Label="Source1" />
+                  <Edge From="16" To="17" Label="Source2" />
                   <Edge From="17" To="18" Label="Source1" />
-                  <Edge From="18" To="19" Label="Source2" />
-                  <Edge From="19" To="20" Label="Source1" />
-                  <Edge From="20" To="21" Label="Source1" />
+                  <Edge From="18" To="19" Label="Source1" />
+                  <Edge From="20" To="27" Label="Source1" />
+                  <Edge From="21" To="25" Label="Source1" />
+                  <Edge From="22" To="23" Label="Source1" />
+                  <Edge From="23" To="24" Label="Source1" />
+                  <Edge From="24" To="25" Label="Source2" />
+                  <Edge From="25" To="26" Label="Source1" />
+                  <Edge From="26" To="27" Label="Source2" />
+                  <Edge From="27" To="28" Label="Source1" />
+                  <Edge From="28" To="29" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -3049,6 +3089,16 @@
                   <Expression xsi:type="rx:PublishSubject">
                     <Name>Port2</Name>
                   </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>FromBonsaiOSC</Name>
+                  </Expression>
+                  <Expression xsi:type="osc:Parse">
+                    <osc:Address>/RewardDelay</osc:Address>
+                    <osc:TypeTag>f</osc:TypeTag>
+                  </Expression>
+                  <Expression xsi:type="rx:BehaviorSubject">
+                    <Name>RewardDelay</Name>
+                  </Expression>
                 </Nodes>
                 <Edges>
                   <Edge From="0" To="1" Label="Source1" />
@@ -3141,6 +3191,8 @@
                   <Edge From="123" To="124" Label="Source1" />
                   <Edge From="125" To="126" Label="Source1" />
                   <Edge From="126" To="127" Label="Source1" />
+                  <Edge From="128" To="129" Label="Source1" />
+                  <Edge From="129" To="130" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
