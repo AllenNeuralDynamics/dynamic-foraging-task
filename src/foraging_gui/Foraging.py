@@ -2205,6 +2205,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             if self.ANewTrial==1 and self.ToGenerateATrial==1 and self.Start.isChecked(): 
                 self.ANewTrial=0 # can start a new trial when we receive the trial end signal from Bonsai
                 GeneratedTrials.B_CurrentTrialN+=1
+                print('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
                 logging.info('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
                 if not (self.GeneratedTrials.TP_AutoReward  or int(self.GeneratedTrials.TP_BlockMinReward)>0):
                     # generate new trial and get reward
