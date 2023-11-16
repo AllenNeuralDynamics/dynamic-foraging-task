@@ -303,7 +303,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 try:
                     instance.io.close()
                 except Exception as e:
-                    logging.error(str(e))
+                    pass#logging.error(str(e))
                 if instance.sn==self.StageSerialNum.currentText():
                     if curent_stage_name!=instance.sn:
                         self._connect_stage(instance)
