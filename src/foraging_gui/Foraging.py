@@ -2047,12 +2047,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
         '''sleep some time'''
         time.sleep(Time)
     
-    def _EnableDisableMetadata(self,state):
+    def _set_metadata_enabled(self, enable: bool):
         '''Enable or disable metadata fields'''
-        self.AnimalName.setEnabled(state)
-        self.ID.setEnabled(state)
-        self.Experimenter.setEnabled(state)
-        self.Tower.setEnabled(state)
+        self.AnimalName.setEnabled(enable)
+        self.ID.setEnabled(enable)
+        self.Experimenter.setEnabled(enable)
+        self.Tower.setEnabled(enable)
 
     def _Start(self):
         '''start trial loop'''
@@ -2073,11 +2073,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.WarningLabel.setText('')
             self.WarningLabel.setStyleSheet("color: none;")
             # disable metadata fields
-            self._EnableDisableMetadata(False)
+            self._set_metadata_enabled(False)
         else:
             self.Start.setStyleSheet("background-color : none")
             # enable metadata fields
-            self._EnableDisableMetadata(True)
+            self._set_metadata_enabled(True)
         # waiting for the finish of the last trial
         if self.StartANewSession==1 and self.ANewTrial==0:
             self.WarningLabel.setText('Waiting for the finish of the last trial!')
