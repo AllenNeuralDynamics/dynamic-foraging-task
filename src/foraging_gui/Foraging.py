@@ -303,7 +303,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 try:
                     instance.io.close()
                 except Exception as e:
-                    logging.error(str(e))
+                    pass#logging.error(str(e))
                 if instance.sn==self.StageSerialNum.currentText():
                     if curent_stage_name!=instance.sn:
                         self._connect_stage(instance)
@@ -742,7 +742,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         except Exception as e:
             logging.error(str(e))
             try:
-                AnimalFolder=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text())
+                AnimalFolder=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.ID.text())
                 subprocess.Popen(['explorer', AnimalFolder])
             except Exception as e:
                 logging.error(str(e))
@@ -1608,12 +1608,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
         '''The new data storage structure. Each session forms an independent folder. Training data, Harp register events, video data, photometry data and ephys data are in different subfolders'''
         current_time = datetime.now()
         formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-        self.SessionFolder=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{formatted_datetime}')
+        self.SessionFolder=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.ID.text(), f'{self.ID.text()}_{formatted_datetime}')
         # Training folder
         self.TrainingFolder=os.path.join(self.SessionFolder,'TrainingFolder')
-        self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.AnimalName.text()}_{formatted_datetime}.mat')
-        self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.AnimalName.text()}_{formatted_datetime}.json')
-        self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.AnimalName.text()}_{formatted_datetime}_par.json')
+        self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
+        self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
+        self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}_par.json')
         # Harp folder
         self.HarpFolder=os.path.join(self.SessionFolder,'HarpFolder')
         # video data
@@ -1647,9 +1647,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
     def _GetSaveFileName(self):
         '''Get the name of the save file. This is an old data structure and has been deprecated.'''
-        SaveFileMat = os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.mat')
-        SaveFileJson= os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}.json')
-        SaveFileParJson= os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_par.json')
+        SaveFileMat = os.path.join(self.default_saveFolder, self.Tower.currentText(),self.ID.text(), f'{self.ID.text()}_{date.today()}.mat')
+        SaveFileJson= os.path.join(self.default_saveFolder, self.Tower.currentText(),self.ID.text(), f'{self.ID.text()}_{date.today()}.json')
+        SaveFileParJson= os.path.join(self.default_saveFolder, self.Tower.currentText(),self.ID.text(), f'{self.ID.text()}_{date.today()}_par.json')
         if not os.path.exists(os.path.dirname(SaveFileJson)):
             os.makedirs(os.path.dirname(SaveFileJson))
             logging.info(f"Created new folder: {os.path.dirname(SaveFileJson)}")
@@ -1657,9 +1657,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
         while 1:
             if os.path.isfile(SaveFileMat) or os.path.isfile(SaveFileJson)or os.path.isfile(SaveFileParJson):
                 N=N+1
-                SaveFileMat=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_{N}.mat')
-                SaveFileJson=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_{N}.json')
-                SaveFileParJson=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.AnimalName.text(), f'{self.AnimalName.text()}_{date.today()}_{N}_par.json')
+                SaveFileMat=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.ID.text(), f'{self.ID.text()}_{date.today()}_{N}.mat')
+                SaveFileJson=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.ID.text(), f'{self.ID.text()}_{date.today()}_{N}.json')
+                SaveFileParJson=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.ID.text(), f'{self.ID.text()}_{date.today()}_{N}_par.json')
             else:
                 break
         self.SaveFileMat=SaveFileMat
@@ -2046,6 +2046,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _Timer(self,Time):
         '''sleep some time'''
         time.sleep(Time)
+    
+    def _set_metadata_enabled(self, enable: bool):
+        '''Enable or disable metadata fields'''
+        self.AnimalName.setEnabled(enable)
+        self.ID.setEnabled(enable)
+        self.Experimenter.setEnabled(enable)
+        self.Tower.setEnabled(enable)
+
     def _Start(self):
         '''start trial loop'''
         if self.InitializeBonsaiSuccessfully==0:
@@ -2064,9 +2072,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.NewSession.setChecked(False)
             self.WarningLabel.setText('')
             self.WarningLabel.setStyleSheet("color: none;")
+            # disable metadata fields
+            self._set_metadata_enabled(False)
         else:
             self.Start.setStyleSheet("background-color : none")
-
+            # enable metadata fields
+            self._set_metadata_enabled(True)
         # waiting for the finish of the last trial
         if self.StartANewSession==1 and self.ANewTrial==0:
             self.WarningLabel.setText('Waiting for the finish of the last trial!')
@@ -2205,6 +2216,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             if self.ANewTrial==1 and self.ToGenerateATrial==1 and self.Start.isChecked(): 
                 self.ANewTrial=0 # can start a new trial when we receive the trial end signal from Bonsai
                 GeneratedTrials.B_CurrentTrialN+=1
+                print('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
                 logging.info('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
                 if not (self.GeneratedTrials.TP_AutoReward  or int(self.GeneratedTrials.TP_BlockMinReward)>0):
                     # generate new trial and get reward

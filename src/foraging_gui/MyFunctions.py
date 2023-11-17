@@ -1188,6 +1188,9 @@ class GenerateTrials():
             Channel1.Left_Bait(int(self.CurrentBait[0]))
             Channel1.Right_Bait(int(self.CurrentBait[1]))
             Channel1.ITI(float(self.CurrentITI))
+            if self.TP_RewardDelay=='':
+                self.TP_RewardDelay=0
+            Channel1.RewardDelay(float(self.TP_RewardDelay))
             Channel1.DelayTime(float(self.CurrentDelay))
             Channel1.ResponseTime(float(self.TP_ResponseTime))
             if self.win.OptogeneticsB.currentText()=='on':
