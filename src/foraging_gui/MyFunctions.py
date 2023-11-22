@@ -571,9 +571,7 @@ class GenerateTrials():
             # show next trial
             self._GetCurrentBlockReward(0)
         # update suggested reward
-        if self.win.TotalWater.text()!='':
-            self.B_SuggestedWater=float(self.win.TotalWater.text())-float(self.BS_TotalReward)/1000-np.sum(self.win.ManualWaterVolume)
-            self.win.SuggestedWater.setText(str(np.round(self.B_SuggestedWater,3)))
+        self.win._UpdateSuggestedWater()
         # foraging efficiency
         Len=np.shape(self.B_RewardedHistory)[1]
         if Len>0:
