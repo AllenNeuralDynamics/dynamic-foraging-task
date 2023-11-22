@@ -1834,6 +1834,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 if hasattr(self,'current_stage'):
                     try:
                         self.current_stage.move_absolute_3d(float(last_positions[0]),float(last_positions[1]),float(last_positions[2]))
+                        self._UpdatePosition((float(last_positions[0]),float(last_positions[1]),float(last_positions[2])),(0,0,0))
                     except Exception as e:
                         logging.error(str(e))
             else:
