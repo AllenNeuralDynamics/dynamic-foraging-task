@@ -227,7 +227,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 return
             current_stage=self.current_stage
             current_position=current_stage.get_position()
-            current_stage.set_speed(500)
+            current_stage.set_speed(3000)
             current_stage.move_relative_1d(axis,step)
             if axis=='x':
                 relative_postition=(step,0,0)
