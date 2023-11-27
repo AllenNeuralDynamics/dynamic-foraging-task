@@ -1538,7 +1538,7 @@ class Ui_ForagingGUI(object):
         self.label_88.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_88.setObjectName("label_88")
         self.StageSerialNum = QtWidgets.QComboBox(self.groupBox_3)
-        self.StageSerialNum.setEnabled(True)
+        self.StageSerialNum.setEnabled(False)
         self.StageSerialNum.setGeometry(QtCore.QRect(50, 30, 111, 22))
         self.StageSerialNum.setObjectName("StageSerialNum")
         self.GetPositions = QtWidgets.QPushButton(self.groupBox_3)
