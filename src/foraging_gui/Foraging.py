@@ -2058,7 +2058,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
     
     def _set_metadata_enabled(self, enable: bool):
         '''Enable or disable metadata fields'''
-        self.AnimalName.setEnabled(enable)
+        #self.AnimalName.setEnabled(enable)
         self.ID.setEnabled(enable)
         self.Experimenter.setEnabled(enable)
         self.Tower.setEnabled(enable)

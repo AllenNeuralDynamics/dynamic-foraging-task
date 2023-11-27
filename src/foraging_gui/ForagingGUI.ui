@@ -2415,25 +2415,6 @@
      </property>
     </widget>
    </widget>
-   <widget class="QLineEdit" name="AnimalName">
-    <property name="geometry">
-     <rect>
-      <x>330</x>
-      <y>20</y>
-      <width>71</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="text">
-     <string>XY_05</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="Load">
     <property name="geometry">
      <rect>
@@ -2962,7 +2943,7 @@
    <widget class="QLineEdit" name="ID">
     <property name="geometry">
      <rect>
-      <x>430</x>
+      <x>324</x>
       <y>20</y>
       <width>71</width>
       <height>20</height>
@@ -2981,7 +2962,7 @@
    <widget class="QLabel" name="label_72">
     <property name="geometry">
      <rect>
-      <x>406</x>
+      <x>300</x>
       <y>20</y>
       <width>21</width>
       <height>20</height>
@@ -2995,31 +2976,6 @@
     </property>
     <property name="text">
      <string>ID:</string>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::AutoText</enum>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_73">
-    <property name="geometry">
-     <rect>
-      <x>293</x>
-      <y>20</y>
-      <width>31</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="text">
-     <string>Name:</string>
     </property>
     <property name="textFormat">
      <enum>Qt::AutoText</enum>
@@ -3541,7 +3497,7 @@
    <widget class="QLabel" name="label_74">
     <property name="geometry">
      <rect>
-      <x>506</x>
+      <x>400</x>
       <y>20</y>
       <width>71</width>
       <height>20</height>
@@ -3566,7 +3522,7 @@
    <widget class="QLineEdit" name="Experimenter">
     <property name="geometry">
      <rect>
-      <x>580</x>
+      <x>474</x>
       <y>20</y>
       <width>101</width>
       <height>20</height>
