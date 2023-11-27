@@ -294,6 +294,9 @@ The GUI will leave a log file at `~/Documents/foraging_gui_logs/` named by the t
 ## Developer Instructions
 The user interface of the GUI was designed based on Qt-designer (introduction available [here](https://realpython.com/qt-designer-python/)).
 
+### Update Protocol
+- Please follow the update protocol [here](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/wiki/Update-Procedures)
+
 ### Add a widget
 - Widgets can be dragged directly into a window or dialog.
 - Qt-designer will create a UI file, and then change the UI file to Python through the command **pyuic5 -o test.py test.ui**. Some useful commands can be found in `dynamic-foraging-task\src\foraging_gui\UI2Python.sh`.
