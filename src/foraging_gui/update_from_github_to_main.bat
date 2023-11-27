@@ -1,4 +1,4 @@
-set "logfile=C:\Users\alex.piet\foraging_gui_logs\github_log.txt"
+set "logfile=C:\Users\alex.piet\Documents\foraging_gui_logs\github_log.txt"
 set "repo=C:\Users\alex.piet\dynamic-foraging-task"
 set "branch=fix_61"
 cd %repo%
