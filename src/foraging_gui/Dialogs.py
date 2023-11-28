@@ -990,7 +990,9 @@ class CameraDialog(QDialog,Ui_Camera):
             if self.AutoControl.currentText()=='No':
                 # Do not restart logging when automatic control is "yes" as logging will start in behavior control
                 if self.CollectVideo.currentText()=='Yes':
-                    self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
+                    # Start logging if the formal logging is not started
+                    if self.MainWindow.loggingstarted!=0:
+                        self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
                 else:
                     if self.MainWindow.loggingstarted!=1:
                         # Start logging if the temporary logging is not started
