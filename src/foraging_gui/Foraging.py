@@ -751,7 +751,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
     def _OpenLoggingFolder(self):
         '''Open the logging folder'''
-        self.Camera_dialog._OpenSaveFolder()
+        try:
+            subprocess.Popen(['explorer', self.Ot_log_folder])
+        except Exception as e:
+            logging.error(str(e))
 
     def _startTemporaryLogging(self):
         '''Restart the temporary logging'''
