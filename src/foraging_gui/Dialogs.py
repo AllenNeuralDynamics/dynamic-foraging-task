@@ -984,6 +984,10 @@ class CameraDialog(QDialog,Ui_Camera):
 
     def _StartCamera(self):
         '''Start/stop the camera'''
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            self.MainWindow._ConnectBonsai()
+            if self.MainWindow.InitializeBonsaiSuccessfully==0:
+                return
         if self.StartCamera.isChecked():
             self.StartCamera.setStyleSheet("background-color : green;")
             self.MainWindow.Channel.CameraFrequency(int(self.FrameRate.text()))
