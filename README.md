@@ -21,6 +21,7 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
   - [Motor Stage](#motor-stage)
 - [Data Format](#data-format)
 - [Log Files](#log-files)
+- [Automatic Updates](#automatic-updates)
 - [Developer Instructions](#developer-instructions)
   - [Add a widget](#add-a-widget)
   - [Create a dialogue](#create-a-dialogue)
