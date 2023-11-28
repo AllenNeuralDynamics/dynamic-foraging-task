@@ -929,7 +929,7 @@ class CameraDialog(QDialog,Ui_Camera):
         '''Open the log/save folder of the camera'''
         if hasattr(self.MainWindow,'Ot_log_folder'):
             try:
-                subprocess.Popen(['explorer', self.MainWindow.Ot_log_folder])
+                subprocess.Popen(['explorer', os.path.join(os.path.dirname(self.MainWindow.Ot_log_folder),'VideoFolder')])
             except Exception as e:
                 logging.error(str(e))
                 self.WarningLabelOpenSave.setText('No logging folder found!')
@@ -957,7 +957,6 @@ class CameraDialog(QDialog,Ui_Camera):
             self.CollectVideo.setEnabled(False)
             self.RestartLogging.setEnabled(False)
             self.StartCamera.setChecked(False)
-            self._StartCamera()
             index = self.CollectVideo.findText('Yes')
             if index != -1:
                 self.CollectVideo.setCurrentIndex(index)
@@ -987,7 +986,7 @@ class CameraDialog(QDialog,Ui_Camera):
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             self.MainWindow._ConnectBonsai()
             if self.MainWindow.InitializeBonsaiSuccessfully==0:
-                return
+                return 
         if self.StartCamera.isChecked():
             self.StartCamera.setStyleSheet("background-color : green;")
             self.MainWindow.Channel.CameraFrequency(int(self.FrameRate.text()))

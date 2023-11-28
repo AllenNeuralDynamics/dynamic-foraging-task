@@ -377,7 +377,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             loggingtype=1
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-            log_folder=os.path.join(log_folder,formatted_datetime)
+            log_folder=os.path.join(log_folder,formatted_datetime,'HarpFolder')
         # stop the logging first
         self.Channel.StopLogging('s')
         self.Channel.StartLogging(log_folder)
