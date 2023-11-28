@@ -1324,7 +1324,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Disabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM9</harp:PortName>
+                      <harp:PortName>COM12</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject">
@@ -2390,7 +2390,7 @@
                 <harp:VisualIndicators>On</harp:VisualIndicators>
                 <harp:Heartbeat>Disabled</harp:Heartbeat>
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                <harp:PortName>COM4</harp:PortName>
+                <harp:PortName>COM3</harp:PortName>
               </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
@@ -3138,6 +3138,16 @@
                   <Expression xsi:type="rx:BehaviorSubject">
                     <Name>RewardDelay</Name>
                   </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>FromBonsaiOSC</Name>
+                  </Expression>
+                  <Expression xsi:type="osc:Parse">
+                    <osc:Address>/camerafrequency</osc:Address>
+                    <osc:TypeTag>i</osc:TypeTag>
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>CameraFrequency</Name>
+                  </Expression>
                 </Nodes>
                 <Edges>
                   <Edge From="0" To="1" Label="Source1" />
@@ -3232,6 +3242,8 @@
                   <Edge From="126" To="127" Label="Source1" />
                   <Edge From="128" To="129" Label="Source1" />
                   <Edge From="129" To="130" Label="Source1" />
+                  <Edge From="131" To="132" Label="Source1" />
+                  <Edge From="132" To="133" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -6432,6 +6444,14 @@
                       <Property Name="FileName" />
                     </PropertyMappings>
                   </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>CameraFrequency</Name>
+                  </Expression>
+                  <Expression xsi:type="PropertyMapping">
+                    <PropertyMappings>
+                      <Property Name="FrameRate" />
+                    </PropertyMappings>
+                  </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="ffmpeg:VideoWriter">
                       <ffmpeg:FileName>C:\Users\bruno.cruz\Desktop\test.mp4</ffmpeg:FileName>
@@ -6482,6 +6502,14 @@
                       <Property Name="FileName" />
                     </PropertyMappings>
                   </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>CameraFrequency</Name>
+                  </Expression>
+                  <Expression xsi:type="PropertyMapping">
+                    <PropertyMappings>
+                      <Property Name="FrameRate" />
+                    </PropertyMappings>
+                  </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="ffmpeg:VideoWriter">
                       <ffmpeg:FileName>C:\Users\bruno.cruz\Desktop\test.mp4</ffmpeg:FileName>
@@ -6523,20 +6551,24 @@
                   <Edge From="32" To="33" Label="Source1" />
                   <Edge From="33" To="34" Label="Source2" />
                   <Edge From="34" To="35" Label="Source1" />
-                  <Edge From="35" To="39" Label="Source1" />
+                  <Edge From="35" To="41" Label="Source1" />
                   <Edge From="36" To="37" Label="Source1" />
                   <Edge From="37" To="38" Label="Source1" />
-                  <Edge From="38" To="39" Label="Source2" />
-                  <Edge From="40" To="41" Label="Source1" />
-                  <Edge From="41" To="45" Label="Source1" />
+                  <Edge From="38" To="41" Label="Source2" />
+                  <Edge From="39" To="40" Label="Source1" />
+                  <Edge From="40" To="41" Label="Source3" />
                   <Edge From="42" To="43" Label="Source1" />
-                  <Edge From="43" To="44" Label="Source1" />
-                  <Edge From="44" To="45" Label="Source2" />
+                  <Edge From="43" To="47" Label="Source1" />
+                  <Edge From="44" To="45" Label="Source1" />
                   <Edge From="45" To="46" Label="Source1" />
-                  <Edge From="46" To="50" Label="Source1" />
+                  <Edge From="46" To="47" Label="Source2" />
                   <Edge From="47" To="48" Label="Source1" />
-                  <Edge From="48" To="49" Label="Source1" />
-                  <Edge From="49" To="50" Label="Source2" />
+                  <Edge From="48" To="54" Label="Source1" />
+                  <Edge From="49" To="50" Label="Source1" />
+                  <Edge From="50" To="51" Label="Source1" />
+                  <Edge From="51" To="54" Label="Source2" />
+                  <Edge From="52" To="53" Label="Source1" />
+                  <Edge From="53" To="54" Label="Source3" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -6580,7 +6612,7 @@
         <Property Name="FileName" DisplayName="SettingsPath" />
       </Expression>
       <Expression xsi:type="io:CsvReader">
-        <io:FileName>C:\Users\svc_aind_ephys\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
+        <io:FileName>C:\Users\xinxin.yin\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
         <io:ScanPattern>%s,%s</io:ScanPattern>
         <io:SkipRows>0</io:SkipRows>
       </Expression>
