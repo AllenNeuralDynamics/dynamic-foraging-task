@@ -76,7 +76,7 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - The GUI will leave a log file at `~\Documents\foraging_gui_logs\` named by the tower and date/time. 
 
 #### Automatic Updates
-To configure automatic updates consistent with the [update protocol](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/wiki/Update-Procedures), please use TaskScheduler to automatically run two batch files at specified times of the week
+To configure automatic updates consistent with the [update protocol](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Software-Update-Procedures),please use TaskScheduler to automatically run two batch files at specified times of the week ([instructions](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Configure-Automatic-Updates))
 - `\src\foraging_gui\update_from_github_to_main.bat` every wednesday at 6am
 - `\src\foraging_gui\update_from_github_to_production_testing.bat` every monday at 6am
 - These batch files will leave a log file at `~\Documents\foraging_gui_logs\github_log.txt`
