@@ -1,4 +1,9 @@
-### Describe changes 
+### Pull Request instructions:
+- Please follow the [update protocol](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Software-Update-Procedures)
+- Answer the questions below in detail. Your responses will be emailed to experimenters. 
+- If the experimenters must do anything new, provide detailed step by step instructions
+
+### Describe changes:
 
 ### What issues or discussions does this update address?
 
@@ -8,4 +13,6 @@
 
 ### Should the experimenters be on the look out for any new behavior?
 
-Please remember to notify all experimenters and include the answers to the questions above
+
+
+
