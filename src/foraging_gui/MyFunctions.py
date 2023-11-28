@@ -528,24 +528,30 @@ class GenerateTrials():
         self.BS_RewardN=np.sum(B_RewardedHistory[0]==True)+np.sum(B_RewardedHistory[1]==True)
         
         TP_LeftValue_volume=[]
-        for s in self.Obj['TP_LeftValue_volume']:
+        n=0
+        for s in self.Obj['TP_LeftValue_volume'][0:len(Ind)]:
             try:
-                float_value = float(s)
+                multiplier=float(self.B_AutoWaterTrial[0][n])*float(self.Obj['TP_Multiplier'][n])
+                float_value = float(s)*multiplier
                 TP_LeftValue_volume.append(float_value)
             except ValueError as e:
                 logging.error(str(e))
                 TP_LeftValue_volume.append(0)
+            n=n+1
         TP_LeftValue_volume=np.array(TP_LeftValue_volume)
         TP_LeftValue_volume=TP_LeftValue_volume[0:len(B_RewardedHistory[0])]
 
         TP_RightValue_volume=[]
-        for s in self.Obj['TP_RightValue_volume']:
+        n=0
+        for s in self.Obj['TP_RightValue_volume'][0:len(Ind)]:
             try:
-                float_value = float(s)
+                multiplier=float(self.B_AutoWaterTrial[1][n])*float(self.Obj['TP_Multiplier'][n])
+                float_value = float(s)*multiplier
                 TP_RightValue_volume.append(float_value)
             except ValueError as e:
                 logging.error(str(e))
                 TP_RightValue_volume.append(0)
+            n=n+1
         TP_RightValue_volume=np.array(TP_RightValue_volume)
         TP_RightValue_volume=TP_RightValue_volume[0:len(B_RewardedHistory[1])]
 
