@@ -289,7 +289,13 @@ Data for each session is saved as a JSON file with the following files:
 - **B_RightLickTime**:'The time of left licks'
 
 ## Log Files
-The GUI will leave a log file at `~/Documents/foraging_gui_logs/` named by the tower and date/time. 
+The GUI will leave a log file at `~\Documents\foraging_gui_logs\` named by the tower and date/time. 
+
+## Automatic Updates
+To configure automatic updates consistent with the [update protocol](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/wiki/Update-Procedures), please use TaskScheduler to automatically run two batch files at specified times of the week
+- `\src\foraging_gui\update_from_github_to_main.bat` every wednesday at 6am
+- `\src\foraging_gui\update_from_github_to_production_testing.bat` every monday at 6am
+- These batch files will leave a log file at `~\Documents\foraging_gui_logs\github_log.txt`
   
 ## Developer Instructions
 The user interface of the GUI was designed based on Qt-designer (introduction available [here](https://realpython.com/qt-designer-python/)).
