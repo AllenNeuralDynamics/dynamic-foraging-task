@@ -73,6 +73,13 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - Run `foraging.bonsai` in `dynamic-foraging-task\src\workflows` to start Bonsai.
 - Activate the `conda` environment created above
 - Run `python dynamic-foraging-task\src\foraging_gui\Foraging.py` to start the GUI.
+- The GUI will leave a log file at `~\Documents\foraging_gui_logs\` named by the tower and date/time. 
+
+#### Automatic Updates
+To configure automatic updates consistent with the [update protocol](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Software-Update-Procedures),please use TaskScheduler to automatically run two batch files at specified times of the week ([instructions](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Configure-Automatic-Updates))
+- `\src\foraging_gui\update_from_github_to_main.bat` every wednesday at 6am
+- `\src\foraging_gui\update_from_github_to_production_testing.bat` every monday at 6am
+- These batch files will leave a log file at `~\Documents\foraging_gui_logs\github_log.txt`
 
 ## Block Diagram
 ![image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/109394934/b8549072-5648-4afd-a508-8d38d7bf6549)
@@ -284,6 +291,9 @@ Data for each session is saved as a JSON file with the following files:
   
 ## Developer Instructions
 The user interface of the GUI was designed based on Qt-designer (introduction available [here](https://realpython.com/qt-designer-python/)).
+
+### Update Protocol
+- Please follow the update protocol [here](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/wiki/Update-Procedures)
 
 ### Add a widget
 - Widgets can be dragged directly into a window or dialog.
