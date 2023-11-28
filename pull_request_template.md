@@ -1,5 +1,5 @@
 ### Pull Request instructions:
-- Please follow the update protocol: https://github.com/AllenNeuralDynamics/dynamic-foraging-task/wiki/Update-Procedures
+- Please follow the [update protocol](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Software-Update-Procedures)
 - Answer the questions below in detail. Your responses will be emailed to experimenters. 
 - If the experimenters must do anything new, provide detailed step by step instructions
 
