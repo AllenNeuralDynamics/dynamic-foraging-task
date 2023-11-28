@@ -528,24 +528,30 @@ class GenerateTrials():
         self.BS_RewardN=np.sum(B_RewardedHistory[0]==True)+np.sum(B_RewardedHistory[1]==True)
         
         TP_LeftValue_volume=[]
-        for s in self.Obj['TP_LeftValue_volume']:
+        n=0
+        for s in self.Obj['TP_LeftValue_volume'][0:len(Ind)]:
             try:
-                float_value = float(s)
+                multiplier=float(self.B_AutoWaterTrial[0][n])*float(self.Obj['TP_Multiplier'][n])
+                float_value = float(s)*multiplier
                 TP_LeftValue_volume.append(float_value)
             except ValueError as e:
                 logging.error(str(e))
                 TP_LeftValue_volume.append(0)
+            n=n+1
         TP_LeftValue_volume=np.array(TP_LeftValue_volume)
         TP_LeftValue_volume=TP_LeftValue_volume[0:len(B_RewardedHistory[0])]
 
         TP_RightValue_volume=[]
-        for s in self.Obj['TP_RightValue_volume']:
+        n=0
+        for s in self.Obj['TP_RightValue_volume'][0:len(Ind)]:
             try:
-                float_value = float(s)
+                multiplier=float(self.B_AutoWaterTrial[1][n])*float(self.Obj['TP_Multiplier'][n])
+                float_value = float(s)*multiplier
                 TP_RightValue_volume.append(float_value)
             except ValueError as e:
                 logging.error(str(e))
                 TP_RightValue_volume.append(0)
+            n=n+1
         TP_RightValue_volume=np.array(TP_RightValue_volume)
         TP_RightValue_volume=TP_RightValue_volume[0:len(B_RewardedHistory[1])]
 
@@ -571,9 +577,7 @@ class GenerateTrials():
             # show next trial
             self._GetCurrentBlockReward(0)
         # update suggested reward
-        if self.win.TotalWater.text()!='':
-            self.B_SuggestedWater=float(self.win.TotalWater.text())-float(self.BS_TotalReward)/1000-np.sum(self.win.ManualWaterVolume)
-            self.win.SuggestedWater.setText(str(np.round(self.B_SuggestedWater,3)))
+        self.win._UpdateSuggestedWater()
         # foraging efficiency
         Len=np.shape(self.B_RewardedHistory)[1]
         if Len>0:
@@ -803,7 +807,7 @@ class GenerateTrials():
                         'Current right block: ' + str(self.BS_CurrentBlockTrialNV[1]) + '/' +  str(self.BS_CurrentBlockLenV[1])+'\n\n'
                         'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                         'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
-                        'Total Reward (ul): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
+                        'Total Reward (ul;excluding manual rewards): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
                         'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
                         'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n')
             self.win.ShowBasic.setText(Other_BasicText)
@@ -813,7 +817,7 @@ class GenerateTrials():
                         'Current right block: ' + str(self.BS_CurrentBlockTrialNV[1]) + '/' +  str(self.BS_CurrentBlockLenV[1])+'\n\n'
                         'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                         'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
-                        'Total Reward (ul): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
+                        'Total Reward (ul;excluding manual rewards): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
                         'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
                         'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n\n'
                         
@@ -839,7 +843,7 @@ class GenerateTrials():
                         'Foraging eff optimal random seed: '+ str(np.round(self.B_for_eff_optimal_random_seed,2))+'\n\n'
                         'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                         'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
-                        'Total Reward (ul): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
+                        'Total Reward (ul;excluding manual rewards): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
                         'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
                         'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n\n'
                         'Early licking (EL)\n'
