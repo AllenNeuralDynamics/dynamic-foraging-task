@@ -3,7 +3,7 @@ set "repo=C:\Users\alex.piet\dynamic-foraging-task"
 set "branch=fix_61_v2"
 cd %repo%
 echo --------------------------- >>%logfile%
-echo %date% >>%logfile%
+echo %date% %time% >>%logfile%
 echo dynamic-foraging-gui update to %branch% >>%logfile%
 echo running git fetch >>%logfile%
 git fetch origin main >>%logfile% 2>&1
