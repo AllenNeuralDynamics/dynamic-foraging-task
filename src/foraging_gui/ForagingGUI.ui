@@ -3311,7 +3311,7 @@
     <widget class="QLabel" name="label_23">
      <property name="geometry">
       <rect>
-       <x>140</x>
+       <x>0</x>
        <y>70</y>
        <width>91</width>
        <height>20</height>
@@ -3324,7 +3324,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Extra water (ml):</string>
+      <string>Target ratio:</string>
      </property>
      <property name="textFormat">
       <enum>Qt::AutoText</enum>
@@ -3333,10 +3333,10 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
-    <widget class="QLineEdit" name="ExtraWater">
+    <widget class="QLineEdit" name="TargetRatio">
      <property name="geometry">
       <rect>
-       <x>240</x>
+       <x>100</x>
        <y>70</y>
        <width>41</width>
        <height>20</height>
@@ -3349,7 +3349,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string/>
+      <string>0.85</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_24">
@@ -3446,10 +3446,32 @@
       <string/>
      </property>
     </widget>
+    <widget class="QLineEdit" name="WeightAfter">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>70</y>
+       <width>41</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
     <widget class="QLabel" name="label_90">
      <property name="geometry">
       <rect>
-       <x>5</x>
+       <x>145</x>
        <y>70</y>
        <width>91</width>
        <height>20</height>
@@ -3469,28 +3491,6 @@
      </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="WeightAfter">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>100</x>
-       <y>70</y>
-       <width>41</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string/>
      </property>
     </widget>
    </widget>

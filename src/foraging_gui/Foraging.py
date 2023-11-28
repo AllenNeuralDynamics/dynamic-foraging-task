@@ -166,7 +166,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._Task)
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._AdvancedBlockAuto)
-        self.ExtraWater.textChanged.connect(self._UpdateSuggestedWater)
+        self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
         self.WeightAfter.textChanged.connect(self._UpdateSuggestedWater)
         self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
         self.Randomness.currentIndexChanged.connect(self._Randomness)
@@ -468,10 +468,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     self.newscale_port_tower4=Settings['newscale_port_tower4']
                 else:
                     self.newscale_port_tower4=''
-                if 'target_weight_ratio' in Settings:
-                    self.target_weight_ratio=Settings['target_weight']
-                else:
-                    self.target_weight_ratio=0.85
             else:
                 self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
                 self.current_box=''
@@ -484,7 +480,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.newscale_port_tower2=''
                 self.newscale_port_tower3=''
                 self.newscale_port_tower4=''
-                self.target_weight_ratio=0.85
         except Exception as e:
             logging.error(str(e))
             self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
@@ -496,7 +491,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.newscale_port_tower2=''
             self.newscale_port_tower3=''
             self.newscale_port_tower4=''
-            self.target_weight_ratio=0.85
         if len(sys.argv)==1:
             towertag=''
         else:
@@ -786,7 +780,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 if key in self.TrainingStagePar[Task][CurrentTrainingStage]:
                     # skip some keys
                     if key=='ExtraWater' or key=='WeightBefore' or key=='WeightAfter' or key=='SuggestedWater':
-                        self.ExtraWater.setText('')
+                        self.WeightAfter.setText('')
                         continue
                     widget = widget_dict[key]
                     try: # load the paramter used by last trial
@@ -1483,7 +1477,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         logging.info('Saving current session, ForceSave={},SaveContinue={}'.format(ForceSave,SaveContinue))
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
-        if self.BaseWeight.text()=='' or self.WeightAfter.text()=='' or self.ExtraWater.text()=='':
+        if self.BaseWeight.text()=='' or self.WeightAfter.text()=='' or self.TargetRatio.text()=='':
             response = QMessageBox.question(self,'Save without weight or extra water:', "Do you want to save without weight or extra water information provided?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
             if response==QMessageBox.Yes:
                 pass
@@ -1747,7 +1741,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     if key in CurrentObj:
                         # skip some keys
                         if key=='ExtraWater' or key=='TotalWater' or key=='WeightAfter' or key=='SuggestedWater' or key=='Start':
-                            self.ExtraWater.setText('')
+                            self.WeightAfter.setText('')
                             continue
                         widget = widget_dict[key]
                         try: # load the paramter used by last trial
@@ -2313,22 +2307,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _UpdateSuggestedWater(self,ManualWater=0):
         '''Update the suggested water from the manually give water'''
         try:
-            if self.BaseWeight.text()!='':
+            if self.BaseWeight.text()!='' and self.TargetRatio.text()!='':
                 # set the target weight
-                target_weight=float(self.target_weight_ratio)*float(self.BaseWeight.text())
+                target_weight=float(self.TargetRatio.text())*float(self.BaseWeight.text())
                 self.TargetWeight.setText(str(np.round(target_weight,3)))
-            if self.WeightAfter.text()!='' and self.BaseWeight.text()!='':
-                # calculate the suggested water
-                suggested_water=target_weight-float(self.WeightAfter.text())
-                # give at lease 1ml
-                if suggested_water<1:
-                    suggested_water=1
-                self.SuggestedWater.setText(str(np.round(suggested_water,3)))
-            # update total water
-            if self.ExtraWater.text()=='':
-                ExtraWater=0
-            else:
-                ExtraWater=float(self.ExtraWater.text())
+
             if hasattr(self,'GeneratedTrials'):
                 if hasattr(self.GeneratedTrials,'BS_TotalReward'):
                     BS_TotalReward=float(self.GeneratedTrials.BS_TotalReward)/1000
@@ -2336,11 +2319,29 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     BS_TotalReward=0
             else:
                 BS_TotalReward=0
+
             if hasattr(self,'ManualWaterVolume'):
                 ManualWaterVolume=np.sum(self.ManualWaterVolume)
             else:
                 ManualWaterVolume=0
-            TotalWater=ExtraWater+BS_TotalReward+ManualWaterVolume
+            Earnedwater=BS_TotalReward+ManualWaterVolume
+            if self.WeightAfter.text()!='' and self.BaseWeight.text()!='' and self.TargetRatio.text()!='':
+                # calculate the suggested water
+                suggested_water=target_weight-float(self.WeightAfter.text())
+                # give at lease 1ml
+                if suggested_water<1:
+                    suggested_water=1-Earnedwater
+                if suggested_water<0:
+                    suggested_water=0
+                self.SuggestedWater.setText(str(np.round(suggested_water,3)))
+            else:
+                self.SuggestedWater.setText('')
+            # update total water
+            if self.SuggestedWater.text()=='':
+                ExtraWater=0
+            else:
+                ExtraWater=float(self.SuggestedWater.text())
+            TotalWater=ExtraWater+Earnedwater
             self.TotalWater.setText(str(np.round(TotalWater,3)))
         except Exception as e:
             logging.error(str(e))
