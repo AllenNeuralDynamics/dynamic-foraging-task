@@ -20,8 +20,6 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
   - [Visualization](#visualization)
   - [Motor Stage](#motor-stage)
 - [Data Format](#data-format)
-- [Log Files](#log-files)
-- [Automatic Updates](#automatic-updates)
 - [Developer Instructions](#developer-instructions)
   - [Add a widget](#add-a-widget)
   - [Create a dialogue](#create-a-dialogue)
@@ -75,11 +73,13 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - Run `foraging.bonsai` in `dynamic-foraging-task\src\workflows` to start Bonsai.
 - Activate the `conda` environment created above
 - Run `python dynamic-foraging-task\src\foraging_gui\Foraging.py` to start the GUI.
+- The GUI will leave a log file at `~\Documents\foraging_gui_logs\` named by the tower and date/time. 
 
-#### To automate updates from github
-- The batch file `dynamic-foraging-task/src/foraging_gui/update_from_github.bat` will update the local repository from github
-- Using the Windows Task Scheduler, configure this script to be run at the desired interval
-- This script leaves a log file at `C:\Users\svc_aind_behavior\foraging_gui_logs\github_log.txt`
+#### Automatic Updates
+To configure automatic updates consistent with the [update protocol](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/wiki/Update-Procedures), please use TaskScheduler to automatically run two batch files at specified times of the week
+- `\src\foraging_gui\update_from_github_to_main.bat` every wednesday at 6am
+- `\src\foraging_gui\update_from_github_to_production_testing.bat` every monday at 6am
+- These batch files will leave a log file at `~\Documents\foraging_gui_logs\github_log.txt`
 
 ## Block Diagram
 ![image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/109394934/b8549072-5648-4afd-a508-8d38d7bf6549)
@@ -288,15 +288,6 @@ Data for each session is saved as a JSON file with the following files:
 - **B_RightRewardDeliveryTime**:'The reward delivery time of the right lick spout'
 - **B_LeftLickTime**:'The time of left licks'
 - **B_RightLickTime**:'The time of left licks'
-
-## Log Files
-The GUI will leave a log file at `~\Documents\foraging_gui_logs\` named by the tower and date/time. 
-
-## Automatic Updates
-To configure automatic updates consistent with the [update protocol](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/wiki/Update-Procedures), please use TaskScheduler to automatically run two batch files at specified times of the week
-- `\src\foraging_gui\update_from_github_to_main.bat` every wednesday at 6am
-- `\src\foraging_gui\update_from_github_to_production_testing.bat` every monday at 6am
-- These batch files will leave a log file at `~\Documents\foraging_gui_logs\github_log.txt`
   
 ## Developer Instructions
 The user interface of the GUI was designed based on Qt-designer (introduction available [here](https://realpython.com/qt-designer-python/)).
