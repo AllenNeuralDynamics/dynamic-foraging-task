@@ -3324,7 +3324,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Target ratio:</string>
+      <string>Target fraction:</string>
      </property>
      <property name="textFormat">
       <enum>Qt::AutoText</enum>
@@ -3355,7 +3355,7 @@
     <widget class="QLabel" name="label_24">
      <property name="geometry">
       <rect>
-       <x>150</x>
+       <x>153</x>
        <y>20</y>
        <width>81</width>
        <height>20</height>
@@ -3402,9 +3402,9 @@
     <widget class="QLabel" name="label_25">
      <property name="geometry">
       <rect>
-       <x>150</x>
+       <x>134</x>
        <y>44</y>
-       <width>81</width>
+       <width>101</width>
        <height>20</height>
       </rect>
      </property>
@@ -3415,7 +3415,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Suggested (ml):</string>
+      <string>Supplemental (ml):</string>
      </property>
      <property name="textFormat">
       <enum>Qt::AutoText</enum>
@@ -3484,7 +3484,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Weight after (g):</string>
+      <string>Post weight (g):</string>
      </property>
      <property name="textFormat">
       <enum>Qt::AutoText</enum>
