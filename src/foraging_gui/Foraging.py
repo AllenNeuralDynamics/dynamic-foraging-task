@@ -1337,9 +1337,17 @@ class Window(QMainWindow, Ui_ForagingGUI):
         logging.info('closing the GUI')
         response = QMessageBox.question(self,'Save and Exit:', "Do you want to save the current result?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
         if response==QMessageBox.Yes:
+            # close the camera
+            if self.Camera_dialog.AutoControl.currentText()=='Yes':
+                self.Camera_dialog.StartCamera.setChecked(False)
+                self.Camera_dialog._StartCamera()
             self._Save()
             self.close()
         elif response==QMessageBox.No:
+            # close the camera
+            if self.Camera_dialog.AutoControl.currentText()=='Yes':
+                self.Camera_dialog.StartCamera.setChecked(False)
+                self.Camera_dialog._StartCamera()
             self.close()
 
     def _Snipping(self):
