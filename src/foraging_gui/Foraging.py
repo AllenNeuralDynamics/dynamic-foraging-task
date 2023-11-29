@@ -6,6 +6,7 @@ import time
 import subprocess
 import math
 import logging
+import socket
 from datetime import date, datetime
 
 import serial 
@@ -2349,7 +2350,8 @@ def start_gui_log_file():
         tower_num = 0
 
     # Build logfile name
-    filename = 'tower_{}_gui_log_{}.txt'.format(tower_num,formatted_datetime)
+    hostname = socket.gethostname()
+    filename = '{}_tower_{}_gui_log_{}.txt'.format(hostname,tower_num,formatted_datetime)
     logging_filename = os.path.join(logging_folder,filename)
 
     # Format the log file:
