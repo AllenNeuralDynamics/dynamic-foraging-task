@@ -2415,6 +2415,25 @@
      </property>
     </widget>
    </widget>
+   <widget class="QLineEdit" name="AnimalName">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>20</y>
+      <width>71</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>XY_05</string>
+    </property>
+   </widget>
    <widget class="QPushButton" name="Load">
     <property name="geometry">
      <rect>
@@ -2943,7 +2962,7 @@
    <widget class="QLineEdit" name="ID">
     <property name="geometry">
      <rect>
-      <x>324</x>
+      <x>430</x>
       <y>20</y>
       <width>71</width>
       <height>20</height>
@@ -2962,7 +2981,7 @@
    <widget class="QLabel" name="label_72">
     <property name="geometry">
      <rect>
-      <x>300</x>
+      <x>406</x>
       <y>20</y>
       <width>21</width>
       <height>20</height>
@@ -2976,6 +2995,31 @@
     </property>
     <property name="text">
      <string>ID:</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_73">
+    <property name="geometry">
+     <rect>
+      <x>293</x>
+      <y>20</y>
+      <width>31</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>Name:</string>
     </property>
     <property name="textFormat">
      <enum>Qt::AutoText</enum>
@@ -3217,11 +3261,11 @@
     <property name="title">
      <string>Weigtht and water</string>
     </property>
-    <widget class="QLineEdit" name="BaseWeight">
+    <widget class="QLineEdit" name="WeightBefore">
      <property name="geometry">
       <rect>
        <x>100</x>
-       <y>20</y>
+       <y>36</y>
        <width>41</width>
        <height>20</height>
       </rect>
@@ -3240,7 +3284,7 @@
      <property name="geometry">
       <rect>
        <x>5</x>
-       <y>20</y>
+       <y>36</y>
        <width>91</width>
        <height>20</height>
       </rect>
@@ -3252,7 +3296,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Base weight (g):</string>
+      <string>Weight before (g):</string>
      </property>
      <property name="textFormat">
       <enum>Qt::AutoText</enum>
@@ -3265,7 +3309,7 @@
      <property name="geometry">
       <rect>
        <x>5</x>
-       <y>44</y>
+       <y>60</y>
        <width>91</width>
        <height>20</height>
       </rect>
@@ -3277,7 +3321,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Target weight (g):</string>
+      <string>Weight after (g):</string>
      </property>
      <property name="textFormat">
       <enum>Qt::AutoText</enum>
@@ -3286,14 +3330,11 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
-    <widget class="QLineEdit" name="TargetWeight">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
+    <widget class="QLineEdit" name="WeightAfter">
      <property name="geometry">
       <rect>
        <x>100</x>
-       <y>44</y>
+       <y>60</y>
        <width>41</width>
        <height>20</height>
       </rect>
@@ -3311,7 +3352,7 @@
     <widget class="QLabel" name="label_23">
      <property name="geometry">
       <rect>
-       <x>0</x>
+       <x>140</x>
        <y>70</y>
        <width>91</width>
        <height>20</height>
@@ -3324,7 +3365,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Target fraction:</string>
+      <string>Extra water (ml):</string>
      </property>
      <property name="textFormat">
       <enum>Qt::AutoText</enum>
@@ -3333,10 +3374,10 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
-    <widget class="QLineEdit" name="TargetRatio">
+    <widget class="QLineEdit" name="ExtraWater">
      <property name="geometry">
       <rect>
-       <x>100</x>
+       <x>240</x>
        <y>70</y>
        <width>41</width>
        <height>20</height>
@@ -3349,13 +3390,13 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>0.85</string>
+      <string/>
      </property>
     </widget>
     <widget class="QLabel" name="label_24">
      <property name="geometry">
       <rect>
-       <x>153</x>
+       <x>150</x>
        <y>20</y>
        <width>81</width>
        <height>20</height>
@@ -3378,9 +3419,6 @@
      </property>
     </widget>
     <widget class="QLineEdit" name="TotalWater">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
      <property name="geometry">
       <rect>
        <x>240</x>
@@ -3396,15 +3434,15 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string/>
+      <string>1.5</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_25">
      <property name="geometry">
       <rect>
-       <x>134</x>
+       <x>150</x>
        <y>44</y>
-       <width>101</width>
+       <width>81</width>
        <height>20</height>
       </rect>
      </property>
@@ -3415,7 +3453,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Supplemental (ml):</string>
+      <string>Suggested (ml):</string>
      </property>
      <property name="textFormat">
       <enum>Qt::AutoText</enum>
@@ -3446,58 +3484,11 @@
       <string/>
      </property>
     </widget>
-    <widget class="QLineEdit" name="WeightAfter">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>240</x>
-       <y>70</y>
-       <width>41</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_90">
-     <property name="geometry">
-      <rect>
-       <x>145</x>
-       <y>70</y>
-       <width>91</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>Post weight (g):</string>
-     </property>
-     <property name="textFormat">
-      <enum>Qt::AutoText</enum>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
    </widget>
    <widget class="QLabel" name="label_74">
     <property name="geometry">
      <rect>
-      <x>400</x>
+      <x>506</x>
       <y>20</y>
       <width>71</width>
       <height>20</height>
@@ -3522,7 +3513,7 @@
    <widget class="QLineEdit" name="Experimenter">
     <property name="geometry">
      <rect>
-      <x>474</x>
+      <x>580</x>
       <y>20</y>
       <width>101</width>
       <height>20</height>
@@ -3778,7 +3769,7 @@
     </widget>
     <widget class="QComboBox" name="StageSerialNum">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="geometry">
       <rect>
@@ -3868,7 +3859,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Move left</string>
+      <string>Move X</string>
      </property>
     </widget>
     <widget class="QLineEdit" name="PositionX">
@@ -3925,7 +3916,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Move back</string>
+      <string>Move Y</string>
      </property>
     </widget>
     <widget class="QLineEdit" name="Step">
@@ -3963,7 +3954,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Move right</string>
+      <string>Move X</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_87">
@@ -4007,13 +3998,13 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Move forward</string>
+      <string>Move Y</string>
      </property>
     </widget>
     <widget class="QPushButton" name="MoveZN">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>90</x>
        <y>140</y>
        <width>75</width>
        <height>23</height>
@@ -4026,7 +4017,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Move up</string>
+      <string>Move Z</string>
      </property>
     </widget>
     <widget class="QPushButton" name="StageStop">
@@ -4051,7 +4042,7 @@
     <widget class="QPushButton" name="MoveZP">
      <property name="geometry">
       <rect>
-       <x>90</x>
+       <x>10</x>
        <y>140</y>
        <width>75</width>
        <height>23</height>
@@ -4064,7 +4055,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Move down</string>
+      <string>Move Z</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_85">
