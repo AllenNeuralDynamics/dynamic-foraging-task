@@ -2328,7 +2328,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 # calculate the suggested water
                 suggested_water=target_weight-float(self.WeightAfter.text())
                 # give at lease 1ml
-                if suggested_water<1:
+                if suggested_water<1-Earnedwater:
                     suggested_water=1-Earnedwater
                 if suggested_water<0:
                     suggested_water=0
