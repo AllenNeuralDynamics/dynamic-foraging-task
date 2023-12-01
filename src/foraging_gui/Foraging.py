@@ -2332,6 +2332,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     suggested_water=1-Earnedwater
                 if suggested_water<0:
                     suggested_water=0
+                # maximum 3.5ml
+                if suggested_water>3.5:
+                    suggested_water=3.5
+                    
                 self.SuggestedWater.setText(str(np.round(suggested_water,3)))
             else:
                 self.SuggestedWater.setText('')
