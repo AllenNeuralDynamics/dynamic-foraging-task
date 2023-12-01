@@ -14,7 +14,6 @@
 
 ### Describe the outcome of testing this update on a rig in 447
 
-### Should the experimenters be on the look out for any new behavior?
 
 
 
