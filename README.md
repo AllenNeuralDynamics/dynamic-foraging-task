@@ -54,7 +54,8 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 ## Deployment
 
 #### For initial installation:
-- Clone reposity onto your computer
+- Clone repository onto your computer
+  - The installation directory should be `C:\Users\svc_aind_behavior\Documents\GitHub\`
   - `git clone https://github.com/AllenNeuralDynamics/dynamic-foraging-task.git`
   - If you do not have git installed, use: https://gitforwindows.org
 - Install Bonsai on your computer
