@@ -2336,6 +2336,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 # maximum 3.5ml
                 if suggested_water>3.5:
                     suggested_water=3.5
+                    self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and LAS should \nbe alerted!')
+                    self.TotalWaterWarning.setStyleSheet("color: red;")
+                else:
+                    self.TotalWaterWarning.setText('')
+
                     
                 self.SuggestedWater.setText(str(np.round(suggested_water,3)))
             else:
