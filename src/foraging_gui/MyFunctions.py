@@ -50,7 +50,8 @@ class GenerateTrials():
         self.B_TrialStartTimeHarp=np.array([]).astype(float)
         self.B_DelayStartTimeHarp=np.array([]).astype(float)
         self.B_TrialEndTimeHarp=np.array([]).astype(float)
-        self.B_GoCueTimeHarp=np.array([]).astype(float)
+        self.B_GoCueTimeHarp=np.array([]).astype(float) # the time from the behavior board
+        self.B_GoCueTimeSoundCard=np.array([]).astype(float) # the time from the soundcard
         self.B_DOPort2Output=np.array([]).astype(float)
         self.B_LeftRewardDeliveryTime=np.array([]).astype(float)
         self.B_RightRewardDeliveryTime=np.array([]).astype(float)
@@ -1287,6 +1288,7 @@ class GenerateTrials():
         self.B_DelayStartTimeHarp=np.append(self.B_DelayStartTimeHarp,DelayStartTimeHarp)
         self.B_TrialEndTimeHarp=np.append(self.B_TrialEndTimeHarp,TrialEndTimeHarp)
         self.B_GoCueTimeHarp=np.append(self.B_GoCueTimeHarp,GoCueTimeHarp)
+        self.B_GoCueTimeSoundCard=np.append(self.B_GoCueTimeHarp,GoCueTimeHarp)
         self.B_DOPort2Output=np.append(self.B_DOPort2Output,B_DOPort2Output)
         # get the event time
         self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime)
@@ -1313,7 +1315,8 @@ class GenerateTrials():
             DelayStartTimeHarp=-999 # -999 means a placeholder
             DelayStartTime=-999
         elif self.CurrentStartType==1:
-            ReceiveN=10
+            ReceiveN=11
+        N=0
         for i in range(ReceiveN):
             Rec=Channel1.receive()
             if Rec[0].address=='/TrialStartTime':
@@ -1354,27 +1357,40 @@ class GenerateTrials():
                 self.B_AnimalResponseHistory=np.append(self.B_AnimalResponseHistory,self.B_AnimalCurrentResponse)
             elif Rec[0].address=='/TrialEndTime':
                 TrialEndTime=Rec[1][1][0]
-            elif Rec[0].address=='/TrialStartTimeHarp':
-                TrialStartTimeHarp=Rec[1][1][0]
-            elif Rec[0].address=='/DelayStartTimeHarp':
-                DelayStartTimeHarp=Rec[1][1][0]
-            elif Rec[0].address=='/GoCueTimeHarp':
+            elif Rec[0].address=='/GoCueTimeSoundCard':
                 # give auto water after Co cue
                 if self.CurrentAutoRewardTrial[0]==1:
                     Channel3.ManualWater_Left(int(1))
                 if self.CurrentAutoRewardTrial[1]==1:
                     Channel3.ManualWater_Right(int(1))
                 GoCueTimeHarp=Rec[1][1][0]
-            elif Rec[0].address=='/TrialEndTimeHarp':
-                TrialEndTimeHarp=Rec[1][1][0]
             elif Rec[0].address=='/DOPort2Output': #this port is used to trigger optogenetics aligned to Go cue
                 B_DOPort2Output=Rec[1][1][0]
                 self.B_DOPort2Output=np.append(self.B_DOPort2Output,B_DOPort2Output)
+            elif Rec[0].address=='/BehaviorEvent':
+                if self.CurrentStartType==1:
+                    if N==0:
+                        TrialStartTimeHarp=Rec[1][1][0]
+                    elif N==1:
+                        DelayStartTimeHarp=Rec[1][1][0]
+                    elif N==2:
+                        GoCueTimeSoundCard=Rec[1][1][0]
+                    elif N==3:
+                        TrialEndTimeHarp=Rec[1][1][0]
+                elif self.CurrentStartType==3:
+                    if N==0:
+                        TrialStartTimeHarp=Rec[1][1][0]
+                    elif N==1:
+                        GoCueTimeSoundCard=Rec[1][1][0]
+                    elif N==2:
+                        TrialEndTimeHarp=Rec[1][1][0]
+                N=N+1
         # get the event harp time
         self.B_TrialStartTimeHarp=np.append(self.B_TrialStartTimeHarp,TrialStartTimeHarp)
         self.B_DelayStartTimeHarp=np.append(self.B_DelayStartTimeHarp,DelayStartTimeHarp)
         self.B_TrialEndTimeHarp=np.append(self.B_TrialEndTimeHarp,TrialEndTimeHarp)
         self.B_GoCueTimeHarp=np.append(self.B_GoCueTimeHarp,GoCueTimeHarp)
+        self.B_GoCueTimeSoundCard=np.append(self.B_GoCueTimeSoundCard,GoCueTimeSoundCard)
         # get the event time
         self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime)
         self.B_DelayStartTime=np.append(self.B_DelayStartTime,DelayStartTime)
