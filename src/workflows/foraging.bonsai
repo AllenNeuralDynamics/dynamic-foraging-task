@@ -326,7 +326,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT6.262S</gl:DueTime>
+                      <gl:DueTime>PT8S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -366,7 +366,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT1.5S</gl:DueTime>
+                      <gl:DueTime>PT1S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -452,7 +452,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Timer">
-                      <gl:DueTime>PT2S</gl:DueTime>
+                      <gl:DueTime>PT1S</gl:DueTime>
                       <gl:Period>PT0S</gl:Period>
                     </Combinator>
                   </Expression>
@@ -855,7 +855,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Timer">
-                      <gl:DueTime>PT2S</gl:DueTime>
+                      <gl:DueTime>PT1S</gl:DueTime>
                       <gl:Period>PT0S</gl:Period>
                     </Combinator>
                   </Expression>
@@ -1323,7 +1323,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Disabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM14</harp:PortName>
+                      <harp:PortName>COM9</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject">
@@ -2462,7 +2462,7 @@
                 <harp:VisualIndicators>On</harp:VisualIndicators>
                 <harp:Heartbeat>Disabled</harp:Heartbeat>
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                <harp:PortName>COM3</harp:PortName>
+                <harp:PortName>COM4</harp:PortName>
               </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
@@ -6690,7 +6690,7 @@
         <Property Name="FileName" DisplayName="SettingsPath" />
       </Expression>
       <Expression xsi:type="io:CsvReader">
-        <io:FileName>C:\Users\xinxin.yin\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
+        <io:FileName>C:\Users\svc_aind_ephys\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
         <io:ScanPattern>%s,%s</io:ScanPattern>
         <io:SkipRows>0</io:SkipRows>
       </Expression>

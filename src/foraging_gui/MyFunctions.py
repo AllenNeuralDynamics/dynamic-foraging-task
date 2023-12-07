@@ -50,7 +50,7 @@ class GenerateTrials():
         self.B_TrialStartTimeHarp=np.array([]).astype(float)
         self.B_DelayStartTimeHarp=np.array([]).astype(float)
         self.B_TrialEndTimeHarp=np.array([]).astype(float)
-        self.B_GoCueTimeHarp=np.array([]).astype(float) # the time from the behavior board
+        self.B_GoCueTimeBehaviorBoard=np.array([]).astype(float) # the time from the behavior board
         self.B_GoCueTimeSoundCard=np.array([]).astype(float) # the time from the soundcard
         self.B_DOPort2Output=np.array([]).astype(float)
         self.B_LeftRewardDeliveryTime=np.array([]).astype(float)
@@ -1278,20 +1278,20 @@ class GenerateTrials():
             TrialStartTimeHarp=self.B_TrialStartTimeHarp[TN-1]+self.B_ITIHistory[TN-1]+self.B_DelayHistory[TN-1]+self.B_ResponseTimeHistory[TN-1]+float(self.Obj['TP_RewardConsumeTime'][TN-1])
         
         DelayStartTimeHarp=TrialStartTimeHarp+self.B_ITIHistory[TN]
-        GoCueTimeHarp=DelayStartTimeHarp+self.B_DelayHistory[TN]
-        TrialEndTimeHarp=GoCueTimeHarp+self.B_ResponseTimeHistory[TN]+float(self.Obj['TP_RewardConsumeTime'][TN])
-        B_DOPort2Output=GoCueTimeHarp
+        GoCueTimeBehaviorBoard=DelayStartTimeHarp+self.B_DelayHistory[TN]
+        TrialEndTimeHarp=GoCueTimeBehaviorBoard+self.B_ResponseTimeHistory[TN]+float(self.Obj['TP_RewardConsumeTime'][TN])
+        B_DOPort2Output=GoCueTimeBehaviorBoard
         TrialStartTime=TrialStartTimeHarp
         DelayStartTime=DelayStartTimeHarp
         TrialEndTime=TrialEndTimeHarp
-        GoCueTime=GoCueTimeHarp
+        GoCueTime=GoCueTimeBehaviorBoard
         RewardOutcomeTime=TrialEndTimeHarp
         # get the event harp time
         self.B_TrialStartTimeHarp=np.append(self.B_TrialStartTimeHarp,TrialStartTimeHarp)
         self.B_DelayStartTimeHarp=np.append(self.B_DelayStartTimeHarp,DelayStartTimeHarp)
         self.B_TrialEndTimeHarp=np.append(self.B_TrialEndTimeHarp,TrialEndTimeHarp)
-        self.B_GoCueTimeHarp=np.append(self.B_GoCueTimeHarp,GoCueTimeHarp)
-        self.B_GoCueTimeSoundCard=np.append(self.B_GoCueTimeHarp,GoCueTimeHarp)
+        self.B_GoCueTimeBehaviorBoard=np.append(self.B_GoCueTimeBehaviorBoard,GoCueTimeBehaviorBoard)
+        self.B_GoCueTimeSoundCard=np.append(self.B_GoCueTimeBehaviorBoard,GoCueTimeBehaviorBoard)
         self.B_DOPort2Output=np.append(self.B_DOPort2Output,B_DOPort2Output)
         # get the event time
         self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime)
@@ -1366,7 +1366,7 @@ class GenerateTrials():
                     Channel3.ManualWater_Left(int(1))
                 if self.CurrentAutoRewardTrial[1]==1:
                     Channel3.ManualWater_Right(int(1))
-                GoCueTimeHarp=Rec[1][1][0]
+                GoCueTimeSoundCard=Rec[1][1][0]
             elif Rec[0].address=='/DOPort2Output': #this port is used to trigger optogenetics aligned to Go cue
                 B_DOPort2Output=Rec[1][1][0]
                 self.B_DOPort2Output=np.append(self.B_DOPort2Output,B_DOPort2Output)
@@ -1377,12 +1377,12 @@ class GenerateTrials():
                     if N==0:
                         DelayStartTimeHarp=Rec[1][1][0]
                     elif N==1:
-                        GoCueTimeSoundCard=Rec[1][1][0]
+                        GoCueTimeBehaviorBoard=Rec[1][1][0]
                     elif N==2:
                         TrialEndTimeHarp=Rec[1][1][0]
                 elif self.CurrentStartType==3:
                     if N==0:
-                        GoCueTimeSoundCard=Rec[1][1][0]
+                        GoCueTimeBehaviorBoard=Rec[1][1][0]
                     elif N==1:
                         TrialEndTimeHarp=Rec[1][1][0]
                 N=N+1
@@ -1390,7 +1390,7 @@ class GenerateTrials():
         self.B_TrialStartTimeHarp=np.append(self.B_TrialStartTimeHarp,TrialStartTimeHarp)
         self.B_DelayStartTimeHarp=np.append(self.B_DelayStartTimeHarp,DelayStartTimeHarp)
         self.B_TrialEndTimeHarp=np.append(self.B_TrialEndTimeHarp,TrialEndTimeHarp)
-        self.B_GoCueTimeHarp=np.append(self.B_GoCueTimeHarp,GoCueTimeHarp)
+        self.B_GoCueTimeBehaviorBoard=np.append(self.B_GoCueTimeBehaviorBoard,GoCueTimeBehaviorBoard)
         self.B_GoCueTimeSoundCard=np.append(self.B_GoCueTimeSoundCard,GoCueTimeSoundCard)
         # get the event time
         self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime)
