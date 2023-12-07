@@ -2324,6 +2324,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             else:
                 ManualWaterVolume=0
             Earnedwater=BS_TotalReward+ManualWaterVolume
+            self.Earnedwater=Earnedwater
             if self.WeightAfter.text()!='' and self.BaseWeight.text()!='' and self.TargetRatio.text()!='':
                 # calculate the suggested water
                 suggested_water=target_weight-float(self.WeightAfter.text())

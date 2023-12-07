@@ -2796,7 +2796,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>420</y>
+       <y>430</y>
        <width>271</width>
        <height>131</height>
       </rect>
@@ -2892,7 +2892,7 @@
        <x>10</x>
        <y>20</y>
        <width>271</width>
-       <height>391</height>
+       <height>411</height>
       </rect>
      </property>
      <property name="sizePolicy">
@@ -2913,7 +2913,7 @@
         <x>10</x>
         <y>20</y>
         <width>251</width>
-        <height>361</height>
+        <height>391</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -3496,7 +3496,7 @@
     <widget class="QLabel" name="TotalWaterWarning">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>-20</x>
        <y>83</y>
        <width>361</width>
        <height>31</height>
