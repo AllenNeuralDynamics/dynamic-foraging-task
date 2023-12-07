@@ -326,7 +326,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT8S</gl:DueTime>
+                      <gl:DueTime>PT6.262S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -366,7 +366,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT1S</gl:DueTime>
+                      <gl:DueTime>PT1.5S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -452,7 +452,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Timer">
-                      <gl:DueTime>PT1S</gl:DueTime>
+                      <gl:DueTime>PT2S</gl:DueTime>
                       <gl:Period>PT0S</gl:Period>
                     </Combinator>
                   </Expression>
@@ -855,7 +855,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Timer">
-                      <gl:DueTime>PT1S</gl:DueTime>
+                      <gl:DueTime>PT2S</gl:DueTime>
                       <gl:Period>PT0S</gl:Period>
                     </Combinator>
                   </Expression>
@@ -1323,7 +1323,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Disabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM9</harp:PortName>
+                      <harp:PortName>COM14</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject">
@@ -2287,6 +2287,69 @@
                 <Selector>Value</Selector>
               </Builder>
             </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>RewardOutcome</Name>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="IntProperty">
+                <Value>1</Value>
+              </Combinator>
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>PassRewardOutcome</Name>
+            </Expression>
+            <Expression xsi:type="PropertyMapping">
+              <PropertyMappings>
+                <Property Name="Value" />
+              </PropertyMappings>
+            </Expression>
+            <Expression xsi:type="rx:SelectMany">
+              <Name>Pass</Name>
+              <Workflow>
+                <Nodes>
+                  <Expression xsi:type="WorkflowInput">
+                    <Name>Source1</Name>
+                  </Expression>
+                  <Expression xsi:type="ExternalizedMapping">
+                    <Property Name="Value" />
+                  </Expression>
+                  <Expression xsi:type="Equal">
+                    <Operand xsi:type="IntProperty">
+                      <Value>0</Value>
+                    </Operand>
+                  </Expression>
+                  <Expression xsi:type="rx:Condition">
+                    <Workflow>
+                      <Nodes>
+                        <Expression xsi:type="WorkflowInput">
+                          <Name>Source1</Name>
+                        </Expression>
+                        <Expression xsi:type="WorkflowOutput" />
+                      </Nodes>
+                      <Edges>
+                        <Edge From="0" To="1" Label="Source1" />
+                      </Edges>
+                    </Workflow>
+                  </Expression>
+                  <Expression xsi:type="WorkflowOutput" />
+                </Nodes>
+                <Edges>
+                  <Edge From="0" To="2" Label="Source1" />
+                  <Edge From="1" To="2" Label="Source2" />
+                  <Edge From="2" To="3" Label="Source1" />
+                  <Edge From="3" To="4" Label="Source1" />
+                </Edges>
+              </Workflow>
+            </Expression>
+            <Expression xsi:type="beh:CreateMessage">
+              <harp:MessageType>Write</harp:MessageType>
+              <harp:Payload xsi:type="beh:CreateOutputTogglePayload">
+                <beh:OutputToggle>DO3</beh:OutputToggle>
+              </harp:Payload>
+            </Expression>
+            <Expression xsi:type="MulticastSubject">
+              <Name>BehaviorCommands</Name>
+            </Expression>
           </Nodes>
           <Edges>
             <Edge From="2" To="3" Label="Source1" />
@@ -2431,6 +2494,12 @@
             <Edge From="155" To="156" Label="Source1" />
             <Edge From="156" To="157" Label="Source1" />
             <Edge From="156" To="158" Label="Source1" />
+            <Edge From="159" To="160" Label="Source1" />
+            <Edge From="160" To="163" Label="Source1" />
+            <Edge From="161" To="162" Label="Source1" />
+            <Edge From="162" To="163" Label="Source2" />
+            <Edge From="163" To="164" Label="Source1" />
+            <Edge From="164" To="165" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
@@ -2462,7 +2531,7 @@
                 <harp:VisualIndicators>On</harp:VisualIndicators>
                 <harp:Heartbeat>Disabled</harp:Heartbeat>
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                <harp:PortName>COM4</harp:PortName>
+                <harp:PortName>COM3</harp:PortName>
               </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
@@ -3230,6 +3299,16 @@
                   <Expression xsi:type="rx:PublishSubject">
                     <Name>PassGoCue</Name>
                   </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>FromBonsaiOSC</Name>
+                  </Expression>
+                  <Expression xsi:type="osc:Parse">
+                    <osc:Address>/PassRewardOutcome</osc:Address>
+                    <osc:TypeTag>i</osc:TypeTag>
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>PassRewardOutcome</Name>
+                  </Expression>
                 </Nodes>
                 <Edges>
                   <Edge From="0" To="1" Label="Source1" />
@@ -3328,6 +3407,8 @@
                   <Edge From="132" To="133" Label="Source1" />
                   <Edge From="134" To="135" Label="Source1" />
                   <Edge From="135" To="136" Label="Source1" />
+                  <Edge From="137" To="138" Label="Source1" />
+                  <Edge From="138" To="139" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -6690,7 +6771,7 @@
         <Property Name="FileName" DisplayName="SettingsPath" />
       </Expression>
       <Expression xsi:type="io:CsvReader">
-        <io:FileName>C:\Users\svc_aind_ephys\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
+        <io:FileName>C:\Users\xinxin.yin\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
         <io:ScanPattern>%s,%s</io:ScanPattern>
         <io:SkipRows>0</io:SkipRows>
       </Expression>

@@ -172,3 +172,8 @@ class RigClient:
     def PassGoCue(self,value):
         # Trigger waveform after Go cue for optogenetics
         self.send("/PassGoCue", value) 
+
+    def PassRewardOutcome(self,value):
+        # Trigger waveform after Rewardoutcome for optogenetics
+        self.send("/PassRewardOutcome", value) 
+

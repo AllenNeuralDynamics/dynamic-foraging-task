@@ -962,7 +962,7 @@ class GenerateTrials():
         self.CLP_OffsetEnd=float(eval('self.TP_OffsetEnd_'+N)) # negative, backward; positive forward
         self.CLP_SampleFrequency=float(self.TP_SampleFrequency)
         # align to trial start
-        if (self.CLP_LaserStart=='Trial start' or self.CLP_LaserStart=='Go cue') and self.CLP_LaserEnd=='NA':
+        if (self.CLP_LaserStart=='Trial start' or self.CLP_LaserStart=='Go cue' or self.CLP_LaserStart=='Reward outcome') and self.CLP_LaserEnd=='NA':
             # the duration is determined by Duration
             self.CLP_CurrentDuration=self.CLP_Duration
         elif self.CLP_LaserStart=='Trial start' and self.CLP_LaserEnd=='Go cue':
@@ -1182,9 +1182,15 @@ class GenerateTrials():
                 if self.CLP_LaserStart=='Trial start':
                     Channel1.TriggerSource('/Dev1/PFI0') # /Dev1/PFI0 corresponding to P2.0 of NIdaq USB6002; Using /Dev1/PFI0 specific for ITI; Using DO0 to trigger NIDaq
                     Channel1.PassGoCue(int(0))
+                    Channel1.PassRewardOutcome(int(0))
                 elif self.CLP_LaserStart=='Go cue':
                     Channel1.TriggerSource('/Dev1/PFI1') # /Dev1/PFI1 corresponding to P1.1 of NIdaq USB6002; Using /Dev1/PFI1 for optogenetics aligned to non "Trial start" events; Using DO3 to trigger NiDaq
                     Channel1.PassGoCue(int(1))
+                    Channel1.PassRewardOutcome(int(0))
+                elif self.CLP_LaserStart=='Reward outcome':
+                    Channel1.TriggerSource('/Dev1/PFI1')
+                    Channel1.PassGoCue(int(0))
+                    Channel1.PassRewardOutcome(int(1))
                 else:
                     self.win.WarningLabel.setText('Unindentified optogenetics start event!')
                     self.win.WarningLabel.setStyleSheet("color: red;")
