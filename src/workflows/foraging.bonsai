@@ -326,7 +326,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT2.031S</gl:DueTime>
+                      <gl:DueTime>PT1.384S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -366,7 +366,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT1.5S</gl:DueTime>
+                      <gl:DueTime>PT1.111S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -1880,6 +1880,53 @@
               <Name>ToBonsaiOSC</Name>
             </Expression>
             <Expression xsi:type="SubscribeSubject">
+              <Name>BehaviorEvents</Name>
+            </Expression>
+            <Expression xsi:type="beh:Parse">
+              <harp:Register xsi:type="beh:TimestampedOutputToggle" />
+            </Expression>
+            <Expression xsi:type="MemberSelector">
+              <Selector>Value</Selector>
+            </Expression>
+            <Expression xsi:type="BitwiseAnd">
+              <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalOutputs">
+                <Value>DO0</Value>
+              </Operand>
+            </Expression>
+            <Expression xsi:type="GreaterThan">
+              <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
+                <Value>0</Value>
+              </Operand>
+            </Expression>
+            <Expression xsi:type="rx:Condition">
+              <Workflow>
+                <Nodes>
+                  <Expression xsi:type="WorkflowInput">
+                    <Name>Source1</Name>
+                  </Expression>
+                  <Expression xsi:type="WorkflowOutput" />
+                </Nodes>
+                <Edges>
+                  <Edge From="0" To="1" Label="Source1" />
+                </Edges>
+              </Workflow>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="rx:WithLatestFrom" />
+            </Expression>
+            <Expression xsi:type="MemberSelector">
+              <Selector>Item2.Seconds</Selector>
+            </Expression>
+            <Expression xsi:type="scr:ExpressionTransform">
+              <scr:Expression>new(it as Seconds)</scr:Expression>
+            </Expression>
+            <Expression xsi:type="osc:Format">
+              <osc:Address>/ITIStartTimeHarp</osc:Address>
+            </Expression>
+            <Expression xsi:type="MulticastSubject">
+              <Name>ToBonsaiOSC</Name>
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
               <Name>SoundCardEvents</Name>
             </Expression>
             <Expression xsi:type="Combinator">
@@ -1962,7 +2009,7 @@
             <Expression xsi:type="beh:CreateMessage">
               <harp:MessageType>Write</harp:MessageType>
               <harp:Payload xsi:type="beh:CreateOutputTogglePayload">
-                <beh:OutputToggle>DO0</beh:OutputToggle>
+                <beh:OutputToggle>DO2</beh:OutputToggle>
               </harp:Payload>
             </Expression>
             <Expression xsi:type="MulticastSubject">
@@ -1974,7 +2021,7 @@
             <Expression xsi:type="beh:CreateMessage">
               <harp:MessageType>Write</harp:MessageType>
               <harp:Payload xsi:type="beh:CreateOutputTogglePayload">
-                <beh:OutputToggle>DO0</beh:OutputToggle>
+                <beh:OutputToggle>DO2</beh:OutputToggle>
               </harp:Payload>
             </Expression>
             <Expression xsi:type="MulticastSubject">
@@ -1986,7 +2033,7 @@
             <Expression xsi:type="beh:CreateMessage">
               <harp:MessageType>Write</harp:MessageType>
               <harp:Payload xsi:type="beh:CreateOutputTogglePayload">
-                <beh:OutputToggle>DO0</beh:OutputToggle>
+                <beh:OutputToggle>DO2</beh:OutputToggle>
               </harp:Payload>
             </Expression>
             <Expression xsi:type="MulticastSubject">
@@ -2177,53 +2224,6 @@
                 <Selector>Value</Selector>
               </Builder>
             </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>BehaviorEvents</Name>
-            </Expression>
-            <Expression xsi:type="beh:Parse">
-              <harp:Register xsi:type="beh:TimestampedOutputToggle" />
-            </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Value</Selector>
-            </Expression>
-            <Expression xsi:type="BitwiseAnd">
-              <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalOutputs">
-                <Value>DO0</Value>
-              </Operand>
-            </Expression>
-            <Expression xsi:type="GreaterThan">
-              <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
-                <Value>0</Value>
-              </Operand>
-            </Expression>
-            <Expression xsi:type="rx:Condition">
-              <Workflow>
-                <Nodes>
-                  <Expression xsi:type="WorkflowInput">
-                    <Name>Source1</Name>
-                  </Expression>
-                  <Expression xsi:type="WorkflowOutput" />
-                </Nodes>
-                <Edges>
-                  <Edge From="0" To="1" Label="Source1" />
-                </Edges>
-              </Workflow>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:WithLatestFrom" />
-            </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Item2.Seconds</Selector>
-            </Expression>
-            <Expression xsi:type="scr:ExpressionTransform">
-              <scr:Expression>new(it as Seconds)</scr:Expression>
-            </Expression>
-            <Expression xsi:type="osc:Format">
-              <osc:Address>/ITIStartTimeHarp</osc:Address>
-            </Expression>
-            <Expression xsi:type="MulticastSubject">
-              <Name>ToBonsaiOSC</Name>
-            </Expression>
           </Nodes>
           <Edges>
             <Edge From="2" To="3" Label="Source1" />
@@ -2307,35 +2307,35 @@
             <Edge From="80" To="81" Label="Source1" />
             <Edge From="82" To="83" Label="Source1" />
             <Edge From="83" To="84" Label="Source1" />
+            <Edge From="83" To="88" Label="Source2" />
             <Edge From="84" To="85" Label="Source1" />
             <Edge From="85" To="86" Label="Source1" />
+            <Edge From="86" To="87" Label="Source1" />
             <Edge From="87" To="88" Label="Source1" />
+            <Edge From="88" To="89" Label="Source1" />
             <Edge From="89" To="90" Label="Source1" />
+            <Edge From="90" To="91" Label="Source1" />
             <Edge From="91" To="92" Label="Source1" />
             <Edge From="93" To="94" Label="Source1" />
+            <Edge From="94" To="95" Label="Source1" />
             <Edge From="95" To="96" Label="Source1" />
-            <Edge From="97" To="98" Label="Source1" />
+            <Edge From="96" To="97" Label="Source1" />
             <Edge From="98" To="99" Label="Source1" />
             <Edge From="100" To="101" Label="Source1" />
-            <Edge From="101" To="102" Label="Source1" />
-            <Edge From="103" To="104" Label="Source1" />
+            <Edge From="102" To="103" Label="Source1" />
             <Edge From="104" To="105" Label="Source1" />
             <Edge From="106" To="107" Label="Source1" />
-            <Edge From="107" To="108" Label="Source1" />
+            <Edge From="108" To="109" Label="Source1" />
             <Edge From="109" To="110" Label="Source1" />
-            <Edge From="110" To="111" Label="Source1" />
             <Edge From="111" To="112" Label="Source1" />
-            <Edge From="113" To="114" Label="Source1" />
+            <Edge From="112" To="113" Label="Source1" />
+            <Edge From="114" To="115" Label="Source1" />
             <Edge From="115" To="116" Label="Source1" />
-            <Edge From="116" To="117" Label="Source1" />
-            <Edge From="116" To="121" Label="Source2" />
             <Edge From="117" To="118" Label="Source1" />
             <Edge From="118" To="119" Label="Source1" />
-            <Edge From="119" To="120" Label="Source1" />
             <Edge From="120" To="121" Label="Source1" />
             <Edge From="121" To="122" Label="Source1" />
             <Edge From="122" To="123" Label="Source1" />
-            <Edge From="123" To="124" Label="Source1" />
             <Edge From="124" To="125" Label="Source1" />
             <Edge From="126" To="127" Label="Source1" />
             <Edge From="127" To="128" Label="Source1" />
@@ -2350,18 +2350,18 @@
             <Edge From="135" To="136" Label="Source1" />
             <Edge From="137" To="138" Label="Source1" />
             <Edge From="138" To="139" Label="Source1" />
-            <Edge From="138" To="140" Label="Source1" />
+            <Edge From="138" To="143" Label="Source2" />
+            <Edge From="139" To="140" Label="Source1" />
+            <Edge From="140" To="141" Label="Source1" />
             <Edge From="141" To="142" Label="Source1" />
             <Edge From="142" To="143" Label="Source1" />
-            <Edge From="142" To="147" Label="Source2" />
             <Edge From="143" To="144" Label="Source1" />
             <Edge From="144" To="145" Label="Source1" />
             <Edge From="145" To="146" Label="Source1" />
             <Edge From="146" To="147" Label="Source1" />
-            <Edge From="147" To="148" Label="Source1" />
             <Edge From="148" To="149" Label="Source1" />
             <Edge From="149" To="150" Label="Source1" />
-            <Edge From="150" To="151" Label="Source1" />
+            <Edge From="149" To="151" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
