@@ -2323,14 +2323,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 ManualWaterVolume=np.sum(self.ManualWaterVolume)
             else:
                 ManualWaterVolume=0
-            Earnedwater=BS_TotalReward+ManualWaterVolume
-            self.Earnedwater=Earnedwater
+            water_in_session=BS_TotalReward+ManualWaterVolume
+            self.water_in_session=water_in_session
             if self.WeightAfter.text()!='' and self.BaseWeight.text()!='' and self.TargetRatio.text()!='':
                 # calculate the suggested water
                 suggested_water=target_weight-float(self.WeightAfter.text())
                 # give at lease 1ml
-                if suggested_water<1-Earnedwater:
-                    suggested_water=1-Earnedwater
+                if suggested_water<1-water_in_session:
+                    suggested_water=1-water_in_session
                 if suggested_water<0:
                     suggested_water=0
                 # maximum 3.5ml
@@ -2348,7 +2348,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 ExtraWater=0
             else:
                 ExtraWater=float(self.SuggestedWater.text())
-            TotalWater=ExtraWater+Earnedwater
+            TotalWater=ExtraWater+water_in_session
             self.TotalWater.setText(str(np.round(TotalWater,3)))
         except Exception as e:
             logging.error(str(e))
