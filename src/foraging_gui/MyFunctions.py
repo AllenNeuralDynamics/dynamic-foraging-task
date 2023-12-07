@@ -1367,22 +1367,20 @@ class GenerateTrials():
             elif Rec[0].address=='/DOPort2Output': #this port is used to trigger optogenetics aligned to Go cue
                 B_DOPort2Output=Rec[1][1][0]
                 self.B_DOPort2Output=np.append(self.B_DOPort2Output,B_DOPort2Output)
+            elif Rec[0].address=='/ITIStartTimeHarp':
+                TrialStartTimeHarp=Rec[1][1][0]
             elif Rec[0].address=='/BehaviorEvent':
                 if self.CurrentStartType==1:
                     if N==0:
-                        TrialStartTimeHarp=Rec[1][1][0]
-                    elif N==1:
                         DelayStartTimeHarp=Rec[1][1][0]
-                    elif N==2:
+                    elif N==1:
                         GoCueTimeSoundCard=Rec[1][1][0]
-                    elif N==3:
+                    elif N==2:
                         TrialEndTimeHarp=Rec[1][1][0]
                 elif self.CurrentStartType==3:
                     if N==0:
-                        TrialStartTimeHarp=Rec[1][1][0]
-                    elif N==1:
                         GoCueTimeSoundCard=Rec[1][1][0]
-                    elif N==2:
+                    elif N==1:
                         TrialEndTimeHarp=Rec[1][1][0]
                 N=N+1
         # get the event harp time
