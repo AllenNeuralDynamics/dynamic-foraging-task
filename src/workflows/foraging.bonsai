@@ -326,7 +326,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT1.384S</gl:DueTime>
+                      <gl:DueTime>PT6.262S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -366,7 +366,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT1.111S</gl:DueTime>
+                      <gl:DueTime>PT1.5S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -1877,7 +1877,7 @@
               <osc:Address>/OptogeneticsTimeHarp</osc:Address>
             </Expression>
             <Expression xsi:type="MulticastSubject">
-              <Name>ToBonsaiOSC</Name>
+              <Name>ToBonsaiOSC2</Name>
             </Expression>
             <Expression xsi:type="SubscribeSubject">
               <Name>BehaviorEvents</Name>
@@ -2048,6 +2048,69 @@
             <Expression xsi:type="beh:Format">
               <harp:MessageType>Write</harp:MessageType>
               <harp:Register xsi:type="beh:PulseDO0" />
+            </Expression>
+            <Expression xsi:type="MulticastSubject">
+              <Name>BehaviorCommands</Name>
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>GoCue</Name>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="IntProperty">
+                <Value>1</Value>
+              </Combinator>
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>PassGoCue</Name>
+            </Expression>
+            <Expression xsi:type="PropertyMapping">
+              <PropertyMappings>
+                <Property Name="Value" />
+              </PropertyMappings>
+            </Expression>
+            <Expression xsi:type="rx:SelectMany">
+              <Name>Pass</Name>
+              <Workflow>
+                <Nodes>
+                  <Expression xsi:type="WorkflowInput">
+                    <Name>Source1</Name>
+                  </Expression>
+                  <Expression xsi:type="ExternalizedMapping">
+                    <Property Name="Value" />
+                  </Expression>
+                  <Expression xsi:type="Equal">
+                    <Operand xsi:type="IntProperty">
+                      <Value>0</Value>
+                    </Operand>
+                  </Expression>
+                  <Expression xsi:type="rx:Condition">
+                    <Workflow>
+                      <Nodes>
+                        <Expression xsi:type="WorkflowInput">
+                          <Name>Source1</Name>
+                        </Expression>
+                        <Expression xsi:type="WorkflowOutput" />
+                      </Nodes>
+                      <Edges>
+                        <Edge From="0" To="1" Label="Source1" />
+                      </Edges>
+                    </Workflow>
+                  </Expression>
+                  <Expression xsi:type="WorkflowOutput" />
+                </Nodes>
+                <Edges>
+                  <Edge From="0" To="2" Label="Source1" />
+                  <Edge From="1" To="2" Label="Source2" />
+                  <Edge From="2" To="3" Label="Source1" />
+                  <Edge From="3" To="4" Label="Source1" />
+                </Edges>
+              </Workflow>
+            </Expression>
+            <Expression xsi:type="beh:CreateMessage">
+              <harp:MessageType>Write</harp:MessageType>
+              <harp:Payload xsi:type="beh:CreateOutputTogglePayload">
+                <beh:OutputToggle>DO3</beh:OutputToggle>
+              </harp:Payload>
             </Expression>
             <Expression xsi:type="MulticastSubject">
               <Name>BehaviorCommands</Name>
@@ -2337,31 +2400,37 @@
             <Edge From="121" To="122" Label="Source1" />
             <Edge From="122" To="123" Label="Source1" />
             <Edge From="124" To="125" Label="Source1" />
+            <Edge From="125" To="128" Label="Source1" />
             <Edge From="126" To="127" Label="Source1" />
-            <Edge From="127" To="128" Label="Source1" />
-            <Edge From="127" To="132" Label="Source2" />
+            <Edge From="127" To="128" Label="Source2" />
             <Edge From="128" To="129" Label="Source1" />
             <Edge From="129" To="130" Label="Source1" />
-            <Edge From="130" To="131" Label="Source1" />
             <Edge From="131" To="132" Label="Source1" />
-            <Edge From="132" To="133" Label="Source1" />
             <Edge From="133" To="134" Label="Source1" />
             <Edge From="134" To="135" Label="Source1" />
+            <Edge From="134" To="139" Label="Source2" />
             <Edge From="135" To="136" Label="Source1" />
+            <Edge From="136" To="137" Label="Source1" />
             <Edge From="137" To="138" Label="Source1" />
             <Edge From="138" To="139" Label="Source1" />
-            <Edge From="138" To="143" Label="Source2" />
             <Edge From="139" To="140" Label="Source1" />
             <Edge From="140" To="141" Label="Source1" />
             <Edge From="141" To="142" Label="Source1" />
             <Edge From="142" To="143" Label="Source1" />
-            <Edge From="143" To="144" Label="Source1" />
             <Edge From="144" To="145" Label="Source1" />
             <Edge From="145" To="146" Label="Source1" />
+            <Edge From="145" To="150" Label="Source2" />
             <Edge From="146" To="147" Label="Source1" />
+            <Edge From="147" To="148" Label="Source1" />
             <Edge From="148" To="149" Label="Source1" />
             <Edge From="149" To="150" Label="Source1" />
-            <Edge From="149" To="151" Label="Source1" />
+            <Edge From="150" To="151" Label="Source1" />
+            <Edge From="151" To="152" Label="Source1" />
+            <Edge From="152" To="153" Label="Source1" />
+            <Edge From="153" To="154" Label="Source1" />
+            <Edge From="155" To="156" Label="Source1" />
+            <Edge From="156" To="157" Label="Source1" />
+            <Edge From="156" To="158" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
@@ -3141,6 +3210,26 @@
                   <Expression xsi:type="rx:BehaviorSubject">
                     <Name>RewardDelay</Name>
                   </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>FromBonsaiOSC</Name>
+                  </Expression>
+                  <Expression xsi:type="osc:Parse">
+                    <osc:Address>/PassITI</osc:Address>
+                    <osc:TypeTag>i</osc:TypeTag>
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>PassITI</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>FromBonsaiOSC</Name>
+                  </Expression>
+                  <Expression xsi:type="osc:Parse">
+                    <osc:Address>/PassGoCue</osc:Address>
+                    <osc:TypeTag>i</osc:TypeTag>
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>PassGoCue</Name>
+                  </Expression>
                 </Nodes>
                 <Edges>
                   <Edge From="0" To="1" Label="Source1" />
@@ -3235,6 +3324,10 @@
                   <Edge From="126" To="127" Label="Source1" />
                   <Edge From="128" To="129" Label="Source1" />
                   <Edge From="129" To="130" Label="Source1" />
+                  <Edge From="131" To="132" Label="Source1" />
+                  <Edge From="132" To="133" Label="Source1" />
+                  <Edge From="134" To="135" Label="Source1" />
+                  <Edge From="135" To="136" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>

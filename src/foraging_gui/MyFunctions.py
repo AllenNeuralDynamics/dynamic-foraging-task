@@ -1180,9 +1180,11 @@ class GenerateTrials():
             # send optogenetics waveform of the upcoming trial if this is an optogenetics trial
             if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:     
                 if self.CLP_LaserStart=='Trial start':
-                    Channel1.TriggerSource('/Dev1/PFI0') # corresponding to P2.0 of NIdaq USB6002
+                    Channel1.TriggerSource('/Dev1/PFI0') # /Dev1/PFI0 corresponding to P2.0 of NIdaq USB6002; Using /Dev1/PFI0 specific for ITI; Using DO0 to trigger NIDaq
+                    Channel1.PassGoCue(int(0))
                 elif self.CLP_LaserStart=='Go cue':
-                    Channel1.TriggerSource('/Dev1/PFI1') # corresponding to P1.1 of NIdaq USB6002
+                    Channel1.TriggerSource('/Dev1/PFI1') # /Dev1/PFI1 corresponding to P1.1 of NIdaq USB6002; Using /Dev1/PFI1 for optogenetics aligned to non "Trial start" events; Using DO3 to trigger NiDaq
+                    Channel1.PassGoCue(int(1))
                 else:
                     self.win.WarningLabel.setText('Unindentified optogenetics start event!')
                     self.win.WarningLabel.setStyleSheet("color: red;")
@@ -1192,7 +1194,8 @@ class GenerateTrials():
                 for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
                     eval('Channel4.WaveForm' + str(1)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
                 FinishOfWaveForm=Channel4.receive()  
-
+            else:
+                Channel1.PassGoCue(int(0))
             Channel1.LeftValue(float(self.TP_LeftValue)*1000)
             Channel1.RightValue(float(self.TP_RightValue)*1000)
             Channel1.RewardConsumeTime(float(self.TP_RewardConsumeTime))

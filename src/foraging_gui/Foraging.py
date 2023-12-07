@@ -2339,8 +2339,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     self.TotalWaterWarning.setStyleSheet("color: red;")
                 else:
                     self.TotalWaterWarning.setText('')
-
-                    
                 self.SuggestedWater.setText(str(np.round(suggested_water,3)))
             else:
                 self.SuggestedWater.setText('')
