@@ -1206,6 +1206,7 @@ class GenerateTrials():
                 FinishOfWaveForm=Channel4.receive()  
             else:
                 Channel1.PassGoCue(int(0))
+                Channel1.PassRewardOutcome(int(0))
             Channel1.LeftValue(float(self.TP_LeftValue)*1000)
             Channel1.RightValue(float(self.TP_RightValue)*1000)
             Channel1.RewardConsumeTime(float(self.TP_RewardConsumeTime))
