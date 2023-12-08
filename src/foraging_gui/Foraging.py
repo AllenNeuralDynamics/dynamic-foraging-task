@@ -378,7 +378,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             loggingtype=1
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-            log_folder=os.path.join(log_folder,formatted_datetime)
+            log_folder=os.path.join(log_folder,formatted_datetime,'HarpFolder')
         # stop the logging first
         self.Channel.StopLogging('s')
         self.Channel.StartLogging(log_folder)
@@ -752,7 +752,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
     def _OpenLoggingFolder(self):
         '''Open the logging folder'''
-        self.Camera_dialog._OpenSaveFolder()
+        try:
+            subprocess.Popen(['explorer', self.Ot_log_folder])
+        except Exception as e:
+            logging.error(str(e))
 
     def _startTemporaryLogging(self):
         '''Restart the temporary logging'''
@@ -1335,9 +1338,17 @@ class Window(QMainWindow, Ui_ForagingGUI):
         logging.info('closing the GUI')
         response = QMessageBox.question(self,'Save and Exit:', "Do you want to save the current result?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
         if response==QMessageBox.Yes:
+            # close the camera
+            if self.Camera_dialog.AutoControl.currentText()=='Yes':
+                self.Camera_dialog.StartCamera.setChecked(False)
+                self.Camera_dialog._StartCamera()
             self._Save()
             self.close()
         elif response==QMessageBox.No:
+            # close the camera
+            if self.Camera_dialog.AutoControl.currentText()=='Yes':
+                self.Camera_dialog.StartCamera.setChecked(False)
+                self.Camera_dialog._StartCamera()
             self.close()
 
     def _Snipping(self):
@@ -2340,8 +2351,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     self.TotalWaterWarning.setStyleSheet("color: red;")
                 else:
                     self.TotalWaterWarning.setText('')
-
-                    
                 self.SuggestedWater.setText(str(np.round(suggested_water,3)))
             else:
                 self.SuggestedWater.setText('')
