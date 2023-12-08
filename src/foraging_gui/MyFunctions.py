@@ -59,6 +59,7 @@ class GenerateTrials():
         self.B_RightRewardDeliveryTimeHarp=np.array([]).astype(float)
         self.B_PhotometryRisingTimeHarp=np.array([]).astype(float)
         self.B_PhotometryFallingTimeHarp=np.array([]).astype(float)
+        self.B_OptogeneticsTimeHarp=np.array([]).astype(float)
         self.B_RewardOutcomeTime=np.array([]).astype(float)
         self.B_LaserOnTrial=[] # trials with laser on
         self.B_SimulationSession=[]
@@ -1450,7 +1451,8 @@ class GenerateTrials():
                 self.B_PhotometryRisingTimeHarp=np.append(self.B_PhotometryRisingTimeHarp,Rec[1][1][0])
             elif Rec[0].address=='/PhotometryFalling':
                 self.B_PhotometryFallingTimeHarp=np.append(self.B_PhotometryFallingTimeHarp,Rec[1][1][0])
-
+            elif Rec[0].address=='/OptogeneticsTimeHarp':
+                self.B_OptogeneticsTimeHarp=np.append(self.B_OptogeneticsTimeHarp,Rec[1][1][0])
     def _DeletePreviousLicks(self,Channel2):
         '''Delete licks from the previous session'''
         while not Channel2.msgs.empty():
