@@ -6,6 +6,7 @@ import time
 import subprocess
 import math
 import logging
+import socket
 from datetime import date, datetime
 
 import serial 
@@ -2063,7 +2064,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
     
     def _set_metadata_enabled(self, enable: bool):
         '''Enable or disable metadata fields'''
-        #self.AnimalName.setEnabled(enable)
         self.ID.setEnabled(enable)
         self.Experimenter.setEnabled(enable)
         self.Tower.setEnabled(enable)
@@ -2344,6 +2344,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     suggested_water=1-Earnedwater
                 if suggested_water<0:
                     suggested_water=0
+                # maximum 3.5ml
+                if suggested_water>3.5:
+                    suggested_water=3.5
+                    self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and LAS should \nbe alerted!')
+                    self.TotalWaterWarning.setStyleSheet("color: red;")
+                else:
+                    self.TotalWaterWarning.setText('')
                 self.SuggestedWater.setText(str(np.round(suggested_water,3)))
             else:
                 self.SuggestedWater.setText('')
@@ -2382,7 +2389,8 @@ def start_gui_log_file():
         tower_num = 0
 
     # Build logfile name
-    filename = 'tower_{}_gui_log_{}.txt'.format(tower_num,formatted_datetime)
+    hostname = socket.gethostname()
+    filename = '{}_tower_{}_gui_log_{}.txt'.format(hostname,tower_num,formatted_datetime)
     logging_filename = os.path.join(logging_folder,filename)
 
     # Format the log file:

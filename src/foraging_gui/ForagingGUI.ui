@@ -3205,7 +3205,7 @@
       <x>1230</x>
       <y>10</y>
       <width>291</width>
-      <height>101</height>
+      <height>111</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -4146,6 +4146,35 @@
      </property>
     </widget>
    </widget>
+   <zorder>infor</zorder>
+   <zorder>line</zorder>
+   <zorder>Task</zorder>
+   <zorder>Tower</zorder>
+   <zorder>line_2</zorder>
+   <zorder>TrainingParameters</zorder>
+   <zorder>Load</zorder>
+   <zorder>Save</zorder>
+   <zorder>Clear</zorder>
+   <zorder>Start</zorder>
+   <zorder>NewSession</zorder>
+   <zorder>Visualization</zorder>
+   <zorder>OptogeneticsB</zorder>
+   <zorder>label_55</zorder>
+   <zorder>ID</zorder>
+   <zorder>label_72</zorder>
+   <zorder>groupBox</zorder>
+   <zorder>groupBox_2</zorder>
+   <zorder>label_74</zorder>
+   <zorder>Experimenter</zorder>
+   <zorder>WarningLabelCamera</zorder>
+   <zorder>label_61</zorder>
+   <zorder>PhtotometryB</zorder>
+   <zorder>label_47</zorder>
+   <zorder>baselinetime</zorder>
+   <zorder>StartExcitation</zorder>
+   <zorder>StartBleaching</zorder>
+   <zorder>TeensyWarning</zorder>
+   <zorder>groupBox_3</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

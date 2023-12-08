@@ -531,7 +531,10 @@ class GenerateTrials():
         n=0
         for s in self.Obj['TP_LeftValue_volume'][0:len(Ind)]:
             try:
-                multiplier=float(self.B_AutoWaterTrial[0][n])*float(self.Obj['TP_Multiplier'][n])
+                if self.B_AutoWaterTrial[0][n]==1:
+                    multiplier=float(self.Obj['TP_Multiplier'][n])
+                else:
+                    multiplier=1
                 float_value = float(s)*multiplier
                 TP_LeftValue_volume.append(float_value)
             except ValueError as e:
@@ -545,7 +548,10 @@ class GenerateTrials():
         n=0
         for s in self.Obj['TP_RightValue_volume'][0:len(Ind)]:
             try:
-                multiplier=float(self.B_AutoWaterTrial[1][n])*float(self.Obj['TP_Multiplier'][n])
+                if self.B_AutoWaterTrial[1][n]==1:
+                    multiplier=float(self.Obj['TP_Multiplier'][n])
+                else:
+                    multiplier=1
                 float_value = float(s)*multiplier
                 TP_RightValue_volume.append(float_value)
             except ValueError as e:
