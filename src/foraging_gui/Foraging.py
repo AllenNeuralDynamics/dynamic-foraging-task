@@ -161,6 +161,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.StartBleaching.clicked.connect(self._StartBleaching)
         self.NextBlock.clicked.connect(self._NextBlock)
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
+        self.OptogeneticsB.currentIndexChanged.connect(self._keyPressEvent)
+        self.PhtotometryB.currentIndexChanged.connect(self._keyPressEvent)
+        self.AdvancedBlockAuto.currentIndexChanged.connect(self._keyPressEvent)
+        self.Tower.currentIndexChanged.connect(self._keyPressEvent)
+        self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
@@ -207,6 +212,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
             for child in container.findChildren((QtWidgets.QLineEdit)):        
                 child.returnPressed.connect(self.keyPressEvent)
     
+    def _keyPressEvent(self):
+        # press enter to confirm parameters change
+        self.keyPressEvent()
+
     def _GetPositions(self):
         '''get the current position of the stage'''
         if hasattr(self, 'current_stage'):
@@ -1007,7 +1016,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         if child.objectName()=='Experimenter' or child.objectName()=='AnimalName' or child.objectName()=='UncoupledReward' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater' or child.objectName()=='Step':
                             child.setStyleSheet('color: red;')
                             self.Continue=1
-                        if child.text()=='': # If it's empty, changing the background color and waiting for the confirming
+                        if child.text()=='': # If empty, change background color and wait for confirmation
                             self.UpdateParameters=0
                             child.setStyleSheet('background-color: red;')
                             self.Continue=1
@@ -1024,7 +1033,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                             float(child.text())
                             self.UpdateParameters=0 # Changes are not allowed until press is typed
                         except Exception as e:
-                            logging.error(str(e))
+                            #logging.error(str(e))
                             # Invalid float. Do not change the parameter
                             if isinstance(child, QtWidgets.QDoubleSpinBox):
                                 child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
@@ -1034,12 +1043,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
                                 child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                             child.setStyleSheet('color: black;')
-                            self.UpdateParameters=1
+                            self.UpdateParameters=0
                     else:
                         child.setStyleSheet('color: black;')
                         child.setStyleSheet('background-color: white;')
                 except Exception as e:
-                    logging.error(str(e))
+                    #logging.error(str(e))
+                    pass
 
     def _CheckFormat(self,child):
         '''Check if the input format is correct'''
