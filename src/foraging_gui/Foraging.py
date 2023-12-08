@@ -1013,14 +1013,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 try:
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                         self.Continue=0
-                        if child.objectName()=='Experimenter' or child.objectName()=='AnimalName' or child.objectName()=='UncoupledReward' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater' or child.objectName()=='Step':
+                        if child.objectName() in {'Experimenter', 'AnimalName', 'UncoupledReward', 'WeightBefore', 'WeightAfter', 'ExtraWater'}:
                             child.setStyleSheet('color: red;')
                             self.Continue=1
                         if child.text()=='': # If empty, change background color and wait for confirmation
                             self.UpdateParameters=0
                             child.setStyleSheet('background-color: red;')
                             self.Continue=1
-                        if child.objectName()=='RunLength' or child.objectName()=='WindowSize' or child.objectName()=='StepSize':
+                        if child.objectName() in {'RunLength','WindowSize','StepSize'}:
                             if child.text()=='':
                                 child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
                                 child.setStyleSheet('color: black;')
@@ -1031,7 +1031,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         try:
                             # it's valid float
                             float(child.text())
-                            self.UpdateParameters=0 # Changes are not allowed until press is typed
+                            # Changes are not allowed until press is typed except for PositionX, PositionY and PositionZ
+                            if child.objectName() not in ('PositionX', 'PositionY', 'PositionZ'):
+                                self.UpdateParameters = 0
                         except Exception as e:
                             #logging.error(str(e))
                             # Invalid float. Do not change the parameter
