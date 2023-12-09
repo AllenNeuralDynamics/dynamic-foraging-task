@@ -34,6 +34,7 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - [FTDI driver](https://ftdichip.com/drivers/) (for Harp devices)
 - [NI-DAQmax **version 19.0**](https://www.ni.com/en/support/downloads/drivers/download.ni-daq-mx.html#484356) (for optogenetic stimulation via NI-DAQ cards)
 - [Spinnaker SDK **version 1.29.0.5**](https://www.flir.com/products/spinnaker-sdk/) (driver for FLIR cameras)
+- [USBXpress_SDK](https://www.silabs.com/documents/public/software/install_USBXpress_SDK.exe) (for newscale python API)
 - Python packages:
   - `numpy`
   - `scipy`
@@ -61,6 +62,9 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
   - Change to the `dynamic-foraging-task\bonsai` folder
   - In the command prompt, type: `setup.cmd`
 - Update the firmware of the Harp Behavior Board by following the instructions [here](https://harp-tech.org/docs/articles/firmware.html).
+- Install the USBXpress software, for the newscale motor stage
+- Install the Spinnaker SDK, if a FLIR camera is being used
+- Install the NI-DAQ max driver if a NiDAQ is present (for optogenetics)
 - Create a `conda` environment, with python version 3.8
   - install `conda` [instructions here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/windows/html)
   - Run `miniconda prompt`
@@ -69,6 +73,18 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - Use `pip` to install this repository:
   - From the top-level directory run `pip install .`
 - Copy `Settings_box1.csv` to `Users\<username>\Documents\ForagingSettings`
+- Configure `ForagingSettings.json`
+  - Copy the template from `src\foraging_gui\ForagingSettings.json` to `Users\<username>\Documents\ForagingSettings\ForagingSettings.json`
+  - There are four fields that need to be set:
+    - "default_saveFolder": For example "E:\DynamicForagingGUI\BehaviorData\",
+    - "current_box": For example "Tower_EphysRig3", "Blue"
+    - "Teensy_COM": For example "COM10",
+    - "newscale_port_tower1": For example 46103
+      - Open Newscale and hit `connect` to see the serial numbers of the newscale devices
+      - Edit `ForagingSettings.json` to add a line `"newscale_port_tower1":<serial number for rig 1>`
+
+
+
 
 #### To launch the software:
 - Run `foraging.bonsai` in `dynamic-foraging-task\src\workflows` to start Bonsai.
