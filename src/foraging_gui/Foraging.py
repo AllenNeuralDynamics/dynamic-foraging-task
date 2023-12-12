@@ -403,7 +403,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.RecentCalibrationDate=sorted_dates[-1]
         else:
             self.RecentCalibrationDate='None'
-        print(self.Laser_1)   
  
     def _GetWaterCalibration(self):
         '''Get the laser calibration results'''
