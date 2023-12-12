@@ -34,7 +34,9 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - [FTDI driver](https://ftdichip.com/drivers/) (for Harp devices)
 - [NI-DAQmax **version 19.0**](https://www.ni.com/en/support/downloads/drivers/download.ni-daq-mx.html#484356) (for optogenetic stimulation via NI-DAQ cards)
 - [Spinnaker SDK **version 1.29.0.5**](https://www.flir.com/products/spinnaker-sdk/) (driver for FLIR cameras)
-- [USBXpress_SDK](https://www.silabs.com/documents/public/software/install_USBXpress_SDK.exe) (for newscale python API)
+- USBXpress SDK (for newscale python API)
+  - [get installation .exe here](https://www.silabs.com/documents/public/software/install_USBXpress_SDK.exe) (for newscale python API)
+  - Click install, accept terms of agreement, hit next and accept default settings for everything. 
 - Python packages:
   - `numpy`
   - `scipy`
@@ -54,21 +56,39 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 ## Deployment
 
 #### For initial installation:
-- Clone reposity onto your computer
+- Clone repository onto your computer
+  - The installation directory should be `C:\Users\svc_aind_behavior\Documents\GitHub\`
   - `git clone https://github.com/AllenNeuralDynamics/dynamic-foraging-task.git`
   - If you do not have git installed, use: https://gitforwindows.org
 - Install Bonsai on your computer
   - Change to the `dynamic-foraging-task\bonsai` folder
   - In the command prompt, type: `setup.cmd`
 - Update the firmware of the Harp Behavior Board by following the instructions [here](https://harp-tech.org/docs/articles/firmware.html).
+- Install the USBXpress software, for the newscale motor stage
+- Install the Spinnaker SDK, if a FLIR camera is being used
+- Install the NI-DAQ max driver if a NiDAQ is present (for optogenetics)
 - Create a `conda` environment, with python version 3.8
   - install `conda` [instructions here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/windows/html)
   - Run `miniconda prompt`
-  - Create an environment: `conda create -n foraging_environment python=3.8`
-  - Activate the environment: `conda activate foraging_environment`
+  - Create an environment: `conda create -n Foraging python=3.8`
+  - Activate the environment: `conda activate Foraging`
 - Use `pip` to install this repository:
-  - From the top-level directory run `pip install .`
-- Copy `Settings_box1.csv` to `Users\<username>\Documents\ForagingSettings`
+  - From the top-level directory run `pip install -e .`
+  - This should install all the required python packages. 
+- Copy `Settings_box<box num>.csv` to `Users\svc_aind_behavior\Documents\ForagingSettings`
+  - Copy `<box num>` 1-4 depending on the computer
+- Copy `Foraging<box num>.bat` to the Desktop
+  - Copy `<box num>` 1-4 depending on the computer
+- Configure `ForagingSettings.json`
+  - Copy the template from `src\foraging_gui\ForagingSettings.json` to `Users\svc_aind_behavior\Documents\ForagingSettings\ForagingSettings.json`
+  - There are four fields that need to be set:
+    - "default_saveFolder": For example "E:\DynamicForagingGUI\BehaviorData\",
+    - "current_box": For example "Tower_EphysRig3", "Blue"
+    - "Teensy_COM": For example "COM10",
+    - "newscale_port_tower1": For example 46103
+      - Open Newscale and hit `connect` to see the serial numbers of the newscale devices
+      - Edit `ForagingSettings.json` to add a line `"newscale_port_tower1":<serial number for rig 1>`
+- Create a log file folder at `~\Documents\foraging_gui_logs`
 
 #### To launch the software:
 - Run `foraging.bonsai` in `dynamic-foraging-task\src\workflows` to start Bonsai.
@@ -77,9 +97,13 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - The GUI will leave a log file at `~\Documents\foraging_gui_logs\` named by the tower and date/time. 
 
 #### Automatic Updates
-To configure automatic updates consistent with the [update protocol](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Software-Update-Procedures),please use TaskScheduler to automatically run two batch files at specified times of the week ([instructions](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Configure-Automatic-Updates))
-- `\src\foraging_gui\update_from_github_to_main.bat` every wednesday at 6am
-- `\src\foraging_gui\update_from_github_to_production_testing.bat` every monday at 6am
+To configure automatic updates consistent with the [update protocol](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Software-Update-Procedures),please use TaskScheduler to automatically run three batch files at specified times of the week ([instructions](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Configure-Automatic-Updates))
+- On every computer:
+   - `\src\foraging_gui\update_from_github_to_main.bat` everyday at 6am
+- On the testing computer:
+   - `\src\foraging_gui\update_from_github_to_production_testing.bat` every monday at 6am
+   - `\src\foraging_gui\check_github_status.bat` every tuesday at 6am
+   - `\src\foraging_gui\update_from_github_to_main.bat` every W,Th,F,S,Su at 6am
 - These batch files will leave a log file at `~\Documents\foraging_gui_logs\github_log.txt`
 
 ## Block Diagram

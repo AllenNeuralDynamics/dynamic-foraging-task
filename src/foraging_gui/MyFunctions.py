@@ -50,7 +50,8 @@ class GenerateTrials():
         self.B_TrialStartTimeHarp=np.array([]).astype(float)
         self.B_DelayStartTimeHarp=np.array([]).astype(float)
         self.B_TrialEndTimeHarp=np.array([]).astype(float)
-        self.B_GoCueTimeHarp=np.array([]).astype(float)
+        self.B_GoCueTimeBehaviorBoard=np.array([]).astype(float) # the time from the behavior board
+        self.B_GoCueTimeSoundCard=np.array([]).astype(float) # the time from the soundcard
         self.B_DOPort2Output=np.array([]).astype(float)
         self.B_LeftRewardDeliveryTime=np.array([]).astype(float)
         self.B_RightRewardDeliveryTime=np.array([]).astype(float)
@@ -58,6 +59,7 @@ class GenerateTrials():
         self.B_RightRewardDeliveryTimeHarp=np.array([]).astype(float)
         self.B_PhotometryRisingTimeHarp=np.array([]).astype(float)
         self.B_PhotometryFallingTimeHarp=np.array([]).astype(float)
+        self.B_OptogeneticsTimeHarp=np.array([]).astype(float)
         self.B_RewardOutcomeTime=np.array([]).astype(float)
         self.B_LaserOnTrial=[] # trials with laser on
         self.B_SimulationSession=[]
@@ -528,24 +530,36 @@ class GenerateTrials():
         self.BS_RewardN=np.sum(B_RewardedHistory[0]==True)+np.sum(B_RewardedHistory[1]==True)
         
         TP_LeftValue_volume=[]
-        for s in self.Obj['TP_LeftValue_volume']:
+        n=0
+        for s in self.Obj['TP_LeftValue_volume'][0:len(Ind)]:
             try:
-                float_value = float(s)
+                if self.B_AutoWaterTrial[0][n]==1:
+                    multiplier=float(self.Obj['TP_Multiplier'][n])
+                else:
+                    multiplier=1
+                float_value = float(s)*multiplier
                 TP_LeftValue_volume.append(float_value)
             except ValueError as e:
                 logging.error(str(e))
                 TP_LeftValue_volume.append(0)
+            n=n+1
         TP_LeftValue_volume=np.array(TP_LeftValue_volume)
         TP_LeftValue_volume=TP_LeftValue_volume[0:len(B_RewardedHistory[0])]
 
         TP_RightValue_volume=[]
-        for s in self.Obj['TP_RightValue_volume']:
+        n=0
+        for s in self.Obj['TP_RightValue_volume'][0:len(Ind)]:
             try:
-                float_value = float(s)
+                if self.B_AutoWaterTrial[1][n]==1:
+                    multiplier=float(self.Obj['TP_Multiplier'][n])
+                else:
+                    multiplier=1
+                float_value = float(s)*multiplier
                 TP_RightValue_volume.append(float_value)
             except ValueError as e:
                 logging.error(str(e))
                 TP_RightValue_volume.append(0)
+            n=n+1
         TP_RightValue_volume=np.array(TP_RightValue_volume)
         TP_RightValue_volume=TP_RightValue_volume[0:len(B_RewardedHistory[1])]
 
@@ -571,9 +585,7 @@ class GenerateTrials():
             # show next trial
             self._GetCurrentBlockReward(0)
         # update suggested reward
-        if self.win.TotalWater.text()!='':
-            self.B_SuggestedWater=float(self.win.TotalWater.text())-float(self.BS_TotalReward)/1000-np.sum(self.win.ManualWaterVolume)
-            self.win.SuggestedWater.setText(str(np.round(self.B_SuggestedWater,3)))
+        self.win._UpdateSuggestedWater()
         # foraging efficiency
         Len=np.shape(self.B_RewardedHistory)[1]
         if Len>0:
@@ -803,7 +815,8 @@ class GenerateTrials():
                         'Current right block: ' + str(self.BS_CurrentBlockTrialNV[1]) + '/' +  str(self.BS_CurrentBlockLenV[1])+'\n\n'
                         'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                         'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
-                        'Total Reward (ul): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
+                        'Water in session (ul): '+str(np.round(self.win.water_in_session*1000,2)) +'\n'
+                        'Earned Reward (ul): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
                         'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
                         'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n')
             self.win.ShowBasic.setText(Other_BasicText)
@@ -813,7 +826,8 @@ class GenerateTrials():
                         'Current right block: ' + str(self.BS_CurrentBlockTrialNV[1]) + '/' +  str(self.BS_CurrentBlockLenV[1])+'\n\n'
                         'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                         'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
-                        'Total Reward (ul): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
+                        'Water in session (ul): '+str(np.round(self.win.water_in_session*1000,2)) +'\n'
+                        'Earned Reward (ul): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
                         'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
                         'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n\n'
                         
@@ -839,7 +853,8 @@ class GenerateTrials():
                         'Foraging eff optimal random seed: '+ str(np.round(self.B_for_eff_optimal_random_seed,2))+'\n\n'
                         'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                         'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
-                        'Total Reward (ul): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
+                        'Water in session (ul): '+str(np.round(self.win.water_in_session*1000,2)) +'\n'
+                        'Earned Reward (ul): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
                         'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
                         'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n\n'
                         'Early licking (EL)\n'
@@ -951,7 +966,7 @@ class GenerateTrials():
         self.CLP_OffsetEnd=float(eval('self.TP_OffsetEnd_'+N)) # negative, backward; positive forward
         self.CLP_SampleFrequency=float(self.TP_SampleFrequency)
         # align to trial start
-        if (self.CLP_LaserStart=='Trial start' or self.CLP_LaserStart=='Go cue') and self.CLP_LaserEnd=='NA':
+        if (self.CLP_LaserStart=='Trial start' or self.CLP_LaserStart=='Go cue' or self.CLP_LaserStart=='Reward outcome') and self.CLP_LaserEnd=='NA':
             # the duration is determined by Duration
             self.CLP_CurrentDuration=self.CLP_Duration
         elif self.CLP_LaserStart=='Trial start' and self.CLP_LaserEnd=='Go cue':
@@ -1169,9 +1184,17 @@ class GenerateTrials():
             # send optogenetics waveform of the upcoming trial if this is an optogenetics trial
             if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:     
                 if self.CLP_LaserStart=='Trial start':
-                    Channel1.TriggerSource('/Dev1/PFI0') # corresponding to P2.0 of NIdaq USB6002
+                    Channel1.TriggerSource('/Dev1/PFI0') # /Dev1/PFI0 corresponding to P2.0 of NIdaq USB6002; Using /Dev1/PFI0 specific for ITI; Using DO0 to trigger NIDaq
+                    Channel1.PassGoCue(int(0))
+                    Channel1.PassRewardOutcome(int(0))
                 elif self.CLP_LaserStart=='Go cue':
-                    Channel1.TriggerSource('/Dev1/PFI1') # corresponding to P1.1 of NIdaq USB6002
+                    Channel1.TriggerSource('/Dev1/PFI1') # /Dev1/PFI1 corresponding to P1.1 of NIdaq USB6002; Using /Dev1/PFI1 for optogenetics aligned to non "Trial start" events; Using DO3 to trigger NiDaq
+                    Channel1.PassGoCue(int(1))
+                    Channel1.PassRewardOutcome(int(0))
+                elif self.CLP_LaserStart=='Reward outcome':
+                    Channel1.TriggerSource('/Dev1/PFI1')
+                    Channel1.PassGoCue(int(0))
+                    Channel1.PassRewardOutcome(int(1))
                 else:
                     self.win.WarningLabel.setText('Unindentified optogenetics start event!')
                     self.win.WarningLabel.setStyleSheet("color: red;")
@@ -1181,7 +1204,9 @@ class GenerateTrials():
                 for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
                     eval('Channel4.WaveForm' + str(1)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
                 FinishOfWaveForm=Channel4.receive()  
-
+            else:
+                Channel1.PassGoCue(int(0))
+                Channel1.PassRewardOutcome(int(0))
             Channel1.LeftValue(float(self.TP_LeftValue)*1000)
             Channel1.RightValue(float(self.TP_RightValue)*1000)
             Channel1.RewardConsumeTime(float(self.TP_RewardConsumeTime))
@@ -1193,7 +1218,7 @@ class GenerateTrials():
             Channel1.RewardDelay(float(self.TP_RewardDelay))
             Channel1.DelayTime(float(self.CurrentDelay))
             Channel1.ResponseTime(float(self.TP_ResponseTime))
-            if self.win.OptogeneticsB.currentText()=='on':
+            if self.TP_OptogeneticsB=='on':
                 Channel1.start(3)
                 self.CurrentStartType=3
                 self.B_StartType.append(self.CurrentStartType)
@@ -1264,19 +1289,20 @@ class GenerateTrials():
             TrialStartTimeHarp=self.B_TrialStartTimeHarp[TN-1]+self.B_ITIHistory[TN-1]+self.B_DelayHistory[TN-1]+self.B_ResponseTimeHistory[TN-1]+float(self.Obj['TP_RewardConsumeTime'][TN-1])
         
         DelayStartTimeHarp=TrialStartTimeHarp+self.B_ITIHistory[TN]
-        GoCueTimeHarp=DelayStartTimeHarp+self.B_DelayHistory[TN]
-        TrialEndTimeHarp=GoCueTimeHarp+self.B_ResponseTimeHistory[TN]+float(self.Obj['TP_RewardConsumeTime'][TN])
-        B_DOPort2Output=GoCueTimeHarp
+        GoCueTimeBehaviorBoard=DelayStartTimeHarp+self.B_DelayHistory[TN]
+        TrialEndTimeHarp=GoCueTimeBehaviorBoard+self.B_ResponseTimeHistory[TN]+float(self.Obj['TP_RewardConsumeTime'][TN])
+        B_DOPort2Output=GoCueTimeBehaviorBoard
         TrialStartTime=TrialStartTimeHarp
         DelayStartTime=DelayStartTimeHarp
         TrialEndTime=TrialEndTimeHarp
-        GoCueTime=GoCueTimeHarp
+        GoCueTime=GoCueTimeBehaviorBoard
         RewardOutcomeTime=TrialEndTimeHarp
         # get the event harp time
         self.B_TrialStartTimeHarp=np.append(self.B_TrialStartTimeHarp,TrialStartTimeHarp)
         self.B_DelayStartTimeHarp=np.append(self.B_DelayStartTimeHarp,DelayStartTimeHarp)
         self.B_TrialEndTimeHarp=np.append(self.B_TrialEndTimeHarp,TrialEndTimeHarp)
-        self.B_GoCueTimeHarp=np.append(self.B_GoCueTimeHarp,GoCueTimeHarp)
+        self.B_GoCueTimeBehaviorBoard=np.append(self.B_GoCueTimeBehaviorBoard,GoCueTimeBehaviorBoard)
+        self.B_GoCueTimeSoundCard=np.append(self.B_GoCueTimeBehaviorBoard,GoCueTimeBehaviorBoard)
         self.B_DOPort2Output=np.append(self.B_DOPort2Output,B_DOPort2Output)
         # get the event time
         self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime)
@@ -1303,7 +1329,8 @@ class GenerateTrials():
             DelayStartTimeHarp=-999 # -999 means a placeholder
             DelayStartTime=-999
         elif self.CurrentStartType==1:
-            ReceiveN=10
+            ReceiveN=11
+        N=0
         for i in range(ReceiveN):
             Rec=Channel1.receive()
             if Rec[0].address=='/TrialStartTime':
@@ -1344,27 +1371,38 @@ class GenerateTrials():
                 self.B_AnimalResponseHistory=np.append(self.B_AnimalResponseHistory,self.B_AnimalCurrentResponse)
             elif Rec[0].address=='/TrialEndTime':
                 TrialEndTime=Rec[1][1][0]
-            elif Rec[0].address=='/TrialStartTimeHarp':
-                TrialStartTimeHarp=Rec[1][1][0]
-            elif Rec[0].address=='/DelayStartTimeHarp':
-                DelayStartTimeHarp=Rec[1][1][0]
-            elif Rec[0].address=='/GoCueTimeHarp':
+            elif Rec[0].address=='/GoCueTimeSoundCard':
                 # give auto water after Co cue
                 if self.CurrentAutoRewardTrial[0]==1:
                     Channel3.ManualWater_Left(int(1))
                 if self.CurrentAutoRewardTrial[1]==1:
                     Channel3.ManualWater_Right(int(1))
-                GoCueTimeHarp=Rec[1][1][0]
-            elif Rec[0].address=='/TrialEndTimeHarp':
-                TrialEndTimeHarp=Rec[1][1][0]
+                GoCueTimeSoundCard=Rec[1][1][0]
             elif Rec[0].address=='/DOPort2Output': #this port is used to trigger optogenetics aligned to Go cue
                 B_DOPort2Output=Rec[1][1][0]
                 self.B_DOPort2Output=np.append(self.B_DOPort2Output,B_DOPort2Output)
+            elif Rec[0].address=='/ITIStartTimeHarp':
+                TrialStartTimeHarp=Rec[1][1][0]
+            elif Rec[0].address=='/BehaviorEvent':
+                if self.CurrentStartType==1:
+                    if N==0:
+                        DelayStartTimeHarp=Rec[1][1][0]
+                    elif N==1:
+                        GoCueTimeBehaviorBoard=Rec[1][1][0]
+                    elif N==2:
+                        TrialEndTimeHarp=Rec[1][1][0]
+                elif self.CurrentStartType==3:
+                    if N==0:
+                        GoCueTimeBehaviorBoard=Rec[1][1][0]
+                    elif N==1:
+                        TrialEndTimeHarp=Rec[1][1][0]
+                N=N+1
         # get the event harp time
         self.B_TrialStartTimeHarp=np.append(self.B_TrialStartTimeHarp,TrialStartTimeHarp)
         self.B_DelayStartTimeHarp=np.append(self.B_DelayStartTimeHarp,DelayStartTimeHarp)
         self.B_TrialEndTimeHarp=np.append(self.B_TrialEndTimeHarp,TrialEndTimeHarp)
-        self.B_GoCueTimeHarp=np.append(self.B_GoCueTimeHarp,GoCueTimeHarp)
+        self.B_GoCueTimeBehaviorBoard=np.append(self.B_GoCueTimeBehaviorBoard,GoCueTimeBehaviorBoard)
+        self.B_GoCueTimeSoundCard=np.append(self.B_GoCueTimeSoundCard,GoCueTimeSoundCard)
         # get the event time
         self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime)
         self.B_DelayStartTime=np.append(self.B_DelayStartTime,DelayStartTime)
@@ -1414,7 +1452,8 @@ class GenerateTrials():
                 self.B_PhotometryRisingTimeHarp=np.append(self.B_PhotometryRisingTimeHarp,Rec[1][1][0])
             elif Rec[0].address=='/PhotometryFalling':
                 self.B_PhotometryFallingTimeHarp=np.append(self.B_PhotometryFallingTimeHarp,Rec[1][1][0])
-
+            elif Rec[0].address=='/OptogeneticsTimeHarp':
+                self.B_OptogeneticsTimeHarp=np.append(self.B_OptogeneticsTimeHarp,Rec[1][1][0])
     def _DeletePreviousLicks(self,Channel2):
         '''Delete licks from the previous session'''
         while not Channel2.msgs.empty():

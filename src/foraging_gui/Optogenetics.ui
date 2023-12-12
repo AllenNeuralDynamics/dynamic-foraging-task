@@ -131,6 +131,11 @@
    </item>
    <item>
     <property name="text">
+     <string>Reward outcome</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
      <string>Left choice</string>
     </property>
    </item>
@@ -557,7 +562,7 @@
     </sizepolicy>
    </property>
    <property name="currentIndex">
-    <number>8</number>
+    <number>0</number>
    </property>
    <item>
     <property name="text">
@@ -567,6 +572,11 @@
    <item>
     <property name="text">
      <string>Go cue</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Reward outcome</string>
     </property>
    </item>
    <item>
@@ -815,7 +825,7 @@
     </sizepolicy>
    </property>
    <property name="currentIndex">
-    <number>8</number>
+    <number>0</number>
    </property>
    <item>
     <property name="text">
@@ -825,6 +835,11 @@
    <item>
     <property name="text">
      <string>Go cue</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Reward outcome</string>
     </property>
    </item>
    <item>
@@ -1053,6 +1068,11 @@
    <item>
     <property name="text">
      <string>Go cue</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Reward outcome</string>
     </property>
    </item>
    <item>
@@ -1600,7 +1620,7 @@
     </sizepolicy>
    </property>
    <property name="currentIndex">
-    <number>8</number>
+    <number>0</number>
    </property>
    <item>
     <property name="text">
@@ -1610,6 +1630,11 @@
    <item>
     <property name="text">
      <string>Go cue</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Reward outcome</string>
     </property>
    </item>
    <item>
@@ -2024,6 +2049,11 @@
    </item>
    <item>
     <property name="text">
+     <string>Reward outcome</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
      <string>Left choice</string>
     </property>
    </item>
@@ -2323,7 +2353,7 @@
     </sizepolicy>
    </property>
    <property name="currentIndex">
-    <number>8</number>
+    <number>0</number>
    </property>
    <item>
     <property name="text">
@@ -2333,6 +2363,11 @@
    <item>
     <property name="text">
      <string>Go cue</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Reward outcome</string>
     </property>
    </item>
    <item>
@@ -2564,6 +2599,11 @@
    <item>
     <property name="text">
      <string>Go cue</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Reward outcome</string>
     </property>
    </item>
    <item>
