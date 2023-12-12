@@ -162,6 +162,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.StartBleaching.clicked.connect(self._StartBleaching)
         self.NextBlock.clicked.connect(self._NextBlock)
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
+        self.OptogeneticsB.currentIndexChanged.connect(self._keyPressEvent)
+        self.PhtotometryB.currentIndexChanged.connect(self._keyPressEvent)
+        self.AdvancedBlockAuto.currentIndexChanged.connect(self._keyPressEvent)
+        self.Tower.currentIndexChanged.connect(self._keyPressEvent)
+        self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
@@ -208,6 +213,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
             for child in container.findChildren((QtWidgets.QLineEdit)):        
                 child.returnPressed.connect(self.keyPressEvent)
     
+    def _keyPressEvent(self):
+        # press enter to confirm parameters change
+        self.keyPressEvent()
+
     def _GetPositions(self):
         '''get the current position of the stage'''
         if hasattr(self, 'current_stage'):
@@ -378,7 +387,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             loggingtype=1
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-            log_folder=os.path.join(log_folder,formatted_datetime)
+            log_folder=os.path.join(log_folder,formatted_datetime,'HarpFolder')
         # stop the logging first
         self.Channel.StopLogging('s')
         self.Channel.StartLogging(log_folder)
@@ -752,7 +761,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
     def _OpenLoggingFolder(self):
         '''Open the logging folder'''
-        self.Camera_dialog._OpenSaveFolder()
+        try:
+            subprocess.Popen(['explorer', self.Ot_log_folder])
+        except Exception as e:
+            logging.error(str(e))
 
     def _startTemporaryLogging(self):
         '''Restart the temporary logging'''
@@ -1005,14 +1017,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 try:
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                         self.Continue=0
-                        if child.objectName()=='Experimenter' or child.objectName()=='AnimalName' or child.objectName()=='UncoupledReward' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater' or child.objectName()=='Step':
+                        if child.objectName() in {'Experimenter', 'AnimalName', 'UncoupledReward', 'WeightBefore', 'WeightAfter', 'ExtraWater'}:
                             child.setStyleSheet('color: red;')
                             self.Continue=1
-                        if child.text()=='': # If it's empty, changing the background color and waiting for the confirming
+                        if child.text()=='': # If empty, change background color and wait for confirmation
                             self.UpdateParameters=0
                             child.setStyleSheet('background-color: red;')
                             self.Continue=1
-                        if child.objectName()=='RunLength' or child.objectName()=='WindowSize' or child.objectName()=='StepSize':
+                        if child.objectName() in {'RunLength','WindowSize','StepSize'}:
                             if child.text()=='':
                                 child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
                                 child.setStyleSheet('color: black;')
@@ -1023,9 +1035,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         try:
                             # it's valid float
                             float(child.text())
-                            self.UpdateParameters=0 # Changes are not allowed until press is typed
+                            # Changes are not allowed until press is typed except for PositionX, PositionY and PositionZ
+                            if child.objectName() not in ('PositionX', 'PositionY', 'PositionZ'):
+                                self.UpdateParameters = 0
                         except Exception as e:
-                            logging.error(str(e))
+                            #logging.error(str(e))
                             # Invalid float. Do not change the parameter
                             if isinstance(child, QtWidgets.QDoubleSpinBox):
                                 child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
@@ -1035,12 +1049,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
                                 child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                             child.setStyleSheet('color: black;')
-                            self.UpdateParameters=1
+                            self.UpdateParameters=0
                     else:
                         child.setStyleSheet('color: black;')
                         child.setStyleSheet('background-color: white;')
                 except Exception as e:
-                    logging.error(str(e))
+                    #logging.error(str(e))
+                    pass
 
     def _CheckFormat(self,child):
         '''Check if the input format is correct'''
@@ -1335,9 +1350,17 @@ class Window(QMainWindow, Ui_ForagingGUI):
         logging.info('closing the GUI')
         response = QMessageBox.question(self,'Save and Exit:', "Do you want to save the current result?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
         if response==QMessageBox.Yes:
+            # close the camera
+            if self.Camera_dialog.AutoControl.currentText()=='Yes':
+                self.Camera_dialog.StartCamera.setChecked(False)
+                self.Camera_dialog._StartCamera()
             self._Save()
             self.close()
         elif response==QMessageBox.No:
+            # close the camera
+            if self.Camera_dialog.AutoControl.currentText()=='Yes':
+                self.Camera_dialog.StartCamera.setChecked(False)
+                self.Camera_dialog._StartCamera()
             self.close()
 
     def _Snipping(self):
@@ -2324,19 +2347,23 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 ManualWaterVolume=np.sum(self.ManualWaterVolume)
             else:
                 ManualWaterVolume=0
-            Earnedwater=BS_TotalReward+ManualWaterVolume
+            water_in_session=BS_TotalReward+ManualWaterVolume
+            self.water_in_session=water_in_session
             if self.WeightAfter.text()!='' and self.BaseWeight.text()!='' and self.TargetRatio.text()!='':
                 # calculate the suggested water
                 suggested_water=target_weight-float(self.WeightAfter.text())
                 # give at lease 1ml
-                if suggested_water<1-Earnedwater:
-                    suggested_water=1-Earnedwater
+                if suggested_water<1-water_in_session:
+                    suggested_water=1-water_in_session
                 if suggested_water<0:
                     suggested_water=0
                 # maximum 3.5ml
                 if suggested_water>3.5:
                     suggested_water=3.5
-                    
+                    self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and LAS should \nbe alerted!')
+                    self.TotalWaterWarning.setStyleSheet("color: red;")
+                else:
+                    self.TotalWaterWarning.setText('')
                 self.SuggestedWater.setText(str(np.round(suggested_water,3)))
             else:
                 self.SuggestedWater.setText('')
@@ -2345,7 +2372,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 ExtraWater=0
             else:
                 ExtraWater=float(self.SuggestedWater.text())
-            TotalWater=ExtraWater+Earnedwater
+            TotalWater=ExtraWater+water_in_session
             self.TotalWater.setText(str(np.round(TotalWater,3)))
         except Exception as e:
             logging.error(str(e))

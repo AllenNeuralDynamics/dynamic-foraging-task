@@ -13,3 +13,4 @@ git stash >>%logfile% 2>&1
 git checkout %branch% >>%logfile% 2>&1
 git reset --hard >>%logfile% 2>&1
 git pull origin %branch% >>%logfile% 2>&1
+git status >>%logfile% 2>&1

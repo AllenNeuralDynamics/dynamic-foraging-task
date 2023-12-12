@@ -929,7 +929,7 @@ class CameraDialog(QDialog,Ui_Camera):
         '''Open the log/save folder of the camera'''
         if hasattr(self.MainWindow,'Ot_log_folder'):
             try:
-                subprocess.Popen(['explorer', self.MainWindow.Ot_log_folder])
+                subprocess.Popen(['explorer', os.path.join(os.path.dirname(self.MainWindow.Ot_log_folder),'VideoFolder')])
             except Exception as e:
                 logging.error(str(e))
                 self.WarningLabelOpenSave.setText('No logging folder found!')
@@ -957,7 +957,6 @@ class CameraDialog(QDialog,Ui_Camera):
             self.CollectVideo.setEnabled(False)
             self.RestartLogging.setEnabled(False)
             self.StartCamera.setChecked(False)
-            self._StartCamera()
             index = self.CollectVideo.findText('Yes')
             if index != -1:
                 self.CollectVideo.setCurrentIndex(index)
@@ -984,13 +983,19 @@ class CameraDialog(QDialog,Ui_Camera):
 
     def _StartCamera(self):
         '''Start/stop the camera'''
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            self.MainWindow._ConnectBonsai()
+            if self.MainWindow.InitializeBonsaiSuccessfully==0:
+                return 
         if self.StartCamera.isChecked():
             self.StartCamera.setStyleSheet("background-color : green;")
             self.MainWindow.Channel.CameraFrequency(int(self.FrameRate.text()))
             if self.AutoControl.currentText()=='No':
                 # Do not restart logging when automatic control is "yes" as logging will start in behavior control
                 if self.CollectVideo.currentText()=='Yes':
-                    self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
+                    # Start logging if the formal logging is not started
+                    if self.MainWindow.loggingstarted!=0:
+                        self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
                 else:
                     if self.MainWindow.loggingstarted!=1:
                         # Start logging if the temporary logging is not started
