@@ -72,9 +72,10 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
   - Activate the environment: `conda activate Foraging`
 - Use `pip` to install this repository:
   - From the top-level directory run `pip install -e .`
-- Copy `Settings_box1.csv` to `Users\<username>\Documents\ForagingSettings`
+- Copy `Settings_box<box num>.csv` to `Users\svc_aind_behavior\Documents\ForagingSettings`
+  - Copy `<box num>` 1-4 depending on the computer
 - Configure `ForagingSettings.json`
-  - Copy the template from `src\foraging_gui\ForagingSettings.json` to `Users\<username>\Documents\ForagingSettings\ForagingSettings.json`
+  - Copy the template from `src\foraging_gui\ForagingSettings.json` to `Users\svc_aind_behavior\Documents\ForagingSettings\ForagingSettings.json`
   - There are four fields that need to be set:
     - "default_saveFolder": For example "E:\DynamicForagingGUI\BehaviorData\",
     - "current_box": For example "Tower_EphysRig3", "Blue"
@@ -82,9 +83,7 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
     - "newscale_port_tower1": For example 46103
       - Open Newscale and hit `connect` to see the serial numbers of the newscale devices
       - Edit `ForagingSettings.json` to add a line `"newscale_port_tower1":<serial number for rig 1>`
-
-
-
+- Create a log file folder at `~\Documents\foraging_gui_logs`
 
 #### To launch the software:
 - Run `foraging.bonsai` in `dynamic-foraging-task\src\workflows` to start Bonsai.
@@ -93,9 +92,13 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - The GUI will leave a log file at `~\Documents\foraging_gui_logs\` named by the tower and date/time. 
 
 #### Automatic Updates
-To configure automatic updates consistent with the [update protocol](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Software-Update-Procedures),please use TaskScheduler to automatically run two batch files at specified times of the week ([instructions](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Configure-Automatic-Updates))
-- `\src\foraging_gui\update_from_github_to_main.bat` every wednesday at 6am
-- `\src\foraging_gui\update_from_github_to_production_testing.bat` every monday at 6am
+To configure automatic updates consistent with the [update protocol](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Software-Update-Procedures),please use TaskScheduler to automatically run three batch files at specified times of the week ([instructions](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Configure-Automatic-Updates))
+- On every computer:
+   - `\src\foraging_gui\update_from_github_to_main.bat` everyday at 6am
+- On the testing computer:
+   - `\src\foraging_gui\update_from_github_to_production_testing.bat` every monday at 6am
+   - `\src\foraging_gui\check_github_status.bat` every tuesday at 6am
+   - `\src\foraging_gui\update_from_github_to_main.bat` every W,Th,F,S,Su at 6am
 - These batch files will leave a log file at `~\Documents\foraging_gui_logs\github_log.txt`
 
 ## Block Diagram
