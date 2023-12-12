@@ -68,10 +68,10 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - Create a `conda` environment, with python version 3.8
   - install `conda` [instructions here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/windows/html)
   - Run `miniconda prompt`
-  - Create an environment: `conda create -n foraging_environment python=3.8`
-  - Activate the environment: `conda activate foraging_environment`
+  - Create an environment: `conda create -n Foraging python=3.8`
+  - Activate the environment: `conda activate Foraging`
 - Use `pip` to install this repository:
-  - From the top-level directory run `pip install .`
+  - From the top-level directory run `pip install -e .`
 - Copy `Settings_box1.csv` to `Users\<username>\Documents\ForagingSettings`
 - Configure `ForagingSettings.json`
   - Copy the template from `src\foraging_gui\ForagingSettings.json` to `Users\<username>\Documents\ForagingSettings\ForagingSettings.json`
