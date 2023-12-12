@@ -77,6 +77,8 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
   - This should install all the required python packages. 
 - Copy `Settings_box<box num>.csv` to `Users\svc_aind_behavior\Documents\ForagingSettings`
   - Copy `<box num>` 1-4 depending on the computer
+- Copy `Foraging<box num>.bat` to the Desktop
+  - Copy `<box num>` 1-4 depending on the computer
 - Configure `ForagingSettings.json`
   - Copy the template from `src\foraging_gui\ForagingSettings.json` to `Users\svc_aind_behavior\Documents\ForagingSettings\ForagingSettings.json`
   - There are four fields that need to be set:
