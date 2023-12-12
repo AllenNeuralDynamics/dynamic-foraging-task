@@ -395,12 +395,15 @@ class Window(QMainWindow, Ui_ForagingGUI):
     
     def _GetLaserCalibration(self):
         '''Get the laser calibration results'''
+        print('here')
         if os.path.exists(self.LaserCalibrationFiles):
+            print('here2')
             with open(self.LaserCalibrationFiles, 'r') as f:
                 self.LaserCalibrationResults = json.load(f)
                 sorted_dates = sorted(self.LaserCalibrationResults.keys(), key=self._custom_sort_key)
                 self.RecentLaserCalibration=self.LaserCalibrationResults[sorted_dates[-1]]
                 self.RecentCalibrationDate=sorted_dates[-1]
+                print('here3')
 
     def _GetWaterCalibration(self):
         '''Get the laser calibration results'''
