@@ -2084,7 +2084,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         '''Check if the Bonsai and GUI are connected'''
         if self.InitializeBonsaiSuccessfully==0:
             self._ConnectBonsai()
-            
+
     def _Start(self):
         '''start trial loop'''
         self._CheckBonsaiConnection()
@@ -2306,10 +2306,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.DelayMax.setEnabled(True)
     def _GiveLeft(self):
         '''manually give left water'''
+        self._CheckBonsaiConnection()
         if self.InitializeBonsaiSuccessfully==0:
-            self._ConnectBonsai()
-            if self.InitializeBonsaiSuccessfully==0:
-                return
+            return
         self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
         time.sleep(0.01) 
         self.Channel3.ManualWater_Left(int(1))
@@ -2319,10 +2318,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
     
     def _GiveRight(self):
         '''manually give right water'''
+        self._CheckBonsaiConnection()
         if self.InitializeBonsaiSuccessfully==0:
-            self._ConnectBonsai()
-            if self.InitializeBonsaiSuccessfully==0:
-                return
+            return
         self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
         time.sleep(0.01) 
         self.Channel3.ManualWater_Right(int(1))
