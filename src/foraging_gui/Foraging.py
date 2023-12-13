@@ -236,6 +236,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         try:
             if not hasattr(self, 'current_stage'):
                 return
+            self._StageStop()
             current_stage=self.current_stage
             current_position=current_stage.get_position()
             current_stage.set_speed(3000)
@@ -956,6 +957,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # move newscale stage
         if hasattr(self,'current_stage'):
             try:
+                self._StageStop()
                 self.current_stage.move_absolute_3d(float(self.PositionX.text()),float(self.PositionY.text()),float(self.PositionZ.text()))
             except Exception as e:
                 logging.error(str(e))
@@ -1862,6 +1864,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     pass
                 if hasattr(self,'current_stage'):
                     try:
+                        self._StageStop()
                         self.current_stage.move_absolute_3d(float(last_positions[0]),float(last_positions[1]),float(last_positions[2]))
                         self._UpdatePosition((float(last_positions[0]),float(last_positions[1]),float(last_positions[2])),(0,0,0))
                     except Exception as e:
