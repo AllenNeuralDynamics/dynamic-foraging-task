@@ -529,8 +529,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
         logging.info('initializing Bonsai')
         # open the bondai workflow and run
         self._OpenBonsaiWorkflow()
+        logging.info('initializing Bonsai 1')
         time.sleep(3)
+        logging.info('initializing Bonsai 2')
         self._ConnectOSC()
+        logging.info('initializing Bonsai 3')
 
     def _ConnectOSC(self):
         '''Connect the GUI and Bonsai through OSC messages'''    
@@ -2437,11 +2440,11 @@ if __name__ == "__main__":
 
     # Formating GUI graphics
     logging.info('Setting QApplication attributes')
-    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling,1)
-    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps,True)
-    QApplication.setAttribute(Qt.AA_DisableHighDpiScaling,False)
-    QApplication.setAttribute(Qt.AA_Use96Dpi,False)
-    QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
+    #QApplication.setAttribute(Qt.AA_EnableHighDpiScaling,1)
+    #QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps,True)
+    #QApplication.setAttribute(Qt.AA_DisableHighDpiScaling,False)
+    #QApplication.setAttribute(Qt.AA_Use96Dpi,False)
+    #QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
     
     # Start Q, and Gui Window
     logging.info('Starting QApplication and Window')
