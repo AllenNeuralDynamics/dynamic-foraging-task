@@ -77,15 +77,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.Visualization.setTitle(str(date.today()))
         self.loggingstarted=-1
         self._InitializeBonsai()
-        #try: 
-        #    self._InitializeBonsai()
-        #    self.InitializeBonsaiSuccessfully=1
-        #    logging.info('Bonsai started successfully')
-        #except Exception as e:
-        #    logging.error('Initializing Bonsai: {}'.format(str(e)))
-        #    self.InitializeBonsaiSuccessfully=0
-        #    self.WarningLabel_2.setText('Start without bonsai connected!')
-        #    self.WarningLabel_2.setStyleSheet("color: red;")
         self.threadpool=QThreadPool() # get animal response
         self.threadpool2=QThreadPool() # get animal lick
         self.threadpool3=QThreadPool() # visualization
@@ -2484,11 +2475,11 @@ if __name__ == "__main__":
 
     # Formating GUI graphics
     logging.info('Setting QApplication attributes')
-    #QApplication.setAttribute(Qt.AA_EnableHighDpiScaling,1)
-    #QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps,True)
-    #QApplication.setAttribute(Qt.AA_DisableHighDpiScaling,False)
-    #QApplication.setAttribute(Qt.AA_Use96Dpi,False)
-    #QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling,1)
+    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps,True)
+    QApplication.setAttribute(Qt.AA_DisableHighDpiScaling,False)
+    QApplication.setAttribute(Qt.AA_Use96Dpi,False)
+    QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
     
     # Start Q, and Gui Window
     logging.info('Starting QApplication and Window')
