@@ -551,7 +551,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             try:
                 self._ConnectOSC()
             except Exception as e:
-                logging.error(str(e))
+                logging.error('Could not connect: '+str(e))
             else:
                 logging.info('Connected to Bonsai')               
                 self.InitializeBonsaiSuccessfully=1
