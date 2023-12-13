@@ -526,39 +526,53 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Tower.setCurrentIndex(index)
 
     def _InitializeBonsai(self):
-        '''Initializing osc messages'''
+        '''
+            Connect to Bonsai using OSC messages to establish a connection. 
+            
+            We first attempt to connect, to see if Bonsai is already running. 
+            If not, we start Bonsai and check the connection every 500ms.
+            If we wait more than 30 seconds without Bonsai connection we set 
+            InitializeBonsaiSuccessfully=0 and return
+    
+        '''
 
+        # Try to connect, to see if Bonsai is already runniny
         try: 
             logging.info('Trying to connect to already running Bonsai')
             self._ConnectOSC()
         except Exception as e:
+            # We couldn't connect, log as info, and move on
             logging.info('Could not connect: '+str(e))
         else:
+            # We could connect, set the indicator flag and return
             logging.info('Connected to already running Bonsai')
             self.InitializeBonsaiSuccessfully=1
             logging.info('Bonsai started successfully')
             return
 
-
+        # Start Bonsai
         logging.info('Starting Bonsai')
-        # open the bondai workflow and run
         self._OpenBonsaiWorkflow()
-        max_wait = 30
+
+        # Test the connection until it completes or we time out
         wait = 0
+        max_wait = 30
         while wait < max_wait:
             time.sleep(1)
             wait += 1
             try:
                 self._ConnectOSC()
             except Exception as e:
+                # We could not connect
                 logging.info('Could not connect, total waiting time {} seconds: '.format(wait)+str(e))
             else:
+                # We could connect
                 logging.info('Connected to Bonsai')               
                 self.InitializeBonsaiSuccessfully=1
                 logging.info('Bonsai started successfully')
                 return
         
-        # Could not connect
+        # Could not connect and we timed out
         logging.info('Could not connect to bonsai with max wait time {} seconds'.format(max_wait))
         self.InitializeBonsaiSuccessfully=0
         self.WarningLabel_2.setText('Started without bonsai connected!')
