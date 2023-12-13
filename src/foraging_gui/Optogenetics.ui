@@ -28,6 +28,9 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
+   <property name="currentIndex">
+    <number>4</number>
+   </property>
    <item>
     <property name="text">
      <string>Blue</string>

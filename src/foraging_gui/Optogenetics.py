@@ -1171,6 +1171,7 @@ class Ui_Optogenetics(object):
         self.label4_16.raise_()
 
         self.retranslateUi(Optogenetics)
+        self.Laser_1.setCurrentIndex(4)
         self.LaserEnd_1.setCurrentIndex(0)
         self.Condition_1.setCurrentIndex(6)
         self.Condition_2.setCurrentIndex(6)
