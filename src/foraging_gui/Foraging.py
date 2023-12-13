@@ -557,9 +557,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # Test the connection until it completes or we time out
         wait = 0
         max_wait = 30
+        check_every = .5
         while wait < max_wait:
-            time.sleep(1)
-            wait += 1
+            time.sleep(check_every)
+            wait += check_every
             try:
                 self._ConnectOSC()
             except Exception as e:
@@ -567,7 +568,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 logging.info('Could not connect, total waiting time {} seconds: '.format(wait)+str(e))
             else:
                 # We could connect
-                logging.info('Connected to Bonsai')               
+                logging.info('Connected to Bonsai after {} seconds'.format(wait))               
                 self.InitializeBonsaiSuccessfully=1
                 logging.info('Bonsai started successfully')
                 return
