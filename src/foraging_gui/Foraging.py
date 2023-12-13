@@ -76,15 +76,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.UpdateParameters=1 # permission to update parameters
         self.Visualization.setTitle(str(date.today()))
         self.loggingstarted=-1
-        try: 
-            self._InitializeBonsai()
-            self.InitializeBonsaiSuccessfully=1
-            logging.info('Bonsai started successfully')
-        except Exception as e:
-            logging.error('Initializing Bonsai: {}'.format(str(e)))
-            self.InitializeBonsaiSuccessfully=0
-            self.WarningLabel_2.setText('Start without bonsai connected!')
-            self.WarningLabel_2.setStyleSheet("color: red;")
+        self._InitializeBonsai()
+        #try: 
+        #    self._InitializeBonsai()
+        #    self.InitializeBonsaiSuccessfully=1
+        #    logging.info('Bonsai started successfully')
+        #except Exception as e:
+        #    logging.error('Initializing Bonsai: {}'.format(str(e)))
+        #    self.InitializeBonsaiSuccessfully=0
+        #    self.WarningLabel_2.setText('Start without bonsai connected!')
+        #    self.WarningLabel_2.setStyleSheet("color: red;")
         self.threadpool=QThreadPool() # get animal response
         self.threadpool2=QThreadPool() # get animal lick
         self.threadpool3=QThreadPool() # visualization
@@ -526,14 +527,40 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
     def _InitializeBonsai(self):
         '''Initializing osc messages'''
-        logging.info('initializing Bonsai')
+
+        try: 
+            logging.info('Trying to connect to already running Bonsai')
+            self._ConnectOSC()
+        except Exception as e:
+            logging.info('Could not connect: '+str(e))
+        else:
+            logging.info('Connected to already running Bonsai')
+            self.InitializeBonsaiSuccessfully=1
+            logging.info('Bonsai started successfully')
+            return
+
+
+        logging.info('Starting Bonsai')
         # open the bondai workflow and run
         self._OpenBonsaiWorkflow()
-        logging.info('initializing Bonsai 1')
-        time.sleep(3)
-        logging.info('initializing Bonsai 2')
-        self._ConnectOSC()
-        logging.info('initializing Bonsai 3')
+        max_wait = 30
+        wait = 0
+        while wait < max_wait:
+            time.sleep(1)
+            try:
+                self._ConnectOSC()
+            except Exception as e:
+                logging.error(str(e))
+            else:
+                logging.info('Connected to Bonsai'                
+                self.InitializeBonsaiSuccessfully=1
+                logging.info('Bonsai started successfully')
+        
+        # Could not connect
+        logging.info('Could not connect to bonsai with max wait time {} seconds'.format(max_wait))
+        self.InitializeBonsaiSuccessfully=0
+        self.WarningLabel_2.setText('Started without bonsai connected!')
+        self.WarningLabel_2.setStyleSheet("color: red;")
 
     def _ConnectOSC(self):
         '''Connect the GUI and Bonsai through OSC messages'''    
