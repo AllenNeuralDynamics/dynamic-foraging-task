@@ -4315,6 +4315,7 @@
     <addaction name="action_Start"/>
     <addaction name="action_NewSession"/>
     <addaction name="actionConnectBonsai"/>
+    <addaction name="actionReconnect_bonsai"/>
     <addaction name="actionRestartLogging_2"/>
     <addaction name="actionOpen_behavior_folder"/>
     <addaction name="actionOpen_logging_folder"/>
@@ -4665,6 +4666,11 @@
   <action name="actionScan_stages">
    <property name="text">
     <string>Scan stages</string>
+   </property>
+  </action>
+  <action name="actionReconnect_bonsai">
+   <property name="text">
+    <string>Reconnect bonsai</string>
    </property>
   </action>
  </widget>

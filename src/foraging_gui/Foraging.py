@@ -150,6 +150,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.action_Start.triggered.connect(self.Start.click)
         self.action_NewSession.triggered.connect(self.NewSession.click)
         self.actionConnectBonsai.triggered.connect(self._ConnectBonsai)
+        self.actionReconnect_bonsai.triggered.connect(self._ReconnectBonsai)
         self.Load.clicked.connect(self._Open)
         self.Save.clicked.connect(self._Save)
         self.Clear.clicked.connect(self._Clear)
@@ -367,6 +368,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.WarningLabelInitializeBonsai.setText('Please open bonsai!')
                 self.WarningLabelInitializeBonsai.setStyleSheet("color: red;")
                 self.InitializeBonsaiSuccessfully=0
+
+    def _ReconnectBonsai(self):
+        '''Reconnect bonsai'''
+        if self.InitializeBonsaiSuccessfully==1:
+            self.client.close()
+            self.client2.close()
+            self.client3.close()
+            self.client4.close()
+        self.InitializeBonsaiSuccessfully=0
+        self._ConnectBonsai()
 
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
