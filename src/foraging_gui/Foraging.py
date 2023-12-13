@@ -63,11 +63,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration_'+str(sys.argv[1])+'.json')
             self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_'+str(sys.argv[1])+'.json')
             self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json')
-        try:
-            self._GetLaserCalibration()
-            logging.info('Loaded Laser Calibration')
-        except Exception as e:
-            logging.error('Could not load laser calibration file: {}'.format(str(e)))
+        self._GetLaserCalibration()
         try:
             self._GetWaterCalibration()
             logging.info('Loaded Water Calibration')
@@ -403,14 +399,30 @@ class Window(QMainWindow, Ui_ForagingGUI):
         return log_folder
     
     def _GetLaserCalibration(self):
-        '''Get the laser calibration results'''
+        '''
+            Load the laser calibration file. 
+
+            If it exists, populate:
+                self.LaserCalibrationResults with the calibration json
+                self.RecentLaserCalibration with the last calibration
+                self.RecentCalibrationDate with the date of the last calibration
+
+            If it does not exist, populate
+                self.LaserCalibrationResults with an empty dictionary
+                self.RecentCalibrationDate with 'None'
+        '''
         if os.path.exists(self.LaserCalibrationFiles):
             with open(self.LaserCalibrationFiles, 'r') as f:
                 self.LaserCalibrationResults = json.load(f)
-                sorted_dates = sorted(self.LaserCalibrationResults.keys(), key=self._custom_sort_key)
+                sorted_dates = sorted(self.LaserCalibrationResults.keys(),key=self._custom_sort_key)
                 self.RecentLaserCalibration=self.LaserCalibrationResults[sorted_dates[-1]]
                 self.RecentCalibrationDate=sorted_dates[-1]
-
+            logging.info('Loaded Laser Calibration')
+        else:
+            self.LaserCalibrationResults = {}
+            self.RecentCalibrationDate='None'
+            logging.info('Did not find a recent laser calibration file')
+ 
     def _GetWaterCalibration(self):
         '''Get the laser calibration results'''
         if os.path.exists(self.WaterCalibrationFiles):
@@ -1585,13 +1597,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 for attr_name in dir(self.LaserCalibration_dialog):
                     if attr_name.startswith('LCM_'):
                         Obj[attr_name] = getattr(self.LaserCalibration_dialog, attr_name)
+
             # save laser calibration results from the json file
             if hasattr(self, 'LaserCalibrationResults'):
                 self._GetLaserCalibration()
-                try:
-                    Obj['LaserCalibrationResults']=self.LaserCalibrationResults
-                except Exception as e:
-                    logging.error(str(e))
+                Obj['LaserCalibrationResults']=self.LaserCalibrationResults
 
             # save water calibration results
             if hasattr(self, 'WaterCalibrationResults'):

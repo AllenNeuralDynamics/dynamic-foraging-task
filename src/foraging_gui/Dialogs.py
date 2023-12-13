@@ -204,10 +204,7 @@ class OptogeneticsDialog(QDialog,Ui_Optogenetics):
             eval('self.OffsetEnd_'+str(Numb)+'.setEnabled('+str(True)+')')
     def _Laser(self,Numb):
         ''' enable/disable items based on laser (blue/green/orange/red/NA)'''
-        try:
-            self.LatestCalibrationDate.setText(self.MainWindow.RecentCalibrationDate)
-        except Exception as e:
-            logging.error(str(e))
+        self.LatestCalibrationDate.setText(self.MainWindow.RecentCalibrationDate)
         Inactlabel=range(2,17)
         if eval('self.Laser_'+str(Numb)+'.currentText()')=='NA':
             Label=False
