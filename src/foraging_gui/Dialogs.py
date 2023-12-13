@@ -958,6 +958,9 @@ class CameraDialog(QDialog,Ui_Camera):
 
     def _RestartLogging(self):
         '''Restart the logging (create a new logging folder)'''
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         if self.CollectVideo.currentText()=='Yes':
             # formal logging
             self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
@@ -989,6 +992,9 @@ class CameraDialog(QDialog,Ui_Camera):
             
     def _ClearTemporaryVideo(self):
         '''Clear temporary video files'''
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         try:
             # Remove a directory and its contents (recursively)
             if os.path.exists(self.MainWindow.temporary_video_folder):
@@ -1001,6 +1007,9 @@ class CameraDialog(QDialog,Ui_Camera):
 
     def _StartCamera(self):
         '''Start/stop the camera'''
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             self.MainWindow._ConnectBonsai()
             if self.MainWindow.InitializeBonsaiSuccessfully==0:
