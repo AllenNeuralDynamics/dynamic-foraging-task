@@ -552,7 +552,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             except Exception as e:
                 logging.error(str(e))
             else:
-                logging.info('Connected to Bonsai'                
+                logging.info('Connected to Bonsai')               
                 self.InitializeBonsaiSuccessfully=1
                 logging.info('Bonsai started successfully')
         
