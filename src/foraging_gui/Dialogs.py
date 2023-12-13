@@ -458,6 +458,9 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
 
     def _StartCalibratingLeft(self):
         '''start the calibration loop of left valve'''
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         if self.StartCalibratingLeft.isChecked():
             # change button color
             self.StartCalibratingLeft.setStyleSheet("background-color : green;")
@@ -619,6 +622,9 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         self.StartCalibratingLeft.setChecked(False)
     def _StartCalibratingRight(self):
         '''start the calibration loop of right valve'''
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         if self.StartCalibratingRight.isChecked():
             # change button color
             self.StartCalibratingRight.setStyleSheet("background-color : green;")
@@ -833,6 +839,9 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
 
     def _OpenLeftForever(self):
         '''Open the left valve forever'''
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         if self.OpenLeftForever.isChecked():
             # change button color
             self.OpenLeftForever.setStyleSheet("background-color : green;")
@@ -851,6 +860,9 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
 
     def _OpenRightForever(self):
         '''Open the right valve forever'''
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         if self.OpenRightForever.isChecked():
             # change button color
             self.OpenRightForever.setStyleSheet("background-color : green;")
@@ -869,6 +881,9 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
 
     def _OpenLeft(self):    
         '''Calibration of left valve in a different thread'''
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         if self.OpenLeft.isChecked():
             # change button color
             self.OpenLeft.setStyleSheet("background-color : green;")
@@ -891,6 +906,9 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
     def _OpenRight(self):
         '''Calibration of right valve'''
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         if self.OpenRight.isChecked():
             # change button color
             self.OpenRight.setStyleSheet("background-color : green;")

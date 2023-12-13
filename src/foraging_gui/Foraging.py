@@ -2080,12 +2080,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.Experimenter.setEnabled(enable)
         self.Tower.setEnabled(enable)
 
-    def _Start(self):
-        '''start trial loop'''
+    def _CheckBonsaiConnection(self):
+        '''Check if the Bonsai and GUI are connected'''
         if self.InitializeBonsaiSuccessfully==0:
             self._ConnectBonsai()
-            if self.InitializeBonsaiSuccessfully==0:
-                return
+            
+    def _Start(self):
+        '''start trial loop'''
+        self._CheckBonsaiConnection()
+        if self.InitializeBonsaiSuccessfully==0:
+            return
         self.WarningLabelInitializeBonsai.setText('')
         self.WarningLabel_SaveTrainingStage.setText('')
         self.WarningLabel_SaveTrainingStage.setStyleSheet("color: none;")
