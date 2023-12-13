@@ -1149,17 +1149,32 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
         self.Flush_DO3.clicked.connect(self._FLush_DO3)
         self.Flush_Port2.clicked.connect(self._FLush_Port2)
     def _FLush_DO0(self):
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         self.MainWindow.Channel.DO0(int(1))
         self.MainWindow.Channel.receive()
     def _FLush_DO1(self):
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         self.MainWindow.Channel.DO1(int(1))
     def _FLush_DO2(self):
-        self.MainWindow.Channel.DO2(int(1))
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
+        #self.MainWindow.Channel.DO2(int(1))
         self.MainWindow.Channel.receive()
     def _FLush_DO3(self):
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         self.MainWindow.Channel.DO3(int(1))
         self.MainWindow.Channel.receive()
     def _FLush_Port2(self):
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         self.MainWindow.Channel.Port2(int(1))
 
     def _Laser_1(self):
@@ -1629,6 +1644,9 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
         self.SleepComplete2=1
     def _Open(self):
         '''Open the laser only once'''
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         if self.Open.isChecked():
             self.SleepComplete2=0
             # change button color and disable the open button
