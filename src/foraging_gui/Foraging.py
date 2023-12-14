@@ -531,7 +531,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             
             We first attempt to connect, to see if Bonsai is already running. 
             If not, we start Bonsai and check the connection every 500ms.
-            If we wait more than 30 seconds without Bonsai connection we set 
+            If we wait more than 6 seconds without Bonsai connection we set 
             InitializeBonsaiSuccessfully=0 and return
     
         '''
@@ -557,7 +557,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
         # Test the connection until it completes or we time out
         wait = 0
-        max_wait = 10
+        max_wait = 6
         check_every = .5
         while wait < max_wait:
             time.sleep(check_every)
