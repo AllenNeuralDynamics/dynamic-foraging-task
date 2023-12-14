@@ -2454,13 +2454,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
         except Exception as e:
             logging.error(str(e))
 
-def start_gui_log_file():
+def start_gui_log_file(bonsai_tag):
     '''
         Starts a log file for the gui.
         The log file is located at C:/Users/<username>/Documents/foraging_gui_logs
         One log file is created for each time the GUI is started
         The name of the gui file is tower_<tower num>_gui_log_<date and time>.txt
-        If no tower number is available, then tower_num = 0
     '''
     # Check if the log folder exists, if it doesn't make it
     logging_folder = os.path.join(os.path.expanduser("~"), "Documents",'foraging_gui_logs')
@@ -2472,15 +2471,9 @@ def start_gui_log_file():
     current_time = datetime.now()
     formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
 
-    # What tower is this for?
-    if len(sys.argv) >=2:
-        tower_num = sys.argv[1]
-    else:
-        tower_num = 0
-
     # Build logfile name
     hostname = socket.gethostname()
-    filename = '{}_tower_{}_gui_log_{}.txt'.format(hostname,tower_num,formatted_datetime)
+    filename = '{}_tower_{}_gui_log_{}.txt'.format(hostname,bonsai_tag,formatted_datetime)
     logging_filename = os.path.join(logging_folder,filename)
 
     # Format the log file:
@@ -2499,8 +2492,15 @@ def start_gui_log_file():
     logging.captureWarnings(True)
 
 if __name__ == "__main__":
+
+    # Determine which box we are using
+    if len(sys.argv) >= 2:
+        bonsai_tag = int(sys.argv[1])
+    else:
+        bonsai_tag = 1
+
     # Start logging
-    start_gui_log_file()
+    start_gui_log_file(bonsai_tag)
 
     # Formating GUI graphics
     logging.info('Setting QApplication attributes')
@@ -2513,7 +2513,7 @@ if __name__ == "__main__":
     # Start Q, and Gui Window
     logging.info('Starting QApplication and Window')
     app = QApplication(sys.argv)
-    win = Window()
+    win = Window(bonsai_tag)
     win.show()
     # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())
