@@ -76,7 +76,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.UpdateParameters=1 # permission to update parameters
         self.Visualization.setTitle(str(date.today()))
         self.loggingstarted=-1
+
+        # Connect to Bonsai
         self._InitializeBonsai()
+
         self.threadpool=QThreadPool() # get animal response
         self.threadpool2=QThreadPool() # get animal lick
         self.threadpool3=QThreadPool() # visualization
@@ -345,7 +348,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.current_stage=Stage(serial=instance)
 
     def _ConnectBonsai(self):
-        '''Connect bonsai'''
+        '''
+            Connect to already running bonsai instance
+            
+            Will only attempt to connect if InitializeBonsaiSuccessfully=0
+            
+            If successfully connects, sets InitializeBonsaiSuccessfully=1
+        '''
         if self.InitializeBonsaiSuccessfully==0:
             try:
                 self._ConnectOSC()
@@ -527,7 +536,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
     
         '''
 
-        # Try to connect, to see if Bonsai is already runniny
+        # Try to connect, to see if Bonsai is already running
+        self.InitializeBonsaiSuccessfully=0
         try: 
             logging.info('Trying to connect to already running Bonsai')
             self._ConnectOSC()
@@ -537,8 +547,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         else:
             # We could connect, set the indicator flag and return
             logging.info('Connected to already running Bonsai')
-            self.InitializeBonsaiSuccessfully=1
             logging.info('Bonsai started successfully')
+            self.InitializeBonsaiSuccessfully=1
             return
 
         # Start Bonsai
@@ -547,7 +557,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
         # Test the connection until it completes or we time out
         wait = 0
-        max_wait = 30
+        max_wait = 10
         check_every = .5
         while wait < max_wait:
             time.sleep(check_every)
@@ -560,18 +570,21 @@ class Window(QMainWindow, Ui_ForagingGUI):
             else:
                 # We could connect
                 logging.info('Connected to Bonsai after {} seconds'.format(wait))               
-                self.InitializeBonsaiSuccessfully=1
                 logging.info('Bonsai started successfully')
+                self.InitializeBonsaiSuccessfully=1
                 return
         
         # Could not connect and we timed out
         logging.info('Could not connect to bonsai with max wait time {} seconds'.format(max_wait))
-        self.InitializeBonsaiSuccessfully=0
         self.WarningLabel_2.setText('Started without bonsai connected!')
         self.WarningLabel_2.setStyleSheet("color: red;")
 
     def _ConnectOSC(self):
-        '''Connect the GUI and Bonsai through OSC messages'''    
+        '''
+            Connect the GUI and Bonsai through OSC messages
+            Uses self.bonsai_tag to determine ports
+        '''    
+
         # connect the bonsai workflow with the python GUI
         logging.info('connecting to GUI and Bonsai through OSC')
         self.ip = "127.0.0.1"
