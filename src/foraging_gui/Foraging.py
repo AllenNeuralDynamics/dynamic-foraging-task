@@ -40,7 +40,7 @@ class NumpyEncoder(json.JSONEncoder):
         return super(NumpyEncoder, self).default(obj)
     
 class Window(QMainWindow, Ui_ForagingGUI):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None,bonsai_tag=1):
         logging.info('Creating Window')
         super().__init__(parent)
         self.setupUi(self)
@@ -2513,7 +2513,7 @@ if __name__ == "__main__":
     # Start Q, and Gui Window
     logging.info('Starting QApplication and Window')
     app = QApplication(sys.argv)
-    win = Window(bonsai_tag)
+    win = Window(bonsai_tag=bonsai_tag)
     win.show()
     # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())
