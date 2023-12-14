@@ -1462,7 +1462,7 @@ class GenerateTrials():
     def _GetTrainingParameters(self,win):
         '''Get training parameters'''
         # Iterate over each container to find child widgets and store their values in self
-        for container in [win.TrainingParameters, win.centralwidget, win.Opto_dialog]:
+        for container in [win.TrainingParameters, win.centralwidget, win.Opto_dialog, win.Camera_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit, QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
                 if child.objectName()=='qt_spinbox_lineedit' or child.objectName()=='':

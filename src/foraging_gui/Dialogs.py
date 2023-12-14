@@ -455,6 +455,9 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
 
     def _StartCalibratingLeft(self):
         '''start the calibration loop of left valve'''
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         if self.StartCalibratingLeft.isChecked():
             # change button color
             self.StartCalibratingLeft.setStyleSheet("background-color : green;")
@@ -616,6 +619,9 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         self.StartCalibratingLeft.setChecked(False)
     def _StartCalibratingRight(self):
         '''start the calibration loop of right valve'''
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         if self.StartCalibratingRight.isChecked():
             # change button color
             self.StartCalibratingRight.setStyleSheet("background-color : green;")
@@ -830,6 +836,9 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
 
     def _OpenLeftForever(self):
         '''Open the left valve forever'''
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         if self.OpenLeftForever.isChecked():
             # change button color
             self.OpenLeftForever.setStyleSheet("background-color : green;")
@@ -848,6 +857,9 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
 
     def _OpenRightForever(self):
         '''Open the right valve forever'''
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         if self.OpenRightForever.isChecked():
             # change button color
             self.OpenRightForever.setStyleSheet("background-color : green;")
@@ -866,6 +878,9 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
 
     def _OpenLeft(self):    
         '''Calibration of left valve in a different thread'''
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         if self.OpenLeft.isChecked():
             # change button color
             self.OpenLeft.setStyleSheet("background-color : green;")
@@ -888,6 +903,9 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
     def _OpenRight(self):
         '''Calibration of right valve'''
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         if self.OpenRight.isChecked():
             # change button color
             self.OpenRight.setStyleSheet("background-color : green;")
@@ -937,6 +955,9 @@ class CameraDialog(QDialog,Ui_Camera):
 
     def _RestartLogging(self):
         '''Restart the logging (create a new logging folder)'''
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         if self.CollectVideo.currentText()=='Yes':
             # formal logging
             self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
@@ -968,6 +989,9 @@ class CameraDialog(QDialog,Ui_Camera):
             
     def _ClearTemporaryVideo(self):
         '''Clear temporary video files'''
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         try:
             # Remove a directory and its contents (recursively)
             if os.path.exists(self.MainWindow.temporary_video_folder):
@@ -980,6 +1004,9 @@ class CameraDialog(QDialog,Ui_Camera):
 
     def _StartCamera(self):
         '''Start/stop the camera'''
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             self.MainWindow._ConnectBonsai()
             if self.MainWindow.InitializeBonsaiSuccessfully==0:
@@ -1128,17 +1155,32 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
         self.Flush_DO3.clicked.connect(self._FLush_DO3)
         self.Flush_Port2.clicked.connect(self._FLush_Port2)
     def _FLush_DO0(self):
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         self.MainWindow.Channel.DO0(int(1))
         self.MainWindow.Channel.receive()
     def _FLush_DO1(self):
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         self.MainWindow.Channel.DO1(int(1))
     def _FLush_DO2(self):
-        self.MainWindow.Channel.DO2(int(1))
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
+        #self.MainWindow.Channel.DO2(int(1))
         self.MainWindow.Channel.receive()
     def _FLush_DO3(self):
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         self.MainWindow.Channel.DO3(int(1))
         self.MainWindow.Channel.receive()
     def _FLush_Port2(self):
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         self.MainWindow.Channel.Port2(int(1))
 
     def _Laser_1(self):
@@ -1608,6 +1650,9 @@ class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
         self.SleepComplete2=1
     def _Open(self):
         '''Open the laser only once'''
+        self.MainWindow._CheckBonsaiConnection()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         if self.Open.isChecked():
             self.SleepComplete2=0
             # change button color and disable the open button

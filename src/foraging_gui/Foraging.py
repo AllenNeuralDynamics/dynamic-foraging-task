@@ -141,6 +141,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.action_Start.triggered.connect(self.Start.click)
         self.action_NewSession.triggered.connect(self.NewSession.click)
         self.actionConnectBonsai.triggered.connect(self._ConnectBonsai)
+        self.actionReconnect_bonsai.triggered.connect(self._ReconnectBonsai)
         self.Load.clicked.connect(self._Open)
         self.Save.clicked.connect(self._Save)
         self.Clear.clicked.connect(self._Clear)
@@ -226,6 +227,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         try:
             if not hasattr(self, 'current_stage'):
                 return
+            self.StageStop.click
             current_stage=self.current_stage
             current_position=current_stage.get_position()
             current_stage.set_speed(3000)
@@ -364,6 +366,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.WarningLabelInitializeBonsai.setText('Please open bonsai!')
                 self.WarningLabelInitializeBonsai.setStyleSheet("color: red;")
                 self.InitializeBonsaiSuccessfully=0
+
+    def _ReconnectBonsai(self):
+        '''Reconnect bonsai'''
+        if self.InitializeBonsaiSuccessfully==1:
+            self.client.close()
+            self.client2.close()
+            self.client3.close()
+            self.client4.close()
+        self.InitializeBonsaiSuccessfully=0
+        self._ConnectBonsai()
 
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
@@ -1008,6 +1020,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # move newscale stage
         if hasattr(self,'current_stage'):
             try:
+                self.StageStop.click
                 self.current_stage.move_absolute_3d(float(self.PositionX.text()),float(self.PositionY.text()),float(self.PositionZ.text()))
             except Exception as e:
                 logging.error(str(e))
@@ -1912,6 +1925,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     pass
                 if hasattr(self,'current_stage'):
                     try:
+                        self.StageStop.click
                         self.current_stage.move_absolute_3d(float(last_positions[0]),float(last_positions[1]),float(last_positions[2]))
                         self._UpdatePosition((float(last_positions[0]),float(last_positions[1]),float(last_positions[2])),(0,0,0))
                     except Exception as e:
@@ -2141,12 +2155,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.Experimenter.setEnabled(enable)
         self.Tower.setEnabled(enable)
 
-    def _Start(self):
-        '''start trial loop'''
+    def _CheckBonsaiConnection(self):
+        '''Check if the Bonsai and GUI are connected'''
         if self.InitializeBonsaiSuccessfully==0:
             self._ConnectBonsai()
-            if self.InitializeBonsaiSuccessfully==0:
-                return
+
+    def _Start(self):
+        '''start trial loop'''
+        self._CheckBonsaiConnection()
+        if self.InitializeBonsaiSuccessfully==0:
+            return
         self.WarningLabelInitializeBonsai.setText('')
         self.WarningLabel_SaveTrainingStage.setText('')
         self.WarningLabel_SaveTrainingStage.setStyleSheet("color: none;")
@@ -2363,10 +2381,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.DelayMax.setEnabled(True)
     def _GiveLeft(self):
         '''manually give left water'''
+        self._CheckBonsaiConnection()
         if self.InitializeBonsaiSuccessfully==0:
-            self._ConnectBonsai()
-            if self.InitializeBonsaiSuccessfully==0:
-                return
+            return
         self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
         time.sleep(0.01) 
         self.Channel3.ManualWater_Left(int(1))
@@ -2376,10 +2393,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
     
     def _GiveRight(self):
         '''manually give right water'''
+        self._CheckBonsaiConnection()
         if self.InitializeBonsaiSuccessfully==0:
-            self._ConnectBonsai()
-            if self.InitializeBonsaiSuccessfully==0:
-                return
+            return
         self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
         time.sleep(0.01) 
         self.Channel3.ManualWater_Right(int(1))
