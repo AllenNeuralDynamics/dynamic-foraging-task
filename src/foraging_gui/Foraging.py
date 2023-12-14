@@ -76,15 +76,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.UpdateParameters=1 # permission to update parameters
         self.Visualization.setTitle(str(date.today()))
         self.loggingstarted=-1
-        try: 
-            self._InitializeBonsai()
-            self.InitializeBonsaiSuccessfully=1
-            logging.info('Bonsai started successfully')
-        except Exception as e:
-            logging.error('Initializing Bonsai: {}'.format(str(e)))
-            self.InitializeBonsaiSuccessfully=0
-            self.WarningLabel_2.setText('Start without bonsai connected!')
-            self.WarningLabel_2.setStyleSheet("color: red;")
+
+        # Connect to Bonsai
+        self._InitializeBonsai()
+
         self.threadpool=QThreadPool() # get animal response
         self.threadpool2=QThreadPool() # get animal lick
         self.threadpool3=QThreadPool() # visualization
@@ -353,7 +348,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.current_stage=Stage(serial=instance)
 
     def _ConnectBonsai(self):
-        '''Connect bonsai'''
+        '''
+            Connect to already running bonsai instance
+            
+            Will only attempt to connect if InitializeBonsaiSuccessfully=0
+            
+            If successfully connects, sets InitializeBonsaiSuccessfully=1
+        '''
         if self.InitializeBonsaiSuccessfully==0:
             try:
                 self._ConnectOSC()
@@ -525,15 +526,65 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Tower.setCurrentIndex(index)
 
     def _InitializeBonsai(self):
-        '''Initializing osc messages'''
-        logging.info('initializing Bonsai')
-        # open the bondai workflow and run
+        '''
+            Connect to Bonsai using OSC messages to establish a connection. 
+            
+            We first attempt to connect, to see if Bonsai is already running. 
+            If not, we start Bonsai and check the connection every 500ms.
+            If we wait more than 6 seconds without Bonsai connection we set 
+            InitializeBonsaiSuccessfully=0 and return
+    
+        '''
+
+        # Try to connect, to see if Bonsai is already running
+        self.InitializeBonsaiSuccessfully=0
+        try: 
+            logging.info('Trying to connect to already running Bonsai')
+            self._ConnectOSC()
+        except Exception as e:
+            # We couldn't connect, log as info, and move on
+            logging.info('Could not connect: '+str(e))
+        else:
+            # We could connect, set the indicator flag and return
+            logging.info('Connected to already running Bonsai')
+            logging.info('Bonsai started successfully')
+            self.InitializeBonsaiSuccessfully=1
+            return
+
+        # Start Bonsai
+        logging.info('Starting Bonsai')
         self._OpenBonsaiWorkflow()
-        time.sleep(3)
-        self._ConnectOSC()
+
+        # Test the connection until it completes or we time out
+        wait = 0
+        max_wait = 6
+        check_every = .5
+        while wait < max_wait:
+            time.sleep(check_every)
+            wait += check_every
+            try:
+                self._ConnectOSC()
+            except Exception as e:
+                # We could not connect
+                logging.info('Could not connect, total waiting time {} seconds: '.format(wait)+str(e))
+            else:
+                # We could connect
+                logging.info('Connected to Bonsai after {} seconds'.format(wait))               
+                logging.info('Bonsai started successfully')
+                self.InitializeBonsaiSuccessfully=1
+                return
+        
+        # Could not connect and we timed out
+        logging.info('Could not connect to bonsai with max wait time {} seconds'.format(max_wait))
+        self.WarningLabel_2.setText('Started without bonsai connected!')
+        self.WarningLabel_2.setStyleSheet("color: red;")
 
     def _ConnectOSC(self):
-        '''Connect the GUI and Bonsai through OSC messages'''    
+        '''
+            Connect the GUI and Bonsai through OSC messages
+            Uses self.bonsai_tag to determine ports
+        '''    
+
         # connect the bonsai workflow with the python GUI
         logging.info('connecting to GUI and Bonsai through OSC')
         self.ip = "127.0.0.1"
