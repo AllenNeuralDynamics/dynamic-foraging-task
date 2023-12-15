@@ -478,9 +478,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             Settings = {}
 
         for key in defaults:
-            if key in Settings:
-                print(Settings[key])
-            else:
+            if key not in Settings:
                 Settings[key] = defaults[key]
                 logging.error('Missing setting ({}), using default'.format(key))
 
