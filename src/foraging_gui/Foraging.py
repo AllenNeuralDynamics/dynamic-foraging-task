@@ -2451,6 +2451,15 @@ def start_gui_log_file(tower_number):
     logging.info('Starting logfile!')
     logging.captureWarnings(True)
 
+def run_gui(tower_number):
+    # Start Q, and Gui Window
+    logging.info('Starting QApplication and Window')
+    app = QApplication(sys.argv)
+    win = Window(tower_number=tower_number)
+    win.show()
+    # Run your application's event loop and stop after closing all windows
+    sys.exit(app.exec())
+
 if __name__ == "__main__":
 
     # Determine which box we are using
@@ -2470,12 +2479,9 @@ if __name__ == "__main__":
     QApplication.setAttribute(Qt.AA_Use96Dpi,False)
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
     
-    # Start Q, and Gui Window
-    logging.info('Starting QApplication and Window')
-    app = QApplication(sys.argv)
-    win = Window(tower_number=tower_number)
-    win.show()
-    # Run your application's event loop and stop after closing all windows
-    sys.exit(app.exec())
+    try:
+        run_gui(tower_number)
+    except Exception as e:
+        logger.exception('Main crashed. Error: {}'.format(e))
 
 
