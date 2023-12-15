@@ -44,25 +44,35 @@ class Window(QMainWindow, Ui_ForagingGUI):
         logging.info('Creating Window')
         super().__init__(parent)
         self.setupUi(self)
-        
+        self.bonsai_tag=bonsai_tag       
+
+        # Load Settings that are specific to this computer  
         self.SettingFolder=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings")
         self.SettingFile=os.path.join(self.SettingFolder,'ForagingSettings.json')
         self._GetSettings()
-        if len(sys.argv)==1:
-            self.setWindowTitle("Foraging")
-            self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration.json')
-            self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration.json')
-            self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar.json')
-            self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json') # The training phase is shared and not differentiated by tower
-        else:
-            if self.current_box=='':
-                self.setWindowTitle("Foraging"+'_'+str(sys.argv[1]))
-            else:
-                self.setWindowTitle("Foraging"+'_'+self.current_box)
-            self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration_'+str(sys.argv[1])+'.json')
-            self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration_'+str(sys.argv[1])+'.json')
-            self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_'+str(sys.argv[1])+'.json')
-            self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json')
+
+        # Load Settings that are specific to this box 
+        self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration_{}.json'.format(bonsai_tag))
+        self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration_{}.json'.format(bonsai_tag))
+        self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_{}.json'.format(bonsai_tag))
+        self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json')
+
+
+        #if len(sys.argv)==1:
+        #    self.setWindowTitle("Foraging")
+        #    self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration.json')
+        #    self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration.json')
+        #    self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar.json')
+        #    self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json') # The training phase is shared and not differentiated by tower
+        #else:
+        #    if self.current_box=='':
+        #        self.setWindowTitle("Foraging"+'_'+str(sys.argv[1]))
+        #    else:
+        #        self.setWindowTitle("Foraging"+'_'+self.current_box)
+        #    self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration_'+str(sys.argv[1])+'.json')
+        #    self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration_'+str(sys.argv[1])+'.json')
+        #    self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_'+str(sys.argv[1])+'.json')
+        #    self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json')
         self._GetLaserCalibration()
         try:
             self._GetWaterCalibration()
@@ -526,16 +536,17 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.newscale_port_tower2=''
             self.newscale_port_tower3=''
             self.newscale_port_tower4=''
-        if len(sys.argv)==1:
-            towertag=''
-        else:
-            towertag=str(sys.argv[1])
+
+        # Determine box
         if self.current_box in ['Green','Blue','Red','Yellow']:
-            self.current_box=self.current_box+'-'+towertag
+            self.current_box='{}-{}'.format(self.current_box,self.bonsai_tag)
+        self.setWindowTitle('Foraging_{}'.format(self.current_box))
+
         # set the current tower automatically
         index = self.Tower.findText(self.current_box)
         if index != -1:
             self.Tower.setCurrentIndex(index)
+
 
     def _InitializeBonsai(self):
         '''
