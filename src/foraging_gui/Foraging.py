@@ -514,7 +514,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 else:
                     self.newscale_port_tower4=''
             else:
-                logging.info('Could not load settings file')
+                logging.info('Could not load settings file at: {}'.format(self.SettingFile))
                 self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
                 self.current_box=''
                 self.log_folder=os.path.join(os.path.expanduser("~"), "Documents",'log')
@@ -548,7 +548,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         index = self.Tower.findText(self.current_box)
         if index != -1:
             self.Tower.setCurrentIndex(index)
-            logging.info('Setting tower number: {}'.format(self.Tower.setCurrentIndex))
+            logging.info('Setting tower number: {}'.format(index))
         else:
             logging.error('Could not set tower number')
 
