@@ -483,6 +483,19 @@ class Window(QMainWindow, Ui_ForagingGUI):
             else:
                 Settings[key] = defaults[key]
                 logging.error('Missing setting ({}), using default'.format(key))
+
+        self.default_saveFolder=Settings['default_saveFolder']
+        self.current_box=Settings['current_box']
+        self.log_folder=Settings['log_folder']
+        self.temporary_video_folder=Settings['temporary_video_folder']
+        self.Teensy_COM=Settings['Teensy_COM']
+        self.bonsai_path=Settings['bonsai_path']
+        self.bonsaiworkflow_path=Settings['bonsaiworkflow_path']
+        self.newscale_port_tower1=Settings['newscale_port_tower1']
+        self.newscale_port_tower2=Settings['newscale_port_tower2']
+        self.newscale_port_tower3=Settings['newscale_port_tower3']
+        self.newscale_port_tower4=Settings['newscale_port_tower4']
+
         #try:
         #    if os.path.exists(self.SettingFile):
         #        # Open the JSON settings file
