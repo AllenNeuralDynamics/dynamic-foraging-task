@@ -640,10 +640,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
         SettingsBox = 'Settings_box{}.csv'.format(self.tower_number)
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
-        if self.tower_number==1:
-            subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox,cwd=CWD)
-        else:
+        if len(sys.argv) == 1:
             subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
+        else:
+            if self.tower_number==1:
+                subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox,cwd=CWD)
+            else:
+                subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
 
     def _OpenSettingFolder(self):
         '''Open the setting folder'''
