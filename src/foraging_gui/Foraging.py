@@ -514,6 +514,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 else:
                     self.newscale_port_tower4=''
             else:
+                logging.info('Could not load settings file')
                 self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
                 self.current_box=''
                 self.log_folder=os.path.join(os.path.expanduser("~"), "Documents",'log')
@@ -541,12 +542,15 @@ class Window(QMainWindow, Ui_ForagingGUI):
         if self.current_box in ['Green','Blue','Red','Yellow']:
             self.current_box='{}-{}'.format(self.current_box,self.bonsai_tag)
         self.setWindowTitle('Foraging_{}'.format(self.current_box))
+        logging.info('Setting Window title: {}'.format(self.setWindowTitle))
 
         # set the current tower automatically
         index = self.Tower.findText(self.current_box)
         if index != -1:
             self.Tower.setCurrentIndex(index)
-
+            logging.info('Setting tower number: {}'.format(self.Tower.setCurrentIndex))
+        else:
+            logging.error('Could not set tower number')
 
     def _InitializeBonsai(self):
         '''
