@@ -45,7 +45,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         super().__init__(parent)
         self.setupUi(self)
         self.tower_number=tower_number       
-        raise Exception('testing!')
 
         # Load Settings that are specific to this computer  
         self.SettingFolder=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings")
@@ -114,6 +113,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._StageSerialNum()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
+        raise Exception('testing!')
 
     def connectSignalsSlots(self):
         '''Define callbacks'''
