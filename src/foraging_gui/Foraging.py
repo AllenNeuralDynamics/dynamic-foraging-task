@@ -63,8 +63,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self._GetWaterCalibration()
             logging.info('Loaded Water Calibration')
         except Exception as e:
-            logging.error('Could not load water calibration file: {}'.format(str(e))
-)
+            logging.error('Could not load water calibration file: {}'.format(str(e)))
+
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
