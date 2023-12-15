@@ -449,7 +449,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
             return (key, 0)
 
     def _GetSettings(self):
-        '''Get default settings'''
+        '''
+            Load the settings that are specific to this computer
+        '''
+
+        # Get default settings
         defaults = {
             'default_saveFolder':os.path.join(os.path.expanduser("~"), "Documents")+'\\',
             'current_box':'',
@@ -464,7 +468,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
             'newscale_port_tower4':''
         }
         
-        
+        # Try to load the settings file        
+        Settings = {}
         try:
             if os.path.exists(self.SettingFile):
                 # Open the JSON settings file
@@ -472,16 +477,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     Settings = json.load(f)
             else:
                 logging.error('Could not find settings file at: {}'.format(self.SettingFile))
-                Settings = {}
         except Exception as e:
             logging.error('Could not load settings file at: {}, {}'.format(self.SettingFile,str(e)))
-            Settings = {}
 
+        # If any settings are missing, use the default values
         for key in defaults:
             if key not in Settings:
                 Settings[key] = defaults[key]
-                logging.error('Missing setting ({}), using default'.format(key))
+                logging.info('Missing setting ({}), using default: {}'.format(key,Settings[key]))
 
+        # Save all settings
         self.default_saveFolder=Settings['default_saveFolder']
         self.current_box=Settings['current_box']
         self.log_folder=Settings['log_folder']
