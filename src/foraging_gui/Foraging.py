@@ -57,28 +57,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_{}.json'.format(bonsai_tag))
         self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json')
 
-
-        #if len(sys.argv)==1:
-        #    self.setWindowTitle("Foraging")
-        #    self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration.json')
-        #    self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration.json')
-        #    self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar.json')
-        #    self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json') # The training phase is shared and not differentiated by tower
-        #else:
-        #    if self.current_box=='':
-        #        self.setWindowTitle("Foraging"+'_'+str(sys.argv[1]))
-        #    else:
-        #        self.setWindowTitle("Foraging"+'_'+self.current_box)
-        #    self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration_'+str(sys.argv[1])+'.json')
-        #    self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration_'+str(sys.argv[1])+'.json')
-        #    self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_'+str(sys.argv[1])+'.json')
-        #    self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json')
+        # Load Laser and Water Calibration Files
         self._GetLaserCalibration()
         try:
             self._GetWaterCalibration()
             logging.info('Loaded Water Calibration')
         except Exception as e:
-            logging.error('Could not load water calibration file: {}'.format(str(e)))
+            logging.error('Could not load water calibration file: {}'.format(str(e))
+)
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
@@ -616,41 +602,43 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # connect the bonsai workflow with the python GUI
         logging.info('connecting to GUI and Bonsai through OSC')
         self.ip = "127.0.0.1"
-        if len(sys.argv)==1:
-            self.bonsai_tag=1
+        #if len(sys.argv)==1:
+        #    self.bonsai_tag=1
+        #    self.request_port = 4002
+        #    self.request_port2 = 4003
+        #    self.request_port3 = 4004
+        #    self.request_port4 = 4005
+        #else:
+        #    bonsai_tag = int(sys.argv[1])
+        #    self.bonsai_tag=bonsai_tag
+        #    # determine ports for different bonsai_tag
+
+        if bonsai_tag==1:
             self.request_port = 4002
             self.request_port2 = 4003
             self.request_port3 = 4004
             self.request_port4 = 4005
+        elif bonsai_tag==2:
+            self.request_port = 4012
+            self.request_port2 = 4013
+            self.request_port3 = 4014
+            self.request_port4 = 4015
+        elif bonsai_tag==3:
+            self.request_port = 4022
+            self.request_port2 = 4023
+            self.request_port3 = 4024
+            self.request_port4 = 4025
+        elif bonsai_tag==4:
+            self.request_port = 4032
+            self.request_port2 = 4033
+            self.request_port3 = 4034
+            self.request_port4 = 4035
         else:
-            bonsai_tag = int(sys.argv[1])
-            self.bonsai_tag=bonsai_tag
-            # determine ports for different bonsai_tag
-            if bonsai_tag==1:
-                self.request_port = 4002
-                self.request_port2 = 4003
-                self.request_port3 = 4004
-                self.request_port4 = 4005
-            elif bonsai_tag==2:
-                self.request_port = 4012
-                self.request_port2 = 4013
-                self.request_port3 = 4014
-                self.request_port4 = 4015
-            elif bonsai_tag==3:
-                self.request_port = 4022
-                self.request_port2 = 4023
-                self.request_port3 = 4024
-                self.request_port4 = 4025
-            elif bonsai_tag==4:
-                self.request_port = 4032
-                self.request_port2 = 4033
-                self.request_port3 = 4034
-                self.request_port4 = 4035
-            else:
-                self.request_port = 4002
-                self.request_port2 = 4003
-                self.request_port3 = 4004
-                self.request_port4 = 4005
+            self.request_port = 4002
+            self.request_port2 = 4003
+            self.request_port3 = 4004
+            self.request_port4 = 4005
+
         # normal behavior events
         self.client = OSCStreamingClient()  # Create client 
         self.client.connect((self.ip, self.request_port))
