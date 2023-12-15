@@ -662,18 +662,20 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
     def _OpenBonsaiWorkflow(self,runworkflow=1):
         '''Open the bonsai workflow and run it'''
-        if len(sys.argv)==1:
-            SettingsBox='Settings_box1.csv'
-        else:
-            bonsai_tag = int(sys.argv[1])
-            if bonsai_tag==1:
-                SettingsBox='Settings_box1.csv'
-            elif bonsai_tag==2:
-                SettingsBox='Settings_box2.csv'
-            elif bonsai_tag==3:
-                SettingsBox='Settings_box3.csv'
-            elif bonsai_tag==4:
-                SettingsBox='Settings_box4.csv'
+        #if len(sys.argv)==1:
+        #    SettingsBox='Settings_box1.csv'
+        #else:
+        #    bonsai_tag = int(sys.argv[1])
+        #    if bonsai_tag==1:
+        #        SettingsBox='Settings_box1.csv'
+        #    elif bonsai_tag==2:
+        #        SettingsBox='Settings_box2.csv'
+        #    elif bonsai_tag==3:
+        #        SettingsBox='Settings_box3.csv'
+        #    elif bonsai_tag==4:
+        #        SettingsBox='Settings_box4.csv'
+        SettingsBox = 'Settings_box{}.csv'.format(self.bonsai_tag)
+
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
         if len(sys.argv)==1:
             subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
