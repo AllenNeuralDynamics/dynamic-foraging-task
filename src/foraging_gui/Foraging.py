@@ -541,8 +541,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # Determine box
         if self.current_box in ['Green','Blue','Red','Yellow']:
             self.current_box='{}-{}'.format(self.current_box,self.bonsai_tag)
-        self.setWindowTitle('Foraging_{}'.format(self.current_box))
-        logging.info('Setting Window title: {}'.format(self.setWindowTitle))
+        window_title = 'Foraging_{}'.format(self.current_box)
+        self.setWindowTitle(window_title)
+        logging.info('Setting Window title: {}'.format(window_title))
 
         # set the current tower automatically
         index = self.Tower.findText(self.current_box)
