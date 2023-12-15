@@ -602,38 +602,29 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # connect the bonsai workflow with the python GUI
         logging.info('connecting to GUI and Bonsai through OSC')
         self.ip = "127.0.0.1"
-        #if len(sys.argv)==1:
-        #    self.bonsai_tag=1
-        #    self.request_port = 4002
-        #    self.request_port2 = 4003
-        #    self.request_port3 = 4004
-        #    self.request_port4 = 4005
-        #else:
-        #    bonsai_tag = int(sys.argv[1])
-        #    self.bonsai_tag=bonsai_tag
-        #    # determine ports for different bonsai_tag
 
-        if bonsai_tag==1:
+        if self.bonsai_tag==1:
             self.request_port = 4002
             self.request_port2 = 4003
             self.request_port3 = 4004
             self.request_port4 = 4005
-        elif bonsai_tag==2:
+        elif self.bonsai_tag==2:
             self.request_port = 4012
             self.request_port2 = 4013
             self.request_port3 = 4014
             self.request_port4 = 4015
-        elif bonsai_tag==3:
+        elif self.bonsai_tag==3:
             self.request_port = 4022
             self.request_port2 = 4023
             self.request_port3 = 4024
             self.request_port4 = 4025
-        elif bonsai_tag==4:
+        elif self.bonsai_tag==4:
             self.request_port = 4032
             self.request_port2 = 4033
             self.request_port3 = 4034
             self.request_port4 = 4035
         else:
+            logging.error('bad bonsai tag {}'.format(self.bonsai_tag))
             self.request_port = 4002
             self.request_port2 = 4003
             self.request_port3 = 4004
