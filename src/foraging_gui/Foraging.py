@@ -40,11 +40,11 @@ class NumpyEncoder(json.JSONEncoder):
         return super(NumpyEncoder, self).default(obj)
     
 class Window(QMainWindow, Ui_ForagingGUI):
-    def __init__(self, parent=None,bonsai_tag=1):
+    def __init__(self, parent=None,tower_number=1):
         logging.info('Creating Window')
         super().__init__(parent)
         self.setupUi(self)
-        self.bonsai_tag=bonsai_tag       
+        self.tower_number=tower_number       
 
         # Load Settings that are specific to this computer  
         self.SettingFolder=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings")
@@ -52,9 +52,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._GetSettings()
 
         # Load Settings that are specific to this box 
-        self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration_{}.json'.format(bonsai_tag))
-        self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration_{}.json'.format(bonsai_tag))
-        self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_{}.json'.format(bonsai_tag))
+        self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration_{}.json'.format(tower_number))
+        self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration_{}.json'.format(tower_number))
+        self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_{}.json'.format(tower_number))
         self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json')
 
         # Load Laser and Water Calibration Files
@@ -316,7 +316,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._scan_for_usb_stages()
         # use the default newscale stage
         try:
-            self.newscale_port=eval('self.newscale_port'+'_tower'+str(self.bonsai_tag))
+            self.newscale_port=eval('self.newscale_port'+'_tower'+str(self.tower_number))
             if self.newscale_port!='':
                 index = self.StageSerialNum.findText(str(self.newscale_port))
                 if index != -1:
@@ -526,7 +526,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
         # Determine box
         if self.current_box in ['Green','Blue','Red','Yellow']:
-            self.current_box='{}-{}'.format(self.current_box,self.bonsai_tag)
+            self.current_box='{}-{}'.format(self.current_box,self.tower_number)
         window_title = 'Foraging_{}'.format(self.current_box)
         self.setWindowTitle(window_title)
         logging.info('Setting Window title: {}'.format(window_title))
@@ -596,35 +596,35 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _ConnectOSC(self):
         '''
             Connect the GUI and Bonsai through OSC messages
-            Uses self.bonsai_tag to determine ports
+            Uses self.tower_number to determine ports
         '''    
 
         # connect the bonsai workflow with the python GUI
         logging.info('connecting to GUI and Bonsai through OSC')
         self.ip = "127.0.0.1"
 
-        if self.bonsai_tag==1:
+        if self.tower_number==1:
             self.request_port = 4002
             self.request_port2 = 4003
             self.request_port3 = 4004
             self.request_port4 = 4005
-        elif self.bonsai_tag==2:
+        elif self.tower_number==2:
             self.request_port = 4012
             self.request_port2 = 4013
             self.request_port3 = 4014
             self.request_port4 = 4015
-        elif self.bonsai_tag==3:
+        elif self.tower_number==3:
             self.request_port = 4022
             self.request_port2 = 4023
             self.request_port3 = 4024
             self.request_port4 = 4025
-        elif self.bonsai_tag==4:
+        elif self.tower_number==4:
             self.request_port = 4032
             self.request_port2 = 4033
             self.request_port3 = 4034
             self.request_port4 = 4035
         else:
-            logging.error('bad bonsai tag {}'.format(self.bonsai_tag))
+            logging.error('bad bonsai tag {}'.format(self.tower_number))
             self.request_port = 4002
             self.request_port2 = 4003
             self.request_port3 = 4004
@@ -663,12 +663,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
     def _OpenBonsaiWorkflow(self,runworkflow=1):
         '''Open the bonsai workflow and run it'''
 
-        SettingsBox = 'Settings_box{}.csv'.format(self.bonsai_tag)
+        SettingsBox = 'Settings_box{}.csv'.format(self.tower_number)
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
-        #if len(sys.argv)==1:
-        #        subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
-        #else:
-        if self.bonsai_tag==1:
+        if self.tower_number==1:
             subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox,cwd=CWD)
         else:
             subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
@@ -2439,7 +2436,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         except Exception as e:
             logging.error(str(e))
 
-def start_gui_log_file(bonsai_tag):
+def start_gui_log_file(tower_number):
     '''
         Starts a log file for the gui.
         The log file is located at C:/Users/<username>/Documents/foraging_gui_logs
@@ -2458,7 +2455,7 @@ def start_gui_log_file(bonsai_tag):
 
     # Build logfile name
     hostname = socket.gethostname()
-    filename = '{}_tower_{}_gui_log_{}.txt'.format(hostname,bonsai_tag,formatted_datetime)
+    filename = '{}_tower_{}_gui_log_{}.txt'.format(hostname,tower_number,formatted_datetime)
     logging_filename = os.path.join(logging_folder,filename)
 
     # Format the log file:
@@ -2480,12 +2477,12 @@ if __name__ == "__main__":
 
     # Determine which box we are using
     if len(sys.argv) >= 2:
-        bonsai_tag = int(sys.argv[1])
+        tower_number = int(sys.argv[1])
     else:
-        bonsai_tag = 1
+        tower_number = 1
 
     # Start logging
-    start_gui_log_file(bonsai_tag)
+    start_gui_log_file(tower_number)
 
     # Formating GUI graphics
     logging.info('Setting QApplication attributes')
@@ -2498,7 +2495,7 @@ if __name__ == "__main__":
     # Start Q, and Gui Window
     logging.info('Starting QApplication and Window')
     app = QApplication(sys.argv)
-    win = Window(bonsai_tag=bonsai_tag)
+    win = Window(tower_number=tower_number)
     win.show()
     # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())

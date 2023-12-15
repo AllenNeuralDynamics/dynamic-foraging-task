@@ -304,8 +304,8 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         self._connectSignalsSlots()
         self.ToInitializeVisual=1
         self._UpdateFigure()
-        if hasattr(self.MainWindow,'bonsai_tag'):
-            self.setWindowTitle("Water Calibration: Tower "+'_'+str(self.MainWindow.bonsai_tag))
+        if hasattr(self.MainWindow,'tower_number'):
+            self.setWindowTitle("Water Calibration: Tower "+'_'+str(self.MainWindow.tower_number))
         else:
             self.setWindowTitle('Water Calibration') 
     def _connectSignalsSlots(self):
