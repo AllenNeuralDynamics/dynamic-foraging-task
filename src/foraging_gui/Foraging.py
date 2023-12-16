@@ -512,7 +512,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Tower.setCurrentIndex(index)
             logging.info('Setting tower number: {}'.format(index))
         else:
-            logging.error('Could not set tower number')
+            logging.info('Could not set tower number, using default')
 
     def _InitializeBonsai(self):
         '''
