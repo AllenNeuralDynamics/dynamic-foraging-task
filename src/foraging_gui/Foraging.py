@@ -477,12 +477,12 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     Settings = json.load(f)
             else:
                 logging.error('Could not find settings file at: {}'.format(self.SettingFile))
-                self.WarningLabel.setText('Could not find settings file!')
-                self.WarningLabel.setStyleSheet("color: red;")
+                raise Exception('Could not find file!')
         except Exception as e:
             logging.error('Could not load settings file at: {}, {}'.format(self.SettingFile,str(e)))
             self.WarningLabel.setText('Could not load settings file!')
             self.WarningLabel.setStyleSheet("color: red;")
+            raise e
 
         # If any settings are missing, use the default values
         for key in defaults:
@@ -490,8 +490,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 Settings[key] = defaults[key]
                 logging.info('Missing setting ({}), using default: {}'.format(key,Settings[key]))
                 if key in ['default_saveFolder','current_box']:
-                    self.WarningLabel.setText('Settings file does not contain field: {}'.format(key))
-                    self.WarningLabel.setStyleSheet("color: red;")                   
+                    logging.error('Missing setting ({}), is required'.format(key))               
+                    raise Exception('Missing setting ({}), is required'.format(key)) 
 
         # Save all settings
         self.default_saveFolder=Settings['default_saveFolder']
