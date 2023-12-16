@@ -477,14 +477,21 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     Settings = json.load(f)
             else:
                 logging.error('Could not find settings file at: {}'.format(self.SettingFile))
+                self.WarningLabel.setText('Could not find settings file!')
+                self.WarningLabel.setStyleSheet("color: red;")
         except Exception as e:
             logging.error('Could not load settings file at: {}, {}'.format(self.SettingFile,str(e)))
+            self.WarningLabel.setText('Could not load settings file!')
+            self.WarningLabel.setStyleSheet("color: red;")
 
         # If any settings are missing, use the default values
         for key in defaults:
             if key not in Settings:
                 Settings[key] = defaults[key]
                 logging.info('Missing setting ({}), using default: {}'.format(key,Settings[key]))
+                if key in ['default_saveFolder','current_box']:
+                    self.WarningLabel.setText('Settings file does not contain field: {}'.format(key))
+                    self.WarningLabel.setStyleSheet("color: red;")                   
 
         # Save all settings
         self.default_saveFolder=Settings['default_saveFolder']
@@ -512,7 +519,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.Tower.setCurrentIndex(index)
             logging.info('Setting tower number: {}'.format(index))
         else:
-            logging.info('Could not set tower number, using default')
+            logging.info('Could not set tower number, using default. Current_box is set at: {}'.format(self.current_box))
 
     def _InitializeBonsai(self):
         '''
@@ -640,13 +647,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
         SettingsBox = 'Settings_box{}.csv'.format(self.tower_number)
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
-        if len(sys.argv) == 1:
-            subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
-        else:
-            if self.tower_number==1:
-                subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox,cwd=CWD)
-            else:
-                subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
+        #if len(sys.argv) == 1:
+        #    subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
+        #else:
+        #    if self.tower_number==1:
+        #        subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox,cwd=CWD)
+        #    else:
+        subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
 
     def _OpenSettingFolder(self):
         '''Open the setting folder'''
