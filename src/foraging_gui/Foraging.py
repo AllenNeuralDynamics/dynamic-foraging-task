@@ -113,6 +113,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._StageSerialNum()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
+        assert False
 
     def connectSignalsSlots(self):
         '''Define callbacks'''
