@@ -96,13 +96,15 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
     - "current_box": For example "Tower_EphysRig3", "Blue"
   - These settings need to be configured for each computer:
     - "Teensy_COM": For example "COM10",
-      - This is for fiber-photometry (See wiki for determining COM value) 
+        - This is only for fiber-photometry  
+        - Follow instructions on the [wiki](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Computer-Configuration) to install Arduino IDE (1.8x) and TeensyDuino
+        - Once both are installed open ArduinoIDE, go to Tools>Port, select COMport cooresponding to Teensy4.1, and this value to the ForagingSettings.json
     - "newscale_port_tower1": For example 46103
     - "newscale_port_tower2": For example 46104
     - "newscale_port_tower3": For example 46105
     - "newscale_port_tower4": For example 46106
-      - Open Newscale and hit `connect` to see the serial numbers of the newscale devices
-      - Edit `ForagingSettings.json` to add a line `"newscale_port_tower1":<serial number for rig 1>`
+        - Open Newscale and hit `connect` to see the serial numbers of the newscale devices
+        - Edit `ForagingSettings.json` to add a line `"newscale_port_tower1":<serial number for rig 1>`
 - Create a log file folder at `~\Documents\foraging_gui_logs`
 
 #### To launch the software:
