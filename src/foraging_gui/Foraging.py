@@ -2458,6 +2458,13 @@ def start_gui_log_file(tower_number):
     logging.info('Starting logfile!')
     logging.captureWarnings(True)
 
+def excepthook(exc_type, exc_value, exc_tb):
+    tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+    print('Error: ')
+    print(tb)
+    logging.error(tb)
+    QtWidgets.QApplication.quit()
+
 if __name__ == "__main__":
 
     # Determine which box we are using
@@ -2479,6 +2486,7 @@ if __name__ == "__main__":
     
     # Start Q, and Gui Window
     logging.info('Starting QApplication and Window')
+    sys.excepthook=excepthook
     app = QApplication(sys.argv)
     win = Window(tower_number=tower_number)
     win.show()
