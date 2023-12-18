@@ -96,8 +96,7 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
     - "current_box": For example "Tower_EphysRig3", "Blue"
   - These settings need to be configured for each computer:
     - "Teensy_COM": For example "COM10",
-      - How does this get seting?
-      - What is it used for?
+      - This is for fiber-photometry (See wiki for determining COM value) 
     - "newscale_port_tower1": For example 46103
     - "newscale_port_tower2": For example 46104
     - "newscale_port_tower3": For example 46105
