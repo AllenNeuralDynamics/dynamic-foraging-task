@@ -1,9 +1,12 @@
 {
-    "default_saveFolder": "E:\\DynamicForagingGUI\\BehaviorData\\",
-    "current_box":"Tower_EphysRig3",
-    "log_folder":"E:\\DynamicForagingGUI\\BehaviorData\\",
-    "Teensy_COM":"COM10",
-    "bonsai_path":"E:\\GitHub\\dynamic-foraging-task\\bonsai\\Bonsai.exe",
-    "bonsaiworkflow_path":"E:\\GitHub\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai",
-    "newscale_port":46103
+    "default_saveFolder": "C:\\Documents\\",
+    "current_box":"",
+    "log_folder":"C:\\Documents\\",
+    "Teensy_COM":"",
+    "bonsai_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\bonsai\\Bonsai.exe",
+    "bonsaiworkflow_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai",
+    "newscale_port_tower1":"",
+    "newscale_port_tower2":"",
+    "newscale_port_tower3":"",
+    "newscale_port_tower4":"",
 }
