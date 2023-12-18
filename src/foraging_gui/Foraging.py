@@ -113,7 +113,6 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._StageSerialNum()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
-        assert False
 
     def connectSignalsSlots(self):
         '''Define callbacks'''
@@ -2460,6 +2459,10 @@ def start_gui_log_file(tower_number):
     logging.captureWarnings(True)
 
 def excepthook(exc_type, exc_value, exc_tb):
+    '''
+        excepthook will be called when the GUI encounters an uncaught exception
+        We will log the error in the logfile, print the error to the console, then exit
+    '''
     tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
     print('Encountered a fatal error: ')
     print(tb)
