@@ -2461,9 +2461,9 @@ def start_gui_log_file(tower_number):
 
 def excepthook(exc_type, exc_value, exc_tb):
     tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
-    print('Error: ')
+    print('Encountered a fatal error: ')
     print(tb)
-    logging.error(tb)
+    logging.error('FATAL ERROR: \n{}'.format(tb))
     QtWidgets.QApplication.quit()
 
 if __name__ == "__main__":
@@ -2484,10 +2484,12 @@ if __name__ == "__main__":
     QApplication.setAttribute(Qt.AA_DisableHighDpiScaling,False)
     QApplication.setAttribute(Qt.AA_Use96Dpi,False)
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
-    
+   
+    # Set excepthook, so we can log uncaught exceptions
+    sys.excepthook=excepthook
+
     # Start Q, and Gui Window
     logging.info('Starting QApplication and Window')
-    sys.excepthook=excepthook
     app = QApplication(sys.argv)
     win = Window(tower_number=tower_number)
     win.show()
