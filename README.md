@@ -78,6 +78,11 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - Copy `Settings_box<box num>.csv` to `Users\svc_aind_behavior\Documents\ForagingSettings`
   - Copy `<box num>` 1-4 depending on the computer
   - Configure the COM ports for each computer
+    - Behavior: 
+        - How are these determined?
+    - Soundcard:
+        - How are these determined?
+  - The BonsaiOsc ports are determined by the box number, and should not be modified. 
 - Copy `Foraging<box num>.bat` to the Desktop
   - Copy `<box num>` 1-4 depending on the computer
 - Configure `ForagingSettings.json`
