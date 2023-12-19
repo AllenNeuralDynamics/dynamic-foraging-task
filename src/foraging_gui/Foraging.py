@@ -59,11 +59,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
         # Load Laser and Water Calibration Files
         self._GetLaserCalibration()
-        try:
-            self._GetWaterCalibration()
-            logging.info('Loaded Water Calibration')
-        except Exception as e:
-            logging.error('Could not load water calibration file: {}'.format(str(e)))
+        self._GetWaterCalibration()
 
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
@@ -113,6 +109,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._StageSerialNum()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
+        
+        logging.info('Start up complete')
 
     def connectSignalsSlots(self):
         '''Define callbacks'''
@@ -433,13 +431,30 @@ class Window(QMainWindow, Ui_ForagingGUI):
             logging.info('Did not find a recent laser calibration file')
  
     def _GetWaterCalibration(self):
-        '''Get the laser calibration results'''
+        '''
+            Load the water calibration file.
+        
+            If it exists, populate:
+                self.WaterCalibrationResults with the calibration json
+                self.RecentWaterCalibration with the last calibration
+                self.RecentCalibrationDate with the date of the last calibration
+    
+            If it does not exist, populate
+                self.WaterCalibrationResults with an empty dictionary
+                self.RecentCalibrationDate with 'None'
+        '''
+
         if os.path.exists(self.WaterCalibrationFiles):
             with open(self.WaterCalibrationFiles, 'r') as f:
                 self.WaterCalibrationResults = json.load(f)
                 sorted_dates = sorted(self.WaterCalibrationResults.keys(), key=self._custom_sort_key)
                 self.RecentWaterCalibration=self.WaterCalibrationResults[sorted_dates[-1]]
                 self.RecentWaterCalibrationDate=sorted_dates[-1]
+            logging.info('Loaded Water Calibration')
+        else:
+            self.WaterCalibrateionResults = {}
+            self.RecentWaterCalibrationDate='None'
+            logging.info('Did not find a recent water calibration file')
 
     def _custom_sort_key(self,key):
         if '_' in key:
@@ -1637,11 +1652,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
             # save water calibration results
             if hasattr(self, 'WaterCalibrationResults'):
                 self._GetWaterCalibration()
-                try:
-                    Obj['WaterCalibrationResults']=self.WaterCalibrationResults
-                except Exception as e:
-                    logging.error(str(e))
-            # save ohter fields start with Ot_
+                Obj['WaterCalibrationResults']=self.WaterCalibrationResults
+            
+            # save other fields start with Ot_
             for attr_name in dir(self):
                 if attr_name.startswith('Ot_'):
                     Obj[attr_name]=getattr(self, attr_name)
