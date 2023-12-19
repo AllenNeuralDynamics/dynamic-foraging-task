@@ -2466,6 +2466,17 @@ def start_gui_log_file(tower_number):
     logging.info('Starting logfile!')
     logging.captureWarnings(True)
 
+def excepthook(exc_type, exc_value, exc_tb):
+    '''
+        excepthook will be called when the GUI encounters an uncaught exception
+        We will log the error in the logfile, print the error to the console, then exit
+    '''
+    tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+    print('Encountered a fatal error: ')
+    print(tb)
+    logging.error('FATAL ERROR: \n{}'.format(tb))
+    QtWidgets.QApplication.quit()
+
 if __name__ == "__main__":
 
     # Determine which box we are using
@@ -2484,7 +2495,10 @@ if __name__ == "__main__":
     QApplication.setAttribute(Qt.AA_DisableHighDpiScaling,False)
     QApplication.setAttribute(Qt.AA_Use96Dpi,False)
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
-    
+   
+    # Set excepthook, so we can log uncaught exceptions
+    sys.excepthook=excepthook
+
     # Start Q, and Gui Window
     logging.info('Starting QApplication and Window')
     app = QApplication(sys.argv)
