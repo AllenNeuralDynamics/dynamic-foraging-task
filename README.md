@@ -78,17 +78,33 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - Copy `Settings_box<box num>.csv` to `Users\svc_aind_behavior\Documents\ForagingSettings`
   - Copy `<box num>` 1-4 depending on the computer
   - Configure the COM ports for each computer
+    - Behavior: 
+        - How are these determined?
+    - Soundcard:
+        - How are these determined?
+  - The BonsaiOsc ports are determined by the box number, and should not be modified. 
 - Copy `Foraging<box num>.bat` to the Desktop
   - Copy `<box num>` 1-4 depending on the computer
 - Configure `ForagingSettings.json`
   - Copy the template from `src\foraging_gui\ForagingSettings.json` to `Users\svc_aind_behavior\Documents\ForagingSettings\ForagingSettings.json`
-  - There are four fields that need to be set:
-    - "default_saveFolder": For example "E:\DynamicForagingGUI\BehaviorData\",
+  - You should never have to modify these settings:
+    - "log_folder": For example "C:\\Documents\\",
+    - "bonsai_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\bonsai\\Bonsai.exe",
+    - "bonsaiworkflow_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai"
+  - There are two fields that are mandatory:
+    - "default_saveFolder": For example "C:\\Documents\\" 
     - "current_box": For example "Tower_EphysRig3", "Blue"
+  - These settings need to be configured for each computer:
     - "Teensy_COM": For example "COM10",
+        - This is only for fiber-photometry  
+        - Follow instructions on the [wiki](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Computer-Configuration) to install Arduino IDE (1.8x) and TeensyDuino
+        - Once both are installed open ArduinoIDE, go to Tools>Port, select COMport cooresponding to Teensy4.1, and this value to the ForagingSettings.json
     - "newscale_port_tower1": For example 46103
-      - Open Newscale and hit `connect` to see the serial numbers of the newscale devices
-      - Edit `ForagingSettings.json` to add a line `"newscale_port_tower1":<serial number for rig 1>`
+    - "newscale_port_tower2": For example 46104
+    - "newscale_port_tower3": For example 46105
+    - "newscale_port_tower4": For example 46106
+        - Open Newscale and hit `connect` to see the serial numbers of the newscale devices
+        - Edit `ForagingSettings.json` to add a line `"newscale_port_tower1":<serial number for rig 1>`
 - Create a log file folder at `~\Documents\foraging_gui_logs`
 
 #### To launch the software:
