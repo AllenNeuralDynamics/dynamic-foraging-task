@@ -2796,7 +2796,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>420</y>
+       <y>430</y>
        <width>271</width>
        <height>131</height>
       </rect>
@@ -2892,7 +2892,7 @@
        <x>10</x>
        <y>20</y>
        <width>271</width>
-       <height>391</height>
+       <height>411</height>
       </rect>
      </property>
      <property name="sizePolicy">
@@ -2913,7 +2913,7 @@
         <x>10</x>
         <y>20</y>
         <width>251</width>
-        <height>361</height>
+        <height>391</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -3205,7 +3205,7 @@
       <x>1230</x>
       <y>10</y>
       <width>291</width>
-      <height>101</height>
+      <height>111</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -3491,6 +3491,34 @@
      </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="TotalWaterWarning">
+     <property name="geometry">
+      <rect>
+       <x>-20</x>
+       <y>83</y>
+       <width>361</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
      </property>
     </widget>
    </widget>
@@ -4146,6 +4174,35 @@
      </property>
     </widget>
    </widget>
+   <zorder>infor</zorder>
+   <zorder>line</zorder>
+   <zorder>Task</zorder>
+   <zorder>Tower</zorder>
+   <zorder>line_2</zorder>
+   <zorder>TrainingParameters</zorder>
+   <zorder>Load</zorder>
+   <zorder>Save</zorder>
+   <zorder>Clear</zorder>
+   <zorder>Start</zorder>
+   <zorder>NewSession</zorder>
+   <zorder>Visualization</zorder>
+   <zorder>OptogeneticsB</zorder>
+   <zorder>label_55</zorder>
+   <zorder>ID</zorder>
+   <zorder>label_72</zorder>
+   <zorder>groupBox</zorder>
+   <zorder>groupBox_2</zorder>
+   <zorder>label_74</zorder>
+   <zorder>Experimenter</zorder>
+   <zorder>WarningLabelCamera</zorder>
+   <zorder>label_61</zorder>
+   <zorder>PhtotometryB</zorder>
+   <zorder>label_47</zorder>
+   <zorder>baselinetime</zorder>
+   <zorder>StartExcitation</zorder>
+   <zorder>StartBleaching</zorder>
+   <zorder>TeensyWarning</zorder>
+   <zorder>groupBox_3</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -4258,6 +4315,7 @@
     <addaction name="action_Start"/>
     <addaction name="action_NewSession"/>
     <addaction name="actionConnectBonsai"/>
+    <addaction name="actionReconnect_bonsai"/>
     <addaction name="actionRestartLogging_2"/>
     <addaction name="actionOpen_behavior_folder"/>
     <addaction name="actionOpen_logging_folder"/>
@@ -4608,6 +4666,11 @@
   <action name="actionScan_stages">
    <property name="text">
     <string>Scan stages</string>
+   </property>
+  </action>
+  <action name="actionReconnect_bonsai">
+   <property name="text">
+    <string>Reconnect bonsai</string>
    </property>
   </action>
  </widget>

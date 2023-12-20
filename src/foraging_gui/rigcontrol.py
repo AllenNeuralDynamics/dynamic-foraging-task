@@ -164,3 +164,16 @@ class RigClient:
     def Port2(self,value):
         # open Port2
         self.send("/Port2", value) 
+
+    def PassITI(self,value):
+        # Trigger waveform after ITI for optogenetics
+        self.send("/PassITI", value) 
+
+    def PassGoCue(self,value):
+        # Trigger waveform after Go cue for optogenetics
+        self.send("/PassGoCue", value) 
+
+    def PassRewardOutcome(self,value):
+        # Trigger waveform after Rewardoutcome for optogenetics
+        self.send("/PassRewardOutcome", value) 
+

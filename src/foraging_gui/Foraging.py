@@ -40,39 +40,27 @@ class NumpyEncoder(json.JSONEncoder):
         return super(NumpyEncoder, self).default(obj)
     
 class Window(QMainWindow, Ui_ForagingGUI):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None,tower_number=1):
         logging.info('Creating Window')
         super().__init__(parent)
         self.setupUi(self)
-        
+        self.tower_number=tower_number       
+
+        # Load Settings that are specific to this computer  
         self.SettingFolder=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings")
         self.SettingFile=os.path.join(self.SettingFolder,'ForagingSettings.json')
         self._GetSettings()
-        if len(sys.argv)==1:
-            self.setWindowTitle("Foraging")
-            self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration.json')
-            self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration.json')
-            self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar.json')
-            self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json') # The training phase is shared and not differentiated by tower
-        else:
-            if self.current_box=='':
-                self.setWindowTitle("Foraging"+'_'+str(sys.argv[1]))
-            else:
-                self.setWindowTitle("Foraging"+'_'+self.current_box)
-            self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration_'+str(sys.argv[1])+'.json')
-            self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration_'+str(sys.argv[1])+'.json')
-            self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_'+str(sys.argv[1])+'.json')
-            self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json')
-        try:
-            self._GetLaserCalibration()
-            logging.info('Loaded Laser Calibration')
-        except Exception as e:
-            logging.error('Could not load laser calibration file: {}'.format(str(e)))
-        try:
-            self._GetWaterCalibration()
-            logging.info('Loaded Water Calibration')
-        except Exception as e:
-            logging.error('Could not load water calibration file: {}'.format(str(e)))
+
+        # Load Settings that are specific to this box 
+        self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration_{}.json'.format(tower_number))
+        self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration_{}.json'.format(tower_number))
+        self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_{}.json'.format(tower_number))
+        self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json')
+
+        # Load Laser and Water Calibration Files
+        self._GetLaserCalibration()
+        self._GetWaterCalibration()
+
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
@@ -80,15 +68,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.UpdateParameters=1 # permission to update parameters
         self.Visualization.setTitle(str(date.today()))
         self.loggingstarted=-1
-        try: 
-            self._InitializeBonsai()
-            self.InitializeBonsaiSuccessfully=1
-            logging.info('Bonsai started successfully')
-        except Exception as e:
-            logging.error('Initializing Bonsai: {}'.format(str(e)))
-            self.InitializeBonsaiSuccessfully=0
-            self.WarningLabel_2.setText('Start without bonsai connected!')
-            self.WarningLabel_2.setStyleSheet("color: red;")
+
+        # Connect to Bonsai
+        self._InitializeBonsai()
+
         self.threadpool=QThreadPool() # get animal response
         self.threadpool2=QThreadPool() # get animal lick
         self.threadpool3=QThreadPool() # visualization
@@ -126,6 +109,8 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._StageSerialNum()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
+        
+        logging.info('Start up complete')
 
     def connectSignalsSlots(self):
         '''Define callbacks'''
@@ -150,6 +135,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.action_Start.triggered.connect(self.Start.click)
         self.action_NewSession.triggered.connect(self.NewSession.click)
         self.actionConnectBonsai.triggered.connect(self._ConnectBonsai)
+        self.actionReconnect_bonsai.triggered.connect(self._ReconnectBonsai)
         self.Load.clicked.connect(self._Open)
         self.Save.clicked.connect(self._Save)
         self.Clear.clicked.connect(self._Clear)
@@ -162,6 +148,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.StartBleaching.clicked.connect(self._StartBleaching)
         self.NextBlock.clicked.connect(self._NextBlock)
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
+        self.OptogeneticsB.currentIndexChanged.connect(self._keyPressEvent)
+        self.PhtotometryB.currentIndexChanged.connect(self._keyPressEvent)
+        self.AdvancedBlockAuto.currentIndexChanged.connect(self._keyPressEvent)
+        self.Tower.currentIndexChanged.connect(self._keyPressEvent)
+        self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
@@ -208,6 +199,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
             for child in container.findChildren((QtWidgets.QLineEdit)):        
                 child.returnPressed.connect(self.keyPressEvent)
     
+    def _keyPressEvent(self):
+        # press enter to confirm parameters change
+        self.keyPressEvent()
+
     def _GetPositions(self):
         '''get the current position of the stage'''
         if hasattr(self, 'current_stage'):
@@ -226,6 +221,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         try:
             if not hasattr(self, 'current_stage'):
                 return
+            self.StageStop.click
             current_stage=self.current_stage
             current_position=current_stage.get_position()
             current_stage.set_speed(3000)
@@ -318,7 +314,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self._scan_for_usb_stages()
         # use the default newscale stage
         try:
-            self.newscale_port=eval('self.newscale_port'+'_tower'+str(self.bonsai_tag))
+            self.newscale_port=eval('self.newscale_port'+'_tower'+str(self.tower_number))
             if self.newscale_port!='':
                 index = self.StageSerialNum.findText(str(self.newscale_port))
                 if index != -1:
@@ -348,7 +344,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.current_stage=Stage(serial=instance)
 
     def _ConnectBonsai(self):
-        '''Connect bonsai'''
+        '''
+            Connect to already running bonsai instance
+            
+            Will only attempt to connect if InitializeBonsaiSuccessfully=0
+            
+            If successfully connects, sets InitializeBonsaiSuccessfully=1
+        '''
         if self.InitializeBonsaiSuccessfully==0:
             try:
                 self._ConnectOSC()
@@ -358,6 +360,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 self.WarningLabelInitializeBonsai.setText('Please open bonsai!')
                 self.WarningLabelInitializeBonsai.setStyleSheet("color: red;")
                 self.InitializeBonsaiSuccessfully=0
+
+    def _ReconnectBonsai(self):
+        '''Reconnect bonsai'''
+        if self.InitializeBonsaiSuccessfully==1:
+            self.client.close()
+            self.client2.close()
+            self.client3.close()
+            self.client4.close()
+        self.InitializeBonsaiSuccessfully=0
+        self._ConnectBonsai()
 
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
@@ -378,7 +390,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
             loggingtype=1
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-            log_folder=os.path.join(log_folder,formatted_datetime)
+            log_folder=os.path.join(log_folder,formatted_datetime,'HarpFolder')
         # stop the logging first
         self.Channel.StopLogging('s')
         self.Channel.StartLogging(log_folder)
@@ -394,22 +406,55 @@ class Window(QMainWindow, Ui_ForagingGUI):
         return log_folder
     
     def _GetLaserCalibration(self):
-        '''Get the laser calibration results'''
+        '''
+            Load the laser calibration file. 
+
+            If it exists, populate:
+                self.LaserCalibrationResults with the calibration json
+                self.RecentLaserCalibration with the last calibration
+                self.RecentCalibrationDate with the date of the last calibration
+
+            If it does not exist, populate
+                self.LaserCalibrationResults with an empty dictionary
+                self.RecentCalibrationDate with 'None'
+        '''
         if os.path.exists(self.LaserCalibrationFiles):
             with open(self.LaserCalibrationFiles, 'r') as f:
                 self.LaserCalibrationResults = json.load(f)
-                sorted_dates = sorted(self.LaserCalibrationResults.keys(), key=self._custom_sort_key)
+                sorted_dates = sorted(self.LaserCalibrationResults.keys(),key=self._custom_sort_key)
                 self.RecentLaserCalibration=self.LaserCalibrationResults[sorted_dates[-1]]
                 self.RecentCalibrationDate=sorted_dates[-1]
-
+            logging.info('Loaded Laser Calibration')
+        else:
+            self.LaserCalibrationResults = {}
+            self.RecentCalibrationDate='None'
+            logging.info('Did not find a recent laser calibration file')
+ 
     def _GetWaterCalibration(self):
-        '''Get the laser calibration results'''
+        '''
+            Load the water calibration file.
+        
+            If it exists, populate:
+                self.WaterCalibrationResults with the calibration json
+                self.RecentWaterCalibration with the last calibration
+                self.RecentCalibrationDate with the date of the last calibration
+    
+            If it does not exist, populate
+                self.WaterCalibrationResults with an empty dictionary
+                self.RecentCalibrationDate with 'None'
+        '''
+
         if os.path.exists(self.WaterCalibrationFiles):
             with open(self.WaterCalibrationFiles, 'r') as f:
                 self.WaterCalibrationResults = json.load(f)
                 sorted_dates = sorted(self.WaterCalibrationResults.keys(), key=self._custom_sort_key)
                 self.RecentWaterCalibration=self.WaterCalibrationResults[sorted_dates[-1]]
                 self.RecentWaterCalibrationDate=sorted_dates[-1]
+            logging.info('Loaded Water Calibration')
+        else:
+            self.WaterCalibrateionResults = {}
+            self.RecentWaterCalibrationDate='None'
+            logging.info('Did not find a recent water calibration file')
 
     def _custom_sort_key(self,key):
         if '_' in key:
@@ -419,138 +464,169 @@ class Window(QMainWindow, Ui_ForagingGUI):
             return (key, 0)
 
     def _GetSettings(self):
-        '''Get default settings'''
+        '''
+            Load the settings that are specific to this computer
+        '''
+
+        # Get default settings
+        defaults = {
+            'default_saveFolder':os.path.join(os.path.expanduser("~"), "Documents")+'\\',
+            'current_box':'',
+            'log_folder':os.path.join(os.path.expanduser("~"), "Documents",'log'),
+            'temporary_video_folder':os.path.join(os.path.expanduser("~"), "Documents",'temporaryvideo'),
+            'Teensy_COM':'',
+            'bonsai_path':os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe'),
+            'bonsaiworkflow_path':os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai'),
+            'newscale_port_tower1':'',
+            'newscale_port_tower2':'',
+            'newscale_port_tower3':'',
+            'newscale_port_tower4':''
+        }
+        
+        # Try to load the settings file        
+        Settings = {}
         try:
             if os.path.exists(self.SettingFile):
                 # Open the JSON settings file
                 with open(self.SettingFile, 'r') as f:
                     Settings = json.load(f)
-                if 'default_saveFolder' in Settings:
-                    self.default_saveFolder=Settings['default_saveFolder']
-                else:
-                    self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
-                if 'current_box' in Settings:
-                    self.current_box=Settings['current_box']
-                else:
-                    self.current_box=''
-                if 'log_folder' in Settings:
-                    self.log_folder=Settings['log_folder']
-                else:
-                    self.log_folder=os.path.join(os.path.expanduser("~"), "Documents",'log')
-                if 'temporary_video_folder' in Settings:
-                    self.temporary_video_folder=Settings['temporary_video_folder']
-                else:
-                    self.temporary_video_folder=os.path.join(os.path.expanduser("~"), "Documents",'temporaryvideo')
-                if 'Teensy_COM' in Settings:
-                    self.Teensy_COM=Settings['Teensy_COM']
-                else:
-                    self.Teensy_COM=''
-                if 'bonsai_path' in Settings:
-                    self.bonsai_path=Settings['bonsai_path']
-                else:
-                    self.bonsai_path=os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe')
-                if 'bonsaiworkflow_path' in Settings:
-                    self.bonsaiworkflow_path=Settings['bonsaiworkflow_path']
-                else:
-                    self.bonsaiworkflow_path=os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai')
-                if 'newscale_port_tower1' in Settings:
-                    self.newscale_port_tower1=Settings['newscale_port_tower1']
-                else:
-                    self.newscale_port_tower1=''
-                if 'newscale_port_tower2' in Settings:
-                    self.newscale_port_tower2=Settings['newscale_port_tower2']
-                else:
-                    self.newscale_port_tower2=''
-                if 'newscale_port_tower3' in Settings:
-                    self.newscale_port_tower3=Settings['newscale_port_tower3']
-                else:
-                    self.newscale_port_tower3=''
-                if 'newscale_port_tower4' in Settings:
-                    self.newscale_port_tower4=Settings['newscale_port_tower4']
-                else:
-                    self.newscale_port_tower4=''
             else:
-                self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
-                self.current_box=''
-                self.log_folder=os.path.join(os.path.expanduser("~"), "Documents",'log')
-                self.temporary_video_folder=os.path.join(os.path.expanduser("~"), "Documents",'temporaryvideo')
-                self.Teensy_COM=''
-                self.bonsai_path=os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe')
-                self.bonsaiworkflow_path=os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai')
-                self.newscale_port_tower1=''
-                self.newscale_port_tower2=''
-                self.newscale_port_tower3=''
-                self.newscale_port_tower4=''
+                logging.error('Could not find settings file at: {}'.format(self.SettingFile))
+                raise Exception('Could not find file!')
         except Exception as e:
-            logging.error(str(e))
-            self.default_saveFolder=os.path.join(os.path.expanduser("~"), "Documents")+'\\'
-            self.current_box=''
-            self.Teensy_COM=''
-            self.bonsai_path=os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe')
-            self.bonsaiworkflow_path=os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai')
-            self.newscale_port_tower1=''
-            self.newscale_port_tower2=''
-            self.newscale_port_tower3=''
-            self.newscale_port_tower4=''
-        if len(sys.argv)==1:
-            towertag=''
-        else:
-            towertag=str(sys.argv[1])
+            logging.error('Could not load settings file at: {}, {}'.format(self.SettingFile,str(e)))
+            self.WarningLabel.setText('Could not load settings file!')
+            self.WarningLabel.setStyleSheet("color: red;")
+            raise e
+
+        # If any settings are missing, use the default values
+        for key in defaults:
+            if key not in Settings:
+                Settings[key] = defaults[key]
+                logging.info('Missing setting ({}), using default: {}'.format(key,Settings[key]))
+                if key in ['default_saveFolder','current_box']:
+                    logging.error('Missing setting ({}), is required'.format(key))               
+                    raise Exception('Missing setting ({}), is required'.format(key)) 
+
+        # Save all settings
+        self.default_saveFolder=Settings['default_saveFolder']
+        self.current_box=Settings['current_box']
+        self.log_folder=Settings['log_folder']
+        self.temporary_video_folder=Settings['temporary_video_folder']
+        self.Teensy_COM=Settings['Teensy_COM']
+        self.bonsai_path=Settings['bonsai_path']
+        self.bonsaiworkflow_path=Settings['bonsaiworkflow_path']
+        self.newscale_port_tower1=Settings['newscale_port_tower1']
+        self.newscale_port_tower2=Settings['newscale_port_tower2']
+        self.newscale_port_tower3=Settings['newscale_port_tower3']
+        self.newscale_port_tower4=Settings['newscale_port_tower4']
+
+        # Determine box
         if self.current_box in ['Green','Blue','Red','Yellow']:
-            self.current_box=self.current_box+'-'+towertag
+            self.current_box='{}-{}'.format(self.current_box,self.tower_number)
+        window_title = 'Foraging_{}'.format(self.current_box)
+        self.setWindowTitle(window_title)
+        logging.info('Setting Window title: {}'.format(window_title))
+
         # set the current tower automatically
         index = self.Tower.findText(self.current_box)
         if index != -1:
             self.Tower.setCurrentIndex(index)
+            logging.info('Setting tower number: {}'.format(index))
+        else:
+            logging.info('Could not set tower number, using default. Current_box is set at: {}'.format(self.current_box))
 
     def _InitializeBonsai(self):
-        '''Initializing osc messages'''
-        logging.info('initializing Bonsai')
-        # open the bondai workflow and run
+        '''
+            Connect to Bonsai using OSC messages to establish a connection. 
+            
+            We first attempt to connect, to see if Bonsai is already running. 
+            If not, we start Bonsai and check the connection every 500ms.
+            If we wait more than 6 seconds without Bonsai connection we set 
+            InitializeBonsaiSuccessfully=0 and return
+    
+        '''
+
+        # Try to connect, to see if Bonsai is already running
+        self.InitializeBonsaiSuccessfully=0
+        try: 
+            logging.info('Trying to connect to already running Bonsai')
+            self._ConnectOSC()
+        except Exception as e:
+            # We couldn't connect, log as info, and move on
+            logging.info('Could not connect: '+str(e))
+        else:
+            # We could connect, set the indicator flag and return
+            logging.info('Connected to already running Bonsai')
+            logging.info('Bonsai started successfully')
+            self.InitializeBonsaiSuccessfully=1
+            return
+
+        # Start Bonsai
+        logging.info('Starting Bonsai')
         self._OpenBonsaiWorkflow()
-        time.sleep(3)
-        self._ConnectOSC()
+
+        # Test the connection until it completes or we time out
+        wait = 0
+        max_wait = 6
+        check_every = .5
+        while wait < max_wait:
+            time.sleep(check_every)
+            wait += check_every
+            try:
+                self._ConnectOSC()
+            except Exception as e:
+                # We could not connect
+                logging.info('Could not connect, total waiting time {} seconds: '.format(wait)+str(e))
+            else:
+                # We could connect
+                logging.info('Connected to Bonsai after {} seconds'.format(wait))               
+                logging.info('Bonsai started successfully')
+                self.InitializeBonsaiSuccessfully=1
+                return
+        
+        # Could not connect and we timed out
+        logging.info('Could not connect to bonsai with max wait time {} seconds'.format(max_wait))
+        self.WarningLabel_2.setText('Started without bonsai connected!')
+        self.WarningLabel_2.setStyleSheet("color: red;")
 
     def _ConnectOSC(self):
-        '''Connect the GUI and Bonsai through OSC messages'''    
+        '''
+            Connect the GUI and Bonsai through OSC messages
+            Uses self.tower_number to determine ports
+        '''    
+
         # connect the bonsai workflow with the python GUI
         logging.info('connecting to GUI and Bonsai through OSC')
         self.ip = "127.0.0.1"
-        if len(sys.argv)==1:
-            self.bonsai_tag=1
+
+        if self.tower_number==1:
             self.request_port = 4002
             self.request_port2 = 4003
             self.request_port3 = 4004
             self.request_port4 = 4005
+        elif self.tower_number==2:
+            self.request_port = 4012
+            self.request_port2 = 4013
+            self.request_port3 = 4014
+            self.request_port4 = 4015
+        elif self.tower_number==3:
+            self.request_port = 4022
+            self.request_port2 = 4023
+            self.request_port3 = 4024
+            self.request_port4 = 4025
+        elif self.tower_number==4:
+            self.request_port = 4032
+            self.request_port2 = 4033
+            self.request_port3 = 4034
+            self.request_port4 = 4035
         else:
-            bonsai_tag = int(sys.argv[1])
-            self.bonsai_tag=bonsai_tag
-            # determine ports for different bonsai_tag
-            if bonsai_tag==1:
-                self.request_port = 4002
-                self.request_port2 = 4003
-                self.request_port3 = 4004
-                self.request_port4 = 4005
-            elif bonsai_tag==2:
-                self.request_port = 4012
-                self.request_port2 = 4013
-                self.request_port3 = 4014
-                self.request_port4 = 4015
-            elif bonsai_tag==3:
-                self.request_port = 4022
-                self.request_port2 = 4023
-                self.request_port3 = 4024
-                self.request_port4 = 4025
-            elif bonsai_tag==4:
-                self.request_port = 4032
-                self.request_port2 = 4033
-                self.request_port3 = 4034
-                self.request_port4 = 4035
-            else:
-                self.request_port = 4002
-                self.request_port2 = 4003
-                self.request_port3 = 4004
-                self.request_port4 = 4005
+            logging.error('bad bonsai tag {}'.format(self.tower_number))
+            self.request_port = 4002
+            self.request_port2 = 4003
+            self.request_port3 = 4004
+            self.request_port4 = 4005
+
         # normal behavior events
         self.client = OSCStreamingClient()  # Create client 
         self.client.connect((self.ip, self.request_port))
@@ -583,26 +659,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
     def _OpenBonsaiWorkflow(self,runworkflow=1):
         '''Open the bonsai workflow and run it'''
-        if len(sys.argv)==1:
-            SettingsBox='Settings_box1.csv'
-        else:
-            bonsai_tag = int(sys.argv[1])
-            if bonsai_tag==1:
-                SettingsBox='Settings_box1.csv'
-            elif bonsai_tag==2:
-                SettingsBox='Settings_box2.csv'
-            elif bonsai_tag==3:
-                SettingsBox='Settings_box3.csv'
-            elif bonsai_tag==4:
-                SettingsBox='Settings_box4.csv'
+
+        SettingsBox = 'Settings_box{}.csv'.format(self.tower_number)
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
-        if len(sys.argv)==1:
-            subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
-        else:
-            if bonsai_tag==1:
-                subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox,cwd=CWD)
-            else:
-                subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
+        subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
+        #subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
 
     def _OpenSettingFolder(self):
         '''Open the setting folder'''
@@ -752,7 +813,10 @@ class Window(QMainWindow, Ui_ForagingGUI):
 
     def _OpenLoggingFolder(self):
         '''Open the logging folder'''
-        self.Camera_dialog._OpenSaveFolder()
+        try:
+            subprocess.Popen(['explorer', self.Ot_log_folder])
+        except Exception as e:
+            logging.error(str(e))
 
     def _startTemporaryLogging(self):
         '''Restart the temporary logging'''
@@ -933,6 +997,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
         # move newscale stage
         if hasattr(self,'current_stage'):
             try:
+                self.StageStop.click
                 self.current_stage.move_absolute_3d(float(self.PositionX.text()),float(self.PositionY.text()),float(self.PositionZ.text()))
             except Exception as e:
                 logging.error(str(e))
@@ -1005,14 +1070,14 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 try:
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                         self.Continue=0
-                        if child.objectName()=='Experimenter' or child.objectName()=='AnimalName' or child.objectName()=='UncoupledReward' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater' or child.objectName()=='Step':
+                        if child.objectName() in {'Experimenter', 'AnimalName', 'UncoupledReward', 'WeightBefore', 'WeightAfter', 'ExtraWater'}:
                             child.setStyleSheet('color: red;')
                             self.Continue=1
-                        if child.text()=='': # If it's empty, changing the background color and waiting for the confirming
+                        if child.text()=='': # If empty, change background color and wait for confirmation
                             self.UpdateParameters=0
                             child.setStyleSheet('background-color: red;')
                             self.Continue=1
-                        if child.objectName()=='RunLength' or child.objectName()=='WindowSize' or child.objectName()=='StepSize':
+                        if child.objectName() in {'RunLength','WindowSize','StepSize'}:
                             if child.text()=='':
                                 child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
                                 child.setStyleSheet('color: black;')
@@ -1023,9 +1088,11 @@ class Window(QMainWindow, Ui_ForagingGUI):
                         try:
                             # it's valid float
                             float(child.text())
-                            self.UpdateParameters=0 # Changes are not allowed until press is typed
+                            # Changes are not allowed until press is typed except for PositionX, PositionY and PositionZ
+                            if child.objectName() not in ('PositionX', 'PositionY', 'PositionZ'):
+                                self.UpdateParameters = 0
                         except Exception as e:
-                            logging.error(str(e))
+                            #logging.error(str(e))
                             # Invalid float. Do not change the parameter
                             if isinstance(child, QtWidgets.QDoubleSpinBox):
                                 child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
@@ -1035,12 +1102,13 @@ class Window(QMainWindow, Ui_ForagingGUI):
                                 child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                             child.setStyleSheet('color: black;')
-                            self.UpdateParameters=1
+                            self.UpdateParameters=0
                     else:
                         child.setStyleSheet('color: black;')
                         child.setStyleSheet('background-color: white;')
                 except Exception as e:
-                    logging.error(str(e))
+                    #logging.error(str(e))
+                    pass
 
     def _CheckFormat(self,child):
         '''Check if the input format is correct'''
@@ -1335,9 +1403,17 @@ class Window(QMainWindow, Ui_ForagingGUI):
         logging.info('closing the GUI')
         response = QMessageBox.question(self,'Save and Exit:', "Do you want to save the current result?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
         if response==QMessageBox.Yes:
+            # close the camera
+            if self.Camera_dialog.AutoControl.currentText()=='Yes':
+                self.Camera_dialog.StartCamera.setChecked(False)
+                self.Camera_dialog._StartCamera()
             self._Save()
             self.close()
         elif response==QMessageBox.No:
+            # close the camera
+            if self.Camera_dialog.AutoControl.currentText()=='Yes':
+                self.Camera_dialog.StartCamera.setChecked(False)
+                self.Camera_dialog._StartCamera()
             self.close()
 
     def _Snipping(self):
@@ -1562,22 +1638,18 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 for attr_name in dir(self.LaserCalibration_dialog):
                     if attr_name.startswith('LCM_'):
                         Obj[attr_name] = getattr(self.LaserCalibration_dialog, attr_name)
+
             # save laser calibration results from the json file
             if hasattr(self, 'LaserCalibrationResults'):
                 self._GetLaserCalibration()
-                try:
-                    Obj['LaserCalibrationResults']=self.LaserCalibrationResults
-                except Exception as e:
-                    logging.error(str(e))
+                Obj['LaserCalibrationResults']=self.LaserCalibrationResults
 
             # save water calibration results
             if hasattr(self, 'WaterCalibrationResults'):
                 self._GetWaterCalibration()
-                try:
-                    Obj['WaterCalibrationResults']=self.WaterCalibrationResults
-                except Exception as e:
-                    logging.error(str(e))
-            # save ohter fields start with Ot_
+                Obj['WaterCalibrationResults']=self.WaterCalibrationResults
+            
+            # save other fields start with Ot_
             for attr_name in dir(self):
                 if attr_name.startswith('Ot_'):
                     Obj[attr_name]=getattr(self, attr_name)
@@ -1828,6 +1900,7 @@ class Window(QMainWindow, Ui_ForagingGUI):
                     pass
                 if hasattr(self,'current_stage'):
                     try:
+                        self.StageStop.click
                         self.current_stage.move_absolute_3d(float(last_positions[0]),float(last_positions[1]),float(last_positions[2]))
                         self._UpdatePosition((float(last_positions[0]),float(last_positions[1]),float(last_positions[2])),(0,0,0))
                     except Exception as e:
@@ -2057,12 +2130,16 @@ class Window(QMainWindow, Ui_ForagingGUI):
         self.Experimenter.setEnabled(enable)
         self.Tower.setEnabled(enable)
 
-    def _Start(self):
-        '''start trial loop'''
+    def _CheckBonsaiConnection(self):
+        '''Check if the Bonsai and GUI are connected'''
         if self.InitializeBonsaiSuccessfully==0:
             self._ConnectBonsai()
-            if self.InitializeBonsaiSuccessfully==0:
-                return
+
+    def _Start(self):
+        '''start trial loop'''
+        self._CheckBonsaiConnection()
+        if self.InitializeBonsaiSuccessfully==0:
+            return
         self.WarningLabelInitializeBonsai.setText('')
         self.WarningLabel_SaveTrainingStage.setText('')
         self.WarningLabel_SaveTrainingStage.setStyleSheet("color: none;")
@@ -2279,10 +2356,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
             self.DelayMax.setEnabled(True)
     def _GiveLeft(self):
         '''manually give left water'''
+        self._CheckBonsaiConnection()
         if self.InitializeBonsaiSuccessfully==0:
-            self._ConnectBonsai()
-            if self.InitializeBonsaiSuccessfully==0:
-                return
+            return
         self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
         time.sleep(0.01) 
         self.Channel3.ManualWater_Left(int(1))
@@ -2292,10 +2368,9 @@ class Window(QMainWindow, Ui_ForagingGUI):
     
     def _GiveRight(self):
         '''manually give right water'''
+        self._CheckBonsaiConnection()
         if self.InitializeBonsaiSuccessfully==0:
-            self._ConnectBonsai()
-            if self.InitializeBonsaiSuccessfully==0:
-                return
+            return
         self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
         time.sleep(0.01) 
         self.Channel3.ManualWater_Right(int(1))
@@ -2324,19 +2399,23 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 ManualWaterVolume=np.sum(self.ManualWaterVolume)
             else:
                 ManualWaterVolume=0
-            Earnedwater=BS_TotalReward+ManualWaterVolume
+            water_in_session=BS_TotalReward+ManualWaterVolume
+            self.water_in_session=water_in_session
             if self.WeightAfter.text()!='' and self.BaseWeight.text()!='' and self.TargetRatio.text()!='':
                 # calculate the suggested water
                 suggested_water=target_weight-float(self.WeightAfter.text())
                 # give at lease 1ml
-                if suggested_water<1-Earnedwater:
-                    suggested_water=1-Earnedwater
+                if suggested_water<1-water_in_session:
+                    suggested_water=1-water_in_session
                 if suggested_water<0:
                     suggested_water=0
                 # maximum 3.5ml
                 if suggested_water>3.5:
                     suggested_water=3.5
-                    
+                    self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and LAS should \nbe alerted!')
+                    self.TotalWaterWarning.setStyleSheet("color: red;")
+                else:
+                    self.TotalWaterWarning.setText('')
                 self.SuggestedWater.setText(str(np.round(suggested_water,3)))
             else:
                 self.SuggestedWater.setText('')
@@ -2345,18 +2424,17 @@ class Window(QMainWindow, Ui_ForagingGUI):
                 ExtraWater=0
             else:
                 ExtraWater=float(self.SuggestedWater.text())
-            TotalWater=ExtraWater+Earnedwater
+            TotalWater=ExtraWater+water_in_session
             self.TotalWater.setText(str(np.round(TotalWater,3)))
         except Exception as e:
             logging.error(str(e))
 
-def start_gui_log_file():
+def start_gui_log_file(tower_number):
     '''
         Starts a log file for the gui.
         The log file is located at C:/Users/<username>/Documents/foraging_gui_logs
         One log file is created for each time the GUI is started
         The name of the gui file is tower_<tower num>_gui_log_<date and time>.txt
-        If no tower number is available, then tower_num = 0
     '''
     # Check if the log folder exists, if it doesn't make it
     logging_folder = os.path.join(os.path.expanduser("~"), "Documents",'foraging_gui_logs')
@@ -2368,15 +2446,9 @@ def start_gui_log_file():
     current_time = datetime.now()
     formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
 
-    # What tower is this for?
-    if len(sys.argv) >=2:
-        tower_num = sys.argv[1]
-    else:
-        tower_num = 0
-
     # Build logfile name
     hostname = socket.gethostname()
-    filename = '{}_tower_{}_gui_log_{}.txt'.format(hostname,tower_num,formatted_datetime)
+    filename = '{}_tower_{}_gui_log_{}.txt'.format(hostname,tower_number,formatted_datetime)
     logging_filename = os.path.join(logging_folder,filename)
 
     # Format the log file:
@@ -2394,9 +2466,27 @@ def start_gui_log_file():
     logging.info('Starting logfile!')
     logging.captureWarnings(True)
 
+def excepthook(exc_type, exc_value, exc_tb):
+    '''
+        excepthook will be called when the GUI encounters an uncaught exception
+        We will log the error in the logfile, print the error to the console, then exit
+    '''
+    tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+    print('Encountered a fatal error: ')
+    print(tb)
+    logging.error('FATAL ERROR: \n{}'.format(tb))
+    QtWidgets.QApplication.quit()
+
 if __name__ == "__main__":
+
+    # Determine which box we are using
+    if len(sys.argv) >= 2:
+        tower_number = int(sys.argv[1])
+    else:
+        tower_number = 1
+
     # Start logging
-    start_gui_log_file()
+    start_gui_log_file(tower_number)
 
     # Formating GUI graphics
     logging.info('Setting QApplication attributes')
@@ -2405,11 +2495,14 @@ if __name__ == "__main__":
     QApplication.setAttribute(Qt.AA_DisableHighDpiScaling,False)
     QApplication.setAttribute(Qt.AA_Use96Dpi,False)
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
-    
+   
+    # Set excepthook, so we can log uncaught exceptions
+    sys.excepthook=excepthook
+
     # Start Q, and Gui Window
     logging.info('Starting QApplication and Window')
     app = QApplication(sys.argv)
-    win = Window()
+    win = Window(tower_number=tower_number)
     win.show()
     # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())

@@ -1,3 +1,8 @@
-cd /d E:\GitHub\dynamic-foraging-task\src\foraging_gui
+cd /d C:\Users\svc_aind_behavior\Documents\GitHub\dynamic-foraging-task\src\foraging_gui
 call conda activate Foraging
-start python Foraging.py 4
+:: This version starts without a console window
+start "" pythonw Foraging.py 4
+:: This version starts with a console window
+:: start python Foraging.py 4
+
+
