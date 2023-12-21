@@ -15,11 +15,10 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 from PyQt5.QtWidgets import QFileDialog,QVBoxLayout,QLineEdit
-from PyQt5 import QtWidgets,QtGui,QtCore
+from PyQt5 import QtWidgets,QtGui,QtCore, uic
 from PyQt5.QtCore import QThreadPool,Qt
 from pyOSC3.OSC3 import OSCStreamingClient
 
-from ForagingGUI import Ui_ForagingGUI
 import rigcontrol
 from Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
 from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog
@@ -39,11 +38,12 @@ class NumpyEncoder(json.JSONEncoder):
             return 'NaN'  # Represent NaN as a string
         return super(NumpyEncoder, self).default(obj)
     
-class Window(QMainWindow, Ui_ForagingGUI):
+class Window(QMainWindow):
     def __init__(self, parent=None,tower_number=1):
         logging.info('Creating Window')
         super().__init__(parent)
-        self.setupUi(self)
+        uic.loadUi('ForagingGUI.ui', self)
+        
         self.tower_number=tower_number       
 
         # Load Settings that are specific to this computer  
