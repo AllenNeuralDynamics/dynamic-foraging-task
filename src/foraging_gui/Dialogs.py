@@ -1706,3 +1706,19 @@ class LaserCalibrationDialog(QDialog):
             # change button color
             self.KeepOpen.setStyleSheet("background-color : none")
             self.KeepOpen.setChecked(False)
+
+
+class AutoTrainDialog(QDialog):
+    '''For automatic training'''
+    
+    def __init__(self, MainWindow, parent=None):
+        super().__init__(parent)
+        uic.loadUi('AutoTrain.ui', self)
+        
+        self.MainWindow=MainWindow
+        
+    def _connect_curriculum_manager(self):
+        return
+    
+    def _show_available_curriculum(self):
+        return
