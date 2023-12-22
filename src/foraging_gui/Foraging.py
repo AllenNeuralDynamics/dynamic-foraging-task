@@ -24,6 +24,7 @@ from Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
 from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog
 from Dialogs import ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog
 from Dialogs import LickStaDialog,TimeDistributionDialog
+from Dialogs import AutoTrainDialog
 from MyFunctions import GenerateTrials, Worker,NewScaleSerialY
 from stage import Stage
 
@@ -155,6 +156,9 @@ class Window(QMainWindow):
         self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
+        
+        self.AutoTrain.clicked.connect(self._AutoTrain)
+        
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._Task)
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._AdvancedBlockAuto)
@@ -2428,6 +2432,12 @@ class Window(QMainWindow):
             self.TotalWater.setText(str(np.round(TotalWater,3)))
         except Exception as e:
             logging.error(str(e))
+            
+    def _AutoTrain(self):
+        """set up auto training"""
+        self.AutoTrain_dialog = AutoTrainDialog(MainWindow=self)
+        self.AutoTrain_dialog.show()
+        
 
 def start_gui_log_file(tower_number):
     '''

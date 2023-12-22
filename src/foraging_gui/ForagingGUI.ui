@@ -4174,6 +4174,25 @@
      </property>
     </widget>
    </widget>
+   <widget class="QPushButton" name="AutoTrain">
+    <property name="geometry">
+     <rect>
+      <x>590</x>
+      <y>10</y>
+      <width>91</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(170, 255, 0);</string>
+    </property>
+    <property name="text">
+     <string>Auto Train</string>
+    </property>
+   </widget>
    <zorder>infor</zorder>
    <zorder>line</zorder>
    <zorder>Task</zorder>
@@ -4203,6 +4222,7 @@
    <zorder>StartBleaching</zorder>
    <zorder>TeensyWarning</zorder>
    <zorder>groupBox_3</zorder>
+   <zorder>AutoTrain</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

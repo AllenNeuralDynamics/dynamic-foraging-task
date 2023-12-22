@@ -9,13 +9,16 @@ import logging
 
 import numpy as np
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout
+from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtCore import QThreadPool,Qt
+from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel
+from PyQt5.QtSvg import QSvgWidget
 
 from MyFunctions import Worker
 from Visualization import PlotWaterCalibration
+from aind_auto_train.curriculum_manager import CurriculumManager
 
+logger = logging.getLogger(__name__)
 
 class LickStaDialog(QDialog):
     '''Lick statistics dialog'''
@@ -1706,3 +1709,96 @@ class LaserCalibrationDialog(QDialog):
             # change button color
             self.KeepOpen.setStyleSheet("background-color : none")
             self.KeepOpen.setChecked(False)
+
+
+class AutoTrainDialog(QDialog):
+    '''For automatic training'''
+
+    def __init__(self, MainWindow, parent=None):
+        super().__init__(parent)
+        uic.loadUi('AutoTrain.ui', self)
+        self.MainWindow = MainWindow
+        
+        # Connect to curriculum manager
+        self._connect_curriculum_manager()
+        self._show_available_curriculums()
+
+    def _connect_curriculum_manager(self):
+        self.curriculum_manager = CurriculumManager(
+            saved_curriculums_on_s3=dict(
+                bucket='aind-behavior-data',
+                root='foraging_auto_training/saved_curriculums/'
+            ),
+            saved_curriculums_local=self.MainWindow.default_saveFolder + '/curriculum_manager/',
+        )
+
+    def _show_available_curriculums(self):
+        self.df_curriculums = self.curriculum_manager.df_curriculums()
+        
+        # Show dataframe in QTableView
+        model = PandasModel(self.df_curriculums)
+        self.tableDfCurriculum.setModel(model)
+        
+        # Set column width
+        self.tableDfCurriculum.resizeColumnsToContents()
+        
+        # Get clicked row
+        self.tableDfCurriculum.clicked.connect(self._curriculum_selected)
+        
+    def _curriculum_selected(self, index):
+        # Retrieve selected curriculum
+        row = index.row()
+        selected_row = self.df_curriculums.iloc[row]
+        logger.info(f"Selected curriculum: {selected_row.to_dict()}")
+        self.selected_curriculum = self.curriculum_manager.get_curriculum(
+            curriculum_task=selected_row['curriculum_task'],
+            curriculum_schema_version=selected_row['curriculum_schema_version'],
+            curriculum_version=selected_row['curriculum_version'],
+        )
+        
+        # Retrieve svgs
+        svg_rule = self.selected_curriculum['diagram_rules_name']
+        svg_paras = self.selected_curriculum['diagram_paras_name']
+        
+        # Render svgs with KeepAspectRatio
+        svgWidget_rules = QSvgWidget(svg_rule)
+        svgWidget_rules.renderer().setAspectRatioMode(Qt.KeepAspectRatio)
+        
+        svgWidget_paras = QSvgWidget(svg_paras)
+        svgWidget_paras.renderer().setAspectRatioMode(Qt.KeepAspectRatio)
+        
+        # Add the SVG widgets to the layout
+        layout = self.horizontalLayout_diagram
+        # Remove all existing widgets from the layout
+        for i in reversed(range(layout.count())): 
+            layout.itemAt(i).widget().setParent(None)
+        layout.addWidget(svgWidget_rules)
+        layout.addWidget(svgWidget_paras)
+                        
+        
+        
+# --- Helpers ---
+class PandasModel(QAbstractTableModel):
+    ''' A helper class to display pandas dataframe in QTableView
+    https://learndataanalysis.org/display-pandas-dataframe-with-pyqt5-qtableview-widget/
+    '''
+    def __init__(self, data):
+        QAbstractTableModel.__init__(self)
+        self._data = data
+
+    def rowCount(self, parent=None):
+        return self._data.shape[0]
+
+    def columnCount(self, parent=None):
+        return self._data.shape[1]
+
+    def data(self, index, role=Qt.DisplayRole):
+        if index.isValid():
+            if role == Qt.DisplayRole:
+                return str(self._data.iloc[index.row(), index.column()])
+        return None
+
+    def headerData(self, col, orientation, role):
+        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
+            return self._data.columns[col]
+        return None
