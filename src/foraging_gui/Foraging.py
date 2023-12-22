@@ -2435,9 +2435,13 @@ class Window(QMainWindow):
             
     def _AutoTrain(self):
         """set up auto training"""
-        self.AutoTrain_dialog = AutoTrainDialog(MainWindow=self)
+        if not hasattr(self, 'AutoTrain_dialog'):
+            self.AutoTrain_dialog = AutoTrainDialog(MainWindow=self, parent=self)
         self.AutoTrain_dialog.show()
-        
+            
+        # Connect to ID change in the mainwindow
+        self.ID.returnPressed.connect(
+            lambda: self.AutoTrain_dialog.update_subject_id(subject_id=self.ID.text()))
 
 def start_gui_log_file(tower_number):
     '''
