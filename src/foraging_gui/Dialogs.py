@@ -11,7 +11,7 @@ import numpy as np
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel
+from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel
 from PyQt5.QtSvg import QSvgWidget
 
 from MyFunctions import Worker
@@ -1720,23 +1720,19 @@ class AutoTrainDialog(QDialog):
         uic.loadUi('AutoTrain.ui', self)
         self.MainWindow = MainWindow
 
-        # Connect and show to auto training manager
+        # Connect to Auto Training Manager and Curriculum Manager
         self._connect_auto_training_manager()
-
-        # Connect and show to curriculum manager
         self._connect_curriculum_manager()
-        self._show_available_curriculums()
         
         # Signals slots
         self._setup_allbacks()
         
         # Sync selected subject_id
         self.update_subject_id(self.MainWindow.ID.text())
-
         
     def _setup_allbacks(self):
         self.checkBox_show_this_mouse_only.stateChanged.connect(
-            self._update_auto_training_manager
+            self._show_auto_training_manager
         )
     
     def update_subject_id(self, subject_id: str):
@@ -1751,22 +1747,27 @@ class AutoTrainDialog(QDialog):
         if self.df_this_mouse.empty:
             # TODO: create a new mouse here
             logger.info(f"No entry found in df_training_manager for subject_id: {self.selected_subject_id}")
+            self.last_session = None
             self.label_curriculum_task.setText('subject not found')
             self.label_curriculum_ver.setText('subject not found')
             self.label_last_actual_stage.setText('subject not found')
             self.label_next_stage_suggested.setText('subject not found')
             self.label_subject_id.setStyleSheet("color: red;")
+
+            self._clear_layout(self.horizontalLayout_diagram) 
+
         else:
             # fetch last session
-            last_session = self.df_this_mouse.iloc[0]  # The first row is the latest session
-            self.label_curriculum_task.setText(str(last_session['curriculum_task']))
-            self.label_curriculum_ver.setText(str(last_session['curriculum_version']))
-            self.label_last_actual_stage.setText(str(last_session['current_stage_actual']))
-            self.label_next_stage_suggested.setText(str(last_session['next_stage_suggested']))
+            self.last_session = self.df_this_mouse.iloc[0]  # The first row is the latest session
+            self.label_curriculum_task.setText(str(self.last_session['curriculum_task']))
+            self.label_curriculum_ver.setText(str(self.last_session['curriculum_version']))
+            self.label_last_actual_stage.setText(str(self.last_session['current_stage_actual']))
+            self.label_next_stage_suggested.setText(str(self.last_session['next_stage_suggested']))
             self.label_subject_id.setStyleSheet("color: black;")
         
-        # Update auto_train_manager
-        self._update_auto_training_manager()
+        # Update df_auto_train_manager and df_curriculum_manager
+        self._show_auto_training_manager()
+        self._show_available_curriculums()
 
         
     def _connect_auto_training_manager(self):
@@ -1795,7 +1796,7 @@ class AutoTrainDialog(QDialog):
         self.df_training_manager = df_training_manager
 
 
-    def _update_auto_training_manager(self):
+    def _show_auto_training_manager(self):
         if_this_mouse_only = self.checkBox_show_this_mouse_only.isChecked()
         
         if if_this_mouse_only:
@@ -1823,11 +1824,25 @@ class AutoTrainDialog(QDialog):
         
         # Show dataframe in QTableView
         model = PandasModel(df_training_manager_to_show)
+        self.tableView_df_training_manager.setModel(model)
         
         # Format table
-        self.tableView_df_training_manager.setModel(model)
         self.tableView_df_training_manager.resizeColumnsToContents()
-        self.tableView_df_training_manager.setSortingEnabled(True)
+        self.tableView_df_training_manager.setSortingEnabled(False)
+        
+        # Highlight the latest session
+        if self.last_session is not None:
+            session_index = df_training_manager_to_show.reset_index().index[
+                (df_training_manager_to_show['subject_id'] == self.last_session['subject_id']) &
+                (df_training_manager_to_show['session'] == self.last_session['session'])
+            ][0]
+            _index = self.tableView_df_training_manager.model().index(session_index, 0)
+            self.tableView_df_training_manager.clearSelection()
+            self.tableView_df_training_manager.selectionModel().select(
+                _index,
+                QItemSelectionModel.Select | QItemSelectionModel.Rows
+            )
+            self.tableView_df_training_manager.scrollTo(_index)
 
 
     def _connect_curriculum_manager(self):
@@ -1850,8 +1865,27 @@ class AutoTrainDialog(QDialog):
         self.tableView_df_curriculum.resizeColumnsToContents()
         self.tableView_df_curriculum.setSortingEnabled(True)
         
-        # Get clicked row
+        # Add callback
         self.tableView_df_curriculum.clicked.connect(self._curriculum_selected)
+        
+        # Auto select the curriculum of the latest session of selected mouse, if exists
+        # Get index of the latest session
+        if self.last_session is not None:
+            curriculum_index = self.df_curriculums.reset_index().index[
+                (self.df_curriculums['curriculum_task'] == self.last_session['curriculum_task']) &
+                (self.df_curriculums['curriculum_version'] == self.last_session['curriculum_version']) &
+                (self.df_curriculums['curriculum_schema_version'] == self.last_session['curriculum_schema_version'])
+            ][0]
+
+            # Auto click the curriculum of the latest session
+            _index = self.tableView_df_curriculum.model().index(curriculum_index, 0)
+            self.tableView_df_curriculum.selectionModel().select(
+                _index,
+                QItemSelectionModel.Select | QItemSelectionModel.Rows
+            )
+            self.tableView_df_curriculum.scrollTo(_index)
+
+            self._curriculum_selected(_index) # Update diagrams
         
     def _curriculum_selected(self, index):
         # Retrieve selected curriculum
@@ -1877,11 +1911,15 @@ class AutoTrainDialog(QDialog):
         
         # Add the SVG widgets to the layout
         layout = self.horizontalLayout_diagram
+        self._clear_layout(layout) 
+        layout.addWidget(svgWidget_rules)
+        layout.addWidget(svgWidget_paras)
+        
+    def _clear_layout(self, layout):
         # Remove all existing widgets from the layout
         for i in reversed(range(layout.count())): 
             layout.itemAt(i).widget().setParent(None)
-        layout.addWidget(svgWidget_rules)
-        layout.addWidget(svgWidget_paras)
+
                         
         
         
