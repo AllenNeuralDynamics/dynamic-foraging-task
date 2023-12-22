@@ -1720,22 +1720,32 @@ class AutoTrainDialog(QDialog):
         uic.loadUi('AutoTrain.ui', self)
         self.MainWindow = MainWindow
 
+        # Connect and show to auto training manager
+        self._connect_auto_training_manager()
+
+        # Connect and show to curriculum manager
+        self._connect_curriculum_manager()
+        self._show_available_curriculums()
+        
+        # Signals slots
+        self._setup_allbacks()
+        
         # Sync selected subject_id
         self.update_subject_id(self.MainWindow.ID.text())
 
-        # Connect to auto training manager
-        self._connect_auto_training_manager()
-        self._show_auto_training_manager()
-
-        # Connect to curriculum manager
-        self._connect_curriculum_manager()
-        self._show_available_curriculums()
+        
+    def _setup_allbacks(self):
+        self.checkBox_show_this_mouse_only.stateChanged.connect(
+            self._update_auto_training_manager
+        )
     
     def update_subject_id(self, subject_id: str):
         self.selected_subject_id = subject_id
         self.label_subject_id.setText(self.selected_subject_id)
         
-        #TODO: update subject_id in auto_train_manager
+        # Update auto_train_manager
+        self._update_auto_training_manager()
+
         
     def _connect_auto_training_manager(self):
         self.auto_train_manager = DynamicForagingAutoTrainManager(
@@ -1746,17 +1756,36 @@ class AutoTrainDialog(QDialog):
             df_manager_root_on_s3=dict(bucket='aind-behavior-data',
                                        root='foraging_auto_training/')
         )
-    
-    def _show_auto_training_manager(self, subject_id=None):
         self.df_training_manager = self.auto_train_manager.df_manager
+
+    def _update_auto_training_manager(self):
+        if_this_mouse_only = self.checkBox_show_this_mouse_only.isChecked()
+        df_training_manager_to_show = self.df_training_manager.copy()
         
-        # Show dataframe in QTableView
-        model = PandasModel(
-            self.df_training_manager[
+        # Filter by subject_id if needed
+        if if_this_mouse_only:
+            df_training_manager_to_show.query(
+                f"subject_id == '{self.selected_subject_id}'", 
+                inplace=True
+            )
+            
+        # Sort by subject_id and session
+        df_training_manager_to_show.sort_values(
+            by=['subject_id', 'session'],
+            ascending=[False, False],  # Newest sessions on the top,
+            inplace=True
+        )
+        
+        # Format dataframe
+        df_training_manager_to_show['session'] = df_training_manager_to_show['session'].astype(int)
+        df_training_manager_to_show['foraging_efficiency'] = \
+            df_training_manager_to_show['foraging_efficiency'].round(3)
+        
+        df_training_manager_to_show = df_training_manager_to_show[
                 ['subject_id',
                  'session',
                  'session_date',
-                 'curriculum_task',
+                 'curriculum_task', 
                  'curriculum_version',
                  'task',
                  'current_stage_suggested',
@@ -1769,7 +1798,9 @@ class AutoTrainDialog(QDialog):
                  'foraging_efficiency',
                  ]
             ]
-        )
+        
+        # Show dataframe in QTableView
+        model = PandasModel(df_training_manager_to_show)
         
         # Format table
         self.tableView_df_training_manager.setModel(model)
@@ -1839,7 +1870,7 @@ class PandasModel(QAbstractTableModel):
     '''
     def __init__(self, data):
         QAbstractTableModel.__init__(self)
-        self._data = data
+        self._data = data.copy()
 
     def rowCount(self, parent=None):
         return self._data.shape[0]
@@ -1858,13 +1889,13 @@ class PandasModel(QAbstractTableModel):
             return self._data.columns[col]
         return None
 
-    def sort(self, column, order):
-        colname = self._data.columns.tolist()[column]
-        self.layoutAboutToBeChanged.emit()
-        self._data.sort_values(
-            colname,
-            ascending=order == Qt.AscendingOrder,
-            inplace=True
-        )
-        self._data.reset_index(inplace=True, drop=True)
-        self.layoutChanged.emit()
+    # def sort(self, column, order):
+    #     colname = self._data.columns.tolist()[column]
+    #     self.layoutAboutToBeChanged.emit()
+    #     self._data.sort_values(
+    #         colname,
+    #         ascending=order == Qt.AscendingOrder,
+    #         inplace=True
+    #     )
+    #     self._data.reset_index(inplace=True, drop=True)
+    #     self.layoutChanged.emit()
