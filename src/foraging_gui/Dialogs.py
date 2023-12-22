@@ -17,6 +17,7 @@ from PyQt5.QtSvg import QSvgWidget
 from MyFunctions import Worker
 from Visualization import PlotWaterCalibration
 from aind_auto_train.curriculum_manager import CurriculumManager
+from aind_auto_train.auto_train_manager import DynamicForagingAutoTrainManager
 
 logger = logging.getLogger(__name__)
 
@@ -1718,10 +1719,63 @@ class AutoTrainDialog(QDialog):
         super().__init__(parent)
         uic.loadUi('AutoTrain.ui', self)
         self.MainWindow = MainWindow
-        
+
+        # Sync selected subject_id
+        self.update_subject_id(self.MainWindow.ID.text())
+
+        # Connect to auto training manager
+        self._connect_auto_training_manager()
+        self._show_auto_training_manager()
+
         # Connect to curriculum manager
         self._connect_curriculum_manager()
         self._show_available_curriculums()
+    
+    def update_subject_id(self, subject_id: str):
+        self.selected_subject_id = subject_id
+        self.label_subject_id.setText(self.selected_subject_id)
+        
+        #TODO: update subject_id in auto_train_manager
+        
+    def _connect_auto_training_manager(self):
+        self.auto_train_manager = DynamicForagingAutoTrainManager(
+            manager_name='447_demo',
+            df_behavior_on_s3=dict(bucket='aind-behavior-data',
+                                   root='foraging_nwb_bonsai_processed/',
+                                   file_name='df_sessions.pkl'),
+            df_manager_root_on_s3=dict(bucket='aind-behavior-data',
+                                       root='foraging_auto_training/')
+        )
+    
+    def _show_auto_training_manager(self, subject_id=None):
+        self.df_training_manager = self.auto_train_manager.df_manager
+        
+        # Show dataframe in QTableView
+        model = PandasModel(
+            self.df_training_manager[
+                ['subject_id',
+                 'session',
+                 'session_date',
+                 'curriculum_task',
+                 'curriculum_version',
+                 'task',
+                 'current_stage_suggested',
+                 'current_stage_actual',
+                 'decision',
+                 'next_stage_suggested',
+                 'if_closed_loop',
+                 'if_overriden_by_trainer',
+                 'finished_trials',
+                 'foraging_efficiency',
+                 ]
+            ]
+        )
+        
+        # Format table
+        self.tableView_df_training_manager.setModel(model)
+        self.tableView_df_training_manager.resizeColumnsToContents()
+        self.tableView_df_training_manager.setSortingEnabled(True)
+
 
     def _connect_curriculum_manager(self):
         self.curriculum_manager = CurriculumManager(
@@ -1734,16 +1788,17 @@ class AutoTrainDialog(QDialog):
 
     def _show_available_curriculums(self):
         self.df_curriculums = self.curriculum_manager.df_curriculums()
-        
+
         # Show dataframe in QTableView
         model = PandasModel(self.df_curriculums)
-        self.tableDfCurriculum.setModel(model)
+        self.tableView_df_curriculum.setModel(model)
         
-        # Set column width
-        self.tableDfCurriculum.resizeColumnsToContents()
+        # Format table
+        self.tableView_df_curriculum.resizeColumnsToContents()
+        self.tableView_df_curriculum.setSortingEnabled(True)
         
         # Get clicked row
-        self.tableDfCurriculum.clicked.connect(self._curriculum_selected)
+        self.tableView_df_curriculum.clicked.connect(self._curriculum_selected)
         
     def _curriculum_selected(self, index):
         # Retrieve selected curriculum
@@ -1802,3 +1857,14 @@ class PandasModel(QAbstractTableModel):
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
             return self._data.columns[col]
         return None
+
+    def sort(self, column, order):
+        colname = self._data.columns.tolist()[column]
+        self.layoutAboutToBeChanged.emit()
+        self._data.sort_values(
+            colname,
+            ascending=order == Qt.AscendingOrder,
+            inplace=True
+        )
+        self._data.reset_index(inplace=True, drop=True)
+        self.layoutChanged.emit()
