@@ -1743,6 +1743,28 @@ class AutoTrainDialog(QDialog):
         self.selected_subject_id = subject_id
         self.label_subject_id.setText(self.selected_subject_id)
         
+        # Get the latest entry from auto_train_manager
+        self.df_this_mouse = self.df_training_manager.query(
+            f"subject_id == '{self.selected_subject_id}'"
+        )
+        
+        if self.df_this_mouse.empty:
+            # TODO: create a new mouse here
+            logger.info(f"No entry found in df_training_manager for subject_id: {self.selected_subject_id}")
+            self.label_curriculum_task.setText('subject not found')
+            self.label_curriculum_ver.setText('subject not found')
+            self.label_last_actual_stage.setText('subject not found')
+            self.label_next_stage_suggested.setText('subject not found')
+            self.label_subject_id.setStyleSheet("color: red;")
+        else:
+            # fetch last session
+            last_session = self.df_this_mouse.iloc[0]  # The first row is the latest session
+            self.label_curriculum_task.setText(str(last_session['curriculum_task']))
+            self.label_curriculum_ver.setText(str(last_session['curriculum_version']))
+            self.label_last_actual_stage.setText(str(last_session['current_stage_actual']))
+            self.label_next_stage_suggested.setText(str(last_session['next_stage_suggested']))
+            self.label_subject_id.setStyleSheet("color: black;")
+        
         # Update auto_train_manager
         self._update_auto_training_manager()
 
@@ -1756,31 +1778,31 @@ class AutoTrainDialog(QDialog):
             df_manager_root_on_s3=dict(bucket='aind-behavior-data',
                                        root='foraging_auto_training/')
         )
-        self.df_training_manager = self.auto_train_manager.df_manager
-
-    def _update_auto_training_manager(self):
-        if_this_mouse_only = self.checkBox_show_this_mouse_only.isChecked()
-        df_training_manager_to_show = self.df_training_manager.copy()
+        df_training_manager = self.auto_train_manager.df_manager
         
-        # Filter by subject_id if needed
-        if if_this_mouse_only:
-            df_training_manager_to_show.query(
-                f"subject_id == '{self.selected_subject_id}'", 
-                inplace=True
-            )
+        # Format dataframe
+        df_training_manager['session'] = df_training_manager['session'].astype(int)
+        df_training_manager['foraging_efficiency'] = \
+            df_training_manager['foraging_efficiency'].round(3)
             
         # Sort by subject_id and session
-        df_training_manager_to_show.sort_values(
+        df_training_manager.sort_values(
             by=['subject_id', 'session'],
             ascending=[False, False],  # Newest sessions on the top,
             inplace=True
         )
+            
+        self.df_training_manager = df_training_manager
+
+
+    def _update_auto_training_manager(self):
+        if_this_mouse_only = self.checkBox_show_this_mouse_only.isChecked()
         
-        # Format dataframe
-        df_training_manager_to_show['session'] = df_training_manager_to_show['session'].astype(int)
-        df_training_manager_to_show['foraging_efficiency'] = \
-            df_training_manager_to_show['foraging_efficiency'].round(3)
-        
+        if if_this_mouse_only:
+            df_training_manager_to_show = self.df_this_mouse
+        else:
+            df_training_manager_to_show = self.df_training_manager
+                
         df_training_manager_to_show = df_training_manager_to_show[
                 ['subject_id',
                  'session',
@@ -1888,14 +1910,3 @@ class PandasModel(QAbstractTableModel):
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
             return self._data.columns[col]
         return None
-
-    # def sort(self, column, order):
-    #     colname = self._data.columns.tolist()[column]
-    #     self.layoutAboutToBeChanged.emit()
-    #     self._data.sort_values(
-    #         colname,
-    #         ascending=order == Qt.AscendingOrder,
-    #         inplace=True
-    #     )
-    #     self._data.reset_index(inplace=True, drop=True)
-    #     self.layoutChanged.emit()
