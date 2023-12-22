@@ -1711,29 +1711,6 @@ class LaserCalibrationDialog(QDialog):
             self.KeepOpen.setChecked(False)
 
 
-class PandasModel(QAbstractTableModel):
-    def __init__(self, data):
-        QAbstractTableModel.__init__(self)
-        self._data = data
-
-    def rowCount(self, parent=None):
-        return self._data.shape[0]
-
-    def columnCount(self, parent=None):
-        return self._data.shape[1]
-
-    def data(self, index, role=Qt.DisplayRole):
-        if index.isValid():
-            if role == Qt.DisplayRole:
-                return str(self._data.iloc[index.row(), index.column()])
-        return None
-
-    def headerData(self, col, orientation, role):
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
-            return self._data.columns[col]
-        return None
-
-
 class AutoTrainDialog(QDialog):
     '''For automatic training'''
 
@@ -1772,6 +1749,7 @@ class AutoTrainDialog(QDialog):
         # Retrieve selected curriculum
         row = index.row()
         selected_row = self.df_curriculums.iloc[row]
+        logger.info(f"Selected curriculum: {selected_row.to_dict()}")
         self.selected_curriculum = self.curriculum_manager.get_curriculum(
             curriculum_task=selected_row['curriculum_task'],
             curriculum_schema_version=selected_row['curriculum_schema_version'],
@@ -1798,3 +1776,29 @@ class AutoTrainDialog(QDialog):
         layout.addWidget(svgWidget_paras)
                         
         
+        
+# --- Helpers ---
+class PandasModel(QAbstractTableModel):
+    ''' A helper class to display pandas dataframe in QTableView
+    https://learndataanalysis.org/display-pandas-dataframe-with-pyqt5-qtableview-widget/
+    '''
+    def __init__(self, data):
+        QAbstractTableModel.__init__(self)
+        self._data = data
+
+    def rowCount(self, parent=None):
+        return self._data.shape[0]
+
+    def columnCount(self, parent=None):
+        return self._data.shape[1]
+
+    def data(self, index, role=Qt.DisplayRole):
+        if index.isValid():
+            if role == Qt.DisplayRole:
+                return str(self._data.iloc[index.row(), index.column()])
+        return None
+
+    def headerData(self, col, orientation, role):
+        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
+            return self._data.columns[col]
+        return None
