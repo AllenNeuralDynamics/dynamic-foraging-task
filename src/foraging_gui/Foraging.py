@@ -2472,11 +2472,15 @@ def start_gui_log_file(tower_number):
     # Start the log file
     print('Starting a GUI log file at: ')
     print(logging_filename)
-    logging.basicConfig(format=log_format,
-        filename=logging_filename, 
+    logging.basicConfig(
+        format=log_format,
         level=logging.INFO,
-        datefmt=log_datefmt
-        )
+        datefmt=log_datefmt,
+        handlers=[
+            logging.FileHandler(logging_filename),
+            logging.StreamHandler()
+        ]
+    )
     logging.info('Starting logfile!')
     logging.captureWarnings(True)
 
