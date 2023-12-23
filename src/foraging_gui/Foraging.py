@@ -2435,7 +2435,7 @@ class Window(QMainWindow):
             
     def _AutoTrain(self):
         """set up auto training"""
-        if not hasattr(self, 'AutoTrain_dialog'):
+        if not hasattr(self, 'AutoTrain_dialog') or not self.AutoTrain_dialog.isVisible():
             self.AutoTrain_dialog = AutoTrainDialog(MainWindow=self, parent=self)
         self.AutoTrain_dialog.show()
             
