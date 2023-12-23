@@ -1730,9 +1730,18 @@ class AutoTrainDialog(QDialog):
         # Sync selected subject_id
         self.update_subject_id(self.MainWindow.ID.text())
         
+        # Set default states
+        self.checkBox_override_stage.setChecked(False)
+        
     def _setup_allbacks(self):
         self.checkBox_show_this_mouse_only.stateChanged.connect(
             self._show_auto_training_manager
+        )
+        self.checkBox_override_stage.stateChanged.connect(
+            self._update_status_override_stage
+        )
+        self.comboBox_override_stage.currentIndexChanged.connect(
+            self._update_stage_to_apply
         )
     
     def update_subject_id(self, subject_id: str):
@@ -1748,28 +1757,49 @@ class AutoTrainDialog(QDialog):
             # TODO: create a new mouse here
             logger.info(f"No entry found in df_training_manager for subject_id: {self.selected_subject_id}")
             self.last_session = None
+            self.label_session.setText('subject not found')
             self.label_curriculum_task.setText('subject not found')
-            self.label_curriculum_ver.setText('subject not found')
             self.label_last_actual_stage.setText('subject not found')
             self.label_next_stage_suggested.setText('subject not found')
             self.label_subject_id.setStyleSheet("color: red;")
-
+            
+            # disable some stuff
+            self.checkBox_override_stage.setChecked(False)
+            self.checkBox_override_stage.setEnabled(False)
             self._clear_layout(self.horizontalLayout_diagram) 
 
         else:
             # fetch last session
             self.last_session = self.df_this_mouse.iloc[0]  # The first row is the latest session
-            self.label_curriculum_task.setText(str(self.last_session['curriculum_task']))
-            self.label_curriculum_ver.setText(str(self.last_session['curriculum_version']))
+            # get curriculum in use
+            self.curriculum_in_use = self.curriculum_manager.get_curriculum(
+                curriculum_task=self.last_session['curriculum_task'],
+                curriculum_schema_version=self.last_session['curriculum_schema_version'],
+                curriculum_version=self.last_session['curriculum_version'],
+            )
+            # update info
+            self.label_curriculum_task.setText(
+                f"{self.last_session['curriculum_task']} "
+                f"(v{self.last_session['curriculum_version']} "
+                f"@ schema v{self.last_session['curriculum_schema_version']})"
+                )
+            self.label_session.setText(str(self.last_session['session']))
             self.label_last_actual_stage.setText(str(self.last_session['current_stage_actual']))
             self.label_next_stage_suggested.setText(str(self.last_session['next_stage_suggested']))
             self.label_subject_id.setStyleSheet("color: black;")
+            
+            # enable some stuff
+            self.checkBox_override_stage.setChecked(False)
+            self.checkBox_override_stage.setEnabled(True)
+            
+        # Update UI
+        self._update_available_training_stages()
+        self._update_stage_to_apply()
         
         # Update df_auto_train_manager and df_curriculum_manager
         self._show_auto_training_manager()
         self._show_available_curriculums()
-
-        
+                
     def _connect_auto_training_manager(self):
         self.auto_train_manager = DynamicForagingAutoTrainManager(
             manager_name='447_demo',
@@ -1794,7 +1824,6 @@ class AutoTrainDialog(QDialog):
         )
             
         self.df_training_manager = df_training_manager
-
 
     def _show_auto_training_manager(self):
         if_this_mouse_only = self.checkBox_show_this_mouse_only.isChecked()
@@ -1843,7 +1872,6 @@ class AutoTrainDialog(QDialog):
                 QItemSelectionModel.Select | QItemSelectionModel.Rows
             )
             self.tableView_df_training_manager.scrollTo(_index)
-
 
     def _connect_curriculum_manager(self):
         self.curriculum_manager = CurriculumManager(
@@ -1915,6 +1943,35 @@ class AutoTrainDialog(QDialog):
         layout.addWidget(svgWidget_rules)
         layout.addWidget(svgWidget_paras)
         
+    def _update_available_training_stages(self):
+        if self.curriculum_in_use is not None:
+            available_training_stages = [v.name for v in 
+                                        self.curriculum_in_use['curriculum'].parameters.keys()]
+        else:
+            available_training_stages = []
+            
+        self.comboBox_override_stage.clear()
+        self.comboBox_override_stage.addItems(available_training_stages)
+        
+    def _update_status_override_stage(self):
+        if self.checkBox_override_stage.isChecked():
+            self.comboBox_override_stage.setEnabled(True)
+        else:
+            self.comboBox_override_stage.setEnabled(False)
+        self._update_stage_to_apply()
+            
+    def _update_stage_to_apply(self):
+        if self.checkBox_override_stage.isChecked():
+            self.stage_to_apply = self.comboBox_override_stage.currentText()
+        elif self.last_session is not None:
+            self.stage_to_apply = self.last_session['next_stage_suggested']
+        else:
+            self.stage_to_apply = 'unknown'
+        
+        self.pushButton_apply_auto_train_paras.setText(
+            f"Apply\n{self.stage_to_apply}"
+        )
+    
     def _clear_layout(self, layout):
         # Remove all existing widgets from the layout
         for i in reversed(range(layout.count())): 

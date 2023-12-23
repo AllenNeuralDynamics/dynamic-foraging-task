@@ -75,7 +75,7 @@
            </widget>
           </item>
           <item row="5" column="2" alignment="Qt::AlignRight">
-           <widget class="QCheckBox" name="checkBox">
+           <widget class="QCheckBox" name="checkBox_override_stage">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>10</horstretch>
@@ -183,40 +183,6 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="3">
-           <widget class="QLabel" name="label_curriculum_ver">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Unknown</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="label_8">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>1</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Curriculum version</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="1">
            <widget class="QLabel" name="label_curriculum_task">
             <property name="minimumSize">
@@ -253,7 +219,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Curriculum task:</string>
+             <string>Curriculum:</string>
             </property>
            </widget>
           </item>
@@ -332,6 +298,64 @@
             </property>
             <property name="text">
              <string>Apply stage!</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2" alignment="Qt::AlignRight">
+           <widget class="QCheckBox" name="checkBox_override_curriculum">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>10</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Override</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QComboBox" name="comboBox_override_curriculum">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>10</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Session finished:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLabel" name="label_session">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Unknown</string>
             </property>
            </widget>
           </item>
@@ -418,11 +442,33 @@
             <pointsize>8</pointsize>
            </font>
           </property>
+          <property name="styleSheet">
+           <string notr="true">QTableView::item:selected {
+                background-color: lightblue;
+                color: black;
+            }</string>
+          </property>
           <property name="selectionBehavior">
            <enum>QAbstractItemView::SelectItems</enum>
           </property>
           <property name="sortingEnabled">
            <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="frame">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>200</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
           </property>
          </widget>
         </item>
@@ -505,6 +551,9 @@
         </item>
         <item>
          <widget class="QTableView" name="tableView_df_curriculum">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>1</horstretch>
@@ -530,6 +579,12 @@
           </property>
           <property name="focusPolicy">
            <enum>Qt::StrongFocus</enum>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QTableView::item:selected {
+                background-color: lightblue;
+                color: black;
+            }</string>
           </property>
           <property name="selectionMode">
            <enum>QAbstractItemView::SingleSelection</enum>
