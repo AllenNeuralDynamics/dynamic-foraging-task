@@ -484,7 +484,8 @@ class Window(QMainWindow):
             'newscale_port_tower1':'',
             'newscale_port_tower2':'',
             'newscale_port_tower3':'',
-            'newscale_port_tower4':''
+            'newscale_port_tower4':'',
+            'enable_show_log_info_in_console':False,
         }
         
         # Try to load the settings file        
@@ -524,6 +525,17 @@ class Window(QMainWindow):
         self.newscale_port_tower2=Settings['newscale_port_tower2']
         self.newscale_port_tower3=Settings['newscale_port_tower3']
         self.newscale_port_tower4=Settings['newscale_port_tower4']
+        
+        # Also stream log info to the console if enabled
+        if ('enable_show_log_info_in_console' in Settings 
+            and Settings['enable_show_log_info_in_console']):
+            logger = logging.getLogger()
+            handler = logging.StreamHandler()
+            # Using the same format and level as the root logger
+            handler.setFormatter(logging.root.handlers[0].formatter)
+            handler.setLevel(logging.root.level)            
+            logger.addHandler(handler)
+            
 
         # Determine box
         if self.current_box in ['Green','Blue','Red','Yellow']:
@@ -2478,7 +2490,6 @@ def start_gui_log_file(tower_number):
         datefmt=log_datefmt,
         handlers=[
             logging.FileHandler(logging_filename),
-            logging.StreamHandler()
         ]
     )
     logging.info('Starting logfile!')
