@@ -167,6 +167,7 @@ To configure automatic updates consistent with the [update protocol](https://git
   - **ForagingSettings.json**: General settings. 
     - **default_saveFolder**: The default save location. The folder structure is `default_saveFolder\Rig\Animal\Animal_year-month-day_hour-minute-second\`. There are five additional folders: `EphysFolder`, `HarpFolder`, `PhotometryFolder`, `TrainingFolder`, and `VideoFolder` for saving different data sources. Default location: `Documents`
     - **current_box**: To define the rig name.
+    - **show_log_info_in_console**: If exists and equals `True`, a copy of log info is sent to the console.
   - **WaterCalibration.json**: The water calibration results.
   - **LaserCalibration.json**: The laser calibration results.
   - **TrainingStagePar.json**: The training stage parameters in a task-dependent manner.
