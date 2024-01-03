@@ -9,15 +9,16 @@ import logging
 
 import numpy as np
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel
+from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject
 from PyQt5.QtSvg import QSvgWidget
 
 from MyFunctions import Worker
 from Visualization import PlotWaterCalibration
 from aind_auto_train.curriculum_manager import CurriculumManager
 from aind_auto_train.auto_train_manager import DynamicForagingAutoTrainManager
+from aind_auto_train.schema.task import TrainingStage
 
 logger = logging.getLogger(__name__)
 
@@ -1743,6 +1744,9 @@ class AutoTrainDialog(QDialog):
         self.comboBox_override_stage.currentIndexChanged.connect(
             self._update_stage_to_apply
         )
+        self.pushButton_apply_auto_train_paras.clicked.connect(
+            self._apply_auto_train_paras
+        )
     
     def update_subject_id(self, subject_id: str):
         self.selected_subject_id = subject_id
@@ -1971,6 +1975,68 @@ class AutoTrainDialog(QDialog):
         self.pushButton_apply_auto_train_paras.setText(
             f"Apply\n{self.stage_to_apply}"
         )
+    
+    def _apply_auto_train_paras(self):
+        # Get parameter settings
+        paras = self.curriculum_in_use['curriculum'].parameters[
+            TrainingStage[self.stage_to_apply]
+        ]
+        
+        paras_dict = paras.to_GUI_format()
+        self._set_training_parameters(paras_dict=paras_dict,
+                                      if_press_enter=True)
+    
+    def _set_training_parameters(self, paras_dict, if_press_enter=False):
+        """Accepts a dictionary of parameters and set the GUI accordingly
+        Trying to refactor Foraging.py's _TrainingStage() here.
+        
+        paras_dict: a dictionary of parameters following Xinxin's convention
+        if_press_enter: if True, press enter after setting the parameters
+        """
+        
+        # Loop over para_dict and try to set the values
+        for key, value in paras_dict.items():
+            if key == 'task':
+                widget_task = self.MainWindow.Task
+                task_ind = widget_task.findText(paras_dict['task'])
+                if task_ind < 0:
+                    logger.error(f"Task {paras_dict['task']} not found!")
+                    QMessageBox.critical(self, "Error", f'''Task "{paras_dict['task']}" not found. Check the curriculum!''')
+                    return  # Return without setting anything
+                else:
+                    widget_task.setCurrentIndex(task_ind)
+                    continue  # Continue to the next parameter
+            
+            # For other parameters, try to find the widget and set the value               
+            widget = self.MainWindow.findChild(QObject, key)
+            if widget is None:
+                logger.info(f''' Widget "{key}" not found. skipped...''')
+                continue
+            
+            # Set the value according to the widget type
+            if isinstance(widget, (QtWidgets.QLineEdit, 
+                                   QtWidgets.QTextEdit)):
+                widget.setText(value)
+            elif isinstance(widget, QtWidgets.QComboBox):
+                ind = widget.findText(value)
+                if ind < 0:
+                    logger.error(f"Parameter choice {key}={value} not found!")
+                    continue  # Still allow other parameters to be set
+                else:
+                    widget.setCurrentIndex(ind)
+            elif isinstance(widget, (QtWidgets.QDoubleSpinBox)):
+                widget.setValue(float(value))
+            elif isinstance(widget, QtWidgets.QSpinBox):
+                widget.setValue(int(value))    
+            elif isinstance(widget, QtWidgets.QPushButton):
+                if key=='AutoReward':
+                    widget.setChecked(bool(value))
+                    self.MainWindow._AutoReward()            
+            
+            logger.info(f"{key} is set to {value}")
+        
+        return
+        
     
     def _clear_layout(self, layout):
         # Remove all existing widgets from the layout
