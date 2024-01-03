@@ -484,7 +484,8 @@ class Window(QMainWindow):
             'newscale_port_tower1':'',
             'newscale_port_tower2':'',
             'newscale_port_tower3':'',
-            'newscale_port_tower4':''
+            'newscale_port_tower4':'',
+            'show_log_info_in_console':False,
         }
         
         # Try to load the settings file        
@@ -524,6 +525,17 @@ class Window(QMainWindow):
         self.newscale_port_tower2=Settings['newscale_port_tower2']
         self.newscale_port_tower3=Settings['newscale_port_tower3']
         self.newscale_port_tower4=Settings['newscale_port_tower4']
+        
+        # Also stream log info to the console if enabled
+        if ('show_log_info_in_console' in Settings 
+            and Settings['show_log_info_in_console']):
+            logger = logging.getLogger()
+            handler = logging.StreamHandler()
+            # Using the same format and level as the root logger
+            handler.setFormatter(logging.root.handlers[0].formatter)
+            handler.setLevel(logging.root.level)            
+            logger.addHandler(handler)
+            
 
         # Determine box
         if self.current_box in ['Green','Blue','Red','Yellow']:
@@ -2435,9 +2447,13 @@ class Window(QMainWindow):
             
     def _AutoTrain(self):
         """set up auto training"""
-        self.AutoTrain_dialog = AutoTrainDialog(MainWindow=self)
+        if not hasattr(self, 'AutoTrain_dialog') or not self.AutoTrain_dialog.isVisible():
+            self.AutoTrain_dialog = AutoTrainDialog(MainWindow=self, parent=self)
         self.AutoTrain_dialog.show()
-        
+            
+        # Connect to ID change in the mainwindow
+        self.ID.returnPressed.connect(
+            lambda: self.AutoTrain_dialog.update_subject_id(subject_id=self.ID.text()))
 
 def start_gui_log_file(tower_number):
     '''
@@ -2468,11 +2484,14 @@ def start_gui_log_file(tower_number):
     # Start the log file
     print('Starting a GUI log file at: ')
     print(logging_filename)
-    logging.basicConfig(format=log_format,
-        filename=logging_filename, 
+    logging.basicConfig(
+        format=log_format,
         level=logging.INFO,
-        datefmt=log_datefmt
-        )
+        datefmt=log_datefmt,
+        handlers=[
+            logging.FileHandler(logging_filename),
+        ]
+    )
     logging.info('Starting logfile!')
     logging.captureWarnings(True)
 

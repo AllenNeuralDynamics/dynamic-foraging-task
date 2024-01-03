@@ -9,14 +9,16 @@ import logging
 
 import numpy as np
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel
+from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject
 from PyQt5.QtSvg import QSvgWidget
 
 from MyFunctions import Worker
 from Visualization import PlotWaterCalibration
 from aind_auto_train.curriculum_manager import CurriculumManager
+from aind_auto_train.auto_train_manager import DynamicForagingAutoTrainManager
+from aind_auto_train.schema.task import TrainingStage
 
 logger = logging.getLogger(__name__)
 
@@ -1718,10 +1720,162 @@ class AutoTrainDialog(QDialog):
         super().__init__(parent)
         uic.loadUi('AutoTrain.ui', self)
         self.MainWindow = MainWindow
-        
-        # Connect to curriculum manager
+
+        # Connect to Auto Training Manager and Curriculum Manager
+        self._connect_auto_training_manager()
         self._connect_curriculum_manager()
+        
+        # Signals slots
+        self._setup_allbacks()
+        
+        # Sync selected subject_id
+        self.update_subject_id(self.MainWindow.ID.text())
+        
+        # Set default states
+        self.checkBox_override_stage.setChecked(False)
+        
+    def _setup_allbacks(self):
+        self.checkBox_show_this_mouse_only.stateChanged.connect(
+            self._show_auto_training_manager
+        )
+        self.checkBox_override_stage.stateChanged.connect(
+            self._update_status_override_stage
+        )
+        self.comboBox_override_stage.currentIndexChanged.connect(
+            self._update_stage_to_apply
+        )
+        self.pushButton_apply_auto_train_paras.clicked.connect(
+            self._apply_auto_train_paras
+        )
+    
+    def update_subject_id(self, subject_id: str):
+        self.selected_subject_id = subject_id
+        self.label_subject_id.setText(self.selected_subject_id)
+        
+        # Get the latest entry from auto_train_manager
+        self.df_this_mouse = self.df_training_manager.query(
+            f"subject_id == '{self.selected_subject_id}'"
+        )
+        
+        if self.df_this_mouse.empty:
+            # TODO: create a new mouse here
+            logger.info(f"No entry found in df_training_manager for subject_id: {self.selected_subject_id}")
+            self.last_session = None
+            self.label_session.setText('subject not found')
+            self.label_curriculum_task.setText('subject not found')
+            self.label_last_actual_stage.setText('subject not found')
+            self.label_next_stage_suggested.setText('subject not found')
+            self.label_subject_id.setStyleSheet("color: red;")
+            
+            # disable some stuff
+            self.checkBox_override_stage.setChecked(False)
+            self.checkBox_override_stage.setEnabled(False)
+            self._clear_layout(self.horizontalLayout_diagram) 
+
+        else:
+            # fetch last session
+            self.last_session = self.df_this_mouse.iloc[0]  # The first row is the latest session
+            # get curriculum in use
+            self.curriculum_in_use = self.curriculum_manager.get_curriculum(
+                curriculum_task=self.last_session['curriculum_task'],
+                curriculum_schema_version=self.last_session['curriculum_schema_version'],
+                curriculum_version=self.last_session['curriculum_version'],
+            )
+            # update info
+            self.label_curriculum_task.setText(
+                f"{self.last_session['curriculum_task']} "
+                f"(v{self.last_session['curriculum_version']} "
+                f"@ schema v{self.last_session['curriculum_schema_version']})"
+                )
+            self.label_session.setText(str(self.last_session['session']))
+            self.label_last_actual_stage.setText(str(self.last_session['current_stage_actual']))
+            self.label_next_stage_suggested.setText(str(self.last_session['next_stage_suggested']))
+            self.label_subject_id.setStyleSheet("color: black;")
+            
+            # enable some stuff
+            self.checkBox_override_stage.setChecked(False)
+            self.checkBox_override_stage.setEnabled(True)
+            
+        # Update UI
+        self._update_available_training_stages()
+        self._update_stage_to_apply()
+        
+        # Update df_auto_train_manager and df_curriculum_manager
+        self._show_auto_training_manager()
         self._show_available_curriculums()
+                
+    def _connect_auto_training_manager(self):
+        self.auto_train_manager = DynamicForagingAutoTrainManager(
+            manager_name='447_demo',
+            df_behavior_on_s3=dict(bucket='aind-behavior-data',
+                                   root='foraging_nwb_bonsai_processed/',
+                                   file_name='df_sessions.pkl'),
+            df_manager_root_on_s3=dict(bucket='aind-behavior-data',
+                                       root='foraging_auto_training/')
+        )
+        df_training_manager = self.auto_train_manager.df_manager
+        
+        # Format dataframe
+        df_training_manager['session'] = df_training_manager['session'].astype(int)
+        df_training_manager['foraging_efficiency'] = \
+            df_training_manager['foraging_efficiency'].round(3)
+            
+        # Sort by subject_id and session
+        df_training_manager.sort_values(
+            by=['subject_id', 'session'],
+            ascending=[False, False],  # Newest sessions on the top,
+            inplace=True
+        )
+            
+        self.df_training_manager = df_training_manager
+
+    def _show_auto_training_manager(self):
+        if_this_mouse_only = self.checkBox_show_this_mouse_only.isChecked()
+        
+        if if_this_mouse_only:
+            df_training_manager_to_show = self.df_this_mouse
+        else:
+            df_training_manager_to_show = self.df_training_manager
+                
+        df_training_manager_to_show = df_training_manager_to_show[
+                ['subject_id',
+                 'session',
+                 'session_date',
+                 'curriculum_task', 
+                 'curriculum_version',
+                 'task',
+                 'current_stage_suggested',
+                 'current_stage_actual',
+                 'decision',
+                 'next_stage_suggested',
+                 'if_closed_loop',
+                 'if_overriden_by_trainer',
+                 'finished_trials',
+                 'foraging_efficiency',
+                 ]
+            ]
+        
+        # Show dataframe in QTableView
+        model = PandasModel(df_training_manager_to_show)
+        self.tableView_df_training_manager.setModel(model)
+        
+        # Format table
+        self.tableView_df_training_manager.resizeColumnsToContents()
+        self.tableView_df_training_manager.setSortingEnabled(False)
+        
+        # Highlight the latest session
+        if self.last_session is not None:
+            session_index = df_training_manager_to_show.reset_index().index[
+                (df_training_manager_to_show['subject_id'] == self.last_session['subject_id']) &
+                (df_training_manager_to_show['session'] == self.last_session['session'])
+            ][0]
+            _index = self.tableView_df_training_manager.model().index(session_index, 0)
+            self.tableView_df_training_manager.clearSelection()
+            self.tableView_df_training_manager.selectionModel().select(
+                _index,
+                QItemSelectionModel.Select | QItemSelectionModel.Rows
+            )
+            self.tableView_df_training_manager.scrollTo(_index)
 
     def _connect_curriculum_manager(self):
         self.curriculum_manager = CurriculumManager(
@@ -1734,16 +1888,36 @@ class AutoTrainDialog(QDialog):
 
     def _show_available_curriculums(self):
         self.df_curriculums = self.curriculum_manager.df_curriculums()
-        
+
         # Show dataframe in QTableView
         model = PandasModel(self.df_curriculums)
-        self.tableDfCurriculum.setModel(model)
+        self.tableView_df_curriculum.setModel(model)
         
-        # Set column width
-        self.tableDfCurriculum.resizeColumnsToContents()
+        # Format table
+        self.tableView_df_curriculum.resizeColumnsToContents()
+        self.tableView_df_curriculum.setSortingEnabled(True)
         
-        # Get clicked row
-        self.tableDfCurriculum.clicked.connect(self._curriculum_selected)
+        # Add callback
+        self.tableView_df_curriculum.clicked.connect(self._curriculum_selected)
+        
+        # Auto select the curriculum of the latest session of selected mouse, if exists
+        # Get index of the latest session
+        if self.last_session is not None:
+            curriculum_index = self.df_curriculums.reset_index().index[
+                (self.df_curriculums['curriculum_task'] == self.last_session['curriculum_task']) &
+                (self.df_curriculums['curriculum_version'] == self.last_session['curriculum_version']) &
+                (self.df_curriculums['curriculum_schema_version'] == self.last_session['curriculum_schema_version'])
+            ][0]
+
+            # Auto click the curriculum of the latest session
+            _index = self.tableView_df_curriculum.model().index(curriculum_index, 0)
+            self.tableView_df_curriculum.selectionModel().select(
+                _index,
+                QItemSelectionModel.Select | QItemSelectionModel.Rows
+            )
+            self.tableView_df_curriculum.scrollTo(_index)
+
+            self._curriculum_selected(_index) # Update diagrams
         
     def _curriculum_selected(self, index):
         # Retrieve selected curriculum
@@ -1769,11 +1943,106 @@ class AutoTrainDialog(QDialog):
         
         # Add the SVG widgets to the layout
         layout = self.horizontalLayout_diagram
+        self._clear_layout(layout) 
+        layout.addWidget(svgWidget_rules)
+        layout.addWidget(svgWidget_paras)
+        
+    def _update_available_training_stages(self):
+        if self.curriculum_in_use is not None:
+            available_training_stages = [v.name for v in 
+                                        self.curriculum_in_use['curriculum'].parameters.keys()]
+        else:
+            available_training_stages = []
+            
+        self.comboBox_override_stage.clear()
+        self.comboBox_override_stage.addItems(available_training_stages)
+        
+    def _update_status_override_stage(self):
+        if self.checkBox_override_stage.isChecked():
+            self.comboBox_override_stage.setEnabled(True)
+        else:
+            self.comboBox_override_stage.setEnabled(False)
+        self._update_stage_to_apply()
+            
+    def _update_stage_to_apply(self):
+        if self.checkBox_override_stage.isChecked():
+            self.stage_to_apply = self.comboBox_override_stage.currentText()
+        elif self.last_session is not None:
+            self.stage_to_apply = self.last_session['next_stage_suggested']
+        else:
+            self.stage_to_apply = 'unknown'
+        
+        self.pushButton_apply_auto_train_paras.setText(
+            f"Apply\n{self.stage_to_apply}"
+        )
+    
+    def _apply_auto_train_paras(self):
+        # Get parameter settings
+        paras = self.curriculum_in_use['curriculum'].parameters[
+            TrainingStage[self.stage_to_apply]
+        ]
+        
+        paras_dict = paras.to_GUI_format()
+        self._set_training_parameters(paras_dict=paras_dict,
+                                      if_press_enter=True)
+    
+    def _set_training_parameters(self, paras_dict, if_press_enter=False):
+        """Accepts a dictionary of parameters and set the GUI accordingly
+        Trying to refactor Foraging.py's _TrainingStage() here.
+        
+        paras_dict: a dictionary of parameters following Xinxin's convention
+        if_press_enter: if True, press enter after setting the parameters
+        """
+        
+        # Loop over para_dict and try to set the values
+        for key, value in paras_dict.items():
+            if key == 'task':
+                widget_task = self.MainWindow.Task
+                task_ind = widget_task.findText(paras_dict['task'])
+                if task_ind < 0:
+                    logger.error(f"Task {paras_dict['task']} not found!")
+                    QMessageBox.critical(self, "Error", f'''Task "{paras_dict['task']}" not found. Check the curriculum!''')
+                    return  # Return without setting anything
+                else:
+                    widget_task.setCurrentIndex(task_ind)
+                    continue  # Continue to the next parameter
+            
+            # For other parameters, try to find the widget and set the value               
+            widget = self.MainWindow.findChild(QObject, key)
+            if widget is None:
+                logger.info(f''' Widget "{key}" not found. skipped...''')
+                continue
+            
+            # Set the value according to the widget type
+            if isinstance(widget, (QtWidgets.QLineEdit, 
+                                   QtWidgets.QTextEdit)):
+                widget.setText(value)
+            elif isinstance(widget, QtWidgets.QComboBox):
+                ind = widget.findText(value)
+                if ind < 0:
+                    logger.error(f"Parameter choice {key}={value} not found!")
+                    continue  # Still allow other parameters to be set
+                else:
+                    widget.setCurrentIndex(ind)
+            elif isinstance(widget, (QtWidgets.QDoubleSpinBox)):
+                widget.setValue(float(value))
+            elif isinstance(widget, QtWidgets.QSpinBox):
+                widget.setValue(int(value))    
+            elif isinstance(widget, QtWidgets.QPushButton):
+                if key=='AutoReward':
+                    widget.setChecked(bool(value))
+                    self.MainWindow._AutoReward()            
+            
+            logger.info(f"{key} is set to {value}")
+        
+        return
+        
+    
+    def _clear_layout(self, layout):
         # Remove all existing widgets from the layout
         for i in reversed(range(layout.count())): 
             layout.itemAt(i).widget().setParent(None)
-        layout.addWidget(svgWidget_rules)
-        layout.addWidget(svgWidget_paras)
+
                         
         
         
@@ -1784,7 +2053,7 @@ class PandasModel(QAbstractTableModel):
     '''
     def __init__(self, data):
         QAbstractTableModel.__init__(self)
-        self._data = data
+        self._data = data.copy()
 
     def rowCount(self, parent=None):
         return self._data.shape[0]
