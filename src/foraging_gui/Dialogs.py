@@ -1762,7 +1762,7 @@ class AutoTrainDialog(QDialog):
             logger.info(f"No entry found in df_training_manager for subject_id: {self.selected_subject_id}")
             self.last_session = None
             self.label_session.setText('subject not found')
-            self.label_curriculum_task.setText('subject not found')
+            self.label_curriculum_name.setText('subject not found')
             self.label_last_actual_stage.setText('subject not found')
             self.label_next_stage_suggested.setText('subject not found')
             self.label_subject_id.setStyleSheet("color: red;")
@@ -1777,13 +1777,13 @@ class AutoTrainDialog(QDialog):
             self.last_session = self.df_this_mouse.iloc[0]  # The first row is the latest session
             # get curriculum in use
             self.curriculum_in_use = self.curriculum_manager.get_curriculum(
-                curriculum_task=self.last_session['curriculum_task'],
+                curriculum_name=self.last_session['curriculum_name'],
                 curriculum_schema_version=self.last_session['curriculum_schema_version'],
                 curriculum_version=self.last_session['curriculum_version'],
             )
             # update info
-            self.label_curriculum_task.setText(
-                f"{self.last_session['curriculum_task']} "
+            self.label_curriculum_name.setText(
+                f"{self.last_session['curriculum_name']} "
                 f"(v{self.last_session['curriculum_version']} "
                 f"@ schema v{self.last_session['curriculum_schema_version']})"
                 )
@@ -1841,7 +1841,7 @@ class AutoTrainDialog(QDialog):
                 ['subject_id',
                  'session',
                  'session_date',
-                 'curriculum_task', 
+                 'curriculum_name', 
                  'curriculum_version',
                  'task',
                  'current_stage_suggested',
@@ -1904,7 +1904,7 @@ class AutoTrainDialog(QDialog):
         # Get index of the latest session
         if self.last_session is not None:
             curriculum_index = self.df_curriculums.reset_index().index[
-                (self.df_curriculums['curriculum_task'] == self.last_session['curriculum_task']) &
+                (self.df_curriculums['curriculum_name'] == self.last_session['curriculum_name']) &
                 (self.df_curriculums['curriculum_version'] == self.last_session['curriculum_version']) &
                 (self.df_curriculums['curriculum_schema_version'] == self.last_session['curriculum_schema_version'])
             ][0]
@@ -1925,7 +1925,7 @@ class AutoTrainDialog(QDialog):
         selected_row = self.df_curriculums.iloc[row]
         logger.info(f"Selected curriculum: {selected_row.to_dict()}")
         self.selected_curriculum = self.curriculum_manager.get_curriculum(
-            curriculum_task=selected_row['curriculum_task'],
+            curriculum_name=selected_row['curriculum_name'],
             curriculum_schema_version=selected_row['curriculum_schema_version'],
             curriculum_version=selected_row['curriculum_version'],
         )
@@ -2033,8 +2033,9 @@ class AutoTrainDialog(QDialog):
                     widget.setChecked(bool(value))
                     self.MainWindow._AutoReward()            
             
+            self.MainWindow._keyPressEvent()  # Mimic an "ENTER" press event to update the parameters
             logger.info(f"{key} is set to {value}")
-        
+            
         return
         
     
