@@ -93,9 +93,7 @@ class Window(QMainWindow):
         self.PhotometryRun=0 # 1. Photometry has been run; 0. Photometry has not been carried out.
         self._Optogenetics()     # open the optogenetics panel 
         self._LaserCalibration() # to open the laser calibration panel
-        logging.info('here5')
         self._WaterCalibration() # to open the water calibration panel
-        logging.info('here6')
         self._Camera()
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self.WaterPerRewardedTrial=0.005 
