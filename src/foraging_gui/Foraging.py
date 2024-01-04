@@ -1030,7 +1030,6 @@ class Window(QMainWindow):
             for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
                 # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
                 for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
-                    logging.info('trying to set parameter: {}'.format(child.objectName()))
                     if child.objectName()=='qt_spinbox_lineedit':
                         continue
                     if child.isEnabled()==False:
@@ -1052,7 +1051,7 @@ class Window(QMainWindow):
                         # it's valid float
                         float(child.text())
                     except Exception as e:
-                        logging.error(str(e))
+                        logging.error(str(e)+' {}'.format(child.objectName()))
                         if isinstance(child, QtWidgets.QDoubleSpinBox):
                             child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
                         elif isinstance(child, QtWidgets.QSpinBox):
