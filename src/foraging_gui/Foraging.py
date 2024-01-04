@@ -69,6 +69,14 @@ class Window(QMainWindow):
         self.UpdateParameters=1 # permission to update parameters
         self.Visualization.setTitle(str(date.today()))
         self.loggingstarted=-1
+        
+        # Some global variables for auto training
+        self.auto_train_locked = False
+        self.widgets_locked_by_auto_train = []
+        self.stage_in_use = None
+        self.curriculum_in_use = None
+        self.checkBox_override_stage = False
+        self.comboBox_override_stage = None
 
         # Connect to Bonsai
         self._InitializeBonsai()
@@ -111,13 +119,6 @@ class Window(QMainWindow):
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
         
-        # Some global variables for auto training
-        self.auto_train_locked = False
-        self.widgets_locked_by_auto_train = []
-        self.stage_in_use = None
-        self.curriculum_in_use = None
-        self.checkBox_override_stage = None
-        self.comboBox_override_stage = None
         
         logging.info('Start up complete')
 
@@ -1196,6 +1197,23 @@ class Window(QMainWindow):
                 # Set an attribute in self with the name 'TP_' followed by the child's object name
                 # and store whether the child is checked or not
                 setattr(self, 'TP_'+child.objectName(), child.isChecked())
+                
+        # Manually attach auto training parameters (In general, we should find a better way...)
+        self.TP_auto_train_locked = self.auto_train_locked
+        if self.TP_auto_train_locked:
+            _curr = self.curriculum_in_use['curriculum']
+            self.TP_auto_train_curriculum_name = _curr.curriculum_name
+            self.TP_auto_train_curriculum_version = _curr.curriculum_version
+            self.TP_auto_train_curriculum_schema_version = _curr.curriculum_schema_version
+            self.TP_auto_train_stage = self.stage_in_use
+            self.TP_auto_train_stage_overridden = self.checkBox_override_stage
+        else:
+            self.TP_auto_train_curriculum_name = None
+            self.TP_auto_train_curriculum_version = None
+            self.TP_auto_train_curriculum_schema_version = None
+            self.TP_auto_train_stage = None
+            self.TP_auto_train_stage_overridden = None
+            
 
     def _Task(self):
         '''hide and show some fields based on the task type'''
