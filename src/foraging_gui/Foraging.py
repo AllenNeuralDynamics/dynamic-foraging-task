@@ -97,8 +97,11 @@ class Window(QMainWindow):
         self._Camera()
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self.WaterPerRewardedTrial=0.005 
+        logging.info('here1')
         self._ShowRewardPairs() # show reward pairs
+        logging.info('here2')
         self._GetTrainingParameters() # get initial training parameters
+        logging.info('here3')
         self.connectSignalsSlots()
         self._Task()
         self._TrainingStage()
