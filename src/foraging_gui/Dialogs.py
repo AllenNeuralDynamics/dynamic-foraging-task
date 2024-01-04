@@ -1730,10 +1730,7 @@ class AutoTrainDialog(QDialog):
         
         # Sync selected subject_id
         self.update_subject_id(self.MainWindow.ID.text())
-        
-        # Set default states
-        self.checkBox_override_stage.setChecked(False)
-        
+                
     def _setup_allbacks(self):
         self.checkBox_show_this_mouse_only.stateChanged.connect(
             self._show_auto_training_manager
@@ -1762,7 +1759,7 @@ class AutoTrainDialog(QDialog):
             logger.info(f"No entry found in df_training_manager for subject_id: {self.selected_subject_id}")
             self.last_session = None
             self.label_session.setText('subject not found')
-            self.label_curriculum_task.setText('subject not found')
+            self.label_curriculum_name.setText('subject not found')
             self.label_last_actual_stage.setText('subject not found')
             self.label_next_stage_suggested.setText('subject not found')
             self.label_subject_id.setStyleSheet("color: red;")
@@ -1770,22 +1767,22 @@ class AutoTrainDialog(QDialog):
             # disable some stuff
             self.checkBox_override_stage.setChecked(False)
             self.checkBox_override_stage.setEnabled(False)
-            self._clear_layout(self.horizontalLayout_diagram) 
+            self._clear_layout(self.horizontalLayout_diagram)
+            self.pushButton_apply_auto_train_paras.setEnabled(False)
 
         else:
             # fetch last session
             self.last_session = self.df_this_mouse.iloc[0]  # The first row is the latest session
             # get curriculum in use
-            self.curriculum_in_use = self.curriculum_manager.get_curriculum(
-                curriculum_task=self.last_session['curriculum_task'],
+            self.MainWindow.curriculum_in_use = self.curriculum_manager.get_curriculum(
+                curriculum_name=self.last_session['curriculum_name'],
                 curriculum_schema_version=self.last_session['curriculum_schema_version'],
                 curriculum_version=self.last_session['curriculum_version'],
             )
             # update info
-            self.label_curriculum_task.setText(
-                f"{self.last_session['curriculum_task']} "
-                f"(v{self.last_session['curriculum_version']} "
-                f"@ schema v{self.last_session['curriculum_schema_version']})"
+            self.label_curriculum_name.setText(
+                f"{self.last_session['curriculum_name']} "
+                f"(v{self.last_session['curriculum_version']})"
                 )
             self.label_session.setText(str(self.last_session['session']))
             self.label_last_actual_stage.setText(str(self.last_session['current_stage_actual']))
@@ -1793,9 +1790,27 @@ class AutoTrainDialog(QDialog):
             self.label_subject_id.setStyleSheet("color: black;")
             
             # enable some stuff
-            self.checkBox_override_stage.setChecked(False)
-            self.checkBox_override_stage.setEnabled(True)
+            self.pushButton_apply_auto_train_paras.setEnabled(True)
             
+            # Set pushButton_apply_auto_train_paras
+            if self.MainWindow.auto_train_locked:
+                # If auto train is locked when the user opens the dialog (again)
+                self.pushButton_apply_auto_train_paras.setChecked(True)
+                
+                # Disable override
+                self.checkBox_override_stage.setEnabled(False)
+                self.comboBox_override_stage.setEnabled(False)
+                
+                # Retrieve status of override_stage from the main window
+                self.checkBox_override_stage.setChecked(
+                    self.MainWindow.checkBox_override_stage
+                )
+            else:  
+                # If not locked, reset status of override_stage and apply button
+                self.pushButton_apply_auto_train_paras.setChecked(False)
+                self.checkBox_override_stage.setEnabled(True)
+                self.checkBox_override_stage.setChecked(False)
+                    
         # Update UI
         self._update_available_training_stages()
         self._update_stage_to_apply()
@@ -1841,7 +1856,7 @@ class AutoTrainDialog(QDialog):
                 ['subject_id',
                  'session',
                  'session_date',
-                 'curriculum_task', 
+                 'curriculum_name', 
                  'curriculum_version',
                  'task',
                  'current_stage_suggested',
@@ -1904,7 +1919,7 @@ class AutoTrainDialog(QDialog):
         # Get index of the latest session
         if self.last_session is not None:
             curriculum_index = self.df_curriculums.reset_index().index[
-                (self.df_curriculums['curriculum_task'] == self.last_session['curriculum_task']) &
+                (self.df_curriculums['curriculum_name'] == self.last_session['curriculum_name']) &
                 (self.df_curriculums['curriculum_version'] == self.last_session['curriculum_version']) &
                 (self.df_curriculums['curriculum_schema_version'] == self.last_session['curriculum_schema_version'])
             ][0]
@@ -1925,7 +1940,7 @@ class AutoTrainDialog(QDialog):
         selected_row = self.df_curriculums.iloc[row]
         logger.info(f"Selected curriculum: {selected_row.to_dict()}")
         self.selected_curriculum = self.curriculum_manager.get_curriculum(
-            curriculum_task=selected_row['curriculum_task'],
+            curriculum_name=selected_row['curriculum_name'],
             curriculum_schema_version=selected_row['curriculum_schema_version'],
             curriculum_version=selected_row['curriculum_version'],
         )
@@ -1948,14 +1963,21 @@ class AutoTrainDialog(QDialog):
         layout.addWidget(svgWidget_paras)
         
     def _update_available_training_stages(self):
-        if self.curriculum_in_use is not None:
+        if self.MainWindow.curriculum_in_use is not None:
             available_training_stages = [v.name for v in 
-                                        self.curriculum_in_use['curriculum'].parameters.keys()]
+                                        self.MainWindow.curriculum_in_use['curriculum'].parameters.keys()]
         else:
             available_training_stages = []
             
         self.comboBox_override_stage.clear()
         self.comboBox_override_stage.addItems(available_training_stages)
+        
+        # Restore override_stage if auto train is locked
+        if self.MainWindow.auto_train_locked:
+            self.comboBox_override_stage.setCurrentIndex(
+                self.MainWindow.comboBox_override_stage
+            )
+            self.comboBox_override_stage.setEnabled(False)
         
     def _update_status_override_stage(self):
         if self.checkBox_override_stage.isChecked():
@@ -1966,26 +1988,54 @@ class AutoTrainDialog(QDialog):
             
     def _update_stage_to_apply(self):
         if self.checkBox_override_stage.isChecked():
-            self.stage_to_apply = self.comboBox_override_stage.currentText()
+            self.MainWindow.stage_in_use = self.comboBox_override_stage.currentText()
         elif self.last_session is not None:
-            self.stage_to_apply = self.last_session['next_stage_suggested']
+            self.MainWindow.stage_in_use = self.last_session['next_stage_suggested']
         else:
-            self.stage_to_apply = 'unknown'
+            self.MainWindow.stage_in_use = 'unknown'
         
         self.pushButton_apply_auto_train_paras.setText(
-            f"Apply\n{self.stage_to_apply}"
+            f"Apply and lock\n{self.MainWindow.stage_in_use}"
         )
     
-    def _apply_auto_train_paras(self):
-        # Get parameter settings
-        paras = self.curriculum_in_use['curriculum'].parameters[
-            TrainingStage[self.stage_to_apply]
-        ]
+    def _apply_auto_train_paras(self, checked):
+        if checked:
+            # Get parameter settings
+            paras = self.MainWindow.curriculum_in_use['curriculum'].parameters[
+                TrainingStage[self.MainWindow.stage_in_use]
+            ]
+            
+            # Convert to GUI format and set the parameters
+            paras_dict = paras.to_GUI_format()
+            # Attach to MainWindow for persistency
+            self.MainWindow.widgets_locked_by_auto_train = self._set_training_parameters(
+                paras_dict=paras_dict,
+                if_press_enter=True
+            )
+            
+            # update the widgets that have been set by auto training
+            self.MainWindow.widgets_locked_by_auto_train.extend(
+                [self.MainWindow.TrainingStage,
+                self.MainWindow.SaveTraining]
+                )
+            
+            # disable override
+            self.checkBox_override_stage.setEnabled(False)
+            self.comboBox_override_stage.setEnabled(False)
+            
+            # cache some status...
+            self.MainWindow.checkBox_override_stage = self.checkBox_override_stage.isChecked()
+            self.MainWindow.comboBox_override_stage = self.comboBox_override_stage.currentIndex()
+        else:
+            # enable override
+            self.checkBox_override_stage.setEnabled(True)
+            self.comboBox_override_stage.setEnabled(self.checkBox_override_stage.isChecked())
+            
+
+        self.MainWindow._update_auto_train_lock(checked)
         
-        paras_dict = paras.to_GUI_format()
-        self._set_training_parameters(paras_dict=paras_dict,
-                                      if_press_enter=True)
-    
+
+            
     def _set_training_parameters(self, paras_dict, if_press_enter=False):
         """Accepts a dictionary of parameters and set the GUI accordingly
         Trying to refactor Foraging.py's _TrainingStage() here.
@@ -1993,6 +2043,8 @@ class AutoTrainDialog(QDialog):
         paras_dict: a dictionary of parameters following Xinxin's convention
         if_press_enter: if True, press enter after setting the parameters
         """
+        # Track widgets that have been set by auto training
+        widgets_set = []
         
         # Loop over para_dict and try to set the values
         for key, value in paras_dict.items():
@@ -2005,12 +2057,20 @@ class AutoTrainDialog(QDialog):
                     return  # Return without setting anything
                 else:
                     widget_task.setCurrentIndex(task_ind)
+                    logger.info(f"Task is set to {paras_dict['task']}")
+                    widgets_set.append(widget_task)
                     continue  # Continue to the next parameter
             
             # For other parameters, try to find the widget and set the value               
             widget = self.MainWindow.findChild(QObject, key)
             if widget is None:
                 logger.info(f''' Widget "{key}" not found. skipped...''')
+                continue
+            
+            # If the parameter is disabled by the GUI in the first place, skip it
+            # For example, the field "uncoupled reward" in a coupled task.
+            if not widget.isEnabled():
+                logger.info(f''' Widget "{key}" has been disabled by the GUI. skipped...''')
                 continue
             
             # Set the value according to the widget type
@@ -2033,9 +2093,15 @@ class AutoTrainDialog(QDialog):
                     widget.setChecked(bool(value))
                     self.MainWindow._AutoReward()            
             
+            # Append the widgets that have been set
+            widgets_set.append(widget)
             logger.info(f"{key} is set to {value}")
         
-        return
+        # Mimic an "ENTER" press event to update the parameters
+        if if_press_enter:
+            self.MainWindow._keyPressEvent()
+    
+        return widgets_set
         
     
     def _clear_layout(self, layout):
