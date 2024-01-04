@@ -1063,6 +1063,8 @@ class Window(QMainWindow):
                             logging.error('Cannot convert input to float: {}, \'{}\''.format(child.objectName(),child.text()))
                     else:
                         old = getattr(Parameters,'TP_'+child.objectName())
+                        if old != '':
+                            old = float(old)
                         new = float(child.text())
                         if new != old:
                             logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
