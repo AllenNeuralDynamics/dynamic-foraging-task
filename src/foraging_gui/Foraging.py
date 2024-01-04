@@ -1061,6 +1061,11 @@ class Window(QMainWindow):
                             # Invalid float. Do not change the parameter, reset back to previous value
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                             logging.error('Cannot convert input to float: {}, \'{}\''.format(child.objectName(),child.text()))
+                    else:
+                        old = getattr(Parameters,'TP_'+child.objectName())
+                        new = float(child.text())
+                        if new != old:
+                            logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
 
             # update the current training parameters
             self._GetTrainingParameters()
