@@ -133,6 +133,7 @@ class GenerateTrials():
                     self.B_LaserOnTrial.append(self.LaserOn) 
                     # generate the optogenetics waveform of the next trial
                     self._GetLaserWaveForm()
+                    self.B_SelectedCondition.append(self.SelctedCondition)
                 else:
                     # this is the control trial
                     self.LaserOn=0
@@ -1135,7 +1136,6 @@ class GenerateTrials():
                 break
             else:
                 self.SelctedCondition=0 # control is selected
-        self.B_SelectedCondition.append(self.SelctedCondition)
 
     def _InitiateATrial(self,Channel1,Channel4):
         # Determine if the current lick port should be baited. self.B_Baited can only be updated after receiving response of the animal, so this part cannot appear in the _GenerateATrial section
