@@ -1047,21 +1047,28 @@ class Window(QMainWindow):
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
                     # check valid for empty condition
-                    try:
-                        # it's valid float
-                        float(child.text())
-                    except Exception as e:
-                        logging.error(str(e)+' {}'.format(child.objectName()))
+                    if not self._try_is_float(child.text():
                         if isinstance(child, QtWidgets.QDoubleSpinBox):
                             child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
                         elif isinstance(child, QtWidgets.QSpinBox):
                             child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
                         else:
-                            # Invalid float. Do not change the parameter
+                            # Invalid float. Do not change the parameter, reset back to previous value
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
+                            logging.error('Cannot convert input to float: {}, {}'.format(child.objectName(),child.text()))
             # update the current training parameters
             self._GetTrainingParameters()
-    
+
+    def _try_is_float(string):
+        '''
+            Check if a string can be converted to a float
+        '''
+        try:
+            float(string)
+            return True
+        except ValueError:
+            return False   
+ 
     def _CheckTextChange(self):
         '''Check if the text change is reasonable'''
         # Get the parameters before change
