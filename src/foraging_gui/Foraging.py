@@ -91,7 +91,7 @@ class Window(QMainWindow):
         self.TimeDistribution_ToInitializeVisual=1
         self.finish_Timer=1 # for photometry baseline recordings
         self.PhotometryRun=0 # 1. Photometry has been run; 0. Photometry has not been carried out.
-        self._Optogenetics() # open the optogenetics panel
+        self._Optogenetics()     # open the optogenetics panel 
         self._LaserCalibration() # to open the laser calibration panel
         self._WaterCalibration() # to open the water calibration panel
         self._Camera()
@@ -491,6 +491,7 @@ class Window(QMainWindow):
                 # Open the JSON settings file
                 with open(self.SettingFile, 'r') as f:
                     Settings = json.load(f)
+                logging.info('Loaded settings file')
             else:
                 logging.error('Could not find settings file at: {}'.format(self.SettingFile))
                 raise Exception('Could not find file!')
@@ -1545,7 +1546,8 @@ class Window(QMainWindow):
             layout.addWidget(PlotLick)
             self.LickSta_ToInitializeVisual=0
         try:
-            self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
+            if hasattr(self, 'GeneratedTrials'):
+                self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
         except Exception as e:
             logging.error(str(e))
 
