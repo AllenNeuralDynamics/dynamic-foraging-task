@@ -812,6 +812,7 @@ class WaterCalibrationDialog(QDialog):
         self._UpdateFigure()
     def _UpdateFigure(self):
         '''plot the calibration result'''
+        logging.info('debugging here1')
         if self.ToInitializeVisual==1: # only run once
             PlotM=PlotWaterCalibration(water_win=self)
             self.PlotM=PlotM
