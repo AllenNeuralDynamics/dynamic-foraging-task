@@ -111,6 +111,14 @@ class Window(QMainWindow):
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
         
+        # Some global variables for auto training
+        self.auto_train_locked = False
+        self.widgets_locked_by_auto_train = []
+        self.stage_in_use = None
+        self.curriculum_in_use = None
+        self.checkBox_override_stage = None
+        self.comboBox_override_stage = None
+        
         logging.info('Start up complete')
 
     def connectSignalsSlots(self):
@@ -2450,7 +2458,7 @@ class Window(QMainWindow):
     def _AutoTrain(self):
         """set up auto training"""
         if not hasattr(self, 'AutoTrain_dialog') or not self.AutoTrain_dialog.isVisible():
-            self.AutoTrain_dialog = AutoTrainDialog(MainWindow=self, parent=self)
+            self.AutoTrain_dialog = AutoTrainDialog(MainWindow=self, parent=None)
         self.AutoTrain_dialog.show()
             
         # Connect to ID change in the mainwindow
