@@ -1025,7 +1025,7 @@ class Window(QMainWindow):
             event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, Qt.Key_Return, Qt.KeyboardModifiers())
         if (event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter):
             # handle the return key press event here
-            logging.info('parameter changes confirmed')
+            logging.info('processing parameter changes')
             # prevent the default behavior of the return key press event
             event.accept()
             self.UpdateParameters=1 # Changes are allowed
@@ -1049,19 +1049,21 @@ class Window(QMainWindow):
                         if Correct ==0: # incorrect format; don't change
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
-                    # check valid for empty condition
+
+                    # check for empty string condition
                     try:
                         float(child.text())
                     except Exception as e:
+                        # Invalid float. Do not change the parameter, reset back to previous value
+                        logging.error('Cannot convert input to float: {}, \'{}\''.format(child.objectName(),child.text()))
                         if isinstance(child, QtWidgets.QDoubleSpinBox):
                             child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
                         elif isinstance(child, QtWidgets.QSpinBox):
                             child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
                         else:
-                            # Invalid float. Do not change the parameter, reset back to previous value
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                            logging.error('Cannot convert input to float: {}, \'{}\''.format(child.objectName(),child.text()))
                     else:
+                        # If this parameter changed, add the change to the log
                         old = getattr(Parameters,'TP_'+child.objectName())
                         if old != '':
                             old = float(old)
