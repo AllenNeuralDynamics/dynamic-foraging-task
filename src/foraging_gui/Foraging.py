@@ -2048,8 +2048,10 @@ class Window(QMainWindow):
     def _AutoReward(self):
         if self.AutoReward.isChecked():
             self.AutoReward.setStyleSheet("background-color : green;")
+            self.AutoReward.setText('On')
         else:
             self.AutoReward.setStyleSheet("background-color : none")
+            self.AutoReward.setText('Off')
     def _NextBlock(self):
         if self.NextBlock.isChecked():
             self.NextBlock.setStyleSheet("background-color : green;")
