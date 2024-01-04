@@ -428,7 +428,7 @@ class Window(QMainWindow):
         else:
             self.LaserCalibrationResults = {}
             self.RecentCalibrationDate='None'
-            logging.info('Did not find a recent laser calibration file')
+            logging.warning('Did not find a recent laser calibration file')
  
     def _GetWaterCalibration(self):
         '''
@@ -454,7 +454,7 @@ class Window(QMainWindow):
         else:
             self.WaterCalibrateionResults = {}
             self.RecentWaterCalibrationDate='None'
-            logging.info('Did not find a recent water calibration file')
+            logging.warning('Did not find a recent water calibration file')
 
     def _custom_sort_key(self,key):
         if '_' in key:
@@ -504,7 +504,7 @@ class Window(QMainWindow):
         for key in defaults:
             if key not in Settings:
                 Settings[key] = defaults[key]
-                logging.info('Missing setting ({}), using default: {}'.format(key,Settings[key]))
+                logging.warning('Missing setting ({}), using default: {}'.format(key,Settings[key]))
                 if key in ['default_saveFolder','current_box']:
                     logging.error('Missing setting ({}), is required'.format(key))               
                     raise Exception('Missing setting ({}), is required'.format(key)) 
@@ -545,7 +545,7 @@ class Window(QMainWindow):
             self.Tower.setCurrentIndex(index)
             logging.info('Setting tower number: {}'.format(index))
         else:
-            logging.info('Could not set tower number, using default. Current_box is set at: {}'.format(self.current_box))
+            logging.warning('Could not set tower number, using default. Current_box is set at: {}'.format(self.current_box))
 
     def _InitializeBonsai(self):
         '''
