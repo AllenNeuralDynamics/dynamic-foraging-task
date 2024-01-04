@@ -1730,14 +1730,7 @@ class AutoTrainDialog(QDialog):
         
         # Sync selected subject_id
         self.update_subject_id(self.MainWindow.ID.text())
-        
-        # Set default states
-        self.checkBox_override_stage.setChecked(False)
-        self.pushButton_apply_auto_train_paras.setChecked(
-            hasattr(self.MainWindow, 'auto_train_locked') 
-            and self.MainWindow.auto_train_locked
-        )
-        
+                
     def _setup_allbacks(self):
         self.checkBox_show_this_mouse_only.stateChanged.connect(
             self._show_auto_training_manager
@@ -1797,14 +1790,30 @@ class AutoTrainDialog(QDialog):
             self.label_subject_id.setStyleSheet("color: black;")
             
             # enable some stuff
-            self.checkBox_override_stage.setChecked(False)
-            self.checkBox_override_stage.setEnabled(True)
             self.pushButton_apply_auto_train_paras.setEnabled(True)
             
+            # Set pushButton_apply_auto_train_paras
+            if self.MainWindow.auto_train_locked:
+                # If auto train is locked when the user opens the dialog (again)
+                self.pushButton_apply_auto_train_paras.setChecked(True)
+                
+                # Disable override
+                self.checkBox_override_stage.setEnabled(False)
+                self.comboBox_override_stage.setEnabled(False)
+                
+                # Retrieve status of override_stage from the main window
+                self.checkBox_override_stage.setChecked(
+                    self.MainWindow.checkBox_override_stage
+                )
+            else:  
+                # If not locked, reset status of override_stage and apply button
+                self.pushButton_apply_auto_train_paras.setChecked(False)
+                self.checkBox_override_stage.setEnabled(True)
+                self.checkBox_override_stage.setChecked(False)
+                    
         # Update UI
         self._update_available_training_stages()
         self._update_stage_to_apply()
-        self.pushButton_apply_auto_train_paras.setChecked(False)
         
         # Update df_auto_train_manager and df_curriculum_manager
         self._show_auto_training_manager()
@@ -1963,6 +1972,13 @@ class AutoTrainDialog(QDialog):
         self.comboBox_override_stage.clear()
         self.comboBox_override_stage.addItems(available_training_stages)
         
+        # Restore override_stage if auto train is locked
+        if self.MainWindow.auto_train_locked:
+            self.comboBox_override_stage.setCurrentIndex(
+                self.MainWindow.comboBox_override_stage
+            )
+            self.comboBox_override_stage.setEnabled(False)
+        
     def _update_status_override_stage(self):
         if self.checkBox_override_stage.isChecked():
             self.comboBox_override_stage.setEnabled(True)
@@ -1972,21 +1988,21 @@ class AutoTrainDialog(QDialog):
             
     def _update_stage_to_apply(self):
         if self.checkBox_override_stage.isChecked():
-            self.stage_to_apply = self.comboBox_override_stage.currentText()
+            self.MainWindow.stage_in_use = self.comboBox_override_stage.currentText()
         elif self.last_session is not None:
-            self.stage_to_apply = self.last_session['next_stage_suggested']
+            self.MainWindow.stage_in_use = self.last_session['next_stage_suggested']
         else:
-            self.stage_to_apply = 'unknown'
+            self.MainWindow.stage_in_use = 'unknown'
         
         self.pushButton_apply_auto_train_paras.setText(
-            f"Apply and lock\n{self.stage_to_apply}"
+            f"Apply and lock\n{self.MainWindow.stage_in_use}"
         )
     
     def _apply_auto_train_paras(self, checked):
         if checked:
             # Get parameter settings
             paras = self.MainWindow.curriculum_in_use['curriculum'].parameters[
-                TrainingStage[self.stage_to_apply]
+                TrainingStage[self.MainWindow.stage_in_use]
             ]
             
             # Convert to GUI format and set the parameters
@@ -2002,7 +2018,20 @@ class AutoTrainDialog(QDialog):
                 [self.MainWindow.TrainingStage,
                 self.MainWindow.SaveTraining]
                 )
-        
+            
+            # disable override
+            self.checkBox_override_stage.setEnabled(False)
+            self.comboBox_override_stage.setEnabled(False)
+            
+            # cache some status...
+            self.MainWindow.checkBox_override_stage = self.checkBox_override_stage.isChecked()
+            self.MainWindow.comboBox_override_stage = self.comboBox_override_stage.currentIndex()
+        else:
+            # enable override
+            self.checkBox_override_stage.setEnabled(True)
+            self.comboBox_override_stage.setEnabled(self.checkBox_override_stage.isChecked())
+            
+
         self.MainWindow._update_auto_train_lock(checked)
         
 
