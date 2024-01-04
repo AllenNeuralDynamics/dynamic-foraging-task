@@ -105,7 +105,7 @@ class Window(QMainWindow):
         self.keyPressEvent()
         self._WaterVolumnManage2()
         self._LickSta()
-        self._InitianizeMotorStage()
+        self._InitializeMotorStage()
         self._StageSerialNum()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
@@ -291,26 +291,28 @@ class Window(QMainWindow):
         try:
             self.instances = NewScaleSerialY.get_instances()
         except Exception as e:
-            logging.error(str(e))
+            logging.error('Could not find instances of NewScale Stage: {}'.format(str(e)))
+            return
+
         if hasattr(self,'current_stage'):
             curent_stage_name=self.current_stage.name
         else:
             curent_stage_name=''
         # connect to one stage
-        try:
-            for instance in self.instances:
-                try:
-                    instance.io.close()
-                except Exception as e:
-                    pass#logging.error(str(e))
-                if instance.sn==self.StageSerialNum.currentText():
-                    if curent_stage_name!=instance.sn:
-                        self._connect_stage(instance)
-        except Exception as e:
-            logging.error(str(e))
+        for instance in self.instances:
+            try:
+                instance.io.close()
+            except Exception as e:
+                pass
+            try:
+                if (instance.sn==self.StageSerialNum.currentText())&\
+                    (curent_stage_name!=instance.sn):
+                    self._connect_stage(instance)
+            except Exception as e:
+                logging.error(str(e))
 
-    def _InitianizeMotorStage(self):
-        '''To initianize motor stage'''
+    def _InitializeMotorStage(self):
+        '''To initialize motor stage'''
         self._scan_for_usb_stages()
         # use the default newscale stage
         try:
@@ -323,19 +325,20 @@ class Window(QMainWindow):
                     self.Warning_Newscale.setText('Default Newsacle not found!')
                     self.Warning_Newscale.setStyleSheet("color: red;")
         except Exception as e:
-            logging.error('Initializing Motor stage: {}'.format(str(e)))
+            logging.error(str(e))
 
     def _scan_for_usb_stages(self):
         '''Scan available stages'''
         try:
             self.instances = NewScaleSerialY.get_instances()
+        except Exception as e:
+            logging.error('Could not find instances of NewScale Stage: {}'.format(str(e)))
+        else:
             self.stage_names=[]
             for instance in self.instances:
                 self.stage_names.append(instance.sn)
             self.StageSerialNum.addItems(self.stage_names)
-        except Exception as e:
-            logging.error(str(e))
-
+    
     def _connect_stage(self,instance):
         '''connect to a stage'''
         instance.io.open()
