@@ -72,12 +72,14 @@ class Window(QMainWindow):
         # Connect to Bonsai
         self._InitializeBonsai()
 
+        logging.info('here1')
         self.threadpool=QThreadPool() # get animal response
         self.threadpool2=QThreadPool() # get animal lick
         self.threadpool3=QThreadPool() # visualization
         self.threadpool4=QThreadPool() # for generating a new trial
         self.threadpool5=QThreadPool() # for starting the trial loop
         self.threadpool_workertimer=QThreadPool() # for timing
+        logging.info('here2')
         self.OpenOptogenetics=0
         self.WaterCalibration=0
         self.LaserCalibration=0
@@ -91,17 +93,20 @@ class Window(QMainWindow):
         self.TimeDistribution_ToInitializeVisual=1
         self.finish_Timer=1 # for photometry baseline recordings
         self.PhotometryRun=0 # 1. Photometry has been run; 0. Photometry has not been carried out.
+        logging.info('here3')
         self._Optogenetics()     # open the optogenetics panel 
+        logging.info('here4')
         self._LaserCalibration() # to open the laser calibration panel
+        logging.info('here5')
         self._WaterCalibration() # to open the water calibration panel
+        logging.info('here6')
         self._Camera()
+        logging.info('here7')
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self.WaterPerRewardedTrial=0.005 
-        logging.info('here1')
+        logging.info('here8')
         self._ShowRewardPairs() # show reward pairs
-        logging.info('here2')
         self._GetTrainingParameters() # get initial training parameters
-        logging.info('here3')
         self.connectSignalsSlots()
         self._Task()
         self._TrainingStage()
