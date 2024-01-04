@@ -1030,6 +1030,7 @@ class Window(QMainWindow):
             for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
                 # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
                 for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
+                    logging.debug('trying to set parameter: {}'.format(child.objectName()))
                     if child.objectName()=='qt_spinbox_lineedit':
                         continue
                     if child.isEnabled()==False:
