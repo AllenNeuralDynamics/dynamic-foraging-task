@@ -2455,8 +2455,38 @@ class Window(QMainWindow):
             
         # Connect to ID change in the mainwindow
         self.ID.returnPressed.connect(
-            lambda: self.AutoTrain_dialog.update_subject_id(subject_id=self.ID.text()))
-
+            lambda: self.AutoTrain_dialog.update_subject_id(subject_id=self.ID.text())
+        )
+        self.ID.returnPressed.connect(
+            lambda: self._update_auto_train_lock(locked=False)
+        )
+        
+    def _update_auto_train_lock(self, locked: bool):
+        """Update the auto train lock"""
+        if locked:
+            for widget in self.widgets_locked_by_auto_train:
+                widget.setEnabled(False)
+                # set the border color to green
+                widget.setStyleSheet("border: 2px solid rgb(170, 255, 0);")
+            self.TrainingParameters.setStyleSheet(
+                '''QGroupBox {
+                        border: 5px solid rgb(170, 255, 0)
+                    }
+                '''
+            )
+            # Update a global state
+            self.auto_train_locked = True
+        else:
+            # Unlock the previously locked widgets
+            for widget in self.widgets_locked_by_auto_train:
+                widget.setEnabled(True)
+                # clear style
+                widget.setStyleSheet("")
+            self.TrainingParameters.setStyleSheet("")
+            
+            # Update the global state
+            self.auto_train_locked = False
+            
 def start_gui_log_file(tower_number):
     '''
         Starts a log file for the gui.
