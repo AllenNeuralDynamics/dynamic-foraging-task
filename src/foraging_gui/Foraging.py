@@ -91,7 +91,7 @@ class Window(QMainWindow):
         self.TimeDistribution_ToInitializeVisual=1
         self.finish_Timer=1 # for photometry baseline recordings
         self.PhotometryRun=0 # 1. Photometry has been run; 0. Photometry has not been carried out.
-        self._Optogenetics() # open the optogenetics panel
+        self._Optogenetics()     # open the optogenetics panel 
         self._LaserCalibration() # to open the laser calibration panel
         self._WaterCalibration() # to open the water calibration panel
         self._Camera()
@@ -105,7 +105,7 @@ class Window(QMainWindow):
         self.keyPressEvent()
         self._WaterVolumnManage2()
         self._LickSta()
-        self._InitianizeMotorStage()
+        self._InitializeMotorStage()
         self._StageSerialNum()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
@@ -291,26 +291,28 @@ class Window(QMainWindow):
         try:
             self.instances = NewScaleSerialY.get_instances()
         except Exception as e:
-            logging.error(str(e))
+            logging.error('Could not find instances of NewScale Stage: {}'.format(str(e)))
+            return
+
         if hasattr(self,'current_stage'):
             curent_stage_name=self.current_stage.name
         else:
             curent_stage_name=''
         # connect to one stage
-        try:
-            for instance in self.instances:
-                try:
-                    instance.io.close()
-                except Exception as e:
-                    pass#logging.error(str(e))
-                if instance.sn==self.StageSerialNum.currentText():
-                    if curent_stage_name!=instance.sn:
-                        self._connect_stage(instance)
-        except Exception as e:
-            logging.error(str(e))
+        for instance in self.instances:
+            try:
+                instance.io.close()
+            except Exception as e:
+                pass
+            try:
+                if (instance.sn==self.StageSerialNum.currentText())&\
+                    (curent_stage_name!=instance.sn):
+                    self._connect_stage(instance)
+            except Exception as e:
+                logging.error(str(e))
 
-    def _InitianizeMotorStage(self):
-        '''To initianize motor stage'''
+    def _InitializeMotorStage(self):
+        '''To initialize motor stage'''
         self._scan_for_usb_stages()
         # use the default newscale stage
         try:
@@ -323,19 +325,20 @@ class Window(QMainWindow):
                     self.Warning_Newscale.setText('Default Newsacle not found!')
                     self.Warning_Newscale.setStyleSheet("color: red;")
         except Exception as e:
-            logging.error('Initializing Motor stage: {}'.format(str(e)))
+            logging.error(str(e))
 
     def _scan_for_usb_stages(self):
         '''Scan available stages'''
         try:
             self.instances = NewScaleSerialY.get_instances()
+        except Exception as e:
+            logging.error('Could not find instances of NewScale Stage: {}'.format(str(e)))
+        else:
             self.stage_names=[]
             for instance in self.instances:
                 self.stage_names.append(instance.sn)
             self.StageSerialNum.addItems(self.stage_names)
-        except Exception as e:
-            logging.error(str(e))
-
+    
     def _connect_stage(self,instance):
         '''connect to a stage'''
         instance.io.open()
@@ -428,7 +431,7 @@ class Window(QMainWindow):
         else:
             self.LaserCalibrationResults = {}
             self.RecentCalibrationDate='None'
-            logging.info('Did not find a recent laser calibration file')
+            logging.warning('Did not find a recent laser calibration file')
  
     def _GetWaterCalibration(self):
         '''
@@ -454,7 +457,7 @@ class Window(QMainWindow):
         else:
             self.WaterCalibrateionResults = {}
             self.RecentWaterCalibrationDate='None'
-            logging.info('Did not find a recent water calibration file')
+            logging.warning('Did not find a recent water calibration file')
 
     def _custom_sort_key(self,key):
         if '_' in key:
@@ -491,6 +494,7 @@ class Window(QMainWindow):
                 # Open the JSON settings file
                 with open(self.SettingFile, 'r') as f:
                     Settings = json.load(f)
+                logging.info('Loaded settings file')
             else:
                 logging.error('Could not find settings file at: {}'.format(self.SettingFile))
                 raise Exception('Could not find file!')
@@ -504,7 +508,7 @@ class Window(QMainWindow):
         for key in defaults:
             if key not in Settings:
                 Settings[key] = defaults[key]
-                logging.info('Missing setting ({}), using default: {}'.format(key,Settings[key]))
+                logging.warning('Missing setting ({}), using default: {}'.format(key,Settings[key]))
                 if key in ['default_saveFolder','current_box']:
                     logging.error('Missing setting ({}), is required'.format(key))               
                     raise Exception('Missing setting ({}), is required'.format(key)) 
@@ -545,7 +549,7 @@ class Window(QMainWindow):
             self.Tower.setCurrentIndex(index)
             logging.info('Setting tower number: {}'.format(index))
         else:
-            logging.info('Could not set tower number, using default. Current_box is set at: {}'.format(self.current_box))
+            logging.warning('Could not set tower number, using default. Current_box is set at: {}'.format(self.current_box))
 
     def _InitializeBonsai(self):
         '''
@@ -1021,7 +1025,7 @@ class Window(QMainWindow):
             event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, Qt.Key_Return, Qt.KeyboardModifiers())
         if (event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter):
             # handle the return key press event here
-            logging.info('parameter changes confirmed')
+            logging.info('processing parameter changes')
             # prevent the default behavior of the return key press event
             event.accept()
             self.UpdateParameters=1 # Changes are allowed
@@ -1045,22 +1049,31 @@ class Window(QMainWindow):
                         if Correct ==0: # incorrect format; don't change
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
-                    # check valid for empty condition
+
+                    # check for empty string condition
                     try:
-                        # it's valid float
                         float(child.text())
                     except Exception as e:
-                        logging.error(str(e))
+                        # Invalid float. Do not change the parameter, reset back to previous value
+                        logging.error('Cannot convert input to float: {}, \'{}\''.format(child.objectName(),child.text()))
                         if isinstance(child, QtWidgets.QDoubleSpinBox):
                             child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
                         elif isinstance(child, QtWidgets.QSpinBox):
                             child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
                         else:
-                            # Invalid float. Do not change the parameter
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
+                    else:
+                        # If this parameter changed, add the change to the log
+                        old = getattr(Parameters,'TP_'+child.objectName())
+                        if old != '':
+                            old = float(old)
+                        new = float(child.text())
+                        if new != old:
+                            logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
+
             # update the current training parameters
             self._GetTrainingParameters()
-    
+ 
     def _CheckTextChange(self):
         '''Check if the text change is reasonable'''
         # Get the parameters before change
@@ -1545,7 +1558,8 @@ class Window(QMainWindow):
             layout.addWidget(PlotLick)
             self.LickSta_ToInitializeVisual=0
         try:
-            self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
+            if hasattr(self, 'GeneratedTrials'):
+                self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
         except Exception as e:
             logging.error(str(e))
 
