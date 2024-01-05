@@ -34,7 +34,8 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - [FTDI driver](https://ftdichip.com/drivers/) (for Harp devices)
 - [NI-DAQmax **version 19.0**](https://www.ni.com/en/support/downloads/drivers/download.ni-daq-mx.html#484356) (for optogenetic stimulation via NI-DAQ cards)
 - [Spinnaker SDK **version 1.29.0.5**](https://www.flir.com/products/spinnaker-sdk/) (driver for FLIR cameras)
-   - [download the driver here](https://alleninstitute-my.sharepoint.com/:u:/g/personal/alex_piet_alleninstitute_org/EVNf6AwDsSVFkdb3LtS1_WMBMc0R0OksB4RoqTx0p7IqrQ?e=6DFmtw)
+   - [download the driver here](https://alleninstitute-my.sharepoint.com/:u:/g/personal/xinxin_yin_alleninstitute_org/Ef8zZAeZymFFjuz_5T70xs8BV8Qmdd3zVCZ6gvdYAismYQ?e=9WvLlQ)
+   - Install FULL, x64
 - USBXpress SDK (for newscale python API)
   - [get installation .exe here](https://www.silabs.com/documents/public/software/install_USBXpress_SDK.exe) (for newscale python API)
   - Click install, accept terms of agreement, hit next and accept default settings for everything. 
