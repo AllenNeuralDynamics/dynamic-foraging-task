@@ -523,8 +523,7 @@ class Window(QMainWindow):
         self.newscale_port_tower4=Settings['newscale_port_tower4']
         
         # Also stream log info to the console if enabled
-        if ('show_log_info_in_console' in Settings 
-            and Settings['show_log_info_in_console']):
+        if  Settings['show_log_info_in_console']:
             logger = logging.getLogger()
             handler = logging.StreamHandler()
             # Using the same format and level as the root logger
