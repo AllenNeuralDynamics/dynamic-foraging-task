@@ -1486,18 +1486,17 @@ class GenerateTrials():
         except Exception as e:
             logging.error(str(e))
             
-        # TODO: this _GetTrainingParameters is redundant with the one in Foraging.gy...
-        # We should refactor this!
         # Manually attach auto training parameters 
-        self.TP_auto_train_locked = win.auto_train_locked
-        if self.TP_auto_train_locked:
-            _curr = win.curriculum_in_use['curriculum']
+        if hasattr(win, 'AutoTrain_dialog') and win.AutoTrain_dialog.auto_train_engaged:
+            self.TP_auto_train_engaged = True
+            _curr = win.AutoTrain_dialog.curriculum_in_use['curriculum']
             self.TP_auto_train_curriculum_name = _curr.curriculum_name
             self.TP_auto_train_curriculum_version = _curr.curriculum_version
             self.TP_auto_train_curriculum_schema_version = _curr.curriculum_schema_version
-            self.TP_auto_train_stage = win.stage_in_use
-            self.TP_auto_train_stage_overridden = win.checkBox_override_stage
+            self.TP_auto_train_stage = win.AutoTrain_dialog.stage_in_use
+            self.TP_auto_train_stage_overridden = win.AutoTrain_dialog.checkBox_override_stage.isChecked()
         else:
+            self.TP_auto_train_engaged = False
             self.TP_auto_train_curriculum_name = None
             self.TP_auto_train_curriculum_version = None
             self.TP_auto_train_curriculum_schema_version = None

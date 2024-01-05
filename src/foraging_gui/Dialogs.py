@@ -8,6 +8,7 @@ from datetime import datetime
 import logging
 
 import numpy as np
+import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox
 from PyQt5 import QtWidgets, uic
@@ -1720,6 +1721,12 @@ class AutoTrainDialog(QDialog):
         super().__init__(parent)
         uic.loadUi('AutoTrain.ui', self)
         self.MainWindow = MainWindow
+        
+        # Initializations
+        self.auto_train_engaged = False
+        self.widgets_locked_by_auto_train = []
+        self.stage_in_use = None
+        self.curriculum_in_use = None
 
         # Connect to Auto Training Manager and Curriculum Manager
         self._connect_auto_training_manager()
@@ -1742,7 +1749,10 @@ class AutoTrainDialog(QDialog):
             self._update_stage_to_apply
         )
         self.pushButton_apply_auto_train_paras.clicked.connect(
-            self._apply_auto_train_paras
+            self.update_auto_train_lock
+        )
+        self.pushButton_apply_curriculum.clicked.connect(
+            self._apply_curriculum
         )
     
     def update_subject_id(self, subject_id: str):
@@ -1755,7 +1765,6 @@ class AutoTrainDialog(QDialog):
         )
         
         if self.df_this_mouse.empty:
-            # TODO: create a new mouse here
             logger.info(f"No entry found in df_training_manager for subject_id: {self.selected_subject_id}")
             self.last_session = None
             self.label_session.setText('subject not found')
@@ -1769,12 +1778,26 @@ class AutoTrainDialog(QDialog):
             self.checkBox_override_stage.setEnabled(False)
             self._clear_layout(self.horizontalLayout_diagram)
             self.pushButton_apply_auto_train_paras.setEnabled(False)
+            
+            # prompt user to create a new mouse
+            if self.isVisible():
+                QMessageBox.information(
+                    self,
+                    "Info",
+                    f"The mouse {self.selected_subject_id} does not exist in the auto training manager!\n"
+                    f"If it is a new mouse (not your typo), please select a curriculum to add it."
+                )
+                
+            self.tableView_df_curriculum.clearSelection() # Unselect any curriculum
+            self.selected_curriculum = None
+            self.pushButton_apply_curriculum.setEnabled(True)
+            self._add_border_curriculum_selection()
 
         else:
             # fetch last session
             self.last_session = self.df_this_mouse.iloc[0]  # The first row is the latest session
             # get curriculum in use
-            self.MainWindow.curriculum_in_use = self.curriculum_manager.get_curriculum(
+            self.curriculum_in_use = self.curriculum_manager.get_curriculum(
                 curriculum_name=self.last_session['curriculum_name'],
                 curriculum_schema_version=self.last_session['curriculum_schema_version'],
                 curriculum_version=self.last_session['curriculum_version'],
@@ -1789,27 +1812,13 @@ class AutoTrainDialog(QDialog):
             self.label_next_stage_suggested.setText(str(self.last_session['next_stage_suggested']))
             self.label_subject_id.setStyleSheet("color: black;")
             
-            # enable some stuff
+            # enable apply training stage
             self.pushButton_apply_auto_train_paras.setEnabled(True)
             
-            # Set pushButton_apply_auto_train_paras
-            if self.MainWindow.auto_train_locked:
-                # If auto train is locked when the user opens the dialog (again)
-                self.pushButton_apply_auto_train_paras.setChecked(True)
-                
-                # Disable override
-                self.checkBox_override_stage.setEnabled(False)
-                self.comboBox_override_stage.setEnabled(False)
-                
-                # Retrieve status of override_stage from the main window
-                self.checkBox_override_stage.setChecked(
-                    self.MainWindow.checkBox_override_stage
-                )
-            else:  
-                # If not locked, reset status of override_stage and apply button
-                self.pushButton_apply_auto_train_paras.setChecked(False)
-                self.checkBox_override_stage.setEnabled(True)
-                self.checkBox_override_stage.setChecked(False)
+            # disable apply curriculum                        
+            self.pushButton_apply_curriculum.setEnabled(False)
+            self._remove_border_curriculum_selection()
+
                     
         # Update UI
         self._update_available_training_stages()
@@ -1818,15 +1827,39 @@ class AutoTrainDialog(QDialog):
         # Update df_auto_train_manager and df_curriculum_manager
         self._show_auto_training_manager()
         self._show_available_curriculums()
+
+    def _add_border_curriculum_selection(self):
+        self.tableView_df_curriculum.setStyleSheet(
+                '''
+                QTableView::item:selected {
+                background-color: lightblue;
+                color: black;
+                            }
+
+                QTableView {
+                                border:7px solid rgb(255, 170, 255);
+                }
+                '''
+        )
+    
+    def _remove_border_curriculum_selection(self):
+        self.tableView_df_curriculum.setStyleSheet(
+                '''
+                QTableView::item:selected {
+                background-color: lightblue;
+                color: black;
+                            }
+                '''
+        )
                 
     def _connect_auto_training_manager(self):
         self.auto_train_manager = DynamicForagingAutoTrainManager(
             manager_name='447_demo',
             df_behavior_on_s3=dict(bucket='aind-behavior-data',
-                                   root='foraging_nwb_bonsai_processed/',
-                                   file_name='df_sessions.pkl'),
+                                root='foraging_nwb_bonsai_processed/',
+                                file_name='df_sessions.pkl'),
             df_manager_root_on_s3=dict(bucket='aind-behavior-data',
-                                       root='foraging_auto_training/')
+                                    root='foraging_auto_training/')
         )
         df_training_manager = self.auto_train_manager.df_manager
         
@@ -1841,9 +1874,8 @@ class AutoTrainDialog(QDialog):
             ascending=[False, False],  # Newest sessions on the top,
             inplace=True
         )
-            
         self.df_training_manager = df_training_manager
-
+            
     def _show_auto_training_manager(self):
         if_this_mouse_only = self.checkBox_show_this_mouse_only.isChecked()
         
@@ -1963,22 +1995,15 @@ class AutoTrainDialog(QDialog):
         layout.addWidget(svgWidget_paras)
         
     def _update_available_training_stages(self):
-        if self.MainWindow.curriculum_in_use is not None:
+        if self.curriculum_in_use is not None:
             available_training_stages = [v.name for v in 
-                                        self.MainWindow.curriculum_in_use['curriculum'].parameters.keys()]
+                                        self.curriculum_in_use['curriculum'].parameters.keys()]
         else:
             available_training_stages = []
             
         self.comboBox_override_stage.clear()
         self.comboBox_override_stage.addItems(available_training_stages)
-        
-        # Restore override_stage if auto train is locked
-        if self.MainWindow.auto_train_locked:
-            self.comboBox_override_stage.setCurrentIndex(
-                self.MainWindow.comboBox_override_stage
-            )
-            self.comboBox_override_stage.setEnabled(False)
-        
+                
     def _update_status_override_stage(self):
         if self.checkBox_override_stage.isChecked():
             self.comboBox_override_stage.setEnabled(True)
@@ -1988,54 +2013,113 @@ class AutoTrainDialog(QDialog):
             
     def _update_stage_to_apply(self):
         if self.checkBox_override_stage.isChecked():
-            self.MainWindow.stage_in_use = self.comboBox_override_stage.currentText()
+            self.stage_in_use = self.comboBox_override_stage.currentText()
         elif self.last_session is not None:
-            self.MainWindow.stage_in_use = self.last_session['next_stage_suggested']
+            self.stage_in_use = self.last_session['next_stage_suggested']
         else:
-            self.MainWindow.stage_in_use = 'unknown'
+            self.stage_in_use = 'unknown training stage'
         
         self.pushButton_apply_auto_train_paras.setText(
-            f"Apply and lock\n{self.MainWindow.stage_in_use}"
+            f"Apply and lock\n{self.stage_in_use}"
         )
-    
-    def _apply_auto_train_paras(self, checked):
-        if checked:
+                
+    def _apply_curriculum(self):
+        # Check if a curriculum is selected
+        if not hasattr(self, 'selected_curriculum') or self.selected_curriculum is None:
+            QMessageBox.critical(self, "Error", "Please select a curriculum!")
+            return
+        
+        # Update global curriculum_in_use
+        self.curriculum_in_use = self.selected_curriculum
+        
+        # Add a dummy entry to df_training_manager
+        self.df_training_manager = pd.concat(
+            [self.df_training_manager, 
+             pd.DataFrame.from_records([
+                dict(subject_id=self.selected_subject_id,
+                    session=0,
+                    session_date='unknown',
+                    curriculum_name=self.selected_curriculum['curriculum'].curriculum_name,
+                    curriculum_version=self.selected_curriculum['curriculum'].curriculum_version,
+                    curriculum_schema_version=self.selected_curriculum['curriculum'].curriculum_schema_version,
+                    task=None,
+                    current_stage_suggested=None,
+                    current_stage_actual=None,
+                    decision=None,
+                    next_stage_suggested='STAGE_1',
+                    if_closed_loop=None,
+                    if_overriden_by_trainer=None,
+                    finished_trials=None,
+                    foraging_efficiency=None,
+                    )
+             ])]
+        )
+        logger.info(f"Added a dummy session 0 for mouse {self.selected_subject_id} ")
+        
+        # Refresh the GUI
+        self.update_subject_id(subject_id=self.selected_subject_id)
+            
+    def update_auto_train_lock(self, engaged):
+        if engaged:
+            # Update the flag
+            self.auto_train_engaged = True
+
             # Get parameter settings
-            paras = self.MainWindow.curriculum_in_use['curriculum'].parameters[
-                TrainingStage[self.MainWindow.stage_in_use]
+            paras = self.curriculum_in_use['curriculum'].parameters[
+                TrainingStage[self.stage_in_use]
             ]
             
             # Convert to GUI format and set the parameters
             paras_dict = paras.to_GUI_format()
-            # Attach to MainWindow for persistency
-            self.MainWindow.widgets_locked_by_auto_train = self._set_training_parameters(
+            self.widgets_locked_by_auto_train = self._set_training_parameters(
                 paras_dict=paras_dict,
                 if_press_enter=True
             )
             
-            # update the widgets that have been set by auto training
-            self.MainWindow.widgets_locked_by_auto_train.extend(
+            if self.widgets_locked_by_auto_train == []:  # Error in setting parameters
+                self.update_auto_train_lock(engaged=False)  # Uncheck the "apply" button
+                return
+                
+            self.widgets_locked_by_auto_train.extend(
                 [self.MainWindow.TrainingStage,
                 self.MainWindow.SaveTraining]
                 )
-            
+
+            # lock the widgets that have been set by auto training 
+            for widget in self.widgets_locked_by_auto_train:
+                widget.setEnabled(False)
+                # set the border color to green
+                widget.setStyleSheet("border: 2px solid rgb(170, 255, 0);")
+            self.MainWindow.TrainingParameters.setStyleSheet(
+                '''QGroupBox {
+                        border: 5px solid rgb(170, 255, 0)
+                    }
+                '''
+            )
+
             # disable override
             self.checkBox_override_stage.setEnabled(False)
             self.comboBox_override_stage.setEnabled(False)
-            
-            # cache some status...
-            self.MainWindow.checkBox_override_stage = self.checkBox_override_stage.isChecked()
-            self.MainWindow.comboBox_override_stage = self.comboBox_override_stage.currentIndex()
+                                    
         else:
+            # Update the flag
+            self.auto_train_engaged = False
+            
+            # Uncheck the button (when this is called from the MainWindow, not from actual button click)
+            self.pushButton_apply_auto_train_paras.setChecked(False)
+
+            # Unlock the previously engaged widgets
+            for widget in self.widgets_locked_by_auto_train:
+                widget.setEnabled(True)
+                # clear style
+                widget.setStyleSheet("")
+            self.MainWindow.TrainingParameters.setStyleSheet("")
+
             # enable override
             self.checkBox_override_stage.setEnabled(True)
             self.comboBox_override_stage.setEnabled(self.checkBox_override_stage.isChecked())
-            
 
-        self.MainWindow._update_auto_train_lock(checked)
-        
 
-            
     def _set_training_parameters(self, paras_dict, if_press_enter=False):
         """Accepts a dictionary of parameters and set the GUI accordingly
         Trying to refactor Foraging.py's _TrainingStage() here.
@@ -2054,7 +2138,7 @@ class AutoTrainDialog(QDialog):
                 if task_ind < 0:
                     logger.error(f"Task {paras_dict['task']} not found!")
                     QMessageBox.critical(self, "Error", f'''Task "{paras_dict['task']}" not found. Check the curriculum!''')
-                    return  # Return without setting anything
+                    return [] # Return an empty list without setting anything
                 else:
                     widget_task.setCurrentIndex(task_ind)
                     logger.info(f"Task is set to {paras_dict['task']}")

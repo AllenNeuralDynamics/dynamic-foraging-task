@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1891</width>
-    <height>997</height>
+    <width>1779</width>
+    <height>1059</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -61,39 +61,28 @@
         </item>
         <item>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="1" column="5" rowspan="5">
-           <widget class="QPushButton" name="pushButton_apply_auto_train_paras">
+          <item row="5" column="1">
+           <widget class="QLabel" name="label_next_stage_suggested">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>20</horstretch>
+              <horstretch>10</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
             <property name="font">
              <font>
-              <pointsize>14</pointsize>
+              <pointsize>13</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
              </font>
             </property>
-            <property name="styleSheet">
-             <string notr="true">background-color: rgb(170, 255, 0);
-</string>
-            </property>
             <property name="text">
-             <string>Apply &lt;stage&gt;</string>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
+             <string>Unknown</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QLabel" name="label_session">
+          <item row="3" column="1">
+           <widget class="QLabel" name="label_last_actual_stage">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -112,35 +101,6 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="4">
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Maximum</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>50</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="1" column="2" alignment="Qt::AlignRight">
-           <widget class="QCheckBox" name="checkBox_override_curriculum">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>10</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Override curriculum</string>
-            </property>
-           </widget>
-          </item>
           <item row="5" column="3">
            <widget class="QComboBox" name="comboBox_override_stage">
             <property name="enabled">
@@ -151,19 +111,6 @@
               <horstretch>10</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="2" alignment="Qt::AlignRight">
-           <widget class="QCheckBox" name="checkBox_override_stage">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>10</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Override stage</string>
             </property>
            </widget>
           </item>
@@ -187,41 +134,17 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="1">
-           <widget class="QLabel" name="label_next_stage_suggested">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>10</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_8">
             <property name="font">
              <font>
-              <pointsize>13</pointsize>
-              <weight>75</weight>
-              <bold>true</bold>
+              <pointsize>10</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>Unknown</string>
+             <string>Session finished:</string>
             </property>
            </widget>
-          </item>
-          <item row="1" column="6">
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Preferred</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>100</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
           </item>
           <item row="0" column="1">
            <widget class="QLabel" name="label_subject_id">
@@ -240,6 +163,55 @@
             </property>
             <property name="text">
              <string>Unknown</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Curriculum:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2" alignment="Qt::AlignRight">
+           <widget class="QCheckBox" name="checkBox_override_curriculum">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>10</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Override curriculum</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="2" alignment="Qt::AlignRight">
+           <widget class="QCheckBox" name="checkBox_override_stage">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>10</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Override stage</string>
             </property>
            </widget>
           </item>
@@ -283,14 +255,8 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_6">
             <property name="font">
              <font>
               <pointsize>10</pointsize>
@@ -299,12 +265,12 @@
              </font>
             </property>
             <property name="text">
-             <string>Curriculum:</string>
+             <string>Last stage (actual): </string>
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
-           <widget class="QLabel" name="label_last_actual_stage">
+          <item row="2" column="1">
+           <widget class="QLabel" name="label_session">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -323,34 +289,56 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_6">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
+          <item row="3" column="4">
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
-            <property name="text">
-             <string>Last stage (actual): </string>
+            <property name="sizeType">
+             <enum>QSizePolicy::Maximum</enum>
             </property>
-           </widget>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>50</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_8">
+          <item row="1" column="5" rowspan="5">
+           <widget class="QPushButton" name="pushButton_apply_auto_train_paras">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>20</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="font">
              <font>
-              <pointsize>10</pointsize>
+              <pointsize>14</pointsize>
              </font>
             </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(170, 255, 0);
+</string>
+            </property>
             <property name="text">
-             <string>Session finished:</string>
+             <string>Apply and lock
+&lt;stage&gt;</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
           <item row="1" column="3" rowspan="2">
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="pushButton_apply_curriculum">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -591,14 +579,7 @@
            <enum>Qt::StrongFocus</enum>
           </property>
           <property name="styleSheet">
-           <string notr="true">QTableView::item:selected {
-                background-color: lightblue;
-                color: black;
-            }
-
-QTableView {
-				border:7px solid rgb(255, 170, 255);
-}</string>
+           <string notr="true"/>
           </property>
           <property name="selectionMode">
            <enum>QAbstractItemView::SingleSelection</enum>
@@ -677,7 +658,7 @@ QTableView {
   <connection>
    <sender>checkBox_override_curriculum</sender>
    <signal>clicked(bool)</signal>
-   <receiver>pushButton</receiver>
+   <receiver>pushButton_apply_curriculum</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
