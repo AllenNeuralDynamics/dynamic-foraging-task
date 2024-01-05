@@ -71,6 +71,7 @@ class Window(QMainWindow):
         self.loggingstarted=-1
         
         # Some global variables for auto training
+        self.df_auto_train_manager = None
         self.auto_train_locked = False
         self.widgets_locked_by_auto_train = []
         self.stage_in_use = None

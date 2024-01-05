@@ -1782,18 +1782,7 @@ class AutoTrainDialog(QDialog):
                 f"If it is a new mouse (not your typo), please select a curriculum to add it."
             )
             self.pushButton_apply_curriculum.setEnabled(True)
-            self.tableView_df_curriculum.setStyleSheet(
-                '''
-                QTableView::item:selected {
-                background-color: lightblue;
-                color: black;
-                            }
-
-                QTableView {
-                                border:7px solid rgb(255, 170, 255);
-                }
-                '''
-            )
+            self._add_border_curriculum_selection()
 
         else:
             # fetch last session
@@ -1819,14 +1808,7 @@ class AutoTrainDialog(QDialog):
             
             # disable apply curriculum                        
             self.pushButton_apply_curriculum.setEnabled(False)
-            self.tableView_df_curriculum.setStyleSheet(
-                '''
-                QTableView::item:selected {
-                background-color: lightblue;
-                color: black;
-                            }
-                '''
-            )
+            self._remove_border_curriculum_selection()
 
             
             # Set pushButton_apply_auto_train_paras
@@ -1855,31 +1837,62 @@ class AutoTrainDialog(QDialog):
         # Update df_auto_train_manager and df_curriculum_manager
         self._show_auto_training_manager()
         self._show_available_curriculums()
+
+    def _add_border_curriculum_selection(self):
+        self.tableView_df_curriculum.setStyleSheet(
+                '''
+                QTableView::item:selected {
+                background-color: lightblue;
+                color: black;
+                            }
+
+                QTableView {
+                                border:7px solid rgb(255, 170, 255);
+                }
+                '''
+        )
+    
+    def _remove_border_curriculum_selection(self):
+        self.tableView_df_curriculum.setStyleSheet(
+                '''
+                QTableView::item:selected {
+                background-color: lightblue;
+                color: black;
+                            }
+                '''
+        )
                 
     def _connect_auto_training_manager(self):
-        self.auto_train_manager = DynamicForagingAutoTrainManager(
-            manager_name='447_demo',
-            df_behavior_on_s3=dict(bucket='aind-behavior-data',
-                                   root='foraging_nwb_bonsai_processed/',
-                                   file_name='df_sessions.pkl'),
-            df_manager_root_on_s3=dict(bucket='aind-behavior-data',
-                                       root='foraging_auto_training/')
-        )
-        df_training_manager = self.auto_train_manager.df_manager
-        
-        # Format dataframe
-        df_training_manager['session'] = df_training_manager['session'].astype(int)
-        df_training_manager['foraging_efficiency'] = \
-            df_training_manager['foraging_efficiency'].round(3)
+        if self.MainWindow.df_auto_train_manager is not None:
+            # Restore the cached auto_train_manager
+            self.df_training_manager = self.MainWindow.df_auto_train_manager
+            logger.info("Restored cached auto_train_manager")
+        else:
+            self.auto_train_manager = DynamicForagingAutoTrainManager(
+                manager_name='447_demo',
+                df_behavior_on_s3=dict(bucket='aind-behavior-data',
+                                    root='foraging_nwb_bonsai_processed/',
+                                    file_name='df_sessions.pkl'),
+                df_manager_root_on_s3=dict(bucket='aind-behavior-data',
+                                        root='foraging_auto_training/')
+            )
+            df_training_manager = self.auto_train_manager.df_manager
             
-        # Sort by subject_id and session
-        df_training_manager.sort_values(
-            by=['subject_id', 'session'],
-            ascending=[False, False],  # Newest sessions on the top,
-            inplace=True
-        )
+            # Format dataframe
+            df_training_manager['session'] = df_training_manager['session'].astype(int)
+            df_training_manager['foraging_efficiency'] = \
+                df_training_manager['foraging_efficiency'].round(3)
+                
+            # Sort by subject_id and session
+            df_training_manager.sort_values(
+                by=['subject_id', 'session'],
+                ascending=[False, False],  # Newest sessions on the top,
+                inplace=True
+            )
+            self.df_training_manager = df_training_manager
             
-        self.df_training_manager = df_training_manager
+            # Note: we don't sync back to the MainWindow here.
+            # We only update the MainWindow one when the user clicks "Apply stage" button.
 
     def _show_auto_training_manager(self):
         if_this_mouse_only = self.checkBox_show_this_mouse_only.isChecked()
@@ -2034,12 +2047,18 @@ class AutoTrainDialog(QDialog):
         self.pushButton_apply_auto_train_paras.setText(
             f"Apply and lock\n{self.MainWindow.stage_in_use}"
         )
-        
+                
     def _apply_curriculum(self):
+        # Check if a curriculum is selected
+        if not hasattr(self, 'selected_curriculum'):
+            QMessageBox.critical(self, "Error", "Please select a curriculum!")
+            return
+        
         # Update global curriculum_in_use
         self.MainWindow.curriculum_in_use = self.selected_curriculum
         
         # Add a dummy entry to df_training_manager
+        # This will sync with MainWindow.df_training_manager when the "apply and lock" button is clicked
         self.df_training_manager = pd.concat(
             [self.df_training_manager, 
              pd.DataFrame.from_records([
@@ -2061,12 +2080,11 @@ class AutoTrainDialog(QDialog):
                     )
              ])]
         )
+        logger.info(f"Added a dummy session 0 for mouse {self.selected_subject_id} ")
         
         # Refresh the GUI
         self.update_subject_id(subject_id=self.selected_subject_id)
-        
-        return
-    
+            
     def _apply_auto_train_paras(self, checked):
         if checked:
             # Get parameter settings
@@ -2082,7 +2100,7 @@ class AutoTrainDialog(QDialog):
                 if_press_enter=True
             )
             
-            # update the widgets that have been set by auto training
+            # update the widgets that have been set by auto training 
             self.MainWindow.widgets_locked_by_auto_train.extend(
                 [self.MainWindow.TrainingStage,
                 self.MainWindow.SaveTraining]
@@ -2100,9 +2118,14 @@ class AutoTrainDialog(QDialog):
             self.checkBox_override_stage.setEnabled(True)
             self.comboBox_override_stage.setEnabled(self.checkBox_override_stage.isChecked())
             
-
         self.MainWindow._update_auto_train_lock(checked)
         
+        # We sync back df_auto_train_manager here, meaning
+        #   1. for a new mouse, the added dummy entry will be persistent
+        #   2. if the user closes the AutoTrain dialog without clicking "Apply and lock",
+        #      the user can still change the curriculum
+        self.MainWindow.df_auto_train_manager = self.df_training_manager
+
 
             
     def _set_training_parameters(self, paras_dict, if_press_enter=False):
