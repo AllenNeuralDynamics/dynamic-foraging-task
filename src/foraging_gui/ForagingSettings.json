@@ -5,8 +5,10 @@
     "Teensy_COM":"",
     "bonsai_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\bonsai\\Bonsai.exe",
     "bonsaiworkflow_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai",
+    "temporary_video_folder":"C:\Users\\svc_aind_behavior\\Documents\\temporaryvideo\\",
+    "show_log_info_in_console":false,
     "newscale_port_tower1":"",
     "newscale_port_tower2":"",
     "newscale_port_tower3":"",
-    "newscale_port_tower4":"",
+    "newscale_port_tower4":""
 }
