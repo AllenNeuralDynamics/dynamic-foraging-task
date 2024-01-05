@@ -100,12 +100,14 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
   - Copy `<box num>` 1-4 depending on the computer
 - Configure `ForagingSettings.json`
   - Copy the template from `src\foraging_gui\ForagingSettings.json` to `Users\svc_aind_behavior\Documents\ForagingSettings\ForagingSettings.json`
-  - You should never have to modify these settings:
-    - "log_folder": For example "C:\\Documents\\",
+  - You should not have to modify these settings:
+    - "log_folder": "C:\\Documents\\",
     - "bonsai_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\bonsai\\Bonsai.exe",
     - "bonsaiworkflow_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai"
-  - There are two fields that are mandatory:
-    - "default_saveFolder": For example "C:\\Documents\\" 
+    - "default_saveFolder": "C:\\Documents\\"
+    - "temporary_video_folder":"C:\\Users\\svc_aind_behavior\\Documents\\temporaryvideo\\",
+    - "show_log_info_in_console":false (only used for debugging)
+  - This field is mandatory and must be configured for each computer:
     - "current_box": For example "Tower_EphysRig3", "Blue"
   - These settings need to be configured for each computer:
     - "Teensy_COM": For example "COM10",
