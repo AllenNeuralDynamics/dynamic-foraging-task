@@ -8,6 +8,7 @@ from datetime import datetime
 import logging
 
 import numpy as np
+import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox
 from PyQt5 import QtWidgets, uic
@@ -1744,6 +1745,9 @@ class AutoTrainDialog(QDialog):
         self.pushButton_apply_auto_train_paras.clicked.connect(
             self._apply_auto_train_paras
         )
+        self.pushButton_apply_curriculum.clicked.connect(
+            self._apply_curriculum
+        )
     
     def update_subject_id(self, subject_id: str):
         self.selected_subject_id = subject_id
@@ -1769,6 +1773,27 @@ class AutoTrainDialog(QDialog):
             self.checkBox_override_stage.setEnabled(False)
             self._clear_layout(self.horizontalLayout_diagram)
             self.pushButton_apply_auto_train_paras.setEnabled(False)
+            
+            # prompt user to create a new mouse
+            QMessageBox.information(
+                self,
+                "Info",
+                f"The mouse {self.selected_subject_id} does not exist in the auto training manager!\n"
+                f"If it is a new mouse (not your typo), please select a curriculum to add it."
+            )
+            self.pushButton_apply_curriculum.setEnabled(True)
+            self.tableView_df_curriculum.setStyleSheet(
+                '''
+                QTableView::item:selected {
+                background-color: lightblue;
+                color: black;
+                            }
+
+                QTableView {
+                                border:7px solid rgb(255, 170, 255);
+                }
+                '''
+            )
 
         else:
             # fetch last session
@@ -1789,8 +1814,20 @@ class AutoTrainDialog(QDialog):
             self.label_next_stage_suggested.setText(str(self.last_session['next_stage_suggested']))
             self.label_subject_id.setStyleSheet("color: black;")
             
-            # enable some stuff
+            # enable apply training stage
             self.pushButton_apply_auto_train_paras.setEnabled(True)
+            
+            # disable apply curriculum                        
+            self.pushButton_apply_curriculum.setEnabled(False)
+            self.tableView_df_curriculum.setStyleSheet(
+                '''
+                QTableView::item:selected {
+                background-color: lightblue;
+                color: black;
+                            }
+                '''
+            )
+
             
             # Set pushButton_apply_auto_train_paras
             if self.MainWindow.auto_train_locked:
@@ -1992,11 +2029,43 @@ class AutoTrainDialog(QDialog):
         elif self.last_session is not None:
             self.MainWindow.stage_in_use = self.last_session['next_stage_suggested']
         else:
-            self.MainWindow.stage_in_use = 'unknown'
+            self.MainWindow.stage_in_use = 'unknown training stage'
         
         self.pushButton_apply_auto_train_paras.setText(
             f"Apply and lock\n{self.MainWindow.stage_in_use}"
         )
+        
+    def _apply_curriculum(self):
+        # Update global curriculum_in_use
+        self.MainWindow.curriculum_in_use = self.selected_curriculum
+        
+        # Add a dummy entry to df_training_manager
+        self.df_training_manager = pd.concat(
+            [self.df_training_manager, 
+             pd.DataFrame.from_records([
+                dict(subject_id=self.selected_subject_id,
+                    session=0,
+                    session_date='unknown',
+                    curriculum_name=self.selected_curriculum['curriculum'].curriculum_name,
+                    curriculum_version=self.selected_curriculum['curriculum'].curriculum_version,
+                    curriculum_schema_version=self.selected_curriculum['curriculum'].curriculum_schema_version,
+                    task=None,
+                    current_stage_suggested=None,
+                    current_stage_actual=None,
+                    decision=None,
+                    next_stage_suggested='STAGE_1',
+                    if_closed_loop=None,
+                    if_overriden_by_trainer=None,
+                    finished_trials=None,
+                    foraging_efficiency=None,
+                    )
+             ])]
+        )
+        
+        # Refresh the GUI
+        self.update_subject_id(subject_id=self.selected_subject_id)
+        
+        return
     
     def _apply_auto_train_paras(self, checked):
         if checked:
