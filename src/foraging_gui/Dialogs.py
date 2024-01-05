@@ -1759,7 +1759,6 @@ class AutoTrainDialog(QDialog):
         )
         
         if self.df_this_mouse.empty:
-            # TODO: create a new mouse here
             logger.info(f"No entry found in df_training_manager for subject_id: {self.selected_subject_id}")
             self.last_session = None
             self.label_session.setText('subject not found')
@@ -1775,12 +1774,16 @@ class AutoTrainDialog(QDialog):
             self.pushButton_apply_auto_train_paras.setEnabled(False)
             
             # prompt user to create a new mouse
-            QMessageBox.information(
-                self,
-                "Info",
-                f"The mouse {self.selected_subject_id} does not exist in the auto training manager!\n"
-                f"If it is a new mouse (not your typo), please select a curriculum to add it."
-            )
+            if self.MainWindow.AutoTrain_dialog.isVisible():
+                QMessageBox.information(
+                    self,
+                    "Info",
+                    f"The mouse {self.selected_subject_id} does not exist in the auto training manager!\n"
+                    f"If it is a new mouse (not your typo), please select a curriculum to add it."
+                )
+                
+            self.tableView_df_curriculum.clearSelection() # Unselect any curriculum
+            self.selected_curriculum = None
             self.pushButton_apply_curriculum.setEnabled(True)
             self._add_border_curriculum_selection()
 
@@ -2050,7 +2053,7 @@ class AutoTrainDialog(QDialog):
                 
     def _apply_curriculum(self):
         # Check if a curriculum is selected
-        if not hasattr(self, 'selected_curriculum'):
+        if not hasattr(self, 'selected_curriculum') or self.selected_curriculum is None:
             QMessageBox.critical(self, "Error", "Please select a curriculum!")
             return
         

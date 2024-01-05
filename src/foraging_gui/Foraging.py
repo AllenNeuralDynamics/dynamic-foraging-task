@@ -2476,17 +2476,21 @@ class Window(QMainWindow):
             
     def _AutoTrain(self):
         """set up auto training"""
-        if not hasattr(self, 'AutoTrain_dialog') or not self.AutoTrain_dialog.isVisible():
+        # Note: by only create one AutoTrainDialog, all objects associated with 
+        # AutoTrainDialog are now persistent!
+        if not hasattr(self, 'AutoTrain_dialog'):
             self.AutoTrain_dialog = AutoTrainDialog(MainWindow=self, parent=None)
-        self.AutoTrain_dialog.show()
+                        
+            # Connect to ID change in the mainwindow
+            self.ID.returnPressed.connect(
+                lambda: self.AutoTrain_dialog.update_subject_id(subject_id=self.ID.text())
+            )
+            self.ID.returnPressed.connect(
+                lambda: self._update_auto_train_lock(locked=False)
+            )
             
-        # Connect to ID change in the mainwindow
-        self.ID.returnPressed.connect(
-            lambda: self.AutoTrain_dialog.update_subject_id(subject_id=self.ID.text())
-        )
-        self.ID.returnPressed.connect(
-            lambda: self._update_auto_train_lock(locked=False)
-        )
+        self.AutoTrain_dialog.show()
+
         
     def _update_auto_train_lock(self, locked: bool):
         """Update the auto train lock"""
