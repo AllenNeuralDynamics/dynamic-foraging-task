@@ -1792,7 +1792,7 @@ class AutoTrainDialog(QDialog):
                 QMessageBox.information(
                     self,
                     "Info",
-                    f"The mouse {self.selected_subject_id} does not exist in the auto training manager!\n"
+                    f"Mouse {self.selected_subject_id} does not exist in the auto training manager!\n"
                     f"If it is a new mouse (not your typo), please select a curriculum to add it."
                 )
                 
@@ -1964,27 +1964,34 @@ class AutoTrainDialog(QDialog):
         self.tableView_df_curriculum.setSortingEnabled(True)
         
         # Add callback
-        self.tableView_df_curriculum.clicked.connect(self._curriculum_selected)
+        self.tableView_df_curriculum.clicked.connect(self._update_curriculum_diagrams)
         
+        self._sync_curriculum_in_use_to_table()
+        
+    def _sync_curriculum_in_use_to_table(self):
         # Auto select the curriculum_in_use, if any
-        if self.curriculum_in_use is not None:
-            curriculum_index = self.df_curriculums.reset_index().index[
-                (self.df_curriculums['curriculum_name'] == self.curriculum_in_use.curriculum_name) &
-                (self.df_curriculums['curriculum_version'] == self.curriculum_in_use.curriculum_version) &
-                (self.df_curriculums['curriculum_schema_version'] == self.curriculum_in_use.curriculum_schema_version)
-            ][0]
+        if self.curriculum_in_use is None:
+            return
+            
+        self.tableView_df_curriculum.clearSelection() # Unselect any curriculum
 
-            # Auto click the curriculum of the latest session
-            _index = self.tableView_df_curriculum.model().index(curriculum_index, 0)
-            self.tableView_df_curriculum.selectionModel().select(
-                _index,
-                QItemSelectionModel.Select | QItemSelectionModel.Rows
-            )
-            self.tableView_df_curriculum.scrollTo(_index)
+        curriculum_index = self.df_curriculums.reset_index().index[
+            (self.df_curriculums['curriculum_name'] == self.curriculum_in_use.curriculum_name) &
+            (self.df_curriculums['curriculum_version'] == self.curriculum_in_use.curriculum_version) &
+            (self.df_curriculums['curriculum_schema_version'] == self.curriculum_in_use.curriculum_schema_version)
+        ][0]
 
-            self._curriculum_selected(_index) # Update diagrams
+        # Auto click the curriculum of the latest session
+        _index = self.tableView_df_curriculum.model().index(curriculum_index, 0)
+        self.tableView_df_curriculum.selectionModel().select(
+            _index,
+            QItemSelectionModel.Select | QItemSelectionModel.Rows
+        )
+        self.tableView_df_curriculum.scrollTo(_index)
+
+        self._update_curriculum_diagrams(_index) # Update diagrams
         
-    def _curriculum_selected(self, index):
+    def _update_curriculum_diagrams(self, index):
         # Retrieve selected curriculum
         row = index.row()
         selected_row = self.df_curriculums.iloc[row]
@@ -2036,6 +2043,9 @@ class AutoTrainDialog(QDialog):
         else:
             self.pushButton_apply_curriculum.setEnabled(False)
             self._remove_border_curriculum_selection()
+        
+        # Always sync
+        self._sync_curriculum_in_use_to_table()
             
     def _update_stage_to_apply(self):
         if self.checkBox_override_stage.isChecked():
@@ -2054,11 +2064,11 @@ class AutoTrainDialog(QDialog):
         if not hasattr(self, 'selected_curriculum') or self.selected_curriculum is None:
             QMessageBox.critical(self, "Error", "Please select a curriculum!")
             return
-        
         if self.df_this_mouse.empty:
+        
             # -- This is a new mouse, we add the first dummy session --
             # Update global curriculum_in_use
-            self.curriculum_in_use = self.selected_curriculum
+            self.curriculum_in_use = self.selected_curriculum['curriculum']
             
             # Add a dummy entry to df_training_manager
             self.df_training_manager = pd.concat(
@@ -2067,9 +2077,9 @@ class AutoTrainDialog(QDialog):
                     dict(subject_id=self.selected_subject_id,
                         session=0,
                         session_date='unknown',
-                        curriculum_name=self.selected_curriculum['curriculum'].curriculum_name,
-                        curriculum_version=self.selected_curriculum['curriculum'].curriculum_version,
-                        curriculum_schema_version=self.selected_curriculum['curriculum'].curriculum_schema_version,
+                        curriculum_name=self.curriculum_in_use.curriculum_name,
+                        curriculum_version=self.curriculum_in_use.curriculum_version,
+                        curriculum_schema_version=self.curriculum_in_use.curriculum_schema_version,
                         task=None,
                         current_stage_suggested=None,
                         current_stage_actual=None,
@@ -2093,10 +2103,6 @@ class AutoTrainDialog(QDialog):
         else:
             # -- This is an existing mouse, we are changing the curriculum --
             # Not sure whether we should leave this option open. But for now, I allow this freedom.            
-            self.checkBox_override_curriculum.setChecked(False)
-            self.pushButton_apply_curriculum.setEnabled(False)
-            self._remove_border_curriculum_selection() # Remove the highlight of curriculum table view
-            
             if self.selected_curriculum['curriculum'] == self.curriculum_in_use:
                 # The selected curriculum is the same as the one in use
                 logger.info(f"Selected curriculum is the same as the one in use. No change is made.")
@@ -2116,6 +2122,10 @@ class AutoTrainDialog(QDialog):
                                 f"{get_curriculum_string(self.selected_curriculum['curriculum'])}")
                     self.curriculum_in_use = self.selected_curriculum['curriculum']
                         
+            self.checkBox_override_curriculum.setChecked(False)
+            self.pushButton_apply_curriculum.setEnabled(False)
+            self._remove_border_curriculum_selection() # Remove the highlight of curriculum table view
+
             # Refresh the GUI
             self.update_auto_train_fields(subject_id=self.selected_subject_id,
                                           curriculum_just_overridden=reply == QMessageBox.Yes)

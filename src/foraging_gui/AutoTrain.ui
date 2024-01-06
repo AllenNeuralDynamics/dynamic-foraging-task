@@ -708,5 +708,21 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>checkBox_override_curriculum</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pushButton_apply_auto_train_paras</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>520</x>
+     <y>92</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>828</x>
+     <y>128</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
 </ui>
