@@ -66,7 +66,7 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - Install Bonsai on your computer
   - In the console, change to the directory `C:\Users\svc_aind_behavior\Documents\GitHub\dynamic-foraging-task\bonsai`
   - install bonsai with: `./setup.cmd`
-- Update the firmware of the Harp Behavior Board by following the instructions [here](https://harp-tech.org/articles/firmware.html)).
+- Update the firmware of the Harp Behavior Board by following the instructions [here](https://harp-tech.org/articles/firmware.html).
 - Install the USBXpress software, for the newscale motor stage
 - Install the Spinnaker SDK, if a FLIR camera is being used
 - Install the NI-DAQ max driver if a NiDAQ is present (for optogenetics)
