@@ -2474,7 +2474,7 @@ class Window(QMainWindow):
                 lambda: self.AutoTrain_dialog.update_auto_train_lock(engaged=False)
             )
             self.ID.returnPressed.connect(
-                lambda: self.AutoTrain_dialog.update_subject_id(subject_id=self.ID.text())
+                lambda: self.AutoTrain_dialog.update_auto_train_fields(subject_id=self.ID.text())
             )
 
             

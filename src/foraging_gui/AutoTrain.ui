@@ -108,7 +108,7 @@
             </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>10</horstretch>
+              <horstretch>7</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
@@ -130,7 +130,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Next stage (suggested): </string>
+             <string>Stage suggested:</string>
             </property>
            </widget>
           </item>
@@ -142,7 +142,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Session finished:</string>
+             <string>Sessions finished:</string>
             </property>
            </widget>
           </item>
@@ -182,18 +182,18 @@
              </font>
             </property>
             <property name="text">
-             <string>Curriculum:</string>
+             <string>Curriculum in use:</string>
             </property>
            </widget>
           </item>
           <item row="1" column="2" alignment="Qt::AlignRight">
            <widget class="QCheckBox" name="checkBox_override_curriculum">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>10</horstretch>
+              <horstretch>8</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
@@ -265,7 +265,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Last stage (actual): </string>
+             <string>Stage of the last session: </string>
             </property>
            </widget>
           </item>
@@ -289,27 +289,11 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="4">
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Maximum</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>50</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
           <item row="1" column="5" rowspan="5">
            <widget class="QPushButton" name="pushButton_apply_auto_train_paras">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>20</horstretch>
+              <horstretch>15</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
@@ -321,7 +305,7 @@
             </property>
             <property name="font">
              <font>
-              <pointsize>14</pointsize>
+              <pointsize>12</pointsize>
              </font>
             </property>
             <property name="styleSheet">
@@ -337,7 +321,23 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="3" rowspan="2">
+          <item row="3" column="4">
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Maximum</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="1" column="3">
            <widget class="QPushButton" name="pushButton_apply_curriculum">
             <property name="enabled">
              <bool>false</bool>
@@ -348,12 +348,17 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
             <property name="styleSheet">
              <string notr="true">background-color: rgb(255, 170, 255)
 </string>
             </property>
             <property name="text">
-             <string>Apply curriculum</string>
+             <string>Set curriculum</string>
             </property>
            </widget>
           </item>
@@ -550,7 +555,7 @@
         <item>
          <widget class="QTableView" name="tableView_df_curriculum">
           <property name="enabled">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -630,8 +635,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>236</x>
-     <y>987</y>
+     <x>245</x>
+     <y>1049</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -646,28 +651,12 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>304</x>
-     <y>987</y>
+     <x>313</x>
+     <y>1049</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>checkBox_override_curriculum</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>pushButton_apply_curriculum</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>403</x>
-     <y>92</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>504</x>
-     <y>107</y>
     </hint>
    </hints>
   </connection>
@@ -682,8 +671,40 @@
      <y>141</y>
     </hint>
     <hint type="destinationlabel">
-     <x>364</x>
-     <y>169</y>
+     <x>465</x>
+     <y>174</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_apply_auto_train_paras</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>checkBox_override_curriculum</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>789</x>
+     <y>114</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>497</x>
+     <y>100</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox_override_curriculum</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>tableView_df_curriculum</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>473</x>
+     <y>92</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1123</x>
+     <y>158</y>
     </hint>
    </hints>
   </connection>

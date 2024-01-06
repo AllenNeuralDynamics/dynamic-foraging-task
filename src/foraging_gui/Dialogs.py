@@ -1736,14 +1736,14 @@ class AutoTrainDialog(QDialog):
         self._setup_allbacks()
         
         # Sync selected subject_id
-        self.update_subject_id(self.MainWindow.ID.text())
+        self.update_auto_train_fields(subject_id=self.MainWindow.ID.text())
                 
     def _setup_allbacks(self):
         self.checkBox_show_this_mouse_only.stateChanged.connect(
             self._show_auto_training_manager
         )
         self.checkBox_override_stage.stateChanged.connect(
-            self._update_status_override_stage
+            self._override_stage_clicked
         )
         self.comboBox_override_stage.currentIndexChanged.connect(
             self._update_stage_to_apply
@@ -1751,11 +1751,14 @@ class AutoTrainDialog(QDialog):
         self.pushButton_apply_auto_train_paras.clicked.connect(
             self.update_auto_train_lock
         )
+        self.checkBox_override_curriculum.stateChanged.connect(
+            self._override_curriculum_clicked
+        )
         self.pushButton_apply_curriculum.clicked.connect(
             self._apply_curriculum
         )
     
-    def update_subject_id(self, subject_id: str):
+    def update_auto_train_fields(self, subject_id: str, curriculum_just_overridden: bool = False):
         self.selected_subject_id = subject_id
         self.label_subject_id.setText(self.selected_subject_id)
         
@@ -1767,6 +1770,7 @@ class AutoTrainDialog(QDialog):
         if self.df_this_mouse.empty:
             logger.info(f"No entry found in df_training_manager for subject_id: {self.selected_subject_id}")
             self.last_session = None
+            self.curriculum_in_use = None
             self.label_session.setText('subject not found')
             self.label_curriculum_name.setText('subject not found')
             self.label_last_actual_stage.setText('subject not found')
@@ -1778,6 +1782,10 @@ class AutoTrainDialog(QDialog):
             self.checkBox_override_stage.setEnabled(False)
             self._clear_layout(self.horizontalLayout_diagram)
             self.pushButton_apply_auto_train_paras.setEnabled(False)
+            
+            # override curriculum is checked by default and disabled
+            self.checkBox_override_curriculum.setChecked(True)
+            self.checkBox_override_curriculum.setEnabled(False)
             
             # prompt user to create a new mouse
             if self.isVisible():
@@ -1792,24 +1800,35 @@ class AutoTrainDialog(QDialog):
             self.selected_curriculum = None
             self.pushButton_apply_curriculum.setEnabled(True)
             self._add_border_curriculum_selection()
-
-        else:
-            # fetch last session
-            self.last_session = self.df_this_mouse.iloc[0]  # The first row is the latest session
-            # get curriculum in use
-            self.curriculum_in_use = self.curriculum_manager.get_curriculum(
-                curriculum_name=self.last_session['curriculum_name'],
-                curriculum_schema_version=self.last_session['curriculum_schema_version'],
-                curriculum_version=self.last_session['curriculum_version'],
-            )
-            # update info
+                        
+        else: # If the mouse exists in the auto_train_manager
+            # get curriculum in use from the last session, unless we just overrode it
+            if not curriculum_just_overridden:
+                # fetch last session
+                self.last_session = self.df_this_mouse.iloc[0]  # The first row is the latest session
+                self.curriculum_in_use = self.curriculum_manager.get_curriculum(
+                    curriculum_name=self.last_session['curriculum_name'],
+                    curriculum_schema_version=self.last_session['curriculum_schema_version'],
+                    curriculum_version=self.last_session['curriculum_version'],
+                )['curriculum']
+            
+                # update stage info
+                self.label_last_actual_stage.setText(str(self.last_session['current_stage_actual']))
+                self.label_next_stage_suggested.setText(str(self.last_session['next_stage_suggested']))
+                self.label_next_stage_suggested.setStyleSheet("color: black;")
+            else:
+                self.label_last_actual_stage.setText('irrelevant (curriculum overridden)')
+                self.label_next_stage_suggested.setText('irrelevant')
+                self.label_next_stage_suggested.setStyleSheet("color: red;")
+                
+                # Set override stage automatically
+                self.checkBox_override_stage.setChecked(True)
+            
+            # update more info
             self.label_curriculum_name.setText(
-                f"{self.last_session['curriculum_name']} "
-                f"(v{self.last_session['curriculum_version']})"
+                get_curriculum_string(self.curriculum_in_use)
                 )
             self.label_session.setText(str(self.last_session['session']))
-            self.label_last_actual_stage.setText(str(self.last_session['current_stage_actual']))
-            self.label_next_stage_suggested.setText(str(self.last_session['next_stage_suggested']))
             self.label_subject_id.setStyleSheet("color: black;")
             
             # enable apply training stage
@@ -1947,13 +1966,12 @@ class AutoTrainDialog(QDialog):
         # Add callback
         self.tableView_df_curriculum.clicked.connect(self._curriculum_selected)
         
-        # Auto select the curriculum of the latest session of selected mouse, if exists
-        # Get index of the latest session
-        if self.last_session is not None:
+        # Auto select the curriculum_in_use, if any
+        if self.curriculum_in_use is not None:
             curriculum_index = self.df_curriculums.reset_index().index[
-                (self.df_curriculums['curriculum_name'] == self.last_session['curriculum_name']) &
-                (self.df_curriculums['curriculum_version'] == self.last_session['curriculum_version']) &
-                (self.df_curriculums['curriculum_schema_version'] == self.last_session['curriculum_schema_version'])
+                (self.df_curriculums['curriculum_name'] == self.curriculum_in_use.curriculum_name) &
+                (self.df_curriculums['curriculum_version'] == self.curriculum_in_use.curriculum_version) &
+                (self.df_curriculums['curriculum_schema_version'] == self.curriculum_in_use.curriculum_schema_version)
             ][0]
 
             # Auto click the curriculum of the latest session
@@ -1997,19 +2015,27 @@ class AutoTrainDialog(QDialog):
     def _update_available_training_stages(self):
         if self.curriculum_in_use is not None:
             available_training_stages = [v.name for v in 
-                                        self.curriculum_in_use['curriculum'].parameters.keys()]
+                                        self.curriculum_in_use.parameters.keys()]
         else:
             available_training_stages = []
             
         self.comboBox_override_stage.clear()
         self.comboBox_override_stage.addItems(available_training_stages)
                 
-    def _update_status_override_stage(self):
-        if self.checkBox_override_stage.isChecked():
+    def _override_stage_clicked(self, state):
+        if state:
             self.comboBox_override_stage.setEnabled(True)
         else:
             self.comboBox_override_stage.setEnabled(False)
         self._update_stage_to_apply()
+        
+    def _override_curriculum_clicked(self, state):
+        if state:
+            self.pushButton_apply_curriculum.setEnabled(True)
+            self._add_border_curriculum_selection()
+        else:
+            self.pushButton_apply_curriculum.setEnabled(False)
+            self._remove_border_curriculum_selection()
             
     def _update_stage_to_apply(self):
         if self.checkBox_override_stage.isChecked():
@@ -2020,7 +2046,7 @@ class AutoTrainDialog(QDialog):
             self.stage_in_use = 'unknown training stage'
         
         self.pushButton_apply_auto_train_paras.setText(
-            f"Apply and lock\n{self.stage_in_use}"
+            f"Apply and lock\n{get_curriculum_string(self.curriculum_in_use)}\n{self.stage_in_use}"
         )
                 
     def _apply_curriculum(self):
@@ -2029,35 +2055,70 @@ class AutoTrainDialog(QDialog):
             QMessageBox.critical(self, "Error", "Please select a curriculum!")
             return
         
-        # Update global curriculum_in_use
-        self.curriculum_in_use = self.selected_curriculum
+        if self.df_this_mouse.empty:
+            # -- This is a new mouse, we add the first dummy session --
+            # Update global curriculum_in_use
+            self.curriculum_in_use = self.selected_curriculum
+            
+            # Add a dummy entry to df_training_manager
+            self.df_training_manager = pd.concat(
+                [self.df_training_manager, 
+                pd.DataFrame.from_records([
+                    dict(subject_id=self.selected_subject_id,
+                        session=0,
+                        session_date='unknown',
+                        curriculum_name=self.selected_curriculum['curriculum'].curriculum_name,
+                        curriculum_version=self.selected_curriculum['curriculum'].curriculum_version,
+                        curriculum_schema_version=self.selected_curriculum['curriculum'].curriculum_schema_version,
+                        task=None,
+                        current_stage_suggested=None,
+                        current_stage_actual=None,
+                        decision=None,
+                        next_stage_suggested='STAGE_1',
+                        if_closed_loop=None,
+                        if_overriden_by_trainer=None,
+                        finished_trials=None,
+                        foraging_efficiency=None,
+                        )
+                ])]
+            )
+            logger.info(f"Added a dummy session 0 for mouse {self.selected_subject_id} ")
+            
+            self.checkBox_override_curriculum.setChecked(False)
+            self.checkBox_override_curriculum.setEnabled(True)
         
-        # Add a dummy entry to df_training_manager
-        self.df_training_manager = pd.concat(
-            [self.df_training_manager, 
-             pd.DataFrame.from_records([
-                dict(subject_id=self.selected_subject_id,
-                    session=0,
-                    session_date='unknown',
-                    curriculum_name=self.selected_curriculum['curriculum'].curriculum_name,
-                    curriculum_version=self.selected_curriculum['curriculum'].curriculum_version,
-                    curriculum_schema_version=self.selected_curriculum['curriculum'].curriculum_schema_version,
-                    task=None,
-                    current_stage_suggested=None,
-                    current_stage_actual=None,
-                    decision=None,
-                    next_stage_suggested='STAGE_1',
-                    if_closed_loop=None,
-                    if_overriden_by_trainer=None,
-                    finished_trials=None,
-                    foraging_efficiency=None,
-                    )
-             ])]
-        )
-        logger.info(f"Added a dummy session 0 for mouse {self.selected_subject_id} ")
-        
-        # Refresh the GUI
-        self.update_subject_id(subject_id=self.selected_subject_id)
+            # Refresh the GUI
+            self.update_auto_train_fields(subject_id=self.selected_subject_id)
+
+        else:
+            # -- This is an existing mouse, we are changing the curriculum --
+            # Not sure whether we should leave this option open. But for now, I allow this freedom.            
+            self.checkBox_override_curriculum.setChecked(False)
+            self.pushButton_apply_curriculum.setEnabled(False)
+            self._remove_border_curriculum_selection() # Remove the highlight of curriculum table view
+            
+            if self.selected_curriculum['curriculum'] == self.curriculum_in_use:
+                # The selected curriculum is the same as the one in use
+                logger.info(f"Selected curriculum is the same as the one in use. No change is made.")
+                QMessageBox.information(self, "Info", "Selected curriculum is the same as the one in use. No change is made.")
+                return
+            else:
+                # Confirm with the user about overriding the curriculum
+                reply = QMessageBox.question(self, "Confirm",
+                                             f"Are you sure you want to override the curriculum?\n"
+                                             f"If yes, please also manually select a training stage.",
+                                             QMessageBox.Yes | QMessageBox.No,
+                                             QMessageBox.No)
+                if reply == QMessageBox.Yes:                
+                    # Update curriculum in use
+                    logger.info(f"Change curriculum from "
+                                f"{get_curriculum_string(self.curriculum_in_use)} to "
+                                f"{get_curriculum_string(self.selected_curriculum['curriculum'])}")
+                    self.curriculum_in_use = self.selected_curriculum['curriculum']
+                        
+            # Refresh the GUI
+            self.update_auto_train_fields(subject_id=self.selected_subject_id,
+                                          curriculum_just_overridden=reply == QMessageBox.Yes)
             
     def update_auto_train_lock(self, engaged):
         if engaged:
@@ -2065,7 +2126,7 @@ class AutoTrainDialog(QDialog):
             self.auto_train_engaged = True
 
             # Get parameter settings
-            paras = self.curriculum_in_use['curriculum'].parameters[
+            paras = self.curriculum_in_use.parameters[
                 TrainingStage[self.stage_in_use]
             ]
             
@@ -2193,7 +2254,13 @@ class AutoTrainDialog(QDialog):
         for i in reversed(range(layout.count())): 
             layout.itemAt(i).widget().setParent(None)
 
-                        
+def get_curriculum_string(curriculum):
+    if curriculum is None:
+        return "unknown curriculum"
+    else:
+        return (f"{curriculum.curriculum_name} "
+                f"(v{curriculum.curriculum_version}"
+                f"@{curriculum.curriculum_schema_version})")
         
         
 # --- Helpers ---
