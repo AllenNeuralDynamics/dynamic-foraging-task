@@ -114,10 +114,10 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
         - This is only for fiber-photometry  
         - Follow instructions on the [wiki](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Computer-Configuration) to install Arduino IDE (1.8x) and TeensyDuino
         - Once both are installed open ArduinoIDE, go to Tools>Port, select COMport cooresponding to Teensy4.1, and this value to the ForagingSettings.json
-    - "newscale_port_tower1": For example 46103
-    - "newscale_port_tower2": For example 46104
-    - "newscale_port_tower3": For example 46105
-    - "newscale_port_tower4": For example 46106
+    - "newscale_serial_num_tower1": For example 46103
+    - "newscale_serial_num_tower2": For example 46104
+    - "newscale_serial_num_tower3": For example 46105
+    - "newscale_serial_num_tower4": For example 46106
         - Determine the serial numbers of the Newscale Stages
             - Unplug the stages for one of the two boxes
             - Open Miniconda Prompt
