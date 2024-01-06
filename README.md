@@ -34,6 +34,8 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - [FTDI driver](https://ftdichip.com/drivers/) (for Harp devices)
 - [NI-DAQmax **version 19.0**](https://www.ni.com/en/support/downloads/drivers/download.ni-daq-mx.html#484356) (for optogenetic stimulation via NI-DAQ cards)
 - [Spinnaker SDK **version 1.29.0.5**](https://www.flir.com/products/spinnaker-sdk/) (driver for FLIR cameras)
+   - [download the driver here](https://alleninstitute-my.sharepoint.com/:u:/g/personal/xinxin_yin_alleninstitute_org/Ef8zZAeZymFFjuz_5T70xs8BV8Qmdd3zVCZ6gvdYAismYQ?e=9WvLlQ)
+   - Install FULL, x64
 - USBXpress SDK (for newscale python API)
   - [get installation .exe here](https://www.silabs.com/documents/public/software/install_USBXpress_SDK.exe) (for newscale python API)
   - Click install, accept terms of agreement, hit next and accept default settings for everything. 
@@ -58,22 +60,31 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 #### For initial installation:
 - Clone repository onto your computer
   - The installation directory should be `C:\Users\svc_aind_behavior\Documents\GitHub\`
-  - `git clone https://github.com/AllenNeuralDynamics/dynamic-foraging-task.git`
-  - If you do not have git installed, use: https://gitforwindows.org
+  - In the console: `git clone https://github.com/AllenNeuralDynamics/dynamic-foraging-task.git`
+      - If you do not have git installed, use: https://gitforwindows.org
+  - You can alternatively use the Github Desktop App to clone the repo
 - Install Bonsai on your computer
-  - Change to the `dynamic-foraging-task\bonsai` folder
-  - In the command prompt, type: `setup.cmd`
+  - In the console, change to the directory `C:\Users\svc_aind_behavior\Documents\GitHub\dynamic-foraging-task\bonsai`
+  - install bonsai with: `./setup.cmd`
 - Update the firmware of the Harp Behavior Board by following the instructions [here](https://harp-tech.org/docs/articles/firmware.html).
 - Install the USBXpress software, for the newscale motor stage
 - Install the Spinnaker SDK, if a FLIR camera is being used
 - Install the NI-DAQ max driver if a NiDAQ is present (for optogenetics)
 - Create a `conda` environment, with python version 3.8
-  - install `conda` [instructions here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/windows/html)
-  - Run `miniconda prompt`
+  - install `conda` [instructions here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/windows.html)
+  - Run `miniconda prompt`, and type `where conda`
+  - Add conda to the path variable
+    - [instructions from here](https://stackoverflow.com/questions/44515769/conda-is-not-recognized-as-internal-or-external-command)
+    - Open Advanced System Settings
+    - Click on "Environment Variables", then "Edit Path", then add the following paths:
+      - C:\Users\alex.piet\AppData\Local\miniconda3
+      - C:\Users\alex.piet\AppData\Local\miniconda3\Scripts
+      - C:\Users\alex.piet\AppData\Local\miniconda3\Library\bin
+      - C:\Users\alex.piet\AppData\Local\miniconda3\condabin
   - Create an environment: `conda create -n Foraging python=3.8`
   - Activate the environment: `conda activate Foraging`
 - Use `pip` to install this repository:
-  - From the top-level directory run `pip install -e .`
+  - From the `C:\Users\svc_aind_behavior\Documents\GitHub\dynamic-foraging-task` directory run `pip install -e .`
   - This should install all the required python packages. 
 - Copy `Settings_box<box num>.csv` to `Users\svc_aind_behavior\Documents\ForagingSettings`
   - Copy `<box num>` 1-4 depending on the computer
