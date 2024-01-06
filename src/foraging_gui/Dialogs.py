@@ -2160,12 +2160,15 @@ class AutoTrainDialog(QDialog):
             for widget in self.widgets_locked_by_auto_train:
                 widget.setEnabled(False)
                 # set the border color to green
-                widget.setStyleSheet("border: 2px solid rgb(170, 255, 0);")
+                widget.setStyleSheet("border: 2px solid  rgb(0, 189, 22);")
             self.MainWindow.TrainingParameters.setStyleSheet(
                 '''QGroupBox {
-                        border: 5px solid rgb(170, 255, 0)
+                        border: 5px solid  rgb(0, 189, 22)
                     }
                 '''
+            )
+            self.MainWindow.label_auto_train_stage.setText(
+                f"{get_curriculum_string(self.curriculum_in_use)}\n{self.stage_in_use}"
             )
 
             # disable override
@@ -2185,6 +2188,8 @@ class AutoTrainDialog(QDialog):
                 # clear style
                 widget.setStyleSheet("")
             self.MainWindow.TrainingParameters.setStyleSheet("")
+            self.MainWindow.label_auto_train_stage.setText("")
+
 
             # enable override
             self.checkBox_override_stage.setEnabled(True)
