@@ -475,7 +475,6 @@ class Window(QMainWindow):
         defaults = {
             'default_saveFolder':os.path.join(os.path.expanduser("~"), "Documents")+'\\',
             'current_box':'',
-            'log_folder':os.path.join(os.path.expanduser("~"), "Documents",'log'),
             'temporary_video_folder':os.path.join(os.path.expanduser("~"), "Documents",'temporaryvideo'),
             'Teensy_COM':'',
             'bonsai_path':os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe'),
@@ -516,7 +515,6 @@ class Window(QMainWindow):
         # Save all settings
         self.default_saveFolder=Settings['default_saveFolder']
         self.current_box=Settings['current_box']
-        self.log_folder=Settings['log_folder']
         self.temporary_video_folder=Settings['temporary_video_folder']
         self.Teensy_COM=Settings['Teensy_COM']
         self.bonsai_path=Settings['bonsai_path']
