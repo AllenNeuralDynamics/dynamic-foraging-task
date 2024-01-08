@@ -1489,7 +1489,7 @@ class GenerateTrials():
         # Manually attach auto training parameters 
         if hasattr(win, 'AutoTrain_dialog') and win.AutoTrain_dialog.auto_train_engaged:
             self.TP_auto_train_engaged = True
-            _curr = win.AutoTrain_dialog.curriculum_in_use['curriculum']
+            _curr = win.AutoTrain_dialog.curriculum_in_use
             self.TP_auto_train_curriculum_name = _curr.curriculum_name
             self.TP_auto_train_curriculum_version = _curr.curriculum_version
             self.TP_auto_train_curriculum_schema_version = _curr.curriculum_schema_version

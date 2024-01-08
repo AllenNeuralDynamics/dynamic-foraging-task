@@ -3692,7 +3692,7 @@
    <widget class="QPushButton" name="StartExcitation">
     <property name="geometry">
      <rect>
-      <x>670</x>
+      <x>480</x>
       <y>871</y>
       <width>91</width>
       <height>21</height>
@@ -3714,7 +3714,7 @@
    <widget class="QPushButton" name="StartBleaching">
     <property name="geometry">
      <rect>
-      <x>780</x>
+      <x>590</x>
       <y>870</y>
       <width>91</width>
       <height>22</height>
@@ -4187,10 +4187,36 @@
      <bool>false</bool>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(170, 255, 0);</string>
+     <string notr="true">background-color:  rgb(0, 189, 22);</string>
     </property>
     <property name="text">
      <string>Auto Train</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_auto_train_stage">
+    <property name="geometry">
+     <rect>
+      <x>780</x>
+      <y>830</y>
+      <width>421</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(0, 189, 22)</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
     </property>
    </widget>
    <zorder>infor</zorder>
@@ -4223,6 +4249,7 @@
    <zorder>TeensyWarning</zorder>
    <zorder>groupBox_3</zorder>
    <zorder>AutoTrain</zorder>
+   <zorder>label_auto_train_stage</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
