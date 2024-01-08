@@ -101,7 +101,6 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - Configure `ForagingSettings.json`
   - Copy the template from `src\foraging_gui\ForagingSettings.json` to `Users\svc_aind_behavior\Documents\ForagingSettings\ForagingSettings.json`
   - You should not have to modify these settings:
-    - "log_folder": "C:\\Documents\\",
     - "bonsai_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\bonsai\\Bonsai.exe",
     - "bonsaiworkflow_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai"
     - "default_saveFolder": "C:\\Documents\\"
@@ -181,7 +180,7 @@ To configure automatic updates consistent with the [update protocol](https://git
 - **New session**: Restart a session
 - **Restart logging**:
   - **Temporary logging**: Logging to a temporary folder (determined by the **temporary_video_folder** in the **ForagingSettings.json** )
-  - **Formal logging**: Logging to a standard folder structure (determined by the **log_folder** in the **ForagingSettings.json** )
+  - **Formal logging**: Logging to a standard folder structure (determined by the **default_saveFolder** in the **ForagingSettings.json** )
 - **Open logging folder**: Open the current logging folder
 - **Open behavior folder**: Open the folder to save the current behavior JSON file
 #### Settings

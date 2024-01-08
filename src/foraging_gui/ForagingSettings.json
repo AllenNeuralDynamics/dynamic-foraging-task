@@ -1,7 +1,6 @@
 {
     "default_saveFolder": "C:\\Documents\\",
     "current_box":"",
-    "log_folder":"C:\\Documents\\",
     "Teensy_COM":"",
     "bonsai_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\bonsai\\Bonsai.exe",
     "bonsaiworkflow_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai",
