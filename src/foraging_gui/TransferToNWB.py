@@ -244,12 +244,13 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                             laser_rampingdown=LaserRampingDownC,
                             laser_pulse_duration=LaserPulseDurC,
                             
-                            # auto training parameters
-                            **{
-                                field: getattr(obj, 'TP_' + field)[i]
-                                for field in nwbfile.trials.columns
-                                if field.startswith('auto_train')
-                            }
+                            # add all auto training parameters (eventually should be in session.json)
+                            auto_train_engaged=obj.TP_auto_train_engaged[i],
+                            auto_train_curriculum_name=obj.TP_auto_train_curriculum_name[i] or 'none',
+                            auto_train_curriculum_version=obj.TP_auto_train_curriculum_version[i] or 'none',
+                            auto_train_curriculum_schema_version=obj.TP_auto_train_curriculum_schema_version[i] or 'none',
+                            auto_train_stage=obj.TP_auto_train_stage[i] or 'none',
+                            auto_train_stage_overridden=obj.TP_auto_train_stage_overridden[i] or np.nan,
                         )
 
 
