@@ -4,8 +4,6 @@ Transfer current Json/mat format from Bonsai behavior control to NWB format
 from uuid import uuid4
 import numpy as np, json,os,datetime
 from pynwb import NWBHDF5IO, NWBFile, TimeSeries
-from pynwb.behavior import Position, SpatialSeries
-from pynwb.epoch import TimeIntervals
 from pynwb.file import Subject
 from scipy.io import loadmat
 
@@ -138,6 +136,15 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_trial_column(name='laser_frequency', description=f'The laser waveform frequency')
     nwbfile.add_trial_column(name='laser_rampingdown', description=f'The ramping down time of the laser')
     nwbfile.add_trial_column(name='laser_pulse_duration', description=f'The pulse duration for Pulse protocol')
+    
+    # auto training parameters
+    nwbfile.add_trial_column(name='auto_train_engaged', description=f'Whether the auto training is engaged')
+    nwbfile.add_trial_column(name='auto_train_curriculum_name', description=f'The name of the auto training curriculum')
+    nwbfile.add_trial_column(name='auto_train_curriculum_version', description=f'The version of the auto training curriculum')
+    nwbfile.add_trial_column(name='auto_train_curriculum_schema_version', description=f'The schema version of the auto training curriculum')
+    nwbfile.add_trial_column(name='auto_train_stage', description=f'The current stage of auto training')
+    nwbfile.add_trial_column(name='auto_train_stage_overridden', description=f'Whether the auto training stage is overridden')
+    
     ## start adding trials ##
     # to see if we have harp timestamps
     if  not hasattr(obj, 'B_TrialEndTimeHarp'):
@@ -235,7 +242,14 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                             laser_protocol=LaserProtocolC,
                             laser_frequency=LaserFrequencyC,
                             laser_rampingdown=LaserRampingDownC,
-                            laser_pulse_duration=LaserPulseDurC
+                            laser_pulse_duration=LaserPulseDurC,
+                            
+                            # auto training parameters
+                            **{
+                                field: getattr(obj, 'TP_' + field)[i]
+                                for field in nwbfile.trials.columns
+                                if field.startswith('auto_train')
+                            }
                         )
 
 
