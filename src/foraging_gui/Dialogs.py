@@ -6,6 +6,7 @@ import shutil
 import subprocess
 from datetime import datetime
 import logging
+import webbrowser
 
 import numpy as np
 import pandas as pd
@@ -1727,6 +1728,8 @@ class AutoTrainDialog(QDialog):
         self.widgets_locked_by_auto_train = []
         self.stage_in_use = None
         self.curriculum_in_use = None
+        self.svg_rules = None
+        self.svg_paras = None        
 
         # Connect to Auto Training Manager and Curriculum Manager
         self._connect_auto_training_manager()
@@ -1756,6 +1759,12 @@ class AutoTrainDialog(QDialog):
         )
         self.pushButton_apply_curriculum.clicked.connect(
             self._apply_curriculum
+        )
+        self.pushButton_show_rules_in_browser.clicked.connect(
+            self._show_rules_in_browser
+        )
+        self.pushButton_show_paras_in_browser.clicked.connect(
+            self._show_paras_in_browser
         )
     
     def update_auto_train_fields(self, subject_id: str, curriculum_just_overridden: bool = False):
@@ -2003,14 +2012,14 @@ class AutoTrainDialog(QDialog):
         )
         
         # Retrieve svgs
-        svg_rule = self.selected_curriculum['diagram_rules_name']
-        svg_paras = self.selected_curriculum['diagram_paras_name']
+        self.svg_rules = self.selected_curriculum['diagram_rules_name']
+        self.svg_paras = self.selected_curriculum['diagram_paras_name']
         
         # Render svgs with KeepAspectRatio
-        svgWidget_rules = QSvgWidget(svg_rule)
+        svgWidget_rules = QSvgWidget(self.svg_rules)
         svgWidget_rules.renderer().setAspectRatioMode(Qt.KeepAspectRatio)
         
-        svgWidget_paras = QSvgWidget(svg_paras)
+        svgWidget_paras = QSvgWidget(self.svg_paras)
         svgWidget_paras.renderer().setAspectRatioMode(Qt.KeepAspectRatio)
         
         # Add the SVG widgets to the layout
@@ -2018,6 +2027,14 @@ class AutoTrainDialog(QDialog):
         self._clear_layout(layout) 
         layout.addWidget(svgWidget_rules)
         layout.addWidget(svgWidget_paras)
+        
+    def _show_rules_in_browser(self):
+        if self.svg_rules is not None and self.curriculum_in_use is not None:
+            webbrowser.open(self.svg_rules)
+            
+    def _show_paras_in_browser(self):
+        if self.svg_paras is not None and self.curriculum_in_use is not None:
+            webbrowser.open(self.svg_paras)
         
     def _update_available_training_stages(self):
         if self.curriculum_in_use is not None:
