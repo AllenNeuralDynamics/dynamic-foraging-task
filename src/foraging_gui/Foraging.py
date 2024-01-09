@@ -321,13 +321,13 @@ class Window(QMainWindow):
         self._scan_for_usb_stages()
         # use the default newscale stage
         try:
-            self.newscale_port=eval('self.newscale_port'+'_tower'+str(self.tower_number))
-            if self.newscale_port!='':
-                index = self.StageSerialNum.findText(str(self.newscale_port))
+            self.newscale_serial_num=eval('self.newscale_serial_num'+'_tower'+str(self.tower_number))
+            if self.newscale_serial_num!='':
+                index = self.StageSerialNum.findText(str(self.newscale_serial_num))
                 if index != -1:
                     self.StageSerialNum.setCurrentIndex(index)
                 else:
-                    self.Warning_Newscale.setText('Default Newsacle not found!')
+                    self.Warning_Newscale.setText('Default Newscale not found!')
                     self.Warning_Newscale.setStyleSheet("color: red;")
         except Exception as e:
             logging.error(str(e))
@@ -480,15 +480,12 @@ class Window(QMainWindow):
         defaults = {
             'default_saveFolder':os.path.join(os.path.expanduser("~"), "Documents")+'\\',
             'current_box':'',
-            'log_folder':os.path.join(os.path.expanduser("~"), "Documents",'log'),
             'temporary_video_folder':os.path.join(os.path.expanduser("~"), "Documents",'temporaryvideo'),
             'Teensy_COM':'',
             'bonsai_path':os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe'),
             'bonsaiworkflow_path':os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai'),
-            'newscale_port_tower1':'',
-            'newscale_port_tower2':'',
-            'newscale_port_tower3':'',
-            'newscale_port_tower4':'',
+            'newscale_serial_num_tower1':'',
+            'newscale_serial_num_tower2':'',
             'show_log_info_in_console':False,
         }
         
@@ -521,15 +518,12 @@ class Window(QMainWindow):
         # Save all settings
         self.default_saveFolder=Settings['default_saveFolder']
         self.current_box=Settings['current_box']
-        self.log_folder=Settings['log_folder']
         self.temporary_video_folder=Settings['temporary_video_folder']
         self.Teensy_COM=Settings['Teensy_COM']
         self.bonsai_path=Settings['bonsai_path']
         self.bonsaiworkflow_path=Settings['bonsaiworkflow_path']
-        self.newscale_port_tower1=Settings['newscale_port_tower1']
-        self.newscale_port_tower2=Settings['newscale_port_tower2']
-        self.newscale_port_tower3=Settings['newscale_port_tower3']
-        self.newscale_port_tower4=Settings['newscale_port_tower4']
+        self.newscale_serial_num_tower1=Settings['newscale_serial_num_tower1']
+        self.newscale_serial_num_tower2=Settings['newscale_serial_num_tower2']
         
         # Also stream log info to the console if enabled
         if  Settings['show_log_info_in_console']:

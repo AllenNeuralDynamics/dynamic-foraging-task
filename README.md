@@ -66,7 +66,7 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - Install Bonsai on your computer
   - In the console, change to the directory `C:\Users\svc_aind_behavior\Documents\GitHub\dynamic-foraging-task\bonsai`
   - install bonsai with: `./setup.cmd`
-- Update the firmware of the Harp Behavior Board by following the instructions [here](https://harp-tech.org/docs/articles/firmware.html).
+- Update the firmware of the Harp Behavior Board by following the instructions [here](https://harp-tech.org/articles/firmware.html).
 - Install the USBXpress software, for the newscale motor stage
 - Install the Spinnaker SDK, if a FLIR camera is being used
 - Install the NI-DAQ max driver if a NiDAQ is present (for optogenetics)
@@ -77,10 +77,10 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
     - [instructions from here](https://stackoverflow.com/questions/44515769/conda-is-not-recognized-as-internal-or-external-command)
     - Open Advanced System Settings
     - Click on "Environment Variables", then "Edit Path", then add the following paths:
-      - C:\Users\alex.piet\AppData\Local\miniconda3
-      - C:\Users\alex.piet\AppData\Local\miniconda3\Scripts
-      - C:\Users\alex.piet\AppData\Local\miniconda3\Library\bin
-      - C:\Users\alex.piet\AppData\Local\miniconda3\condabin
+      - C:\Users\svc_aind_behavior\AppData\Local\miniconda3
+      - C:\Users\svc_aind_behavior\AppData\Local\miniconda3\Scripts
+      - C:\Users\svc_aind_behavior\AppData\Local\miniconda3\Library\bin
+      - C:\Users\svc_aind_behavior\AppData\Local\miniconda3\condabin
   - Create an environment: `conda create -n Foraging python=3.8`
   - Activate the environment: `conda activate Foraging`
 - Use `pip` to install this repository:
@@ -88,33 +88,43 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
   - This should install all the required python packages. 
 - Copy `Settings_box<box num>.csv` to `Users\svc_aind_behavior\Documents\ForagingSettings`
   - Copy `<box num>` 1-4 depending on the computer
-  - Configure the COM ports for each computer
-    - Behavior: 
-        - How are these determined?
-    - Soundcard:
-        - How are these determined?
+  - Configure the Behavior/Soundcard COM ports for each computer
+     - Unplug the USB cables for the Behavior and Soundcard boards for one of the two behavior boxes connected to each computer.
+     - In a file browser, navigated to `C:\Users\svc_aind_behavior\Documents\GitHub\dynamic-foraging-task\bonsai`
+     - Click on `Bonsai`, then `New Project`
+     - In the Toolbox window type `Device (Harp)`
+     - Select the Node, then in the properties window, iterate through the COM Ports and look in the console window, which will tell you which board is connected to which COM port.
+     - Plug in the other behavior box's boards and repeat the steps. 
   - The BonsaiOsc ports are determined by the box number, and should not be modified. 
 - Copy `Foraging<box num>.bat` to the Desktop
   - Copy `<box num>` 1-4 depending on the computer
 - Configure `ForagingSettings.json`
   - Copy the template from `src\foraging_gui\ForagingSettings.json` to `Users\svc_aind_behavior\Documents\ForagingSettings\ForagingSettings.json`
-  - You should never have to modify these settings:
-    - "log_folder": For example "C:\\Documents\\",
+  - You should not have to modify these settings:
     - "bonsai_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\bonsai\\Bonsai.exe",
     - "bonsaiworkflow_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai"
-  - There are two fields that are mandatory:
-    - "default_saveFolder": For example "C:\\Documents\\" 
+    - "default_saveFolder": "C:\\Documents\\"
+    - "temporary_video_folder":"C:\\Users\\svc_aind_behavior\\Documents\\temporaryvideo\\",
+    - "show_log_info_in_console":false (only used for debugging)
+  - This field is mandatory and must be configured for each computer:
     - "current_box": For example "Tower_EphysRig3", "Blue"
   - These settings need to be configured for each computer:
     - "Teensy_COM": For example "COM10",
         - This is only for fiber-photometry  
         - Follow instructions on the [wiki](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Computer-Configuration) to install Arduino IDE (1.8x) and TeensyDuino
         - Once both are installed open ArduinoIDE, go to Tools>Port, select COMport cooresponding to Teensy4.1, and this value to the ForagingSettings.json
-    - "newscale_port_tower1": For example 46103
-    - "newscale_port_tower2": For example 46104
-    - "newscale_port_tower3": For example 46105
-    - "newscale_port_tower4": For example 46106
-        - Open Newscale and hit `connect` to see the serial numbers of the newscale devices
+    - "newscale_serial_num_tower1": For example 46103
+    - "newscale_serial_num_tower2": For example 46104
+    - "newscale_serial_num_tower3": For example 46105
+    - "newscale_serial_num_tower4": For example 46106
+        - Determine the serial numbers of the Newscale Stages
+            - Unplug the stages for one of the two boxes
+            - Open Miniconda Prompt
+            - type `conda activate Foraging`
+            - navigate to `dynamic-foraging-task/src/foraging)gui`
+            - `python`
+            - `from MyFunctions import NewScaleSerialY `
+            - `serial_num = NewScaleSerialY.get_instances()[0]`
         - Edit `ForagingSettings.json` to add a line `"newscale_port_tower1":<serial number for rig 1>`
 - Create a log file folder at `~\Documents\foraging_gui_logs`
 
@@ -170,7 +180,7 @@ To configure automatic updates consistent with the [update protocol](https://git
 - **New session**: Restart a session
 - **Restart logging**:
   - **Temporary logging**: Logging to a temporary folder (determined by the **temporary_video_folder** in the **ForagingSettings.json** )
-  - **Formal logging**: Logging to a standard folder structure (determined by the **log_folder** in the **ForagingSettings.json** )
+  - **Formal logging**: Logging to a standard folder structure (determined by the **default_saveFolder** in the **ForagingSettings.json** )
 - **Open logging folder**: Open the current logging folder
 - **Open behavior folder**: Open the folder to save the current behavior JSON file
 #### Settings
