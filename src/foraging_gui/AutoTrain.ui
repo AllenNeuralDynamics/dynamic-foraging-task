@@ -460,6 +460,19 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="pushButton_show_all_training_history">
+          <property name="maximumSize">
+           <size>
+            <width>200</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Show all training history</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QFrame" name="frame">
           <property name="minimumSize">
            <size>

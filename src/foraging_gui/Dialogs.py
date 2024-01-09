@@ -1766,6 +1766,9 @@ class AutoTrainDialog(QDialog):
         self.pushButton_show_paras_in_browser.clicked.connect(
             self._show_paras_in_browser
         )
+        self.pushButton_show_all_training_history.clicked.connect(
+            self._show_all_training_history
+        )
     
     def update_auto_train_fields(self, subject_id: str, curriculum_just_overridden: bool = False):
         self.selected_subject_id = subject_id
@@ -2035,6 +2038,16 @@ class AutoTrainDialog(QDialog):
     def _show_paras_in_browser(self):
         if self.svg_paras is not None and self.curriculum_in_use is not None:
             webbrowser.open(self.svg_paras)
+            
+    def _show_all_training_history(self):
+        all_progress_plotly = self.auto_train_manager.plot_all_progress(
+            x_axis='session',
+            sort_by='subject_id',
+            sort_order='descending',
+            if_show_fig=True
+        )
+        all_progress_plotly.show()
+
         
     def _update_available_training_stages(self):
         if self.curriculum_in_use is not None:
