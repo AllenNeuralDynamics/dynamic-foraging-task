@@ -126,6 +126,7 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
             - `from MyFunctions import NewScaleSerialY `
             - `serial_num = NewScaleSerialY.get_instances()[0]`
         - Edit `ForagingSettings.json` to add a line `"newscale_port_tower1":<serial number for rig 1>`
+   - Create shortcut to the camera workflows 
 - Create a log file folder at `~\Documents\foraging_gui_logs`
 
 #### To launch the software:
