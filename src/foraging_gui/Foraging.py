@@ -481,6 +481,8 @@ class Window(QMainWindow):
             'bonsaiworkflow_path':os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai'),
             'newscale_serial_num_tower1':'',
             'newscale_serial_num_tower2':'',
+            'newscale_serial_num_tower3':'',
+            'newscale_serial_num_tower4':'',
             'show_log_info_in_console':False,
         }
         
@@ -519,6 +521,8 @@ class Window(QMainWindow):
         self.bonsaiworkflow_path=Settings['bonsaiworkflow_path']
         self.newscale_serial_num_tower1=Settings['newscale_serial_num_tower1']
         self.newscale_serial_num_tower2=Settings['newscale_serial_num_tower2']
+        self.newscale_serial_num_tower3=Settings['newscale_serial_num_tower3']
+        self.newscale_serial_num_tower4=Settings['newscale_serial_num_tower4']
         
         # Also stream log info to the console if enabled
         if  Settings['show_log_info_in_console']:
