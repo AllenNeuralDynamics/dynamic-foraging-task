@@ -2473,9 +2473,9 @@ def map_hostname_to_box(hostname,box_num):
         4:'D'
     }
     if hostname in host_mapping:
-        return host_mapping[hostname]+boxmapping[box_num]
+        return host_mapping[hostname]+box_mapping[box_num]
     else:
-        return hostname+'-'+boxmapping[box_num]
+        return hostname+'-'+box_mapping[box_num]
 
 def start_gui_log_file(box_number):
     '''
