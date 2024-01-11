@@ -9,3 +9,4 @@ git+https://github.com/glopesdev/pyosc3.git@master
 pyserial
 git+https://github.com/AllenNeuralDynamics/python-newscale@axes-on-target
 git+https://github.com/AllenNeuralDynamics/aind-foraging-behavior-bonsai-automatic-training.git@main
+pynwb
