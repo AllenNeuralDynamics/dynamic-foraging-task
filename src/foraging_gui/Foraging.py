@@ -2497,7 +2497,7 @@ def start_gui_log_file(box_number):
     # Build logfile name
     hostname = socket.gethostname()
     box_name = map_hostname_to_box(hostname, box_number)
-    filename = '{}_{}_gui_log_{}.txt'.format(box_name,formatted_datetime)
+    filename = '{}_gui_log_{}.txt'.format(box_name,formatted_datetime)
     logging_filename = os.path.join(logging_folder,filename)
 
     # Format the log file:
