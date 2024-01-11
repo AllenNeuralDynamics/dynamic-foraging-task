@@ -2554,7 +2554,7 @@ if __name__ == "__main__":
     # Start Q, and Gui Window
     logging.info('Starting QApplication and Window')
     app = QApplication(sys.argv)
-    win = Window(box=box)
+    win = Window(box=box_number)
     win.show()
     # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())
