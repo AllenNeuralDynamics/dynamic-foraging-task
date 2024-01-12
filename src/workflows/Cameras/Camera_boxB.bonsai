@@ -7,7 +7,7 @@
   <Workflow>
     <Nodes>
       <Expression xsi:type="GroupWorkflow">
-        <Name>CameraBehavior</Name>
+        <Name>BoxB</Name>
         <Workflow>
           <Nodes>
             <Expression xsi:type="Combinator">
