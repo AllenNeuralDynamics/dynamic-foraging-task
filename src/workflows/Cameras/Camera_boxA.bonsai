@@ -37,7 +37,7 @@
             </Expression>
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
-              <viz:Name>Red3</viz:Name>
+              <viz:Name>BoxA</viz:Name>
               <viz:ColumnCount>2</viz:ColumnCount>
               <viz:RowCount>2</viz:RowCount>
               <viz:ColumnStyles />
