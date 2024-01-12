@@ -34,6 +34,11 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - [FTDI driver](https://ftdichip.com/drivers/) (for Harp devices)
 - [NI-DAQmax **version 19.0**](https://www.ni.com/en/support/downloads/drivers/download.ni-daq-mx.html#484356) (for optogenetic stimulation via NI-DAQ cards)
 - [Spinnaker SDK **version 1.29.0.5**](https://www.flir.com/products/spinnaker-sdk/) (driver for FLIR cameras)
+   - [download the driver here](https://alleninstitute-my.sharepoint.com/:u:/g/personal/xinxin_yin_alleninstitute_org/Ef8zZAeZymFFjuz_5T70xs8BV8Qmdd3zVCZ6gvdYAismYQ?e=9WvLlQ)
+   - Install FULL, x64
+- USBXpress SDK (for newscale python API)
+  - [get installation .exe here](https://www.silabs.com/documents/public/software/install_USBXpress_SDK.exe) (for newscale python API)
+  - Click install, accept terms of agreement, hit next and accept default settings for everything. 
 - Python packages:
   - `numpy`
   - `scipy`
@@ -55,20 +60,74 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 #### For initial installation:
 - Clone repository onto your computer
   - The installation directory should be `C:\Users\svc_aind_behavior\Documents\GitHub\`
-  - `git clone https://github.com/AllenNeuralDynamics/dynamic-foraging-task.git`
-  - If you do not have git installed, use: https://gitforwindows.org
+  - In the console: `git clone https://github.com/AllenNeuralDynamics/dynamic-foraging-task.git`
+      - If you do not have git installed, use: https://gitforwindows.org
+  - You can alternatively use the Github Desktop App to clone the repo
 - Install Bonsai on your computer
-  - Change to the `dynamic-foraging-task\bonsai` folder
-  - In the command prompt, type: `setup.cmd`
-- Update the firmware of the Harp Behavior Board by following the instructions [here](https://harp-tech.org/docs/articles/firmware.html).
+  - In the console, change to the directory `C:\Users\svc_aind_behavior\Documents\GitHub\dynamic-foraging-task\bonsai`
+  - install bonsai with: `./setup.cmd`
+- Update the firmware of the Harp Behavior Board by following the instructions [here](https://harp-tech.org/articles/firmware.html).
+- Install the USBXpress software, for the newscale motor stage
+- Install the Spinnaker SDK, if a FLIR camera is being used
+- Install the NI-DAQ max driver if a NiDAQ is present (for optogenetics)
 - Create a `conda` environment, with python version 3.8
-  - install `conda` [instructions here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/windows/html)
-  - Run `miniconda prompt`
-  - Create an environment: `conda create -n foraging_environment python=3.8`
-  - Activate the environment: `conda activate foraging_environment`
+  - install `conda` [instructions here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/windows.html)
+  - Run `miniconda prompt`, and type `where conda`
+  - Add conda to the path variable
+    - [instructions from here](https://stackoverflow.com/questions/44515769/conda-is-not-recognized-as-internal-or-external-command)
+    - Open Advanced System Settings
+    - Click on "Environment Variables", then "Edit Path", then add the following paths:
+      - C:\Users\svc_aind_behavior\AppData\Local\miniconda3
+      - C:\Users\svc_aind_behavior\AppData\Local\miniconda3\Scripts
+      - C:\Users\svc_aind_behavior\AppData\Local\miniconda3\Library\bin
+      - C:\Users\svc_aind_behavior\AppData\Local\miniconda3\condabin
+  - Create an environment: `conda create -n Foraging python=3.8`
+  - Activate the environment: `conda activate Foraging`
 - Use `pip` to install this repository:
-  - From the top-level directory run `pip install .`
-- Copy `Settings_box1.csv` to `Users\<username>\Documents\ForagingSettings`
+  - From the `C:\Users\svc_aind_behavior\Documents\GitHub\dynamic-foraging-task` directory run `pip install -e .`
+  - This should install all the required python packages. 
+- Copy `Settings_box<box num>.csv` to `Users\svc_aind_behavior\Documents\ForagingSettings`
+  - Copy `<box num>` 1-4 depending on the computer
+  - Configure the Behavior/Soundcard COM ports for each computer
+     - Unplug the USB cables for the Behavior and Soundcard boards for one of the two behavior boxes connected to each computer.
+     - In a file browser, navigated to `C:\Users\svc_aind_behavior\Documents\GitHub\dynamic-foraging-task\bonsai`
+     - Click on `Bonsai`, then `New Project`
+     - In the Toolbox window type `Device (Harp)`
+     - Select the Node, then in the properties window, iterate through the COM Ports and look in the console window, which will tell you which board is connected to which COM port.
+     - Plug in the other behavior box's boards and repeat the steps. 
+  - The BonsaiOsc ports are determined by the box number, and should not be modified. 
+- Copy `Foraging<box num>.bat` to the Desktop
+  - Copy `<box num>` 1-4 depending on the computer
+- Configure `ForagingSettings.json`
+  - Copy the template from `src\foraging_gui\ForagingSettings.json` to `Users\svc_aind_behavior\Documents\ForagingSettings\ForagingSettings.json`
+  - You should not have to modify these settings:
+    - "bonsai_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\bonsai\\Bonsai.exe",
+    - "bonsaiworkflow_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai"
+    - "default_saveFolder": "C:\\Documents\\"
+    - "temporary_video_folder":"C:\\Users\\svc_aind_behavior\\Documents\\temporaryvideo\\",
+    - "show_log_info_in_console":false (only used for debugging)
+  - This field is mandatory and must be configured for each computer:
+    - "current_box": For example "Tower_EphysRig3", "Blue"
+  - These settings need to be configured for each computer:
+    - "Teensy_COM": For example "COM10",
+        - This is only for fiber-photometry  
+        - Follow instructions on the [wiki](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Computer-Configuration) to install Arduino IDE (1.8x) and TeensyDuino
+        - Once both are installed open ArduinoIDE, go to Tools>Port, select COMport cooresponding to Teensy4.1, and this value to the ForagingSettings.json
+    - "newscale_serial_num_tower1": For example 46103
+    - "newscale_serial_num_tower2": For example 46104
+    - "newscale_serial_num_tower3": For example 46105
+    - "newscale_serial_num_tower4": For example 46106
+        - Determine the serial numbers of the Newscale Stages
+            - Unplug the stages for one of the two boxes
+            - Open Miniconda Prompt
+            - type `conda activate Foraging`
+            - navigate to `dynamic-foraging-task/src/foraging)gui`
+            - `python`
+            - `from MyFunctions import NewScaleSerialY `
+            - `serial_num = NewScaleSerialY.get_instances()[0]`
+        - Edit `ForagingSettings.json` to add a line `"newscale_port_tower1":<serial number for rig 1>`
+   - Create shortcut to the camera workflows 
+- Create a log file folder at `~\Documents\foraging_gui_logs`
 
 #### To launch the software:
 - Run `foraging.bonsai` in `dynamic-foraging-task\src\workflows` to start Bonsai.
@@ -77,9 +136,13 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - The GUI will leave a log file at `~\Documents\foraging_gui_logs\` named by the tower and date/time. 
 
 #### Automatic Updates
-To configure automatic updates consistent with the [update protocol](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Software-Update-Procedures),please use TaskScheduler to automatically run two batch files at specified times of the week ([instructions](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Configure-Automatic-Updates))
-- `\src\foraging_gui\update_from_github_to_main.bat` every wednesday at 6am
-- `\src\foraging_gui\update_from_github_to_production_testing.bat` every monday at 6am
+To configure automatic updates consistent with the [update protocol](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Software-Update-Procedures),please use TaskScheduler to automatically run three batch files at specified times of the week ([instructions](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Configure-Automatic-Updates))
+- On every computer:
+   - `\src\foraging_gui\update_from_github_to_main.bat` everyday at 6am
+- On the testing computer:
+   - `\src\foraging_gui\update_from_github_to_production_testing.bat` every monday at 6am
+   - `\src\foraging_gui\check_github_status.bat` every tuesday at 6am
+   - `\src\foraging_gui\update_from_github_to_main.bat` every W,Th,F,S,Su at 6am
 - These batch files will leave a log file at `~\Documents\foraging_gui_logs\github_log.txt`
 
 ## Block Diagram
@@ -118,7 +181,7 @@ To configure automatic updates consistent with the [update protocol](https://git
 - **New session**: Restart a session
 - **Restart logging**:
   - **Temporary logging**: Logging to a temporary folder (determined by the **temporary_video_folder** in the **ForagingSettings.json** )
-  - **Formal logging**: Logging to a standard folder structure (determined by the **log_folder** in the **ForagingSettings.json** )
+  - **Formal logging**: Logging to a standard folder structure (determined by the **default_saveFolder** in the **ForagingSettings.json** )
 - **Open logging folder**: Open the current logging folder
 - **Open behavior folder**: Open the folder to save the current behavior JSON file
 #### Settings
@@ -126,6 +189,7 @@ To configure automatic updates consistent with the [update protocol](https://git
   - **ForagingSettings.json**: General settings. 
     - **default_saveFolder**: The default save location. The folder structure is `default_saveFolder\Rig\Animal\Animal_year-month-day_hour-minute-second\`. There are five additional folders: `EphysFolder`, `HarpFolder`, `PhotometryFolder`, `TrainingFolder`, and `VideoFolder` for saving different data sources. Default location: `Documents`
     - **current_box**: To define the rig name.
+    - **show_log_info_in_console**: If exists and equals `True`, a copy of log info is sent to the console.
   - **WaterCalibration.json**: The water calibration results.
   - **LaserCalibration.json**: The laser calibration results.
   - **TrainingStagePar.json**: The training stage parameters in a task-dependent manner.

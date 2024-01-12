@@ -10,40 +10,35 @@ import logging
 import numpy as np
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import QThreadPool,Qt
 
-from Optogenetics import Ui_Optogenetics
-from Calibration import Ui_WaterCalibration
-from Camera import Ui_Camera
-from MotorStage import Ui_MotorStage
-from Manipulator import Ui_Manipulator
-from LicksDistribution import Ui_LickDistribution
-from TimeDistribution import Ui_TimeDistribution
-from CalibrationLaser import Ui_CalibrationLaser
 from MyFunctions import Worker
 from Visualization import PlotWaterCalibration
 
 
-class LickStaDialog(QDialog,Ui_LickDistribution):
+class LickStaDialog(QDialog):
     '''Lick statistics dialog'''
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
-        self.setupUi(self)
+        uic.loadUi('LicksDistribution.ui', self)
+        
         self.MainWindow=MainWindow
 
-class TimeDistributionDialog(QDialog,Ui_TimeDistribution):
+class TimeDistributionDialog(QDialog):
     '''Simulated distribution of ITI/Delay/Block length'''
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
-        self.setupUi(self)
+        uic.loadUi('TimeDistribution.ui', self)
+        
         self.MainWindow=MainWindow
 
-class OptogeneticsDialog(QDialog,Ui_Optogenetics):
+class OptogeneticsDialog(QDialog):
     '''Optogenetics dialog'''
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
-        self.setupUi(self)
+        uic.loadUi('Optogenetics.ui', self)
+        
         self._connectSignalsSlots()
         self.MainWindow=MainWindow
         self._Laser_1()
@@ -323,11 +318,12 @@ class OptogeneticsDialog(QDialog,Ui_Optogenetics):
         if eval('self.Laser_'+str(Numb)+'.currentText()')!='NA':    
             eval('self._activated_'+str(Numb)+'()')
 
-class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
+class WaterCalibrationDialog(QDialog):
     '''Water valve calibration'''
     def __init__(self, MainWindow,parent=None):
         super().__init__(parent)
-        self.setupUi(self)
+        uic.loadUi('Calibration.ui', self)
+        
         self.MainWindow=MainWindow
         self.FinishLeftValve=0
         if not hasattr(self.MainWindow,'WaterCalibrationResults'):
@@ -338,8 +334,8 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         self._connectSignalsSlots()
         self.ToInitializeVisual=1
         self._UpdateFigure()
-        if hasattr(self.MainWindow,'bonsai_tag'):
-            self.setWindowTitle("Water Calibration: Tower "+'_'+str(self.MainWindow.bonsai_tag))
+        if hasattr(self.MainWindow,'tower_number'):
+            self.setWindowTitle("Water Calibration: Tower "+'_'+str(self.MainWindow.tower_number))
         else:
             self.setWindowTitle('Water Calibration') 
     def _connectSignalsSlots(self):
@@ -961,10 +957,11 @@ class WaterCalibrationDialog(QDialog,Ui_WaterCalibration):
         # set the default valve open time
         self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
 
-class CameraDialog(QDialog,Ui_Camera):
+class CameraDialog(QDialog):
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
-        self.setupUi(self)
+        uic.loadUi('Camera.ui', self)
+        
         self.MainWindow=MainWindow
         self._connectSignalsSlots()
     def _connectSignalsSlots(self):
@@ -1151,22 +1148,24 @@ def is_file_in_use(file_path):
         except OSError as e:
             return True
 
-class ManipulatorDialog(QDialog,Ui_Manipulator):
+class ManipulatorDialog(QDialog):
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
-        self.setupUi(self)
+        uic.loadUi('Manipulator.ui', self)
 
-class MotorStageDialog(QDialog,Ui_MotorStage):
+class MotorStageDialog(QDialog):
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
-        self.setupUi(self)
+        uic.loadUi('MotorStage.ui', self)
+        
         self.MainWindow=MainWindow
 
-class LaserCalibrationDialog(QDialog,Ui_CalibrationLaser):
+class LaserCalibrationDialog(QDialog):
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
         self.MainWindow=MainWindow
-        self.setupUi(self)
+        uic.loadUi('CalibrationLaser.ui', self)
+        
         self._connectSignalsSlots()
         self.SleepComplete=1
         self.SleepComplete2=0
