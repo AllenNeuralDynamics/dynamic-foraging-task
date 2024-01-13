@@ -3285,38 +3285,6 @@
     </property>
    </item>
   </widget>
-  <widget class="QLabel" name="label1_17">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>530</y>
-     <width>131</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Latest calibration date=</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="LatestCalibrationDate">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>530</y>
-     <width>91</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
   <widget class="QComboBox" name="LaserPowerRight_1">
    <property name="geometry">
     <rect>
@@ -3611,6 +3579,95 @@
     <string>GroupBox</string>
    </property>
   </widget>
+  <widget class="QLabel" name="label1_20">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>260</x>
+     <y>530</y>
+     <width>131</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Latest calibration date=</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="LatestCalibrationDate">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>380</x>
+     <y>530</y>
+     <width>91</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label1_17">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>530</y>
+     <width>41</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Laser=</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="Laser_calibration">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>530</y>
+     <width>80</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
+   <item>
+    <property name="text">
+     <string>Blue</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Red</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Orange</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Green</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>NA</string>
+    </property>
+   </item>
+  </widget>
   <zorder>OptoPar</zorder>
   <zorder>Laser_1</zorder>
   <zorder>label1_2</zorder>
@@ -3734,8 +3791,6 @@
   <zorder>Frequency_3</zorder>
   <zorder>label4_13</zorder>
   <zorder>Frequency_4</zorder>
-  <zorder>label1_17</zorder>
-  <zorder>LatestCalibrationDate</zorder>
   <zorder>LaserPowerRight_1</zorder>
   <zorder>LaserPowerRight_2</zorder>
   <zorder>LaserPowerRight_3</zorder>
@@ -3744,6 +3799,10 @@
   <zorder>label2_16</zorder>
   <zorder>label3_16</zorder>
   <zorder>label4_16</zorder>
+  <zorder>label1_20</zorder>
+  <zorder>LatestCalibrationDate</zorder>
+  <zorder>label1_17</zorder>
+  <zorder>Laser_calibration</zorder>
  </widget>
  <resources/>
  <connections/>

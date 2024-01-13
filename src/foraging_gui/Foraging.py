@@ -414,25 +414,11 @@ class Window(QMainWindow):
 
             If it exists, populate:
                 self.LaserCalibrationResults with the calibration json
-                self.RecentLaserCalibration with the last calibration
-                self.RecentCalibrationDate with the date of the last calibration
 
-            If it does not exist, populate
-                self.LaserCalibrationResults with an empty dictionary
-                self.RecentCalibrationDate with 'None'
         '''
         if os.path.exists(self.LaserCalibrationFiles):
             with open(self.LaserCalibrationFiles, 'r') as f:
                 self.LaserCalibrationResults = json.load(f)
-                sorted_dates = sorted(self.LaserCalibrationResults.keys(),key=self._custom_sort_key)
-                self.RecentLaserCalibration=self.LaserCalibrationResults[sorted_dates[-1]]
-                self.RecentCalibrationDate=sorted_dates[-1]
-            logging.info('Loaded Laser Calibration')
-        else:
-            self.LaserCalibrationResults = {}
-            self.RecentCalibrationDate='None'
-            logging.warning('Did not find a recent laser calibration file')
- 
     def _GetWaterCalibration(self):
         '''
             Load the water calibration file.
