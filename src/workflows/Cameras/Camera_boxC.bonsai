@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<WorkflowBuilder Version="2.7.3"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns:vid="clr-namespace:Bonsai.Video;assembly=Bonsai.Video"
+                 xmlns:viz="clr-namespace:Bonsai.Design.Visualizers;assembly=Bonsai.Design.Visualizers"
+                 xmlns="https://bonsai-rx.org/2018/workflow">
+  <Workflow>
+    <Nodes>
+      <Expression xsi:type="GroupWorkflow">
+        <Name>BoxC</Name>
+        <Workflow>
+          <Nodes>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="vid:VideoCaptureDevice">
+                <vid:Index>0</vid:Index>
+                <vid:CaptureProperties />
+              </Combinator>
+            </Expression>
+            <Expression xsi:type="VisualizerMapping" />
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="vid:VideoCaptureDevice">
+                <vid:Index>2</vid:Index>
+                <vid:CaptureProperties />
+              </Combinator>
+            </Expression>
+            <Expression xsi:type="VisualizerMapping" />
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="StringProperty">
+                <Value>bottom</Value>
+              </Combinator>
+            </Expression>
+            <Expression xsi:type="VisualizerMapping" />
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="StringProperty">
+                <Value>side</Value>
+              </Combinator>
+            </Expression>
+            <Expression xsi:type="VisualizerMapping" />
+            <Expression xsi:type="viz:TableLayoutPanelBuilder">
+              <viz:Name>BoxC</viz:Name>
+              <viz:ColumnCount>2</viz:ColumnCount>
+              <viz:RowCount>2</viz:RowCount>
+              <viz:ColumnStyles />
+              <viz:RowStyles>
+                <viz:RowStyle>
+                  <viz:SizeType>Percent</viz:SizeType>
+                  <viz:Height>10</viz:Height>
+                </viz:RowStyle>
+              </viz:RowStyles>
+              <viz:CellSpans>
+                <viz:CellSpan ColumnSpan="1" RowSpan="1" />
+              </viz:CellSpans>
+            </Expression>
+            <Expression xsi:type="WorkflowOutput" />
+          </Nodes>
+          <Edges>
+            <Edge From="0" To="1" Label="Source1" />
+            <Edge From="1" To="8" Label="Source1" />
+            <Edge From="2" To="3" Label="Source1" />
+            <Edge From="3" To="8" Label="Source2" />
+            <Edge From="4" To="5" Label="Source1" />
+            <Edge From="5" To="8" Label="Source3" />
+            <Edge From="6" To="7" Label="Source1" />
+            <Edge From="7" To="8" Label="Source4" />
+            <Edge From="8" To="9" Label="Source1" />
+          </Edges>
+        </Workflow>
+      </Expression>
+    </Nodes>
+    <Edges />
+  </Workflow>
+</WorkflowBuilder>

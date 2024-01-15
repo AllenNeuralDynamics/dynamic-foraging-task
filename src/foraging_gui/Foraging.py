@@ -40,12 +40,12 @@ class NumpyEncoder(json.JSONEncoder):
         return super(NumpyEncoder, self).default(obj)
     
 class Window(QMainWindow):
-    def __init__(self, parent=None,tower_number=1):
+    def __init__(self, parent=None,box_number=1):
         logging.info('Creating Window')
         super().__init__(parent)
         uic.loadUi('ForagingGUI.ui', self)
         
-        self.tower_number=tower_number       
+        self.box_number=box_number      
 
         # Load Settings that are specific to this computer  
         self.SettingFolder=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings")
@@ -53,9 +53,9 @@ class Window(QMainWindow):
         self._GetSettings()
 
         # Load Settings that are specific to this box 
-        self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration_{}.json'.format(tower_number))
-        self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration_{}.json'.format(tower_number))
-        self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_{}.json'.format(tower_number))
+        self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration_{}.json'.format(box_number))
+        self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration_{}.json'.format(box_number))
+        self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_{}.json'.format(box_number))
         self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json')
 
         # Load Laser and Water Calibration Files
@@ -321,7 +321,7 @@ class Window(QMainWindow):
         self._scan_for_usb_stages()
         # use the default newscale stage
         try:
-            self.newscale_serial_num=eval('self.newscale_serial_num'+'_tower'+str(self.tower_number))
+            self.newscale_serial_num=eval('self.newscale_serial_num_box'+str(self.box_number))
             if self.newscale_serial_num!='':
                 index = self.StageSerialNum.findText(str(self.newscale_serial_num))
                 if index != -1:
@@ -419,25 +419,11 @@ class Window(QMainWindow):
 
             If it exists, populate:
                 self.LaserCalibrationResults with the calibration json
-                self.RecentLaserCalibration with the last calibration
-                self.RecentCalibrationDate with the date of the last calibration
 
-            If it does not exist, populate
-                self.LaserCalibrationResults with an empty dictionary
-                self.RecentCalibrationDate with 'None'
         '''
         if os.path.exists(self.LaserCalibrationFiles):
             with open(self.LaserCalibrationFiles, 'r') as f:
                 self.LaserCalibrationResults = json.load(f)
-                sorted_dates = sorted(self.LaserCalibrationResults.keys(),key=self._custom_sort_key)
-                self.RecentLaserCalibration=self.LaserCalibrationResults[sorted_dates[-1]]
-                self.RecentCalibrationDate=sorted_dates[-1]
-            logging.info('Loaded Laser Calibration')
-        else:
-            self.LaserCalibrationResults = {}
-            self.RecentCalibrationDate='None'
-            logging.warning('Did not find a recent laser calibration file')
- 
     def _GetWaterCalibration(self):
         '''
             Load the water calibration file.
@@ -484,8 +470,10 @@ class Window(QMainWindow):
             'Teensy_COM':'',
             'bonsai_path':os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe'),
             'bonsaiworkflow_path':os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai'),
-            'newscale_serial_num_tower1':'',
-            'newscale_serial_num_tower2':'',
+            'newscale_serial_num_box1':'',
+            'newscale_serial_num_box2':'',
+            'newscale_serial_num_box3':'',
+            'newscale_serial_num_box4':'',
             'show_log_info_in_console':False,
         }
         
@@ -522,8 +510,10 @@ class Window(QMainWindow):
         self.Teensy_COM=Settings['Teensy_COM']
         self.bonsai_path=Settings['bonsai_path']
         self.bonsaiworkflow_path=Settings['bonsaiworkflow_path']
-        self.newscale_serial_num_tower1=Settings['newscale_serial_num_tower1']
-        self.newscale_serial_num_tower2=Settings['newscale_serial_num_tower2']
+        self.newscale_serial_num_box1=Settings['newscale_serial_num_box1']
+        self.newscale_serial_num_box2=Settings['newscale_serial_num_box2']
+        self.newscale_serial_num_box3=Settings['newscale_serial_num_box3']
+        self.newscale_serial_num_box4=Settings['newscale_serial_num_box4']
         
         # Also stream log info to the console if enabled
         if  Settings['show_log_info_in_console']:
@@ -536,9 +526,15 @@ class Window(QMainWindow):
             
 
         # Determine box
-        if self.current_box in ['Green','Blue','Red','Yellow']:
-            self.current_box='{}-{}'.format(self.current_box,self.tower_number)
-        window_title = 'Foraging_{}'.format(self.current_box)
+        if self.current_box in ['447-1','447-2','447-3']:
+            mapper={
+                1:'A',
+                2:'B',
+                3:'C',
+                4:'D'
+            }
+            self.current_box='{}-{}'.format(self.current_box,mapper[self.box_number])
+        window_title = '{}'.format(self.current_box)
         self.setWindowTitle(window_title)
         logging.info('Setting Window title: {}'.format(window_title))
 
@@ -607,35 +603,35 @@ class Window(QMainWindow):
     def _ConnectOSC(self):
         '''
             Connect the GUI and Bonsai through OSC messages
-            Uses self.tower_number to determine ports
+            Uses self.box_number to determine ports
         '''    
 
         # connect the bonsai workflow with the python GUI
         logging.info('connecting to GUI and Bonsai through OSC')
         self.ip = "127.0.0.1"
 
-        if self.tower_number==1:
+        if self.box_number==1:
             self.request_port = 4002
             self.request_port2 = 4003
             self.request_port3 = 4004
             self.request_port4 = 4005
-        elif self.tower_number==2:
+        elif self.box_number==2:
             self.request_port = 4012
             self.request_port2 = 4013
             self.request_port3 = 4014
             self.request_port4 = 4015
-        elif self.tower_number==3:
+        elif self.box_number==3:
             self.request_port = 4022
             self.request_port2 = 4023
             self.request_port3 = 4024
             self.request_port4 = 4025
-        elif self.tower_number==4:
+        elif self.box_number==4:
             self.request_port = 4032
             self.request_port2 = 4033
             self.request_port3 = 4034
             self.request_port4 = 4035
         else:
-            logging.error('bad bonsai tag {}'.format(self.tower_number))
+            logging.error('bad bonsai tag {}'.format(self.box_number))
             self.request_port = 4002
             self.request_port2 = 4003
             self.request_port3 = 4004
@@ -674,10 +670,9 @@ class Window(QMainWindow):
     def _OpenBonsaiWorkflow(self,runworkflow=1):
         '''Open the bonsai workflow and run it'''
 
-        SettingsBox = 'Settings_box{}.csv'.format(self.tower_number)
+        SettingsBox = 'Settings_box{}.csv'.format(self.box_number)
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
         subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
-        #subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD)
 
     def _OpenSettingFolder(self):
         '''Open the setting folder'''
@@ -2475,12 +2470,32 @@ class Window(QMainWindow):
         self.AutoTrain_dialog.show()
 
         
-def start_gui_log_file(tower_number):
+def map_hostname_to_box(hostname,box_num):
+    host_mapping = {
+        'W10DT714033':'447-1-',
+        'W10DT714086':'447-1-',
+        'KAPPA':      '447-2-',
+        'W10DT714027':'447-2-',
+        'W10DT714028':'447-3-',
+        'W10DT714003':'447-3-'
+    }
+    box_mapping = {
+        1:'A',
+        2:'B',
+        3:'C',
+        4:'D'
+    }
+    if hostname in host_mapping:
+        return host_mapping[hostname]+box_mapping[box_num]
+    else:
+        return hostname+'-'+box_mapping[box_num]
+
+def start_gui_log_file(box_number):
     '''
         Starts a log file for the gui.
         The log file is located at C:/Users/<username>/Documents/foraging_gui_logs
         One log file is created for each time the GUI is started
-        The name of the gui file is tower_<tower num>_gui_log_<date and time>.txt
+        The name of the gui file is <box_name>_gui_log_<date and time>.txt
     '''
     # Check if the log folder exists, if it doesn't make it
     logging_folder = os.path.join(os.path.expanduser("~"), "Documents",'foraging_gui_logs')
@@ -2494,7 +2509,8 @@ def start_gui_log_file(tower_number):
 
     # Build logfile name
     hostname = socket.gethostname()
-    filename = '{}_tower_{}_gui_log_{}.txt'.format(hostname,tower_number,formatted_datetime)
+    box_name = map_hostname_to_box(hostname, box_number)
+    filename = '{}_gui_log_{}.txt'.format(box_name,formatted_datetime)
     logging_filename = os.path.join(logging_folder,filename)
 
     # Format the log file:
@@ -2530,12 +2546,12 @@ if __name__ == "__main__":
 
     # Determine which box we are using
     if len(sys.argv) >= 2:
-        tower_number = int(sys.argv[1])
+        box_number = int(sys.argv[1])
     else:
-        tower_number = 1
+        box_number = 1
 
     # Start logging
-    start_gui_log_file(tower_number)
+    start_gui_log_file(box_number)
 
     # Formating GUI graphics
     logging.info('Setting QApplication attributes')
@@ -2551,7 +2567,7 @@ if __name__ == "__main__":
     # Start Q, and Gui Window
     logging.info('Starting QApplication and Window')
     app = QApplication(sys.argv)
-    win = Window(tower_number=tower_number)
+    win = Window(box_number=box_number)
     win.show()
     # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())

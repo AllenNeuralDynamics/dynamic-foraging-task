@@ -52,6 +52,7 @@ class OptogeneticsDialog(QDialog):
         self._Laser_2()
         self._Laser_3()
         self._Laser_4()
+        self._Laser_calibration()
     def _connectSignalsSlots(self):
         self.Laser_1.currentIndexChanged.connect(self._Laser_1)
         self.Laser_2.currentIndexChanged.connect(self._Laser_2)
@@ -101,6 +102,30 @@ class OptogeneticsDialog(QDialog):
         self.LaserEnd_2.currentIndexChanged.connect(self._activated_2)
         self.LaserEnd_3.currentIndexChanged.connect(self._activated_3)
         self.LaserEnd_4.currentIndexChanged.connect(self._activated_4)
+        self.Laser_calibration.currentIndexChanged.connect(self._Laser_calibration)
+        self.Laser_calibration.activated.connect(self._Laser_calibration)
+    def _Laser_calibration(self):
+        ''''change the laser calibration date'''
+        # find the latest calibration date for the selected laser
+        Laser=self.Laser_calibration.currentText()
+        latest_calibration_date=self._FindLatestCalibrationDate(Laser)
+        # set the latest calibration date
+        self.LatestCalibrationDate.setText(latest_calibration_date)
+
+    def _FindLatestCalibrationDate(self,Laser):
+        '''find the latest calibration date for the selected laser'''
+        if not hasattr(self.MainWindow,'LaserCalibrationResults'):
+            return 'NA'
+        Dates=[]
+        for Date in self.MainWindow.LaserCalibrationResults:
+            if Laser in self.MainWindow.LaserCalibrationResults[Date].keys():
+                Dates.append(Date)
+        sorted_dates = sorted(Dates)
+        if sorted_dates==[]:
+            return 'NA'
+        else:
+            return sorted_dates[-1]
+
     def _Frequency_1(self):
         self._Frequency(1)
     def _Frequency_2(self):
@@ -134,17 +159,22 @@ class OptogeneticsDialog(QDialog):
             CurrentFrequency=eval('self.Frequency_'+str(Numb)+'.currentText()')
             CurrentlaserPowerLeft=eval('self.LaserPowerLeft_'+str(Numb)+'.currentText()')
             CurrentlaserPowerRight=eval('self.LaserPowerRight_'+str(Numb)+'.currentText()')
+            latest_calibration_date=self._FindLatestCalibrationDate(Color)
+            if latest_calibration_date=='NA':
+                RecentLaserCalibration={}
+            else:
+                RecentLaserCalibration=self.MainWindow.LaserCalibrationResults[latest_calibration_date]
             if Protocol=='Sine':
-                for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'])):
-                    ItemsLeft.append(str(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'][i]))
-                for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'])):
-                    ItemsRight.append(str(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'][i]))
+                for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'])):
+                    ItemsLeft.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'][i]))
+                for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'])):
+                    ItemsRight.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'][i]))
 
             elif Protocol=='Constant' or Protocol=='Pulse':
-                for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'])):
-                    ItemsLeft.append(str(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'][i]))
-                for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'])):
-                    ItemsRight.append(str(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'][i]))
+                for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'])):
+                    ItemsLeft.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'][i]))
+                for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'])):
+                    ItemsRight.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'][i]))
             ItemsLeft=sorted(ItemsLeft)
             ItemsRight=sorted(ItemsRight)
             eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
@@ -206,7 +236,6 @@ class OptogeneticsDialog(QDialog):
             eval('self.OffsetEnd_'+str(Numb)+'.setEnabled('+str(True)+')')
     def _Laser(self,Numb):
         ''' enable/disable items based on laser (blue/green/orange/red/NA)'''
-        self.LatestCalibrationDate.setText(self.MainWindow.RecentCalibrationDate)
         Inactlabel=range(2,17)
         if eval('self.Laser_'+str(Numb)+'.currentText()')=='NA':
             Label=False
@@ -215,11 +244,16 @@ class OptogeneticsDialog(QDialog):
             Color=eval('self.Laser_'+str(Numb)+'.currentText()')
             Protocol=eval('self.Protocol_'+str(Numb)+'.currentText()')
             CurrentFrequency=eval('self.Frequency_'+str(Numb)+'.currentText()')
-            if hasattr(self.MainWindow,'RecentLaserCalibration'):
-                if Color in self.MainWindow.RecentLaserCalibration.keys():
-                    if Protocol in self.MainWindow.RecentLaserCalibration[Color].keys():
+            latest_calibration_date=self._FindLatestCalibrationDate(Color)
+            if latest_calibration_date=='NA':
+                RecentLaserCalibration={}
+            else:
+                RecentLaserCalibration=self.MainWindow.LaserCalibrationResults[latest_calibration_date]
+            if not RecentLaserCalibration=={}:
+                if Color in RecentLaserCalibration.keys():
+                    if Protocol in RecentLaserCalibration[Color].keys():
                         if Protocol=='Sine': 
-                            Frequency=self.MainWindow.RecentLaserCalibration[Color][Protocol].keys()
+                            Frequency=RecentLaserCalibration[Color][Protocol].keys()
                             ItemsFrequency=[]
                             for Fre in Frequency:
                                 ItemsFrequency.append(Fre)
@@ -230,10 +264,10 @@ class OptogeneticsDialog(QDialog):
                                 CurrentFrequency=eval('self.Frequency_'+str(Numb)+'.currentText()')
                             ItemsLeft=[]
                             ItemsRight=[]
-                            for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'])):
-                                ItemsLeft.append(str(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'][i]))
-                            for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'])):
-                                ItemsRight.append(str(self.MainWindow.RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'][i]))
+                            for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'])):
+                                ItemsLeft.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'][i]))
+                            for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'])):
+                                ItemsRight.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'][i]))
                             ItemsLeft=sorted(ItemsLeft)
                             ItemsRight=sorted(ItemsRight)
                             eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
@@ -243,10 +277,10 @@ class OptogeneticsDialog(QDialog):
                         elif Protocol=='Constant' or Protocol=='Pulse':
                             ItemsLeft=[]
                             ItemsRight=[]
-                            for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Protocol]['Left']['LaserPowerVoltage'])):
-                                ItemsLeft.append(str(self.MainWindow.RecentLaserCalibration[Color][Protocol]['Left']['LaserPowerVoltage'][i]))
-                            for i in range(len(self.MainWindow.RecentLaserCalibration[Color][Protocol]['Right']['LaserPowerVoltage'])):
-                                ItemsRight.append(str(self.MainWindow.RecentLaserCalibration[Color][Protocol]['Right']['LaserPowerVoltage'][i]))
+                            for i in range(len(RecentLaserCalibration[Color][Protocol]['Left']['LaserPowerVoltage'])):
+                                ItemsLeft.append(str(RecentLaserCalibration[Color][Protocol]['Left']['LaserPowerVoltage'][i]))
+                            for i in range(len(RecentLaserCalibration[Color][Protocol]['Right']['LaserPowerVoltage'])):
+                                ItemsRight.append(str(RecentLaserCalibration[Color][Protocol]['Right']['LaserPowerVoltage'][i]))
                             ItemsLeft=sorted(ItemsLeft)
                             ItemsRight=sorted(ItemsRight)
                             eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')

@@ -10,7 +10,6 @@
 __pycache__
 *.egg-info
 dist
-*.csv
 obj
 bin
 Notebooks

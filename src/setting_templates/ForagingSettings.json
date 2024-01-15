@@ -6,6 +6,8 @@
     "bonsaiworkflow_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai",
     "temporary_video_folder":"C:\\Users\\svc_aind_behavior\\Documents\\temporaryvideo\\",
     "show_log_info_in_console":false,
-    "newscale_serial_num_tower1":"",
-    "newscale_serial_num_tower2":""
+    "newscale_serial_num_box1":"",
+    "newscale_serial_num_box2":"",
+    "newscale_serial_num_box3":"",
+    "newscale_serial_num_box4":""
 }
