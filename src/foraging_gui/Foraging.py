@@ -27,6 +27,7 @@ from Dialogs import LickStaDialog,TimeDistributionDialog
 from Dialogs import AutoTrainDialog
 from MyFunctions import GenerateTrials, Worker,NewScaleSerialY
 from stage import Stage
+from TransferToNWB import bonsai_to_nwb
 
 
 class NumpyEncoder(json.JSONEncoder):
@@ -1683,6 +1684,16 @@ class Window(QMainWindow):
             elif self.SaveFile.endswith('.json'):
                 with open(self.SaveFile, "w") as outfile:
                     json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
+                    
+            # Also export to nwb automatically here
+            try:
+                nwb_name = self.SaveFile.replace('.json','.nwb')
+                bonsai_to_nwb(self.SaveFile, os.path.dirname(self.SaveFileJson))
+            except Exception as e:
+                logging.warning(f'Failed to export to nwb...\n{e}')
+            else:
+                logging.info(f'Exported to nwb {nwb_name} successfully!')
+            
             # close the camera
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
                 self.Camera_dialog.StartCamera.setChecked(False)

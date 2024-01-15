@@ -4179,8 +4179,8 @@
      <rect>
       <x>590</x>
       <y>10</y>
-      <width>91</width>
-      <height>31</height>
+      <width>101</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="autoFillBackground">
@@ -4190,7 +4190,11 @@
      <string notr="true">background-color:  rgb(0, 189, 22);</string>
     </property>
     <property name="text">
-     <string>Auto Train</string>
+     <string>Auto Train
+(Ctrl+Alt+A)</string>
+    </property>
+    <property name="shortcut">
+     <string>Ctrl+Alt+A</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_auto_train_stage">
