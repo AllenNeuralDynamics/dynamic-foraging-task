@@ -2152,14 +2152,9 @@ class Window(QMainWindow):
         self.ID.setEnabled(enable)
         self.Experimenter.setEnabled(enable)
 
-    def _CheckBonsaiConnection(self):
-        '''Check if the Bonsai and GUI are connected'''
-        if self.InitializeBonsaiSuccessfully==0:
-            self._ConnectBonsai() 
-
     def _Start(self):
         '''start trial loop'''
-        self._CheckBonsaiConnection()
+        self.ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
             return
         self.WarningLabelInitializeBonsai.setText('')
@@ -2378,7 +2373,7 @@ class Window(QMainWindow):
             self.DelayMax.setEnabled(True)
     def _GiveLeft(self):
         '''manually give left water'''
-        self._CheckBonsaiConnection()
+        self.ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
             return
         self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
@@ -2390,7 +2385,7 @@ class Window(QMainWindow):
     
     def _GiveRight(self):
         '''manually give right water'''
-        self._CheckBonsaiConnection()
+        self.ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
             return
         self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
