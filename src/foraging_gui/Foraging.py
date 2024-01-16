@@ -371,7 +371,7 @@ class Window(QMainWindow):
             self.client2.close()
             self.client3.close()
             self.client4.close()
-        except Exception as e
+        except Exception as e:
             logging.info('could not close bonsai connection: {}'.format(str(e))) 
 
         #if self.InitializeBonsaiSuccessfully==1:
