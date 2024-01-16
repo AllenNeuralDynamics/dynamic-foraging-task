@@ -65,8 +65,8 @@
      <rect>
       <x>703</x>
       <y>20</y>
-      <width>152</width>
-      <height>20</height>
+      <width>119</width>
+      <height>19</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -110,140 +110,6 @@
     <item>
      <property name="text">
       <string>RewardN</string>
-     </property>
-    </item>
-   </widget>
-   <widget class="QComboBox" name="Tower">
-    <property name="geometry">
-     <rect>
-      <x>860</x>
-      <y>20</y>
-      <width>112</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="editable">
-     <bool>false</bool>
-    </property>
-    <item>
-     <property name="text">
-      <string>Tower-1</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Tower-2</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Tower-3</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Tower-4</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Tower-5</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Tower-6</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Tower-7</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Green-1</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Green-2</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Green-3</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Green-4</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Blue-1</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Blue-2</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Blue-3</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Blue-4</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Red-1</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Red-2</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Red-3</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Red-4</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Tower-EphysHan</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Tower_EphysRig1</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Tower_EphysRig2</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Tower_EphysRig3</string>
      </property>
     </item>
    </widget>
@@ -2956,7 +2822,7 @@
      </sizepolicy>
     </property>
     <property name="text">
-     <string>641733</string>
+     <string>0</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_72">
@@ -3552,7 +3418,7 @@
      <rect>
       <x>474</x>
       <y>20</y>
-      <width>101</width>
+      <width>121</width>
       <height>20</height>
      </rect>
     </property>
@@ -3563,7 +3429,7 @@
      </sizepolicy>
     </property>
     <property name="text">
-     <string>Xinxin Yin</string>
+     <string>the ghost in the shell</string>
     </property>
    </widget>
    <widget class="QLabel" name="WarningLabelCamera">
@@ -4226,7 +4092,6 @@
    <zorder>infor</zorder>
    <zorder>line</zorder>
    <zorder>Task</zorder>
-   <zorder>Tower</zorder>
    <zorder>line_2</zorder>
    <zorder>TrainingParameters</zorder>
    <zorder>Load</zorder>
@@ -4261,7 +4126,7 @@
      <x>0</x>
      <y>0</y>
      <width>1875</width>
-     <height>21</height>
+     <height>18</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -4729,7 +4594,6 @@
   <tabstop>TrainingStage</tabstop>
   <tabstop>NextBlock</tabstop>
   <tabstop>Task</tabstop>
-  <tabstop>Tower</tabstop>
  </tabstops>
  <resources/>
  <connections/>
