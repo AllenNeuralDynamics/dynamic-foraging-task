@@ -224,7 +224,8 @@ To configure automatic updates consistent with the [update protocol](https://git
   
 #### Automatic training
 1. In the main dialog, press `Auto Train` button  <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/9ef26192-044b-4c22-928f-b328b7ab36ab" width="90"> or `Ctrl + Alt + A` to open the Automatic Training dialog.
-2. For the first session of a new mouse:
+   - If the dialog fails to open, check AWS credentials at `~/.aws/credentials`. See [instructions](#for-initial-installation)
+3. For the first session of a new mouse:
    - Confirm that this is a new mouse<br>
    <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/bcaafe89-3330-4704-81f9-ab30c259512b" width="400"><br>
    - On the right side, select a desired curriculum for the new mouse. Double-check `curriculum_name`, `curriculum_version`, and the diagrams<br>.
@@ -233,14 +234,14 @@ To configure automatic updates consistent with the [update protocol](https://git
    - Click `Set curriculum` button <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/f1fac3e0-1c84-42e9-9f12-ba11896845b8" width="60"> to confirm
    - Now a new entry with `session = 0` is added in `Training history`, and `STAGE_1` of the selected curriculum is suggested by default. <br>
    <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/90a054ab-71c1-4fa2-b13b-ab06f7895080" width="700"><br>
-3. For a mouse that already started training
+4. For a mouse that already started training
    - Its training history and curriculum is automatically loaded
    <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/58a9e583-09a4-4295-84eb-db5ef873df5d" width="900">
    - Uncheck `show this mouse only` to see training history from all mice
    <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/97c05425-7dac-426b-9ba2-aadcfc1868ed" height="30">
    - Press `Show all training history` <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/ff1354b6-4b78-4740-a317-b5ec1b83686e" height="30"> to open an interactive plotly chart that visualize all training history in browser
    <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/af541948-94ab-4f13-b599-ca188be77324" width="700">
-4. Apply and lock training parameters
+5. Apply and lock training parameters
    - Check the curriculum name and stage name shown on the huge green button<br>
    <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/c46cd82e-76e7-4d7c-914e-41752937fee8" width="200"><br>
    - Press the button to apply and lock all curriculum-controlled training parameters in the main GUI (including the "Task").
@@ -249,14 +250,14 @@ To configure automatic updates consistent with the [update protocol](https://git
    - You could now close the Auto Training dialog.
    - Start the training as usual.
      
-5. Override parameters (not recommended)
+6. Override parameters (not recommended)
    - Once `Apply and lock` is pressed, you can press it again to unlock the parameters and override any of them. But in this case, the automatic training mode is disengaged, and this session is considered "off-curriculum".
      
-6. Override stage (not recommended)
+7. Override stage (not recommended)
    - Check `Override stage` to override the suggested stage. In the example below, `STAGE_FINAL` is suggested, but `STAGE_3` will be actually used (see the green button).
    <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/92fb9df7-3e54-4bf2-a86a-02c3808c554e" width="700">
 
-7. Override curriculum (not recommended)
+8. Override curriculum (not recommended)
      - If you somehow decide to change the curriculum during training, press `Override curriculum` and set a new curriculum.
      - In this case, since all stages from the old curriculum now become "irrelevant", you should always manually select a stage in the ***new*** curriculum to override.
    <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/802e5208-dc5f-45f5-8ece-b9241157bf88" width="300">
