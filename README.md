@@ -129,6 +129,11 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
         - Edit `ForagingSettings.json` to add a line `"newscale_port_tower1":<serial number for rig 1>`
    - Create shortcut to the camera workflows 
 - Create a log file folder at `~\Documents\foraging_gui_logs`
+- Set up AWS credential for the [Automatic Training GUI](#automatic-training)
+    - AWS credentials must exist in the file `~\.aws\credentials` (Ask Han). Something like this:
+      ![image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/476faa86-f8fd-4443-8e42-8b24c5490847)
+
+           
 
 #### To launch the software:
 - Run `foraging.bonsai` in `dynamic-foraging-task\src\workflows` to start Bonsai.
