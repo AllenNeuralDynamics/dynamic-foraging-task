@@ -63,10 +63,10 @@
    <widget class="QComboBox" name="Task">
     <property name="geometry">
      <rect>
-      <x>703</x>
+      <x>620</x>
       <y>20</y>
-      <width>119</width>
-      <height>19</height>
+      <width>152</width>
+      <height>20</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -4043,9 +4043,9 @@
    <widget class="QPushButton" name="AutoTrain">
     <property name="geometry">
      <rect>
-      <x>590</x>
+      <x>790</x>
       <y>10</y>
-      <width>101</width>
+      <width>111</width>
       <height>41</height>
      </rect>
     </property>
@@ -4126,7 +4126,7 @@
      <x>0</x>
      <y>0</y>
      <width>1875</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="sizePolicy">
