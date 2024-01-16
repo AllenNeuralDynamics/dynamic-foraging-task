@@ -151,7 +151,6 @@ class Window(QMainWindow):
         self.OptogeneticsB.currentIndexChanged.connect(self._keyPressEvent)
         self.PhtotometryB.currentIndexChanged.connect(self._keyPressEvent)
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._keyPressEvent)
-        self.Tower.currentIndexChanged.connect(self._keyPressEvent)
         self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
@@ -533,14 +532,6 @@ class Window(QMainWindow):
         self.setWindowTitle(window_title)
         logging.info('Setting Window title: {}'.format(window_title))
 
-        # set the current tower automatically
-        index = self.Tower.findText(self.current_box)
-        if index != -1:
-            self.Tower.setCurrentIndex(index)
-            logging.info('Setting tower number: {}'.format(index))
-        else:
-            logging.warning('Could not set tower number, using default. Current_box is set at: {}'.format(self.current_box))
-
     def _InitializeBonsai(self):
         '''
             Connect to Bonsai using OSC messages to establish a connection. 
@@ -810,7 +801,7 @@ class Window(QMainWindow):
         except Exception as e:
             logging.error(str(e))
             try:
-                AnimalFolder=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.ID.text())
+                AnimalFolder=os.path.join(self.default_saveFolder, self.current_box, self.ID.text())
                 subprocess.Popen(['explorer', AnimalFolder])
             except Exception as e:
                 logging.error(str(e))
@@ -1667,6 +1658,10 @@ class Window(QMainWindow):
             for attr_name in dir(self):
                 if attr_name.startswith('Ot_'):
                     Obj[attr_name]=getattr(self, attr_name)
+
+            # Save the current box
+            Obj['box'] = self.current_box
+    
             # save Json or mat
             if self.SaveFile.endswith('.mat'):
             # Save data to a .mat file
@@ -1697,7 +1692,7 @@ class Window(QMainWindow):
         '''The new data storage structure. Each session forms an independent folder. Training data, Harp register events, video data, photometry data and ephys data are in different subfolders'''
         current_time = datetime.now()
         formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-        self.SessionFolder=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.ID.text(), f'{self.ID.text()}_{formatted_datetime}')
+        self.SessionFolder=os.path.join(self.default_saveFolder, self.current_box,self.ID.text(), f'{self.ID.text()}_{formatted_datetime}')
         # Training folder
         self.TrainingFolder=os.path.join(self.SessionFolder,'TrainingFolder')
         self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
@@ -1736,9 +1731,9 @@ class Window(QMainWindow):
 
     def _GetSaveFileName(self):
         '''Get the name of the save file. This is an old data structure and has been deprecated.'''
-        SaveFileMat = os.path.join(self.default_saveFolder, self.Tower.currentText(),self.ID.text(), f'{self.ID.text()}_{date.today()}.mat')
-        SaveFileJson= os.path.join(self.default_saveFolder, self.Tower.currentText(),self.ID.text(), f'{self.ID.text()}_{date.today()}.json')
-        SaveFileParJson= os.path.join(self.default_saveFolder, self.Tower.currentText(),self.ID.text(), f'{self.ID.text()}_{date.today()}_par.json')
+        SaveFileMat = os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}.mat')
+        SaveFileJson= os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}.json')
+        SaveFileParJson= os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}_par.json')
         if not os.path.exists(os.path.dirname(SaveFileJson)):
             os.makedirs(os.path.dirname(SaveFileJson))
             logging.info(f"Created new folder: {os.path.dirname(SaveFileJson)}")
@@ -1746,9 +1741,9 @@ class Window(QMainWindow):
         while 1:
             if os.path.isfile(SaveFileMat) or os.path.isfile(SaveFileJson)or os.path.isfile(SaveFileParJson):
                 N=N+1
-                SaveFileMat=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.ID.text(), f'{self.ID.text()}_{date.today()}_{N}.mat')
-                SaveFileJson=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.ID.text(), f'{self.ID.text()}_{date.today()}_{N}.json')
-                SaveFileParJson=os.path.join(self.default_saveFolder, self.Tower.currentText(),self.ID.text(), f'{self.ID.text()}_{date.today()}_{N}_par.json')
+                SaveFileMat=os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}_{N}.mat')
+                SaveFileJson=os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}_{N}.json')
+                SaveFileParJson=os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}_{N}_par.json')
             else:
                 break
         self.SaveFileMat=SaveFileMat
@@ -1791,7 +1786,7 @@ class Window(QMainWindow):
             self.NewSession.setDisabled(True) # You must start a NewSession after loading a new file, and you can't continue that session
         elif Reply == QMessageBox.Cancel:
             return
-        fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder+'\\'+self.Tower.currentText(), "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
+        fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder+'\\'+self.current_box, "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
         self.fname=fname
         if fname:
             if fname.endswith('.mat'):
@@ -2142,7 +2137,6 @@ class Window(QMainWindow):
         '''Enable or disable metadata fields'''
         self.ID.setEnabled(enable)
         self.Experimenter.setEnabled(enable)
-        self.Tower.setEnabled(enable)
 
     def _CheckBonsaiConnection(self):
         '''Check if the Bonsai and GUI are connected'''
