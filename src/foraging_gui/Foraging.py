@@ -2154,10 +2154,8 @@ class Window(QMainWindow):
 
     def _CheckBonsaiConnection(self):
         '''Check if the Bonsai and GUI are connected'''
-        self._ConnectOSC()
-        #if self.InitializeBonsaiSuccessfully==0:
-        #    self._ConnectBonsai()
-        
+        if self.InitializeBonsaiSuccessfully==0:
+            self._ConnectBonsai() 
 
     def _Start(self):
         '''start trial loop'''
