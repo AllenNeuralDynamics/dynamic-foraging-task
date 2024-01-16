@@ -1796,7 +1796,7 @@ class Window(QMainWindow):
             self.NewSession.setDisabled(True) # You must start a NewSession after loading a new file, and you can't continue that session
         elif Reply == QMessageBox.Cancel:
             return
-        fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder, "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
+        fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder+'\\'+self.current_box, "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
         self.fname=fname
         if fname:
             if fname.endswith('.mat'):
