@@ -357,6 +357,7 @@ class Window(QMainWindow):
             try:
                 self._ConnectOSC()
                 self.InitializeBonsaiSuccessfully=1
+                logging.info('Connected to Bonsai')
             except Exception as e:
                 logging.error(str(e))
                 self.WarningLabelInitializeBonsai.setText('Please open bonsai!')
@@ -372,15 +373,27 @@ class Window(QMainWindow):
             self.client3.close()
             self.client4.close()
         except Exception as e:
-            logging.info('could not close bonsai connection: {}'.format(str(e))) 
+            logging.info('could not close bonsai connection: {}'.format(str(e)))    
+        else:
+            logging.info('Bonsai connection closed')
 
-        #if self.InitializeBonsaiSuccessfully==1:
-        #    self.client.close()
-        #    self.client2.close()
-        #    self.client3.close()
-        #    self.client4.close()
         self.InitializeBonsaiSuccessfully=0
         self._ConnectBonsai()
+
+    def _RestartBonsai(self):
+        try:
+            logging.info('Attempting to close Bonsai connection')
+            self.client.close()
+            self.client2.close()
+            self.client3.close()
+            self.client4.close()
+        except Exception as e:
+            logging.info('could not close bonsai connection: {}'.format(str(e)))    
+        else:
+            logging.info('Bonsai connection closed')
+        logging.info('Attempting to restart bonsai')
+        self.InitializeBonsaiSuccessfully=0       
+        self._InitializeBonsai()
 
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
