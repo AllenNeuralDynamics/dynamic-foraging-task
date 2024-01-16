@@ -365,11 +365,20 @@ class Window(QMainWindow):
 
     def _ReconnectBonsai(self):
         '''Reconnect bonsai'''
-        if self.InitializeBonsaiSuccessfully==1:
+        try:
+            logging.info('Attempting to close Bonsai connection')
             self.client.close()
             self.client2.close()
             self.client3.close()
             self.client4.close()
+        except Exception as e
+            logging.info('could not close bonsai connection: {}'.format(str(e))) 
+
+        #if self.InitializeBonsaiSuccessfully==1:
+        #    self.client.close()
+        #    self.client2.close()
+        #    self.client3.close()
+        #    self.client4.close()
         self.InitializeBonsaiSuccessfully=0
         self._ConnectBonsai()
 
