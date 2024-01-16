@@ -1672,6 +1672,10 @@ class Window(QMainWindow):
             for attr_name in dir(self):
                 if attr_name.startswith('Ot_'):
                     Obj[attr_name]=getattr(self, attr_name)
+
+            # Save the current box
+            Obj['box'] = self.current_box
+    
             # save Json or mat
             if self.SaveFile.endswith('.mat'):
             # Save data to a .mat file
