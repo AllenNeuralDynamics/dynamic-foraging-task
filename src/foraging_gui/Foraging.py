@@ -2444,7 +2444,7 @@ def map_hostname_to_box(hostname,box_num):
         'KAPPA':      '447-2-',
         'W10DT714027':'447-2-',
         'W10DT714028':'447-3-',
-        'W10DT714003':'447-3-'
+        'W10DT714030':'447-3-'
     }
     box_mapping = {
         1:'A',
