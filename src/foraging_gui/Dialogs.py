@@ -1766,7 +1766,13 @@ class AutoTrainDialog(QDialog):
         self.svg_paras = None        
 
         # Connect to Auto Training Manager and Curriculum Manager
-        self._connect_auto_training_manager()
+        aws_connected = self._connect_auto_training_manager()
+        
+        # Disable Auto Train button if not connected to AWS
+        if not aws_connected:
+            self.MainWindow.AutoTrain.setEnabled(False)
+            return
+        
         self._connect_curriculum_manager()
         
         # Signals slots
@@ -1918,14 +1924,22 @@ class AutoTrainDialog(QDialog):
         )
                 
     def _connect_auto_training_manager(self):
-        self.auto_train_manager = DynamicForagingAutoTrainManager(
-            manager_name='447_demo',
-            df_behavior_on_s3=dict(bucket='aind-behavior-data',
-                                root='foraging_nwb_bonsai_processed/',
-                                file_name='df_sessions.pkl'),
-            df_manager_root_on_s3=dict(bucket='aind-behavior-data',
-                                    root='foraging_auto_training/')
-        )
+        try:
+            self.auto_train_manager = DynamicForagingAutoTrainManager(
+                manager_name='447_demo',
+                df_behavior_on_s3=dict(bucket='aind-behavior-data',
+                                    root='foraging_nwb_bonsai_processed/',
+                                    file_name='df_sessions.pkl'),
+                df_manager_root_on_s3=dict(bucket='aind-behavior-data',
+                                        root='foraging_auto_training/')
+            )
+        except:
+            logger.error("AWS connection failed!")
+            QMessageBox.critical(self,
+                                 'Error',
+                                 f'AWS connection failed!\n'
+                                 f'Please check your AWS credentials at ~\.aws\credentials!')
+            return False
         df_training_manager = self.auto_train_manager.df_manager
         
         # Format dataframe
@@ -1940,6 +1954,7 @@ class AutoTrainDialog(QDialog):
             inplace=True
         )
         self.df_training_manager = df_training_manager
+        return True
             
     def _show_auto_training_manager(self):
         if_this_mouse_only = self.checkBox_show_this_mouse_only.isChecked()
