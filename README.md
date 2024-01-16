@@ -244,16 +244,16 @@ To configure automatic updates consistent with the [update protocol](https://git
    - You could now close the Auto Training dialog.
    - Start the training as usual.
      
-6. Override parameters (not recommended)
+5. Override parameters (not recommended)
    - Once `Apply and lock` is pressed, you can press it again to unlock the parameters and override any of them. But in this case, the automatic training mode is disengaged, and this session is considered "off-curriculum".
      
-8. Override stage (not recommended)
+6. Override stage (not recommended)
    - Check `Override stage` to override the suggested stage. In the example below, `STAGE_FINAL` is suggested, but `STAGE_3` will be actually used (see the green button).
    <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/92fb9df7-3e54-4bf2-a86a-02c3808c554e" width="700">
 
-10. Override curriculum (not recommended)
-   - If you somehow decide to change the curriculum during training, press `Override curriculum` and set a new curriculum.
-   - In this case, since all stages from the old curriculum now become "irrelevant", you should always manually select a stage in the ***new*** curriculum to override.
+7. Override curriculum (not recommended)
+     - If you somehow decide to change the curriculum during training, press `Override curriculum` and set a new curriculum.
+     - In this case, since all stages from the old curriculum now become "irrelevant", you should always manually select a stage in the ***new*** curriculum to override.
    <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/802e5208-dc5f-45f5-8ece-b9241157bf88" width="300">
    <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/fba62a4b-acdb-49e9-a401-3a382607b0f3" width="700">
 
