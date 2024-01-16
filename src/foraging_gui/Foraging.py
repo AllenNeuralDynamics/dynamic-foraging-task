@@ -364,25 +364,16 @@ class Window(QMainWindow):
                 self.WarningLabelInitializeBonsai.setStyleSheet("color: red;")
                 self.InitializeBonsaiSuccessfully=0
 
-    def _ReconnectBonsai2(self):
-        '''Reconnect bonsai'''
-        try:
-            logging.info('Attempting to close Bonsai connection')
-            self.client.close()
-            self.client2.close()
-            self.client3.close()
-            self.client4.close()
-        except Exception as e:
-            logging.info('could not close bonsai connection: {}'.format(str(e)))    
-        else:
-            logging.info('Bonsai connection closed')
-
-        self.InitializeBonsaiSuccessfully=0
-        self._ConnectBonsai()
-
     def _ReconnectBonsai(self):
+        '''
+            Reconnect bonsai
+            
+            First, it closes the connections with the clients. 
+            Then, it restarts the Bonsai workflow. If a bonsai instance is already running, 
+            then it will connect. Otherwise it will start a new bonsai instance
+        '''
         try:
-            logging.info('Attempting to close Bonsai connection')
+            logging.info('attempting to close bonsai connection')
             self.client.close()
             self.client2.close()
             self.client3.close()
@@ -390,8 +381,9 @@ class Window(QMainWindow):
         except Exception as e:
             logging.info('could not close bonsai connection: {}'.format(str(e)))    
         else:
-            logging.info('Bonsai connection closed')
-        logging.info('Attempting to restart bonsai')
+            logging.info('bonsai connection closed')
+
+        logging.info('attempting to restart bonsai')
         self.InitializeBonsaiSuccessfully=0       
         self._InitializeBonsai()
 
@@ -2162,8 +2154,10 @@ class Window(QMainWindow):
 
     def _CheckBonsaiConnection(self):
         '''Check if the Bonsai and GUI are connected'''
-        if self.InitializeBonsaiSuccessfully==0:
-            self._ConnectBonsai()
+        self._ConnectBonsai()
+        #if self.InitializeBonsaiSuccessfully==0:
+        #    self._ConnectBonsai()
+        
 
     def _Start(self):
         '''start trial loop'''
