@@ -364,7 +364,7 @@ class Window(QMainWindow):
                 self.WarningLabelInitializeBonsai.setStyleSheet("color: red;")
                 self.InitializeBonsaiSuccessfully=0
 
-    def _ReconnectBonsai(self):
+    def _ReconnectBonsai2(self):
         '''Reconnect bonsai'''
         try:
             logging.info('Attempting to close Bonsai connection')
@@ -380,7 +380,7 @@ class Window(QMainWindow):
         self.InitializeBonsaiSuccessfully=0
         self._ConnectBonsai()
 
-    def _RestartBonsai(self):
+    def _ReconnectBonsai(self):
         try:
             logging.info('Attempting to close Bonsai connection')
             self.client.close()
