@@ -598,7 +598,7 @@ class Window(QMainWindow):
                 # We could connect
                 logging.info('Connected to Bonsai after {} seconds'.format(wait))               
                 logging.info('Bonsai started successfully')
-                if self.WarningLabel.Text() == 'Lost bonsai connection':
+                if self.WarningLabel.text() == 'Lost bonsai connection':
                     self.WarningLabel.setText('')
                     self.WarningLabel.setStyleSheet("color: red;")
                 self.InitializeBonsaiSuccessfully=1
