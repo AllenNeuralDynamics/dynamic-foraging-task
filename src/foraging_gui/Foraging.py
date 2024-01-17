@@ -2315,7 +2315,8 @@ class Window(QMainWindow):
             logging.info('ending trial loop')
         while self.Start.isChecked():
             QApplication.processEvents()
-            if self.ANewTrial==1 and self.Start.isChecked() and self.finish_Timer==1: 
+            if self.ANewTrial==1 and self.Start.isChecked() and self.finish_Timer==1:
+                logging.info('here') 
                 self.ANewTrial=0 # can start a new trial when we receive the trial end signal from Bonsai
                 GeneratedTrials.B_CurrentTrialN+=1
                 print('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
