@@ -7,6 +7,7 @@ import subprocess
 import math
 import logging
 import socket
+import timeit
 from datetime import date, datetime
 
 import serial 
@@ -2148,12 +2149,18 @@ class Window(QMainWindow):
         if self.ANewTrial==0:
             self.WarningLabel.setText('Waiting for the finish of the last trial!')
             self.WarningLabel.setStyleSheet("color: red;")
+            start_time = timeit.timeit()
             while 1:
                 QApplication.processEvents()
                 if self.ANewTrial==1:
                     self.WarningLabel.setText('')
                     self.WarningLabel.setStyleSheet("color: red;")
                     break
+                elif timeit.timeit() - start > 60:
+                    self.WarningLabel.setText('Session loop timed out. Start a new session')
+                    self.WarningLabel.setStyleSheet("color: red;")                  
+                    self.ANewTrial = 1
+                    break 
     def _thread_complete(self):
         '''complete of a trial'''
         if self.NewTrialRewardOrder==0:
