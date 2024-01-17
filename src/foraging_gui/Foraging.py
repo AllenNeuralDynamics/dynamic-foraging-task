@@ -392,13 +392,10 @@ class Window(QMainWindow):
         logging.info('attempting to restart bonsai')
         self.InitializeBonsaiSuccessfully=0       
         self._InitializeBonsai()
-
-        if hasattr(self, 'GeneratedTrials'):
-            logging.info('restarting logging')
-            self.Ot_log_folder=self._restartlogging()
-        else:
-            logging.info('not restarting logging because no generated trials')
-        
+        if self.InitializeBonsaiSuccessfully ==1 and hasattr(self, 'GeneratedTrials'):
+            reply = QMessageBox.question(self, 'Reconnect Bonsai', 'Reconnected to Bonsai, but trials have been generated. Start a new session before running more trials',QMessageBox.Ok )
+       
+ 
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
         # stop the current session except it is a new session
