@@ -2173,6 +2173,7 @@ class Window(QMainWindow):
 
     def _Start(self):
         '''start trial loop'''
+        logging.info('Start button pressed')
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
             return
