@@ -16,8 +16,8 @@ from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject
 from PyQt5.QtSvg import QSvgWidget
 
-from MyFunctions import Worker
-from Visualization import PlotWaterCalibration
+from foraging_gui.MyFunctions import Worker
+from foraging_gui.Visualization import PlotWaterCalibration
 from aind_auto_train.curriculum_manager import CurriculumManager
 from aind_auto_train.auto_train_manager import DynamicForagingAutoTrainManager
 from aind_auto_train.schema.task import TrainingStage
