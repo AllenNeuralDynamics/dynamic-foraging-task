@@ -598,6 +598,8 @@ class Window(QMainWindow):
                 # We could connect
                 logging.info('Connected to Bonsai after {} seconds'.format(wait))               
                 logging.info('Bonsai started successfully')
+                self.WarningLabel.setText('')
+                self.WarningLabel.setStyleSheet("color: red;")
                 self.InitializeBonsaiSuccessfully=1
                 return
         
@@ -2203,18 +2205,7 @@ class Window(QMainWindow):
             self.Start.setStyleSheet("background-color : none")
             # enable metadata fields
             self._set_metadata_enabled(True)
-            self._StopCurrentSession()
-        ## waiting for the finish of the last trial
-        #if self.StartANewSession==1 and self.ANewTrial==0:
-        #    self.WarningLabel.setText('Waiting for the finish of the last trial!')
-        #    self.WarningLabel.setStyleSheet("color: red;")
-        #    while 1:
-        #        QApplication.processEvents()
-        #        if self.ANewTrial==1:
-        #            self.WarningLabel.setText('')
-        #            self.WarningLabel.setStyleSheet("color: red;")
-        #            break
-    
+            self._StopCurrentSession()  
 
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
