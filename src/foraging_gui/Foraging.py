@@ -2173,14 +2173,20 @@ class Window(QMainWindow):
 
     def _Start(self):
         '''start trial loop'''
-        logging.info('Start button pressed')
+        
+        # Check for Bonsai connection
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
+            logging.info('Start button pressed, but bonsai not connected')
             return
+        
+        # Clear warnings
         self.WarningLabelInitializeBonsai.setText('')
         self.WarningLabel_SaveTrainingStage.setText('')
         self.WarningLabel_SaveTrainingStage.setStyleSheet("color: none;")
         self.NewSession.setDisabled(False)
+            
+        # Toggle button colors
         if self.Start.isChecked():
             self.keyPressEvent()
             # change button color and mark the state change
@@ -2195,6 +2201,7 @@ class Window(QMainWindow):
             self.Start.setStyleSheet("background-color : none")
             # enable metadata fields
             self._set_metadata_enabled(True)
+
         # waiting for the finish of the last trial
         if self.StartANewSession==1 and self.ANewTrial==0:
             self.WarningLabel.setText('Waiting for the finish of the last trial!')
@@ -2202,9 +2209,11 @@ class Window(QMainWindow):
             while 1:
                 QApplication.processEvents()
                 if self.ANewTrial==1:
+                    logging.info('Start button pressed, ending trial generation')
                     self.WarningLabel.setText('')
                     self.WarningLabel.setStyleSheet("color: red;")
                     break
+
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
             # generate a new session id
