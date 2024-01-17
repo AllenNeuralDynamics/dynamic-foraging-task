@@ -2209,7 +2209,6 @@ class Window(QMainWindow):
             while 1:
                 QApplication.processEvents()
                 if self.ANewTrial==1:
-                    logging.info('Start button pressed, ending trial generation')
                     self.WarningLabel.setText('')
                     self.WarningLabel.setStyleSheet("color: red;")
                     break
@@ -2302,7 +2301,10 @@ class Window(QMainWindow):
                 logging.error(str(e))
 
     def _StartTrialLoop(self,GeneratedTrials,worker1):
-        logging.info('starting trial loop')
+        if self.Start.isChecked():
+            logging.info('starting trial loop')
+        else:
+            logging.info('ending trial loop')
         while self.Start.isChecked():
             QApplication.processEvents()
             if self.ANewTrial==1 and self.Start.isChecked() and self.finish_Timer==1: 
