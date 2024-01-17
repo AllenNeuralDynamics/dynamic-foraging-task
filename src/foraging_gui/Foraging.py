@@ -24,8 +24,10 @@ from Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
 from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog
 from Dialogs import ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog
 from Dialogs import LickStaDialog,TimeDistributionDialog
+from Dialogs import AutoTrainDialog
 from MyFunctions import GenerateTrials, Worker,NewScaleSerialY
 from stage import Stage
+from TransferToNWB import bonsai_to_nwb
 
 
 class NumpyEncoder(json.JSONEncoder):
@@ -68,7 +70,7 @@ class Window(QMainWindow):
         self.UpdateParameters=1 # permission to update parameters
         self.Visualization.setTitle(str(date.today()))
         self.loggingstarted=-1
-
+        
         # Connect to Bonsai
         self._InitializeBonsai()
 
@@ -109,6 +111,7 @@ class Window(QMainWindow):
         self._StageSerialNum()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
+        
         
         logging.info('Start up complete')
 
@@ -154,6 +157,9 @@ class Window(QMainWindow):
         self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
+        
+        self.AutoTrain.clicked.connect(self._AutoTrain)
+        
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._Task)
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._AdvancedBlockAuto)
@@ -1176,6 +1182,7 @@ class Window(QMainWindow):
                 # Set an attribute in self with the name 'TP_' followed by the child's object name
                 # and store whether the child is checked or not
                 setattr(self, 'TP_'+child.objectName(), child.isChecked())
+                            
 
     def _Task(self):
         '''hide and show some fields based on the task type'''
@@ -1672,6 +1679,16 @@ class Window(QMainWindow):
             elif self.SaveFile.endswith('.json'):
                 with open(self.SaveFile, "w") as outfile:
                     json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
+                    
+            # Also export to nwb automatically here
+            try:
+                nwb_name = self.SaveFile.replace('.json','.nwb')
+                bonsai_to_nwb(self.SaveFile, os.path.dirname(self.SaveFileJson))
+            except Exception as e:
+                logging.warning(f'Failed to export to nwb...\n{e}')
+            else:
+                logging.info(f'Exported to nwb {nwb_name} successfully!')
+            
             # close the camera
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
                 self.Camera_dialog.StartCamera.setChecked(False)
@@ -2041,8 +2058,10 @@ class Window(QMainWindow):
     def _AutoReward(self):
         if self.AutoReward.isChecked():
             self.AutoReward.setStyleSheet("background-color : green;")
+            self.AutoReward.setText('On')
         else:
             self.AutoReward.setStyleSheet("background-color : none")
+            self.AutoReward.setText('Off')
     def _NextBlock(self):
         if self.NextBlock.isChecked():
             self.NextBlock.setStyleSheet("background-color : green;")
@@ -2436,7 +2455,26 @@ class Window(QMainWindow):
             self.TotalWater.setText(str(np.round(TotalWater,3)))
         except Exception as e:
             logging.error(str(e))
+            
+    def _AutoTrain(self):
+        """set up auto training"""
+        # Note: by only create one AutoTrainDialog, all objects associated with 
+        # AutoTrainDialog are now persistent!
+        if not hasattr(self, 'AutoTrain_dialog'):
+            self.AutoTrain_dialog = AutoTrainDialog(MainWindow=self, parent=None)
+                        
+            # Connect to ID change in the mainwindow
+            self.ID.returnPressed.connect(
+                lambda: self.AutoTrain_dialog.update_auto_train_lock(engaged=False)
+            )
+            self.ID.returnPressed.connect(
+                lambda: self.AutoTrain_dialog.update_auto_train_fields(subject_id=self.ID.text())
+            )
 
+            
+        self.AutoTrain_dialog.show()
+
+        
 def map_hostname_to_box(hostname,box_num):
     host_mapping = {
         'W10DT714033':'447-1-',
