@@ -392,6 +392,8 @@ class Window(QMainWindow):
         logging.info('attempting to restart bonsai')
         self.InitializeBonsaiSuccessfully=0       
         self._InitializeBonsai()
+        
+        ## DEBUG CODE
         logging.info('Cleaning up state variables: ANewTrials {}, finish_Timer {}'.format(self.ANewTrial, self.finish_Timer))
         self.ANewTrial=1
         self.finish_Timer=1
@@ -2354,7 +2356,9 @@ class Window(QMainWindow):
                     self.threadpool.start(worker1)
                 #generate a new trial
                 if self.NewTrialRewardOrder==1:
-                    GeneratedTrials._GenerateATrial(self.Channel4)     
+                    GeneratedTrials._GenerateATrial(self.Channel4)    
+            else:
+                logging.info('ANewTrials {}, Start {}, finish_Timer {}'.format(self.ANewTrial, self.Start.isChecked(), self.finish_Timer)) 
 
     def _StartTrialLoop1(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         logging.info('starting trial loop 1')
