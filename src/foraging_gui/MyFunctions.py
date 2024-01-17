@@ -128,6 +128,8 @@ class GenerateTrials():
             if self.TP_OptogeneticsB=='on': # optogenetics is turned on
                 # select the current optogenetics condition
                 self._SelectOptogeneticsCondition()
+                # to check if session-wide control is on. If yes, the SelectedCondition will have extra constraints. 
+                self._CheckSessionControl()
                 if self.SelctedCondition!=0: 
                     self.LaserOn=1
                     self.B_LaserOnTrial.append(self.LaserOn) 
@@ -160,7 +162,16 @@ class GenerateTrials():
             self.CurrentLaserAmplitude=[0,0]
             # Catch the exception and print error information
             logging.error(str(e))
-
+    def _CheckSessionControl(self):
+        '''
+        Check if session-wide control is on. If yes, the SelectedCondition will have extra constraints.
+        
+        We can give optogenetics only in half (the fraction is determined by "Fraction of session (trials)") of the session (measured by trials). 
+        The "Start with=" is also controled by "Alternating across sessions", which means if the session that is loaded as a reference starts 
+        with on (off), the "Start with=" will be set to off (on).
+        '''
+        self.TP_SessionWideControl
+        pass
     def _CheckBaitPermitted(self):
         '''Check if bait is permitted of the current trial'''
         #For task rewardN, if this is the "initial N trials" of the active side, no bait will be be given.
@@ -1136,7 +1147,6 @@ class GenerateTrials():
                 break
             else:
                 self.SelctedCondition=0 # control is selected
-
     def _InitiateATrial(self,Channel1,Channel4):
         # Determine if the current lick port should be baited. self.B_Baited can only be updated after receiving response of the animal, so this part cannot appear in the _GenerateATrial section
         RandomNumber=np.random.random(2)
