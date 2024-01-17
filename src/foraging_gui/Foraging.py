@@ -2203,17 +2203,18 @@ class Window(QMainWindow):
             self.Start.setStyleSheet("background-color : none")
             # enable metadata fields
             self._set_metadata_enabled(True)
-
-        # waiting for the finish of the last trial
-        if self.StartANewSession==1 and self.ANewTrial==0:
-            self.WarningLabel.setText('Waiting for the finish of the last trial!')
-            self.WarningLabel.setStyleSheet("color: red;")
-            while 1:
-                QApplication.processEvents()
-                if self.ANewTrial==1:
-                    self.WarningLabel.setText('')
-                    self.WarningLabel.setStyleSheet("color: red;")
-                    break
+            self._StopCurrentSession()
+        ## waiting for the finish of the last trial
+        #if self.StartANewSession==1 and self.ANewTrial==0:
+        #    self.WarningLabel.setText('Waiting for the finish of the last trial!')
+        #    self.WarningLabel.setStyleSheet("color: red;")
+        #    while 1:
+        #        QApplication.processEvents()
+        #        if self.ANewTrial==1:
+        #            self.WarningLabel.setText('')
+        #            self.WarningLabel.setStyleSheet("color: red;")
+        #            break
+    
 
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
@@ -2221,7 +2222,13 @@ class Window(QMainWindow):
             self.WarningLabel.setText('')
             self.WarningLabel.setStyleSheet("color: gray;")
             # start a new logging
-            self.Ot_log_folder=self._restartlogging()
+            try:
+                self.Ot_log_folder=self._restartlogging()
+            except Exception as e:
+                logging.info('lost bonsai connection: restartlogging()')
+                self.WarningLabel.setText('Lost bonsai connection')
+                self.WarningLabel.setStyleSheet("color: red;")
+                break
             # start the camera during the begginning of each session
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
                 self.Camera_dialog.StartCamera.setChecked(True)
@@ -2324,7 +2331,7 @@ class Window(QMainWindow):
                 try:
                     GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
                 except Exception as e:
-                    logging.info('lost bonsai connection')
+                    logging.info('lost bonsai connection: InitiateATrial')
                     self.WarningLabel.setText('Lost bonsai connection')
                     self.WarningLabel.setStyleSheet("color: red;")
                     break
