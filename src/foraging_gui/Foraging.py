@@ -2323,7 +2323,7 @@ class Window(QMainWindow):
                 #initiate the generated trial
                 try:
                     GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
-                except ConnectionAbortedError as e:
+                except Exception as e:
                     logging.info('lost bonsai connection')
                     break
                 #receive licks and update figures
