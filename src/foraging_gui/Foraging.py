@@ -393,8 +393,7 @@ class Window(QMainWindow):
         self.InitializeBonsaiSuccessfully=0       
         self._InitializeBonsai()
         if self.InitializeBonsaiSuccessfully ==1 and hasattr(self, 'GeneratedTrials'):
-            reply = QMessageBox.question(self, 'Reconnect Bonsai', 'Reconnected to Bonsai, but trials have been generated. Start a new session before running more trials',QMessageBox.Ok )
-       
+            reply = QMessageBox.question(self, 'Reconnect Bonsai', 'Reconnected to Bonsai. Start a new session before running more trials',QMessageBox.Ok )
  
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
@@ -2316,7 +2315,6 @@ class Window(QMainWindow):
         while self.Start.isChecked():
             QApplication.processEvents()
             if self.ANewTrial==1 and self.Start.isChecked() and self.finish_Timer==1:
-                logging.info('here') 
                 self.ANewTrial=0 # can start a new trial when we receive the trial end signal from Bonsai
                 GeneratedTrials.B_CurrentTrialN+=1
                 print('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
