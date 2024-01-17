@@ -2321,7 +2321,11 @@ class Window(QMainWindow):
                     # get reward and generate a new trial
                     self.NewTrialRewardOrder=0     
                 #initiate the generated trial
-                GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
+                try:
+                    GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
+                except ConnectionAbortedError as e:
+                    logging.info('lost bonsai connection')
+                    break
                 #receive licks and update figures
                 if self.actionDrawing_after_stopping.isChecked()==False:
                     self.PlotM._Update(GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
