@@ -2325,6 +2325,8 @@ class Window(QMainWindow):
                     GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
                 except Exception as e:
                     logging.info('lost bonsai connection')
+                    self.WarningLabel.setText('Lost bonsai connection')
+                    self.WarningLabel.setStyleSheet("color: red;")
                     break
                 #receive licks and update figures
                 if self.actionDrawing_after_stopping.isChecked()==False:
