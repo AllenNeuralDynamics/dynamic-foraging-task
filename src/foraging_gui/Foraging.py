@@ -2156,7 +2156,7 @@ class Window(QMainWindow):
                     self.WarningLabel.setText('')
                     self.WarningLabel.setStyleSheet("color: red;")
                     break
-                elif timeit.timeit() - start > 60:
+                elif timeit.timeit() - start_time > 60:
                     self.WarningLabel.setText('Session loop timed out. Start a new session')
                     self.WarningLabel.setStyleSheet("color: red;")                  
                     self.ANewTrial = 1
