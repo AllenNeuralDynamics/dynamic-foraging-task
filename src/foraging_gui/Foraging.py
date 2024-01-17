@@ -2228,7 +2228,7 @@ class Window(QMainWindow):
                 logging.info('lost bonsai connection: restartlogging()')
                 self.WarningLabel.setText('Lost bonsai connection')
                 self.WarningLabel.setStyleSheet("color: red;")
-                break
+                return 
             # start the camera during the begginning of each session
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
                 self.Camera_dialog.StartCamera.setChecked(True)
