@@ -394,6 +394,7 @@ class Window(QMainWindow):
         self._InitializeBonsai()
         if self.InitializeBonsaiSuccessfully ==1 and hasattr(self, 'GeneratedTrials'):
             reply = QMessageBox.question(self, 'Reconnect Bonsai', 'Reconnected to Bonsai. Start a new session before running more trials',QMessageBox.Ok )
+
  
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
@@ -2226,6 +2227,12 @@ class Window(QMainWindow):
                 self.Start.setChecked(False)
                 self.Start.setStyleSheet("background-color : none")
                 self.InitializeBonsaiSuccessfully=0
+                reply = QMessageBox.question(self, 'Start', 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No)
+                if reply == QMessageBox.Yes:
+                    self._ReconnectBonsai()
+                    logging.info('User selected reconnect bonsai')
+                else:                   
+                    logging.info('User selected not to reconnect bonsai')
                 return 
             # start the camera during the begginning of each session
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
@@ -2335,6 +2342,12 @@ class Window(QMainWindow):
                     self.Start.setChecked(False)
                     self.Start.setStyleSheet("background-color : none")
                     self.InitializeBonsaiSuccessfully=0
+                    reply = QMessageBox.question(self, 'Start', 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No)
+                    if reply == QMessageBox.Yes:
+                        self._ReconnectBonsai()
+                        logging.info('User selected reconnect bonsai')
+                    else:                   
+                        logging.info('User selected not to reconnect bonsai')
                     break
                 #receive licks and update figures
                 if self.actionDrawing_after_stopping.isChecked()==False:
