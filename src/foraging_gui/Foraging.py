@@ -392,7 +392,10 @@ class Window(QMainWindow):
         logging.info('attempting to restart bonsai')
         self.InitializeBonsaiSuccessfully=0       
         self._InitializeBonsai()
+        logging.info('Cleaning up state variables: ANewTrials {}, finish_Timer {}'.format(self.ANewTrial, self.finish_Timer))
         self.ANewTrial=1
+        self.finish_Timer=1
+
 
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
