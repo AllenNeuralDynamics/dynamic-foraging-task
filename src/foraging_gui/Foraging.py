@@ -2229,6 +2229,7 @@ class Window(QMainWindow):
                 self.WarningLabel.setText('Lost bonsai connection')
                 self.WarningLabel.setStyleSheet("color: red;")
                 self.Start.setChecked(False)
+                self.Start.setStyleSheet("background-color : none")
                 self.InitializeBonsaiSuccessfully=0
                 return 
             # start the camera during the begginning of each session
@@ -2337,6 +2338,7 @@ class Window(QMainWindow):
                     self.WarningLabel.setText('Lost bonsai connection')
                     self.WarningLabel.setStyleSheet("color: red;")
                     self.Start.setChecked(False)
+                    self.Start.setStyleSheet("background-color : none")
                     self.InitializeBonsaiSuccessfully=0
                     break
                 #receive licks and update figures
