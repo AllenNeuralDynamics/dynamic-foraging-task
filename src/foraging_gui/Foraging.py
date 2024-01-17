@@ -2228,6 +2228,8 @@ class Window(QMainWindow):
                 logging.info('lost bonsai connection: restartlogging()')
                 self.WarningLabel.setText('Lost bonsai connection')
                 self.WarningLabel.setStyleSheet("color: red;")
+                self.Start.setChecked(False)
+                self.InitializeBonsaiSuccessfully=0
                 return 
             # start the camera during the begginning of each session
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
@@ -2334,6 +2336,8 @@ class Window(QMainWindow):
                     logging.info('lost bonsai connection: InitiateATrial')
                     self.WarningLabel.setText('Lost bonsai connection')
                     self.WarningLabel.setStyleSheet("color: red;")
+                    self.Start.setChecked(False)
+                    self.InitializeBonsaiSuccessfully=0
                     break
                 #receive licks and update figures
                 if self.actionDrawing_after_stopping.isChecked()==False:
