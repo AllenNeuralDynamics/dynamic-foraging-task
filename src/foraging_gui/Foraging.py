@@ -7,7 +7,6 @@ import subprocess
 import math
 import logging
 import socket
-import timeit
 from datetime import date, datetime
 
 import serial 
@@ -393,13 +392,13 @@ class Window(QMainWindow):
         logging.info('attempting to restart bonsai')
         self.InitializeBonsaiSuccessfully=0       
         self._InitializeBonsai()
+
+        if hasattr(self, 'GeneratedTrials'):
+            logging.info('restarting logging')
+            self.Ot_log_folder=self._restartlogging()
+        else:
+            logging.info('not restarting logging because no generated trials')
         
-        ## DEBUG CODE
-        logging.info('Cleaning up state variables: ANewTrials {}, finish_Timer {}'.format(self.ANewTrial, self.finish_Timer))
-        self.ANewTrial=1
-        self.finish_Timer=1
-
-
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
         # stop the current session except it is a new session
@@ -2149,18 +2148,13 @@ class Window(QMainWindow):
         if self.ANewTrial==0:
             self.WarningLabel.setText('Waiting for the finish of the last trial!')
             self.WarningLabel.setStyleSheet("color: red;")
-            start_time = timeit.timeit()
             while 1:
                 QApplication.processEvents()
                 if self.ANewTrial==1:
                     self.WarningLabel.setText('')
                     self.WarningLabel.setStyleSheet("color: red;")
                     break
-                elif timeit.timeit() - start_time > 60:
-                    self.WarningLabel.setText('Session loop timed out. Start a new session')
-                    self.WarningLabel.setStyleSheet("color: red;")                  
-                    self.ANewTrial = 1
-                    break 
+    
     def _thread_complete(self):
         '''complete of a trial'''
         if self.NewTrialRewardOrder==0:
@@ -2364,8 +2358,6 @@ class Window(QMainWindow):
                 #generate a new trial
                 if self.NewTrialRewardOrder==1:
                     GeneratedTrials._GenerateATrial(self.Channel4)    
-            else:
-                logging.info('ANewTrials {}, Start {}, finish_Timer {}'.format(self.ANewTrial, self.Start.isChecked(), self.finish_Timer)) 
 
     def _StartTrialLoop1(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         logging.info('starting trial loop 1')
