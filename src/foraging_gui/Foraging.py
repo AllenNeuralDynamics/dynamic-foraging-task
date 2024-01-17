@@ -2188,6 +2188,7 @@ class Window(QMainWindow):
             
         # Toggle button colors
         if self.Start.isChecked():
+            logging.info('Start button pressed: starting trial loop')
             self.keyPressEvent()
             # change button color and mark the state change
             self.Start.setStyleSheet("background-color : green;")
@@ -2198,6 +2199,7 @@ class Window(QMainWindow):
             # disable metadata fields
             self._set_metadata_enabled(False)
         else:
+            logging.info('Start button pressed: ending trial loop')
             self.Start.setStyleSheet("background-color : none")
             # enable metadata fields
             self._set_metadata_enabled(True)
