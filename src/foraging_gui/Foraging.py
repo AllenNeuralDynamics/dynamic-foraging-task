@@ -363,6 +363,7 @@ class Window(QMainWindow):
             try:
                 self._ConnectOSC()
                 self.InitializeBonsaiSuccessfully=1
+                logging.info('Connected to Bonsai')
             except Exception as e:
                 logging.error(str(e))
                 self.WarningLabelInitializeBonsai.setText('Please open bonsai!')
@@ -370,14 +371,27 @@ class Window(QMainWindow):
                 self.InitializeBonsaiSuccessfully=0
 
     def _ReconnectBonsai(self):
-        '''Reconnect bonsai'''
-        if self.InitializeBonsaiSuccessfully==1:
+        '''
+            Reconnect bonsai
+            
+            First, it closes the connections with the clients. 
+            Then, it restarts the Bonsai workflow. If a bonsai instance is already running, 
+            then it will connect. Otherwise it will start a new bonsai instance
+        '''
+        try:
+            logging.info('attempting to close bonsai connection')
             self.client.close()
             self.client2.close()
             self.client3.close()
             self.client4.close()
-        self.InitializeBonsaiSuccessfully=0
-        self._ConnectBonsai()
+        except Exception as e:
+            logging.info('could not close bonsai connection: {}'.format(str(e)))    
+        else:
+            logging.info('bonsai connection closed')
+
+        logging.info('attempting to restart bonsai')
+        self.InitializeBonsaiSuccessfully=0       
+        self._InitializeBonsai()
 
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
@@ -2157,14 +2171,9 @@ class Window(QMainWindow):
         self.ID.setEnabled(enable)
         self.Experimenter.setEnabled(enable)
 
-    def _CheckBonsaiConnection(self):
-        '''Check if the Bonsai and GUI are connected'''
-        if self.InitializeBonsaiSuccessfully==0:
-            self._ConnectBonsai()
-
     def _Start(self):
         '''start trial loop'''
-        self._CheckBonsaiConnection()
+        self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
             return
         self.WarningLabelInitializeBonsai.setText('')
@@ -2383,7 +2392,7 @@ class Window(QMainWindow):
             self.DelayMax.setEnabled(True)
     def _GiveLeft(self):
         '''manually give left water'''
-        self._CheckBonsaiConnection()
+        self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
             return
         self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
@@ -2395,7 +2404,7 @@ class Window(QMainWindow):
     
     def _GiveRight(self):
         '''manually give right water'''
-        self._CheckBonsaiConnection()
+        self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
             return
         self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)

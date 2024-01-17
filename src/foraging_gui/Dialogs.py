@@ -492,7 +492,7 @@ class WaterCalibrationDialog(QDialog):
 
     def _StartCalibratingLeft(self):
         '''start the calibration loop of left valve'''
-        self.MainWindow._CheckBonsaiConnection()
+        self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
         if self.StartCalibratingLeft.isChecked():
@@ -656,7 +656,7 @@ class WaterCalibrationDialog(QDialog):
         self.StartCalibratingLeft.setChecked(False)
     def _StartCalibratingRight(self):
         '''start the calibration loop of right valve'''
-        self.MainWindow._CheckBonsaiConnection()
+        self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
         if self.StartCalibratingRight.isChecked():
@@ -873,7 +873,7 @@ class WaterCalibrationDialog(QDialog):
 
     def _OpenLeftForever(self):
         '''Open the left valve forever'''
-        self.MainWindow._CheckBonsaiConnection()
+        self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
         if self.OpenLeftForever.isChecked():
@@ -894,7 +894,7 @@ class WaterCalibrationDialog(QDialog):
 
     def _OpenRightForever(self):
         '''Open the right valve forever'''
-        self.MainWindow._CheckBonsaiConnection()
+        self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
         if self.OpenRightForever.isChecked():
@@ -915,7 +915,7 @@ class WaterCalibrationDialog(QDialog):
 
     def _OpenLeft(self):    
         '''Calibration of left valve in a different thread'''
-        self.MainWindow._CheckBonsaiConnection()
+        self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
         if self.OpenLeft.isChecked():
@@ -940,7 +940,7 @@ class WaterCalibrationDialog(QDialog):
         self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
     def _OpenRight(self):
         '''Calibration of right valve'''
-        self.MainWindow._CheckBonsaiConnection()
+        self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
         if self.OpenRight.isChecked():
@@ -993,7 +993,7 @@ class CameraDialog(QDialog):
 
     def _RestartLogging(self):
         '''Restart the logging (create a new logging folder)'''
-        self.MainWindow._CheckBonsaiConnection()
+        self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
         if self.CollectVideo.currentText()=='Yes':
@@ -1027,7 +1027,7 @@ class CameraDialog(QDialog):
             
     def _ClearTemporaryVideo(self):
         '''Clear temporary video files'''
-        self.MainWindow._CheckBonsaiConnection()
+        self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
         try:
@@ -1042,7 +1042,7 @@ class CameraDialog(QDialog):
 
     def _StartCamera(self):
         '''Start/stop the camera'''
-        self.MainWindow._CheckBonsaiConnection()
+        self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
@@ -1195,30 +1195,30 @@ class LaserCalibrationDialog(QDialog):
         self.Flush_DO3.clicked.connect(self._FLush_DO3)
         self.Flush_Port2.clicked.connect(self._FLush_Port2)
     def _FLush_DO0(self):
-        self.MainWindow._CheckBonsaiConnection()
+        self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
         self.MainWindow.Channel.DO0(int(1))
         self.MainWindow.Channel.receive()
     def _FLush_DO1(self):
-        self.MainWindow._CheckBonsaiConnection()
+        self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
         self.MainWindow.Channel.DO1(int(1))
     def _FLush_DO2(self):
-        self.MainWindow._CheckBonsaiConnection()
+        self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
         #self.MainWindow.Channel.DO2(int(1))
         self.MainWindow.Channel.receive()
     def _FLush_DO3(self):
-        self.MainWindow._CheckBonsaiConnection()
+        self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
         self.MainWindow.Channel.DO3(int(1))
         self.MainWindow.Channel.receive()
     def _FLush_Port2(self):
-        self.MainWindow._CheckBonsaiConnection()
+        self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
         self.MainWindow.Channel.Port2(int(1))
@@ -1690,7 +1690,7 @@ class LaserCalibrationDialog(QDialog):
         self.SleepComplete2=1
     def _Open(self):
         '''Open the laser only once'''
-        self.MainWindow._CheckBonsaiConnection()
+        self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
         if self.Open.isChecked():
