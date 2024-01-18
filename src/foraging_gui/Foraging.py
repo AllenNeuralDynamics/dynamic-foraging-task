@@ -398,6 +398,7 @@ class Window(QMainWindow):
  
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
+        raise Exception('testing2')
         # stop the current session except it is a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
             pass
