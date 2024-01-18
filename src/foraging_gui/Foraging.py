@@ -2380,7 +2380,11 @@ class Window(QMainWindow):
                 if reply == QMessageBox.Yes:
                     logging.error('trial stalled {} minutes, user stopped trials'.format(elapsed_time))
                     self.ANewTrial=1
+                    self.InitializeBonsaiSuccessfully=0
                     self.Start.setChecked(False)
+                    self.Start.setStyleSheet("background-color : none")
+                    self.WarningLabel.setText('Trials stalled, recheck bonsai connection.')
+                    self.WarningLabel.setStyleSheet("color: red;")
                     break
                 else:
                     logging.error('trial stalled {} minutes, user continued trials'.format(elapsed_time))
