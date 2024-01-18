@@ -2319,15 +2319,22 @@ class Window(QMainWindow):
             logging.info('starting trial loop')
         else:
             logging.info('ending trial loop')
+        
+        # Track elapsed time in case Bonsai Stalls
         last_trial_start = time.time()
         stall_iteration = 1
-        stall_duration = 1*60 ##DEBUG
+        stall_duration = 5*60 
+
         while self.Start.isChecked():
             QApplication.processEvents()
             if self.ANewTrial==1 and self.Start.isChecked() and self.finish_Timer==1:
+
+                # Reset stall timer
                 last_trial_start = time.time()
                 stall_iteration = 1
-                self.ANewTrial=0 # can start a new trial when we receive the trial end signal from Bonsai
+                
+                # can start a new trial when we receive the trial end signal from Bonsai
+                self.ANewTrial=0 
                 GeneratedTrials.B_CurrentTrialN+=1
                 print('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
                 logging.info('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
@@ -2336,11 +2343,13 @@ class Window(QMainWindow):
                     self.NewTrialRewardOrder=1
                 else:
                     # get reward and generate a new trial
-                    self.NewTrialRewardOrder=0     
+                    self.NewTrialRewardOrder=0    
+ 
                 #initiate the generated trial
                 try:
                     GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
                 except Exception as e:
+                    print(e)
                     logging.info('lost bonsai connection: InitiateATrial')
                     self.WarningLabel.setText('Lost bonsai connection')
                     self.WarningLabel.setStyleSheet("color: red;")
@@ -2372,21 +2381,35 @@ class Window(QMainWindow):
                     self.threadpool.start(worker1)
                 #generate a new trial
                 if self.NewTrialRewardOrder==1:
-                    GeneratedTrials._GenerateATrial(self.Channel4)   
+                    GeneratedTrials._GenerateATrial(self.Channel4)  
+ 
             elif (time.time() - last_trial_start) >stall_duration*stall_iteration:
+                # Elapsed time since last trial is more than tolerance
+                
+                # Prompt user to stop trials
                 elapsed_time = int(np.floor(stall_duration*stall_iteration/60))
                 message = '{} minutes have elapsed since the last trial started. Bonsai may have stopped. Stop trials?'.format(elapsed_time)
                 reply = QMessageBox.question(self, 'Trial Generator', message,QMessageBox.Yes| QMessageBox.No )
                 if reply == QMessageBox.Yes:
+                    # User stops trials
                     logging.error('trial stalled {} minutes, user stopped trials'.format(elapsed_time))
+        
+                    # Set that the current trial ended, so we can save
                     self.ANewTrial=1
+    
+                    # Flag Bonsai connection
                     self.InitializeBonsaiSuccessfully=0
+                
+                    # Reset Start button
                     self.Start.setChecked(False)
                     self.Start.setStyleSheet("background-color : none")
+                    
+                    # Give warning to user
                     self.WarningLabel.setText('Trials stalled, recheck bonsai connection.')
                     self.WarningLabel.setStyleSheet("color: red;")
                     break
                 else:
+                    # User continues, wait another stall_duration and prompt again
                     logging.error('trial stalled {} minutes, user continued trials'.format(elapsed_time))
                     stall_iteration +=1
 
