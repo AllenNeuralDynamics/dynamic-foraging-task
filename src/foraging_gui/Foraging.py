@@ -1367,9 +1367,19 @@ class Window(QMainWindow):
                 self.RewardPairs=self.RewardFamilies[int(self.RewardFamily.text())-1][:int(self.RewardPairsN.text())]
                 self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.BaseRewardSum.text())
                 if hasattr(self, 'GeneratedTrials'):
-                    self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2))) 
+                    self.ShowRewardPairs.setText('Reward pairs:\n'
+                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
+                                                 + '\n\n'
+                                                 + 'Current pair:\n'
+                                                 + str(np.round(
+                                                     self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2))) 
+                    self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
                 else:
-                    self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: ') 
+                    self.ShowRewardPairs.setText('Reward pairs:\n'
+                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
+                                                 +'\n\n'+'Current pair:\n ') 
+                    self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
+                    
             elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
                 input_string=self.UncoupledReward.text()
                 # remove any square brackets and spaces from the string
@@ -1381,9 +1391,18 @@ class Window(QMainWindow):
                 # create a numpy array from the list of numbers
                 self.RewardProb=np.array(num_list)
                 if hasattr(self, 'GeneratedTrials'):
-                    self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2))) 
+                    self.ShowRewardPairs.setText('Reward pairs:\n'
+                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
+                                                 + '\n\n'
+                                                 +'Current pair:\n'
+                                                 + str(np.round(self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2))) 
+                    self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
                 else:
-                    self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: ') 
+                    self.ShowRewardPairs.setText('Reward pairs:\n'
+                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
+                                                 + '\n\n'
+                                                 +'Current pair:\n ') 
+                    self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
         except Exception as e:
             # Catch the exception and log error information
             logging.error(str(e))
@@ -2453,7 +2472,7 @@ class Window(QMainWindow):
                 # maximum 3.5ml
                 if suggested_water>3.5:
                     suggested_water=3.5
-                    self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and LAS should \nbe alerted!')
+                    self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and LAS should be alerted!')
                     self.TotalWaterWarning.setStyleSheet("color: red;")
                 else:
                     self.TotalWaterWarning.setText('')
