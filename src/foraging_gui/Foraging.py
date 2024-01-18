@@ -2654,7 +2654,8 @@ def excepthook(exc_type, exc_value, exc_tb):
     print('Encountered a fatal error: ')
     print(tb)
     logging.error('FATAL ERROR: \n{}'.format(tb))
-    reply = QMessageBox.question('Unexpected Error!', 'The GUI has encountered an unexpected error and will not close. Error message: {}'.format(tb),QMessageBox.Ok)
+    messagebox = QMessageBox()
+    messagebox.setText('Error: {}'.format(tb))
     QtWidgets.QApplication.quit()
 
 if __name__ == "__main__":
