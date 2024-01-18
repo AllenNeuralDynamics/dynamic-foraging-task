@@ -1944,13 +1944,13 @@ class Window(QMainWindow):
                 logging.error(str(e))
                 # delete GeneratedTrials
                 del self.GeneratedTrials
+                
             # show basic information
-            if 'Other_inforTitle' in Obj:
-                self.infor.setTitle(Obj['Other_inforTitle'])
-            if 'Other_BasicTitle' in Obj:
-                self.Basic.setTitle(Obj['Other_BasicTitle'])
-            if 'Other_BasicText' in Obj:
-                self.ShowBasic.setText(Obj['Other_BasicText'])
+            if 'info_task' in Obj:
+                self.label_info_task.setTitle(Obj['info_task'])
+            if 'info_other_perf' in Obj:
+                self.ShowBasic.setText(Obj['info_other_perf'])
+                
             # Set newscale position to last position
             if 'B_NewscalePositions' in Obj:
                 try:

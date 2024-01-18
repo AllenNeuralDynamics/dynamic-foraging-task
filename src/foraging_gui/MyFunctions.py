@@ -813,18 +813,24 @@ class GenerateTrials():
         self.win.Other_RunningTime=tdelta.seconds // 60
         SessionStartTimeHM = SessionStartTime.strftime('%H:%M')
         CurrentTimeHM = self.win.CurrentTime.strftime('%H:%M')
-        self.win.Other_inforTitle='Session started: '+SessionStartTimeHM+ '  Current: '+CurrentTimeHM+ '  Run: '+str(self.win.Other_RunningTime)+'m'
+        
+        self.win.info_task=f'Session started at: {SessionStartTimeHM}\n'\
+                                   f'Current time: {CurrentTimeHM}\n'\
+                                   f'Run time: {str(self.win.Other_RunningTime)} mins'
+                                   
         if (self.TP_AutoReward  or int(self.TP_BlockMinReward)>0) and self.win.Start.isChecked():
             # show the next trial
-            self.win.Other_BasicTitle='Current trial: ' + str(self.B_CurrentTrialN+2)
+            info_trial='\nCurrent trial: ' + str(self.B_CurrentTrialN+2)
         else:
             # show the current trial
-            self.win.Other_BasicTitle='Current trial: ' + str(self.B_CurrentTrialN+1)
-        self.win.infor.setTitle(self.win.Other_inforTitle)
-        self.win.Basic.setTitle(self.win.Other_BasicTitle)
+            info_trial='\nCurrent trial: ' + str(self.B_CurrentTrialN+1)
+            
+        self.win.info_task += info_trial
+        self.win.label_info_task.setText(self.win.info_task)
+                
         # show basic session statistics    
         if self.B_CurrentTrialN>=0 and self.B_CurrentTrialN<1:
-            Other_BasicText=  ('Current left block: ' + str(self.BS_CurrentBlockTrialNV[0]) + '/' +  str(self.BS_CurrentBlockLenV[0])+'\n'
+            info_other_perf=  ('Current left block: ' + str(self.BS_CurrentBlockTrialNV[0]) + '/' +  str(self.BS_CurrentBlockLenV[0])+'\n'
                         'Current right block: ' + str(self.BS_CurrentBlockTrialNV[1]) + '/' +  str(self.BS_CurrentBlockLenV[1])+'\n\n'
                         'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                         'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
@@ -832,10 +838,10 @@ class GenerateTrials():
                         'Earned Reward (ul): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
                         'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
                         'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n')
-            self.win.ShowBasic.setText(Other_BasicText)
-            self.win.Other_BasicText=Other_BasicText
+            self.win.ShowBasic.setText(info_other_perf)
+            self.win.info_other_perf=info_other_perf
         elif self.B_CurrentTrialN>=1 and self.B_CurrentTrialN<2:
-            Other_BasicText=('Current left block: ' + str(self.BS_CurrentBlockTrialNV[0]) + '/' +  str(self.BS_CurrentBlockLenV[0])+'\n'
+            info_other_perf=('Current left block: ' + str(self.BS_CurrentBlockTrialNV[0]) + '/' +  str(self.BS_CurrentBlockLenV[0])+'\n'
                         'Current right block: ' + str(self.BS_CurrentBlockTrialNV[1]) + '/' +  str(self.BS_CurrentBlockLenV[1])+'\n\n'
                         'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                         'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
@@ -857,10 +863,10 @@ class GenerateTrials():
                         '  Frac of DD trial goCue_goCue1: ' + str(self.DD_TrialsN_GoCue_GoCue1) + '/' + str(len(self.GoCue_GoCue1_DD)) + ' ('+str(np.round(self.DDRate_GoCue_GoCue1,2))+')' +'\n'
                         '  DD per finish trial start_goCue: ' + str(self.DD_PerTrial_Start_GoCue)+'\n'
                         '  DD per finish trial goCue_goCue1: ' + str(self.DD_PerTrial_GoCue_GoCue1)+'\n')
-            self.win.ShowBasic.setText(Other_BasicText)
-            self.win.Other_BasicText=Other_BasicText
+            self.win.ShowBasic.setText(info_other_perf)
+            self.win.info_other_perf=info_other_perf
         elif self.B_CurrentTrialN>=2:
-            Other_BasicText=('Current left block: ' + str(self.BS_CurrentBlockTrialNV[0]) + '/' +  str(self.BS_CurrentBlockLenV[0])+'\n'
+            info_other_perf=('Current left block: ' + str(self.BS_CurrentBlockTrialNV[0]) + '/' +  str(self.BS_CurrentBlockLenV[0])+'\n'
                         'Current right block: ' + str(self.BS_CurrentBlockTrialNV[1]) + '/' +  str(self.BS_CurrentBlockLenV[1])+'\n\n'
                         'Foraging eff optimal: '+str(np.round(self.B_for_eff_optimal,2))+'\n'
                         'Foraging eff optimal random seed: '+ str(np.round(self.B_for_eff_optimal_random_seed,2))+'\n\n'
@@ -885,8 +891,8 @@ class GenerateTrials():
                         '  DD per finish trial start_goCue: ' + str(self.DD_PerTrial_Start_GoCue)+'\n'
                         '  DD per finish trial goCue_goCue1: ' + str(self.DD_PerTrial_GoCue_GoCue1)+'\n'
                         '  DD per finish trial goCue_nextStart: ' + str(self.DD_PerTrial_GoCue_NextStart)+'\n')
-            self.win.ShowBasic.setText(Other_BasicText)
-            self.win.Other_BasicText=Other_BasicText
+            self.win.ShowBasic.setText(info_other_perf)
+            self.win.info_other_perf=info_other_perf
             # newscale positions
             if hasattr(self.win, 'current_stage'):
                 self.win._GetPositions()

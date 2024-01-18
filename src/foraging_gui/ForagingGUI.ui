@@ -12,7 +12,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>959</width>
+    <width>960</width>
     <height>1000</height>
    </rect>
   </property>
@@ -41,7 +41,7 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout_10">
+   <layout class="QVBoxLayout" name="verticalLayout_12">
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_7">
       <property name="leftMargin">
@@ -186,32 +186,6 @@
         <property name="title">
          <string>Date</string>
         </property>
-        <widget class="QLabel" name="label_auto_train_stage">
-         <property name="geometry">
-          <rect>
-           <x>570</x>
-           <y>290</y>
-           <width>351</width>
-           <height>41</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">color: rgb(0, 189, 22)</string>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
-         </property>
-        </widget>
         <widget class="QWidget" name="layoutWidget">
          <property name="geometry">
           <rect>
@@ -422,7 +396,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>901</width>
+               <width>902</width>
                <height>523</height>
               </rect>
              </property>
@@ -431,18 +405,42 @@
                <widget class="QWidget" name="widget_2" native="true">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                  <horstretch>5</horstretch>
+                  <horstretch>10</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>330</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
                 <layout class="QVBoxLayout" name="verticalLayout_5">
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
                  <item>
                   <widget class="QGroupBox" name="groupBox_5">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                      <horstretch>0</horstretch>
-                     <verstretch>3</verstretch>
+                     <verstretch>2</verstretch>
                     </sizepolicy>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>140</height>
+                    </size>
                    </property>
                    <property name="title">
                     <string/>
@@ -650,7 +648,7 @@
                    <property name="maximumSize">
                     <size>
                      <width>16777215</width>
-                     <height>150</height>
+                     <height>140</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1265,528 +1263,605 @@
                </widget>
               </item>
               <item>
-               <widget class="QWidget" name="widget" native="true">
+               <widget class="QWidget" name="widget_4" native="true">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                   <horstretch>15</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>280</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <layout class="QHBoxLayout" name="horizontalLayout_2">
+                <layout class="QVBoxLayout" name="verticalLayout_13">
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
                  <item>
-                  <layout class="QVBoxLayout" name="verticalLayout_9">
-                   <item>
-                    <widget class="QGroupBox" name="groupBox_4">
-                     <property name="maximumSize">
-                      <size>
-                       <width>260</width>
-                       <height>70</height>
-                      </size>
-                     </property>
-                     <property name="title">
-                      <string>Manual water</string>
-                     </property>
-                     <layout class="QGridLayout" name="gridLayout_8">
-                      <item row="0" column="2">
-                       <widget class="QLabel" name="label_32">
-                        <property name="text">
-                         <string>s</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="0" column="5">
-                       <widget class="QLabel" name="label_33">
-                        <property name="text">
-                         <string>s</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="0" column="1" alignment="Qt::AlignRight">
-                       <widget class="QLabel" name="label_16">
-                        <property name="text">
-                         <string>0.030</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="0" column="4" alignment="Qt::AlignRight">
-                       <widget class="QLabel" name="label_31">
-                        <property name="text">
-                         <string>0.030</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="1" column="1" alignment="Qt::AlignRight">
-                       <widget class="QLabel" name="label_34">
-                        <property name="text">
-                         <string>3.00</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="1" column="4" alignment="Qt::AlignRight">
-                       <widget class="QLabel" name="label_35">
-                        <property name="text">
-                         <string>3.00</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="0" column="0" rowspan="2">
-                       <widget class="QPushButton" name="GiveLeft_2">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
-                          <horstretch>20</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="minimumSize">
-                         <size>
-                          <width>40</width>
-                          <height>0</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>Give
-Left</string>
-                        </property>
-                        <property name="checkable">
-                         <bool>false</bool>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="0" column="3" rowspan="2">
-                       <widget class="QPushButton" name="GiveRight_2">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
-                          <horstretch>20</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="minimumSize">
-                         <size>
-                          <width>40</width>
-                          <height>0</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>Give
-Right</string>
-                        </property>
-                        <property name="checkable">
-                         <bool>false</bool>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="1" column="2">
-                       <widget class="QLabel" name="label_36">
-                        <property name="text">
-                         <string>ul</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="1" column="5">
-                       <widget class="QLabel" name="label_37">
-                        <property name="text">
-                         <string>ul</string>
-                        </property>
-                       </widget>
-                      </item>
-                     </layout>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QGroupBox" name="groupBox">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="maximumSize">
-                      <size>
-                       <width>16777215</width>
-                       <height>170</height>
-                      </size>
-                     </property>
-                     <property name="font">
-                      <font>
-                       <pointsize>10</pointsize>
-                      </font>
-                     </property>
-                     <property name="title">
-                      <string>Warning</string>
-                     </property>
-                     <layout class="QVBoxLayout" name="verticalLayout_2">
-                      <item>
-                       <layout class="QVBoxLayout" name="verticalLayout">
-                        <item>
-                         <widget class="QLabel" name="WarningLabelAutoWater">
-                          <property name="sizePolicy">
-                           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                           </sizepolicy>
-                          </property>
-                          <property name="text">
-                           <string/>
-                          </property>
-                          <property name="textFormat">
-                           <enum>Qt::AutoText</enum>
-                          </property>
-                          <property name="scaledContents">
-                           <bool>false</bool>
-                          </property>
-                          <property name="alignment">
-                           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                          </property>
-                         </widget>
-                        </item>
-                        <item>
-                         <widget class="QLabel" name="WarningLabelRewardN">
-                          <property name="sizePolicy">
-                           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                           </sizepolicy>
-                          </property>
-                          <property name="text">
-                           <string/>
-                          </property>
-                          <property name="textFormat">
-                           <enum>Qt::AutoText</enum>
-                          </property>
-                          <property name="scaledContents">
-                           <bool>false</bool>
-                          </property>
-                          <property name="alignment">
-                           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                          </property>
-                         </widget>
-                        </item>
-                        <item>
-                         <widget class="QLabel" name="WarningLabelInitializeBonsai">
-                          <property name="sizePolicy">
-                           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                           </sizepolicy>
-                          </property>
-                          <property name="text">
-                           <string/>
-                          </property>
-                          <property name="textFormat">
-                           <enum>Qt::AutoText</enum>
-                          </property>
-                          <property name="scaledContents">
-                           <bool>false</bool>
-                          </property>
-                          <property name="alignment">
-                           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                          </property>
-                         </widget>
-                        </item>
-                        <item>
-                         <widget class="QLabel" name="WarningLabelStop">
-                          <property name="sizePolicy">
-                           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                           </sizepolicy>
-                          </property>
-                          <property name="text">
-                           <string/>
-                          </property>
-                          <property name="textFormat">
-                           <enum>Qt::AutoText</enum>
-                          </property>
-                          <property name="scaledContents">
-                           <bool>false</bool>
-                          </property>
-                          <property name="alignment">
-                           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                          </property>
-                         </widget>
-                        </item>
-                        <item>
-                         <widget class="QLabel" name="WarningLabel">
-                          <property name="sizePolicy">
-                           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                           </sizepolicy>
-                          </property>
-                          <property name="text">
-                           <string/>
-                          </property>
-                          <property name="textFormat">
-                           <enum>Qt::AutoText</enum>
-                          </property>
-                          <property name="scaledContents">
-                           <bool>false</bool>
-                          </property>
-                          <property name="alignment">
-                           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                          </property>
-                         </widget>
-                        </item>
-                        <item>
-                         <widget class="QLabel" name="TeensyWarning">
-                          <property name="sizePolicy">
-                           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                           </sizepolicy>
-                          </property>
-                          <property name="text">
-                           <string/>
-                          </property>
-                          <property name="textFormat">
-                           <enum>Qt::AutoText</enum>
-                          </property>
-                          <property name="scaledContents">
-                           <bool>false</bool>
-                          </property>
-                          <property name="alignment">
-                           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                          </property>
-                         </widget>
-                        </item>
-                        <item>
-                         <widget class="QLabel" name="WarningLabelCamera">
-                          <property name="sizePolicy">
-                           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                           </sizepolicy>
-                          </property>
-                          <property name="text">
-                           <string/>
-                          </property>
-                          <property name="textFormat">
-                           <enum>Qt::AutoText</enum>
-                          </property>
-                          <property name="scaledContents">
-                           <bool>false</bool>
-                          </property>
-                          <property name="alignment">
-                           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                          </property>
-                         </widget>
-                        </item>
-                        <item>
-                         <widget class="QLabel" name="WarningLabel_2">
-                          <property name="sizePolicy">
-                           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                           </sizepolicy>
-                          </property>
-                          <property name="text">
-                           <string/>
-                          </property>
-                          <property name="textFormat">
-                           <enum>Qt::AutoText</enum>
-                          </property>
-                          <property name="scaledContents">
-                           <bool>false</bool>
-                          </property>
-                          <property name="alignment">
-                           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                          </property>
-                         </widget>
-                        </item>
-                        <item>
-                         <widget class="QLabel" name="WarningLabel_SaveTrainingStage">
-                          <property name="sizePolicy">
-                           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                           </sizepolicy>
-                          </property>
-                          <property name="text">
-                           <string/>
-                          </property>
-                          <property name="textFormat">
-                           <enum>Qt::AutoText</enum>
-                          </property>
-                          <property name="scaledContents">
-                           <bool>false</bool>
-                          </property>
-                          <property name="alignment">
-                           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                          </property>
-                         </widget>
-                        </item>
-                       </layout>
-                      </item>
-                     </layout>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-              <item>
-               <widget class="QWidget" name="widget_3" native="true">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                  <horstretch>15</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <layout class="QVBoxLayout" name="verticalLayout_4">
-                 <item>
-                  <widget class="QGroupBox" name="ShowReward">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
+                  <widget class="QLabel" name="label_auto_train_stage">
                    <property name="minimumSize">
                     <size>
                      <width>0</width>
-                     <height>0</height>
+                     <height>50</height>
                     </size>
                    </property>
                    <property name="maximumSize">
                     <size>
                      <width>16777215</width>
-                     <height>120</height>
+                     <height>50</height>
                     </size>
                    </property>
                    <property name="font">
                     <font>
-                     <pointsize>10</pointsize>
+                     <pointsize>11</pointsize>
+                     <weight>75</weight>
+                     <bold>true</bold>
                     </font>
                    </property>
-                   <property name="title">
-                    <string>Task info</string>
+                   <property name="styleSheet">
+                    <string notr="true">color: rgb(0, 189, 22)</string>
                    </property>
-                   <layout class="QHBoxLayout" name="horizontalLayout_13">
-                    <item>
-                     <layout class="QVBoxLayout" name="verticalLayout_8">
-                      <item>
-                       <widget class="QLabel" name="ShowRewardPairs">
-                        <property name="enabled">
-                         <bool>true</bool>
-                        </property>
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>16777215</width>
-                          <height>80</height>
-                         </size>
-                        </property>
-                        <property name="font">
-                         <font>
-                          <pointsize>8</pointsize>
-                         </font>
-                        </property>
-                        <property name="text">
-                         <string>Reward pairs:
-[]
-
-Current pair:
-[]</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::PlainText</enum>
-                        </property>
-                        <property name="scaledContents">
-                         <bool>true</bool>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-                        </property>
-                        <property name="wordWrap">
-                         <bool>true</bool>
-                        </property>
-                       </widget>
-                      </item>
-                     </layout>
-                    </item>
-                   </layout>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+                   </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QGroupBox" name="Basic">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                     <horstretch>25</horstretch>
-                     <verstretch>3</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="font">
-                    <font>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="title">
-                    <string>Performance info</string>
-                   </property>
-                   <layout class="QVBoxLayout" name="verticalLayout_3">
+                  <widget class="QWidget" name="widget" native="true">
+                   <layout class="QHBoxLayout" name="horizontalLayout_2">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
                     <item>
-                     <widget class="QScrollArea" name="scrollArea_3">
-                      <property name="widgetResizable">
-                       <bool>true</bool>
+                     <widget class="QWidget" name="widget_5" native="true">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>10</verstretch>
+                       </sizepolicy>
                       </property>
-                      <widget class="QWidget" name="scrollAreaWidgetContents_4">
-                       <property name="geometry">
-                        <rect>
-                         <x>0</x>
-                         <y>0</y>
-                         <width>238</width>
-                         <height>340</height>
-                        </rect>
-                       </property>
-                       <layout class="QHBoxLayout" name="horizontalLayout_8">
-                        <item>
-                         <widget class="QLabel" name="ShowBasic">
-                          <property name="enabled">
-                           <bool>true</bool>
-                          </property>
-                          <property name="sizePolicy">
-                           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                           </sizepolicy>
-                          </property>
-                          <property name="text">
-                           <string/>
-                          </property>
-                          <property name="textFormat">
-                           <enum>Qt::PlainText</enum>
-                          </property>
-                          <property name="scaledContents">
-                           <bool>true</bool>
-                          </property>
-                          <property name="alignment">
-                           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-                          </property>
-                          <property name="wordWrap">
-                           <bool>true</bool>
-                          </property>
-                         </widget>
-                        </item>
-                       </layout>
-                      </widget>
+                      <property name="maximumSize">
+                       <size>
+                        <width>250</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <layout class="QVBoxLayout" name="verticalLayout_14">
+                       <item>
+                        <widget class="QGroupBox" name="groupBox_4">
+                         <property name="maximumSize">
+                          <size>
+                           <width>260</width>
+                           <height>70</height>
+                          </size>
+                         </property>
+                         <property name="title">
+                          <string>Manual water</string>
+                         </property>
+                         <layout class="QGridLayout" name="gridLayout_8">
+                          <item row="0" column="2">
+                           <widget class="QLabel" name="label_32">
+                            <property name="text">
+                             <string>s</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="0" column="5">
+                           <widget class="QLabel" name="label_33">
+                            <property name="text">
+                             <string>s</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="0" column="1" alignment="Qt::AlignRight">
+                           <widget class="QLabel" name="label_16">
+                            <property name="text">
+                             <string>0.030</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="0" column="4" alignment="Qt::AlignRight">
+                           <widget class="QLabel" name="label_31">
+                            <property name="text">
+                             <string>0.030</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="1" column="1" alignment="Qt::AlignRight">
+                           <widget class="QLabel" name="label_34">
+                            <property name="text">
+                             <string>3.00</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="1" column="4" alignment="Qt::AlignRight">
+                           <widget class="QLabel" name="label_35">
+                            <property name="text">
+                             <string>3.00</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="0" column="0" rowspan="2">
+                           <widget class="QPushButton" name="GiveLeft_2">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+                              <horstretch>20</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                             <size>
+                              <width>40</width>
+                              <height>0</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>Give
+Left</string>
+                            </property>
+                            <property name="checkable">
+                             <bool>false</bool>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="0" column="3" rowspan="2">
+                           <widget class="QPushButton" name="GiveRight_2">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+                              <horstretch>20</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                             <size>
+                              <width>40</width>
+                              <height>0</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>Give
+Right</string>
+                            </property>
+                            <property name="checkable">
+                             <bool>false</bool>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="1" column="2">
+                           <widget class="QLabel" name="label_36">
+                            <property name="text">
+                             <string>ul</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="1" column="5">
+                           <widget class="QLabel" name="label_37">
+                            <property name="text">
+                             <string>ul</string>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QGroupBox" name="groupBox">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>16777215</width>
+                           <height>170</height>
+                          </size>
+                         </property>
+                         <property name="font">
+                          <font>
+                           <pointsize>10</pointsize>
+                          </font>
+                         </property>
+                         <property name="title">
+                          <string>Warning</string>
+                         </property>
+                         <layout class="QVBoxLayout" name="verticalLayout_2">
+                          <item>
+                           <layout class="QVBoxLayout" name="verticalLayout">
+                            <item>
+                             <widget class="QLabel" name="WarningLabelAutoWater">
+                              <property name="sizePolicy">
+                               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                               </sizepolicy>
+                              </property>
+                              <property name="text">
+                               <string/>
+                              </property>
+                              <property name="textFormat">
+                               <enum>Qt::AutoText</enum>
+                              </property>
+                              <property name="scaledContents">
+                               <bool>false</bool>
+                              </property>
+                              <property name="alignment">
+                               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                              </property>
+                             </widget>
+                            </item>
+                            <item>
+                             <widget class="QLabel" name="WarningLabelRewardN">
+                              <property name="sizePolicy">
+                               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                               </sizepolicy>
+                              </property>
+                              <property name="text">
+                               <string/>
+                              </property>
+                              <property name="textFormat">
+                               <enum>Qt::AutoText</enum>
+                              </property>
+                              <property name="scaledContents">
+                               <bool>false</bool>
+                              </property>
+                              <property name="alignment">
+                               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                              </property>
+                             </widget>
+                            </item>
+                            <item>
+                             <widget class="QLabel" name="WarningLabelInitializeBonsai">
+                              <property name="sizePolicy">
+                               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                               </sizepolicy>
+                              </property>
+                              <property name="text">
+                               <string/>
+                              </property>
+                              <property name="textFormat">
+                               <enum>Qt::AutoText</enum>
+                              </property>
+                              <property name="scaledContents">
+                               <bool>false</bool>
+                              </property>
+                              <property name="alignment">
+                               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                              </property>
+                             </widget>
+                            </item>
+                            <item>
+                             <widget class="QLabel" name="WarningLabelStop">
+                              <property name="sizePolicy">
+                               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                               </sizepolicy>
+                              </property>
+                              <property name="text">
+                               <string/>
+                              </property>
+                              <property name="textFormat">
+                               <enum>Qt::AutoText</enum>
+                              </property>
+                              <property name="scaledContents">
+                               <bool>false</bool>
+                              </property>
+                              <property name="alignment">
+                               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                              </property>
+                             </widget>
+                            </item>
+                            <item>
+                             <widget class="QLabel" name="WarningLabel">
+                              <property name="sizePolicy">
+                               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                               </sizepolicy>
+                              </property>
+                              <property name="text">
+                               <string/>
+                              </property>
+                              <property name="textFormat">
+                               <enum>Qt::AutoText</enum>
+                              </property>
+                              <property name="scaledContents">
+                               <bool>false</bool>
+                              </property>
+                              <property name="alignment">
+                               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                              </property>
+                             </widget>
+                            </item>
+                            <item>
+                             <widget class="QLabel" name="TeensyWarning">
+                              <property name="sizePolicy">
+                               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                               </sizepolicy>
+                              </property>
+                              <property name="text">
+                               <string/>
+                              </property>
+                              <property name="textFormat">
+                               <enum>Qt::AutoText</enum>
+                              </property>
+                              <property name="scaledContents">
+                               <bool>false</bool>
+                              </property>
+                              <property name="alignment">
+                               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                              </property>
+                             </widget>
+                            </item>
+                            <item>
+                             <widget class="QLabel" name="WarningLabelCamera">
+                              <property name="sizePolicy">
+                               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                               </sizepolicy>
+                              </property>
+                              <property name="text">
+                               <string/>
+                              </property>
+                              <property name="textFormat">
+                               <enum>Qt::AutoText</enum>
+                              </property>
+                              <property name="scaledContents">
+                               <bool>false</bool>
+                              </property>
+                              <property name="alignment">
+                               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                              </property>
+                             </widget>
+                            </item>
+                            <item>
+                             <widget class="QLabel" name="WarningLabel_2">
+                              <property name="sizePolicy">
+                               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                               </sizepolicy>
+                              </property>
+                              <property name="text">
+                               <string/>
+                              </property>
+                              <property name="textFormat">
+                               <enum>Qt::AutoText</enum>
+                              </property>
+                              <property name="scaledContents">
+                               <bool>false</bool>
+                              </property>
+                              <property name="alignment">
+                               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                              </property>
+                             </widget>
+                            </item>
+                            <item>
+                             <widget class="QLabel" name="WarningLabel_SaveTrainingStage">
+                              <property name="sizePolicy">
+                               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                               </sizepolicy>
+                              </property>
+                              <property name="text">
+                               <string/>
+                              </property>
+                              <property name="textFormat">
+                               <enum>Qt::AutoText</enum>
+                              </property>
+                              <property name="scaledContents">
+                               <bool>false</bool>
+                              </property>
+                              <property name="alignment">
+                               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                              </property>
+                             </widget>
+                            </item>
+                           </layout>
+                          </item>
+                         </layout>
+                        </widget>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QWidget" name="widget_6" native="true">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>15</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <layout class="QVBoxLayout" name="verticalLayout_9">
+                       <item>
+                        <widget class="QGroupBox" name="ShowReward">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>0</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>16777215</width>
+                           <height>16777215</height>
+                          </size>
+                         </property>
+                         <property name="font">
+                          <font>
+                           <pointsize>10</pointsize>
+                          </font>
+                         </property>
+                         <property name="title">
+                          <string>Task info</string>
+                         </property>
+                         <layout class="QHBoxLayout" name="horizontalLayout_13">
+                          <item>
+                           <layout class="QVBoxLayout" name="verticalLayout_8">
+                            <item>
+                             <widget class="QLabel" name="ShowRewardPairs">
+                              <property name="enabled">
+                               <bool>true</bool>
+                              </property>
+                              <property name="sizePolicy">
+                               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                               </sizepolicy>
+                              </property>
+                              <property name="maximumSize">
+                               <size>
+                                <width>16777215</width>
+                                <height>80</height>
+                               </size>
+                              </property>
+                              <property name="font">
+                               <font>
+                                <pointsize>8</pointsize>
+                               </font>
+                              </property>
+                              <property name="text">
+                               <string>Reward pairs:
+[ ]
+
+Current pair:
+[ ]</string>
+                              </property>
+                              <property name="textFormat">
+                               <enum>Qt::PlainText</enum>
+                              </property>
+                              <property name="scaledContents">
+                               <bool>true</bool>
+                              </property>
+                              <property name="alignment">
+                               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+                              </property>
+                              <property name="wordWrap">
+                               <bool>true</bool>
+                              </property>
+                             </widget>
+                            </item>
+                            <item>
+                             <widget class="QLabel" name="label_info_task">
+                              <property name="text">
+                               <string>TextLabel</string>
+                              </property>
+                             </widget>
+                            </item>
+                           </layout>
+                          </item>
+                         </layout>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QGroupBox" name="Basic">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                           <horstretch>25</horstretch>
+                           <verstretch>3</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>0</height>
+                          </size>
+                         </property>
+                         <property name="font">
+                          <font>
+                           <pointsize>10</pointsize>
+                          </font>
+                         </property>
+                         <property name="title">
+                          <string>Performance info</string>
+                         </property>
+                         <layout class="QVBoxLayout" name="verticalLayout_3">
+                          <item>
+                           <widget class="QScrollArea" name="scrollArea_3">
+                            <property name="widgetResizable">
+                             <bool>true</bool>
+                            </property>
+                            <widget class="QWidget" name="scrollAreaWidgetContents_4">
+                             <property name="geometry">
+                              <rect>
+                               <x>0</x>
+                               <y>0</y>
+                               <width>252</width>
+                               <height>265</height>
+                              </rect>
+                             </property>
+                             <layout class="QHBoxLayout" name="horizontalLayout_8">
+                              <item>
+                               <widget class="QLabel" name="ShowBasic">
+                                <property name="enabled">
+                                 <bool>true</bool>
+                                </property>
+                                <property name="sizePolicy">
+                                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                  <horstretch>0</horstretch>
+                                  <verstretch>0</verstretch>
+                                 </sizepolicy>
+                                </property>
+                                <property name="text">
+                                 <string/>
+                                </property>
+                                <property name="textFormat">
+                                 <enum>Qt::PlainText</enum>
+                                </property>
+                                <property name="scaledContents">
+                                 <bool>true</bool>
+                                </property>
+                                <property name="alignment">
+                                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+                                </property>
+                                <property name="wordWrap">
+                                 <bool>true</bool>
+                                </property>
+                               </widget>
+                              </item>
+                             </layout>
+                            </widget>
+                           </widget>
+                          </item>
+                         </layout>
+                        </widget>
+                       </item>
+                      </layout>
                      </widget>
                     </item>
                    </layout>
@@ -1822,11 +1897,37 @@ Current pair:
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>901</width>
+               <width>902</width>
                <height>523</height>
               </rect>
              </property>
-             <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <layout class="QVBoxLayout" name="verticalLayout_6">
+              <item>
+               <widget class="QLabel" name="label_auto_train_stage_2">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(0, 189, 22)</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+                </property>
+               </widget>
+              </item>
               <item>
                <widget class="QGroupBox" name="TrainingParameters">
                 <property name="enabled">
@@ -3624,10 +3725,10 @@ Current pair:
                      </property>
                      <property name="text">
                       <string>Reward pairs:
-[]
+[ ]
 
 Current pair:
-[]</string>
+[ ]</string>
                      </property>
                      <property name="textFormat">
                       <enum>Qt::PlainText</enum>
@@ -3807,7 +3908,7 @@ Current pair:
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>901</width>
+               <width>902</width>
                <height>523</height>
               </rect>
              </property>
@@ -3999,7 +4100,7 @@ Current pair:
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>959</width>
+     <width>960</width>
      <height>21</height>
     </rect>
    </property>
@@ -4477,7 +4578,7 @@ Current pair:
    <hints>
     <hint type="sourcelabel">
      <x>444</x>
-     <y>583</y>
+     <y>526</y>
     </hint>
     <hint type="destinationlabel">
      <x>600</x>
@@ -4492,8 +4593,8 @@ Current pair:
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>553</x>
-     <y>583</y>
+     <x>539</x>
+     <y>526</y>
     </hint>
     <hint type="destinationlabel">
      <x>776</x>
@@ -4512,8 +4613,8 @@ Current pair:
      <y>553</y>
     </hint>
     <hint type="destinationlabel">
-     <x>484</x>
-     <y>588</y>
+     <x>477</x>
+     <y>530</y>
     </hint>
    </hints>
   </connection>
@@ -4528,8 +4629,8 @@ Current pair:
      <y>543</y>
     </hint>
     <hint type="destinationlabel">
-     <x>620</x>
-     <y>585</y>
+     <x>599</x>
+     <y>528</y>
     </hint>
    </hints>
   </connection>
@@ -4544,8 +4645,8 @@ Current pair:
      <y>576</y>
     </hint>
     <hint type="destinationlabel">
-     <x>612</x>
-     <y>300</y>
+     <x>480</x>
+     <y>542</y>
     </hint>
    </hints>
   </connection>
@@ -4560,8 +4661,8 @@ Current pair:
      <y>575</y>
     </hint>
     <hint type="destinationlabel">
-     <x>707</x>
-     <y>302</y>
+     <x>602</x>
+     <y>544</y>
     </hint>
    </hints>
   </connection>

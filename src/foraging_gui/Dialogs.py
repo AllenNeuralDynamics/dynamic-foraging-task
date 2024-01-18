@@ -2249,7 +2249,9 @@ class AutoTrainDialog(QDialog):
             self.MainWindow.label_auto_train_stage.setText(
                 f"{get_curriculum_string(self.curriculum_in_use)}\n{self.stage_in_use}"
             )
-
+            self.MainWindow.label_auto_train_stage_2.setText(
+                f"{get_curriculum_string(self.curriculum_in_use)}\n{self.stage_in_use}"
+            )
             # disable override
             self.checkBox_override_stage.setEnabled(False)
             self.comboBox_override_stage.setEnabled(False)
@@ -2268,6 +2270,7 @@ class AutoTrainDialog(QDialog):
                 widget.setStyleSheet("")
             self.MainWindow.TrainingParameters.setStyleSheet("")
             self.MainWindow.label_auto_train_stage.setText("")
+            self.MainWindow.label_auto_train_stage_2.setText("")
 
 
             # enable override
