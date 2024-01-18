@@ -2216,7 +2216,6 @@ class Window(QMainWindow):
             # enable metadata fields
             self._set_metadata_enabled(True)
             self._StopCurrentSession() 
- 
 
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
@@ -2655,6 +2654,7 @@ def excepthook(exc_type, exc_value, exc_tb):
     print('Encountered a fatal error: ')
     print(tb)
     logging.error('FATAL ERROR: \n{}'.format(tb))
+    reply = QMessageBox.question(self, 'Unexpected Error!', 'The GUI has encountered an unexpected error and will not close. Error message: {}'.format(tb),QMessageBox.Ok)
     QtWidgets.QApplication.quit()
 
 if __name__ == "__main__":
