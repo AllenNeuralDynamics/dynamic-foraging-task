@@ -392,8 +392,15 @@ class Window(QMainWindow):
         logging.info('attempting to restart bonsai')
         self.InitializeBonsaiSuccessfully=0       
         self._InitializeBonsai()
+        
+        '''
+            If trials have already been generated, then after reconnection to bonsai
+            trial generation loops indefinitiely. See issue #166. I cannot understand
+            the root cause, so I am warning users to start a new session. 
+        '''   
         if self.InitializeBonsaiSuccessfully ==1 and hasattr(self, 'GeneratedTrials'):
-            reply = QMessageBox.question(self, 'Reconnect Bonsai', 'Reconnected to Bonsai. Start a new session before running more trials',QMessageBox.Ok )
+            msg = 'Reconnected to Bonsai. Start a new session before running more trials'
+            reply = QMessageBox.question(self, 'Reconnect Bonsai', msg, QMessageBox.Ok )
 
  
     def _restartlogging(self,log_folder=None):
