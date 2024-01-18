@@ -2320,7 +2320,7 @@ class Window(QMainWindow):
         else:
             logging.info('ending trial loop')
         last_trial_start = time.time()
-        stall_iteration = 0
+        stall_iteration = 1
         stall_duration = 1*60 ##DEBUG
         while self.Start.isChecked():
             QApplication.processEvents()
