@@ -2349,7 +2349,7 @@ class Window(QMainWindow):
                 try:
                     GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
                 except Exception as e:
-                    print(e)
+                    print('type: {}, text:{}'.format(type(e),e))
                     logging.info('lost bonsai connection: InitiateATrial')
                     self.WarningLabel.setText('Lost bonsai connection')
                     self.WarningLabel.setStyleSheet("color: red;")
