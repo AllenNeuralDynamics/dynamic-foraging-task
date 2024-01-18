@@ -341,7 +341,7 @@ class WaterCalibrationDialog(QDialog):
         self._connectSignalsSlots()
         self.ToInitializeVisual=1
         self._UpdateFigure()
-        self.setWindowTitle('Water Calibration: {}'.format(self.current_box) 
+        self.setWindowTitle('Water Calibration: {}'.format(self.current_box))
 
     def _connectSignalsSlots(self):
         self.OpenLeft.clicked.connect(self._OpenLeft)
