@@ -2374,15 +2374,16 @@ class Window(QMainWindow):
                 if self.NewTrialRewardOrder==1:
                     GeneratedTrials._GenerateATrial(self.Channel4)   
             elif (time.time() - last_trial_start) >stall_duration*stall_iteration:
-                message = '{} minutes have elapsed since the last trial started. Bonsai may have stopped. Stop trials?'.format(stall_duration*stall_iteration/60)
+                elapsed_time = int(np.floor(stall_duration*stall_iteration/60))
+                message = '{} minutes have elapsed since the last trial started. Bonsai may have stopped. Stop trials?'.format(elapsed_time)
                 reply = QMessageBox.question(self, 'Trial Generator', message,QMessageBox.Yes| QMessageBox.No )
                 if reply == QMessageBox.Yes:
-                    logging.error('trial stalled {} minutes, user stopped trials'.format(stall_duration*stall_iteration/60))
+                    logging.error('trial stalled {} minutes, user stopped trials'.format(elapsed_time))
                     self.ANewTrial=1
                     self.Start.setChecked(False)
                     break
                 else:
-                    logging.error('trial stalled {} minutes, user continued trials'.format(stall_duration*stall_iteration/60))
+                    logging.error('trial stalled {} minutes, user continued trials'.format(elapsed_time))
                     stall_iteration +=1
 
 
