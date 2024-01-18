@@ -2321,6 +2321,7 @@ class Window(QMainWindow):
             logging.info('ending trial loop')
         last_trial_start = time.time()
         stall_iteration = 0
+        stall_duration = 1*60 ##DEBUG
         while self.Start.isChecked():
             QApplication.processEvents()
             if self.ANewTrial==1 and self.Start.isChecked() and self.finish_Timer==1:
@@ -2370,16 +2371,16 @@ class Window(QMainWindow):
                 #generate a new trial
                 if self.NewTrialRewardOrder==1:
                     GeneratedTrials._GenerateATrial(self.Channel4)   
-            elif (time.time() - last_trial_start) >5*60*stall_iteration:
-                message = '{} minutes have elapsed since the last trial started. Bonsai may have stopped. Stop trials?'.format(5*60*stall_iteration)
+            elif (time.time() - last_trial_start) >stall_duration*stall_iteration:
+                message = '{} minutes have elapsed since the last trial started. Bonsai may have stopped. Stop trials?'.format(stall_duration*stall_iteration)
                 reply = QMessageBox.question(self, 'Trial Generator', message,QMessageBox.Yes| QMessageBox.No )
                 if reply == QMessageBox.Yes:
-                    logging.error('trial stalled {} minutes, user stopped trials'.format(5*60*stall_iteration))
+                    logging.error('trial stalled {} minutes, user stopped trials'.format(stall_duration*stall_iteration))
                     self.ANewTrial==1
                     self.Start.setChecked(False)
                     break
                 else:
-                    logging.error('trial stalled {} minutes, user continued trials'.format(5*60*stall_iteration))
+                    logging.error('trial stalled {} minutes, user continued trials'.format(stall_duration*stall_iteration))
                     stall_iteration +=1
 
 
