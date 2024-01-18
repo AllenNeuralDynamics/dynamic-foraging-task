@@ -794,17 +794,17 @@ class GenerateTrials():
                                                 + 'Current pair:\n'
                                                 + str(np.round(
                                                     self.B_RewardProHistory[:,self.B_CurrentTrialN],2))) 
-                self.win.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
+                self.win.ShowRewardPairs_2.setText(self.win.ShowRewardPairs.text())
             elif (self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']):
                 self.win.ShowRewardPairs.setText('Reward pairs:\n'
                                 + str(np.round(self.RewardProbPoolUncoupled,2)).replace('\n', ',')
                                 + '\n\n'
                                 +'Current pair:\n'
                                 + str(np.round(self.B_RewardProHistory[:,self.B_CurrentTrialN],2))) 
-                self.win.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
-                
+                self.win.ShowRewardPairs_2.setText(self.win.ShowRewardPairs.text())
         except Exception as e:
             logging.error(str(e))
+            
         # session start time
         SessionStartTime=self.win.SessionStartTime
         self.win.CurrentTime=datetime.now()
