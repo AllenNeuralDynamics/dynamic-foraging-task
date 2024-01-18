@@ -2326,7 +2326,7 @@ class Window(QMainWindow):
             QApplication.processEvents()
             if self.ANewTrial==1 and self.Start.isChecked() and self.finish_Timer==1:
                 last_trial_start = time.time()
-                stall_iteration = 0
+                stall_iteration = 1
                 self.ANewTrial=0 # can start a new trial when we receive the trial end signal from Bonsai
                 GeneratedTrials.B_CurrentTrialN+=1
                 print('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
