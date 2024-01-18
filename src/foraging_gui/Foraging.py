@@ -112,7 +112,7 @@ class Window(QMainWindow):
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
         
-        
+        raise Exception('testing') 
         logging.info('Start up complete')
 
     def connectSignalsSlots(self):
@@ -2654,7 +2654,7 @@ def excepthook(exc_type, exc_value, exc_tb):
     print('Encountered a fatal error: ')
     print(tb)
     logging.error('FATAL ERROR: \n{}'.format(tb))
-    reply = QMessageBox.question(self, 'Unexpected Error!', 'The GUI has encountered an unexpected error and will not close. Error message: {}'.format(tb),QMessageBox.Ok)
+    reply = QMessageBox.question('Unexpected Error!', 'The GUI has encountered an unexpected error and will not close. Error message: {}'.format(tb),QMessageBox.Ok)
     QtWidgets.QApplication.quit()
 
 if __name__ == "__main__":
