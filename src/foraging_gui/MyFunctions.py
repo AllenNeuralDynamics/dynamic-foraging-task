@@ -1139,6 +1139,8 @@ class GenerateTrials():
 
     def _InitiateATrial(self,Channel1,Channel4):
         # Determine if the current lick port should be baited. self.B_Baited can only be updated after receiving response of the animal, so this part cannot appear in the _GenerateATrial section
+        
+        raise Exception('testing')
         RandomNumber=np.random.random(2)
         self.B_CurrentRewardProbRandomNumber.append(RandomNumber)
         self.CurrentBait=self.B_CurrentRewardProb>RandomNumber
