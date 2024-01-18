@@ -2353,6 +2353,8 @@ class Window(QMainWindow):
                         logging.info('User selected reconnect bonsai')
                     else:                   
                         logging.info('User selected not to reconnect bonsai')
+                    self.ANewTrial=1
+                    self.Start.setChecked(False)
                     break
                 #receive licks and update figures
                 if self.actionDrawing_after_stopping.isChecked()==False:
@@ -2372,15 +2374,15 @@ class Window(QMainWindow):
                 if self.NewTrialRewardOrder==1:
                     GeneratedTrials._GenerateATrial(self.Channel4)   
             elif (time.time() - last_trial_start) >stall_duration*stall_iteration:
-                message = '{} minutes have elapsed since the last trial started. Bonsai may have stopped. Stop trials?'.format(stall_duration*stall_iteration)
+                message = '{} minutes have elapsed since the last trial started. Bonsai may have stopped. Stop trials?'.format(stall_duration*stall_iteration/60)
                 reply = QMessageBox.question(self, 'Trial Generator', message,QMessageBox.Yes| QMessageBox.No )
                 if reply == QMessageBox.Yes:
-                    logging.error('trial stalled {} minutes, user stopped trials'.format(stall_duration*stall_iteration))
-                    self.ANewTrial==1
+                    logging.error('trial stalled {} minutes, user stopped trials'.format(stall_duration*stall_iteration/60))
+                    self.ANewTrial=1
                     self.Start.setChecked(False)
                     break
                 else:
-                    logging.error('trial stalled {} minutes, user continued trials'.format(stall_duration*stall_iteration))
+                    logging.error('trial stalled {} minutes, user continued trials'.format(stall_duration*stall_iteration/60))
                     stall_iteration +=1
 
 
