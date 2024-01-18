@@ -2221,19 +2221,23 @@ class Window(QMainWindow):
             try:
                 self.Ot_log_folder=self._restartlogging()
             except Exception as e:
-                logging.info('lost bonsai connection: restartlogging()')
-                self.WarningLabel.setText('Lost bonsai connection')
-                self.WarningLabel.setStyleSheet("color: red;")
-                self.Start.setChecked(False)
-                self.Start.setStyleSheet("background-color : none")
-                self.InitializeBonsaiSuccessfully=0
-                reply = QMessageBox.question(self, 'Start', 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No)
-                if reply == QMessageBox.Yes:
-                    self._ReconnectBonsai()
-                    logging.info('User selected reconnect bonsai')
-                else:                   
-                    logging.info('User selected not to reconnect bonsai')
-                return 
+                if 'ConnectionAbortedError' in str(e):
+                    logging.info('lost bonsai connection: restartlogging()')
+                    self.WarningLabel.setText('Lost bonsai connection')
+                    self.WarningLabel.setStyleSheet("color: red;")
+                    self.Start.setChecked(False)
+                    self.Start.setStyleSheet("background-color : none")
+                    self.InitializeBonsaiSuccessfully=0
+                    reply = QMessageBox.question(self, 'Start', 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No)
+                    if reply == QMessageBox.Yes:
+                        self._ReconnectBonsai()
+                        logging.info('User selected reconnect bonsai')
+                    else:                   
+                        logging.info('User selected not to reconnect bonsai')
+                    return 
+                else:
+                    print('type: {}, text:{}'.format(type(e),e))
+                    raise
             # start the camera during the begginning of each session
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
                 self.Camera_dialog.StartCamera.setChecked(True)
@@ -2349,22 +2353,25 @@ class Window(QMainWindow):
                 try:
                     GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
                 except Exception as e:
-                    print('type: {}, text:{}'.format(type(e),e))
-                    logging.info('lost bonsai connection: InitiateATrial')
-                    self.WarningLabel.setText('Lost bonsai connection')
-                    self.WarningLabel.setStyleSheet("color: red;")
-                    self.Start.setChecked(False)
-                    self.Start.setStyleSheet("background-color : none")
-                    self.InitializeBonsaiSuccessfully=0
-                    reply = QMessageBox.question(self, 'Start', 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No)
-                    if reply == QMessageBox.Yes:
-                        self._ReconnectBonsai()
-                        logging.info('User selected reconnect bonsai')
-                    else:                   
-                        logging.info('User selected not to reconnect bonsai')
-                    self.ANewTrial=1
-                    self.Start.setChecked(False)
-                    break
+                    if 'ConnectionAbortedError' in str(e):
+                        logging.info('lost bonsai connection: InitiateATrial')
+                        self.WarningLabel.setText('Lost bonsai connection')
+                        self.WarningLabel.setStyleSheet("color: red;")
+                        self.Start.setChecked(False)
+                        self.Start.setStyleSheet("background-color : none")
+                        self.InitializeBonsaiSuccessfully=0
+                        reply = QMessageBox.question(self, 'Start', 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No)
+                        if reply == QMessageBox.Yes:
+                            self._ReconnectBonsai()
+                            logging.info('User selected reconnect bonsai')
+                        else:                   
+                            logging.info('User selected not to reconnect bonsai')
+                        self.ANewTrial=1
+                        self.Start.setChecked(False)
+                        break
+                    else:
+                        print('type: {}, text:{}'.format(type(e),e))
+                        raise
                 #receive licks and update figures
                 if self.actionDrawing_after_stopping.isChecked()==False:
                     self.PlotM._Update(GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
