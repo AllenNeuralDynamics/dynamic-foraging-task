@@ -13,7 +13,7 @@
     <x>0</x>
     <y>0</y>
     <width>960</width>
-    <height>716</height>
+    <height>720</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -749,7 +749,7 @@
             <string notr="true"/>
            </property>
            <property name="currentIndex">
-            <number>1</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="tab_2">
             <attribute name="title">
@@ -1851,7 +1851,7 @@
                   <x>0</x>
                   <y>0</y>
                   <width>639</width>
-                  <height>259</height>
+                  <height>262</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_9">
@@ -2121,7 +2121,7 @@
                       <property name="maximumSize">
                        <size>
                         <width>16777215</width>
-                        <height>16777215</height>
+                        <height>120</height>
                        </size>
                       </property>
                       <property name="font">
@@ -2339,7 +2339,7 @@ Bias:</string>
                          <x>0</x>
                          <y>0</y>
                          <width>347</width>
-                         <height>129</height>
+                         <height>132</height>
                         </rect>
                        </property>
                        <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -4246,7 +4246,7 @@ Current pair:
                   <x>0</x>
                   <y>0</y>
                   <width>639</width>
-                  <height>259</height>
+                  <height>262</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_16">
