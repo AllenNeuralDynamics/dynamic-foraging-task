@@ -2149,7 +2149,7 @@ class Window(QMainWindow):
         # waiting for the finish of the last trial
         start_time = time.time()
         stall_iteration = 1
-        stall_duration = 5*60
+        stall_duration = 1*60 ##DEBUG
         if self.ANewTrial==0:
             self.WarningLabel.setText('Waiting for the finish of the last trial!')
             self.WarningLabel.setStyleSheet("color: red;")
@@ -2346,7 +2346,7 @@ class Window(QMainWindow):
         # Track elapsed time in case Bonsai Stalls
         last_trial_start = time.time()
         stall_iteration = 1
-        stall_duration = 5*60 
+        stall_duration = 1*60 ##DEBUG
 
         while self.Start.isChecked():
             QApplication.processEvents()
