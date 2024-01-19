@@ -46,7 +46,14 @@ class Window(QMainWindow):
         super().__init__(parent)
         uic.loadUi('ForagingGUI.ui', self)
         
-        self.box_number=box_number      
+        self.box_number=box_number
+        mapper = {
+            1:'A',
+            2:'B',
+            3:'C',
+            4:'D',
+        }
+        self.box_letter = mapper[box_number]
 
         # Load Settings that are specific to this computer  
         self.SettingFolder=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings")
@@ -363,6 +370,7 @@ class Window(QMainWindow):
                 self._ConnectOSC()
                 self.InitializeBonsaiSuccessfully=1
                 logging.info('Connected to Bonsai')
+                subprocess.Popen('title Box{}'.format(self.box_letter),shell=True)
             except Exception as e:
                 logging.error(str(e))
                 self.WarningLabelInitializeBonsai.setText('Please open bonsai!')
@@ -613,6 +621,7 @@ class Window(QMainWindow):
                     self.WarningLabel.setText('')
                     self.WarningLabel.setStyleSheet("color: red;")
                 self.InitializeBonsaiSuccessfully=1
+                subprocess.Popen('title Box{}'.format(self.box_letter),shell=True)
                 return
         
         # Could not connect and we timed out
