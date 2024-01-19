@@ -2247,11 +2247,11 @@ class AutoTrainDialog(QDialog):
                 '''
             )
             self.MainWindow.label_auto_train_stage.setText(
-                f"{get_curriculum_string(self.curriculum_in_use)}\n{self.stage_in_use}"
+                '\n'.join(get_curriculum_string(self.curriculum_in_use).split('(')).strip(')') 
+                + f", {self.stage_in_use}"
             )
-            self.MainWindow.label_auto_train_stage_2.setText(
-                f"{get_curriculum_string(self.curriculum_in_use)}\n{self.stage_in_use}"
-            )
+            self.MainWindow.label_auto_train_stage.setStyleSheet("color: rgb(0, 189, 22);")
+            
             # disable override
             self.checkBox_override_stage.setEnabled(False)
             self.comboBox_override_stage.setEnabled(False)
@@ -2269,8 +2269,8 @@ class AutoTrainDialog(QDialog):
                 # clear style
                 widget.setStyleSheet("")
             self.MainWindow.TrainingParameters.setStyleSheet("")
-            self.MainWindow.label_auto_train_stage.setText("")
-            self.MainWindow.label_auto_train_stage_2.setText("")
+            self.MainWindow.label_auto_train_stage.setText("off curriculum")
+            self.MainWindow.label_auto_train_stage.setStyleSheet("color: red;")
 
 
             # enable override

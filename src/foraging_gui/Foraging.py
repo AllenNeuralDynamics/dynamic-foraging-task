@@ -1949,7 +1949,7 @@ class Window(QMainWindow):
             if 'info_task' in Obj:
                 self.label_info_task.setTitle(Obj['info_task'])
             if 'info_other_perf' in Obj:
-                self.ShowBasic.setText(Obj['info_other_perf'])
+                self.label_info_performance_others.setText(Obj['info_other_perf'])
                 
             # Set newscale position to last position
             if 'B_NewscalePositions' in Obj:

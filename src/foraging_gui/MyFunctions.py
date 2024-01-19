@@ -838,7 +838,7 @@ class GenerateTrials():
                         'Earned Reward (ul): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
                         'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
                         'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n')
-            self.win.ShowBasic.setText(info_other_perf)
+            self.win.label_info_performance_others.setText(info_other_perf)
             self.win.info_other_perf=info_other_perf
         elif self.B_CurrentTrialN>=1 and self.B_CurrentTrialN<2:
             info_other_perf=('Current left block: ' + str(self.BS_CurrentBlockTrialNV[0]) + '/' +  str(self.BS_CurrentBlockLenV[0])+'\n'
@@ -863,7 +863,7 @@ class GenerateTrials():
                         '  Frac of DD trial goCue_goCue1: ' + str(self.DD_TrialsN_GoCue_GoCue1) + '/' + str(len(self.GoCue_GoCue1_DD)) + ' ('+str(np.round(self.DDRate_GoCue_GoCue1,2))+')' +'\n'
                         '  DD per finish trial start_goCue: ' + str(self.DD_PerTrial_Start_GoCue)+'\n'
                         '  DD per finish trial goCue_goCue1: ' + str(self.DD_PerTrial_GoCue_GoCue1)+'\n')
-            self.win.ShowBasic.setText(info_other_perf)
+            self.win.label_info_performance_others.setText(info_other_perf)
             self.win.info_other_perf=info_other_perf
         elif self.B_CurrentTrialN>=2:
             info_other_perf=('Current left block: ' + str(self.BS_CurrentBlockTrialNV[0]) + '/' +  str(self.BS_CurrentBlockLenV[0])+'\n'
@@ -890,8 +890,9 @@ class GenerateTrials():
                         '  Frac of DD trial goCue_nextStart: ' + str(self.DD_TrialsN_GoCue_NextStart) + '/' + str(len(self.GoCue_NextStart_DD)) + ' ('+str(np.round(self.DDRate_GoCue_NextStart,2))+')' +'\n'
                         '  DD per finish trial start_goCue: ' + str(self.DD_PerTrial_Start_GoCue)+'\n'
                         '  DD per finish trial goCue_goCue1: ' + str(self.DD_PerTrial_GoCue_GoCue1)+'\n'
+                        
                         '  DD per finish trial goCue_nextStart: ' + str(self.DD_PerTrial_GoCue_NextStart)+'\n')
-            self.win.ShowBasic.setText(info_other_perf)
+            self.win.label_info_performance_others.setText(info_other_perf)
             self.win.info_other_perf=info_other_perf
             # newscale positions
             if hasattr(self.win, 'current_stage'):
