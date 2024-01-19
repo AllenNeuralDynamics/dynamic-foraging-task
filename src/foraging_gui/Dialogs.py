@@ -1888,11 +1888,17 @@ class AutoTrainDialog(QDialog):
             # disable apply curriculum                        
             self.pushButton_apply_curriculum.setEnabled(False)
             self._remove_border_curriculum_selection()
+            
+            # Reset override curriculum
+            self.checkBox_override_curriculum.setChecked(False)
+            self.checkBox_override_curriculum.setEnabled(True)
+
 
                     
         # Update UI
         self._update_available_training_stages()
         self._update_stage_to_apply()
+        
         
         # Update df_auto_train_manager and df_curriculum_manager
         self._show_auto_training_manager()
@@ -2067,11 +2073,11 @@ class AutoTrainDialog(QDialog):
         self.svg_paras = self.selected_curriculum['diagram_paras_name']
                         
     def _show_rules_in_browser(self):
-        if self.svg_rules is not None and self.curriculum_in_use is not None:
+        if self.svg_rules is not None:
             webbrowser.open(self.svg_rules)
             
     def _show_paras_in_browser(self):
-        if self.svg_paras is not None and self.curriculum_in_use is not None:
+        if self.svg_paras is not None:
             webbrowser.open(self.svg_paras)
             
     def _show_all_training_history(self):
