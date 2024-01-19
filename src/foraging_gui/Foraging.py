@@ -112,7 +112,6 @@ class Window(QMainWindow):
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
         
-        raise Exception('testing') 
         logging.info('Start up complete')
 
     def connectSignalsSlots(self):
