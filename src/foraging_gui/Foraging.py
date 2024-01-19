@@ -2148,6 +2148,9 @@ class Window(QMainWindow):
         self.Start.setStyleSheet("background-color : none")
         self.Start.setChecked(False)
         # waiting for the finish of the last trial
+        start_time = time.time()
+        stall_iteration = 1
+        stall_duration = 5*60
         if self.ANewTrial==0:
             self.WarningLabel.setText('Waiting for the finish of the last trial!')
             self.WarningLabel.setStyleSheet("color: red;")
@@ -2157,6 +2160,15 @@ class Window(QMainWindow):
                     self.WarningLabel.setText('')
                     self.WarningLabel.setStyleSheet("color: red;")
                     break
+                elif (time.time() - start_time) > stall_duration*stall_iteration:
+                    elapsed_time = int(np.floor(stall_duration*stall_iteration/60))
+                    message = '{} minutes have elapsed since trial stopped was initiated. Force stop?'.format(elapsed_time)
+                    reply = QMessageBox.question(self,'StopCurrentSession',message,QMessageBox.Yes|QMessageBox.No)
+                    if reply == QMessageBox.Yes:
+                        logging.error('trial stalled {} minutes, user force stopped trials'.format(elapsed_time))
+                        self.ANewTrial==1
+                    else:
+                        stall_iteration+=1
     
     def _thread_complete(self):
         '''complete of a trial'''
@@ -2654,8 +2666,6 @@ def excepthook(exc_type, exc_value, exc_tb):
     print('Encountered a fatal error: ')
     print(tb)
     logging.error('FATAL ERROR: \n{}'.format(tb))
-    messagebox = QMessageBox()
-    messagebox.setText('Error: {}'.format(tb))
     QtWidgets.QApplication.quit()
 
 if __name__ == "__main__":
