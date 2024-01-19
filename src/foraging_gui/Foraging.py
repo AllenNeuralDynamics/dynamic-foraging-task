@@ -68,7 +68,7 @@ class Window(QMainWindow):
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
         self.ANewTrial=1 # permission to start a new trial
         self.UpdateParameters=1 # permission to update parameters
-        self.Visualization.setTitle(str(date.today()))
+        self.label_date.setText(str(date.today()))
         self.loggingstarted=-1
         
         # Connect to Bonsai

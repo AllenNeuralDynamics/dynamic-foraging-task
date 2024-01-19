@@ -193,6 +193,8 @@ class PlotV(FigureCanvas):
     def _PlotMatching(self):
         ax=self.ax3
         ax.cla()
+        ax.set_box_aspect(1)
+
         if self.WindowSize()!='':
             WindowSize=int(self.WindowSize())
             if WindowSize==0 or WindowSize==1:
@@ -261,7 +263,7 @@ class PlotV(FigureCanvas):
             self.main_win.B_Bias_R=intercept
             
             ax.plot(fit_x, fit_y, 'r', label=f'r = {r_value:.3f}\np = {p_value:.2e}')
-            ax.set_title(f'Matching slope = {slope:.2f}, bias_R = {intercept:.2f}', fontsize=10)
+            ax.set_title(f'slope = {slope:.2f}, bias_R = {intercept:.2f}', fontsize=9)
             ax.legend(loc='upper left', fontsize=8)
             ax.axis('equal')
             ax.set_xlim([fit_x.min()-2, fit_x.max()+2])
