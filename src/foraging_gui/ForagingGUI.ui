@@ -42,6 +42,9 @@
     </sizepolicy>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_12">
+    <property name="leftMargin">
+     <number>9</number>
+    </property>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_7">
       <property name="leftMargin">
@@ -111,6 +114,12 @@
       </item>
       <item>
        <layout class="QGridLayout" name="gridLayout_5">
+        <property name="leftMargin">
+         <number>5</number>
+        </property>
+        <property name="rightMargin">
+         <number>5</number>
+        </property>
         <item row="0" column="1">
          <widget class="QPushButton" name="Save">
           <property name="sizePolicy">
@@ -1908,7 +1917,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>627</width>
+                  <width>621</width>
                   <height>295</height>
                  </rect>
                 </property>
@@ -2396,7 +2405,7 @@ Bias:</string>
                         <rect>
                          <x>0</x>
                          <y>0</y>
-                         <width>340</width>
+                         <width>336</width>
                          <height>165</height>
                         </rect>
                        </property>
@@ -4303,7 +4312,7 @@ Current pair:
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>627</width>
+                  <width>621</width>
                   <height>295</height>
                  </rect>
                 </property>
