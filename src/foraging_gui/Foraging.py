@@ -518,7 +518,7 @@ class Window(QMainWindow):
                 logging.info('Loaded settings file')
             else:
                 logging.error('Could not find settings file at: {}'.format(self.SettingFile))
-                raise Exception('Could not find file!')
+                raise Exception('Could not find settings file at: {}'.format(self.SettingFile))
         except Exception as e:
             logging.error('Could not load settings file at: {}, {}'.format(self.SettingFile,str(e)))
             self.WarningLabel.setText('Could not load settings file!')
