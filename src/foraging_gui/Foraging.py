@@ -585,6 +585,8 @@ class Window(QMainWindow):
             logging.info('Connected to already running Bonsai')
             logging.info('Bonsai started successfully')
             self.InitializeBonsaiSuccessfully=1
+            self.WarningLabel.setText('')
+            self.WarningLabel.setStyleSheet("color: red;")
             return
 
         # Start Bonsai
