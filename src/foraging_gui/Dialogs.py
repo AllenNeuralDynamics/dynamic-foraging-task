@@ -1874,6 +1874,7 @@ class AutoTrainDialog(QDialog):
                 
                 # Set override stage automatically
                 self.checkBox_override_stage.setChecked(True)
+                self.checkBox_override_stage.setEnabled(True)
             
             # update more info
             self.label_curriculum_name.setText(
@@ -2137,8 +2138,11 @@ class AutoTrainDialog(QDialog):
         if not hasattr(self, 'selected_curriculum') or self.selected_curriculum is None:
             QMessageBox.critical(self, "Error", "Please select a curriculum!")
             return
-        if self.df_this_mouse.empty:
         
+        # Always enable override stage
+        self.checkBox_override_stage.setEnabled(True)
+        
+        if self.df_this_mouse.empty:
             # -- This is a new mouse, we add the first dummy session --
             # Update global curriculum_in_use
             self.curriculum_in_use = self.selected_curriculum['curriculum']
@@ -2172,7 +2176,6 @@ class AutoTrainDialog(QDialog):
         
             # Refresh the GUI
             self.update_auto_train_fields(subject_id=self.selected_subject_id)
-
         else:
             # -- This is an existing mouse, we are changing the curriculum --
             # Not sure whether we should leave this option open. But for now, I allow this freedom.            
