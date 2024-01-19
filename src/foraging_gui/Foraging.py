@@ -2165,7 +2165,10 @@ class Window(QMainWindow):
                     reply = QMessageBox.question(self,'StopCurrentSession',message,QMessageBox.Yes|QMessageBox.No)
                     if reply == QMessageBox.Yes:
                         logging.error('trial stalled {} minutes, user force stopped trials'.format(elapsed_time))
-                        self.ANewTrial==1
+                        self.ANewTrial=1
+                        self.WarningLabel.setText('')
+                        self.WarningLabel.setStyleSheet("color: red;")
+                        break
                     else:
                         stall_iteration+=1
     
