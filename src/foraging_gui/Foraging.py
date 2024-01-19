@@ -2383,11 +2383,14 @@ class Window(QMainWindow):
                         else:                   
                             logging.info('User selected not to reconnect bonsai')
                         self.ANewTrial=1
-                        self.Start.setChecked(False)
+
                         break
                     else:
-                        print('type: {}, text:{}'.format(type(e),e))
-                        raise
+                        reply = QMessageBox.question(self, 'Error', 'Encountered the following error: {}'.format(e),QMessageBox.Ok )
+                        self.ANewTrial=1
+                        self.Start.setChecked(False)
+                        self.Start.setStyleSheet("background-color : none")
+                        break
                 #receive licks and update figures
                 if self.actionDrawing_after_stopping.isChecked()==False:
                     self.PlotM._Update(GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
