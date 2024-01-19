@@ -2504,9 +2504,10 @@ class Window(QMainWindow):
                 lambda: self.AutoTrain_dialog.update_auto_train_fields(subject_id=self.ID.text())
             )
 
-            
         self.AutoTrain_dialog.show()
-
+        
+        # Check subject id each time the dialog is opened
+        self.AutoTrain_dialog.update_auto_train_fields(subject_id=self.ID.text())
         
 def map_hostname_to_box(hostname,box_num):
     host_mapping = {
