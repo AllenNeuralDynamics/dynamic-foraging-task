@@ -1832,7 +1832,6 @@ class AutoTrainDialog(QDialog):
             # disable some stuff
             self.checkBox_override_stage.setChecked(False)
             self.checkBox_override_stage.setEnabled(False)
-            self._clear_layout(self.horizontalLayout_diagram)
             self.pushButton_apply_auto_train_paras.setEnabled(False)
             
             # override curriculum is checked by default and disabled
@@ -2066,20 +2065,7 @@ class AutoTrainDialog(QDialog):
         # Retrieve svgs
         self.svg_rules = self.selected_curriculum['diagram_rules_name']
         self.svg_paras = self.selected_curriculum['diagram_paras_name']
-        
-        # Render svgs with KeepAspectRatio
-        svgWidget_rules = QSvgWidget(self.svg_rules)
-        svgWidget_rules.renderer().setAspectRatioMode(Qt.KeepAspectRatio)
-        
-        svgWidget_paras = QSvgWidget(self.svg_paras)
-        svgWidget_paras.renderer().setAspectRatioMode(Qt.KeepAspectRatio)
-        
-        # Add the SVG widgets to the layout
-        layout = self.horizontalLayout_diagram
-        self._clear_layout(layout) 
-        layout.addWidget(svgWidget_rules)
-        layout.addWidget(svgWidget_paras)
-        
+                        
     def _show_rules_in_browser(self):
         if self.svg_rules is not None and self.curriculum_in_use is not None:
             webbrowser.open(self.svg_rules)
@@ -2135,7 +2121,9 @@ class AutoTrainDialog(QDialog):
             self.stage_in_use = 'unknown training stage'
         
         self.pushButton_apply_auto_train_paras.setText(
-            f"Apply and lock\n{get_curriculum_string(self.curriculum_in_use)}\n{self.stage_in_use}"
+            f"Apply and lock\n"
+            + '\n'.join(get_curriculum_string(self.curriculum_in_use).split('(')).strip(')') 
+            + f"\n{self.stage_in_use}"
         )
                 
     def _apply_curriculum(self):
