@@ -19,15 +19,15 @@ from PyQt5 import QtWidgets,QtGui,QtCore, uic
 from PyQt5.QtCore import QThreadPool,Qt
 from pyOSC3.OSC3 import OSCStreamingClient
 
-import foraging_gui.rigcontrol
-from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
-from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog
-from foraging_gui.Dialogs import ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog
-from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
-from foraging_gui.Dialogs import AutoTrainDialog
-from foraging_gui.MyFunctions import GenerateTrials, Worker,NewScaleSerialY
-from foraging_gui.stage import Stage
-from foraging_gui.TransferToNWB import bonsai_to_nwb
+import rigcontrol
+from Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
+from Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog
+from Dialogs import ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog
+from Dialogs import LickStaDialog,TimeDistributionDialog
+from Dialogs import AutoTrainDialog
+from MyFunctions import GenerateTrials, Worker,NewScaleSerialY
+from stage import Stage
+from TransferToNWB import bonsai_to_nwb
 
 
 class NumpyEncoder(json.JSONEncoder):
