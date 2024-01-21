@@ -63,7 +63,7 @@
    <widget class="QComboBox" name="Task">
     <property name="geometry">
      <rect>
-      <x>620</x>
+      <x>780</x>
       <y>20</y>
       <width>152</width>
       <height>20</height>
@@ -2809,7 +2809,7 @@
    <widget class="QLineEdit" name="ID">
     <property name="geometry">
      <rect>
-      <x>324</x>
+      <x>484</x>
       <y>20</y>
       <width>71</width>
       <height>20</height>
@@ -2828,7 +2828,7 @@
    <widget class="QLabel" name="label_72">
     <property name="geometry">
      <rect>
-      <x>300</x>
+      <x>460</x>
       <y>20</y>
       <width>21</width>
       <height>20</height>
@@ -3391,7 +3391,7 @@
    <widget class="QLabel" name="label_74">
     <property name="geometry">
      <rect>
-      <x>400</x>
+      <x>560</x>
       <y>20</y>
       <width>71</width>
       <height>20</height>
@@ -3416,7 +3416,7 @@
    <widget class="QLineEdit" name="Experimenter">
     <property name="geometry">
      <rect>
-      <x>474</x>
+      <x>634</x>
       <y>20</y>
       <width>121</width>
       <height>20</height>
@@ -4040,29 +4040,6 @@
      </property>
     </widget>
    </widget>
-   <widget class="QPushButton" name="AutoTrain">
-    <property name="geometry">
-     <rect>
-      <x>790</x>
-      <y>10</y>
-      <width>111</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color:  rgb(0, 189, 22);</string>
-    </property>
-    <property name="text">
-     <string>Auto Train
-(Ctrl+Alt+A)</string>
-    </property>
-    <property name="shortcut">
-     <string>Ctrl+Alt+A</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_auto_train_stage">
     <property name="geometry">
      <rect>
@@ -4087,6 +4064,28 @@
     </property>
     <property name="alignment">
      <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="AutoTrain">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>20</y>
+      <width>71</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color:  rgb(0, 189, 22);</string>
+    </property>
+    <property name="text">
+     <string>Auto Train</string>
+    </property>
+    <property name="shortcut">
+     <string>Ctrl+Alt+A</string>
     </property>
    </widget>
    <zorder>infor</zorder>
@@ -4117,8 +4116,8 @@
    <zorder>StartBleaching</zorder>
    <zorder>TeensyWarning</zorder>
    <zorder>groupBox_3</zorder>
-   <zorder>AutoTrain</zorder>
    <zorder>label_auto_train_stage</zorder>
+   <zorder>AutoTrain</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -4236,6 +4235,7 @@
     <addaction name="actionOpen_behavior_folder"/>
     <addaction name="actionOpen_logging_folder"/>
     <addaction name="actionScan_stages"/>
+    <addaction name="actionAuto_train"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="sizePolicy">
@@ -4587,6 +4587,14 @@
   <action name="actionReconnect_bonsai">
    <property name="text">
     <string>Reconnect bonsai</string>
+   </property>
+  </action>
+  <action name="actionAuto_train">
+   <property name="text">
+    <string>Auto train</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+A</string>
    </property>
   </action>
  </widget>
