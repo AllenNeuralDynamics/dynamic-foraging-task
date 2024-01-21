@@ -165,12 +165,38 @@ class GenerateTrials():
 
     def _CheckWarmUp(self):
         '''Check if we should turn on warm up'''
-        self._get_warmup_sta()
+        if self.win.warmup.currentText()=='off':
+            return
+        warmup=self._get_warmup_state()
+        if warmup==0 and self.TP_warmup=='on':
+            # set warm up to off
+            index=self.win.warmup.findText('off')
+            self.win.warmup.setCurrentIndex(index)
 
-    def _get_warmup_sta(self):
-        '''calculate the metrics related to the warm up'''
-        self.TP_warm_windowsize
-    
+    def _get_warmup_state(self):
+        '''calculate the metrics related to the warm up and decide if we should turn on the warm up'''
+        TP_warm_windowsize=int(self.TP_warm_windowsize)
+        B_AnimalResponseHistory_window=self.B_AnimalResponseHistory[-TP_warm_windowsize:]
+        finish_trial=B_AnimalResponseHistory_window.shape[0]
+        left_choices = np.count_nonzero(B_AnimalResponseHistory_window == 0)
+        right_choices = np.count_nonzero(B_AnimalResponseHistory_window == 1)
+        no_responses = np.count_nonzero(B_AnimalResponseHistory_window == 2)
+        if left_choices+right_choices+no_responses==0:
+            finish_ratio=0
+        else:
+            finish_ratio=(left_choices+right_choices)/(left_choices+right_choices+no_responses)
+        if left_choices+right_choices==0:
+            choice_ratio=0
+        else:
+            choice_ratio=right_choices/(left_choices+right_choices)
+        if finish_trial>=float(self.TP_warm_min_trial) and finish_ratio>=float(self.TP_warm_finish_ratio) and (choice_ratio-0.5)<=float(self.TP_warm_choice_ratio_bias):
+            # turn off the warm up
+            warmup=0
+        else:
+            # turn on the warm up
+            warmup=1
+        return warmup
+        
     def _CheckBaitPermitted(self):
         '''Check if bait is permitted of the current trial'''
         #For task rewardN, if this is the "initial N trials" of the active side, no bait will be be given.

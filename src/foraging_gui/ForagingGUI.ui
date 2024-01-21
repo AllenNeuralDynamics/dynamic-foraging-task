@@ -2460,7 +2460,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>max choice ratio=</string>
+      <string>max choice ratio bias=</string>
      </property>
      <property name="textFormat">
       <enum>Qt::AutoText</enum>
@@ -2469,7 +2469,7 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
-    <widget class="QLineEdit" name="warm_max_choice_ratio">
+    <widget class="QLineEdit" name="warm_max_choice_ratio_bias">
      <property name="geometry">
       <rect>
        <x>863</x>

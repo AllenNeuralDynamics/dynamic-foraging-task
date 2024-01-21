@@ -212,7 +212,7 @@ class Window(QMainWindow):
         if self.warmup.currentText()=='on':
             self.warm_min_trial.setEnabled(True)
             self.warm_min_finish_ratio.setEnabled(True)
-            self.warm_max_choice_ratio.setEnabled(True)
+            self.warm_max_choice_ratio_bias.setEnabled(True)
             self.warm_windowsize.setEnabled(True)
             self.label_64.setEnabled(True)
             self.label_116.setEnabled(True)
@@ -241,7 +241,7 @@ class Window(QMainWindow):
         elif self.warmup.currentText()=='off':
             self.warm_min_trial.setEnabled(False)
             self.warm_min_finish_ratio.setEnabled(False)
-            self.warm_max_choice_ratio.setEnabled(False)
+            self.warm_max_choice_ratio_bias.setEnabled(False)
             self.warm_windowsize.setEnabled(False)
             self.label_64.setEnabled(False)
             self.label_116.setEnabled(False)
