@@ -159,6 +159,7 @@ class Window(QMainWindow):
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
         
         self.AutoTrain.clicked.connect(self._AutoTrain)
+        self.actionAuto_train.triggered.connect(self.AutoTrain.click)
         
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._Task)
