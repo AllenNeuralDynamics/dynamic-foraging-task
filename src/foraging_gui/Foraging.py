@@ -109,6 +109,7 @@ class Window(QMainWindow):
         self._LickSta()
         self._InitializeMotorStage()
         self._StageSerialNum()
+        self._warmup()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
         
@@ -192,7 +193,8 @@ class Window(QMainWindow):
         self.StageStop.clicked.connect(self._StageStop)
         self.GetPositions.clicked.connect(self._GetPositions)
         self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
-
+        self.warmup.currentIndexChanged.connect(self._warmup)
+        self.warmup.activated.connect(self._warmup)
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
@@ -204,6 +206,65 @@ class Window(QMainWindow):
             for child in container.findChildren((QtWidgets.QLineEdit)):        
                 child.returnPressed.connect(self.keyPressEvent)
     
+    def _warmup(self):
+        '''warm up the session before starting'''
+        # disable/enable corresponding fields; set warm up parameters
+        if self.warmup.currentText()=='on':
+            self.warm_min_trial.setEnabled(True)
+            self.warm_min_finish_ratio.setEnabled(True)
+            self.warm_max_choice_ratio.setEnabled(True)
+            self.warm_windowsize.setEnabled(True)
+            self.label_64.setEnabled(True)
+            self.label_116.setEnabled(True)
+            self.label_117.setEnabled(True)
+            self.label_118.setEnabled(True)
+
+            self.TrainingStage.setEnabled(False)
+            self.BaseRewardSum.setEnabled(False)
+            self.RewardFamily.setEnabled(False)
+            self.RewardPairsN.setEnabled(False)
+            self.BlockBeta.setEnabled(False)
+            self.BlockMin.setEnabled(False)
+            self.BlockMax.setEnabled(False)
+            self.BlockMinReward.setEnabled(False)
+            self.AutoReward.setEnabled(False)
+            # set warm up default parameters
+            self.BaseRewardSum.setText('1')
+            self.RewardFamily.setText('3')
+            self.RewardPairsN.setText('1')
+            self.BlockBeta.setText('1')
+            self.BlockMin.setText('1')
+            self.BlockMax.setText('1')
+            self.BlockMinReward.setText('1')
+            self.AutoReward.setChecked(True)
+            self._ShowRewardPairs()
+        elif self.warmup.currentText()=='off':
+            self.warm_min_trial.setEnabled(False)
+            self.warm_min_finish_ratio.setEnabled(False)
+            self.warm_max_choice_ratio.setEnabled(False)
+            self.warm_windowsize.setEnabled(False)
+            self.label_64.setEnabled(False)
+            self.label_116.setEnabled(False)
+            self.label_117.setEnabled(False)
+            self.label_118.setEnabled(False)
+            self.TrainingStage.setEnabled(True)
+            self.BaseRewardSum.setEnabled(True)
+            self.RewardFamily.setEnabled(True)
+            self.RewardPairsN.setEnabled(True)
+            self.BlockBeta.setEnabled(True)
+            self.BlockMin.setEnabled(True)
+            self.BlockMax.setEnabled(True)
+            self.BlockMinReward.setEnabled(True)
+            self.AutoReward.setEnabled(True)
+            self._ShowRewardPairs()
+            # return to the previous parameters after warm up
+            if 0: #if AutoTrain is on:
+                pass
+            else:   
+                self._TrainingStage()
+
+
+
     def _keyPressEvent(self):
         # press enter to confirm parameters change
         self.keyPressEvent()

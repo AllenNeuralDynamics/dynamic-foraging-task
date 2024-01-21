@@ -105,6 +105,8 @@ class GenerateTrials():
         self._CheckAutoWater()
         # check block transition
         self._CheckBlockTransition()
+        # check warm up
+        self._CheckWarmUp()
         # Get reward probability and other trial related parameters
         self._SelectTrainingParameter()
         # check if bait is permitted at the current trial
@@ -161,6 +163,14 @@ class GenerateTrials():
             # Catch the exception and print error information
             logging.error(str(e))
 
+    def _CheckWarmUp(self):
+        '''Check if we should turn on warm up'''
+        self._get_warmup_sta()
+
+    def _get_warmup_sta(self):
+        '''calculate the metrics related to the warm up'''
+        self.TP_warm_windowsize
+    
     def _CheckBaitPermitted(self):
         '''Check if bait is permitted of the current trial'''
         #For task rewardN, if this is the "initial N trials" of the active side, no bait will be be given.
