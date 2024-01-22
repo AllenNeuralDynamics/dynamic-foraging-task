@@ -2221,7 +2221,8 @@ class Window(QMainWindow):
         if self.InitializeBonsaiSuccessfully==0:
             logging.info('Start button pressed, but bonsai not connected')
             return
-        
+        print('DEBUGGING: {}, {}'.format(self.StartANewSession, self.ANewTrial))       
+ 
         # Clear warnings
         self.WarningLabelInitializeBonsai.setText('')
         self.WarningLabel_SaveTrainingStage.setText('')
@@ -2244,6 +2245,8 @@ class Window(QMainWindow):
             logging.info('Start button pressed: ending trial loop')
             # enable metadata fields
             self._set_metadata_enabled(True)
+
+        if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             self._StopCurrentSession() 
 
         # to see if we should start a new session
