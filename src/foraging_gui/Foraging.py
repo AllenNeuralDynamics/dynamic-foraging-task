@@ -680,7 +680,7 @@ class Window(QMainWindow):
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
         
         # Copy the bonsai workflow to a temporary location so we can rename it with the box
-        box_path = os.path.join(os.path.expanduser("~"), "Documents","temporary_workflows","Box{}".format(self.box_number))
+        box_path = os.path.join(os.path.expanduser("~"), "Documents","temporary_workflows","Box{}.bonsai".format(self.box_number))
         subprocess.call('copy {} {}'.format(self.bonsaiworkflow_path, box_path),shell=True)
         subprocess.call('copy {} {}'.format(self.bonsaiworkflow_path+'.layout', box_path+'.layout'),shell=True)
 
