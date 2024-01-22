@@ -678,12 +678,13 @@ class Window(QMainWindow):
 
         SettingsBox = 'Settings_box{}.csv'.format(self.box_number)
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
+        
+        # Copy the bonsai workflow to a temporary location so we can rename it with the box
         box_path = os.path.join(os.path.expanduser("~"), "Documents","temporary_workflows","Box{}.bonsai".format(self.box_number))
-        logging.info('copy {} {}'.format(self.bonsaiworkflow_path, box_path))
         subprocess.call('copy {} {}'.format(self.bonsaiworkflow_path, box_path),shell=True)
-        subprocess.Popen(self.bonsai_path+' '+box_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
-        #subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
+        subprocess.call('copy {} {}'.format(self.bonsaiworkflow_path+'.layout', box_path+'.layout'),shell=True)
 
+        subprocess.Popen(self.bonsai_path+' '+box_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
 
     def _OpenSettingFolder(self):
         '''Open the setting folder'''
