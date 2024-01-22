@@ -2242,6 +2242,7 @@ class Window(QMainWindow):
             self._set_metadata_enabled(False)
         else:
             logging.info('Start button pressed: ending trial loop')
+            self.Start.setStyleSheet("background-color : none")
             # enable metadata fields
             self._set_metadata_enabled(True)
 
