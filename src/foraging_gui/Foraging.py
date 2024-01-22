@@ -2163,7 +2163,7 @@ class Window(QMainWindow):
         # waiting for the finish of the last trial
         start_time = time.time()
         stall_iteration = 1
-        stall_duration = 1*60 ##DEBUG
+        stall_duration = 5*60 
         if self.ANewTrial==0:
             self.WarningLabel.setText('Waiting for the finish of the last trial!')
             self.WarningLabel.setStyleSheet("color: red;")
@@ -2221,7 +2221,6 @@ class Window(QMainWindow):
         if self.InitializeBonsaiSuccessfully==0:
             logging.info('Start button pressed, but bonsai not connected')
             return
-        print('DEBUGGING: {}, {}'.format(self.StartANewSession, self.ANewTrial))       
  
         # Clear warnings
         self.WarningLabelInitializeBonsai.setText('')
@@ -2247,6 +2246,7 @@ class Window(QMainWindow):
             self._set_metadata_enabled(True)
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
+            # If we are starting a new session, we should wait for the last trial to finish
             self._StopCurrentSession() 
 
         # to see if we should start a new session
@@ -2364,7 +2364,7 @@ class Window(QMainWindow):
         # Track elapsed time in case Bonsai Stalls
         last_trial_start = time.time()
         stall_iteration = 1
-        stall_duration = 1*60  ## DEBUG
+        stall_duration = 5*60  
 
         while self.Start.isChecked():
             QApplication.processEvents()
