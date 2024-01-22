@@ -1832,7 +1832,6 @@ class AutoTrainDialog(QDialog):
             # disable some stuff
             self.checkBox_override_stage.setChecked(False)
             self.checkBox_override_stage.setEnabled(False)
-            self._clear_layout(self.horizontalLayout_diagram)
             self.pushButton_apply_auto_train_paras.setEnabled(False)
             
             # override curriculum is checked by default and disabled
@@ -1875,6 +1874,7 @@ class AutoTrainDialog(QDialog):
                 
                 # Set override stage automatically
                 self.checkBox_override_stage.setChecked(True)
+                self.checkBox_override_stage.setEnabled(True)
             
             # update more info
             self.label_curriculum_name.setText(
@@ -1889,11 +1889,17 @@ class AutoTrainDialog(QDialog):
             # disable apply curriculum                        
             self.pushButton_apply_curriculum.setEnabled(False)
             self._remove_border_curriculum_selection()
+            
+            # Reset override curriculum
+            self.checkBox_override_curriculum.setChecked(False)
+            self.checkBox_override_curriculum.setEnabled(True)
+
 
                     
         # Update UI
         self._update_available_training_stages()
         self._update_stage_to_apply()
+        
         
         # Update df_auto_train_manager and df_curriculum_manager
         self._show_auto_training_manager()
@@ -2066,26 +2072,13 @@ class AutoTrainDialog(QDialog):
         # Retrieve svgs
         self.svg_rules = self.selected_curriculum['diagram_rules_name']
         self.svg_paras = self.selected_curriculum['diagram_paras_name']
-        
-        # Render svgs with KeepAspectRatio
-        svgWidget_rules = QSvgWidget(self.svg_rules)
-        svgWidget_rules.renderer().setAspectRatioMode(Qt.KeepAspectRatio)
-        
-        svgWidget_paras = QSvgWidget(self.svg_paras)
-        svgWidget_paras.renderer().setAspectRatioMode(Qt.KeepAspectRatio)
-        
-        # Add the SVG widgets to the layout
-        layout = self.horizontalLayout_diagram
-        self._clear_layout(layout) 
-        layout.addWidget(svgWidget_rules)
-        layout.addWidget(svgWidget_paras)
-        
+                        
     def _show_rules_in_browser(self):
-        if self.svg_rules is not None and self.curriculum_in_use is not None:
+        if self.svg_rules is not None:
             webbrowser.open(self.svg_rules)
             
     def _show_paras_in_browser(self):
-        if self.svg_paras is not None and self.curriculum_in_use is not None:
+        if self.svg_paras is not None:
             webbrowser.open(self.svg_paras)
             
     def _show_all_training_history(self):
@@ -2135,7 +2128,9 @@ class AutoTrainDialog(QDialog):
             self.stage_in_use = 'unknown training stage'
         
         self.pushButton_apply_auto_train_paras.setText(
-            f"Apply and lock\n{get_curriculum_string(self.curriculum_in_use)}\n{self.stage_in_use}"
+            f"Apply and lock\n"
+            + '\n'.join(get_curriculum_string(self.curriculum_in_use).split('(')).strip(')') 
+            + f"\n{self.stage_in_use}"
         )
                 
     def _apply_curriculum(self):
@@ -2143,8 +2138,11 @@ class AutoTrainDialog(QDialog):
         if not hasattr(self, 'selected_curriculum') or self.selected_curriculum is None:
             QMessageBox.critical(self, "Error", "Please select a curriculum!")
             return
-        if self.df_this_mouse.empty:
         
+        # Always enable override stage
+        self.checkBox_override_stage.setEnabled(True)
+        
+        if self.df_this_mouse.empty:
             # -- This is a new mouse, we add the first dummy session --
             # Update global curriculum_in_use
             self.curriculum_in_use = self.selected_curriculum['curriculum']
@@ -2178,7 +2176,6 @@ class AutoTrainDialog(QDialog):
         
             # Refresh the GUI
             self.update_auto_train_fields(subject_id=self.selected_subject_id)
-
         else:
             # -- This is an existing mouse, we are changing the curriculum --
             # Not sure whether we should leave this option open. But for now, I allow this freedom.            
@@ -2247,9 +2244,11 @@ class AutoTrainDialog(QDialog):
                 '''
             )
             self.MainWindow.label_auto_train_stage.setText(
-                f"{get_curriculum_string(self.curriculum_in_use)}\n{self.stage_in_use}"
+                '\n'.join(get_curriculum_string(self.curriculum_in_use).split('(')).strip(')') 
+                + f", {self.stage_in_use}"
             )
-
+            self.MainWindow.label_auto_train_stage.setStyleSheet("color: rgb(0, 189, 22);")
+            
             # disable override
             self.checkBox_override_stage.setEnabled(False)
             self.comboBox_override_stage.setEnabled(False)
@@ -2267,7 +2266,8 @@ class AutoTrainDialog(QDialog):
                 # clear style
                 widget.setStyleSheet("")
             self.MainWindow.TrainingParameters.setStyleSheet("")
-            self.MainWindow.label_auto_train_stage.setText("")
+            self.MainWindow.label_auto_train_stage.setText("off curriculum")
+            self.MainWindow.label_auto_train_stage.setStyleSheet("color: red;")
 
 
             # enable override

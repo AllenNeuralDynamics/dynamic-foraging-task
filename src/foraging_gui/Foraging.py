@@ -68,7 +68,7 @@ class Window(QMainWindow):
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
         self.ANewTrial=1 # permission to start a new trial
         self.UpdateParameters=1 # permission to update parameters
-        self.Visualization.setTitle(str(date.today()))
+        self.label_date.setText(str(date.today()))
         self.loggingstarted=-1
         
         # Connect to Bonsai
@@ -1367,9 +1367,19 @@ class Window(QMainWindow):
                 self.RewardPairs=self.RewardFamilies[int(self.RewardFamily.text())-1][:int(self.RewardPairsN.text())]
                 self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.BaseRewardSum.text())
                 if hasattr(self, 'GeneratedTrials'):
-                    self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2))) 
+                    self.ShowRewardPairs.setText('Reward pairs:\n'
+                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
+                                                 + '\n\n'
+                                                 + 'Current pair:\n'
+                                                 + str(np.round(
+                                                     self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2))) 
+                    self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
                 else:
-                    self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: ') 
+                    self.ShowRewardPairs.setText('Reward pairs:\n'
+                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
+                                                 +'\n\n'+'Current pair:\n ') 
+                    self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
+                    
             elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
                 input_string=self.UncoupledReward.text()
                 # remove any square brackets and spaces from the string
@@ -1381,9 +1391,18 @@ class Window(QMainWindow):
                 # create a numpy array from the list of numbers
                 self.RewardProb=np.array(num_list)
                 if hasattr(self, 'GeneratedTrials'):
-                    self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2))) 
+                    self.ShowRewardPairs.setText('Reward pairs:\n'
+                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
+                                                 + '\n\n'
+                                                 +'Current pair:\n'
+                                                 + str(np.round(self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2))) 
+                    self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
                 else:
-                    self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: ') 
+                    self.ShowRewardPairs.setText('Reward pairs:\n'
+                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
+                                                 + '\n\n'
+                                                 +'Current pair:\n ') 
+                    self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
         except Exception as e:
             # Catch the exception and log error information
             logging.error(str(e))
@@ -1925,13 +1944,13 @@ class Window(QMainWindow):
                 logging.error(str(e))
                 # delete GeneratedTrials
                 del self.GeneratedTrials
+                
             # show basic information
-            if 'Other_inforTitle' in Obj:
-                self.infor.setTitle(Obj['Other_inforTitle'])
-            if 'Other_BasicTitle' in Obj:
-                self.Basic.setTitle(Obj['Other_BasicTitle'])
-            if 'Other_BasicText' in Obj:
-                self.ShowBasic.setText(Obj['Other_BasicText'])
+            if 'info_task' in Obj:
+                self.label_info_task.setTitle(Obj['info_task'])
+            if 'info_other_perf' in Obj:
+                self.label_info_performance_others.setText(Obj['info_other_perf'])
+                
             # Set newscale position to last position
             if 'B_NewscalePositions' in Obj:
                 try:
@@ -2073,9 +2092,14 @@ class Window(QMainWindow):
         if self.AutoReward.isChecked():
             self.AutoReward.setStyleSheet("background-color : green;")
             self.AutoReward.setText('On')
+            for widget in ['AutoWaterType', 'Multiplier', 'Unrewarded', 'Ignored']:
+                getattr(self, widget).setEnabled(True)
         else:
             self.AutoReward.setStyleSheet("background-color : none")
             self.AutoReward.setText('Off')
+            for widget in ['AutoWaterType', 'Multiplier', 'Unrewarded', 'Ignored']:
+                getattr(self, widget).setEnabled(False)
+            
     def _NextBlock(self):
         if self.NextBlock.isChecked():
             self.NextBlock.setStyleSheet("background-color : green;")
@@ -2448,7 +2472,7 @@ class Window(QMainWindow):
                 # maximum 3.5ml
                 if suggested_water>3.5:
                     suggested_water=3.5
-                    self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and LAS should \nbe alerted!')
+                    self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and LAS should be alerted!')
                     self.TotalWaterWarning.setStyleSheet("color: red;")
                 else:
                     self.TotalWaterWarning.setText('')
@@ -2480,9 +2504,10 @@ class Window(QMainWindow):
                 lambda: self.AutoTrain_dialog.update_auto_train_fields(subject_id=self.ID.text())
             )
 
-            
         self.AutoTrain_dialog.show()
-
+        
+        # Check subject id each time the dialog is opened
+        self.AutoTrain_dialog.update_auto_train_fields(subject_id=self.ID.text())
         
 def map_hostname_to_box(hostname,box_num):
     host_mapping = {
