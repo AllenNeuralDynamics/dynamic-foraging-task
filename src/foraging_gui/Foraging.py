@@ -678,15 +678,11 @@ class Window(QMainWindow):
 
         SettingsBox = 'Settings_box{}.csv'.format(self.box_number)
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
-        try:
-            box_path = os.path.join(os.path.expanduser("~"), "Documents","temporary_workflows","Box{}.bonsai".format(self.box_number))
-            logging.info('copy {} {}'.format(self.bonsaiworkflow_path, box_path))
-            subprocess.Popen('copy {} {}'.format(self.bonsaiworkflow_path, box_path),shell=True)
-            logging.info('here') ##DEBUG
-        except Exception as e:
-            print(e)
-        #subprocess.Popen(self.bonsai_path+' '+box_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
-        subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
+        box_path = os.path.join(os.path.expanduser("~"), "Documents","temporary_workflows","Box{}.bonsai".format(self.box_number))
+        logging.info('copy {} {}'.format(self.bonsaiworkflow_path, box_path))
+        subprocess.call('copy {} {}'.format(self.bonsaiworkflow_path, box_path),shell=True)
+        subprocess.Popen(self.bonsai_path+' '+box_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
+        #subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
 
 
     def _OpenSettingFolder(self):
