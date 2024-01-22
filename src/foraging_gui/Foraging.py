@@ -679,9 +679,9 @@ class Window(QMainWindow):
         SettingsBox = 'Settings_box{}.csv'.format(self.box_number)
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
         try:
-            box_path = os.path.join(os.path.expanduser("~"), "Documents",'temporary_workflows','Box{}'.format(self.box_number))
-            print('copy {} {}'.format(self.bonsaiworkflow_path, box_path))
-            subprocess.Popen('copy {} {}'.format(self.bonsaiworkflow_path, box_path))
+            box_path = os.path.join(os.path.expanduser("~"), "Documents",'temporary_workflows','Box{}.bonsai'.format(self.box_number))
+            logging.info('copy {} {}'.format(self.bonsaiworkflow_path, os.getcwd()))
+            subprocess.Popen('copy {} {}'.format(self.bonsaiworkflow_path, os.getcwd()))
             logging.info('here') ##DEBUG
         except Exception as e:
             print(e)
