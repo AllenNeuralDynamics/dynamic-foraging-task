@@ -679,7 +679,8 @@ class Window(QMainWindow):
         SettingsBox = 'Settings_box{}.csv'.format(self.box_number)
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
         box_path = os.path.join(os.path.expanduser("~"), "Documents",'temporary_workflows','Box{}'.format(self.box_number))
-        subprocess.call('cp {} {}'.format(self.bonsaiworkflow_path, box_path))
+        subprocess.call('copy {} {}'.format(self.bonsaiworkflow_path, box_path))
+        logging.info('here') ##DEBUG
         subprocess.Popen(self.bonsai_path+' '+box_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
 
     def _OpenSettingFolder(self):
