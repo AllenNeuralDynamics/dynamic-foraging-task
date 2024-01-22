@@ -189,7 +189,7 @@ class GenerateTrials():
             choice_ratio=0
         else:
             choice_ratio=right_choices/(left_choices+right_choices)
-        if finish_trial>=float(self.TP_warm_min_trial) and finish_ratio>=float(self.TP_warm_finish_ratio) and (choice_ratio-0.5)<=float(self.TP_warm_choice_ratio_bias):
+        if finish_trial>=float(self.TP_warm_min_trial) and finish_ratio>=float(self.TP_warm_finish_ratio) and abs(choice_ratio-0.5)<=float(self.TP_warm_choice_ratio_bias):
             # turn off the warm up
             warmup=0
         else:
