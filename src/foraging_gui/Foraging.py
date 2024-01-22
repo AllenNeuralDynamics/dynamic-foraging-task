@@ -681,7 +681,7 @@ class Window(QMainWindow):
         try:
             box_path = os.path.join(os.path.expanduser("~"), "Documents","temporary_workflows","Box{}.bonsai".format(self.box_number))
             logging.info('copy {} {}'.format(self.bonsaiworkflow_path, box_path))
-            subprocess.Popen('copy {} {}'.format(self.bonsaiworkflow_path, box_path))
+            subprocess.Popen('copy {} {}'.format(self.bonsaiworkflow_path, box_path),shell=True)
             logging.info('here') ##DEBUG
         except Exception as e:
             print(e)
