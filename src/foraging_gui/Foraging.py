@@ -2711,6 +2711,10 @@ def start_gui_log_file(box_number):
     logging.info('Starting logfile!')
     logging.captureWarnings(True)
 
+def log_git_hash():
+    git_hash = subprocess.check_output(['git','rev-parse','--short', 'HEAD']).decode('ascii').strip()
+    logging.info('Current git commit hash: {}'.format(git_has))
+
 def excepthook(exc_type, exc_value, exc_tb):
     '''
         excepthook will be called when the GUI encounters an uncaught exception
@@ -2732,6 +2736,7 @@ if __name__ == "__main__":
 
     # Start logging
     start_gui_log_file(box_number)
+    log_git_has()
 
     # Formating GUI graphics
     logging.info('Setting QApplication attributes')
