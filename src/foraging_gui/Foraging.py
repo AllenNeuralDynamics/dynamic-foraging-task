@@ -2713,7 +2713,7 @@ def start_gui_log_file(box_number):
 
 def log_git_hash():
     git_hash = subprocess.check_output(['git','rev-parse','--short', 'HEAD']).decode('ascii').strip()
-    logging.info('Current git commit hash: {}'.format(git_has))
+    logging.info('Current git commit hash: {}'.format(git_hash))
 
 def excepthook(exc_type, exc_value, exc_tb):
     '''
