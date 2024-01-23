@@ -1094,17 +1094,16 @@ class Window(QMainWindow):
                         if new != old:
                             logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
 
-                    #try:
-                    #    # If this parameter changed, add the change to the log
-                    #    old = getattr(Parameters,'TP_'+child.objectName())
-                    #    if old != '':
-                    #        old = float(old)
-                    #    new = float(child.text())
-                    #    if new != old:
-                    #        logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
-                    #except Exception as e:
-                    #    logging.error('Could not evaluate parameter change: "{}","{}" '.format(child.objectName(),child.text()))
-                    #    logging.error(str(e))
+                    if hasattr(Parameters, 'TP_'+child.objectName()):
+                        # If this parameter changed, add the change to the log
+                        old = getattr(Parameters,'TP_'+child.objectName())
+                        if old != '':
+                            old = float(old)
+                        new = float(child.text())
+                        if new != old:
+                            logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
+                    else:
+                        logging.error('Could not evaluate parameter change: "{}","{}" '.format(child.objectName(),child.text()))
                     
             # update the current training parameters
             self._GetTrainingParameters()
