@@ -1086,7 +1086,7 @@ class Window(QMainWindow):
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                     else:
                         # If this parameter changed, add the change to the log
-                        logging.debug('debugging parameter error: "{}" '.format(child.objectName()))
+                        logging.info('debugging parameter error: "{}" '.format(child.objectName())) ##DEBUG
                         old = getattr(Parameters,'TP_'+child.objectName())
                         if old != '':
                             old = float(old)
