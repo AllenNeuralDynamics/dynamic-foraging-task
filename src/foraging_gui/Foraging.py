@@ -1085,8 +1085,7 @@ class Window(QMainWindow):
                         else:
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
-
-                    try:
+                    else:
                         # If this parameter changed, add the change to the log
                         old = getattr(Parameters,'TP_'+child.objectName())
                         if old != '':
@@ -1094,9 +1093,18 @@ class Window(QMainWindow):
                         new = float(child.text())
                         if new != old:
                             logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
-                    except Exception as e:
-                        logging.error('Could not evaluate parameter change: "{}","{}" '.format(child.objectName(),child.text()))
-                        logging.error(str(e))
+
+                    #try:
+                    #    # If this parameter changed, add the change to the log
+                    #    old = getattr(Parameters,'TP_'+child.objectName())
+                    #    if old != '':
+                    #        old = float(old)
+                    #    new = float(child.text())
+                    #    if new != old:
+                    #        logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
+                    #except Exception as e:
+                    #    logging.error('Could not evaluate parameter change: "{}","{}" '.format(child.objectName(),child.text()))
+                    #    logging.error(str(e))
                     
             # update the current training parameters
             self._GetTrainingParameters()
