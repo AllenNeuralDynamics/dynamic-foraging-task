@@ -205,7 +205,11 @@ class Window(QMainWindow):
                 child.returnPressed.connect(self.keyPressEvent)
     
     def _warmup(self):
-        '''warm up the session before starting'''
+        '''warm up the session before starting.
+            Use warm up with caution. Usually, it is only used for the first time training. 
+            Turn on the warm up only when all parameters are set correctly, otherwise it would revert 
+            to some incorrect parameters when it was turned off.
+        '''
         # set warm up parameters
         if self.warmup.currentText()=='on':
             # get parameters before the warm up is on
@@ -1921,8 +1925,8 @@ class Window(QMainWindow):
                         logging.error(str(e))
                         continue
                     if key in CurrentObj:
-                        # skip some keys
-                        if key=='ExtraWater' or key=='TotalWater' or key=='WeightAfter' or key=='SuggestedWater' or key=='Start':
+                        # skip some keys; skip warmup
+                        if key=='ExtraWater' or key=='TotalWater' or key=='WeightAfter' or key=='SuggestedWater' or key=='Start' or key=='warmup':
                             self.WeightAfter.setText('')
                             continue
                         widget = widget_dict[key]
