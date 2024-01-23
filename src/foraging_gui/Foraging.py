@@ -219,24 +219,21 @@ class Window(QMainWindow):
             self.label_117.setEnabled(True)
             self.label_118.setEnabled(True)
 
-            self.TrainingStage.setEnabled(False)
-            self.BaseRewardSum.setEnabled(False)
-            self.RewardFamily.setEnabled(False)
-            self.RewardPairsN.setEnabled(False)
-            self.BlockBeta.setEnabled(False)
-            self.BlockMin.setEnabled(False)
-            self.BlockMax.setEnabled(False)
-            self.BlockMinReward.setEnabled(False)
-            self.AutoReward.setEnabled(False)
             # set warm up default parameters
             self.BaseRewardSum.setText('1')
             self.RewardFamily.setText('3')
             self.RewardPairsN.setText('1')
+
             self.BlockBeta.setText('1')
             self.BlockMin.setText('1')
             self.BlockMax.setText('1')
             self.BlockMinReward.setText('1')
+
             self.AutoReward.setChecked(True)
+            self._AutoReward()
+            self.AutoWaterType.setCurrentIndex(self.AutoWaterType.findText('Natural'))
+            self.Multiplier.setText('0.8')
+            self.Unrewarded
             self._ShowRewardPairs()
         elif self.warmup.currentText()=='off':
             self.warm_min_trial.setEnabled(False)
@@ -247,15 +244,7 @@ class Window(QMainWindow):
             self.label_116.setEnabled(False)
             self.label_117.setEnabled(False)
             self.label_118.setEnabled(False)
-            self.TrainingStage.setEnabled(True)
-            self.BaseRewardSum.setEnabled(True)
-            self.RewardFamily.setEnabled(True)
-            self.RewardPairsN.setEnabled(True)
-            self.BlockBeta.setEnabled(True)
-            self.BlockMin.setEnabled(True)
-            self.BlockMax.setEnabled(True)
-            self.BlockMinReward.setEnabled(True)
-            self.AutoReward.setEnabled(True)
+
             self._ShowRewardPairs()
             # return to the previous parameters after warm up
             if 0: #if AutoTrain is on:
