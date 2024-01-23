@@ -2736,7 +2736,7 @@ if __name__ == "__main__":
 
     # Start logging
     start_gui_log_file(box_number)
-    log_git_has()
+    log_git_hash()
 
     # Formating GUI graphics
     logging.info('Setting QApplication attributes')
