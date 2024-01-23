@@ -2712,8 +2712,12 @@ def start_gui_log_file(box_number):
     logging.captureWarnings(True)
 
 def log_git_hash():
-    git_hash = subprocess.check_output(['git','rev-parse','--short', 'HEAD']).decode('ascii').strip()
-    logging.info('Current git commit hash: {}'.format(git_hash))
+    try:
+        git_hash = subprocess.check_output(['git','rev-parse','--short', 'HEAD']).decode('ascii').strip()
+        git_branch = subprocess.check_output(['git','branch','--show-current'].decode('ascii').strip()
+        logging.info('Current git commit branch, hash: {}, {}'.format(git_branch,git_hash))
+    except Exception as e:
+        logging.error('Could not log git branch and hash: {}'.format(str(e)))
 
 def excepthook(exc_type, exc_value, exc_tb):
     '''
