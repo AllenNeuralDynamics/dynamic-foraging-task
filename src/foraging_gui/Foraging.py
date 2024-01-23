@@ -1062,6 +1062,7 @@ class Window(QMainWindow):
                             child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
                         else:
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
+                    '''
                     else:
                         # If this parameter changed, add the change to the log
                         old = getattr(Parameters,'TP_'+child.objectName())
@@ -1070,7 +1071,8 @@ class Window(QMainWindow):
                         new = float(child.text())
                         if new != old:
                             logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
-
+                    '''
+                    
             # update the current training parameters
             self._GetTrainingParameters()
  
