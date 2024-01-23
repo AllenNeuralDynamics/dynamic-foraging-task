@@ -1085,14 +1085,6 @@ class Window(QMainWindow):
                         else:
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
-                    else:
-                        # If this parameter changed, add the change to the log
-                        old = getattr(Parameters,'TP_'+child.objectName())
-                        if old != '':
-                            old = float(old)
-                        new = float(child.text())
-                        if new != old:
-                            logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
 
                     if hasattr(Parameters, 'TP_'+child.objectName()):
                         # If this parameter changed, add the change to the log
