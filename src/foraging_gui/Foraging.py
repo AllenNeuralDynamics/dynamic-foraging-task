@@ -119,6 +119,8 @@ class Window(QMainWindow):
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
         
+        if not self.start_bonsai_ide:
+            self._ReconnectBonsai()   
         logging.info('Start up complete')
 
     def connectSignalsSlots(self):
