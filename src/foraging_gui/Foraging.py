@@ -74,7 +74,7 @@ class Window(QMainWindow):
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
         self.ANewTrial=1 # permission to start a new trial
         self.UpdateParameters=1 # permission to update parameters
-        self.Visualization.setTitle(str(date.today()))
+        self.label_date.setText(str(date.today()))
         self.loggingstarted=-1
         
         # Connect to Bonsai
@@ -333,7 +333,7 @@ class Window(QMainWindow):
                     self.StageSerialNum.setCurrentIndex(index)
                 else:
                     self.Warning_Newscale.setText('Default Newscale not found!')
-                    self.Warning_Newscale.setStyleSheet("color: red;")
+                    self.Warning_Newscale.setStyleSheet("color: purple;")
         except Exception as e:
             logging.error(str(e))
 
@@ -373,7 +373,7 @@ class Window(QMainWindow):
             except Exception as e:
                 logging.error(str(e))
                 self.WarningLabelInitializeBonsai.setText('Please open bonsai!')
-                self.WarningLabelInitializeBonsai.setStyleSheet("color: red;")
+                self.WarningLabelInitializeBonsai.setStyleSheet("color: purple;")
                 self.InitializeBonsaiSuccessfully=0
 
     def _ReconnectBonsai(self):
@@ -521,7 +521,7 @@ class Window(QMainWindow):
         except Exception as e:
             logging.error('Could not load settings file at: {}, {}'.format(self.SettingFile,str(e)))
             self.WarningLabel.setText('Could not load settings file!')
-            self.WarningLabel.setStyleSheet("color: red;")
+            self.WarningLabel.setStyleSheet("color: purple;")
             raise e
 
         # If any settings are missing, use the default values
@@ -626,7 +626,7 @@ class Window(QMainWindow):
         # Could not connect and we timed out
         logging.info('Could not connect to bonsai with max wait time {} seconds'.format(max_wait))
         self.WarningLabel_2.setText('Started without bonsai connected!')
-        self.WarningLabel_2.setStyleSheet("color: red;")
+        self.WarningLabel_2.setStyleSheet("color: purple;")
 
     def _ConnectOSC(self):
         '''
@@ -974,7 +974,7 @@ class Window(QMainWindow):
         with open(self.TrainingStageFiles, "w") as file:
             json.dump(self.TrainingStagePar, file,indent=4) 
         self.WarningLabel_SaveTrainingStage.setText('Training stage parameters were saved!')
-        self.WarningLabel_SaveTrainingStage.setStyleSheet("color: red;")
+        self.WarningLabel_SaveTrainingStage.setStyleSheet("color: purple;")
         self.SaveTraining.setChecked(False)
 
     def _LoadTrainingPar(self):
@@ -1084,6 +1084,7 @@ class Window(QMainWindow):
                             child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
                         else:
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
+                    '''
                     else:
                         # If this parameter changed, add the change to the log
                         old = getattr(Parameters,'TP_'+child.objectName())
@@ -1092,7 +1093,8 @@ class Window(QMainWindow):
                         new = float(child.text())
                         if new != old:
                             logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
-
+                    '''
+                    
             # update the current training parameters
             self._GetTrainingParameters()
  
@@ -1117,11 +1119,11 @@ class Window(QMainWindow):
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                         self.Continue=0
                         if child.objectName() in {'Experimenter', 'AnimalName', 'UncoupledReward', 'WeightBefore', 'WeightAfter', 'ExtraWater'}:
-                            child.setStyleSheet('color: red;')
+                            child.setStyleSheet('color: purple;')
                             self.Continue=1
                         if child.text()=='': # If empty, change background color and wait for confirmation
                             self.UpdateParameters=0
-                            child.setStyleSheet('background-color: red;')
+                            child.setStyleSheet('background-color: purple;')
                             self.Continue=1
                         if child.objectName() in {'RunLength','WindowSize','StepSize'}:
                             if child.text()=='':
@@ -1130,7 +1132,7 @@ class Window(QMainWindow):
                                 child.setStyleSheet('background-color: white;')
                         if self.Continue==1:
                             continue
-                        child.setStyleSheet('color: red;')
+                        child.setStyleSheet('color: purple;')
                         try:
                             # it's valid float
                             float(child.text())
@@ -1389,9 +1391,19 @@ class Window(QMainWindow):
                 self.RewardPairs=self.RewardFamilies[int(self.RewardFamily.text())-1][:int(self.RewardPairsN.text())]
                 self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.BaseRewardSum.text())
                 if hasattr(self, 'GeneratedTrials'):
-                    self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2))) 
+                    self.ShowRewardPairs.setText('Reward pairs:\n'
+                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
+                                                 + '\n\n'
+                                                 + 'Current pair:\n'
+                                                 + str(np.round(
+                                                     self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2))) 
+                    self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
                 else:
-                    self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: ') 
+                    self.ShowRewardPairs.setText('Reward pairs:\n'
+                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
+                                                 +'\n\n'+'Current pair:\n ') 
+                    self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
+                    
             elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
                 input_string=self.UncoupledReward.text()
                 # remove any square brackets and spaces from the string
@@ -1403,9 +1415,18 @@ class Window(QMainWindow):
                 # create a numpy array from the list of numbers
                 self.RewardProb=np.array(num_list)
                 if hasattr(self, 'GeneratedTrials'):
-                    self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: '+str(np.round(self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2))) 
+                    self.ShowRewardPairs.setText('Reward pairs:\n'
+                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
+                                                 + '\n\n'
+                                                 +'Current pair:\n'
+                                                 + str(np.round(self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2))) 
+                    self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
                 else:
-                    self.ShowRewardPairs.setText('Reward pairs: '+str(np.round(self.RewardProb,2))+'\n\n'+'Current pair: ') 
+                    self.ShowRewardPairs.setText('Reward pairs:\n'
+                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
+                                                 + '\n\n'
+                                                 +'Current pair:\n ') 
+                    self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
         except Exception as e:
             # Catch the exception and log error information
             logging.error(str(e))
@@ -1607,7 +1628,7 @@ class Window(QMainWindow):
             if response==QMessageBox.Yes:
                 pass
                 self.WarningLabel.setText('Saving without weight or extra water!')
-                self.WarningLabel.setStyleSheet("color: red;")
+                self.WarningLabel.setStyleSheet("color: purple;")
                 logging.info('saving without weight or extra water')
             elif response==QMessageBox.No:
                 logging.info('saving declined by user')
@@ -1634,7 +1655,7 @@ class Window(QMainWindow):
             self.SaveFile=Names[0]
         if self.SaveFile == '':
             self.WarningLabel.setText('Discard saving!')
-            self.WarningLabel.setStyleSheet("color: red;")
+            self.WarningLabel.setStyleSheet("color: purple;")
         if self.SaveFile != '':
             if hasattr(self, 'GeneratedTrials'):
                 if hasattr(self.GeneratedTrials, 'Obj'):
@@ -1947,13 +1968,13 @@ class Window(QMainWindow):
                 logging.error(str(e))
                 # delete GeneratedTrials
                 del self.GeneratedTrials
+                
             # show basic information
-            if 'Other_inforTitle' in Obj:
-                self.infor.setTitle(Obj['Other_inforTitle'])
-            if 'Other_BasicTitle' in Obj:
-                self.Basic.setTitle(Obj['Other_BasicTitle'])
-            if 'Other_BasicText' in Obj:
-                self.ShowBasic.setText(Obj['Other_BasicText'])
+            if 'info_task' in Obj:
+                self.label_info_task.setTitle(Obj['info_task'])
+            if 'info_other_perf' in Obj:
+                self.label_info_performance_others.setText(Obj['info_other_perf'])
+                
             # Set newscale position to last position
             if 'B_NewscalePositions' in Obj:
                 try:
@@ -2044,11 +2065,11 @@ class Window(QMainWindow):
                 ser.write(b'c')
                 ser.close()
                 self.TeensyWarning.setText('Start excitation!')
-                self.TeensyWarning.setStyleSheet("color: red;")
+                self.TeensyWarning.setStyleSheet("color: purple;")
             except Exception as e:
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: start excitation!')
-                self.TeensyWarning.setStyleSheet("color: red;")
+                self.TeensyWarning.setStyleSheet("color: purple;")
         else:
             self.StartExcitation.setStyleSheet("background-color : none")
             try:
@@ -2057,11 +2078,11 @@ class Window(QMainWindow):
                 ser.write(b's')
                 ser.close()
                 self.TeensyWarning.setText('Stop excitation!')
-                self.TeensyWarning.setStyleSheet("color: red;")
+                self.TeensyWarning.setStyleSheet("color: purple;")
             except Exception as e:
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: stop excitation!')
-                self.TeensyWarning.setStyleSheet("color: red;")
+                self.TeensyWarning.setStyleSheet("color: purple;")
     
     def _StartBleaching(self):
         if self.StartBleaching.isChecked():
@@ -2072,11 +2093,11 @@ class Window(QMainWindow):
                 ser.write(b'd')
                 ser.close()
                 self.TeensyWarning.setText('Start bleaching!')
-                self.TeensyWarning.setStyleSheet("color: red;")
+                self.TeensyWarning.setStyleSheet("color: purple;")
             except Exception as e:
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: start bleaching!')
-                self.TeensyWarning.setStyleSheet("color: red;")
+                self.TeensyWarning.setStyleSheet("color: purple;")
         else:
             self.StartBleaching.setStyleSheet("background-color : none")
             try:
@@ -2085,19 +2106,24 @@ class Window(QMainWindow):
                 ser.write(b's')
                 ser.close()
                 self.TeensyWarning.setText('Stop bleaching!')
-                self.TeensyWarning.setStyleSheet("color: red;")
+                self.TeensyWarning.setStyleSheet("color: purple;")
             except Exception as e:
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: stop bleaching!')
-                self.TeensyWarning.setStyleSheet("color: red;")
+                self.TeensyWarning.setStyleSheet("color: purple;")
 
     def _AutoReward(self):
         if self.AutoReward.isChecked():
             self.AutoReward.setStyleSheet("background-color : green;")
-            self.AutoReward.setText('On')
+            self.AutoReward.setText('Auto water On')
+            for widget in ['AutoWaterType', 'Multiplier', 'Unrewarded', 'Ignored']:
+                getattr(self, widget).setEnabled(True)
         else:
             self.AutoReward.setStyleSheet("background-color : none")
-            self.AutoReward.setText('Off')
+            self.AutoReward.setText('Auto water Off')
+            for widget in ['AutoWaterType', 'Multiplier', 'Unrewarded', 'Ignored']:
+                getattr(self, widget).setEnabled(False)
+            
     def _NextBlock(self):
         if self.NextBlock.isChecked():
             self.NextBlock.setStyleSheet("background-color : green;")
@@ -2166,12 +2192,12 @@ class Window(QMainWindow):
         stall_duration = 5*60 
         if self.ANewTrial==0:
             self.WarningLabel.setText('Waiting for the finish of the last trial!')
-            self.WarningLabel.setStyleSheet("color: red;")
+            self.WarningLabel.setStyleSheet("color: purple;")
             while 1:
                 QApplication.processEvents()
                 if self.ANewTrial==1:
                     self.WarningLabel.setText('')
-                    self.WarningLabel.setStyleSheet("color: red;")
+                    self.WarningLabel.setStyleSheet("color: purple;")
                     break
                 elif (time.time() - start_time) > stall_duration*stall_iteration:
                     elapsed_time = int(np.floor(stall_duration*stall_iteration/60))
@@ -2585,8 +2611,8 @@ class Window(QMainWindow):
                 # maximum 3.5ml
                 if suggested_water>3.5:
                     suggested_water=3.5
-                    self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and LAS should \nbe alerted!')
-                    self.TotalWaterWarning.setStyleSheet("color: red;")
+                    self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and LAS should be alerted!')
+                    self.TotalWaterWarning.setStyleSheet("color: purple;")
                 else:
                     self.TotalWaterWarning.setText('')
                 self.SuggestedWater.setText(str(np.round(suggested_water,3)))
@@ -2617,9 +2643,10 @@ class Window(QMainWindow):
                 lambda: self.AutoTrain_dialog.update_auto_train_fields(subject_id=self.ID.text())
             )
 
-            
         self.AutoTrain_dialog.show()
-
+        
+        # Check subject id each time the dialog is opened
+        self.AutoTrain_dialog.update_auto_train_fields(subject_id=self.ID.text())
         
 def map_hostname_to_box(hostname,box_num):
     host_mapping = {
