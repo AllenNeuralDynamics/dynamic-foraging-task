@@ -2091,12 +2091,12 @@ class Window(QMainWindow):
     def _AutoReward(self):
         if self.AutoReward.isChecked():
             self.AutoReward.setStyleSheet("background-color : green;")
-            self.AutoReward.setText('On')
+            self.AutoReward.setText('Auto water On')
             for widget in ['AutoWaterType', 'Multiplier', 'Unrewarded', 'Ignored']:
                 getattr(self, widget).setEnabled(True)
         else:
             self.AutoReward.setStyleSheet("background-color : none")
-            self.AutoReward.setText('Off')
+            self.AutoReward.setText('Auto water Off')
             for widget in ['AutoWaterType', 'Multiplier', 'Unrewarded', 'Ignored']:
                 getattr(self, widget).setEnabled(False)
             
