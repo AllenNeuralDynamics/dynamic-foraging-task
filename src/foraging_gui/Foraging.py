@@ -158,9 +158,7 @@ class Window(QMainWindow):
         self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
-        
         self.AutoTrain.clicked.connect(self._AutoTrain)
-        
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._Task)
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._AdvancedBlockAuto)
@@ -194,7 +192,7 @@ class Window(QMainWindow):
         self.GetPositions.clicked.connect(self._GetPositions)
         self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
         self.warmup.currentIndexChanged.connect(self._warmup)
-        self.warmup.activated.connect(self._warmup)
+
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
@@ -208,8 +206,10 @@ class Window(QMainWindow):
     
     def _warmup(self):
         '''warm up the session before starting'''
-        # disable/enable corresponding fields; set warm up parameters
+        # set warm up parameters
         if self.warmup.currentText()=='on':
+            # get parameters before the warm up is on
+            self._GetTrainingParameters(prefix='WB_')
             self.warm_min_trial.setEnabled(True)
             self.warm_min_finish_ratio.setEnabled(True)
             self.warm_max_choice_ratio_bias.setEnabled(True)
@@ -233,9 +233,12 @@ class Window(QMainWindow):
             self._AutoReward()
             self.AutoWaterType.setCurrentIndex(self.AutoWaterType.findText('Natural'))
             self.Multiplier.setText('0.8')
-            self.Unrewarded
+            self.Unrewarded.setText('0')
+            self.Ignored.setText('0')
             self._ShowRewardPairs()
         elif self.warmup.currentText()=='off':
+            # set parameters back to the previous parameters before warm up
+            self._revert_to_previous_parameters()
             self.warm_min_trial.setEnabled(False)
             self.warm_min_finish_ratio.setEnabled(False)
             self.warm_max_choice_ratio_bias.setEnabled(False)
@@ -244,15 +247,22 @@ class Window(QMainWindow):
             self.label_116.setEnabled(False)
             self.label_117.setEnabled(False)
             self.label_118.setEnabled(False)
-
             self._ShowRewardPairs()
-            # return to the previous parameters after warm up
-            if 0: #if AutoTrain is on:
-                pass
-            else:   
-                self._TrainingStage()
 
-
+    def _revert_to_previous_parameters(self):
+        '''reverse to previous parameters before warm up'''
+        # get parameters before the warm up is on
+        parameters={}
+        for attr_name in dir(self):
+            if attr_name.startswith('WB_') and attr_name!='WB_' and attr_name!='WB_warmup':
+                parameters[attr_name[3:]]=getattr(self,attr_name)
+        widget_dict = {w.objectName(): w for w in self.TrainingParameters.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+        try:
+            for key in widget_dict.keys():
+                self._set_parameters(key,widget_dict,parameters)
+        except Exception as e:
+            # Catch the exception and log error information
+            logging.error(str(e))
 
     def _keyPressEvent(self):
         # press enter to confirm parameters change
@@ -907,73 +917,81 @@ class Window(QMainWindow):
                     continue
                 elif CurrentTrainingStage not in self.TrainingStagePar[Task]:
                     continue
-                if key in self.TrainingStagePar[Task][CurrentTrainingStage]:
-                    # skip some keys
-                    if key=='ExtraWater' or key=='WeightBefore' or key=='WeightAfter' or key=='SuggestedWater':
-                        self.WeightAfter.setText('')
-                        continue
-                    widget = widget_dict[key]
-                    try: # load the paramter used by last trial
-                        value=np.array([self.TrainingStagePar[Task][CurrentTrainingStage][key]])
-                        Tag=0
-                    # sometimes we only have training parameters, no behavior parameters
-                    except Exception as e:
-                        logging.error(str(e))
-                        value=self.TrainingStagePar[Task][CurrentTrainingStage][key]
-                        Tag=1
-                    if isinstance(widget, QtWidgets.QPushButton):
-                        pass
-                    if type(value)==bool:
-                        Tag=1
-                    else:
-                        if len(value)==0:
-                            value=np.array([''], dtype='<U1')
-                            Tag=0
-                    if type(value)==np.ndarray:
-                        Tag=0
-                    if isinstance(widget, QtWidgets.QLineEdit):
-                        if Tag==0:
-                            widget.setText(value[-1])
-                        elif Tag==1:
-                            widget.setText(value)
-                    elif isinstance(widget, QtWidgets.QComboBox):
-                        if Tag==0:
-                            index = widget.findText(value[-1])
-                        elif Tag==1:
-                            index = widget.findText(value)
-                        if index != -1:
-                            widget.setCurrentIndex(index)
-                    elif isinstance(widget, QtWidgets.QDoubleSpinBox):
-                        if Tag==0:
-                            widget.setValue(float(value[-1]))
-                        elif Tag==1:
-                            widget.setValue(float(value))
-                    elif isinstance(widget, QtWidgets.QSpinBox):
-                        if Tag==0:
-                            widget.setValue(int(value[-1]))
-                        elif Tag==1:
-                            widget.setValue(int(value))
-                    elif isinstance(widget, QtWidgets.QTextEdit):
-                        if Tag==0:
-                            widget.setText(value[-1])
-                        elif Tag==1:
-                            widget.setText(value)
-                    elif isinstance(widget, QtWidgets.QPushButton):
-                        if key=='AutoReward':
-                            if Tag==0:
-                                widget.setChecked(bool(value[-1]))
-                            elif Tag==1:
-                                widget.setChecked(value)
-                            self._AutoReward()
-                else:
-                    widget = widget_dict[key]
-                    if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
-                        pass
-                        #widget.clear()
+                self._set_parameters(key,widget_dict,self.TrainingStagePar[Task][CurrentTrainingStage])
         except Exception as e:
             # Catch the exception and log error information
             logging.error(str(e))
-        
+
+    def _set_parameters(self,key,widget_dict,parameters):
+        '''Set the parameters in the GUI
+            key: the parameter name you want to change
+            widget_dict: the dictionary of all the widgets in the GUI
+            parameters: the dictionary of all the parameters containing the key you want to change
+        '''
+        if key in parameters:
+            # skip some keys
+            if key=='ExtraWater' or key=='WeightBefore' or key=='WeightAfter' or key=='SuggestedWater':
+                self.WeightAfter.setText('')
+                return
+            widget = widget_dict[key]
+            try: # load the paramter used by last trial
+                value=np.array([parameters[key]])
+                Tag=0
+            # sometimes we only have training parameters, no behavior parameters
+            except Exception as e:
+                logging.error(str(e))
+                value=parameters[key]
+                Tag=1
+            if isinstance(widget, QtWidgets.QPushButton):
+                pass
+            if type(value)==bool:
+                Tag=1
+            else:
+                if len(value)==0:
+                    value=np.array([''], dtype='<U1')
+                    Tag=0
+            if type(value)==np.ndarray:
+                Tag=0
+            if isinstance(widget, QtWidgets.QLineEdit):
+                if Tag==0:
+                    widget.setText(value[-1])
+                elif Tag==1:
+                    widget.setText(value)
+            elif isinstance(widget, QtWidgets.QComboBox):
+                if Tag==0:
+                    index = widget.findText(value[-1])
+                elif Tag==1:
+                    index = widget.findText(value)
+                if index != -1:
+                    widget.setCurrentIndex(index)
+            elif isinstance(widget, QtWidgets.QDoubleSpinBox):
+                if Tag==0:
+                    widget.setValue(float(value[-1]))
+                elif Tag==1:
+                    widget.setValue(float(value))
+            elif isinstance(widget, QtWidgets.QSpinBox):
+                if Tag==0:
+                    widget.setValue(int(value[-1]))
+                elif Tag==1:
+                    widget.setValue(int(value))
+            elif isinstance(widget, QtWidgets.QTextEdit):
+                if Tag==0:
+                    widget.setText(value[-1])
+                elif Tag==1:
+                    widget.setText(value)
+            elif isinstance(widget, QtWidgets.QPushButton):
+                if key=='AutoReward':
+                    if Tag==0:
+                        widget.setChecked(bool(value[-1]))
+                    elif Tag==1:
+                        widget.setChecked(value)
+                    self._AutoReward()
+        else:
+            widget = widget_dict[key]
+            if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
+                pass
+                #widget.clear()
+
     def _SaveTraining(self):
         '''Save the training stage parameters'''
         logging.info('Saving training stage parameters')
@@ -1226,7 +1244,7 @@ class Window(QMainWindow):
         else:
             return 1
         
-    def _GetTrainingParameters(self):
+    def _GetTrainingParameters(self,prefix='TP_'):
         '''Get training parameters'''
         # Iterate over each container to find child widgets and store their values in self
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
@@ -1236,17 +1254,17 @@ class Window(QMainWindow):
                     continue
                 # Set an attribute in self with the name 'TP_' followed by the child's object name
                 # and store the child's text value
-                setattr(self, 'TP_'+child.objectName(), child.text())
+                setattr(self, prefix+child.objectName(), child.text())
             # Iterate over each child of the container that is a QComboBox
             for child in container.findChildren(QtWidgets.QComboBox):
                 # Set an attribute in self with the name 'TP_' followed by the child's object name
                 # and store the child's current text value
-                setattr(self, 'TP_'+child.objectName(), child.currentText())
+                setattr(self, prefix+child.objectName(), child.currentText())
             # Iterate over each child of the container that is a QPushButton
             for child in container.findChildren(QtWidgets.QPushButton):
                 # Set an attribute in self with the name 'TP_' followed by the child's object name
                 # and store whether the child is checked or not
-                setattr(self, 'TP_'+child.objectName(), child.isChecked())
+                setattr(self, prefix+child.objectName(), child.isChecked())
                             
 
     def _Task(self):
