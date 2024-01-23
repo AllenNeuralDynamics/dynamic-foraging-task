@@ -390,7 +390,7 @@
                       <bool>false</bool>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">background-color:  rgb(0, 189, 22);</string>
+                      <string notr="true">background-color: rgb(0, 214, 103);</string>
                      </property>
                      <property name="text">
                       <string>Auto Train
@@ -478,7 +478,7 @@
                  </font>
                 </property>
                 <property name="styleSheet">
-                 <string notr="true">color: rgb(255, 0, 0);</string>
+                 <string notr="true">color: purple;</string>
                 </property>
                 <property name="text">
                  <string>off curriculum</string>
@@ -834,7 +834,7 @@
                   <x>0</x>
                   <y>0</y>
                   <width>627</width>
-                  <height>295</height>
+                  <height>325</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout">
@@ -1918,7 +1918,7 @@
                   <x>0</x>
                   <y>0</y>
                   <width>627</width>
-                  <height>295</height>
+                  <height>325</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_9">
@@ -2406,7 +2406,7 @@ Bias:</string>
                          <x>0</x>
                          <y>0</y>
                          <width>340</width>
-                         <height>165</height>
+                         <height>195</height>
                         </rect>
                        </property>
                        <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -2476,7 +2476,7 @@ Double dipping:
                 <property name="geometry">
                  <rect>
                   <x>0</x>
-                  <y>-100</y>
+                  <y>0</y>
                   <width>904</width>
                   <height>408</height>
                  </rect>
@@ -4333,7 +4333,7 @@ Current pair:
                   <x>0</x>
                   <y>0</y>
                   <width>627</width>
-                  <height>295</height>
+                  <height>325</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_16">

@@ -328,7 +328,7 @@ class Window(QMainWindow):
                     self.StageSerialNum.setCurrentIndex(index)
                 else:
                     self.Warning_Newscale.setText('Default Newscale not found!')
-                    self.Warning_Newscale.setStyleSheet("color: red;")
+                    self.Warning_Newscale.setStyleSheet("color: purple;")
         except Exception as e:
             logging.error(str(e))
 
@@ -367,7 +367,7 @@ class Window(QMainWindow):
             except Exception as e:
                 logging.error(str(e))
                 self.WarningLabelInitializeBonsai.setText('Please open bonsai!')
-                self.WarningLabelInitializeBonsai.setStyleSheet("color: red;")
+                self.WarningLabelInitializeBonsai.setStyleSheet("color: purple;")
                 self.InitializeBonsaiSuccessfully=0
 
     def _ReconnectBonsai(self):
@@ -505,7 +505,7 @@ class Window(QMainWindow):
         except Exception as e:
             logging.error('Could not load settings file at: {}, {}'.format(self.SettingFile,str(e)))
             self.WarningLabel.setText('Could not load settings file!')
-            self.WarningLabel.setStyleSheet("color: red;")
+            self.WarningLabel.setStyleSheet("color: purple;")
             raise e
 
         # If any settings are missing, use the default values
@@ -604,7 +604,7 @@ class Window(QMainWindow):
         # Could not connect and we timed out
         logging.info('Could not connect to bonsai with max wait time {} seconds'.format(max_wait))
         self.WarningLabel_2.setText('Started without bonsai connected!')
-        self.WarningLabel_2.setStyleSheet("color: red;")
+        self.WarningLabel_2.setStyleSheet("color: purple;")
 
     def _ConnectOSC(self):
         '''
@@ -952,7 +952,7 @@ class Window(QMainWindow):
         with open(self.TrainingStageFiles, "w") as file:
             json.dump(self.TrainingStagePar, file,indent=4) 
         self.WarningLabel_SaveTrainingStage.setText('Training stage parameters were saved!')
-        self.WarningLabel_SaveTrainingStage.setStyleSheet("color: red;")
+        self.WarningLabel_SaveTrainingStage.setStyleSheet("color: purple;")
         self.SaveTraining.setChecked(False)
 
     def _LoadTrainingPar(self):
@@ -1095,11 +1095,11 @@ class Window(QMainWindow):
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                         self.Continue=0
                         if child.objectName() in {'Experimenter', 'AnimalName', 'UncoupledReward', 'WeightBefore', 'WeightAfter', 'ExtraWater'}:
-                            child.setStyleSheet('color: red;')
+                            child.setStyleSheet('color: purple;')
                             self.Continue=1
                         if child.text()=='': # If empty, change background color and wait for confirmation
                             self.UpdateParameters=0
-                            child.setStyleSheet('background-color: red;')
+                            child.setStyleSheet('background-color: purple;')
                             self.Continue=1
                         if child.objectName() in {'RunLength','WindowSize','StepSize'}:
                             if child.text()=='':
@@ -1108,7 +1108,7 @@ class Window(QMainWindow):
                                 child.setStyleSheet('background-color: white;')
                         if self.Continue==1:
                             continue
-                        child.setStyleSheet('color: red;')
+                        child.setStyleSheet('color: purple;')
                         try:
                             # it's valid float
                             float(child.text())
@@ -1604,7 +1604,7 @@ class Window(QMainWindow):
             if response==QMessageBox.Yes:
                 pass
                 self.WarningLabel.setText('Saving without weight or extra water!')
-                self.WarningLabel.setStyleSheet("color: red;")
+                self.WarningLabel.setStyleSheet("color: purple;")
                 logging.info('saving without weight or extra water')
             elif response==QMessageBox.No:
                 logging.info('saving declined by user')
@@ -1631,7 +1631,7 @@ class Window(QMainWindow):
             self.SaveFile=Names[0]
         if self.SaveFile == '':
             self.WarningLabel.setText('Discard saving!')
-            self.WarningLabel.setStyleSheet("color: red;")
+            self.WarningLabel.setStyleSheet("color: purple;")
         if self.SaveFile != '':
             if hasattr(self, 'GeneratedTrials'):
                 if hasattr(self.GeneratedTrials, 'Obj'):
@@ -2041,11 +2041,11 @@ class Window(QMainWindow):
                 ser.write(b'c')
                 ser.close()
                 self.TeensyWarning.setText('Start excitation!')
-                self.TeensyWarning.setStyleSheet("color: red;")
+                self.TeensyWarning.setStyleSheet("color: purple;")
             except Exception as e:
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: start excitation!')
-                self.TeensyWarning.setStyleSheet("color: red;")
+                self.TeensyWarning.setStyleSheet("color: purple;")
         else:
             self.StartExcitation.setStyleSheet("background-color : none")
             try:
@@ -2054,11 +2054,11 @@ class Window(QMainWindow):
                 ser.write(b's')
                 ser.close()
                 self.TeensyWarning.setText('Stop excitation!')
-                self.TeensyWarning.setStyleSheet("color: red;")
+                self.TeensyWarning.setStyleSheet("color: purple;")
             except Exception as e:
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: stop excitation!')
-                self.TeensyWarning.setStyleSheet("color: red;")
+                self.TeensyWarning.setStyleSheet("color: purple;")
     
     def _StartBleaching(self):
         if self.StartBleaching.isChecked():
@@ -2069,11 +2069,11 @@ class Window(QMainWindow):
                 ser.write(b'd')
                 ser.close()
                 self.TeensyWarning.setText('Start bleaching!')
-                self.TeensyWarning.setStyleSheet("color: red;")
+                self.TeensyWarning.setStyleSheet("color: purple;")
             except Exception as e:
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: start bleaching!')
-                self.TeensyWarning.setStyleSheet("color: red;")
+                self.TeensyWarning.setStyleSheet("color: purple;")
         else:
             self.StartBleaching.setStyleSheet("background-color : none")
             try:
@@ -2082,11 +2082,11 @@ class Window(QMainWindow):
                 ser.write(b's')
                 ser.close()
                 self.TeensyWarning.setText('Stop bleaching!')
-                self.TeensyWarning.setStyleSheet("color: red;")
+                self.TeensyWarning.setStyleSheet("color: purple;")
             except Exception as e:
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: stop bleaching!')
-                self.TeensyWarning.setStyleSheet("color: red;")
+                self.TeensyWarning.setStyleSheet("color: purple;")
 
     def _AutoReward(self):
         if self.AutoReward.isChecked():
@@ -2162,12 +2162,12 @@ class Window(QMainWindow):
         # waiting for the finish of the last trial
         if self.ANewTrial==0:
             self.WarningLabel.setText('Waiting for the finish of the last trial!')
-            self.WarningLabel.setStyleSheet("color: red;")
+            self.WarningLabel.setStyleSheet("color: purple;")
             while 1:
                 QApplication.processEvents()
                 if self.ANewTrial==1:
                     self.WarningLabel.setText('')
-                    self.WarningLabel.setStyleSheet("color: red;")
+                    self.WarningLabel.setStyleSheet("color: purple;")
                     break
     def _thread_complete(self):
         '''complete of a trial'''
@@ -2221,12 +2221,12 @@ class Window(QMainWindow):
         # waiting for the finish of the last trial
         if self.StartANewSession==1 and self.ANewTrial==0:
             self.WarningLabel.setText('Waiting for the finish of the last trial!')
-            self.WarningLabel.setStyleSheet("color: red;")
+            self.WarningLabel.setStyleSheet("color: purple;")
             while 1:
                 QApplication.processEvents()
                 if self.ANewTrial==1:
                     self.WarningLabel.setText('')
-                    self.WarningLabel.setStyleSheet("color: red;")
+                    self.WarningLabel.setStyleSheet("color: purple;")
                     break
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
@@ -2473,7 +2473,7 @@ class Window(QMainWindow):
                 if suggested_water>3.5:
                     suggested_water=3.5
                     self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and LAS should be alerted!')
-                    self.TotalWaterWarning.setStyleSheet("color: red;")
+                    self.TotalWaterWarning.setStyleSheet("color: purple;")
                 else:
                     self.TotalWaterWarning.setText('')
                 self.SuggestedWater.setText(str(np.round(suggested_water,3)))
