@@ -13,6 +13,7 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
   - [Menu](#menu)
   - [Toolbars](#toolbars)
   - [Training Parameters](#training-parameters)
+  - [Automatic training](#automatic-training)
   - [Water Calibration](#water-calibration)
   - [Laser Calibration](#laser-calibration)
   - [Optogenetics](#optogenetics)
@@ -34,7 +35,11 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - [FTDI driver](https://ftdichip.com/drivers/) (for Harp devices)
 - [NI-DAQmax **version 19.0**](https://www.ni.com/en/support/downloads/drivers/download.ni-daq-mx.html#484356) (for optogenetic stimulation via NI-DAQ cards)
 - [Spinnaker SDK **version 1.29.0.5**](https://www.flir.com/products/spinnaker-sdk/) (driver for FLIR cameras)
-- [USBXpress_SDK](https://www.silabs.com/documents/public/software/install_USBXpress_SDK.exe) (for newscale python API)
+   - [download the driver here](https://alleninstitute-my.sharepoint.com/:u:/g/personal/xinxin_yin_alleninstitute_org/Ef8zZAeZymFFjuz_5T70xs8BV8Qmdd3zVCZ6gvdYAismYQ?e=9WvLlQ)
+   - Install FULL, x64
+- USBXpress SDK (for newscale python API)
+  - [get installation .exe here](https://www.silabs.com/documents/public/software/install_USBXpress_SDK.exe) (for newscale python API)
+  - Click install, accept terms of agreement, hit next and accept default settings for everything. 
 - Python packages:
   - `numpy`
   - `scipy`
@@ -56,35 +61,79 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 #### For initial installation:
 - Clone repository onto your computer
   - The installation directory should be `C:\Users\svc_aind_behavior\Documents\GitHub\`
-  - `git clone https://github.com/AllenNeuralDynamics/dynamic-foraging-task.git`
-  - If you do not have git installed, use: https://gitforwindows.org
+  - In the console: `git clone https://github.com/AllenNeuralDynamics/dynamic-foraging-task.git`
+      - If you do not have git installed, use: https://gitforwindows.org
+  - You can alternatively use the Github Desktop App to clone the repo
 - Install Bonsai on your computer
-  - Change to the `dynamic-foraging-task\bonsai` folder
-  - In the command prompt, type: `setup.cmd`
-- Update the firmware of the Harp Behavior Board by following the instructions [here](https://harp-tech.org/docs/articles/firmware.html).
+  - In the console, change to the directory `C:\Users\svc_aind_behavior\Documents\GitHub\dynamic-foraging-task\bonsai`
+  - install bonsai with: `./setup.cmd`
+- Update the firmware of the Harp Behavior Board by following the instructions [here](https://harp-tech.org/articles/firmware.html).
 - Install the USBXpress software, for the newscale motor stage
 - Install the Spinnaker SDK, if a FLIR camera is being used
 - Install the NI-DAQ max driver if a NiDAQ is present (for optogenetics)
 - Create a `conda` environment, with python version 3.8
-  - install `conda` [instructions here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/windows/html)
-  - Run `miniconda prompt`
-  - Create an environment: `conda create -n foraging_environment python=3.8`
-  - Activate the environment: `conda activate foraging_environment`
+  - install `conda` [instructions here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/windows.html)
+  - Run `miniconda prompt`, and type `where conda`
+  - Add conda to the path variable
+    - [instructions from here](https://stackoverflow.com/questions/44515769/conda-is-not-recognized-as-internal-or-external-command)
+    - Open Advanced System Settings
+    - Click on "Environment Variables", then "Edit Path", then add the following paths:
+      - C:\Users\svc_aind_behavior\AppData\Local\miniconda3
+      - C:\Users\svc_aind_behavior\AppData\Local\miniconda3\Scripts
+      - C:\Users\svc_aind_behavior\AppData\Local\miniconda3\Library\bin
+      - C:\Users\svc_aind_behavior\AppData\Local\miniconda3\condabin
+  - Create an environment: `conda create -n Foraging python=3.8`
+  - Activate the environment: `conda activate Foraging`
 - Use `pip` to install this repository:
-  - From the top-level directory run `pip install .`
-- Copy `Settings_box1.csv` to `Users\<username>\Documents\ForagingSettings`
+  - From the `C:\Users\svc_aind_behavior\Documents\GitHub\dynamic-foraging-task` directory run `pip install -e .`
+  - This should install all the required python packages. 
+- Copy `Settings_box<box num>.csv` to `Users\svc_aind_behavior\Documents\ForagingSettings`
+  - Copy `<box num>` 1-4 depending on the computer
+  - Configure the Behavior/Soundcard COM ports for each computer
+     - Unplug the USB cables for the Behavior and Soundcard boards for one of the two behavior boxes connected to each computer.
+     - In a file browser, navigated to `C:\Users\svc_aind_behavior\Documents\GitHub\dynamic-foraging-task\bonsai`
+     - Click on `Bonsai`, then `New Project`
+     - In the Toolbox window type `Device (Harp)`
+     - Select the Node, then in the properties window, iterate through the COM Ports and look in the console window, which will tell you which board is connected to which COM port.
+     - Plug in the other behavior box's boards and repeat the steps. 
+  - The BonsaiOsc ports are determined by the box number, and should not be modified. 
+- Copy `Foraging<box num>.bat` to the Desktop
+  - Copy `<box num>` 1-4 depending on the computer
 - Configure `ForagingSettings.json`
-  - Copy the template from `src\foraging_gui\ForagingSettings.json` to `Users\<username>\Documents\ForagingSettings\ForagingSettings.json`
-  - There are four fields that need to be set:
-    - "default_saveFolder": For example "E:\DynamicForagingGUI\BehaviorData\",
+  - Copy the template from `src\foraging_gui\ForagingSettings.json` to `Users\svc_aind_behavior\Documents\ForagingSettings\ForagingSettings.json`
+  - You should not have to modify these settings:
+    - "bonsai_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\bonsai\\Bonsai.exe",
+    - "bonsaiworkflow_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai"
+    - "default_saveFolder": "C:\\Documents\\"
+    - "temporary_video_folder":"C:\\Users\\svc_aind_behavior\\Documents\\temporaryvideo\\",
+    - "show_log_info_in_console":false (only used for debugging)
+  - This field is mandatory and must be configured for each computer:
     - "current_box": For example "Tower_EphysRig3", "Blue"
+  - These settings need to be configured for each computer:
     - "Teensy_COM": For example "COM10",
-    - "newscale_port_tower1": For example 46103
-      - Open Newscale and hit `connect` to see the serial numbers of the newscale devices
-      - Edit `ForagingSettings.json` to add a line `"newscale_port_tower1":<serial number for rig 1>`
+        - This is only for fiber-photometry  
+        - Follow instructions on the [wiki](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Computer-Configuration) to install Arduino IDE (1.8x) and TeensyDuino
+        - Once both are installed open ArduinoIDE, go to Tools>Port, select COMport cooresponding to Teensy4.1, and this value to the ForagingSettings.json
+    - "newscale_serial_num_tower1": For example 46103
+    - "newscale_serial_num_tower2": For example 46104
+    - "newscale_serial_num_tower3": For example 46105
+    - "newscale_serial_num_tower4": For example 46106
+        - Determine the serial numbers of the Newscale Stages
+            - Unplug the stages for one of the two boxes
+            - Open Miniconda Prompt
+            - type `conda activate Foraging`
+            - navigate to `dynamic-foraging-task/src/foraging)gui`
+            - `python`
+            - `from MyFunctions import NewScaleSerialY `
+            - `serial_num = NewScaleSerialY.get_instances()[0]`
+        - Edit `ForagingSettings.json` to add a line `"newscale_port_tower1":<serial number for rig 1>`
+   - Create shortcut to the camera workflows 
+- Create a log file folder at `~\Documents\foraging_gui_logs`
+- Set up AWS credential for the [Automatic Training GUI](#automatic-training)
+    - AWS credentials must exist in the file `~\.aws\credentials` (Ask Han). Something like this:
+      ![image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/476faa86-f8fd-4443-8e42-8b24c5490847)
 
-
-
+           
 
 #### To launch the software:
 - Run `foraging.bonsai` in `dynamic-foraging-task\src\workflows` to start Bonsai.
@@ -93,17 +142,20 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - The GUI will leave a log file at `~\Documents\foraging_gui_logs\` named by the tower and date/time. 
 
 #### Automatic Updates
-To configure automatic updates consistent with the [update protocol](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Software-Update-Procedures),please use TaskScheduler to automatically run two batch files at specified times of the week ([instructions](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Configure-Automatic-Updates))
-- `\src\foraging_gui\update_from_github_to_main.bat` every wednesday at 6am
-- `\src\foraging_gui\update_from_github_to_production_testing.bat` every monday at 6am
+To configure automatic updates consistent with the [update protocol](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Software-Update-Procedures),please use TaskScheduler to automatically run three batch files at specified times of the week ([instructions](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Configure-Automatic-Updates))
+- On every computer:
+   - `\src\foraging_gui\update_from_github_to_main.bat` everyday at 6am
+- On the testing computer:
+   - `\src\foraging_gui\update_from_github_to_production_testing.bat` every monday at 6am
+   - `\src\foraging_gui\check_github_status.bat` every tuesday at 6am
+   - `\src\foraging_gui\update_from_github_to_main.bat` every W,Th,F,S,Su at 6am
 - These batch files will leave a log file at `~\Documents\foraging_gui_logs\github_log.txt`
 
 ## Block Diagram
 ![image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/109394934/b8549072-5648-4afd-a508-8d38d7bf6549)
 
 ## User Manual
-
-![GUI-screenshot](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/109394934/1852c841-2f5f-4307-b32e-f204e89b290a)
+![GUI-screenshot](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/e7b0dcc4-288c-4bf7-8fe2-80bfafa4d2a5)
 
 ### Menu
 
@@ -134,7 +186,7 @@ To configure automatic updates consistent with the [update protocol](https://git
 - **New session**: Restart a session
 - **Restart logging**:
   - **Temporary logging**: Logging to a temporary folder (determined by the **temporary_video_folder** in the **ForagingSettings.json** )
-  - **Formal logging**: Logging to a standard folder structure (determined by the **log_folder** in the **ForagingSettings.json** )
+  - **Formal logging**: Logging to a standard folder structure (determined by the **default_saveFolder** in the **ForagingSettings.json** )
 - **Open logging folder**: Open the current logging folder
 - **Open behavior folder**: Open the folder to save the current behavior JSON file
 #### Settings
@@ -142,6 +194,7 @@ To configure automatic updates consistent with the [update protocol](https://git
   - **ForagingSettings.json**: General settings. 
     - **default_saveFolder**: The default save location. The folder structure is `default_saveFolder\Rig\Animal\Animal_year-month-day_hour-minute-second\`. There are five additional folders: `EphysFolder`, `HarpFolder`, `PhotometryFolder`, `TrainingFolder`, and `VideoFolder` for saving different data sources. Default location: `Documents`
     - **current_box**: To define the rig name.
+    - **show_log_info_in_console**: If exists and equals `True`, a copy of log info is sent to the console.
   - **WaterCalibration.json**: The water calibration results.
   - **LaserCalibration.json**: The laser calibration results.
   - **TrainingStagePar.json**: The training stage parameters in a task-dependent manner.
@@ -167,6 +220,8 @@ To configure automatic updates consistent with the [update protocol](https://git
 - **Experimenter**: The experimenter running this session.
 - **Task**: There are currently five tasks supported (**Coupled Baiting**;**Uncoupled Baiting**;**Coupled Without Baiting**;**Uncoupled Without Baiting**;**RewardN**).
 - **Tower**: The current tower (can be set by **current_box** in **ForagingSettings.json**).
+- **Auto Train**: Click the button to open the [Automatic Training](#automatic-training) dialog, see below
+  
 #### Trial-related parameters
 - **training stage**: Select the training stage parameters. These parameters can be saved in **TrainingStagePar.json** through "**Save training**" button. They are task dependent. 
 - **randomness**: There are **exponential** and **even distribution** available. This random generator will be applied to generate **Block length**/**ITI**/**Delay period**.
@@ -222,7 +277,50 @@ To configure automatic updates consistent with the [update protocol](https://git
 - **Left choice rewarded**:
 - **Right choice rewarded**:
 - **Early licking**: Statistics of early licking rate in different behavior epochs.
-- **Double dipping**: Double dipping statistics in different behavior epochs and conditions. 
+- **Double dipping**: Double dipping statistics in different behavior epochs and conditions.
+
+### Automatic training
+1. In the main dialog, press `Auto Train` button  <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/9ef26192-044b-4c22-928f-b328b7ab36ab" width="90"> or `Ctrl + Alt + A` to open the Automatic Training dialog
+> [!IMPORTANT]
+> If the dialog fails to open, check AWS credentials at `~/.aws/credentials`. See [instructions](#for-initial-installation)
+2. For the first session of a new mouse:
+   - Confirm that this is a new mouse<br>
+   <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/bcaafe89-3330-4704-81f9-ab30c259512b" width="400"><br>
+   - On the right side, select a desired curriculum for the new mouse. Double-check `curriculum_name`, `curriculum_version`, and the diagrams<br>.
+   <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/2e3c030f-f91e-4917-9fa9-7e27af115171" width="700"><br>
+   - Click buttons to see interative diagrams in browser <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/bb845129-a12b-445a-8639-0e981a60deb9" height="30">
+   - Click `Set curriculum` button <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/f1fac3e0-1c84-42e9-9f12-ba11896845b8" width="60"> to confirm
+   - Now a new entry with `session = 0` is added in `Training history`, and `STAGE_1` of the selected curriculum is suggested by default. <br>
+   <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/90a054ab-71c1-4fa2-b13b-ab06f7895080" width="700"><br>
+3. For a mouse that already started training
+   - Its training history and curriculum is automatically loaded
+   <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/58a9e583-09a4-4295-84eb-db5ef873df5d" width="900">
+   - Uncheck `show this mouse only` to see training history from all mice
+   <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/97c05425-7dac-426b-9ba2-aadcfc1868ed" height="30">
+   - Press `Show all training history` <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/ff1354b6-4b78-4740-a317-b5ec1b83686e" height="30"> to open an interactive plotly chart that visualize all training history in browser
+   <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/af541948-94ab-4f13-b599-ca188be77324" width="700">
+4. Apply and lock training parameters
+   - Check the curriculum name and stage name shown on the huge green button<br>
+   <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/c46cd82e-76e7-4d7c-914e-41752937fee8" width="200"><br>
+   - Press the button to apply and lock all curriculum-controlled training parameters in the main GUI (including the "Task").
+   <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/27e72b0d-5317-47ba-ac16-7b22e7374cd7" width="900">
+   - Note that you can still modify some items in `Training parameters`, such as `Valve open time`, `Give left/right`, and `Next block`.
+   - You could now close the Auto Training dialog.
+   - Start the training as usual.
+     
+5. Override parameters (not recommended)
+   - Once `Apply and lock` is pressed, you can press it again to unlock the parameters and override any of them. But in this case, the automatic training mode is disengaged, and this session is considered "off-curriculum".
+     
+6. Override stage (not recommended)
+   - Check `Override stage` to override the suggested stage. In the example below, `STAGE_FINAL` is suggested, but `STAGE_3` will be actually used (see the green button).
+   <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/92fb9df7-3e54-4bf2-a86a-02c3808c554e" width="700">
+
+7. Override curriculum (not recommended)
+     - If you somehow decide to change the curriculum during training, press `Override curriculum` and set a new curriculum.
+     - In this case, since all stages from the old curriculum now become "irrelevant", you should always manually select a stage in the ***new*** curriculum to override.
+   <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/802e5208-dc5f-45f5-8ece-b9241157bf88" width="300">
+   <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/fba62a4b-acdb-49e9-a401-3a382607b0f3" width="700">
+
 ### Water Calibration
 
 (Your content here)
