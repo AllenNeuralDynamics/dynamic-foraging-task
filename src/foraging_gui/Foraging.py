@@ -217,8 +217,8 @@ class Window(QMainWindow):
         '''
         # set warm up parameters
         if self.warmup.currentText()=='on':
-            # get parameters before the warm up is on;WB stands for Warmup backup, which are parameters before warm-up.
-            self._GetTrainingParameters(prefix='WB_')
+            # get parameters before the warm up is on;WarmupBackup_ stands for Warmup backup, which are parameters before warm-up.
+            self._GetTrainingParameters(prefix='WarmupBackup_')
             self.warm_min_trial.setEnabled(True)
             self.warm_min_finish_ratio.setEnabled(True)
             self.warm_max_choice_ratio_bias.setEnabled(True)
@@ -263,7 +263,7 @@ class Window(QMainWindow):
         # get parameters before the warm up is on
         parameters={}
         for attr_name in dir(self):
-            if attr_name.startswith('WB_') and attr_name!='WB_' and attr_name!='WB_warmup':
+            if attr_name.startswith('WarmupBackup_') and attr_name!='WarmupBackup_' and attr_name!='WarmupBackup_warmup':
                 parameters[attr_name[3:]]=getattr(self,attr_name)
         widget_dict = {w.objectName(): w for w in self.TrainingParameters.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
         try:
