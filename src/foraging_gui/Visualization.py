@@ -23,6 +23,7 @@ class PlotV(FigureCanvas):
         self.StepSize=win.StepSize.text
         self.StepSizeSetValue=win.StepSize.setValue
         self.MarkerSize=3
+        self.main_win = win
 
     def _Update(self,GeneratedTrials=None,Channel=None):
         if Channel is not None:
@@ -192,6 +193,8 @@ class PlotV(FigureCanvas):
     def _PlotMatching(self):
         ax=self.ax3
         ax.cla()
+        ax.set_box_aspect(1)
+
         if self.WindowSize()!='':
             WindowSize=int(self.WindowSize())
             if WindowSize==0 or WindowSize==1:
@@ -255,8 +258,12 @@ class PlotV(FigureCanvas):
             slope, intercept, r_value, p_value, _ = stats.linregress(x, y)
             fit_x = x
             fit_y = x * slope + intercept
+            
+            # Save intercept to show bias in performane info
+            self.main_win.B_Bias_R=intercept
+            
             ax.plot(fit_x, fit_y, 'r', label=f'r = {r_value:.3f}\np = {p_value:.2e}')
-            ax.set_title(f'Matching slope = {slope:.2f}, bias_R = {intercept:.2f}', fontsize=10)
+            ax.set_title(f'slope = {slope:.2f}, bias_R = {intercept:.2f}', fontsize=9)
             ax.legend(loc='upper left', fontsize=8)
             ax.axis('equal')
             ax.set_xlim([fit_x.min()-2, fit_x.max()+2])

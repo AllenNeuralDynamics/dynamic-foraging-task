@@ -16,8 +16,8 @@ from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject
 from PyQt5.QtSvg import QSvgWidget
 
-from MyFunctions import Worker
-from Visualization import PlotWaterCalibration
+from foraging_gui.MyFunctions import Worker
+from foraging_gui.Visualization import PlotWaterCalibration
 from aind_auto_train.curriculum_manager import CurriculumManager
 from aind_auto_train.auto_train_manager import DynamicForagingAutoTrainManager
 from aind_auto_train.schema.task import TrainingStage
@@ -293,17 +293,17 @@ class OptogeneticsDialog(QDialog):
                         eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
                         eval('self.LaserPowerRight_'+str(Numb)+'.clear()')
                         self.MainWindow.WarningLabel.setText('No calibration for this protocol identified!')
-                        self.MainWindow.WarningLabel.setStyleSheet("color: red;")
+                        self.MainWindow.WarningLabel.setStyleSheet("color: purple;")
                 else:
                     eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
                     eval('self.LaserPowerRight_'+str(Numb)+'.clear()')
                     self.MainWindow.WarningLabel.setText('No calibration for this laser identified!')
-                    self.MainWindow.WarningLabel.setStyleSheet("color: red;")
+                    self.MainWindow.WarningLabel.setStyleSheet("color: purple;")
             else:
                 eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
                 eval('self.LaserPowerRight_'+str(Numb)+'.clear()')
                 self.MainWindow.WarningLabel.setText('No calibration for this laser identified!')
-                self.MainWindow.WarningLabel.setStyleSheet("color: red;")
+                self.MainWindow.WarningLabel.setStyleSheet("color: purple;")
 
         eval('self.Location_'+str(Numb)+'.setEnabled('+str(Label)+')')
         eval('self.LaserPowerLeft_'+str(Numb)+'.setEnabled('+str(Label)+')')
@@ -341,10 +341,8 @@ class WaterCalibrationDialog(QDialog):
         self._connectSignalsSlots()
         self.ToInitializeVisual=1
         self._UpdateFigure()
-        if hasattr(self.MainWindow,'tower_number'):
-            self.setWindowTitle("Water Calibration: Tower "+'_'+str(self.MainWindow.tower_number))
-        else:
-            self.setWindowTitle('Water Calibration') 
+        self.setWindowTitle('Water Calibration: {}'.format(self.MainWindow.current_box))
+
     def _connectSignalsSlots(self):
         self.OpenLeft.clicked.connect(self._OpenLeft)
         self.OpenRight.clicked.connect(self._OpenRight)
@@ -384,7 +382,7 @@ class WaterCalibrationDialog(QDialog):
         self.SaveCalibrationPar.setChecked(False)
         self.Warning
         self.Warning.setText('Calibration parameters saved for calibration type: '+CalibrationType)
-        self.Warning.setStyleSheet("color: red;")
+        self.Warning.setStyleSheet("color: purple;")
 
     def _Showrecent(self):
         '''update the calibration figure'''
@@ -523,7 +521,7 @@ class WaterCalibrationDialog(QDialog):
         else:
             self.StartCalibratingLeft.setStyleSheet("background-color : none")
             self.Warning.setText('Calibration was terminated!')
-            self.Warning.setStyleSheet("color: red;")
+            self.Warning.setStyleSheet("color: purple;")
         N=0
         for current_valve_opentime in np.arange(float(self.TimeLeftMin.text()),float(self.TimeLeftMax.text())+0.0001,float(self.StrideLeft.text())):
             N=N+1
@@ -552,7 +550,7 @@ class WaterCalibrationDialog(QDialog):
                         if self.StartCalibratingLeft.isChecked():
                             # print the current calibration value
                             self.Warning.setText('You are calibrating Left valve: '+ str(round(float(current_valve_opentime),4))+'   Current cycle:'+str(i+1)+'/'+self.CycleCaliLeft.text())
-                            self.Warning.setStyleSheet("color: red;")
+                            self.Warning.setStyleSheet("color: purple;")
                             # set the valve open time
                             self.MainWindow.Channel.LeftValue(float(current_valve_opentime)*1000) 
                             # open the valve
@@ -565,7 +563,7 @@ class WaterCalibrationDialog(QDialog):
                 self.Continue.setStyleSheet("background-color : none")
                 if i==range(int(self.CycleCaliLeft.text()))[-1]:
                     self.Warning.setText('Finish calibrating left valve: '+ str(round(float(current_valve_opentime),4))+'\nPlease enter the \"weight after(mg)\" and click the \"Continue\" button to start calibrating the next value.\nOr enter a negative value to repeat the current calibration.')
-                self.Warning.setStyleSheet("color: red;")
+                self.Warning.setStyleSheet("color: purple;")
                 self.TubeWeightLeft.setEnabled(True)
                 self.label_26.setEnabled(True)
                 # Waiting for the continue button to be clicked
@@ -629,7 +627,7 @@ class WaterCalibrationDialog(QDialog):
         except Exception as e:
             logging.error(str(e))
             self.Warning.setText('Calibration is not complete! Parameters error!')
-            self.Warning.setStyleSheet("color: red;")
+            self.Warning.setStyleSheet("color: purple;")
         # set the default valve open time
         self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
         # enable the right valve calibration
@@ -687,7 +685,7 @@ class WaterCalibrationDialog(QDialog):
         else:
             self.StartCalibratingRight.setStyleSheet("background-color : none")
             self.Warning.setText('Calibration was terminated!')
-            self.Warning.setStyleSheet("color: red;")
+            self.Warning.setStyleSheet("color: purple;")
         N=0
         for current_valve_opentime in np.arange(float(self.TimeRightMin.text()),float(self.TimeRightMax.text())+0.0001,float(self.StrideRight.text())):
             N=N+1
@@ -717,7 +715,7 @@ class WaterCalibrationDialog(QDialog):
                         if self.StartCalibratingRight.isChecked():
                             # print the current calibration value
                             self.Warning.setText('You are calibrating Right valve: '+ str(round(float(current_valve_opentime),4))+'   Current cycle:'+str(i+1)+'/'+self.CycleCaliRight.text())
-                            self.Warning.setStyleSheet("color: red;")
+                            self.Warning.setStyleSheet("color: purple;")
                             # set the valve open time
                             self.MainWindow.Channel.RightValue(float(current_valve_opentime)*1000) 
                             # open the valve
@@ -730,7 +728,7 @@ class WaterCalibrationDialog(QDialog):
                 self.Continue.setStyleSheet("background-color : none")
                 if i==range(int(self.CycleCaliRight.text()))[-1]:
                     self.Warning.setText('Finish calibrating Right valve: '+ str(round(float(current_valve_opentime),4))+'\nPlease enter the \"weight after(mg)\" and click the \"Continue\" button to start calibrating the next value.\nOr enter a negative value to repeat the current calibration.')
-                    self.Warning.setStyleSheet("color: red;")
+                    self.Warning.setStyleSheet("color: purple;")
                 self.TubeWeightRight.setEnabled(True)
                 self.label_27.setEnabled(True)
                 # Waiting for the continue button to be clicked
@@ -794,7 +792,7 @@ class WaterCalibrationDialog(QDialog):
         except Exception as e:
             logging.error(str(e))
             self.Warning.setText('Calibration is not complete! Parameters error!')
-            self.Warning.setStyleSheet("color: red;")
+            self.Warning.setStyleSheet("color: purple;")
 
         # set the default valve open time
         self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
@@ -986,10 +984,10 @@ class CameraDialog(QDialog):
             except Exception as e:
                 logging.error(str(e))
                 self.WarningLabelOpenSave.setText('No logging folder found!')
-                self.WarningLabelOpenSave.setStyleSheet("color: red;")
+                self.WarningLabelOpenSave.setStyleSheet("color: purple;")
         else:
             self.WarningLabelOpenSave.setText('No logging folder found!')
-            self.WarningLabelOpenSave.setStyleSheet("color: red;")
+            self.WarningLabelOpenSave.setStyleSheet("color: purple;")
 
     def _RestartLogging(self):
         '''Restart the logging (create a new logging folder)'''
@@ -1003,7 +1001,7 @@ class CameraDialog(QDialog):
             # temporary logging
             self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging(self.MainWindow.temporary_video_folder)
         self.WarningLabelLogging.setText('Logging has restarted!')
-        self.WarningLabelLogging.setStyleSheet("color: red;")
+        self.WarningLabelLogging.setStyleSheet("color: purple;")
 
     def _AutoControl(self):
         '''Trigger the camera during the start of a new behavior session'''
@@ -1084,9 +1082,9 @@ class CameraDialog(QDialog):
             # start the video triggers
             self.MainWindow.Channel.CameraControl(int(1))
             self.MainWindow.WarningLabelCamera.setText('Camera is on!')
-            self.MainWindow.WarningLabelCamera.setStyleSheet("color: red;")
+            self.MainWindow.WarningLabelCamera.setStyleSheet("color: purple;")
             self.WarningLabelCameraOn.setText('Camera is on!')
-            self.WarningLabelCameraOn.setStyleSheet("color: red;")
+            self.WarningLabelCameraOn.setStyleSheet("color: purple;")
             self.WarningLabelLogging.setText('')
             self.WarningLabelLogging.setStyleSheet("color: None;")
             self.WarningLabelOpenSave.setText('')
@@ -1094,9 +1092,9 @@ class CameraDialog(QDialog):
             self.StartCamera.setStyleSheet("background-color : none")
             self.MainWindow.Channel.CameraControl(int(2))
             self.MainWindow.WarningLabelCamera.setText('Camera is off!')
-            self.MainWindow.WarningLabelCamera.setStyleSheet("color: red;")
+            self.MainWindow.WarningLabelCamera.setStyleSheet("color: purple;")
             self.WarningLabelCameraOn.setText('Camera is off!')
-            self.WarningLabelCameraOn.setStyleSheet("color: red;")
+            self.WarningLabelCameraOn.setStyleSheet("color: purple;")
             self.WarningLabelLogging.setText('')
             self.WarningLabelLogging.setStyleSheet("color: None;")
             self.WarningLabelOpenSave.setText('')
@@ -1105,7 +1103,7 @@ class CameraDialog(QDialog):
         '''Save the video data'''
         self.MainWindow._GetSaveFileName()
         video_folder=self.MainWindow.video_folder
-        video_folder=os.path.join(video_folder,self.MainWindow.Tower.currentText(),self.MainWindow.AnimalName.text())
+        video_folder=os.path.join(video_folder,self.MainWindow.current_box,self.MainWindow.AnimalName.text())
         if not os.path.exists(video_folder):
             os.makedirs(video_folder)
         base_name=os.path.splitext(os.path.basename(self.MainWindow.SaveFileJson))[0]
@@ -1116,7 +1114,7 @@ class CameraDialog(QDialog):
         bottom_camera_csv=os.path.join(video_folder,base_name+'_bottom_camera.csv')
         if is_file_in_use(side_camera_file) or is_file_in_use(bottom_camera_file) or is_file_in_use(side_camera_csv) or is_file_in_use(bottom_camera_csv):              
             self.WarningLabelFileIsInUse.setText('File is in use. Please restart the bonsai!')
-            self.WarningLabelFileIsInUse.setStyleSheet("color: red;")
+            self.WarningLabelFileIsInUse.setStyleSheet("color: purple;")
             return False
         else:
             self.WarningLabelFileIsInUse.setText('')
@@ -1132,7 +1130,7 @@ class CameraDialog(QDialog):
                 break
         if is_file_in_use(side_camera_file) or is_file_in_use(bottom_camera_file) or is_file_in_use(side_camera_csv) or is_file_in_use(bottom_camera_csv):
             self.WarningLabelFileIsInUse.setText('File is in use. Please restart the bonsai!')
-            self.WarningLabelFileIsInUse.setStyleSheet("color: red;")
+            self.WarningLabelFileIsInUse.setStyleSheet("color: purple;")
             return False
         else:
             self.WarningLabelFileIsInUse.setText('')
@@ -1311,7 +1309,7 @@ class LaserCalibrationDialog(QDialog):
             if self.CLP_RampingDown>0:
                 if self.CLP_RampingDown>self.CLP_CurrentDuration:
                     self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
-                    self.win.WarningLabel.setStyleSheet("color: red;")
+                    self.win.WarningLabel.setStyleSheet("color: purple;")
                 else:
                     Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
                     RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
@@ -1321,14 +1319,14 @@ class LaserCalibrationDialog(QDialog):
         elif self.CLP_Protocol=='Pulse':
             if self.CLP_PulseDur=='NA':
                 self.win.WarningLabel.setText('Pulse duration is NA!')
-                self.win.WarningLabel.setStyleSheet("color: red;")
+                self.win.WarningLabel.setStyleSheet("color: purple;")
             else:
                 self.CLP_PulseDur=float(self.CLP_PulseDur)
                 PointsEachPulse=int(self.CLP_SampleFrequency*self.CLP_PulseDur)
                 PulseIntervalPoints=int(1/self.CLP_Frequency*self.CLP_SampleFrequency-PointsEachPulse)
                 if PulseIntervalPoints<0:
                     self.win.WarningLabel.setText('Pulse frequency and pulse duration are not compatible!')
-                    self.win.WarningLabel.setStyleSheet("color: red;")
+                    self.win.WarningLabel.setStyleSheet("color: purple;")
                 TotalPoints=int(self.CLP_SampleFrequency*self.CLP_CurrentDuration)
                 PulseNumber=np.floor(self.CLP_CurrentDuration*self.CLP_Frequency) 
                 EachPulse=Amplitude*np.ones(PointsEachPulse)
@@ -1341,7 +1339,7 @@ class LaserCalibrationDialog(QDialog):
                         self.my_wave=np.concatenate((self.my_wave, WaveFormEachCycle), axis=0)
                 else:
                     self.win.WarningLabel.setText('Pulse number is less than 1!')
-                    self.win.WarningLabel.setStyleSheet("color: red;")
+                    self.win.WarningLabel.setStyleSheet("color: purple;")
                     return
                 self.my_wave=np.concatenate((self.my_wave, EachPulse), axis=0)
                 self.my_wave=np.concatenate((self.my_wave, np.zeros(TotalPoints-np.shape(self.my_wave)[0])), axis=0)
@@ -1353,7 +1351,7 @@ class LaserCalibrationDialog(QDialog):
             # add ramping down
                 if self.CLP_RampingDown>self.CLP_CurrentDuration:
                     self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
-                    self.win.WarningLabel.setStyleSheet("color: red;")
+                    self.win.WarningLabel.setStyleSheet("color: purple;")
                 else:
                     Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
                     RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
@@ -1362,7 +1360,7 @@ class LaserCalibrationDialog(QDialog):
             self.my_wave=np.append(self.my_wave,[0,0])
         else:
             self.win.WarningLabel.setText('Unidentified optogenetics protocol!')
-            self.win.WarningLabel.setStyleSheet("color: red;")
+            self.win.WarningLabel.setStyleSheet("color: purple;")
 
     def _GetLaserAmplitude(self):
         '''the voltage amplitude dependens on Protocol, Laser Power, Laser color, and the stimulation locations<>'''
@@ -1374,7 +1372,7 @@ class LaserCalibrationDialog(QDialog):
             self.CurrentLaserAmplitude=[self.CLP_InputVoltage,self.CLP_InputVoltage]
         else:
             self.win.WarningLabel.setText('No stimulation location defined!')
-            self.win.WarningLabel.setStyleSheet("color: red;")
+            self.win.WarningLabel.setStyleSheet("color: purple;")
    
     # get training parameters
     def _GetTrainingParameters(self,win):
@@ -1438,12 +1436,12 @@ class LaserCalibrationDialog(QDialog):
         self.Warning.setText('')
         if self.Location_1.currentText()=='Both':
             self.Warning.setText('Data not captured! Please choose left or right, not both!')
-            self.Warning.setStyleSheet("color: red;")
+            self.Warning.setStyleSheet("color: purple;")
             self.Warning.setAlignment(Qt.AlignCenter)
             return
         if self.LaserPowerMeasured.text()=='':
             self.Warning.setText('Data not captured! Please enter power measured!')
-            self.Warning.setStyleSheet("color: red;")
+            self.Warning.setStyleSheet("color: purple;")
             self.Warning.setAlignment(Qt.AlignCenter)
             return
         for attr_name in dir(self):
@@ -1480,7 +1478,7 @@ class LaserCalibrationDialog(QDialog):
         except Exception as e:
             logging.error(str(e))
             self.Warning.setText('Data not saved! Please Capture the power first!')
-            self.Warning.setStyleSheet("color: red;")
+            self.Warning.setStyleSheet("color: purple;")
             self.Warning.setAlignment(Qt.AlignCenter)
             return
         # delete invalid indices
@@ -1643,7 +1641,7 @@ class LaserCalibrationDialog(QDialog):
         self.Warning.setText('')
         if LaserCalibrationResults=={}:
             self.Warning.setText('Data not saved! Please enter power measured!')
-            self.Warning.setStyleSheet("color: red;")
+            self.Warning.setStyleSheet("color: purple;")
             self.Warning.setAlignment(Qt.AlignCenter)
             return
         self.MainWindow.LaserCalibrationResults=LaserCalibrationResults
@@ -1827,12 +1825,11 @@ class AutoTrainDialog(QDialog):
             self.label_curriculum_name.setText('subject not found')
             self.label_last_actual_stage.setText('subject not found')
             self.label_next_stage_suggested.setText('subject not found')
-            self.label_subject_id.setStyleSheet("color: red;")
+            self.label_subject_id.setStyleSheet("color: purple;")
             
             # disable some stuff
             self.checkBox_override_stage.setChecked(False)
             self.checkBox_override_stage.setEnabled(False)
-            self._clear_layout(self.horizontalLayout_diagram)
             self.pushButton_apply_auto_train_paras.setEnabled(False)
             
             # override curriculum is checked by default and disabled
@@ -1871,10 +1868,11 @@ class AutoTrainDialog(QDialog):
             else:
                 self.label_last_actual_stage.setText('irrelevant (curriculum overridden)')
                 self.label_next_stage_suggested.setText('irrelevant')
-                self.label_next_stage_suggested.setStyleSheet("color: red;")
+                self.label_next_stage_suggested.setStyleSheet("color: purple;")
                 
                 # Set override stage automatically
                 self.checkBox_override_stage.setChecked(True)
+                self.checkBox_override_stage.setEnabled(True)
             
             # update more info
             self.label_curriculum_name.setText(
@@ -1889,11 +1887,17 @@ class AutoTrainDialog(QDialog):
             # disable apply curriculum                        
             self.pushButton_apply_curriculum.setEnabled(False)
             self._remove_border_curriculum_selection()
+            
+            # Reset override curriculum
+            self.checkBox_override_curriculum.setChecked(False)
+            self.checkBox_override_curriculum.setEnabled(True)
+
 
                     
         # Update UI
         self._update_available_training_stages()
         self._update_stage_to_apply()
+        
         
         # Update df_auto_train_manager and df_curriculum_manager
         self._show_auto_training_manager()
@@ -2066,26 +2070,13 @@ class AutoTrainDialog(QDialog):
         # Retrieve svgs
         self.svg_rules = self.selected_curriculum['diagram_rules_name']
         self.svg_paras = self.selected_curriculum['diagram_paras_name']
-        
-        # Render svgs with KeepAspectRatio
-        svgWidget_rules = QSvgWidget(self.svg_rules)
-        svgWidget_rules.renderer().setAspectRatioMode(Qt.KeepAspectRatio)
-        
-        svgWidget_paras = QSvgWidget(self.svg_paras)
-        svgWidget_paras.renderer().setAspectRatioMode(Qt.KeepAspectRatio)
-        
-        # Add the SVG widgets to the layout
-        layout = self.horizontalLayout_diagram
-        self._clear_layout(layout) 
-        layout.addWidget(svgWidget_rules)
-        layout.addWidget(svgWidget_paras)
-        
+                        
     def _show_rules_in_browser(self):
-        if self.svg_rules is not None and self.curriculum_in_use is not None:
+        if self.svg_rules is not None:
             webbrowser.open(self.svg_rules)
             
     def _show_paras_in_browser(self):
-        if self.svg_paras is not None and self.curriculum_in_use is not None:
+        if self.svg_paras is not None:
             webbrowser.open(self.svg_paras)
             
     def _show_all_training_history(self):
@@ -2135,7 +2126,9 @@ class AutoTrainDialog(QDialog):
             self.stage_in_use = 'unknown training stage'
         
         self.pushButton_apply_auto_train_paras.setText(
-            f"Apply and lock\n{get_curriculum_string(self.curriculum_in_use)}\n{self.stage_in_use}"
+            f"Apply and lock\n"
+            + '\n'.join(get_curriculum_string(self.curriculum_in_use).split('(')).strip(')') 
+            + f"\n{self.stage_in_use}"
         )
                 
     def _apply_curriculum(self):
@@ -2143,8 +2136,11 @@ class AutoTrainDialog(QDialog):
         if not hasattr(self, 'selected_curriculum') or self.selected_curriculum is None:
             QMessageBox.critical(self, "Error", "Please select a curriculum!")
             return
-        if self.df_this_mouse.empty:
         
+        # Always enable override stage
+        self.checkBox_override_stage.setEnabled(True)
+        
+        if self.df_this_mouse.empty:
             # -- This is a new mouse, we add the first dummy session --
             # Update global curriculum_in_use
             self.curriculum_in_use = self.selected_curriculum['curriculum']
@@ -2178,7 +2174,6 @@ class AutoTrainDialog(QDialog):
         
             # Refresh the GUI
             self.update_auto_train_fields(subject_id=self.selected_subject_id)
-
         else:
             # -- This is an existing mouse, we are changing the curriculum --
             # Not sure whether we should leave this option open. But for now, I allow this freedom.            
@@ -2239,17 +2234,19 @@ class AutoTrainDialog(QDialog):
             for widget in self.widgets_locked_by_auto_train:
                 widget.setEnabled(False)
                 # set the border color to green
-                widget.setStyleSheet("border: 2px solid  rgb(0, 189, 22);")
+                widget.setStyleSheet("border: 2px solid  rgb(0, 214, 103);")
             self.MainWindow.TrainingParameters.setStyleSheet(
                 '''QGroupBox {
-                        border: 5px solid  rgb(0, 189, 22)
+                        border: 5px solid  rgb(0, 214, 103)
                     }
                 '''
             )
             self.MainWindow.label_auto_train_stage.setText(
-                f"{get_curriculum_string(self.curriculum_in_use)}\n{self.stage_in_use}"
+                '\n'.join(get_curriculum_string(self.curriculum_in_use).split('(')).strip(')') 
+                + f", {self.stage_in_use}"
             )
-
+            self.MainWindow.label_auto_train_stage.setStyleSheet("color: rgb(0, 214, 103);")
+            
             # disable override
             self.checkBox_override_stage.setEnabled(False)
             self.comboBox_override_stage.setEnabled(False)
@@ -2267,7 +2264,8 @@ class AutoTrainDialog(QDialog):
                 # clear style
                 widget.setStyleSheet("")
             self.MainWindow.TrainingParameters.setStyleSheet("")
-            self.MainWindow.label_auto_train_stage.setText("")
+            self.MainWindow.label_auto_train_stage.setText("off curriculum")
+            self.MainWindow.label_auto_train_stage.setStyleSheet("color: purple;")
 
 
             # enable override

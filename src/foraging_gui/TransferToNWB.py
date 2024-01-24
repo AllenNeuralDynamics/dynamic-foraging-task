@@ -55,7 +55,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
 
     ### session related information ###
     nwbfile = NWBFile(
-        session_description='Session end time:'+obj.Other_CurrentTime+'  Give extra water(ml):'+obj.ExtraWater+'  Training tower:'+obj.Tower,  
+        session_description='Session end time:'+obj.Other_CurrentTime+'  Give extra water(ml):'+obj.ExtraWater+'  box:'+obj.box,  
         identifier=str(uuid4()),  # required
         session_start_time= session_start_timeC,  # required
         session_id=os.path.basename(fname),  # optional
