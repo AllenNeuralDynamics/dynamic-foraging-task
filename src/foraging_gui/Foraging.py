@@ -217,7 +217,7 @@ class Window(QMainWindow):
         '''
         # set warm up parameters
         if self.warmup.currentText()=='on':
-            # get parameters before the warm up is on
+            # get parameters before the warm up is on;WB stands for Warmup backup, which are parameters before warm-up.
             self._GetTrainingParameters(prefix='WB_')
             self.warm_min_trial.setEnabled(True)
             self.warm_min_finish_ratio.setEnabled(True)
