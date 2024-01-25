@@ -80,6 +80,10 @@ class Window(QMainWindow):
             self.default_warning_color="color: red;"
             self.default_text_color='color: red;'
             self.default_text_background_color='background-color: red;'
+        else:
+            self.default_warning_color="color: red;"
+            self.default_text_color='color: red;'
+            self.default_text_background_color='background-color: red;'
 
 
         self.StartANewSession=1 # to decide if should start a new session
@@ -2043,12 +2047,19 @@ class Window(QMainWindow):
                 logging.error(str(e))
                 # delete GeneratedTrials
                 del self.GeneratedTrials
-                
             # show basic information
-            if 'info_task' in Obj:
-                self.label_info_task.setTitle(Obj['info_task'])
-            if 'info_other_perf' in Obj:
-                self.label_info_performance_others.setText(Obj['info_other_perf'])
+            if self.default_ui=='ForagingGUI.ui':  
+                if 'info_task' in Obj:
+                    self.label_info_task.setTitle(Obj['info_task'])
+                if 'info_other_perf' in Obj:
+                    self.label_info_performance_others.setText(Obj['info_other_perf'])
+            elif self.default_ui=='ForagingGUI_Ephys.ui':
+                if 'Other_inforTitle' in Obj:
+                    self.infor.setTitle(Obj['Other_inforTitle'])
+                if 'Other_BasicTitle' in Obj:
+                    self.Basic.setTitle(Obj['Other_BasicTitle'])
+                if 'Other_BasicText' in Obj:
+                    self.ShowBasic.setText(Obj['Other_BasicText'])
                 
             # Set newscale position to last position
             if 'B_NewscalePositions' in Obj:
