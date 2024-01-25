@@ -1357,6 +1357,7 @@ class GenerateTrials():
                 Channel1.start(1)
                 self.CurrentStartType=1
                 self.B_StartType.append(self.CurrentStartType)
+
     def _CheckSimulationSession(self):
         '''To check if this is a simulation session'''
         if self.win.actionWin_stay_lose_switch.isChecked()==True or  self.win.actionRandom_choice.isChecked()==True:
