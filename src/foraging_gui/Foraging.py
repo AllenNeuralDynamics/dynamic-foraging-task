@@ -70,13 +70,19 @@ class Window(QMainWindow):
         self._GetWaterCalibration()
         
         uic.loadUi(self.default_ui, self)
+        if self.default_ui=='ForagingGUI.ui':
+            self.label_date.setText(str(date.today()))
+            self.default_warning_color=self.default_color
+        elif self.default_ui=='ForagingGUI_Ephys.ui':
+            self.Visualization.setTitle(str(date.today()))
+            self.default_warning_color="color: red;"
+
 
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
         self.ANewTrial=1 # permission to start a new trial
         self.UpdateParameters=1 # permission to update parameters
-        self.label_date.setText(str(date.today()))
         self.loggingstarted=-1
         
         # Connect to Bonsai
@@ -399,7 +405,7 @@ class Window(QMainWindow):
                     self.StageSerialNum.setCurrentIndex(index)
                 else:
                     self.Warning_Newscale.setText('Default Newscale not found!')
-                    self.Warning_Newscale.setStyleSheet("color: purple;")
+                    self.Warning_Newscale.setStyleSheet(self.default_warning_color)
         except Exception as e:
             logging.error(str(e))
 
@@ -439,7 +445,7 @@ class Window(QMainWindow):
             except Exception as e:
                 logging.error(str(e))
                 self.WarningLabelInitializeBonsai.setText('Please open bonsai!')
-                self.WarningLabelInitializeBonsai.setStyleSheet("color: purple;")
+                self.WarningLabelInitializeBonsai.setStyleSheet(self.default_warning_color)
                 self.InitializeBonsaiSuccessfully=0
 
     def _ReconnectBonsai(self):
@@ -588,7 +594,7 @@ class Window(QMainWindow):
         except Exception as e:
             logging.error('Could not load settings file at: {}, {}'.format(self.SettingFile,str(e)))
             self.WarningLabel.setText('Could not load settings file!')
-            self.WarningLabel.setStyleSheet("color: purple;")
+            self.WarningLabel.setStyleSheet(self.default_color)
             raise e
 
         # If any settings are missing, use the default values
@@ -693,7 +699,7 @@ class Window(QMainWindow):
         # Could not connect and we timed out
         logging.info('Could not connect to bonsai with max wait time {} seconds'.format(max_wait))
         self.WarningLabel_2.setText('Started without bonsai connected!')
-        self.WarningLabel_2.setStyleSheet("color: purple;")
+        self.WarningLabel_2.setStyleSheet(self.default_color)
 
     def _ConnectOSC(self):
         '''
@@ -1050,7 +1056,7 @@ class Window(QMainWindow):
         with open(self.TrainingStageFiles, "w") as file:
             json.dump(self.TrainingStagePar, file,indent=4) 
         self.WarningLabel_SaveTrainingStage.setText('Training stage parameters were saved!')
-        self.WarningLabel_SaveTrainingStage.setStyleSheet("color: purple;")
+        self.WarningLabel_SaveTrainingStage.setStyleSheet(self.default_color)
         self.SaveTraining.setChecked(False)
 
     def _LoadTrainingPar(self):
@@ -1704,7 +1710,7 @@ class Window(QMainWindow):
             if response==QMessageBox.Yes:
                 pass
                 self.WarningLabel.setText('Saving without weight or extra water!')
-                self.WarningLabel.setStyleSheet("color: purple;")
+                self.WarningLabel.setStyleSheet(self.default_color)
                 logging.info('saving without weight or extra water')
             elif response==QMessageBox.No:
                 logging.info('saving declined by user')
@@ -1731,7 +1737,7 @@ class Window(QMainWindow):
             self.SaveFile=Names[0]
         if self.SaveFile == '':
             self.WarningLabel.setText('Discard saving!')
-            self.WarningLabel.setStyleSheet("color: purple;")
+            self.WarningLabel.setStyleSheet(self.default_color)
         if self.SaveFile != '':
             if hasattr(self, 'GeneratedTrials'):
                 if hasattr(self.GeneratedTrials, 'Obj'):
@@ -2141,11 +2147,11 @@ class Window(QMainWindow):
                 ser.write(b'c')
                 ser.close()
                 self.TeensyWarning.setText('Start excitation!')
-                self.TeensyWarning.setStyleSheet("color: purple;")
+                self.TeensyWarning.setStyleSheet(self.default_color)
             except Exception as e:
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: start excitation!')
-                self.TeensyWarning.setStyleSheet("color: purple;")
+                self.TeensyWarning.setStyleSheet(self.default_color)
         else:
             self.StartExcitation.setStyleSheet("background-color : none")
             try:
@@ -2154,11 +2160,11 @@ class Window(QMainWindow):
                 ser.write(b's')
                 ser.close()
                 self.TeensyWarning.setText('Stop excitation!')
-                self.TeensyWarning.setStyleSheet("color: purple;")
+                self.TeensyWarning.setStyleSheet(self.default_color)
             except Exception as e:
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: stop excitation!')
-                self.TeensyWarning.setStyleSheet("color: purple;")
+                self.TeensyWarning.setStyleSheet(self.default_color)
     
     def _StartBleaching(self):
         if self.StartBleaching.isChecked():
@@ -2169,11 +2175,11 @@ class Window(QMainWindow):
                 ser.write(b'd')
                 ser.close()
                 self.TeensyWarning.setText('Start bleaching!')
-                self.TeensyWarning.setStyleSheet("color: purple;")
+                self.TeensyWarning.setStyleSheet(self.default_color)
             except Exception as e:
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: start bleaching!')
-                self.TeensyWarning.setStyleSheet("color: purple;")
+                self.TeensyWarning.setStyleSheet(self.default_color)
         else:
             self.StartBleaching.setStyleSheet("background-color : none")
             try:
@@ -2182,11 +2188,11 @@ class Window(QMainWindow):
                 ser.write(b's')
                 ser.close()
                 self.TeensyWarning.setText('Stop bleaching!')
-                self.TeensyWarning.setStyleSheet("color: purple;")
+                self.TeensyWarning.setStyleSheet(self.default_color)
             except Exception as e:
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: stop bleaching!')
-                self.TeensyWarning.setStyleSheet("color: purple;")
+                self.TeensyWarning.setStyleSheet(self.default_color)
 
     def _AutoReward(self):
         if self.AutoReward.isChecked():
@@ -2268,12 +2274,12 @@ class Window(QMainWindow):
         stall_duration = 5*60 
         if self.ANewTrial==0:
             self.WarningLabel.setText('Waiting for the finish of the last trial!')
-            self.WarningLabel.setStyleSheet("color: purple;")
+            self.WarningLabel.setStyleSheet(self.default_color)
             while 1:
                 QApplication.processEvents()
                 if self.ANewTrial==1:
                     self.WarningLabel.setText('')
-                    self.WarningLabel.setStyleSheet("color: purple;")
+                    self.WarningLabel.setStyleSheet(self.default_color)
                     break
                 elif (time.time() - start_time) > stall_duration*stall_iteration:
                     elapsed_time = int(np.floor(stall_duration*stall_iteration/60))
@@ -2688,7 +2694,7 @@ class Window(QMainWindow):
                 if suggested_water>3.5:
                     suggested_water=3.5
                     self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and LAS should be alerted!')
-                    self.TotalWaterWarning.setStyleSheet("color: purple;")
+                    self.TotalWaterWarning.setStyleSheet(self.default_color)
                 else:
                     self.TotalWaterWarning.setText('')
                 self.SuggestedWater.setText(str(np.round(suggested_water,3)))
