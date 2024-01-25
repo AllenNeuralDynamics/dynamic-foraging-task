@@ -1476,20 +1476,6 @@ class Window(QMainWindow):
             if self.Task.currentText() in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
                 self.RewardPairs=self.RewardFamilies[int(self.RewardFamily.text())-1][:int(self.RewardPairsN.text())]
                 self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.BaseRewardSum.text())
-                if hasattr(self, 'GeneratedTrials'):
-                    self.ShowRewardPairs.setText('Reward pairs:\n'
-                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
-                                                 + '\n\n'
-                                                 + 'Current pair:\n'
-                                                 + str(np.round(
-                                                     self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2))) 
-                    self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
-                else:
-                    self.ShowRewardPairs.setText('Reward pairs:\n'
-                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
-                                                 +'\n\n'+'Current pair:\n ') 
-                    self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
-                    
             elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
                 input_string=self.UncoupledReward.text()
                 # remove any square brackets and spaces from the string
@@ -1500,19 +1486,22 @@ class Window(QMainWindow):
                 num_list = [float(num) for num in num_list]
                 # create a numpy array from the list of numbers
                 self.RewardProb=np.array(num_list)
+            if self.Task.currentText() in ['Coupled Baiting','Coupled Without Baiting','RewardN','Uncoupled Baiting','Uncoupled Without Baiting']:
                 if hasattr(self, 'GeneratedTrials'):
                     self.ShowRewardPairs.setText('Reward pairs:\n'
                                                  + str(np.round(self.RewardProb,2)).replace('\n', ',')
                                                  + '\n\n'
                                                  +'Current pair:\n'
-                                                 + str(np.round(self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2))) 
-                    self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
+                                                 + str(np.round(self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2)))
+                    if self.default_ui=='ForagingGUI.ui':
+                        self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
                 else:
                     self.ShowRewardPairs.setText('Reward pairs:\n'
                                                  + str(np.round(self.RewardProb,2)).replace('\n', ',')
                                                  + '\n\n'
                                                  +'Current pair:\n ') 
-                    self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
+                    if self.default_ui=='ForagingGUI.ui':
+                        self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
         except Exception as e:
             # Catch the exception and log error information
             logging.error(str(e))
