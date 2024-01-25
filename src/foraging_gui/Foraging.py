@@ -43,7 +43,7 @@ class Window(QMainWindow):
     def __init__(self, parent=None,box_number=1):
         logging.info('Creating Window')
         super().__init__(parent)
-        uic.loadUi('ForagingGUI.ui', self)
+        
         
         self.box_number=box_number
         mapper = {
@@ -68,6 +68,8 @@ class Window(QMainWindow):
         # Load Laser and Water Calibration Files
         self._GetLaserCalibration()
         self._GetWaterCalibration()
+        
+        uic.loadUi(self.default_ui, self)
 
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
@@ -569,6 +571,7 @@ class Window(QMainWindow):
             'newscale_serial_num_box3':'',
             'newscale_serial_num_box4':'',
             'show_log_info_in_console':False,
+            'default_ui':'ForagingGUI.ui'
         }
         
         # Try to load the settings file        
@@ -608,7 +611,7 @@ class Window(QMainWindow):
         self.newscale_serial_num_box2=Settings['newscale_serial_num_box2']
         self.newscale_serial_num_box3=Settings['newscale_serial_num_box3']
         self.newscale_serial_num_box4=Settings['newscale_serial_num_box4']
-        
+        self.default_ui=Settings['default_ui']
         # Also stream log info to the console if enabled
         if  Settings['show_log_info_in_console']:
             logger = logging.getLogger()
