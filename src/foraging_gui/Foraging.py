@@ -72,10 +72,14 @@ class Window(QMainWindow):
         uic.loadUi(self.default_ui, self)
         if self.default_ui=='ForagingGUI.ui':
             self.label_date.setText(str(date.today()))
-            self.default_warning_color=self.default_color
+            self.default_warning_color="color: purple;"
+            self.default_text_color='color: purple;'
+            self.default_text_background_color='background-color: purple;'
         elif self.default_ui=='ForagingGUI_Ephys.ui':
             self.Visualization.setTitle(str(date.today()))
             self.default_warning_color="color: red;"
+            self.default_text_color='color: red;'
+            self.default_text_background_color='background-color: red;'
 
 
         self.StartANewSession=1 # to decide if should start a new session
@@ -1201,11 +1205,11 @@ class Window(QMainWindow):
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                         self.Continue=0
                         if child.objectName() in {'Experimenter', 'AnimalName', 'UncoupledReward', 'WeightBefore', 'WeightAfter', 'ExtraWater'}:
-                            child.setStyleSheet('color: purple;')
+                            child.setStyleSheet(self.default_text_color)
                             self.Continue=1
                         if child.text()=='': # If empty, change background color and wait for confirmation
                             self.UpdateParameters=0
-                            child.setStyleSheet('background-color: purple;')
+                            child.setStyleSheet(self.default_text_background_color)
                             self.Continue=1
                         if child.objectName() in {'RunLength','WindowSize','StepSize'}:
                             if child.text()=='':
@@ -1214,7 +1218,7 @@ class Window(QMainWindow):
                                 child.setStyleSheet('background-color: white;')
                         if self.Continue==1:
                             continue
-                        child.setStyleSheet('color: purple;')
+                        child.setStyleSheet(self.default_text_color)
                         try:
                             # it's valid float
                             float(child.text())
