@@ -177,7 +177,7 @@ class GenerateTrials():
         '''calculate the metrics related to the warm up and decide if we should turn on the warm up'''
         TP_warm_windowsize=int(self.TP_warm_windowsize)
         B_AnimalResponseHistory_window=self.B_AnimalResponseHistory[-TP_warm_windowsize:]
-        finish_trial=B_AnimalResponseHistory_window.shape[0]
+        finish_trial=B_AnimalResponseHistory_window.shape[0] # the warmup is only turned on at the beginning of the session, thus the number of finished trials is equal to the number of trials with warmup on
         left_choices = np.count_nonzero(B_AnimalResponseHistory_window == 0)
         right_choices = np.count_nonzero(B_AnimalResponseHistory_window == 1)
         no_responses = np.count_nonzero(B_AnimalResponseHistory_window == 2)
@@ -189,7 +189,7 @@ class GenerateTrials():
             choice_ratio=0
         else:
             choice_ratio=right_choices/(left_choices+right_choices)
-        if finish_trial>=float(self.TP_warm_min_trial) and finish_ratio>=float(self.TP_warm_finish_ratio) and abs(choice_ratio-0.5)<=float(self.TP_warm_choice_ratio_bias):
+        if finish_trial>=float(self.TP_warm_min_trial) and finish_ratio>=float(self.TP_warm_min_finish_ratio) and abs(choice_ratio-0.5)<=float(self.TP_warm_max_choice_ratio_bias):
             # turn off the warm up
             warmup=0
         else:
