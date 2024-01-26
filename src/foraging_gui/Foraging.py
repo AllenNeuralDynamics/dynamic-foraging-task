@@ -1173,17 +1173,18 @@ class Window(QMainWindow):
                         elif isinstance(child, QtWidgets.QSpinBox):
                             child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
                         else:
-                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                    '''
+                            if not child.objectName()=='':
+                                child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                     else:
                         # If this parameter changed, add the change to the log
-                        old = getattr(Parameters,'TP_'+child.objectName())
-                        if old != '':
-                            old = float(old)
-                        new = float(child.text())
-                        if new != old:
-                            logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
-                    '''
+                        if not child.objectName()=='':
+                            old = getattr(Parameters,'TP_'+child.objectName())
+                            if old != '':
+                                old = float(old)
+                            new = float(child.text())
+                            if new != old:
+                                logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
+
                     
             # update the current training parameters
             self._GetTrainingParameters()
