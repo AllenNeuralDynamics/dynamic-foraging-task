@@ -1050,7 +1050,8 @@ class Window(QMainWindow):
                         elif isinstance(child, QtWidgets.QSpinBox):
                             child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
                         else:
-                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))
+                            if not child.objectName()=='':
+                                child.setText(getattr(Parameters, 'TP_'+child.objectName()))
 
 
             # update the current training parameters
