@@ -1252,7 +1252,7 @@ class GenerateTrials():
         ConditionsOn=[]
         Probabilities=[]
         for attr_name in dir(self):
-            if attr_name.startswith('TP_Laser_'):
+            if attr_name in ['TP_Laser_1','TP_Laser_2','TP_Laser_3','TP_Laser_4']:
                 if getattr(self, attr_name) !='NA':
                     parts = attr_name.split('_')
                     ConditionsOn.append(parts[-1])
