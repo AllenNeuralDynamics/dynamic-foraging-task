@@ -2697,7 +2697,7 @@ class Window(QMainWindow):
                 # maximum 3.5ml
                 if suggested_water>3.5:
                     suggested_water=3.5
-                    self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and LAS should be alerted!')
+                    self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and \n LAS should be alerted!')
                     self.TotalWaterWarning.setStyleSheet(self.default_warning_color)
                 else:
                     self.TotalWaterWarning.setText('')
