@@ -1324,7 +1324,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Disabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM14</harp:PortName>
+                      <harp:PortName>COM5</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject">
@@ -7053,7 +7053,7 @@
                         <ffmpeg:Suffix>None</ffmpeg:Suffix>
                         <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                         <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                        <ffmpeg:OutputArguments>-vcodec libx264 -crf 23 -preset medium -threads 10</ffmpeg:OutputArguments>
+                        <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset medium</ffmpeg:OutputArguments>
                       </Combinator>
                     </Expression>
                     <Expression xsi:type="SubscribeSubject">
@@ -7111,7 +7111,7 @@
                         <ffmpeg:Suffix>None</ffmpeg:Suffix>
                         <ffmpeg:Overwrite>false</ffmpeg:Overwrite>
                         <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                        <ffmpeg:OutputArguments>-vcodec libx264 -crf 23  -preset medium  -threads 10</ffmpeg:OutputArguments>
+                        <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset medium</ffmpeg:OutputArguments>
                       </Combinator>
                     </Expression>
                   </Nodes>
