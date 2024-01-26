@@ -1173,18 +1173,19 @@ class Window(QMainWindow):
                         elif isinstance(child, QtWidgets.QSpinBox):
                             child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
                         else:
-                            if not child.objectName()=='':
+                            if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
                                 child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                     else:
-                        # If this parameter changed, add the change to the log
-                        if not child.objectName()=='':
+                        if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
+                            # If this parameter changed, add the change to the log
                             old = getattr(Parameters,'TP_'+child.objectName())
                             if old != '':
                                 old = float(old)
                             new = float(child.text())
                             if new != old:
                                 logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
-
+                        else:
+                            logging.error('Could not evaluate parameter change: "{}","{}" '.format(child.objectName(),child.text()))
                     
             # update the current training parameters
             self._GetTrainingParameters()
@@ -2796,6 +2797,14 @@ def start_gui_log_file(box_number):
     logging.info('Starting logfile!')
     logging.captureWarnings(True)
 
+def log_git_hash():
+    try:
+        git_hash = subprocess.check_output(['git','rev-parse','--short', 'HEAD']).decode('ascii').strip()
+        git_branch = subprocess.check_output(['git','branch','--show-current']).decode('ascii').strip()
+        logging.info('Current git commit branch, hash: {}, {}'.format(git_branch,git_hash))
+    except Exception as e:
+        logging.error('Could not log git branch and hash: {}'.format(str(e)))
+
 def excepthook(exc_type, exc_value, exc_tb):
     '''
         excepthook will be called when the GUI encounters an uncaught exception
@@ -2817,6 +2826,7 @@ if __name__ == "__main__":
 
     # Start logging
     start_gui_log_file(box_number)
+    log_git_hash()
 
     # Formating GUI graphics
     logging.info('Setting QApplication attributes')
