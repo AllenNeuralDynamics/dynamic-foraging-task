@@ -280,7 +280,8 @@ class Window(QMainWindow):
         parameters={}
         for attr_name in dir(self):
             if attr_name.startswith('WarmupBackup_') and attr_name!='WarmupBackup_' and attr_name!='WarmupBackup_warmup':
-                parameters[attr_name.strip('WarmupBackup_')]=getattr(self,attr_name)
+                parameters[attr_name.replace('WarmupBackup_','')]=getattr(self,attr_name)
+                print(attr_name.strip('WarmupBackup_'))
         widget_dict = {w.objectName(): w for w in self.TrainingParameters.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
         try:
             for key in widget_dict.keys():
