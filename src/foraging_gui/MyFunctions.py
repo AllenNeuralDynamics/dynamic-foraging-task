@@ -172,6 +172,8 @@ class GenerateTrials():
             # set warm up to off
             index=self.win.warmup.findText('off')
             self.win.warmup.setCurrentIndex(index)
+            self.win._warmup()
+            self.win.keyPressEvent()
 
     def _get_warmup_state(self):
         '''calculate the metrics related to the warm up and decide if we should turn on the warm up'''
