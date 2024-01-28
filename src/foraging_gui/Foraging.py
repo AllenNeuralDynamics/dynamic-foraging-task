@@ -260,6 +260,8 @@ class Window(QMainWindow):
             self.Multiplier.setText('0.8')
             self.Unrewarded.setText('0')
             self.Ignored.setText('0')
+            # turn advanced block auto off
+            self.AdvancedBlockAuto.setCurrentIndex(self.AdvancedBlockAuto.findText('off'))
             self._ShowRewardPairs()
         elif self.warmup.currentText()=='off':
             # set parameters back to the previous parameters before warm up
