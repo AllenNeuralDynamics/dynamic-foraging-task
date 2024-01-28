@@ -105,8 +105,6 @@ class GenerateTrials():
         self._CheckAutoWater()
         # check block transition
         self._CheckBlockTransition()
-        # check warm up
-        self._CheckWarmUp()
         # Get reward probability and other trial related parameters
         self._SelectTrainingParameter()
         # check if bait is permitted at the current trial
@@ -122,6 +120,8 @@ class GenerateTrials():
         self._CheckStop()
         # optogenetics section
         self._PerformOptogenetics(Channel4)
+        # check warm up for the next trial
+        self._CheckWarmUp()
         # finish to generate the next trial
         self.GeneFinish=1
     def _PerformOptogenetics(self,Channel4):
