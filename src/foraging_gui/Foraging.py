@@ -1149,10 +1149,9 @@ class Window(QMainWindow):
                 for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
                     if child.objectName()=='qt_spinbox_lineedit':
                         continue
-                    if child.isEnabled()==False:
-                        continue
                     child.setStyleSheet('color: black;')
                     child.setStyleSheet('background-color: white;')
+                    self._Task()
                     if child.objectName()=='AnimalName' and child.text()=='':
                         child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
@@ -1371,8 +1370,8 @@ class Window(QMainWindow):
             self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 128, 80, 20))
             self.label_26.setGeometry(QtCore.QRect(929, 128, 146, 16))
             # set block length to the default value
-            self.BlockMin.setText('20')
-            self.BlockMax.setText('60')
+            #self.BlockMin.setText('20')
+            #self.BlockMax.setText('60')
         elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
             border_color = "rgb(100, 100, 100,80)"
             border_style = "1px solid " + border_color
@@ -1418,7 +1417,7 @@ class Window(QMainWindow):
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
             # change name of min reward each block
             self.label_13.setText('min reward each block=')
-            self.BlockMinReward.setText('0')
+            #self.BlockMinReward.setText('0')
             # change the position of RewardN=/min reward each block=
             self.BlockMinReward.setGeometry(QtCore.QRect(863, 128, 80, 20))
             self.label_13.setGeometry(QtCore.QRect(711, 128, 146, 16))
@@ -1426,8 +1425,8 @@ class Window(QMainWindow):
             self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 128, 80, 20))
             self.label_26.setGeometry(QtCore.QRect(929, 128, 146, 16))
             # set block length to the default value
-            self.BlockMin.setText('20')
-            self.BlockMax.setText('60')
+            #self.BlockMin.setText('20')
+            #self.BlockMax.setText('60')
         elif self.Task.currentText() in ['RewardN']:
             self.label_6.setEnabled(True)
             self.label_7.setEnabled(True)
