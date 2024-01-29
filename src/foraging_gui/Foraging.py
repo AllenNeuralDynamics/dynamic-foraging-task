@@ -2761,4 +2761,3 @@ if __name__ == "__main__":
     # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())
 
-
