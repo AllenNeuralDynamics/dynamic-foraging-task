@@ -1362,7 +1362,7 @@ class Window(QMainWindow):
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
             # change name of min reward each block
             self.label_13.setText('min reward each block=')
-            self.BlockMinReward.setText('0')
+            # self.BlockMinReward.setText('0')
             # change the position of RewardN=/min reward each block=
             self.BlockMinReward.setGeometry(QtCore.QRect(863, 128, 80, 20))
             self.label_13.setGeometry(QtCore.QRect(711, 128, 146, 16))
