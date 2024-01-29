@@ -119,8 +119,12 @@ class Window(QMainWindow):
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
         
-        #if not self.start_bonsai_ide:
-        #    self._ReconnectBonsai()   
+        if not self.start_bonsai_ide:
+            '''
+                When starting bonsai without the IDE the connection is always unstable.
+                Reconnecting solves the issue
+            '''
+            self._ReconnectBonsai()   
         logging.info('Start up complete')
 
     def connectSignalsSlots(self):
@@ -667,33 +671,6 @@ class Window(QMainWindow):
             self.request_port2 = 4003
             self.request_port3 = 4004
             self.request_port4 = 4005
-
-
-        # Race condition creates instabilities, force close any open connections
-        try:
-            self.client.close()
-        except Exception as e:
-            pass
-        else:
-            logging.info('bonsai connection 1 closed')
-        try:
-            self.client2.close()
-        except Exception as e:
-            pass
-        else:
-            logging.info('bonsai connection 2 closed')
-        try:
-            self.client3.close()
-        except Exception as e:
-            pass
-        else:
-            logging.info('bonsai connection 3 closed')
-        try:
-            self.client4.close()
-        except Exception as e:
-            pass
-        else:
-            logging.info('bonsai connection 4 closed')
 
         # normal behavior events
         self.client = OSCStreamingClient()  # Create client 
