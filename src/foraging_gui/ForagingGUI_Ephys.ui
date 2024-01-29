@@ -2667,7 +2667,7 @@
     <widget class="QLabel" name="label_69">
      <property name="geometry">
       <rect>
-       <x>295</x>
+       <x>585</x>
        <y>10</y>
        <width>121</width>
        <height>20</height>
@@ -2692,7 +2692,7 @@
     <widget class="QLabel" name="label_70">
      <property name="geometry">
       <rect>
-       <x>710</x>
+       <x>810</x>
        <y>10</y>
        <width>91</width>
        <height>20</height>
@@ -2717,7 +2717,7 @@
     <widget class="QLabel" name="label_71">
      <property name="geometry">
       <rect>
-       <x>860</x>
+       <x>960</x>
        <y>11</y>
        <width>66</width>
        <height>16</height>
@@ -2742,7 +2742,7 @@
     <widget class="QSpinBox" name="WindowSize">
      <property name="geometry">
       <rect>
-       <x>805</x>
+       <x>905</x>
        <y>10</y>
        <width>61</width>
        <height>22</height>
@@ -2767,7 +2767,7 @@
     <widget class="QSpinBox" name="RunLength">
      <property name="geometry">
       <rect>
-       <x>420</x>
+       <x>710</x>
        <y>10</y>
        <width>61</width>
        <height>22</height>
@@ -2792,7 +2792,7 @@
     <widget class="QSpinBox" name="StepSize">
      <property name="geometry">
       <rect>
-       <x>930</x>
+       <x>1030</x>
        <y>10</y>
        <width>61</width>
        <height>22</height>
@@ -2817,7 +2817,7 @@
     <widget class="QComboBox" name="MartchingType">
      <property name="geometry">
       <rect>
-       <x>1010</x>
+       <x>1110</x>
        <y>8</y>
        <width>71</width>
        <height>25</height>
@@ -2839,6 +2839,66 @@
        <string>fraction R</string>
       </property>
      </item>
+    </widget>
+    <widget class="QLabel" name="label_73">
+     <property name="geometry">
+      <rect>
+       <x>250</x>
+       <y>10</y>
+       <width>121</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>session=</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="SessionlistSpin">
+     <property name="geometry">
+      <rect>
+       <x>530</x>
+       <y>10</y>
+       <width>41</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="maximum">
+      <number>100000</number>
+     </property>
+     <property name="value">
+      <number>1</number>
+     </property>
+     <property name="displayIntegerBase">
+      <number>10</number>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="Sessionlist">
+     <property name="geometry">
+      <rect>
+       <x>380</x>
+       <y>10</y>
+       <width>151</width>
+       <height>22</height>
+      </rect>
+     </property>
     </widget>
    </widget>
    <widget class="QComboBox" name="OptogeneticsB">
