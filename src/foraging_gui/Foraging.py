@@ -668,6 +668,33 @@ class Window(QMainWindow):
             self.request_port3 = 4004
             self.request_port4 = 4005
 
+
+        # Race condition creates instabilities, force close any open connections
+        try:
+            self.client.close()
+        except Exception as e:
+            pass
+        else:
+            logging.info('bonsai connection 1 closed')
+        try:
+            self.client2.close()
+        except Exception as e:
+            pass
+        else:
+            logging.info('bonsai connection 2 closed')
+        try:
+            self.client3.close()
+        except Exception as e:
+            pass
+        else:
+            logging.info('bonsai connection 3 closed')
+        try:
+            self.client4.close()
+        except Exception as e:
+            pass
+        else:
+            logging.info('bonsai connection 4 closed')
+
         # normal behavior events
         self.client = OSCStreamingClient()  # Create client 
         self.client.connect((self.ip, self.request_port))
