@@ -269,6 +269,7 @@ class GenerateTrials():
                     self.BlockLenHistory[i].append(self.BlockLen)
                     self.B_ANewBlock[i]=0
 
+
                     
         self.B_RewardProHistory=np.append(self.B_RewardProHistory,self.B_CurrentRewardProb.reshape(self.B_LickPortN,1),axis=1)
         # get the ITI time and delay time
