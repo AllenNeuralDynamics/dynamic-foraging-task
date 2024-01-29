@@ -84,7 +84,9 @@ class Window(QMainWindow):
             self.default_warning_color="color: red;"
             self.default_text_color='color: red;'
             self.default_text_background_color='background-color: red;'
-
+        # set window title
+        self.setWindowTitle(self.window_title)
+        logging.info('Setting Window title: {}'.format(self.window_title))
 
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
@@ -648,8 +650,7 @@ class Window(QMainWindow):
             }
             self.current_box='{}-{}'.format(self.current_box,mapper[self.box_number])
         window_title = '{}'.format(self.current_box)
-        self.setWindowTitle(window_title)
-        logging.info('Setting Window title: {}'.format(window_title))
+        self.window_title = window_title
 
     def _InitializeBonsai(self):
         '''
