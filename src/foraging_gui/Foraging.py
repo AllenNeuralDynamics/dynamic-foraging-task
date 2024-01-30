@@ -259,7 +259,6 @@ class Window(QMainWindow):
             self._connect_Sessionlist(connect=True)
             self._Open(input_file=fname)
 
-            
     def _connect_Sessionlist(self,connect=True):
         '''connect or disconnect the Sessionlist and SessionlistSpin'''
         if connect:
@@ -300,8 +299,6 @@ class Window(QMainWindow):
         self.Sessionlist.addItems(sorted_dates)
         self._connect_Sessionlist(connect=True)
         
-
-                
     def _warmup(self):
         '''warm up the session before starting.
             Use warm up with caution. Usually, it is only used for the first time training. 
