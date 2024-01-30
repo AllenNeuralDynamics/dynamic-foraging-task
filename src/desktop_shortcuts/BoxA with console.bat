@@ -2,5 +2,5 @@ cd /d C:\Users\svc_aind_behavior\Documents\GitHub\dynamic-foraging-task\src\fora
 call conda activate Foraging
 :: This version starts with a console window
 python Foraging.py 1
-
+timeout 3600 > NUL
 

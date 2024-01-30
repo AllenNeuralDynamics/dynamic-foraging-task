@@ -16,8 +16,8 @@ from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject
 from PyQt5.QtSvg import QSvgWidget
 
-from MyFunctions import Worker
-from Visualization import PlotWaterCalibration
+from foraging_gui.MyFunctions import Worker
+from foraging_gui.Visualization import PlotWaterCalibration
 from aind_auto_train.curriculum_manager import CurriculumManager
 from aind_auto_train.auto_train_manager import DynamicForagingAutoTrainManager
 from aind_auto_train.schema.task import TrainingStage
@@ -341,10 +341,8 @@ class WaterCalibrationDialog(QDialog):
         self._connectSignalsSlots()
         self.ToInitializeVisual=1
         self._UpdateFigure()
-        if hasattr(self.MainWindow,'tower_number'):
-            self.setWindowTitle("Water Calibration: Tower "+'_'+str(self.MainWindow.tower_number))
-        else:
-            self.setWindowTitle('Water Calibration') 
+        self.setWindowTitle('Water Calibration: {}'.format(self.MainWindow.current_box))
+
     def _connectSignalsSlots(self):
         self.OpenLeft.clicked.connect(self._OpenLeft)
         self.OpenRight.clicked.connect(self._OpenRight)
@@ -1105,7 +1103,7 @@ class CameraDialog(QDialog):
         '''Save the video data'''
         self.MainWindow._GetSaveFileName()
         video_folder=self.MainWindow.video_folder
-        video_folder=os.path.join(video_folder,self.MainWindow.Tower.currentText(),self.MainWindow.AnimalName.text())
+        video_folder=os.path.join(video_folder,self.MainWindow.current_box,self.MainWindow.AnimalName.text())
         if not os.path.exists(video_folder):
             os.makedirs(video_folder)
         base_name=os.path.splitext(os.path.basename(self.MainWindow.SaveFileJson))[0]
