@@ -4341,6 +4341,19 @@
      <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
     </property>
    </widget>
+   <widget class="QPushButton" name="pushButton_streamlit">
+    <property name="geometry">
+     <rect>
+      <x>910</x>
+      <y>20</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Streamlit!</string>
+    </property>
+   </widget>
    <zorder>infor</zorder>
    <zorder>line</zorder>
    <zorder>Task</zorder>
@@ -4371,6 +4384,7 @@
    <zorder>groupBox_3</zorder>
    <zorder>AutoTrain</zorder>
    <zorder>label_auto_train_stage</zorder>
+   <zorder>pushButton_streamlit</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

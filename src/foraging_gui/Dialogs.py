@@ -1760,8 +1760,6 @@ class AutoTrainDialog(QDialog):
         self.widgets_locked_by_auto_train = []
         self.stage_in_use = None
         self.curriculum_in_use = None
-        self.svg_rules = None
-        self.svg_paras = None        
 
         # Connect to Auto Training Manager and Curriculum Manager
         aws_connected = self._connect_auto_training_manager()
@@ -1798,14 +1796,11 @@ class AutoTrainDialog(QDialog):
         self.pushButton_apply_curriculum.clicked.connect(
             self._apply_curriculum
         )
-        self.pushButton_show_rules_in_browser.clicked.connect(
-            self._show_rules_in_browser
+        self.pushButton_show_curriculum_in_streamlit.clicked.connect(
+            self._show_curriculum_in_streamlit
         )
-        self.pushButton_show_paras_in_browser.clicked.connect(
-            self._show_paras_in_browser
-        )
-        self.pushButton_show_all_training_history.clicked.connect(
-            self._show_all_training_history
+        self.pushButton_show_auto_training_history_in_streamlit.clicked.connect(
+            self._show_auto_training_history_in_streamlit
         )
     
     def update_auto_train_fields(self, subject_id: str, curriculum_just_overridden: bool = False):
@@ -2066,27 +2061,26 @@ class AutoTrainDialog(QDialog):
             curriculum_schema_version=selected_row['curriculum_schema_version'],
             curriculum_version=selected_row['curriculum_version'],
         )
-        
-        # Retrieve svgs
-        self.svg_rules = self.selected_curriculum['diagram_rules_name']
-        self.svg_paras = self.selected_curriculum['diagram_paras_name']
+                                            
+    def _show_curriculum_in_streamlit(self):
+        if self.selected_curriculum is not None:
+            webbrowser.open(
+                'https://foraging-behavior-browser.streamlit.app/'
+                '?tab_id=tab_auto_train_curriculum'
+                f'&auto_training_curriculum_name={self.selected_curriculum["curriculum"].curriculum_name}'
+                f'&auto_training_curriculum_version={self.selected_curriculum["curriculum"].curriculum_version}'
+                f'&auto_training_curriculum_schema_version={self.selected_curriculum["curriculum"].curriculum_schema_version}'
+            )
                         
-    def _show_rules_in_browser(self):
-        if self.svg_rules is not None:
-            webbrowser.open(self.svg_rules)
-            
-    def _show_paras_in_browser(self):
-        if self.svg_paras is not None:
-            webbrowser.open(self.svg_paras)
-            
-    def _show_all_training_history(self):
-        all_progress_plotly = self.auto_train_manager.plot_all_progress(
-            x_axis='session',
-            sort_by='subject_id',
-            sort_order='descending',
-            if_show_fig=True
+    def _show_auto_training_history_in_streamlit(self):
+        webbrowser.open(
+            'https://foraging-behavior-browser.streamlit.app/?'
+            f'&filter_subject_id={self.selected_subject_id}'
+            f'&tab_id=tab_auto_train_history'
+            f'&auto_training_history_x_axis=date'
+            f'&auto_training_history_sort_by=subject_id'
+            f'&auto_training_history_sort_order=descending'
         )
-        all_progress_plotly.show()
 
         
     def _update_available_training_stages(self):
