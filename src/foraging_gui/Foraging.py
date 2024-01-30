@@ -43,7 +43,7 @@ class Window(QMainWindow):
     def __init__(self, parent=None,box_number=1):
         logging.info('Creating Window')
         super().__init__(parent)
-        uic.loadUi('ForagingGUI.ui', self)
+        
         
         self.box_number=box_number
         mapper = {
@@ -68,13 +68,31 @@ class Window(QMainWindow):
         # Load Laser and Water Calibration Files
         self._GetLaserCalibration()
         self._GetWaterCalibration()
+        
+        uic.loadUi(self.default_ui, self)
+        if self.default_ui=='ForagingGUI.ui':
+            self.label_date.setText(str(date.today()))
+            self.default_warning_color="color: purple;"
+            self.default_text_color='color: purple;'
+            self.default_text_background_color='background-color: purple;'
+        elif self.default_ui=='ForagingGUI_Ephys.ui':
+            self.Visualization.setTitle(str(date.today()))
+            self.default_warning_color="color: red;"
+            self.default_text_color='color: red;'
+            self.default_text_background_color='background-color: red;'
+        else:
+            self.default_warning_color="color: red;"
+            self.default_text_color='color: red;'
+            self.default_text_background_color='background-color: red;'
+        # set window title
+        self.setWindowTitle(self.window_title)
+        logging.info('Setting Window title: {}'.format(self.window_title))
 
         self.StartANewSession=1 # to decide if should start a new session
         self.ToInitializeVisual=1
         self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
         self.ANewTrial=1 # permission to start a new trial
         self.UpdateParameters=1 # permission to update parameters
-        self.label_date.setText(str(date.today()))
         self.loggingstarted=-1
         
         # Connect to Bonsai
@@ -115,6 +133,7 @@ class Window(QMainWindow):
         self._LickSta()
         self._InitializeMotorStage()
         self._StageSerialNum()
+        self._warmup()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
         
@@ -162,9 +181,7 @@ class Window(QMainWindow):
         self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
-        
         self.AutoTrain.clicked.connect(self._AutoTrain)
-        
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._Task)
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._AdvancedBlockAuto)
@@ -197,6 +214,7 @@ class Window(QMainWindow):
         self.StageStop.clicked.connect(self._StageStop)
         self.GetPositions.clicked.connect(self._GetPositions)
         self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
+        self.warmup.currentIndexChanged.connect(self._warmup)
 
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
@@ -209,6 +227,72 @@ class Window(QMainWindow):
             for child in container.findChildren((QtWidgets.QLineEdit)):        
                 child.returnPressed.connect(self.keyPressEvent)
     
+    def _warmup(self):
+        '''warm up the session before starting.
+            Use warm up with caution. Usually, it is only used for the first time training. 
+            Turn on the warm up only when all parameters are set correctly, otherwise it would revert 
+            to some incorrect parameters when it was turned off.
+        '''
+        # set warm up parameters
+        if self.warmup.currentText()=='on':
+            # get parameters before the warm up is on;WarmupBackup_ stands for Warmup backup, which are parameters before warm-up.
+            self._GetTrainingParameters(prefix='WarmupBackup_')
+            self.warm_min_trial.setEnabled(True)
+            self.warm_min_finish_ratio.setEnabled(True)
+            self.warm_max_choice_ratio_bias.setEnabled(True)
+            self.warm_windowsize.setEnabled(True)
+            self.label_64.setEnabled(True)
+            self.label_116.setEnabled(True)
+            self.label_117.setEnabled(True)
+            self.label_118.setEnabled(True)
+
+            # set warm up default parameters
+            self.BaseRewardSum.setText('1')
+            self.RewardFamily.setText('3')
+            self.RewardPairsN.setText('1')
+
+            self.BlockBeta.setText('1')
+            self.BlockMin.setText('1')
+            self.BlockMax.setText('1')
+            self.BlockMinReward.setText('1')
+
+            self.AutoReward.setChecked(True)
+            self._AutoReward()
+            self.AutoWaterType.setCurrentIndex(self.AutoWaterType.findText('Natural'))
+            self.Multiplier.setText('0.8')
+            self.Unrewarded.setText('0')
+            self.Ignored.setText('0')
+            # turn advanced block auto off
+            self.AdvancedBlockAuto.setCurrentIndex(self.AdvancedBlockAuto.findText('off'))
+            self._ShowRewardPairs()
+        elif self.warmup.currentText()=='off':
+            # set parameters back to the previous parameters before warm up
+            self._revert_to_previous_parameters()
+            self.warm_min_trial.setEnabled(False)
+            self.warm_min_finish_ratio.setEnabled(False)
+            self.warm_max_choice_ratio_bias.setEnabled(False)
+            self.warm_windowsize.setEnabled(False)
+            self.label_64.setEnabled(False)
+            self.label_116.setEnabled(False)
+            self.label_117.setEnabled(False)
+            self.label_118.setEnabled(False)
+            self._ShowRewardPairs()
+
+    def _revert_to_previous_parameters(self):
+        '''reverse to previous parameters before warm up'''
+        # get parameters before the warm up is on
+        parameters={}
+        for attr_name in dir(self):
+            if attr_name.startswith('WarmupBackup_') and attr_name!='WarmupBackup_' and attr_name!='WarmupBackup_warmup':
+                parameters[attr_name.replace('WarmupBackup_','')]=getattr(self,attr_name)
+        widget_dict = {w.objectName(): w for w in self.TrainingParameters.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+        try:
+            for key in widget_dict.keys():
+                self._set_parameters(key,widget_dict,parameters)
+        except Exception as e:
+            # Catch the exception and log error information
+            logging.error(str(e))
+
     def _keyPressEvent(self):
         # press enter to confirm parameters change
         self.keyPressEvent()
@@ -333,7 +417,7 @@ class Window(QMainWindow):
                     self.StageSerialNum.setCurrentIndex(index)
                 else:
                     self.Warning_Newscale.setText('Default Newscale not found!')
-                    self.Warning_Newscale.setStyleSheet("color: purple;")
+                    self.Warning_Newscale.setStyleSheet(self.default_warning_color)
         except Exception as e:
             logging.error(str(e))
 
@@ -373,7 +457,7 @@ class Window(QMainWindow):
             except Exception as e:
                 logging.error(str(e))
                 self.WarningLabelInitializeBonsai.setText('Please open bonsai!')
-                self.WarningLabelInitializeBonsai.setStyleSheet("color: purple;")
+                self.WarningLabelInitializeBonsai.setStyleSheet(self.default_warning_color)
                 self.InitializeBonsaiSuccessfully=0
 
     def _ReconnectBonsai(self):
@@ -505,6 +589,7 @@ class Window(QMainWindow):
             'newscale_serial_num_box3':'',
             'newscale_serial_num_box4':'',
             'show_log_info_in_console':False,
+            'default_ui':'ForagingGUI.ui'
         }
         
         # Try to load the settings file        
@@ -521,7 +606,7 @@ class Window(QMainWindow):
         except Exception as e:
             logging.error('Could not load settings file at: {}, {}'.format(self.SettingFile,str(e)))
             self.WarningLabel.setText('Could not load settings file!')
-            self.WarningLabel.setStyleSheet("color: purple;")
+            self.WarningLabel.setStyleSheet(self.default_warning_color)
             raise e
 
         # If any settings are missing, use the default values
@@ -544,7 +629,7 @@ class Window(QMainWindow):
         self.newscale_serial_num_box2=Settings['newscale_serial_num_box2']
         self.newscale_serial_num_box3=Settings['newscale_serial_num_box3']
         self.newscale_serial_num_box4=Settings['newscale_serial_num_box4']
-        
+        self.default_ui=Settings['default_ui']
         # Also stream log info to the console if enabled
         if  Settings['show_log_info_in_console']:
             logger = logging.getLogger()
@@ -565,8 +650,7 @@ class Window(QMainWindow):
             }
             self.current_box='{}-{}'.format(self.current_box,mapper[self.box_number])
         window_title = '{}'.format(self.current_box)
-        self.setWindowTitle(window_title)
-        logging.info('Setting Window title: {}'.format(window_title))
+        self.window_title = window_title
 
     def _InitializeBonsai(self):
         '''
@@ -626,7 +710,7 @@ class Window(QMainWindow):
         # Could not connect and we timed out
         logging.info('Could not connect to bonsai with max wait time {} seconds'.format(max_wait))
         self.WarningLabel_2.setText('Started without bonsai connected!')
-        self.WarningLabel_2.setStyleSheet("color: purple;")
+        self.WarningLabel_2.setStyleSheet(self.default_warning_color)
 
     def _ConnectOSC(self):
         '''
@@ -879,72 +963,81 @@ class Window(QMainWindow):
                     continue
                 elif CurrentTrainingStage not in self.TrainingStagePar[Task]:
                     continue
-                if key in self.TrainingStagePar[Task][CurrentTrainingStage]:
-                    # skip some keys
-                    if key=='ExtraWater' or key=='WeightBefore' or key=='WeightAfter' or key=='SuggestedWater':
-                        self.WeightAfter.setText('')
-                        continue
-                    widget = widget_dict[key]
-                    try: # load the paramter used by last trial
-                        value=np.array([self.TrainingStagePar[Task][CurrentTrainingStage][key]])
-                        Tag=0
-                    # sometimes we only have training parameters, no behavior parameters
-                    except Exception as e:
-                        logging.error(str(e))
-                        value=self.TrainingStagePar[Task][CurrentTrainingStage][key]
-                        Tag=1
-                    if isinstance(widget, QtWidgets.QPushButton):
-                        pass
-                    if type(value)==bool:
-                        Tag=1
-                    else:
-                        if len(value)==0:
-                            value=np.array([''], dtype='<U1')
-                            Tag=0
-                    if type(value)==np.ndarray:
-                        Tag=0
-                    if isinstance(widget, QtWidgets.QLineEdit):
-                        if Tag==0:
-                            widget.setText(value[-1])
-                        elif Tag==1:
-                            widget.setText(value)
-                    elif isinstance(widget, QtWidgets.QComboBox):
-                        if Tag==0:
-                            index = widget.findText(value[-1])
-                        elif Tag==1:
-                            index = widget.findText(value)
-                        if index != -1:
-                            widget.setCurrentIndex(index)
-                    elif isinstance(widget, QtWidgets.QDoubleSpinBox):
-                        if Tag==0:
-                            widget.setValue(float(value[-1]))
-                        elif Tag==1:
-                            widget.setValue(float(value))
-                    elif isinstance(widget, QtWidgets.QSpinBox):
-                        if Tag==0:
-                            widget.setValue(int(value[-1]))
-                        elif Tag==1:
-                            widget.setValue(int(value))
-                    elif isinstance(widget, QtWidgets.QTextEdit):
-                        if Tag==0:
-                            widget.setText(value[-1])
-                        elif Tag==1:
-                            widget.setText(value)
-                    elif isinstance(widget, QtWidgets.QPushButton):
-                        if key=='AutoReward':
-                            if Tag==0:
-                                widget.setChecked(bool(value[-1]))
-                            elif Tag==1:
-                                widget.setChecked(value)
-                            self._AutoReward()
-                else:
-                    widget = widget_dict[key]
-                    if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
-                        widget.clear()
+                self._set_parameters(key,widget_dict,self.TrainingStagePar[Task][CurrentTrainingStage])
         except Exception as e:
             # Catch the exception and log error information
             logging.error(str(e))
-        
+
+    def _set_parameters(self,key,widget_dict,parameters):
+        '''Set the parameters in the GUI
+            key: the parameter name you want to change
+            widget_dict: the dictionary of all the widgets in the GUI
+            parameters: the dictionary of all the parameters containing the key you want to change
+        '''
+        if key in parameters:
+            # skip some keys
+            if key=='ExtraWater' or key=='WeightBefore' or key=='WeightAfter' or key=='SuggestedWater':
+                self.WeightAfter.setText('')
+                return
+            widget = widget_dict[key]
+            try: # load the paramter used by last trial
+                value=np.array([parameters[key]])
+                Tag=0
+            # sometimes we only have training parameters, no behavior parameters
+            except Exception as e:
+                logging.error(str(e))
+                value=parameters[key]
+                Tag=1
+            if isinstance(widget, QtWidgets.QPushButton):
+                pass
+            if type(value)==bool:
+                Tag=1
+            else:
+                if len(value)==0:
+                    value=np.array([''], dtype='<U1')
+                    Tag=0
+            if type(value)==np.ndarray:
+                Tag=0
+            if isinstance(widget, QtWidgets.QLineEdit):
+                if Tag==0:
+                    widget.setText(value[-1])
+                elif Tag==1:
+                    widget.setText(value)
+            elif isinstance(widget, QtWidgets.QComboBox):
+                if Tag==0:
+                    index = widget.findText(value[-1])
+                elif Tag==1:
+                    index = widget.findText(value)
+                if index != -1:
+                    widget.setCurrentIndex(index)
+            elif isinstance(widget, QtWidgets.QDoubleSpinBox):
+                if Tag==0:
+                    widget.setValue(float(value[-1]))
+                elif Tag==1:
+                    widget.setValue(float(value))
+            elif isinstance(widget, QtWidgets.QSpinBox):
+                if Tag==0:
+                    widget.setValue(int(value[-1]))
+                elif Tag==1:
+                    widget.setValue(int(value))
+            elif isinstance(widget, QtWidgets.QTextEdit):
+                if Tag==0:
+                    widget.setText(value[-1])
+                elif Tag==1:
+                    widget.setText(value)
+            elif isinstance(widget, QtWidgets.QPushButton):
+                if key=='AutoReward':
+                    if Tag==0:
+                        widget.setChecked(bool(value[-1]))
+                    elif Tag==1:
+                        widget.setChecked(value)
+                    self._AutoReward()
+        else:
+            widget = widget_dict[key]
+            if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
+                pass
+                #widget.clear()
+
     def _SaveTraining(self):
         '''Save the training stage parameters'''
         logging.info('Saving training stage parameters')
@@ -974,7 +1067,7 @@ class Window(QMainWindow):
         with open(self.TrainingStageFiles, "w") as file:
             json.dump(self.TrainingStagePar, file,indent=4) 
         self.WarningLabel_SaveTrainingStage.setText('Training stage parameters were saved!')
-        self.WarningLabel_SaveTrainingStage.setStyleSheet("color: purple;")
+        self.WarningLabel_SaveTrainingStage.setStyleSheet(self.default_warning_color)
         self.SaveTraining.setChecked(False)
 
     def _LoadTrainingPar(self):
@@ -1057,10 +1150,9 @@ class Window(QMainWindow):
                 for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
                     if child.objectName()=='qt_spinbox_lineedit':
                         continue
-                    if child.isEnabled()==False:
-                        continue
                     child.setStyleSheet('color: black;')
                     child.setStyleSheet('background-color: white;')
+                    self._Task()
                     if child.objectName()=='AnimalName' and child.text()=='':
                         child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
@@ -1083,10 +1175,10 @@ class Window(QMainWindow):
                         elif isinstance(child, QtWidgets.QSpinBox):
                             child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
                         else:
-                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                        continue
+                            if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
+                                child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                     else:
-                        if hasattr(Parameters, 'TP_'+child.objectName()):
+                        if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
                             # If this parameter changed, add the change to the log
                             old = getattr(Parameters,'TP_'+child.objectName())
                             if old != '':
@@ -1121,11 +1213,11 @@ class Window(QMainWindow):
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                         self.Continue=0
                         if child.objectName() in {'Experimenter', 'AnimalName', 'UncoupledReward', 'WeightBefore', 'WeightAfter', 'ExtraWater'}:
-                            child.setStyleSheet('color: purple;')
+                            child.setStyleSheet(self.default_text_color)
                             self.Continue=1
                         if child.text()=='': # If empty, change background color and wait for confirmation
                             self.UpdateParameters=0
-                            child.setStyleSheet('background-color: purple;')
+                            child.setStyleSheet(self.default_text_background_color)
                             self.Continue=1
                         if child.objectName() in {'RunLength','WindowSize','StepSize'}:
                             if child.text()=='':
@@ -1134,7 +1226,7 @@ class Window(QMainWindow):
                                 child.setStyleSheet('background-color: white;')
                         if self.Continue==1:
                             continue
-                        child.setStyleSheet('color: purple;')
+                        child.setStyleSheet(self.default_text_color)
                         try:
                             # it's valid float
                             float(child.text())
@@ -1201,7 +1293,7 @@ class Window(QMainWindow):
         else:
             return 1
         
-    def _GetTrainingParameters(self):
+    def _GetTrainingParameters(self,prefix='TP_'):
         '''Get training parameters'''
         # Iterate over each container to find child widgets and store their values in self
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
@@ -1211,17 +1303,17 @@ class Window(QMainWindow):
                     continue
                 # Set an attribute in self with the name 'TP_' followed by the child's object name
                 # and store the child's text value
-                setattr(self, 'TP_'+child.objectName(), child.text())
+                setattr(self, prefix+child.objectName(), child.text())
             # Iterate over each child of the container that is a QComboBox
             for child in container.findChildren(QtWidgets.QComboBox):
                 # Set an attribute in self with the name 'TP_' followed by the child's object name
                 # and store the child's current text value
-                setattr(self, 'TP_'+child.objectName(), child.currentText())
+                setattr(self, prefix+child.objectName(), child.currentText())
             # Iterate over each child of the container that is a QPushButton
             for child in container.findChildren(QtWidgets.QPushButton):
                 # Set an attribute in self with the name 'TP_' followed by the child's object name
                 # and store whether the child is checked or not
-                setattr(self, 'TP_'+child.objectName(), child.isChecked())
+                setattr(self, prefix+child.objectName(), child.isChecked())
                             
 
     def _Task(self):
@@ -1271,7 +1363,7 @@ class Window(QMainWindow):
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
             # change name of min reward each block
             self.label_13.setText('min reward each block=')
-            self.BlockMinReward.setText('0')
+            # self.BlockMinReward.setText('0')
             # change the position of RewardN=/min reward each block=
             self.BlockMinReward.setGeometry(QtCore.QRect(863, 128, 80, 20))
             self.label_13.setGeometry(QtCore.QRect(711, 128, 146, 16))
@@ -1279,8 +1371,8 @@ class Window(QMainWindow):
             self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 128, 80, 20))
             self.label_26.setGeometry(QtCore.QRect(929, 128, 146, 16))
             # set block length to the default value
-            self.BlockMin.setText('20')
-            self.BlockMax.setText('60')
+            #self.BlockMin.setText('20')
+            #self.BlockMax.setText('60')
         elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
             border_color = "rgb(100, 100, 100,80)"
             border_style = "1px solid " + border_color
@@ -1326,7 +1418,7 @@ class Window(QMainWindow):
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
             # change name of min reward each block
             self.label_13.setText('min reward each block=')
-            self.BlockMinReward.setText('0')
+            #self.BlockMinReward.setText('0')
             # change the position of RewardN=/min reward each block=
             self.BlockMinReward.setGeometry(QtCore.QRect(863, 128, 80, 20))
             self.label_13.setGeometry(QtCore.QRect(711, 128, 146, 16))
@@ -1334,8 +1426,8 @@ class Window(QMainWindow):
             self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 128, 80, 20))
             self.label_26.setGeometry(QtCore.QRect(929, 128, 146, 16))
             # set block length to the default value
-            self.BlockMin.setText('20')
-            self.BlockMax.setText('60')
+            #self.BlockMin.setText('20')
+            #self.BlockMax.setText('60')
         elif self.Task.currentText() in ['RewardN']:
             self.label_6.setEnabled(True)
             self.label_7.setEnabled(True)
@@ -1392,20 +1484,6 @@ class Window(QMainWindow):
             if self.Task.currentText() in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
                 self.RewardPairs=self.RewardFamilies[int(self.RewardFamily.text())-1][:int(self.RewardPairsN.text())]
                 self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.BaseRewardSum.text())
-                if hasattr(self, 'GeneratedTrials'):
-                    self.ShowRewardPairs.setText('Reward pairs:\n'
-                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
-                                                 + '\n\n'
-                                                 + 'Current pair:\n'
-                                                 + str(np.round(
-                                                     self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2))) 
-                    self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
-                else:
-                    self.ShowRewardPairs.setText('Reward pairs:\n'
-                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
-                                                 +'\n\n'+'Current pair:\n ') 
-                    self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
-                    
             elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
                 input_string=self.UncoupledReward.text()
                 # remove any square brackets and spaces from the string
@@ -1416,19 +1494,22 @@ class Window(QMainWindow):
                 num_list = [float(num) for num in num_list]
                 # create a numpy array from the list of numbers
                 self.RewardProb=np.array(num_list)
+            if self.Task.currentText() in ['Coupled Baiting','Coupled Without Baiting','RewardN','Uncoupled Baiting','Uncoupled Without Baiting']:
                 if hasattr(self, 'GeneratedTrials'):
                     self.ShowRewardPairs.setText('Reward pairs:\n'
                                                  + str(np.round(self.RewardProb,2)).replace('\n', ',')
                                                  + '\n\n'
                                                  +'Current pair:\n'
-                                                 + str(np.round(self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2))) 
-                    self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
+                                                 + str(np.round(self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2)))
+                    if self.default_ui=='ForagingGUI.ui':
+                        self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
                 else:
                     self.ShowRewardPairs.setText('Reward pairs:\n'
                                                  + str(np.round(self.RewardProb,2)).replace('\n', ',')
                                                  + '\n\n'
                                                  +'Current pair:\n ') 
-                    self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
+                    if self.default_ui=='ForagingGUI.ui':
+                        self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
         except Exception as e:
             # Catch the exception and log error information
             logging.error(str(e))
@@ -1630,7 +1711,7 @@ class Window(QMainWindow):
             if response==QMessageBox.Yes:
                 pass
                 self.WarningLabel.setText('Saving without weight or extra water!')
-                self.WarningLabel.setStyleSheet("color: purple;")
+                self.WarningLabel.setStyleSheet(self.default_warning_color)
                 logging.info('saving without weight or extra water')
             elif response==QMessageBox.No:
                 logging.info('saving declined by user')
@@ -1657,7 +1738,7 @@ class Window(QMainWindow):
             self.SaveFile=Names[0]
         if self.SaveFile == '':
             self.WarningLabel.setText('Discard saving!')
-            self.WarningLabel.setStyleSheet("color: purple;")
+            self.WarningLabel.setStyleSheet(self.default_warning_color)
         if self.SaveFile != '':
             if hasattr(self, 'GeneratedTrials'):
                 if hasattr(self.GeneratedTrials, 'Obj'):
@@ -1897,8 +1978,8 @@ class Window(QMainWindow):
                         logging.error(str(e))
                         continue
                     if key in CurrentObj:
-                        # skip some keys
-                        if key=='ExtraWater' or key=='TotalWater' or key=='WeightAfter' or key=='SuggestedWater' or key=='Start':
+                        # skip some keys; skip warmup
+                        if key=='ExtraWater' or key=='TotalWater' or key=='WeightAfter' or key=='SuggestedWater' or key=='Start' or key=='warmup':
                             self.WeightAfter.setText('')
                             continue
                         widget = widget_dict[key]
@@ -1970,12 +2051,19 @@ class Window(QMainWindow):
                 logging.error(str(e))
                 # delete GeneratedTrials
                 del self.GeneratedTrials
-                
             # show basic information
-            if 'info_task' in Obj:
-                self.label_info_task.setTitle(Obj['info_task'])
-            if 'info_other_perf' in Obj:
-                self.label_info_performance_others.setText(Obj['info_other_perf'])
+            if self.default_ui=='ForagingGUI.ui':  
+                if 'info_task' in Obj:
+                    self.label_info_task.setTitle(Obj['info_task'])
+                if 'info_other_perf' in Obj:
+                    self.label_info_performance_others.setText(Obj['info_other_perf'])
+            elif self.default_ui=='ForagingGUI_Ephys.ui':
+                if 'Other_inforTitle' in Obj:
+                    self.infor.setTitle(Obj['Other_inforTitle'])
+                if 'Other_BasicTitle' in Obj:
+                    self.Basic.setTitle(Obj['Other_BasicTitle'])
+                if 'Other_BasicText' in Obj:
+                    self.ShowBasic.setText(Obj['Other_BasicText'])
                 
             # Set newscale position to last position
             if 'B_NewscalePositions' in Obj:
@@ -2067,11 +2155,11 @@ class Window(QMainWindow):
                 ser.write(b'c')
                 ser.close()
                 self.TeensyWarning.setText('Start excitation!')
-                self.TeensyWarning.setStyleSheet("color: purple;")
+                self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: start excitation!')
-                self.TeensyWarning.setStyleSheet("color: purple;")
+                self.TeensyWarning.setStyleSheet(self.default_warning_color)
         else:
             self.StartExcitation.setStyleSheet("background-color : none")
             try:
@@ -2080,11 +2168,11 @@ class Window(QMainWindow):
                 ser.write(b's')
                 ser.close()
                 self.TeensyWarning.setText('Stop excitation!')
-                self.TeensyWarning.setStyleSheet("color: purple;")
+                self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: stop excitation!')
-                self.TeensyWarning.setStyleSheet("color: purple;")
+                self.TeensyWarning.setStyleSheet(self.default_warning_color)
     
     def _StartBleaching(self):
         if self.StartBleaching.isChecked():
@@ -2095,11 +2183,11 @@ class Window(QMainWindow):
                 ser.write(b'd')
                 ser.close()
                 self.TeensyWarning.setText('Start bleaching!')
-                self.TeensyWarning.setStyleSheet("color: purple;")
+                self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: start bleaching!')
-                self.TeensyWarning.setStyleSheet("color: purple;")
+                self.TeensyWarning.setStyleSheet(self.default_warning_color)
         else:
             self.StartBleaching.setStyleSheet("background-color : none")
             try:
@@ -2108,11 +2196,11 @@ class Window(QMainWindow):
                 ser.write(b's')
                 ser.close()
                 self.TeensyWarning.setText('Stop bleaching!')
-                self.TeensyWarning.setStyleSheet("color: purple;")
+                self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: stop bleaching!')
-                self.TeensyWarning.setStyleSheet("color: purple;")
+                self.TeensyWarning.setStyleSheet(self.default_warning_color)
 
     def _AutoReward(self):
         if self.AutoReward.isChecked():
@@ -2194,12 +2282,12 @@ class Window(QMainWindow):
         stall_duration = 5*60 
         if self.ANewTrial==0:
             self.WarningLabel.setText('Waiting for the finish of the last trial!')
-            self.WarningLabel.setStyleSheet("color: purple;")
+            self.WarningLabel.setStyleSheet(self.default_warning_color)
             while 1:
                 QApplication.processEvents()
                 if self.ANewTrial==1:
                     self.WarningLabel.setText('')
-                    self.WarningLabel.setStyleSheet("color: purple;")
+                    self.WarningLabel.setStyleSheet(self.default_warning_color)
                     break
                 elif (time.time() - start_time) > stall_duration*stall_iteration:
                     elapsed_time = int(np.floor(stall_duration*stall_iteration/60))
@@ -2613,8 +2701,11 @@ class Window(QMainWindow):
                 # maximum 3.5ml
                 if suggested_water>3.5:
                     suggested_water=3.5
-                    self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and LAS should be alerted!')
-                    self.TotalWaterWarning.setStyleSheet("color: purple;")
+                    if self.default_ui=='ForagingGUI.ui':
+                        self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and LAS should be alerted!')
+                    elif self.default_ui=='ForagingGUI_Ephys.ui':
+                        self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and \n LAS should be alerted!')
+                    self.TotalWaterWarning.setStyleSheet(self.default_warning_color)
                 else:
                     self.TotalWaterWarning.setText('')
                 self.SuggestedWater.setText(str(np.round(suggested_water,3)))
