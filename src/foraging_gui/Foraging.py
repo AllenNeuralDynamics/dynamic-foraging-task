@@ -18,6 +18,7 @@ from PyQt5.QtWidgets import QFileDialog,QVBoxLayout,QLineEdit
 from PyQt5 import QtWidgets,QtGui,QtCore, uic
 from PyQt5.QtCore import QThreadPool,Qt
 from pyOSC3.OSC3 import OSCStreamingClient
+import webbrowser
 
 import foraging_gui.rigcontrol as rigcontrol
 from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
@@ -164,6 +165,7 @@ class Window(QMainWindow):
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
         
         self.AutoTrain.clicked.connect(self._AutoTrain)
+        self.pushButton_streamlit.clicked.connect(self._open_mouse_on_streamlit)
         
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._Task)
@@ -2649,6 +2651,16 @@ class Window(QMainWindow):
         
         # Check subject id each time the dialog is opened
         self.AutoTrain_dialog.update_auto_train_fields(subject_id=self.ID.text())
+        
+    def _open_mouse_on_streamlit(self):
+        '''open the training history of the current mouse on the streamlit app'''
+        # See this PR: https://github.com/AllenNeuralDynamics/foraging-behavior-browser/pull/25
+        webbrowser.open(f'https://foraging-behavior-browser.streamlit.app/?filter_subject_id={self.ID.text()}'
+                         '&tab_id=tab_session_x_y&x_y_plot_xname=session&x_y_plot_yname=foraging_eff'
+                         '&x_y_plot_group_by=h2o&x_y_plot_if_show_dots=True&x_y_plot_if_aggr_each_group=True&x_y_plot_aggr_method_group=lowess'
+                         '&x_y_plot_if_aggr_all=False&x_y_plot_smooth_factor=5'
+                         '&x_y_plot_dot_size=20&x_y_plot_dot_opacity=0.8&x_y_plot_line_width=3.0'
+        )
         
 def map_hostname_to_box(hostname,box_num):
     host_mapping = {
