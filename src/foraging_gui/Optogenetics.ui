@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1442</width>
-    <height>630</height>
+    <height>785</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -3066,8 +3066,8 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>480</y>
+     <x>20</x>
+     <y>740</y>
      <width>131</width>
      <height>20</height>
     </rect>
@@ -3082,8 +3082,8 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>480</y>
+     <x>150</x>
+     <y>740</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -3585,8 +3585,8 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>260</x>
-     <y>530</y>
+     <x>270</x>
+     <y>690</y>
      <width>131</width>
      <height>20</height>
     </rect>
@@ -3601,8 +3601,8 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>380</x>
-     <y>530</y>
+     <x>390</x>
+     <y>690</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -3614,8 +3614,8 @@
   <widget class="QLabel" name="label1_17">
    <property name="geometry">
     <rect>
-     <x>100</x>
-     <y>530</y>
+     <x>110</x>
+     <y>690</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -3627,8 +3627,8 @@
   <widget class="QComboBox" name="Laser_calibration">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>530</y>
+     <x>150</x>
+     <y>690</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -3667,6 +3667,228 @@
      <string>NA</string>
     </property>
    </item>
+  </widget>
+  <widget class="Line" name="line">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>670</y>
+     <width>1411</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="Line" name="line_2">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>440</y>
+     <width>1411</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="SessionAlternating">
+   <property name="geometry">
+    <rect>
+     <x>810</x>
+     <y>470</y>
+     <width>81</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="editable">
+    <bool>true</bool>
+   </property>
+   <item>
+    <property name="text">
+     <string>on</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>off</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string/>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string/>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label3_17">
+   <property name="geometry">
+    <rect>
+     <x>660</x>
+     <y>470</y>
+     <width>141</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Alternating across sessions=</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label3_18">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>470</y>
+     <width>141</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Fraction of session (trials) =</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="FractionOfSession">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>470</y>
+     <width>81</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>0.5</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label3_19">
+   <property name="geometry">
+    <rect>
+     <x>480</x>
+     <y>470</y>
+     <width>61</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Start with=</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="SessionStartWith">
+   <property name="geometry">
+    <rect>
+     <x>550</x>
+     <y>470</y>
+     <width>81</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="editable">
+    <bool>true</bool>
+   </property>
+   <item>
+    <property name="text">
+     <string>on</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>off</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string/>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string/>
+    </property>
+   </item>
+  </widget>
+  <widget class="QComboBox" name="SessionWideControl">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>470</y>
+     <width>81</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="editable">
+    <bool>true</bool>
+   </property>
+   <item>
+    <property name="text">
+     <string>on</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>off</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label3_20">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>470</y>
+     <width>91</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Session control=</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
   </widget>
   <zorder>OptoPar</zorder>
   <zorder>Laser_1</zorder>
@@ -3803,6 +4025,16 @@
   <zorder>LatestCalibrationDate</zorder>
   <zorder>label1_17</zorder>
   <zorder>Laser_calibration</zorder>
+  <zorder>line</zorder>
+  <zorder>line_2</zorder>
+  <zorder>SessionAlternating</zorder>
+  <zorder>label3_17</zorder>
+  <zorder>label3_18</zorder>
+  <zorder>FractionOfSession</zorder>
+  <zorder>label3_19</zorder>
+  <zorder>SessionStartWith</zorder>
+  <zorder>SessionWideControl</zorder>
+  <zorder>label3_20</zorder>
  </widget>
  <resources/>
  <connections/>
