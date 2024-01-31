@@ -4,15 +4,15 @@ echo Starting the GUI and Bonsai, please wait. You can close this window, it wil
 echo             .--,       .--,
 echo            ( (  \.---./  ) )
 echo             '.__/o   o\__.'
-echo                {=  ^  =}
+echo                {=  ^^  =}
 echo                 ^>  -  ^<
 echo  ___________.""`-------`"".____________
 echo /  The GUI is starting!         O      \
 echo \                      o               /
-echo /  .    O                          o   \
+echo /  .    O       Please wait!       o   \
 echo \                                      /         __
-echo /                                      \     _.-'  `.
-echo \______________o__________o____________/ .-~^        `~--'
+echo /        You can close this window!    \     _.-'  `.
+echo \______________o__________o____________/ .-~^^        `~--'
 echo               ___)( )(___        `-.___.'
 echo              (((__) (__)))
 
