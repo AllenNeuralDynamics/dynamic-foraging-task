@@ -5,7 +5,7 @@ echo             .--,       .--,
 echo            ( (  \.---./  ) )
 echo             '.__/o   o\__.'
 echo                {=  ^  =}
-echo                 >  -  <
+echo                 ^>  -  ^<
 echo  ___________.""`-------`"".____________
 echo /  The GUI is starting!         O      \
 echo \                      o               /
