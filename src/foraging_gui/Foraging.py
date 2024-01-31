@@ -41,7 +41,7 @@ class NumpyEncoder(json.JSONEncoder):
         return super(NumpyEncoder, self).default(obj)
     
 class Window(QMainWindow):
-    def __init__(self, parent=None,box_number=1):
+    def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
         super().__init__(parent)
         
@@ -54,6 +54,7 @@ class Window(QMainWindow):
             4:'D',
         }
         self.box_letter = mapper[box_number]
+        self.start_bonsai_ide = start_bonsai_ide
 
         # Load Settings that are specific to this computer  
         self.SettingFolder=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings")
@@ -138,6 +139,12 @@ class Window(QMainWindow):
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
         
+        if not self.start_bonsai_ide:
+            '''
+                When starting bonsai without the IDE the connection is always unstable.
+                Reconnecting solves the issue
+            '''
+            self._ReconnectBonsai()   
         logging.info('Start up complete')
 
     def connectSignalsSlots(self):
@@ -786,7 +793,10 @@ class Window(QMainWindow):
 
         SettingsBox = 'Settings_box{}.csv'.format(self.box_number)
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
-        subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
+        if self.start_bonsai_ide:
+            subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
+        else:
+            subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True)
 
     def _OpenSettingFolder(self):
         '''Open the setting folder'''
@@ -2835,12 +2845,17 @@ def excepthook(exc_type, exc_value, exc_tb):
 
 if __name__ == "__main__":
 
-    # Determine which box we are using
-    if len(sys.argv) >= 2:
+    # Determine which box we are using, and whether to start bonsai IDE
+    start_bonsai_ide=True
+    if len(sys.argv) == 1:
+        box_number = 1
+    elif len(sys.argv) == 2:
         box_number = int(sys.argv[1])
     else:
-        box_number = 1
-
+        box_number = int(sys.argv[1])
+        if sys.argv[2] == '--no-bonsai-ide':
+            start_bonsai_ide=False
+   
     # Start logging
     start_gui_log_file(box_number)
     log_git_hash()
@@ -2859,7 +2874,7 @@ if __name__ == "__main__":
     # Start Q, and Gui Window
     logging.info('Starting QApplication and Window')
     app = QApplication(sys.argv)
-    win = Window(box_number=box_number)
+    win = Window(box_number=box_number,start_bonsai_ide=start_bonsai_ide)
     win.show()
     # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())
