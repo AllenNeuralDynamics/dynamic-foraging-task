@@ -2310,18 +2310,23 @@ class Window(QMainWindow):
         if self.NewTrialRewardOrder==0:
             self.GeneratedTrials._GenerateATrial(self.Channel4)
         self.ANewTrial=1
+    
     def _thread_complete2(self):
         '''complete of receive licks'''
         self.ToReceiveLicks=1
+    
     def _thread_complete3(self):
         '''complete of update figures'''
         self.ToUpdateFigure=1
+    
     def _thread_complete4(self):
         '''complete of generating a trial'''
         self.ToGenerateATrial=1
+    
     def _thread_complete_timer(self):
         '''complete of _Timer'''
         self.finish_Timer=1
+    
     def _Timer(self,Time):
         '''sleep some time'''
         time.sleep(Time)
@@ -2460,11 +2465,13 @@ class Window(QMainWindow):
         
         # collecting the base signal for photometry. Only run once
         if self.PhtotometryB.currentText()=='on' and self.PhotometryRun==0:
+            logging.info('Starting photometry baseline timer')
             self.finish_Timer=0
             self.PhotometryRun=1
             workertimer = Worker(self._Timer,float(self.baselinetime.text())*60)
             workertimer.signals.finished.connect(self._thread_complete_timer)
             self.threadpool_workertimer.start(workertimer)
+            logging.info('Finished photometry baseline timer')
         
         self._StartTrialLoop(GeneratedTrials,worker1)
 
@@ -2559,8 +2566,9 @@ class Window(QMainWindow):
                 reply = QMessageBox.question(self, 'Trial Generator', message,QMessageBox.Yes| QMessageBox.No )
                 if reply == QMessageBox.Yes:
                     # User stops trials
-                    logging.error('trial stalled {} minutes, user stopped trials'.format(elapsed_time))
-        
+                    err_msg = 'trial stalled {} minutes, user stopped trials. ANewTrial:{},Start:{},finish_Timer:{}'
+                    logging.error(err_msg.format(elapsed_time,self.ANewTrial,self.Start.isChecked(), self.finish_Timer))
+
                     # Set that the current trial ended, so we can save
                     self.ANewTrial=1
     
