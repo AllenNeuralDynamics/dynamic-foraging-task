@@ -1,5 +1,6 @@
 echo off
 mode 70,19
+title Hello!
 cls
 echo.
 echo.
