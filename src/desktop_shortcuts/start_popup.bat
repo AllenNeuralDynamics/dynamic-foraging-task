@@ -1,8 +1,6 @@
 echo off
 mode 70,19
 title Hello!
-Set /a num=(%Random% %%9)+1
-color %num%
 cls
 echo.
 echo.
