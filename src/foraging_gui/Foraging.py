@@ -184,7 +184,7 @@ class Window(QMainWindow):
         self.NextBlock.clicked.connect(self._NextBlock)
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
         self.OptogeneticsB.currentIndexChanged.connect(self._keyPressEvent)
-        self.PhtotometryB.currentIndexChanged.connect(self._keyPressEvent)
+        self.PhotometryB.currentIndexChanged.connect(self._keyPressEvent)
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._keyPressEvent)
         self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
@@ -2163,6 +2163,7 @@ class Window(QMainWindow):
 
     def _StartExcitation(self):
         if self.StartExcitation.isChecked():
+            logging.info('StartExcitation is checked')
             self.StartExcitation.setStyleSheet("background-color : green;")
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
@@ -2175,7 +2176,14 @@ class Window(QMainWindow):
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: start excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
+                reply = QMessageBox.question(self, 'Start excitation:', 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
+                self.StartExcitation.setChecked(False)
+            else:
+                self.TeensyWarning.setText('')
+                self.TeensyWarning.setStyleSheet(self.default_warning_color)               
+
         else:
+            logging.info('StartExcitation is unchecked')
             self.StartExcitation.setStyleSheet("background-color : none")
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
@@ -2188,6 +2196,11 @@ class Window(QMainWindow):
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: stop excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
+                reply = QMessageBox.question(self, 'Start excitation:', 'error when stopping excitation: {}'.format(e), QMessageBox.Ok)
+            else:
+                self.TeensyWarning.setText('')
+                self.TeensyWarning.setStyleSheet(self.default_warning_color)               
+
     
     def _StartBleaching(self):
         if self.StartBleaching.isChecked():
@@ -2323,18 +2336,26 @@ class Window(QMainWindow):
         if self.NewTrialRewardOrder==0:
             self.GeneratedTrials._GenerateATrial(self.Channel4)
         self.ANewTrial=1
+    
     def _thread_complete2(self):
         '''complete of receive licks'''
         self.ToReceiveLicks=1
+    
     def _thread_complete3(self):
         '''complete of update figures'''
         self.ToUpdateFigure=1
+    
     def _thread_complete4(self):
         '''complete of generating a trial'''
         self.ToGenerateATrial=1
+    
     def _thread_complete_timer(self):
         '''complete of _Timer'''
         self.finish_Timer=1
+        logging.info('Finished photometry baseline timer')
+        self.WarningLabelStop.setText('')
+        self.WarningLabelStop.setStyleSheet(self.default_warning_color)
+    
     def _Timer(self,Time):
         '''sleep some time'''
         time.sleep(Time)
@@ -2470,14 +2491,28 @@ class Window(QMainWindow):
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
             workerStartTrialLoop1=self.workerStartTrialLoop1
-        
+
+        # Check if photometry excitation is running or not
+        if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and (not self.StartExcitation.isChecked()):
+            logging.warning('photometry is set to "on", but excitation is not running')
+            reply = QMessageBox.question(self, 'Start', 'Photometry is set to "on", but excitation is not running. Start excitation now?',QMessageBox.Yes | QMessageBox.No)
+            if reply == QMessageBox.Yes:
+                self.StartExcitation.setChecked(True)
+                logging.info('User selected to start excitation')
+                self._StartExcitation()
+            else:                   
+                logging.info('User selected not to start excitation')
+  
         # collecting the base signal for photometry. Only run once
-        if self.PhtotometryB.currentText()=='on' and self.PhotometryRun==0:
+        if self.PhotometryB.currentText()=='on' and self.PhotometryRun==0:
+            logging.info('Starting photometry baseline timer')
             self.finish_Timer=0
             self.PhotometryRun=1
             workertimer = Worker(self._Timer,float(self.baselinetime.text())*60)
             workertimer.signals.finished.connect(self._thread_complete_timer)
             self.threadpool_workertimer.start(workertimer)
+            self.WarningLabelStop.setText('Running photometry baseline')
+            self.WarningLabelStop.setStyleSheet(self.default_warning_color)
         
         self._StartTrialLoop(GeneratedTrials,worker1)
 
@@ -2496,7 +2531,7 @@ class Window(QMainWindow):
         # Track elapsed time in case Bonsai Stalls
         last_trial_start = time.time()
         stall_iteration = 1
-        stall_duration = 5*60  
+        stall_duration = 5*60 
 
         while self.Start.isChecked():
             QApplication.processEvents()
@@ -2561,10 +2596,16 @@ class Window(QMainWindow):
                     self.threadpool.start(worker1)
                 #generate a new trial
                 if self.NewTrialRewardOrder==1:
-                    GeneratedTrials._GenerateATrial(self.Channel4)  
- 
+                    GeneratedTrials._GenerateATrial(self.Channel4)   
+
             elif (time.time() - last_trial_start) >stall_duration*stall_iteration:
                 # Elapsed time since last trial is more than tolerance
+
+                # Check if we are in the photometry baseline period.
+                if (self.finish_Timer==0) & ((time.time() - last_trial_start) < (float(self.baselinetime.text())*60+10)):
+                    # Extra 10 seconds is to avoid any race conditions
+                    # We are in the photometry baseline period
+                    continue
                 
                 # Prompt user to stop trials
                 elapsed_time = int(np.floor(stall_duration*stall_iteration/60))
@@ -2572,8 +2613,9 @@ class Window(QMainWindow):
                 reply = QMessageBox.question(self, 'Trial Generator', message,QMessageBox.Yes| QMessageBox.No )
                 if reply == QMessageBox.Yes:
                     # User stops trials
-                    logging.error('trial stalled {} minutes, user stopped trials'.format(elapsed_time))
-        
+                    err_msg = 'trial stalled {} minutes, user stopped trials. ANewTrial:{},Start:{},finish_Timer:{}'
+                    logging.error(err_msg.format(elapsed_time,self.ANewTrial,self.Start.isChecked(), self.finish_Timer))
+
                     # Set that the current trial ended, so we can save
                     self.ANewTrial=1
     
