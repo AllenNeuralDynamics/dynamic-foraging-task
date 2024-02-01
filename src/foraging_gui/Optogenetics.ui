@@ -3710,7 +3710,7 @@
     </sizepolicy>
    </property>
    <property name="editable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <item>
     <property name="text">
@@ -3720,16 +3720,6 @@
    <item>
     <property name="text">
      <string>off</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string/>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string/>
     </property>
    </item>
   </widget>
@@ -3819,7 +3809,7 @@
     </sizepolicy>
    </property>
    <property name="editable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <item>
     <property name="text">
@@ -3829,16 +3819,6 @@
    <item>
     <property name="text">
      <string>off</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string/>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string/>
     </property>
    </item>
   </widget>
@@ -3858,7 +3838,7 @@
     </sizepolicy>
    </property>
    <property name="editable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="currentIndex">
     <number>1</number>
