@@ -2326,6 +2326,7 @@ class Window(QMainWindow):
     def _thread_complete_timer(self):
         '''complete of _Timer'''
         self.finish_Timer=1
+        logging.info('Finished photometry baseline timer')
     
     def _Timer(self,Time):
         '''sleep some time'''
@@ -2471,7 +2472,7 @@ class Window(QMainWindow):
             workertimer = Worker(self._Timer,float(self.baselinetime.text())*60)
             workertimer.signals.finished.connect(self._thread_complete_timer)
             self.threadpool_workertimer.start(workertimer)
-            logging.info('Finished photometry baseline timer')
+
         
         self._StartTrialLoop(GeneratedTrials,worker1)
 
