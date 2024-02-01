@@ -2164,6 +2164,7 @@ class Window(QMainWindow):
                 self.TeensyWarning.setText('Error: start excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
                 reply = QMessageBox.question(self, 'Start excitation:', 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
+                self.StartExcitation.setChecked(False)
 
         else:
             logging.info('StartExcitation is unchecked')
@@ -2510,7 +2511,7 @@ class Window(QMainWindow):
         # Track elapsed time in case Bonsai Stalls
         last_trial_start = time.time()
         stall_iteration = 1
-        stall_duration = 1*60#5*60 ##DEBUGGING CODE 
+        stall_duration = 5*60 
 
         while self.Start.isChecked():
             QApplication.processEvents()
