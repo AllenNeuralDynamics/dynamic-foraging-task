@@ -2469,7 +2469,7 @@ class Window(QMainWindow):
             workerStartTrialLoop1=self.workerStartTrialLoop1
 
         # Check if photometry excitation is running or not
-        if (not self.Start.isChecked()) and self.PhotometryB.currentText()=='on' and (not self.StartExcitation.isChecked()):
+        if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and (not self.StartExcitation.isChecked()):
             logging.warning('photometry is set to "on", but excitation is not running')
             reply = QMessageBox.question(self, 'Start', 'Photometry is set to "on", but excitation is not running. Start excitation now?',QMessageBox.Yes | QMessageBox.No)
             if reply == QMessageBox.Yes:
