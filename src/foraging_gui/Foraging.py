@@ -2562,7 +2562,7 @@ class Window(QMainWindow):
                 # Elapsed time since last trial is more than tolerance
 
                 # Check if we are in the photometry baseline period.
-                if (self.finish_Timer==0) & ((current_time - last_trial_start) < float(self.baselinetime.text())*60)):
+                if (self.finish_Timer==0) & ((current_time - last_trial_start) < float(self.baselinetime.text())*60):
                     # We are in the photometry baseline period
                     continue
                 
