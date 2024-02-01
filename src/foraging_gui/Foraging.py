@@ -2491,7 +2491,7 @@ class Window(QMainWindow):
         # Track elapsed time in case Bonsai Stalls
         last_trial_start = time.time()
         stall_iteration = 1
-        stall_duration = 5*60  
+        stall_duration = 1#5*60  
 
         while self.Start.isChecked():
             QApplication.processEvents()
@@ -2563,7 +2563,8 @@ class Window(QMainWindow):
                 # Elapsed time since last trial is more than tolerance
 
                 # Check if we are in the photometry baseline period.
-                if (self.finish_Timer==0) & ((current_time - last_trial_start) < float(self.baselinetime.text())*60):
+                if (self.finish_Timer==0) & ((current_time - last_trial_start) < (float(self.baselinetime.text())*60+10)):
+                    # Extra 10 seconds is to avoid any race conditions
                     # We are in the photometry baseline period
                     continue
                 
