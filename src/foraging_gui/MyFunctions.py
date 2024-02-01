@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 
 
-
 if PLATFORM == 'win32':
     from newscale.usbxpress import USBXpressLib, USBXpressDevice
 VID_NEWSCALE = 0x10c4
@@ -1022,21 +1021,18 @@ class GenerateTrials():
         else:
             self.BS_CurrentRunningTime=0
 
+        # Make message box prompt
         stop = False
         msg =''
-
-        # Make message box prompt
         warning_label_text = ''
         warning_label_color = 'color: gray;'        
- 
-        if np.shape(self.B_AnimalResponseHistory)[0]>=StopIgnore:
-            if np.all(self.B_AnimalResponseHistory[-StopIgnore:]==2):
-                stop=True
-                msg = 'Stopping the session because the mouse has ignored at least {} consecutive trials'.format(self.TP_StopIgnores)
-                warning_label_text = 'Stop because ignore trials exceed or equal: '+self.TP_StopIgnores
-                warning_label_color = self.win.default_warning_color
-            else:
-                stop=False
+
+        # Check for reasons to stop early 
+        if (np.shape(self.B_AnimalResponseHistory)[0]>=StopIgnore) and (np.all(self.B_AnimalResponseHistory[-StopIgnore:]==2)):
+            stop=True
+            msg = 'Stopping the session because the mouse has ignored at least {} consecutive trials'.format(self.TP_StopIgnores)
+            warning_label_text = 'Stop because ignore trials exceed or equal: '+self.TP_StopIgnores
+            warning_label_color = self.win.default_warning_color
         elif self.B_CurrentTrialN>MaxTrial: 
             stop=True
             msg = 'Stopping the session because the mouse has reached the maximum trial count: {}'.format(self.TP_MaxTrial)
