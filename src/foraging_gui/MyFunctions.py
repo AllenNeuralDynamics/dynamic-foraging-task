@@ -1058,7 +1058,7 @@ class GenerateTrials():
         if stop:           
             self.win.Start.setStyleSheet("background-color : none")
             self.win.Start.setChecked(False)        
-            reply = QtWidgets.QMessageBox.question(self.win, 'Box {}'.format(self.win.box_letter), msg, QMessageBox.Ok)
+            reply = QtWidgets.QMessageBox.question(self.win, 'Box {}'.format(self.win.box_letter), msg, QtWidgets.QMessageBox.Ok)
     
     def _CheckAutoWater(self):
         '''Check if it should be an auto water trial'''
