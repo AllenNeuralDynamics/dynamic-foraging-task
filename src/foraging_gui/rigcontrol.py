@@ -9,13 +9,25 @@ class RigClient:
         self.client = client
         self.client.addMsgHandler("default", self.msg_handler)
         self.msgs = queue.Queue(maxsize=0)
+        self.photometry_messages = {
+            'count':0,
+            'time':None
+            }
+
+    def track_photometry_messages(message):
+        return True
 
     def msg_handler(self, address, *args):
         msg = OSCMessage(address, args)
         CurrentMessage=[msg.address,args[1][0],msg.values()[2],msg.values()[3]]
         self.msgs.put([msg,args])
-        print(CurrentMessage)
-        logging.info(CurrentMessage)
+        msg_str = str(CurrentMessage)
+        if (('PhotometryRising' in msg_str) or ('PhotometryFalling' in msg_str) and (track_photometry_messages(msg_str)):
+            print('Always tracking: '+str(CurrentMessage))
+            logging.info('Always tracking: '+str(CurrentMessage))
+        else:
+            print(CurrentMessage)
+            logging.info(CurrentMessage)
 
     def send(self, address="", *args):
         message = OSCMessage(address, *args)
