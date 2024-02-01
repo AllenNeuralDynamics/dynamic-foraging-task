@@ -2165,6 +2165,9 @@ class Window(QMainWindow):
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
                 reply = QMessageBox.question(self, 'Start excitation:', 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
                 self.StartExcitation.setChecked(False)
+            else:
+                self.TeensyWarning.setText('')
+                self.TeensyWarning.setStyleSheet(self.default_warning_color)               
 
         else:
             logging.info('StartExcitation is unchecked')
@@ -2181,6 +2184,10 @@ class Window(QMainWindow):
                 self.TeensyWarning.setText('Error: stop excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
                 reply = QMessageBox.question(self, 'Start excitation:', 'error when stopping excitation: {}'.format(e), QMessageBox.Ok)
+            else:
+                self.TeensyWarning.setText('')
+                self.TeensyWarning.setStyleSheet(self.default_warning_color)               
+
     
     def _StartBleaching(self):
         if self.StartBleaching.isChecked():
