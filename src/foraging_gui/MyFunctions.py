@@ -68,6 +68,7 @@ class GenerateTrials():
         self.B_SelectedCondition=[]
         self.B_AutoWaterTrial=np.array([[],[]]).astype(bool) # to indicate if it is a trial with outo water.
         self.B_NewscalePositions=[]
+        self.B_session_control_state=[]
         self.NextWaveForm=1 # waveform stored for later use
         self.CurrentWaveForm=1 # the current waveform to trigger the optogenetics
         self.Start_Delay_LeftLicks=[]
@@ -130,6 +131,8 @@ class GenerateTrials():
             if self.TP_OptogeneticsB=='on': # optogenetics is turned on
                 # select the current optogenetics condition
                 self._SelectOptogeneticsCondition()
+                # session control is regarded as off when the optogenetics is turned off
+                self.B_session_control_state.append(self.session_control_state)
                 if self.SelctedCondition!=0: 
                     self.LaserOn=1
                     self.B_LaserOnTrial.append(self.LaserOn) 
@@ -152,6 +155,7 @@ class GenerateTrials():
                 self.B_LaserDuration.append(0)
                 self.B_SelectedCondition.append(0)
                 self.CurrentLaserAmplitude=[0,0]
+                self.B_session_control_state.append(0)
         except Exception as e:
             # optogenetics is turned off
             self.LaserOn=0
@@ -160,8 +164,16 @@ class GenerateTrials():
             self.B_LaserDuration.append(0) # corresponding to two locations
             self.B_SelectedCondition.append(0)
             self.CurrentLaserAmplitude=[0,0]
+            self.B_session_control_state.append(0)
             # Catch the exception and print error information
             logging.error(str(e))
+    def _CheckSessionControl(self):
+        '''Check if the session control is on'''
+        if self.TP_SessionWideControl=='on':
+            pass
+        else:
+            self.session_control_state=0
+
 
     def _CheckWarmUp(self):
         '''Check if we should turn on warm up'''
@@ -1251,6 +1263,11 @@ class GenerateTrials():
     def _SelectOptogeneticsCondition(self):
         '''To decide if this should be an optogenetics trial'''
         # condition should be taken into account in the future
+        # check session session
+        self._CheckSessionControl()
+        if self.session_control_state!=1:
+            self.SelctedCondition=0
+            return
         ConditionsOn=[]
         Probabilities=[]
         for attr_name in dir(self):
