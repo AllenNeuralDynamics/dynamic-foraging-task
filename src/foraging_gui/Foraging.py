@@ -2002,6 +2002,9 @@ class Window(QMainWindow):
                             logging.error(str(e))
                             value=CurrentObj[key]
                             Tag=1
+                        if key=='BaseWeight':
+                            value=CurrentObj[key]
+                            Tag=1
                         if isinstance(widget, QtWidgets.QPushButton):
                             pass
                         if type(value)==bool:
