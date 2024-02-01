@@ -2329,6 +2329,8 @@ class Window(QMainWindow):
         '''complete of _Timer'''
         self.finish_Timer=1
         logging.info('Finished photometry baseline timer')
+        self.WarningLabelStop.setText('')
+        self.WarningLabelStop.setStyleSheet(self.default_warning_color)
     
     def _Timer(self,Time):
         '''sleep some time'''
@@ -2466,17 +2468,17 @@ class Window(QMainWindow):
             workerStartTrialLoop=self.workerStartTrialLoop
             workerStartTrialLoop1=self.workerStartTrialLoop1
 
+        # Check if photometry excitation is running or not
         if self.PhotometryB.currentText()=='on' and (not self.StartExcitation.isChecked()):
             logging.warning('photometry is set to "on", but excitation is not running')
-            reply = QMessageBox.question(self, 'Start', 'photometry is set to on, but excitation is not running. Start excitation now?',QMessageBox.Yes | QMessageBox.No)
+            reply = QMessageBox.question(self, 'Start', 'Photometry is set to "on", but excitation is not running. Start excitation now?',QMessageBox.Yes | QMessageBox.No)
             if reply == QMessageBox.Yes:
                 self._StartExcitation.setChecked(True)
                 self._StartExcitation()
                 logging.info('User selected to start excitation')
             else:                   
                 logging.info('User selected not to start excitation')
- 
-        
+  
         # collecting the base signal for photometry. Only run once
         if self.PhotometryB.currentText()=='on' and self.PhotometryRun==0:
             logging.info('Starting photometry baseline timer')
@@ -2485,7 +2487,8 @@ class Window(QMainWindow):
             workertimer = Worker(self._Timer,float(self.baselinetime.text())*60)
             workertimer.signals.finished.connect(self._thread_complete_timer)
             self.threadpool_workertimer.start(workertimer)
-
+            self.WarningLabelStop.setText('Running photometry baseline')
+            self.WarningLabelStop.setStyleSheet(self.default_warning_color)
         
         self._StartTrialLoop(GeneratedTrials,worker1)
 
