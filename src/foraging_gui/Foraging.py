@@ -2473,7 +2473,7 @@ class Window(QMainWindow):
             logging.warning('photometry is set to "on", but excitation is not running')
             reply = QMessageBox.question(self, 'Start', 'Photometry is set to "on", but excitation is not running. Start excitation now?',QMessageBox.Yes | QMessageBox.No)
             if reply == QMessageBox.Yes:
-                self._StartExcitation.setChecked(True)
+                self.StartExcitation.setChecked(True)
                 self._StartExcitation()
                 logging.info('User selected to start excitation')
             else:                   
