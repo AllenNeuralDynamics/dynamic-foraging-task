@@ -2494,6 +2494,7 @@ class Window(QMainWindow):
 
         while self.Start.isChecked():
             QApplication.processEvents()
+            current_time = time.time()
             if self.ANewTrial==1 and self.Start.isChecked() and self.finish_Timer==1:
 
                 # Reset stall timer
@@ -2555,10 +2556,15 @@ class Window(QMainWindow):
                     self.threadpool.start(worker1)
                 #generate a new trial
                 if self.NewTrialRewardOrder==1:
-                    GeneratedTrials._GenerateATrial(self.Channel4)  
- 
-            elif (time.time() - last_trial_start) >stall_duration*stall_iteration:
+                    GeneratedTrials._GenerateATrial(self.Channel4)   
+
+            elif (current_time - last_trial_start) >stall_duration*stall_iteration:
                 # Elapsed time since last trial is more than tolerance
+
+                # Check if we are in the photometry baseline period.
+                if (self.finish_Timer==0) & ((current_time - last_trial_start) < float(self.baselinetime.text())*60)):
+                    # We are in the photometry baseline period
+                    continue
                 
                 # Prompt user to stop trials
                 elapsed_time = int(np.floor(stall_duration*stall_iteration/60))
