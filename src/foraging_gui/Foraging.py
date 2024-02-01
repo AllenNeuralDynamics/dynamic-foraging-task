@@ -2163,6 +2163,8 @@ class Window(QMainWindow):
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: start excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
+                reply = QMessageBox.question(self, 'Start excitation:', 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
+
         else:
             logging.info('StartExcitation is unchecked')
             self.StartExcitation.setStyleSheet("background-color : none")
@@ -2177,6 +2179,7 @@ class Window(QMainWindow):
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: stop excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
+                reply = QMessageBox.question(self, 'Start excitation:', 'error when stopping excitation: {}'.format(e), QMessageBox.Ok)
     
     def _StartBleaching(self):
         if self.StartBleaching.isChecked():
@@ -2474,8 +2477,8 @@ class Window(QMainWindow):
             reply = QMessageBox.question(self, 'Start', 'Photometry is set to "on", but excitation is not running. Start excitation now?',QMessageBox.Yes | QMessageBox.No)
             if reply == QMessageBox.Yes:
                 self.StartExcitation.setChecked(True)
-                self._StartExcitation()
                 logging.info('User selected to start excitation')
+                self._StartExcitation()
             else:                   
                 logging.info('User selected not to start excitation')
   
