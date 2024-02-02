@@ -167,12 +167,29 @@ class GenerateTrials():
             self.B_session_control_state.append(0)
             # Catch the exception and print error information
             logging.error(str(e))
+
     def _CheckSessionControl(self):
         '''Check if the session control is on'''
         if self.TP_SessionWideControl=='on':
-            pass
+            session_control_block_length=float(self.TP_MaxTrial)*float(self.TP_FractionOfSession)
+            if self.TP_SessionStartWith=='on':
+                initial_state=1
+            elif self.TP_SessionStartWith=='off':
+                initial_state=0
+            calculated_state=np.zeros(int(self.TP_MaxTrial))
+            numbers=np.arange(int(self.TP_MaxTrial))
+            numbers_floor=np.floor(numbers/session_control_block_length)
+            # Find odd values: A value is odd if value % 2 != 0
+            odd_values_mask = (numbers_floor % 2 != 0)
+            even_values_mask = (numbers_floor % 2 == 0)
+            calculated_state[even_values_mask]=initial_state
+            calculated_state[odd_values_mask]=1-initial_state
+            self.calculated_state=calculated_state
+            # get the session_control_state of the current trial
+            self.session_control_state=self.calculated_state[self.B_RewardProHistory.shape[1]-1]
         else:
             self.session_control_state=0
+            
 
 
     def _CheckWarmUp(self):
@@ -1265,7 +1282,7 @@ class GenerateTrials():
         # condition should be taken into account in the future
         # check session session
         self._CheckSessionControl()
-        if self.session_control_state!=1:
+        if self.session_control_state==0 and self.TP_SessionWideControl=='on':
             self.SelctedCondition=0
             return
         ConditionsOn=[]
