@@ -3873,6 +3873,34 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
+  <widget class="QLabel" name="SessionControlWarning">
+   <property name="geometry">
+    <rect>
+     <x>920</x>
+     <y>466</y>
+     <width>491</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="scaledContents">
+    <bool>false</bool>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+   </property>
+  </widget>
   <zorder>OptoPar</zorder>
   <zorder>Laser_1</zorder>
   <zorder>label1_2</zorder>
@@ -4018,6 +4046,7 @@
   <zorder>SessionStartWith</zorder>
   <zorder>SessionWideControl</zorder>
   <zorder>label3_20</zorder>
+  <zorder>SessionControlWarning</zorder>
  </widget>
  <resources/>
  <connections/>

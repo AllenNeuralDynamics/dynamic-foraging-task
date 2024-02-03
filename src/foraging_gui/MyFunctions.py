@@ -189,8 +189,12 @@ class GenerateTrials():
             self.session_control_state=self.calculated_state[self.B_RewardProHistory.shape[1]-1]
         else:
             self.session_control_state=0
-            
-
+        if self.session_control_state==0:
+            state='off'
+        else:
+            state='on'
+        self.win.Opto_dialog.SessionControlWarning.setText('Session control state: '+state)
+        self.win.Opto_dialog.SessionControlWarning.setStyleSheet(self.win.default_warning_color)    
 
     def _CheckWarmUp(self):
         '''Check if we should turn on warm up'''
