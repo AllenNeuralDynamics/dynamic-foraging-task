@@ -288,7 +288,8 @@ To configure automatic updates consistent with the [update protocol](https://git
    1. ‼️ So far, the automatic training system cannot handle our previous Stage 1.1 --> Stage 1.2.<br>
      For a new mouse, please still use `Stage 1.1` in the "Parameters" page to warm up the mouse as before.<br>
      ![image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/13c34f43-ceeb-4a79-927e-242f03608602)<br>
-     When you think the mouse is ready for Stage 1.2, please follow the steps below to start using automatic training.<br><br>
+     When you think the mouse is ready for Stage 1.2, please follow the steps below to start using automatic training. <br>(`Stage 1` in `Auto Train`= `Stage 1.2` in the `Parameters` tab.)<br><br>
+     
    2. Confirm that this is a new mouse in the automatic training system<br>
    <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/684d4aac-f9a9-4ce7-9536-61aace828c76" width="400"><br>
    3. In "Curriculum Manager", select a desired curriculum for the new mouse. Double-check `curriculum_name` and `curriculum_version`<br>.
