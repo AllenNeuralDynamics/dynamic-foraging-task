@@ -1546,6 +1546,7 @@ class Window(QMainWindow):
                 self.client3.close()
                 self.client4.close()
             self.Opto_dialog.close()
+            self._StopPhotometry()       
             print('GUI Window closed')
             logging.info('GUI Window closed')
         elif reply == QMessageBox.No:
@@ -1556,6 +1557,7 @@ class Window(QMainWindow):
                 self.client2.close()
                 self.client3.close()
                 self.client4.close()
+            self._StopPhotometry()       
             print('GUI Window closed')
             logging.info('GUI Window closed')
             self.Opto_dialog.close()
@@ -2273,7 +2275,6 @@ class Window(QMainWindow):
             # Trigger Teensy with the above specified exp mode
             ser.write(b's')
             ser.close()
-
         except Exception as e:
             logging.info('Could not stop photometry, most likely this means photometry is not running: '+str(e))
         finally:
