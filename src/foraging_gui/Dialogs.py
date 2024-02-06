@@ -2009,7 +2009,8 @@ class AutoTrainDialog(QDialog):
                 bucket='aind-behavior-data',
                 root='foraging_auto_training/saved_curriculums/'
             ),
-            saved_curriculums_local=self.MainWindow.default_saveFolder + '/curriculum_manager/',
+            # saved to tmp folder under user's home directory
+            saved_curriculums_local=os.path.expanduser('~/.aind_auto_train/curriculum_manager/')
         )
 
     def _show_available_curriculums(self):
