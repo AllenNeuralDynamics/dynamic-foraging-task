@@ -1168,7 +1168,7 @@ class Window(QMainWindow):
                     if child.objectName()=='AnimalName' and child.text()=='':
                         child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
-                    if child.objectName()=='Experimenter' or child.objectName()=='TotalWater' or child.objectName()=='AnimalName' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
+                    if child.objectName() in {'Experimenter','TotalWater','AnimalName','WeightBefore','WeightAfter','ExtraWater'}:
                         continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
@@ -1991,7 +1991,7 @@ class Window(QMainWindow):
                         continue
                     if key in CurrentObj:
                         # skip some keys; skip warmup
-                        if key=='ExtraWater' or key=='TotalWater' or key=='WeightAfter' or key=='SuggestedWater' or key=='Start' or key=='warmup':
+                        if key in ['Start','warmup']:
                             self.WeightAfter.setText('')
                             continue
                         widget = widget_dict[key]
@@ -2002,7 +2002,10 @@ class Window(QMainWindow):
                             logging.error(str(e))
                             value=CurrentObj[key]
                             Tag=1
-                        if key=='BaseWeight':
+                        if key in {'BaseWeight','TotalWater','TargetWeight','WeightAfter','SuggestedWater','TargetRatio'}:
+                            self.BaseWeight.disconnect()
+                            self.TargetRatio.disconnect()
+                            self.WeightAfter.disconnect()
                             value=CurrentObj[key]
                             Tag=1
                         if isinstance(widget, QtWidgets.QPushButton):
@@ -2020,6 +2023,10 @@ class Window(QMainWindow):
                                 widget.setText(value[-1])
                             elif Tag==1:
                                 widget.setText(value)
+                            if key in {'BaseWeight','TotalWater','TargetWeight','WeightAfter','SuggestedWater','TargetRatio'}:
+                                self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
+                                self.WeightAfter.textChanged.connect(self._UpdateSuggestedWater)
+                                self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
                         elif isinstance(widget, QtWidgets.QComboBox):
                             if Tag==0:
                                 index = widget.findText(value[-1])
@@ -2367,7 +2374,9 @@ class Window(QMainWindow):
 
     def _Start(self):
         '''start trial loop'''
-        
+        # empty post weight
+        self.WeightAfter.setText('')
+
         # Check for Bonsai connection
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
@@ -2768,6 +2777,7 @@ class Window(QMainWindow):
                 self.SuggestedWater.setText(str(np.round(suggested_water,3)))
             else:
                 self.SuggestedWater.setText('')
+                self.TotalWaterWarning.setText('')
             # update total water
             if self.SuggestedWater.text()=='':
                 ExtraWater=0
