@@ -138,7 +138,8 @@ class Window(QMainWindow):
         self._warmup()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
-        
+        self._StopPhotometry()       
+ 
         if not self.start_bonsai_ide:
             '''
                 When starting bonsai without the IDE the connection is always unstable.
@@ -1571,13 +1572,16 @@ class Window(QMainWindow):
                 self.Camera_dialog.StartCamera.setChecked(False)
                 self.Camera_dialog._StartCamera()
             self._Save()
+            self._StopPhotometry()       
             self.close()
         elif response==QMessageBox.No:
             # close the camera
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
                 self.Camera_dialog.StartCamera.setChecked(False)
                 self.Camera_dialog._StartCamera()
+            self._StopPhotometry()       
             self.close()
+
 
     def _Snipping(self):
         '''Open the snipping tool'''
@@ -2229,7 +2233,27 @@ class Window(QMainWindow):
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: stop bleaching!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
+    
+    def _StopPhotometry(self):
+        '''
+            Stop either bleaching or photometry
+        '''
+        try:
+            ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
+            # Trigger Teensy with the above specified exp mode
+            ser.write(b's')
+            ser.close()
 
+        except Exception as e:
+            logging.error(str(e))
+        finally:
+            self.TeensyWarning.setText('')
+            self.TeensyWarning.setStyleSheet(self.default_warning_color)      
+            self.StartBleaching.setStyleSheet("background-color : none")
+            self.StartExcitation.setStyleSheet("background-color : none")
+            self.StartBleaching.setChecked(False)
+            self.StartExcitation.setChecked(False)
+           
     def _AutoReward(self):
         if self.AutoReward.isChecked():
             self.AutoReward.setStyleSheet("background-color : green;")
