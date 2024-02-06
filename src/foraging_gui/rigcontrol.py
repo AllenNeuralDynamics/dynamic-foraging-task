@@ -11,7 +11,7 @@ class RigClient:
         self.client.addMsgHandler("default", self.msg_handler)
         self.msgs = queue.Queue(maxsize=0)
         self.photometry_messages = {}
-        self.photometry_message_tolerance = 1
+        self.photometry_message_tolerance = 2
 
     def track_photometry_messages(self, message):
         '''
@@ -37,8 +37,8 @@ class RigClient:
         # Selectively log photometry messages 1 Hz
         if (('PhotometryRising' in msg_str) or ('PhotometryFalling' in msg_str)):
             if (self.track_photometry_messages(msg.address)):
-                print(msg_str+', displaying 1/sec')
-                logging.info(msg_str+', displaying 1/sec')    
+                print(msg_str+', displaying at {} Hz'.format(1/self.photometry_message_tolerance))
+                logging.info(msg_str+', displaying at {} Hz'.format(1/self.photometry_message_tolerance))    
         else:
             print(CurrentMessage)
             logging.info(CurrentMessage)
