@@ -2287,6 +2287,8 @@ class Window(QMainWindow):
             ser.close()
         except Exception as e:
             logging.info('Could not stop photometry, most likely this means photometry is not running: '+str(e))
+        else:
+            logging.info('Photometry excitation stopped')
         finally:
             self.TeensyWarning.setText('')
             self.TeensyWarning.setStyleSheet(self.default_warning_color)      
