@@ -197,6 +197,9 @@ class GenerateTrials():
         else:
             # turn on the warm up
             warmup=1
+        # show current metrics of the warm up
+        self.win.WarmupWarning.setText('Finish trial: '+str(round(finish_trial,2))+ ' Finish ratio: '+str(round(finish_ratio,2))+'; Choice ratio bias: '+str(round(abs(choice_ratio-0.5),2)))
+        self.win.WarmupWarning.setStyleSheet(self.win.default_warning_color)
         return warmup
         
     def _CheckBaitPermitted(self):
