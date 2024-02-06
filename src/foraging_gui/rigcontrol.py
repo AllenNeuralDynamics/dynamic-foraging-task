@@ -14,6 +14,9 @@ class RigClient:
         self.photometry_message_tolerance = 1
 
     def track_photometry_messages(self, message):
+        '''
+            Keep track of when we last displayed each type of photometry signal
+        '''
         if message in self.photometry_messages:
             now = time.time()
             if (now - self.photometry_messages[message]) < self.photometry_message_tolerance:
@@ -30,10 +33,12 @@ class RigClient:
         CurrentMessage=[msg.address,args[1][0],msg.values()[2],msg.values()[3]]
         self.msgs.put([msg,args])
         msg_str = str(CurrentMessage)
-        message_key = msg.address
-        if (('PhotometryRising' in msg_str) or ('PhotometryFalling' in msg_str)) and (self.track_photometry_messages(message_key)):
-            print(msg_str+', displaying 1/sec')
-            logging.info(msg_str+', displaying 1/sec')    
+        
+        # Selectively log photometry messages 1 Hz
+        if (('PhotometryRising' in msg_str) or ('PhotometryFalling' in msg_str)):
+            if (self.track_photometry_messages(msg.address)):
+                print(msg_str+', displaying 1/sec')
+                logging.info(msg_str+', displaying 1/sec')    
         else:
             print(CurrentMessage)
             logging.info(CurrentMessage)
