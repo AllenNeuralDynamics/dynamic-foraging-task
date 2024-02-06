@@ -10,7 +10,7 @@ class RigClient:
         self.client = client
         self.client.addMsgHandler("default", self.msg_handler)
         self.msgs = queue.Queue(maxsize=0)
-        self.photometry_messages = Dict()
+        self.photometry_messages = {}
         self.photometry_message_tolerance = 1
 
     def track_photometry_messages(message):
