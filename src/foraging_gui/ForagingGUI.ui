@@ -534,7 +534,7 @@
                       <x>0</x>
                       <y>-22</y>
                       <width>178</width>
-                      <height>184</height>
+                      <height>182</height>
                      </rect>
                     </property>
                     <layout class="QVBoxLayout" name="verticalLayout">
@@ -621,6 +621,11 @@
                      </item>
                      <item>
                       <widget class="QLabel" name="WarmupWarning">
+                       <property name="font">
+                        <font>
+                         <pointsize>7</pointsize>
+                        </font>
+                       </property>
                        <property name="text">
                         <string/>
                        </property>

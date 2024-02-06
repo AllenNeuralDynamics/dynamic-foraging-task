@@ -2407,6 +2407,7 @@ class Window(QMainWindow):
             # generate a new session id
             self.WarningLabel.setText('')
             self.WarningLabel.setStyleSheet("color: gray;")
+            self.win.WarmupWarning.setText('')
             # start a new logging
             try:
                 self.Ot_log_folder=self._restartlogging()

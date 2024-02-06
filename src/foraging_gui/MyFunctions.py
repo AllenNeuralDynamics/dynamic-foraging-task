@@ -174,6 +174,8 @@ class GenerateTrials():
             self.win.warmup.setCurrentIndex(index)
             self.win._warmup()
             self.win.keyPressEvent()
+            self.win.NextBlock.setChecked(True)
+            self.win._NextBlock()
             self.win.WarmupWarning.setText('Warm up is turned off')
 
     def _get_warmup_state(self):
