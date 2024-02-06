@@ -1,3 +1,4 @@
+import time
 import queue
 import logging
 
@@ -9,22 +10,32 @@ class RigClient:
         self.client = client
         self.client.addMsgHandler("default", self.msg_handler)
         self.msgs = queue.Queue(maxsize=0)
-        self.photometry_messages = {
-            'count':0,
-            'time':None
-            }
+        self.photometry_messages = Dict()
+        self.photometry_message_tolerance = 1
 
     def track_photometry_messages(message):
-        return True
+        if message in self.photometry_messages:
+            now = time.time()
+            if (now - self.photometry_messages[message]) < self.photometry_message_tolerance:
+                return False
+            else:
+                self.photometry_messages[message] = time.time()
+                return True
+        else:
+            self.photometry_messages[message] = time.time()
+            return True
 
     def msg_handler(self, address, *args):
         msg = OSCMessage(address, args)
         CurrentMessage=[msg.address,args[1][0],msg.values()[2],msg.values()[3]]
         self.msgs.put([msg,args])
         msg_str = str(CurrentMessage)
-        if (('PhotometryRising' in msg_str) or ('PhotometryFalling' in msg_str) and (track_photometry_messages(msg_str)):
-            print('Always tracking: '+str(CurrentMessage))
-            logging.info('Always tracking: '+str(CurrentMessage))
+        message_key = args[1][0]
+        print('Always tracking: '+str(', '.join(CurrentMessage)))
+        logging.info('Always tracking: '+str(', '.join(CurrentMessage)))
+        if (('PhotometryRising' in msg_str) or ('PhotometryFalling' in msg_str)) and (track_photometry_messages(message_key):
+            print('Selective tracking: '+str(', '.join(CurrentMessage)))
+            logging.info('Selective tracking: '+str(', '.join(CurrentMessage)))    
         else:
             print(CurrentMessage)
             logging.info(CurrentMessage)
