@@ -2262,6 +2262,7 @@ class Window(QMainWindow):
         '''
             Stop either bleaching or photometry
         '''
+        logging.info('Checking that photometry is not running')
         try:
             ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
             # Trigger Teensy with the above specified exp mode
@@ -2269,7 +2270,7 @@ class Window(QMainWindow):
             ser.close()
 
         except Exception as e:
-            logging.error(str(e))
+            logging.info('Could not stop photometry, most likely this means photometry is not running: '+str(e))
         finally:
             self.TeensyWarning.setText('')
             self.TeensyWarning.setStyleSheet(self.default_warning_color)      
