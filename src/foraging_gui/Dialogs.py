@@ -334,7 +334,7 @@ class WaterCalibrationDialog(QDialog):
         self.MainWindow=MainWindow
         self.FinishLeftValve=0
         if not hasattr(self.MainWindow,'WaterCalibrationResults'):
-            self.MainWindow.LaserCalibrationResults={}
+            self.MainWindow.WaterCalibrationResults={}
             self.WaterCalibrationResults={}
         else:
             self.WaterCalibrationResults=self.MainWindow.WaterCalibrationResults
