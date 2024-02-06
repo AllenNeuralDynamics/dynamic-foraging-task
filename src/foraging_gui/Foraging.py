@@ -2180,8 +2180,9 @@ class Window(QMainWindow):
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: start excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
-                reply = QMessageBox.question(self, 'Start excitation:', 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
+                reply = QMessageBox.question(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
                 self.StartExcitation.setChecked(False)
+                self.StartExcitation.setStyleSheet("background-color : none")
             else:
                 self.TeensyWarning.setText('')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)               
