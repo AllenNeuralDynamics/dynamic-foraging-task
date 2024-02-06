@@ -2235,6 +2235,10 @@ class Window(QMainWindow):
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: start bleaching!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
+                reply = QMessageBox.question(self, 'Box {}, Start bleaching:'.format(self.box_letter), 
+                    'Cannot start photobleaching: {}'.format(str(e)), QMessageBox.Ok)
+                self.StartBleaching.setStyleSheet("background-color : none")               
+                self.StartBleaching.setChecked(False)
             else:
                 # Bleaching continues until user stops
                 msgbox = QMessageBox()
