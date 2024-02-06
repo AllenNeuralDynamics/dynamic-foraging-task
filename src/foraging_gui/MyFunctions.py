@@ -174,6 +174,7 @@ class GenerateTrials():
             self.win.warmup.setCurrentIndex(index)
             self.win._warmup()
             self.win.keyPressEvent()
+            self.win.WarmupWarning.setText('Warm up is turned off')
 
     def _get_warmup_state(self):
         '''calculate the metrics related to the warm up and decide if we should turn on the warm up'''
@@ -198,7 +199,7 @@ class GenerateTrials():
             # turn on the warm up
             warmup=1
         # show current metrics of the warm up
-        self.win.WarmupWarning.setText('Finish trial: '+str(round(finish_trial,2))+ ' Finish ratio: '+str(round(finish_ratio,2))+'; Choice ratio bias: '+str(round(abs(choice_ratio-0.5),2)))
+        self.win.WarmupWarning.setText('Finish trial: '+str(round(finish_trial,2))+ '; Finish ratio: '+str(round(finish_ratio,2))+'; Choice ratio bias: '+str(round(abs(choice_ratio-0.5),2)))
         self.win.WarmupWarning.setStyleSheet(self.win.default_warning_color)
         return warmup
         
