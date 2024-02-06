@@ -31,11 +31,9 @@ class RigClient:
         self.msgs.put([msg,args])
         msg_str = str(CurrentMessage)
         message_key = msg.address
-        print(CurrentMessage)
-        logging.info(CurrentMessage)
         if (('PhotometryRising' in msg_str) or ('PhotometryFalling' in msg_str)) and (self.track_photometry_messages(message_key)):
-            print('Selective tracking: '+msg_str)
-            logging.info('Selective tracking: '+msg_str)    
+            print(msg_str+', displaying 1/sec')
+            logging.info(msg_str+', displaying 1/sec')    
         else:
             print(CurrentMessage)
             logging.info(CurrentMessage)
