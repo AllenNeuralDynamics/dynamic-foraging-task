@@ -2238,7 +2238,7 @@ class Window(QMainWindow):
             else:
                 # Bleaching continues until user stops
                 msgbox = QMessageBox()
-                msgbox.setWindowTitle('Box {}, bleaching:'.format(self.box_letter)
+                msgbox.setWindowTitle('Box {}, bleaching:'.format(self.box_letter))
                 msgbox.setText('Photobleaching in progress, do not close the GUI.')
                 msgbox.addButton('Stop bleaching',QMessageBox.Ok)
                 bttn = msgbox.exec_()
