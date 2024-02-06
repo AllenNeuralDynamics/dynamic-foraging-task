@@ -686,7 +686,7 @@ class Window(QMainWindow):
             logging.info('Bonsai started successfully')
             self.InitializeBonsaiSuccessfully=1
             self.WarningLabel.setText('')
-            self.WarningLabel.setStyleSheet("color: red;")
+            self.WarningLabel.setStyleSheet(self.default_warning_color)
             return
 
         # Start Bonsai
@@ -711,7 +711,7 @@ class Window(QMainWindow):
                 logging.info('Bonsai started successfully')
                 if self.WarningLabel.text() == 'Lost bonsai connection':
                     self.WarningLabel.setText('')
-                    self.WarningLabel.setStyleSheet("color: red;")
+                    self.WarningLabel.setStyleSheet(self.default_warning_color)
                 self.InitializeBonsaiSuccessfully=1
                 subprocess.Popen('title Box{}'.format(self.box_letter),shell=True)
                 return
@@ -2325,7 +2325,7 @@ class Window(QMainWindow):
                         logging.error('trial stalled {} minutes, user force stopped trials'.format(elapsed_time))
                         self.ANewTrial=1
                         self.WarningLabel.setText('')
-                        self.WarningLabel.setStyleSheet("color: red;")
+                        self.WarningLabel.setStyleSheet(self.default_warning_color)
                         break
                     else:
                         stall_iteration+=1
@@ -2414,7 +2414,7 @@ class Window(QMainWindow):
                 if 'ConnectionAbortedError' in str(e):
                     logging.info('lost bonsai connection: restartlogging()')
                     self.WarningLabel.setText('Lost bonsai connection')
-                    self.WarningLabel.setStyleSheet("color: red;")
+                    self.WarningLabel.setStyleSheet(self.default_warning_color)
                     self.Start.setChecked(False)
                     self.Start.setStyleSheet("background-color : none")
                     self.InitializeBonsaiSuccessfully=0
@@ -2560,7 +2560,7 @@ class Window(QMainWindow):
                     if 'ConnectionAbortedError' in str(e):
                         logging.info('lost bonsai connection: InitiateATrial')
                         self.WarningLabel.setText('Lost bonsai connection')
-                        self.WarningLabel.setStyleSheet("color: red;")
+                        self.WarningLabel.setStyleSheet(self.default_warning_color)
                         self.Start.setChecked(False)
                         self.Start.setStyleSheet("background-color : none")
                         self.InitializeBonsaiSuccessfully=0
@@ -2628,7 +2628,7 @@ class Window(QMainWindow):
                     
                     # Give warning to user
                     self.WarningLabel.setText('Trials stalled, recheck bonsai connection.')
-                    self.WarningLabel.setStyleSheet("color: red;")
+                    self.WarningLabel.setStyleSheet(self.default_warning_color)
                     break
                 else:
                     # User continues, wait another stall_duration and prompt again
