@@ -433,7 +433,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_show_all_training_history">
+           <widget class="QPushButton" name="pushButton_show_auto_training_history_in_streamlit">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -442,12 +442,12 @@
             </property>
             <property name="maximumSize">
              <size>
-              <width>300</width>
+              <width>250</width>
               <height>30</height>
              </size>
             </property>
             <property name="text">
-             <string>Show training history in browser</string>
+             <string>Show auto-training history in Streamlit</string>
             </property>
            </widget>
           </item>
@@ -589,7 +589,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_show_paras_in_browser">
+                 <widget class="QPushButton" name="pushButton_show_curriculum_in_streamlit">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                     <horstretch>0</horstretch>
@@ -598,31 +598,12 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>200</width>
+                    <width>250</width>
                     <height>30</height>
                    </size>
                   </property>
                   <property name="text">
-                   <string>Show parameters in browser</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="pushButton_show_rules_in_browser">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>200</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string>Show rules in browser</string>
+                   <string>Show curriculum in Streamlit</string>
                   </property>
                  </widget>
                 </item>

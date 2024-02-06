@@ -372,35 +372,6 @@
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="3" rowspan="2">
-                    <widget class="QPushButton" name="AutoTrain">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                       <horstretch>10</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="maximumSize">
-                      <size>
-                       <width>16777215</width>
-                       <height>50</height>
-                      </size>
-                     </property>
-                     <property name="autoFillBackground">
-                      <bool>false</bool>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">background-color: rgb(0, 214, 103);</string>
-                     </property>
-                     <property name="text">
-                      <string>Auto Train
-(Ctrl+Alt+A)</string>
-                     </property>
-                     <property name="shortcut">
-                      <string>Ctrl+Alt+A</string>
-                     </property>
-                    </widget>
-                   </item>
                    <item row="3" column="1">
                     <widget class="QLabel" name="label_74">
                      <property name="sizePolicy">
@@ -442,6 +413,41 @@
                      </property>
                      <property name="text">
                       <string>Date</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="3" rowspan="2">
+                    <widget class="QPushButton" name="AutoTrain">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                       <horstretch>10</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>16777215</width>
+                       <height>50</height>
+                      </size>
+                     </property>
+                     <property name="autoFillBackground">
+                      <bool>false</bool>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">background-color: rgb(0, 214, 103);</string>
+                     </property>
+                     <property name="text">
+                      <string>Auto Train</string>
+                     </property>
+                     <property name="shortcut">
+                      <string>Ctrl+Alt+A</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="3">
+                    <widget class="QPushButton" name="pushButton_streamlit">
+                     <property name="text">
+                      <string>Streamlit!</string>
                      </property>
                     </widget>
                    </item>
@@ -816,7 +822,7 @@
             <string notr="true"/>
            </property>
            <property name="currentIndex">
-            <number>2</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="tab_2">
             <attribute name="title">
@@ -1806,7 +1812,7 @@
                            </property>
                           </widget>
                          </item>
-                         <item row="4" column="0" colspan="5">
+                         <item row="4" column="0" colspan="3">
                           <widget class="QLabel" name="TotalWaterWarning">
                            <property name="minimumSize">
                             <size>
@@ -2476,9 +2482,9 @@ Double dipping:
                 <property name="geometry">
                  <rect>
                   <x>0</x>
-                  <y>0</y>
-                  <width>904</width>
-                  <height>408</height>
+                  <y>-152</y>
+                  <width>1077</width>
+                  <height>460</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -2505,22 +2511,54 @@ Double dipping:
                    <layout class="QVBoxLayout" name="verticalLayout_10">
                     <item>
                      <layout class="QGridLayout" name="gridLayout">
-                      <item row="11" column="3">
-                       <widget class="QLineEdit" name="BlockMinReward">
+                      <item row="10" column="8">
+                       <widget class="QLabel" name="label_60">
+                        <property name="enabled">
+                         <bool>false</bool>
+                        </property>
                         <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>7</horstretch>
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
                           <verstretch>0</verstretch>
                          </sizepolicy>
                         </property>
-                        <property name="maximumSize">
+                        <property name="text">
+                         <string>points in a row=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="4" column="4">
+                       <spacer name="horizontalSpacer">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
                          <size>
-                          <width>70</width>
-                          <height>16777215</height>
+                          <width>10</width>
+                          <height>20</height>
                          </size>
                         </property>
+                       </spacer>
+                      </item>
+                      <item row="8" column="0">
+                       <widget class="QLabel" name="label_44">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>30</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
                         <property name="text">
-                         <string>0</string>
+                         <string>Auto water</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
                         </property>
                        </widget>
                       </item>
@@ -2546,38 +2584,22 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
-                      <item row="4" column="4">
-                       <spacer name="horizontalSpacer">
-                        <property name="orientation">
-                         <enum>Qt::Horizontal</enum>
-                        </property>
-                        <property name="sizeHint" stdset="0">
-                         <size>
-                          <width>10</width>
-                          <height>20</height>
-                         </size>
-                        </property>
-                       </spacer>
-                      </item>
-                      <item row="10" column="8">
-                       <widget class="QLabel" name="label_60">
-                        <property name="enabled">
-                         <bool>false</bool>
-                        </property>
+                      <item row="11" column="3">
+                       <widget class="QLineEdit" name="BlockMinReward">
                         <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>7</horstretch>
                           <verstretch>0</verstretch>
                          </sizepolicy>
                         </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
                         <property name="text">
-                         <string>points in a row=</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                         <string>0</string>
                         </property>
                        </widget>
                       </item>
@@ -2594,22 +2616,6 @@ Double dipping:
                         </property>
                         <property name="checkable">
                          <bool>true</bool>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="6" column="12">
-                       <widget class="QLineEdit" name="ITIIncrease">
-                        <property name="enabled">
-                         <bool>false</bool>
-                        </property>
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>7</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>0</string>
                         </property>
                        </widget>
                       </item>
@@ -2632,19 +2638,19 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
-                      <item row="8" column="0">
-                       <widget class="QLabel" name="label_44">
+                      <item row="6" column="12">
+                       <widget class="QLineEdit" name="ITIIncrease">
+                        <property name="enabled">
+                         <bool>false</bool>
+                        </property>
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>30</horstretch>
+                          <horstretch>7</horstretch>
                           <verstretch>0</verstretch>
                          </sizepolicy>
                         </property>
                         <property name="text">
-                         <string>Auto water</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
+                         <string>0</string>
                         </property>
                        </widget>
                       </item>
@@ -2664,44 +2670,6 @@ Double dipping:
                         </property>
                         <property name="alignment">
                          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="5" column="12">
-                       <widget class="QLineEdit" name="RewardDelay">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>7</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>0</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="6" column="3">
-                       <widget class="QLineEdit" name="ITIBeta">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>2</string>
                         </property>
                        </widget>
                       </item>
@@ -2736,445 +2704,11 @@ Double dipping:
                         </item>
                        </widget>
                       </item>
-                      <item row="6" column="9">
-                       <widget class="QLineEdit" name="ITIMax">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>8</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="5" column="2">
-                       <widget class="QLabel" name="label_18">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>beta=</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="8" column="11">
-                       <widget class="QLabel" name="label_46">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>ignored=</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="7" column="2">
-                       <widget class="QLabel" name="label_50">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>RT=</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="7" column="3">
-                       <widget class="QLineEdit" name="ResponseTime">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>1</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="10" column="3">
-                       <widget class="QComboBox" name="AdvancedBlockAuto">
-                        <property name="enabled">
-                         <bool>true</bool>
-                        </property>
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <item>
-                         <property name="text">
-                          <string>off</string>
-                         </property>
-                        </item>
-                        <item>
-                         <property name="text">
-                          <string>now</string>
-                         </property>
-                        </item>
-                        <item>
-                         <property name="text">
-                          <string>once</string>
-                         </property>
-                        </item>
-                       </widget>
-                      </item>
-                      <item row="5" column="8">
-                       <widget class="QLabel" name="label_17">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>max=</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="10" column="9">
-                       <widget class="QLineEdit" name="PointsInARow">
-                        <property name="enabled">
-                         <bool>false</bool>
-                        </property>
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>5</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="10" column="0" rowspan="2">
-                       <widget class="QLabel" name="label_52">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>30</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>Auto block</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="8" column="12">
-                       <widget class="QLineEdit" name="Ignored">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>100</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="4" column="10">
-                       <spacer name="horizontalSpacer_3">
-                        <property name="orientation">
-                         <enum>Qt::Horizontal</enum>
-                        </property>
-                        <property name="sizeHint" stdset="0">
-                         <size>
-                          <width>10</width>
-                          <height>20</height>
-                         </size>
-                        </property>
-                       </spacer>
-                      </item>
-                      <item row="6" column="8">
-                       <widget class="QLabel" name="label_41">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>max=</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="2" column="2">
-                       <widget class="QLabel" name="label_28">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="layoutDirection">
-                         <enum>Qt::LeftToRight</enum>
-                        </property>
-                        <property name="text">
-                         <string>L(ul)=</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="3" column="8">
-                       <widget class="QLabel" name="label_8">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string># of pairs</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="4" column="0">
-                       <widget class="QLabel" name="label_10">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>30</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>Block</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="6" column="2">
-                       <widget class="QLabel" name="label_39">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>beta=</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="5" column="0">
-                       <widget class="QLabel" name="label_19">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>30</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>Delay period</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="6" column="6">
-                       <widget class="QLineEdit" name="ITIMin">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>1</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="4" column="3">
-                       <widget class="QLineEdit" name="BlockBeta">
+                      <item row="5" column="12">
+                       <widget class="QLineEdit" name="RewardDelay">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>7</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>20</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="8" column="8">
-                       <widget class="QLabel" name="label_45">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>unrewarded=</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="0" column="3">
-                       <widget class="QLabel" name="label_5">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>training stage=</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="10" column="2">
-                       <widget class="QLabel" name="label_53">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>auto block=</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="4" column="8">
-                       <widget class="QLabel" name="label_11">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>15</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>max=</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="5" column="6">
-                       <widget class="QLineEdit" name="DelayMin">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
                           <verstretch>0</verstretch>
                          </sizepolicy>
                         </property>
@@ -3186,234 +2720,6 @@ Double dipping:
                         </property>
                         <property name="text">
                          <string>0</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="5" column="11">
-                       <widget class="QLabel" name="label_89">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>Reward delay=</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="5" column="5">
-                       <widget class="QLabel" name="label_15">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>min=</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="11" column="2">
-                       <widget class="QLabel" name="label_13">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>20</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>min rew. each block=</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="10" column="6">
-                       <widget class="QLineEdit" name="SwitchThr">
-                        <property name="enabled">
-                         <bool>false</bool>
-                        </property>
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>0.5</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="7" column="0">
-                       <widget class="QLabel" name="label_49">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>30</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>Other times (sec)</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="4" column="9">
-                       <widget class="QLineEdit" name="BlockMax">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>7</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>60</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="4" column="5">
-                       <widget class="QLabel" name="label_12">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>15</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>min=</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="4" column="6">
-                       <widget class="QLineEdit" name="BlockMin">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>7</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>20</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="8" column="5">
-                       <widget class="QLabel" name="label_48">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>multiplier=</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="8" column="6">
-                       <widget class="QLineEdit" name="Multiplier">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>0.8</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="10" column="5">
-                       <widget class="QLabel" name="label_54">
-                        <property name="enabled">
-                         <bool>false</bool>
-                        </property>
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>switch thr=</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="6" column="0">
-                       <widget class="QLabel" name="label_40">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>30</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>ITI</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
                         </property>
                        </widget>
                       </item>
@@ -3470,24 +2776,62 @@ Double dipping:
                         </item>
                        </widget>
                       </item>
-                      <item row="0" column="6">
-                       <widget class="QPushButton" name="SaveTraining">
+                      <item row="13" column="13">
+                       <spacer name="horizontalSpacer_6">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item row="4" column="9">
+                       <widget class="QLineEdit" name="BlockMax">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>7</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>60</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="11" column="2">
+                       <widget class="QLabel" name="label_13">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
+                          <horstretch>20</horstretch>
                           <verstretch>0</verstretch>
                          </sizepolicy>
                         </property>
                         <property name="text">
-                         <string>Save training</string>
+                         <string>min rew. each block=</string>
                         </property>
-                        <property name="checkable">
-                         <bool>true</bool>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                         </property>
                        </widget>
                       </item>
-                      <item row="0" column="12">
-                       <widget class="QLineEdit" name="InitiallyInactiveN">
+                      <item row="10" column="6">
+                       <widget class="QLineEdit" name="SwitchThr">
+                        <property name="enabled">
+                         <bool>false</bool>
+                        </property>
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -3501,12 +2845,66 @@ Double dipping:
                          </size>
                         </property>
                         <property name="text">
-                         <string>2</string>
+                         <string>0.5</string>
                         </property>
                        </widget>
                       </item>
-                      <item row="5" column="3">
-                       <widget class="QLineEdit" name="DelayBeta">
+                      <item row="5" column="5">
+                       <widget class="QLabel" name="label_15">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>min=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="7" column="0">
+                       <widget class="QLabel" name="label_49">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>30</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>Other times (sec)</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="5" column="2">
+                       <widget class="QLabel" name="label_18">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>beta=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="7" column="3">
+                       <widget class="QLineEdit" name="ResponseTime">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -3524,8 +2922,464 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
+                      <item row="6" column="3">
+                       <widget class="QLineEdit" name="ITIBeta">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>2</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="5" column="8">
+                       <widget class="QLabel" name="label_17">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>max=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="6" column="9">
+                       <widget class="QLineEdit" name="ITIMax">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>8</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="7" column="2">
+                       <widget class="QLabel" name="label_50">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>RT=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="10" column="3">
+                       <widget class="QComboBox" name="AdvancedBlockAuto">
+                        <property name="enabled">
+                         <bool>true</bool>
+                        </property>
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <item>
+                         <property name="text">
+                          <string>off</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>now</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>once</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
+                      <item row="8" column="11">
+                       <widget class="QLabel" name="label_46">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>ignored=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="10" column="9">
+                       <widget class="QLineEdit" name="PointsInARow">
+                        <property name="enabled">
+                         <bool>false</bool>
+                        </property>
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>5</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="6" column="8">
+                       <widget class="QLabel" name="label_41">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>max=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="2" column="2">
+                       <widget class="QLabel" name="label_28">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="layoutDirection">
+                         <enum>Qt::LeftToRight</enum>
+                        </property>
+                        <property name="text">
+                         <string>L(ul)=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="6" column="2">
+                       <widget class="QLabel" name="label_39">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>beta=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="10" column="0" rowspan="2">
+                       <widget class="QLabel" name="label_52">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>30</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>Auto block</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="4" column="10">
+                       <spacer name="horizontalSpacer_3">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>10</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item row="8" column="12">
+                       <widget class="QLineEdit" name="Ignored">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>100</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="4" column="0">
+                       <widget class="QLabel" name="label_10">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>30</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>Block</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="5" column="0">
+                       <widget class="QLabel" name="label_19">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>30</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>Delay period</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="4" column="3">
+                       <widget class="QLineEdit" name="BlockBeta">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>7</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>20</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="8" column="8">
+                       <widget class="QLabel" name="label_45">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>unrewarded=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="3" column="8">
+                       <widget class="QLabel" name="label_8">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string># of pairs</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="10" column="2">
+                       <widget class="QLabel" name="label_53">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>auto block=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="6" column="6">
+                       <widget class="QLineEdit" name="ITIMin">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>1</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="5" column="11">
+                       <widget class="QLabel" name="label_89">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>Reward delay=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="5" column="6">
+                       <widget class="QLineEdit" name="DelayMin">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>0</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="4" column="8">
+                       <widget class="QLabel" name="label_11">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>15</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>max=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
                       <item row="5" column="9">
                        <widget class="QLineEdit" name="DelayMax">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>1</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="5" column="3">
+                       <widget class="QLineEdit" name="DelayBeta">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -3562,6 +3416,25 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
+                      <item row="0" column="12">
+                       <widget class="QLineEdit" name="InitiallyInactiveN">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>2</string>
+                        </property>
+                       </widget>
+                      </item>
                       <item row="1" column="0" rowspan="2">
                        <widget class="QLabel" name="label">
                         <property name="sizePolicy">
@@ -3575,31 +3448,6 @@ Double dipping:
                         </property>
                         <property name="textFormat">
                          <enum>Qt::AutoText</enum>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="3" column="11">
-                       <widget class="QLabel" name="label_20">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>20</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="minimumSize">
-                         <size>
-                          <width>0</width>
-                          <height>0</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>uncoupled =</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                         </property>
                        </widget>
                       </item>
@@ -3641,16 +3489,22 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
-                      <item row="2" column="5">
-                       <widget class="QLabel" name="label_29">
+                      <item row="3" column="11">
+                       <widget class="QLabel" name="label_20">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
+                          <horstretch>20</horstretch>
                           <verstretch>0</verstretch>
                          </sizepolicy>
                         </property>
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>0</height>
+                         </size>
+                        </property>
                         <property name="text">
-                         <string>R(ul)=</string>
+                         <string>uncoupled =</string>
                         </property>
                         <property name="textFormat">
                          <enum>Qt::AutoText</enum>
@@ -3660,27 +3514,110 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
-                      <item row="3" column="12" colspan="2">
-                       <widget class="QLineEdit" name="UncoupledReward">
+                      <item row="8" column="5">
+                       <widget class="QLabel" name="label_48">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>10</horstretch>
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>multiplier=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="4" column="5">
+                       <widget class="QLabel" name="label_12">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>15</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>min=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="4" column="6">
+                       <widget class="QLineEdit" name="BlockMin">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>7</horstretch>
                           <verstretch>0</verstretch>
                          </sizepolicy>
                         </property>
                         <property name="maximumSize">
                          <size>
-                          <width>150</width>
+                          <width>70</width>
                           <height>16777215</height>
                          </size>
                         </property>
                         <property name="text">
-                         <string>0.1,0.3,0.7</string>
+                         <string>20</string>
                         </property>
                        </widget>
                       </item>
-                      <item row="0" column="5">
-                       <widget class="QComboBox" name="TrainingStage">
+                      <item row="12" column="3">
+                       <widget class="QLineEdit" name="StopIgnores">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>20</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="0" column="8">
+                       <widget class="QLabel" name="label_9">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>randomness=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="10" column="1" rowspan="2">
+                       <widget class="Line" name="line">
+                        <property name="orientation">
+                         <enum>Qt::Vertical</enum>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="3" column="9">
+                       <widget class="QLineEdit" name="RewardPairsN">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -3693,46 +3630,274 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
+                        <property name="text">
+                         <string>1</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="7" column="6">
+                       <widget class="QLineEdit" name="RewardConsumeTime">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>3</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="12" column="0">
+                       <widget class="QLabel" name="label_30">
+                        <property name="text">
+                         <string>Auto stop</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="10" column="11" rowspan="2">
+                       <widget class="QPushButton" name="NextBlock">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>Next block</string>
+                        </property>
+                        <property name="checkable">
+                         <bool>true</bool>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="12" column="9">
+                       <widget class="QLineEdit" name="MaxTime">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>120</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="11" column="6">
+                       <widget class="QComboBox" name="IncludeAutoReward">
+                        <property name="enabled">
+                         <bool>true</bool>
+                        </property>
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>7</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
                         <item>
                          <property name="text">
-                          <string>NA</string>
+                          <string>no</string>
                          </property>
                         </item>
                         <item>
                          <property name="text">
-                          <string>Stage1.1</string>
+                          <string>yes</string>
                          </property>
                         </item>
-                        <item>
-                         <property name="text">
-                          <string>Stage1.2</string>
-                         </property>
-                        </item>
-                        <item>
-                         <property name="text">
-                          <string>Stage2</string>
-                         </property>
-                        </item>
-                        <item>
-                         <property name="text">
-                          <string>Stage3</string>
-                         </property>
-                        </item>
-                        <item>
-                         <property name="text">
-                          <string>Stage4</string>
-                         </property>
-                        </item>
-                        <item>
-                         <property name="text">
-                          <string>Stage5</string>
-                         </property>
-                        </item>
-                        <item>
-                         <property name="text">
-                          <string>Stage6</string>
-                         </property>
-                        </item>
+                       </widget>
+                      </item>
+                      <item row="12" column="5">
+                       <widget class="QLabel" name="label_57">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>max trial=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="7" column="5">
+                       <widget class="QLabel" name="label_56">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>Reward consume time =</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="4" column="2">
+                       <widget class="QLabel" name="label_14">
+                        <property name="text">
+                         <string>beta=</string>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="12" column="8">
+                       <widget class="QLabel" name="label_58">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>max time (min)=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="10" column="5">
+                       <widget class="QLabel" name="label_54">
+                        <property name="enabled">
+                         <bool>false</bool>
+                        </property>
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>switch thr=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="8" column="6">
+                       <widget class="QLineEdit" name="Multiplier">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>0.8</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="9" column="2">
+                       <spacer name="verticalSpacer">
+                        <property name="orientation">
+                         <enum>Qt::Vertical</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>20</width>
+                          <height>5</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item row="3" column="6">
+                       <widget class="QLineEdit" name="RewardFamily">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>1</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="6" column="0">
+                       <widget class="QLabel" name="label_40">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>30</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>ITI</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="13" column="14">
+                       <widget class="QLabel" name="label_116">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>min finish ratio=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
                        </widget>
                       </item>
                       <item row="2" column="6">
@@ -3757,6 +3922,44 @@ Double dipping:
                         </property>
                         <property name="value">
                          <double>3.000000000000000</double>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="2" column="5">
+                       <widget class="QLabel" name="label_29">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>R(ul)=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="3" column="12" colspan="4">
+                       <widget class="QLineEdit" name="UncoupledReward">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>10</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>150</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>0.1,0.3,0.7</string>
                         </property>
                        </widget>
                       </item>
@@ -3843,25 +4046,6 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
-                      <item row="3" column="3">
-                       <widget class="QLineEdit" name="BaseRewardSum">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>0.8</string>
-                        </property>
-                       </widget>
-                      </item>
                       <item row="1" column="2">
                        <widget class="QLabel" name="label_2">
                         <property name="sizePolicy">
@@ -3881,50 +4065,6 @@ Double dipping:
                         </property>
                         <property name="alignment">
                          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="3" column="0">
-                       <widget class="QLabel" name="label_4">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>30</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>Rew. probabilities</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="2" column="3">
-                       <widget class="QDoubleSpinBox" name="LeftValue_volume">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="decimals">
-                         <number>2</number>
-                        </property>
-                        <property name="maximum">
-                         <double>998.000000000000000</double>
-                        </property>
-                        <property name="singleStep">
-                         <double>1.000000000000000</double>
-                        </property>
-                        <property name="value">
-                         <double>3.000000000000000</double>
                         </property>
                        </widget>
                       </item>
@@ -3972,11 +4112,11 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
-                      <item row="12" column="6">
-                       <widget class="QLineEdit" name="MaxTrial">
+                      <item row="3" column="3">
+                       <widget class="QLineEdit" name="BaseRewardSum">
                         <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                          <horstretch>7</horstretch>
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
                           <verstretch>0</verstretch>
                          </sizepolicy>
                         </property>
@@ -3987,7 +4127,42 @@ Double dipping:
                          </size>
                         </property>
                         <property name="text">
-                         <string>1000</string>
+                         <string>0.8</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="3" column="0">
+                       <widget class="QLabel" name="label_4">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>30</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>Rew. probabilities</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="13" column="2">
+                       <widget class="QLabel" name="label_63">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>warm up=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                         </property>
                        </widget>
                       </item>
@@ -4010,210 +4185,10 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
-                      <item row="3" column="9">
-                       <widget class="QLineEdit" name="RewardPairsN">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>1</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="10" column="1" rowspan="2">
-                       <widget class="Line" name="line">
-                        <property name="orientation">
-                         <enum>Qt::Vertical</enum>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="12" column="3">
-                       <widget class="QLineEdit" name="StopIgnores">
+                      <item row="12" column="6">
+                       <widget class="QLineEdit" name="MaxTrial">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>20</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="12" column="11" rowspan="2" colspan="3">
-                       <widget class="QLabel" name="ShowRewardPairs_2">
-                        <property name="enabled">
-                         <bool>true</bool>
-                        </property>
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>16777215</width>
-                          <height>80</height>
-                         </size>
-                        </property>
-                        <property name="font">
-                         <font>
-                          <pointsize>8</pointsize>
-                         </font>
-                        </property>
-                        <property name="text">
-                         <string>Reward pairs:
-[ ]
-
-Current pair:
-[ ]</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::PlainText</enum>
-                        </property>
-                        <property name="scaledContents">
-                         <bool>true</bool>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-                        </property>
-                        <property name="wordWrap">
-                         <bool>true</bool>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="0" column="8">
-                       <widget class="QLabel" name="label_9">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>randomness=</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="10" column="11" rowspan="2">
-                       <widget class="QPushButton" name="NextBlock">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>Next block</string>
-                        </property>
-                        <property name="checkable">
-                         <bool>true</bool>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="4" column="2">
-                       <widget class="QLabel" name="label_14">
-                        <property name="text">
-                         <string>beta=</string>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="7" column="6">
-                       <widget class="QLineEdit" name="RewardConsumeTime">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>3</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="7" column="5">
-                       <widget class="QLabel" name="label_56">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>Reward consume time =</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="12" column="0">
-                       <widget class="QLabel" name="label_30">
-                        <property name="text">
-                         <string>Auto stop</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="3" column="6">
-                       <widget class="QLineEdit" name="RewardFamily">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>1</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="11" column="6">
-                       <widget class="QComboBox" name="IncludeAutoReward">
-                        <property name="enabled">
-                         <bool>true</bool>
-                        </property>
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>7</horstretch>
                           <verstretch>0</verstretch>
                          </sizepolicy>
@@ -4224,22 +4199,15 @@ Current pair:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <item>
-                         <property name="text">
-                          <string>no</string>
-                         </property>
-                        </item>
-                        <item>
-                         <property name="text">
-                          <string>yes</string>
-                         </property>
-                        </item>
+                        <property name="text">
+                         <string>1000</string>
+                        </property>
                        </widget>
                       </item>
-                      <item row="12" column="9">
-                       <widget class="QLineEdit" name="MaxTime">
+                      <item row="2" column="3">
+                       <widget class="QDoubleSpinBox" name="LeftValue_volume">
                         <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
                           <verstretch>0</verstretch>
                          </sizepolicy>
@@ -4250,13 +4218,22 @@ Current pair:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
-                         <string>120</string>
+                        <property name="decimals">
+                         <number>2</number>
+                        </property>
+                        <property name="maximum">
+                         <double>998.000000000000000</double>
+                        </property>
+                        <property name="singleStep">
+                         <double>1.000000000000000</double>
+                        </property>
+                        <property name="value">
+                         <double>3.000000000000000</double>
                         </property>
                        </widget>
                       </item>
-                      <item row="12" column="5">
-                       <widget class="QLabel" name="label_57">
+                      <item row="13" column="0">
+                       <widget class="QLabel" name="label_62">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -4264,7 +4241,46 @@ Current pair:
                          </sizepolicy>
                         </property>
                         <property name="text">
-                         <string>max trial=</string>
+                         <string>Warm up:</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="13" column="3">
+                       <widget class="QComboBox" name="warmup">
+                        <property name="enabled">
+                         <bool>true</bool>
+                        </property>
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <item>
+                         <property name="text">
+                          <string>off</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>on</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
+                      <item row="13" column="5">
+                       <widget class="QLabel" name="label_64">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>min trial=</string>
                         </property>
                         <property name="textFormat">
                          <enum>Qt::AutoText</enum>
@@ -4274,8 +4290,8 @@ Current pair:
                         </property>
                        </widget>
                       </item>
-                      <item row="12" column="8">
-                       <widget class="QLabel" name="label_58">
+                      <item row="13" column="8">
+                       <widget class="QLabel" name="label_117">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -4283,7 +4299,7 @@ Current pair:
                          </sizepolicy>
                         </property>
                         <property name="text">
-                         <string>max time (min)=</string>
+                         <string>max choice ratio bias=</string>
                         </property>
                         <property name="textFormat">
                          <enum>Qt::AutoText</enum>
@@ -4293,22 +4309,224 @@ Current pair:
                         </property>
                        </widget>
                       </item>
-                      <item row="9" column="2">
-                       <spacer name="verticalSpacer">
+                      <item row="13" column="9">
+                       <widget class="QLineEdit" name="warm_max_choice_ratio_bias">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>0.1</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="13" column="12">
+                       <widget class="QLineEdit" name="warm_windowsize">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>20</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="13" column="11">
+                       <widget class="QLabel" name="label_118">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>window size (trials)=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="0" column="6">
+                       <widget class="QPushButton" name="SaveTraining">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>Save training</string>
+                        </property>
+                        <property name="checkable">
+                         <bool>true</bool>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="0" column="5">
+                       <widget class="QComboBox" name="TrainingStage">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <item>
+                         <property name="text">
+                          <string>NA</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>Stage1.1</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>Stage1.2</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>Stage2</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>Stage3</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>Stage4</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>Stage5</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>Stage6</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
+                      <item row="0" column="3">
+                       <widget class="QLabel" name="label_5">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>training stage=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="13" column="6">
+                       <widget class="QLineEdit" name="warm_min_trial">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>60</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="13" column="7">
+                       <spacer name="horizontalSpacer_7">
                         <property name="orientation">
-                         <enum>Qt::Vertical</enum>
+                         <enum>Qt::Horizontal</enum>
                         </property>
                         <property name="sizeHint" stdset="0">
                          <size>
-                          <width>20</width>
-                          <height>5</height>
+                          <width>40</width>
+                          <height>20</height>
                          </size>
                         </property>
                        </spacer>
                       </item>
+                      <item row="13" column="15">
+                       <widget class="QLineEdit" name="warm_min_finish_ratio">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>0.8</string>
+                        </property>
+                       </widget>
+                      </item>
                      </layout>
                     </item>
                    </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="ShowRewardPairs_2">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>80</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>8</pointsize>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Reward pairs:
+[ ]
+
+Current pair:
+[ ]</string>
+                   </property>
+                   <property name="textFormat">
+                    <enum>Qt::PlainText</enum>
+                   </property>
+                   <property name="scaledContents">
+                    <bool>true</bool>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+                   </property>
+                   <property name="wordWrap">
+                    <bool>true</bool>
+                   </property>
                   </widget>
                  </item>
                 </layout>
@@ -4387,7 +4605,7 @@ Current pair:
                        </widget>
                       </item>
                       <item row="1" column="1" colspan="2">
-                       <widget class="QComboBox" name="PhtotometryB">
+                       <widget class="QComboBox" name="PhotometryB">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                           <horstretch>0</horstretch>

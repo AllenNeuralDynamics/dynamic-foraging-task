@@ -120,6 +120,8 @@ class GenerateTrials():
         self._CheckStop()
         # optogenetics section
         self._PerformOptogenetics(Channel4)
+        # check warm up for the next trial
+        self._CheckWarmUp()
         # finish to generate the next trial
         self.GeneFinish=1
     def _PerformOptogenetics(self,Channel4):
@@ -161,6 +163,42 @@ class GenerateTrials():
             # Catch the exception and print error information
             logging.error(str(e))
 
+    def _CheckWarmUp(self):
+        '''Check if we should turn on warm up'''
+        if self.win.warmup.currentText()=='off':
+            return
+        warmup=self._get_warmup_state()
+        if warmup==0 and self.TP_warmup=='on':
+            # set warm up to off
+            index=self.win.warmup.findText('off')
+            self.win.warmup.setCurrentIndex(index)
+            self.win._warmup()
+            self.win.keyPressEvent()
+
+    def _get_warmup_state(self):
+        '''calculate the metrics related to the warm up and decide if we should turn on the warm up'''
+        TP_warm_windowsize=int(self.TP_warm_windowsize)
+        B_AnimalResponseHistory_window=self.B_AnimalResponseHistory[-TP_warm_windowsize:]
+        finish_trial=B_AnimalResponseHistory_window.shape[0] # the warmup is only turned on at the beginning of the session, thus the number of finished trials is equal to the number of trials with warmup on
+        left_choices = np.count_nonzero(B_AnimalResponseHistory_window == 0)
+        right_choices = np.count_nonzero(B_AnimalResponseHistory_window == 1)
+        no_responses = np.count_nonzero(B_AnimalResponseHistory_window == 2)
+        if left_choices+right_choices+no_responses==0:
+            finish_ratio=0
+        else:
+            finish_ratio=(left_choices+right_choices)/(left_choices+right_choices+no_responses)
+        if left_choices+right_choices==0:
+            choice_ratio=0
+        else:
+            choice_ratio=right_choices/(left_choices+right_choices)
+        if finish_trial>=float(self.TP_warm_min_trial) and finish_ratio>=float(self.TP_warm_min_finish_ratio) and abs(choice_ratio-0.5)<=float(self.TP_warm_max_choice_ratio_bias):
+            # turn off the warm up
+            warmup=0
+        else:
+            # turn on the warm up
+            warmup=1
+        return warmup
+        
     def _CheckBaitPermitted(self):
         '''Check if bait is permitted of the current trial'''
         #For task rewardN, if this is the "initial N trials" of the active side, no bait will be be given.
@@ -175,7 +213,7 @@ class GenerateTrials():
             self.BaitPermitted=True
         if self.BaitPermitted==False:
             self.win.WarningLabelRewardN.setText('The active side has no reward due to consecutive \nselections('+str(MaxCLen)+')<'+self.TP_InitiallyInactiveN)
-            self.win.WarningLabelRewardN.setStyleSheet("color: purple;")
+            self.win.WarningLabelRewardN.setStyleSheet(self.win.default_warning_color)
         else:
             self.win.WarningLabelRewardN.setText('')
             self.win.WarningLabelRewardN.setStyleSheet("color: gray;")
@@ -794,14 +832,16 @@ class GenerateTrials():
                                                 + 'Current pair:\n'
                                                 + str(np.round(
                                                     self.B_RewardProHistory[:,self.B_CurrentTrialN],2))) 
-                self.win.ShowRewardPairs_2.setText(self.win.ShowRewardPairs.text())
+                if self.win.default_ui=='ForagingGUI.ui': 
+                    self.win.ShowRewardPairs_2.setText(self.win.ShowRewardPairs.text())
             elif (self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']):
                 self.win.ShowRewardPairs.setText('Reward pairs:\n'
                                 + str(np.round(self.RewardProbPoolUncoupled,2)).replace('\n', ',')
                                 + '\n\n'
                                 +'Current pair:\n'
-                                + str(np.round(self.B_RewardProHistory[:,self.B_CurrentTrialN],2))) 
-                self.win.ShowRewardPairs_2.setText(self.win.ShowRewardPairs.text())
+                                + str(np.round(self.B_RewardProHistory[:,self.B_CurrentTrialN],2)))
+                if self.win.default_ui=='ForagingGUI.ui': 
+                    self.win.ShowRewardPairs_2.setText(self.win.ShowRewardPairs.text())
         except Exception as e:
             logging.error(str(e))
             
@@ -814,84 +854,159 @@ class GenerateTrials():
         SessionStartTimeHM = SessionStartTime.strftime('%H:%M')
         CurrentTimeHM = self.win.CurrentTime.strftime('%H:%M')
         
-        # Task info
-        self.win.info_task = (f'Session started: {SessionStartTimeHM}\n'
-                              f'Current time: {CurrentTimeHM}\n'
-                              f'Run time: {str(self.win.Other_RunningTime)} mins\n\n'
-                              'Current left block: ' + (f'{self.BS_CurrentBlockTrialNV[0]}/{self.BS_CurrentBlockLenV[0]}' if self.B_CurrentTrialN>=0 else '') + '\n'
-                              'Current right block: ' + (f'{self.BS_CurrentBlockTrialNV[1]}/{self.BS_CurrentBlockLenV[1]}' if self.B_CurrentTrialN>=0 else '')
-                              )
-        self.win.label_info_task.setText(self.win.info_task)
-        
-        # Performance info
-        # 1. essential info
-        # left side in the GUI
-        if (self.TP_AutoReward  or int(self.TP_BlockMinReward)>0) and self.win.Start.isChecked():
-            # show the next trial
-            self.win.info_performance_essential_1 = f'Current trial: {self.B_CurrentTrialN + 2}\n'
+        if self.win.default_ui=='ForagingGUI.ui':
+            # Task info
+            self.win.info_task = (f'Session started: {SessionStartTimeHM}\n'
+                                f'Current time: {CurrentTimeHM}\n'
+                                f'Run time: {str(self.win.Other_RunningTime)} mins\n\n'
+                                'Current left block: ' + (f'{self.BS_CurrentBlockTrialNV[0]}/{self.BS_CurrentBlockLenV[0]}' if self.B_CurrentTrialN>=0 else '') + '\n'
+                                'Current right block: ' + (f'{self.BS_CurrentBlockTrialNV[1]}/{self.BS_CurrentBlockLenV[1]}' if self.B_CurrentTrialN>=0 else '')
+                                )
+            self.win.label_info_task.setText(self.win.info_task)
+            # Performance info
+            # 1. essential info
+            # left side in the GUI
+            if (self.TP_AutoReward  or int(self.TP_BlockMinReward)>0) and self.win.Start.isChecked():
+                # show the next trial
+                self.win.info_performance_essential_1 = f'Current trial: {self.B_CurrentTrialN + 2}\n'
 
-        else:
-            # show the current trial
-            self.win.info_performance_essential_1 = f'Current trial: {self.B_CurrentTrialN + 1}\n'
-        
-        if self.B_CurrentTrialN >= 0:
-            self.win.info_performance_essential_1 += (
-                                f'Responded trial: {self.BS_FinisheTrialN}/{self.BS_AllTrialN} ({self.BS_RespondedRate:.2f})\n'
-                                f'Reward Trial: {self.BS_RewardTrialN}/{self.BS_AllTrialN} ({self.BS_OverallRewardRate:.2f})\n'
-                                f'Earned Reward: {self.BS_TotalReward:.0f} uL\n'
-                                f'Water in session: {self.win.water_in_session*1000 if self.B_CurrentTrialN>=0 else 0:.0f} uL'   
+            else:
+                # show the current trial
+                self.win.info_performance_essential_1 = f'Current trial: {self.B_CurrentTrialN + 1}\n'
+            
+            if self.B_CurrentTrialN >= 0:
+                self.win.info_performance_essential_1 += (
+                                    f'Responded trial: {self.BS_FinisheTrialN}/{self.BS_AllTrialN} ({self.BS_RespondedRate:.2f})\n'
+                                    f'Reward Trial: {self.BS_RewardTrialN}/{self.BS_AllTrialN} ({self.BS_OverallRewardRate:.2f})\n'
+                                    f'Earned Reward: {self.BS_TotalReward:.0f} uL\n'
+                                    f'Water in session: {self.win.water_in_session*1000 if self.B_CurrentTrialN>=0 else 0:.0f} uL'   
+                )
+            self.win.label_info_performance_essential_1.setText(self.win.info_performance_essential_1)
+            
+            # right side in the GUI
+            self.win.info_performance_essential_2 = (
+                            'Foraging eff: ' + (f'{self.B_for_eff_optimal:.2f}' if self.B_CurrentTrialN>=2 else '') + '\n'
+                            'Foraging eff (r.s.): ' + (f'{self.B_for_eff_optimal_random_seed:.2f}' if self.B_CurrentTrialN>=2 else '') + '\n\n'
             )
-        self.win.label_info_performance_essential_1.setText(self.win.info_performance_essential_1)
-        
-        # right side in the GUI
-        self.win.info_performance_essential_2 = (
-                        'Foraging eff: ' + (f'{self.B_for_eff_optimal:.2f}' if self.B_CurrentTrialN>=2 else '') + '\n'
-                        'Foraging eff (r.s.): ' + (f'{self.B_for_eff_optimal_random_seed:.2f}' if self.B_CurrentTrialN>=2 else '') + '\n\n'
-        )
-        if hasattr(self.win, 'B_Bias_R'):
-            bias_side = 'left' if self.win.B_Bias_R <= 0 else 'right'
-            self.win.info_performance_essential_2 += (
-                f'Bias: {self.win.B_Bias_R:.2f} ({bias_side})'
-            )
-        else:
-            self.win.info_performance_essential_2 += (
-                'Bias: '
-            )
-        
-        self.win.label_info_performance_essential_2.setText(self.win.info_performance_essential_2)
+            if hasattr(self.win, 'B_Bias_R'):
+                bias_side = 'left' if self.win.B_Bias_R <= 0 else 'right'
+                self.win.info_performance_essential_2 += (
+                    f'Bias: {self.win.B_Bias_R:.2f} ({bias_side})'
+                )
+            else:
+                self.win.info_performance_essential_2 += (
+                    'Bias: '
+                )
+            
+            self.win.label_info_performance_essential_2.setText(self.win.info_performance_essential_2)
 
-        # 2. other info
-        self.win.info_performance_others = ''
-        if self.B_CurrentTrialN >= 0:
-            self.win.info_performance_others += (
-                        'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
-                        'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n\n'
+            # 2. other info
+            self.win.info_performance_others = ''
+            if self.B_CurrentTrialN >= 0:
+                self.win.info_performance_others += (
+                            'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
+                            'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n\n'
+                )
+                
+            if self.B_CurrentTrialN >= 1:
+                self.win.info_performance_others += (
+                            'Early licking (EL)\n'
+                            '  Frac of EL trial start_goCue: ' + str(self.EarlyLickingTrialsN_Start_GoCue) + '/' + str(len(self.Start_GoCue_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Start_GoCue,2))+')' +'\n'
+                            '  Frac of EL trial start_delay: ' + str(self.EarlyLickingTrialsN_Start_Delay) + '/' + str(len(self.Start_Delay_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Start_Delay,2))+')' +'\n'
+                            '  Frac of EL trial delay_goCue: ' + str(self.EarlyLickingTrialsN_Delay_GoCue) + '/' + str(len(self.Delay_GoCue_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Delay_GoCue,2))+')' +'\n'
+                            '  Left/Right early licks start_goCue: ' + str(sum(self.Start_GoCue_LeftLicks)) + '/' + str(sum(self.Start_GoCue_RightLicks)) + ' ('+str(np.round(self.Start_CoCue_LeftRightRatio,2))+')' +'\n\n'
+                            
+                            'Double dipping (DD)\n'
+                            '  Frac of DD trial start_goCue: ' + str(self.DD_TrialsN_Start_CoCue) + '/' + str(len(self.Start_GoCue_DD)) + ' ('+str(np.round(self.DDRate_Start_CoCue,2))+')' +'\n'
+                            '  Frac of DD trial start_delay: ' + str(self.DD_TrialsN_Start_Delay) + '/' + str(len(self.Start_Delay_DD)) + ' ('+str(np.round(self.DDRate_Start_Delay,2))+')' +'\n'
+                            '  Frac of DD trial delay_goCue: ' + str(self.DD_TrialsN_Delay_GoCue) + '/' + str(len(self.Delay_GoCue_DD)) + ' ('+str(np.round(self.DDRate_Delay_GoCue,2))+')' +'\n'
+                            '  Frac of DD trial goCue_goCue1: ' + str(self.DD_TrialsN_GoCue_GoCue1) + '/' + str(len(self.GoCue_GoCue1_DD)) + ' ('+str(np.round(self.DDRate_GoCue_GoCue1,2))+')' +'\n'
+                            '  DD per finish trial start_goCue: ' + str(self.DD_PerTrial_Start_GoCue)+'\n'
+                            '  DD per finish trial goCue_goCue1: ' + str(self.DD_PerTrial_GoCue_GoCue1)+'\n\n'
+                )
+                
+            if self.B_CurrentTrialN >= 2:
+                self.win.info_performance_others += (                
+                            '  Frac of DD trial goCue_nextStart: ' + str(self.DD_TrialsN_GoCue_NextStart) + '/' + str(len(self.GoCue_NextStart_DD)) + ' ('+str(np.round(self.DDRate_GoCue_NextStart,2))+')' +'\n'
+                            '  DD per finish trial goCue_nextStart: ' + str(self.DD_PerTrial_GoCue_NextStart)+'\n'
             )
-            
-        if self.B_CurrentTrialN >= 1:
-            self.win.info_performance_others += (
-                        'Early licking (EL)\n'
-                        '  Frac of EL trial start_goCue: ' + str(self.EarlyLickingTrialsN_Start_GoCue) + '/' + str(len(self.Start_GoCue_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Start_GoCue,2))+')' +'\n'
-                        '  Frac of EL trial start_delay: ' + str(self.EarlyLickingTrialsN_Start_Delay) + '/' + str(len(self.Start_Delay_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Start_Delay,2))+')' +'\n'
-                        '  Frac of EL trial delay_goCue: ' + str(self.EarlyLickingTrialsN_Delay_GoCue) + '/' + str(len(self.Delay_GoCue_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Delay_GoCue,2))+')' +'\n'
-                        '  Left/Right early licks start_goCue: ' + str(sum(self.Start_GoCue_LeftLicks)) + '/' + str(sum(self.Start_GoCue_RightLicks)) + ' ('+str(np.round(self.Start_CoCue_LeftRightRatio,2))+')' +'\n\n'
-                        
-                        'Double dipping (DD)\n'
-                        '  Frac of DD trial start_goCue: ' + str(self.DD_TrialsN_Start_CoCue) + '/' + str(len(self.Start_GoCue_DD)) + ' ('+str(np.round(self.DDRate_Start_CoCue,2))+')' +'\n'
-                        '  Frac of DD trial start_delay: ' + str(self.DD_TrialsN_Start_Delay) + '/' + str(len(self.Start_Delay_DD)) + ' ('+str(np.round(self.DDRate_Start_Delay,2))+')' +'\n'
-                        '  Frac of DD trial delay_goCue: ' + str(self.DD_TrialsN_Delay_GoCue) + '/' + str(len(self.Delay_GoCue_DD)) + ' ('+str(np.round(self.DDRate_Delay_GoCue,2))+')' +'\n'
-                        '  Frac of DD trial goCue_goCue1: ' + str(self.DD_TrialsN_GoCue_GoCue1) + '/' + str(len(self.GoCue_GoCue1_DD)) + ' ('+str(np.round(self.DDRate_GoCue_GoCue1,2))+')' +'\n'
-                        '  DD per finish trial start_goCue: ' + str(self.DD_PerTrial_Start_GoCue)+'\n'
-                        '  DD per finish trial goCue_goCue1: ' + str(self.DD_PerTrial_GoCue_GoCue1)+'\n\n'
-            )
-            
-        if self.B_CurrentTrialN >= 2:
-            self.win.info_performance_others += (                
-                        '  Frac of DD trial goCue_nextStart: ' + str(self.DD_TrialsN_GoCue_NextStart) + '/' + str(len(self.GoCue_NextStart_DD)) + ' ('+str(np.round(self.DDRate_GoCue_NextStart,2))+')' +'\n'
-                        '  DD per finish trial goCue_nextStart: ' + str(self.DD_PerTrial_GoCue_NextStart)+'\n'
-        )
-        self.win.label_info_performance_others.setText(self.win.info_performance_others)
-            
+            self.win.label_info_performance_others.setText(self.win.info_performance_others)
+        elif self.win.default_ui=='ForagingGUI_Ephys.ui':
+            self.win.Other_inforTitle='Session started: '+SessionStartTimeHM+ '  Current: '+CurrentTimeHM+ '  Run: '+str(self.win.Other_RunningTime)+'m'
+            if (self.TP_AutoReward  or int(self.TP_BlockMinReward)>0) and self.win.Start.isChecked():
+                # show the next trial
+                self.win.Other_BasicTitle='Current trial: ' + str(self.B_CurrentTrialN+2)
+            else:
+                # show the current trial
+                self.win.Other_BasicTitle='Current trial: ' + str(self.B_CurrentTrialN+1)
+            self.win.infor.setTitle(self.win.Other_inforTitle)
+            self.win.Basic.setTitle(self.win.Other_BasicTitle)
+            # show basic session statistics    
+            if self.B_CurrentTrialN>=0 and self.B_CurrentTrialN<1:
+                Other_BasicText=  ('Current left block: ' + str(self.BS_CurrentBlockTrialNV[0]) + '/' +  str(self.BS_CurrentBlockLenV[0])+'\n'
+                            'Current right block: ' + str(self.BS_CurrentBlockTrialNV[1]) + '/' +  str(self.BS_CurrentBlockLenV[1])+'\n\n'
+                            'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
+                            'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
+                            'Water in session (ul): '+str(np.round(self.win.water_in_session*1000,2)) +'\n'
+                            'Earned Reward (ul): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
+                            'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
+                            'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n')
+                self.win.ShowBasic.setText(Other_BasicText)
+                self.win.Other_BasicText=Other_BasicText
+            elif self.B_CurrentTrialN>=1 and self.B_CurrentTrialN<2:
+                Other_BasicText=('Current left block: ' + str(self.BS_CurrentBlockTrialNV[0]) + '/' +  str(self.BS_CurrentBlockLenV[0])+'\n'
+                            'Current right block: ' + str(self.BS_CurrentBlockTrialNV[1]) + '/' +  str(self.BS_CurrentBlockLenV[1])+'\n\n'
+                            'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
+                            'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
+                            'Water in session (ul): '+str(np.round(self.win.water_in_session*1000,2)) +'\n'
+                            'Earned Reward (ul): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
+                            'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
+                            'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n\n'
+                            
+                            'Early licking (EL)\n'
+                            '  Frac of EL trial start_goCue: ' + str(self.EarlyLickingTrialsN_Start_GoCue) + '/' + str(len(self.Start_GoCue_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Start_GoCue,2))+')' +'\n'
+                            '  Frac of EL trial start_delay: ' + str(self.EarlyLickingTrialsN_Start_Delay) + '/' + str(len(self.Start_Delay_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Start_Delay,2))+')' +'\n'
+                            '  Frac of EL trial delay_goCue: ' + str(self.EarlyLickingTrialsN_Delay_GoCue) + '/' + str(len(self.Delay_GoCue_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Delay_GoCue,2))+')' +'\n'
+                            '  Left/Right early licks start_goCue: ' + str(sum(self.Start_GoCue_LeftLicks)) + '/' + str(sum(self.Start_GoCue_RightLicks)) + ' ('+str(np.round(self.Start_CoCue_LeftRightRatio,2))+')' +'\n\n'
+                            
+                            'Double dipping (DD)\n'
+                            '  Frac of DD trial start_goCue: ' + str(self.DD_TrialsN_Start_CoCue) + '/' + str(len(self.Start_GoCue_DD)) + ' ('+str(np.round(self.DDRate_Start_CoCue,2))+')' +'\n'
+                            '  Frac of DD trial start_delay: ' + str(self.DD_TrialsN_Start_Delay) + '/' + str(len(self.Start_Delay_DD)) + ' ('+str(np.round(self.DDRate_Start_Delay,2))+')' +'\n'
+                            '  Frac of DD trial delay_goCue: ' + str(self.DD_TrialsN_Delay_GoCue) + '/' + str(len(self.Delay_GoCue_DD)) + ' ('+str(np.round(self.DDRate_Delay_GoCue,2))+')' +'\n'
+                            '  Frac of DD trial goCue_goCue1: ' + str(self.DD_TrialsN_GoCue_GoCue1) + '/' + str(len(self.GoCue_GoCue1_DD)) + ' ('+str(np.round(self.DDRate_GoCue_GoCue1,2))+')' +'\n'
+                            '  DD per finish trial start_goCue: ' + str(self.DD_PerTrial_Start_GoCue)+'\n'
+                            '  DD per finish trial goCue_goCue1: ' + str(self.DD_PerTrial_GoCue_GoCue1)+'\n')
+                self.win.ShowBasic.setText(Other_BasicText)
+                self.win.Other_BasicText=Other_BasicText
+            elif self.B_CurrentTrialN>=2:
+                Other_BasicText=('Current left block: ' + str(self.BS_CurrentBlockTrialNV[0]) + '/' +  str(self.BS_CurrentBlockLenV[0])+'\n'
+                            'Current right block: ' + str(self.BS_CurrentBlockTrialNV[1]) + '/' +  str(self.BS_CurrentBlockLenV[1])+'\n\n'
+                            'Foraging eff optimal: '+str(np.round(self.B_for_eff_optimal,2))+'\n'
+                            'Foraging eff optimal random seed: '+ str(np.round(self.B_for_eff_optimal_random_seed,2))+'\n\n'
+                            'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
+                            'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
+                            'Water in session (ul): '+str(np.round(self.win.water_in_session*1000,2)) +'\n'
+                            'Earned Reward (ul): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
+                            'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
+                            'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n\n'
+                            'Early licking (EL)\n'
+                            '  Frac of EL trial start_goCue: ' + str(self.EarlyLickingTrialsN_Start_GoCue) + '/' + str(len(self.Start_GoCue_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Start_GoCue,2))+')' +'\n'
+                            '  Frac of EL trial start_delay: ' + str(self.EarlyLickingTrialsN_Start_Delay) + '/' + str(len(self.Start_Delay_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Start_Delay,2))+')' +'\n'
+                            '  Frac of EL trial delay_goCue: ' + str(self.EarlyLickingTrialsN_Delay_GoCue) + '/' + str(len(self.Delay_GoCue_LeftLicks)) + ' ('+str(np.round(self.EarlyLickingRate_Delay_GoCue,2))+')' +'\n'
+                            '  Left/Right early licks start_goCue: ' + str(sum(self.Start_GoCue_LeftLicks)) + '/' + str(sum(self.Start_GoCue_RightLicks)) + ' ('+str(np.round(self.Start_CoCue_LeftRightRatio,2))+')' +'\n\n'
+                            
+                            'Double dipping (DD)\n'
+                            '  Frac of DD trial start_goCue: ' + str(self.DD_TrialsN_Start_CoCue) + '/' + str(len(self.Start_GoCue_DD)) + ' ('+str(np.round(self.DDRate_Start_CoCue,2))+')' +'\n'
+                            '  Frac of DD trial start_delay: ' + str(self.DD_TrialsN_Start_Delay) + '/' + str(len(self.Start_Delay_DD)) + ' ('+str(np.round(self.DDRate_Start_Delay,2))+')' +'\n'
+                            '  Frac of DD trial delay_goCue: ' + str(self.DD_TrialsN_Delay_GoCue) + '/' + str(len(self.Delay_GoCue_DD)) + ' ('+str(np.round(self.DDRate_Delay_GoCue,2))+')' +'\n'
+                            '  Frac of DD trial goCue_goCue1: ' + str(self.DD_TrialsN_GoCue_GoCue1) + '/' + str(len(self.GoCue_GoCue1_DD)) + ' ('+str(np.round(self.DDRate_GoCue_GoCue1,2))+')' +'\n'
+                            '  Frac of DD trial goCue_nextStart: ' + str(self.DD_TrialsN_GoCue_NextStart) + '/' + str(len(self.GoCue_NextStart_DD)) + ' ('+str(np.round(self.DDRate_GoCue_NextStart,2))+')' +'\n'
+                            '  DD per finish trial start_goCue: ' + str(self.DD_PerTrial_Start_GoCue)+'\n'
+                            '  DD per finish trial goCue_goCue1: ' + str(self.DD_PerTrial_GoCue_GoCue1)+'\n'
+                            '  DD per finish trial goCue_nextStart: ' + str(self.DD_PerTrial_GoCue_NextStart)+'\n')
+                self.win.ShowBasic.setText(Other_BasicText)
+                self.win.Other_BasicText=Other_BasicText
+     
         # newscale positions
         if hasattr(self.win, 'current_stage'):
             self.win._GetPositions()
@@ -906,30 +1021,41 @@ class GenerateTrials():
         else:
             self.BS_CurrentRunningTime=0
 
-        if np.shape(self.B_AnimalResponseHistory)[0]>=StopIgnore:
-            if np.all(self.B_AnimalResponseHistory[-StopIgnore:]==2):
-                self.Stop=1
-                self.win.WarningLabelStop.setText('Stop because ignore trials exceed or equal: '+self.TP_StopIgnores)
-                self.win.WarningLabelStop.setStyleSheet("color: purple;")
-            else:
-                self.Stop=0
-                self.win.WarningLabelStop.setText('')
-                self.win.WarningLabelStop.setStyleSheet("color: gray;")
+        # Make message box prompt
+        stop = False
+        msg =''
+        warning_label_text = ''
+        warning_label_color = 'color: gray;'        
+
+        # Check for reasons to stop early 
+        if (np.shape(self.B_AnimalResponseHistory)[0]>=StopIgnore) and (np.all(self.B_AnimalResponseHistory[-StopIgnore:]==2)):
+            stop=True
+            msg = 'Stopping the session because the mouse has ignored at least {} consecutive trials'.format(self.TP_StopIgnores)
+            warning_label_text = 'Stop because ignore trials exceed or equal: '+self.TP_StopIgnores
+            warning_label_color = self.win.default_warning_color
         elif self.B_CurrentTrialN>MaxTrial: 
-            self.Stop=1
-            self.win.WarningLabelStop.setText('Stop because maximum trials exceed or equal: '+self.TP_MaxTrial)
-            self.win.WarningLabelStop.setStyleSheet("color: purple;")
+            stop=True
+            msg = 'Stopping the session because the mouse has reached the maximum trial count: {}'.format(self.TP_MaxTrial)
+            warning_label_text = 'Stop because maximum trials exceed or equal: '+self.TP_MaxTrial
+            warning_label_color = self.win.default_warning_color
         elif self.BS_CurrentRunningTime>MaxTime:
-            self.Stop=1
-            self.win.WarningLabelStop.setText('Stop because running time exceeds or equals: '+self.TP_MaxTime+'m')
-            self.win.WarningLabelStop.setStyleSheet("color: purple;")
+            stop=True
+            msg = 'Stopping the session because the session running time has reached {} minutes'.format(self.TP_MaxTime)
+            warning_label_text = 'Stop because running time exceeds or equals: '+self.TP_MaxTime+'m'
+            warning_label_color = self.win.default_warning_color
         else:
-            self.Stop=0
-            self.win.WarningLabelStop.setText('')
-            self.win.WarningLabelStop.setStyleSheet("color: gray;")
-        if  self.Stop==1:           
+            stop=False
+
+        # Update the warning label text/color
+        self.win.WarningLabelStop.setText(warning_label_text)
+        self.win.WarningLabelStop.setStyleSheet(warning_label_color)
+    
+        # If we should stop trials, uncheck the start button
+        if stop:           
             self.win.Start.setStyleSheet("background-color : none")
-            self.win.Start.setChecked(False)
+            self.win.Start.setChecked(False)        
+            reply = QtWidgets.QMessageBox.question(self.win, 'Box {}'.format(self.win.box_letter), msg, QtWidgets.QMessageBox.Ok)
+    
     def _CheckAutoWater(self):
         '''Check if it should be an auto water trial'''
         if self.TP_AutoReward:
@@ -938,10 +1064,10 @@ class GenerateTrials():
             if UnrewardedN<=0:
                 self.CurrentAutoReward=1
                 self.win.WarningLabelAutoWater.setText('Auto water because unrewarded trials exceed: '+self.TP_Unrewarded)
-                self.win.WarningLabelAutoWater.setStyleSheet("color: purple;")
+                self.win.WarningLabelAutoWater.setStyleSheet(self.win.default_warning_color)
             elif  IgnoredN <=0:
                 self.win.WarningLabelAutoWater.setText('Auto water because ignored trials exceed: '+self.TP_Ignored)
-                self.win.WarningLabelAutoWater.setStyleSheet("color: purple;")
+                self.win.WarningLabelAutoWater.setStyleSheet(self.win.default_warning_color)
                 self.CurrentAutoReward=1
             else:
                 if np.shape(self.B_AnimalResponseHistory)[0]>=IgnoredN or np.shape(self.B_RewardedHistory[0])[0]>=UnrewardedN:
@@ -953,11 +1079,11 @@ class GenerateTrials():
                     if np.all(self.B_AnimalResponseHistory[-IgnoredN:]==2) and np.shape(self.B_AnimalResponseHistory)[0]>=IgnoredN:
                         self.CurrentAutoReward=1
                         self.win.WarningLabelAutoWater.setText('Auto water because ignored trials exceed: '+self.TP_Ignored)
-                        self.win.WarningLabelAutoWater.setStyleSheet("color: purple;")
+                        self.win.WarningLabelAutoWater.setStyleSheet(self.win.default_warning_color)
                     elif (np.all(B_RewardedHistory[0][-UnrewardedN:]==False) and np.all(B_RewardedHistory[1][-UnrewardedN:]==False) and np.shape(B_RewardedHistory[0])[0]>=UnrewardedN):
                         self.CurrentAutoReward=1
                         self.win.WarningLabelAutoWater.setText('Auto water because unrewarded trials exceed: '+self.TP_Unrewarded)
-                        self.win.WarningLabelAutoWater.setStyleSheet("color: purple;")
+                        self.win.WarningLabelAutoWater.setStyleSheet(self.win.default_warning_color)
                     else:
                         self.CurrentAutoReward=0
                 else:
@@ -993,7 +1119,7 @@ class GenerateTrials():
             # only positive CLP_OffsetStart is allowed
             if self.CLP_OffsetStart<0:
                 self.win.WarningLabel.setText('Please set offset start to be positive!')
-                self.win.WarningLabel.setStyleSheet("color: purple;")
+                self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
             # there is no delay for optogenetics trials 
             self.CLP_CurrentDuration=self.CurrentITI-self.CLP_OffsetStart+self.CLP_OffsetEnd
         elif self.CLP_LaserStart=='Go cue' and self.CLP_LaserEnd=='Trial start':
@@ -1023,7 +1149,7 @@ class GenerateTrials():
             if self.CLP_RampingDown>0:
                 if self.CLP_RampingDown>self.CLP_CurrentDuration:
                     self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
-                    self.win.WarningLabel.setStyleSheet("color: purple;")
+                    self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
                 else:
                     Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
                     RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
@@ -1039,11 +1165,11 @@ class GenerateTrials():
         elif self.CLP_Protocol=='Pulse':
             if self.CLP_PulseDur=='NA':
                 self.win.WarningLabel.setText('Pulse duration is NA!')
-                self.win.WarningLabel.setStyleSheet("color: purple;")
+                self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
                 self.CLP_PulseDur=0
             elif self.CLP_Frequency=='':
                 self.win.WarningLabel.setText('Pulse frequency is NA!')
-                self.win.WarningLabel.setStyleSheet("color: purple;")
+                self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
                 self.CLP_Frequency=0
             else:
                 self.CLP_PulseDur=float(self.CLP_PulseDur)
@@ -1051,7 +1177,7 @@ class GenerateTrials():
                 PulseIntervalPoints=int(1/self.CLP_Frequency*self.CLP_SampleFrequency-PointsEachPulse)
                 if PulseIntervalPoints<0:
                     self.win.WarningLabel.setText('Pulse frequency and pulse duration are not compatible!')
-                    self.win.WarningLabel.setStyleSheet("color: purple;")
+                    self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
                 TotalPoints=int(self.CLP_SampleFrequency*self.CLP_CurrentDuration)
                 PulseNumber=np.floor(self.CLP_CurrentDuration*self.CLP_Frequency) 
                 EachPulse=Amplitude*np.ones(PointsEachPulse)
@@ -1064,7 +1190,7 @@ class GenerateTrials():
                         self.my_wave=np.concatenate((self.my_wave, WaveFormEachCycle), axis=0)
                 else:
                     self.win.WarningLabel.setText('Pulse number is less than 1!')
-                    self.win.WarningLabel.setStyleSheet("color: purple;")
+                    self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
                     return
                 self.my_wave=np.concatenate((self.my_wave, EachPulse), axis=0)
                 self.my_wave=np.concatenate((self.my_wave, np.zeros(TotalPoints-np.shape(self.my_wave)[0])), axis=0)
@@ -1081,7 +1207,7 @@ class GenerateTrials():
             # add ramping down
                 if self.CLP_RampingDown>self.CLP_CurrentDuration:
                     self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
-                    self.win.WarningLabel.setStyleSheet("color: purple;")
+                    self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
                 else:
                     Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
                     RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
@@ -1095,7 +1221,7 @@ class GenerateTrials():
             self.my_wave=np.append(self.my_wave,[0,0])
         else:
             self.win.WarningLabel.setText('Unidentified optogenetics protocol!')
-            self.win.WarningLabel.setStyleSheet("color: purple;")
+            self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
 
         '''
         # test
@@ -1109,28 +1235,28 @@ class GenerateTrials():
         if self.CLP_Location=='Left':
             if self.CLP_LaserPowerLeft=='':
                 self.win.WarningLabel.setText('No amplitude for left laser defined!')
-                self.win.WarningLabel.setStyleSheet("color: purple;")
+                self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
             else:
                 LaserPowerAmpLeft=eval(self.CLP_LaserPowerLeft)
                 self.CurrentLaserAmplitude=[LaserPowerAmpLeft[0],0]
         elif self.CLP_Location=='Right':
             if self.CLP_LaserPowerRight=='':
                 self.win.WarningLabel.setText('No amplitude for right laser defined!')
-                self.win.WarningLabel.setStyleSheet("color: purple;")
+                self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
             else:
                 LaserPowerAmpRight=eval(self.CLP_LaserPowerRight)
                 self.CurrentLaserAmplitude=[0,LaserPowerAmpRight[0]]
         elif self.CLP_Location=='Both':
             if  self.CLP_LaserPowerLeft=='' or self.CLP_Location=='Right':
                 self.win.WarningLabel.setText('No amplitude for left or right laser defined!')
-                self.win.WarningLabel.setStyleSheet("color: purple;")
+                self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
             else:
                 LaserPowerAmpLeft=eval(self.CLP_LaserPowerLeft)
                 LaserPowerAmpRight=eval(self.CLP_LaserPowerRight)
                 self.CurrentLaserAmplitude=[LaserPowerAmpLeft[0],LaserPowerAmpRight[0]]
         else:
             self.win.WarningLabel.setText('No stimulation location defined!')
-            self.win.WarningLabel.setStyleSheet("color: purple;")
+            self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
         self.B_LaserAmplitude.append(self.CurrentLaserAmplitude)
 
     def _SelectOptogeneticsCondition(self):
@@ -1139,7 +1265,7 @@ class GenerateTrials():
         ConditionsOn=[]
         Probabilities=[]
         for attr_name in dir(self):
-            if attr_name.startswith('TP_Laser_'):
+            if attr_name in ['TP_Laser_1','TP_Laser_2','TP_Laser_3','TP_Laser_4']:
                 if getattr(self, attr_name) !='NA':
                     parts = attr_name.split('_')
                     ConditionsOn.append(parts[-1])
@@ -1215,7 +1341,7 @@ class GenerateTrials():
                     Channel1.PassRewardOutcome(int(1))
                 else:
                     self.win.WarningLabel.setText('Unindentified optogenetics start event!')
-                    self.win.WarningLabel.setStyleSheet("color: purple;")
+                    self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
                 # send the waveform size
                 Channel1.Location1_Size(int(self.Location1_Size))
                 Channel1.Location2_Size(int(self.Location2_Size))
@@ -1244,6 +1370,7 @@ class GenerateTrials():
                 Channel1.start(1)
                 self.CurrentStartType=1
                 self.B_StartType.append(self.CurrentStartType)
+
     def _CheckSimulationSession(self):
         '''To check if this is a simulation session'''
         if self.win.actionWin_stay_lose_switch.isChecked()==True or  self.win.actionRandom_choice.isChecked()==True:

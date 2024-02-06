@@ -9,5 +9,6 @@
     "newscale_serial_num_box1":"",
     "newscale_serial_num_box2":"",
     "newscale_serial_num_box3":"",
-    "newscale_serial_num_box4":""
+    "newscale_serial_num_box4":"",
+    "default_ui":"ForagingGUI.ui"
 }
