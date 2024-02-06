@@ -2208,6 +2208,21 @@ class Window(QMainWindow):
     
     def _StartBleaching(self):
         if self.StartBleaching.isChecked():
+            # Check if trials have stopped
+            if self.ANewTrial==0:
+                reply = QMessageBox.question(self, 'Box {}, Start bleaching:'.format(self.box_letter), 
+                    'Cannot start photobleaching, because trials are in progress', QMessageBox.Ok)
+                self.StartBleaching.setChecked(False)
+                return
+            
+            # Verify mouse is disconnected
+            reply = QMessageBox.question(self, 'Box {}, Start bleaching:'.format(self.box_letter), 
+                    'Starting photobleaching, have the cables been disconnected from the mouse?',QMessageBox.Yes, QMessageBox.No )
+            if reply == QMessageBox.No:
+                self.StartBleaching.setChecked(False)
+                return
+
+            # Start bleaching
             self.StartBleaching.setStyleSheet("background-color : green;")
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
@@ -2220,6 +2235,15 @@ class Window(QMainWindow):
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: start bleaching!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
+            else:
+                # Bleaching continues until user stops
+                msgbox = QMessageBox()
+                msgbox.setWindowTitle('Box {}, bleaching:'.format(self.box_letter)
+                msgbox.setText('Photobleaching in progress, do not close the GUI.')
+                msgbox.addButton('Stop bleaching',QMessageBox.Ok)
+                bttn = msgbox.exec_()
+                self.StartBleching.setChecked(False)
+                self._StartBleaching()
         else:
             self.StartBleaching.setStyleSheet("background-color : none")
             try:
@@ -2227,7 +2251,7 @@ class Window(QMainWindow):
                 # Trigger Teensy with the above specified exp mode
                 ser.write(b's')
                 ser.close()
-                self.TeensyWarning.setText('Stop bleaching!')
+                self.TeensyWarning.setText('')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
                 logging.error(str(e))
