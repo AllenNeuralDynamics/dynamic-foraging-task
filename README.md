@@ -287,7 +287,7 @@ To configure automatic updates consistent with the [update protocol](https://git
 2. For the first session of a new mouse:
    1. ‼️ So far, the automatic training system cannot handle our previous Stage 1.1 --> Stage 1.2.<br>
      For a new mouse, please still use `Coupled Baiting - Stage 1.1` in the "Parameters" page to warm up the mouse as before.<br>
-     Note we always start with `Coupled Baiting - Stage 1.1` even if `curriculum_name == "Uncoupled ..."` (see [this issue](https://github.com/AllenNeuralDynamics/aind-behavior-blog/issues/241))
+     Note we always start with `Coupled Baiting - Stage 1.1` even if `curriculum_name == "Uncoupled ..."` (see [this issue](https://github.com/AllenNeuralDynamics/aind-behavior-blog/issues/241))<br>
      ![image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/13c34f43-ceeb-4a79-927e-242f03608602)<br>
      Once you think the mouse is ready for Stage 1.2, please follow the steps below to start using automatic training. <br>(`Stage 1` in `Auto Train`= `Stage 1.2` in the `Parameters` tab.)<br><br>
      
