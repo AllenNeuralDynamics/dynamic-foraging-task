@@ -500,7 +500,7 @@ class Window(QMainWindow):
         '''   
         if self.InitializeBonsaiSuccessfully ==1 and hasattr(self, 'GeneratedTrials'):
             msg = 'Reconnected to Bonsai. Start a new session before running more trials'
-            reply = QMessageBox.question(self, 'Reconnect Bonsai', msg, QMessageBox.Ok )
+            reply = QMessageBox.question(self, 'Box {}, Reconnect Bonsai'.format(self.box_letter), msg, QMessageBox.Ok )
  
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
@@ -687,7 +687,7 @@ class Window(QMainWindow):
             logging.info('Bonsai started successfully')
             self.InitializeBonsaiSuccessfully=1
             self.WarningLabel.setText('')
-            self.WarningLabel.setStyleSheet("color: red;")
+            self.WarningLabel.setStyleSheet(self.default_warning_color)
             return
 
         # Start Bonsai
@@ -712,7 +712,7 @@ class Window(QMainWindow):
                 logging.info('Bonsai started successfully')
                 if self.WarningLabel.text() == 'Lost bonsai connection':
                     self.WarningLabel.setText('')
-                    self.WarningLabel.setStyleSheet("color: red;")
+                    self.WarningLabel.setStyleSheet(self.default_warning_color)
                 self.InitializeBonsaiSuccessfully=1
                 subprocess.Popen('title Box{}'.format(self.box_letter),shell=True)
                 return
@@ -1169,7 +1169,7 @@ class Window(QMainWindow):
                     if child.objectName()=='AnimalName' and child.text()=='':
                         child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
-                    if child.objectName()=='Experimenter' or child.objectName()=='TotalWater' or child.objectName()=='AnimalName' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
+                    if child.objectName() in {'Experimenter','TotalWater','AnimalName','WeightBefore','WeightAfter','ExtraWater'}:
                         continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
@@ -1535,7 +1535,7 @@ class Window(QMainWindow):
          # enable close icon
         self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, True)
         self.show()
-        reply = QMessageBox.question(self, 'Foraging Close', 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+        reply = QMessageBox.question(self, 'Box {}, Foraging Close'.format(self.box_letter), 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
             self._Save()
             event.accept()
@@ -1567,7 +1567,7 @@ class Window(QMainWindow):
     def _Exit(self):
         '''Close the GUI'''
         logging.info('closing the GUI')
-        response = QMessageBox.question(self,'Save and Exit:', "Do you want to save the current result?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
+        response = QMessageBox.question(self,'Box {}, Save and Exit:'.format(self.box_letter), "Do you want to save the current result?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
         if response==QMessageBox.Yes:
             # close the camera
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
@@ -1725,7 +1725,7 @@ class Window(QMainWindow):
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
         if self.BaseWeight.text()=='' or self.WeightAfter.text()=='' or self.TargetRatio.text()=='':
-            response = QMessageBox.question(self,'Save without weight or extra water:', "Do you want to save without weight or extra water information provided?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
+            response = QMessageBox.question(self,'Box {}, Save without weight or extra water:'.format(self.box_letter), "Do you want to save without weight or extra water information provided?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
             if response==QMessageBox.Yes:
                 pass
                 self.WarningLabel.setText('Saving without weight or extra water!')
@@ -1997,7 +1997,7 @@ class Window(QMainWindow):
                         continue
                     if key in CurrentObj:
                         # skip some keys; skip warmup
-                        if key=='ExtraWater' or key=='TotalWater' or key=='WeightAfter' or key=='SuggestedWater' or key=='Start' or key=='warmup':
+                        if key in ['Start','warmup']:
                             self.WeightAfter.setText('')
                             continue
                         widget = widget_dict[key]
@@ -2008,7 +2008,10 @@ class Window(QMainWindow):
                             logging.error(str(e))
                             value=CurrentObj[key]
                             Tag=1
-                        if key=='BaseWeight':
+                        if key in {'BaseWeight','TotalWater','TargetWeight','WeightAfter','SuggestedWater','TargetRatio'}:
+                            self.BaseWeight.disconnect()
+                            self.TargetRatio.disconnect()
+                            self.WeightAfter.disconnect()
                             value=CurrentObj[key]
                             Tag=1
                         if isinstance(widget, QtWidgets.QPushButton):
@@ -2026,6 +2029,10 @@ class Window(QMainWindow):
                                 widget.setText(value[-1])
                             elif Tag==1:
                                 widget.setText(value)
+                            if key in {'BaseWeight','TotalWater','TargetWeight','WeightAfter','SuggestedWater','TargetRatio'}:
+                                self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
+                                self.WeightAfter.textChanged.connect(self._UpdateSuggestedWater)
+                                self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
                         elif isinstance(widget, QtWidgets.QComboBox):
                             if Tag==0:
                                 index = widget.findText(value[-1])
@@ -2156,7 +2163,7 @@ class Window(QMainWindow):
         PlotM._Update(GeneratedTrials=self.GeneratedTrials)
         self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
     def _Clear(self):
-        reply = QMessageBox.question(self, 'Clear parameters:', 'Do you want to clear training parameters?',QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        reply = QMessageBox.question(self, 'Box {}, Clear parameters:'.format(self.box_letter), 'Do you want to clear training parameters?',QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
             for child in self.TrainingParameters.findChildren(QtWidgets.QLineEdit)+ self.centralwidget.findChildren(QtWidgets.QLineEdit):
                 if child.isEnabled():
@@ -2203,7 +2210,7 @@ class Window(QMainWindow):
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: stop excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
-                reply = QMessageBox.question(self, 'Start excitation:', 'error when stopping excitation: {}'.format(e), QMessageBox.Ok)
+                reply = QMessageBox.question(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when stopping excitation: {}'.format(e), QMessageBox.Ok)
             else:
                 self.TeensyWarning.setText('')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)               
@@ -2306,7 +2313,7 @@ class Window(QMainWindow):
         logging.info('starting new session')
         if self.NewSession.isChecked():
             if self.ToInitializeVisual==0: # Do not ask to save when no session starts running
-                reply = QMessageBox.question(self, 'New Session:', 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+                reply = QMessageBox.question(self, 'Box {}, New Session:'.format(self.box_letter), 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
             else:
                 reply=QMessageBox.No
             if reply == QMessageBox.Yes:
@@ -2342,7 +2349,7 @@ class Window(QMainWindow):
         return reply
 
     def _AskSave(self):
-        reply = QMessageBox.question(self, 'New Session:', 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+        reply = QMessageBox.question(self, 'Box {}, New Session:'.format(self.box_letter), 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
             self._Save()
             logging.info('The current session was saved')
@@ -2375,12 +2382,12 @@ class Window(QMainWindow):
                 elif (time.time() - start_time) > stall_duration*stall_iteration:
                     elapsed_time = int(np.floor(stall_duration*stall_iteration/60))
                     message = '{} minutes have elapsed since trial stopped was initiated. Force stop?'.format(elapsed_time)
-                    reply = QMessageBox.question(self,'StopCurrentSession',message,QMessageBox.Yes|QMessageBox.No)
+                    reply = QMessageBox.question(self,'Box {}, StopCurrentSession'.format(self.box_letter),message,QMessageBox.Yes|QMessageBox.No)
                     if reply == QMessageBox.Yes:
                         logging.error('trial stalled {} minutes, user force stopped trials'.format(elapsed_time))
                         self.ANewTrial=1
                         self.WarningLabel.setText('')
-                        self.WarningLabel.setStyleSheet("color: red;")
+                        self.WarningLabel.setStyleSheet(self.default_warning_color)
                         break
                     else:
                         stall_iteration+=1
@@ -2422,7 +2429,9 @@ class Window(QMainWindow):
 
     def _Start(self):
         '''start trial loop'''
-        
+        # empty post weight
+        self.WeightAfter.setText('')
+
         # Check for Bonsai connection
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
@@ -2469,11 +2478,11 @@ class Window(QMainWindow):
                 if 'ConnectionAbortedError' in str(e):
                     logging.info('lost bonsai connection: restartlogging()')
                     self.WarningLabel.setText('Lost bonsai connection')
-                    self.WarningLabel.setStyleSheet("color: red;")
+                    self.WarningLabel.setStyleSheet(self.default_warning_color)
                     self.Start.setChecked(False)
                     self.Start.setStyleSheet("background-color : none")
                     self.InitializeBonsaiSuccessfully=0
-                    reply = QMessageBox.question(self, 'Start', 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No)
+                    reply = QMessageBox.question(self, 'Box {}, Start'.format(self.box_letter), 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No)
                     if reply == QMessageBox.Yes:
                         self._ReconnectBonsai()
                         logging.info('User selected reconnect bonsai')
@@ -2550,7 +2559,7 @@ class Window(QMainWindow):
         # Check if photometry excitation is running or not
         if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and (not self.StartExcitation.isChecked()):
             logging.warning('photometry is set to "on", but excitation is not running')
-            reply = QMessageBox.question(self, 'Start', 'Photometry is set to "on", but excitation is not running. Start excitation now?',QMessageBox.Yes | QMessageBox.No)
+            reply = QMessageBox.question(self, 'Box {}, Start'.format(self.box_letter), 'Photometry is set to "on", but excitation is not running. Start excitation now?',QMessageBox.Yes | QMessageBox.No)
             if reply == QMessageBox.Yes:
                 self.StartExcitation.setChecked(True)
                 logging.info('User selected to start excitation')
@@ -2615,11 +2624,11 @@ class Window(QMainWindow):
                     if 'ConnectionAbortedError' in str(e):
                         logging.info('lost bonsai connection: InitiateATrial')
                         self.WarningLabel.setText('Lost bonsai connection')
-                        self.WarningLabel.setStyleSheet("color: red;")
+                        self.WarningLabel.setStyleSheet(self.default_warning_color)
                         self.Start.setChecked(False)
                         self.Start.setStyleSheet("background-color : none")
                         self.InitializeBonsaiSuccessfully=0
-                        reply = QMessageBox.question(self, 'Start', 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No)
+                        reply = QMessageBox.question(self, 'Box {}, Start'.format(self.box_letter), 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No)
                         if reply == QMessageBox.Yes:
                             self._ReconnectBonsai()
                             logging.info('User selected reconnect bonsai')
@@ -2629,7 +2638,7 @@ class Window(QMainWindow):
 
                         break
                     else:
-                        reply = QMessageBox.question(self, 'Error', 'Encountered the following error: {}'.format(e),QMessageBox.Ok )
+                        reply = QMessageBox.question(self, 'Box {}, Error'.format(self.box_letter), 'Encountered the following error: {}'.format(e),QMessageBox.Ok )
                         logging.error('Caught this error: {}'.format(e))
                         self.ANewTrial=1
                         self.Start.setChecked(False)
@@ -2665,7 +2674,7 @@ class Window(QMainWindow):
                 # Prompt user to stop trials
                 elapsed_time = int(np.floor(stall_duration*stall_iteration/60))
                 message = '{} minutes have elapsed since the last trial started. Bonsai may have stopped. Stop trials?'.format(elapsed_time)
-                reply = QMessageBox.question(self, 'Trial Generator', message,QMessageBox.Yes| QMessageBox.No )
+                reply = QMessageBox.question(self, 'Box {}, Trial Generator'.format(self.box_letter), message,QMessageBox.Yes| QMessageBox.No )
                 if reply == QMessageBox.Yes:
                     # User stops trials
                     err_msg = 'trial stalled {} minutes, user stopped trials. ANewTrial:{},Start:{},finish_Timer:{}'
@@ -2683,7 +2692,7 @@ class Window(QMainWindow):
                     
                     # Give warning to user
                     self.WarningLabel.setText('Trials stalled, recheck bonsai connection.')
-                    self.WarningLabel.setStyleSheet("color: red;")
+                    self.WarningLabel.setStyleSheet(self.default_warning_color)
                     break
                 else:
                     # User continues, wait another stall_duration and prompt again
@@ -2823,6 +2832,7 @@ class Window(QMainWindow):
                 self.SuggestedWater.setText(str(np.round(suggested_water,3)))
             else:
                 self.SuggestedWater.setText('')
+                self.TotalWaterWarning.setText('')
             # update total water
             if self.SuggestedWater.text()=='':
                 ExtraWater=0

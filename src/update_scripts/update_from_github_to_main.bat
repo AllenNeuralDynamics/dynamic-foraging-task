@@ -1,5 +1,5 @@
-set "logfile=C:\Users\svc_aind_behavior\Documents\foraging_gui_logs\github_log.txt"
-set "repo=C:\Users\svc_aind_behavior\Documents\GitHub\dynamic-foraging-task"
+set "logfile=C:\Users\%USERNAME%\Documents\foraging_gui_logs\github_log.txt"
+set "repo=C:\Users\%USERNAME%\Documents\GitHub\dynamic-foraging-task"
 set "branch=main"
 cd %repo%
 echo --------------------------- >>%logfile%

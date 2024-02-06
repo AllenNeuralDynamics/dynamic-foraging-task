@@ -1021,30 +1021,41 @@ class GenerateTrials():
         else:
             self.BS_CurrentRunningTime=0
 
-        if np.shape(self.B_AnimalResponseHistory)[0]>=StopIgnore:
-            if np.all(self.B_AnimalResponseHistory[-StopIgnore:]==2):
-                self.Stop=1
-                self.win.WarningLabelStop.setText('Stop because ignore trials exceed or equal: '+self.TP_StopIgnores)
-                self.win.WarningLabelStop.setStyleSheet(self.win.default_warning_color)
-            else:
-                self.Stop=0
-                self.win.WarningLabelStop.setText('')
-                self.win.WarningLabelStop.setStyleSheet("color: gray;")
+        # Make message box prompt
+        stop = False
+        msg =''
+        warning_label_text = ''
+        warning_label_color = 'color: gray;'        
+
+        # Check for reasons to stop early 
+        if (np.shape(self.B_AnimalResponseHistory)[0]>=StopIgnore) and (np.all(self.B_AnimalResponseHistory[-StopIgnore:]==2)):
+            stop=True
+            msg = 'Stopping the session because the mouse has ignored at least {} consecutive trials'.format(self.TP_StopIgnores)
+            warning_label_text = 'Stop because ignore trials exceed or equal: '+self.TP_StopIgnores
+            warning_label_color = self.win.default_warning_color
         elif self.B_CurrentTrialN>MaxTrial: 
-            self.Stop=1
-            self.win.WarningLabelStop.setText('Stop because maximum trials exceed or equal: '+self.TP_MaxTrial)
-            self.win.WarningLabelStop.setStyleSheet(self.win.default_warning_color)
+            stop=True
+            msg = 'Stopping the session because the mouse has reached the maximum trial count: {}'.format(self.TP_MaxTrial)
+            warning_label_text = 'Stop because maximum trials exceed or equal: '+self.TP_MaxTrial
+            warning_label_color = self.win.default_warning_color
         elif self.BS_CurrentRunningTime>MaxTime:
-            self.Stop=1
-            self.win.WarningLabelStop.setText('Stop because running time exceeds or equals: '+self.TP_MaxTime+'m')
-            self.win.WarningLabelStop.setStyleSheet(self.win.default_warning_color)
+            stop=True
+            msg = 'Stopping the session because the session running time has reached {} minutes'.format(self.TP_MaxTime)
+            warning_label_text = 'Stop because running time exceeds or equals: '+self.TP_MaxTime+'m'
+            warning_label_color = self.win.default_warning_color
         else:
-            self.Stop=0
-            self.win.WarningLabelStop.setText('')
-            self.win.WarningLabelStop.setStyleSheet("color: gray;")
-        if  self.Stop==1:           
+            stop=False
+
+        # Update the warning label text/color
+        self.win.WarningLabelStop.setText(warning_label_text)
+        self.win.WarningLabelStop.setStyleSheet(warning_label_color)
+    
+        # If we should stop trials, uncheck the start button
+        if stop:           
             self.win.Start.setStyleSheet("background-color : none")
-            self.win.Start.setChecked(False)
+            self.win.Start.setChecked(False)        
+            reply = QtWidgets.QMessageBox.question(self.win, 'Box {}'.format(self.win.box_letter), msg, QtWidgets.QMessageBox.Ok)
+    
     def _CheckAutoWater(self):
         '''Check if it should be an auto water trial'''
         if self.TP_AutoReward:
