@@ -2259,7 +2259,7 @@ class Window(QMainWindow):
                 button.setText('Stop bleaching')
                 #msgbox.addButton('Stop bleaching',QMessageBox.Ok)
                 bttn = msgbox.exec_()
-                self.StartBleching.setChecked(False)
+                self.StartBleaching.setChecked(False)
                 self._StartBleaching()
         else:
             self.StartBleaching.setStyleSheet("background-color : none")
