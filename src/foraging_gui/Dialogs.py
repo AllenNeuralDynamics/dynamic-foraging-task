@@ -285,8 +285,8 @@ class OptogeneticsDialog(QDialog):
                             ItemsRight=sorted(ItemsRight)
                             eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
                             eval('self.LaserPowerLeft_'+str(Numb)+'.addItems(ItemsLeft)')
-                            eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
-                            eval('self.LaserPowerLeft_'+str(Numb)+'.addItems(ItemsRight)')
+                            eval('self.LaserPowerRight_'+str(Numb)+'.clear()')
+                            eval('self.LaserPowerRight_'+str(Numb)+'.addItems(ItemsRight)')
                         self.MainWindow.WarningLabel.setText('')
                         self.MainWindow.WarningLabel.setStyleSheet("color: gray;")
                     else:
