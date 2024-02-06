@@ -1935,7 +1935,7 @@ class AutoTrainDialog(QDialog):
         except:
             logger.error("AWS connection failed!")
             QMessageBox.critical(self,
-                                 'Error',
+                                 'Box {}, Error'.format(self.MainWindow.box_letter),
                                  f'AWS connection failed!\n'
                                  f'Please check your AWS credentials at ~\.aws\credentials!')
             return False
@@ -2129,7 +2129,7 @@ class AutoTrainDialog(QDialog):
     def _apply_curriculum(self):
         # Check if a curriculum is selected
         if not hasattr(self, 'selected_curriculum') or self.selected_curriculum is None:
-            QMessageBox.critical(self, "Error", "Please select a curriculum!")
+            QMessageBox.critical(self, "Box {}, Error".format(self.MainWindow.box_letter), "Please select a curriculum!")
             return
         
         # Always enable override stage
@@ -2175,11 +2175,11 @@ class AutoTrainDialog(QDialog):
             if self.selected_curriculum['curriculum'] == self.curriculum_in_use:
                 # The selected curriculum is the same as the one in use
                 logger.info(f"Selected curriculum is the same as the one in use. No change is made.")
-                QMessageBox.information(self, "Info", "Selected curriculum is the same as the one in use. No change is made.")
+                QMessageBox.information(self, "Box {}, Info".format(self.MainWindow.box_letter), "Selected curriculum is the same as the one in use. No change is made.")
                 return
             else:
                 # Confirm with the user about overriding the curriculum
-                reply = QMessageBox.question(self, "Confirm",
+                reply = QMessageBox.question(self, "Box {}, Confirm".format(self.MainWindow.box_letter),
                                              f"Are you sure you want to override the curriculum?\n"
                                              f"If yes, please also manually select a training stage.",
                                              QMessageBox.Yes | QMessageBox.No,
@@ -2285,7 +2285,8 @@ class AutoTrainDialog(QDialog):
                 task_ind = widget_task.findText(paras_dict['task'])
                 if task_ind < 0:
                     logger.error(f"Task {paras_dict['task']} not found!")
-                    QMessageBox.critical(self, "Error", f'''Task "{paras_dict['task']}" not found. Check the curriculum!''')
+                    QMessageBox.critical(self, "Box {}, Error".format(self.MainWindow.box_letter), 
+                        f'''Task "{paras_dict['task']}" not found. Check the curriculum!''')
                     return [] # Return an empty list without setting anything
                 else:
                     widget_task.setCurrentIndex(task_ind)
