@@ -13,7 +13,7 @@ class RigClient:
         self.photometry_messages = {}
         self.photometry_message_tolerance = 1
 
-    def track_photometry_messages(message):
+    def track_photometry_messages(self, message):
         if message in self.photometry_messages:
             now = time.time()
             if (now - self.photometry_messages[message]) < self.photometry_message_tolerance:
