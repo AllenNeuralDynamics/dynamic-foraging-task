@@ -174,12 +174,15 @@ class GenerateTrials():
             self.win.warmup.setCurrentIndex(index)
             self.win._warmup()
             self.win.keyPressEvent()
+            self.win.NextBlock.setChecked(True)
+            self.win._NextBlock()
+            self.win.WarmupWarning.setText('Warm up is turned off')
 
     def _get_warmup_state(self):
         '''calculate the metrics related to the warm up and decide if we should turn on the warm up'''
         TP_warm_windowsize=int(self.TP_warm_windowsize)
         B_AnimalResponseHistory_window=self.B_AnimalResponseHistory[-TP_warm_windowsize:]
-        finish_trial=B_AnimalResponseHistory_window.shape[0] # the warmup is only turned on at the beginning of the session, thus the number of finished trials is equal to the number of trials with warmup on
+        finish_trial=self.B_AnimalResponseHistory.shape[0] # the warmup is only turned on at the beginning of the session, thus the number of finished trials is equal to the number of trials with warmup on
         left_choices = np.count_nonzero(B_AnimalResponseHistory_window == 0)
         right_choices = np.count_nonzero(B_AnimalResponseHistory_window == 1)
         no_responses = np.count_nonzero(B_AnimalResponseHistory_window == 2)
@@ -197,6 +200,9 @@ class GenerateTrials():
         else:
             # turn on the warm up
             warmup=1
+        # show current metrics of the warm up
+        self.win.WarmupWarning.setText('Finish trial: '+str(round(finish_trial,2))+ '; Finish ratio: '+str(round(finish_ratio,2))+'; Choice ratio bias: '+str(round(abs(choice_ratio-0.5),2)))
+        self.win.WarmupWarning.setStyleSheet(self.win.default_warning_color)
         return warmup
         
     def _CheckBaitPermitted(self):
