@@ -2897,7 +2897,7 @@ def show_exception_box(log_msg):
         errorbox = QtWidgets.QMessageBox()
         errorbox.setWindowTitle('Box {}, Error'.format(box))
         msg = '<span style="color:purple;font-weight:bold">An uncontrolled error occurred. Save any data and restart the GUI. </span> <br><br>{}'.format(log_msg)
-        msg = msg.replace('call last):', 'call last):<br>')
+        #msg = msg.replace('call last):', 'call last):<br>')
         errorbox.setText(msg)
         errorbox.exec_()
     else:
@@ -2919,10 +2919,11 @@ class UncaughtHook(QtCore.QObject):
         self._exception_caught.connect(show_exception_box)
 
     def exception_hook(self, exc_type, exc_value, exc_traceback):
-        tb = ",,".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+        tb = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         print('Encountered a fatal error: ')
         print(tb)
         logging.error('FATAL ERROR: \n{}'.format(tb))
+        tb = "<br>".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         self._exception_caught.emit(self.box+tb)
 
 if __name__ == "__main__":
