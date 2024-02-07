@@ -10,6 +10,8 @@ class RigClient:
         self.client = client
         self.client.addMsgHandler("default", self.msg_handler)
         self.msgs = queue.Queue(maxsize=0)
+    
+        # Keep track photometry message history
         self.photometry_messages = {}
         self.photometry_message_tolerance = 2
 
@@ -18,13 +20,17 @@ class RigClient:
             Keep track of when we last displayed each type of photometry signal
         '''
         if message in self.photometry_messages:
+            # We have seen this message before, check for tolerance
             now = time.time()
             if (now - self.photometry_messages[message]) < self.photometry_message_tolerance:
+                # It has been less than tolerance, return False and do not display message
                 return False
             else:
+                # It has been greater than tolerance, record new time, and display message
                 self.photometry_messages[message] = time.time()
                 return True
         else:
+            # We have not seen this message before, enter time, and display message
             self.photometry_messages[message] = time.time()
             return True
 
@@ -34,12 +40,16 @@ class RigClient:
         self.msgs.put([msg,args])
         msg_str = str(CurrentMessage)
         
-        # Selectively log photometry messages 1 Hz
+        # Selectively log photometry messages 
         if (('PhotometryRising' in msg_str) or ('PhotometryFalling' in msg_str)):
+            # Only selectively log these two messages
+
             if (self.track_photometry_messages(msg.address)):
+                # It was has been more than self.photometry_message_tolerance for this message
                 print(msg_str+', displaying at {} Hz'.format(1/self.photometry_message_tolerance))
                 logging.info(msg_str+', displaying at {} Hz'.format(1/self.photometry_message_tolerance))    
         else:
+            # Print and add to log
             print(CurrentMessage)
             logging.info(CurrentMessage)
 

@@ -138,7 +138,7 @@ class Window(QMainWindow):
         self._warmup()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
-        self._StopPhotometry()       
+        self._StopPhotometry() # Make sure photoexcitation is stopped 
  
         if not self.start_bonsai_ide:
             '''
@@ -1546,7 +1546,7 @@ class Window(QMainWindow):
                 self.client3.close()
                 self.client4.close()
             self.Opto_dialog.close()
-            self._StopPhotometry()       
+            self._StopPhotometry()  # Make sure photo excitation is stopped 
             print('GUI Window closed')
             logging.info('GUI Window closed')
         elif reply == QMessageBox.No:
@@ -1557,7 +1557,7 @@ class Window(QMainWindow):
                 self.client2.close()
                 self.client3.close()
                 self.client4.close()
-            self._StopPhotometry()       
+            self._StopPhotometry()   # Make sure photo excitation is stopped    
             print('GUI Window closed')
             logging.info('GUI Window closed')
             self.Opto_dialog.close()
@@ -1574,16 +1574,15 @@ class Window(QMainWindow):
                 self.Camera_dialog.StartCamera.setChecked(False)
                 self.Camera_dialog._StartCamera()
             self._Save()
-            self._StopPhotometry()       
+            self._StopPhotometry()# Make sure photo excitation is stopped 
             self.close()
         elif response==QMessageBox.No:
             # close the camera
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
                 self.Camera_dialog.StartCamera.setChecked(False)
                 self.Camera_dialog._StartCamera()
-            self._StopPhotometry()       
+            self._StopPhotometry()# Make sure photo excitation is stopped 
             self.close()
-
 
     def _Snipping(self):
         '''Open the snipping tool'''
@@ -2220,8 +2219,11 @@ class Window(QMainWindow):
         if self.StartBleaching.isChecked():
             # Check if trials have stopped
             if self.ANewTrial==0:
+                # Alert User
                 reply = QMessageBox.question(self, 'Box {}, Start bleaching:'.format(self.box_letter), 
                     'Cannot start photobleaching, because trials are in progress', QMessageBox.Ok)
+
+                # reset GUI button
                 self.StartBleaching.setChecked(False)
                 return
             
@@ -2229,6 +2231,7 @@ class Window(QMainWindow):
             reply = QMessageBox.question(self, 'Box {}, Start bleaching:'.format(self.box_letter), 
                     'Starting photobleaching, have the cables been disconnected from the mouse?',QMessageBox.Yes, QMessageBox.No )
             if reply == QMessageBox.No:
+                # reset GUI button
                 self.StartBleaching.setChecked(False)
                 return
 
@@ -2243,10 +2246,14 @@ class Window(QMainWindow):
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
                 logging.error(str(e))
+                
+                # Alert user
                 self.TeensyWarning.setText('Error: start bleaching!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
                 reply = QMessageBox.question(self, 'Box {}, Start bleaching:'.format(self.box_letter), 
                     'Cannot start photobleaching: {}'.format(str(e)), QMessageBox.Ok)
+                
+                # Reset GUI button
                 self.StartBleaching.setStyleSheet("background-color : none")               
                 self.StartBleaching.setChecked(False)
             else:
@@ -2257,8 +2264,9 @@ class Window(QMainWindow):
                 msgbox.setStandardButtons(QMessageBox.Ok)
                 button = msgbox.button(QMessageBox.Ok)
                 button.setText('Stop bleaching')
-                #msgbox.addButton('Stop bleaching',QMessageBox.Ok)
                 bttn = msgbox.exec_()
+                
+                # Stop Bleaching
                 self.StartBleaching.setChecked(False)
                 self._StartBleaching()
         else:
@@ -2290,6 +2298,7 @@ class Window(QMainWindow):
         else:
             logging.info('Photometry excitation stopped')
         finally:
+            # Reset all GUI buttons
             self.TeensyWarning.setText('')
             self.TeensyWarning.setStyleSheet(self.default_warning_color)      
             self.StartBleaching.setStyleSheet("background-color : none")
