@@ -146,7 +146,6 @@ class Window(QMainWindow):
             '''
             self._ReconnectBonsai()   
         logging.info('Start up complete')
-        raise Exception('testing')
 
     def connectSignalsSlots(self):
         '''Define callbacks'''
@@ -2374,6 +2373,7 @@ class Window(QMainWindow):
         self.Experimenter.setEnabled(enable)
 
     def _Start(self):
+        raise Exception('testing')
         '''start trial loop'''
         # empty post weight
         self.WeightAfter.setText('')
