@@ -406,7 +406,7 @@ class Window(QMainWindow):
             logging.error('Could not find instances of NewScale Stage: {}'.format(str(e)))
             return
         else:
-            logging.info('Foound newscale stage instances')
+            logging.info('Found newscale stage instances')
 
         if hasattr(self,'current_stage'):
             curent_stage_name=self.current_stage.name
@@ -436,8 +436,9 @@ class Window(QMainWindow):
                 if index != -1:
                     self.StageSerialNum.setCurrentIndex(index)
                 else:
-                    self.Warning_Newscale.setText('Default Newscale not found!')
+                    self.Warning_Newscale.setText('Newscale not found!')
                     self.Warning_Newscale.setStyleSheet(self.default_warning_color)
+                    logging.error('Could not find newscale with serial number: {}'.format(self.newscale_serial_num))
         except Exception as e:
             logging.error(str(e))
 
