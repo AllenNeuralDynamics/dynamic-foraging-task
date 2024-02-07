@@ -146,6 +146,7 @@ class Window(QMainWindow):
             '''
             self._ReconnectBonsai()   
         logging.info('Start up complete')
+        raise Exception('testing')
 
     def connectSignalsSlots(self):
         '''Define callbacks'''
