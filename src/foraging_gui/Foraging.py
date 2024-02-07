@@ -138,7 +138,8 @@ class Window(QMainWindow):
         self._warmup()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
-        
+        self._StopPhotometry() # Make sure photoexcitation is stopped 
+ 
         if not self.start_bonsai_ide:
             '''
                 When starting bonsai without the IDE the connection is always unstable.
@@ -1545,6 +1546,7 @@ class Window(QMainWindow):
                 self.client3.close()
                 self.client4.close()
             self.Opto_dialog.close()
+            self._StopPhotometry()  # Make sure photo excitation is stopped 
             print('GUI Window closed')
             logging.info('GUI Window closed')
         elif reply == QMessageBox.No:
@@ -1555,6 +1557,7 @@ class Window(QMainWindow):
                 self.client2.close()
                 self.client3.close()
                 self.client4.close()
+            self._StopPhotometry()   # Make sure photo excitation is stopped    
             print('GUI Window closed')
             logging.info('GUI Window closed')
             self.Opto_dialog.close()
@@ -1571,12 +1574,14 @@ class Window(QMainWindow):
                 self.Camera_dialog.StartCamera.setChecked(False)
                 self.Camera_dialog._StartCamera()
             self._Save()
+            self._StopPhotometry()# Make sure photo excitation is stopped 
             self.close()
         elif response==QMessageBox.No:
             # close the camera
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
                 self.Camera_dialog.StartCamera.setChecked(False)
                 self.Camera_dialog._StartCamera()
+            self._StopPhotometry()# Make sure photo excitation is stopped 
             self.close()
 
     def _Snipping(self):
@@ -2185,6 +2190,7 @@ class Window(QMainWindow):
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
                 reply = QMessageBox.question(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
                 self.StartExcitation.setChecked(False)
+                self.StartExcitation.setStyleSheet("background-color : none")
             else:
                 self.TeensyWarning.setText('')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)               
@@ -2211,6 +2217,25 @@ class Window(QMainWindow):
     
     def _StartBleaching(self):
         if self.StartBleaching.isChecked():
+            # Check if trials have stopped
+            if self.ANewTrial==0:
+                # Alert User
+                reply = QMessageBox.question(self, 'Box {}, Start bleaching:'.format(self.box_letter), 
+                    'Cannot start photobleaching, because trials are in progress', QMessageBox.Ok)
+
+                # reset GUI button
+                self.StartBleaching.setChecked(False)
+                return
+            
+            # Verify mouse is disconnected
+            reply = QMessageBox.question(self, 'Box {}, Start bleaching:'.format(self.box_letter), 
+                    'Starting photobleaching, have the cables been disconnected from the mouse?',QMessageBox.Yes, QMessageBox.No )
+            if reply == QMessageBox.No:
+                # reset GUI button
+                self.StartBleaching.setChecked(False)
+                return
+
+            # Start bleaching
             self.StartBleaching.setStyleSheet("background-color : green;")
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
@@ -2221,8 +2246,29 @@ class Window(QMainWindow):
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
                 logging.error(str(e))
+                
+                # Alert user
                 self.TeensyWarning.setText('Error: start bleaching!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
+                reply = QMessageBox.question(self, 'Box {}, Start bleaching:'.format(self.box_letter), 
+                    'Cannot start photobleaching: {}'.format(str(e)), QMessageBox.Ok)
+                
+                # Reset GUI button
+                self.StartBleaching.setStyleSheet("background-color : none")               
+                self.StartBleaching.setChecked(False)
+            else:
+                # Bleaching continues until user stops
+                msgbox = QMessageBox()
+                msgbox.setWindowTitle('Box {}, bleaching:'.format(self.box_letter))
+                msgbox.setText('Photobleaching in progress, do not close the GUI.')
+                msgbox.setStandardButtons(QMessageBox.Ok)
+                button = msgbox.button(QMessageBox.Ok)
+                button.setText('Stop bleaching')
+                bttn = msgbox.exec_()
+                
+                # Stop Bleaching
+                self.StartBleaching.setChecked(False)
+                self._StartBleaching()
         else:
             self.StartBleaching.setStyleSheet("background-color : none")
             try:
@@ -2230,13 +2276,36 @@ class Window(QMainWindow):
                 # Trigger Teensy with the above specified exp mode
                 ser.write(b's')
                 ser.close()
-                self.TeensyWarning.setText('Stop bleaching!')
+                self.TeensyWarning.setText('')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: stop bleaching!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
-
+    
+    def _StopPhotometry(self):
+        '''
+            Stop either bleaching or photometry
+        '''
+        logging.info('Checking that photometry is not running')
+        try:
+            ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
+            # Trigger Teensy with the above specified exp mode
+            ser.write(b's')
+            ser.close()
+        except Exception as e:
+            logging.info('Could not stop photometry, most likely this means photometry is not running: '+str(e))
+        else:
+            logging.info('Photometry excitation stopped')
+        finally:
+            # Reset all GUI buttons
+            self.TeensyWarning.setText('')
+            self.TeensyWarning.setStyleSheet(self.default_warning_color)      
+            self.StartBleaching.setStyleSheet("background-color : none")
+            self.StartExcitation.setStyleSheet("background-color : none")
+            self.StartBleaching.setChecked(False)
+            self.StartExcitation.setChecked(False)
+           
     def _AutoReward(self):
         if self.AutoReward.isChecked():
             self.AutoReward.setStyleSheet("background-color : green;")
