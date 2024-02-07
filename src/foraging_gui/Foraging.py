@@ -2917,7 +2917,7 @@ class UncaughtHook(QtCore.QObject):
         self._exception_caught.connect(show_exception_box)
 
     def exception_hook(self, exc_type, exc_value, exc_traceback):
-        tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+        tb = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         print('Encountered a fatal error: ')
         print(tb)
         logging.error('FATAL ERROR: \n{}'.format(tb))
