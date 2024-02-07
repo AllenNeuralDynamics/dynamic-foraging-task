@@ -126,7 +126,6 @@ class Window(QMainWindow):
         self._WaterVolumnManage2()
         self._LickSta()
         self._InitializeMotorStage()
-        #self._StageSerialNum()
         self._warmup()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
@@ -181,7 +180,7 @@ class Window(QMainWindow):
         self.SaveContinue.triggered.connect(self._SaveContinue)
         self.action_Exit.triggered.connect(self._Exit)
         self.action_New.triggered.connect(self._New)
-        self.actionScan_stages.triggered.connect(self._scan_for_usb_stages)
+        #self.actionScan_stages.triggered.connect(self._scan_for_usb_stages)
         self.action_Clear.triggered.connect(self._Clear)
         self.action_Start.triggered.connect(self.Start.click)
         self.action_NewSession.triggered.connect(self.NewSession.click)
@@ -412,39 +411,21 @@ class Window(QMainWindow):
         self.PositionY.setText(str(NewPositions[1]))
         self.PositionZ.setText(str(NewPositions[2]))
 
-    #def _StageSerialNum(self):
-    #    '''connect to a stage'''
-    #    # scan stages
-    #    #try:
-    #    #    self.instances = NewScaleSerialY.get_instances()
-    #    #except Exception as e:
-    #    #    logging.error('Could not find instances of NewScale Stage: {}'.format(str(e)))
-    #    #    return
-    #    #else:
-    #    #    logging.info('Found newscale stage instances')
-
-    #    if hasattr(self,'current_stage'):
-    #        curent_stage_name=self.current_stage.name
-    #    else:
-    #        curent_stage_name=''
-    #    # connect to one stage
-    #    for instance in self.instances:
-    #        try:
-    #            instance.io.close()
-    #        except Exception as e:
-    #            pass
-    #        try:
-    #            if (instance.sn==self.StageSerialNum.currentText())&\
-    #                (curent_stage_name!=instance.sn):
-    #                self._connect_stage(instance)
-    #        except Exception as e:
-    #            logging.error(str(e))
-
     def _InitializeMotorStage(self):
         '''To initialize motor stage'''
     
         # find available newscale stages
-        self._scan_for_usb_stages()
+        logging.info('Scanning for newscale stages')
+        try:
+            self.instances = NewScaleSerialY.get_instances()
+        except Exception as e:
+            logging.info('Could not find instances of NewScale Stage: {}'.format(str(e)))
+            return
+        else:
+            self.stage_names=[]
+            for instance in self.instances:
+                self.stage_names.append(instance.sn)
+            self.StageSerialNum.addItems(self.stage_names)
 
         # use the newscale stage in the settings file
         try:
@@ -465,35 +446,19 @@ class Window(QMainWindow):
             logging.error(str(e))
 
         # connect to the Stage
-        if hasattr(self,'current_stage'):
-            current_stage_name=self.current_stage.name
-        else:
-            current_stage_name=''
         for instance in self.instances:
             try:
                 instance.io.close()
             except Exception as e:
                 pass
             try:
-                if (instance.sn==self.StageSerialNum.currentText())&\
-                    (current_stage_name!=instance.sn):
+                if (instance.sn==self.newscale_serial_num):
                     self._connect_stage(instance)
             except Exception as e:
                 logging.error(str(e))
 
 
-    def _scan_for_usb_stages(self):
-        '''Scan available stages'''
-        logging.info('Scanning for newscale stages')
-        try:
-            self.instances = NewScaleSerialY.get_instances()
-        except Exception as e:
-            logging.error('Could not find instances of NewScale Stage: {}'.format(str(e)))
-        else:
-            self.stage_names=[]
-            for instance in self.instances:
-                self.stage_names.append(instance.sn)
-            self.StageSerialNum.addItems(self.stage_names)
+
     
     def _connect_stage(self,instance):
         '''connect to a stage'''
