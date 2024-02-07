@@ -2898,6 +2898,30 @@ def excepthook(exc_type, exc_value, exc_tb):
     logging.error('FATAL ERROR: \n{}'.format(tb))
     QtWidgets.QApplication.quit()
 
+def show_exception_box(log_msg):
+    if QtWidgets.QApplication.instance() is not None:
+        errorbox = QtWidgets.QMessageBox()
+        errorbox.setText('Encountered a fatal error, the GUI will now close: \n{}'.format(log_msg))
+        errorbox.exec_()
+    else:
+        logging.error('could not launch exception box')
+
+class UncaughtHook(QtCore.QObject):
+    _exception_caught = QtCore.Signal(object)
+    
+    def __init__(self, *args, **kwargs):
+        super(UncaughtHook, self).__init__(*args, **kwargs)
+    
+        sys.excepthook = self.exception_hook
+        self._exception_caught.connect(show_exception_box)
+
+    def exception_hook(self, exc_type, exc_value, exc_traceback):
+        tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+        print('Encountered a fatal error: ')
+        print(tb)
+        logging.error('FATAL ERROR: \n{}'.format(tb))
+        self._exception_caught.emit(tb)
+
 if __name__ == "__main__":
 
     # Determine which box we are using, and whether to start bonsai IDE
@@ -2923,8 +2947,8 @@ if __name__ == "__main__":
     QApplication.setAttribute(Qt.AA_Use96Dpi,False)
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
    
-    # Set excepthook, so we can log uncaught exceptions
-    sys.excepthook=excepthook
+    ## Set excepthook, so we can log uncaught exceptions
+    #sys.excepthook=excepthook
 
     # Start Q, and Gui Window
     logging.info('Starting QApplication and Window')
