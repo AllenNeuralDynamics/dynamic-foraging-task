@@ -1715,6 +1715,7 @@ class Window(QMainWindow):
         )
    
     def _Save(self,ForceSave=0,SaveContinue=0):
+        raise Exception('just trying something with a longer message')
         logging.info('Saving current session, ForceSave={},SaveContinue={}'.format(ForceSave,SaveContinue))
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
@@ -2888,17 +2889,6 @@ def log_git_hash():
     except Exception as e:
         logging.error('Could not log git branch and hash: {}'.format(str(e)))
 
-def excepthook(exc_type, exc_value, exc_tb):
-    '''
-        excepthook will be called when the GUI encounters an uncaught exception
-        We will log the error in the logfile, print the error to the console, then exit
-    '''
-    tb = ", ".join(traceback.format_exception(exc_type, exc_value, exc_tb))
-    print('Encountered a fatal error: ')
-    print(tb)
-    logging.error('FATAL ERROR: \n{}'.format(tb))
-    QtWidgets.QApplication.quit()
-
 def show_exception_box(log_msg):
     if QtWidgets.QApplication.instance() is not None:
         box = log_msg[0]
@@ -2906,7 +2896,7 @@ def show_exception_box(log_msg):
 
         errorbox = QtWidgets.QMessageBox()
         errorbox.setWindowTitle('Box {}, Error'.format(box))
-        msg = '<span style="color:purple;font-weight:bold;size=10">An uncontrolled error occurred. Save any data and restart the GUI. </span> <br><br>{}'.format(log_msg)
+        msg = '<span style="color:purple;font-weight:bold;size=20">An uncontrolled error occurred. Save any data and restart the GUI. </span> <br><br>{}'.format(log_msg)
         msg = msg.replace('call last):', 'call last):<br>')
         errorbox.setText(msg)
         errorbox.exec_()
@@ -2960,16 +2950,14 @@ if __name__ == "__main__":
     QApplication.setAttribute(Qt.AA_Use96Dpi,False)
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
    
-    ## Set excepthook, so we can log uncaught exceptions
-    #sys.excepthook=excepthook
-
     # Start Q, and Gui Window
     logging.info('Starting QApplication and Window')
     app = QApplication(sys.argv)
     qt_exception_hook = UncaughtHook(box_number)
     win = Window(box_number=box_number,start_bonsai_ide=start_bonsai_ide)
     win.show()
-    # Run your application's event loop and stop after closing all windows
+   
+     # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())
 
 
