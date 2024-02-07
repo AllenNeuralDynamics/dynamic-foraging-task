@@ -2906,7 +2906,9 @@ def show_exception_box(log_msg):
 
         errorbox = QtWidgets.QMessageBox()
         errorbox.setWindowTitle('Box {}, Error'.format(box))
-        errorbox.setText('<span style="color:purple;font-weight:bold">An uncontrolled error occurred. Save any data and restart the GUI. </span> <br><br>{}'.format(log_msg))
+        msg = '<span style="color:purple;font-weight:bold;size=10">An uncontrolled error occurred. Save any data and restart the GUI. </span> <br><br>{}'.format(log_msg)
+        msg = msg.replace('call last):', 'call last):<br>')
+        errorbox.setText(msg)
         errorbox.exec_()
     else:
         logging.error('could not launch exception box')
