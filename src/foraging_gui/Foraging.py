@@ -2954,6 +2954,7 @@ if __name__ == "__main__":
     # Start Q, and Gui Window
     logging.info('Starting QApplication and Window')
     app = QApplication(sys.argv)
+    qt_exception_hook = UncaughtHook()
     win = Window(box_number=box_number,start_bonsai_ide=start_bonsai_ide)
     win.show()
     # Run your application's event loop and stop after closing all windows
