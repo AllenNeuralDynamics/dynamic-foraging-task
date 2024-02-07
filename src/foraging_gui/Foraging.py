@@ -45,7 +45,7 @@ class Window(QMainWindow):
         logging.info('Creating Window')
         super().__init__(parent)
         
-        
+        # Process inputs        
         self.box_number=box_number
         mapper = {
             1:'A',
@@ -70,42 +70,34 @@ class Window(QMainWindow):
         # Load Laser and Water Calibration Files
         self._GetLaserCalibration()
         self._GetWaterCalibration()
-        
-        uic.loadUi(self.default_ui, self)
-        if self.default_ui=='ForagingGUI.ui':
-            self.label_date.setText(str(date.today()))
-            self.default_warning_color="color: purple;"
-            self.default_text_color='color: purple;'
-            self.default_text_background_color='background-color: purple;'
-        elif self.default_ui=='ForagingGUI_Ephys.ui':
-            self.Visualization.setTitle(str(date.today()))
-            self.default_warning_color="color: red;"
-            self.default_text_color='color: red;'
-            self.default_text_background_color='background-color: red;'
-        else:
-            self.default_warning_color="color: red;"
-            self.default_text_color='color: red;'
-            self.default_text_background_color='background-color: red;'
+       
+        # Load User interface 
+        self._LoadUI()
+
         # set window title
         self.setWindowTitle(self.window_title)
         logging.info('Setting Window title: {}'.format(self.window_title))
 
-        self.StartANewSession=1 # to decide if should start a new session
-        self.ToInitializeVisual=1
-        self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
-        self.ANewTrial=1 # permission to start a new trial
-        self.UpdateParameters=1 # permission to update parameters
-        self.loggingstarted=-1
+        # Set up parameters
+        self.StartANewSession = 1   # to decide if should start a new session
+        self.ToInitializeVisual = 1 # Should we visualize performance
+        self.FigureUpdateTooSlow = 0# if the FigureUpdateTooSlow is true, using different process to update figures
+        self.ANewTrial = 1          # permission to start a new trial
+        self.UpdateParameters = 1   # permission to update parameters
+        self.loggingstarted = -1    # Have we started trial logging
         
         # Connect to Bonsai
         self._InitializeBonsai()
 
+        # Set up threads 
         self.threadpool=QThreadPool() # get animal response
         self.threadpool2=QThreadPool() # get animal lick
         self.threadpool3=QThreadPool() # visualization
         self.threadpool4=QThreadPool() # for generating a new trial
         self.threadpool5=QThreadPool() # for starting the trial loop
         self.threadpool_workertimer=QThreadPool() # for timing
+
+        # Set up more parameters
         self.OpenOptogenetics=0
         self.WaterCalibration=0
         self.LaserCalibration=0
@@ -117,11 +109,11 @@ class Window(QMainWindow):
         self.LickSta_ToInitializeVisual=1
         self.TimeDistribution=0
         self.TimeDistribution_ToInitializeVisual=1
-        self.finish_Timer=1 # for photometry baseline recordings
-        self.PhotometryRun=0 # 1. Photometry has been run; 0. Photometry has not been carried out.
-        self._Optogenetics()     # open the optogenetics panel 
-        self._LaserCalibration() # to open the laser calibration panel
-        self._WaterCalibration() # to open the water calibration panel
+        self.finish_Timer=1     # for photometry baseline recordings
+        self.PhotometryRun=0    # 1. Photometry has been run; 0. Photometry has not been carried out.
+        self._Optogenetics()    # open the optogenetics panel 
+        self._LaserCalibration()# to open the laser calibration panel
+        self._WaterCalibration()# to open the water calibration panel
         self._Camera()
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self.WaterPerRewardedTrial=0.005 
@@ -147,6 +139,29 @@ class Window(QMainWindow):
             '''
             self._ReconnectBonsai()   
         logging.info('Start up complete')
+    
+    def _LoadUI(self):
+        '''
+            Determine which user interface to use
+        '''
+        uic.loadUi(self.default_ui, self)
+        if self.default_ui=='ForagingGUI.ui':
+            logging.info('Using ForagingGUI.ui interface')
+            self.label_date.setText(str(date.today()))
+            self.default_warning_color="color: purple;"
+            self.default_text_color='color: purple;'
+            self.default_text_background_color='background-color: purple;'
+        elif self.default_ui=='ForagingGUI_Ephys.ui':
+            logging.info('Using ForagingGUI_Ephys.ui interface')
+            self.Visualization.setTitle(str(date.today()))
+            self.default_warning_color="color: red;"
+            self.default_text_color='color: red;'
+            self.default_text_background_color='background-color: red;'
+        else:
+            logging.info('Using ForagingGUI.ui interface')
+            self.default_warning_color="color: red;"
+            self.default_text_color='color: red;'
+            self.default_text_background_color='background-color: red;'
 
     def connectSignalsSlots(self):
         '''Define callbacks'''
