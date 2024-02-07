@@ -2899,16 +2899,13 @@ def excepthook(exc_type, exc_value, exc_tb):
     logging.error('FATAL ERROR: \n{}'.format(tb))
     QtWidgets.QApplication.quit()
 
-def show_exception_box(box_number, log_msg):
+def show_exception_box(log_msg):
     if QtWidgets.QApplication.instance() is not None:
-        mapper = {
-            1:'A',
-            2:'B',
-            3:'C',
-            4:'D'
-            }
+        box = log_msg[0]
+        log_msg = log_msg[1:]
+
         errorbox = QtWidgets.QMessageBox()
-        errorbox.setWindowTitle('Box {}, Error'.format(mapper[box_number]))
+        errorbox.setWindowTitle('Box {}, Error'.format(box))
         errorbox.setText('<span style="color:purple;font-weight:bold">An uncontrolled error occurred. Save any data and restart the GUI. </span> <br><br>{}'.format(log_msg))
         errorbox.exec_()
     else:
@@ -2917,9 +2914,15 @@ def show_exception_box(box_number, log_msg):
 class UncaughtHook(QtCore.QObject):
     _exception_caught = QtCore.Signal(object)
     
-    def __init__(self, box_number, *args, **kwargs):
+    def __init__(self,box_number, *args, **kwargs):
         super(UncaughtHook, self).__init__(*args, **kwargs)
-        self.box_number = box_number 
+        mapper = {
+            1:'A',
+            2:'B',
+            3:'C',
+            4:'D'
+            }
+        self.box = mapper[box_number]
         sys.excepthook = self.exception_hook
         self._exception_caught.connect(show_exception_box)
 
@@ -2928,7 +2931,7 @@ class UncaughtHook(QtCore.QObject):
         print('Encountered a fatal error: ')
         print(tb)
         logging.error('FATAL ERROR: \n{}'.format(tb))
-        self._exception_caught.emit(box_number, tb)
+        self._exception_caught.emit(self.box+tb)
 
 if __name__ == "__main__":
 
