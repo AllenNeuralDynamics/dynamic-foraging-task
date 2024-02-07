@@ -2902,7 +2902,8 @@ def excepthook(exc_type, exc_value, exc_tb):
 def show_exception_box(log_msg):
     if QtWidgets.QApplication.instance() is not None:
         errorbox = QtWidgets.QMessageBox()
-        errorbox.setText('Encountered a fatal error, the GUI will now close: \n{}'.format(log_msg))
+        errorbox.setWindowTitle('Error')
+        errorbox.setText('An uncontrolled error occurred: \n{}\n Save any data and restart the GUI'.format(log_msg))
         errorbox.exec_()
     else:
         logging.error('could not launch exception box')
