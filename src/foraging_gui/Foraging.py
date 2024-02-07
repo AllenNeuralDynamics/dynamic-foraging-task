@@ -2893,17 +2893,23 @@ def excepthook(exc_type, exc_value, exc_tb):
         excepthook will be called when the GUI encounters an uncaught exception
         We will log the error in the logfile, print the error to the console, then exit
     '''
-    tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+    tb = ", ".join(traceback.format_exception(exc_type, exc_value, exc_tb))
     print('Encountered a fatal error: ')
     print(tb)
     logging.error('FATAL ERROR: \n{}'.format(tb))
     QtWidgets.QApplication.quit()
 
-def show_exception_box(log_msg):
+def show_exception_box(box_number, log_msg):
     if QtWidgets.QApplication.instance() is not None:
+        mapper = {
+            1:'A',
+            2:'B',
+            3:'C',
+            4:'D'
+            }
         errorbox = QtWidgets.QMessageBox()
-        errorbox.setWindowTitle('Error')
-        errorbox.setText('<span style="color:purple">An uncontrolled error occurred. Save any data and restart the GUI. </span> <br><br>{}'.format(log_msg))
+        errorbox.setWindowTitle('Box {}, Error'.format(mapper[box_number]))
+        errorbox.setText('<span style="color:purple;font-weight:bold">An uncontrolled error occurred. Save any data and restart the GUI. </span> <br><br>{}'.format(log_msg))
         errorbox.exec_()
     else:
         logging.error('could not launch exception box')
@@ -2911,9 +2917,9 @@ def show_exception_box(log_msg):
 class UncaughtHook(QtCore.QObject):
     _exception_caught = QtCore.Signal(object)
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, box_number, *args, **kwargs):
         super(UncaughtHook, self).__init__(*args, **kwargs)
-    
+        self.box_number = box_number 
         sys.excepthook = self.exception_hook
         self._exception_caught.connect(show_exception_box)
 
@@ -2922,7 +2928,7 @@ class UncaughtHook(QtCore.QObject):
         print('Encountered a fatal error: ')
         print(tb)
         logging.error('FATAL ERROR: \n{}'.format(tb))
-        self._exception_caught.emit(tb)
+        self._exception_caught.emit(box_number, tb)
 
 if __name__ == "__main__":
 
@@ -2955,7 +2961,7 @@ if __name__ == "__main__":
     # Start Q, and Gui Window
     logging.info('Starting QApplication and Window')
     app = QApplication(sys.argv)
-    qt_exception_hook = UncaughtHook()
+    qt_exception_hook = UncaughtHook(box_number)
     win = Window(box_number=box_number,start_bonsai_ide=start_bonsai_ide)
     win.show()
     # Run your application's event loop and stop after closing all windows
