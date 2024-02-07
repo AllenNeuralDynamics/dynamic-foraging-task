@@ -1715,7 +1715,6 @@ class Window(QMainWindow):
         )
    
     def _Save(self,ForceSave=0,SaveContinue=0):
-        raise Exception('just trying something with a longer message')
         logging.info('Saving current session, ForceSave={},SaveContinue={}'.format(ForceSave,SaveContinue))
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
@@ -2374,7 +2373,6 @@ class Window(QMainWindow):
         self.Experimenter.setEnabled(enable)
 
     def _Start(self):
-        raise Exception('testing')
         '''start trial loop'''
         # empty post weight
         self.WeightAfter.setText('')
