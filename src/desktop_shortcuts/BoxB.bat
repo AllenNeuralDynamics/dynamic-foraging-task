@@ -4,4 +4,4 @@ start "" C:\Users\%USERNAME%\Documents\GitHub\dynamic-foraging-task\src\desktop_
 powershell -window minimized -command ""
 python Foraging.py 2 --no-bonsai-ide
 timeout 3600 > NUL
-
+:: Open the GUI, minimize the console
