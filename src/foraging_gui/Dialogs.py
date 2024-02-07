@@ -1401,6 +1401,7 @@ class LaserCalibrationDialog(QDialog):
         self.MainWindow.Channel.TriggerSource('/Dev1/PFI0')
         # start generating waveform in bonsai
         self.MainWindow.Channel.OptogeneticsCalibration(int(1))
+        self.MainWindow.Channel.receive()
     def _CopyFromOpto(self):
         '''Copy the optogenetics parameters'''
         N=[]
