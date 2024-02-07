@@ -310,21 +310,29 @@ class Window(QMainWindow):
     def _GetPositions(self):
         '''get the current position of the stage'''
         if hasattr(self, 'current_stage'):
+            logging.info('Grabbing current stage position')
             current_stage=self.current_stage
             current_position=current_stage.get_position()
             self._UpdatePosition(current_position,(0,0,0))
+        else:
+            logging.info('GetPositions pressed, but no current stage')
                                 
     def _StageStop(self):
         '''Halt the stage'''
         if hasattr(self, 'current_stage'):
+            logging.info('Stopping stage movement')
             current_stage=self.current_stage
             current_stage.halt()
+        else:
+            logging.info('StageStop pressed, but no current stage')
 
     def _Move(self,axis,step):
         '''Move stage'''
         try:
             if not hasattr(self, 'current_stage'):
+                logging.info('Move Stage pressed, but no current stage')
                 return
+            logging.info('Moving stage')
             self.StageStop.click
             current_stage=self.current_stage
             current_position=current_stage.get_position()
@@ -397,6 +405,8 @@ class Window(QMainWindow):
         except Exception as e:
             logging.error('Could not find instances of NewScale Stage: {}'.format(str(e)))
             return
+        else:
+            logging.info('Foound newscale stage instances')
 
         if hasattr(self,'current_stage'):
             curent_stage_name=self.current_stage.name
