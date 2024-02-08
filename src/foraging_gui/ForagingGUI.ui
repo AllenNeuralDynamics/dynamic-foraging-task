@@ -1171,6 +1171,7 @@
                             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                            </property>
                           </widget>
+                         </item>
                          <item row="7" column="0" colspan="6">
                           <widget class="QLabel" name="Warning_Newscale">
                            <property name="sizePolicy">
