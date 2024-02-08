@@ -23,28 +23,25 @@ class IOWorker(QObject):
         self.halt_requested = False
 
     def run(self):
-        try:
-            while True:
-                while not self.qslow.empty() and not self.halt_requested:
-                    cmd = self.qslow.get()
-                    cmd.execute()
-                    if not cmd.blocking:
-                        while not cmd.done() and not self.halt_requested:
-                            while not self.qfast.empty() and not self.halt_requested:
-                                fc = self.qfast.get()
-                                fc.execute()
-                            time.sleep(TIME_SLEEP)
-                while not self.qfast.empty() and not self.halt_requested:
-                    fc = self.qfast.get()
-                    fc.execute()
-                if self.halt_requested:
-                    self.device.halt()
-                    self.clear_queues()
-                    self.halt_requested = False
-                time.sleep(TIME_SLEEP)
-            self.finished.emit()
-        except:
-            logging.error('newscale error')
+        while True:
+            while not self.qslow.empty() and not self.halt_requested:
+                cmd = self.qslow.get()
+                cmd.execute()
+                if not cmd.blocking:
+                    while not cmd.done() and not self.halt_requested:
+                        while not self.qfast.empty() and not self.halt_requested:
+                            fc = self.qfast.get()
+                            fc.execute()
+                        time.sleep(TIME_SLEEP)
+            while not self.qfast.empty() and not self.halt_requested:
+                fc = self.qfast.get()
+                fc.execute()
+            if self.halt_requested:
+                self.device.halt()
+                self.clear_queues()
+                self.halt_requested = False
+            time.sleep(TIME_SLEEP)
+        self.finished.emit()
 
     def queue_command(self, cmd):
         if cmd.fast:
