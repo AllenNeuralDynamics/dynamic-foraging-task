@@ -124,6 +124,7 @@ class Window(QMainWindow):
         self._WaterVolumnManage2()
         self._LickSta()
         self._InitializeMotorStage()
+        self._GetPositions()
         self._warmup()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
@@ -408,7 +409,12 @@ class Window(QMainWindow):
 
     def _InitializeMotorStage(self):
         '''To initialize motor stage'''
-    
+        ## TODO
+        # Remove Manipulator, and MotorStage from UI files
+        # Remove "Stage" from UI file in Motorstage section
+        # Check this still works on a computer with multiple stages  
+        # Remove all notion of "self.StageSerialNum" 
+ 
         # find available newscale stages
         logging.info('Scanning for newscale stages')
         try:
