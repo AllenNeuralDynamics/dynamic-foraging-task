@@ -408,7 +408,14 @@ class Window(QMainWindow):
         self.PositionZ.setText(str(NewPositions[2]))
 
     def _InitializeMotorStage(self):
-        '''To initialize motor stage'''
+        '''
+            Scans for available newscale stages. Attempts to connect to the newscale stage
+            defined by the serial number in the settings file. If it cannot connect for any reason
+            it displays a warning in the motor stage box, and returns. 
+            
+            Failure modes include: an error in scanning for stages, no stages found, no stage defined
+            in the settings file, the defined stage not found, an error in connecting to the stage 
+        '''
         ## TODO
         # Remove Manipulator, and MotorStage from UI files
         # Remove "Stage" from UI file in Motorstage section
@@ -462,14 +469,21 @@ class Window(QMainWindow):
    
         # Setup connection
         newscale_stage_instance = self.instances[stage_index]
-        #self._disconnect_stage(newscale_stage_instance)  
         self._connect_stage(newscale_stage_instance)
 
     def _no_stage(self):
+        '''
+            Display a warrning message that the newscale stage is not connected
+        '''
         self.Warning_Newscale.setText('Newscale stage not connected')
         self.Warning_Newscale.setStyleSheet(self.default_warning_color)
 
     def _disconnect_stage(self, instance):
+        '''
+            disconnects from the newscale stage instace.
+            python-newscale will print an "SI_INVALID_HANDLE" error if the instance
+            does not have an open connection
+        '''
         try:
             instance.io.close()
         except Exception as e:
