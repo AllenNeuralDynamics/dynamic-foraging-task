@@ -462,7 +462,7 @@ class Window(QMainWindow):
    
         # Setup connection
         newscale_stage_instance = self.instances[stage_index]
-        self._disconnect_stage(newscale_stage_instance)  
+        #self._disconnect_stage(newscale_stage_instance)  
         self._connect_stage(newscale_stage_instance)
 
     def _no_stage(self):
