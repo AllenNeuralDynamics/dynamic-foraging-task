@@ -23,7 +23,7 @@ import webbrowser
 import foraging_gui.rigcontrol as rigcontrol
 from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
 from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog
-from foraging_gui.Dialogs import ManipulatorDialog,LaserCalibrationDialog
+from foraging_gui.Dialogs import LaserCalibrationDialog
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,NewScaleSerialY
@@ -102,8 +102,6 @@ class Window(QMainWindow):
         self.WaterCalibration=0
         self.LaserCalibration=0
         self.Camera=0
-        #self.MotorStage=0
-        self.Manipulator=0
         self.NewTrialRewardOrder=0
         self.LickSta=0
         self.LickSta_ToInitializeVisual=1
@@ -167,8 +165,6 @@ class Window(QMainWindow):
         self.action_About.triggered.connect(self._about)
         self.action_Camera.triggered.connect(self._Camera)
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
-        self.action_Manipulator.triggered.connect(self._Manipulator)
-        #self.action_MotorStage.triggered.connect(self._MotorStage)
         self.actionLicks_sta.triggered.connect(self._LickSta)
         self.actionTime_distribution.triggered.connect(self._TimeDistribution)
         self.action_Calibration.triggered.connect(self._WaterCalibration)
@@ -421,19 +417,26 @@ class Window(QMainWindow):
             logging.info('Could not find instances of NewScale Stage: {}'.format(str(e)))
             return
         else:
+            if len(self.instances) == 0:
+                logging.info('Could not find instances of NewScale Stage: {}'.format(str(e)))
+                return               
+    
             logging.info('found {} newscale stages'.format(len(self.instances)))
             self.stage_names=[]
             for instance in self.instances:
                 self.stage_names.append(instance.sn)
             self.StageSerialNum.addItems(self.stage_names)
 
-        # use the newscale stage in the settings file
+        # Determine if the newscale stage from the settings file is in our instances 
+        stage_index = 0
         try:
             self.newscale_serial_num=eval('self.newscale_serial_num_box'+str(self.box_number))
             if self.newscale_serial_num!='':
                 index = self.StageSerialNum.findText(str(self.newscale_serial_num))
                 if index != -1:
                     self.StageSerialNum.setCurrentIndex(index)
+                    stage_index = index
+                    logging.info('Found the newscale stage from the settings file')
                 else:
                     self.Warning_Newscale.setText('Newscale not found!')
                     self.Warning_Newscale.setStyleSheet(self.default_warning_color)
@@ -444,24 +447,21 @@ class Window(QMainWindow):
                 return
         except Exception as e:
             logging.error(str(e))
+            return
 
         # connect to the Stage
-        for instance in self.instances:
-            try:
-                instance.io.close()
-            except Exception as e:
-                pass
-            try:
-                if (instance.sn==self.newscale_serial_num):
-                    self._connect_stage(instance)
-            except Exception as e:
-                logging.error(str(e))
-            else:
-                logging.info('Successfully connected to newscale stage')
-
-
-
-    
+        newscale_stage_instance = self.instances[stage_index]
+        try:
+            newscale_stage_instance.io.close()
+        except Exception as e:
+            pass
+        try:
+            self._connect_stage(newscale_stage_instance)
+        except Exception as e:
+            logging.error(str(e))
+        else:
+            logging.info('Successfully connected to newscale stage')       
+     
     def _connect_stage(self,instance):
         '''connect to a stage'''
         instance.io.open()
@@ -1627,15 +1627,6 @@ class Window(QMainWindow):
         else:
             self.Camera_dialog.hide()
 
-    def _Manipulator(self):
-        if self.Manipulator==0:
-            self.ManipulatoB_dialog = ManipulatorDialog(MainWindow=self)
-            self.Manipulator=1
-        if self.action_Manipulator.isChecked()==True:
-            self.ManipulatoB_dialog.show()
-        else:
-            self.ManipulatoB_dialog.hide()
-
     def _WaterCalibration(self):
         if self.WaterCalibration==0:
             self.WaterCalibration_dialog = WaterCalibrationDialog(MainWindow=self)
@@ -1653,15 +1644,6 @@ class Window(QMainWindow):
             self.LaserCalibration_dialog.show()
         else:
             self.LaserCalibration_dialog.hide()
-
-    #def _MotorStage(self):
-    #    if self.MotorStage==0:
-    #        self.MotorStage_dialog = MotorStageDialog(MainWindow=self)
-    #        self.MotorStage=1
-    #    if self.action_MotorStage.isChecked()==True:
-    #        self.MotorStage_dialog.show()
-    #    else:
-    #        self.MotorStage_dialog.hide()
 
     def _TimeDistribution(self):
         '''Plot simulated ITI/delay/block distribution'''

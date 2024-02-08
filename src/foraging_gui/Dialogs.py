@@ -1153,10 +1153,10 @@ def is_file_in_use(file_path):
         except OSError as e:
             return True
 
-class ManipulatorDialog(QDialog):
-    def __init__(self, MainWindow, parent=None):
-        super().__init__(parent)
-        uic.loadUi('Manipulator.ui', self)
+#class ManipulatorDialog(QDialog):
+#    def __init__(self, MainWindow, parent=None):
+#        super().__init__(parent)
+#        uic.loadUi('Manipulator.ui', self)
 
 #class MotorStageDialog(QDialog):
 #    def __init__(self, MainWindow, parent=None):
