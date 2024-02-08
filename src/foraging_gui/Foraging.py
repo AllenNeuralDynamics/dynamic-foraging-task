@@ -415,6 +415,9 @@ class Window(QMainWindow):
         # Check this still works on a computer with multiple stages  
         # Remove all notion of "self.StageSerialNum" 
             # Ask XX about whether we need this functionality
+        # Make some updates to the python-newscale package, determine if issues are from NEWSCALE, or python-newscale
+            # At least change prints to logging
+            # Figure out why we are on a branch!?!?
  
         # find available newscale stages
         logging.info('Scanning for newscale stages')
