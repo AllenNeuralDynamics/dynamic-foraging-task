@@ -4463,7 +4463,6 @@
     <addaction name="actionRestartLogging_2"/>
     <addaction name="actionOpen_behavior_folder"/>
     <addaction name="actionOpen_logging_folder"/>
-    <addaction name="actionScan_stages"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="sizePolicy">
@@ -4805,11 +4804,6 @@
    </property>
    <property name="text">
     <string>Time distribution</string>
-   </property>
-  </action>
-  <action name="actionScan_stages">
-   <property name="text">
-    <string>Scan stages</string>
    </property>
   </action>
   <action name="actionReconnect_bonsai">
