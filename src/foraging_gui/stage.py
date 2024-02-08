@@ -98,11 +98,14 @@ class Stage(QObject):
         self.worker.queue_command(cmd)
 
     def get_position(self):
-        cmd = io.GetPositionCommand(self.device)
-        self.worker.queue_command(cmd)
-        while not cmd.done():
-            time.sleep(TIME_SLEEP)
-        return cmd.result()
+        try:
+            cmd = io.GetPositionCommand(self.device)
+            self.worker.queue_command(cmd)
+            while not cmd.done():
+                time.sleep(TIME_SLEEP)
+            return cmd.result()
+        except:
+            print('error here')
 
     def get_speed(self):
         cmd = io.GetSpeedCommand(self.device)
