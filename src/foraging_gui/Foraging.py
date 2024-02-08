@@ -424,41 +424,39 @@ class Window(QMainWindow):
         try:
             self.instances = NewScaleSerialY.get_instances()
         except Exception as e:
-            logging.info('Could not find instances of NewScale Stage: {}'.format(str(e)))
+            logging.error('Could not find instances of NewScale Stage: {}'.format(str(e)))
+            return
+       
+        # If we can't find any stages, return 
+        if len(self.instances) == 0:
+            logging.warning('Could not find any instances of NewScale Stage')
+            return               
+    
+        logging.info('found {} newscale stages'.format(len(self.instances)))
+
+        # Get the serial num from settings
+        if not hasattr(self, 'newscale_serial_num_box'):
+            logging.error('Cannot determine newscale serial num')
+            return
+        self.newscale_serial_num=eval('self.newscale_serial_num_box'+str(self.box_number))
+        if self.newscale_serial_num == '':
+            logging.warning('No newscale serial number in settings file')
+            return
+
+        # See if the serial num from settings is in the instances we found
+        stage_index = 0
+        stage_names = [str(instance.sn) for instance in self.instances]
+        index = np.where(stage_names == str(self.newscale_serial_num))[0]
+        if len(index) == 0:
+            self.Warning_Newscale.setText('Newscale not found!')
+            self.Warning_Newscale.setStyleSheet(self.default_warning_color)
+            msg = 'Could not find newscale with serial number: {}'
+            logging.error(msg.format(self.newscale_serial_num))
             return
         else:
-            if len(self.instances) == 0:
-                logging.info('Could not find any instances of NewScale Stage')
-                return               
-    
-            logging.info('found {} newscale stages'.format(len(self.instances)))
-            self.stage_names=[]
-            for instance in self.instances:
-                self.stage_names.append(instance.sn)
-            self.StageSerialNum.addItems(self.stage_names)
-
-        # Determine if the newscale stage from the settings file is in our instances 
-        stage_index = 0
-        try:
-            self.newscale_serial_num=eval('self.newscale_serial_num_box'+str(self.box_number))
-            if self.newscale_serial_num!='':
-                index = self.StageSerialNum.findText(str(self.newscale_serial_num))
-                if index != -1:
-                    self.StageSerialNum.setCurrentIndex(index)
-                    stage_index = index
-                    logging.info('Found the newscale stage from the settings file')
-                else:
-                    self.Warning_Newscale.setText('Newscale not found!')
-                    self.Warning_Newscale.setStyleSheet(self.default_warning_color)
-                    logging.error('Could not find newscale with serial number: {}'.format(self.newscale_serial_num))
-                    return
-            else:
-                logging.info('No newscale serial number in settings file')
-                return
-        except Exception as e:
-            logging.error(str(e))
-            return
-
+            stage_index = index[0]
+            logging.info('Found the newscale stage from the settings file')
+   
         # Setup connection
         newscale_stage_instance = self.instances[stage_index]
         self._disconnect_stage(newscale_stage_instance)  
