@@ -23,7 +23,7 @@ import webbrowser
 import foraging_gui.rigcontrol as rigcontrol
 from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
 from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog
-from foraging_gui.Dialogs import ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog
+from foraging_gui.Dialogs import ManipulatorDialog,LaserCalibrationDialog
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,NewScaleSerialY
@@ -102,7 +102,7 @@ class Window(QMainWindow):
         self.WaterCalibration=0
         self.LaserCalibration=0
         self.Camera=0
-        self.MotorStage=0
+        #self.MotorStage=0
         self.Manipulator=0
         self.NewTrialRewardOrder=0
         self.LickSta=0
@@ -168,7 +168,7 @@ class Window(QMainWindow):
         self.action_Camera.triggered.connect(self._Camera)
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
         self.action_Manipulator.triggered.connect(self._Manipulator)
-        self.action_MotorStage.triggered.connect(self._MotorStage)
+        #self.action_MotorStage.triggered.connect(self._MotorStage)
         self.actionLicks_sta.triggered.connect(self._LickSta)
         self.actionTime_distribution.triggered.connect(self._TimeDistribution)
         self.action_Calibration.triggered.connect(self._WaterCalibration)
@@ -180,7 +180,6 @@ class Window(QMainWindow):
         self.SaveContinue.triggered.connect(self._SaveContinue)
         self.action_Exit.triggered.connect(self._Exit)
         self.action_New.triggered.connect(self._New)
-        #self.actionScan_stages.triggered.connect(self._scan_for_usb_stages)
         self.action_Clear.triggered.connect(self._Clear)
         self.action_Start.triggered.connect(self.Start.click)
         self.action_NewSession.triggered.connect(self.NewSession.click)
@@ -1655,14 +1654,14 @@ class Window(QMainWindow):
         else:
             self.LaserCalibration_dialog.hide()
 
-    def _MotorStage(self):
-        if self.MotorStage==0:
-            self.MotorStage_dialog = MotorStageDialog(MainWindow=self)
-            self.MotorStage=1
-        if self.action_MotorStage.isChecked()==True:
-            self.MotorStage_dialog.show()
-        else:
-            self.MotorStage_dialog.hide()
+    #def _MotorStage(self):
+    #    if self.MotorStage==0:
+    #        self.MotorStage_dialog = MotorStageDialog(MainWindow=self)
+    #        self.MotorStage=1
+    #    if self.action_MotorStage.isChecked()==True:
+    #        self.MotorStage_dialog.show()
+    #    else:
+    #        self.MotorStage_dialog.hide()
 
     def _TimeDistribution(self):
         '''Plot simulated ITI/delay/block distribution'''

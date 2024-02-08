@@ -1158,12 +1158,12 @@ class ManipulatorDialog(QDialog):
         super().__init__(parent)
         uic.loadUi('Manipulator.ui', self)
 
-class MotorStageDialog(QDialog):
-    def __init__(self, MainWindow, parent=None):
-        super().__init__(parent)
-        uic.loadUi('MotorStage.ui', self)
-        
-        self.MainWindow=MainWindow
+#class MotorStageDialog(QDialog):
+#    def __init__(self, MainWindow, parent=None):
+#        super().__init__(parent)
+#        uic.loadUi('MotorStage.ui', self)
+#        
+#        self.MainWindow=MainWindow
 
 class LaserCalibrationDialog(QDialog):
     def __init__(self, MainWindow, parent=None):
