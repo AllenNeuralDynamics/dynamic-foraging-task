@@ -3897,31 +3897,6 @@
     <property name="title">
      <string>Motor stage</string>
     </property>
-    <widget class="QLabel" name="label_88">
-     <property name="geometry">
-      <rect>
-       <x>-20</x>
-       <y>30</y>
-       <width>61</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>Stage:</string>
-     </property>
-     <property name="textFormat">
-      <enum>Qt::AutoText</enum>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget> 
     <widget class="QPushButton" name="GetPositions">
      <property name="geometry">
       <rect>
