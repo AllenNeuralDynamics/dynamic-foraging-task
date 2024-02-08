@@ -1745,6 +1745,7 @@ class NewScaleSerialY():
                 data += c
                 if (c == '\r'): break
         return data
+
 class WorkerSignals(QtCore.QObject):
     '''
     Defines the signals available from a running worker thread.
