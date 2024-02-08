@@ -418,7 +418,7 @@ class Window(QMainWindow):
             return
         else:
             if len(self.instances) == 0:
-                logging.info('Could not find instances of NewScale Stage: {}'.format(str(e)))
+                logging.info('Could not find any instances of NewScale Stage')
                 return               
     
             logging.info('found {} newscale stages'.format(len(self.instances)))
@@ -449,12 +449,17 @@ class Window(QMainWindow):
             logging.error(str(e))
             return
 
-        # connect to the Stage
         newscale_stage_instance = self.instances[stage_index]
+        # Double check a connection isnt already open
         try:
             newscale_stage_instance.io.close()
         except Exception as e:
+            logging.info('Could not disconnect newscale stage instance, this is probably fine')
             pass
+        else:
+            logging.info('disconnected newscale stage instance')
+        
+        # connect to the Stage
         try:
             self._connect_stage(newscale_stage_instance)
         except Exception as e:
