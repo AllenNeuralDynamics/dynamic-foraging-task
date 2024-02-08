@@ -1,5 +1,6 @@
 import queue
 import time
+import logging
 
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
 
