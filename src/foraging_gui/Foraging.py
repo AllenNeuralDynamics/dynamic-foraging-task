@@ -324,7 +324,7 @@ class Window(QMainWindow):
                 print('here2')
                 self.current_stage.get_position()
                 print('here3')
-            except Exception as e:
+            except:
                 print('here4')
                 logging.error('could not connect to newscale stage')
                 self.Warning_Newscale.setText('Lost newscale stage connection')
@@ -3054,7 +3054,7 @@ if __name__ == "__main__":
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
    
     # Set excepthook, so we can log uncaught exceptions
-    #sys.excepthook=excepthook ##DEBUGGING
+    sys.excepthook=excepthook
 
     # Start Q, and Gui Window
     logging.info('Starting QApplication and Window')
