@@ -2903,7 +2903,7 @@ def show_exception_box(log_msg):
         # Make a QWindow, wait for user response
         errorbox = QtWidgets.QMessageBox()
         errorbox.setWindowTitle('Box {}, Error'.format(box))
-        msg = '<span style="color:purple;font-weight:bold">An uncontrolled error occurred. If the error is related to newscale, you can try to continue. Otherwise, save any data and restart the GUI. </span> <br><br>{}'.format(log_msg)
+        msg = '<span style="color:purple;font-weight:bold">An uncontrolled error occurred. If the error is related to newscale or USBXpress, you can try to continue. Otherwise, save any data and restart the GUI. </span> <br><br>{}'.format(log_msg)
         errorbox.setText(msg)
         errorbox.exec_()
     else:
