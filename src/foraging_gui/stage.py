@@ -25,16 +25,25 @@ class IOWorker(QObject):
         while True:
             while not self.qslow.empty() and not self.halt_requested:
                 cmd = self.qslow.get()
-                cmd.execute()
+                try:
+                    cmd.execute()
+                except Exception as e:
+                    logging.error(e)
                 if not cmd.blocking:
                     while not cmd.done() and not self.halt_requested:
                         while not self.qfast.empty() and not self.halt_requested:
                             fc = self.qfast.get()
-                            fc.execute()
+                            try:
+                                fc.execute()
+                            except Exception as e:
+                                logging.error(e)
                         time.sleep(TIME_SLEEP)
             while not self.qfast.empty() and not self.halt_requested:
                 fc = self.qfast.get()
-                fc.execute()
+                try:
+                    fc.execute()
+                except Exception as e:
+                    logging.error(e)
             if self.halt_requested:
                 self.device.halt()
                 self.clear_queues()
@@ -98,14 +107,11 @@ class Stage(QObject):
         self.worker.queue_command(cmd)
 
     def get_position(self):
-        try:
-            cmd = io.GetPositionCommand(self.device)
-            self.worker.queue_command(cmd)
-            while not cmd.done():
-                time.sleep(TIME_SLEEP)
-            return cmd.result()
-        except:
-            print('error here')
+        cmd = io.GetPositionCommand(self.device)
+        self.worker.queue_command(cmd)
+        while not cmd.done():
+            time.sleep(TIME_SLEEP)
+        return cmd.result()
 
     def get_speed(self):
         cmd = io.GetSpeedCommand(self.device)
