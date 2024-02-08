@@ -445,9 +445,10 @@ class Window(QMainWindow):
 
         # See if the serial num from settings is in the instances we found
         stage_index = 0
-        stage_names = [str(instance.sn) for instance in self.instances]
+        stage_names = np.array([str(instance.sn) for instance in self.instances])
         print(stage_names)
         index = np.where(stage_names == str(self.newscale_serial_num))[0]
+        print(index)
         if len(index) == 0:
             self.Warning_Newscale.setText('Newscale not found!')
             self.Warning_Newscale.setStyleSheet(self.default_warning_color)
