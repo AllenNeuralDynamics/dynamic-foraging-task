@@ -1171,14 +1171,6 @@
                             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                            </property>
                           </widget>
-                         </item>
-                         <item row="2" column="1" colspan="2">
-                          <widget class="QComboBox" name="StageSerialNum">
-                           <property name="enabled">
-                            <bool>false</bool>
-                           </property>
-                          </widget>
-                         </item>
                          <item row="7" column="0" colspan="6">
                           <widget class="QLabel" name="Warning_Newscale">
                            <property name="sizePolicy">
