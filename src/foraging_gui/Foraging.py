@@ -318,24 +318,32 @@ class Window(QMainWindow):
         self.keyPressEvent()
 
     def _CheckStageConnection(self):
+        print('here1')
         if hasattr(self,'current_stage'):
             try:
+                print('here2')
                 self.current_stage.get_position()
+                print('here3')
             except Exception as e:
+                print('here4')
                 logging.error('could not connect to newscale stage')
                 self.Warning_Newscale.setText('Lost newscale stage connection')
                 self.Warning_Newscale.setStyleSheet(self.default_warning_color)
                 return False
             else:
+                print('here5')
                 self.Warning_Newscale.setText('')
                 self.Warning_Newscale.setStyleSheet(self.default_warning_color)
                 return True 
         else:
+            print('here6')
             return False
 
     def _GetPositions(self):
         '''get the current position of the stage'''
+        print('here7')
         if hasattr(self, 'current_stage') & self._CheckStageConnection():
+            print('here8')
             logging.info('Grabbing current stage position')
             current_stage=self.current_stage
             current_position=current_stage.get_position()
