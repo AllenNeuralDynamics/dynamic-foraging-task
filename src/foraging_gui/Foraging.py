@@ -425,11 +425,13 @@ class Window(QMainWindow):
             self.instances = NewScaleSerialY.get_instances()
         except Exception as e:
             logging.error('Could not find instances of NewScale Stage: {}'.format(str(e)))
+            self._no_stage()
             return
        
         # If we can't find any stages, return 
         if len(self.instances) == 0:
             logging.warning('Could not find any instances of NewScale Stage')
+            self._no_stage()
             return               
     
         logging.info('found {} newscale stages'.format(len(self.instances)))
@@ -437,21 +439,20 @@ class Window(QMainWindow):
         # Get the serial num from settings
         if not hasattr(self, 'newscale_serial_num_box{}'.format(self.box_number)):
             logging.error('Cannot determine newscale serial num')
+            self._no_stage()
             return
         self.newscale_serial_num=eval('self.newscale_serial_num_box'+str(self.box_number))
         if self.newscale_serial_num == '':
             logging.warning('No newscale serial number in settings file')
+            self._no_stage()
             return
 
         # See if the serial num from settings is in the instances we found
         stage_index = 0
         stage_names = np.array([str(instance.sn) for instance in self.instances])
-        print(stage_names)
         index = np.where(stage_names == str(self.newscale_serial_num))[0]
-        print(index)
         if len(index) == 0:
-            self.Warning_Newscale.setText('Newscale not found!')
-            self.Warning_Newscale.setStyleSheet(self.default_warning_color)
+            self._no_stage()
             msg = 'Could not find newscale with serial number: {}'
             logging.error(msg.format(self.newscale_serial_num))
             return
@@ -463,6 +464,10 @@ class Window(QMainWindow):
         newscale_stage_instance = self.instances[stage_index]
         self._disconnect_stage(newscale_stage_instance)  
         self._connect_stage(newscale_stage_instance)
+
+    def _no_stage(self):
+        self.Warning_Newscale.setText('Newscale stage not connected')
+        self.Warning_Newscale.setStyleSheet(self.default_warning_color)
 
     def _disconnect_stage(self, instance):
         try:
@@ -482,6 +487,7 @@ class Window(QMainWindow):
             self.current_stage=Stage(serial=instance)
         except Exception as e:
             logging.error(str(e))
+            self._no_stage()
         else:
             logging.info('Successfully connected to newscale stage: {}'.format(instance.sn))       
 
