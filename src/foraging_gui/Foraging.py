@@ -414,6 +414,7 @@ class Window(QMainWindow):
         # Remove "Stage" from UI file in Motorstage section
         # Check this still works on a computer with multiple stages  
         # Remove all notion of "self.StageSerialNum" 
+            # Ask XX about whether we need this functionality
  
         # find available newscale stages
         logging.info('Scanning for newscale stages')
@@ -455,30 +456,31 @@ class Window(QMainWindow):
             logging.error(str(e))
             return
 
+        # Setup connection
         newscale_stage_instance = self.instances[stage_index]
-        # Double check a connection isnt already open
+        self._disconnect_stage(newscale_stage_instance)  
+        self._connect_stage(newscale_stage_instance)
+
+    def _disconnect_stage(self, instance):
         try:
-            newscale_stage_instance.io.close()
+            instance.io.close()
         except Exception as e:
             logging.info('Could not disconnect newscale stage instance, this is probably fine')
             pass
         else:
             logging.info('disconnected newscale stage instance')
-        
-        # connect to the Stage
-        try:
-            self._connect_stage(newscale_stage_instance)
-        except Exception as e:
-            logging.error(str(e))
-        else:
-            logging.info('Successfully connected to newscale stage')       
      
     def _connect_stage(self,instance):
         '''connect to a stage'''
-        instance.io.open()
-        instance.set_timeout(1)
-        instance.set_baudrate(250000)
-        self.current_stage=Stage(serial=instance)
+        try:       
+            instance.io.open()
+            instance.set_timeout(1)
+            instance.set_baudrate(250000)
+            self.current_stage=Stage(serial=instance)
+        except Exception as e:
+            logging.error(str(e))
+        else:
+            logging.info('Successfully connected to newscale stage: {}'.format(instance.sn))       
 
     def _ConnectBonsai(self):
         '''
