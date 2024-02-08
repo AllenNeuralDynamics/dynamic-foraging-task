@@ -3054,7 +3054,7 @@ if __name__ == "__main__":
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
    
     # Set excepthook, so we can log uncaught exceptions
-    sys.excepthook=excepthook
+    #sys.excepthook=excepthook ##DEBUGGING
 
     # Start Q, and Gui Window
     logging.info('Starting QApplication and Window')
