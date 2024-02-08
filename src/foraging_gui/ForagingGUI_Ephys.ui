@@ -4454,8 +4454,6 @@
     </widget>
     <addaction name="action_Optogenetics"/>
     <addaction name="action_Camera"/>
-    <addaction name="action_MotorStage"/>
-    <addaction name="action_Manipulator"/>
     <addaction name="action_Start"/>
     <addaction name="action_NewSession"/>
     <addaction name="actionConnectBonsai"/>
@@ -4531,8 +4529,6 @@
     <bool>false</bool>
    </attribute>
    <addaction name="action_Camera"/>
-   <addaction name="action_MotorStage"/>
-   <addaction name="action_Manipulator"/>
   </widget>
   <widget class="QToolBar" name="toolBar_3">
    <property name="sizePolicy">
@@ -4668,30 +4664,6 @@
    </property>
    <property name="priority">
     <enum>QAction::NormalPriority</enum>
-   </property>
-  </action>
-  <action name="action_MotorStage">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>resources/Motor.png</normaloff>resources/Motor.png</iconset>
-   </property>
-   <property name="text">
-    <string>Motor stage</string>
-   </property>
-  </action>
-  <action name="action_Manipulator">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>resources/Manipulator.png</normaloff>resources/Manipulator.png</iconset>
-   </property>
-   <property name="text">
-    <string>Manipulator</string>
    </property>
   </action>
   <action name="actionOpenSettingFolder">
