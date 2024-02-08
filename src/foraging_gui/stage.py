@@ -28,23 +28,23 @@ class IOWorker(QObject):
                 cmd = self.qslow.get()
                 try:
                     cmd.execute()
-                except Exception as e:
-                    logging.error(e)
+                except:
+                    logging.error('newscale error')
                 if not cmd.blocking:
                     while not cmd.done() and not self.halt_requested:
                         while not self.qfast.empty() and not self.halt_requested:
                             fc = self.qfast.get()
                             try:
                                 fc.execute()
-                            except Exception as e:
-                                logging.error(e)
+                            except:
+                                logging.error('newscale error')
                         time.sleep(TIME_SLEEP)
             while not self.qfast.empty() and not self.halt_requested:
                 fc = self.qfast.get()
                 try:
                     fc.execute()
-                except Exception as e:
-                    logging.error(e)
+                except:
+                    logging.error('newscale error')
             if self.halt_requested:
                 self.device.halt()
                 self.clear_queues()
