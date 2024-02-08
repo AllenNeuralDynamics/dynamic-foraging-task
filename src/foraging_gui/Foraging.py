@@ -435,7 +435,7 @@ class Window(QMainWindow):
         logging.info('found {} newscale stages'.format(len(self.instances)))
 
         # Get the serial num from settings
-        if not hasattr(self, 'newscale_serial_num_box'):
+        if not hasattr(self, 'newscale_serial_num_box{}'.format(self.box_number)):
             logging.error('Cannot determine newscale serial num')
             return
         self.newscale_serial_num=eval('self.newscale_serial_num_box'+str(self.box_number))
