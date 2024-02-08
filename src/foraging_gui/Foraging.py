@@ -422,6 +422,7 @@ class Window(QMainWindow):
             logging.info('Could not find instances of NewScale Stage: {}'.format(str(e)))
             return
         else:
+            logging.info('found {} newscale stages'.format(len(self.instances)))
             self.stage_names=[]
             for instance in self.instances:
                 self.stage_names.append(instance.sn)
@@ -456,6 +457,8 @@ class Window(QMainWindow):
                     self._connect_stage(instance)
             except Exception as e:
                 logging.error(str(e))
+            else:
+                logging.info('Successfully connected to newscale stage')
 
 
 
