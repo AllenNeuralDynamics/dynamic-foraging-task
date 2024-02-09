@@ -40,7 +40,7 @@ class IOWorker(QObject):
                     fc = self.qfast.get()
                     fc.execute()
                 except:
-                    print('here'2)
+                    print('here2')
             if self.halt_requested:
                 self.device.halt()
                 self.clear_queues()
