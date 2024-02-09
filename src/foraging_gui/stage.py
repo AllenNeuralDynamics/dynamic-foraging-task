@@ -94,7 +94,6 @@ class Stage(QObject):
         self.z_safe = 0.
     
     def _on_failure(self):
-        logging.info('Failure signal from stage worker')
         return 
 
     def __del__(self):
