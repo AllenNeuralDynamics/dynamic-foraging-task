@@ -1,7 +1,7 @@
 import queue
 import time
 
-from PyQt5.QtCore import QObject, pyqtSignal, QThread, pyqtSlot
+from PyQt5.QtCore import QObject, pyqtSignal, QThread, Signal
 
 from newscale.multistage import USBXYZStage, PoEXYZStage
 from newscale.interfaces import USBInterface
@@ -13,7 +13,7 @@ TIME_SLEEP = 0.03
 
 class IOWorker(QObject):
     finished = pyqtSignal()
-    error = pyqtSignal(Exception)
+    error = pyqtSignal(str)
 
     def __init__(self, device):
         QObject.__init__(self)
@@ -22,8 +22,7 @@ class IOWorker(QObject):
         self.qfast = queue.Queue()
         self.halt_requested = False
 
-    @pyqtSlot()
-    def run(self):
+    def process(self):
         try:
             while True:
                 while not self.qslow.empty() and not self.halt_requested:
@@ -45,7 +44,7 @@ class IOWorker(QObject):
                 time.sleep(TIME_SLEEP)
         except Exception as e:
             print('here run')
-            self.error.emit(Exception('test'))
+            self.error.emit('test')
         else:
             self.finished.emit()
 
@@ -64,7 +63,6 @@ class IOWorker(QObject):
     def halt(self):
         self.halt_requested = True
 
-
 class Stage(QObject):
 
     def __init__(self, ip=None, serial=None):
@@ -82,7 +80,7 @@ class Stage(QObject):
         self.thread = QThread()
         self.worker = IOWorker(self.device)
         self.worker.moveToThread(self.thread)
-        self.thread.started.connect(self.worker.run)
+        self.thread.started.connect(self.worker.process)
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
