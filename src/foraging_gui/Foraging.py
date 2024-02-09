@@ -477,8 +477,8 @@ class Window(QMainWindow):
    
         # Setup connection
         newscale_stage_instance = self.instances[stage_index]
-        if hasattr(self, 'current_stage'):
-            self._disconnect_stage(newscale_stage_instance)
+        #if hasattr(self, 'current_stage'):
+        #    self._disconnect_stage(newscale_stage_instance)
         self._connect_stage(newscale_stage_instance)
 
     def _no_stage(self):
@@ -499,9 +499,13 @@ class Window(QMainWindow):
     def _connect_stage(self,instance):
         '''connect to a stage'''
         try:       
+            print('a')
             instance.io.open()
+            print('b')
             instance.set_timeout(1)
+            print('c')
             instance.set_baudrate(250000)
+            print('d')
             self.current_stage=Stage(serial=instance)
         except Exception as e:
             logging.error(str(e))
