@@ -2849,6 +2849,8 @@ class Window(QMainWindow):
                     elif self.default_ui=='ForagingGUI_Ephys.ui':
                         self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and \n LAS should be alerted!')
                     self.TotalWaterWarning.setStyleSheet(self.default_warning_color)
+                    msg = 'Supplemental water is greater than 3.5, this suggests a health issue, alert LAS'
+                    reply = QMessageBox.question(self, 'Box {}, Potential health issue'.format(self.box_letter), msg, QMessageBox.Ok )
                 else:
                     self.TotalWaterWarning.setText('')
                 self.SuggestedWater.setText(str(np.round(suggested_water,3)))
