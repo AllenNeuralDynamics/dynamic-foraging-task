@@ -492,7 +492,7 @@ class Window(QMainWindow):
         try:
             instance.io.close() 
         except:
-            logging.error('Error when disconnecting'))    
+            logging.error('Error when disconnecting')    
         else:
             logging.info('disconnected')
 
