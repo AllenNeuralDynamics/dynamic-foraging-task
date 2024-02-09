@@ -1023,7 +1023,7 @@ class Window(QMainWindow):
         '''
         if key in parameters:
             # skip some keys
-            if key=='ExtraWater' or key=='WeightBefore' or key=='WeightAfter' or key=='SuggestedWater':
+            if key=='ExtraWater' or key=='WeightAfter' or key=='SuggestedWater':
                 self.WeightAfter.setText('')
                 return
             widget = widget_dict[key]
@@ -1173,11 +1173,12 @@ class Window(QMainWindow):
 
         # move newscale stage
         if hasattr(self,'current_stage'):
-            try:
-                self.StageStop.click
-                self.current_stage.move_absolute_3d(float(self.PositionX.text()),float(self.PositionY.text()),float(self.PositionZ.text()))
-            except Exception as e:
-                logging.error(str(e))
+            if (self.PositionX.text() != '')and (self.PositionY.text() != '')and (self.PositionZ.text() != ''):
+                try:
+                    self.StageStop.click
+                    self.current_stage.move_absolute_3d(float(self.PositionX.text()),float(self.PositionY.text()),float(self.PositionZ.text()))
+                except Exception as e:
+                    logging.error(str(e))
         # Get the parameters before change
         if hasattr(self, 'GeneratedTrials') and self.ToInitializeVisual==0: # use the current GUI paramters when no session starts running
             Parameters=self.GeneratedTrials
@@ -1200,16 +1201,22 @@ class Window(QMainWindow):
                     child.setStyleSheet('color: black;')
                     child.setStyleSheet('background-color: white;')
                     self._Task()
-                    if child.objectName()=='AnimalName' and child.text()=='':
-                        child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                        continue
-                    if child.objectName() in {'Experimenter','TotalWater','AnimalName','WeightBefore','WeightAfter','ExtraWater'}:
+                    if child.objectName() in {'Experimenter','TotalWater','WeightAfter','ExtraWater'}:
                         continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
                         if Correct ==0: # incorrect format; don't change
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
+                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight']) and
+                        (child.text() == '')):
+                        # These attributes can have the empty string, but we can't set the value as the empty string
+                        if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
+                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))                       
+                        continue
+                    if (child.objectName() == 'LatestCalibrationDate') and (child.text() == 'NA'):
+                        continue
+
 
                     # check for empty string condition
                     try:
@@ -1233,8 +1240,6 @@ class Window(QMainWindow):
                             new = float(child.text())
                             if new != old:
                                 logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
-                        else:
-                            logging.error('Could not evaluate parameter change: "{}","{}" '.format(child.objectName(),child.text()))
                     
             # update the current training parameters
             self._GetTrainingParameters()
@@ -1259,7 +1264,7 @@ class Window(QMainWindow):
                 try:
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                         self.Continue=0
-                        if child.objectName() in {'Experimenter', 'AnimalName', 'UncoupledReward', 'WeightBefore', 'WeightAfter', 'ExtraWater'}:
+                        if child.objectName() in {'Experimenter', 'UncoupledReward', 'WeightAfter', 'ExtraWater'}:
                             child.setStyleSheet(self.default_text_color)
                             self.Continue=1
                         if child.text()=='': # If empty, change background color and wait for confirmation
