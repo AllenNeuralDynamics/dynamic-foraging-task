@@ -1201,8 +1201,6 @@ class Window(QMainWindow):
                             new = float(child.text())
                             if new != old:
                                 logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
-                        else:
-                            logging.error('Could not evaluate parameter change: "{}","{}" '.format(child.objectName(),child.text()))
                     
             # update the current training parameters
             self._GetTrainingParameters()
