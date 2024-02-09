@@ -97,7 +97,6 @@ class Stage(QObject):
     
     def _on_failure(self):
         print('here failure')
-        self.connected=False
 
     def __del__(self):
         self.clean()
@@ -120,6 +119,7 @@ class Stage(QObject):
             time.sleep(TIME_SLEEP)
         result = cmd.result()        
         if result is None:
+            print('here 3')
             self.connected=False
         return result
 
