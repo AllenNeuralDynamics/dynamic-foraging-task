@@ -1,6 +1,5 @@
 import queue
 import time
-import logging
 
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
 
@@ -37,14 +36,12 @@ class IOWorker(QObject):
                             time.sleep(TIME_SLEEP)
                 except:
                     cmd._done=True
-                    logging.error('An error occured with a newscale stage')
             while not self.qfast.empty() and not self.halt_requested:
                 try:
                     fc = self.qfast.get()
                     fc.execute()
                 except:
                     fc._done=True
-                    logging.error('An error occured with a newscale stage')
             if self.halt_requested:
                 self.device.halt()
                 self.clear_queues()
