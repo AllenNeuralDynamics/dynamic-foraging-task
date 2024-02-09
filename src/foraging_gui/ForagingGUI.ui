@@ -1083,25 +1083,6 @@
                            </property>
                           </widget>
                          </item>
-                         <item row="2" column="0">
-                          <widget class="QLabel" name="label_88">
-                           <property name="sizePolicy">
-                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                             <horstretch>0</horstretch>
-                             <verstretch>0</verstretch>
-                            </sizepolicy>
-                           </property>
-                           <property name="text">
-                            <string>Stage:</string>
-                           </property>
-                           <property name="textFormat">
-                            <enum>Qt::AutoText</enum>
-                           </property>
-                           <property name="alignment">
-                            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                           </property>
-                          </widget>
-                         </item>
                          <item row="3" column="2">
                           <widget class="QPushButton" name="MoveXN">
                            <property name="sizePolicy">
@@ -1181,13 +1162,6 @@
                            </property>
                            <property name="alignment">
                             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                           </property>
-                          </widget>
-                         </item>
-                         <item row="2" column="1" colspan="2">
-                          <widget class="QComboBox" name="StageSerialNum">
-                           <property name="enabled">
-                            <bool>false</bool>
                            </property>
                           </widget>
                          </item>
@@ -4895,8 +4869,6 @@ Current pair:
     </widget>
     <addaction name="action_Optogenetics"/>
     <addaction name="action_Camera"/>
-    <addaction name="action_MotorStage"/>
-    <addaction name="action_Manipulator"/>
     <addaction name="action_Start"/>
     <addaction name="action_NewSession"/>
     <addaction name="actionConnectBonsai"/>
@@ -4904,7 +4876,6 @@ Current pair:
     <addaction name="actionRestartLogging_2"/>
     <addaction name="actionOpen_behavior_folder"/>
     <addaction name="actionOpen_logging_folder"/>
-    <addaction name="actionScan_stages"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="sizePolicy">
@@ -4973,8 +4944,6 @@ Current pair:
     <bool>false</bool>
    </attribute>
    <addaction name="action_Camera"/>
-   <addaction name="action_MotorStage"/>
-   <addaction name="action_Manipulator"/>
   </widget>
   <widget class="QToolBar" name="toolBar_3">
    <property name="sizePolicy">
@@ -5112,30 +5081,6 @@ Current pair:
     <enum>QAction::NormalPriority</enum>
    </property>
   </action>
-  <action name="action_MotorStage">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>resources/Motor.png</normaloff>resources/Motor.png</iconset>
-   </property>
-   <property name="text">
-    <string>Motor stage</string>
-   </property>
-  </action>
-  <action name="action_Manipulator">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>resources/Manipulator.png</normaloff>resources/Manipulator.png</iconset>
-   </property>
-   <property name="text">
-    <string>Manipulator</string>
-   </property>
-  </action>
   <action name="actionOpenSettingFolder">
    <property name="text">
     <string>Open setting folder</string>
@@ -5246,11 +5191,6 @@ Current pair:
    </property>
    <property name="text">
     <string>Time distribution</string>
-   </property>
-  </action>
-  <action name="actionScan_stages">
-   <property name="text">
-    <string>Scan stages</string>
    </property>
   </action>
   <action name="actionReconnect_bonsai">

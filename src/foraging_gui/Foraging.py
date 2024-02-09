@@ -23,7 +23,7 @@ import webbrowser
 import foraging_gui.rigcontrol as rigcontrol
 from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
 from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog
-from foraging_gui.Dialogs import ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog
+from foraging_gui.Dialogs import LaserCalibrationDialog
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,NewScaleSerialY
@@ -45,7 +45,7 @@ class Window(QMainWindow):
         logging.info('Creating Window')
         super().__init__(parent)
         
-        
+        # Process inputs        
         self.box_number=box_number
         mapper = {
             1:'A',
@@ -70,58 +70,48 @@ class Window(QMainWindow):
         # Load Laser and Water Calibration Files
         self._GetLaserCalibration()
         self._GetWaterCalibration()
-        
-        uic.loadUi(self.default_ui, self)
-        if self.default_ui=='ForagingGUI.ui':
-            self.label_date.setText(str(date.today()))
-            self.default_warning_color="color: purple;"
-            self.default_text_color='color: purple;'
-            self.default_text_background_color='background-color: purple;'
-        elif self.default_ui=='ForagingGUI_Ephys.ui':
-            self.Visualization.setTitle(str(date.today()))
-            self.default_warning_color="color: red;"
-            self.default_text_color='color: red;'
-            self.default_text_background_color='background-color: red;'
-        else:
-            self.default_warning_color="color: red;"
-            self.default_text_color='color: red;'
-            self.default_text_background_color='background-color: red;'
+       
+        # Load User interface 
+        self._LoadUI()
+
         # set window title
         self.setWindowTitle(self.window_title)
         logging.info('Setting Window title: {}'.format(self.window_title))
 
-        self.StartANewSession=1 # to decide if should start a new session
-        self.ToInitializeVisual=1
-        self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
-        self.ANewTrial=1 # permission to start a new trial
-        self.UpdateParameters=1 # permission to update parameters
-        self.loggingstarted=-1
+        # Set up parameters
+        self.StartANewSession = 1   # to decide if should start a new session
+        self.ToInitializeVisual = 1 # Should we visualize performance
+        self.FigureUpdateTooSlow = 0# if the FigureUpdateTooSlow is true, using different process to update figures
+        self.ANewTrial = 1          # permission to start a new trial
+        self.UpdateParameters = 1   # permission to update parameters
+        self.loggingstarted = -1    # Have we started trial logging
         
         # Connect to Bonsai
         self._InitializeBonsai()
 
+        # Set up threads 
         self.threadpool=QThreadPool() # get animal response
         self.threadpool2=QThreadPool() # get animal lick
         self.threadpool3=QThreadPool() # visualization
         self.threadpool4=QThreadPool() # for generating a new trial
         self.threadpool5=QThreadPool() # for starting the trial loop
         self.threadpool_workertimer=QThreadPool() # for timing
+
+        # Set up more parameters
         self.OpenOptogenetics=0
         self.WaterCalibration=0
         self.LaserCalibration=0
         self.Camera=0
-        self.MotorStage=0
-        self.Manipulator=0
         self.NewTrialRewardOrder=0
         self.LickSta=0
         self.LickSta_ToInitializeVisual=1
         self.TimeDistribution=0
         self.TimeDistribution_ToInitializeVisual=1
-        self.finish_Timer=1 # for photometry baseline recordings
-        self.PhotometryRun=0 # 1. Photometry has been run; 0. Photometry has not been carried out.
-        self._Optogenetics()     # open the optogenetics panel 
-        self._LaserCalibration() # to open the laser calibration panel
-        self._WaterCalibration() # to open the water calibration panel
+        self.finish_Timer=1     # for photometry baseline recordings
+        self.PhotometryRun=0    # 1. Photometry has been run; 0. Photometry has not been carried out.
+        self._Optogenetics()    # open the optogenetics panel 
+        self._LaserCalibration()# to open the laser calibration panel
+        self._WaterCalibration()# to open the water calibration panel
         self._Camera()
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self.WaterPerRewardedTrial=0.005 
@@ -134,7 +124,7 @@ class Window(QMainWindow):
         self._WaterVolumnManage2()
         self._LickSta()
         self._InitializeMotorStage()
-        self._StageSerialNum()
+        self._GetPositions()
         self._warmup()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
@@ -147,14 +137,35 @@ class Window(QMainWindow):
             '''
             self._ReconnectBonsai()   
         logging.info('Start up complete')
+    
+    def _LoadUI(self):
+        '''
+            Determine which user interface to use
+        '''
+        uic.loadUi(self.default_ui, self)
+        if self.default_ui=='ForagingGUI.ui':
+            logging.info('Using ForagingGUI.ui interface')
+            self.label_date.setText(str(date.today()))
+            self.default_warning_color="color: purple;"
+            self.default_text_color='color: purple;'
+            self.default_text_background_color='background-color: purple;'
+        elif self.default_ui=='ForagingGUI_Ephys.ui':
+            logging.info('Using ForagingGUI_Ephys.ui interface')
+            self.Visualization.setTitle(str(date.today()))
+            self.default_warning_color="color: red;"
+            self.default_text_color='color: red;'
+            self.default_text_background_color='background-color: red;'
+        else:
+            logging.info('Using ForagingGUI.ui interface')
+            self.default_warning_color="color: red;"
+            self.default_text_color='color: red;'
+            self.default_text_background_color='background-color: red;'
 
     def connectSignalsSlots(self):
         '''Define callbacks'''
         self.action_About.triggered.connect(self._about)
         self.action_Camera.triggered.connect(self._Camera)
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
-        self.action_Manipulator.triggered.connect(self._Manipulator)
-        self.action_MotorStage.triggered.connect(self._MotorStage)
         self.actionLicks_sta.triggered.connect(self._LickSta)
         self.actionTime_distribution.triggered.connect(self._TimeDistribution)
         self.action_Calibration.triggered.connect(self._WaterCalibration)
@@ -166,7 +177,6 @@ class Window(QMainWindow):
         self.SaveContinue.triggered.connect(self._SaveContinue)
         self.action_Exit.triggered.connect(self._Exit)
         self.action_New.triggered.connect(self._New)
-        self.actionScan_stages.triggered.connect(self._scan_for_usb_stages)
         self.action_Clear.triggered.connect(self._Clear)
         self.action_Start.triggered.connect(self.Start.click)
         self.action_NewSession.triggered.connect(self.NewSession.click)
@@ -312,21 +322,29 @@ class Window(QMainWindow):
     def _GetPositions(self):
         '''get the current position of the stage'''
         if hasattr(self, 'current_stage'):
+            logging.info('Grabbing current stage position')
             current_stage=self.current_stage
             current_position=current_stage.get_position()
             self._UpdatePosition(current_position,(0,0,0))
+        else:
+            logging.info('GetPositions pressed, but no current stage')
                                 
     def _StageStop(self):
         '''Halt the stage'''
         if hasattr(self, 'current_stage'):
+            logging.info('Stopping stage movement')
             current_stage=self.current_stage
             current_stage.halt()
+        else:
+            logging.info('StageStop pressed, but no current stage')
 
     def _Move(self,axis,step):
         '''Move stage'''
         try:
             if not hasattr(self, 'current_stage'):
+                logging.info('Move Stage pressed, but no current stage')
                 return
+            logging.info('Moving stage')
             self.StageStop.click
             current_stage=self.current_stage
             current_position=current_stage.get_position()
@@ -391,66 +409,80 @@ class Window(QMainWindow):
         self.PositionY.setText(str(NewPositions[1]))
         self.PositionZ.setText(str(NewPositions[2]))
 
-    def _StageSerialNum(self):
-        '''connect to a stage'''
-        # scan stages
+    def _InitializeMotorStage(self):
+        '''
+            Scans for available newscale stages. Attempts to connect to the newscale stage
+            defined by the serial number in the settings file. If it cannot connect for any reason
+            it displays a warning in the motor stage box, and returns. 
+            
+            Failure modes include: an error in scanning for stages, no stages found, no stage defined
+            in the settings file, the defined stage not found, an error in connecting to the stage 
+        '''
+ 
+        # find available newscale stages
+        logging.info('Scanning for newscale stages')
         try:
             self.instances = NewScaleSerialY.get_instances()
         except Exception as e:
             logging.error('Could not find instances of NewScale Stage: {}'.format(str(e)))
+            self._no_stage()
+            return
+       
+        # If we can't find any stages, return 
+        if len(self.instances) == 0:
+            logging.warning('Could not find any instances of NewScale Stage')
+            self._no_stage()
+            return               
+    
+        logging.info('found {} newscale stages'.format(len(self.instances)))
+
+        # Get the serial num from settings
+        if not hasattr(self, 'newscale_serial_num_box{}'.format(self.box_number)):
+            logging.error('Cannot determine newscale serial num')
+            self._no_stage()
+            return
+        self.newscale_serial_num=eval('self.newscale_serial_num_box'+str(self.box_number))
+        if self.newscale_serial_num == '':
+            logging.warning('No newscale serial number in settings file')
+            self._no_stage()
             return
 
-        if hasattr(self,'current_stage'):
-            curent_stage_name=self.current_stage.name
+        # See if the serial num from settings is in the instances we found
+        stage_index = 0
+        stage_names = np.array([str(instance.sn) for instance in self.instances])
+        index = np.where(stage_names == str(self.newscale_serial_num))[0]
+        if len(index) == 0:
+            self._no_stage()
+            msg = 'Could not find newscale with serial number: {}'
+            logging.error(msg.format(self.newscale_serial_num))
+            return
         else:
-            curent_stage_name=''
-        # connect to one stage
-        for instance in self.instances:
-            try:
-                instance.io.close()
-            except Exception as e:
-                pass
-            try:
-                if (instance.sn==self.StageSerialNum.currentText())&\
-                    (curent_stage_name!=instance.sn):
-                    self._connect_stage(instance)
-            except Exception as e:
-                logging.error(str(e))
+            stage_index = index[0]
+            logging.info('Found the newscale stage from the settings file')
+   
+        # Setup connection
+        newscale_stage_instance = self.instances[stage_index]
+        self._connect_stage(newscale_stage_instance)
 
-    def _InitializeMotorStage(self):
-        '''To initialize motor stage'''
-        self._scan_for_usb_stages()
-        # use the default newscale stage
-        try:
-            self.newscale_serial_num=eval('self.newscale_serial_num_box'+str(self.box_number))
-            if self.newscale_serial_num!='':
-                index = self.StageSerialNum.findText(str(self.newscale_serial_num))
-                if index != -1:
-                    self.StageSerialNum.setCurrentIndex(index)
-                else:
-                    self.Warning_Newscale.setText('Default Newscale not found!')
-                    self.Warning_Newscale.setStyleSheet(self.default_warning_color)
-        except Exception as e:
-            logging.error(str(e))
-
-    def _scan_for_usb_stages(self):
-        '''Scan available stages'''
-        try:
-            self.instances = NewScaleSerialY.get_instances()
-        except Exception as e:
-            logging.error('Could not find instances of NewScale Stage: {}'.format(str(e)))
-        else:
-            self.stage_names=[]
-            for instance in self.instances:
-                self.stage_names.append(instance.sn)
-            self.StageSerialNum.addItems(self.stage_names)
-    
+    def _no_stage(self):
+        '''
+            Display a warrning message that the newscale stage is not connected
+        '''
+        self.Warning_Newscale.setText('Newscale stage not connected')
+        self.Warning_Newscale.setStyleSheet(self.default_warning_color)
+     
     def _connect_stage(self,instance):
         '''connect to a stage'''
-        instance.io.open()
-        instance.set_timeout(1)
-        instance.set_baudrate(250000)
-        self.current_stage=Stage(serial=instance)
+        try:       
+            instance.io.open()
+            instance.set_timeout(1)
+            instance.set_baudrate(250000)
+            self.current_stage=Stage(serial=instance)
+        except Exception as e:
+            logging.error(str(e))
+            self._no_stage()
+        else:
+            logging.info('Successfully connected to newscale stage: {}'.format(instance.sn))       
 
     def _ConnectBonsai(self):
         '''
@@ -1610,15 +1642,6 @@ class Window(QMainWindow):
         else:
             self.Camera_dialog.hide()
 
-    def _Manipulator(self):
-        if self.Manipulator==0:
-            self.ManipulatoB_dialog = ManipulatorDialog(MainWindow=self)
-            self.Manipulator=1
-        if self.action_Manipulator.isChecked()==True:
-            self.ManipulatoB_dialog.show()
-        else:
-            self.ManipulatoB_dialog.hide()
-
     def _WaterCalibration(self):
         if self.WaterCalibration==0:
             self.WaterCalibration_dialog = WaterCalibrationDialog(MainWindow=self)
@@ -1636,15 +1659,6 @@ class Window(QMainWindow):
             self.LaserCalibration_dialog.show()
         else:
             self.LaserCalibration_dialog.hide()
-
-    def _MotorStage(self):
-        if self.MotorStage==0:
-            self.MotorStage_dialog = MotorStageDialog(MainWindow=self)
-            self.MotorStage=1
-        if self.action_MotorStage.isChecked()==True:
-            self.MotorStage_dialog.show()
-        else:
-            self.MotorStage_dialog.hide()
 
     def _TimeDistribution(self):
         '''Plot simulated ITI/delay/block distribution'''

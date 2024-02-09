@@ -3925,44 +3925,6 @@
     <property name="title">
      <string>Motor stage</string>
     </property>
-    <widget class="QLabel" name="label_88">
-     <property name="geometry">
-      <rect>
-       <x>-20</x>
-       <y>30</y>
-       <width>61</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>Stage:</string>
-     </property>
-     <property name="textFormat">
-      <enum>Qt::AutoText</enum>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="StageSerialNum">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>50</x>
-       <y>30</y>
-       <width>111</width>
-       <height>22</height>
-      </rect>
-     </property>
-    </widget>
     <widget class="QPushButton" name="GetPositions">
      <property name="geometry">
       <rect>
@@ -4520,8 +4482,6 @@
     </widget>
     <addaction name="action_Optogenetics"/>
     <addaction name="action_Camera"/>
-    <addaction name="action_MotorStage"/>
-    <addaction name="action_Manipulator"/>
     <addaction name="action_Start"/>
     <addaction name="action_NewSession"/>
     <addaction name="actionConnectBonsai"/>
@@ -4529,7 +4489,6 @@
     <addaction name="actionRestartLogging_2"/>
     <addaction name="actionOpen_behavior_folder"/>
     <addaction name="actionOpen_logging_folder"/>
-    <addaction name="actionScan_stages"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="sizePolicy">
@@ -4598,8 +4557,6 @@
     <bool>false</bool>
    </attribute>
    <addaction name="action_Camera"/>
-   <addaction name="action_MotorStage"/>
-   <addaction name="action_Manipulator"/>
   </widget>
   <widget class="QToolBar" name="toolBar_3">
    <property name="sizePolicy">
@@ -4737,30 +4694,6 @@
     <enum>QAction::NormalPriority</enum>
    </property>
   </action>
-  <action name="action_MotorStage">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>resources/Motor.png</normaloff>resources/Motor.png</iconset>
-   </property>
-   <property name="text">
-    <string>Motor stage</string>
-   </property>
-  </action>
-  <action name="action_Manipulator">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>resources/Manipulator.png</normaloff>resources/Manipulator.png</iconset>
-   </property>
-   <property name="text">
-    <string>Manipulator</string>
-   </property>
-  </action>
   <action name="actionOpenSettingFolder">
    <property name="text">
     <string>Open setting folder</string>
@@ -4871,11 +4804,6 @@
    </property>
    <property name="text">
     <string>Time distribution</string>
-   </property>
-  </action>
-  <action name="actionScan_stages">
-   <property name="text">
-    <string>Scan stages</string>
    </property>
   </action>
   <action name="actionReconnect_bonsai">
