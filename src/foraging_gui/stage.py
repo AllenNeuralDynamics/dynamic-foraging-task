@@ -88,7 +88,7 @@ class Stage(QObject):
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
-        self.worker.error.connect(on_error)
+        self.worker.error.connect(self.on_error)
         self.thread.start()
 
         self.z_safe = 0.
