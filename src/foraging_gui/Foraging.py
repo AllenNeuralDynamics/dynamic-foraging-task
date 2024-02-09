@@ -341,7 +341,8 @@ class Window(QMainWindow):
                                 
     def _StageStop(self):
         '''Halt the stage'''
-        if hasattr(self, 'current_stage'):
+        self._CheckStageConnection()
+        if hasattr(self, 'current_stage') and self.current_stage.connected:
             logging.info('Stopping stage movement')
             current_stage=self.current_stage
             current_stage.halt()
@@ -350,8 +351,9 @@ class Window(QMainWindow):
 
     def _Move(self,axis,step):
         '''Move stage'''
+        self._CheckStageConnection()
         try:
-            if not hasattr(self, 'current_stage'):
+            if not hasattr(self, 'current_stage') and self.current_stage.connected:
                 logging.info('Move Stage pressed, but no current stage')
                 return
             logging.info('Moving stage')
