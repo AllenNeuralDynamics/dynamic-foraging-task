@@ -1178,6 +1178,13 @@ class Window(QMainWindow):
                         if Correct ==0: # incorrect format; don't change
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
+                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight']) and
+                        (child.text() == '')):
+                        # These attributes can have the empty string, but we can't set the value as the empty string
+                        if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
+                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))                       
+                        continue
+
 
                     # check for empty string condition
                     try:
