@@ -1,3 +1,4 @@
+import sys
 import queue
 import time
 
@@ -22,7 +23,7 @@ class IOWorker(QObject):
         self.qfast = queue.Queue()
         self.halt_requested = False
 
-    def process(self):
+    def run(self):
         try:
             while True:
                 while not self.qslow.empty() and not self.halt_requested:
@@ -44,7 +45,9 @@ class IOWorker(QObject):
                 time.sleep(TIME_SLEEP)
         except Exception as e:
             print('here run')
-            self.error.emit('test')
+            (a,b,c) = sys.exc_inf()
+            sys.excepthook(a,b,c)_
+            #self.error.emit('test')
         else:
             self.finished.emit()
 
@@ -80,7 +83,7 @@ class Stage(QObject):
         self.thread = QThread()
         self.worker = IOWorker(self.device)
         self.worker.moveToThread(self.thread)
-        self.thread.started.connect(self.worker.process)
+        self.thread.started.connect(self.worker.run)
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
