@@ -338,9 +338,6 @@ class Window(QMainWindow):
             self._UpdatePosition(current_position,(0,0,0))
         else:
             logging.info('GetPositions pressed, but no current stage')
-            reply = QMessageBox.question(self, 'Box {}, Get Positions'.format(self.box_letter), 'Want to reconnect?', QMessageBox.Yes |QMessageBox.No)
-            if reply == QMessageBox.Yes:
-                self._InitializeMotorStage()
 
     def _StageStop(self):
         '''Halt the stage'''
@@ -492,20 +489,12 @@ class Window(QMainWindow):
             instance.io.open()
             instance.set_timeout(1)
             instance.set_baudrate(250000)
-            if hasattr(self, 'current_stage'):
-                print('trying')
-                instance.io.flush_buffers()
-                instance.io.cancel_io()
-                print('tried')
-            print('creating stage object')
             self.current_stage=Stage(serial=instance)
-            print('done connect_stage')
         except Exception as e:
             logging.error(str(e))
             self._no_stage()
         else:
             logging.info('Successfully connected to newscale stage: {}'.format(instance.sn))       
-        print('done connect_stage 2')
 
     def _ConnectBonsai(self):
         '''
