@@ -319,7 +319,7 @@ class Window(QMainWindow):
     
     def _CheckStageConnection(self):
         '''get the current position of the stage'''
-        if hasattr(self, 'current_stage') & (not self.current_stage.connected):
+        if hasattr(self, 'current_stage') and self.current_stage.connected:
             logging.info('Checking stage connection')
             current_stage=self.current_stage
             current_position=current_stage.get_position()
@@ -331,7 +331,7 @@ class Window(QMainWindow):
         '''get the current position of the stage'''
         self._CheckStageConnection()
 
-        if hasattr(self, 'current_stage') & (not self.current_stage.connected):
+        if hasattr(self, 'current_stage') and self.current_stage.connected:
             logging.info('Grabbing current stage position')
             current_stage=self.current_stage
             current_position=current_stage.get_position()
