@@ -14,7 +14,7 @@ TIME_SLEEP = 0.03
 
 class IOWorker(QObject):
     finished = pyqtSignal()
-    error = pyqtSignal(str)
+    error = Signal() 
 
     def __init__(self, device):
         QObject.__init__(self)
@@ -45,9 +45,7 @@ class IOWorker(QObject):
                 time.sleep(TIME_SLEEP)
         except Exception as e:
             print('here run')
-            (a,b,c) = sys.exc_info()
-            sys.excepthook(a,b,c)
-            #self.error.emit('test')
+            self.error.emit()
         else:
             self.finished.emit()
 
