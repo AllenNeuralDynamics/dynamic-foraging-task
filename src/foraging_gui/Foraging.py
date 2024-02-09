@@ -338,7 +338,10 @@ class Window(QMainWindow):
             self._UpdatePosition(current_position,(0,0,0))
         else:
             logging.info('GetPositions pressed, but no current stage')
-                                
+            reply = QMessageBox.question(self, 'Box {}, Get Positions'.format(self.box_letter), 'Want to reconnect?', QMessageBox.Yes |QMessageBox.No)
+            if reply == QMessageBox.Yes:
+                self._InitializeMotorStage()
+
     def _StageStop(self):
         '''Halt the stage'''
         self._CheckStageConnection()
