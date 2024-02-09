@@ -480,7 +480,10 @@ class Window(QMainWindow):
         '''
             Display a warrning message that the newscale stage is not connected
         '''
-        self.Warning_Newscale.setText('Newscale stage not connected')
+        if hasattr(self, 'current_stage'):
+            self.Warning_Newscale.setText('Lost newscale stage connection')
+        else:
+            self.Warning_Newscale.setText('Newscale stage not connected')
         self.Warning_Newscale.setStyleSheet(self.default_warning_color)
     
     def _connect_stage(self,instance):
