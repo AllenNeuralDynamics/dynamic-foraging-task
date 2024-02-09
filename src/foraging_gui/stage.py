@@ -46,6 +46,7 @@ class IOWorker(QObject):
         except Exception as e:
             print('here run')
             self.error.emit()
+            self.finished.emit()
         else:
             self.finished.emit()
 
@@ -87,7 +88,6 @@ class Stage(QObject):
         self.thread.finished.connect(self.thread.deleteLater)
         self.worker.error.connect(self.on_error)
         self.worker.error.connect(self.worker.deleteLater)
-        self.thread.error.connect(self.thread.deleteLater)
         self.thread.start()
 
         self.z_safe = 0.
