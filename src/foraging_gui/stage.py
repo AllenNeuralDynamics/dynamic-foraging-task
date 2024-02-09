@@ -70,6 +70,7 @@ class Stage(QObject):
     def __init__(self, ip=None, serial=None):
         QObject.__init__(self)
 
+        print('a')
         if ip is not None:
             self.ip = ip
             self.name = ip
@@ -78,7 +79,7 @@ class Stage(QObject):
             self.serial = serial
             self.name = serial.get_serial_number()
             self.device = USBXYZStage(usb_interface=USBInterface(serial))
-
+        print('b')
         self.thread = QThread()
         self.worker = IOWorker(self.device)
         self.worker.moveToThread(self.thread)
@@ -87,6 +88,7 @@ class Stage(QObject):
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
+        print('c')
 
         self.z_safe = 0.
 
