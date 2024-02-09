@@ -1,7 +1,7 @@
 import queue
 import time
 
-from PyQt5.QtCore import QObject, pyqtSignal, QThread
+from PyQt5.QtCore import QObject, pyqtSignal, QThread, pyqtSlot
 
 from newscale.multistage import USBXYZStage, PoEXYZStage
 from newscale.interfaces import USBInterface
@@ -22,7 +22,7 @@ class IOWorker(QObject):
         self.qfast = queue.Queue()
         self.halt_requested = False
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def run(self):
         try:
             while True:
