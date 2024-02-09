@@ -1,8 +1,7 @@
-import sys
 import queue
 import time
 
-from PyQt5.QtCore import QObject, pyqtSignal, QThread, Signal
+from PyQt5.QtCore import QObject, pyqtSignal, QThread
 
 from newscale.multistage import USBXYZStage, PoEXYZStage
 from newscale.interfaces import USBInterface
@@ -23,9 +22,9 @@ class IOWorker(QObject):
         self.halt_requested = False
 
     def run(self):
-        try:
-            while True:
-                while not self.qslow.empty() and not self.halt_requested:
+        while True:
+            while not self.qslow.empty() and not self.halt_requested:
+                try:
                     cmd = self.qslow.get()
                     cmd.execute()
                     if not cmd.blocking:
@@ -34,19 +33,20 @@ class IOWorker(QObject):
                                 fc = self.qfast.get()
                                 fc.execute()
                             time.sleep(TIME_SLEEP)
-                while not self.qfast.empty() and not self.halt_requested:
+                except:
+                    print('here')
+            while not self.qfast.empty() and not self.halt_requested:
+                try:
                     fc = self.qfast.get()
                     fc.execute()
-                if self.halt_requested:
-                    self.device.halt()
-                    self.clear_queues()
-                    self.halt_requested = False
-                time.sleep(TIME_SLEEP)
-        except Exception as e:
-            print('here run')
-            self.finished.emit()
-        else:
-            self.finished.emit()
+                except:
+                    print('here'2)
+            if self.halt_requested:
+                self.device.halt()
+                self.clear_queues()
+                self.halt_requested = False
+            time.sleep(TIME_SLEEP)
+        self.finished.emit()
 
     def queue_command(self, cmd):
         if cmd.fast:
