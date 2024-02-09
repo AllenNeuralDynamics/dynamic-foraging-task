@@ -37,7 +37,6 @@ class IOWorker(QObject):
                 except:
                     cmd._done = True
                     self.failure.emit()
-                    print('here')
             while not self.qfast.empty() and not self.halt_requested:
                 try:
                     fc = self.qfast.get()
@@ -45,7 +44,6 @@ class IOWorker(QObject):
                 except:
                     fc._done=True
                     self.failure.emit()
-                    print('here2')
             if self.halt_requested:
                 self.device.halt()
                 self.clear_queues()
@@ -96,7 +94,8 @@ class Stage(QObject):
         self.z_safe = 0.
     
     def _on_failure(self):
-        print('here failure')
+        logging.info('Failure signal from stage worker')
+        return 
 
     def __del__(self):
         self.clean()
@@ -119,7 +118,6 @@ class Stage(QObject):
             time.sleep(TIME_SLEEP)
         result = cmd.result()        
         if result is None:
-            print('here 3')
             self.connected=False
         return result
 
