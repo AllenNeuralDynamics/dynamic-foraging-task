@@ -23,9 +23,9 @@ class IOWorker(QObject):
         self.halt_requested = False
 
     def run(self):
-        while True:
-            while not self.qslow.empty() and not self.halt_requested:
-                try:
+        try:
+            while True:
+                while not self.qslow.empty() and not self.halt_requested:
                     cmd = self.qslow.get()
                     cmd.execute()
                     if not cmd.blocking:
@@ -34,22 +34,19 @@ class IOWorker(QObject):
                                 fc = self.qfast.get()
                                 fc.execute()
                             time.sleep(TIME_SLEEP)
-                except Exception as e:
-                    print('here!')
-                    self.error.emit(e)
-            while not self.qfast.empty() and not self.halt_requested:
-                try:
+                while not self.qfast.empty() and not self.halt_requested:
                     fc = self.qfast.get()
                     fc.execute()
-                except Exception as e:
-                    print('here 2!')
-                    self.error.emit(Exception('here'))
-            if self.halt_requested:
-                self.device.halt()
-                self.clear_queues()
-                self.halt_requested = False
-            time.sleep(TIME_SLEEP)
-        self.finished.emit()
+                if self.halt_requested:
+                    self.device.halt()
+                    self.clear_queues()
+                    self.halt_requested = False
+                time.sleep(TIME_SLEEP)
+        except Exception as e:
+            print('here run')
+            self.error.emit(Exception('test'))
+        else:
+            self.finished.emit()
 
     def queue_command(self, cmd):
         if cmd.fast:
