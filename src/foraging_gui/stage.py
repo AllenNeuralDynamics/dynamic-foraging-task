@@ -118,7 +118,10 @@ class Stage(QObject):
         self.worker.queue_command(cmd)
         while not cmd.done():
             time.sleep(TIME_SLEEP)
-        return cmd.result()
+        result = cmd.result()        
+        if result is None:
+            self.connected=False
+        return result
 
     def get_speed(self):
         cmd = io.GetSpeedCommand(self.device)
