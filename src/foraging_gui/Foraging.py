@@ -331,6 +331,7 @@ class Window(QMainWindow):
 
     def _GetPositions(self):
         '''get the current position of the stage'''
+        self._CheckStageConnection()
         if hasattr(self, 'current_stage'):
             logging.info('Grabbing current stage position')
             current_stage=self.current_stage
