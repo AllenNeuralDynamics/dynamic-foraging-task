@@ -13,7 +13,7 @@ TIME_SLEEP = 0.03
 
 class IOWorker(QObject):
     finished = pyqtSignal()
-    error = pyqtSignal(tuple)
+    error = pyqtSignal(Exception)
 
     def __init__(self, device):
         QObject.__init__(self)
