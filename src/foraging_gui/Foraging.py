@@ -1169,10 +1169,7 @@ class Window(QMainWindow):
                     child.setStyleSheet('color: black;')
                     child.setStyleSheet('background-color: white;')
                     self._Task()
-                    if child.objectName()=='AnimalName' and child.text()=='':
-                        child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                        continue
-                    if child.objectName() in {'Experimenter','TotalWater','AnimalName','WeightBefore','WeightAfter','ExtraWater'}:
+                    if child.objectName() in {'Experimenter','TotalWater','WeightBefore','WeightAfter','ExtraWater'}:
                         continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
@@ -1233,7 +1230,7 @@ class Window(QMainWindow):
                 try:
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                         self.Continue=0
-                        if child.objectName() in {'Experimenter', 'AnimalName', 'UncoupledReward', 'WeightBefore', 'WeightAfter', 'ExtraWater'}:
+                        if child.objectName() in {'Experimenter', 'UncoupledReward', 'WeightBefore', 'WeightAfter', 'ExtraWater'}:
                             child.setStyleSheet(self.default_text_color)
                             self.Continue=1
                         if child.text()=='': # If empty, change background color and wait for confirmation
