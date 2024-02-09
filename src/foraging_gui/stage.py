@@ -45,7 +45,7 @@ class IOWorker(QObject):
                 time.sleep(TIME_SLEEP)
         except Exception as e:
             print('here run')
-            (a,b,c) = sys.exc_inf()
+            (a,b,c) = sys.exc_info()
             sys.excepthook(a,b,c)
             #self.error.emit('test')
         else:
