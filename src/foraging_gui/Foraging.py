@@ -1182,6 +1182,8 @@ class Window(QMainWindow):
                         if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))                       
                         continue
+                    if (child.objectName() == 'LatestCalibrationDate') and (child.text() == 'NA'):
+                        continue
 
 
                     # check for empty string condition
