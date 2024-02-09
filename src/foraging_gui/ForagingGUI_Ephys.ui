@@ -3316,6 +3316,34 @@
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
      </property>
     </widget>
+    <widget class="QLabel" name="WarmupWarning">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>361</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">
@@ -4316,6 +4344,7 @@
      <string>Streamlit!</string>
     </property>
    </widget>
+   <zorder>PhotometryB</zorder>
    <zorder>infor</zorder>
    <zorder>line</zorder>
    <zorder>Task</zorder>
@@ -4337,7 +4366,6 @@
    <zorder>Experimenter</zorder>
    <zorder>WarningLabelCamera</zorder>
    <zorder>label_61</zorder>
-   <zorder>PhtotometryB</zorder>
    <zorder>label_47</zorder>
    <zorder>baselinetime</zorder>
    <zorder>StartExcitation</zorder>

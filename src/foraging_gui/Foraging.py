@@ -267,6 +267,7 @@ class Window(QMainWindow):
             self.label_118.setEnabled(True)
 
             # set warm up default parameters
+            self.Task.setCurrentIndex(self.Task.findText('Coupled Baiting'))
             self.BaseRewardSum.setText('1')
             self.RewardFamily.setText('3')
             self.RewardPairsN.setText('1')
@@ -306,6 +307,7 @@ class Window(QMainWindow):
             if attr_name.startswith('WarmupBackup_') and attr_name!='WarmupBackup_' and attr_name!='WarmupBackup_warmup':
                 parameters[attr_name.replace('WarmupBackup_','')]=getattr(self,attr_name)
         widget_dict = {w.objectName(): w for w in self.TrainingParameters.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+        widget_dict['Task']=self.Task
         try:
             for key in widget_dict.keys():
                 self._set_parameters(key,widget_dict,parameters)
@@ -2516,6 +2518,7 @@ class Window(QMainWindow):
             # generate a new session id
             self.WarningLabel.setText('')
             self.WarningLabel.setStyleSheet("color: gray;")
+            self.WarmupWarning.setText('')
             # start a new logging
             try:
                 self.Ot_log_folder=self._restartlogging()
