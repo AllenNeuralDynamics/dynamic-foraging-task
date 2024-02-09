@@ -13,6 +13,7 @@ TIME_SLEEP = 0.03
 
 class IOWorker(QObject):
     finished = pyqtSignal()
+    failure = Signal()
 
     def __init__(self, device):
         QObject.__init__(self)
@@ -35,6 +36,7 @@ class IOWorker(QObject):
                             time.sleep(TIME_SLEEP)
                 except:
                     cmd._done = True
+                    self.failure.emit()
                     print('here')
             while not self.qfast.empty() and not self.halt_requested:
                 try:
@@ -42,6 +44,7 @@ class IOWorker(QObject):
                     fc.execute()
                 except:
                     fc._done=True
+                    self.failure.emit()
                     print('here2')
             if self.halt_requested:
                 self.device.halt()
@@ -66,6 +69,7 @@ class IOWorker(QObject):
         self.halt_requested = True
 
 class Stage(QObject):
+    connected = True
 
     def __init__(self, ip=None, serial=None):
         QObject.__init__(self)
@@ -86,10 +90,14 @@ class Stage(QObject):
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
+        self.worker.failure.connect(self._on_failure)
         self.thread.start()
 
         self.z_safe = 0.
     
+    def _on_failure(self):
+        print('here failure')
+        self.connected=False
 
     def __del__(self):
         self.clean()

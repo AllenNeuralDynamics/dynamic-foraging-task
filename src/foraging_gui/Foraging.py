@@ -316,6 +316,18 @@ class Window(QMainWindow):
     def _keyPressEvent(self):
         # press enter to confirm parameters change
         self.keyPressEvent()
+    
+    def _CheckStageConnection(self):
+        '''get the current position of the stage'''
+        if hasattr(self, 'current_stage'):
+            logging.info('Checking stage connection')
+            current_stage=self.current_stage
+            current_position=current_stage.get_position()
+            if not current_stage.connected:
+                logging.error('lost stage connection')
+        else:
+            logging.info('GetPositions pressed, but no current stage')
+
 
     def _GetPositions(self):
         '''get the current position of the stage'''
