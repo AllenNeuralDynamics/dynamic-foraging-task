@@ -491,8 +491,8 @@ class Window(QMainWindow):
     def _disconnect_stage(self, instance):
         try:
             instance.io.close() 
-        except Exception as e:
-            logging.error(str(e))    
+        except:
+            logging.error('Error when disconnecting'))    
         else:
             logging.info('disconnected')
 
