@@ -1141,11 +1141,12 @@ class Window(QMainWindow):
 
         # move newscale stage
         if hasattr(self,'current_stage'):
-            try:
-                self.StageStop.click
-                self.current_stage.move_absolute_3d(float(self.PositionX.text()),float(self.PositionY.text()),float(self.PositionZ.text()))
-            except Exception as e:
-                logging.error(str(e))
+            if (self.PositionX.text() != '')and (self.PositionY.text() != '')and (self.PositionZ.text() != ''):
+                try:
+                    self.StageStop.click
+                    self.current_stage.move_absolute_3d(float(self.PositionX.text()),float(self.PositionY.text()),float(self.PositionZ.text()))
+                except Exception as e:
+                    logging.error(str(e))
         # Get the parameters before change
         if hasattr(self, 'GeneratedTrials') and self.ToInitializeVisual==0: # use the current GUI paramters when no session starts running
             Parameters=self.GeneratedTrials
