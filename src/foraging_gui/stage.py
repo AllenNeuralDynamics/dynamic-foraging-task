@@ -109,8 +109,12 @@ class Stage(QObject):
     def get_position(self):
         cmd = io.GetPositionCommand(self.device)
         self.worker.queue_command(cmd)
+        max_wait = 10
         while not cmd.done():
             time.sleep(TIME_SLEEP)
+            max_wait -= 1
+            if max_wait < 0:
+                break
         result = cmd.result()       
         
         # check if command was a failure 
