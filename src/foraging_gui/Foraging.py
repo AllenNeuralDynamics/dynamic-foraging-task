@@ -2963,6 +2963,9 @@ def start_gui_log_file(box_number):
     logging.captureWarnings(True)
 
 def log_git_hash():
+    '''
+        Add a note to the GUI log about the current branch and hash. Assumes the local repo is clean
+    '''
     try:
         git_hash = subprocess.check_output(['git','rev-parse','--short', 'HEAD']).decode('ascii').strip()
         git_branch = subprocess.check_output(['git','branch','--show-current']).decode('ascii').strip()
@@ -2970,16 +2973,68 @@ def log_git_hash():
     except Exception as e:
         logging.error('Could not log git branch and hash: {}'.format(str(e)))
 
-def excepthook(exc_type, exc_value, exc_tb):
+def show_exception_box(log_msg):
     '''
-        excepthook will be called when the GUI encounters an uncaught exception
-        We will log the error in the logfile, print the error to the console, then exit
+        Displays a Qwindow alert to the user that an uncontrolled error has occured, and the error message
+        if no QApplication instance is available, logs a note in the GUI log
     '''
-    tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
-    print('Encountered a fatal error: ')
-    print(tb)
-    logging.error('FATAL ERROR: \n{}'.format(tb))
-    QtWidgets.QApplication.quit()
+    # Check if a QApplication instance is running
+    if QtWidgets.QApplication.instance() is not None:
+        box = log_msg[0] # Grab the box letter
+        log_msg = log_msg[1:] # Grab the error messages
+
+        # Make a QWindow, wait for user response
+        errorbox = QtWidgets.QMessageBox()
+        errorbox.setWindowTitle('Box {}, Error'.format(box))
+        msg = '<span style="color:purple;font-weight:bold">An uncontrolled error occurred. If the error is related to newscale or USBXpress, you can try to continue. Otherwise, save any data and restart the GUI. </span> <br><br>{}'.format(log_msg)
+        errorbox.setText(msg)
+        errorbox.exec_()
+    else:
+        logging.error('could not launch exception box')
+
+class UncaughtHook(QtCore.QObject):
+    '''
+        This class handles uncaught exceptions and hooks into the sys.excepthook
+    '''
+    _exception_caught = QtCore.Signal(object)
+    
+    def __init__(self,box_number, *args, **kwargs):
+        super(UncaughtHook, self).__init__(*args, **kwargs)
+        
+        # Determine what Box we are in
+        mapper = {
+            1:'A',
+            2:'B',
+            3:'C',
+            4:'D'
+            }
+        self.box = mapper[box_number]
+
+        # Hook into the system except hook
+        sys.excepthook = self.exception_hook
+
+        # Call our custom function to display an alert
+        self._exception_caught.connect(show_exception_box)
+
+        
+    def exception_hook(self, exc_type, exc_value, exc_traceback):
+        '''
+            Log the error in the log, and display in the console
+            then call our custom hook function to display an alert
+        '''
+
+        # Display in console
+        tb = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+        print('Encountered a fatal error: ')
+        print(tb)
+
+        # Add to log
+        logging.error('FATAL ERROR: \n{}'.format(tb))
+
+        # Display alert box
+        tb = "<br>".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+        self._exception_caught.emit(self.box+tb)
+
 
 if __name__ == "__main__":
 
@@ -3006,15 +3061,18 @@ if __name__ == "__main__":
     QApplication.setAttribute(Qt.AA_Use96Dpi,False)
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
    
-    # Set excepthook, so we can log uncaught exceptions
-    sys.excepthook=excepthook
-
-    # Start Q, and Gui Window
+    # Start QApplication
     logging.info('Starting QApplication and Window')
     app = QApplication(sys.argv)
+    
+    # Create global instance of uncaught exception handler
+    qt_exception_hook = UncaughtHook(box_number)
+
+    # Start GUI window
     win = Window(box_number=box_number,start_bonsai_ide=start_bonsai_ide)
     win.show()
-    # Run your application's event loop and stop after closing all windows
+   
+     # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())
 
 
