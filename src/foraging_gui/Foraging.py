@@ -495,6 +495,7 @@ class Window(QMainWindow):
             if hasattr(self, 'current_stage'):
                 print('trying')
                 instance.io.flush_buffers()
+                instance.io.cancel_io()
                 print('tried')
             print('creating stage object')
             self.current_stage=Stage(serial=instance)
