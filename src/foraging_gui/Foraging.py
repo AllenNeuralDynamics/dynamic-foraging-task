@@ -317,22 +317,6 @@ class Window(QMainWindow):
         # press enter to confirm parameters change
         self.keyPressEvent()
 
-    def _CheckStageConnection(self):
-        if hasattr(self,'current_stage'):
-            try:
-                self.current_stage.get_position()
-            except:
-                logging.error('could not connect to newscale stage')
-                self.Warning_Newscale.setText('Lost newscale stage connection')
-                self.Warning_Newscale.setStyleSheet(self.default_warning_color)
-                return False
-            else:
-                self.Warning_Newscale.setText('')
-                self.Warning_Newscale.setStyleSheet(self.default_warning_color)
-                return True 
-        else:
-            return False
-
     def _GetPositions(self):
         '''get the current position of the stage'''
         if hasattr(self, 'current_stage'):
@@ -493,20 +477,6 @@ class Window(QMainWindow):
         '''
         self.Warning_Newscale.setText('Newscale stage not connected')
         self.Warning_Newscale.setStyleSheet(self.default_warning_color)
-
-    def _disconnect_stage(self, instance):
-        '''
-            disconnects from the newscale stage instace.
-            python-newscale will print an "SI_INVALID_HANDLE" error if the instance
-            does not have an open connection
-        '''
-        try:
-            instance.io.close()
-        except Exception as e:
-            logging.info('Could not disconnect newscale stage instance, this is probably fine')
-            pass
-        else:
-            logging.info('disconnected newscale stage instance')
      
     def _connect_stage(self,instance):
         '''connect to a stage'''
