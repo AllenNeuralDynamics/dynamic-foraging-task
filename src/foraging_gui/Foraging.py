@@ -416,15 +416,6 @@ class Window(QMainWindow):
             Failure modes include: an error in scanning for stages, no stages found, no stage defined
             in the settings file, the defined stage not found, an error in connecting to the stage 
         '''
-        ## TODO
-        # Remove Manipulator, and MotorStage from UI files
-        # Remove "Stage" from UI file in Motorstage section
-        # Check this still works on a computer with multiple stages  
-        # Remove all notion of "self.StageSerialNum" 
-            # Ask XX about whether we need this functionality
-        # Make some updates to the python-newscale package, determine if issues are from NEWSCALE, or python-newscale
-            # At least change prints to logging
-            # Figure out why we are on a branch!?!?
  
         # find available newscale stages
         logging.info('Scanning for newscale stages')
