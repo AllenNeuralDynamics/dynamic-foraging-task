@@ -492,6 +492,10 @@ class Window(QMainWindow):
             instance.io.open()
             instance.set_timeout(1)
             instance.set_baudrate(250000)
+            if hasattr(self, 'current_stage'):
+                print('trying')
+                instance.io.flush_buffers()
+                print('tried')
             print('creating stage object')
             self.current_stage=Stage(serial=instance)
             print('done connect_stage')
