@@ -13,6 +13,7 @@ TIME_SLEEP = 0.03
 
 class IOWorker(QObject):
     finished = pyqtSignal()
+    error = pyqtSignal(tuple)
 
     def __init__(self, device):
         QObject.__init__(self)
@@ -24,17 +25,25 @@ class IOWorker(QObject):
     def run(self):
         while True:
             while not self.qslow.empty() and not self.halt_requested:
-                cmd = self.qslow.get()
-                cmd.execute()
-                if not cmd.blocking:
-                    while not cmd.done() and not self.halt_requested:
-                        while not self.qfast.empty() and not self.halt_requested:
-                            fc = self.qfast.get()
-                            fc.execute()
-                        time.sleep(TIME_SLEEP)
+                try:
+                    cmd = self.qslow.get()
+                    cmd.execute()
+                    if not cmd.blocking:
+                        while not cmd.done() and not self.halt_requested:
+                            while not self.qfast.empty() and not self.halt_requested:
+                                fc = self.qfast.get()
+                                fc.execute()
+                            time.sleep(TIME_SLEEP)
+                except Exception as e:
+                    print('here!')
+                    self.error.emit(e)
             while not self.qfast.empty() and not self.halt_requested:
-                fc = self.qfast.get()
-                fc.execute()
+                try:
+                    fc = self.qfast.get()
+                    fc.execute()
+                except Exception as e:
+                    print('here 2!')
+                    self.error.emit(e)
             if self.halt_requested:
                 self.device.halt()
                 self.clear_queues()
