@@ -492,12 +492,15 @@ class Window(QMainWindow):
             instance.io.open()
             instance.set_timeout(1)
             instance.set_baudrate(250000)
+            print('creating stage object')
             self.current_stage=Stage(serial=instance)
+            print('done connect_stage')
         except Exception as e:
             logging.error(str(e))
             self._no_stage()
         else:
             logging.info('Successfully connected to newscale stage: {}'.format(instance.sn))       
+        print('done connect_stage 2')
 
     def _ConnectBonsai(self):
         '''
