@@ -2953,7 +2953,7 @@ def start_gui_log_file(box_number):
     print(logging_filename)
     logging.basicConfig(
         format=log_format,
-        level=logging.DEBUG, ### DEBUG
+        level=logging.INFO,
         datefmt=log_datefmt,
         handlers=[
             logging.FileHandler(logging_filename),
