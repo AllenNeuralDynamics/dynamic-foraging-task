@@ -991,7 +991,7 @@ class Window(QMainWindow):
         '''
         if key in parameters:
             # skip some keys
-            if key=='ExtraWater' or key=='WeightBefore' or key=='WeightAfter' or key=='SuggestedWater':
+            if key=='ExtraWater' or key=='WeightAfter' or key=='SuggestedWater':
                 self.WeightAfter.setText('')
                 return
             widget = widget_dict[key]
@@ -1169,7 +1169,7 @@ class Window(QMainWindow):
                     child.setStyleSheet('color: black;')
                     child.setStyleSheet('background-color: white;')
                     self._Task()
-                    if child.objectName() in {'Experimenter','TotalWater','WeightBefore','WeightAfter','ExtraWater'}:
+                    if child.objectName() in {'Experimenter','TotalWater','WeightAfter','ExtraWater'}:
                         continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
@@ -1232,7 +1232,7 @@ class Window(QMainWindow):
                 try:
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                         self.Continue=0
-                        if child.objectName() in {'Experimenter', 'UncoupledReward', 'WeightBefore', 'WeightAfter', 'ExtraWater'}:
+                        if child.objectName() in {'Experimenter', 'UncoupledReward', 'WeightAfter', 'ExtraWater'}:
                             child.setStyleSheet(self.default_text_color)
                             self.Continue=1
                         if child.text()=='': # If empty, change background color and wait for confirmation
