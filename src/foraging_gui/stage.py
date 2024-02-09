@@ -22,6 +22,7 @@ class IOWorker(QObject):
         self.qfast = queue.Queue()
         self.halt_requested = False
 
+    @QtCore.pyqtSlot()
     def run(self):
         try:
             while True:
