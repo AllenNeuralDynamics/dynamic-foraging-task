@@ -46,7 +46,7 @@ class IOWorker(QObject):
         except Exception as e:
             print('here run')
             (a,b,c) = sys.exc_inf()
-            sys.excepthook(a,b,c)_
+            sys.excepthook(a,b,c)
             #self.error.emit('test')
         else:
             self.finished.emit()
