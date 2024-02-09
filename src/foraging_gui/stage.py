@@ -41,6 +41,7 @@ class IOWorker(QObject):
                     fc = self.qfast.get()
                     fc.execute()
                 except:
+                    fc._done=True
                     print('here2')
             if self.halt_requested:
                 self.device.halt()
