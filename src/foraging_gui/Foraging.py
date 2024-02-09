@@ -325,6 +325,8 @@ class Window(QMainWindow):
             current_position=current_stage.get_position()
             if not current_stage.connected:
                 logging.error('lost stage connection')
+                self._no_stage()
+                delattr(self, 'current_stage')
         else:
             logging.info('GetPositions pressed, but no current stage')
 
@@ -332,6 +334,7 @@ class Window(QMainWindow):
     def _GetPositions(self):
         '''get the current position of the stage'''
         self._CheckStageConnection()
+            
         if hasattr(self, 'current_stage'):
             logging.info('Grabbing current stage position')
             current_stage=self.current_stage
