@@ -1,5 +1,6 @@
 import queue
 import time
+import logging
 
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
 
@@ -35,15 +36,15 @@ class IOWorker(QObject):
                                 fc.execute()
                             time.sleep(TIME_SLEEP)
                 except:
-                    cmd._done = True
-                    self.failure.emit()
+                    cmd._done=True
+                    logging.error('An error occured with a newscale stage')
             while not self.qfast.empty() and not self.halt_requested:
                 try:
                     fc = self.qfast.get()
                     fc.execute()
                 except:
                     fc._done=True
-                    self.failure.emit()
+                    logging.error('An error occured with a newscale stage')
             if self.halt_requested:
                 self.device.halt()
                 self.clear_queues()
@@ -88,13 +89,9 @@ class Stage(QObject):
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
-        self.worker.failure.connect(self._on_failure)
         self.thread.start()
 
         self.z_safe = 0.
-    
-    def _on_failure(self):
-        return 
 
     def __del__(self):
         self.clean()
@@ -115,9 +112,12 @@ class Stage(QObject):
         self.worker.queue_command(cmd)
         while not cmd.done():
             time.sleep(TIME_SLEEP)
-        result = cmd.result()        
+        result = cmd.result()       
+        
+        # check if command was a failure 
         if result is None:
             self.connected=False
+    
         return result
 
     def get_speed(self):
