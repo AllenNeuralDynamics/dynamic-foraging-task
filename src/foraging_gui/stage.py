@@ -95,7 +95,6 @@ class Stage(QObject):
     
     def on_error(error):
         print('here 3')
-        raise error
 
     def __del__(self):
         self.clean()
