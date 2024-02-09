@@ -337,7 +337,7 @@ class Window(QMainWindow):
         self._CheckStageConnection()
         logging.error('here 7') 
         if hasattr(self, 'current_stage'):
-            if not current_stage.connected:
+            if not self.current_stage.connected:
                 return
             logging.info('Grabbing current stage position')
             current_stage=self.current_stage
