@@ -353,7 +353,7 @@ class Window(QMainWindow):
         '''Move stage'''
         self._CheckStageConnection()
         try:
-            if not hasattr(self, 'current_stage') and self.current_stage.connected:
+            if (not hasattr(self, 'current_stage')) or (not self.current_stage.connected):
                 logging.info('Move Stage pressed, but no current stage')
                 return
             logging.info('Moving stage')
