@@ -43,7 +43,7 @@ class IOWorker(QObject):
                     fc.execute()
                 except Exception as e:
                     print('here 2!')
-                    self.error.emit(e)
+                    self.error.emit(Exception('here'))
             if self.halt_requested:
                 self.device.halt()
                 self.clear_queues()
