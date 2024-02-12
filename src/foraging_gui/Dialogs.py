@@ -1288,6 +1288,8 @@ class LaserCalibrationDialog(QDialog):
         self.CLP_InputVoltage=float(self.voltage.text())
         # generate the waveform based on self.CLP_CurrentDuration and Protocol, Frequency, RampingDown, PulseDur
         self._GetLaserAmplitude()
+        # send the trigger source. It's '/Dev1/PFI0' ( P2.0 of NIdaq USB6002) by default 
+        self.MainWindow.Channel.TriggerSource('/Dev1/PFI0')
         # dimension of self.CurrentLaserAmplitude indicates how many locations do we have
         for i in range(len(self.CurrentLaserAmplitude)):
             # in some cases the other paramters except the amplitude could also be different
@@ -1397,8 +1399,6 @@ class LaserCalibrationDialog(QDialog):
                 setattr(self, Prefix+'_'+child.objectName(), child.isChecked())
     def _InitiateATrial(self):
         '''Initiate calibration in bonsai'''
-        # send the trigger source. It's '/Dev1/PFI0' ( P2.0 of NIdaq USB6002) by default 
-        self.MainWindow.Channel.TriggerSource('/Dev1/PFI0')
         # start generating waveform in bonsai
         self.MainWindow.Channel.OptogeneticsCalibration(int(1))
         self.MainWindow.Channel.receive()
@@ -1697,7 +1697,6 @@ class LaserCalibrationDialog(QDialog):
             # change button color and disable the open button
             self.Open.setEnabled(False)
             self.Open.setStyleSheet("background-color : green;")
-            QApplication.processEvents()
             self._GetTrainingParameters(self.MainWindow)
             self._GetLaserWaveForm()
             self.worker2 = Worker(self._Sleep,float(self.LC_Duration_1)+1)
