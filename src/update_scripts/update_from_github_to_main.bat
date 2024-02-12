@@ -13,4 +13,6 @@ git stash >>%logfile% 2>&1
 git checkout %branch% >>%logfile% 2>&1
 git reset --hard >>%logfile% 2>&1
 git pull origin %branch% >>%logfile% 2>&1
+echo waiting thirty second for long running processes >>%logfile%
+timeout 30>NUL
 git status >>%logfile% 2>&1
