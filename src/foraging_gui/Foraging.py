@@ -2198,6 +2198,9 @@ class Window(QMainWindow):
         if self.StartExcitation.isChecked():
             logging.info('StartExcitation is checked')
             self.StartExcitation.setStyleSheet("background-color : green;")
+            ## DEBUGGING CODE
+            self.TeensyWarning.setText('')
+            self.TeensyWarning.setStyleSheet(self.default_warning_color)   
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
                 # Trigger Teensy with the above specified exp mode
