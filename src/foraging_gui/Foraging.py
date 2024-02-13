@@ -2460,6 +2460,7 @@ class Window(QMainWindow):
     def _update_photometery_timer(self,time):
         minutes = np.mod(time, 60)
         seconds = np.remainder(time,60)
+        logging.info('updating photometry baseline timer')
         self.WarningLabelStop.setText('Running photometry baseline: {}:{}'.format(minutes,seconds))
         self.WarningLabelStop.setStyleSheet(self.default_warning_color)       
  
@@ -2470,6 +2471,7 @@ class Window(QMainWindow):
             time.sleep(15)
             Time -=15
             self.progress.emit(int(Time))
+            logging.info('emitting photometry baseline timer progress')
             num_updates += 1
         time.sleep(Time)
     
