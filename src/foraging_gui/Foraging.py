@@ -2621,6 +2621,8 @@ class Window(QMainWindow):
             logging.info('Starting photometry baseline timer')
             self.finish_Timer=0
             self.PhotometryRun=1
+            
+            # If we already created a workertimer and thread we can reuse them
             if not hasattr(self, 'workertimer'):
                 self.workertimer = TimerWorker()
                 self.workertimer_thread = QThread()
