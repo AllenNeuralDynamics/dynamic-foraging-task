@@ -1832,7 +1832,7 @@ class TimerWorker(QtCore.QObject):
     def _Timer(self,Time):
         '''sleep some time'''
         # Emit initial status
-        interval = 5
+        interval = 1
         num_updates = int(np.floor(Time/interval))
         self.progress.emit(int(Time))
 
@@ -1841,7 +1841,6 @@ class TimerWorker(QtCore.QObject):
             time.sleep(interval)
             Time -=interval
             self.progress.emit(int(Time))
-            logging.info('emitting photometry baseline timer progress')
             num_updates -= 1
         
         # Sleep the remainder of the time and finish
