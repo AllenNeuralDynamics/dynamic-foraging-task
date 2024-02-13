@@ -1821,7 +1821,7 @@ class Worker(QtCore.QRunnable):
 
 
 
-class TimerWorker(QtCore.QRunnable):
+class TimerWorker(QtCore.QObject):
     '''
     Worker thread
 
