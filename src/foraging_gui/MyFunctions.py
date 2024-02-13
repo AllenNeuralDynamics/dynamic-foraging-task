@@ -1834,7 +1834,6 @@ class TimerWorker(QtCore.QRunnable):
     :param kwargs: Keywords to pass to the callback function
 
     '''
-    Time = QtCore.pyqtSignal(int)
     finished = QtCore.pyqtSignal()
     progress = QtCore.pyqtSignal(int)
 

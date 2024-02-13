@@ -16,7 +16,7 @@ from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 from PyQt5.QtWidgets import QFileDialog,QVBoxLayout,QLineEdit
 from PyQt5 import QtWidgets,QtGui,QtCore, uic
-from PyQt5.QtCore import QThreadPool,Qt
+from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 
@@ -2626,11 +2626,14 @@ class Window(QMainWindow):
             logging.info('Starting photometry baseline timer')
             self.finish_Timer=0
             self.PhotometryRun=1
-            workertimer = TimerWorker()#self._Timer,float(self.baselinetime.text())*60)
-            workertimer.finished.connect(self._thread_complete_timer)
-            workertimer.progress.connect(self._update_photometery_timer)
-            workertimer.Time.connect(workertimer._Timer)
-            self.threadpool_workertimer.start(workertimer)
+            self.Time = QtCore.pyqtSignal(int)
+            self.workertimer = TimerWorker()#self._Timer,float(self.baselinetime.text())*60)
+            self.workertimer.finished.connect(self._thread_complete_timer)
+            self.workertimer.progress.connect(self._update_photometery_timer)
+            self.Time.connect(self.workertimer._Timer)
+            self.workertimer_thread = QThread()
+            self.workertimer.moveToThread(self.workertimer_thread)
+            self.worker_thread.start()
             self.Time.emit(int(float(self.baselinetime.text())*60)) 
             self.WarningLabelStop.setText('Running photometry baseline')
             self.WarningLabelStop.setStyleSheet(self.default_warning_color)
