@@ -2621,13 +2621,14 @@ class Window(QMainWindow):
             logging.info('Starting photometry baseline timer')
             self.finish_Timer=0
             self.PhotometryRun=1
-            self.workertimer = TimerWorker()
-            self.workertimer_thread = QThread()
-            self.workertimer.progress.connect(self._update_photometery_timer)
-            self.workertimer.finished.connect(self._thread_complete_timer)
-            self.Time.connect(self.workertimer._Timer)
-            self.workertimer.moveToThread(self.workertimer_thread)
-            self.workertimer_thread.start()
+            if not hasattr(self, 'workertimer'):
+                self.workertimer = TimerWorker()
+                self.workertimer_thread = QThread()
+                self.workertimer.progress.connect(self._update_photometery_timer)
+                self.workertimer.finished.connect(self._thread_complete_timer)
+                self.Time.connect(self.workertimer._Timer)
+                self.workertimer.moveToThread(self.workertimer_thread)
+                self.workertimer_thread.start()
 
             self.Time.emit(int(np.floor(float(self.baselinetime.text())*60))) 
             self.WarningLabelStop.setText('Running photometry baseline')
