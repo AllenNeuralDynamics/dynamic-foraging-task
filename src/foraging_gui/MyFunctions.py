@@ -1840,7 +1840,7 @@ class TimerWorker(QtCore.QObject):
     @QtCore.pyqtSlot(int)
     def _Timer(self,Time):
         '''sleep some time'''
-        num_updates = np.mod(Time,15)
+        num_updates = int(np.floor(Time,15))
         logging.info('here {}, {}'.format(num_updates, Time))
         self.progress.emit(int(Time))
         while num_updates >0:
