@@ -285,8 +285,8 @@ class OptogeneticsDialog(QDialog):
                             ItemsRight=sorted(ItemsRight)
                             eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
                             eval('self.LaserPowerLeft_'+str(Numb)+'.addItems(ItemsLeft)')
-                            eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
-                            eval('self.LaserPowerLeft_'+str(Numb)+'.addItems(ItemsRight)')
+                            eval('self.LaserPowerRight_'+str(Numb)+'.clear()')
+                            eval('self.LaserPowerRight_'+str(Numb)+'.addItems(ItemsRight)')
                         self.MainWindow.WarningLabel.setText('')
                         self.MainWindow.WarningLabel.setStyleSheet("color: gray;")
                     else:
@@ -334,7 +334,7 @@ class WaterCalibrationDialog(QDialog):
         self.MainWindow=MainWindow
         self.FinishLeftValve=0
         if not hasattr(self.MainWindow,'WaterCalibrationResults'):
-            self.MainWindow.LaserCalibrationResults={}
+            self.MainWindow.WaterCalibrationResults={}
             self.WaterCalibrationResults={}
         else:
             self.WaterCalibrationResults=self.MainWindow.WaterCalibrationResults
@@ -1153,17 +1153,17 @@ def is_file_in_use(file_path):
         except OSError as e:
             return True
 
-class ManipulatorDialog(QDialog):
-    def __init__(self, MainWindow, parent=None):
-        super().__init__(parent)
-        uic.loadUi('Manipulator.ui', self)
+#class ManipulatorDialog(QDialog):
+#    def __init__(self, MainWindow, parent=None):
+#        super().__init__(parent)
+#        uic.loadUi('Manipulator.ui', self)
 
-class MotorStageDialog(QDialog):
-    def __init__(self, MainWindow, parent=None):
-        super().__init__(parent)
-        uic.loadUi('MotorStage.ui', self)
-        
-        self.MainWindow=MainWindow
+#class MotorStageDialog(QDialog):
+#    def __init__(self, MainWindow, parent=None):
+#        super().__init__(parent)
+#        uic.loadUi('MotorStage.ui', self)
+#        
+#        self.MainWindow=MainWindow
 
 class LaserCalibrationDialog(QDialog):
     def __init__(self, MainWindow, parent=None):
@@ -1288,6 +1288,8 @@ class LaserCalibrationDialog(QDialog):
         self.CLP_InputVoltage=float(self.voltage.text())
         # generate the waveform based on self.CLP_CurrentDuration and Protocol, Frequency, RampingDown, PulseDur
         self._GetLaserAmplitude()
+        # send the trigger source. It's '/Dev1/PFI0' ( P2.0 of NIdaq USB6002) by default 
+        self.MainWindow.Channel.TriggerSource('/Dev1/PFI0')
         # dimension of self.CurrentLaserAmplitude indicates how many locations do we have
         for i in range(len(self.CurrentLaserAmplitude)):
             # in some cases the other paramters except the amplitude could also be different
@@ -1397,10 +1399,9 @@ class LaserCalibrationDialog(QDialog):
                 setattr(self, Prefix+'_'+child.objectName(), child.isChecked())
     def _InitiateATrial(self):
         '''Initiate calibration in bonsai'''
-        # send the trigger source. It's '/Dev1/PFI0' ( P2.0 of NIdaq USB6002) by default 
-        self.MainWindow.Channel.TriggerSource('/Dev1/PFI0')
         # start generating waveform in bonsai
         self.MainWindow.Channel.OptogeneticsCalibration(int(1))
+        self.MainWindow.Channel.receive()
     def _CopyFromOpto(self):
         '''Copy the optogenetics parameters'''
         N=[]
@@ -1696,7 +1697,6 @@ class LaserCalibrationDialog(QDialog):
             # change button color and disable the open button
             self.Open.setEnabled(False)
             self.Open.setStyleSheet("background-color : green;")
-            QApplication.processEvents()
             self._GetTrainingParameters(self.MainWindow)
             self._GetLaserWaveForm()
             self.worker2 = Worker(self._Sleep,float(self.LC_Duration_1)+1)
@@ -1935,7 +1935,7 @@ class AutoTrainDialog(QDialog):
         except:
             logger.error("AWS connection failed!")
             QMessageBox.critical(self,
-                                 'Error',
+                                 'Box {}, Error'.format(self.MainWindow.box_letter),
                                  f'AWS connection failed!\n'
                                  f'Please check your AWS credentials at ~\.aws\credentials!')
             return False
@@ -2009,7 +2009,8 @@ class AutoTrainDialog(QDialog):
                 bucket='aind-behavior-data',
                 root='foraging_auto_training/saved_curriculums/'
             ),
-            saved_curriculums_local=self.MainWindow.default_saveFolder + '/curriculum_manager/',
+            # saved to tmp folder under user's home directory
+            saved_curriculums_local=os.path.expanduser('~/.aind_auto_train/curriculum_manager/')
         )
 
     def _show_available_curriculums(self):
@@ -2128,7 +2129,7 @@ class AutoTrainDialog(QDialog):
     def _apply_curriculum(self):
         # Check if a curriculum is selected
         if not hasattr(self, 'selected_curriculum') or self.selected_curriculum is None:
-            QMessageBox.critical(self, "Error", "Please select a curriculum!")
+            QMessageBox.critical(self, "Box {}, Error".format(self.MainWindow.box_letter), "Please select a curriculum!")
             return
         
         # Always enable override stage
@@ -2174,11 +2175,11 @@ class AutoTrainDialog(QDialog):
             if self.selected_curriculum['curriculum'] == self.curriculum_in_use:
                 # The selected curriculum is the same as the one in use
                 logger.info(f"Selected curriculum is the same as the one in use. No change is made.")
-                QMessageBox.information(self, "Info", "Selected curriculum is the same as the one in use. No change is made.")
+                QMessageBox.information(self, "Box {}, Info".format(self.MainWindow.box_letter), "Selected curriculum is the same as the one in use. No change is made.")
                 return
             else:
                 # Confirm with the user about overriding the curriculum
-                reply = QMessageBox.question(self, "Confirm",
+                reply = QMessageBox.question(self, "Box {}, Confirm".format(self.MainWindow.box_letter),
                                              f"Are you sure you want to override the curriculum?\n"
                                              f"If yes, please also manually select a training stage.",
                                              QMessageBox.Yes | QMessageBox.No,
@@ -2284,7 +2285,8 @@ class AutoTrainDialog(QDialog):
                 task_ind = widget_task.findText(paras_dict['task'])
                 if task_ind < 0:
                     logger.error(f"Task {paras_dict['task']} not found!")
-                    QMessageBox.critical(self, "Error", f'''Task "{paras_dict['task']}" not found. Check the curriculum!''')
+                    QMessageBox.critical(self, "Box {}, Error".format(self.MainWindow.box_letter), 
+                        f'''Task "{paras_dict['task']}" not found. Check the curriculum!''')
                     return [] # Return an empty list without setting anything
                 else:
                     widget_task.setCurrentIndex(task_ind)
