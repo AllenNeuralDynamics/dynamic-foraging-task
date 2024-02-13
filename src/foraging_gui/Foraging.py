@@ -2201,6 +2201,7 @@ class Window(QMainWindow):
             ## DEBUGGING CODE
             self.TeensyWarning.setText('')
             self.TeensyWarning.setStyleSheet(self.default_warning_color)   
+            return
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
                 # Trigger Teensy with the above specified exp mode
@@ -2455,9 +2456,21 @@ class Window(QMainWindow):
         logging.info('Finished photometry baseline timer')
         self.WarningLabelStop.setText('')
         self.WarningLabelStop.setStyleSheet(self.default_warning_color)
-    
+   
+    def _update_photometery_timer(self,time):
+        minutes = np.mod(time, 60)
+        seconds = np.remainder(time,60)
+        self.WarningLabelStop.setText('Running photometry baseline: {}:{}'.format(minutes,seconds))
+        self.WarningLabelStop.setStyleSheet(self.default_warning_color)       
+ 
     def _Timer(self,Time):
         '''sleep some time'''
+        num_updates = np.mod(Time,15)
+        while num_updates >0:
+            time.sleep(15)
+            Time -=15
+            self.progress.emit(int(Time))
+            num_updates += 1
         time.sleep(Time)
     
     def _set_metadata_enabled(self, enable: bool):
@@ -2613,6 +2626,7 @@ class Window(QMainWindow):
             self.PhotometryRun=1
             workertimer = Worker(self._Timer,float(self.baselinetime.text())*60)
             workertimer.signals.finished.connect(self._thread_complete_timer)
+            workertimer.signals.progress.connect(self._update_photometery_timer)
             self.threadpool_workertimer.start(workertimer)
             self.WarningLabelStop.setText('Running photometry baseline')
             self.WarningLabelStop.setStyleSheet(self.default_warning_color)
