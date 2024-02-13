@@ -2465,7 +2465,7 @@ class Window(QMainWindow):
         '''
         minutes = int(np.floor(time/60))
         seconds = np.remainder(time,60)
-        if len(str(seconds) == 1:
+        if len(str(seconds)) == 1:
             seconds = '0{}'.format(seconds)
         self.WarningLabelStop.setText('Running photometry baseline: {}:{}'.format(minutes,seconds))
         self.WarningLabelStop.setStyleSheet(self.default_warning_color)       
