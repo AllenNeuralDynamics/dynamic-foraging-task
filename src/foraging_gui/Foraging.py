@@ -26,7 +26,7 @@ from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,Camer
 from foraging_gui.Dialogs import LaserCalibrationDialog
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog
-from foraging_gui.MyFunctions import GenerateTrials, Worker,NewScaleSerialY
+from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY
 from foraging_gui.stage import Stage
 from foraging_gui.TransferToNWB import bonsai_to_nwb
 
@@ -2626,10 +2626,12 @@ class Window(QMainWindow):
             logging.info('Starting photometry baseline timer')
             self.finish_Timer=0
             self.PhotometryRun=1
-            workertimer = Worker(self._Timer,float(self.baselinetime.text())*60)
+            workertimer = TimerWorker()#self._Timer,float(self.baselinetime.text())*60)
             workertimer.signals.finished.connect(self._thread_complete_timer)
             workertimer.signals.progress.connect(self._update_photometery_timer)
+            workertimer.signals.Time.connect(workertimer._Timer)
             self.threadpool_workertimer.start(workertimer)
+            self.Time.emit(int(float(self.baselinetime.text())*60)) 
             self.WarningLabelStop.setText('Running photometry baseline')
             self.WarningLabelStop.setStyleSheet(self.default_warning_color)
         
