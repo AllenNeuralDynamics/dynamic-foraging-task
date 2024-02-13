@@ -1841,6 +1841,8 @@ class TimerWorker(QtCore.QObject):
     def _Timer(self,Time):
         '''sleep some time'''
         num_updates = np.mod(Time,15)
+        logging.info('here {}, {}'.format(num_updates, Time))
+        self.progress.emit(int(Time))
         while num_updates >0:
             time.sleep(15)
             Time -=15
