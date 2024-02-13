@@ -3745,8 +3745,8 @@
   <widget class="QLabel" name="label3_18">
    <property name="geometry">
     <rect>
-     <x>220</x>
-     <y>470</y>
+     <x>215</x>
+     <y>466</y>
      <width>141</width>
      <height>20</height>
     </rect>
@@ -3901,6 +3901,25 @@
     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
+  <widget class="QLabel" name="label3_21">
+   <property name="geometry">
+    <rect>
+     <x>215</x>
+     <y>480</y>
+     <width>141</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>(block size=max trial * frac) </string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
   <zorder>OptoPar</zorder>
   <zorder>Laser_1</zorder>
   <zorder>label1_2</zorder>
@@ -4047,6 +4066,7 @@
   <zorder>SessionWideControl</zorder>
   <zorder>label3_20</zorder>
   <zorder>SessionControlWarning</zorder>
+  <zorder>label3_21</zorder>
  </widget>
  <resources/>
  <connections/>

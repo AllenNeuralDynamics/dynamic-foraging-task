@@ -53,6 +53,7 @@ class OptogeneticsDialog(QDialog):
         self._Laser_3()
         self._Laser_4()
         self._Laser_calibration()
+        self._SessionWideControl()
     def _connectSignalsSlots(self):
         self.Laser_1.currentIndexChanged.connect(self._Laser_1)
         self.Laser_2.currentIndexChanged.connect(self._Laser_2)
@@ -104,6 +105,20 @@ class OptogeneticsDialog(QDialog):
         self.LaserEnd_4.currentIndexChanged.connect(self._activated_4)
         self.Laser_calibration.currentIndexChanged.connect(self._Laser_calibration)
         self.Laser_calibration.activated.connect(self._Laser_calibration)
+        self.SessionWideControl.currentIndexChanged.connect(self._SessionWideControl)
+    def _SessionWideControl(self):
+        '''enable/disable items based on session wide control'''
+        if self.SessionWideControl.currentText()=='on':
+            enable=True
+        else:
+            enable=False
+        self.label3_18.setEnabled(enable)
+        self.label3_21.setEnabled(enable)
+        self.FractionOfSession.setEnabled(enable)
+        self.label3_19.setEnabled(enable)
+        self.SessionStartWith.setEnabled(enable)
+        self.label3_17.setEnabled(enable)
+        self.SessionAlternating.setEnabled(enable)
     def _Laser_calibration(self):
         ''''change the laser calibration date'''
         # find the latest calibration date for the selected laser
