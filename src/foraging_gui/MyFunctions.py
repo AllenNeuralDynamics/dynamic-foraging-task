@@ -69,6 +69,7 @@ class GenerateTrials():
         self.B_AutoWaterTrial=np.array([[],[]]).astype(bool) # to indicate if it is a trial with outo water.
         self.B_NewscalePositions=[]
         self.B_session_control_state=[]
+        self.B_opto_error=[]
         self.NextWaveForm=1 # waveform stored for later use
         self.CurrentWaveForm=1 # the current waveform to trigger the optogenetics
         self.Start_Delay_LeftLicks=[]
@@ -156,8 +157,10 @@ class GenerateTrials():
                 self.B_SelectedCondition.append(0)
                 self.CurrentLaserAmplitude=[0,0]
                 self.B_session_control_state.append(0)
+            self.B_opto_error.append(0)
         except Exception as e:
             # optogenetics is turned off
+            self.B_opto_error.append(1)
             self.LaserOn=0
             self.B_LaserOnTrial.append(self.LaserOn)
             self.B_LaserAmplitude.append([0,0]) # corresponding to two locations
