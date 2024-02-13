@@ -1835,12 +1835,9 @@ class TimerWorker(QtCore.QRunnable):
 
     '''
     Time = QtCore.pyqtSignal(int)
-    def __init__(self):
-        super(Worker, self).__init__()
+    finished = QtCore.pyqtSignal()
+    progress = QtCore.pyqtSignal(int)
 
-        # Store constructor arguments (re-used for processing)
-        self.signals = WorkerSignals()
-        self.setAutoDelete(False) 
 
     def _Timer(self,Time):
         '''sleep some time'''
