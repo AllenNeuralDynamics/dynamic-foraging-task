@@ -1837,7 +1837,7 @@ class TimerWorker(QtCore.QObject):
     finished = QtCore.pyqtSignal()
     progress = QtCore.pyqtSignal(int)
 
-    @pyqtSlot(int)
+    @QtCore.pyqtSlot(int)
     def _Timer(self,Time):
         '''sleep some time'''
         num_updates = np.mod(Time,15)
