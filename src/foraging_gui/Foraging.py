@@ -2015,9 +2015,10 @@ class Window(QMainWindow):
                             if index != -1:
                                 # Alternating on/off for SessionStartWith if SessionAlternating is on
                                 if key=='SessionStartWith' and 'Opto_dialog' in Obj:
-                                    if Obj['Opto_dialog']['SessionAlternating']=='on':
-                                        index=1-index
-                                        widget.setCurrentIndex(index)
+                                    if 'SessionAlternating' in Obj['Opto_dialog'] and 'SessionWideControl' in Obj['Opto_dialog']:
+                                        if Obj['Opto_dialog']['SessionAlternating']=='on' and Obj['OptogeneticsB']=='on' and Obj['Opto_dialog']['SessionWideControl']=='on':
+                                            index=1-index
+                                            widget.setCurrentIndex(index)
                                 else:
                                     widget.setCurrentIndex(index)
                         elif isinstance(widget, QtWidgets.QDoubleSpinBox):
