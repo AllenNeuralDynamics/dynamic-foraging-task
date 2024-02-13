@@ -2463,11 +2463,10 @@ class Window(QMainWindow):
         '''
             Updates photometry baseline timer
         '''
-        logging.info('updating photometry baseline timer')
         minutes = int(np.floor(time/60))
         seconds = np.remainder(time,60)
-        if seconds == 0:
-            seconds = '00'
+        if len(str(seconds) == 1:
+            seconds = '0{}'.format(seconds)
         self.WarningLabelStop.setText('Running photometry baseline: {}:{}'.format(minutes,seconds))
         self.WarningLabelStop.setStyleSheet(self.default_warning_color)       
      
@@ -2630,7 +2629,7 @@ class Window(QMainWindow):
             self.workertimer.moveToThread(self.workertimer_thread)
             self.workertimer_thread.start()
 
-            self.Time.emit(int(float(self.baselinetime.text())*60)) 
+            self.Time.emit(int(np.floor(float(self.baselinetime.text())*60))) 
             self.WarningLabelStop.setText('Running photometry baseline')
             self.WarningLabelStop.setStyleSheet(self.default_warning_color)
         
