@@ -41,7 +41,7 @@ class NumpyEncoder(json.JSONEncoder):
         return super(NumpyEncoder, self).default(obj)
     
 class Window(QMainWindow):
-    Time = QtCore.pyqtSignal(int)
+    Time = QtCore.pyqtSignal(int) # Photometry timer signal
 
     def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
@@ -111,7 +111,6 @@ class Window(QMainWindow):
         self.TimeDistribution_ToInitializeVisual=1
         self.finish_Timer=1     # for photometry baseline recordings
         self.PhotometryRun=0    # 1. Photometry has been run; 0. Photometry has not been carried out.
-
         self._Optogenetics()    # open the optogenetics panel 
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
@@ -2461,23 +2460,17 @@ class Window(QMainWindow):
         self.WarningLabelStop.setStyleSheet(self.default_warning_color)
    
     def _update_photometery_timer(self,time):
+        '''
+            Updates photometry baseline timer
+        '''
+        logging.info('updating photometry baseline timer')
         minutes = int(np.floor(time/60))
         seconds = np.remainder(time,60)
-        logging.info('updating photometry baseline timer')
+        if seconds == 0:
+            seconds = '00'
         self.WarningLabelStop.setText('Running photometry baseline: {}:{}'.format(minutes,seconds))
         self.WarningLabelStop.setStyleSheet(self.default_warning_color)       
- 
-    def _Timer(self,Time):
-        '''sleep some time'''
-        num_updates = np.mod(Time,15)
-        while num_updates >0:
-            time.sleep(15)
-            Time -=15
-            self.progress.emit(int(Time))
-            logging.info('emitting photometry baseline timer progress')
-            num_updates += 1
-        time.sleep(Time)
-    
+     
     def _set_metadata_enabled(self, enable: bool):
         '''Enable or disable metadata fields'''
         self.ID.setEnabled(enable)

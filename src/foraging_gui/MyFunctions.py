@@ -1823,16 +1823,7 @@ class Worker(QtCore.QRunnable):
 
 class TimerWorker(QtCore.QObject):
     '''
-    Worker thread
-
-    Inherits from QRunnable to handler worker thread setup, signals and wrap-up.
-
-    :param callback: The function callback to run on this worker thread. Supplied args and
-                     kwargs will be passed through to the runner.
-    :type callback: function
-    :param args: Arguments to pass to the callback function
-    :param kwargs: Keywords to pass to the callback function
-
+        Worker for photometry timer
     '''
     finished = QtCore.pyqtSignal()
     progress = QtCore.pyqtSignal(int)
@@ -1840,15 +1831,20 @@ class TimerWorker(QtCore.QObject):
     @QtCore.pyqtSlot(int)
     def _Timer(self,Time):
         '''sleep some time'''
-        logging.info('here {}'.format(Time))
-        num_updates = int(np.floor(Time/15))
+        # Emit initial status
+        interval = 5
+        num_updates = int(np.floor(Time/interval))
         self.progress.emit(int(Time))
+
+        # Iterate through intervals 
         while num_updates >0:
-            time.sleep(15)
-            Time -=15
+            time.sleep(interval)
+            Time -=interval
             self.progress.emit(int(Time))
             logging.info('emitting photometry baseline timer progress')
-            num_updates += 1
+            num_updates -= 1
+        
+        # Sleep the remainder of the time and finish
         time.sleep(Time)
         self.finished.emit()
 
