@@ -109,6 +109,7 @@ class Window(QMainWindow):
         self.TimeDistribution_ToInitializeVisual=1
         self.finish_Timer=1     # for photometry baseline recordings
         self.PhotometryRun=0    # 1. Photometry has been run; 0. Photometry has not been carried out.
+        self.Time = QtCore.pyqtSignal(int)
         self._Optogenetics()    # open the optogenetics panel 
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
@@ -2626,14 +2627,14 @@ class Window(QMainWindow):
             logging.info('Starting photometry baseline timer')
             self.finish_Timer=0
             self.PhotometryRun=1
-            self.Time = QtCore.pyqtSignal(int)
-            self.workertimer = TimerWorker()#self._Timer,float(self.baselinetime.text())*60)
-            self.workertimer.finished.connect(self._thread_complete_timer)
-            self.workertimer.progress.connect(self._update_photometery_timer)
-            self.Time.connect(self.workertimer._Timer)
+            self.workertimer = TimerWorker()
             self.workertimer_thread = QThread()
+            self.workertimer.progress.connect(self._update_photometery_timer)
+            self.workertimer.finished.connect(self._thread_complete_timer)
+            self.Time.connect(self.workertimer._Timer)
             self.workertimer.moveToThread(self.workertimer_thread)
             self.worker_thread.start()
+
             self.Time.emit(int(float(self.baselinetime.text())*60)) 
             self.WarningLabelStop.setText('Running photometry baseline')
             self.WarningLabelStop.setStyleSheet(self.default_warning_color)
