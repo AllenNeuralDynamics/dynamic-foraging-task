@@ -2627,9 +2627,9 @@ class Window(QMainWindow):
             self.finish_Timer=0
             self.PhotometryRun=1
             workertimer = TimerWorker()#self._Timer,float(self.baselinetime.text())*60)
-            workertimer.signals.finished.connect(self._thread_complete_timer)
-            workertimer.signals.progress.connect(self._update_photometery_timer)
-            workertimer.signals.Time.connect(workertimer._Timer)
+            workertimer.finished.connect(self._thread_complete_timer)
+            workertimer.progress.connect(self._update_photometery_timer)
+            workertimer.Time.connect(workertimer._Timer)
             self.threadpool_workertimer.start(workertimer)
             self.Time.emit(int(float(self.baselinetime.text())*60)) 
             self.WarningLabelStop.setText('Running photometry baseline')

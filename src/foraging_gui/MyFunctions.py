@@ -1849,6 +1849,6 @@ class TimerWorker(QtCore.QRunnable):
             logging.info('emitting photometry baseline timer progress')
             num_updates += 1
         time.sleep(Time)
-        self.signals.finished.emit()
+        self.finished.emit()
 
 
