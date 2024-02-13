@@ -1818,3 +1818,33 @@ class Worker(QtCore.QRunnable):
             self.signals.result.emit(result)  # Return the result of the processing
         finally:
             self.signals.finished.emit()  # Done
+
+
+
+class TimerWorker(QtCore.QObject):
+    '''
+        Worker for photometry timer
+    '''
+    finished = QtCore.pyqtSignal()
+    progress = QtCore.pyqtSignal(int)
+
+    @QtCore.pyqtSlot(int)
+    def _Timer(self,Time):
+        '''sleep some time'''
+        # Emit initial status
+        interval = 1
+        num_updates = int(np.floor(Time/interval))
+        self.progress.emit(int(Time))
+
+        # Iterate through intervals 
+        while num_updates >0:
+            time.sleep(interval)
+            Time -=interval
+            self.progress.emit(int(Time))
+            num_updates -= 1
+        
+        # Sleep the remainder of the time and finish
+        time.sleep(Time)
+        self.finished.emit()
+
+

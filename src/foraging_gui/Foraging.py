@@ -16,7 +16,7 @@ from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 from PyQt5.QtWidgets import QFileDialog,QVBoxLayout,QLineEdit
 from PyQt5 import QtWidgets,QtGui,QtCore, uic
-from PyQt5.QtCore import QThreadPool,Qt
+from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 
@@ -26,7 +26,7 @@ from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,Camer
 from foraging_gui.Dialogs import LaserCalibrationDialog
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog
-from foraging_gui.MyFunctions import GenerateTrials, Worker,NewScaleSerialY
+from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY
 from foraging_gui.stage import Stage
 from foraging_gui.TransferToNWB import bonsai_to_nwb
 
@@ -41,6 +41,8 @@ class NumpyEncoder(json.JSONEncoder):
         return super(NumpyEncoder, self).default(obj)
     
 class Window(QMainWindow):
+    Time = QtCore.pyqtSignal(int) # Photometry timer signal
+
     def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
         super().__init__(parent)
@@ -2469,11 +2471,18 @@ class Window(QMainWindow):
         logging.info('Finished photometry baseline timer')
         self.WarningLabelStop.setText('')
         self.WarningLabelStop.setStyleSheet(self.default_warning_color)
-    
-    def _Timer(self,Time):
-        '''sleep some time'''
-        time.sleep(Time)
-    
+   
+    def _update_photometery_timer(self,time):
+        '''
+            Updates photometry baseline timer
+        '''
+        minutes = int(np.floor(time/60))
+        seconds = np.remainder(time,60)
+        if len(str(seconds)) == 1:
+            seconds = '0{}'.format(seconds)
+        self.WarningLabelStop.setText('Running photometry baseline: {}:{}'.format(minutes,seconds))
+        self.WarningLabelStop.setStyleSheet(self.default_warning_color)       
+     
     def _set_metadata_enabled(self, enable: bool):
         '''Enable or disable metadata fields'''
         self.ID.setEnabled(enable)
@@ -2625,9 +2634,18 @@ class Window(QMainWindow):
             logging.info('Starting photometry baseline timer')
             self.finish_Timer=0
             self.PhotometryRun=1
-            workertimer = Worker(self._Timer,float(self.baselinetime.text())*60)
-            workertimer.signals.finished.connect(self._thread_complete_timer)
-            self.threadpool_workertimer.start(workertimer)
+            
+            # If we already created a workertimer and thread we can reuse them
+            if not hasattr(self, 'workertimer'):
+                self.workertimer = TimerWorker()
+                self.workertimer_thread = QThread()
+                self.workertimer.progress.connect(self._update_photometery_timer)
+                self.workertimer.finished.connect(self._thread_complete_timer)
+                self.Time.connect(self.workertimer._Timer)
+                self.workertimer.moveToThread(self.workertimer_thread)
+                self.workertimer_thread.start()
+
+            self.Time.emit(int(np.floor(float(self.baselinetime.text())*60))) 
             self.WarningLabelStop.setText('Running photometry baseline')
             self.WarningLabelStop.setStyleSheet(self.default_warning_color)
         
