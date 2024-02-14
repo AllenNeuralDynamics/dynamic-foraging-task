@@ -1336,7 +1336,7 @@ class GenerateTrials():
     def _InitiateATrial(self,Channel1,Channel4):
     
         # Indicate that unsaved data exists
-        self.win.unsaved_date=True
+        self.win.unsaved_data=True
 
         # Determine if the current lick port should be baited. self.B_Baited can only be updated after receiving response of the animal, so this part cannot appear in the _GenerateATrial section
         RandomNumber=np.random.random(2)
