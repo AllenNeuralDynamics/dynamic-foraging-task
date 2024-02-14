@@ -2401,7 +2401,7 @@ class Window(QMainWindow):
         self.TotalWaterWarning.setText('')
         self.WarningLabel_2.setText('')
         self.GeneratedTrials=GenerateTrials(self)
-        self.PlotM=PlotV(win=self,GeneratedTrials=GeneratedTrials,width=5, height=4)
+        self.PlotM=PlotV(win=self,GeneratedTrials=self.GeneratedTrials,width=5, height=4)
 
         # Reset state variables
         self.StartANewSession=1
