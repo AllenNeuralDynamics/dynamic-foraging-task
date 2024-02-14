@@ -1989,15 +1989,26 @@ class Window(QMainWindow):
                 elif isinstance(widget, QtWidgets.QComboBox):
                     Obj[keyname][widget.objectName()]=widget.currentText()
         return Obj
+
     def _Open(self):
-        self._StopCurrentSession() # stop current session first
-        self.NewSession.setChecked(True)
-        Reply=self._NewSession()
-        ## DEBUGGING need to update here too
-        if Reply == QMessageBox.Yes or Reply == QMessageBox.No:
-            self.NewSession.setDisabled(True) # You must start a NewSession after loading a new file, and you can't continue that session
-        elif Reply == QMessageBox.Cancel:
-            return
+
+        # stop current session first
+        self._StopCurrentSession() 
+
+        # If we have unsaved data, prompt to save
+        if (self.ToInitializeVisual==0) and (self.unsaved_data): 
+            reply = QMessageBox.critical(self, 
+                'Box {}, Open Session:'.format(self.box_letter), 
+                'Open session without saving?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+            if reply == QMessageBox.No:
+                self.NewSession.setStyleSheet("background-color : none")
+                self.NewSession.setChecked(False)
+                logging.info('Open Session declined')
+                return 
+        # Disable continuing new session
+        self.NewSession.setDisabled(True)
+
         fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder+'\\'+self.current_box, "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
         self.fname=fname
         if fname:
@@ -2383,7 +2394,7 @@ class Window(QMainWindow):
                 self.NewSession.setStyleSheet("background-color : none")
                 self.NewSession.setChecked(False)
                 logging.info('New Session declined')
-                return
+                return reply
         
         # Reset logging
         try:
@@ -2400,8 +2411,6 @@ class Window(QMainWindow):
         self.WarningLabel.setText('')
         self.TotalWaterWarning.setText('')
         self.WarningLabel_2.setText('')
-        self.GeneratedTrials=GenerateTrials(self)
-        self.PlotM=PlotV(win=self,GeneratedTrials=self.GeneratedTrials,width=5, height=4)
 
         # Reset state variables
         self.StartANewSession=1
