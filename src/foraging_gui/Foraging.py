@@ -1779,7 +1779,10 @@ class Window(QMainWindow):
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
         if self.BaseWeight.text()=='' or self.WeightAfter.text()=='' or self.TargetRatio.text()=='':
-            response = QMessageBox.question(self,'Box {}, Save without weight or extra water:'.format(self.box_letter), "Do you want to save without weight or extra water information provided?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
+            response = QMessageBox.question(self,
+                'Box {}, Save without weight or extra water:'.format(self.box_letter), 
+                "Do you want to save without weight or extra water information provided?",
+                 QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
             if response==QMessageBox.Yes:
                 pass
                 self.WarningLabel.setText('Saving without weight or extra water!')
@@ -1811,110 +1814,110 @@ class Window(QMainWindow):
         if self.SaveFile == '':
             self.WarningLabel.setText('Discard saving!')
             self.WarningLabel.setStyleSheet(self.default_warning_color)
-        if self.SaveFile != '':
-            if hasattr(self, 'GeneratedTrials'):
-                if hasattr(self.GeneratedTrials, 'Obj'):
-                    Obj=self.GeneratedTrials.Obj
-                else:
-                    Obj={}
+            return
+        if hasattr(self, 'GeneratedTrials'):
+            if hasattr(self.GeneratedTrials, 'Obj'):
+                Obj=self.GeneratedTrials.Obj
             else:
                 Obj={}
-            widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-            widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
-            self._Concat(widget_dict,Obj,'None')
-            if hasattr(self, 'LaserCalibration_dialog'):
-                widget_dict_LaserCalibration={w.objectName(): w for w in self.LaserCalibration_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))} 
-                self._Concat(widget_dict_LaserCalibration,Obj,'LaserCalibration_dialog')
-            if hasattr(self, 'Opto_dialog'):
-                widget_dict_opto={w.objectName(): w for w in self.Opto_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-                self._Concat(widget_dict_opto,Obj,'Opto_dialog')
-            if hasattr(self, 'Camera_dialog'):
-                widget_dict_camera={w.objectName(): w for w in self.Camera_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-                self._Concat(widget_dict_camera,Obj,'Camera_dialog')
-            
-            Obj2=Obj.copy()
-            # save behavor events
-            if hasattr(self, 'GeneratedTrials'):
-                # Do something if self has the GeneratedTrials attribute
-                # Iterate over all attributes of the GeneratedTrials object
-                for attr_name in dir(self.GeneratedTrials):
-                    if attr_name.startswith('B_') or attr_name.startswith('BS_'):
-                        if attr_name=='B_RewardFamilies' and self.SaveFile.endswith('.mat'):
-                            pass
-                        else:
-                            Value=getattr(self.GeneratedTrials, attr_name)
-                            try:
-                                if math.isnan(Value):
-                                    Obj[attr_name]='nan'
-                                else:
-                                    Obj[attr_name]=Value
-                            except Exception as e:
-                                logging.error(str(e))
+        else:
+            Obj={}
+        widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+        widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
+        self._Concat(widget_dict,Obj,'None')
+        if hasattr(self, 'LaserCalibration_dialog'):
+            widget_dict_LaserCalibration={w.objectName(): w for w in self.LaserCalibration_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))} 
+            self._Concat(widget_dict_LaserCalibration,Obj,'LaserCalibration_dialog')
+        if hasattr(self, 'Opto_dialog'):
+            widget_dict_opto={w.objectName(): w for w in self.Opto_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+            self._Concat(widget_dict_opto,Obj,'Opto_dialog')
+        if hasattr(self, 'Camera_dialog'):
+            widget_dict_camera={w.objectName(): w for w in self.Camera_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+            self._Concat(widget_dict_camera,Obj,'Camera_dialog')
+        
+        Obj2=Obj.copy()
+        # save behavor events
+        if hasattr(self, 'GeneratedTrials'):
+            # Do something if self has the GeneratedTrials attribute
+            # Iterate over all attributes of the GeneratedTrials object
+            for attr_name in dir(self.GeneratedTrials):
+                if attr_name.startswith('B_') or attr_name.startswith('BS_'):
+                    if attr_name=='B_RewardFamilies' and self.SaveFile.endswith('.mat'):
+                        pass
+                    else:
+                        Value=getattr(self.GeneratedTrials, attr_name)
+                        try:
+                            if math.isnan(Value):
+                                Obj[attr_name]='nan'
+                            else:
                                 Obj[attr_name]=Value
-            # save other events, e.g. session start time
-            for attr_name in dir(self):
-                if attr_name.startswith('Other_'):
-                    Obj[attr_name] = getattr(self, attr_name)
-            # save laser calibration results (only for the calibration session)
-            if hasattr(self, 'LaserCalibration_dialog'):
-                # Do something if self has the GeneratedTrials attribute
-                # Iterate over all attributes of the GeneratedTrials object
-                for attr_name in dir(self.LaserCalibration_dialog):
-                    if attr_name.startswith('LCM_'):
-                        Obj[attr_name] = getattr(self.LaserCalibration_dialog, attr_name)
+                        except Exception as e:
+                            logging.error(str(e))
+                            Obj[attr_name]=Value
+        # save other events, e.g. session start time
+        for attr_name in dir(self):
+            if attr_name.startswith('Other_'):
+                Obj[attr_name] = getattr(self, attr_name)
+        # save laser calibration results (only for the calibration session)
+        if hasattr(self, 'LaserCalibration_dialog'):
+            # Do something if self has the GeneratedTrials attribute
+            # Iterate over all attributes of the GeneratedTrials object
+            for attr_name in dir(self.LaserCalibration_dialog):
+                if attr_name.startswith('LCM_'):
+                    Obj[attr_name] = getattr(self.LaserCalibration_dialog, attr_name)
 
-            # save laser calibration results from the json file
-            if hasattr(self, 'LaserCalibrationResults'):
-                self._GetLaserCalibration()
-                Obj['LaserCalibrationResults']=self.LaserCalibrationResults
+        # save laser calibration results from the json file
+        if hasattr(self, 'LaserCalibrationResults'):
+            self._GetLaserCalibration()
+            Obj['LaserCalibrationResults']=self.LaserCalibrationResults
 
-            # save water calibration results
-            if hasattr(self, 'WaterCalibrationResults'):
-                self._GetWaterCalibration()
-                Obj['WaterCalibrationResults']=self.WaterCalibrationResults
-            
-            # save other fields start with Ot_
-            for attr_name in dir(self):
-                if attr_name.startswith('Ot_'):
-                    Obj[attr_name]=getattr(self, attr_name)
+        # save water calibration results
+        if hasattr(self, 'WaterCalibrationResults'):
+            self._GetWaterCalibration()
+            Obj['WaterCalibrationResults']=self.WaterCalibrationResults
+        
+        # save other fields start with Ot_
+        for attr_name in dir(self):
+            if attr_name.startswith('Ot_'):
+                Obj[attr_name]=getattr(self, attr_name)
 
-            # Save the current box
-            Obj['box'] = self.current_box
+        # Save the current box
+        Obj['box'] = self.current_box
     
-            # save Json or mat
-            if self.SaveFile.endswith('.mat'):
-            # Save data to a .mat file
-                savemat(self.SaveFile, Obj) 
-            elif self.SaveFile.endswith('par.json'):
-                with open(self.SaveFile, "w") as outfile:
-                    json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
-            elif self.SaveFile.endswith('.json'):
-                with open(self.SaveFile, "w") as outfile:
-                    json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
-                    
-            # Also export to nwb automatically here
+        # save Json or mat
+        if self.SaveFile.endswith('.mat'):
+        # Save data to a .mat file
+            savemat(self.SaveFile, Obj) 
+        elif self.SaveFile.endswith('par.json'):
+            with open(self.SaveFile, "w") as outfile:
+                json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
+        elif self.SaveFile.endswith('.json'):
+            with open(self.SaveFile, "w") as outfile:
+                json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
+                
+        # Also export to nwb automatically here
+        try:
+            nwb_name = self.SaveFile.replace('.json','.nwb')
+            bonsai_to_nwb(self.SaveFile, os.path.dirname(self.SaveFileJson))
+        except Exception as e:
+            logging.warning(f'Failed to export to nwb...\n{e}')
+        else:
+            logging.info(f'Exported to nwb {nwb_name} successfully!')
+        
+        # close the camera
+        if self.Camera_dialog.AutoControl.currentText()=='Yes':
+            self.Camera_dialog.StartCamera.setChecked(False)
+            self.Camera_dialog._StartCamera()
+        if SaveContinue==0:
+            # must start a new session 
+            self.NewSession.setStyleSheet("background-color : green;")
+            self.NewSession.setDisabled(True) 
+            self.StartANewSession=1
+            self.CreateNewFolder=1
             try:
-                nwb_name = self.SaveFile.replace('.json','.nwb')
-                bonsai_to_nwb(self.SaveFile, os.path.dirname(self.SaveFileJson))
+                self.Channel.StopLogging('s')
             except Exception as e:
-                logging.warning(f'Failed to export to nwb...\n{e}')
-            else:
-                logging.info(f'Exported to nwb {nwb_name} successfully!')
-            
-            # close the camera
-            if self.Camera_dialog.AutoControl.currentText()=='Yes':
-                self.Camera_dialog.StartCamera.setChecked(False)
-                self.Camera_dialog._StartCamera()
-            if SaveContinue==0:
-                # must start a new session 
-                self.NewSession.setStyleSheet("background-color : green;")
-                self.NewSession.setDisabled(True) 
-                self.StartANewSession=1
-                self.CreateNewFolder=1
-                try:
-                    self.Channel.StopLogging('s')
-                except Exception as e:
-                    logging.error(str(e))
+                logging.error(str(e))
 
         # Toggle unsaved data to False
         self.unsaved_data=False
