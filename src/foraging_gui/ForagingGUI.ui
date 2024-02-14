@@ -266,7 +266,7 @@
          <widget class="QComboBox" name="Sessionlist">
           <property name="minimumSize">
            <size>
-            <width>130</width>
+            <width>200</width>
             <height>0</height>
            </size>
           </property>
