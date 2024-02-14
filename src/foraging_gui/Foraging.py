@@ -1612,8 +1612,10 @@ class Window(QMainWindow):
                 'Close the GUI?',
                 QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)  
             if reply == QMessageBox.No:
+                event.ignore()
                 return
             if reply == QMessageBox.Cancel:
+                event.ignore()
                 return
 
         event.accept()
