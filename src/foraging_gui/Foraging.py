@@ -87,7 +87,8 @@ class Window(QMainWindow):
         self.ANewTrial = 1          # permission to start a new trial
         self.UpdateParameters = 1   # permission to update parameters
         self.loggingstarted = -1    # Have we started trial logging
-        
+        self.unsaved_data = False       
+ 
         # Connect to Bonsai
         self._InitializeBonsai()
 
@@ -1593,39 +1594,38 @@ class Window(QMainWindow):
          # enable close icon
         self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, True)
         self.show()
-        reply = QMessageBox.question(self, 'Box {}, Foraging Close'.format(self.box_letter), 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
-        if reply == QMessageBox.Yes:
-            self._Save()
-            event.accept()
-            self.Start.setChecked(False)
-            if self.InitializeBonsaiSuccessfully==1:
-                self.client.close()
-                self.client2.close()
-                self.client3.close()
-                self.client4.close()
-            self.Opto_dialog.close()
-            self._StopPhotometry()  # Make sure photo excitation is stopped 
-            print('GUI Window closed')
-            logging.info('GUI Window closed')
-        elif reply == QMessageBox.No:
-            event.accept()
-            self.Start.setChecked(False)
-            if self.InitializeBonsaiSuccessfully==1:
-                self.client.close()
-                self.client2.close()
-                self.client3.close()
-                self.client4.close()
-            self._StopPhotometry()   # Make sure photo excitation is stopped    
-            print('GUI Window closed')
-            logging.info('GUI Window closed')
-            self.Opto_dialog.close()
-        else:
-            event.ignore()
+
+        if self.unsaved_data:
+            reply = QMessageBox.question(self, 
+                'Box {}, Foraging Close'.format(self.box_letter), 
+                'Do you want to save the current result?',
+                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)  
+            if reply == QMessageBox.Cancel:a
+                event.ignore()
+                return
+            if reply == QMessageBox.Yes:
+                self._Save()
+
+        event.accept()
+        self.Start.setChecked(False)
+        if self.InitializeBonsaiSuccessfully==1:
+            self.client.close()
+            self.client2.close()
+            self.client3.close()
+            self.client4.close()
+        self.Opto_dialog.close()
+        self._StopPhotometry()  # Make sure photo excitation is stopped 
+        print('GUI Window closed')
+        logging.info('GUI Window closed') 
 
     def _Exit(self):
         '''Close the GUI'''
         logging.info('closing the GUI')
-        response = QMessageBox.question(self,'Box {}, Save and Exit:'.format(self.box_letter), "Do you want to save the current result?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
+        
+        response = QMessageBox.question(self,
+            'Box {}, Save and Exit:'.format(self.box_letter), 
+            "Do you want to save the current result?", 
+            QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
         if response==QMessageBox.Yes:
             # close the camera
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
@@ -1901,6 +1901,8 @@ class Window(QMainWindow):
                 except Exception as e:
                     logging.error(str(e))
 
+        # Toggle unsaved data to False
+        self.unsaved_data=False
 
     def _GetSaveFolder(self,CTrainingFolder=1,CHarpFolder=1,CVideoFolder=1,CPhotometryFolder=1,CEphysFolder=1):
         '''The new data storage structure. Each session forms an independent folder. Training data, Harp register events, video data, photometry data and ephys data are in different subfolders'''
@@ -2373,7 +2375,7 @@ class Window(QMainWindow):
     def _NewSession(self):
         logging.info('starting new session')
         if self.NewSession.isChecked():
-            if self.ToInitializeVisual==0: # Do not ask to save when no session starts running
+            if (self.ToInitializeVisual==0) and (self.unsaved_data): # Do not ask to save when no session starts running
                 reply = QMessageBox.question(self, 'Box {}, New Session:'.format(self.box_letter), 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
             else:
                 reply=QMessageBox.No
