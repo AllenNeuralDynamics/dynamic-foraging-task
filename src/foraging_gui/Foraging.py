@@ -1588,7 +1588,6 @@ class Window(QMainWindow):
 
     def closeEvent(self, event):
         # disable close icon
-        print('closeevent')
         self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
         self.show()
         self._StopCurrentSession() # stop the current session first
@@ -1599,14 +1598,11 @@ class Window(QMainWindow):
         if self.unsaved_data:
             reply = QMessageBox.question(self, 
                 'Box {}, Foraging Close'.format(self.box_letter), 
-                'Do you want to save the current result?',
-                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)  
-            if reply == QMessageBox.Cancel:
+                'Exit without saving?',
+                QMessageBox.Yes | QMessageBox.No , QMessageBox.Yes)  
+            if reply == QMessageBox.No:
                 event.ignore()
                 return
-            if reply == QMessageBox.Yes:
-                self._Save()
-                self.close()
         else:
             reply = QMessageBox.question(self,
                 'Box {}, Foraging Close'.format(self.box_letter), 
@@ -1916,6 +1912,7 @@ class Window(QMainWindow):
 
         # Toggle unsaved data to False
         self.unsaved_data=False
+        self.Save.setStyleSheet("background-color : None;")
 
     def _GetSaveFolder(self,CTrainingFolder=1,CHarpFolder=1,CVideoFolder=1,CPhotometryFolder=1,CEphysFolder=1):
         '''The new data storage structure. Each session forms an independent folder. Training data, Harp register events, video data, photometry data and ephys data are in different subfolders'''
