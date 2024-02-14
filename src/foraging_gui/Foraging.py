@@ -2384,6 +2384,12 @@ class Window(QMainWindow):
                 self.NewSession.setChecked(False)
                 logging.info('New Session declined')
                 return
+        
+        # Reset logging
+        try:
+            self.Channel.StopLogging('s')
+        except Exception as e:
+            logging.error(str(e))
 
         # Reset GUI visuals
         self.Save.setStyleSheet("color:black;background-color:None;")
@@ -2394,21 +2400,14 @@ class Window(QMainWindow):
         self.WarningLabel.setText('')
         self.TotalWaterWarning.setText('')
         self.WarningLabel_2.setText('')
-        try:
-            self.PlotM._Update(GeneratedTrials=None,Channel=self.Channel2)
-        except Exception as e:
-            logging.error(str(e))
+        self.GeneratedTrials=GenerateTrials(self)
+        self.PlotM=PlotV(win=self,GeneratedTrials=GeneratedTrials,width=5, height=4)
 
         # Reset state variables
         self.StartANewSession=1
         self.CreateNewFolder=1
         self.PhotometryRun=0
-        
-        # Reset logging
-        try:
-            self.Channel.StopLogging('s')
-        except Exception as e:
-            logging.error(str(e))
+        self.unsaved_data=False
 
         # Add note to log
         logging.info('New Session complete')
