@@ -1606,6 +1606,7 @@ class Window(QMainWindow):
                 return
             if reply == QMessageBox.Yes:
                 self._Save()
+                self.close()
         else:
             reply = QMessageBox.question(self,
                 'Box {}, Foraging Close'.format(self.box_letter), 
