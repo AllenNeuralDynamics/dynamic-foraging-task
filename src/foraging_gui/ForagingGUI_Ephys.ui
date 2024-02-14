@@ -2843,7 +2843,7 @@
     <widget class="QLabel" name="label_73">
      <property name="geometry">
       <rect>
-       <x>250</x>
+       <x>210</x>
        <y>10</y>
        <width>121</width>
        <height>20</height>
@@ -2893,9 +2893,9 @@
     <widget class="QComboBox" name="Sessionlist">
      <property name="geometry">
       <rect>
-       <x>380</x>
+       <x>340</x>
        <y>10</y>
-       <width>151</width>
+       <width>191</width>
        <height>22</height>
       </rect>
      </property>
