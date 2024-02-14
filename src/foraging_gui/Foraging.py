@@ -1919,6 +1919,7 @@ class Window(QMainWindow):
         # Toggle unsaved data to False
         self.unsaved_data=False
         self.Save.setStyleSheet("background-color : None;")
+        self.Save.setStyleSheet("color: black;")
 
     def _GetSaveFolder(self,CTrainingFolder=1,CHarpFolder=1,CVideoFolder=1,CPhotometryFolder=1,CEphysFolder=1):
         '''The new data storage structure. Each session forms an independent folder. Training data, Harp register events, video data, photometry data and ephys data are in different subfolders'''
