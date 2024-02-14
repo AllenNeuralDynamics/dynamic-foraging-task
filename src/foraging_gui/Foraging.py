@@ -1999,17 +1999,10 @@ class Window(QMainWindow):
         # stop current session first
         self._StopCurrentSession() 
 
-        # If we have unsaved data, prompt to save
-        if (self.ToInitializeVisual==0) and (self.unsaved_data): 
-            reply = QMessageBox.critical(self, 
-                'Box {}, Open Session:'.format(self.box_letter), 
-                'Open session without saving?',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
-            if reply == QMessageBox.No:
-                self.NewSession.setStyleSheet("background-color : none")
-                self.NewSession.setChecked(False)
-                logging.info('Open Session declined')
-                return 
+        new_session = self._NewSession()
+        if not new_session:
+            return
+
         # Disable continuing new session
         self.Start.setDisabled(True)
 
@@ -2398,7 +2391,7 @@ class Window(QMainWindow):
                 self.NewSession.setStyleSheet("background-color : none")
                 self.NewSession.setChecked(False)
                 logging.info('New Session declined')
-                return reply
+                return False
         
         # Reset logging
         try:
@@ -2425,7 +2418,7 @@ class Window(QMainWindow):
 
         # Add note to log
         logging.info('New Session complete')
-
+        return True
 
     def _AskSave(self):
         reply = QMessageBox.question(self, 'Box {}, New Session:'.format(self.box_letter), 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
