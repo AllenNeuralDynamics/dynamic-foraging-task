@@ -1621,41 +1621,45 @@ class Window(QMainWindow):
             self.client4.close()
         self.Opto_dialog.close()
         self._StopPhotometry()  # Make sure photo excitation is stopped 
+        if self.Camera_dialog.AutoControl.currentText()=='Yes':
+            self.Camera_dialog.StartCamera.setChecked(False)
+            self.Camera_dialog._StartCamera()
         print('GUI Window closed')
         logging.info('GUI Window closed') 
 
     def _Exit(self):
         '''Close the GUI'''
         logging.info('closing the GUI')
-       
-        if self.unsaved_data:
-            reply = QMessageBox.critical(self, 
-                'Box {}, Foraging Close'.format(self.box_letter), 
-                'Exit without saving?',
-                QMessageBox.Yes | QMessageBox.No , QMessageBox.Yes)  
-            if reply == QMessageBox.No:
-                return
-        else:
-            reply = QMessageBox.question(self,
-                'Box {}, Foraging Close'.format(self.box_letter), 
-                'Close the GUI?',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)  
-            if reply == QMessageBox.No:
-                return
-        self.Start.setChecked(False)
-        if self.InitializeBonsaiSuccessfully==1:
-            self.client.close()
-            self.client2.close()
-            self.client3.close()
-            self.client4.close()
-        self.Opto_dialog.close()
-        self._StopPhotometry()  # Make sure photo excitation is stopped 
-        if self.Camera_dialog.AutoControl.currentText()=='Yes':
-            self.Camera_dialog.StartCamera.setChecked(False)
-            self.Camera_dialog._StartCamera()
-        print('GUI Window closed')
-        logging.info('GUI Window closed') 
-        self.close() 
+        self.close()      
+ 
+        #if self.unsaved_data:
+        #    reply = QMessageBox.critical(self, 
+        #        'Box {}, Foraging Close'.format(self.box_letter), 
+        #        'Exit without saving?',
+        #        QMessageBox.Yes | QMessageBox.No , QMessageBox.Yes)  
+        #    if reply == QMessageBox.No:
+        #        return
+        #else:
+        #    reply = QMessageBox.question(self,
+        #        'Box {}, Foraging Close'.format(self.box_letter), 
+        #        'Close the GUI?',
+        #        QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)  
+        #    if reply == QMessageBox.No:
+        #        return
+        #self.Start.setChecked(False)
+        #if self.InitializeBonsaiSuccessfully==1:
+        #    self.client.close()
+        #    self.client2.close()
+        #    self.client3.close()
+        #    self.client4.close()
+        #self.Opto_dialog.close()
+        #self._StopPhotometry()  # Make sure photo excitation is stopped 
+        #if self.Camera_dialog.AutoControl.currentText()=='Yes':
+        #    self.Camera_dialog.StartCamera.setChecked(False)
+        #    self.Camera_dialog._StartCamera()
+        #print('GUI Window closed')
+        #logging.info('GUI Window closed') 
+        #self.close() 
 
     def _Snipping(self):
         '''Open the snipping tool'''
