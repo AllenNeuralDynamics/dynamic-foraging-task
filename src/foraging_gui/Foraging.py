@@ -1588,6 +1588,7 @@ class Window(QMainWindow):
 
     def closeEvent(self, event):
         # disable close icon
+        print('closeevent')
         self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
         self.show()
         self._StopCurrentSession() # stop the current session first
@@ -1605,6 +1606,15 @@ class Window(QMainWindow):
                 return
             if reply == QMessageBox.Yes:
                 self._Save()
+        else:
+            reply = QMessageBox.question(self,
+                'Box {}, Foraging Close'.format(self.box_letter), 
+                'Close the GUI?',
+                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)  
+            if reply == QMessageBox.No:
+                return
+            if reply == QMessageBox.Cancel:
+                return
 
         event.accept()
         self.Start.setChecked(False)
