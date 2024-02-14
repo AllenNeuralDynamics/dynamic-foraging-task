@@ -2369,6 +2369,7 @@ class Window(QMainWindow):
             self.NextBlock.setStyleSheet("background-color : none")
 
     def _NewSession(self):
+        self._StopCurrentSession() 
         logging.info('starting new session')
         if self.NewSession.isChecked():
             if (self.ToInitializeVisual==0) and (self.unsaved_data): # Do not ask to save when no session starts running
