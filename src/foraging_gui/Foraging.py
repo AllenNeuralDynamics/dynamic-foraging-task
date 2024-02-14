@@ -2308,6 +2308,8 @@ class Window(QMainWindow):
         '''
             Stop either bleaching or photometry
         '''
+        if self.box_letter != "D":
+            return
         logging.info('Checking that photometry is not running')
         try:
             ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
