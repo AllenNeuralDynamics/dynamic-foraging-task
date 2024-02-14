@@ -1338,7 +1338,7 @@ class GenerateTrials():
         # Indicate that unsaved data exists
         self.win.unsaved_data=True
         self.win.Save.setStyleSheet("background-color : mediumorchid;")
-        self.Save.setStyleSheet("color: white;")
+        self.win.Save.setStyleSheet("color: white;")
 
         # Determine if the current lick port should be baited. self.B_Baited can only be updated after receiving response of the animal, so this part cannot appear in the _GenerateATrial section
         RandomNumber=np.random.random(2)
