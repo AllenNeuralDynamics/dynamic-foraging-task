@@ -252,7 +252,7 @@ class Window(QMainWindow):
                 child.returnPressed.connect(self.keyPressEvent)
     
     def _session_list(self):
-        '''show all sessions of the current animal and load the selected session'''
+        '''show all sessions of the current animal and load the selected session by drop down list'''
         if not hasattr(self,'fname'):
             return 0
         # open the selected session
@@ -267,7 +267,7 @@ class Window(QMainWindow):
             self._connect_Sessionlist(connect=True)
 
     def _session_list_spin(self):
-        '''show all sessions of the current animal and load the selected session'''
+        '''show all sessions of the current animal and load the selected session by spin box'''
         if not hasattr(self,'fname'):
             return 0
         if self.SessionlistSpin.text()!='':
@@ -305,9 +305,7 @@ class Window(QMainWindow):
                 if not file_name.endswith('.json'):
                     continue
                 session_full_path_list.append(os.path.join(training_folder, file_name))
-                parts=os.path.splitext(file_name)[0].split('_')
-                session_path_list.append(parts[0]+'_'+parts[1])  # Remove the suffix
-        
+                session_path_list.append(session_folder) 
         sorted_indices = sorted(enumerate(session_path_list), key=lambda x: x[1], reverse=True)
         sorted_dates = [date for index, date in sorted_indices]
         # Extract just the indices
@@ -2235,9 +2233,8 @@ class Window(QMainWindow):
             # show session list related to that animal
             tag=self._show_sessions()
             if tag!=0:
-                fname_basename=os.path.basename(fname)
-                parts=os.path.splitext(fname_basename)[0].split('_')
-                Ind=self.Sessionlist.findText(parts[0]+'_'+parts[1])
+                fname_session_folder=os.path.basename(os.path.dirname(os.path.dirname(fname)))
+                Ind=self.Sessionlist.findText(fname_session_folder)
                 self._connect_Sessionlist(connect=False)
                 self.Sessionlist.setCurrentIndex(Ind)
                 self.SessionlistSpin.setValue(Ind+1)
