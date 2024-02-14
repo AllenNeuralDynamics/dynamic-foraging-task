@@ -16,7 +16,7 @@ from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 from PyQt5.QtWidgets import QFileDialog,QVBoxLayout,QLineEdit
 from PyQt5 import QtWidgets,QtGui,QtCore, uic
-from PyQt5.QtCore import QThreadPool,Qt
+from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 
@@ -26,7 +26,7 @@ from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,Camer
 from foraging_gui.Dialogs import LaserCalibrationDialog
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog
-from foraging_gui.MyFunctions import GenerateTrials, Worker,NewScaleSerialY
+from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY
 from foraging_gui.stage import Stage
 from foraging_gui.TransferToNWB import bonsai_to_nwb
 
@@ -41,6 +41,8 @@ class NumpyEncoder(json.JSONEncoder):
         return super(NumpyEncoder, self).default(obj)
     
 class Window(QMainWindow):
+    Time = QtCore.pyqtSignal(int) # Photometry timer signal
+
     def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
         super().__init__(parent)
@@ -318,20 +320,33 @@ class Window(QMainWindow):
     def _keyPressEvent(self):
         # press enter to confirm parameters change
         self.keyPressEvent()
+    
+    def _CheckStageConnection(self):
+        '''get the current position of the stage'''
+        if hasattr(self, 'current_stage') and self.current_stage.connected:
+            logging.info('Checking stage connection')
+            current_stage=self.current_stage
+            current_position=current_stage.get_position()
+            if not current_stage.connected:
+                logging.error('lost stage connection')
+                self._no_stage()
 
     def _GetPositions(self):
         '''get the current position of the stage'''
-        if hasattr(self, 'current_stage'):
+        self._CheckStageConnection()
+
+        if hasattr(self, 'current_stage') and self.current_stage.connected:
             logging.info('Grabbing current stage position')
             current_stage=self.current_stage
             current_position=current_stage.get_position()
             self._UpdatePosition(current_position,(0,0,0))
         else:
             logging.info('GetPositions pressed, but no current stage')
-                                
+
     def _StageStop(self):
         '''Halt the stage'''
-        if hasattr(self, 'current_stage'):
+        self._CheckStageConnection()
+        if hasattr(self, 'current_stage') and self.current_stage.connected:
             logging.info('Stopping stage movement')
             current_stage=self.current_stage
             current_stage.halt()
@@ -340,8 +355,9 @@ class Window(QMainWindow):
 
     def _Move(self,axis,step):
         '''Move stage'''
+        self._CheckStageConnection()
         try:
-            if not hasattr(self, 'current_stage'):
+            if (not hasattr(self, 'current_stage')) or (not self.current_stage.connected):
                 logging.info('Move Stage pressed, but no current stage')
                 return
             logging.info('Moving stage')
@@ -468,9 +484,12 @@ class Window(QMainWindow):
         '''
             Display a warrning message that the newscale stage is not connected
         '''
-        self.Warning_Newscale.setText('Newscale stage not connected')
+        if hasattr(self, 'current_stage'):
+            self.Warning_Newscale.setText('Lost newscale stage connection')
+        else:
+            self.Warning_Newscale.setText('Newscale stage not connected')
         self.Warning_Newscale.setStyleSheet(self.default_warning_color)
-     
+    
     def _connect_stage(self,instance):
         '''connect to a stage'''
         try:       
@@ -2059,7 +2078,14 @@ class Window(QMainWindow):
                             elif Tag==1:
                                 index = widget.findText(value)
                             if index != -1:
-                                widget.setCurrentIndex(index)
+                                # Alternating on/off for SessionStartWith if SessionAlternating is on
+                                if key=='SessionStartWith' and 'Opto_dialog' in Obj:
+                                    if 'SessionAlternating' in Obj['Opto_dialog'] and 'SessionWideControl' in Obj['Opto_dialog']:
+                                        if Obj['Opto_dialog']['SessionAlternating']=='on' and Obj['OptogeneticsB']=='on' and Obj['Opto_dialog']['SessionWideControl']=='on':
+                                            index=1-index
+                                            widget.setCurrentIndex(index)
+                                else:
+                                    widget.setCurrentIndex(index)
                         elif isinstance(widget, QtWidgets.QDoubleSpinBox):
                             if Tag==0:
                                 widget.setValue(float(value[-1]))
@@ -2452,11 +2478,18 @@ class Window(QMainWindow):
         logging.info('Finished photometry baseline timer')
         self.WarningLabelStop.setText('')
         self.WarningLabelStop.setStyleSheet(self.default_warning_color)
-    
-    def _Timer(self,Time):
-        '''sleep some time'''
-        time.sleep(Time)
-    
+   
+    def _update_photometery_timer(self,time):
+        '''
+            Updates photometry baseline timer
+        '''
+        minutes = int(np.floor(time/60))
+        seconds = np.remainder(time,60)
+        if len(str(seconds)) == 1:
+            seconds = '0{}'.format(seconds)
+        self.WarningLabelStop.setText('Running photometry baseline: {}:{}'.format(minutes,seconds))
+        self.WarningLabelStop.setStyleSheet(self.default_warning_color)       
+     
     def _set_metadata_enabled(self, enable: bool):
         '''Enable or disable metadata fields'''
         self.ID.setEnabled(enable)
@@ -2608,9 +2641,18 @@ class Window(QMainWindow):
             logging.info('Starting photometry baseline timer')
             self.finish_Timer=0
             self.PhotometryRun=1
-            workertimer = Worker(self._Timer,float(self.baselinetime.text())*60)
-            workertimer.signals.finished.connect(self._thread_complete_timer)
-            self.threadpool_workertimer.start(workertimer)
+            
+            # If we already created a workertimer and thread we can reuse them
+            if not hasattr(self, 'workertimer'):
+                self.workertimer = TimerWorker()
+                self.workertimer_thread = QThread()
+                self.workertimer.progress.connect(self._update_photometery_timer)
+                self.workertimer.finished.connect(self._thread_complete_timer)
+                self.Time.connect(self.workertimer._Timer)
+                self.workertimer.moveToThread(self.workertimer_thread)
+                self.workertimer_thread.start()
+
+            self.Time.emit(int(np.floor(float(self.baselinetime.text())*60))) 
             self.WarningLabelStop.setText('Running photometry baseline')
             self.WarningLabelStop.setStyleSheet(self.default_warning_color)
         
@@ -2971,6 +3013,9 @@ def start_gui_log_file(box_number):
     logging.captureWarnings(True)
 
 def log_git_hash():
+    '''
+        Add a note to the GUI log about the current branch and hash. Assumes the local repo is clean
+    '''
     try:
         git_hash = subprocess.check_output(['git','rev-parse','--short', 'HEAD']).decode('ascii').strip()
         git_branch = subprocess.check_output(['git','branch','--show-current']).decode('ascii').strip()
@@ -2978,16 +3023,68 @@ def log_git_hash():
     except Exception as e:
         logging.error('Could not log git branch and hash: {}'.format(str(e)))
 
-def excepthook(exc_type, exc_value, exc_tb):
+def show_exception_box(log_msg):
     '''
-        excepthook will be called when the GUI encounters an uncaught exception
-        We will log the error in the logfile, print the error to the console, then exit
+        Displays a Qwindow alert to the user that an uncontrolled error has occured, and the error message
+        if no QApplication instance is available, logs a note in the GUI log
     '''
-    tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
-    print('Encountered a fatal error: ')
-    print(tb)
-    logging.error('FATAL ERROR: \n{}'.format(tb))
-    QtWidgets.QApplication.quit()
+    # Check if a QApplication instance is running
+    if QtWidgets.QApplication.instance() is not None:
+        box = log_msg[0] # Grab the box letter
+        log_msg = log_msg[1:] # Grab the error messages
+
+        # Make a QWindow, wait for user response
+        errorbox = QtWidgets.QMessageBox()
+        errorbox.setWindowTitle('Box {}, Error'.format(box))
+        msg = '<span style="color:purple;font-weight:bold">An uncontrolled error occurred. Save any data and restart the GUI. </span> <br><br>{}'.format(log_msg)
+        errorbox.setText(msg)
+        errorbox.exec_()
+    else:
+        logging.error('could not launch exception box')
+
+class UncaughtHook(QtCore.QObject):
+    '''
+        This class handles uncaught exceptions and hooks into the sys.excepthook
+    '''
+    _exception_caught = QtCore.Signal(object)
+    
+    def __init__(self,box_number, *args, **kwargs):
+        super(UncaughtHook, self).__init__(*args, **kwargs)
+        
+        # Determine what Box we are in
+        mapper = {
+            1:'A',
+            2:'B',
+            3:'C',
+            4:'D'
+            }
+        self.box = mapper[box_number]
+
+        # Hook into the system except hook
+        sys.excepthook = self.exception_hook
+
+        # Call our custom function to display an alert
+        self._exception_caught.connect(show_exception_box)
+
+        
+    def exception_hook(self, exc_type, exc_value, exc_traceback):
+        '''
+            Log the error in the log, and display in the console
+            then call our custom hook function to display an alert
+        '''
+
+        # Display in console
+        tb = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+        print('Encountered a fatal error: ')
+        print(tb)
+
+        # Add to log
+        logging.error('FATAL ERROR: \n{}'.format(tb))
+
+        # Display alert box
+        tb = "<br>".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+        self._exception_caught.emit(self.box+tb)
+
 
 if __name__ == "__main__":
 
@@ -3014,15 +3111,18 @@ if __name__ == "__main__":
     QApplication.setAttribute(Qt.AA_Use96Dpi,False)
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
    
-    # Set excepthook, so we can log uncaught exceptions
-    sys.excepthook=excepthook
-
-    # Start Q, and Gui Window
+    # Start QApplication
     logging.info('Starting QApplication and Window')
     app = QApplication(sys.argv)
+    
+    # Create global instance of uncaught exception handler
+    qt_exception_hook = UncaughtHook(box_number)
+
+    # Start GUI window
     win = Window(box_number=box_number,start_bonsai_ide=start_bonsai_ide)
     win.show()
-    # Run your application's event loop and stop after closing all windows
+   
+     # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())
 
 

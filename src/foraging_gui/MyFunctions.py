@@ -68,6 +68,8 @@ class GenerateTrials():
         self.B_SelectedCondition=[]
         self.B_AutoWaterTrial=np.array([[],[]]).astype(bool) # to indicate if it is a trial with outo water.
         self.B_NewscalePositions=[]
+        self.B_session_control_state=[]
+        self.B_opto_error=[]
         self.NextWaveForm=1 # waveform stored for later use
         self.CurrentWaveForm=1 # the current waveform to trigger the optogenetics
         self.Start_Delay_LeftLicks=[]
@@ -130,6 +132,8 @@ class GenerateTrials():
             if self.TP_OptogeneticsB=='on': # optogenetics is turned on
                 # select the current optogenetics condition
                 self._SelectOptogeneticsCondition()
+                # session control is regarded as off when the optogenetics is turned off
+                self.B_session_control_state.append(self.session_control_state)
                 if self.SelctedCondition!=0: 
                     self.LaserOn=1
                     self.B_LaserOnTrial.append(self.LaserOn) 
@@ -152,16 +156,48 @@ class GenerateTrials():
                 self.B_LaserDuration.append(0)
                 self.B_SelectedCondition.append(0)
                 self.CurrentLaserAmplitude=[0,0]
+                self.B_session_control_state.append(0)
+            self.B_opto_error.append(0)
         except Exception as e:
             # optogenetics is turned off
+            self.B_opto_error.append(1)
             self.LaserOn=0
             self.B_LaserOnTrial.append(self.LaserOn)
             self.B_LaserAmplitude.append([0,0]) # corresponding to two locations
             self.B_LaserDuration.append(0) # corresponding to two locations
             self.B_SelectedCondition.append(0)
             self.CurrentLaserAmplitude=[0,0]
+            self.B_session_control_state.append(0)
             # Catch the exception and print error information
             logging.error(str(e))
+
+    def _CheckSessionControl(self):
+        '''Check if the session control is on'''
+        if self.TP_SessionWideControl=='on':
+            session_control_block_length=float(self.TP_MaxTrial)*float(self.TP_FractionOfSession)
+            if self.TP_SessionStartWith=='on':
+                initial_state=1
+            elif self.TP_SessionStartWith=='off':
+                initial_state=0
+            calculated_state=np.zeros(int(self.TP_MaxTrial))
+            numbers=np.arange(int(self.TP_MaxTrial))
+            numbers_floor=np.floor(numbers/session_control_block_length)
+            # Find odd values: A value is odd if value % 2 != 0
+            odd_values_mask = (numbers_floor % 2 != 0)
+            even_values_mask = (numbers_floor % 2 == 0)
+            calculated_state[even_values_mask]=initial_state
+            calculated_state[odd_values_mask]=1-initial_state
+            self.calculated_state=calculated_state
+            # get the session_control_state of the current trial
+            self.session_control_state=self.calculated_state[self.B_RewardProHistory.shape[1]-1]
+        else:
+            self.session_control_state=0
+        if self.session_control_state==0:
+            state='off'
+        else:
+            state='on'
+        self.win.Opto_dialog.SessionControlWarning.setText('Session control state: '+state)
+        self.win.Opto_dialog.SessionControlWarning.setStyleSheet(self.win.default_warning_color)    
 
     def _CheckWarmUp(self):
         '''Check if we should turn on warm up'''
@@ -1268,14 +1304,24 @@ class GenerateTrials():
     def _SelectOptogeneticsCondition(self):
         '''To decide if this should be an optogenetics trial'''
         # condition should be taken into account in the future
+        # check session session
+        self._CheckSessionControl()
+        if self.session_control_state==0 and self.TP_SessionWideControl=='on':
+            self.SelctedCondition=0
+            return
         ConditionsOn=[]
         Probabilities=[]
+        empty=1
         for attr_name in dir(self):
             if attr_name in ['TP_Laser_1','TP_Laser_2','TP_Laser_3','TP_Laser_4']:
                 if getattr(self, attr_name) !='NA':
                     parts = attr_name.split('_')
                     ConditionsOn.append(parts[-1])
                     Probabilities.append(float(eval('self.TP_Probability_'+parts[-1])))
+                    empty=0
+        if empty==1:
+            self.SelctedCondition=0
+            return
         self.ConditionsOn=ConditionsOn
         self.Probabilities=Probabilities
         ProAccu=list(accumulate(Probabilities))
@@ -1818,3 +1864,33 @@ class Worker(QtCore.QRunnable):
             self.signals.result.emit(result)  # Return the result of the processing
         finally:
             self.signals.finished.emit()  # Done
+
+
+
+class TimerWorker(QtCore.QObject):
+    '''
+        Worker for photometry timer
+    '''
+    finished = QtCore.pyqtSignal()
+    progress = QtCore.pyqtSignal(int)
+
+    @QtCore.pyqtSlot(int)
+    def _Timer(self,Time):
+        '''sleep some time'''
+        # Emit initial status
+        interval = 1
+        num_updates = int(np.floor(Time/interval))
+        self.progress.emit(int(Time))
+
+        # Iterate through intervals 
+        while num_updates >0:
+            time.sleep(interval)
+            Time -=interval
+            self.progress.emit(int(Time))
+            num_updates -= 1
+        
+        # Sleep the remainder of the time and finish
+        time.sleep(Time)
+        self.finished.emit()
+
+

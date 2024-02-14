@@ -1,3 +1,4 @@
+:: Just for fun popup script
 echo off
 mode 70,19
 title Hello!
@@ -19,6 +20,6 @@ echo       \______________o__________o____________/ .-~^^        `~--'
 echo                     ___)( )(___        `-.___.'
 echo                    (((__) (__)))
 
-timeout 30 >nul
+timeout 20 >nul
 exit
 

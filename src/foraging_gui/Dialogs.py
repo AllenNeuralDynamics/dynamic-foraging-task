@@ -53,6 +53,7 @@ class OptogeneticsDialog(QDialog):
         self._Laser_3()
         self._Laser_4()
         self._Laser_calibration()
+        self._SessionWideControl()
     def _connectSignalsSlots(self):
         self.Laser_1.currentIndexChanged.connect(self._Laser_1)
         self.Laser_2.currentIndexChanged.connect(self._Laser_2)
@@ -104,6 +105,20 @@ class OptogeneticsDialog(QDialog):
         self.LaserEnd_4.currentIndexChanged.connect(self._activated_4)
         self.Laser_calibration.currentIndexChanged.connect(self._Laser_calibration)
         self.Laser_calibration.activated.connect(self._Laser_calibration)
+        self.SessionWideControl.currentIndexChanged.connect(self._SessionWideControl)
+    def _SessionWideControl(self):
+        '''enable/disable items based on session wide control'''
+        if self.SessionWideControl.currentText()=='on':
+            enable=True
+        else:
+            enable=False
+        self.label3_18.setEnabled(enable)
+        self.label3_21.setEnabled(enable)
+        self.FractionOfSession.setEnabled(enable)
+        self.label3_19.setEnabled(enable)
+        self.SessionStartWith.setEnabled(enable)
+        self.label3_17.setEnabled(enable)
+        self.SessionAlternating.setEnabled(enable)
     def _Laser_calibration(self):
         ''''change the laser calibration date'''
         # find the latest calibration date for the selected laser
@@ -285,8 +300,8 @@ class OptogeneticsDialog(QDialog):
                             ItemsRight=sorted(ItemsRight)
                             eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
                             eval('self.LaserPowerLeft_'+str(Numb)+'.addItems(ItemsLeft)')
-                            eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
-                            eval('self.LaserPowerLeft_'+str(Numb)+'.addItems(ItemsRight)')
+                            eval('self.LaserPowerRight_'+str(Numb)+'.clear()')
+                            eval('self.LaserPowerRight_'+str(Numb)+'.addItems(ItemsRight)')
                         self.MainWindow.WarningLabel.setText('')
                         self.MainWindow.WarningLabel.setStyleSheet("color: gray;")
                     else:
@@ -334,7 +349,7 @@ class WaterCalibrationDialog(QDialog):
         self.MainWindow=MainWindow
         self.FinishLeftValve=0
         if not hasattr(self.MainWindow,'WaterCalibrationResults'):
-            self.MainWindow.LaserCalibrationResults={}
+            self.MainWindow.WaterCalibrationResults={}
             self.WaterCalibrationResults={}
         else:
             self.WaterCalibrationResults=self.MainWindow.WaterCalibrationResults
@@ -1288,6 +1303,8 @@ class LaserCalibrationDialog(QDialog):
         self.CLP_InputVoltage=float(self.voltage.text())
         # generate the waveform based on self.CLP_CurrentDuration and Protocol, Frequency, RampingDown, PulseDur
         self._GetLaserAmplitude()
+        # send the trigger source. It's '/Dev1/PFI0' ( P2.0 of NIdaq USB6002) by default 
+        self.MainWindow.Channel.TriggerSource('/Dev1/PFI0')
         # dimension of self.CurrentLaserAmplitude indicates how many locations do we have
         for i in range(len(self.CurrentLaserAmplitude)):
             # in some cases the other paramters except the amplitude could also be different
@@ -1397,10 +1414,9 @@ class LaserCalibrationDialog(QDialog):
                 setattr(self, Prefix+'_'+child.objectName(), child.isChecked())
     def _InitiateATrial(self):
         '''Initiate calibration in bonsai'''
-        # send the trigger source. It's '/Dev1/PFI0' ( P2.0 of NIdaq USB6002) by default 
-        self.MainWindow.Channel.TriggerSource('/Dev1/PFI0')
         # start generating waveform in bonsai
         self.MainWindow.Channel.OptogeneticsCalibration(int(1))
+        self.MainWindow.Channel.receive()
     def _CopyFromOpto(self):
         '''Copy the optogenetics parameters'''
         N=[]
@@ -1696,7 +1712,6 @@ class LaserCalibrationDialog(QDialog):
             # change button color and disable the open button
             self.Open.setEnabled(False)
             self.Open.setStyleSheet("background-color : green;")
-            QApplication.processEvents()
             self._GetTrainingParameters(self.MainWindow)
             self._GetLaserWaveForm()
             self.worker2 = Worker(self._Sleep,float(self.LC_Duration_1)+1)
