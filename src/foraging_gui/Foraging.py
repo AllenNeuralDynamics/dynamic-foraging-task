@@ -1596,7 +1596,7 @@ class Window(QMainWindow):
         self.show()
 
         if self.unsaved_data:
-            reply = QMessageBox.question(self, 
+            reply = QMessageBox.critical(self, 
                 'Box {}, Foraging Close'.format(self.box_letter), 
                 'Exit without saving?',
                 QMessageBox.Yes | QMessageBox.No , QMessageBox.Yes)  
@@ -1607,11 +1607,8 @@ class Window(QMainWindow):
             reply = QMessageBox.question(self,
                 'Box {}, Foraging Close'.format(self.box_letter), 
                 'Close the GUI?',
-                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)  
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)  
             if reply == QMessageBox.No:
-                event.ignore()
-                return
-            if reply == QMessageBox.Cancel:
                 event.ignore()
                 return
 
