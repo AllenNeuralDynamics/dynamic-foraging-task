@@ -1782,19 +1782,10 @@ class Window(QMainWindow):
             os.makedirs(os.path.dirname(self.SaveFileJson))
             logging.info(f"Created new folder: {os.path.dirname(self.SaveFileJson)}")
 
+        # Save in the standard location
         self.SaveFile = self.SaveFileJson
-        #print(self.SaveFileJson)
-        #Names = QFileDialog.getSaveFileName(self, 'Save File',self.SaveFileJson,"JSON files (*.json);;MAT files (*.mat);;JSON parameters (*_par.json)")
-        #print(Names)
 
-        #if Names[1]=='JSON parameters (*_par.json)':
-        #    self.SaveFile=Names[0].replace('.json', '_par.json')
-        #else:
-        #    self.SaveFile=Names[0]
-        #if self.SaveFile == '':
-        #    self.WarningLabel.setText('Discard saving!')
-        #    self.WarningLabel.setStyleSheet(self.default_warning_color)
-        #    return
+        # Do we have trials to save?
         if hasattr(self, 'GeneratedTrials'):
             if hasattr(self.GeneratedTrials, 'Obj'):
                 Obj=self.GeneratedTrials.Obj
@@ -1802,20 +1793,28 @@ class Window(QMainWindow):
                 Obj={}
         else:
             Obj={}
-        widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+        widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren(
+            (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+            QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
         widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
         self._Concat(widget_dict,Obj,'None')
         if hasattr(self, 'LaserCalibration_dialog'):
-            widget_dict_LaserCalibration={w.objectName(): w for w in self.LaserCalibration_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))} 
+            widget_dict_LaserCalibration={w.objectName(): w for w in self.LaserCalibration_dialog.findChildren(
+            (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+            QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))} 
             self._Concat(widget_dict_LaserCalibration,Obj,'LaserCalibration_dialog')
         if hasattr(self, 'Opto_dialog'):
-            widget_dict_opto={w.objectName(): w for w in self.Opto_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+            widget_dict_opto={w.objectName(): w for w in self.Opto_dialog.findChildren(
+                (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+                QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
             self._Concat(widget_dict_opto,Obj,'Opto_dialog')
         if hasattr(self, 'Camera_dialog'):
-            widget_dict_camera={w.objectName(): w for w in self.Camera_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+            widget_dict_camera={w.objectName(): w for w in self.Camera_dialog.findChildren(
+                (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+                QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
             self._Concat(widget_dict_camera,Obj,'Camera_dialog')
         
-        Obj2=Obj.copy()
+        ##Obj2=Obj.copy()
         # save behavor events
         if hasattr(self, 'GeneratedTrials'):
             # Do something if self has the GeneratedTrials attribute
@@ -1865,15 +1864,15 @@ class Window(QMainWindow):
         Obj['box'] = self.current_box
     
         # save Json or mat
-        if self.SaveFile.endswith('.mat'):
-        # Save data to a .mat file
-            savemat(self.SaveFile, Obj) 
-        elif self.SaveFile.endswith('par.json'):
-            with open(self.SaveFile, "w") as outfile:
-                json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
-        elif self.SaveFile.endswith('.json'):
-            with open(self.SaveFile, "w") as outfile:
-                json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
+        #if self.SaveFile.endswith('.mat'):
+        ## Save data to a .mat file
+        #    savemat(self.SaveFile, Obj) 
+        #elif self.SaveFile.endswith('par.json'):
+        #    with open(self.SaveFile, "w") as outfile:
+        #        json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
+        #elif self.SaveFile.endswith('.json'):
+        with open(self.SaveFile, "w") as outfile:
+            json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
                 
         # Also export to nwb automatically here
         try:
