@@ -1993,6 +1993,7 @@ class Window(QMainWindow):
         self._StopCurrentSession() # stop current session first
         self.NewSession.setChecked(True)
         Reply=self._NewSession()
+        ## DEBUGGING need to update here too
         if Reply == QMessageBox.Yes or Reply == QMessageBox.No:
             self.NewSession.setDisabled(True) # You must start a NewSession after loading a new file, and you can't continue that session
         elif Reply == QMessageBox.Cancel:
@@ -2369,44 +2370,44 @@ class Window(QMainWindow):
             self.NextBlock.setStyleSheet("background-color : none")
 
     def _NewSession(self):
+        logging.info('New Session pressed')
         self._StopCurrentSession() 
-        logging.info('starting new session')
-        if self.NewSession.isChecked():
-            if (self.ToInitializeVisual==0) and (self.unsaved_data): # Do not ask to save when no session starts running
-                reply = QMessageBox.question(self, 'Box {}, New Session:'.format(self.box_letter), 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
-            else:
-                reply=QMessageBox.No
-            if reply == QMessageBox.Yes:
-                self.NewSession.setStyleSheet("background-color : green;")
-                self.Start.setStyleSheet("background-color : none")
-                self._Save()
-                self.Start.setChecked(False)
-                self.StartANewSession=1
-                self.CreateNewFolder=1
-                self.PhotometryRun=0
-                try:
-                    self.Channel.StopLogging('s')
-                except Exception as e:
-                    logging.error(str(e))
-                logging.info('The current session was saved')
-            elif reply == QMessageBox.No:
-                self.NewSession.setStyleSheet("background-color : green;")
-                self.Start.setStyleSheet("background-color : none")
-                self.Start.setChecked(False)
-                self.StartANewSession=1
-                self.CreateNewFolder=1
-                self.PhotometryRun=0
-                try:
-                    self.Channel.StopLogging('s')
-                except Exception as e:
-                    logging.error(str(e))
-            else:
+
+        # If we have unsaved data, prompt to save
+        if (self.ToInitializeVisual==0) and (self.unsaved_data): 
+            reply = QMessageBox.critical(self, 
+                'Box {}, New Session:'.format(self.box_letter), 
+                'Start new session without saving?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+            if reply == QMessageBox.No:
+                self.NewSession.setStyleSheet("background-color : none")
                 self.NewSession.setChecked(False)
-                pass
-        else:
-            self.NewSession.setStyleSheet("background-color : none")
-            reply=QMessageBox.Cancel
-        return reply
+                logging.info('New Session declined')
+                return
+
+        # Reset GUI visuals
+        self.Save.setStyleSheet("color:black;background-color:None;")
+        self.NewSession.setStyleSheet("background-color : None;")
+        self.NewSession.setChecked(False)
+        self.Start.setStyleSheet("background-color : none")
+        self.Start.setChecked(False)        
+        # TODO Clear plots 
+        # TODO Clear performance info, clear Task info        
+
+        # Reset state variables
+        self.StartANewSession=1
+        self.CreateNewFolder=1
+        self.PhotometryRun=0
+        
+        # Reset logging
+        try:
+            self.Channel.StopLogging('s')
+        except Exception as e:
+            logging.error(str(e))
+
+        # Add note to log
+        logging.info('New Session complete')
+
 
     def _AskSave(self):
         reply = QMessageBox.question(self, 'Box {}, New Session:'.format(self.box_letter), 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
