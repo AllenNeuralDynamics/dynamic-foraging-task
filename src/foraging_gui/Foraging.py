@@ -2391,12 +2391,13 @@ class Window(QMainWindow):
         self.NewSession.setChecked(False)
         self.Start.setStyleSheet("background-color : none")
         self.Start.setChecked(False)        
-        # TODO Clear plots 
-        # TODO Clear performance info, clear Task info        
         self.WarningLabel.setText('')
         self.TotalWaterWarning.setText('')
         self.WarningLabel_2.setText('')
-        self._ConnectBonsai()
+        try:
+            self.PlotM._Update(GeneratedTrials=None,Channel=self.Channel2)
+        except Exception as e:
+            logging.error(str(e))
 
         # Reset state variables
         self.StartANewSession=1
