@@ -2007,7 +2007,7 @@ class Window(QMainWindow):
                 logging.info('Open Session declined')
                 return 
         # Disable continuing new session
-        self.NewSession.setDisabled(True)
+        self.Start.setDisabled(True)
 
         fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder+'\\'+self.current_box, "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
         self.fname=fname
@@ -2408,6 +2408,7 @@ class Window(QMainWindow):
         self.NewSession.setChecked(False)
         self.Start.setStyleSheet("background-color : none")
         self.Start.setChecked(False)        
+        self.Start.setDisabled(False)
         self.WarningLabel.setText('')
         self.TotalWaterWarning.setText('')
         self.WarningLabel_2.setText('')
