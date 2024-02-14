@@ -1,10 +1,7 @@
-cd /d C:\Users\svc_aind_behavior\Documents\GitHub\dynamic-foraging-task\src\foraging_gui
+cd /d C:\Users\%USERNAME%\Documents\GitHub\dynamic-foraging-task\src\foraging_gui
 call conda activate Foraging
-:: This version starts without a console window
-start "" pythonw Foraging.py 1
-echo Starting the GUI and Bonsai, please wait. This window will close in 20 seconds
-timeout 20 >nul
-:: This version starts with a console window
-:: start python Foraging.py 1
-
-
+start "" C:\Users\%USERNAME%\Documents\GitHub\dynamic-foraging-task\src\desktop_shortcuts\start_popup.bat
+powershell -window minimized -command ""
+python Foraging.py 1 --no-bonsai-ide
+timeout 3600 > NUL
+:: Open the GUI, minimize the console

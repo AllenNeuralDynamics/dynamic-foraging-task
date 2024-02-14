@@ -68,6 +68,8 @@ class GenerateTrials():
         self.B_SelectedCondition=[]
         self.B_AutoWaterTrial=np.array([[],[]]).astype(bool) # to indicate if it is a trial with outo water.
         self.B_NewscalePositions=[]
+        self.B_session_control_state=[]
+        self.B_opto_error=[]
         self.NextWaveForm=1 # waveform stored for later use
         self.CurrentWaveForm=1 # the current waveform to trigger the optogenetics
         self.Start_Delay_LeftLicks=[]
@@ -130,6 +132,8 @@ class GenerateTrials():
             if self.TP_OptogeneticsB=='on': # optogenetics is turned on
                 # select the current optogenetics condition
                 self._SelectOptogeneticsCondition()
+                # session control is regarded as off when the optogenetics is turned off
+                self.B_session_control_state.append(self.session_control_state)
                 if self.SelctedCondition!=0: 
                     self.LaserOn=1
                     self.B_LaserOnTrial.append(self.LaserOn) 
@@ -152,16 +156,48 @@ class GenerateTrials():
                 self.B_LaserDuration.append(0)
                 self.B_SelectedCondition.append(0)
                 self.CurrentLaserAmplitude=[0,0]
+                self.B_session_control_state.append(0)
+            self.B_opto_error.append(0)
         except Exception as e:
             # optogenetics is turned off
+            self.B_opto_error.append(1)
             self.LaserOn=0
             self.B_LaserOnTrial.append(self.LaserOn)
             self.B_LaserAmplitude.append([0,0]) # corresponding to two locations
             self.B_LaserDuration.append(0) # corresponding to two locations
             self.B_SelectedCondition.append(0)
             self.CurrentLaserAmplitude=[0,0]
+            self.B_session_control_state.append(0)
             # Catch the exception and print error information
             logging.error(str(e))
+
+    def _CheckSessionControl(self):
+        '''Check if the session control is on'''
+        if self.TP_SessionWideControl=='on':
+            session_control_block_length=float(self.TP_MaxTrial)*float(self.TP_FractionOfSession)
+            if self.TP_SessionStartWith=='on':
+                initial_state=1
+            elif self.TP_SessionStartWith=='off':
+                initial_state=0
+            calculated_state=np.zeros(int(self.TP_MaxTrial))
+            numbers=np.arange(int(self.TP_MaxTrial))
+            numbers_floor=np.floor(numbers/session_control_block_length)
+            # Find odd values: A value is odd if value % 2 != 0
+            odd_values_mask = (numbers_floor % 2 != 0)
+            even_values_mask = (numbers_floor % 2 == 0)
+            calculated_state[even_values_mask]=initial_state
+            calculated_state[odd_values_mask]=1-initial_state
+            self.calculated_state=calculated_state
+            # get the session_control_state of the current trial
+            self.session_control_state=self.calculated_state[self.B_RewardProHistory.shape[1]-1]
+        else:
+            self.session_control_state=0
+        if self.session_control_state==0:
+            state='off'
+        else:
+            state='on'
+        self.win.Opto_dialog.SessionControlWarning.setText('Session control state: '+state)
+        self.win.Opto_dialog.SessionControlWarning.setStyleSheet(self.win.default_warning_color)    
 
     def _CheckWarmUp(self):
         '''Check if we should turn on warm up'''
@@ -174,12 +210,15 @@ class GenerateTrials():
             self.win.warmup.setCurrentIndex(index)
             self.win._warmup()
             self.win.keyPressEvent()
+            self.win.NextBlock.setChecked(True)
+            self.win._NextBlock()
+            self.win.WarmupWarning.setText('Warm up is turned off')
 
     def _get_warmup_state(self):
         '''calculate the metrics related to the warm up and decide if we should turn on the warm up'''
         TP_warm_windowsize=int(self.TP_warm_windowsize)
         B_AnimalResponseHistory_window=self.B_AnimalResponseHistory[-TP_warm_windowsize:]
-        finish_trial=B_AnimalResponseHistory_window.shape[0] # the warmup is only turned on at the beginning of the session, thus the number of finished trials is equal to the number of trials with warmup on
+        finish_trial=self.B_AnimalResponseHistory.shape[0] # the warmup is only turned on at the beginning of the session, thus the number of finished trials is equal to the number of trials with warmup on
         left_choices = np.count_nonzero(B_AnimalResponseHistory_window == 0)
         right_choices = np.count_nonzero(B_AnimalResponseHistory_window == 1)
         no_responses = np.count_nonzero(B_AnimalResponseHistory_window == 2)
@@ -197,6 +236,9 @@ class GenerateTrials():
         else:
             # turn on the warm up
             warmup=1
+        # show current metrics of the warm up
+        self.win.WarmupWarning.setText('Finish trial: '+str(round(finish_trial,2))+ '; Finish ratio: '+str(round(finish_ratio,2))+'; Choice ratio bias: '+str(round(abs(choice_ratio-0.5),2)))
+        self.win.WarmupWarning.setStyleSheet(self.win.default_warning_color)
         return warmup
         
     def _CheckBaitPermitted(self):
@@ -878,8 +920,8 @@ class GenerateTrials():
                 self.win.info_performance_essential_1 += (
                                     f'Responded trial: {self.BS_FinisheTrialN}/{self.BS_AllTrialN} ({self.BS_RespondedRate:.2f})\n'
                                     f'Reward Trial: {self.BS_RewardTrialN}/{self.BS_AllTrialN} ({self.BS_OverallRewardRate:.2f})\n'
-                                    f'Earned Reward: {self.BS_TotalReward:.0f} uL\n'
-                                    f'Water in session: {self.win.water_in_session*1000 if self.B_CurrentTrialN>=0 else 0:.0f} uL'   
+                                    f'Earned Reward: {self.BS_TotalReward / 1000:.3f} mL\n'
+                                    f'Water in session: {self.win.water_in_session if self.B_CurrentTrialN>=0 else 0:.3f} mL'   
                 )
             self.win.label_info_performance_essential_1.setText(self.win.info_performance_essential_1)
             
@@ -1021,30 +1063,41 @@ class GenerateTrials():
         else:
             self.BS_CurrentRunningTime=0
 
-        if np.shape(self.B_AnimalResponseHistory)[0]>=StopIgnore:
-            if np.all(self.B_AnimalResponseHistory[-StopIgnore:]==2):
-                self.Stop=1
-                self.win.WarningLabelStop.setText('Stop because ignore trials exceed or equal: '+self.TP_StopIgnores)
-                self.win.WarningLabelStop.setStyleSheet(self.win.default_warning_color)
-            else:
-                self.Stop=0
-                self.win.WarningLabelStop.setText('')
-                self.win.WarningLabelStop.setStyleSheet("color: gray;")
+        # Make message box prompt
+        stop = False
+        msg =''
+        warning_label_text = ''
+        warning_label_color = 'color: gray;'        
+
+        # Check for reasons to stop early 
+        if (np.shape(self.B_AnimalResponseHistory)[0]>=StopIgnore) and (np.all(self.B_AnimalResponseHistory[-StopIgnore:]==2)):
+            stop=True
+            msg = 'Stopping the session because the mouse has ignored at least {} consecutive trials'.format(self.TP_StopIgnores)
+            warning_label_text = 'Stop because ignore trials exceed or equal: '+self.TP_StopIgnores
+            warning_label_color = self.win.default_warning_color
         elif self.B_CurrentTrialN>MaxTrial: 
-            self.Stop=1
-            self.win.WarningLabelStop.setText('Stop because maximum trials exceed or equal: '+self.TP_MaxTrial)
-            self.win.WarningLabelStop.setStyleSheet(self.win.default_warning_color)
+            stop=True
+            msg = 'Stopping the session because the mouse has reached the maximum trial count: {}'.format(self.TP_MaxTrial)
+            warning_label_text = 'Stop because maximum trials exceed or equal: '+self.TP_MaxTrial
+            warning_label_color = self.win.default_warning_color
         elif self.BS_CurrentRunningTime>MaxTime:
-            self.Stop=1
-            self.win.WarningLabelStop.setText('Stop because running time exceeds or equals: '+self.TP_MaxTime+'m')
-            self.win.WarningLabelStop.setStyleSheet(self.win.default_warning_color)
+            stop=True
+            msg = 'Stopping the session because the session running time has reached {} minutes'.format(self.TP_MaxTime)
+            warning_label_text = 'Stop because running time exceeds or equals: '+self.TP_MaxTime+'m'
+            warning_label_color = self.win.default_warning_color
         else:
-            self.Stop=0
-            self.win.WarningLabelStop.setText('')
-            self.win.WarningLabelStop.setStyleSheet("color: gray;")
-        if  self.Stop==1:           
+            stop=False
+
+        # Update the warning label text/color
+        self.win.WarningLabelStop.setText(warning_label_text)
+        self.win.WarningLabelStop.setStyleSheet(warning_label_color)
+    
+        # If we should stop trials, uncheck the start button
+        if stop:           
             self.win.Start.setStyleSheet("background-color : none")
-            self.win.Start.setChecked(False)
+            self.win.Start.setChecked(False)        
+            reply = QtWidgets.QMessageBox.question(self.win, 'Box {}'.format(self.win.box_letter), msg, QtWidgets.QMessageBox.Ok)
+    
     def _CheckAutoWater(self):
         '''Check if it should be an auto water trial'''
         if self.TP_AutoReward:
@@ -1251,14 +1304,24 @@ class GenerateTrials():
     def _SelectOptogeneticsCondition(self):
         '''To decide if this should be an optogenetics trial'''
         # condition should be taken into account in the future
+        # check session session
+        self._CheckSessionControl()
+        if self.session_control_state==0 and self.TP_SessionWideControl=='on':
+            self.SelctedCondition=0
+            return
         ConditionsOn=[]
         Probabilities=[]
+        empty=1
         for attr_name in dir(self):
             if attr_name in ['TP_Laser_1','TP_Laser_2','TP_Laser_3','TP_Laser_4']:
                 if getattr(self, attr_name) !='NA':
                     parts = attr_name.split('_')
                     ConditionsOn.append(parts[-1])
                     Probabilities.append(float(eval('self.TP_Probability_'+parts[-1])))
+                    empty=0
+        if empty==1:
+            self.SelctedCondition=0
+            return
         self.ConditionsOn=ConditionsOn
         self.Probabilities=Probabilities
         ProAccu=list(accumulate(Probabilities))
@@ -1734,6 +1797,7 @@ class NewScaleSerialY():
                 data += c
                 if (c == '\r'): break
         return data
+
 class WorkerSignals(QtCore.QObject):
     '''
     Defines the signals available from a running worker thread.
@@ -1800,3 +1864,33 @@ class Worker(QtCore.QRunnable):
             self.signals.result.emit(result)  # Return the result of the processing
         finally:
             self.signals.finished.emit()  # Done
+
+
+
+class TimerWorker(QtCore.QObject):
+    '''
+        Worker for photometry timer
+    '''
+    finished = QtCore.pyqtSignal()
+    progress = QtCore.pyqtSignal(int)
+
+    @QtCore.pyqtSlot(int)
+    def _Timer(self,Time):
+        '''sleep some time'''
+        # Emit initial status
+        interval = 1
+        num_updates = int(np.floor(Time/interval))
+        self.progress.emit(int(Time))
+
+        # Iterate through intervals 
+        while num_updates >0:
+            time.sleep(interval)
+            Time -=interval
+            self.progress.emit(int(Time))
+            num_updates -= 1
+        
+        # Sleep the remainder of the time and finish
+        time.sleep(Time)
+        self.finished.emit()
+
+

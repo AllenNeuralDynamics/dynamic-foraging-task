@@ -1,5 +1,5 @@
-set "logfile=C:\Users\svc_aind_behavior\Documents\foraging_gui_logs\github_log.txt"
-set "repo=C:\Users\svc_aind_behavior\Documents\GitHub\dynamic-foraging-task"
+set "logfile=C:\Users\%USERNAME%\Documents\foraging_gui_logs\github_log.txt"
+set "repo=C:\Users\%USERNAME%\Documents\GitHub\dynamic-foraging-task"
 set "branch=main"
 cd %repo%
 echo --------------------------- >>%logfile%
@@ -13,4 +13,6 @@ git stash >>%logfile% 2>&1
 git checkout %branch% >>%logfile% 2>&1
 git reset --hard >>%logfile% 2>&1
 git pull origin %branch% >>%logfile% 2>&1
+echo waiting thirty second for long running processes >>%logfile%
+timeout 30>NUL
 git status >>%logfile% 2>&1

@@ -16,16 +16,17 @@ from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 from PyQt5.QtWidgets import QFileDialog,QVBoxLayout,QLineEdit
 from PyQt5 import QtWidgets,QtGui,QtCore, uic
-from PyQt5.QtCore import QThreadPool,Qt
+from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
+import webbrowser
 
 import foraging_gui.rigcontrol as rigcontrol
 from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
 from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog
-from foraging_gui.Dialogs import ManipulatorDialog,MotorStageDialog,LaserCalibrationDialog
+from foraging_gui.Dialogs import LaserCalibrationDialog
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog
-from foraging_gui.MyFunctions import GenerateTrials, Worker,NewScaleSerialY
+from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY
 from foraging_gui.stage import Stage
 from foraging_gui.TransferToNWB import bonsai_to_nwb
 
@@ -40,11 +41,13 @@ class NumpyEncoder(json.JSONEncoder):
         return super(NumpyEncoder, self).default(obj)
     
 class Window(QMainWindow):
-    def __init__(self, parent=None,box_number=1):
+    Time = QtCore.pyqtSignal(int) # Photometry timer signal
+
+    def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
         super().__init__(parent)
         
-        
+        # Process inputs        
         self.box_number=box_number
         mapper = {
             1:'A',
@@ -53,6 +56,7 @@ class Window(QMainWindow):
             4:'D',
         }
         self.box_letter = mapper[box_number]
+        self.start_bonsai_ide = start_bonsai_ide
 
         # Load Settings that are specific to this computer  
         self.SettingFolder=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings")
@@ -68,58 +72,48 @@ class Window(QMainWindow):
         # Load Laser and Water Calibration Files
         self._GetLaserCalibration()
         self._GetWaterCalibration()
-        
-        uic.loadUi(self.default_ui, self)
-        if self.default_ui=='ForagingGUI.ui':
-            self.label_date.setText(str(date.today()))
-            self.default_warning_color="color: purple;"
-            self.default_text_color='color: purple;'
-            self.default_text_background_color='background-color: purple;'
-        elif self.default_ui=='ForagingGUI_Ephys.ui':
-            self.Visualization.setTitle(str(date.today()))
-            self.default_warning_color="color: red;"
-            self.default_text_color='color: red;'
-            self.default_text_background_color='background-color: red;'
-        else:
-            self.default_warning_color="color: red;"
-            self.default_text_color='color: red;'
-            self.default_text_background_color='background-color: red;'
+       
+        # Load User interface 
+        self._LoadUI()
+
         # set window title
         self.setWindowTitle(self.window_title)
         logging.info('Setting Window title: {}'.format(self.window_title))
 
-        self.StartANewSession=1 # to decide if should start a new session
-        self.ToInitializeVisual=1
-        self.FigureUpdateTooSlow=0 # if the FigureUpdateTooSlow is true, using different process to update figures
-        self.ANewTrial=1 # permission to start a new trial
-        self.UpdateParameters=1 # permission to update parameters
-        self.loggingstarted=-1
+        # Set up parameters
+        self.StartANewSession = 1   # to decide if should start a new session
+        self.ToInitializeVisual = 1 # Should we visualize performance
+        self.FigureUpdateTooSlow = 0# if the FigureUpdateTooSlow is true, using different process to update figures
+        self.ANewTrial = 1          # permission to start a new trial
+        self.UpdateParameters = 1   # permission to update parameters
+        self.loggingstarted = -1    # Have we started trial logging
         
         # Connect to Bonsai
         self._InitializeBonsai()
 
+        # Set up threads 
         self.threadpool=QThreadPool() # get animal response
         self.threadpool2=QThreadPool() # get animal lick
         self.threadpool3=QThreadPool() # visualization
         self.threadpool4=QThreadPool() # for generating a new trial
         self.threadpool5=QThreadPool() # for starting the trial loop
         self.threadpool_workertimer=QThreadPool() # for timing
+
+        # Set up more parameters
         self.OpenOptogenetics=0
         self.WaterCalibration=0
         self.LaserCalibration=0
         self.Camera=0
-        self.MotorStage=0
-        self.Manipulator=0
         self.NewTrialRewardOrder=0
         self.LickSta=0
         self.LickSta_ToInitializeVisual=1
         self.TimeDistribution=0
         self.TimeDistribution_ToInitializeVisual=1
-        self.finish_Timer=1 # for photometry baseline recordings
-        self.PhotometryRun=0 # 1. Photometry has been run; 0. Photometry has not been carried out.
-        self._Optogenetics()     # open the optogenetics panel 
-        self._LaserCalibration() # to open the laser calibration panel
-        self._WaterCalibration() # to open the water calibration panel
+        self.finish_Timer=1     # for photometry baseline recordings
+        self.PhotometryRun=0    # 1. Photometry has been run; 0. Photometry has not been carried out.
+        self._Optogenetics()    # open the optogenetics panel 
+        self._LaserCalibration()# to open the laser calibration panel
+        self._WaterCalibration()# to open the water calibration panel
         self._Camera()
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self.WaterPerRewardedTrial=0.005 
@@ -132,20 +126,48 @@ class Window(QMainWindow):
         self._WaterVolumnManage2()
         self._LickSta()
         self._InitializeMotorStage()
-        self._StageSerialNum()
+        self._GetPositions()
         self._warmup()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
-        
+        self._StopPhotometry() # Make sure photoexcitation is stopped 
+ 
+        if not self.start_bonsai_ide:
+            '''
+                When starting bonsai without the IDE the connection is always unstable.
+                Reconnecting solves the issue
+            '''
+            self._ReconnectBonsai()   
         logging.info('Start up complete')
+    
+    def _LoadUI(self):
+        '''
+            Determine which user interface to use
+        '''
+        uic.loadUi(self.default_ui, self)
+        if self.default_ui=='ForagingGUI.ui':
+            logging.info('Using ForagingGUI.ui interface')
+            self.label_date.setText(str(date.today()))
+            self.default_warning_color="color: purple;"
+            self.default_text_color='color: purple;'
+            self.default_text_background_color='background-color: purple;'
+        elif self.default_ui=='ForagingGUI_Ephys.ui':
+            logging.info('Using ForagingGUI_Ephys.ui interface')
+            self.Visualization.setTitle(str(date.today()))
+            self.default_warning_color="color: red;"
+            self.default_text_color='color: red;'
+            self.default_text_background_color='background-color: red;'
+        else:
+            logging.info('Using ForagingGUI.ui interface')
+            self.default_warning_color="color: red;"
+            self.default_text_color='color: red;'
+            self.default_text_background_color='background-color: red;'
 
     def connectSignalsSlots(self):
         '''Define callbacks'''
         self.action_About.triggered.connect(self._about)
         self.action_Camera.triggered.connect(self._Camera)
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
-        self.action_Manipulator.triggered.connect(self._Manipulator)
-        self.action_MotorStage.triggered.connect(self._MotorStage)
         self.actionLicks_sta.triggered.connect(self._LickSta)
         self.actionTime_distribution.triggered.connect(self._TimeDistribution)
         self.action_Calibration.triggered.connect(self._WaterCalibration)
@@ -157,7 +179,6 @@ class Window(QMainWindow):
         self.SaveContinue.triggered.connect(self._SaveContinue)
         self.action_Exit.triggered.connect(self._Exit)
         self.action_New.triggered.connect(self._New)
-        self.actionScan_stages.triggered.connect(self._scan_for_usb_stages)
         self.action_Clear.triggered.connect(self._Clear)
         self.action_Start.triggered.connect(self.Start.click)
         self.action_NewSession.triggered.connect(self.NewSession.click)
@@ -176,12 +197,13 @@ class Window(QMainWindow):
         self.NextBlock.clicked.connect(self._NextBlock)
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
         self.OptogeneticsB.currentIndexChanged.connect(self._keyPressEvent)
-        self.PhtotometryB.currentIndexChanged.connect(self._keyPressEvent)
+        self.PhotometryB.currentIndexChanged.connect(self._keyPressEvent)
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._keyPressEvent)
         self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
         self.AutoTrain.clicked.connect(self._AutoTrain)
+        self.pushButton_streamlit.clicked.connect(self._open_mouse_on_streamlit)
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._Task)
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._AdvancedBlockAuto)
@@ -319,6 +341,7 @@ class Window(QMainWindow):
             self.label_118.setEnabled(True)
 
             # set warm up default parameters
+            self.Task.setCurrentIndex(self.Task.findText('Coupled Baiting'))
             self.BaseRewardSum.setText('1')
             self.RewardFamily.setText('3')
             self.RewardPairsN.setText('1')
@@ -358,6 +381,7 @@ class Window(QMainWindow):
             if attr_name.startswith('WarmupBackup_') and attr_name!='WarmupBackup_' and attr_name!='WarmupBackup_warmup':
                 parameters[attr_name.replace('WarmupBackup_','')]=getattr(self,attr_name)
         widget_dict = {w.objectName(): w for w in self.TrainingParameters.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+        widget_dict['Task']=self.Task
         try:
             for key in widget_dict.keys():
                 self._set_parameters(key,widget_dict,parameters)
@@ -368,25 +392,47 @@ class Window(QMainWindow):
     def _keyPressEvent(self):
         # press enter to confirm parameters change
         self.keyPressEvent()
+    
+    def _CheckStageConnection(self):
+        '''get the current position of the stage'''
+        if hasattr(self, 'current_stage') and self.current_stage.connected:
+            logging.info('Checking stage connection')
+            current_stage=self.current_stage
+            current_position=current_stage.get_position()
+            if not current_stage.connected:
+                logging.error('lost stage connection')
+                self._no_stage()
 
     def _GetPositions(self):
         '''get the current position of the stage'''
-        if hasattr(self, 'current_stage'):
+        self._CheckStageConnection()
+
+        if hasattr(self, 'current_stage') and self.current_stage.connected:
+            logging.info('Grabbing current stage position')
             current_stage=self.current_stage
             current_position=current_stage.get_position()
             self._UpdatePosition(current_position,(0,0,0))
-                                
+        else:
+            logging.info('GetPositions pressed, but no current stage')
+
     def _StageStop(self):
         '''Halt the stage'''
-        if hasattr(self, 'current_stage'):
+        self._CheckStageConnection()
+        if hasattr(self, 'current_stage') and self.current_stage.connected:
+            logging.info('Stopping stage movement')
             current_stage=self.current_stage
             current_stage.halt()
+        else:
+            logging.info('StageStop pressed, but no current stage')
 
     def _Move(self,axis,step):
         '''Move stage'''
+        self._CheckStageConnection()
         try:
-            if not hasattr(self, 'current_stage'):
+            if (not hasattr(self, 'current_stage')) or (not self.current_stage.connected):
+                logging.info('Move Stage pressed, but no current stage')
                 return
+            logging.info('Moving stage')
             self.StageStop.click
             current_stage=self.current_stage
             current_position=current_stage.get_position()
@@ -451,66 +497,83 @@ class Window(QMainWindow):
         self.PositionY.setText(str(NewPositions[1]))
         self.PositionZ.setText(str(NewPositions[2]))
 
-    def _StageSerialNum(self):
-        '''connect to a stage'''
-        # scan stages
+    def _InitializeMotorStage(self):
+        '''
+            Scans for available newscale stages. Attempts to connect to the newscale stage
+            defined by the serial number in the settings file. If it cannot connect for any reason
+            it displays a warning in the motor stage box, and returns. 
+            
+            Failure modes include: an error in scanning for stages, no stages found, no stage defined
+            in the settings file, the defined stage not found, an error in connecting to the stage 
+        '''
+ 
+        # find available newscale stages
+        logging.info('Scanning for newscale stages')
         try:
             self.instances = NewScaleSerialY.get_instances()
         except Exception as e:
             logging.error('Could not find instances of NewScale Stage: {}'.format(str(e)))
+            self._no_stage()
+            return
+       
+        # If we can't find any stages, return 
+        if len(self.instances) == 0:
+            logging.warning('Could not find any instances of NewScale Stage')
+            self._no_stage()
+            return               
+    
+        logging.info('found {} newscale stages'.format(len(self.instances)))
+
+        # Get the serial num from settings
+        if not hasattr(self, 'newscale_serial_num_box{}'.format(self.box_number)):
+            logging.error('Cannot determine newscale serial num')
+            self._no_stage()
+            return
+        self.newscale_serial_num=eval('self.newscale_serial_num_box'+str(self.box_number))
+        if self.newscale_serial_num == '':
+            logging.warning('No newscale serial number in settings file')
+            self._no_stage()
             return
 
-        if hasattr(self,'current_stage'):
-            curent_stage_name=self.current_stage.name
+        # See if the serial num from settings is in the instances we found
+        stage_index = 0
+        stage_names = np.array([str(instance.sn) for instance in self.instances])
+        index = np.where(stage_names == str(self.newscale_serial_num))[0]
+        if len(index) == 0:
+            self._no_stage()
+            msg = 'Could not find newscale with serial number: {}'
+            logging.error(msg.format(self.newscale_serial_num))
+            return
         else:
-            curent_stage_name=''
-        # connect to one stage
-        for instance in self.instances:
-            try:
-                instance.io.close()
-            except Exception as e:
-                pass
-            try:
-                if (instance.sn==self.StageSerialNum.currentText())&\
-                    (curent_stage_name!=instance.sn):
-                    self._connect_stage(instance)
-            except Exception as e:
-                logging.error(str(e))
+            stage_index = index[0]
+            logging.info('Found the newscale stage from the settings file')
+   
+        # Setup connection
+        newscale_stage_instance = self.instances[stage_index]
+        self._connect_stage(newscale_stage_instance)
 
-    def _InitializeMotorStage(self):
-        '''To initialize motor stage'''
-        self._scan_for_usb_stages()
-        # use the default newscale stage
-        try:
-            self.newscale_serial_num=eval('self.newscale_serial_num_box'+str(self.box_number))
-            if self.newscale_serial_num!='':
-                index = self.StageSerialNum.findText(str(self.newscale_serial_num))
-                if index != -1:
-                    self.StageSerialNum.setCurrentIndex(index)
-                else:
-                    self.Warning_Newscale.setText('Default Newscale not found!')
-                    self.Warning_Newscale.setStyleSheet(self.default_warning_color)
-        except Exception as e:
-            logging.error(str(e))
-
-    def _scan_for_usb_stages(self):
-        '''Scan available stages'''
-        try:
-            self.instances = NewScaleSerialY.get_instances()
-        except Exception as e:
-            logging.error('Could not find instances of NewScale Stage: {}'.format(str(e)))
+    def _no_stage(self):
+        '''
+            Display a warrning message that the newscale stage is not connected
+        '''
+        if hasattr(self, 'current_stage'):
+            self.Warning_Newscale.setText('Lost newscale stage connection')
         else:
-            self.stage_names=[]
-            for instance in self.instances:
-                self.stage_names.append(instance.sn)
-            self.StageSerialNum.addItems(self.stage_names)
+            self.Warning_Newscale.setText('Newscale stage not connected')
+        self.Warning_Newscale.setStyleSheet(self.default_warning_color)
     
     def _connect_stage(self,instance):
         '''connect to a stage'''
-        instance.io.open()
-        instance.set_timeout(1)
-        instance.set_baudrate(250000)
-        self.current_stage=Stage(serial=instance)
+        try:       
+            instance.io.open()
+            instance.set_timeout(1)
+            instance.set_baudrate(250000)
+            self.current_stage=Stage(serial=instance)
+        except Exception as e:
+            logging.error(str(e))
+            self._no_stage()
+        else:
+            logging.info('Successfully connected to newscale stage: {}'.format(instance.sn))       
 
     def _ConnectBonsai(self):
         '''
@@ -562,7 +625,7 @@ class Window(QMainWindow):
         '''   
         if self.InitializeBonsaiSuccessfully ==1 and hasattr(self, 'GeneratedTrials'):
             msg = 'Reconnected to Bonsai. Start a new session before running more trials'
-            reply = QMessageBox.question(self, 'Reconnect Bonsai', msg, QMessageBox.Ok )
+            reply = QMessageBox.question(self, 'Box {}, Reconnect Bonsai'.format(self.box_letter), msg, QMessageBox.Ok )
  
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
@@ -749,7 +812,7 @@ class Window(QMainWindow):
             logging.info('Bonsai started successfully')
             self.InitializeBonsaiSuccessfully=1
             self.WarningLabel.setText('')
-            self.WarningLabel.setStyleSheet("color: red;")
+            self.WarningLabel.setStyleSheet(self.default_warning_color)
             return
 
         # Start Bonsai
@@ -774,7 +837,7 @@ class Window(QMainWindow):
                 logging.info('Bonsai started successfully')
                 if self.WarningLabel.text() == 'Lost bonsai connection':
                     self.WarningLabel.setText('')
-                    self.WarningLabel.setStyleSheet("color: red;")
+                    self.WarningLabel.setStyleSheet(self.default_warning_color)
                 self.InitializeBonsaiSuccessfully=1
                 subprocess.Popen('title Box{}'.format(self.box_letter),shell=True)
                 return
@@ -856,7 +919,10 @@ class Window(QMainWindow):
 
         SettingsBox = 'Settings_box{}.csv'.format(self.box_number)
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
-        subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
+        if self.start_bonsai_ide:
+            subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
+        else:
+            subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True)
 
     def _OpenSettingFolder(self):
         '''Open the setting folder'''
@@ -1048,7 +1114,7 @@ class Window(QMainWindow):
         '''
         if key in parameters:
             # skip some keys
-            if key=='ExtraWater' or key=='WeightBefore' or key=='WeightAfter' or key=='SuggestedWater':
+            if key=='ExtraWater' or key=='WeightAfter' or key=='SuggestedWater':
                 self.WeightAfter.setText('')
                 return
             widget = widget_dict[key]
@@ -1198,11 +1264,12 @@ class Window(QMainWindow):
 
         # move newscale stage
         if hasattr(self,'current_stage'):
-            try:
-                self.StageStop.click
-                self.current_stage.move_absolute_3d(float(self.PositionX.text()),float(self.PositionY.text()),float(self.PositionZ.text()))
-            except Exception as e:
-                logging.error(str(e))
+            if (self.PositionX.text() != '')and (self.PositionY.text() != '')and (self.PositionZ.text() != ''):
+                try:
+                    self.StageStop.click
+                    self.current_stage.move_absolute_3d(float(self.PositionX.text()),float(self.PositionY.text()),float(self.PositionZ.text()))
+                except Exception as e:
+                    logging.error(str(e))
         # Get the parameters before change
         if hasattr(self, 'GeneratedTrials') and self.ToInitializeVisual==0: # use the current GUI paramters when no session starts running
             Parameters=self.GeneratedTrials
@@ -1225,16 +1292,22 @@ class Window(QMainWindow):
                     child.setStyleSheet('color: black;')
                     child.setStyleSheet('background-color: white;')
                     self._Task()
-                    if child.objectName()=='AnimalName' and child.text()=='':
-                        child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                        continue
-                    if child.objectName()=='Experimenter' or child.objectName()=='TotalWater' or child.objectName()=='AnimalName' or child.objectName()=='WeightBefore'  or child.objectName()=='WeightAfter' or child.objectName()=='ExtraWater':
+                    if child.objectName() in {'Experimenter','TotalWater','WeightAfter','ExtraWater'}:
                         continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
                         if Correct ==0: # incorrect format; don't change
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
+                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight']) and
+                        (child.text() == '')):
+                        # These attributes can have the empty string, but we can't set the value as the empty string
+                        if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
+                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))                       
+                        continue
+                    if (child.objectName() == 'LatestCalibrationDate') and (child.text() == 'NA'):
+                        continue
+
 
                     # check for empty string condition
                     try:
@@ -1258,8 +1331,6 @@ class Window(QMainWindow):
                             new = float(child.text())
                             if new != old:
                                 logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
-                        else:
-                            logging.error('Could not evaluate parameter change: "{}","{}" '.format(child.objectName(),child.text()))
                     
             # update the current training parameters
             self._GetTrainingParameters()
@@ -1284,7 +1355,7 @@ class Window(QMainWindow):
                 try:
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                         self.Continue=0
-                        if child.objectName() in {'Experimenter', 'AnimalName', 'UncoupledReward', 'WeightBefore', 'WeightAfter', 'ExtraWater'}:
+                        if child.objectName() in {'Experimenter', 'UncoupledReward', 'WeightAfter', 'ExtraWater'}:
                             child.setStyleSheet(self.default_text_color)
                             self.Continue=1
                         if child.text()=='': # If empty, change background color and wait for confirmation
@@ -1594,7 +1665,7 @@ class Window(QMainWindow):
          # enable close icon
         self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, True)
         self.show()
-        reply = QMessageBox.question(self, 'Foraging Close', 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+        reply = QMessageBox.question(self, 'Box {}, Foraging Close'.format(self.box_letter), 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
             self._Save()
             event.accept()
@@ -1605,6 +1676,7 @@ class Window(QMainWindow):
                 self.client3.close()
                 self.client4.close()
             self.Opto_dialog.close()
+            self._StopPhotometry()  # Make sure photo excitation is stopped 
             print('GUI Window closed')
             logging.info('GUI Window closed')
         elif reply == QMessageBox.No:
@@ -1615,6 +1687,7 @@ class Window(QMainWindow):
                 self.client2.close()
                 self.client3.close()
                 self.client4.close()
+            self._StopPhotometry()   # Make sure photo excitation is stopped    
             print('GUI Window closed')
             logging.info('GUI Window closed')
             self.Opto_dialog.close()
@@ -1624,19 +1697,21 @@ class Window(QMainWindow):
     def _Exit(self):
         '''Close the GUI'''
         logging.info('closing the GUI')
-        response = QMessageBox.question(self,'Save and Exit:', "Do you want to save the current result?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
+        response = QMessageBox.question(self,'Box {}, Save and Exit:'.format(self.box_letter), "Do you want to save the current result?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
         if response==QMessageBox.Yes:
             # close the camera
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
                 self.Camera_dialog.StartCamera.setChecked(False)
                 self.Camera_dialog._StartCamera()
             self._Save()
+            self._StopPhotometry()# Make sure photo excitation is stopped 
             self.close()
         elif response==QMessageBox.No:
             # close the camera
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
                 self.Camera_dialog.StartCamera.setChecked(False)
                 self.Camera_dialog._StartCamera()
+            self._StopPhotometry()# Make sure photo excitation is stopped 
             self.close()
 
     def _Snipping(self):
@@ -1663,15 +1738,6 @@ class Window(QMainWindow):
         else:
             self.Camera_dialog.hide()
 
-    def _Manipulator(self):
-        if self.Manipulator==0:
-            self.ManipulatoB_dialog = ManipulatorDialog(MainWindow=self)
-            self.Manipulator=1
-        if self.action_Manipulator.isChecked()==True:
-            self.ManipulatoB_dialog.show()
-        else:
-            self.ManipulatoB_dialog.hide()
-
     def _WaterCalibration(self):
         if self.WaterCalibration==0:
             self.WaterCalibration_dialog = WaterCalibrationDialog(MainWindow=self)
@@ -1689,15 +1755,6 @@ class Window(QMainWindow):
             self.LaserCalibration_dialog.show()
         else:
             self.LaserCalibration_dialog.hide()
-
-    def _MotorStage(self):
-        if self.MotorStage==0:
-            self.MotorStage_dialog = MotorStageDialog(MainWindow=self)
-            self.MotorStage=1
-        if self.action_MotorStage.isChecked()==True:
-            self.MotorStage_dialog.show()
-        else:
-            self.MotorStage_dialog.hide()
 
     def _TimeDistribution(self):
         '''Plot simulated ITI/delay/block distribution'''
@@ -1779,7 +1836,7 @@ class Window(QMainWindow):
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
         if self.BaseWeight.text()=='' or self.WeightAfter.text()=='' or self.TargetRatio.text()=='':
-            response = QMessageBox.question(self,'Save without weight or extra water:', "Do you want to save without weight or extra water information provided?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
+            response = QMessageBox.question(self,'Box {}, Save without weight or extra water:'.format(self.box_letter), "Do you want to save without weight or extra water information provided?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
             if response==QMessageBox.Yes:
                 pass
                 self.WarningLabel.setText('Saving without weight or extra water!')
@@ -2057,7 +2114,7 @@ class Window(QMainWindow):
                         continue
                     if key in CurrentObj:
                         # skip some keys; skip warmup
-                        if key=='ExtraWater' or key=='TotalWater' or key=='WeightAfter' or key=='SuggestedWater' or key=='Start' or key=='warmup' or key=='SessionlistSpin':
+                        if key in ['Start','warmup','SessionlistSpin']:
                             self.WeightAfter.setText('')
                             continue
                         widget = widget_dict[key]
@@ -2066,6 +2123,12 @@ class Window(QMainWindow):
                             Tag=0
                         except Exception as e: # sometimes we only have training parameters, no behavior parameters
                             logging.error(str(e))
+                            value=CurrentObj[key]
+                            Tag=1
+                        if key in {'BaseWeight','TotalWater','TargetWeight','WeightAfter','SuggestedWater','TargetRatio'}:
+                            self.BaseWeight.disconnect()
+                            self.TargetRatio.disconnect()
+                            self.WeightAfter.disconnect()
                             value=CurrentObj[key]
                             Tag=1
                         if isinstance(widget, QtWidgets.QPushButton):
@@ -2083,13 +2146,24 @@ class Window(QMainWindow):
                                 widget.setText(value[-1])
                             elif Tag==1:
                                 widget.setText(value)
+                            if key in {'BaseWeight','TotalWater','TargetWeight','WeightAfter','SuggestedWater','TargetRatio'}:
+                                self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
+                                self.WeightAfter.textChanged.connect(self._UpdateSuggestedWater)
+                                self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
                         elif isinstance(widget, QtWidgets.QComboBox):
                             if Tag==0:
                                 index = widget.findText(value[-1])
                             elif Tag==1:
                                 index = widget.findText(value)
                             if index != -1:
-                                widget.setCurrentIndex(index)
+                                # Alternating on/off for SessionStartWith if SessionAlternating is on
+                                if key=='SessionStartWith' and 'Opto_dialog' in Obj:
+                                    if 'SessionAlternating' in Obj['Opto_dialog'] and 'SessionWideControl' in Obj['Opto_dialog']:
+                                        if Obj['Opto_dialog']['SessionAlternating']=='on' and Obj['OptogeneticsB']=='on' and Obj['Opto_dialog']['SessionWideControl']=='on':
+                                            index=1-index
+                                            widget.setCurrentIndex(index)
+                                else:
+                                    widget.setCurrentIndex(index)
                         elif isinstance(widget, QtWidgets.QDoubleSpinBox):
                             if Tag==0:
                                 widget.setValue(float(value[-1]))
@@ -2222,7 +2296,7 @@ class Window(QMainWindow):
         PlotM._Update(GeneratedTrials=self.GeneratedTrials)
         self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
     def _Clear(self):
-        reply = QMessageBox.question(self, 'Clear parameters:', 'Do you want to clear training parameters?',QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        reply = QMessageBox.question(self, 'Box {}, Clear parameters:'.format(self.box_letter), 'Do you want to clear training parameters?',QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
             for child in self.TrainingParameters.findChildren(QtWidgets.QLineEdit)+ self.centralwidget.findChildren(QtWidgets.QLineEdit):
                 if child.isEnabled():
@@ -2235,6 +2309,7 @@ class Window(QMainWindow):
 
     def _StartExcitation(self):
         if self.StartExcitation.isChecked():
+            logging.info('StartExcitation is checked')
             self.StartExcitation.setStyleSheet("background-color : green;")
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
@@ -2247,7 +2322,15 @@ class Window(QMainWindow):
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: start excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
+                reply = QMessageBox.question(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
+                self.StartExcitation.setChecked(False)
+                self.StartExcitation.setStyleSheet("background-color : none")
+            else:
+                self.TeensyWarning.setText('')
+                self.TeensyWarning.setStyleSheet(self.default_warning_color)               
+
         else:
+            logging.info('StartExcitation is unchecked')
             self.StartExcitation.setStyleSheet("background-color : none")
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
@@ -2260,9 +2343,33 @@ class Window(QMainWindow):
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: stop excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
+                reply = QMessageBox.question(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when stopping excitation: {}'.format(e), QMessageBox.Ok)
+            else:
+                self.TeensyWarning.setText('')
+                self.TeensyWarning.setStyleSheet(self.default_warning_color)               
+
     
     def _StartBleaching(self):
         if self.StartBleaching.isChecked():
+            # Check if trials have stopped
+            if self.ANewTrial==0:
+                # Alert User
+                reply = QMessageBox.question(self, 'Box {}, Start bleaching:'.format(self.box_letter), 
+                    'Cannot start photobleaching, because trials are in progress', QMessageBox.Ok)
+
+                # reset GUI button
+                self.StartBleaching.setChecked(False)
+                return
+            
+            # Verify mouse is disconnected
+            reply = QMessageBox.question(self, 'Box {}, Start bleaching:'.format(self.box_letter), 
+                    'Starting photobleaching, have the cables been disconnected from the mouse?',QMessageBox.Yes, QMessageBox.No )
+            if reply == QMessageBox.No:
+                # reset GUI button
+                self.StartBleaching.setChecked(False)
+                return
+
+            # Start bleaching
             self.StartBleaching.setStyleSheet("background-color : green;")
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
@@ -2273,8 +2380,29 @@ class Window(QMainWindow):
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
                 logging.error(str(e))
+                
+                # Alert user
                 self.TeensyWarning.setText('Error: start bleaching!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
+                reply = QMessageBox.question(self, 'Box {}, Start bleaching:'.format(self.box_letter), 
+                    'Cannot start photobleaching: {}'.format(str(e)), QMessageBox.Ok)
+                
+                # Reset GUI button
+                self.StartBleaching.setStyleSheet("background-color : none")               
+                self.StartBleaching.setChecked(False)
+            else:
+                # Bleaching continues until user stops
+                msgbox = QMessageBox()
+                msgbox.setWindowTitle('Box {}, bleaching:'.format(self.box_letter))
+                msgbox.setText('Photobleaching in progress, do not close the GUI.')
+                msgbox.setStandardButtons(QMessageBox.Ok)
+                button = msgbox.button(QMessageBox.Ok)
+                button.setText('Stop bleaching')
+                bttn = msgbox.exec_()
+                
+                # Stop Bleaching
+                self.StartBleaching.setChecked(False)
+                self._StartBleaching()
         else:
             self.StartBleaching.setStyleSheet("background-color : none")
             try:
@@ -2282,13 +2410,36 @@ class Window(QMainWindow):
                 # Trigger Teensy with the above specified exp mode
                 ser.write(b's')
                 ser.close()
-                self.TeensyWarning.setText('Stop bleaching!')
+                self.TeensyWarning.setText('')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: stop bleaching!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
-
+    
+    def _StopPhotometry(self):
+        '''
+            Stop either bleaching or photometry
+        '''
+        logging.info('Checking that photometry is not running')
+        try:
+            ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
+            # Trigger Teensy with the above specified exp mode
+            ser.write(b's')
+            ser.close()
+        except Exception as e:
+            logging.info('Could not stop photometry, most likely this means photometry is not running: '+str(e))
+        else:
+            logging.info('Photometry excitation stopped')
+        finally:
+            # Reset all GUI buttons
+            self.TeensyWarning.setText('')
+            self.TeensyWarning.setStyleSheet(self.default_warning_color)      
+            self.StartBleaching.setStyleSheet("background-color : none")
+            self.StartExcitation.setStyleSheet("background-color : none")
+            self.StartBleaching.setChecked(False)
+            self.StartExcitation.setChecked(False)
+           
     def _AutoReward(self):
         if self.AutoReward.isChecked():
             self.AutoReward.setStyleSheet("background-color : green;")
@@ -2310,7 +2461,7 @@ class Window(QMainWindow):
         logging.info('starting new session')
         if self.NewSession.isChecked():
             if self.ToInitializeVisual==0: # Do not ask to save when no session starts running
-                reply = QMessageBox.question(self, 'New Session:', 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+                reply = QMessageBox.question(self, 'Box {}, New Session:'.format(self.box_letter), 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
             else:
                 reply=QMessageBox.No
             if reply == QMessageBox.Yes:
@@ -2346,7 +2497,7 @@ class Window(QMainWindow):
         return reply
 
     def _AskSave(self):
-        reply = QMessageBox.question(self, 'New Session:', 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+        reply = QMessageBox.question(self, 'Box {}, New Session:'.format(self.box_letter), 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
             self._Save()
             logging.info('The current session was saved')
@@ -2379,12 +2530,12 @@ class Window(QMainWindow):
                 elif (time.time() - start_time) > stall_duration*stall_iteration:
                     elapsed_time = int(np.floor(stall_duration*stall_iteration/60))
                     message = '{} minutes have elapsed since trial stopped was initiated. Force stop?'.format(elapsed_time)
-                    reply = QMessageBox.question(self,'StopCurrentSession',message,QMessageBox.Yes|QMessageBox.No)
+                    reply = QMessageBox.question(self,'Box {}, StopCurrentSession'.format(self.box_letter),message,QMessageBox.Yes|QMessageBox.No)
                     if reply == QMessageBox.Yes:
                         logging.error('trial stalled {} minutes, user force stopped trials'.format(elapsed_time))
                         self.ANewTrial=1
                         self.WarningLabel.setText('')
-                        self.WarningLabel.setStyleSheet("color: red;")
+                        self.WarningLabel.setStyleSheet(self.default_warning_color)
                         break
                     else:
                         stall_iteration+=1
@@ -2395,22 +2546,37 @@ class Window(QMainWindow):
         if self.NewTrialRewardOrder==0:
             self.GeneratedTrials._GenerateATrial(self.Channel4)
         self.ANewTrial=1
+    
     def _thread_complete2(self):
         '''complete of receive licks'''
         self.ToReceiveLicks=1
+    
     def _thread_complete3(self):
         '''complete of update figures'''
         self.ToUpdateFigure=1
+    
     def _thread_complete4(self):
         '''complete of generating a trial'''
         self.ToGenerateATrial=1
+    
     def _thread_complete_timer(self):
         '''complete of _Timer'''
         self.finish_Timer=1
-    def _Timer(self,Time):
-        '''sleep some time'''
-        time.sleep(Time)
-    
+        logging.info('Finished photometry baseline timer')
+        self.WarningLabelStop.setText('')
+        self.WarningLabelStop.setStyleSheet(self.default_warning_color)
+   
+    def _update_photometery_timer(self,time):
+        '''
+            Updates photometry baseline timer
+        '''
+        minutes = int(np.floor(time/60))
+        seconds = np.remainder(time,60)
+        if len(str(seconds)) == 1:
+            seconds = '0{}'.format(seconds)
+        self.WarningLabelStop.setText('Running photometry baseline: {}:{}'.format(minutes,seconds))
+        self.WarningLabelStop.setStyleSheet(self.default_warning_color)       
+     
     def _set_metadata_enabled(self, enable: bool):
         '''Enable or disable metadata fields'''
         self.ID.setEnabled(enable)
@@ -2418,7 +2584,9 @@ class Window(QMainWindow):
 
     def _Start(self):
         '''start trial loop'''
-        
+        # empty post weight
+        self.WeightAfter.setText('')
+
         # Check for Bonsai connection
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
@@ -2466,6 +2634,7 @@ class Window(QMainWindow):
             # generate a new session id
             self.WarningLabel.setText('')
             self.WarningLabel.setStyleSheet("color: gray;")
+            self.WarmupWarning.setText('')
             # start a new logging
             try:
                 self.Ot_log_folder=self._restartlogging()
@@ -2473,11 +2642,11 @@ class Window(QMainWindow):
                 if 'ConnectionAbortedError' in str(e):
                     logging.info('lost bonsai connection: restartlogging()')
                     self.WarningLabel.setText('Lost bonsai connection')
-                    self.WarningLabel.setStyleSheet("color: red;")
+                    self.WarningLabel.setStyleSheet(self.default_warning_color)
                     self.Start.setChecked(False)
                     self.Start.setStyleSheet("background-color : none")
                     self.InitializeBonsaiSuccessfully=0
-                    reply = QMessageBox.question(self, 'Start', 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No)
+                    reply = QMessageBox.question(self, 'Box {}, Start'.format(self.box_letter), 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No)
                     if reply == QMessageBox.Yes:
                         self._ReconnectBonsai()
                         logging.info('User selected reconnect bonsai')
@@ -2550,14 +2719,37 @@ class Window(QMainWindow):
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
             workerStartTrialLoop1=self.workerStartTrialLoop1
-        
+
+        # Check if photometry excitation is running or not
+        if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and (not self.StartExcitation.isChecked()):
+            logging.warning('photometry is set to "on", but excitation is not running')
+            reply = QMessageBox.question(self, 'Box {}, Start'.format(self.box_letter), 'Photometry is set to "on", but excitation is not running. Start excitation now?',QMessageBox.Yes | QMessageBox.No)
+            if reply == QMessageBox.Yes:
+                self.StartExcitation.setChecked(True)
+                logging.info('User selected to start excitation')
+                self._StartExcitation()
+            else:                   
+                logging.info('User selected not to start excitation')
+  
         # collecting the base signal for photometry. Only run once
-        if self.PhtotometryB.currentText()=='on' and self.PhotometryRun==0:
+        if self.PhotometryB.currentText()=='on' and self.PhotometryRun==0:
+            logging.info('Starting photometry baseline timer')
             self.finish_Timer=0
             self.PhotometryRun=1
-            workertimer = Worker(self._Timer,float(self.baselinetime.text())*60)
-            workertimer.signals.finished.connect(self._thread_complete_timer)
-            self.threadpool_workertimer.start(workertimer)
+            
+            # If we already created a workertimer and thread we can reuse them
+            if not hasattr(self, 'workertimer'):
+                self.workertimer = TimerWorker()
+                self.workertimer_thread = QThread()
+                self.workertimer.progress.connect(self._update_photometery_timer)
+                self.workertimer.finished.connect(self._thread_complete_timer)
+                self.Time.connect(self.workertimer._Timer)
+                self.workertimer.moveToThread(self.workertimer_thread)
+                self.workertimer_thread.start()
+
+            self.Time.emit(int(np.floor(float(self.baselinetime.text())*60))) 
+            self.WarningLabelStop.setText('Running photometry baseline')
+            self.WarningLabelStop.setStyleSheet(self.default_warning_color)
         
         self._StartTrialLoop(GeneratedTrials,worker1)
 
@@ -2576,7 +2768,7 @@ class Window(QMainWindow):
         # Track elapsed time in case Bonsai Stalls
         last_trial_start = time.time()
         stall_iteration = 1
-        stall_duration = 5*60  
+        stall_duration = 5*60 
 
         while self.Start.isChecked():
             QApplication.processEvents()
@@ -2605,11 +2797,11 @@ class Window(QMainWindow):
                     if 'ConnectionAbortedError' in str(e):
                         logging.info('lost bonsai connection: InitiateATrial')
                         self.WarningLabel.setText('Lost bonsai connection')
-                        self.WarningLabel.setStyleSheet("color: red;")
+                        self.WarningLabel.setStyleSheet(self.default_warning_color)
                         self.Start.setChecked(False)
                         self.Start.setStyleSheet("background-color : none")
                         self.InitializeBonsaiSuccessfully=0
-                        reply = QMessageBox.question(self, 'Start', 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No)
+                        reply = QMessageBox.question(self, 'Box {}, Start'.format(self.box_letter), 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No)
                         if reply == QMessageBox.Yes:
                             self._ReconnectBonsai()
                             logging.info('User selected reconnect bonsai')
@@ -2619,7 +2811,7 @@ class Window(QMainWindow):
 
                         break
                     else:
-                        reply = QMessageBox.question(self, 'Error', 'Encountered the following error: {}'.format(e),QMessageBox.Ok )
+                        reply = QMessageBox.question(self, 'Box {}, Error'.format(self.box_letter), 'Encountered the following error: {}'.format(e),QMessageBox.Ok )
                         logging.error('Caught this error: {}'.format(e))
                         self.ANewTrial=1
                         self.Start.setChecked(False)
@@ -2641,19 +2833,26 @@ class Window(QMainWindow):
                     self.threadpool.start(worker1)
                 #generate a new trial
                 if self.NewTrialRewardOrder==1:
-                    GeneratedTrials._GenerateATrial(self.Channel4)  
- 
+                    GeneratedTrials._GenerateATrial(self.Channel4)   
+
             elif (time.time() - last_trial_start) >stall_duration*stall_iteration:
                 # Elapsed time since last trial is more than tolerance
+
+                # Check if we are in the photometry baseline period.
+                if (self.finish_Timer==0) & ((time.time() - last_trial_start) < (float(self.baselinetime.text())*60+10)):
+                    # Extra 10 seconds is to avoid any race conditions
+                    # We are in the photometry baseline period
+                    continue
                 
                 # Prompt user to stop trials
                 elapsed_time = int(np.floor(stall_duration*stall_iteration/60))
                 message = '{} minutes have elapsed since the last trial started. Bonsai may have stopped. Stop trials?'.format(elapsed_time)
-                reply = QMessageBox.question(self, 'Trial Generator', message,QMessageBox.Yes| QMessageBox.No )
+                reply = QMessageBox.question(self, 'Box {}, Trial Generator'.format(self.box_letter), message,QMessageBox.Yes| QMessageBox.No )
                 if reply == QMessageBox.Yes:
                     # User stops trials
-                    logging.error('trial stalled {} minutes, user stopped trials'.format(elapsed_time))
-        
+                    err_msg = 'trial stalled {} minutes, user stopped trials. ANewTrial:{},Start:{},finish_Timer:{}'
+                    logging.error(err_msg.format(elapsed_time,self.ANewTrial,self.Start.isChecked(), self.finish_Timer))
+
                     # Set that the current trial ended, so we can save
                     self.ANewTrial=1
     
@@ -2666,7 +2865,7 @@ class Window(QMainWindow):
                     
                     # Give warning to user
                     self.WarningLabel.setText('Trials stalled, recheck bonsai connection.')
-                    self.WarningLabel.setStyleSheet("color: red;")
+                    self.WarningLabel.setStyleSheet(self.default_warning_color)
                     break
                 else:
                     # User continues, wait another stall_duration and prompt again
@@ -2806,6 +3005,7 @@ class Window(QMainWindow):
                 self.SuggestedWater.setText(str(np.round(suggested_water,3)))
             else:
                 self.SuggestedWater.setText('')
+                self.TotalWaterWarning.setText('')
             # update total water
             if self.SuggestedWater.text()=='':
                 ExtraWater=0
@@ -2835,6 +3035,16 @@ class Window(QMainWindow):
         
         # Check subject id each time the dialog is opened
         self.AutoTrain_dialog.update_auto_train_fields(subject_id=self.ID.text())
+        
+    def _open_mouse_on_streamlit(self):
+        '''open the training history of the current mouse on the streamlit app'''
+        # See this PR: https://github.com/AllenNeuralDynamics/foraging-behavior-browser/pull/25
+        webbrowser.open(f'https://foraging-behavior-browser.streamlit.app/?filter_subject_id={self.ID.text()}'
+                         '&tab_id=tab_session_x_y&x_y_plot_xname=session&x_y_plot_yname=foraging_eff'
+                         '&x_y_plot_group_by=h2o&x_y_plot_if_show_dots=True&x_y_plot_if_aggr_each_group=True&x_y_plot_aggr_method_group=lowess'
+                         '&x_y_plot_if_aggr_all=False&x_y_plot_smooth_factor=5'
+                         '&x_y_plot_dot_size=20&x_y_plot_dot_opacity=0.8&x_y_plot_line_width=3.0'
+        )
         
 def map_hostname_to_box(hostname,box_num):
     host_mapping = {
@@ -2898,6 +3108,9 @@ def start_gui_log_file(box_number):
     logging.captureWarnings(True)
 
 def log_git_hash():
+    '''
+        Add a note to the GUI log about the current branch and hash. Assumes the local repo is clean
+    '''
     try:
         git_hash = subprocess.check_output(['git','rev-parse','--short', 'HEAD']).decode('ascii').strip()
         git_branch = subprocess.check_output(['git','branch','--show-current']).decode('ascii').strip()
@@ -2905,25 +3118,82 @@ def log_git_hash():
     except Exception as e:
         logging.error('Could not log git branch and hash: {}'.format(str(e)))
 
-def excepthook(exc_type, exc_value, exc_tb):
+def show_exception_box(log_msg):
     '''
-        excepthook will be called when the GUI encounters an uncaught exception
-        We will log the error in the logfile, print the error to the console, then exit
+        Displays a Qwindow alert to the user that an uncontrolled error has occured, and the error message
+        if no QApplication instance is available, logs a note in the GUI log
     '''
-    tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
-    print('Encountered a fatal error: ')
-    print(tb)
-    logging.error('FATAL ERROR: \n{}'.format(tb))
-    QtWidgets.QApplication.quit()
+    # Check if a QApplication instance is running
+    if QtWidgets.QApplication.instance() is not None:
+        box = log_msg[0] # Grab the box letter
+        log_msg = log_msg[1:] # Grab the error messages
+
+        # Make a QWindow, wait for user response
+        errorbox = QtWidgets.QMessageBox()
+        errorbox.setWindowTitle('Box {}, Error'.format(box))
+        msg = '<span style="color:purple;font-weight:bold">An uncontrolled error occurred. Save any data and restart the GUI. </span> <br><br>{}'.format(log_msg)
+        errorbox.setText(msg)
+        errorbox.exec_()
+    else:
+        logging.error('could not launch exception box')
+
+class UncaughtHook(QtCore.QObject):
+    '''
+        This class handles uncaught exceptions and hooks into the sys.excepthook
+    '''
+    _exception_caught = QtCore.Signal(object)
+    
+    def __init__(self,box_number, *args, **kwargs):
+        super(UncaughtHook, self).__init__(*args, **kwargs)
+        
+        # Determine what Box we are in
+        mapper = {
+            1:'A',
+            2:'B',
+            3:'C',
+            4:'D'
+            }
+        self.box = mapper[box_number]
+
+        # Hook into the system except hook
+        sys.excepthook = self.exception_hook
+
+        # Call our custom function to display an alert
+        self._exception_caught.connect(show_exception_box)
+
+        
+    def exception_hook(self, exc_type, exc_value, exc_traceback):
+        '''
+            Log the error in the log, and display in the console
+            then call our custom hook function to display an alert
+        '''
+
+        # Display in console
+        tb = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+        print('Encountered a fatal error: ')
+        print(tb)
+
+        # Add to log
+        logging.error('FATAL ERROR: \n{}'.format(tb))
+
+        # Display alert box
+        tb = "<br>".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+        self._exception_caught.emit(self.box+tb)
+
 
 if __name__ == "__main__":
 
-    # Determine which box we are using
-    if len(sys.argv) >= 2:
+    # Determine which box we are using, and whether to start bonsai IDE
+    start_bonsai_ide=True
+    if len(sys.argv) == 1:
+        box_number = 1
+    elif len(sys.argv) == 2:
         box_number = int(sys.argv[1])
     else:
-        box_number = 1
-
+        box_number = int(sys.argv[1])
+        if sys.argv[2] == '--no-bonsai-ide':
+            start_bonsai_ide=False
+   
     # Start logging
     start_gui_log_file(box_number)
     log_git_hash()
@@ -2936,15 +3206,18 @@ if __name__ == "__main__":
     QApplication.setAttribute(Qt.AA_Use96Dpi,False)
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
    
-    # Set excepthook, so we can log uncaught exceptions
-    sys.excepthook=excepthook
-
-    # Start Q, and Gui Window
+    # Start QApplication
     logging.info('Starting QApplication and Window')
     app = QApplication(sys.argv)
-    win = Window(box_number=box_number)
+    
+    # Create global instance of uncaught exception handler
+    qt_exception_hook = UncaughtHook(box_number)
+
+    # Start GUI window
+    win = Window(box_number=box_number,start_bonsai_ide=start_bonsai_ide)
     win.show()
-    # Run your application's event loop and stop after closing all windows
+   
+     # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())
 
 

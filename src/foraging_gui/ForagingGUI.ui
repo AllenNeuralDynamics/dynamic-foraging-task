@@ -435,35 +435,6 @@
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="3" rowspan="2">
-                    <widget class="QPushButton" name="AutoTrain">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                       <horstretch>10</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="maximumSize">
-                      <size>
-                       <width>16777215</width>
-                       <height>50</height>
-                      </size>
-                     </property>
-                     <property name="autoFillBackground">
-                      <bool>false</bool>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">background-color: rgb(0, 214, 103);</string>
-                     </property>
-                     <property name="text">
-                      <string>Auto Train
-(Ctrl+Alt+A)</string>
-                     </property>
-                     <property name="shortcut">
-                      <string>Ctrl+Alt+A</string>
-                     </property>
-                    </widget>
-                   </item>
                    <item row="3" column="1">
                     <widget class="QLabel" name="label_74">
                      <property name="sizePolicy">
@@ -505,6 +476,41 @@
                      </property>
                      <property name="text">
                       <string>Date</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="3" rowspan="2">
+                    <widget class="QPushButton" name="AutoTrain">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                       <horstretch>10</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>16777215</width>
+                       <height>50</height>
+                      </size>
+                     </property>
+                     <property name="autoFillBackground">
+                      <bool>false</bool>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">background-color: rgb(0, 214, 103);</string>
+                     </property>
+                     <property name="text">
+                      <string>Auto Train</string>
+                     </property>
+                     <property name="shortcut">
+                      <string>Ctrl+Alt+A</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="3">
+                    <widget class="QPushButton" name="pushButton_streamlit">
+                     <property name="text">
+                      <string>Streamlit!</string>
                      </property>
                     </widget>
                    </item>
@@ -591,7 +597,7 @@
                       <x>0</x>
                       <y>0</y>
                       <width>178</width>
-                      <height>165</height>
+                      <height>182</height>
                      </rect>
                     </property>
                     <layout class="QVBoxLayout" name="verticalLayout">
@@ -673,6 +679,18 @@
                        </property>
                        <property name="alignment">
                         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="WarmupWarning">
+                       <property name="font">
+                        <font>
+                         <pointsize>7</pointsize>
+                        </font>
+                       </property>
+                       <property name="text">
+                        <string/>
                        </property>
                       </widget>
                      </item>
@@ -879,7 +897,7 @@
             <string notr="true"/>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="tab_2">
             <attribute name="title">
@@ -1128,25 +1146,6 @@
                            </property>
                           </widget>
                          </item>
-                         <item row="2" column="0">
-                          <widget class="QLabel" name="label_88">
-                           <property name="sizePolicy">
-                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                             <horstretch>0</horstretch>
-                             <verstretch>0</verstretch>
-                            </sizepolicy>
-                           </property>
-                           <property name="text">
-                            <string>Stage:</string>
-                           </property>
-                           <property name="textFormat">
-                            <enum>Qt::AutoText</enum>
-                           </property>
-                           <property name="alignment">
-                            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                           </property>
-                          </widget>
-                         </item>
                          <item row="3" column="2">
                           <widget class="QPushButton" name="MoveXN">
                            <property name="sizePolicy">
@@ -1226,13 +1225,6 @@
                            </property>
                            <property name="alignment">
                             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                           </property>
-                          </widget>
-                         </item>
-                         <item row="2" column="1" colspan="2">
-                          <widget class="QComboBox" name="StageSerialNum">
-                           <property name="enabled">
-                            <bool>false</bool>
                            </property>
                           </widget>
                          </item>
@@ -1869,7 +1861,7 @@
                            </property>
                           </widget>
                          </item>
-                         <item row="4" column="0" colspan="5">
+                         <item row="4" column="0" colspan="3">
                           <widget class="QLabel" name="TotalWaterWarning">
                            <property name="minimumSize">
                             <size>
@@ -2228,6 +2220,76 @@
                          </property>
                          <property name="checkable">
                           <bool>false</bool>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                    <item alignment="Qt::AlignTop">
+                     <widget class="QGroupBox" name="groupBox_7">
+                      <property name="maximumSize">
+                       <size>
+                        <width>260</width>
+                        <height>110</height>
+                       </size>
+                      </property>
+                      <property name="font">
+                       <font>
+                        <pointsize>8</pointsize>
+                       </font>
+                      </property>
+                      <property name="title">
+                       <string>Manual motor stage</string>
+                      </property>
+                      <layout class="QGridLayout" name="gridLayout_11">
+                       <item row="0" column="0">
+                        <widget class="QPushButton" name="MoveXP_2">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>20</width>
+                           <height>25</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>100</width>
+                           <height>16777215</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string>Move Left</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="1">
+                        <widget class="QPushButton" name="MoveXN_2">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>20</width>
+                           <height>25</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>100</width>
+                           <height>16777215</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string>Move Right</string>
                          </property>
                         </widget>
                        </item>
@@ -4662,7 +4724,7 @@ Current pair:
                        </widget>
                       </item>
                       <item row="1" column="1" colspan="2">
-                       <widget class="QComboBox" name="PhtotometryB">
+                       <widget class="QComboBox" name="PhotometryB">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                           <horstretch>0</horstretch>
@@ -4940,8 +5002,6 @@ Current pair:
     </widget>
     <addaction name="action_Optogenetics"/>
     <addaction name="action_Camera"/>
-    <addaction name="action_MotorStage"/>
-    <addaction name="action_Manipulator"/>
     <addaction name="action_Start"/>
     <addaction name="action_NewSession"/>
     <addaction name="actionConnectBonsai"/>
@@ -4949,7 +5009,6 @@ Current pair:
     <addaction name="actionRestartLogging_2"/>
     <addaction name="actionOpen_behavior_folder"/>
     <addaction name="actionOpen_logging_folder"/>
-    <addaction name="actionScan_stages"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="sizePolicy">
@@ -5018,8 +5077,6 @@ Current pair:
     <bool>false</bool>
    </attribute>
    <addaction name="action_Camera"/>
-   <addaction name="action_MotorStage"/>
-   <addaction name="action_Manipulator"/>
   </widget>
   <widget class="QToolBar" name="toolBar_3">
    <property name="sizePolicy">
@@ -5157,30 +5214,6 @@ Current pair:
     <enum>QAction::NormalPriority</enum>
    </property>
   </action>
-  <action name="action_MotorStage">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>resources/Motor.png</normaloff>resources/Motor.png</iconset>
-   </property>
-   <property name="text">
-    <string>Motor stage</string>
-   </property>
-  </action>
-  <action name="action_Manipulator">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>resources/Manipulator.png</normaloff>resources/Manipulator.png</iconset>
-   </property>
-   <property name="text">
-    <string>Manipulator</string>
-   </property>
-  </action>
   <action name="actionOpenSettingFolder">
    <property name="text">
     <string>Open setting folder</string>
@@ -5293,11 +5326,6 @@ Current pair:
     <string>Time distribution</string>
    </property>
   </action>
-  <action name="actionScan_stages">
-   <property name="text">
-    <string>Scan stages</string>
-   </property>
-  </action>
   <action name="actionReconnect_bonsai">
    <property name="text">
     <string>Reconnect bonsai</string>
@@ -5308,5 +5336,38 @@ Current pair:
   <tabstop>Task</tabstop>
  </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>MoveXP_2</sender>
+   <signal>clicked()</signal>
+   <receiver>MoveXP</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>412</x>
+     <y>128</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>414</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MoveXN_2</sender>
+   <signal>clicked()</signal>
+   <receiver>MoveXN</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>487</x>
+     <y>132</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>404</x>
+     <y>424</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

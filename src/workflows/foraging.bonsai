@@ -1324,7 +1324,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Disabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM25</harp:PortName>
+                      <harp:PortName>COM14</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject">
@@ -7053,7 +7053,7 @@
                         <ffmpeg:Suffix>None</ffmpeg:Suffix>
                         <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                         <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                        <ffmpeg:OutputArguments>-vcodec libx264 -crf 23 -preset medium -threads 10</ffmpeg:OutputArguments>
+                        <ffmpeg:OutputArguments>-vcodec libx264 -crf 23 -preset fast</ffmpeg:OutputArguments>
                       </Combinator>
                     </Expression>
                     <Expression xsi:type="SubscribeSubject">
@@ -7109,9 +7109,9 @@
                       <Combinator xsi:type="ffmpeg:VideoWriter">
                         <ffmpeg:FileName>E:\DynamicForagingGUI\BehaviorData\Tower_EphysRig3\641733\641733_2023-12-08_15-48-06\HarpFolder/../VideoFolder/side_camera.avi</ffmpeg:FileName>
                         <ffmpeg:Suffix>None</ffmpeg:Suffix>
-                        <ffmpeg:Overwrite>false</ffmpeg:Overwrite>
+                        <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                         <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                        <ffmpeg:OutputArguments>-vcodec libx264 -crf 23  -preset medium  -threads 10</ffmpeg:OutputArguments>
+                        <ffmpeg:OutputArguments>-vcodec libx264 -crf 23 -preset fast</ffmpeg:OutputArguments>
                       </Combinator>
                     </Expression>
                   </Nodes>
