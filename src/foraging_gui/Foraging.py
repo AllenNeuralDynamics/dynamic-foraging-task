@@ -1600,7 +1600,7 @@ class Window(QMainWindow):
                 'Box {}, Foraging Close'.format(self.box_letter), 
                 'Do you want to save the current result?',
                 QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)  
-            if reply == QMessageBox.Cancel:a
+            if reply == QMessageBox.Cancel:
                 event.ignore()
                 return
             if reply == QMessageBox.Yes:
