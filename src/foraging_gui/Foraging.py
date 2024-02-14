@@ -1782,18 +1782,19 @@ class Window(QMainWindow):
             os.makedirs(os.path.dirname(self.SaveFileJson))
             logging.info(f"Created new folder: {os.path.dirname(self.SaveFileJson)}")
 
-        print(self.SaveFileJson)
-        Names = QFileDialog.getSaveFileName(self, 'Save File',self.SaveFileJson,"JSON files (*.json);;MAT files (*.mat);;JSON parameters (*_par.json)")
-        print(Names)
+        self.SaveFile = self.SaveFileJson
+        #print(self.SaveFileJson)
+        #Names = QFileDialog.getSaveFileName(self, 'Save File',self.SaveFileJson,"JSON files (*.json);;MAT files (*.mat);;JSON parameters (*_par.json)")
+        #print(Names)
 
-        if Names[1]=='JSON parameters (*_par.json)':
-            self.SaveFile=Names[0].replace('.json', '_par.json')
-        else:
-            self.SaveFile=Names[0]
-        if self.SaveFile == '':
-            self.WarningLabel.setText('Discard saving!')
-            self.WarningLabel.setStyleSheet(self.default_warning_color)
-            return
+        #if Names[1]=='JSON parameters (*_par.json)':
+        #    self.SaveFile=Names[0].replace('.json', '_par.json')
+        #else:
+        #    self.SaveFile=Names[0]
+        #if self.SaveFile == '':
+        #    self.WarningLabel.setText('Discard saving!')
+        #    self.WarningLabel.setStyleSheet(self.default_warning_color)
+        #    return
         if hasattr(self, 'GeneratedTrials'):
             if hasattr(self.GeneratedTrials, 'Obj'):
                 Obj=self.GeneratedTrials.Obj
