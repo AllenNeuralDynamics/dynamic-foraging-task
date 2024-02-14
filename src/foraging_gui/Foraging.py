@@ -1749,7 +1749,7 @@ class Window(QMainWindow):
             "<p></p>",
         )
    
-    def _Save(self,ForceSave=0,SaveContinue=0):
+    def _Save(self,ForceSave=0,SaveContinue=1):
         logging.info('Saving current session, ForceSave={},SaveContinue={}'.format(ForceSave,SaveContinue))
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
@@ -2367,6 +2367,7 @@ class Window(QMainWindow):
             self.NextBlock.setStyleSheet("background-color : green;")
         else:
             self.NextBlock.setStyleSheet("background-color : none")
+
     def _NewSession(self):
         logging.info('starting new session')
         if self.NewSession.isChecked():
