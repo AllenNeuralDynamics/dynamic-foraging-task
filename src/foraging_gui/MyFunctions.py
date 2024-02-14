@@ -920,8 +920,8 @@ class GenerateTrials():
                 self.win.info_performance_essential_1 += (
                                     f'Responded trial: {self.BS_FinisheTrialN}/{self.BS_AllTrialN} ({self.BS_RespondedRate:.2f})\n'
                                     f'Reward Trial: {self.BS_RewardTrialN}/{self.BS_AllTrialN} ({self.BS_OverallRewardRate:.2f})\n'
-                                    f'Earned Reward: {self.BS_TotalReward:.0f} uL\n'
-                                    f'Water in session: {self.win.water_in_session*1000 if self.B_CurrentTrialN>=0 else 0:.0f} uL'   
+                                    f'Earned Reward: {self.BS_TotalReward / 1000:.3f} mL\n'
+                                    f'Water in session: {self.win.water_in_session if self.B_CurrentTrialN>=0 else 0:.3f} mL'   
                 )
             self.win.label_info_performance_essential_1.setText(self.win.info_performance_essential_1)
             
