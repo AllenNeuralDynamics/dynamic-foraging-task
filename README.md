@@ -39,7 +39,8 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
    - Install FULL, x64
 - USBXpress SDK (for newscale python API)
   - [get installation .exe here](https://www.silabs.com/documents/public/software/install_USBXpress_SDK.exe) (for newscale python API)
-  - Click install, accept terms of agreement, hit next and accept default settings for everything. 
+  - Click install, accept terms of agreement, hit next and accept default settings for everything.
+- [FFmpeg](https://ffmpeg.org/download.html) and [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads) (Compressing video using GPU in bonsai)
 - Python packages:
   - `numpy`
   - `scipy`
