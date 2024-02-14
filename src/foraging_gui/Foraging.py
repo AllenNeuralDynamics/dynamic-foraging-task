@@ -2393,6 +2393,10 @@ class Window(QMainWindow):
         self.Start.setChecked(False)        
         # TODO Clear plots 
         # TODO Clear performance info, clear Task info        
+        self.WarningLabel.setText('')
+        self.TotalWaterWarning.setText('')
+        self.WarningLabel_2.setText('')
+        self._ConnectBonsai()
 
         # Reset state variables
         self.StartANewSession=1
