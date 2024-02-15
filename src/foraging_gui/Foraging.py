@@ -2037,7 +2037,7 @@ class Window(QMainWindow):
             return False, ''
         session_dir = os.path.join(self.default_saveFolder, self.current_box, mouse_id)
         sessions = os.listdir(session_dir)
-        if len(sessions) == :
+        if len(sessions) == 0:
             reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
                 'Mouse ID: does not have any saved sessions on this computer'.format(mouse_id),
                 QMessageBox.Ok)
