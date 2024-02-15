@@ -2543,6 +2543,8 @@ class Window(QMainWindow):
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
             logging.info('Start button pressed, but bonsai not connected')
+            self.Start.setChecked(False)
+            self.Start.setStyleSheet('background-color:none;')
             return
  
         # Clear warnings
@@ -2555,6 +2557,17 @@ class Window(QMainWindow):
         if self.Start.isChecked():
             logging.info('Start button pressed: starting trial loop')
             self.keyPressEvent()
+
+            if self.StartANewSession == 0 :
+                reply = QMessageBox.question(self, 
+                    'Box {}, Start'.format(self.box_letter), 
+                    'Continue current session?',
+                    QMessageBox.Yes | QMessageBox.No)
+                if reply == QMessageBox.No:
+                    self.Start.setChecked(False)
+                    logging.info('User declines continuation of session')
+                    return
+
             # change button color and mark the state change
             self.Start.setStyleSheet("background-color : green;")
             self.NewSession.setStyleSheet("background-color : none")
@@ -2568,6 +2581,8 @@ class Window(QMainWindow):
             self.Start.setStyleSheet("background-color : none")
             # enable metadata fields
             self._set_metadata_enabled(True)
+
+                
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
@@ -2622,6 +2637,7 @@ class Window(QMainWindow):
             GeneratedTrials._DeletePreviousLicks(self.Channel2)
         else:
             GeneratedTrials=self.GeneratedTrials
+
 
         if self.ToInitializeVisual==1: # only run once
             self.PlotM=PlotM
