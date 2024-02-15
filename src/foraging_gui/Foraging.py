@@ -2447,11 +2447,6 @@ class Window(QMainWindow):
         # Add note to log
         logging.info('New Session complete')
         return True
-        # TODO, add Save As, which allows to save just the parameters
-        # Save as, if you hit cancel, dont start a new session, just return to previous state
-        # Save as, -> Savecontinue, not start a new session
-        # TODO, Switch Load/Open to disable newSession, and set selected
-
 
     def _AskSave(self):
         reply = QMessageBox.question(self, 'Box {}, New Session:'.format(self.box_letter), 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
