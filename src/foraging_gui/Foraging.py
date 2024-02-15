@@ -2025,9 +2025,8 @@ class Window(QMainWindow):
         self._Open(open_last=True)
 
     def _OpenLast_find_session(self,mouse_id):
-        # Are there any session from this mouse?
-        # Are there any .json files for this mouse?
 
+        # Is this mouse on this computer?
         filepath = os.path.join(self.default_saveFolder,self.current_box)
         mouse_dirs = os.listdir(filepath)
         if str(mouse_id) not in mouse_dirs:
@@ -2035,16 +2034,34 @@ class Window(QMainWindow):
                 'Mouse ID: does not have any saved sessions on this computer'.format(mouse_id),
                 QMessageBox.Ok)
             return False, ''
+
+        # Are there any session from this mouse?
         session_dir = os.path.join(self.default_saveFolder, self.current_box, str(mouse_id))
         sessions = os.listdir(session_dir)
         if len(sessions) == 0:
             reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
                 'Mouse ID: does not have any saved sessions on this computer'.format(mouse_id),
                 QMessageBox.Ok)
-            return False, ''       
-        print(sessions)
+            return False, ''      
 
-        return True, ''
+        # do any of the sessions have saved data? Grab the most recent        
+        for i in range(len(sessions)-1, -1, -1)):
+            s = sessions[i]
+            json_file = os.path.join(self.default_saveFolder, 
+                self.current_box, str(mouse_id), s,'TrainingFolder',s+'.json')
+            if os.path.isfile(json_file):
+                reply = QMessageBox.information(self,
+                    'Box {}, Load mouse'.format(self.box_letter),
+                    'Loading session: {}'.format(s),
+                    QMessageBox.Ok)
+                return True, json_file
+       
+        # none of the sessions have saved data.  
+        reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
+            'Mouse ID: does not have any saved sessions on this computer'.format(mouse_id),
+            QMessageBox.Ok)
+        return False, ''             
+
 
     def _Open(self,open_last = False):
 
