@@ -178,6 +178,7 @@ class Window(QMainWindow):
         self.action_Save.triggered.connect(self._Save)
         self.actionForce_save.triggered.connect(self._ForceSave)
         self.SaveContinue.triggered.connect(self._SaveContinue)
+        self.SaveAs.triggered.connect(self._SaveAs)
         self.action_Exit.triggered.connect(self._Exit)
         self.action_New.triggered.connect(self._New)
         self.action_Clear.triggered.connect(self._Clear)
@@ -867,6 +868,10 @@ class Window(QMainWindow):
     def _SaveContinue(self):
         '''Do not restart a session after saving'''
         self._Save(SaveContinue=1)
+
+    def _SaveAs(self):
+        '''Do not restart a session after saving'''
+        self._Save(SaveAs=1)
 
     def _WaterVolumnManage1(self):
         '''Change the water volume based on the valve open time'''
@@ -1786,13 +1791,14 @@ class Window(QMainWindow):
         if SaveAs == 0:
             self.SaveFile = self.SaveFileJson
         else:
-            print('need to implement!')
             Names = QFileDialog.getSaveFileName(self, 'Save File',self.SaveFileJson,"JSON files (*.json);;MAT files (*.mat);;JSON parameters (*_par.json)")
             if Names[1]=='JSON parameters (*_par.json)':
                 self.SaveFile=Names[0].replace('.json', '_par.json')
             else:
                 self.SaveFile=Names[0]
-
+            if self.SaveFile == '':
+                logging.info('empty file name')
+                return
 
 
         # Do we have trials to save?

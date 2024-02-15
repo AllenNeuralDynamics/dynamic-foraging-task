@@ -4866,6 +4866,7 @@ Current pair:
     <addaction name="action_Clear"/>
     <addaction name="actionForce_save"/>
     <addaction name="SaveContinue"/>
+    <addaction name="SaveAs"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="sizePolicy">
@@ -5229,6 +5230,11 @@ Current pair:
   <action name="SaveContinue">
    <property name="text">
     <string>Save (without restarting a session)</string>
+   </property>
+  </action>
+  <action name="SaveAs">
+   <property name="text">
+    <string>Save As</string>
    </property>
   </action>
   <action name="actionWin_stay_lose_switch">
