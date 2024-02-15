@@ -2402,7 +2402,7 @@ class Window(QMainWindow):
 
         # Reset GUI visuals
         self.Save.setStyleSheet("color:black;background-color:None;")
-        self.NewSession.setStyleSheet("background-color : None;")
+        self.NewSession.setStyleSheet("background-color : green;")
         self.NewSession.setChecked(False)
         self.Start.setStyleSheet("background-color : none")
         self.Start.setChecked(False)        
