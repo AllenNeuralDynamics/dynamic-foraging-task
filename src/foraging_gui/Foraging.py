@@ -2029,7 +2029,12 @@ class Window(QMainWindow):
         # Are there any .json files for this mouse?
 
         filepath = os.path.join(self.default_saveFolder,self.current_box)
-        print(os.listdir(filepath))
+        mouse_dirs = os.listdir(filepath)
+        if str(mouse_id) not in mouse_dirs:
+            reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
+                'Mouse ID: does not have any saved sessions on this computer'.format(mouse_id),
+                QMessageBox.Ok)
+            return False, ''
 
     def _Open(self,open_last = False):
 
@@ -2053,10 +2058,14 @@ class Window(QMainWindow):
                 default_value, min_value,max_value)
             # User hit cancel, or "x"
             if not ok:
+                print('bad input')
                 return
            
-            fname = self._OpenLast_find_session(mouse_id)  
-            return        
+            good_load, fname = self._OpenLast_find_session(mouse_id)  
+            if not good_load:
+                print('bad load')
+                return        
+            return
     
         # Disable continuing new sessiona
         #self.NewSession.setChecked(True)
