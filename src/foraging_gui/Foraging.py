@@ -1787,7 +1787,13 @@ class Window(QMainWindow):
             self.SaveFile = self.SaveFileJson
         else:
             print('need to implement!')
-            self.SaveFile = self.SaveFileJson
+            Names = QFileDialog.getSaveFileName(self, 'Save File',self.SaveFileJson,"JSON files (*.json);;MAT files (*.mat);;JSON parameters (*_par.json)")
+            if Names[1]=='JSON parameters (*_par.json)':
+                self.SaveFile=Names[0].replace('.json', '_par.json')
+            else:
+                self.SaveFile=Names[0]
+
+
 
         # Do we have trials to save?
         if hasattr(self, 'GeneratedTrials'):
