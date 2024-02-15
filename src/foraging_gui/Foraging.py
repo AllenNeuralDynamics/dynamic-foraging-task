@@ -1749,7 +1749,7 @@ class Window(QMainWindow):
             "<p></p>",
         )
    
-    def _Save(self,ForceSave=0,SaveContinue=1):
+    def _Save(self,ForceSave=0,SaveContinue=1,SaveAs=0):
         logging.info('Saving current session, ForceSave={},SaveContinue={}'.format(ForceSave,SaveContinue))
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
@@ -1783,7 +1783,11 @@ class Window(QMainWindow):
             logging.info(f"Created new folder: {os.path.dirname(self.SaveFileJson)}")
 
         # Save in the standard location
-        self.SaveFile = self.SaveFileJson
+        if SaveAs == 0:
+            self.SaveFile = self.SaveFileJson
+        else:
+            print('need to implement!')
+            self.SaveFile = self.SaveFileJson
 
         # Do we have trials to save?
         if hasattr(self, 'GeneratedTrials'):
@@ -1814,7 +1818,7 @@ class Window(QMainWindow):
                 QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
             self._Concat(widget_dict_camera,Obj,'Camera_dialog')
         
-        ##Obj2=Obj.copy()
+        Obj2=Obj.copy()
         # save behavor events
         if hasattr(self, 'GeneratedTrials'):
             # Do something if self has the GeneratedTrials attribute
@@ -1864,13 +1868,13 @@ class Window(QMainWindow):
         Obj['box'] = self.current_box
     
         # save Json or mat
-        #if self.SaveFile.endswith('.mat'):
-        ## Save data to a .mat file
-        #    savemat(self.SaveFile, Obj) 
-        #elif self.SaveFile.endswith('par.json'):
-        #    with open(self.SaveFile, "w") as outfile:
-        #        json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
-        #elif self.SaveFile.endswith('.json'):
+        if self.SaveFile.endswith('.mat'):
+        # Save data to a .mat file
+            savemat(self.SaveFile, Obj) 
+        elif self.SaveFile.endswith('par.json'):
+            with open(self.SaveFile, "w") as outfile:
+                json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
+        elif self.SaveFile.endswith('.json'):
         with open(self.SaveFile, "w") as outfile:
             json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
                 
