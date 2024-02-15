@@ -2092,13 +2092,13 @@ class Window(QMainWindow):
             if not good_load:
                 print('bad load')
                 return        
-            return
+        else:
+            fname, _ = QFileDialog.getOpenFileName(self, 'Open file', 
+                self.default_saveFolder+'\\'+self.current_box, 
+                "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
+        print(fname)
+        return
     
-        # Disable continuing new sessiona
-        #self.NewSession.setChecked(True)
-        #self.NewSession.setDisabled(True)
-
-        fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder+'\\'+self.current_box, "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
         self.fname=fname
         if fname:
             if fname.endswith('.mat'):
