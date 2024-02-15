@@ -107,12 +107,26 @@ class GenerateTrials():
         # to decide if it's an auto water trial. will give water in _GetAnimalResponse
         self._CheckAutoWater()
         
-        # check block transition
-        self._check_block_transition()
-        # Get reward probability
-        self._generate_next_trial_reward_prob()
+        # --- Handle reward schedule ---
+        if self.TP_Task in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
+            # -- Use the old logic --
+            # check block transition and set self.B_ANewBlock
+            self._check_coupled_block_transition()
+            # generate the next block reward probability if block is transitioned
+            if any(self.B_ANewBlock==1):
+                self._generate_next_coupled_block()
+        elif self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']:
+            # -- Use Han's UncoupledBlocks class --
+            #TODO: plugin in the new logic here
+            pass
+            
+        # Append the current reward probability to the history
+        self.B_RewardProHistory=np.append(
+            self.B_RewardProHistory,
+            self.B_CurrentRewardProb.reshape(self.B_LickPortN,1),
+            axis=1)
         
-        # Generate other parameters such as ITI, delay, and response time
+        # --- Generate other parameters such as ITI, delay, and response time ---
         self._generate_next_trial_other_paras()
         
         # check if bait is permitted at the current trial
@@ -290,73 +304,70 @@ class GenerateTrials():
         else:
             return np.max(length)
 
-    def _generate_next_trial_reward_prob(self):
-        '''Select the training parameter of the next trial'''
+    def _generate_next_coupled_block(self):
+        '''Generate the next block reward probability and block length (coupled task only)'''
         # determine the reward probability of the next trial based on tasks
-        if (self.TP_Task in ['Coupled Baiting','Coupled Without Baiting','RewardN']) and any(self.B_ANewBlock==1):
-            self.RewardPairs=self.B_RewardFamilies[int(self.TP_RewardFamily)-1][:int(self.TP_RewardPairsN)]
-            self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.TP_BaseRewardSum)
-            # get the reward probabilities pool
-            RewardProbPool=np.append(self.RewardProb,np.fliplr(self.RewardProb),axis=0)
-            if self.B_RewardProHistory.size!=0:
-                # exclude the previous reward probabilities
-                RewardProbPool=RewardProbPool[np.any(RewardProbPool!=self.B_RewardProHistory[:,-1],axis=1)]
-                # exclude blocks with the same identity/order (forced change of block identity (L->R; R->L))
-                if self.B_RewardProHistory[0,-1]!=self.B_RewardProHistory[1,-1]:
-                    RewardProbPool=RewardProbPool[(RewardProbPool[:,0]>RewardProbPool[:,1])!=(self.B_RewardProHistory[0,-1]>self.B_RewardProHistory[1,-1])]
-            # Remove duplicates
-            RewardProbPool = np.unique(RewardProbPool, axis=0)
-            # get the reward probabilities of the current block
-            self.B_CurrentRewardProb=RewardProbPool[random.choice(range(np.shape(RewardProbPool)[0]))]
-            # randomly draw a block length between Min and Max
-            if self.TP_Randomness=='Exponential':
-                self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta),1)+float(self.TP_BlockMin)))
-            elif self.TP_Randomness=='Even':
-                self.BlockLen=  np.array(np.random.randint(float(self.TP_BlockMin), float(self.TP_BlockMax)+1))
-            if self.BlockLen>float(self.TP_BlockMax):
-                self.BlockLen=int(self.TP_BlockMax)
-            for i in range(len(self.B_ANewBlock)):
-                self.BlockLenHistory[i].append(self.BlockLen)
-            self.B_ANewBlock=np.array([0,0])
+        self.RewardPairs=self.B_RewardFamilies[int(self.TP_RewardFamily)-1][:int(self.TP_RewardPairsN)]
+        self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.TP_BaseRewardSum)
+        # get the reward probabilities pool
+        RewardProbPool=np.append(self.RewardProb,np.fliplr(self.RewardProb),axis=0)
+        if self.B_RewardProHistory.size!=0:
+            # exclude the previous reward probabilities
+            RewardProbPool=RewardProbPool[np.any(RewardProbPool!=self.B_RewardProHistory[:,-1],axis=1)]
+            # exclude blocks with the same identity/order (forced change of block identity (L->R; R->L))
+            if self.B_RewardProHistory[0,-1]!=self.B_RewardProHistory[1,-1]:
+                RewardProbPool=RewardProbPool[(RewardProbPool[:,0]>RewardProbPool[:,1])!=(self.B_RewardProHistory[0,-1]>self.B_RewardProHistory[1,-1])]
+        # Remove duplicates
+        RewardProbPool = np.unique(RewardProbPool, axis=0)
+        # get the reward probabilities of the current block
+        self.B_CurrentRewardProb=RewardProbPool[random.choice(range(np.shape(RewardProbPool)[0]))]
+        # randomly draw a block length between Min and Max
+        if self.TP_Randomness=='Exponential':
+            self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta),1)+float(self.TP_BlockMin)))
+        elif self.TP_Randomness=='Even':
+            self.BlockLen=  np.array(np.random.randint(float(self.TP_BlockMin), float(self.TP_BlockMax)+1))
+        if self.BlockLen>float(self.TP_BlockMax):
+            self.BlockLen=int(self.TP_BlockMax)
+        for i in range(len(self.B_ANewBlock)):
+            self.BlockLenHistory[i].append(self.BlockLen)
+        self.B_ANewBlock=np.array([0,0])
             
-        elif (self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting'])  and any(self.B_ANewBlock==1):
-            # get the reward probabilities pool
-            for i in range(len(self.B_ANewBlock)):
-                if self.B_ANewBlock[i]==1:
-                    input_string=self.win.UncoupledReward.text()
-                    # remove any square brackets and spaces from the string
-                    input_string = input_string.replace('[','').replace(']','').replace(',', ' ')
-                    # split the remaining string into a list of individual numbers
-                    num_list = input_string.split()
-                    # convert each number in the list to a float
-                    num_list = [float(num) for num in num_list]
-                    # create a numpy array from the list of numbers
-                    RewardProbPool=np.array(num_list)
-                    self.RewardProbPoolUncoupled=RewardProbPool.copy()
-                    # exclude the previous reward probabilities
-                    if self.B_RewardProHistory.size!=0:
-                        RewardProbPool=RewardProbPool[RewardProbPool!=self.B_RewardProHistory[i,-1]]
-                    # exclude pairs with small reward size (temporarily)
-                    if (i==0 and self.B_CurrentRewardProb[1]==0.1) or (i==1 and self.B_CurrentRewardProb[0]==0.1):
-                            RewardProbPool=RewardProbPool[RewardProbPool!=0.1]
-                    # get the reward probabilities of the current block
-                    self.B_CurrentRewardProb[i]=RewardProbPool[random.choice(range(np.shape(RewardProbPool)[0]))]
-                    # "if one spout was assigned a reward probability greater than or equal to the reward probability of the other spout for 3 consecutive blocks, the probability of that spout was set to 0.1 to encourage switching behavior and limit the creation of a direction bias"
-                    if np.shape(self.BlockLenHistory[i])[0]>=3:
-                        total_trial=np.sum(self.BlockLenHistory[i][-3:])
-                        if np.all(self.B_RewardProHistory[i][-total_trial:]>=self.B_RewardProHistory[1-i][-total_trial:]):
-                            self.B_CurrentRewardProb[i]=0.1
-                    # randomly draw a block length between Min and Max
-                    if self.TP_Randomness=='Exponential':
-                        self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta),1)+float(self.TP_BlockMin)))
-                    elif self.TP_Randomness=='Even':
-                        self.BlockLen=  np.array(np.random.randint(float(self.TP_BlockMin), float(self.TP_BlockMax)+1))
-                    if self.BlockLen>float(self.TP_BlockMax):
-                        self.BlockLen=int(self.TP_BlockMax)
-                    self.BlockLenHistory[i].append(self.BlockLen)
-                    self.B_ANewBlock[i]=0
-
-        self.B_RewardProHistory=np.append(self.B_RewardProHistory,self.B_CurrentRewardProb.reshape(self.B_LickPortN,1),axis=1)
+        # elif (self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting'])  and any(self.B_ANewBlock==1):
+        #     # get the reward probabilities pool
+        #     for i in range(len(self.B_ANewBlock)):
+        #         if self.B_ANewBlock[i]==1:
+        #             input_string=self.win.UncoupledReward.text()
+        #             # remove any square brackets and spaces from the string
+        #             input_string = input_string.replace('[','').replace(']','').replace(',', ' ')
+        #             # split the remaining string into a list of individual numbers
+        #             num_list = input_string.split()
+        #             # convert each number in the list to a float
+        #             num_list = [float(num) for num in num_list]
+        #             # create a numpy array from the list of numbers
+        #             RewardProbPool=np.array(num_list)
+        #             self.RewardProbPoolUncoupled=RewardProbPool.copy()
+        #             # exclude the previous reward probabilities
+        #             if self.B_RewardProHistory.size!=0:
+        #                 RewardProbPool=RewardProbPool[RewardProbPool!=self.B_RewardProHistory[i,-1]]
+        #             # exclude pairs with small reward size (temporarily)
+        #             if (i==0 and self.B_CurrentRewardProb[1]==0.1) or (i==1 and self.B_CurrentRewardProb[0]==0.1):
+        #                     RewardProbPool=RewardProbPool[RewardProbPool!=0.1]
+        #             # get the reward probabilities of the current block
+        #             self.B_CurrentRewardProb[i]=RewardProbPool[random.choice(range(np.shape(RewardProbPool)[0]))]
+        #             # "if one spout was assigned a reward probability greater than or equal to the reward probability of the other spout for 3 consecutive blocks, the probability of that spout was set to 0.1 to encourage switching behavior and limit the creation of a direction bias"
+        #             if np.shape(self.BlockLenHistory[i])[0]>=3:
+        #                 total_trial=np.sum(self.BlockLenHistory[i][-3:])
+        #                 if np.all(self.B_RewardProHistory[i][-total_trial:]>=self.B_RewardProHistory[1-i][-total_trial:]):
+        #                     self.B_CurrentRewardProb[i]=0.1
+        #             # randomly draw a block length between Min and Max
+        #             if self.TP_Randomness=='Exponential':
+        #                 self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta),1)+float(self.TP_BlockMin)))
+        #             elif self.TP_Randomness=='Even':
+        #                 self.BlockLen=  np.array(np.random.randint(float(self.TP_BlockMin), float(self.TP_BlockMax)+1))
+        #             if self.BlockLen>float(self.TP_BlockMax):
+        #                 self.BlockLen=int(self.TP_BlockMax)
+        #             self.BlockLenHistory[i].append(self.BlockLen)
+        #             self.B_ANewBlock[i]=0
 
     def _generate_next_trial_other_paras(self):
         # get the ITI time and delay time
@@ -381,7 +392,7 @@ class GenerateTrials():
         self.B_DelayHistory.append(self.CurrentDelay)
         self.B_ResponseTimeHistory.append(float(self.TP_ResponseTime))
 
-    def _check_block_transition(self):
+    def _check_coupled_block_transition(self):
         '''Check if we should perform a block change for the next trial. 
         If you change the block length parameter, it only takes effect 
         after the current block is completed'''
@@ -417,23 +428,22 @@ class GenerateTrials():
             
         # Don't switch if the minimum reward requirement is not met 
         # or advanced block switch is not permitted
-        if self.TP_Task in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
-            # For the coupled task, hold block switch on both side
-            if np.all(self.B_ANewBlock==1) and self.AllRewardThisBlock!=-1:
-                if self.AllRewardThisBlock < float(self.TP_BlockMinReward) \
-                    or self.AdvancedBlockSwitchPermitted==0:
-                    self.B_ANewBlock=np.zeros_like(self.B_ANewBlock)
-                    self._override_block_len(range(len(self.B_ANewBlock)))
-        elif self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']:
-            # For uncoupled task, hold block switch on each side separately 
-            # (this is actually problematic!!)
-            for i in range(len(self.B_ANewBlock)):
-                if self.B_ANewBlock[i]==1 and (
-                    self.BS_RewardedTrialN_CurrentBlock[i] < float(self.TP_BlockMinReward) 
-                    or self.AdvancedBlockSwitchPermitted==0
-                    ) and self.AllRewardThisBlock!=-1:
-                    self.B_ANewBlock[i]=0
-                    self._override_block_len([i])
+        # For the coupled task, hold block switch on both sides       
+        if np.all(self.B_ANewBlock==1) and self.AllRewardThisBlock!=-1:
+            if self.AllRewardThisBlock < float(self.TP_BlockMinReward) \
+                or self.AdvancedBlockSwitchPermitted==0:
+                self.B_ANewBlock=np.zeros_like(self.B_ANewBlock)
+                self._override_block_len(range(len(self.B_ANewBlock)))
+        # elif self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']:
+        #     # For uncoupled task, hold block switch on each side separately 
+        #     # (this is actually problematic!!)
+        #     for i in range(len(self.B_ANewBlock)):
+        #         if self.B_ANewBlock[i]==1 and (
+        #             self.BS_RewardedTrialN_CurrentBlock[i] < float(self.TP_BlockMinReward) 
+        #             or self.AdvancedBlockSwitchPermitted==0
+        #             ) and self.AllRewardThisBlock!=-1:
+        #             self.B_ANewBlock[i]=0
+        #             self._override_block_len([i])
                         
     def _override_block_len(self,ind):
         '''Get the block length and update the block length history'''
