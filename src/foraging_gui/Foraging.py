@@ -186,7 +186,7 @@ class Window(QMainWindow):
         self.action_NewSession.triggered.connect(self.NewSession.click)
         self.actionConnectBonsai.triggered.connect(self._ConnectBonsai)
         self.actionReconnect_bonsai.triggered.connect(self._ReconnectBonsai)
-        self.Load.clicked.connect(self._Open)
+        self.Load.clicked.connect(self._OpenLast)
         self.Save.clicked.connect(self._Save)
         self.Clear.clicked.connect(self._Clear)
         self.Start.clicked.connect(self._Start)
@@ -2021,7 +2021,10 @@ class Window(QMainWindow):
                     Obj[keyname][widget.objectName()]=widget.currentText()
         return Obj
 
-    def _Open(self):
+    def _OpenLast(self):
+        self._Open(open_last=True)
+
+    def _Open(self,open_last = False):
 
         #self.NewSession.setChecked(True)
         #Reply=self._NewSession()
@@ -2039,6 +2042,19 @@ class Window(QMainWindow):
         if not new_session:
             return
 
+        if open_last:
+            min_value = 0
+            default_value = 0
+            max_value = 1000000000
+            mouse_id, ok = QInputDialog.getInt(self, 
+                'Box {}, Load mouse'.format(self.box_letter),
+                'Enter the mouse ID',
+                default_value, min_value,max_value)
+            if not ok:
+                return
+            print(mouse_id)
+            return        
+    
         # Disable continuing new sessiona
         #self.NewSession.setChecked(True)
         #self.NewSession.setDisabled(True)
