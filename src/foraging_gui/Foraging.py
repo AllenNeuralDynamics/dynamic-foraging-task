@@ -2031,7 +2031,7 @@ class Window(QMainWindow):
         mouse_dirs = os.listdir(filepath)
         if str(mouse_id) not in mouse_dirs:
             reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
-                'Mouse ID: does not have any saved sessions on this computer'.format(mouse_id),
+                'Mouse ID {} does not have any saved sessions on this computer'.format(mouse_id),
                 QMessageBox.Ok)
             return False, ''
 
@@ -2040,7 +2040,7 @@ class Window(QMainWindow):
         sessions = os.listdir(session_dir)
         if len(sessions) == 0:
             reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
-                'Mouse ID: does not have any saved sessions on this computer'.format(mouse_id),
+                'Mouse ID {} does not have any saved sessions on this computer'.format(mouse_id),
                 QMessageBox.Ok)
             return False, ''      
 
@@ -2058,7 +2058,7 @@ class Window(QMainWindow):
        
         # none of the sessions have saved data.  
         reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
-            'Mouse ID: does not have any saved sessions on this computer'.format(mouse_id),
+            'Mouse ID {} does not have any saved sessions on this computer'.format(mouse_id),
             QMessageBox.Ok)
         return False, ''             
 
