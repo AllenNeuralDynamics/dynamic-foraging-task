@@ -106,9 +106,9 @@ class GenerateTrials():
         # to decide if it's an auto water trial. will give water in _GetAnimalResponse
         self._CheckAutoWater()
         # check block transition
-        self._CheckBlockTransition()
+        self._check_block_transition()
         # Get reward probability and other trial related parameters
-        self._SelectTrainingParameter()
+        self._generate_next_reward_prob()
         # check if bait is permitted at the current trial
         self._CheckBaitPermitted()
         self.finish_select_par=1
@@ -284,7 +284,7 @@ class GenerateTrials():
         else:
             return np.max(length)
 
-    def _SelectTrainingParameter(self):
+    def _generate_next_reward_prob(self):
         '''Select the training parameter of the next trial'''
         # determine the reward probability of the next trial based on tasks
         if (self.TP_Task in ['Coupled Baiting','Coupled Without Baiting','RewardN']) and any(self.B_ANewBlock==1):
@@ -312,6 +312,7 @@ class GenerateTrials():
             for i in range(len(self.B_ANewBlock)):
                 self.BlockLenHistory[i].append(self.BlockLen)
             self.B_ANewBlock=np.array([0,0])
+            
         elif (self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting'])  and any(self.B_ANewBlock==1):
             # get the reward probabilities pool
             for i in range(len(self.B_ANewBlock)):
@@ -373,43 +374,59 @@ class GenerateTrials():
         self.B_DelayHistory.append(self.CurrentDelay)
         self.B_ResponseTimeHistory.append(float(self.TP_ResponseTime))
 
-    def _CheckBlockTransition(self):
+    def _check_block_transition(self):
         '''Check if we should perform a block change for the next trial. 
         If you change the block length parameter, it only takes effect 
         after the current block is completed'''
         # Check advanced block swith
-        self._CheckAdvancedBlockSwitch()
-        # transition to the next block when NextBlock button is clicked
+        # and set self.AdvancedBlockSwitchPermitted
+        self._check_advanced_block_switch()
+        
+        # --- Force transition to the next block when NextBlock button is clicked ---
         if self.TP_NextBlock:
             self.B_ANewBlock[:]=1
             self.win.NextBlock.setChecked(False)
             self.win.NextBlock.setStyleSheet("background-color : none")
-            self._update_block_len([0,1])
-        # decide if block transition will happen at the next trial
+            self._override_block_len([0,1])
+            return  # Early return here
+            
+        # --- Decide block transition based on this block length ---
         for i in range(len(self.B_ANewBlock)):
             if self.B_CurrentTrialN+1>=sum(self.BlockLenHistory[i]):
                 self.B_ANewBlock[i]=1
-        if not self.TP_NextBlock:
-            # min rewards to perform transition
-            if self.B_CurrentTrialN>=0:
-                # get the rewarded trial number of the current finished trial.
-                self._GetCurrentBlockReward(1,CountAutoWater=1,UpdateBlockLen=1)
-            else:
-                self.AllRewardThisBlock=-1
-                self.BS_RewardedTrialN_CurrentBlock=[0,0]
-            if self.TP_Task in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
-                if np.all(self.B_ANewBlock==1) and self.AllRewardThisBlock!=-1:
-                    if self.AllRewardThisBlock<float(self.TP_BlockMinReward) or self.AdvancedBlockSwitchPermitted==0:
-                        # do not switch
-                        self.B_ANewBlock=np.zeros_like(self.B_ANewBlock)
-                        self._update_block_len(range(len(self.B_ANewBlock)))
-            elif self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']:
-                for i in range(len(self.B_ANewBlock)):
-                    if self.B_ANewBlock[i]==1 and (self.BS_RewardedTrialN_CurrentBlock[i]<float(self.TP_BlockMinReward) or self.AdvancedBlockSwitchPermitted==0) and self.AllRewardThisBlock!=-1:
-                        # do not switch
-                        self.B_ANewBlock[i]=0
-                        self._update_block_len([i])
-    def _update_block_len(self,ind):
+                
+        # --- Reject block transition decision based on 
+        # minimum reward requirement or advanced block switch ---
+        
+        # Get the number of reward trials in the current block
+        if self.B_CurrentTrialN>=0:
+            self._get_current_block_reward(1,CountAutoWater=1,UpdateBlockLen=1)
+        else:
+            # If this is the first trial of the block, set self.AllRewardThisBlock to -1
+            self.AllRewardThisBlock=-1
+            self.BS_RewardedTrialN_CurrentBlock=[0,0]
+            
+        # Don't switch if the minimum reward requirement is not met 
+        # or advanced block switch is not permitted
+        if self.TP_Task in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
+            # For the coupled task, hold block switch on both side
+            if np.all(self.B_ANewBlock==1) and self.AllRewardThisBlock!=-1:
+                if self.AllRewardThisBlock < float(self.TP_BlockMinReward) \
+                    or self.AdvancedBlockSwitchPermitted==0:
+                    self.B_ANewBlock=np.zeros_like(self.B_ANewBlock)
+                    self._override_block_len(range(len(self.B_ANewBlock)))
+        elif self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']:
+            # For uncoupled task, hold block switch on each side separately 
+            # (this is actually problematic!!)
+            for i in range(len(self.B_ANewBlock)):
+                if self.B_ANewBlock[i]==1 and (
+                    self.BS_RewardedTrialN_CurrentBlock[i] < float(self.TP_BlockMinReward) 
+                    or self.AdvancedBlockSwitchPermitted==0
+                    ) and self.AllRewardThisBlock!=-1:
+                    self.B_ANewBlock[i]=0
+                    self._override_block_len([i])
+                        
+    def _override_block_len(self,ind):
         '''Get the block length and update the block length history'''
         block_len_history = self.BlockLenHistory.copy()
         for i in ind:
@@ -427,7 +444,7 @@ class GenerateTrials():
             block_len_history[i].append(count)
         self.BlockLenHistory=block_len_history     
         
-    def _CheckAdvancedBlockSwitch(self):
+    def _check_advanced_block_switch(self):
         '''Check if we can switch to a different block'''
         if self.TP_AdvancedBlockAuto=='off':
             self.AdvancedBlockSwitchPermitted=1
@@ -539,7 +556,7 @@ class GenerateTrials():
         ChoiceFraction=ResponseHistoryF[:-kernel_size+1]
         return ChoiceFraction
 
-    def _GetCurrentBlockReward(self,NewTrialRewardOrder,CountAutoWater=0,UpdateBlockLen=0):
+    def _get_current_block_reward(self,NewTrialRewardOrder,CountAutoWater=0,UpdateBlockLen=0):
         '''Get the reward length of the current block'''
         self.BS_CurrentBlockTrialN=[[],[]]
         index=[[],[]]
@@ -587,7 +604,7 @@ class GenerateTrials():
             if self.BS_CurrentBlockTrialN[i]>self.BS_CurrentBlockLen[i]:
                 self.BS_CurrentBlockLenV[i]=self.BS_CurrentBlockTrialNV[i]
                 if UpdateBlockLen==1:
-                    self._update_block_len([i])
+                    self._override_block_len([i])
                     self.BS_CurrentBlockLen[i]=self.BlockLenHistory[i][-1]
 
     def _GetBasic(self):
@@ -661,10 +678,10 @@ class GenerateTrials():
         # current trial numbers in the current block; BS_CurrentBlockTrialN
         if self.win.NewTrialRewardOrder==1:
             # show current finished trial
-            self._GetCurrentBlockReward(1)
+            self._get_current_block_reward(1)
         else:
             # show next trial
-            self._GetCurrentBlockReward(0)
+            self._get_current_block_reward(0)
         # update suggested reward
         self.win._UpdateSuggestedWater()
         # foraging efficiency
