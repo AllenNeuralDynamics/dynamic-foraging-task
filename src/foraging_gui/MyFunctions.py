@@ -108,7 +108,7 @@ class GenerateTrials():
         # check block transition
         self._check_block_transition()
         # Get reward probability and other trial related parameters
-        self._generate_next_reward_prob()
+        self._generate_next_trial_paras()
         # check if bait is permitted at the current trial
         self._CheckBaitPermitted()
         self.finish_select_par=1
@@ -284,7 +284,7 @@ class GenerateTrials():
         else:
             return np.max(length)
 
-    def _generate_next_reward_prob(self):
+    def _generate_next_trial_paras(self):
         '''Select the training parameter of the next trial'''
         # determine the reward probability of the next trial based on tasks
         if (self.TP_Task in ['Coupled Baiting','Coupled Without Baiting','RewardN']) and any(self.B_ANewBlock==1):
