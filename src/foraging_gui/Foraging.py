@@ -1770,9 +1770,13 @@ class Window(QMainWindow):
                 logging.info('saving without weight or extra water')
             elif response==QMessageBox.No:
                 logging.info('saving declined by user')
+                self.WarningLabel.setText('')
+                self.WarningLabel.setStyleSheet(self.default_warning_color)
                 return
             elif response==QMessageBox.Cancel:
                 logging.info('saving canceled by user')
+                self.WarningLabel.setText('')
+                self.WarningLabel.setStyleSheet(self.default_warning_color)
                 return
 
         # this should be improved in the future. Need to get the last LeftRewardDeliveryTime and RightRewardDeliveryTime
@@ -1798,6 +1802,8 @@ class Window(QMainWindow):
                 self.SaveFile=Names[0]
             if self.SaveFile == '':
                 logging.info('empty file name')
+                self.WarningLabel.setText('')
+                self.WarningLabel.setStyleSheet(self.default_warning_color)
                 return
 
 
@@ -1918,6 +1924,10 @@ class Window(QMainWindow):
         self.unsaved_data=False
         self.Save.setStyleSheet("background-color : None;")
         self.Save.setStyleSheet("color: black;")
+
+
+        self.WarningLabel.setText('Data saved: {}'.format(self.SaveFile))
+        self.WarningLabel.setStyleSheet(self.default_warning_color)
 
     def _GetSaveFolder(self,CTrainingFolder=1,CHarpFolder=1,CVideoFolder=1,CPhotometryFolder=1,CEphysFolder=1):
         '''The new data storage structure. Each session forms an independent folder. Training data, Harp register events, video data, photometry data and ephys data are in different subfolders'''
