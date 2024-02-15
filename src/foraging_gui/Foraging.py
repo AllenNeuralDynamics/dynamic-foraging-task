@@ -1926,7 +1926,8 @@ class Window(QMainWindow):
         self.Save.setStyleSheet("color: black;")
 
 
-        self.WarningLabel.setText('Data saved: {}'.format(self.SaveFile))
+        short_file = save.SaveFile.split('\\')[1]
+        self.WarningLabel.setText('Data saved: {}'.format(short_file))
         self.WarningLabel.setStyleSheet(self.default_warning_color)
 
     def _GetSaveFolder(self,CTrainingFolder=1,CHarpFolder=1,CVideoFolder=1,CPhotometryFolder=1,CEphysFolder=1):
