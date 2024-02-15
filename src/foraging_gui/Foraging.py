@@ -1887,8 +1887,8 @@ class Window(QMainWindow):
             with open(self.SaveFile, "w") as outfile:
                 json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
         elif self.SaveFile.endswith('.json'):
-        with open(self.SaveFile, "w") as outfile:
-            json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
+            with open(self.SaveFile, "w") as outfile:
+                json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
                 
         # Also export to nwb automatically here
         try:
