@@ -2024,24 +2024,25 @@ class Window(QMainWindow):
     def _OpenLast(self):
         self._Open(open_last=True)
 
+    def _OpenLast_find_session(self,mouse_id):
+        # Are there any session from this mouse?
+        # Are there any .json files for this mouse?
+
+        filepath = os.path.join(self.default_saveFolder,self.current_box)
+        print(os.listdir(filepath))
+
     def _Open(self,open_last = False):
 
-        #self.NewSession.setChecked(True)
-        #Reply=self._NewSession()
-        #if Reply == QMessageBox.Yes or Reply == QMessageBox.No:
-        #    self.NewSession.setDisabled(True) # You must start a NewSession after loading a new file, and you can't continue that session
-        #elif Reply == QMessageBox.Cancel:
-        #    return
-        ####self.NewSession.setStyleSheet("background-color : green;")
-        ####self.NewSession.setChecked(False)
 
         # stop current session first
         self._StopCurrentSession() 
 
+        # Start new session
         new_session = self._NewSession()
         if not new_session:
             return
 
+        # If we are using the quick load, ask for the mouse id, and load the last session
         if open_last:
             min_value = 0
             default_value = 0
@@ -2050,9 +2051,11 @@ class Window(QMainWindow):
                 'Box {}, Load mouse'.format(self.box_letter),
                 'Enter the mouse ID',
                 default_value, min_value,max_value)
+            # User hit cancel, or "x"
             if not ok:
                 return
-            print(mouse_id)
+           
+            fname = self._OpenLast_find_session(mouse_id)  
             return        
     
         # Disable continuing new sessiona
