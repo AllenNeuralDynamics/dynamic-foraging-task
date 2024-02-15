@@ -1927,7 +1927,7 @@ class Window(QMainWindow):
 
 
         short_file = self.SaveFile.split('\\')[-1]
-        self.WarningLabel.setText('Data saved: {}'.format(short_file))
+        self.WarningLabel.setText('Saved: {}'.format(short_file))
         self.WarningLabel.setStyleSheet(self.default_warning_color)
 
     def _GetSaveFolder(self,CTrainingFolder=1,CHarpFolder=1,CVideoFolder=1,CPhotometryFolder=1,CEphysFolder=1):
