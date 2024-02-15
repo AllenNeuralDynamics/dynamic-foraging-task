@@ -1926,7 +1926,7 @@ class Window(QMainWindow):
         self.Save.setStyleSheet("color: black;")
 
 
-        short_file = save.SaveFile.split('\\')[1]
+        short_file = self.SaveFile.split('\\')[1]
         self.WarningLabel.setText('Data saved: {}'.format(short_file))
         self.WarningLabel.setStyleSheet(self.default_warning_color)
 
