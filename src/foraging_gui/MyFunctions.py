@@ -93,6 +93,7 @@ class GenerateTrials():
         self.Obj={}
         # get all of the training parameters of the current trial
         self._GetTrainingParameters(self.win)
+        
     def _GenerateATrial(self,Channel4):
         self.finish_select_par=0
         if self.win.UpdateParameters==1:
@@ -105,10 +106,15 @@ class GenerateTrials():
             self._LickSta([self.B_CurrentTrialN-1])
         # to decide if it's an auto water trial. will give water in _GetAnimalResponse
         self._CheckAutoWater()
+        
         # check block transition
         self._check_block_transition()
-        # Get reward probability and other trial related parameters
-        self._generate_next_trial_paras()
+        # Get reward probability
+        self._generate_next_trial_reward_prob()
+        
+        # Generate other parameters such as ITI, delay, and response time
+        self._generate_next_trial_other_paras()
+        
         # check if bait is permitted at the current trial
         self._CheckBaitPermitted()
         self.finish_select_par=1
@@ -284,7 +290,7 @@ class GenerateTrials():
         else:
             return np.max(length)
 
-    def _generate_next_trial_paras(self):
+    def _generate_next_trial_reward_prob(self):
         '''Select the training parameter of the next trial'''
         # determine the reward probability of the next trial based on tasks
         if (self.TP_Task in ['Coupled Baiting','Coupled Without Baiting','RewardN']) and any(self.B_ANewBlock==1):
@@ -350,8 +356,9 @@ class GenerateTrials():
                     self.BlockLenHistory[i].append(self.BlockLen)
                     self.B_ANewBlock[i]=0
 
-                    
         self.B_RewardProHistory=np.append(self.B_RewardProHistory,self.B_CurrentRewardProb.reshape(self.B_LickPortN,1),axis=1)
+
+    def _generate_next_trial_other_paras(self):
         # get the ITI time and delay time
         if self.TP_Randomness=='Exponential':
             self.CurrentITI = float(np.random.exponential(float(self.TP_ITIBeta),1)+float(self.TP_ITIMin))
@@ -391,6 +398,8 @@ class GenerateTrials():
             return  # Early return here
             
         # --- Decide block transition based on this block length ---
+        # self.BlockLenHistory is initialized as [[],[]] in __init__
+        # So the first block is also generated here
         for i in range(len(self.B_ANewBlock)):
             if self.B_CurrentTrialN+1>=sum(self.BlockLenHistory[i]):
                 self.B_ANewBlock[i]=1
