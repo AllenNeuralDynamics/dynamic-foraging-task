@@ -2023,6 +2023,15 @@ class Window(QMainWindow):
 
     def _Open(self):
 
+        #self.NewSession.setChecked(True)
+        #Reply=self._NewSession()
+        #if Reply == QMessageBox.Yes or Reply == QMessageBox.No:
+        #    self.NewSession.setDisabled(True) # You must start a NewSession after loading a new file, and you can't continue that session
+        #elif Reply == QMessageBox.Cancel:
+        #    return
+        ####self.NewSession.setStyleSheet("background-color : green;")
+        ####self.NewSession.setChecked(False)
+
         # stop current session first
         self._StopCurrentSession() 
 
@@ -2031,8 +2040,8 @@ class Window(QMainWindow):
             return
 
         # Disable continuing new sessiona
-        self.NewSession.setChecked(True)
-        self.NewSession.setDisabled(True)
+        #self.NewSession.setChecked(True)
+        #self.NewSession.setDisabled(True)
 
         fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder+'\\'+self.current_box, "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
         self.fname=fname
