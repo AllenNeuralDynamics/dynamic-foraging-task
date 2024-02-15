@@ -2033,6 +2033,7 @@ class Window(QMainWindow):
             reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
                 'Mouse ID {} does not have any saved sessions on this computer'.format(mouse_id),
                 QMessageBox.Ok)
+            logging.info('User input mouse id {}, which had no sessions on this computer'.format(mouse_id))
             return False, ''
 
         # Are there any session from this mouse?
@@ -2042,6 +2043,7 @@ class Window(QMainWindow):
             reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
                 'Mouse ID {} does not have any saved sessions on this computer'.format(mouse_id),
                 QMessageBox.Ok)
+            logging.info('User input mouse id {}, which had no sessions on this computer'.format(mouse_id))
             return False, ''      
 
         # do any of the sessions have saved data? Grab the most recent        
@@ -2060,11 +2062,11 @@ class Window(QMainWindow):
         reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
             'Mouse ID {} does not have any saved sessions on this computer'.format(mouse_id),
             QMessageBox.Ok)
+        logging.info('User input mouse id {}, which had no sessions on this computer'.format(mouse_id))
         return False, ''             
 
 
     def _Open(self,open_last = False):
-
 
         # stop current session first
         self._StopCurrentSession() 
@@ -2074,29 +2076,33 @@ class Window(QMainWindow):
         if not new_session:
             return
 
-        # If we are using the quick load, ask for the mouse id, and load the last session
         if open_last:
+            # If we are using the quick load, ask for the mouse id, and load the last session
             min_value = 0
             default_value = 0
             max_value = 1000000000
+            logging.info('Quick load, prompting user for mouse id')
             mouse_id, ok = QInputDialog.getInt(self, 
                 'Box {}, Load mouse'.format(self.box_letter),
                 'Enter the mouse ID',
                 default_value, min_value,max_value)
-            # User hit cancel, or "x"
             if not ok:
-                print('bad input')
+                # User hit cancel, or "x"
+                logging.info('Quick load failed, user hit cancel or X')
                 return
            
             good_load, fname = self._OpenLast_find_session(mouse_id)  
             if not good_load:
-                print('bad load')
+                logging.info('Quick load failed')
                 return        
+            logging.info('Quick load success: {}'.format(fname))
         else:
+            # Open dialog box
             fname, _ = QFileDialog.getOpenFileName(self, 'Open file', 
                 self.default_saveFolder+'\\'+self.current_box, 
                 "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
-    
+            logging.info('User selected: {}'.format(fname))    
+
         self.fname=fname
         if fname:
             if fname.endswith('.mat'):
@@ -2106,15 +2112,23 @@ class Window(QMainWindow):
                 Obj = json.loads(f.read())
                 f.close()
             self.Obj = Obj
-            widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+            widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((
+                QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+                QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox))}
             widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
-            widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))})  # update optogenetics parameters from the loaded file
+            widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((
+                QtWidgets.QLineEdit, QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox))})  # update optogenetics parameters from the loaded file
             if hasattr(self, 'LaserCalibration_dialog'):
-                widget_dict.update({w.objectName(): w for w in self.LaserCalibration_dialog.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))})  
+                widget_dict.update({w.objectName(): w for w in self.LaserCalibration_dialog.findChildren((
+                    QtWidgets.QLineEdit, QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox))})  
             if hasattr(self, 'Opto_dialog'):
-                widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))})
+                widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((
+                    QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+                    QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox))})
             if hasattr(self, 'Camera_dialog'):
-                widget_dict.update({w.objectName(): w for w in self.Camera_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))})
+                widget_dict.update({w.objectName(): w for w in self.Camera_dialog.findChildren((
+                    QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+                    QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox))})
             try:
                 for key in widget_dict.keys():
                     try:
