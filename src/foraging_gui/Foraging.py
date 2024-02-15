@@ -2096,8 +2096,6 @@ class Window(QMainWindow):
             fname, _ = QFileDialog.getOpenFileName(self, 'Open file', 
                 self.default_saveFolder+'\\'+self.current_box, 
                 "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
-        print(fname)
-        return
     
         self.fname=fname
         if fname:
