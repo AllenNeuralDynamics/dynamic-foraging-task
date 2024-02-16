@@ -2319,14 +2319,23 @@ class Window(QMainWindow):
         layout.addWidget(PlotM)
         PlotM._Update(GeneratedTrials=self.GeneratedTrials)
         self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
+
     def _Clear(self):
-        reply = QMessageBox.question(self, 'Box {}, Clear parameters:'.format(self.box_letter), 'Do you want to clear training parameters?',QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        
+        if self.unsaved_data:
+            reply = QMessageBox.critical(self, 
+                'Box {}, Clear parameters:'.format(self.box_letter), 
+                'Unsaved data exists! Do you want to clear training parameters?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)        
+        else:
+            reply = QMessageBox.question(self, 
+                'Box {}, Clear parameters:'.format(self.box_letter), 
+                'Do you want to clear training parameters?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
             for child in self.TrainingParameters.findChildren(QtWidgets.QLineEdit)+ self.centralwidget.findChildren(QtWidgets.QLineEdit):
                 if child.isEnabled():
                     child.clear()
-        else:
-            pass
 
     def _New(self):
         self._Clear()
