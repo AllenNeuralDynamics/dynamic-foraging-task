@@ -31,12 +31,16 @@ class MouseSelectorDialog(QDialog):
         self.mice = mice
         self.MainWindow = MainWindow
 
+
         combo = QtWidgets.QComboBox()
         combo.addItems(mice)
         combo.setEditable(True)
         combo.setInsertPolicy(QtWidgets.QComboBox.NoInsert)
         combo.completer().setCompletionMode(QtWidgets.QCompleter.PopupCompletion)
             
+        layout = QVBoxLayout(self)
+        layout.addWidget(combo)
+
 
 class LickStaDialog(QDialog):
     '''Lick statistics dialog'''
