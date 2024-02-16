@@ -2028,6 +2028,12 @@ class Window(QMainWindow):
         self._Open(open_last=True)
 
     def _OpenLast_find_session(self,mouse_id):
+        '''
+            Returns the filepath of the last available session of this mouse
+            Returns a tuple (Bool, str)
+            Bool is True is a valid filepath was found, false otherwise
+            If a valid filepath was found, then str contains the filepath 
+        '''
 
         # Is this mouse on this computer?
         filepath = os.path.join(self.default_saveFolder,self.current_box)
@@ -2075,6 +2081,9 @@ class Window(QMainWindow):
         return False, ''             
 
     def _OpenNewMouse(self, mouse_id):
+        '''
+            Queries the user to start a new mouse
+        '''
         reply = QMessageBox.question(self, 
             'Box {}, Load mouse'.format(self.box_letter),
             'No data for this mouse, start new mouse?', 
@@ -2083,16 +2092,13 @@ class Window(QMainWindow):
             logging.info('User declines to start new mouse: {}'.format(mouse_id))
             return
 
+        # Set ID, clear weight information
         logging.info('User starting a new mouse: {}'.format(mouse_id))
         self.ID.setText(mouse_id)   
         self.BaseWeight.setText('')
         self.WeightAfter.setText('')
         self.TargetRatio.setText('0.85')
-        self.keyPressEvent(allow_reset=True)
-        # get Mouse ID
-        # get Experimenter
-        # Clear BaseWeight 
-  
+        self.keyPressEvent(allow_reset=True) 
         return 
     
     def _Open_getListOfMice(self):
