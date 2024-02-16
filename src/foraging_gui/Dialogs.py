@@ -32,7 +32,7 @@ class MouseSelectorDialog(QDialog):
         self.mice = ['']+mice
         self.MainWindow = MainWindow
         self.setWindowTitle('Box {}, Load Mouse'.format(self.MainWindow.box_letter))
-        self.setFixedSize(250,75)
+        self.setFixedSize(250,100)
         
         QBtns = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtns)
