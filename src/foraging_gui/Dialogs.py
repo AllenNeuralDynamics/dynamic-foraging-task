@@ -63,7 +63,7 @@ class MouseSelectorDialog(QDialog):
 
 
     def eventFilter(self, target, event):
-        if target == self.combo and event.typ() == QtCore.QEvent.MouseButtonPress:
+        if target == self.combo and event.type() == QtCore.QEvent.MouseButtonPress:
             print('here')
             self.combo.showPopup()
 
