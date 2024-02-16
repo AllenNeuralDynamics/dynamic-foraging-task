@@ -2081,6 +2081,7 @@ class Window(QMainWindow):
             logging.info('User declines to start new mouse: {}'.format(mouse_id))
             return
 
+        logging.info('User starting a new mouse: {}'.format(mouse_id))
         self.ID.setText(mouse_id)   
         self.BaseWeight.setText('')
         self.WeightAfter.setText('')
