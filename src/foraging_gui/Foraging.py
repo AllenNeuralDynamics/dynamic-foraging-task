@@ -2157,10 +2157,10 @@ class Window(QMainWindow):
             ##lineEdit.setValidator(onlyInt)
         
             # Get response
-            ok, mouse_id = (
-                dialog.exec_() == QtWidgets.QDialog.Accepted, 
-                dialog.textValue(),
-            )
+            #ok, mouse_id = (
+            #    dialog.exec_() == QtWidgets.QDialog.Accepted, 
+            #    dialog.textValue(),
+            #)
             if not ok: 
                 logging.info('Quick load failed, user hit cancel or X')
                 return                                

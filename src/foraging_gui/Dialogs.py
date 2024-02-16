@@ -61,10 +61,6 @@ class MouseSelectorDialog(QDialog):
         self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
 
-    def mousePressEvent(self, event):
-        print('here')
-        self.combo.showPopup()
-
 class LickStaDialog(QDialog):
     '''Lick statistics dialog'''
     def __init__(self, MainWindow, parent=None):
