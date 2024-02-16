@@ -2072,6 +2072,15 @@ class Window(QMainWindow):
         logging.info('User input mouse id {}, which had no sessions on this computer'.format(mouse_id))
         return False, ''             
 
+    def _OpenNewMouse(self, mouse_id):
+        #msgbox = QMessageBox()
+        #msgbox.setWindowTitle('Box {}, bleaching:'.format(self.box_letter))
+        #msgbox.setText('Photobleaching in progress, do not close the GUI.')
+        #msgbox.setStandardButtons(QMessageBox.Ok)
+        #button = msgbox.button(QMessageBox.Ok)
+        #button.setText('Stop bleaching')
+        #bttn = msgbox.exec_()
+        return 
 
     def _Open(self,open_last = False):
 
@@ -2084,25 +2093,45 @@ class Window(QMainWindow):
             return
 
         if open_last:
-            # If we are using the quick load, ask for the mouse id, and load the last session
-            min_value = 0
-            default_value = 0
-            max_value = 1000000000
-            logging.info('Quick load, prompting user for mouse id')
-            mouse_id, ok = QInputDialog.getInt(self, 
-                'Box {}, Load mouse'.format(self.box_letter),
-                'Enter the mouse ID',
-                default_value, min_value,max_value)
-            if not ok:
-                # User hit cancel, or "x"
-                logging.info('Quick load failed, user hit cancel or X')
-                return
+            #msgbox = QMessageBox()
+            #msgbox.setWindowTitle('Box {}, Load mouse'.format(self.box_letter))
+            dialog = QtWidgets.QInputDialog(self)
+            dialog.setWindowTitle('test')
+            dialog.setLabelText('Enter the mouse ID')
+            dialog.setTextValue('')
+            le = dialog.findChild(QtWidgets.QLineEdit)
+            mice = ['0','1','2','200','201']
+            complete = QtWidgets.QCompleter(mice, le)
+            le.setCompleter(completer)
+            ok, text = (
+                dialog.exec_() == QtWidgets.QDialog.Accepted, 
+                dialog.textValue(),
+            )
+            if ok:
+                print(text)
+            else: 
+                logging.info('Quick load failed')
+                return        
+            #### If we are using the quick load, ask for the mouse id, and load the last session
+            ###min_value = 0
+            ###default_value = 0
+            ###max_value = 1000000000
+            ###logging.info('Quick load, prompting user for mouse id')
+            ###mouse_id, ok = QInputDialog.getInt(self, 
+            ###    'Box {}, Load mouse'.format(self.box_letter),
+            ###    'Enter the mouse ID',
+            ###    default_value, min_value,max_value)
+            ###if not ok:
+            ###    # User hit cancel, or "x"
+            ###    logging.info('Quick load failed, user hit cancel or X')
+            ###    return
            
             good_load, fname = self._OpenLast_find_session(mouse_id)  
             if not good_load:
                 logging.info('Quick load failed')
                 return        
             logging.info('Quick load success: {}'.format(fname))
+            return
         else:
             # Open dialog box
             fname, _ = QFileDialog.getOpenFileName(self, 'Open file', 
