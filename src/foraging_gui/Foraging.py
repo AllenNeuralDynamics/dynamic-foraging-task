@@ -1444,6 +1444,17 @@ class Window(QMainWindow):
             # set block length to the default value
             #self.BlockMin.setText('20')
             #self.BlockMax.setText('60')
+            
+            # Reopen block beta, NextBlock, and AutoBlock panel
+            self.BlockBeta.setEnabled(True)
+            self.NextBlock.setEnabled(True)
+            
+            self.AdvancedBlockAuto.setEnabled(True)
+            self._AdvancedBlockAuto() # Update states of SwitchThr and PointsInARow
+            
+            self.BlockMinReward.setEnabled(True)
+            self.IncludeAutoReward.setEnabled(True)
+            
         elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
             border_color = "rgb(100, 100, 100,80)"
             border_style = "1px solid " + border_color
@@ -1474,7 +1485,6 @@ class Window(QMainWindow):
                 self.label_14.setStyleSheet("color: gray;")
             self.label_12.setEnabled(True)
             self.label_11.setEnabled(True)
-            self.BlockBeta.setEnabled(True)
             self.BlockMin.setEnabled(True)
             self.BlockMax.setEnabled(True)
             self.label_12.setStyleSheet("color: black;")
@@ -1496,9 +1506,17 @@ class Window(QMainWindow):
             # move auto-reward
             self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 128, 80, 20))
             self.label_26.setGeometry(QtCore.QRect(929, 128, 146, 16))
-            # set block length to the default value
-            #self.BlockMin.setText('20')
-            #self.BlockMax.setText('60')
+            
+            # Disable block beta, NextBlock, and AutoBlock panel
+            self.BlockBeta.setEnabled(False)
+            self.NextBlock.setEnabled(False)
+            self.AdvancedBlockAuto.setEnabled(False)
+            self.SwitchThr.setEnabled(False)
+            self.PointsInARow.setEnabled(False)
+            self.BlockMinReward.setEnabled(False)
+            self.IncludeAutoReward.setEnabled(False)
+            
+            
         elif self.Task.currentText() in ['RewardN']:
             self.label_6.setEnabled(True)
             self.label_7.setEnabled(True)
@@ -2688,12 +2706,15 @@ class Window(QMainWindow):
                 GeneratedTrials.B_CurrentTrialN+=1
                 print('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
                 logging.info('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
-                if not (self.GeneratedTrials.TP_AutoReward  or int(self.GeneratedTrials.TP_BlockMinReward)>0):
-                    # generate a new trial and get reward
-                    self.NewTrialRewardOrder=1
+                if (self.GeneratedTrials.TP_AutoReward  or int(self.GeneratedTrials.TP_BlockMinReward)>0
+                    or self.GeneratedTrials.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']):
+                    # The next trial parameters must be dependent on the current trial's choice
+                    # get animal response and then generate a new trial
+                    self.NewTrialRewardOrder=0
                 else:
-                    # get reward and generate a new trial
-                    self.NewTrialRewardOrder=0    
+                    # By default, to save time, generate a new trial as early as possible
+                    # generate a new trial and then get animal response
+                    self.NewTrialRewardOrder=1   
  
                 #initiate the generated trial
                 try:
