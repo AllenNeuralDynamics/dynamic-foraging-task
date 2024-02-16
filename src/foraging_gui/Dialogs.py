@@ -47,7 +47,8 @@ class MouseSelectorDialog(QDialog):
         font = combo.font()
         font.setPointSize(15)
         combo.setFont(font)
-        combo.installEventFilter(self)
+        self.combo = combo
+        self.combo.installEventFilter(self)
         
         msg = QLabel('Enter the Mouse ID: ')
         font = msg.font()
@@ -56,10 +57,10 @@ class MouseSelectorDialog(QDialog):
 
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(msg)
-        self.layout.addWidget(combo)
+        self.layout.addWidget(self.combo)
         self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
-        self.combo = combo
+
 
     def eventFilter(self, target, event):
         if target == self.combo and event.typ() == QtCore.QEvent.MouseButtonPress:
