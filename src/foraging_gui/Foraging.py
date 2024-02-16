@@ -2073,6 +2073,8 @@ class Window(QMainWindow):
         return False, ''             
 
     def _OpenNewMouse(self, mouse_id):
+        reply = QMessageBox.question(self, '','No data for this mouse, start new mouse?', QMessageBox.Yes | QMessageBox.No)
+        
         #msgbox = QMessageBox()
         #msgbox.setWindowTitle('Box {}, bleaching:'.format(self.box_letter))
         #msgbox.setText('Photobleaching in progress, do not close the GUI.')
@@ -2083,6 +2085,9 @@ class Window(QMainWindow):
         return 
     
     def _Open_getListOfMice(self):
+        '''
+            Returns a list of mice with data saved on this computer
+        '''
         filepath = os.path.join(self.default_saveFolder,self.current_box)
         mouse_dirs = os.listdir(filepath)      
         mice = []
@@ -2135,8 +2140,15 @@ class Window(QMainWindow):
             if not ok: 
                 logging.info('Quick load failed, user hit cancel or X')
                 return                                
+            
+            # Mouse ID not in list of mice:
+            if mouse_id not in mice:
+                # figureout out new Mouse
+                logging.info('User entered the ID for a mouse with no data')
+                self._OpenNewMouse(mouse_id)
+                return
  
-            # attempt to load mouse
+            # attempt to load last session from mouse
             good_load, fname = self._OpenLast_find_session(mouse_id)  
             if not good_load:
                 logging.info('Quick load failed')
