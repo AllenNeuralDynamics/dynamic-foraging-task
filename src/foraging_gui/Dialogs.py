@@ -61,7 +61,7 @@ class MouseSelectorDialog(QDialog):
         self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
 
-    def mousePressEvent():
+    def mousePressEvent(self, event):
         print('here')
         self.combo.showPopup()
 
