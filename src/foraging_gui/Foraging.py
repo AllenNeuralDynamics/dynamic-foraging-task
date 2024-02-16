@@ -2056,8 +2056,8 @@ class Window(QMainWindow):
                 date = s.split('_')[1]
                 session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
                 reply = QMessageBox.information(self,
-                    'Box {}, Load mouse'.format(self.box_letter),
-                    'Please verify:<br><span style="color:purple;font-weight:bold">Mouse ID:     {}</span><br>Last session: {}<br>Filename:     {}'.format(mouse_id, session_date, s),
+                    'Box {}, Please verify'.format(self.box_letter),
+                    '<span style="color:purple;font-weight:bold"><pre>Mouse ID:     </pre>{}</span><br><pre>Last session: </pre>{}<br><pre>Filename:     </pre>{}'.format(mouse_id, session_date, s),
                     QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
                 if reply == QMessageBox.Cancel:
                     logging.info('User hit cancel')
