@@ -45,7 +45,7 @@ class MouseSelectorDialog(QDialog):
         combo.completer().setCompletionMode(QtWidgets.QCompleter.PopupCompletion)
             
         self.layout = QVBoxLayout(self)
-        self.layout.AddWidget(QLabel('Enter the Mouse ID: '))
+        self.layout.addWidget(QLabel('Enter the Mouse ID: '))
         self.layout.addWidget(combo)
         self.layout.addWidget(QBtns)
 
