@@ -45,11 +45,16 @@ class MouseSelectorDialog(QDialog):
         combo.setInsertPolicy(QtWidgets.QComboBox.NoInsert)
         combo.completer().setCompletionMode(QtWidgets.QCompleter.PopupCompletion)
         font = combo.font()
-        font.setPointSize(20)
+        font.setPointSize(15)
         combo.setFont(font)
-            
+        
+        msg = QLabel('Enter the Mouse ID: ')
+        font = msg.font()
+        font.setPointSize(15)
+        msg.setFont(font)
+
         self.layout = QVBoxLayout(self)
-        self.layout.addWidget(QLabel('Enter the Mouse ID: '))
+        self.layout.addWidget(msg)
         self.layout.addWidget(combo)
         self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
