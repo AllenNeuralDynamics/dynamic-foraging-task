@@ -2132,7 +2132,8 @@ class Window(QMainWindow):
         if open_last:
             mice = self._Open_getListOfMice()
             W = MouseSelectorDialog(self, mice)
-                    
+            W.exec_()            
+        
             # Prompt user to enter mouse ID, with auto-completion
             dialog = QtWidgets.QInputDialog(self)
             dialog.setWindowTitle('Box {}, Load mouse'.format(self.box_letter))
