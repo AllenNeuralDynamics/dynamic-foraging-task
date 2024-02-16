@@ -2115,10 +2115,19 @@ class Window(QMainWindow):
             dialog.setWindowTitle('Box {}, Load mouse'.format(self.box_letter))
             dialog.setLabelText('Enter the mouse ID')
             dialog.setTextValue('')
-            le = dialog.findChild(QtWidgets.QLineEdit)
+            lineEdit = dialog.findChild(QtWidgets.QLineEdit)
+        
+            # Set auto complete
             mice = self._Open_getListOfMice()
-            completer = QtWidgets.QCompleter(mice, le)
-            le.setCompleter(completer)
+            completer = QtWidgets.QCompleter(mice, lineEdit)
+            lineEdit.setCompleter(completer)
+            
+            # Only accept integers
+            onlyInt = QtGui.QIntValidator()
+            onlyInt.setRange(0, 10000000000000)
+            lineEdit.setValidator(onlyInt)
+        
+            # Get response
             ok, mouse_id = (
                 dialog.exec_() == QtWidgets.QDialog.Accepted, 
                 dialog.textValue(),
@@ -2127,6 +2136,7 @@ class Window(QMainWindow):
                 logging.info('Quick load failed, user hit cancel or X')
                 return                                
  
+            # attempt to load mouse
             good_load, fname = self._OpenLast_find_session(mouse_id)  
             if not good_load:
                 logging.info('Quick load failed')
