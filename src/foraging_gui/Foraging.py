@@ -2136,7 +2136,7 @@ class Window(QMainWindow):
 
             ok, mouse_id = (
                 W.exec_() == QtWidgets.QDialog.Accepted, 
-                W.textValue(),
+                W.combo.currentText(),
             )        
 
             ### Prompt user to enter mouse ID, with auto-completion
