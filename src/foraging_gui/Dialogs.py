@@ -30,7 +30,7 @@ class MouseSelectorDialog(QDialog):
         super().__init__(parent)
         self.mice = mice
         self.MainWindow = MainWindow
-
+        self.setWindowTitle('Box {}, Load Mouse'.format(self.MainWindow.box_letter))
 
         combo = QtWidgets.QComboBox()
         combo.addItems(mice)
