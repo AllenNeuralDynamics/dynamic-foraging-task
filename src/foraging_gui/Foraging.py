@@ -2101,7 +2101,7 @@ class Window(QMainWindow):
             dialog.setTextValue('')
             le = dialog.findChild(QtWidgets.QLineEdit)
             mice = ['0','1','2','200','201']
-            complete = QtWidgets.QCompleter(mice, le)
+            completer = QtWidgets.QCompleter(mice, le)
             le.setCompleter(completer)
             ok, text = (
                 dialog.exec_() == QtWidgets.QDialog.Accepted, 
