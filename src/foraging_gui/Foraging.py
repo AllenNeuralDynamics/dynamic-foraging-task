@@ -1189,7 +1189,7 @@ class Window(QMainWindow):
             self.SwitchThr.setEnabled(True)
             self.PointsInARow.setEnabled(True)
 
-    def keyPressEvent(self, event=None):
+    def keyPressEvent(self, event=None,allow_reset=False):
         '''Enter press to allow change of parameters'''
         try:
             if self.actionTime_distribution.isChecked()==True:
@@ -1236,7 +1236,9 @@ class Window(QMainWindow):
                         continue
                     if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight']) and
                         (child.text() == '')):
-                        # These attributes can have the empty string, but we can't set the value as the empty string
+                        # These attributes can have the empty string, but we can't set the value as the empty string, unless we allow resets
+                        if allow_reset:
+                            continue
                         if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))                       
                         continue
@@ -2086,7 +2088,7 @@ class Window(QMainWindow):
         self.BaseWeight.setText('')
         self.WeightAfter.setText('')
         self.TargetRatio.setText('0.85')
-        self.keyPressEvent()
+        self.keyPressEvent(allow_reset=True)
         # get Mouse ID
         # get Experimenter
         # Clear BaseWeight 
