@@ -32,7 +32,7 @@ class MouseSelectorDialog(QDialog):
         self.mice = ['']+mice
         self.MainWindow = MainWindow
         self.setWindowTitle('Box {}, Load Mouse'.format(self.MainWindow.box_letter))
-        self.setFixedSize(300,150)
+        self.setFixedSize(250,75)
         
         QBtns = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtns)
@@ -40,7 +40,7 @@ class MouseSelectorDialog(QDialog):
         self.buttonBox.rejected.connect(self.reject)
 
         combo = QtWidgets.QComboBox()
-        combo.addItems(mice)
+        combo.addItems(self.mice)
         combo.setEditable(True)
         combo.setInsertPolicy(QtWidgets.QComboBox.NoInsert)
         combo.completer().setCompletionMode(QtWidgets.QCompleter.PopupCompletion)
