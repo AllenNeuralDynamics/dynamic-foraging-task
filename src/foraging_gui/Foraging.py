@@ -2093,45 +2093,32 @@ class Window(QMainWindow):
             return
 
         if open_last:
-            #msgbox = QMessageBox()
-            #msgbox.setWindowTitle('Box {}, Load mouse'.format(self.box_letter))
+            # Prompt user to enter mouse ID, with auto-completion
             dialog = QtWidgets.QInputDialog(self)
-            dialog.setWindowTitle('test')
+            dialog.setWindowTitle('Box {}, Load mouse'.format(self.box_letter))
             dialog.setLabelText('Enter the mouse ID')
             dialog.setTextValue('')
             le = dialog.findChild(QtWidgets.QLineEdit)
+            filepath = os.path.join(self.default_saveFolder,self.current_box)
+            mouse_dirs = os.listdir(filepath)
             mice = ['0','1','2','200','201']
-            completer = QtWidgets.QCompleter(mice, le)
+            completer = QtWidgets.QCompleter(mouse_dirs, le)
             le.setCompleter(completer)
             ok, text = (
                 dialog.exec_() == QtWidgets.QDialog.Accepted, 
                 dialog.textValue(),
             )
-            if ok:
-                print(text)
-            else: 
-                logging.info('Quick load failed')
+            if not ok: 
+                logging.info('Quick load failed, user hit cancel or X')
                 return        
-            #### If we are using the quick load, ask for the mouse id, and load the last session
-            ###min_value = 0
-            ###default_value = 0
-            ###max_value = 1000000000
-            ###logging.info('Quick load, prompting user for mouse id')
-            ###mouse_id, ok = QInputDialog.getInt(self, 
-            ###    'Box {}, Load mouse'.format(self.box_letter),
-            ###    'Enter the mouse ID',
-            ###    default_value, min_value,max_value)
-            ###if not ok:
-            ###    # User hit cancel, or "x"
-            ###    logging.info('Quick load failed, user hit cancel or X')
-            ###    return
+            print(text)
+            return
            
             good_load, fname = self._OpenLast_find_session(mouse_id)  
             if not good_load:
                 logging.info('Quick load failed')
                 return        
             logging.info('Quick load success: {}'.format(fname))
-            return
         else:
             # Open dialog box
             fname, _ = QFileDialog.getOpenFileName(self, 'Open file', 
