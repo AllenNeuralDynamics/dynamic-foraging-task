@@ -118,14 +118,17 @@ class GenerateTrials():
                 self._generate_next_coupled_block()
         elif self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']:
             if self.B_CurrentTrialN == -1:
+                # Get uncoupled task settings
+                self.RewardProbPoolUncoupled = self._get_uncoupled_reward_prob_pool()
+                
                 # Initialize the UncoupledBlocks object and generate the first trial
                 self.uncoupled_blocks = UncoupledBlocks(                 
-                    rwd_prob_array=[0.1, 0.5, 0.9],
-                    block_min=20, 
-                    block_max=35,
-                    persev_add=True, 
-                    perseverative_limit=4,
-                    max_block_tally=3,
+                    rwd_prob_array=self.RewardProbPoolUncoupled,
+                    block_min=self.TP_BlockMin, 
+                    block_max=self.TP_BlockMax,
+                    persev_add=True,  # Hard-coded to True for now
+                    perseverative_limit=4, # Hard-coded to 4 for now
+                    max_block_tally=3, # Hard-coded to 3 for now
                 )
                 self.uncoupled_blocks.next_trial()
             else:
@@ -135,7 +138,7 @@ class GenerateTrials():
                 )
                 self.uncoupled_blocks.next_trial()
             
-            # 
+            # Extract parameters from the UncoupledBlocks object
             
         # Append the (updated) current reward probability to the history 
         self.B_RewardProHistory=np.append(
@@ -235,6 +238,18 @@ class GenerateTrials():
             state='on'
         self.win.Opto_dialog.SessionControlWarning.setText('Session control state: '+state)
         self.win.Opto_dialog.SessionControlWarning.setStyleSheet(self.win.default_warning_color)    
+
+    def _get_uncoupled_reward_prob_pool(self):
+        # Get reward prob pool from the input string (e.g., ["0.1", "0.5", "0.9"])
+        input_string = self.win.UncoupledReward.text()
+        # remove any square brackets and spaces from the string
+        input_string = input_string.replace('[','').replace(']','').replace(',', ' ')
+        # split the remaining string into a list of individual numbers
+        num_list = input_string.split()
+        # convert each number in the list to a float
+        num_list = [float(num) for num in num_list]
+        # return a numpy array from the list of numbers
+        return np.array(num_list)
 
     def _CheckWarmUp(self):
         '''Check if we should turn on warm up'''
