@@ -31,7 +31,6 @@ class MouseSelectorDialog(QDialog):
         self.mice = mice
         self.MainWindow = MainWindow
 
-        label = QtGui.QLabel('Text')
         combo = QtWidgets.QComboBox()
         combo.addItems(mice)
         combo.setEditable(True)
