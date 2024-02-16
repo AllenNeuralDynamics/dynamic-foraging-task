@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox
-from PyQt5 import QtWidgets, uic
+from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject
 from PyQt5.QtSvg import QSvgWidget
 
@@ -23,6 +23,21 @@ from aind_auto_train.auto_train_manager import DynamicForagingAutoTrainManager
 from aind_auto_train.schema.task import TrainingStage
 
 logger = logging.getLogger(__name__)
+
+class MouseSelectorDialog(QDialog):
+    
+    def __init__(self, MainWindow, mice, parent=None):
+        super(Dialog, self).__init__(parent)
+        self.mice = mice
+        self.MainWindow = MainWindow
+
+        label = QtGui.QLabel('Text')
+        combo = QtWidgets.QComboBox()
+        combo.addItems(mice)
+        combo.setEditable(True)
+        combo.setInsertPolicy(QtWidgets.QComboBox.NoInsert)
+        combo.completer().setCompletionMode(QtWidgets.QCompleter.PopupCompletion)
+            
 
 class LickStaDialog(QDialog):
     '''Lick statistics dialog'''

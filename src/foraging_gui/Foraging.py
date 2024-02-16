@@ -25,7 +25,7 @@ from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistri
 from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog
 from foraging_gui.Dialogs import LaserCalibrationDialog
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
-from foraging_gui.Dialogs import AutoTrainDialog
+from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY
 from foraging_gui.stage import Stage
 from foraging_gui.TransferToNWB import bonsai_to_nwb
@@ -2131,17 +2131,8 @@ class Window(QMainWindow):
 
         if open_last:
             mice = self._Open_getListOfMice()
-            combo = QtWidgets.QComboBox()
-            combo.addItems(mice)
-            combo.setEditable(True)
-            combo.setInsertPolicy(QtWidgets.QComboBox.NoInsert)
-            combo.completer().setCompletionMode(QtWidgets.QCompleter.PopupCompletion)
-            combo.show()
-            
-
-
-
-            
+            W = MouseSelectorDialog(self, mice)
+                    
             # Prompt user to enter mouse ID, with auto-completion
             dialog = QtWidgets.QInputDialog(self)
             dialog.setWindowTitle('Box {}, Load mouse'.format(self.box_letter))
