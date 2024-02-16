@@ -2132,7 +2132,6 @@ class Window(QMainWindow):
         if open_last:
             mice = self._Open_getListOfMice()
             W = MouseSelectorDialog(self, mice)
-            W.setFont(QtGui.QFont("Arial",15))
 
             ok, mouse_id = (
                 W.exec_() == QtWidgets.QDialog.Accepted, 
