@@ -14,7 +14,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox 
 from PyQt5.QtWidgets import QLabel, QDialogButtonBox
 from PyQt5 import QtWidgets, uic, QtGui
-from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject
+from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject, QEvent
 from PyQt5.QtSvg import QSvgWidget
 
 from foraging_gui.MyFunctions import Worker
@@ -63,7 +63,7 @@ class MouseSelectorDialog(QDialog):
 
 
     def eventFilter(self, target, event):
-        if target == self.combo and event.type() == QtCore.QEvent.MouseButtonPress:
+        if target == self.combo and event.type() == QEvent.MouseButtonPress:
             print('here')
             self.combo.showPopup()
 
