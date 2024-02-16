@@ -11,7 +11,8 @@ import webbrowser
 import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox
+from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox 
+from PtQt5.QtWidgets import QLabel, QDialogButtonBox
 from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject
 from PyQt5.QtSvg import QSvgWidget
@@ -32,14 +33,21 @@ class MouseSelectorDialog(QDialog):
         self.MainWindow = MainWindow
         self.setWindowTitle('Box {}, Load Mouse'.format(self.MainWindow.box_letter))
 
+        QBtns = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtns)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
         combo = QtWidgets.QComboBox()
         combo.addItems(mice)
         combo.setEditable(True)
         combo.setInsertPolicy(QtWidgets.QComboBox.NoInsert)
         combo.completer().setCompletionMode(QtWidgets.QCompleter.PopupCompletion)
             
-        layout = QVBoxLayout(self)
-        layout.addWidget(combo)
+        self.layout = QVBoxLayout(self)
+        self.layout.AddWidget(QLabel('Enter the Mouse ID: '))
+        self.layout.addWidget(combo)
+        self.layout.addWidget(QBtns)
 
 
 class LickStaDialog(QDialog):
