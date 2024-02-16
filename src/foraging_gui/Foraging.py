@@ -2030,7 +2030,7 @@ class Window(QMainWindow):
         # Is this mouse on this computer?
         filepath = os.path.join(self.default_saveFolder,self.current_box)
         mouse_dirs = os.listdir(filepath)
-        if str(mouse_id) not in mouse_dirs:
+        if mouse_id not in mouse_dirs:
             reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
                 'Mouse ID {} does not have any saved sessions on this computer'.format(mouse_id),
                 QMessageBox.Ok)
@@ -2038,7 +2038,7 @@ class Window(QMainWindow):
             return False, ''
 
         # Are there any session from this mouse?
-        session_dir = os.path.join(self.default_saveFolder, self.current_box, str(mouse_id))
+        session_dir = os.path.join(self.default_saveFolder, self.current_box, mouse_id)
         sessions = os.listdir(session_dir)
         if len(sessions) == 0:
             reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
@@ -2051,7 +2051,7 @@ class Window(QMainWindow):
         for i in range(len(sessions)-1, -1, -1):
             s = sessions[i]
             json_file = os.path.join(self.default_saveFolder, 
-                self.current_box, str(mouse_id), s,'TrainingFolder',s+'.json')
+                self.current_box, mouse_id, s,'TrainingFolder',s+'.json')
             if os.path.isfile(json_file):
                 date = s.split('_')[1]
                 session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
@@ -2119,14 +2119,14 @@ class Window(QMainWindow):
             mice = self._Open_getListOfMice()
             completer = QtWidgets.QCompleter(mice, le)
             le.setCompleter(completer)
-            ok, text = (
+            ok, mouse_id = (
                 dialog.exec_() == QtWidgets.QDialog.Accepted, 
                 dialog.textValue(),
             )
             if not ok: 
                 logging.info('Quick load failed, user hit cancel or X')
-                return        
-           
+                return                                
+ 
             good_load, fname = self._OpenLast_find_session(mouse_id)  
             if not good_load:
                 logging.info('Quick load failed')
