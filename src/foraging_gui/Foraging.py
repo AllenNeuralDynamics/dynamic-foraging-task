@@ -2086,7 +2086,7 @@ class Window(QMainWindow):
         '''
         reply = QMessageBox.question(self, 
             'Box {}, Load mouse'.format(self.box_letter),
-            'No data for this mouse, start new mouse?', 
+            'No data for mouse <span style="color:purple;font-weight:bold">{}</span>, start new mouse?'.format(mouse_id), 
             QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if reply == QMessageBox.No:
             logging.info('User declines to start new mouse: {}'.format(mouse_id))
