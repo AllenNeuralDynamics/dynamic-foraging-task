@@ -48,7 +48,7 @@ class MouseSelectorDialog(QDialog):
         font.setPointSize(15)
         combo.setFont(font)
         self.combo = combo
-        self.combo.installEventFilter(self)
+        #self.combo.installEventFilter(self)
         
         msg = QLabel('Enter the Mouse ID: ')
         font = msg.font()
@@ -63,7 +63,7 @@ class MouseSelectorDialog(QDialog):
 
 
     def eventFilter(self, target, event):
-        if target == self.combo and event.type() == QEvent.MouseButtonPress:
+        if event.type() == QEvent.MouseButtonPress:
             print('here')
             self.combo.showPopup()
         return False
