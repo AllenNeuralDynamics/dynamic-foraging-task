@@ -2126,8 +2126,6 @@ class Window(QMainWindow):
             if not ok: 
                 logging.info('Quick load failed, user hit cancel or X')
                 return        
-            print(text)
-            return
            
             good_load, fname = self._OpenLast_find_session(mouse_id)  
             if not good_load:
