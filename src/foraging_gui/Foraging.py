@@ -2073,15 +2073,19 @@ class Window(QMainWindow):
         return False, ''             
 
     def _OpenNewMouse(self, mouse_id):
-        reply = QMessageBox.question(self, '','No data for this mouse, start new mouse?', QMessageBox.Yes | QMessageBox.No)
-        
-        #msgbox = QMessageBox()
-        #msgbox.setWindowTitle('Box {}, bleaching:'.format(self.box_letter))
-        #msgbox.setText('Photobleaching in progress, do not close the GUI.')
-        #msgbox.setStandardButtons(QMessageBox.Ok)
-        #button = msgbox.button(QMessageBox.Ok)
-        #button.setText('Stop bleaching')
-        #bttn = msgbox.exec_()
+        reply = QMessageBox.question(self, 
+            'Box {}, Load mouse'.format(self.box_letter),
+            'No data for this mouse, start new mouse?', 
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        if reply == QMessageBox.No:
+            logging.info('User declines to start new mouse: {}'.format(mouse_id))
+            return
+
+        self.ID.setText(mouse_id)   
+        # get Mouse ID
+        # get Experimenter
+        # Clear BaseWeight 
+  
         return 
     
     def _Open_getListOfMice(self):
@@ -2144,7 +2148,7 @@ class Window(QMainWindow):
             # Mouse ID not in list of mice:
             if mouse_id not in mice:
                 # figureout out new Mouse
-                logging.info('User entered the ID for a mouse with no data')
+                logging.info('User entered the ID for a mouse with no data: {}'.format(mouse_id))
                 self._OpenNewMouse(mouse_id)
                 return
  
@@ -2591,6 +2595,7 @@ class Window(QMainWindow):
         self.CreateNewFolder=1
         self.PhotometryRun=0
         self.unsaved_data=False
+        self.ManualWaterVolume=[0,0]       
 
         # Add note to log
         logging.info('New Session complete')
