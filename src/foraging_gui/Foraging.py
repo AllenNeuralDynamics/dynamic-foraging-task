@@ -555,7 +555,8 @@ class Window(QMainWindow):
         '''   
         if self.InitializeBonsaiSuccessfully ==1 and hasattr(self, 'GeneratedTrials'):
             msg = 'Reconnected to Bonsai. Start a new session before running more trials'
-            reply = QMessageBox.question(self, 'Box {}, Reconnect Bonsai'.format(self.box_letter), msg, QMessageBox.Ok )
+            reply = QMessageBox.information(self, 
+                'Box {}, Reconnect Bonsai'.format(self.box_letter), msg, QMessageBox.Ok )
  
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
@@ -1604,7 +1605,7 @@ class Window(QMainWindow):
             reply = QMessageBox.critical(self, 
                 'Box {}, Foraging Close'.format(self.box_letter), 
                 'Exit without saving?',
-                QMessageBox.Yes | QMessageBox.No , QMessageBox.Yes)  
+                QMessageBox.Yes | QMessageBox.No , QMessageBox.No)  
             if reply == QMessageBox.No:
                 event.ignore()
                 return
@@ -2319,7 +2320,7 @@ class Window(QMainWindow):
         PlotM._Update(GeneratedTrials=self.GeneratedTrials)
         self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
     def _Clear(self):
-        reply = QMessageBox.question(self, 'Box {}, Clear parameters:'.format(self.box_letter), 'Do you want to clear training parameters?',QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        reply = QMessageBox.question(self, 'Box {}, Clear parameters:'.format(self.box_letter), 'Do you want to clear training parameters?',QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
             for child in self.TrainingParameters.findChildren(QtWidgets.QLineEdit)+ self.centralwidget.findChildren(QtWidgets.QLineEdit):
                 if child.isEnabled():
@@ -2345,7 +2346,7 @@ class Window(QMainWindow):
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: start excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
-                reply = QMessageBox.question(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
+                reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
                 self.StartExcitation.setChecked(False)
                 self.StartExcitation.setStyleSheet("background-color : none")
             else:
@@ -2366,7 +2367,7 @@ class Window(QMainWindow):
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: stop excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
-                reply = QMessageBox.question(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when stopping excitation: {}'.format(e), QMessageBox.Ok)
+                reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when stopping excitation: {}'.format(e), QMessageBox.Ok)
             else:
                 self.TeensyWarning.setText('')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)               
@@ -2377,7 +2378,7 @@ class Window(QMainWindow):
             # Check if trials have stopped
             if self.ANewTrial==0:
                 # Alert User
-                reply = QMessageBox.question(self, 'Box {}, Start bleaching:'.format(self.box_letter), 
+                reply = QMessageBox.critical(self, 'Box {}, Start bleaching:'.format(self.box_letter), 
                     'Cannot start photobleaching, because trials are in progress', QMessageBox.Ok)
 
                 # reset GUI button
@@ -2407,7 +2408,7 @@ class Window(QMainWindow):
                 # Alert user
                 self.TeensyWarning.setText('Error: start bleaching!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
-                reply = QMessageBox.question(self, 'Box {}, Start bleaching:'.format(self.box_letter), 
+                reply = QMessageBox.critical(self, 'Box {}, Start bleaching:'.format(self.box_letter), 
                     'Cannot start photobleaching: {}'.format(str(e)), QMessageBox.Ok)
                 
                 # Reset GUI button
@@ -2490,7 +2491,7 @@ class Window(QMainWindow):
             reply = QMessageBox.critical(self, 
                 'Box {}, New Session:'.format(self.box_letter), 
                 'Start new session without saving?',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if reply == QMessageBox.No:
                 self.NewSession.setStyleSheet("background-color : none")
                 self.NewSession.setChecked(False)
@@ -2558,7 +2559,7 @@ class Window(QMainWindow):
                 elif (time.time() - start_time) > stall_duration*stall_iteration:
                     elapsed_time = int(np.floor(stall_duration*stall_iteration/60))
                     message = '{} minutes have elapsed since trial stopped was initiated. Force stop?'.format(elapsed_time)
-                    reply = QMessageBox.question(self,'Box {}, StopCurrentSession'.format(self.box_letter),message,QMessageBox.Yes|QMessageBox.No)
+                    reply = QMessageBox.question(self,'Box {}, StopCurrentSession'.format(self.box_letter),message,QMessageBox.Yes|QMessageBox.No, QMessageBox.Yes)
                     if reply == QMessageBox.Yes:
                         logging.error('trial stalled {} minutes, user force stopped trials'.format(elapsed_time))
                         self.ANewTrial=1
@@ -2681,7 +2682,7 @@ class Window(QMainWindow):
                     self.Start.setChecked(False)
                     self.Start.setStyleSheet("background-color : none")
                     self.InitializeBonsaiSuccessfully=0
-                    reply = QMessageBox.question(self, 'Box {}, Start'.format(self.box_letter), 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No)
+                    reply = QMessageBox.question(self, 'Box {}, Start'.format(self.box_letter), 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
                     if reply == QMessageBox.Yes:
                         self._ReconnectBonsai()
                         logging.info('User selected reconnect bonsai')
@@ -2759,7 +2760,10 @@ class Window(QMainWindow):
         # Check if photometry excitation is running or not
         if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and (not self.StartExcitation.isChecked()):
             logging.warning('photometry is set to "on", but excitation is not running')
-            reply = QMessageBox.question(self, 'Box {}, Start'.format(self.box_letter), 'Photometry is set to "on", but excitation is not running. Start excitation now?',QMessageBox.Yes | QMessageBox.No)
+            reply = QMessageBox.question(self, 
+                'Box {}, Start'.format(self.box_letter), 
+                'Photometry is set to "on", but excitation is not running. Start excitation now?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
             if reply == QMessageBox.Yes:
                 self.StartExcitation.setChecked(True)
                 logging.info('User selected to start excitation')
@@ -2837,7 +2841,10 @@ class Window(QMainWindow):
                         self.Start.setChecked(False)
                         self.Start.setStyleSheet("background-color : none")
                         self.InitializeBonsaiSuccessfully=0
-                        reply = QMessageBox.question(self, 'Box {}, Start'.format(self.box_letter), 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No)
+                        reply = QMessageBox.question(self, 
+                            'Box {}, Start'.format(self.box_letter), 
+                            'Cannot connect to Bonsai. Attempt reconnection?',
+                            QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
                         if reply == QMessageBox.Yes:
                             self._ReconnectBonsai()
                             logging.info('User selected reconnect bonsai')
@@ -2847,7 +2854,7 @@ class Window(QMainWindow):
 
                         break
                     else:
-                        reply = QMessageBox.question(self, 'Box {}, Error'.format(self.box_letter), 'Encountered the following error: {}'.format(e),QMessageBox.Ok )
+                        reply = QMessageBox.critical(self, 'Box {}, Error'.format(self.box_letter), 'Encountered the following error: {}'.format(e),QMessageBox.Ok )
                         logging.error('Caught this error: {}'.format(e))
                         self.ANewTrial=1
                         self.Start.setChecked(False)
@@ -2883,7 +2890,9 @@ class Window(QMainWindow):
                 # Prompt user to stop trials
                 elapsed_time = int(np.floor(stall_duration*stall_iteration/60))
                 message = '{} minutes have elapsed since the last trial started. Bonsai may have stopped. Stop trials?'.format(elapsed_time)
-                reply = QMessageBox.question(self, 'Box {}, Trial Generator'.format(self.box_letter), message,QMessageBox.Yes| QMessageBox.No )
+                reply = QMessageBox.question(self, 
+                    'Box {}, Trial Generator'.format(self.box_letter), 
+                    message,QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
                 if reply == QMessageBox.Yes:
                     # User stops trials
                     err_msg = 'trial stalled {} minutes, user stopped trials. ANewTrial:{},Start:{},finish_Timer:{}'
