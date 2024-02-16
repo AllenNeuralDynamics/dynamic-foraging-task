@@ -2321,7 +2321,10 @@ class Window(QMainWindow):
         self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
 
     def _Clear(self):
-        
+        # Stop current session first
+        self._StopCurrentSession()    
+    
+        # Verify user wants to clear parameters
         if self.unsaved_data:
             reply = QMessageBox.critical(self, 
                 'Box {}, Clear parameters:'.format(self.box_letter), 
@@ -2332,6 +2335,8 @@ class Window(QMainWindow):
                 'Box {}, Clear parameters:'.format(self.box_letter), 
                 'Do you want to clear training parameters?',
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        
+        # If yes, clear parameters
         if reply == QMessageBox.Yes:
             for child in self.TrainingParameters.findChildren(QtWidgets.QLineEdit)+ self.centralwidget.findChildren(QtWidgets.QLineEdit):
                 if child.isEnabled():
