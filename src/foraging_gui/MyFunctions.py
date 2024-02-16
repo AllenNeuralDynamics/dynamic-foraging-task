@@ -124,8 +124,8 @@ class GenerateTrials():
                 # Initialize the UncoupledBlocks object and generate the first trial
                 self.uncoupled_blocks = UncoupledBlocks(                 
                     rwd_prob_array=self.RewardProbPoolUncoupled,
-                    block_min=self.TP_BlockMin, 
-                    block_max=self.TP_BlockMax,
+                    block_min=int(self.TP_BlockMin), 
+                    block_max=int(self.TP_BlockMax),
                     persev_add=True,  # Hard-coded to True for now
                     perseverative_limit=4, # Hard-coded to 4 for now
                     max_block_tally=3, # Hard-coded to 3 for now
@@ -139,6 +139,16 @@ class GenerateTrials():
                 self.uncoupled_blocks.next_trial()
             
             # Extract parameters from the UncoupledBlocks object
+            for i, side in enumerate(['L', 'R']):
+                # Update self.B_CurrentRewardProb from trial_rwd_prob
+                self.B_CurrentRewardProb[i] = self.uncoupled_blocks.trial_rwd_prob[side][-1]
+                
+                # Update self.BlockLenHistory from diff(block_ends)
+                # Note we don't need override_block_len here since all
+                # overrides are handled by the UncoupledBlocks object
+                self.BlockLenHistory[i] = np.diff(
+                    [0] + self.uncoupled_blocks.block_ends[side]
+                )
             
         # Append the (updated) current reward probability to the history 
         self.B_RewardProHistory=np.append(
