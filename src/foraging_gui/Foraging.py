@@ -2085,7 +2085,7 @@ class Window(QMainWindow):
         self.BaseWeight.setText('')
         self.WeightAfter.setText('')
         self.TargetRatio.setText('0.85')
-        self.keyPressEvent(event = Qt.Key_Enter)
+        self.keyPressEvent()
         # get Mouse ID
         # get Experimenter
         # Clear BaseWeight 
