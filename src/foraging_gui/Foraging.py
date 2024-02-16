@@ -2130,36 +2130,36 @@ class Window(QMainWindow):
             return
 
         if open_last:
-            mice = self._Open_getListOfMice()
-            W = MouseSelectorDialog(self, mice)
-
-            ok, mouse_id = (
-                W.exec_() == QtWidgets.QDialog.Accepted, 
-                W.combo.currentText(),
-            )        
-
-            ### Prompt user to enter mouse ID, with auto-completion
-            ##dialog = QtWidgets.QInputDialog(self)
-            ##dialog.setWindowTitle('Box {}, Load mouse'.format(self.box_letter))
-            ##dialog.setLabelText('Enter the mouse ID')
-            ##dialog.setTextValue('')
-            ##lineEdit = dialog.findChild(QtWidgets.QLineEdit)
-        
-            ### Set auto complete
             ##mice = self._Open_getListOfMice()
-            ##completer = QtWidgets.QCompleter(mice, lineEdit)
-            ##lineEdit.setCompleter(completer)
-            ##
-            ### Only accept integers
-            ##onlyInt = QtGui.QIntValidator()
-            ##onlyInt.setRange(0, 100000000)
-            ##lineEdit.setValidator(onlyInt)
+            ##W = MouseSelectorDialog(self, mice)
+
+            ##ok, mouse_id = (
+            ##    W.exec_() == QtWidgets.QDialog.Accepted, 
+            ##    W.combo.currentText(),
+            ##)        
+
+            # Prompt user to enter mouse ID, with auto-completion
+            dialog = QtWidgets.QInputDialog(self)
+            dialog.setWindowTitle('Box {}, Load mouse'.format(self.box_letter))
+            dialog.setLabelText('Enter the mouse ID')
+            dialog.setTextValue('')
+            lineEdit = dialog.findChild(QtWidgets.QLineEdit)
+        
+            # Set auto complete
+            mice = self._Open_getListOfMice()
+            completer = QtWidgets.QCompleter(mice, lineEdit)
+            lineEdit.setCompleter(completer)
+            
+            # Only accept integers
+            onlyInt = QtGui.QIntValidator()
+            onlyInt.setRange(0, 100000000)
+            lineEdit.setValidator(onlyInt)
         
             # Get response
-            #ok, mouse_id = (
-            #    dialog.exec_() == QtWidgets.QDialog.Accepted, 
-            #    dialog.textValue(),
-            #)
+            ok, mouse_id = (
+                dialog.exec_() == QtWidgets.QDialog.Accepted, 
+                dialog.textValue(),
+            )
             if not ok: 
                 logging.info('Quick load failed, user hit cancel or X')
                 return                                
