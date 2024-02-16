@@ -2082,6 +2082,10 @@ class Window(QMainWindow):
             return
 
         self.ID.setText(mouse_id)   
+        self.BaseWeight.setText('')
+        self.WeightAfter.setText('')
+        self.TargetRatio.setText('0.85')
+        self.keyPressEvent()
         # get Mouse ID
         # get Experimenter
         # Clear BaseWeight 
