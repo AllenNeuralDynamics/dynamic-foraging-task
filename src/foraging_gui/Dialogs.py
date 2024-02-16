@@ -66,7 +66,7 @@ class MouseSelectorDialog(QDialog):
         if target == self.combo and event.type() == QEvent.MouseButtonPress:
             print('here')
             self.combo.showPopup()
-
+        return False
 
 class LickStaDialog(QDialog):
     '''Lick statistics dialog'''
