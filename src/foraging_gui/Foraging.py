@@ -2096,7 +2096,7 @@ class Window(QMainWindow):
                     self.current_box, str(m), s,'TrainingFolder',s+'.json')
                 if os.path.isfile(json_file):
                     mice.append(m)
-                    continue
+                    break
         return mice  
 
     def _Open(self,open_last = False):
