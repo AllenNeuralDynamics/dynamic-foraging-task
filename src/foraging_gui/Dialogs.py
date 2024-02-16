@@ -47,7 +47,8 @@ class MouseSelectorDialog(QDialog):
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(QLabel('Enter the Mouse ID: '))
         self.layout.addWidget(combo)
-        self.layout.addWidget(QBtns)
+        self.layout.addWidget(self.buttonBox)
+        self.setLayout(self.layout)
 
 
 class LickStaDialog(QDialog):
