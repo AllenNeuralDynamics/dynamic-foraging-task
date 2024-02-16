@@ -13,6 +13,7 @@ from serial.tools.list_ports import comports as list_comports
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 
+from foraging_gui.reward_schedules.uncoupled_block import UncoupledBlocks
 
 if PLATFORM == 'win32':
     from newscale.usbxpress import USBXpressLib, USBXpressDevice
@@ -112,15 +113,31 @@ class GenerateTrials():
             # -- Use the old logic --
             # check block transition and set self.B_ANewBlock
             self._check_coupled_block_transition()
-            # generate the next block reward probability if block is transitioned
             if any(self.B_ANewBlock==1):
+                # assign the next block's reward prob to self.B_CurrentRewardProb 
                 self._generate_next_coupled_block()
         elif self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']:
-            # -- Use Han's UncoupledBlocks class --
-            #TODO: plugin in the new logic here
-            pass
+            if self.B_CurrentTrialN == -1:
+                # Initialize the UncoupledBlocks object and generate the first trial
+                self.uncoupled_blocks = UncoupledBlocks(                 
+                    rwd_prob_array=[0.1, 0.5, 0.9],
+                    block_min=20, 
+                    block_max=35,
+                    persev_add=True, 
+                    perseverative_limit=4,
+                    max_block_tally=3,
+                )
+                self.uncoupled_blocks.next_trial()
+            else:
+                # Add animal's last choice and generate the next trial
+                self.uncoupled_blocks.add_choice(
+                    ['L', 'R', 'ignored'][int(self.B_AnimalResponseHistory[-1])]
+                )
+                self.uncoupled_blocks.next_trial()
             
-        # Append the current reward probability to the history
+            # 
+            
+        # Append the (updated) current reward probability to the history 
         self.B_RewardProHistory=np.append(
             self.B_RewardProHistory,
             self.B_CurrentRewardProb.reshape(self.B_LickPortN,1),
