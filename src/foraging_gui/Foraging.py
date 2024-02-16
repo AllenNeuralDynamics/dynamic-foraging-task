@@ -87,7 +87,7 @@ class Window(QMainWindow):
         self.ANewTrial = 1          # permission to start a new trial
         self.UpdateParameters = 1   # permission to update parameters
         self.loggingstarted = -1    # Have we started trial logging
-        self.unsaved_data = False       
+        self.unsaved_data = False   # Setting unsaved data to False 
  
         # Connect to Bonsai
         self._InitializeBonsai()
@@ -1190,7 +1190,10 @@ class Window(QMainWindow):
             self.PointsInARow.setEnabled(True)
 
     def keyPressEvent(self, event=None,allow_reset=False):
-        '''Enter press to allow change of parameters'''
+        '''
+            Enter press to allow change of parameters
+            allow_reset (bool) allows the Baseweight parameter to be reset to the empty string
+        '''
         try:
             if self.actionTime_distribution.isChecked()==True:
                 self.PlotTime._Update(self)
@@ -1595,13 +1598,8 @@ class Window(QMainWindow):
             logging.error(str(e))
 
     def closeEvent(self, event):
-        ## disable close icon
-        #self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
-        #self.show()
-        self._StopCurrentSession() # stop the current session first
-        # # enable close icon
-        #self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, True)
-        #self.show()
+        # stop the current session first
+        self._StopCurrentSession() 
 
         if self.unsaved_data:
             reply = QMessageBox.critical(self, 
