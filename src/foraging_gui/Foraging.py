@@ -2081,6 +2081,23 @@ class Window(QMainWindow):
         #button.setText('Stop bleaching')
         #bttn = msgbox.exec_()
         return 
+    
+    def _Open_getListOfMice(self):
+        filepath = os.path.join(self.default_saveFolder,self.current_box)
+        mouse_dirs = os.listdir(filepath)      
+        mice = []
+        for m in mouse_dirs:
+            session_dir = os.path.join(self.default_saveFolder, self.current_box, str(m))
+            sessions = os.listdir(session_dir)
+            if len(sessions) == 0 :
+                continue
+            for s in sessions:
+                json_file = os.path.join(self.default_saveFolder, 
+                    self.current_box, str(m), s,'TrainingFolder',s+'.json')
+                if os.path.isfile(json_file):
+                    mice.append(m)
+                    continue
+        return mice  
 
     def _Open(self,open_last = False):
 
@@ -2099,10 +2116,8 @@ class Window(QMainWindow):
             dialog.setLabelText('Enter the mouse ID')
             dialog.setTextValue('')
             le = dialog.findChild(QtWidgets.QLineEdit)
-            filepath = os.path.join(self.default_saveFolder,self.current_box)
-            mouse_dirs = os.listdir(filepath)
-            mice = ['0','1','2','200','201']
-            completer = QtWidgets.QCompleter(mouse_dirs, le)
+            mice = self._Open_getListOfMice()
+            completer = QtWidgets.QCompleter(mice, le)
             le.setCompleter(completer)
             ok, text = (
                 dialog.exec_() == QtWidgets.QDialog.Accepted, 
