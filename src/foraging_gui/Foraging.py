@@ -2124,7 +2124,7 @@ class Window(QMainWindow):
             
             # Only accept integers
             onlyInt = QtGui.QIntValidator()
-            onlyInt.setRange(0, 10000000000000)
+            onlyInt.setRange(0, 100000000)
             lineEdit.setValidator(onlyInt)
         
             # Get response
