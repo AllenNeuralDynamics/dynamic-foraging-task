@@ -2138,8 +2138,7 @@ class Window(QMainWindow):
                     self.Basic.setTitle(Obj['Other_BasicTitle'])
                 if 'Other_BasicText' in Obj:
                     self.ShowBasic.setText(Obj['Other_BasicText'])
-                
-            # Set newscale position to last position
+                Set newscale position to last position
             if 'B_NewscalePositions' in Obj:
                 try:
                     last_positions=Obj['B_NewscalePositions'][-1]
@@ -2157,6 +2156,7 @@ class Window(QMainWindow):
                     
         else:
             self.NewSession.setDisabled(False)
+        self.StartExcitation.setChecked(False)
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
