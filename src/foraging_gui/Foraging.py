@@ -2609,6 +2609,7 @@ class Window(QMainWindow):
         self.WarningLabel.setText('')
         self.TotalWaterWarning.setText('')
         self.WarningLabel_2.setText('')
+        self._set_metadata_enabled(True)
 
         # Reset state variables
         self.StartANewSession=1
@@ -2752,10 +2753,7 @@ class Window(QMainWindow):
         else:
             logging.info('Start button pressed: ending trial loop')
             self.Start.setStyleSheet("background-color : none")
-            # enable metadata fields
-            self._set_metadata_enabled(True)
-
-                
+ 
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
