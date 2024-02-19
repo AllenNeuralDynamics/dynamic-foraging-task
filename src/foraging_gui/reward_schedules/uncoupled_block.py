@@ -5,6 +5,9 @@ matplotlib.use('Qt5Agg')
 
 #  np.random.seed(56)
 
+import logging
+logger = logging.getLogger(__name__)
+
 class UncoupledBlocks:
     '''
     Generate uncoupled block reward schedule
@@ -36,7 +39,6 @@ class UncoupledBlocks:
         self.force_by_both_lowest = {'L':[], 'R': []}
 
         # Anti-persev
-        self.persev_add, self.perseverative_limit = persev_add, perseverative_limit
         self.persev_consec_on_min_prob = {'L': 0, 'R': 0}
         self.persev_add_at_trials = []
         self.choice_history = []
@@ -61,6 +63,7 @@ class UncoupledBlocks:
         self.block_effective_ind = 1  # Effective block ind
 
     def generate_next_block(self, side, check_higher_in_a_row=True, check_both_lowest=True):
+        msg = ''
         other_side = list({'L', 'R'} - {side})[0]
         random_block_len = np.random.randint(low=self.block_min, high=self.block_max + 1)
         
@@ -87,7 +90,8 @@ class UncoupledBlocks:
                     self.rwd_tally[side] = 0
                 
                 if self.rwd_tally[side] >= self.max_block_tally:  # Only check higher-in-a-row for this side
-                    print(f'--- {self.trial_now}: {side} is higher for {self.rwd_tally[side]} eff_blocks, force {side} to lowest ---')
+                    msg = (f'--- {self.trial_now}: {side} is higher for {self.rwd_tally[side]} eff_blocks, force {side} to lowest ---\n')
+                    logger.info(msg)
                     self.block_rwd_prob[side].append(min(self.rwd_prob_array))
                     self.rwd_tally[side] = self.rwd_tally[other_side] = 0            
                     self.force_by_tally[side].append(self.trial_now)
@@ -108,13 +112,16 @@ class UncoupledBlocks:
                 self.block_ends[side][-1] -= self.block_stagger
                 
                 # Force block switch of the other side
-                print(f'--- {self.trial_now}: both side is the lowest, push {side} to higher ---')
+                msg += (f'--- {self.trial_now}: both side is the lowest, push {side} to higher ---')
+                logger.info(msg)
                 self.force_by_both_lowest[side].append(self.trial_now)
                 self.block_ends[other_side][-1] = self.trial_now
                 self.block_ind[other_side] += 1  # Two sides change at the same time, no need to add block_effective_ind twice
                 self.generate_next_block(other_side, check_higher_in_a_row=False, check_both_lowest=False)  # Just generate new block, no need to do checks
+        return msg
 
     def auto_shape_perseverance(self):
+        msg = ''
         for s in ['L', 'R']:
             if self.choice_history[-1] == s:
                 self.persev_consec_on_min_prob[list({'L', 'R'} - {s})[0]] = 0  # Reset other side as soon as there is an opposite choice
@@ -126,13 +133,16 @@ class UncoupledBlocks:
                 for ss in ['L', 'R']:
                     self.block_ends[ss][-1] += self.perseverative_limit   # Add 'perseverative_limit' trials to both blocks
                     self.persev_consec_on_min_prob[ss] = 0
-                print(f'persev at side = {s}, added {self.perseverative_limit} trials to both sides')
+                msg = (f'persev at side = {s}, added {self.perseverative_limit} trials to both sides')
+                logger.info(msg)
                 self.persev_add_at_trials.append(self.trial_now)
+        return msg
 
     def add_choice(self, this_choice):
         self.choice_history.append(this_choice)
 
     def next_trial(self):
+        msg = ''
         self.trial_now += 1  # Starts from 0; initialized from -1
         
         # Block switch?
@@ -144,7 +154,7 @@ class UncoupledBlocks:
 
                     self.block_ind[s] += 1
                     self.block_effective_ind += 1
-                    self.generate_next_block(s, check_higher_in_a_row=True, check_both_lowest=True)
+                    msg = self.generate_next_block(s, check_higher_in_a_row=True, check_both_lowest=True) + '\n'
 
         # Fill new value
         for s in ['L', 'R']:
@@ -152,7 +162,7 @@ class UncoupledBlocks:
 
         # Anti-persev
         if not self.hold_this_block and self.persev_add and len(self.choice_history):
-            self.auto_shape_perseverance()
+            msg = msg + self.auto_shape_perseverance()
         else:
             for s in ['L', 'R']:
                 self.persev_consec_on_min_prob[s] = 0
@@ -161,7 +171,7 @@ class UncoupledBlocks:
         assert all([self.block_ind['L'] + 1 == len(self.block_rwd_prob['L']) == len(self.block_ends['L']) for s in ['L', 'R']])
 
         return ([self.trial_rwd_prob[s][-2] != self.trial_rwd_prob[s][-1] for s in ['L', 'R']]  # Whether block just switched
-                if self.trial_now > 0 else [0, 0])
+                if self.trial_now > 0 else [0, 0]), msg
     
     def plot_reward_schedule(self):
         fig, ax = plt.subplots(2, 1, figsize=[15, 7], sharex='col')

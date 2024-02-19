@@ -131,13 +131,13 @@ class GenerateTrials():
                     perseverative_limit=4, # Hard-coded to 4 for now
                     max_block_tally=3, # Hard-coded to 3 for now
                 )
-                self.uncoupled_blocks.next_trial()
+                _, msg_uncoupled_block = self.uncoupled_blocks.next_trial()
             else:
                 # Add animal's last choice and generate the next trial
                 self.uncoupled_blocks.add_choice(
                     ['L', 'R', 'ignored'][int(self.B_AnimalResponseHistory[-1])]
                 )
-                self.uncoupled_blocks.next_trial()
+                _, msg_uncoupled_block = self.uncoupled_blocks.next_trial()
             
             # Extract parameters from the UncoupledBlocks object
             for i, side in enumerate(['L', 'R']):
@@ -150,6 +150,9 @@ class GenerateTrials():
                 self.BlockLenHistory[i] = np.diff(
                     [0] + self.uncoupled_blocks.block_ends[side]
                 )
+                
+            # Show msg
+            self.win.WarningLabel_uncoupled_task.setText(msg_uncoupled_block)
             
         # Append the (updated) current reward probability to the history 
         self.B_RewardProHistory=np.append(
