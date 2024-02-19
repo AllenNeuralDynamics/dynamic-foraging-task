@@ -1406,37 +1406,16 @@ class Window(QMainWindow):
             self.RewardFamily.setEnabled(True)
             self.label_20.setEnabled(False)
             self.UncoupledReward.setEnabled(False)
-            # self.label_6.setStyleSheet("color: black;")
-            # self.label_7.setStyleSheet("color: black;")
-            # self.label_8.setStyleSheet("color: black;")
-            # self.BaseRewardSum.setStyleSheet("color: black;""border: 1px solid gray;")
-            # self.RewardPairsN.setStyleSheet("color: black;""border: 1px solid gray;")
-            # self.RewardFamily.setStyleSheet("color: black;""border: 1px solid gray;")
-            # self.label_20.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            # self.UncoupledReward.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            # # block
-            # if self.Randomness.currentText()=='Exponential':
-            #     self.BlockBeta.setEnabled(True)
-            #     self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
-            #     self.label_14.setStyleSheet("color: black;background-color: rgba(0, 0, 0, 0)")
-            # else:
-            #     self.BlockBeta.setEnabled(False)
-            #     self.BlockBeta.setStyleSheet("color: gray;""border: 1px solid gray;")
-            #     self.label_14.setStyleSheet("color: gray;")
+
             self.label_12.setEnabled(True)
             self.label_11.setEnabled(True)
             self.BlockBeta.setEnabled(True)
             self.BlockMin.setEnabled(True)
             self.BlockMax.setEnabled(True)
-            # self.label_12.setStyleSheet("color: black;")
-            # self.label_11.setStyleSheet("color: black;")
-            # self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
-            # self.BlockMin.setStyleSheet("color: black;""border: 1px solid gray;")
-            # self.BlockMax.setStyleSheet("color: black;""border: 1px solid gray;")
+
             self.label_27.setEnabled(False)
             self.InitiallyInactiveN.setEnabled(False)
-            # self.label_27.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            # self.InitiallyInactiveN.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
             # change name of min reward each block
             self.label_13.setText('min reward each block=')
@@ -1447,9 +1426,6 @@ class Window(QMainWindow):
             # move auto-reward
             self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 128, 80, 20))
             self.label_26.setGeometry(QtCore.QRect(929, 128, 146, 16))
-            # set block length to the default value
-            #self.BlockMin.setText('20')
-            #self.BlockMax.setText('60')
             
             # Reopen block beta, NextBlock, and AutoBlock panel
             self.BlockBeta.setEnabled(True)
@@ -1462,8 +1438,6 @@ class Window(QMainWindow):
             self.IncludeAutoReward.setEnabled(True)
             
         elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
-            # border_color = "rgb(100, 100, 100,80)"
-            # border_style = "1px solid " + border_color
             self.label_6.setEnabled(False)
             self.label_7.setEnabled(False)
             self.label_8.setEnabled(False)
@@ -1472,36 +1446,14 @@ class Window(QMainWindow):
             self.RewardFamily.setEnabled(False)
             self.label_20.setEnabled(True)
             self.UncoupledReward.setEnabled(True)
-            # self.label_6.setStyleSheet("color: gray;")
-            # self.label_7.setStyleSheet("color: gray;")
-            # self.label_8.setStyleSheet("color: gray;")
-            # self.BaseRewardSum.setStyleSheet(f"color: gray;background-color: rgba(0, 0, 0, 0);border: 1px solid gray;border:{border_style};")
-            # self.RewardPairsN.setStyleSheet(f"color: gray;background-color: rgba(0, 0, 0, 0);border: 1px solid gray;border:{border_style};")
-            # self.RewardFamily.setStyleSheet(f"color: gray;background-color: rgba(0, 0, 0, 0);border: 1px solid gray;border:{border_style};")
-            # self.label_20.setStyleSheet("color: black;")
-            # self.UncoupledReward.setStyleSheet("color: black;""border: 1px solid gray;")
-            # # block
-            # if self.Randomness.currentText()=='Exponential':
-            #     self.BlockBeta.setEnabled(True)
-            #     # self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
-            #     # self.label_14.setStyleSheet("color: black;")
-            # else:
-            #     self.BlockBeta.setEnabled(False)
-            #     self.BlockBeta.setStyleSheet("color: gray;""border: 1px solid gray;")
-            #     self.label_14.setStyleSheet("color: gray;")
+
             self.label_12.setEnabled(True)
             self.label_11.setEnabled(True)
             self.BlockMin.setEnabled(True)
             self.BlockMax.setEnabled(True)
-            # self.label_12.setStyleSheet("color: black;")
-            # self.label_11.setStyleSheet("color: black;")
-            # self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
-            # self.BlockMin.setStyleSheet("color: black;""border: 1px solid gray;")
-            # self.BlockMax.setStyleSheet("color: black;""border: 1px solid gray;")
+
             self.label_27.setEnabled(False)
             self.InitiallyInactiveN.setEnabled(False)
-            # self.label_27.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            # self.InitiallyInactiveN.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
             # change name of min reward each block
             self.label_13.setText('min reward each block=')
@@ -1532,14 +1484,7 @@ class Window(QMainWindow):
             self.RewardFamily.setEnabled(True)
             self.label_20.setEnabled(False)
             self.UncoupledReward.setEnabled(False)
-            # self.label_6.setStyleSheet("color: black;")
-            # self.label_7.setStyleSheet("color: black;")
-            # self.label_8.setStyleSheet("color: black;")
-            # self.BaseRewardSum.setStyleSheet("color: black;""border: 1px solid gray;")
-            # self.RewardPairsN.setStyleSheet("color: black;""border: 1px solid gray;")
-            # self.RewardFamily.setStyleSheet("color: black;""border: 1px solid gray;")
-            # self.label_20.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            # self.UncoupledReward.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+
             # block
             self.label_14.setEnabled(False)
             self.label_12.setEnabled(False)
@@ -1547,17 +1492,11 @@ class Window(QMainWindow):
             self.BlockBeta.setEnabled(False)
             self.BlockMin.setEnabled(False)
             self.BlockMax.setEnabled(False)
-            # self.label_14.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            # self.label_12.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            # self.label_11.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            # self.BlockBeta.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            # self.BlockMin.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            # self.BlockMax.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+
             # block; no reward when initially active
             self.label_27.setEnabled(True)
             self.InitiallyInactiveN.setEnabled(True)
-            # self.label_27.setStyleSheet("color: black;")
-            # self.InitiallyInactiveN.setStyleSheet("color: black;""border: 1px solid gray;")
+
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(403, 128, 80, 20))
             # change name of min reward each block
             self.label_13.setText('RewardN=')
