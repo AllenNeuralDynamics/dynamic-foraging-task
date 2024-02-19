@@ -1474,7 +1474,9 @@ class GenerateTrials():
                 if np.random.random(1)<0.1: # no response
                     self.B_AnimalCurrentResponse=2
                 else:
-                    if any(self.B_RewardedHistory[:,-1]==1):# win
+                    if np.random.random(1) < 0:  # Introduce a left bias if needed
+                        self.B_AnimalCurrentResponse = 0
+                    elif any(self.B_RewardedHistory[:,-1]==1):# win
                         self.B_AnimalCurrentResponse=self.B_AnimalResponseHistory[-1]
                     elif any(self.B_RewardedHistory[:,-1]==0) and self.B_AnimalResponseHistory[-1]!=2:# lose
                         self.B_AnimalCurrentResponse=1-self.B_AnimalResponseHistory[-1]
