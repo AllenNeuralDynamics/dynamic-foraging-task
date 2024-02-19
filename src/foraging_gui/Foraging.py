@@ -1217,9 +1217,15 @@ class Window(QMainWindow):
                 for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
                     if child.objectName()=='qt_spinbox_lineedit':
                         continue
-                    child.setStyleSheet('color: black;')
-                    child.setStyleSheet('background-color: white;')
-                    self._Task()
+                    
+                    if not (hasattr(self, 'AutoTrain_dialog') and self.AutoTrain_dialog.auto_train_engaged):
+                        # Only run _Task again if AutoTrain is NOT engaged
+                        # To avoid the _Task() function overwriting the AutoTrain UI locks
+                        # resolves https://github.com/AllenNeuralDynamics/dynamic-foraging-task/issues/239
+                        child.setStyleSheet('color: black;')
+                        child.setStyleSheet('background-color: white;')
+                        self._Task()
+                    
                     if child.objectName() in {'Experimenter','TotalWater','WeightAfter','ExtraWater'}:
                         continue
                     if child.objectName()=='UncoupledReward':
