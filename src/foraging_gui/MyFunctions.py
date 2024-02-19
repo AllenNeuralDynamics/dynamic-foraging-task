@@ -118,7 +118,8 @@ class GenerateTrials():
                 self._generate_next_coupled_block()
         elif self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']:
             # -- Use Han's standalone class --
-            if self.B_CurrentTrialN == -1:
+            if self.B_CurrentTrialN == -1 or \
+                not hasattr(self, 'uncoupled_blocks'): # Or the user start uncoupled in the midde of the session
                 # Get uncoupled task settings
                 self.RewardProbPoolUncoupled = self._get_uncoupled_reward_prob_pool()
                 
@@ -147,9 +148,9 @@ class GenerateTrials():
                 # Update self.BlockLenHistory from diff(block_ends)
                 # Note we don't need override_block_len here since all
                 # overrides are handled by the UncoupledBlocks object
-                self.BlockLenHistory[i] = np.diff(
+                self.BlockLenHistory[i] = list(np.diff(
                     [0] + self.uncoupled_blocks.block_ends[side]
-                )
+                ))
                 
             # Show msg
             self.win.WarningLabel_uncoupled_task.setText(msg_uncoupled_block)
