@@ -13,7 +13,7 @@
     <x>0</x>
     <y>0</y>
     <width>1875</width>
-    <height>1032</height>
+    <height>1015</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -3054,6 +3054,24 @@
       </property>
       <property name="wordWrap">
        <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="WarningLabel_uncoupled_task">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>130</y>
+        <width>261</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>7</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string/>
       </property>
      </widget>
     </widget>
