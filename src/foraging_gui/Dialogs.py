@@ -1900,8 +1900,8 @@ class AutoTrainDialog(QDialog):
             
             # Reset override curriculum
             self.checkBox_override_curriculum.setChecked(False)
-            self.checkBox_override_curriculum.setEnabled(True)
-
+            if not self.auto_train_engaged:
+                self.checkBox_override_curriculum.setEnabled(True)
 
                     
         # Update UI
