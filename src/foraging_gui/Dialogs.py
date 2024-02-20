@@ -2099,15 +2099,22 @@ class AutoTrainDialog(QDialog):
         )
 
         
-    def _update_available_training_stages(self):
-        if self.curriculum_in_use is not None:
-            available_training_stages = [v.name for v in 
-                                        self.curriculum_in_use.parameters.keys()]
+    def _update_available_training_stages(self):            
+        # If AutoTrain is engaged, and override stage is checked
+        if self.auto_train_engaged and self.checkBox_override_stage.isChecked():
+            # Restore stage_in_use. No need to reload available stages
+            self.comboBox_override_stage.setCurrentText(self.stage_in_use)
         else:
-            available_training_stages = []
-            
-        self.comboBox_override_stage.clear()
-        self.comboBox_override_stage.addItems(available_training_stages)
+            # Reload available stages
+            if self.curriculum_in_use is not None:
+                available_training_stages = [v.name for v in 
+                                            self.curriculum_in_use.parameters.keys()]
+            else:
+                available_training_stages = []
+                
+            self.comboBox_override_stage.clear()
+            self.comboBox_override_stage.addItems(available_training_stages)
+
                 
     def _override_stage_clicked(self, state):
         if state:
