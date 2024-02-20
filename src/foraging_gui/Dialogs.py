@@ -2169,7 +2169,9 @@ class AutoTrainDialog(QDialog):
                         current_stage_suggested=None,
                         current_stage_actual=None,
                         decision=None,
-                        next_stage_suggested='STAGE_1',
+                        next_stage_suggested='STAGE_1_WARMUP' 
+                            if 'STAGE_1_WARMUP' in [k.name for k in self.curriculum_in_use.parameters.keys()]
+                            else 'STAGE_1',
                         if_closed_loop=None,
                         if_overriden_by_trainer=None,
                         finished_trials=None,
