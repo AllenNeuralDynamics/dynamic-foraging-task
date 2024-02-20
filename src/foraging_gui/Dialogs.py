@@ -1882,6 +1882,9 @@ class AutoTrainDialog(QDialog):
                             f"Please choose another valid curriculum and a training stage for this mouse."
                         )
                     
+                    # Clear curriculum in use
+                    self.curriculum_in_use = None
+
                     # Turn on override curriculum
                     self.checkBox_override_curriculum.setChecked(True)
                     self.checkBox_override_curriculum.setEnabled(False)
