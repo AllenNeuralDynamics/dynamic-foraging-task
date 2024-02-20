@@ -22,6 +22,9 @@ from aind_auto_train.curriculum_manager import CurriculumManager
 from aind_auto_train.auto_train_manager import DynamicForagingAutoTrainManager
 from aind_auto_train.schema.task import TrainingStage
 
+from aind_auto_train.schema.curriculum import DynamicForagingCurriculum
+codebase_curriculum_schema_version = DynamicForagingCurriculum.model_fields['curriculum_schema_version'].default
+
 logger = logging.getLogger(__name__)
 
 class LickStaDialog(QDialog):
@@ -1865,11 +1868,45 @@ class AutoTrainDialog(QDialog):
             if not curriculum_just_overridden:
                 # fetch last session
                 self.last_session = self.df_this_mouse.iloc[0]  # The first row is the latest session
-                self.curriculum_in_use = self.curriculum_manager.get_curriculum(
-                    curriculum_name=self.last_session['curriculum_name'],
-                    curriculum_schema_version=self.last_session['curriculum_schema_version'],
-                    curriculum_version=self.last_session['curriculum_version'],
-                )['curriculum']
+                
+                last_curriculum_schema_version = self.last_session['curriculum_schema_version']
+                if codebase_curriculum_schema_version != last_curriculum_schema_version:
+                    # schema version don't match. prompt user to choose another curriculum
+                    if self.isVisible():
+                        QMessageBox.information(
+                            self,
+                            "Info",
+                            f"The curriculum_schema_version of the last session ({last_curriculum_schema_version}) does not match "
+                            f"that of the current code base ({codebase_curriculum_schema_version})!\n"
+                            f"This is likely because the AutoTrain system has been updated since the last session.\n\n"
+                            f"Please choose another valid curriculum and a training stage for this mouse."
+                        )
+                    
+                    # Turn on override curriculum
+                    self.checkBox_override_curriculum.setChecked(True)
+                    self.checkBox_override_curriculum.setEnabled(False)
+                    self.tableView_df_curriculum.clearSelection() # Unselect any curriculum
+                    self.selected_curriculum = None
+                    self.pushButton_apply_curriculum.setEnabled(True)
+                    self._add_border_curriculum_selection()
+                    
+                    # Update UI
+                    self._update_available_training_stages()
+                    self._update_stage_to_apply()
+                    
+                    # Update df_auto_train_manager and df_curriculum_manager
+                    self._show_auto_training_manager()
+                    self._show_available_curriculums()      
+                    
+                    # Eearly return
+                    return
+                else:
+                    self.curriculum_in_use = self.curriculum_manager.get_curriculum(
+                        curriculum_name=self.last_session['curriculum_name'],
+                        curriculum_schema_version=last_curriculum_schema_version,
+                        curriculum_version=self.last_session['curriculum_version'],
+                    )['curriculum']
+                    
             
                 # update stage info
                 self.label_last_actual_stage.setText(str(self.last_session['current_stage_actual']))
@@ -1900,14 +1937,12 @@ class AutoTrainDialog(QDialog):
             
             # Reset override curriculum
             self.checkBox_override_curriculum.setChecked(False)
-            self.checkBox_override_curriculum.setEnabled(True)
-
-
+            if not self.auto_train_engaged:
+                self.checkBox_override_curriculum.setEnabled(True)
                     
         # Update UI
         self._update_available_training_stages()
         self._update_stage_to_apply()
-        
         
         # Update df_auto_train_manager and df_curriculum_manager
         self._show_auto_training_manager()
