@@ -61,26 +61,6 @@
         </item>
         <item>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="1">
-           <widget class="QLabel" name="label_subject_id">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>13</pointsize>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Unknown</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_4">
             <property name="sizePolicy">
@@ -154,6 +134,99 @@
             </property>
            </widget>
           </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="label_subject_id">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>13</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Unknown</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLabel" name="label_last_actual_stage">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Unknown</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Selected ID:  </string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="4">
+           <widget class="QLabel" name="label_curriculum_name">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>13</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Unknown</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="0" alignment="Qt::AlignRight">
+           <widget class="QCheckBox" name="checkBox_override_stage">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>5</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Override stage</string>
+            </property>
+           </widget>
+          </item>
           <item row="4" column="0">
            <widget class="QLabel" name="label_6">
             <property name="font">
@@ -168,16 +241,60 @@
             </property>
            </widget>
           </item>
-          <item row="7" column="0" alignment="Qt::AlignRight">
-           <widget class="QCheckBox" name="checkBox_override_stage">
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Sessions finished:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1" alignment="Qt::AlignLeft">
+           <widget class="QComboBox" name="comboBox_override_stage">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>7</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>120</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>1000000</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>5</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
-             <string>Override stage</string>
+             <string>Stage suggested:</string>
             </property>
            </widget>
           </item>
@@ -221,128 +338,11 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_8">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Sessions finished:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <widget class="QLabel" name="label_last_actual_stage">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Unknown</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="1" alignment="Qt::AlignLeft">
-           <widget class="QComboBox" name="comboBox_override_stage">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>7</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>120</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>1000000</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Selected ID:  </string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="label_5">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>5</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Stage suggested:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1" colspan="4">
-           <widget class="QLabel" name="label_curriculum_name">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>13</pointsize>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Unknown</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="4" rowspan="6">
+          <item row="2" column="4" rowspan="6" colspan="2">
            <widget class="QPushButton" name="pushButton_apply_auto_train_paras">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>12</horstretch>
+              <horstretch>8</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
@@ -367,6 +367,29 @@
             </property>
             <property name="checkable">
              <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="5" rowspan="2">
+           <widget class="QPushButton" name="pushButton_preview_auto_train_paras">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>130</width>
+              <height>10000</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(225, 225, 0);
+</string>
+            </property>
+            <property name="text">
+             <string>Preview changes</string>
             </property>
            </widget>
           </item>
@@ -660,8 +683,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>263</x>
-     <y>791</y>
+     <x>272</x>
+     <y>743</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -676,8 +699,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>331</x>
-     <y>791</y>
+     <x>340</x>
+     <y>743</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
@@ -692,12 +715,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>860</x>
-     <y>232</y>
+     <x>669</x>
+     <y>228</y>
     </hint>
     <hint type="destinationlabel">
-     <x>248</x>
-     <y>230</y>
+     <x>168</x>
+     <y>226</y>
     </hint>
    </hints>
   </connection>
@@ -708,11 +731,11 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>789</x>
-     <y>114</y>
+     <x>669</x>
+     <y>222</y>
     </hint>
     <hint type="destinationlabel">
-     <x>248</x>
+     <x>168</x>
      <y>127</y>
     </hint>
    </hints>
@@ -724,12 +747,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
+     <x>168</x>
      <y>127</y>
     </hint>
     <hint type="destinationlabel">
-     <x>828</x>
-     <y>128</y>
+     <x>669</x>
+     <y>228</y>
     </hint>
    </hints>
   </connection>
@@ -740,7 +763,7 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
+     <x>168</x>
      <y>127</y>
     </hint>
     <hint type="destinationlabel">

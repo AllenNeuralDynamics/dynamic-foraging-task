@@ -1820,7 +1820,10 @@ class AutoTrainDialog(QDialog):
         self.pushButton_show_auto_training_history_in_streamlit.clicked.connect(
             self._show_auto_training_history_in_streamlit
         )
-    
+        self.pushButton_preview_auto_train_paras.clicked.connect(
+            self._preview_auto_train_paras
+        )
+        
     def update_auto_train_fields(self, subject_id: str, curriculum_just_overridden: bool = False):
         self.selected_subject_id = subject_id
         self.label_subject_id.setText(self.selected_subject_id)
@@ -1844,6 +1847,7 @@ class AutoTrainDialog(QDialog):
             self.checkBox_override_stage.setChecked(False)
             self.checkBox_override_stage.setEnabled(False)
             self.pushButton_apply_auto_train_paras.setEnabled(False)
+            self.pushButton_preview_auto_train_paras.setEnabled(False)
             
             # override curriculum is checked by default and disabled
             self.checkBox_override_curriculum.setChecked(True)
@@ -1933,6 +1937,7 @@ class AutoTrainDialog(QDialog):
             
             # enable apply training stage
             self.pushButton_apply_auto_train_paras.setEnabled(True)
+            self.pushButton_preview_auto_train_paras.setEnabled(True)
             
             # disable apply curriculum                        
             self.pushButton_apply_curriculum.setEnabled(False)
@@ -2260,7 +2265,35 @@ class AutoTrainDialog(QDialog):
             # Refresh the GUI
             self.update_auto_train_fields(subject_id=self.selected_subject_id,
                                           curriculum_just_overridden=reply == QMessageBox.Yes)
-            
+        
+    def _preview_auto_train_paras(self):
+        """Apply parameters to the GUI without applying and locking the widgets.
+        """
+        # Get parameter settings
+        paras = self.curriculum_in_use.parameters[
+            TrainingStage[self.stage_in_use]
+        ]
+        
+        # Convert to GUI format and set the parameters
+        paras_dict = paras.to_GUI_format()
+        widgets_set, widgets_changed = self._set_training_parameters(
+            paras_dict=paras_dict,
+            if_apply_and_lock=False
+        )
+        
+        # Clear the style of all widgets
+        for widget in widgets_set:
+            widget.setStyleSheet("font-weight: normal")
+        
+        # Highlight the changed widgets
+        for widget in widgets_changed:
+            widget.setStyleSheet(
+                '''
+                    background-color: rgb(225, 225, 0);
+                    font-weight: bold
+                '''
+            )
+                    
     def update_auto_train_lock(self, engaged):
         if engaged:
             # Update the flag
@@ -2273,9 +2306,9 @@ class AutoTrainDialog(QDialog):
             
             # Convert to GUI format and set the parameters
             paras_dict = paras.to_GUI_format()
-            self.widgets_locked_by_auto_train = self._set_training_parameters(
+            self.widgets_locked_by_auto_train, _ = self._set_training_parameters(
                 paras_dict=paras_dict,
-                if_press_enter=True
+                if_apply_and_lock=True
             )
             
             if self.widgets_locked_by_auto_train == []:  # Error in setting parameters
@@ -2307,6 +2340,9 @@ class AutoTrainDialog(QDialog):
             # disable override
             self.checkBox_override_stage.setEnabled(False)
             self.comboBox_override_stage.setEnabled(False)
+            
+            # disable preview
+            self.pushButton_preview_auto_train_paras.setEnabled(False)
                                     
         else:
             # Update the flag
@@ -2314,6 +2350,7 @@ class AutoTrainDialog(QDialog):
             
             # Uncheck the button (when this is called from the MainWindow, not from actual button click)
             self.pushButton_apply_auto_train_paras.setChecked(False)
+            self.pushButton_preview_auto_train_paras.setEnabled(True)
 
             # Unlock the previously engaged widgets
             for widget in self.widgets_locked_by_auto_train:
@@ -2330,15 +2367,16 @@ class AutoTrainDialog(QDialog):
             self.comboBox_override_stage.setEnabled(self.checkBox_override_stage.isChecked())
 
 
-    def _set_training_parameters(self, paras_dict, if_press_enter=False):
+    def _set_training_parameters(self, paras_dict, if_apply_and_lock=False):
         """Accepts a dictionary of parameters and set the GUI accordingly
         Trying to refactor Foraging.py's _TrainingStage() here.
         
         paras_dict: a dictionary of parameters following Xinxin's convention
-        if_press_enter: if True, press enter after setting the parameters
+        if_apply_and_lock: if True, press enter after setting the parameters
         """
         # Track widgets that have been set by auto training
         widgets_set = []
+        widgets_changed = []
         
         # If warmup exists, always turn it off first, set other parameters, 
         # and then turn it to the desired state
@@ -2349,6 +2387,9 @@ class AutoTrainDialog(QDialog):
             
             # Set warmup to off first so that all AutoTrain parameters
             # can be correctly registered in WarmupBackup if warmup is turned on later
+            if paras_dict and paras_dict['warmup'] != self.MainWindow.warmup.currentText():
+                widgets_changed.append(self.MainWindow.warmup) # Track the changes
+            
             index=self.MainWindow.warmup.findText('off')
             self.MainWindow.warmup.setCurrentIndex(index)
                                        
@@ -2365,9 +2406,12 @@ class AutoTrainDialog(QDialog):
                         f'''Task "{paras_dict['task']}" not found. Check the curriculum!''')
                     return [] # Return an empty list without setting anything
                 else:
+                    if task_ind != widget_task.currentIndex():
+                        widgets_changed.append(widget_task) # Track the changes
                     widget_task.setCurrentIndex(task_ind)
                     logger.info(f"Task is set to {paras_dict['task']}")
                     widgets_set.append(widget_task)
+                    
                     continue  # Continue to the next parameter
             
             # For other parameters, try to find the widget and set the value               
@@ -2391,22 +2435,32 @@ class AutoTrainDialog(QDialog):
             # Set the value according to the widget type
             if isinstance(widget, (QtWidgets.QLineEdit, 
                                    QtWidgets.QTextEdit)):
-                widget.setText(value)
+                if value != widget.text():
+                    widgets_changed.append(widget) # Track the changes
+                    widget.setText(value)
             elif isinstance(widget, QtWidgets.QComboBox):
                 ind = widget.findText(value)
                 if ind < 0:
                     logger.error(f"Parameter choice {key}={value} not found!")
                     continue  # Still allow other parameters to be set
                 else:
-                    widget.setCurrentIndex(ind)
+                    if ind != widget.currentIndex():
+                        widgets_changed.append(widget) # Track the changes
+                        widget.setCurrentIndex(ind)
             elif isinstance(widget, (QtWidgets.QDoubleSpinBox)):
-                widget.setValue(float(value))
+                if float(value) != widget.value():
+                    widgets_changed.append(widget) # Track the changes
+                    widget.setValue(float(value))
             elif isinstance(widget, QtWidgets.QSpinBox):
-                widget.setValue(int(value))    
+                if float(value) != widget.value():
+                    widgets_changed.append(widget) # Track the changes
+                    widget.setValue(int(value))    
             elif isinstance(widget, QtWidgets.QPushButton):
                 if key=='AutoReward':
-                    widget.setChecked(bool(value))
-                    self.MainWindow._AutoReward()            
+                    if bool(value) != widget.isChecked():
+                        widgets_changed.append(widget) # Track the changes
+                        widget.setChecked(bool(value))
+                        self.MainWindow._AutoReward()            
             
             # Append the widgets that have been set
             widgets_set.append(widget)
@@ -2427,12 +2481,11 @@ class AutoTrainDialog(QDialog):
                 )
         
         # Mimic an "ENTER" press event to update the parameters
-        if if_press_enter:
+        if if_apply_and_lock:
             self.MainWindow._keyPressEvent()
         
-        return widgets_set
-        
-    
+        return widgets_set, widgets_changed
+            
     def _clear_layout(self, layout):
         # Remove all existing widgets from the layout
         for i in reversed(range(layout.count())): 
