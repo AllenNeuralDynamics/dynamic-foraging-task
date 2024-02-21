@@ -13,6 +13,7 @@ TIME_SLEEP = 0.03
 
 class IOWorker(QObject):
     finished = pyqtSignal()
+    failure = pyqtSignal()
 
     def __init__(self, device):
         QObject.__init__(self)
@@ -25,16 +26,22 @@ class IOWorker(QObject):
         while True:
             while not self.qslow.empty() and not self.halt_requested:
                 cmd = self.qslow.get()
-                cmd.execute()
-                if not cmd.blocking:
-                    while not cmd.done() and not self.halt_requested:
-                        while not self.qfast.empty() and not self.halt_requested:
-                            fc = self.qfast.get()
-                            fc.execute()
-                        time.sleep(TIME_SLEEP)
+                try:
+                    cmd.execute()
+                    if not cmd.blocking:
+                        while not cmd.done() and not self.halt_requested:
+                            while not self.qfast.empty() and not self.halt_requested:
+                                fc = self.qfast.get()
+                                fc.execute()
+                            time.sleep(TIME_SLEEP)
+                except:
+                    cmd._done=True
             while not self.qfast.empty() and not self.halt_requested:
-                fc = self.qfast.get()
-                fc.execute()
+                try:
+                    fc = self.qfast.get()
+                    fc.execute()
+                except:
+                    fc._done=True
             if self.halt_requested:
                 self.device.halt()
                 self.clear_queues()
@@ -57,8 +64,8 @@ class IOWorker(QObject):
     def halt(self):
         self.halt_requested = True
 
-
 class Stage(QObject):
+    connected = True
 
     def __init__(self, ip=None, serial=None):
         QObject.__init__(self)
@@ -71,7 +78,6 @@ class Stage(QObject):
             self.serial = serial
             self.name = serial.get_serial_number()
             self.device = USBXYZStage(usb_interface=USBInterface(serial))
-
         self.thread = QThread()
         self.worker = IOWorker(self.device)
         self.worker.moveToThread(self.thread)
@@ -102,7 +108,13 @@ class Stage(QObject):
         self.worker.queue_command(cmd)
         while not cmd.done():
             time.sleep(TIME_SLEEP)
-        return cmd.result()
+        result = cmd.result()       
+        
+        # check if command was a failure 
+        if result is None:
+            self.connected=False
+    
+        return result
 
     def get_speed(self):
         cmd = io.GetSpeedCommand(self.device)
