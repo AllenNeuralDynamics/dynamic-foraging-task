@@ -2340,8 +2340,22 @@ class AutoTrainDialog(QDialog):
         # Track widgets that have been set by auto training
         widgets_set = []
         
+        # If warmup exists, always turn it off first, set other parameters, 
+        # and then turn it to the desired state
+        keys = list(paras_dict.keys())
+        if 'warmup' in keys:
+            keys.remove('warmup') 
+            keys += ['warmup']
+            
+            # Set warmup to off first so that all AutoTrain parameters
+            # can be correctly registered in WarmupBackup if warmup is turned on later
+            index=self.MainWindow.warmup.findText('off')
+            self.MainWindow.warmup.setCurrentIndex(index)
+                                       
         # Loop over para_dict and try to set the values
-        for key, value in paras_dict.items():
+        for key in keys:
+            value = paras_dict[key]
+            
             if key == 'task':
                 widget_task = self.MainWindow.Task
                 task_ind = widget_task.findText(paras_dict['task'])
@@ -2361,6 +2375,12 @@ class AutoTrainDialog(QDialog):
             if widget is None:
                 logger.info(f''' Widget "{key}" not found. skipped...''')
                 continue
+            
+            # Enable warmup-related widgets if warmup will be turned on later.
+            # Otherwise, they are now disabled (see 30 lines above) 
+            # and thus cannot be set by AutoTrain (see above line)
+            if 'warm' in key and paras_dict['warmup'] == 'on':
+                widget.setEnabled(True)
             
             # If the parameter is disabled by the GUI in the first place, skip it
             # For example, the field "uncoupled reward" in a coupled task.
@@ -2391,11 +2411,25 @@ class AutoTrainDialog(QDialog):
             # Append the widgets that have been set
             widgets_set.append(widget)
             logger.info(f"{key} is set to {value}")
+            
+            # Lock all water reward-related widgets if one exists
+            if 'LeftValue' in key:
+                widgets_set.extend(
+                    [self.MainWindow.findChild(QObject, 'LeftValue'),
+                     self.MainWindow.findChild(QObject, 'LeftValue_volume')
+                    ]
+                )
+            if 'RightValue' in key:
+                widgets_set.extend(
+                    [self.MainWindow.findChild(QObject, 'RightValue'),
+                     self.MainWindow.findChild(QObject, 'RightValue_volume')
+                    ]
+                )
         
         # Mimic an "ENTER" press event to update the parameters
         if if_press_enter:
             self.MainWindow._keyPressEvent()
-    
+        
         return widgets_set
         
     
