@@ -2266,33 +2266,48 @@ class AutoTrainDialog(QDialog):
             self.update_auto_train_fields(subject_id=self.selected_subject_id,
                                           curriculum_just_overridden=reply == QMessageBox.Yes)
         
-    def _preview_auto_train_paras(self):
+    def _preview_auto_train_paras(self, preview_checked):
         """Apply parameters to the GUI without applying and locking the widgets.
         """
-        # Get parameter settings
-        paras = self.curriculum_in_use.parameters[
-            TrainingStage[self.stage_in_use]
-        ]
-        
-        # Convert to GUI format and set the parameters
-        paras_dict = paras.to_GUI_format()
-        widgets_set, widgets_changed = self._set_training_parameters(
-            paras_dict=paras_dict,
-            if_apply_and_lock=False
-        )
-        
-        # Clear the style of all widgets
-        for widget in widgets_set:
-            widget.setStyleSheet("font-weight: normal")
-        
-        # Highlight the changed widgets
-        for widget in widgets_changed:
-            widget.setStyleSheet(
-                '''
-                    background-color: rgb(225, 225, 0);
-                    font-weight: bold
-                '''
+        if preview_checked:
+            # Get parameter settings
+            paras = self.curriculum_in_use.parameters[
+                TrainingStage[self.stage_in_use]
+            ]
+            
+            # Convert to GUI format and set the parameters
+            paras_dict = paras.to_GUI_format()
+            widgets_set, self.widgets_changed = self._set_training_parameters(
+                paras_dict=paras_dict,
+                if_apply_and_lock=False
             )
+            
+            # Clear the style of all widgets
+            for widget in widgets_set:
+                widget.setStyleSheet("font-weight: normal")
+            
+            # Highlight the changed widgets
+            for widget in self.widgets_changed.keys():
+                widget.setStyleSheet(
+                    '''
+                        background-color: rgb(225, 225, 0);
+                        font-weight: bold
+                    '''
+                )
+        elif hasattr(self, 'widgets_changed'):  # Revert to previous values
+            paras_to_revert = {widget.objectName():value 
+                               for widget, value in self.widgets_changed.items()}
+            
+            _, widgets_changed = self._set_training_parameters(
+                paras_dict=paras_to_revert,
+                if_apply_and_lock=False
+            )            
+            
+            # Clear the style of all widgets
+            for widget in widgets_changed:
+                widget.setStyleSheet("font-weight: normal")
+            
+            self.widgets_changed = {}
                     
     def update_auto_train_lock(self, engaged):
         if engaged:
@@ -2376,7 +2391,7 @@ class AutoTrainDialog(QDialog):
         """
         # Track widgets that have been set by auto training
         widgets_set = []
-        widgets_changed = []
+        widgets_changed = {}  # Dict of {changed_key: previous_value}
         
         # If warmup exists, always turn it off first, set other parameters, 
         # and then turn it to the desired state
@@ -2388,7 +2403,11 @@ class AutoTrainDialog(QDialog):
             # Set warmup to off first so that all AutoTrain parameters
             # can be correctly registered in WarmupBackup if warmup is turned on later
             if paras_dict and paras_dict['warmup'] != self.MainWindow.warmup.currentText():
-                widgets_changed.append(self.MainWindow.warmup) # Track the changes
+                widgets_changed.update(
+                    {self.MainWindow.warmup: 
+                     self.MainWindow.warmup.currentText()
+                     }
+                ) # Track the changes
             
             index=self.MainWindow.warmup.findText('off')
             self.MainWindow.warmup.setCurrentIndex(index)
@@ -2407,7 +2426,9 @@ class AutoTrainDialog(QDialog):
                     return [] # Return an empty list without setting anything
                 else:
                     if task_ind != widget_task.currentIndex():
-                        widgets_changed.append(widget_task) # Track the changes
+                        widgets_changed.update(
+                            {widget_task: widget_task.currentIndex()}
+                        ) # Track the changes
                     widget_task.setCurrentIndex(task_ind)
                     logger.info(f"Task is set to {paras_dict['task']}")
                     widgets_set.append(widget_task)
@@ -2436,7 +2457,7 @@ class AutoTrainDialog(QDialog):
             if isinstance(widget, (QtWidgets.QLineEdit, 
                                    QtWidgets.QTextEdit)):
                 if value != widget.text():
-                    widgets_changed.append(widget) # Track the changes
+                    widgets_changed.update({widget: widget.text()}) # Track the changes
                     widget.setText(value)
             elif isinstance(widget, QtWidgets.QComboBox):
                 ind = widget.findText(value)
@@ -2445,20 +2466,20 @@ class AutoTrainDialog(QDialog):
                     continue  # Still allow other parameters to be set
                 else:
                     if ind != widget.currentIndex():
-                        widgets_changed.append(widget) # Track the changes
+                        widgets_changed.update({widget: widget.currentText()}) # Track the changes
                         widget.setCurrentIndex(ind)
             elif isinstance(widget, (QtWidgets.QDoubleSpinBox)):
                 if float(value) != widget.value():
-                    widgets_changed.append(widget) # Track the changes
+                    widgets_changed.update({widget: widget.value()}) # Track the changes
                     widget.setValue(float(value))
             elif isinstance(widget, QtWidgets.QSpinBox):
                 if float(value) != widget.value():
-                    widgets_changed.append(widget) # Track the changes
+                    widgets_changed.update({widget: widget.value()}) # Track the changes
                     widget.setValue(int(value))    
             elif isinstance(widget, QtWidgets.QPushButton):
                 if key=='AutoReward':
                     if bool(value) != widget.isChecked():
-                        widgets_changed.append(widget) # Track the changes
+                        widgets_changed.update({widget: widget.isChecked()})  # Track the changes
                         widget.setChecked(bool(value))
                         self.MainWindow._AutoReward()            
             
