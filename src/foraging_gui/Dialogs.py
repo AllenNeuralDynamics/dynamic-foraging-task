@@ -2027,6 +2027,7 @@ class AutoTrainDialog(QDialog):
                  'session_date',
                  'curriculum_name', 
                  'curriculum_version',
+                 'curriculum_schema_version',
                  'task',
                  'current_stage_suggested',
                  'current_stage_actual',
