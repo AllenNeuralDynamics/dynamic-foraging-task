@@ -286,20 +286,15 @@ To configure automatic updates consistent with the [update protocol](https://git
 > If the dialog fails to open, check AWS credentials at `~/.aws/credentials`. See [instructions](#for-initial-installation)
 
 2. For the first session of a new mouse:
-   1. ‼️ So far, the automatic training system cannot handle our previous Stage 1.1 --> Stage 1.2.<br>
-     For a new mouse, please still use `Coupled Baiting - Stage 1.1` in the "Parameters" page to warm up the mouse as before.<br>
-     Note we always start with `Coupled Baiting - Stage 1.1` even if `curriculum_name == "Uncoupled ..."` (see [this issue](https://github.com/AllenNeuralDynamics/aind-behavior-blog/issues/241))<br>
-     ![image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/13c34f43-ceeb-4a79-927e-242f03608602)<br>
-     Once you think the mouse is ready for Stage 1.2, please follow the steps below to start using automatic training. <br>(`Stage 1` in `Auto Train`= `Stage 1.2` in the `Parameters` tab.)<br><br>
-     
+   1. ~~So far, the automatic training system cannot handle our previous Stage 1.1 --> Stage 1.2.<br>~~    
    2. Confirm that this is a new mouse in the automatic training system<br>
    <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/684d4aac-f9a9-4ce7-9536-61aace828c76" width="400"><br>
-   3. In "Curriculum Manager", select a desired curriculum for the new mouse. Double-check `curriculum_name` and `curriculum_version`<br>.
-   <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/da03961e-71ef-4c6b-a0c0-37475edd1c66" width="700"><br><br>
-   4. (Optional) Click buttons to see interative diagrams in browser <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/99038b93-aef7-48bb-b756-a387bf435a6e" height="30">
-   5. Click `Set curriculum` button <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/2e3f9abd-afda-4a8c-8475-dfb4f2d8065d" width="300"> to confirm
-   6. Now a new entry with `session = 0` is added in `Training history`, and `STAGE_1` of the selected curriculum is suggested by default. <br>
-   <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/dac71e11-ed71-4fbc-9c3b-85695aa8ef5c" width="700"><br><br>
+   3. In "Curriculum Manager", select a desired curriculum for the new mouse. Double-check `curriculum_name`, `curriculum_version`, and `curriculum_schema_version`.<br>
+   <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/8276c9e6-bb7f-4ff7-893e-aefe6e9a994e" width="700"><br><br>
+   5. (Optional) Click buttons to see interative diagrams in browser <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/99038b93-aef7-48bb-b756-a387bf435a6e" height="30">
+   6. Click `Set curriculum` button <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/2e3f9abd-afda-4a8c-8475-dfb4f2d8065d" width="300"> to confirm
+   7. Now a new entry with `session = 0` is added in `Training history`, and `STAGE_1_WARMUP` of the selected curriculum is suggested by default. <br>
+   <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/0f74695e-5212-42d4-8aa3-e71ef43f4d67" width="700"><br><br>
 3. For a mouse that already started training
    1. Its training history and curriculum is automatically loaded
    <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/1dc6e13a-a563-425e-81df-28c0e71a8037" width="900">
@@ -310,11 +305,14 @@ To configure automatic updates consistent with the [update protocol](https://git
 4. Apply and lock training parameters
    1. Check the curriculum name and stage name shown on the huge green button<br>
     <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/b4bcfd2e-dc68-4349-9208-b06f429c993f" width="200"><br>
-   2. Press the button to apply and lock all curriculum-controlled training parameters in the main GUI (including the "Task").
-   <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/fabbf0c2-3f9f-4fa3-8945-030105248851" width="1200">
-   3. Note that you can still modify some items in `Training parameters`, such as `Valve open time`, `Give left/right`, and `Next block`.
-   4. You could now close the Auto Training dialog.
-   5. Start the training as usual.
+   2. (Optional) Toggle the "Preview changes" to preview/revert the parameters that will be changed by the currently chosen stage.
+      ![image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/ab961ff3-be15-428b-86ce-237142c309bc)
+
+   4. Press the button to apply and lock all curriculum-controlled training parameters in the main GUI (including the "Task").
+   <br><img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/f093ef9d-78b1-439e-ab7f-fc63572a91cf" width="1200">
+   6. ~~Note that you can still modify some items in `Training parameters`, such as `Valve open time`, `Give left/right`, and `Next block`.~~
+   7. You could now close the Auto Training dialog.
+   8. Start the training as usual.
     
 5. Override parameters (not recommended)
    1. Once `Apply and lock` is pressed, you can press it again to unlock the parameters and override any of them. But in this case, the automatic training mode is disengaged, and this session is considered "off-curriculum". <br>
