@@ -1888,6 +1888,7 @@ class AutoTrainDialog(QDialog):
                     
                     # Clear curriculum in use
                     self.curriculum_in_use = None
+                    self.pushButton_preview_auto_train_paras.setEnabled(False)
 
                     # Turn on override curriculum
                     self.checkBox_override_curriculum.setChecked(True)
@@ -1913,7 +1914,8 @@ class AutoTrainDialog(QDialog):
                         curriculum_schema_version=last_curriculum_schema_version,
                         curriculum_version=self.last_session['curriculum_version'],
                     )['curriculum']
-                    
+
+                    self.pushButton_preview_auto_train_paras.setEnabled(True)
             
                 # update stage info
                 self.label_last_actual_stage.setText(str(self.last_session['current_stage_actual']))
@@ -2270,7 +2272,11 @@ class AutoTrainDialog(QDialog):
     def _preview_auto_train_paras(self, preview_checked):
         """Apply parameters to the GUI without applying and locking the widgets.
         """
+        
         if preview_checked:
+            if self.curriculum_in_use is None:
+                return
+            
             # Get parameter settings
             paras = self.curriculum_in_use.parameters[
                 TrainingStage[self.stage_in_use]
