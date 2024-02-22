@@ -11,9 +11,10 @@ import webbrowser
 import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox
-from PyQt5 import QtWidgets, uic
-from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject
+from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox 
+from PyQt5.QtWidgets import QLabel, QDialogButtonBox
+from PyQt5 import QtWidgets, uic, QtGui
+from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject, QEvent
 from PyQt5.QtSvg import QSvgWidget
 
 from foraging_gui.MyFunctions import Worker
@@ -23,6 +24,41 @@ from aind_auto_train.auto_train_manager import DynamicForagingAutoTrainManager
 from aind_auto_train.schema.task import TrainingStage
 
 logger = logging.getLogger(__name__)
+
+class MouseSelectorDialog(QDialog):
+    
+    def __init__(self, MainWindow, mice, parent=None):
+        super().__init__(parent)
+        self.mice = ['']+mice
+        self.MainWindow = MainWindow
+        self.setWindowTitle('Box {}, Load Mouse'.format(self.MainWindow.box_letter))
+        self.setFixedSize(250,125)
+        
+        QBtns = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtns)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        combo = QtWidgets.QComboBox()
+        combo.addItems(self.mice)
+        combo.setEditable(True)
+        combo.setInsertPolicy(QtWidgets.QComboBox.NoInsert)
+        combo.completer().setCompletionMode(QtWidgets.QCompleter.PopupCompletion)
+        font = combo.font()
+        font.setPointSize(15)
+        combo.setFont(font)
+        self.combo = combo
+        
+        msg = QLabel('Enter the Mouse ID: ')
+        font = msg.font()
+        font.setPointSize(12)
+        msg.setFont(font)
+
+        self.layout = QVBoxLayout(self)
+        self.layout.addWidget(msg)
+        self.layout.addWidget(self.combo)
+        self.layout.addWidget(self.buttonBox)
+        self.setLayout(self.layout)
 
 class LickStaDialog(QDialog):
     '''Lick statistics dialog'''
