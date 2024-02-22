@@ -306,14 +306,7 @@ class Window(QMainWindow):
         # get parameters before the warm up is on
         parameters={}
         for attr_name in dir(self):
-            # Only recovery warm up-related parameters to fix the bug
-            # where if the user makes some other changes (like reward size) when "warm up" is on, 
-            # the changes will not be saved when "warm up" is off, because they are incorrectly "recovered". 
-            # Specifically, I found this bug when switching AutoTrain from STAGE_1_Warmup to STAGE_1 without running the task.
-            if attr_name.startswith('WarmupBackup_') and attr_name!='WarmupBackup_' and attr_name!='WarmupBackup_warmup'\
-                and any(f in attr_name for f in ['BaseRewardSum', 'RewardFamily', 'RewardPairsN', 
-                                                 'BlockBeta', 'BlockMin', 'BlockMax', 'BlockMinReward', 'AutoReward',
-                                                 'AutoWaterType', 'Multiplier', 'Unrewarded', 'Ignored', 'AdvancedBlockAuto']):
+            if attr_name.startswith('WarmupBackup_') and attr_name!='WarmupBackup_' and attr_name!='WarmupBackup_warmup':
                 parameters[attr_name.replace('WarmupBackup_','')]=getattr(self,attr_name)
         widget_dict = {w.objectName(): w for w in self.TrainingParameters.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
         widget_dict['Task']=self.Task
