@@ -1816,7 +1816,7 @@ class Window(QMainWindow):
                             else:
                                 Obj[attr_name]=Value
                         except Exception as e:
-                            logging.error(str(e))
+                            logging.error(f'saving {attr_name} error: str(e)')
                             Obj[attr_name]=Value
         # save other events, e.g. session start time
         for attr_name in dir(self):
