@@ -1816,7 +1816,12 @@ class Window(QMainWindow):
                             else:
                                 Obj[attr_name]=Value
                         except Exception as e:
-                            logging.error(f'saving {attr_name} error: str(e)')
+                            # Lots of B_xxx data are not real scalars and thus math.isnan(Value) will fail
+                            # e.g. B_AnimalResponseHistory. We just save them as they are. 
+                            # This is expected and no need to log an error.
+                            # I don't know the necessity of turning nan values into 'nan', 
+                            # but for backward compatibility, I keep it above.
+                            logging.info(f'{attr_name} is not a real scalar, save it as it is.')
                             Obj[attr_name]=Value
         # save other events, e.g. session start time
         for attr_name in dir(self):
