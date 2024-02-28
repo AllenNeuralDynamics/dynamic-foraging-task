@@ -14,7 +14,7 @@ import numpy as np
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
-from PyQt5.QtWidgets import QFileDialog,QVBoxLayout,QLineEdit
+from PyQt5.QtWidgets import QFileDialog,QVBoxLayout
 from PyQt5 import QtWidgets,QtGui,QtCore, uic
 from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
@@ -25,7 +25,7 @@ from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistri
 from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog
 from foraging_gui.Dialogs import LaserCalibrationDialog
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
-from foraging_gui.Dialogs import AutoTrainDialog
+from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY
 from foraging_gui.stage import Stage
 from foraging_gui.TransferToNWB import bonsai_to_nwb
@@ -87,7 +87,8 @@ class Window(QMainWindow):
         self.ANewTrial = 1          # permission to start a new trial
         self.UpdateParameters = 1   # permission to update parameters
         self.loggingstarted = -1    # Have we started trial logging
-        
+        self.unsaved_data = False   # Setting unsaved data to False 
+ 
         # Connect to Bonsai
         self._InitializeBonsai()
 
@@ -177,6 +178,7 @@ class Window(QMainWindow):
         self.action_Save.triggered.connect(self._Save)
         self.actionForce_save.triggered.connect(self._ForceSave)
         self.SaveContinue.triggered.connect(self._SaveContinue)
+        self.SaveAs.triggered.connect(self._SaveAs)
         self.action_Exit.triggered.connect(self._Exit)
         self.action_New.triggered.connect(self._New)
         self.action_Clear.triggered.connect(self._Clear)
@@ -184,7 +186,7 @@ class Window(QMainWindow):
         self.action_NewSession.triggered.connect(self.NewSession.click)
         self.actionConnectBonsai.triggered.connect(self._ConnectBonsai)
         self.actionReconnect_bonsai.triggered.connect(self._ReconnectBonsai)
-        self.Load.clicked.connect(self._Open)
+        self.Load.clicked.connect(self._OpenLast)
         self.Save.clicked.connect(self._Save)
         self.Clear.clicked.connect(self._Clear)
         self.Start.clicked.connect(self._Start)
@@ -553,7 +555,8 @@ class Window(QMainWindow):
         '''   
         if self.InitializeBonsaiSuccessfully ==1 and hasattr(self, 'GeneratedTrials'):
             msg = 'Reconnected to Bonsai. Start a new session before running more trials'
-            reply = QMessageBox.question(self, 'Box {}, Reconnect Bonsai'.format(self.box_letter), msg, QMessageBox.Ok )
+            reply = QMessageBox.information(self, 
+                'Box {}, Reconnect Bonsai'.format(self.box_letter), msg, QMessageBox.Ok )
  
     def _restartlogging(self,log_folder=None):
         '''Restarting logging'''
@@ -867,6 +870,10 @@ class Window(QMainWindow):
         '''Do not restart a session after saving'''
         self._Save(SaveContinue=1)
 
+    def _SaveAs(self):
+        '''Do not restart a session after saving'''
+        self._Save(SaveAs=1)
+
     def _WaterVolumnManage1(self):
         '''Change the water volume based on the valve open time'''
         self.LeftValue.textChanged.disconnect(self._WaterVolumnManage1)
@@ -1153,9 +1160,8 @@ class Window(QMainWindow):
             self.BlockBeta.setEnabled(True)
             self.DelayBeta.setEnabled(True)
             self.ITIBeta.setEnabled(True)
-            if self.Task.currentText()!='RewardN':
-                self.BlockBeta.setStyleSheet("color: black;border: 1px solid gray;background-color: white;")
-                self.label_14.setStyleSheet("color: black;background-color: white;")
+            # if self.Task.currentText()!='RewardN':
+            #     self.BlockBeta.setStyleSheet("color: black;border: 1px solid gray;background-color: white;")
         elif self.Randomness.currentText()=='Even':
             self.label_14.setEnabled(False)
             self.label_18.setEnabled(False)
@@ -1163,11 +1169,10 @@ class Window(QMainWindow):
             self.BlockBeta.setEnabled(False)
             self.DelayBeta.setEnabled(False)
             self.ITIBeta.setEnabled(False)
-            if self.Task.currentText()!='RewardN':
-                border_color = "rgb(100, 100, 100,80)"
-                border_style = "1px solid " + border_color
-                self.BlockBeta.setStyleSheet(f"color: gray;border:{border_style};background-color: rgba(0, 0, 0, 0);")
-                self.label_14.setStyleSheet("color: gray;background-color: rgba(0, 0, 0, 0);")
+            # if self.Task.currentText()!='RewardN':
+            #     border_color = "rgb(100, 100, 100,80)"
+            #     border_style = "1px solid " + border_color
+            #     self.BlockBeta.setStyleSheet(f"color: gray;border:{border_style};background-color: rgba(0, 0, 0, 0);")
 
     def _AdvancedBlockAuto(self):
         '''enable/disable some fields in the AdvancedBlockAuto'''
@@ -1182,8 +1187,11 @@ class Window(QMainWindow):
             self.SwitchThr.setEnabled(True)
             self.PointsInARow.setEnabled(True)
 
-    def keyPressEvent(self, event=None):
-        '''Enter press to allow change of parameters'''
+    def keyPressEvent(self, event=None,allow_reset=False):
+        '''
+            Enter press to allow change of parameters
+            allow_reset (bool) allows the Baseweight parameter to be reset to the empty string
+        '''
         try:
             if self.actionTime_distribution.isChecked()==True:
                 self.PlotTime._Update(self)
@@ -1217,9 +1225,15 @@ class Window(QMainWindow):
                 for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
                     if child.objectName()=='qt_spinbox_lineedit':
                         continue
-                    child.setStyleSheet('color: black;')
-                    child.setStyleSheet('background-color: white;')
-                    self._Task()
+                    
+                    if not (hasattr(self, 'AutoTrain_dialog') and self.AutoTrain_dialog.auto_train_engaged):
+                        # Only run _Task again if AutoTrain is NOT engaged
+                        # To avoid the _Task() function overwriting the AutoTrain UI locks
+                        # resolves https://github.com/AllenNeuralDynamics/dynamic-foraging-task/issues/239
+                        child.setStyleSheet('color: black;')
+                        child.setStyleSheet('background-color: white;')
+                        self._Task()
+                    
                     if child.objectName() in {'Experimenter','TotalWater','WeightAfter','ExtraWater'}:
                         continue
                     if child.objectName()=='UncoupledReward':
@@ -1229,7 +1243,9 @@ class Window(QMainWindow):
                         continue
                     if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight']) and
                         (child.text() == '')):
-                        # These attributes can have the empty string, but we can't set the value as the empty string
+                        # These attributes can have the empty string, but we can't set the value as the empty string, unless we allow resets
+                        if allow_reset:
+                            continue
                         if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))                       
                         continue
@@ -1391,6 +1407,8 @@ class Window(QMainWindow):
         '''hide and show some fields based on the task type'''
         self.label_43.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
         self.ITIIncrease.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+        self._Randomness()
+
         if self.Task.currentText() in ['Coupled Baiting','Coupled Without Baiting']:
             self.label_6.setEnabled(True)
             self.label_7.setEnabled(True)
@@ -1400,37 +1418,16 @@ class Window(QMainWindow):
             self.RewardFamily.setEnabled(True)
             self.label_20.setEnabled(False)
             self.UncoupledReward.setEnabled(False)
-            self.label_6.setStyleSheet("color: black;")
-            self.label_7.setStyleSheet("color: black;")
-            self.label_8.setStyleSheet("color: black;")
-            self.BaseRewardSum.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.RewardPairsN.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.RewardFamily.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.label_20.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.UncoupledReward.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            # block
-            if self.Randomness.currentText()=='Exponential':
-                self.BlockBeta.setEnabled(True)
-                self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
-                self.label_14.setStyleSheet("color: black;background-color: rgba(0, 0, 0, 0)")
-            else:
-                self.BlockBeta.setEnabled(False)
-                self.BlockBeta.setStyleSheet("color: gray;""border: 1px solid gray;")
-                self.label_14.setStyleSheet("color: gray;")
+
             self.label_12.setEnabled(True)
             self.label_11.setEnabled(True)
             self.BlockBeta.setEnabled(True)
             self.BlockMin.setEnabled(True)
             self.BlockMax.setEnabled(True)
-            self.label_12.setStyleSheet("color: black;")
-            self.label_11.setStyleSheet("color: black;")
-            self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.BlockMin.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.BlockMax.setStyleSheet("color: black;""border: 1px solid gray;")
+
             self.label_27.setEnabled(False)
             self.InitiallyInactiveN.setEnabled(False)
-            self.label_27.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.InitiallyInactiveN.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
             # change name of min reward each block
             self.label_13.setText('min reward each block=')
@@ -1441,12 +1438,18 @@ class Window(QMainWindow):
             # move auto-reward
             self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 128, 80, 20))
             self.label_26.setGeometry(QtCore.QRect(929, 128, 146, 16))
-            # set block length to the default value
-            #self.BlockMin.setText('20')
-            #self.BlockMax.setText('60')
+            
+            # Reopen block beta, NextBlock, and AutoBlock panel
+            self.BlockBeta.setEnabled(True)
+            self.NextBlock.setEnabled(True)
+            
+            self.AdvancedBlockAuto.setEnabled(True)
+            self._AdvancedBlockAuto() # Update states of SwitchThr and PointsInARow
+            
+            self.BlockMinReward.setEnabled(True)
+            self.IncludeAutoReward.setEnabled(True)
+            
         elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
-            border_color = "rgb(100, 100, 100,80)"
-            border_style = "1px solid " + border_color
             self.label_6.setEnabled(False)
             self.label_7.setEnabled(False)
             self.label_8.setEnabled(False)
@@ -1455,37 +1458,14 @@ class Window(QMainWindow):
             self.RewardFamily.setEnabled(False)
             self.label_20.setEnabled(True)
             self.UncoupledReward.setEnabled(True)
-            self.label_6.setStyleSheet("color: gray;")
-            self.label_7.setStyleSheet("color: gray;")
-            self.label_8.setStyleSheet("color: gray;")
-            self.BaseRewardSum.setStyleSheet(f"color: gray;background-color: rgba(0, 0, 0, 0);border: 1px solid gray;border:{border_style};")
-            self.RewardPairsN.setStyleSheet(f"color: gray;background-color: rgba(0, 0, 0, 0);border: 1px solid gray;border:{border_style};")
-            self.RewardFamily.setStyleSheet(f"color: gray;background-color: rgba(0, 0, 0, 0);border: 1px solid gray;border:{border_style};")
-            self.label_20.setStyleSheet("color: black;")
-            self.UncoupledReward.setStyleSheet("color: black;""border: 1px solid gray;")
-            # block
-            if self.Randomness.currentText()=='Exponential':
-                self.BlockBeta.setEnabled(True)
-                self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
-                self.label_14.setStyleSheet("color: black;")
-            else:
-                self.BlockBeta.setEnabled(False)
-                self.BlockBeta.setStyleSheet("color: gray;""border: 1px solid gray;")
-                self.label_14.setStyleSheet("color: gray;")
+
             self.label_12.setEnabled(True)
             self.label_11.setEnabled(True)
-            self.BlockBeta.setEnabled(True)
             self.BlockMin.setEnabled(True)
             self.BlockMax.setEnabled(True)
-            self.label_12.setStyleSheet("color: black;")
-            self.label_11.setStyleSheet("color: black;")
-            self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.BlockMin.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.BlockMax.setStyleSheet("color: black;""border: 1px solid gray;")
+
             self.label_27.setEnabled(False)
             self.InitiallyInactiveN.setEnabled(False)
-            self.label_27.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.InitiallyInactiveN.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
             # change name of min reward each block
             self.label_13.setText('min reward each block=')
@@ -1496,9 +1476,17 @@ class Window(QMainWindow):
             # move auto-reward
             self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 128, 80, 20))
             self.label_26.setGeometry(QtCore.QRect(929, 128, 146, 16))
-            # set block length to the default value
-            #self.BlockMin.setText('20')
-            #self.BlockMax.setText('60')
+            
+            # Disable block beta, NextBlock, and AutoBlock panel
+            self.BlockBeta.setEnabled(False)
+            self.NextBlock.setEnabled(False)
+            self.AdvancedBlockAuto.setEnabled(False)
+            self.SwitchThr.setEnabled(False)
+            self.PointsInARow.setEnabled(False)
+            self.BlockMinReward.setEnabled(False)
+            self.IncludeAutoReward.setEnabled(False)
+            
+            
         elif self.Task.currentText() in ['RewardN']:
             self.label_6.setEnabled(True)
             self.label_7.setEnabled(True)
@@ -1508,14 +1496,7 @@ class Window(QMainWindow):
             self.RewardFamily.setEnabled(True)
             self.label_20.setEnabled(False)
             self.UncoupledReward.setEnabled(False)
-            self.label_6.setStyleSheet("color: black;")
-            self.label_7.setStyleSheet("color: black;")
-            self.label_8.setStyleSheet("color: black;")
-            self.BaseRewardSum.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.RewardPairsN.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.RewardFamily.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.label_20.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.UncoupledReward.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+
             # block
             self.label_14.setEnabled(False)
             self.label_12.setEnabled(False)
@@ -1523,17 +1504,11 @@ class Window(QMainWindow):
             self.BlockBeta.setEnabled(False)
             self.BlockMin.setEnabled(False)
             self.BlockMax.setEnabled(False)
-            self.label_14.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.label_12.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.label_11.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.BlockBeta.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.BlockMin.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.BlockMax.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+
             # block; no reward when initially active
             self.label_27.setEnabled(True)
             self.InitiallyInactiveN.setEnabled(True)
-            self.label_27.setStyleSheet("color: black;")
-            self.InitiallyInactiveN.setStyleSheet("color: black;""border: 1px solid gray;")
+
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(403, 128, 80, 20))
             # change name of min reward each block
             self.label_13.setText('RewardN=')
@@ -1547,7 +1522,6 @@ class Window(QMainWindow):
             # set block length to be 1
             self.BlockMin.setText('1')
             self.BlockMax.setText('1')
-        self._Randomness()
 
     def _ShowRewardPairs(self):
         '''Show reward pairs'''
@@ -1586,62 +1560,46 @@ class Window(QMainWindow):
             logging.error(str(e))
 
     def closeEvent(self, event):
-        # disable close icon
-        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
-        self.show()
-        self._StopCurrentSession() # stop the current session first
-         # enable close icon
-        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, True)
-        self.show()
-        reply = QMessageBox.question(self, 'Box {}, Foraging Close'.format(self.box_letter), 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
-        if reply == QMessageBox.Yes:
-            self._Save()
-            event.accept()
-            self.Start.setChecked(False)
-            if self.InitializeBonsaiSuccessfully==1:
-                self.client.close()
-                self.client2.close()
-                self.client3.close()
-                self.client4.close()
-            self.Opto_dialog.close()
-            self._StopPhotometry()  # Make sure photo excitation is stopped 
-            print('GUI Window closed')
-            logging.info('GUI Window closed')
-        elif reply == QMessageBox.No:
-            event.accept()
-            self.Start.setChecked(False)
-            if self.InitializeBonsaiSuccessfully==1:
-                self.client.close()
-                self.client2.close()
-                self.client3.close()
-                self.client4.close()
-            self._StopPhotometry()   # Make sure photo excitation is stopped    
-            print('GUI Window closed')
-            logging.info('GUI Window closed')
-            self.Opto_dialog.close()
+        # stop the current session first
+        self._StopCurrentSession() 
+
+        if self.unsaved_data:
+            reply = QMessageBox.critical(self, 
+                'Box {}, Foraging Close'.format(self.box_letter), 
+                'Exit without saving?',
+                QMessageBox.Yes | QMessageBox.No , QMessageBox.No)  
+            if reply == QMessageBox.No:
+                event.ignore()
+                return
         else:
-            event.ignore()
+            reply = QMessageBox.question(self,
+                'Box {}, Foraging Close'.format(self.box_letter), 
+                'Close the GUI?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)  
+            if reply == QMessageBox.No:
+                event.ignore()
+                return
+
+        event.accept()
+        self.Start.setChecked(False)
+        if self.InitializeBonsaiSuccessfully==1:
+            self.client.close()
+            self.client2.close()
+            self.client3.close()
+            self.client4.close()
+        self.Opto_dialog.close()
+        self._StopPhotometry()  # Make sure photo excitation is stopped 
+        if self.Camera_dialog.AutoControl.currentText()=='Yes':
+            self.Camera_dialog.StartCamera.setChecked(False)
+            self.Camera_dialog._StartCamera()
+        print('GUI Window closed')
+        logging.info('GUI Window closed') 
 
     def _Exit(self):
         '''Close the GUI'''
         logging.info('closing the GUI')
-        response = QMessageBox.question(self,'Box {}, Save and Exit:'.format(self.box_letter), "Do you want to save the current result?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
-        if response==QMessageBox.Yes:
-            # close the camera
-            if self.Camera_dialog.AutoControl.currentText()=='Yes':
-                self.Camera_dialog.StartCamera.setChecked(False)
-                self.Camera_dialog._StartCamera()
-            self._Save()
-            self._StopPhotometry()# Make sure photo excitation is stopped 
-            self.close()
-        elif response==QMessageBox.No:
-            # close the camera
-            if self.Camera_dialog.AutoControl.currentText()=='Yes':
-                self.Camera_dialog.StartCamera.setChecked(False)
-                self.Camera_dialog._StartCamera()
-            self._StopPhotometry()# Make sure photo excitation is stopped 
-            self.close()
-
+        self.close()      
+ 
     def _Snipping(self):
         '''Open the snipping tool'''
         os.system("start %windir%\system32\SnippingTool.exe") 
@@ -1759,12 +1717,15 @@ class Window(QMainWindow):
             "<p></p>",
         )
    
-    def _Save(self,ForceSave=0,SaveContinue=0):
+    def _Save(self,ForceSave=0,SaveContinue=1,SaveAs=0):
         logging.info('Saving current session, ForceSave={},SaveContinue={}'.format(ForceSave,SaveContinue))
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
         if self.BaseWeight.text()=='' or self.WeightAfter.text()=='' or self.TargetRatio.text()=='':
-            response = QMessageBox.question(self,'Box {}, Save without weight or extra water:'.format(self.box_letter), "Do you want to save without weight or extra water information provided?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
+            response = QMessageBox.question(self,
+                'Box {}, Save without weight or extra water:'.format(self.box_letter), 
+                "Do you want to save without weight or extra water information provided?",
+                 QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
             if response==QMessageBox.Yes:
                 pass
                 self.WarningLabel.setText('Saving without weight or extra water!')
@@ -1772,9 +1733,13 @@ class Window(QMainWindow):
                 logging.info('saving without weight or extra water')
             elif response==QMessageBox.No:
                 logging.info('saving declined by user')
+                self.WarningLabel.setText('')
+                self.WarningLabel.setStyleSheet(self.default_warning_color)
                 return
             elif response==QMessageBox.Cancel:
                 logging.info('saving canceled by user')
+                self.WarningLabel.setText('')
+                self.WarningLabel.setStyleSheet(self.default_warning_color)
                 return
 
         # this should be improved in the future. Need to get the last LeftRewardDeliveryTime and RightRewardDeliveryTime
@@ -1788,119 +1753,145 @@ class Window(QMainWindow):
         if not os.path.exists(os.path.dirname(self.SaveFileJson)):
             os.makedirs(os.path.dirname(self.SaveFileJson))
             logging.info(f"Created new folder: {os.path.dirname(self.SaveFileJson)}")
-        Names = QFileDialog.getSaveFileName(self, 'Save File',self.SaveFileJson,"JSON files (*.json);;MAT files (*.mat);;JSON parameters (*_par.json)")
-        if Names[1]=='JSON parameters (*_par.json)':
-            self.SaveFile=Names[0].replace('.json', '_par.json')
+
+        # Save in the standard location
+        if SaveAs == 0:
+            self.SaveFile = self.SaveFileJson
         else:
-            self.SaveFile=Names[0]
-        if self.SaveFile == '':
-            self.WarningLabel.setText('Discard saving!')
-            self.WarningLabel.setStyleSheet(self.default_warning_color)
-        if self.SaveFile != '':
-            if hasattr(self, 'GeneratedTrials'):
-                if hasattr(self.GeneratedTrials, 'Obj'):
-                    Obj=self.GeneratedTrials.Obj
-                else:
-                    Obj={}
+            Names = QFileDialog.getSaveFileName(self, 'Save File',self.SaveFileJson,"JSON files (*.json);;MAT files (*.mat);;JSON parameters (*_par.json)")
+            if Names[1]=='JSON parameters (*_par.json)':
+                self.SaveFile=Names[0].replace('.json', '_par.json')
+            else:
+                self.SaveFile=Names[0]
+            if self.SaveFile == '':
+                logging.info('empty file name')
+                self.WarningLabel.setText('')
+                self.WarningLabel.setStyleSheet(self.default_warning_color)
+                return
+
+
+        # Do we have trials to save?
+        if hasattr(self, 'GeneratedTrials'):
+            if hasattr(self.GeneratedTrials, 'Obj'):
+                Obj=self.GeneratedTrials.Obj
             else:
                 Obj={}
-            widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-            widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
-            self._Concat(widget_dict,Obj,'None')
-            if hasattr(self, 'LaserCalibration_dialog'):
-                widget_dict_LaserCalibration={w.objectName(): w for w in self.LaserCalibration_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))} 
-                self._Concat(widget_dict_LaserCalibration,Obj,'LaserCalibration_dialog')
-            if hasattr(self, 'Opto_dialog'):
-                widget_dict_opto={w.objectName(): w for w in self.Opto_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-                self._Concat(widget_dict_opto,Obj,'Opto_dialog')
-            if hasattr(self, 'Camera_dialog'):
-                widget_dict_camera={w.objectName(): w for w in self.Camera_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-                self._Concat(widget_dict_camera,Obj,'Camera_dialog')
-            
-            Obj2=Obj.copy()
-            # save behavor events
-            if hasattr(self, 'GeneratedTrials'):
-                # Do something if self has the GeneratedTrials attribute
-                # Iterate over all attributes of the GeneratedTrials object
-                for attr_name in dir(self.GeneratedTrials):
-                    if attr_name.startswith('B_') or attr_name.startswith('BS_'):
-                        if attr_name=='B_RewardFamilies' and self.SaveFile.endswith('.mat'):
-                            pass
-                        else:
-                            Value=getattr(self.GeneratedTrials, attr_name)
-                            try:
-                                if math.isnan(Value):
-                                    Obj[attr_name]='nan'
-                                else:
-                                    Obj[attr_name]=Value
-                            except Exception as e:
-                                logging.error(str(e))
+        else:
+            Obj={}
+        widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren(
+            (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+            QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+        widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
+        self._Concat(widget_dict,Obj,'None')
+        if hasattr(self, 'LaserCalibration_dialog'):
+            widget_dict_LaserCalibration={w.objectName(): w for w in self.LaserCalibration_dialog.findChildren(
+            (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+            QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))} 
+            self._Concat(widget_dict_LaserCalibration,Obj,'LaserCalibration_dialog')
+        if hasattr(self, 'Opto_dialog'):
+            widget_dict_opto={w.objectName(): w for w in self.Opto_dialog.findChildren(
+                (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+                QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+            self._Concat(widget_dict_opto,Obj,'Opto_dialog')
+        if hasattr(self, 'Camera_dialog'):
+            widget_dict_camera={w.objectName(): w for w in self.Camera_dialog.findChildren(
+                (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+                QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+            self._Concat(widget_dict_camera,Obj,'Camera_dialog')
+        
+        Obj2=Obj.copy()
+        # save behavor events
+        if hasattr(self, 'GeneratedTrials'):
+            # Do something if self has the GeneratedTrials attribute
+            # Iterate over all attributes of the GeneratedTrials object
+            for attr_name in dir(self.GeneratedTrials):
+                if attr_name.startswith('B_') or attr_name.startswith('BS_'):
+                    if attr_name=='B_RewardFamilies' and self.SaveFile.endswith('.mat'):
+                        pass
+                    else:
+                        Value=getattr(self.GeneratedTrials, attr_name)
+                        try:
+                            if math.isnan(Value):
+                                Obj[attr_name]='nan'
+                            else:
                                 Obj[attr_name]=Value
-            # save other events, e.g. session start time
-            for attr_name in dir(self):
-                if attr_name.startswith('Other_'):
-                    Obj[attr_name] = getattr(self, attr_name)
-            # save laser calibration results (only for the calibration session)
-            if hasattr(self, 'LaserCalibration_dialog'):
-                # Do something if self has the GeneratedTrials attribute
-                # Iterate over all attributes of the GeneratedTrials object
-                for attr_name in dir(self.LaserCalibration_dialog):
-                    if attr_name.startswith('LCM_'):
-                        Obj[attr_name] = getattr(self.LaserCalibration_dialog, attr_name)
+                        except Exception as e:
+                            logging.error(str(e))
+                            Obj[attr_name]=Value
+        # save other events, e.g. session start time
+        for attr_name in dir(self):
+            if attr_name.startswith('Other_'):
+                Obj[attr_name] = getattr(self, attr_name)
+        # save laser calibration results (only for the calibration session)
+        if hasattr(self, 'LaserCalibration_dialog'):
+            # Do something if self has the GeneratedTrials attribute
+            # Iterate over all attributes of the GeneratedTrials object
+            for attr_name in dir(self.LaserCalibration_dialog):
+                if attr_name.startswith('LCM_'):
+                    Obj[attr_name] = getattr(self.LaserCalibration_dialog, attr_name)
 
-            # save laser calibration results from the json file
-            if hasattr(self, 'LaserCalibrationResults'):
-                self._GetLaserCalibration()
-                Obj['LaserCalibrationResults']=self.LaserCalibrationResults
+        # save laser calibration results from the json file
+        if hasattr(self, 'LaserCalibrationResults'):
+            self._GetLaserCalibration()
+            Obj['LaserCalibrationResults']=self.LaserCalibrationResults
 
-            # save water calibration results
-            if hasattr(self, 'WaterCalibrationResults'):
-                self._GetWaterCalibration()
-                Obj['WaterCalibrationResults']=self.WaterCalibrationResults
-            
-            # save other fields start with Ot_
-            for attr_name in dir(self):
-                if attr_name.startswith('Ot_'):
-                    Obj[attr_name]=getattr(self, attr_name)
+        # save water calibration results
+        if hasattr(self, 'WaterCalibrationResults'):
+            self._GetWaterCalibration()
+            Obj['WaterCalibrationResults']=self.WaterCalibrationResults
+        
+        # save other fields start with Ot_
+        for attr_name in dir(self):
+            if attr_name.startswith('Ot_'):
+                Obj[attr_name]=getattr(self, attr_name)
 
-            # Save the current box
-            Obj['box'] = self.current_box
+        # Save the current box
+        Obj['box'] = self.current_box
     
-            # save Json or mat
-            if self.SaveFile.endswith('.mat'):
-            # Save data to a .mat file
-                savemat(self.SaveFile, Obj) 
-            elif self.SaveFile.endswith('par.json'):
-                with open(self.SaveFile, "w") as outfile:
-                    json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
-            elif self.SaveFile.endswith('.json'):
-                with open(self.SaveFile, "w") as outfile:
-                    json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
-                    
-            # Also export to nwb automatically here
+        # save Json or mat
+        if self.SaveFile.endswith('.mat'):
+        # Save data to a .mat file
+            savemat(self.SaveFile, Obj) 
+        elif self.SaveFile.endswith('par.json'):
+            with open(self.SaveFile, "w") as outfile:
+                json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
+        elif self.SaveFile.endswith('.json'):
+            with open(self.SaveFile, "w") as outfile:
+                json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
+                
+        # Also export to nwb automatically here
+        try:
+            nwb_name = self.SaveFile.replace('.json','.nwb')
+            bonsai_to_nwb(self.SaveFile, os.path.dirname(self.SaveFileJson))
+        except Exception as e:
+            logging.warning(f'Failed to export to nwb...\n{e}')
+        else:
+            logging.info(f'Exported to nwb {nwb_name} successfully!')
+        
+        # close the camera
+        if self.Camera_dialog.AutoControl.currentText()=='Yes':
+            self.Camera_dialog.StartCamera.setChecked(False)
+            self.Camera_dialog._StartCamera()
+        if SaveContinue==0:
+            # must start a new session 
+            self.NewSession.setStyleSheet("background-color : green;")
+            self.NewSession.setDisabled(True) 
+            self.StartANewSession=1
+            self.CreateNewFolder=1
             try:
-                nwb_name = self.SaveFile.replace('.json','.nwb')
-                bonsai_to_nwb(self.SaveFile, os.path.dirname(self.SaveFileJson))
+                self.Channel.StopLogging('s')
             except Exception as e:
-                logging.warning(f'Failed to export to nwb...\n{e}')
-            else:
-                logging.info(f'Exported to nwb {nwb_name} successfully!')
-            
-            # close the camera
-            if self.Camera_dialog.AutoControl.currentText()=='Yes':
-                self.Camera_dialog.StartCamera.setChecked(False)
-                self.Camera_dialog._StartCamera()
-            if SaveContinue==0:
-                # must start a new session 
-                self.NewSession.setStyleSheet("background-color : green;")
-                self.NewSession.setDisabled(True) 
-                self.StartANewSession=1
-                self.CreateNewFolder=1
-                try:
-                    self.Channel.StopLogging('s')
-                except Exception as e:
-                    logging.error(str(e))
+                logging.error(str(e))
 
+        # Toggle unsaved data to False
+        self.unsaved_data=False
+        self.Save.setStyleSheet("background-color : None;")
+        self.Save.setStyleSheet("color: black;")
+
+
+        short_file = self.SaveFile.split('\\')[-1]
+        self.WarningLabel.setText('Saved: {}'.format(short_file))
+        self.WarningLabel.setStyleSheet(self.default_warning_color)
 
     def _GetSaveFolder(self,CTrainingFolder=1,CHarpFolder=1,CVideoFolder=1,CPhotometryFolder=1,CEphysFolder=1):
         '''The new data storage structure. Each session forms an independent folder. Training data, Harp register events, video data, photometry data and ephys data are in different subfolders'''
@@ -1992,15 +1983,170 @@ class Window(QMainWindow):
                 elif isinstance(widget, QtWidgets.QComboBox):
                     Obj[keyname][widget.objectName()]=widget.currentText()
         return Obj
-    def _Open(self):
-        self._StopCurrentSession() # stop current session first
-        self.NewSession.setChecked(True)
-        Reply=self._NewSession()
-        if Reply == QMessageBox.Yes or Reply == QMessageBox.No:
-            self.NewSession.setDisabled(True) # You must start a NewSession after loading a new file, and you can't continue that session
-        elif Reply == QMessageBox.Cancel:
+
+    def _OpenLast(self):
+        self._Open(open_last=True)
+
+    def _OpenLast_find_session(self,mouse_id):
+        '''
+            Returns the filepath of the last available session of this mouse
+            Returns a tuple (Bool, str)
+            Bool is True is a valid filepath was found, false otherwise
+            If a valid filepath was found, then str contains the filepath 
+        '''
+
+        # Is this mouse on this computer?
+        filepath = os.path.join(self.default_saveFolder,self.current_box)
+        mouse_dirs = os.listdir(filepath)
+        if mouse_id not in mouse_dirs:
+            reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
+                'Mouse ID {} does not have any saved sessions on this computer'.format(mouse_id),
+                QMessageBox.Ok)
+            logging.info('User input mouse id {}, which had no sessions on this computer'.format(mouse_id))
+            return False, ''
+
+        # Are there any session from this mouse?
+        session_dir = os.path.join(self.default_saveFolder, self.current_box, mouse_id)
+        sessions = os.listdir(session_dir)
+        if len(sessions) == 0:
+            reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
+                'Mouse ID {} does not have any saved sessions on this computer'.format(mouse_id),
+                QMessageBox.Ok)
+            logging.info('User input mouse id {}, which had no sessions on this computer'.format(mouse_id))
+            return False, ''      
+
+        # do any of the sessions have saved data? Grab the most recent        
+        for i in range(len(sessions)-1, -1, -1):
+            s = sessions[i]
+            json_file = os.path.join(self.default_saveFolder, 
+                self.current_box, mouse_id, s,'TrainingFolder',s+'.json')
+            if os.path.isfile(json_file):
+                date = s.split('_')[1]
+                session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
+                reply = QMessageBox.information(self,
+                    'Box {}, Please verify'.format(self.box_letter),
+                    '<span style="color:purple;font-weight:bold">Mouse ID: {}</span><br>Last session: {}<br>Filename: {}'.format(mouse_id, session_date, s),
+                    QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
+                if reply == QMessageBox.Cancel:
+                    logging.info('User hit cancel')
+                    return False, ''
+                else: 
+                    return True, json_file
+       
+        # none of the sessions have saved data.  
+        reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
+            'Mouse ID {} does not have any saved sessions on this computer'.format(mouse_id),
+            QMessageBox.Ok)
+        logging.info('User input mouse id {}, which had no sessions on this computer'.format(mouse_id))
+        return False, ''             
+
+    def _OpenNewMouse(self, mouse_id):
+        '''
+            Queries the user to start a new mouse
+        '''
+        reply = QMessageBox.question(self, 
+            'Box {}, Load mouse'.format(self.box_letter),
+            'No data for mouse <span style="color:purple;font-weight:bold">{}</span>, start new mouse?'.format(mouse_id), 
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        if reply == QMessageBox.No:
+            logging.info('User declines to start new mouse: {}'.format(mouse_id))
             return
-        fname, _ = QFileDialog.getOpenFileName(self, 'Open file', self.default_saveFolder+'\\'+self.current_box, "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
+
+        # Set ID, clear weight information
+        logging.info('User starting a new mouse: {}'.format(mouse_id))
+        self.ID.setText(mouse_id)   
+        self.BaseWeight.setText('')
+        self.WeightAfter.setText('')
+        self.TargetRatio.setText('0.85')
+        self.keyPressEvent(allow_reset=True) 
+        return 
+    
+    def _Open_getListOfMice(self):
+        '''
+            Returns a list of mice with data saved on this computer
+        '''
+        filepath = os.path.join(self.default_saveFolder,self.current_box)
+        mouse_dirs = os.listdir(filepath)      
+        mice = []
+        for m in mouse_dirs:
+            session_dir = os.path.join(self.default_saveFolder, self.current_box, str(m))
+            sessions = os.listdir(session_dir)
+            if len(sessions) == 0 :
+                continue
+            for s in sessions:
+                json_file = os.path.join(self.default_saveFolder, 
+                    self.current_box, str(m), s,'TrainingFolder',s+'.json')
+                if os.path.isfile(json_file):
+                    mice.append(m)
+                    break
+        return mice  
+
+    def _Open(self,open_last = False):
+
+        # stop current session first
+        self._StopCurrentSession() 
+
+        # Start new session
+        new_session = self._NewSession()
+        if not new_session:
+            return
+
+        if open_last:
+            mice = self._Open_getListOfMice()
+            W = MouseSelectorDialog(self, mice)
+
+            ok, mouse_id = (
+                W.exec_() == QtWidgets.QDialog.Accepted, 
+                W.combo.currentText(),
+            )        
+
+            # Version 1, keeping it for the moment 
+            ### Prompt user to enter mouse ID, with auto-completion
+            ##dialog = QtWidgets.QInputDialog(self)
+            ##dialog.setWindowTitle('Box {}, Load mouse'.format(self.box_letter))
+            ##dialog.setLabelText('Enter the mouse ID')
+            ##dialog.setTextValue('')
+            ##lineEdit = dialog.findChild(QtWidgets.QLineEdit)
+        
+            ### Set auto complete
+            ##mice = self._Open_getListOfMice()
+            ##completer = QtWidgets.QCompleter(mice, lineEdit)
+            ##lineEdit.setCompleter(completer)
+            ##
+            ### Only accept integers
+            ##onlyInt = QtGui.QIntValidator()
+            ##onlyInt.setRange(0, 100000000)
+            ##lineEdit.setValidator(onlyInt)
+        
+            ### Get response
+            ##ok, mouse_id = (
+            ##    dialog.exec_() == QtWidgets.QDialog.Accepted, 
+            ##    dialog.textValue(),
+            ##)
+            if not ok: 
+                logging.info('Quick load failed, user hit cancel or X')
+                return                                
+            
+            # Mouse ID not in list of mice:
+            if mouse_id not in mice:
+                # figureout out new Mouse
+                logging.info('User entered the ID for a mouse with no data: {}'.format(mouse_id))
+                self._OpenNewMouse(mouse_id)
+                return
+ 
+            # attempt to load last session from mouse
+            good_load, fname = self._OpenLast_find_session(mouse_id)  
+            if not good_load:
+                logging.info('Quick load failed')
+                return        
+            logging.info('Quick load success: {}'.format(fname))
+        else:
+            # Open dialog box
+            fname, _ = QFileDialog.getOpenFileName(self, 'Open file', 
+                self.default_saveFolder+'\\'+self.current_box, 
+                "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
+            logging.info('User selected: {}'.format(fname))    
+
         self.fname=fname
         if fname:
             if fname.endswith('.mat'):
@@ -2010,15 +2156,23 @@ class Window(QMainWindow):
                 Obj = json.loads(f.read())
                 f.close()
             self.Obj = Obj
-            widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+            widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((
+                QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+                QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox))}
             widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
-            widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))})  # update optogenetics parameters from the loaded file
+            widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((
+                QtWidgets.QLineEdit, QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox))})  # update optogenetics parameters from the loaded file
             if hasattr(self, 'LaserCalibration_dialog'):
-                widget_dict.update({w.objectName(): w for w in self.LaserCalibration_dialog.findChildren((QtWidgets.QLineEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox))})  
+                widget_dict.update({w.objectName(): w for w in self.LaserCalibration_dialog.findChildren((
+                    QtWidgets.QLineEdit, QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox))})  
             if hasattr(self, 'Opto_dialog'):
-                widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))})
+                widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((
+                    QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+                    QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox))})
             if hasattr(self, 'Camera_dialog'):
-                widget_dict.update({w.objectName(): w for w in self.Camera_dialog.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))})
+                widget_dict.update({w.objectName(): w for w in self.Camera_dialog.findChildren((
+                    QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+                    QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox))})
             try:
                 for key in widget_dict.keys():
                     try:
@@ -2138,8 +2292,8 @@ class Window(QMainWindow):
                     self.Basic.setTitle(Obj['Other_BasicTitle'])
                 if 'Other_BasicText' in Obj:
                     self.ShowBasic.setText(Obj['Other_BasicText'])
-                
-            # Set newscale position to last position
+            
+            #Set newscale position to last position
             if 'B_NewscalePositions' in Obj:
                 try:
                     last_positions=Obj['B_NewscalePositions'][-1]
@@ -2157,6 +2311,7 @@ class Window(QMainWindow):
                     
         else:
             self.NewSession.setDisabled(False)
+        self.StartExcitation.setChecked(False)
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
@@ -2208,14 +2363,28 @@ class Window(QMainWindow):
         layout.addWidget(PlotM)
         PlotM._Update(GeneratedTrials=self.GeneratedTrials)
         self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
+
     def _Clear(self):
-        reply = QMessageBox.question(self, 'Box {}, Clear parameters:'.format(self.box_letter), 'Do you want to clear training parameters?',QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        # Stop current session first
+        self._StopCurrentSession()    
+    
+        # Verify user wants to clear parameters
+        if self.unsaved_data:
+            reply = QMessageBox.critical(self, 
+                'Box {}, Clear parameters:'.format(self.box_letter), 
+                'Unsaved data exists! Do you want to clear training parameters?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)        
+        else:
+            reply = QMessageBox.question(self, 
+                'Box {}, Clear parameters:'.format(self.box_letter), 
+                'Do you want to clear training parameters?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        
+        # If yes, clear parameters
         if reply == QMessageBox.Yes:
             for child in self.TrainingParameters.findChildren(QtWidgets.QLineEdit)+ self.centralwidget.findChildren(QtWidgets.QLineEdit):
                 if child.isEnabled():
                     child.clear()
-        else:
-            pass
 
     def _New(self):
         self._Clear()
@@ -2235,7 +2404,7 @@ class Window(QMainWindow):
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: start excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
-                reply = QMessageBox.question(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
+                reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
                 self.StartExcitation.setChecked(False)
                 self.StartExcitation.setStyleSheet("background-color : none")
             else:
@@ -2256,7 +2425,7 @@ class Window(QMainWindow):
                 logging.error(str(e))
                 self.TeensyWarning.setText('Error: stop excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
-                reply = QMessageBox.question(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when stopping excitation: {}'.format(e), QMessageBox.Ok)
+                reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when stopping excitation: {}'.format(e), QMessageBox.Ok)
             else:
                 self.TeensyWarning.setText('')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)               
@@ -2267,7 +2436,7 @@ class Window(QMainWindow):
             # Check if trials have stopped
             if self.ANewTrial==0:
                 # Alert User
-                reply = QMessageBox.question(self, 'Box {}, Start bleaching:'.format(self.box_letter), 
+                reply = QMessageBox.critical(self, 'Box {}, Start bleaching:'.format(self.box_letter), 
                     'Cannot start photobleaching, because trials are in progress', QMessageBox.Ok)
 
                 # reset GUI button
@@ -2297,7 +2466,7 @@ class Window(QMainWindow):
                 # Alert user
                 self.TeensyWarning.setText('Error: start bleaching!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
-                reply = QMessageBox.question(self, 'Box {}, Start bleaching:'.format(self.box_letter), 
+                reply = QMessageBox.critical(self, 'Box {}, Start bleaching:'.format(self.box_letter), 
                     'Cannot start photobleaching: {}'.format(str(e)), QMessageBox.Ok)
                 
                 # Reset GUI button
@@ -2372,44 +2541,51 @@ class Window(QMainWindow):
             self.NextBlock.setStyleSheet("background-color : green;")
         else:
             self.NextBlock.setStyleSheet("background-color : none")
+
     def _NewSession(self):
-        logging.info('starting new session')
-        if self.NewSession.isChecked():
-            if self.ToInitializeVisual==0: # Do not ask to save when no session starts running
-                reply = QMessageBox.question(self, 'Box {}, New Session:'.format(self.box_letter), 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
-            else:
-                reply=QMessageBox.No
-            if reply == QMessageBox.Yes:
-                self.NewSession.setStyleSheet("background-color : green;")
-                self.Start.setStyleSheet("background-color : none")
-                self._Save()
-                self.Start.setChecked(False)
-                self.StartANewSession=1
-                self.CreateNewFolder=1
-                self.PhotometryRun=0
-                try:
-                    self.Channel.StopLogging('s')
-                except Exception as e:
-                    logging.error(str(e))
-                logging.info('The current session was saved')
-            elif reply == QMessageBox.No:
-                self.NewSession.setStyleSheet("background-color : green;")
-                self.Start.setStyleSheet("background-color : none")
-                self.Start.setChecked(False)
-                self.StartANewSession=1
-                self.CreateNewFolder=1
-                self.PhotometryRun=0
-                try:
-                    self.Channel.StopLogging('s')
-                except Exception as e:
-                    logging.error(str(e))
-            else:
+        logging.info('New Session pressed')
+        self._StopCurrentSession() 
+
+        # If we have unsaved data, prompt to save
+        if (self.ToInitializeVisual==0) and (self.unsaved_data): 
+            reply = QMessageBox.critical(self, 
+                'Box {}, New Session:'.format(self.box_letter), 
+                'Start new session without saving?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if reply == QMessageBox.No:
+                self.NewSession.setStyleSheet("background-color : none")
                 self.NewSession.setChecked(False)
-                pass
-        else:
-            self.NewSession.setStyleSheet("background-color : none")
-            reply=QMessageBox.Cancel
-        return reply
+                logging.info('New Session declined')
+                return False
+        
+        # Reset logging
+        try:
+            self.Channel.StopLogging('s')
+        except Exception as e:
+            logging.error(str(e))
+
+        # Reset GUI visuals
+        self.Save.setStyleSheet("color:black;background-color:None;")
+        self.NewSession.setStyleSheet("background-color : green;")
+        self.NewSession.setChecked(False)
+        self.Start.setStyleSheet("background-color : none")
+        self.Start.setChecked(False)        
+        self.Start.setDisabled(False)
+        self.WarningLabel.setText('')
+        self.TotalWaterWarning.setText('')
+        self.WarningLabel_2.setText('')
+        self._set_metadata_enabled(True)
+
+        # Reset state variables
+        self.StartANewSession=1
+        self.CreateNewFolder=1
+        self.PhotometryRun=0
+        self.unsaved_data=False
+        self.ManualWaterVolume=[0,0]       
+
+        # Add note to log
+        logging.info('New Session complete')
+        return True
 
     def _AskSave(self):
         reply = QMessageBox.question(self, 'Box {}, New Session:'.format(self.box_letter), 'Do you want to save the current result?',QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
@@ -2445,7 +2621,7 @@ class Window(QMainWindow):
                 elif (time.time() - start_time) > stall_duration*stall_iteration:
                     elapsed_time = int(np.floor(stall_duration*stall_iteration/60))
                     message = '{} minutes have elapsed since trial stopped was initiated. Force stop?'.format(elapsed_time)
-                    reply = QMessageBox.question(self,'Box {}, StopCurrentSession'.format(self.box_letter),message,QMessageBox.Yes|QMessageBox.No)
+                    reply = QMessageBox.question(self,'Box {}, StopCurrentSession'.format(self.box_letter),message,QMessageBox.Yes|QMessageBox.No, QMessageBox.Yes)
                     if reply == QMessageBox.Yes:
                         logging.error('trial stalled {} minutes, user force stopped trials'.format(elapsed_time))
                         self.ANewTrial=1
@@ -2506,6 +2682,8 @@ class Window(QMainWindow):
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
             logging.info('Start button pressed, but bonsai not connected')
+            self.Start.setChecked(False)
+            self.Start.setStyleSheet('background-color:none;')
             return
  
         # Clear warnings
@@ -2518,6 +2696,17 @@ class Window(QMainWindow):
         if self.Start.isChecked():
             logging.info('Start button pressed: starting trial loop')
             self.keyPressEvent()
+
+            if self.StartANewSession == 0 :
+                reply = QMessageBox.question(self, 
+                    'Box {}, Start'.format(self.box_letter), 
+                    'Continue current session?',
+                    QMessageBox.Yes | QMessageBox.No)
+                if reply == QMessageBox.No:
+                    self.Start.setChecked(False)
+                    logging.info('User declines continuation of session')
+                    return
+
             # change button color and mark the state change
             self.Start.setStyleSheet("background-color : green;")
             self.NewSession.setStyleSheet("background-color : none")
@@ -2529,8 +2718,7 @@ class Window(QMainWindow):
         else:
             logging.info('Start button pressed: ending trial loop')
             self.Start.setStyleSheet("background-color : none")
-            # enable metadata fields
-            self._set_metadata_enabled(True)
+ 
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
@@ -2553,7 +2741,7 @@ class Window(QMainWindow):
                     self.Start.setChecked(False)
                     self.Start.setStyleSheet("background-color : none")
                     self.InitializeBonsaiSuccessfully=0
-                    reply = QMessageBox.question(self, 'Box {}, Start'.format(self.box_letter), 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No)
+                    reply = QMessageBox.question(self, 'Box {}, Start'.format(self.box_letter), 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
                     if reply == QMessageBox.Yes:
                         self._ReconnectBonsai()
                         logging.info('User selected reconnect bonsai')
@@ -2585,6 +2773,7 @@ class Window(QMainWindow):
             GeneratedTrials._DeletePreviousLicks(self.Channel2)
         else:
             GeneratedTrials=self.GeneratedTrials
+
 
         if self.ToInitializeVisual==1: # only run once
             self.PlotM=PlotM
@@ -2630,7 +2819,10 @@ class Window(QMainWindow):
         # Check if photometry excitation is running or not
         if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and (not self.StartExcitation.isChecked()):
             logging.warning('photometry is set to "on", but excitation is not running')
-            reply = QMessageBox.question(self, 'Box {}, Start'.format(self.box_letter), 'Photometry is set to "on", but excitation is not running. Start excitation now?',QMessageBox.Yes | QMessageBox.No)
+            reply = QMessageBox.question(self, 
+                'Box {}, Start'.format(self.box_letter), 
+                'Photometry is set to "on", but excitation is not running. Start excitation now?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
             if reply == QMessageBox.Yes:
                 self.StartExcitation.setChecked(True)
                 logging.info('User selected to start excitation')
@@ -2690,12 +2882,15 @@ class Window(QMainWindow):
                 GeneratedTrials.B_CurrentTrialN+=1
                 print('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
                 logging.info('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
-                if not (self.GeneratedTrials.TP_AutoReward  or int(self.GeneratedTrials.TP_BlockMinReward)>0):
-                    # generate a new trial and get reward
-                    self.NewTrialRewardOrder=1
+                if (self.GeneratedTrials.TP_AutoReward  or int(self.GeneratedTrials.TP_BlockMinReward)>0
+                    or self.GeneratedTrials.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']):
+                    # The next trial parameters must be dependent on the current trial's choice
+                    # get animal response and then generate a new trial
+                    self.NewTrialRewardOrder=0
                 else:
-                    # get reward and generate a new trial
-                    self.NewTrialRewardOrder=0    
+                    # By default, to save time, generate a new trial as early as possible
+                    # generate a new trial and then get animal response
+                    self.NewTrialRewardOrder=1   
  
                 #initiate the generated trial
                 try:
@@ -2708,7 +2903,10 @@ class Window(QMainWindow):
                         self.Start.setChecked(False)
                         self.Start.setStyleSheet("background-color : none")
                         self.InitializeBonsaiSuccessfully=0
-                        reply = QMessageBox.question(self, 'Box {}, Start'.format(self.box_letter), 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No)
+                        reply = QMessageBox.question(self, 
+                            'Box {}, Start'.format(self.box_letter), 
+                            'Cannot connect to Bonsai. Attempt reconnection?',
+                            QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
                         if reply == QMessageBox.Yes:
                             self._ReconnectBonsai()
                             logging.info('User selected reconnect bonsai')
@@ -2718,7 +2916,7 @@ class Window(QMainWindow):
 
                         break
                     else:
-                        reply = QMessageBox.question(self, 'Box {}, Error'.format(self.box_letter), 'Encountered the following error: {}'.format(e),QMessageBox.Ok )
+                        reply = QMessageBox.critical(self, 'Box {}, Error'.format(self.box_letter), 'Encountered the following error: {}'.format(e),QMessageBox.Ok )
                         logging.error('Caught this error: {}'.format(e))
                         self.ANewTrial=1
                         self.Start.setChecked(False)
@@ -2754,7 +2952,9 @@ class Window(QMainWindow):
                 # Prompt user to stop trials
                 elapsed_time = int(np.floor(stall_duration*stall_iteration/60))
                 message = '{} minutes have elapsed since the last trial started. Bonsai may have stopped. Stop trials?'.format(elapsed_time)
-                reply = QMessageBox.question(self, 'Box {}, Trial Generator'.format(self.box_letter), message,QMessageBox.Yes| QMessageBox.No )
+                reply = QMessageBox.question(self, 
+                    'Box {}, Trial Generator'.format(self.box_letter), 
+                    message,QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
                 if reply == QMessageBox.Yes:
                     # User stops trials
                     err_msg = 'trial stalled {} minutes, user stopped trials. ANewTrial:{},Start:{},finish_Timer:{}'

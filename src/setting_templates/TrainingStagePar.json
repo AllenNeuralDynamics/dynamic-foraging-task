@@ -471,8 +471,8 @@
             "InitiallyInactiveN": "2",
             "GiveWaterL_volume": "3.00",
             "GiveWaterR_volume": "3.00",
-            "RightValue_volume": "5.00",
-            "LeftValue_volume": "5.00"
+            "RightValue_volume": "3.00",
+            "LeftValue_volume": "3.00"
         },
         "Stage2": {
             "TrainingStage": "Stage2",
@@ -567,8 +567,8 @@
             "InitiallyInactiveN": "2",
             "GiveWaterL_volume": "3.00",
             "GiveWaterR_volume": "3.00",
-            "RightValue_volume": "5.00",
-            "LeftValue_volume": "5.00"
+            "RightValue_volume": "3.00",
+            "LeftValue_volume": "3.00"
         },
         "Stage3": {
             "TrainingStage": "Stage3",
@@ -614,8 +614,8 @@
             "InitiallyInactiveN": "2",
             "GiveWaterL_volume": "3.00",
             "GiveWaterR_volume": "3.00",
-            "RightValue_volume": "5.00",
-            "LeftValue_volume": "5.00"
+            "RightValue_volume": "3.00",
+            "LeftValue_volume": "3.00"
         }
     },
     "Uncoupled Baiting": {

@@ -11,9 +11,10 @@ import webbrowser
 import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox
-from PyQt5 import QtWidgets, uic
-from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject
+from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox 
+from PyQt5.QtWidgets import QLabel, QDialogButtonBox
+from PyQt5 import QtWidgets, uic, QtGui
+from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject, QEvent
 from PyQt5.QtSvg import QSvgWidget
 
 from foraging_gui.MyFunctions import Worker
@@ -22,7 +23,45 @@ from aind_auto_train.curriculum_manager import CurriculumManager
 from aind_auto_train.auto_train_manager import DynamicForagingAutoTrainManager
 from aind_auto_train.schema.task import TrainingStage
 
+from aind_auto_train.schema.curriculum import DynamicForagingCurriculum
+codebase_curriculum_schema_version = DynamicForagingCurriculum.model_fields['curriculum_schema_version'].default
+
 logger = logging.getLogger(__name__)
+
+class MouseSelectorDialog(QDialog):
+    
+    def __init__(self, MainWindow, mice, parent=None):
+        super().__init__(parent)
+        self.mice = ['']+mice
+        self.MainWindow = MainWindow
+        self.setWindowTitle('Box {}, Load Mouse'.format(self.MainWindow.box_letter))
+        self.setFixedSize(250,125)
+        
+        QBtns = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtns)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        combo = QtWidgets.QComboBox()
+        combo.addItems(self.mice)
+        combo.setEditable(True)
+        combo.setInsertPolicy(QtWidgets.QComboBox.NoInsert)
+        combo.completer().setCompletionMode(QtWidgets.QCompleter.PopupCompletion)
+        font = combo.font()
+        font.setPointSize(15)
+        combo.setFont(font)
+        self.combo = combo
+        
+        msg = QLabel('Enter the Mouse ID: ')
+        font = msg.font()
+        font.setPointSize(12)
+        msg.setFont(font)
+
+        self.layout = QVBoxLayout(self)
+        self.layout.addWidget(msg)
+        self.layout.addWidget(self.combo)
+        self.layout.addWidget(self.buttonBox)
+        self.setLayout(self.layout)
 
 class LickStaDialog(QDialog):
     '''Lick statistics dialog'''
@@ -1817,7 +1856,10 @@ class AutoTrainDialog(QDialog):
         self.pushButton_show_auto_training_history_in_streamlit.clicked.connect(
             self._show_auto_training_history_in_streamlit
         )
-    
+        self.pushButton_preview_auto_train_paras.clicked.connect(
+            self._preview_auto_train_paras
+        )
+        
     def update_auto_train_fields(self, subject_id: str, curriculum_just_overridden: bool = False):
         self.selected_subject_id = subject_id
         self.label_subject_id.setText(self.selected_subject_id)
@@ -1841,6 +1883,7 @@ class AutoTrainDialog(QDialog):
             self.checkBox_override_stage.setChecked(False)
             self.checkBox_override_stage.setEnabled(False)
             self.pushButton_apply_auto_train_paras.setEnabled(False)
+            self.pushButton_preview_auto_train_paras.setEnabled(False)
             
             # override curriculum is checked by default and disabled
             self.checkBox_override_curriculum.setChecked(True)
@@ -1865,11 +1908,50 @@ class AutoTrainDialog(QDialog):
             if not curriculum_just_overridden:
                 # fetch last session
                 self.last_session = self.df_this_mouse.iloc[0]  # The first row is the latest session
-                self.curriculum_in_use = self.curriculum_manager.get_curriculum(
-                    curriculum_name=self.last_session['curriculum_name'],
-                    curriculum_schema_version=self.last_session['curriculum_schema_version'],
-                    curriculum_version=self.last_session['curriculum_version'],
-                )['curriculum']
+                
+                last_curriculum_schema_version = self.last_session['curriculum_schema_version']
+                if codebase_curriculum_schema_version != last_curriculum_schema_version:
+                    # schema version don't match. prompt user to choose another curriculum
+                    if self.isVisible():
+                        QMessageBox.information(
+                            self,
+                            "Info",
+                            f"The curriculum_schema_version of the last session ({last_curriculum_schema_version}) does not match "
+                            f"that of the current code base ({codebase_curriculum_schema_version})!\n"
+                            f"This is likely because the AutoTrain system has been updated since the last session.\n\n"
+                            f"Please choose another valid curriculum and a training stage for this mouse."
+                        )
+                    
+                    # Clear curriculum in use
+                    self.curriculum_in_use = None
+                    self.pushButton_preview_auto_train_paras.setEnabled(False)
+
+                    # Turn on override curriculum
+                    self.checkBox_override_curriculum.setChecked(True)
+                    self.checkBox_override_curriculum.setEnabled(False)
+                    self.tableView_df_curriculum.clearSelection() # Unselect any curriculum
+                    self.selected_curriculum = None
+                    self.pushButton_apply_curriculum.setEnabled(True)
+                    self._add_border_curriculum_selection()
+                    
+                    # Update UI
+                    self._update_available_training_stages()
+                    self._update_stage_to_apply()
+                    
+                    # Update df_auto_train_manager and df_curriculum_manager
+                    self._show_auto_training_manager()
+                    self._show_available_curriculums()      
+                    
+                    # Eearly return
+                    return
+                else:
+                    self.curriculum_in_use = self.curriculum_manager.get_curriculum(
+                        curriculum_name=self.last_session['curriculum_name'],
+                        curriculum_schema_version=last_curriculum_schema_version,
+                        curriculum_version=self.last_session['curriculum_version'],
+                    )['curriculum']
+
+                    self.pushButton_preview_auto_train_paras.setEnabled(True)
             
                 # update stage info
                 self.label_last_actual_stage.setText(str(self.last_session['current_stage_actual']))
@@ -1893,6 +1975,7 @@ class AutoTrainDialog(QDialog):
             
             # enable apply training stage
             self.pushButton_apply_auto_train_paras.setEnabled(True)
+            self.pushButton_preview_auto_train_paras.setEnabled(True)
             
             # disable apply curriculum                        
             self.pushButton_apply_curriculum.setEnabled(False)
@@ -1900,14 +1983,12 @@ class AutoTrainDialog(QDialog):
             
             # Reset override curriculum
             self.checkBox_override_curriculum.setChecked(False)
-            self.checkBox_override_curriculum.setEnabled(True)
-
-
+            if not self.auto_train_engaged:
+                self.checkBox_override_curriculum.setEnabled(True)
                     
         # Update UI
         self._update_available_training_stages()
         self._update_stage_to_apply()
-        
         
         # Update df_auto_train_manager and df_curriculum_manager
         self._show_auto_training_manager()
@@ -1984,6 +2065,7 @@ class AutoTrainDialog(QDialog):
                  'session_date',
                  'curriculum_name', 
                  'curriculum_version',
+                 'curriculum_schema_version',
                  'task',
                  'current_stage_suggested',
                  'current_stage_actual',
@@ -2099,15 +2181,22 @@ class AutoTrainDialog(QDialog):
         )
 
         
-    def _update_available_training_stages(self):
-        if self.curriculum_in_use is not None:
-            available_training_stages = [v.name for v in 
-                                        self.curriculum_in_use.parameters.keys()]
+    def _update_available_training_stages(self):            
+        # If AutoTrain is engaged, and override stage is checked
+        if self.auto_train_engaged and self.checkBox_override_stage.isChecked():
+            # Restore stage_in_use. No need to reload available stages
+            self.comboBox_override_stage.setCurrentText(self.stage_in_use)
         else:
-            available_training_stages = []
-            
-        self.comboBox_override_stage.clear()
-        self.comboBox_override_stage.addItems(available_training_stages)
+            # Reload available stages
+            if self.curriculum_in_use is not None:
+                available_training_stages = [v.name for v in 
+                                            self.curriculum_in_use.parameters.keys()]
+            else:
+                available_training_stages = []
+                
+            self.comboBox_override_stage.clear()
+            self.comboBox_override_stage.addItems(available_training_stages)
+
                 
     def _override_stage_clicked(self, state):
         if state:
@@ -2169,7 +2258,9 @@ class AutoTrainDialog(QDialog):
                         current_stage_suggested=None,
                         current_stage_actual=None,
                         decision=None,
-                        next_stage_suggested='STAGE_1',
+                        next_stage_suggested='STAGE_1_WARMUP' 
+                            if 'STAGE_1_WARMUP' in [k.name for k in self.curriculum_in_use.parameters.keys()]
+                            else 'STAGE_1',
                         if_closed_loop=None,
                         if_overriden_by_trainer=None,
                         finished_trials=None,
@@ -2213,7 +2304,54 @@ class AutoTrainDialog(QDialog):
             # Refresh the GUI
             self.update_auto_train_fields(subject_id=self.selected_subject_id,
                                           curriculum_just_overridden=reply == QMessageBox.Yes)
+        
+    def _preview_auto_train_paras(self, preview_checked):
+        """Apply parameters to the GUI without applying and locking the widgets.
+        """
+        
+        if preview_checked:
+            if self.curriculum_in_use is None:
+                return
             
+            # Get parameter settings
+            paras = self.curriculum_in_use.parameters[
+                TrainingStage[self.stage_in_use]
+            ]
+            
+            # Convert to GUI format and set the parameters
+            paras_dict = paras.to_GUI_format()
+            widgets_set, self.widgets_changed = self._set_training_parameters(
+                paras_dict=paras_dict,
+                if_apply_and_lock=False
+            )
+            
+            # Clear the style of all widgets
+            for widget in widgets_set:
+                widget.setStyleSheet("font-weight: normal")
+            
+            # Highlight the changed widgets
+            for widget in self.widgets_changed.keys():
+                widget.setStyleSheet(
+                    '''
+                        background-color: rgb(225, 225, 0);
+                        font-weight: bold
+                    '''
+                )
+        elif hasattr(self, 'widgets_changed'):  # Revert to previous values
+            paras_to_revert = {widget.objectName():value 
+                               for widget, value in self.widgets_changed.items()}
+            
+            _, widgets_changed = self._set_training_parameters(
+                paras_dict=paras_to_revert,
+                if_apply_and_lock=False
+            )            
+            
+            # Clear the style of all widgets
+            for widget in widgets_changed:
+                widget.setStyleSheet("font-weight: normal")
+            
+            self.widgets_changed = {}
+                    
     def update_auto_train_lock(self, engaged):
         if engaged:
             # Update the flag
@@ -2226,9 +2364,9 @@ class AutoTrainDialog(QDialog):
             
             # Convert to GUI format and set the parameters
             paras_dict = paras.to_GUI_format()
-            self.widgets_locked_by_auto_train = self._set_training_parameters(
+            self.widgets_locked_by_auto_train, _ = self._set_training_parameters(
                 paras_dict=paras_dict,
-                if_press_enter=True
+                if_apply_and_lock=True
             )
             
             if self.widgets_locked_by_auto_train == []:  # Error in setting parameters
@@ -2260,6 +2398,9 @@ class AutoTrainDialog(QDialog):
             # disable override
             self.checkBox_override_stage.setEnabled(False)
             self.comboBox_override_stage.setEnabled(False)
+            
+            # disable preview
+            self.pushButton_preview_auto_train_paras.setEnabled(False)
                                     
         else:
             # Update the flag
@@ -2267,6 +2408,7 @@ class AutoTrainDialog(QDialog):
             
             # Uncheck the button (when this is called from the MainWindow, not from actual button click)
             self.pushButton_apply_auto_train_paras.setChecked(False)
+            self.pushButton_preview_auto_train_paras.setEnabled(True)
 
             # Unlock the previously engaged widgets
             for widget in self.widgets_locked_by_auto_train:
@@ -2283,18 +2425,40 @@ class AutoTrainDialog(QDialog):
             self.comboBox_override_stage.setEnabled(self.checkBox_override_stage.isChecked())
 
 
-    def _set_training_parameters(self, paras_dict, if_press_enter=False):
+    def _set_training_parameters(self, paras_dict, if_apply_and_lock=False):
         """Accepts a dictionary of parameters and set the GUI accordingly
         Trying to refactor Foraging.py's _TrainingStage() here.
         
         paras_dict: a dictionary of parameters following Xinxin's convention
-        if_press_enter: if True, press enter after setting the parameters
+        if_apply_and_lock: if True, press enter after setting the parameters
         """
         # Track widgets that have been set by auto training
         widgets_set = []
+        widgets_changed = {}  # Dict of {changed_key: previous_value}
         
+        # If warmup exists, always turn it off first, set other parameters, 
+        # and then turn it to the desired state
+        keys = list(paras_dict.keys())
+        if 'warmup' in keys:
+            keys.remove('warmup') 
+            keys += ['warmup']
+            
+            # Set warmup to off first so that all AutoTrain parameters
+            # can be correctly registered in WarmupBackup if warmup is turned on later
+            if paras_dict and paras_dict['warmup'] != self.MainWindow.warmup.currentText():
+                widgets_changed.update(
+                    {self.MainWindow.warmup: 
+                     self.MainWindow.warmup.currentText()
+                     }
+                ) # Track the changes
+            
+            index=self.MainWindow.warmup.findText('off')
+            self.MainWindow.warmup.setCurrentIndex(index)
+                                       
         # Loop over para_dict and try to set the values
-        for key, value in paras_dict.items():
+        for key in keys:
+            value = paras_dict[key]
+            
             if key == 'task':
                 widget_task = self.MainWindow.Task
                 task_ind = widget_task.findText(paras_dict['task'])
@@ -2304,9 +2468,14 @@ class AutoTrainDialog(QDialog):
                         f'''Task "{paras_dict['task']}" not found. Check the curriculum!''')
                     return [] # Return an empty list without setting anything
                 else:
+                    if task_ind != widget_task.currentIndex():
+                        widgets_changed.update(
+                            {widget_task: widget_task.currentIndex()}
+                        ) # Track the changes
                     widget_task.setCurrentIndex(task_ind)
                     logger.info(f"Task is set to {paras_dict['task']}")
                     widgets_set.append(widget_task)
+                    
                     continue  # Continue to the next parameter
             
             # For other parameters, try to find the widget and set the value               
@@ -2314,6 +2483,12 @@ class AutoTrainDialog(QDialog):
             if widget is None:
                 logger.info(f''' Widget "{key}" not found. skipped...''')
                 continue
+            
+            # Enable warmup-related widgets if warmup will be turned on later.
+            # Otherwise, they are now disabled (see 30 lines above) 
+            # and thus cannot be set by AutoTrain (see above line)
+            if 'warm' in key and paras_dict['warmup'] == 'on':
+                widget.setEnabled(True)
             
             # If the parameter is disabled by the GUI in the first place, skip it
             # For example, the field "uncoupled reward" in a coupled task.
@@ -2324,34 +2499,57 @@ class AutoTrainDialog(QDialog):
             # Set the value according to the widget type
             if isinstance(widget, (QtWidgets.QLineEdit, 
                                    QtWidgets.QTextEdit)):
-                widget.setText(value)
+                if value != widget.text():
+                    widgets_changed.update({widget: widget.text()}) # Track the changes
+                    widget.setText(value)
             elif isinstance(widget, QtWidgets.QComboBox):
                 ind = widget.findText(value)
                 if ind < 0:
                     logger.error(f"Parameter choice {key}={value} not found!")
                     continue  # Still allow other parameters to be set
                 else:
-                    widget.setCurrentIndex(ind)
+                    if ind != widget.currentIndex():
+                        widgets_changed.update({widget: widget.currentText()}) # Track the changes
+                        widget.setCurrentIndex(ind)
             elif isinstance(widget, (QtWidgets.QDoubleSpinBox)):
-                widget.setValue(float(value))
+                if float(value) != widget.value():
+                    widgets_changed.update({widget: widget.value()}) # Track the changes
+                    widget.setValue(float(value))
             elif isinstance(widget, QtWidgets.QSpinBox):
-                widget.setValue(int(value))    
+                if float(value) != widget.value():
+                    widgets_changed.update({widget: widget.value()}) # Track the changes
+                    widget.setValue(int(value))    
             elif isinstance(widget, QtWidgets.QPushButton):
                 if key=='AutoReward':
-                    widget.setChecked(bool(value))
-                    self.MainWindow._AutoReward()            
+                    if bool(value) != widget.isChecked():
+                        widgets_changed.update({widget: widget.isChecked()})  # Track the changes
+                        widget.setChecked(bool(value))
+                        self.MainWindow._AutoReward()            
             
             # Append the widgets that have been set
             widgets_set.append(widget)
             logger.info(f"{key} is set to {value}")
+            
+            # Lock all water reward-related widgets if one exists
+            if 'LeftValue' in key:
+                widgets_set.extend(
+                    [self.MainWindow.findChild(QObject, 'LeftValue'),
+                     self.MainWindow.findChild(QObject, 'LeftValue_volume')
+                    ]
+                )
+            if 'RightValue' in key:
+                widgets_set.extend(
+                    [self.MainWindow.findChild(QObject, 'RightValue'),
+                     self.MainWindow.findChild(QObject, 'RightValue_volume')
+                    ]
+                )
         
         # Mimic an "ENTER" press event to update the parameters
-        if if_press_enter:
+        if if_apply_and_lock:
             self.MainWindow._keyPressEvent()
-    
-        return widgets_set
         
-    
+        return widgets_set, widgets_changed
+            
     def _clear_layout(self, layout):
         # Remove all existing widgets from the layout
         for i in reversed(range(layout.count())): 
