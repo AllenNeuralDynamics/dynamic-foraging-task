@@ -19,7 +19,7 @@ save_folder=R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\nwb'
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
 
-def _get_field(obj, field_list, default=np.nan):
+def _get_field(obj, field_list, index=None, default=np.nan):
     """get field from obj, if not found, return default
 
     Parameters
@@ -27,6 +27,9 @@ def _get_field(obj, field_list, default=np.nan):
     obj : the object to get the field from
     field : str or list
             if is a list, try one by one until one is found in the obj (for back-compatibility)
+    index: int, optional
+            if index is not None and the field is a list, return the index-th element of the field
+            otherwise, return default
     default : _type_, optional
         _description_, by default np.nan
     """
@@ -35,7 +38,15 @@ def _get_field(obj, field_list, default=np.nan):
         
     for f in field_list:
         if hasattr(obj, f):
-            return getattr(obj, f)  # return the first found field
+            value = getattr(obj, f)
+            if index is None:
+                return value
+            # If index is int, try to get the index-th element of the field
+            try:
+                return value[index]
+            except:
+                logger.warning(f"Field {field_list} is iterable or index {index} is out of range")
+                return default
     else:
         logger.warning(f"Field {field_list} not found in the object")
         return default
@@ -230,6 +241,10 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_trial_column(name='lickspout_position_y', description=f'y position (um) of the lickspout position (forward-backward)')
     nwbfile.add_trial_column(name='lickspout_position_z', description=f'z position (um) of the lickspout position (up-down)')
 
+    # add reward size
+    nwbfile.add_trial_column(name='reward_size_left', description=f'Left reward size (uL)')
+    nwbfile.add_trial_column(name='reward_size_right', description=f'Right reward size (uL)')
+
     ## start adding trials ##
     # to see if we have harp timestamps
     if not hasattr(obj, 'B_TrialEndTimeHarp'):
@@ -345,6 +360,10 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                           lickspout_position_x=obj.B_NewscalePositions[i][0] if hasattr(obj, 'B_NewscalePositions') else np.nan,
                           lickspout_position_y=obj.B_NewscalePositions[i][1] if hasattr(obj, 'B_NewscalePositions') else np.nan,
                           lickspout_position_z=obj.B_NewscalePositions[i][2] if hasattr(obj, 'B_NewscalePositions') else np.nan,
+                          
+                          # reward size
+                          reward_size_left=float(_get_field(obj, 'TP_LeftValue_volume', index=i)),
+                          reward_size_right=float(_get_field(obj, 'TP_RightValue_volume', index=i)),
                         )
 
 
