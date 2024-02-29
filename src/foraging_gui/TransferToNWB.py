@@ -346,6 +346,20 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         description='The time of photometry rising edge (from Harp)'
     )
     nwbfile.add_acquisition(PhotometryRisingTimeHarp)
+    
+    # Add optogenetics time stamps
+    if not hasattr(obj, 'B_OptogeneticsTimeHarp') or obj.B_OptogeneticsTimeHarp == []:
+        B_OptogeneticsTimeHarp = [np.nan]
+    else:
+        B_OptogeneticsTimeHarp = obj.B_OptogeneticsTimeHarp
+    OptogeneticsTimeHarp = TimeSeries(
+        name="optogenetics_time",
+        unit="second",
+        timestamps=B_OptogeneticsTimeHarp,
+        data=np.ones(len(B_OptogeneticsTimeHarp)).tolist(),
+        description='Optogenetics time (from Harp)'
+    )
+    nwbfile.add_acquisition(OptogeneticsTimeHarp)
 
 
     # save NWB file
