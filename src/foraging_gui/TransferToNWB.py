@@ -38,17 +38,17 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     for attr_name in Obj.keys():
         setattr(obj, attr_name, Obj[attr_name])
     # Some fields are not provided in some cases
-    if  not hasattr(obj, 'Experimenter'):
+    if not hasattr(obj, 'Experimenter'):
         setattr(obj, 'Experimenter', '')
-    if  not hasattr(obj, 'ExtraWater'):
+    if not hasattr(obj, 'ExtraWater'):
         setattr(obj, 'ExtraWater', '')
-    if  not hasattr(obj, 'Other_CurrentTime'):
+    if not hasattr(obj, 'Other_CurrentTime'):
         setattr(obj, 'Other_CurrentTime', '')
-    if  not hasattr(obj, 'WeightAfter'):
+    if not hasattr(obj, 'WeightAfter'):
         setattr(obj, 'WeightAfter', '')
-    if  not hasattr(obj, 'WeightBefore'):
+    if not hasattr(obj, 'WeightBefore'):
         setattr(obj, 'WeightBefore', '')
-    if  not hasattr(obj, 'Other_SessionStartTime'):
+    if not hasattr(obj, 'Other_SessionStartTime'):
         session_start_timeC=datetime.datetime.strptime('2023-04-26', "%Y-%m-%d") # specific for LA30_2023-04-27.json
     else:
         session_start_timeC=datetime.datetime.strptime(obj.Other_SessionStartTime, '%Y-%m-%d %H:%M:%S.%f')
