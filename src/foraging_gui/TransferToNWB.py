@@ -145,6 +145,11 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_trial_column(name='auto_train_stage', description=f'The current stage of auto training')
     nwbfile.add_trial_column(name='auto_train_stage_overridden', description=f'Whether the auto training stage is overridden')
     
+    # add lickspout position
+    nwbfile.add_trial_column(name='lickspout_position_x', description=f'x position (um) of the lickspout position (left-right)')
+    nwbfile.add_trial_column(name='lickspout_position_y', description=f'y position (um) of the lickspout position (forward-backward)')
+    nwbfile.add_trial_column(name='lickspout_position_z', description=f'z position (um) of the lickspout position (up-down)')
+
     ## start adding trials ##
     # to see if we have harp timestamps
     if not hasattr(obj, 'B_TrialEndTimeHarp'):
@@ -255,6 +260,11 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                           auto_train_curriculum_schema_version=obj.TP_auto_train_curriculum_schema_version[i] or 'none',
                           auto_train_stage=obj.TP_auto_train_stage[i] or 'none',
                           auto_train_stage_overridden=obj.TP_auto_train_stage_overridden[i] or np.nan,
+                          
+                          # lickspout position
+                          lickspout_position_x=obj.B_NewscalePositions[i][0] if hasattr(obj, 'B_NewscalePositions') else np.nan,
+                          lickspout_position_y=obj.B_NewscalePositions[i][1] if hasattr(obj, 'B_NewscalePositions') else np.nan,
+                          lickspout_position_z=obj.B_NewscalePositions[i][2] if hasattr(obj, 'B_NewscalePositions') else np.nan,
                         )
 
 
