@@ -144,7 +144,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_trial_column(name='auto_train_curriculum_schema_version', description=f'The schema version of the auto training curriculum')
     nwbfile.add_trial_column(name='auto_train_stage', description=f'The current stage of auto training')
     nwbfile.add_trial_column(name='auto_train_stage_overridden', description=f'Whether the auto training stage is overridden')
-
+    
     ## start adding trials ##
     # to see if we have harp timestamps
     if not hasattr(obj, 'B_TrialEndTimeHarp'):
@@ -192,11 +192,15 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                 LaserFrequencyC = getattr(obj, f'TP_Frequency_{Sc}')[i]
                 LaserRampingDownC = getattr(obj, f'TP_RD_{Sc}')[i]
                 LaserPulseDurC = getattr(obj, f'TP_PulseDur_{Sc}')[i]
-
+         
         if Harp == '':
-            goCue_start_time_t = getattr(obj, f'B_GoCueTime')[i]
+            goCue_start_time_t = getattr(obj, f'B_GoCueTime')[i]  # Use CPU time
         else:
-            goCue_start_time_t = getattr(obj, f'B_GoCueTimeSoundCard')[i]
+            if hasattr(obj, f'B_GoCueTimeHarp'):
+                goCue_start_time_t = getattr(obj, f'B_GoCueTimeHarp')[i]  # Use Harp time, old format
+            else:
+                goCue_start_time_t = getattr(obj, f'B_GoCueTimeSoundCard')[i]  # Use Harp time, new format
+            
         nwbfile.add_trial(start_time=getattr(obj, f'B_TrialStartTime{Harp}')[i], 
                           stop_time=getattr(obj, f'B_TrialEndTime{Harp}')[i],
                           animal_response=obj.B_AnimalResponseHistory[i],
@@ -305,6 +309,34 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         description='The time of left licks'
     )
     nwbfile.add_acquisition(RightLickTime)
+
+    # Add photometry time stamps
+    if not hasattr(obj, 'B_PhotometryFallingTimeHarp') or obj.B_PhotometryFallingTimeHarp == []:
+        B_PhotometryFallingTimeHarp = [np.nan]
+    else:
+        B_PhotometryFallingTimeHarp = obj.B_PhotometryFallingTimeHarp
+    PhotometryFallingTimeHarp = TimeSeries(
+        name="FIP_falling_time",
+        unit="second",
+        timestamps=B_PhotometryFallingTimeHarp,
+        data=np.ones(len(B_PhotometryFallingTimeHarp)).tolist(),
+        description='The time of photometry falling edge (from Harp)'
+    )
+    nwbfile.add_acquisition(PhotometryFallingTimeHarp)
+
+    if not hasattr(obj, 'B_PhotometryRisingTimeHarp') or obj.B_PhotometryRisingTimeHarp == []:
+        B_PhotometryRisingTimeHarp = [np.nan]
+    else:
+        B_PhotometryRisingTimeHarp = obj.B_PhotometryRisingTimeHarp
+    PhotometryRisingTimeHarp = TimeSeries(
+        name="FIP_rising_time",
+        unit="second",
+        timestamps=B_PhotometryRisingTimeHarp,
+        data=np.ones(len(B_PhotometryRisingTimeHarp)).tolist(),
+        description='The time of photometry rising edge (from Harp)'
+    )
+    nwbfile.add_acquisition(PhotometryRisingTimeHarp)
+
 
     # save NWB file
     base_filename = os.path.splitext(os.path.basename(fname))[0] + '.nwb'
