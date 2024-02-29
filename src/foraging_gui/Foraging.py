@@ -28,7 +28,6 @@ from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY
 from foraging_gui.stage import Stage
-from foraging_gui.TransferToNWB import bonsai_to_nwb
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -1863,16 +1862,7 @@ class Window(QMainWindow):
         elif self.SaveFile.endswith('.json'):
             with open(self.SaveFile, "w") as outfile:
                 json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
-                
-        # Also export to nwb automatically here
-        try:
-            nwb_name = self.SaveFile.replace('.json','.nwb')
-            bonsai_to_nwb(self.SaveFile, os.path.dirname(self.SaveFileJson))
-        except Exception as e:
-            logging.warning(f'Failed to export to nwb...\n{e}')
-        else:
-            logging.info(f'Exported to nwb {nwb_name} successfully!')
-        
+                        
         # close the camera
         if self.Camera_dialog.AutoControl.currentText()=='Yes':
             self.Camera_dialog.StartCamera.setChecked(False)
