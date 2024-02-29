@@ -143,6 +143,10 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         'target_weight': _get_field(obj, 'TargetWeight'),
         'target_weight_ratio': _get_field(obj, 'TargetRatio'),
         'weight_after': _get_field(obj, 'WeightAfter'),
+        
+        # Performance
+        'foraging_efficiency': _get_field(obj, 'B_for_eff_optimal'),
+        'foraging_efficiency_with_actual_random_seed': _get_field(obj, 'B_for_eff_optimal_random_seed'),
     }
 
     # Turn the metadata into a DataFrame in order to add it to the scratch
