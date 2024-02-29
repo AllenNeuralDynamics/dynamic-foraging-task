@@ -2,7 +2,12 @@
 Transfer current Json/mat format from Bonsai behavior control to NWB format
 """
 from uuid import uuid4
-import numpy as np, json,os,datetime
+import numpy as np
+import json
+import os
+import datetime
+from dateutil.tz import tzlocal
+
 from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 from pynwb.file import Subject
 from scipy.io import loadmat
@@ -48,10 +53,14 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         setattr(obj, 'WeightAfter', '')
     if not hasattr(obj, 'WeightBefore'):
         setattr(obj, 'WeightBefore', '')
+        
     if not hasattr(obj, 'Other_SessionStartTime'):
         session_start_timeC=datetime.datetime.strptime('2023-04-26', "%Y-%m-%d") # specific for LA30_2023-04-27.json
     else:
         session_start_timeC=datetime.datetime.strptime(obj.Other_SessionStartTime, '%Y-%m-%d %H:%M:%S.%f')
+    
+    # add local time zone explicitly
+    session_start_timeC = session_start_timeC.replace(tzinfo=tzlocal())
 
     ### session related information ###
     nwbfile = NWBFile(
