@@ -6,6 +6,8 @@ import numpy as np
 import json
 import os
 import datetime
+import logging
+import pandas as pd
 from dateutil.tz import tzlocal
 
 from pynwb import NWBHDF5IO, NWBFile, TimeSeries
@@ -13,6 +15,31 @@ from pynwb.file import Subject
 from scipy.io import loadmat
 
 save_folder=R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\nwb'
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
+
+def _get_field(obj, field_list, default=np.nan):
+    """get field from obj, if not found, return default
+
+    Parameters
+    ----------
+    obj : the object to get the field from
+    field : str or list
+            if is a list, try one by one until one is found in the obj (for back-compatibility)
+    default : _type_, optional
+        _description_, by default np.nan
+    """
+    if type(field_list) is not list:
+        field_list = [field_list]
+        
+    for f in field_list:
+        if hasattr(obj, f):
+            return getattr(obj, f)  # return the first found field
+    else:
+        logger.warning(f"Field {field_list} not found in the object")
+        return default
+    
 
 ######## load the Json/Mat file #######
 def bonsai_to_nwb(fname, save_folder=save_folder):
@@ -89,6 +116,46 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         weight=obj.WeightBefore,
     )
     # print(nwbfile)
+    
+    ### Add some meta data to the scratch (rather than the session description) ###
+    # Handle water info (with better names)
+    water_in_session_foraging = _get_field(obj, 'BS_TotalReward') / 1000  # Turn uL to mL
+    water_after_session = float(_get_field(obj, ['SuggestedWater', 'ExtraWater']))  # Old name: "ExtraWater"
+    water_day_total = float(_get_field(obj, 'TotalWater'))
+    water_in_session_total = water_day_total - water_after_session
+    water_in_session_manual = water_in_session_total - water_in_session_foraging
+    
+    metadata = {
+        # Meta
+        'box': _get_field(obj, 'box'),
+        'session_end_time': _get_field(obj, 'Other_CurrentTime'),
+        'session_run_time_in_min': _get_field(obj, 'Other_RunningTime'),
+        
+        # Water (all in mL)
+        'water_in_session_foraging': water_in_session_foraging, 
+        'water_in_session_manual': water_in_session_manual,
+        'water_in_session_total':  water_in_session_total,
+        'water_after_session': water_after_session,
+        'water_day_total': water_day_total,
+
+        # Weight
+        'base_weight': _get_field(obj, 'BaseWeight'),
+        'target_weight': _get_field(obj, 'TargetWeight'),
+        'target_weight_ratio': _get_field(obj, 'TargetRatio'),
+        'weight_after': _get_field(obj, 'WeightAfter'),
+    }
+
+    # Turn the metadata into a DataFrame in order to add it to the scratch
+    df_metadata = pd.DataFrame(metadata, index=[0])
+
+    # Are there any better places to add arbitrary meta data in nwb?
+    # I don't bother creating an nwb "extension"...
+    # To retrieve the metadata, use:
+    # nwbfile.scratch['metadata'].to_dataframe()
+    nwbfile.add_scratch(df_metadata, 
+                        name="metadata",
+                        description="Some important session-wise meta data")
+
 
     #######       Add trial     #######
     ## behavior events (including trial start/end time; left/right lick time; give left/right reward time) ##
@@ -369,7 +436,6 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         description='Optogenetics time (from Harp)'
     )
     nwbfile.add_acquisition(OptogeneticsTimeHarp)
-
 
     # save NWB file
     base_filename = os.path.splitext(os.path.basename(fname))[0] + '.nwb'
