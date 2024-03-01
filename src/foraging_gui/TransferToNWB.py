@@ -2,12 +2,55 @@
 Transfer current Json/mat format from Bonsai behavior control to NWB format
 """
 from uuid import uuid4
-import numpy as np, json,os,datetime
+import numpy as np
+import json
+import os
+import datetime
+import logging
+import pandas as pd
+from dateutil.tz import tzlocal
+
 from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 from pynwb.file import Subject
 from scipy.io import loadmat
 
 save_folder=R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\nwb'
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
+
+def _get_field(obj, field_list, index=None, default=np.nan):
+    """get field from obj, if not found, return default
+
+    Parameters
+    ----------
+    obj : the object to get the field from
+    field : str or list
+            if is a list, try one by one until one is found in the obj (for back-compatibility)
+    index: int, optional
+            if index is not None and the field is a list, return the index-th element of the field
+            otherwise, return default
+    default : _type_, optional
+        _description_, by default np.nan
+    """
+    if type(field_list) is not list:
+        field_list = [field_list]
+        
+    for f in field_list:
+        if hasattr(obj, f):
+            value = getattr(obj, f)
+            if index is None:
+                return value
+            # If index is int, try to get the index-th element of the field
+            try:
+                return value[index]
+            except:
+                logger.warning(f"Field {field_list} is iterable or index {index} is out of range")
+                return default
+    else:
+        logger.warning(f"Field {field_list} not found in the object")
+        return default
+    
 
 ######## load the Json/Mat file #######
 def bonsai_to_nwb(fname, save_folder=save_folder):
@@ -38,20 +81,24 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     for attr_name in Obj.keys():
         setattr(obj, attr_name, Obj[attr_name])
     # Some fields are not provided in some cases
-    if  not hasattr(obj, 'Experimenter'):
+    if not hasattr(obj, 'Experimenter'):
         setattr(obj, 'Experimenter', '')
-    if  not hasattr(obj, 'ExtraWater'):
+    if not hasattr(obj, 'ExtraWater'):
         setattr(obj, 'ExtraWater', '')
-    if  not hasattr(obj, 'Other_CurrentTime'):
+    if not hasattr(obj, 'Other_CurrentTime'):
         setattr(obj, 'Other_CurrentTime', '')
-    if  not hasattr(obj, 'WeightAfter'):
+    if not hasattr(obj, 'WeightAfter'):
         setattr(obj, 'WeightAfter', '')
-    if  not hasattr(obj, 'WeightBefore'):
+    if not hasattr(obj, 'WeightBefore'):
         setattr(obj, 'WeightBefore', '')
-    if  not hasattr(obj, 'Other_SessionStartTime'):
+        
+    if not hasattr(obj, 'Other_SessionStartTime'):
         session_start_timeC=datetime.datetime.strptime('2023-04-26', "%Y-%m-%d") # specific for LA30_2023-04-27.json
     else:
         session_start_timeC=datetime.datetime.strptime(obj.Other_SessionStartTime, '%Y-%m-%d %H:%M:%S.%f')
+    
+    # add local time zone explicitly
+    session_start_timeC = session_start_timeC.replace(tzinfo=tzlocal())
 
     ### session related information ###
     nwbfile = NWBFile(
@@ -80,6 +127,50 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         weight=obj.WeightBefore,
     )
     # print(nwbfile)
+    
+    ### Add some meta data to the scratch (rather than the session description) ###
+    # Handle water info (with better names)
+    water_in_session_foraging = _get_field(obj, 'BS_TotalReward') / 1000  # Turn uL to mL
+    water_after_session = float(_get_field(obj, ['SuggestedWater', 'ExtraWater']))  # Old name: "ExtraWater"
+    water_day_total = float(_get_field(obj, 'TotalWater'))
+    water_in_session_total = water_day_total - water_after_session
+    water_in_session_manual = water_in_session_total - water_in_session_foraging
+    
+    metadata = {
+        # Meta
+        'box': _get_field(obj, 'box'),
+        'session_end_time': _get_field(obj, 'Other_CurrentTime'),
+        'session_run_time_in_min': _get_field(obj, 'Other_RunningTime'),
+        
+        # Water (all in mL)
+        'water_in_session_foraging': water_in_session_foraging, 
+        'water_in_session_manual': water_in_session_manual,
+        'water_in_session_total':  water_in_session_total,
+        'water_after_session': water_after_session,
+        'water_day_total': water_day_total,
+
+        # Weight
+        'base_weight': _get_field(obj, 'BaseWeight'),
+        'target_weight': _get_field(obj, 'TargetWeight'),
+        'target_weight_ratio': _get_field(obj, 'TargetRatio'),
+        'weight_after': _get_field(obj, 'WeightAfter'),
+        
+        # Performance
+        'foraging_efficiency': _get_field(obj, 'B_for_eff_optimal'),
+        'foraging_efficiency_with_actual_random_seed': _get_field(obj, 'B_for_eff_optimal_random_seed'),
+    }
+
+    # Turn the metadata into a DataFrame in order to add it to the scratch
+    df_metadata = pd.DataFrame(metadata, index=[0])
+
+    # Are there any better places to add arbitrary meta data in nwb?
+    # I don't bother creating an nwb "extension"...
+    # To retrieve the metadata, use:
+    # nwbfile.scratch['metadata'].to_dataframe()
+    nwbfile.add_scratch(df_metadata, 
+                        name="metadata",
+                        description="Some important session-wise meta data")
+
 
     #######       Add trial     #######
     ## behavior events (including trial start/end time; left/right lick time; give left/right reward time) ##
@@ -145,133 +236,155 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_trial_column(name='auto_train_stage', description=f'The current stage of auto training')
     nwbfile.add_trial_column(name='auto_train_stage_overridden', description=f'Whether the auto training stage is overridden')
     
+    # add lickspout position
+    nwbfile.add_trial_column(name='lickspout_position_x', description=f'x position (um) of the lickspout position (left-right)')
+    nwbfile.add_trial_column(name='lickspout_position_y', description=f'y position (um) of the lickspout position (forward-backward)')
+    nwbfile.add_trial_column(name='lickspout_position_z', description=f'z position (um) of the lickspout position (up-down)')
+
+    # add reward size
+    nwbfile.add_trial_column(name='reward_size_left', description=f'Left reward size (uL)')
+    nwbfile.add_trial_column(name='reward_size_right', description=f'Right reward size (uL)')
+
     ## start adding trials ##
     # to see if we have harp timestamps
-    if  not hasattr(obj, 'B_TrialEndTimeHarp'):
-        Harp=''
-    elif obj.B_TrialEndTimeHarp==[]: # for json file transferred from mat data
-        Harp=''
+    if not hasattr(obj, 'B_TrialEndTimeHarp'):
+        Harp = ''
+    elif obj.B_TrialEndTimeHarp == []: # for json file transferred from mat data
+        Harp = ''
     else:
-        Harp='Harp'
+        Harp = 'Harp'
     for i in range(len(obj.B_TrialEndTime)):
-        Sc=obj.B_SelectedCondition[i] # the optogenetics conditions
-        if Sc==0:
-            LaserWavelengthC=0
-            LaserLocationC=0
-            LaserPowerC=0
-            LaserDurationC=0
-            LaserConditionC=0
-            LaserConditionProC=0
-            LaserStartC=0
-            LaserStartOffsetC=0
-            LaserEndC=0
-            LaserEndOffsetC=0
-            LaserProtocolC=0
-            LaserFrequencyC=0
-            LaserRampingDownC=0
-            LaserPulseDurC=0
+        Sc = obj.B_SelectedCondition[i] # the optogenetics conditions
+        if Sc == 0:
+            LaserWavelengthC = 0
+            LaserLocationC = 0
+            LaserPowerC = 0
+            LaserDurationC = 0
+            LaserConditionC = 0
+            LaserConditionProC = 0
+            LaserStartC = 0
+            LaserStartOffsetC = 0
+            LaserEndC = 0
+            LaserEndOffsetC = 0
+            LaserProtocolC = 0
+            LaserFrequencyC = 0
+            LaserRampingDownC = 0
+            LaserPulseDurC = 0
         else:
             # if there is no training paramters history stored (for old Bonsai behavior control)
-            if  not hasattr(obj, 'TP_Laser_1'):    
-                if eval('obj.TP_Laser_'+str(Sc)+'[i]')=='Blue':
-                    LaserWavelengthC=473
-                elif eval('obj.TP_Laser_'+str(Sc)+'[i]')=='Red':
-                    LaserWavelengthC=647
-                elif eval('obj.TP_Laser_'+str(Sc)+'[i]')=='Green':
-                    LaserWavelengthC=547
-                LaserLocationC=eval('obj.TP_Location_'+str(Sc)+'[i]')
-                LaserPowerC=eval('obj.TP_LaserPower_'+str(Sc)+'[i]')
-                LaserDurationC=eval('obj.TP_Duration_'+str(Sc)+'[i]')
-                LaserConditionC=eval('obj.TP_Condition_'+str(Sc)+'[i]')
-                LaserConditionProC=eval('obj.TP_ConditionP_'+str(Sc)+'[i]')
-                LaserStartC=eval('obj.TP_LaserStart_'+str(Sc)+'[i]')
-                LaserStartOffsetC=eval('obj.TP_OffsetStart_'+str(Sc)+'[i]')
-                LaserEndC=eval('obj.TP_LaserEnd_'+str(Sc)+'[i]')
-                LaserEndOffsetC=eval('obj.TP_OffsetEnd_'+str(Sc)+'[i]')
-                LaserProtocolC=eval('obj.TP_Protocol_'+str(Sc)+'[i]')
-                LaserFrequencyC=eval('obj.TP_Frequency_'+str(Sc)+'[i]')
-                LaserRampingDownC=eval('obj.TP_RD_'+str(Sc)+'[i]')
-                LaserPulseDurC=eval('obj.TP_PulseDur_'+str(Sc)+'[i]')
-                
-        if Harp=='':
-            goCue_start_time_t=eval('obj.B_GoCueTime'+'[i]')
+            if not hasattr(obj, 'TP_Laser_1'):
+                if getattr(obj, f'TP_Laser_{Sc}')[i] == 'Blue':
+                    LaserWavelengthC = 473
+                elif getattr(obj, f'TP_Laser_{Sc}')[i] == 'Red':
+                    LaserWavelengthC = 647
+                elif getattr(obj, f'TP_Laser_{Sc}')[i] == 'Green':
+                    LaserWavelengthC = 547
+                LaserLocationC = getattr(obj, f'TP_Location_{Sc}')[i]
+                LaserPowerC = getattr(obj, f'TP_LaserPower_{Sc}')[i]
+                LaserDurationC = getattr(obj, f'TP_Duration_{Sc}')[i]
+                LaserConditionC = getattr(obj, f'TP_Condition_{Sc}')[i]
+                LaserConditionProC = getattr(obj, f'TP_ConditionP_{Sc}')[i]
+                LaserStartC = getattr(obj, f'TP_LaserStart_{Sc}')[i]
+                LaserStartOffsetC = getattr(obj, f'TP_OffsetStart_{Sc}')[i]
+                LaserEndC = getattr(obj, f'TP_LaserEnd_{Sc}')[i]
+                LaserEndOffsetC = getattr(obj, f'TP_OffsetEnd_{Sc}')[i]
+                LaserProtocolC = getattr(obj, f'TP_Protocol_{Sc}')[i]
+                LaserFrequencyC = getattr(obj, f'TP_Frequency_{Sc}')[i]
+                LaserRampingDownC = getattr(obj, f'TP_RD_{Sc}')[i]
+                LaserPulseDurC = getattr(obj, f'TP_PulseDur_{Sc}')[i]
+         
+        if Harp == '':
+            goCue_start_time_t = getattr(obj, f'B_GoCueTime')[i]  # Use CPU time
         else:
-            goCue_start_time_t=eval('obj.B_GoCueTimeSoundCard'+'[i]')
-        nwbfile.add_trial(start_time=eval('obj.B_TrialStartTime'+Harp+'[i]'), 
-                            stop_time=eval('obj.B_TrialEndTime'+Harp+'[i]'),
-                            animal_response=obj.B_AnimalResponseHistory[i],
-                            rewarded_historyL=obj.B_RewardedHistory[0][i],
-                            rewarded_historyR=obj.B_RewardedHistory[1][i],
-                            reward_outcome_time=obj.B_RewardOutcomeTime[i],
-                            delay_start_time=eval('obj.B_DelayStartTime'+Harp+'[i]'),
-                            goCue_start_time=goCue_start_time_t,
-                            bait_left=obj.B_BaitHistory[0][i],
-                            bait_right=obj.B_BaitHistory[1][i],
-                            base_reward_probability_sum=float(obj.TP_BaseRewardSum[i]),
-                            reward_probabilityL=float(obj.B_RewardProHistory[0][i]),
-                            reward_probabilityR=float(obj.B_RewardProHistory[1][i]),
-                            left_valve_open_time=float(obj.TP_LeftValue[i]),
-                            right_valve_open_time=float(obj.TP_RightValue[i]),
-                            block_beta=float(obj.TP_BlockBeta[i]),
-                            block_min=float(obj.TP_BlockMin[i]),
-                            block_max=float(obj.TP_BlockMax[i]),
-                            min_reward_each_block=float(obj.TP_BlockMinReward[i]),
-                            delay_beta=float(obj.TP_DelayBeta[i]),
-                            delay_min=float(obj.TP_DelayMin[i]),
-                            delay_max=float(obj.TP_DelayMax[i]),
-                            delay_duration=obj.B_DelayHistory[i],
-                            ITI_beta=float(obj.TP_ITIBeta[i]),
-                            ITI_min=float(obj.TP_ITIMin[i]),
-                            ITI_max=float(obj.TP_ITIMax[i]),
-                            ITI_duration=obj.B_ITIHistory[i],
-                            response_duration=float(obj.TP_ResponseTime[i]),
-                            reward_consumption_duration=float(obj.TP_RewardConsumeTime[i]),
-                            auto_waterL=obj.B_AutoWaterTrial[0][i] if type(obj.B_AutoWaterTrial[0]) is list else obj.B_AutoWaterTrial[i],   # Back-compatible with old autowater format
-                            auto_waterR=obj.B_AutoWaterTrial[1][i] if type(obj.B_AutoWaterTrial[0]) is list else obj.B_AutoWaterTrial[i],
-                            laser_on_trial=obj.B_LaserOnTrial[i],
-                            laser_wavelength=LaserWavelengthC,
-                            laser_location=LaserLocationC,
-                            laser_power=LaserPowerC,
-                            laser_duration=LaserDurationC,
-                            laser_condition=LaserConditionC,
-                            laser_condition_probability=LaserConditionProC,
-                            laser_start=LaserStartC,
-                            laser_start_offset=LaserStartOffsetC,
-                            laser_end=LaserEndC,
-                            laser_end_offset=LaserEndOffsetC,
-                            laser_protocol=LaserProtocolC,
-                            laser_frequency=LaserFrequencyC,
-                            laser_rampingdown=LaserRampingDownC,
-                            laser_pulse_duration=LaserPulseDurC,
-                            
-                            # add all auto training parameters (eventually should be in session.json)
-                            auto_train_engaged=obj.TP_auto_train_engaged[i],
-                            auto_train_curriculum_name=obj.TP_auto_train_curriculum_name[i] or 'none',
-                            auto_train_curriculum_version=obj.TP_auto_train_curriculum_version[i] or 'none',
-                            auto_train_curriculum_schema_version=obj.TP_auto_train_curriculum_schema_version[i] or 'none',
-                            auto_train_stage=obj.TP_auto_train_stage[i] or 'none',
-                            auto_train_stage_overridden=obj.TP_auto_train_stage_overridden[i] or np.nan,
+            if hasattr(obj, f'B_GoCueTimeHarp'):
+                goCue_start_time_t = getattr(obj, f'B_GoCueTimeHarp')[i]  # Use Harp time, old format
+            else:
+                goCue_start_time_t = getattr(obj, f'B_GoCueTimeSoundCard')[i]  # Use Harp time, new format
+            
+        nwbfile.add_trial(start_time=getattr(obj, f'B_TrialStartTime{Harp}')[i], 
+                          stop_time=getattr(obj, f'B_TrialEndTime{Harp}')[i],
+                          animal_response=obj.B_AnimalResponseHistory[i],
+                          rewarded_historyL=obj.B_RewardedHistory[0][i],
+                          rewarded_historyR=obj.B_RewardedHistory[1][i],
+                          reward_outcome_time=obj.B_RewardOutcomeTime[i],
+                          delay_start_time=getattr(obj, f'B_DelayStartTime{Harp}')[i],
+                          goCue_start_time=goCue_start_time_t,
+                          bait_left=obj.B_BaitHistory[0][i],
+                          bait_right=obj.B_BaitHistory[1][i],
+                          base_reward_probability_sum=float(obj.TP_BaseRewardSum[i]),
+                          reward_probabilityL=float(obj.B_RewardProHistory[0][i]),
+                          reward_probabilityR=float(obj.B_RewardProHistory[1][i]),
+                          left_valve_open_time=float(obj.TP_LeftValue[i]),
+                          right_valve_open_time=float(obj.TP_RightValue[i]),
+                          block_beta=float(obj.TP_BlockBeta[i]),
+                          block_min=float(obj.TP_BlockMin[i]),
+                          block_max=float(obj.TP_BlockMax[i]),
+                          min_reward_each_block=float(obj.TP_BlockMinReward[i]),
+                          delay_beta=float(obj.TP_DelayBeta[i]),
+                          delay_min=float(obj.TP_DelayMin[i]),
+                          delay_max=float(obj.TP_DelayMax[i]),
+                          delay_duration=obj.B_DelayHistory[i],
+                          ITI_beta=float(obj.TP_ITIBeta[i]),
+                          ITI_min=float(obj.TP_ITIMin[i]),
+                          ITI_max=float(obj.TP_ITIMax[i]),
+                          ITI_duration=obj.B_ITIHistory[i],
+                          response_duration=float(obj.TP_ResponseTime[i]),
+                          reward_consumption_duration=float(obj.TP_RewardConsumeTime[i]),
+                          auto_waterL=obj.B_AutoWaterTrial[0][i] if type(obj.B_AutoWaterTrial[0]) is list else obj.B_AutoWaterTrial[i],   # Back-compatible with old autowater format
+                          auto_waterR=obj.B_AutoWaterTrial[1][i] if type(obj.B_AutoWaterTrial[0]) is list else obj.B_AutoWaterTrial[i],
+                          laser_on_trial=obj.B_LaserOnTrial[i],
+                          laser_wavelength=LaserWavelengthC,
+                          laser_location=LaserLocationC,
+                          laser_power=LaserPowerC,
+                          laser_duration=LaserDurationC,
+                          laser_condition=LaserConditionC,
+                          laser_condition_probability=LaserConditionProC,
+                          laser_start=LaserStartC,
+                          laser_start_offset=LaserStartOffsetC,
+                          laser_end=LaserEndC,
+                          laser_end_offset=LaserEndOffsetC,
+                          laser_protocol=LaserProtocolC,
+                          laser_frequency=LaserFrequencyC,
+                          laser_rampingdown=LaserRampingDownC,
+                          laser_pulse_duration=LaserPulseDurC,
+
+                          # add all auto training parameters (eventually should be in session.json)
+                          auto_train_engaged=obj.TP_auto_train_engaged[i],
+                          auto_train_curriculum_name=obj.TP_auto_train_curriculum_name[i] or 'none',
+                          auto_train_curriculum_version=obj.TP_auto_train_curriculum_version[i] or 'none',
+                          auto_train_curriculum_schema_version=obj.TP_auto_train_curriculum_schema_version[i] or 'none',
+                          auto_train_stage=obj.TP_auto_train_stage[i] or 'none',
+                          auto_train_stage_overridden=obj.TP_auto_train_stage_overridden[i] or np.nan,
+                          
+                          # lickspout position
+                          lickspout_position_x=obj.B_NewscalePositions[i][0] if hasattr(obj, 'B_NewscalePositions') else np.nan,
+                          lickspout_position_y=obj.B_NewscalePositions[i][1] if hasattr(obj, 'B_NewscalePositions') else np.nan,
+                          lickspout_position_z=obj.B_NewscalePositions[i][2] if hasattr(obj, 'B_NewscalePositions') else np.nan,
+                          
+                          # reward size
+                          reward_size_left=float(_get_field(obj, 'TP_LeftValue_volume', index=i)),
+                          reward_size_right=float(_get_field(obj, 'TP_RightValue_volume', index=i)),
                         )
 
 
     #######  Other time series  #######
     #left/right lick time; give left/right reward time
-    if eval('obj.B_LeftRewardDeliveryTime'+Harp)==[]:
-        B_LeftRewardDeliveryTime=[np.nan]
+    if getattr(obj, f'B_LeftRewardDeliveryTime{Harp}') == []:
+        B_LeftRewardDeliveryTime = [np.nan]
     else:
-        B_LeftRewardDeliveryTime=eval('obj.B_LeftRewardDeliveryTime'+Harp)
-    if eval('obj.B_RightRewardDeliveryTime'+Harp)==[]:
-        B_RightRewardDeliveryTime=[np.nan]
+        B_LeftRewardDeliveryTime = getattr(obj, f'B_LeftRewardDeliveryTime{Harp}')
+    if getattr(obj, f'B_RightRewardDeliveryTime{Harp}') == []:
+        B_RightRewardDeliveryTime = [np.nan]
     else:
-        B_RightRewardDeliveryTime=eval('obj.B_RightRewardDeliveryTime'+Harp)
-    if obj.B_LeftLickTime==[]:
-        B_LeftLickTime=[np.nan]
+        B_RightRewardDeliveryTime = getattr(obj, f'B_RightRewardDeliveryTime{Harp}')
+    if obj.B_LeftLickTime == []:
+        B_LeftLickTime = [np.nan]
     else:
-        B_LeftLickTime=obj.B_LeftLickTime
-    if obj.B_RightLickTime==[]:
-        B_RightLickTime=[np.nan]
+        B_LeftLickTime = obj.B_LeftLickTime
+    if obj.B_RightLickTime == []:
+        B_RightLickTime = [np.nan]
     else:
-        B_RightLickTime=obj.B_RightLickTime
+        B_RightLickTime = obj.B_RightLickTime
 
     LeftRewardDeliveryTime = TimeSeries(
         name="left_reward_delivery_time",
@@ -306,13 +419,54 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     )
     nwbfile.add_acquisition(RightLickTime)
 
+    # Add photometry time stamps
+    if not hasattr(obj, 'B_PhotometryFallingTimeHarp') or obj.B_PhotometryFallingTimeHarp == []:
+        B_PhotometryFallingTimeHarp = [np.nan]
+    else:
+        B_PhotometryFallingTimeHarp = obj.B_PhotometryFallingTimeHarp
+    PhotometryFallingTimeHarp = TimeSeries(
+        name="FIP_falling_time",
+        unit="second",
+        timestamps=B_PhotometryFallingTimeHarp,
+        data=np.ones(len(B_PhotometryFallingTimeHarp)).tolist(),
+        description='The time of photometry falling edge (from Harp)'
+    )
+    nwbfile.add_acquisition(PhotometryFallingTimeHarp)
+
+    if not hasattr(obj, 'B_PhotometryRisingTimeHarp') or obj.B_PhotometryRisingTimeHarp == []:
+        B_PhotometryRisingTimeHarp = [np.nan]
+    else:
+        B_PhotometryRisingTimeHarp = obj.B_PhotometryRisingTimeHarp
+    PhotometryRisingTimeHarp = TimeSeries(
+        name="FIP_rising_time",
+        unit="second",
+        timestamps=B_PhotometryRisingTimeHarp,
+        data=np.ones(len(B_PhotometryRisingTimeHarp)).tolist(),
+        description='The time of photometry rising edge (from Harp)'
+    )
+    nwbfile.add_acquisition(PhotometryRisingTimeHarp)
+    
+    # Add optogenetics time stamps
+    if not hasattr(obj, 'B_OptogeneticsTimeHarp') or obj.B_OptogeneticsTimeHarp == []:
+        B_OptogeneticsTimeHarp = [np.nan]
+    else:
+        B_OptogeneticsTimeHarp = obj.B_OptogeneticsTimeHarp
+    OptogeneticsTimeHarp = TimeSeries(
+        name="optogenetics_time",
+        unit="second",
+        timestamps=B_OptogeneticsTimeHarp,
+        data=np.ones(len(B_OptogeneticsTimeHarp)).tolist(),
+        description='Optogenetics time (from Harp)'
+    )
+    nwbfile.add_acquisition(OptogeneticsTimeHarp)
+
     # save NWB file
-    base_filename = os.path.splitext(os.path.basename(fname))[0]+'.nwb'
-    NWBName=os.path.join(save_folder,base_filename)
+    base_filename = os.path.splitext(os.path.basename(fname))[0] + '.nwb'
+    NWBName = os.path.join(save_folder, base_filename)
     io = NWBHDF5IO(NWBName, mode="w")
     io.write(nwbfile)
     io.close()
-    
-    
+
+
 if __name__ == '__main__':
-    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\668463\668463_2023-07-07.json')
+    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
