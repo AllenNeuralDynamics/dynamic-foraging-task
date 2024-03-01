@@ -13,7 +13,7 @@
     <x>0</x>
     <y>0</y>
     <width>1875</width>
-    <height>1032</height>
+    <height>1015</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -4404,6 +4404,24 @@
      <string>Streamlit!</string>
     </property>
    </widget>
+   <widget class="QLabel" name="WarningLabel_uncoupled_task">
+    <property name="geometry">
+     <rect>
+      <x>1240</x>
+      <y>870</y>
+      <width>261</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>7</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
    <zorder>PhotometryB</zorder>
    <zorder>infor</zorder>
    <zorder>line</zorder>
@@ -4435,6 +4453,7 @@
    <zorder>AutoTrain</zorder>
    <zorder>label_auto_train_stage</zorder>
    <zorder>pushButton_streamlit</zorder>
+   <zorder>WarningLabel_uncoupled_task</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -4469,6 +4488,7 @@
     <addaction name="action_Clear"/>
     <addaction name="actionForce_save"/>
     <addaction name="SaveContinue"/>
+    <addaction name="SaveAs"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="sizePolicy">
@@ -4832,6 +4852,11 @@
   <action name="SaveContinue">
    <property name="text">
     <string>Save (without restarting a session)</string>
+   </property>
+  </action>
+  <action name="SaveAs">
+   <property name="text">
+    <string>Save As</string>
    </property>
   </action>
   <action name="actionWin_stay_lose_switch">
