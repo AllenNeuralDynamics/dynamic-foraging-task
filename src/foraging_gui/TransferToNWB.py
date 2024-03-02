@@ -83,8 +83,6 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     # Some fields are not provided in some cases
     if not hasattr(obj, 'Experimenter'):
         setattr(obj, 'Experimenter', '')
-    if not hasattr(obj, 'ExtraWater'):
-        setattr(obj, 'ExtraWater', '')
     if not hasattr(obj, 'Other_CurrentTime'):
         setattr(obj, 'Other_CurrentTime', '')
     if not hasattr(obj, 'WeightAfter'):
@@ -102,7 +100,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
 
     ### session related information ###
     nwbfile = NWBFile(
-        session_description='Session end time:'+obj.Other_CurrentTime+'  Give extra water(ml):'+obj.ExtraWater+'  box:'+ _get_field(obj, ['box', 'Tower']),  
+        session_description='Session end time:'+obj.Other_CurrentTime,  
         identifier=str(uuid4()),  # required
         session_start_time= session_start_timeC,  # required
         session_id=os.path.basename(fname),  # optional
@@ -130,8 +128,11 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     
     ### Add some meta data to the scratch (rather than the session description) ###
     # Handle water info (with better names)
-    water_in_session_foraging = _get_field(obj, 'BS_TotalReward') / 1000  # Turn uL to mL
-    water_after_session = float(_get_field(obj, ['SuggestedWater', 'ExtraWater']))  # Old name: "ExtraWater"
+    BS_TotalReward = _get_field(obj, 'BS_TotalReward')
+    # Turn uL to mL if the value is too large
+    water_in_session_foraging = BS_TotalReward / 1000 if BS_TotalReward > 5.0 else BS_TotalReward 
+    # Old name "ExtraWater" goes first because old json has a wrong Suggested Water
+    water_after_session = float(_get_field(obj, ['ExtraWater', 'SuggestedWater']))
     water_day_total = float(_get_field(obj, 'TotalWater'))
     water_in_session_total = water_day_total - water_after_session
     water_in_session_manual = water_in_session_total - water_in_session_foraging
@@ -349,12 +350,12 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                           laser_pulse_duration=LaserPulseDurC,
 
                           # add all auto training parameters (eventually should be in session.json)
-                          auto_train_engaged=obj.TP_auto_train_engaged[i],
-                          auto_train_curriculum_name=obj.TP_auto_train_curriculum_name[i] or 'none',
-                          auto_train_curriculum_version=obj.TP_auto_train_curriculum_version[i] or 'none',
-                          auto_train_curriculum_schema_version=obj.TP_auto_train_curriculum_schema_version[i] or 'none',
-                          auto_train_stage=obj.TP_auto_train_stage[i] or 'none',
-                          auto_train_stage_overridden=obj.TP_auto_train_stage_overridden[i] or np.nan,
+                          auto_train_engaged=_get_field(obj, 'TP_auto_train_engaged', index=i),
+                          auto_train_curriculum_name=_get_field(obj, 'TP_auto_train_curriculum_name', index=i, default=None) or 'none',
+                          auto_train_curriculum_version=_get_field(obj, 'TP_auto_train_curriculum_version', index=i, default=None) or 'none',
+                          auto_train_curriculum_schema_version=_get_field(obj, 'TP_auto_train_curriculum_schema_version', index=i, default=None) or 'none',
+                          auto_train_stage=_get_field(obj, 'TP_auto_train_stage', index=i, default=None) or 'none',
+                          auto_train_stage_overridden=_get_field(obj, 'TP_auto_train_stage_overridden', index=i, default=None) or np.nan,
                           
                           # lickspout position
                           lickspout_position_x=obj.B_NewscalePositions[i][0] if hasattr(obj, 'B_NewscalePositions') else np.nan,
