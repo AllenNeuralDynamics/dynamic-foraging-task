@@ -18,7 +18,7 @@ save_folder=R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\nwb'
 
 logger = logging.getLogger(__name__)
 
-def _get_field(obj, field_list, index=None, default=np.nan):
+def _get_field(obj, field_list, reject_list=[], index=None, default=np.nan):
     """get field from obj, if not found, return default
 
     Parameters
@@ -26,6 +26,8 @@ def _get_field(obj, field_list, index=None, default=np.nan):
     obj : the object to get the field from
     field : str or list
             if is a list, try one by one until one is found in the obj (for back-compatibility)
+    reject_list: list, optional
+            if the value is in the reject_list, reject this value and continue to search the next field name in the field_list
     index: int, optional
             if index is not None and the field is a list, return the index-th element of the field
             otherwise, return default
@@ -38,6 +40,8 @@ def _get_field(obj, field_list, index=None, default=np.nan):
     for f in field_list:
         if hasattr(obj, f):
             value = getattr(obj, f)
+            if value in reject_list:
+                continue
             if index is None:
                 return value
             # If index is int, try to get the index-th element of the field
@@ -131,8 +135,11 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     # Turn uL to mL if the value is too large
     water_in_session_foraging = BS_TotalReward / 1000 if BS_TotalReward > 5.0 else BS_TotalReward 
     # Old name "ExtraWater" goes first because old json has a wrong Suggested Water
-    water_after_session = float(_get_field(obj, ['ExtraWater', 'SuggestedWater']))
-    water_day_total = float(_get_field(obj, 'TotalWater'))
+    water_after_session = float(_get_field(obj, 
+                                           field_list=['ExtraWater', 'SuggestedWater'], 
+                                           reject_list=['']
+                                           ))
+    water_day_total = float(_get_field(obj, 'TotalWater', reject_list=['']))
     water_in_session_total = water_day_total - water_after_session
     water_in_session_manual = water_in_session_total - water_in_session_foraging
     
@@ -150,10 +157,10 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         'water_day_total': water_day_total,
 
         # Weight
-        'base_weight': float(_get_field(obj, 'BaseWeight') or np.nan),
-        'target_weight': float(_get_field(obj, 'TargetWeight') or np.nan),
-        'target_weight_ratio': float(_get_field(obj, 'TargetRatio') or np.nan),
-        'weight_after': float(_get_field(obj, 'WeightAfter') or np.nan),
+        'base_weight': float(_get_field(obj, 'BaseWeight', reject_list=[''])),
+        'target_weight': float(_get_field(obj, 'TargetWeight', reject_list=[''])),
+        'target_weight_ratio': float(_get_field(obj, 'TargetRatio', reject_list=[''])),
+        'weight_after': float(_get_field(obj, 'WeightAfter', reject_list=[''])),
         
         # Performance
         'foraging_efficiency': _get_field(obj, 'B_for_eff_optimal'),
@@ -474,6 +481,6 @@ if __name__ == '__main__':
     
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-G1\668546\668546_2023-09-19.json')
     
-    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-B1\676747\676747_2023-10-09.json')
+    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-B1\668546\668546_2023-10-03.json')
     
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
