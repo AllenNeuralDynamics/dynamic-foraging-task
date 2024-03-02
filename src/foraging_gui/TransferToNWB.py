@@ -95,7 +95,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         
     # Early return if missing some key fields
     if any([not hasattr(obj, field) for field in ['B_TrialEndTime', 'TP_BaseRewardSum']]):
-        logger.warning(f"Skipping {fname} due to missing key fields")
+        logger.warning(f"Missing key fields! Skipping {fname}")
         return
     
         
@@ -482,7 +482,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         io.close()
         logger.info(f'Successfully converted: {NWBName}')
     else:
-        logger.warning(f"No trials found in {base_filename}, skip saving NWB file")
+        logger.warning(f"No trials found! Skipping {fname}")
 
 
 if __name__ == '__main__':
