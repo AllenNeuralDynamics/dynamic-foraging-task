@@ -28,7 +28,6 @@ from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY
 from foraging_gui.stage import Stage
-from foraging_gui.TransferToNWB import bonsai_to_nwb
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -1816,7 +1815,12 @@ class Window(QMainWindow):
                             else:
                                 Obj[attr_name]=Value
                         except Exception as e:
-                            logging.error(str(e))
+                            # Lots of B_xxx data are not real scalars and thus math.isnan(Value) will fail
+                            # e.g. B_AnimalResponseHistory. We just save them as they are. 
+                            # This is expected and no need to log an error.
+                            # I don't know the necessity of turning nan values into 'nan', 
+                            # but for backward compatibility, I keep it above.
+                            logging.info(f'{attr_name} is not a real scalar, save it as it is.')
                             Obj[attr_name]=Value
         # save other events, e.g. session start time
         for attr_name in dir(self):
@@ -1858,16 +1862,7 @@ class Window(QMainWindow):
         elif self.SaveFile.endswith('.json'):
             with open(self.SaveFile, "w") as outfile:
                 json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
-                
-        # Also export to nwb automatically here
-        try:
-            nwb_name = self.SaveFile.replace('.json','.nwb')
-            bonsai_to_nwb(self.SaveFile, os.path.dirname(self.SaveFileJson))
-        except Exception as e:
-            logging.warning(f'Failed to export to nwb...\n{e}')
-        else:
-            logging.info(f'Exported to nwb {nwb_name} successfully!')
-        
+                        
         # close the camera
         if self.Camera_dialog.AutoControl.currentText()=='Yes':
             self.Camera_dialog.StartCamera.setChecked(False)
