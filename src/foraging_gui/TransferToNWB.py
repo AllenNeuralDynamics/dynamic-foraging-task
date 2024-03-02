@@ -200,6 +200,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_trial_column(name='base_reward_probability_sum', description=f'The summation of left and right reward probability')
     nwbfile.add_trial_column(name='reward_probabilityL', description=f'The reward probability of left lick port')
     nwbfile.add_trial_column(name='reward_probabilityR', description=f'The reward probability of right lick port')
+    nwbfile.add_trial_column(name='reward_random_number_left', description=f'The random number used to determine the reward of left lick port')
+    nwbfile.add_trial_column(name='reward_random_number_right', description=f'The random number used to determine the reward of right lick port')
     nwbfile.add_trial_column(name='left_valve_open_time', description=f'The left valve open time')
     nwbfile.add_trial_column(name='right_valve_open_time', description=f'The right valve open time')
     # block
@@ -327,6 +329,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                           base_reward_probability_sum=float(obj.TP_BaseRewardSum[i]),
                           reward_probabilityL=float(obj.B_RewardProHistory[0][i]),
                           reward_probabilityR=float(obj.B_RewardProHistory[1][i]),
+                          reward_random_number_left=_get_field(obj, 'B_CurrentRewardProbRandomNumber', index=i, default=[np.nan] * 2)[0],
+                          reward_random_number_right=_get_field(obj, 'B_CurrentRewardProbRandomNumber', index=i, default=[np.nan] * 2)[1],
                           left_valve_open_time=float(obj.TP_LeftValue[i]),
                           right_valve_open_time=float(obj.TP_RightValue[i]),
                           block_beta=float(obj.TP_BlockBeta[i]),
@@ -489,8 +493,6 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
     
-    # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-G1\668546\668546_2023-09-19.json')
-    
-    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-1-D\707254\707254_2024-02-16_13-18-41\TrainingFolder\707254_2024-02-16_13-18-41.json')
+    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-G1\668546\668546_2023-09-19.json')
     
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
