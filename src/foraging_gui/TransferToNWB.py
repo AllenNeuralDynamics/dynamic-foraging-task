@@ -17,7 +17,6 @@ from scipy.io import loadmat
 save_folder=R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\nwb'
 
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler())
 
 def _get_field(obj, field_list, index=None, default=np.nan):
     """get field from obj, if not found, return default
@@ -45,10 +44,10 @@ def _get_field(obj, field_list, index=None, default=np.nan):
             try:
                 return value[index]
             except:
-                logger.warning(f"Field {field_list} is iterable or index {index} is out of range")
+                logger.debug(f"Field {field_list} is iterable or index {index} is out of range")
                 return default
     else:
-        logger.warning(f"Field {field_list} not found in the object")
+        logger.debug(f"Field {field_list} not found in the object")
         return default
     
 
@@ -470,5 +469,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
 
 
 if __name__ == '__main__':
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(logging.StreamHandler())
     bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-G1\668546\668546_2023-09-19.json')
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
