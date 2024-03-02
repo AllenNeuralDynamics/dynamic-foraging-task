@@ -102,7 +102,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
 
     ### session related information ###
     nwbfile = NWBFile(
-        session_description='Session end time:'+obj.Other_CurrentTime+'  Give extra water(ml):'+obj.ExtraWater+'  box:'+obj.box,  
+        session_description='Session end time:'+obj.Other_CurrentTime+'  Give extra water(ml):'+obj.ExtraWater+'  box:'+ _get_field(obj, ['box', 'Tower']),  
         identifier=str(uuid4()),  # required
         session_start_time= session_start_timeC,  # required
         session_id=os.path.basename(fname),  # optional
@@ -138,7 +138,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     
     metadata = {
         # Meta
-        'box': _get_field(obj, 'box'),
+        'box': _get_field(obj, ['box', 'Tower']),
         'session_end_time': _get_field(obj, 'Other_CurrentTime'),
         'session_run_time_in_min': _get_field(obj, 'Other_RunningTime'),
         
@@ -469,4 +469,5 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
 
 
 if __name__ == '__main__':
-    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
+    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-G1\668546\668546_2023-09-19.json')
+    # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
