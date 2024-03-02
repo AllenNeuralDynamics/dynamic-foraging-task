@@ -93,6 +93,12 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     if not hasattr(obj, 'WeightBefore'):
         setattr(obj, 'WeightBefore', '')
         
+    # Early return if missing some key fields
+    if any([not hasattr(obj, field) for field in ['B_TrialEndTime', 'TP_BaseRewardSum']]):
+        logger.warning(f"Skipping {fname} due to missing key fields")
+        return
+    
+        
     if not hasattr(obj, 'Other_SessionStartTime'):
         session_start_timeC=datetime.datetime.strptime('2023-04-26', "%Y-%m-%d") # specific for LA30_2023-04-27.json
     else:
@@ -468,14 +474,14 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_acquisition(OptogeneticsTimeHarp)
 
     # save NWB file
+    base_filename = os.path.splitext(os.path.basename(fname))[0] + '.nwb'
     if len(nwbfile.trials) > 0:
-        base_filename = os.path.splitext(os.path.basename(fname))[0] + '.nwb'
         NWBName = os.path.join(save_folder, base_filename)
         io = NWBHDF5IO(NWBName, mode="w")
         io.write(nwbfile)
         io.close()
     else:
-        logger.warning(f"No trials found in {fname}, skip saving NWB file")
+        logger.warning(f"No trials found in {base_filename}, skip saving NWB file")
 
 
 if __name__ == '__main__':
@@ -484,6 +490,6 @@ if __name__ == '__main__':
     
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-G1\668546\668546_2023-09-19.json')
     
-    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-D\710414\710414_2024-02-12_14-26-37\TrainingFolder\710414_2024-02-12_14-26-37.json')
+    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-1-D\707254\707254_2024-02-16_13-18-41\TrainingFolder\707254_2024-02-16_13-18-41.json')
     
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
