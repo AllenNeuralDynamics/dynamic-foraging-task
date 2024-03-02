@@ -150,10 +150,10 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         'water_day_total': water_day_total,
 
         # Weight
-        'base_weight': float(_get_field(obj, 'BaseWeight')),
-        'target_weight': float(_get_field(obj, 'TargetWeight')),
-        'target_weight_ratio': float(_get_field(obj, 'TargetRatio')),
-        'weight_after': float(_get_field(obj, 'WeightAfter')),
+        'base_weight': float(_get_field(obj, 'BaseWeight') or np.nan),
+        'target_weight': float(_get_field(obj, 'TargetWeight') or np.nan),
+        'target_weight_ratio': float(_get_field(obj, 'TargetRatio') or np.nan),
+        'weight_after': float(_get_field(obj, 'WeightAfter') or np.nan),
         
         # Performance
         'foraging_efficiency': _get_field(obj, 'B_for_eff_optimal'),
@@ -471,5 +471,9 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
 if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
-    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-G1\668546\668546_2023-09-19.json')
+    
+    # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-G1\668546\668546_2023-09-19.json')
+    
+    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-B1\676747\676747_2023-10-09.json')
+    
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
