@@ -480,6 +480,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         io = NWBHDF5IO(NWBName, mode="w")
         io.write(nwbfile)
         io.close()
+        logger.info(f'Successfully converted: {NWBName}')
     else:
         logger.warning(f"No trials found in {base_filename}, skip saving NWB file")
 
