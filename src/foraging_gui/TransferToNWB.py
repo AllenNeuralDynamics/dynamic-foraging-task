@@ -468,11 +468,14 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_acquisition(OptogeneticsTimeHarp)
 
     # save NWB file
-    base_filename = os.path.splitext(os.path.basename(fname))[0] + '.nwb'
-    NWBName = os.path.join(save_folder, base_filename)
-    io = NWBHDF5IO(NWBName, mode="w")
-    io.write(nwbfile)
-    io.close()
+    if len(nwbfile.trials) > 0:
+        base_filename = os.path.splitext(os.path.basename(fname))[0] + '.nwb'
+        NWBName = os.path.join(save_folder, base_filename)
+        io = NWBHDF5IO(NWBName, mode="w")
+        io.write(nwbfile)
+        io.close()
+    else:
+        logger.warning(f"No trials found in {fname}, skip saving NWB file")
 
 
 if __name__ == '__main__':
@@ -481,6 +484,6 @@ if __name__ == '__main__':
     
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-G1\668546\668546_2023-09-19.json')
     
-    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-C\713557\713557_2024-02-06_11-36-59\TrainingFolder\713557_2024-02-06_11-36-59.json')
+    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-D\710414\710414_2024-02-12_14-26-37\TrainingFolder\710414_2024-02-12_14-26-37.json')
     
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
