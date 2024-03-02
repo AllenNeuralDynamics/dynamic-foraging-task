@@ -364,9 +364,9 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                           auto_train_stage_overridden=_get_field(obj, 'TP_auto_train_stage_overridden', index=i, default=None) or np.nan,
                           
                           # lickspout position
-                          lickspout_position_x=obj.B_NewscalePositions[i][0] if hasattr(obj, 'B_NewscalePositions') else np.nan,
-                          lickspout_position_y=obj.B_NewscalePositions[i][1] if hasattr(obj, 'B_NewscalePositions') else np.nan,
-                          lickspout_position_z=obj.B_NewscalePositions[i][2] if hasattr(obj, 'B_NewscalePositions') else np.nan,
+                          lickspout_position_x=_get_field(obj, 'B_NewscalePositions', index=i, default=[np.nan] * 3)[0],
+                          lickspout_position_y=_get_field(obj, 'B_NewscalePositions', index=i, default=[np.nan] * 3)[1],
+                          lickspout_position_z=_get_field(obj, 'B_NewscalePositions', index=i, default=[np.nan] * 3)[2],
                           
                           # reward size
                           reward_size_left=float(_get_field(obj, 'TP_LeftValue_volume', index=i)),
@@ -481,6 +481,6 @@ if __name__ == '__main__':
     
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-G1\668546\668546_2023-09-19.json')
     
-    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-B1\668546\668546_2023-10-03.json')
+    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-C\713557\713557_2024-02-06_11-36-59\TrainingFolder\713557_2024-02-06_11-36-59.json')
     
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
