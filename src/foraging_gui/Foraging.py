@@ -1588,10 +1588,16 @@ class Window(QMainWindow):
             self.client3.close()
             self.client4.close()
         self.Opto_dialog.close()
-        self._StopPhotometry()  # Make sure photo excitation is stopped 
+        self._StopPhotometry()  # Make sure photo excitation is stopped
+        # stop the camera 
         if self.Camera_dialog.AutoControl.currentText()=='Yes':
             self.Camera_dialog.StartCamera.setChecked(False)
             self.Camera_dialog._StartCamera()
+        # stop the logging
+        try:
+            self.Channel.StopLogging('s')
+        except Exception as e:
+            logging.error(str(e))
         print('GUI Window closed')
         logging.info('GUI Window closed') 
 
