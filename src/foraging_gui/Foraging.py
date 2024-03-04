@@ -2153,73 +2153,76 @@ class Window(QMainWindow):
                     break
         return mice  
 
-    def _Open(self,open_last = False):
+    def _Open(self,open_last = False,input_file = ''):
+        if input_file == '' or input_file == False:
+            # stop current session first
+            self._StopCurrentSession() 
 
-        # stop current session first
-        self._StopCurrentSession() 
-
-        # Start new session
-        new_session = self._NewSession()
-        if not new_session:
-            return
-
-        if open_last:
-            mice = self._Open_getListOfMice()
-            W = MouseSelectorDialog(self, mice)
-
-            ok, mouse_id = (
-                W.exec_() == QtWidgets.QDialog.Accepted, 
-                W.combo.currentText(),
-            )        
-
-            # Version 1, keeping it for the moment 
-            ### Prompt user to enter mouse ID, with auto-completion
-            ##dialog = QtWidgets.QInputDialog(self)
-            ##dialog.setWindowTitle('Box {}, Load mouse'.format(self.box_letter))
-            ##dialog.setLabelText('Enter the mouse ID')
-            ##dialog.setTextValue('')
-            ##lineEdit = dialog.findChild(QtWidgets.QLineEdit)
-        
-            ### Set auto complete
-            ##mice = self._Open_getListOfMice()
-            ##completer = QtWidgets.QCompleter(mice, lineEdit)
-            ##lineEdit.setCompleter(completer)
-            ##
-            ### Only accept integers
-            ##onlyInt = QtGui.QIntValidator()
-            ##onlyInt.setRange(0, 100000000)
-            ##lineEdit.setValidator(onlyInt)
-        
-            ### Get response
-            ##ok, mouse_id = (
-            ##    dialog.exec_() == QtWidgets.QDialog.Accepted, 
-            ##    dialog.textValue(),
-            ##)
-            if not ok: 
-                logging.info('Quick load failed, user hit cancel or X')
-                return                                
-            
-            # Mouse ID not in list of mice:
-            if mouse_id not in mice:
-                # figureout out new Mouse
-                logging.info('User entered the ID for a mouse with no data: {}'.format(mouse_id))
-                self._OpenNewMouse(mouse_id)
+            # Start new session
+            new_session = self._NewSession()
+            if not new_session:
                 return
- 
-            # attempt to load last session from mouse
-            good_load, fname = self._OpenLast_find_session(mouse_id)  
-            if not good_load:
-                logging.info('Quick load failed')
-                return        
-            logging.info('Quick load success: {}'.format(fname))
-        else:
-            # Open dialog box
-            fname, _ = QFileDialog.getOpenFileName(self, 'Open file', 
-                self.default_saveFolder+'\\'+self.current_box, 
-                "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
-            logging.info('User selected: {}'.format(fname))    
 
-        self.fname=fname
+            if open_last:
+                mice = self._Open_getListOfMice()
+                W = MouseSelectorDialog(self, mice)
+
+                ok, mouse_id = (
+                    W.exec_() == QtWidgets.QDialog.Accepted, 
+                    W.combo.currentText(),
+                )        
+
+                # Version 1, keeping it for the moment 
+                ### Prompt user to enter mouse ID, with auto-completion
+                ##dialog = QtWidgets.QInputDialog(self)
+                ##dialog.setWindowTitle('Box {}, Load mouse'.format(self.box_letter))
+                ##dialog.setLabelText('Enter the mouse ID')
+                ##dialog.setTextValue('')
+                ##lineEdit = dialog.findChild(QtWidgets.QLineEdit)
+            
+                ### Set auto complete
+                ##mice = self._Open_getListOfMice()
+                ##completer = QtWidgets.QCompleter(mice, lineEdit)
+                ##lineEdit.setCompleter(completer)
+                ##
+                ### Only accept integers
+                ##onlyInt = QtGui.QIntValidator()
+                ##onlyInt.setRange(0, 100000000)
+                ##lineEdit.setValidator(onlyInt)
+            
+                ### Get response
+                ##ok, mouse_id = (
+                ##    dialog.exec_() == QtWidgets.QDialog.Accepted, 
+                ##    dialog.textValue(),
+                ##)
+                if not ok: 
+                    logging.info('Quick load failed, user hit cancel or X')
+                    return                                
+                
+                # Mouse ID not in list of mice:
+                if mouse_id not in mice:
+                    # figureout out new Mouse
+                    logging.info('User entered the ID for a mouse with no data: {}'.format(mouse_id))
+                    self._OpenNewMouse(mouse_id)
+                    return
+    
+                # attempt to load last session from mouse
+                good_load, fname = self._OpenLast_find_session(mouse_id)  
+                if not good_load:
+                    logging.info('Quick load failed')
+                    return        
+                logging.info('Quick load success: {}'.format(fname))
+            else:
+                # Open dialog box
+                fname, _ = QFileDialog.getOpenFileName(self, 'Open file', 
+                    self.default_saveFolder+'\\'+self.current_box, 
+                    "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
+                logging.info('User selected: {}'.format(fname))    
+
+            self.fname=fname
+        else:
+            fname=input_file
+            self.fname=fname
         if fname:
             if fname.endswith('.mat'):
                 Obj = loadmat(fname)
