@@ -1879,7 +1879,6 @@ class Window(QMainWindow):
         if self.Camera_dialog.AutoControl.currentText()=='Yes':
             self.Camera_dialog.StartCamera.setChecked(False)
             self.Camera_dialog._StartCamera()
-            time.sleep(2)
         if SaveContinue==0:
             # must start a new session 
             self.NewSession.setStyleSheet("background-color : green;")
