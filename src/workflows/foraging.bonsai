@@ -7174,6 +7174,39 @@
                 </Workflow>
               </Builder>
             </Expression>
+            <Expression xsi:type="rx:Defer">
+              <Name>HarpDeviceDump</Name>
+              <Workflow>
+                <Nodes>
+                  <Expression xsi:type="harp:CreateMessage">
+                    <harp:MessageType>Write</harp:MessageType>
+                    <harp:Payload xsi:type="harp:CreateOperationControlPayload">
+                      <harp:OperationMode>Active</harp:OperationMode>
+                      <harp:DumpRegisters>true</harp:DumpRegisters>
+                      <harp:MuteReplies>false</harp:MuteReplies>
+                      <harp:VisualIndicators>On</harp:VisualIndicators>
+                      <harp:OperationLed>On</harp:OperationLed>
+                      <harp:Heartbeat>Enabled</harp:Heartbeat>
+                    </harp:Payload>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>BehaviorCommands</Name>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>SoundCardCommands</Name>
+                  </Expression>
+                </Nodes>
+                <Edges>
+                  <Edge From="0" To="1" Label="Source1" />
+                  <Edge From="1" To="2" Label="Source1" />
+                </Edges>
+              </Workflow>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="rx:DelaySubscription">
+                <rx:DueTime>PT2S</rx:DueTime>
+              </Combinator>
+            </Expression>
           </Nodes>
           <Edges>
             <Edge From="0" To="1" Label="Source1" />
@@ -7201,6 +7234,7 @@
             <Edge From="32" To="33" Label="Source1" />
             <Edge From="34" To="35" Label="Source1" />
             <Edge From="36" To="37" Label="Source1" />
+            <Edge From="40" To="41" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
