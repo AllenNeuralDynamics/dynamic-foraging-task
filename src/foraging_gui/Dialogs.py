@@ -1103,7 +1103,6 @@ class CameraDialog(QDialog):
                 return 
         if self.StartCamera.isChecked():
             self.StartCamera.setStyleSheet("background-color : green;")
-            self.MainWindow.Channel.CameraFrequency(int(self.FrameRate.text()))
             if self.AutoControl.currentText()=='No':
                 # Do not restart logging when automatic control is "yes" as logging will start in behavior control
                 if self.CollectVideo.currentText()=='Yes':
@@ -1133,6 +1132,8 @@ class CameraDialog(QDialog):
                 self.MainWindow.Channel.SideCameraCSV(side_camera_csv)
                 self.MainWindow.Channel.BottomCameraCSV(bottom_camera_csv)
             '''
+            # set the camera frequency. It's better to set the frequency after the temporary logging. 
+            self.MainWindow.Channel.CameraFrequency(int(self.FrameRate.text()))
             # start the video triggers
             self.MainWindow.Channel.CameraControl(int(1))
             self.MainWindow.WarningLabelCamera.setText('Camera is on!')
