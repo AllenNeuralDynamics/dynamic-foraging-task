@@ -2843,6 +2843,16 @@ class Window(QMainWindow):
         # Check if photometry excitation is running or not
         if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and (not self.StartExcitation.isChecked()):
             logging.warning('photometry is set to "on", but excitation is not running')
+            
+            if self.Teensy_COM == '':
+                logging.warning('No Teensy COM configured for this box, cannot start excitation')
+                msg = 'Photometry is set to "on", but no Teensy COM configured for this box, cannot start excitation.'
+                reply = QMessageBox.info(self,'Box {}, Start'.format(self.box_letter), 
+                    msg, QMessageBox.Ok)
+                self.Start.setStyleSheet("background-color : none")
+                self.Start.setChecked(False)
+                return
+
             reply = QMessageBox.question(self, 
                 'Box {}, Start'.format(self.box_letter), 
                 'Photometry is set to "on", but excitation is not running. Start excitation now?',
