@@ -2398,6 +2398,8 @@ class Window(QMainWindow):
             msg = 'No Teensy COM configured for this box, cannot start excitation'
             reply = QMessageBox.information(self, 
                 'Box {}, StartExcitation'.format(self.box_letter), msg, QMessageBox.Ok )
+            self.StartExcitation.setChecked(False)
+            self.StartExcitation.setStyleSheet("background-color : none")
             return
 
         if self.StartExcitation.isChecked():
