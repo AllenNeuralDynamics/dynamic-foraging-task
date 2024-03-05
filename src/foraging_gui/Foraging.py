@@ -2711,8 +2711,17 @@ class Window(QMainWindow):
             # disable metadata fields
             self._set_metadata_enabled(False)
         else:
-            logging.info('Start button pressed: ending trial loop')
-            self.Start.setStyleSheet("background-color : none")
+            reply = QMessageBox.question(self, 
+                'Box {}, Start'.format(self.box_letter), 
+                'Stop current session?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+            if reply == QMessageBox.Yes:
+                logging.info('Start button pressed: ending trial loop')
+                self.Start.setStyleSheet("background-color : none")
+            else:
+                logging.info('Start button pressed: user continued session')               
+                self.Start.setChecked(True)
+                return
  
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
