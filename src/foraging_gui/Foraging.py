@@ -2711,18 +2711,20 @@ class Window(QMainWindow):
             # disable metadata fields
             self._set_metadata_enabled(False)
         else:
+            # Prompt user to confirm stopping trials
             reply = QMessageBox.question(self, 
                 'Box {}, Start'.format(self.box_letter), 
                 'Stop current session?',
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
             if reply == QMessageBox.Yes:
+                # End trials
                 logging.info('Start button pressed: ending trial loop')
                 self.Start.setStyleSheet("background-color : none")
             else:
+                # Continue trials
                 logging.info('Start button pressed: user continued session')               
                 self.Start.setChecked(True)
-                return
- 
+                return 
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
