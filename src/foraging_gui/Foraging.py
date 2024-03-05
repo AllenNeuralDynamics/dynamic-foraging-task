@@ -603,6 +603,7 @@ class Window(QMainWindow):
         if os.path.exists(self.LaserCalibrationFiles):
             with open(self.LaserCalibrationFiles, 'r') as f:
                 self.LaserCalibrationResults = json.load(f)
+
     def _GetWaterCalibration(self):
         '''
             Load the water calibration file.
@@ -646,7 +647,10 @@ class Window(QMainWindow):
             'default_saveFolder':os.path.join(os.path.expanduser("~"), "Documents")+'\\',
             'current_box':'',
             'temporary_video_folder':os.path.join(os.path.expanduser("~"), "Documents",'temporaryvideo'),
-            'Teensy_COM':'',
+            'Teensy_COM_box1':'',
+            'Teensy_COM_box2':'',
+            'Teensy_COM_box3':'',
+            'Teensy_COM_box4':'',
             'bonsai_path':os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe'),
             'bonsaiworkflow_path':os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai'),
             'newscale_serial_num_box1':'',
@@ -687,7 +691,7 @@ class Window(QMainWindow):
         self.default_saveFolder=Settings['default_saveFolder']
         self.current_box=Settings['current_box']
         self.temporary_video_folder=Settings['temporary_video_folder']
-        self.Teensy_COM=Settings['Teensy_COM']
+        self.Teensy_COM = Settings['Teensy_COM_box'+self.box_number]
         self.bonsai_path=Settings['bonsai_path']
         self.bonsaiworkflow_path=Settings['bonsaiworkflow_path']
         self.newscale_serial_num_box1=Settings['newscale_serial_num_box1']
@@ -695,6 +699,7 @@ class Window(QMainWindow):
         self.newscale_serial_num_box3=Settings['newscale_serial_num_box3']
         self.newscale_serial_num_box4=Settings['newscale_serial_num_box4']
         self.default_ui=Settings['default_ui']
+
         # Also stream log info to the console if enabled
         if  Settings['show_log_info_in_console']:
             logger = logging.getLogger()
@@ -704,7 +709,6 @@ class Window(QMainWindow):
             handler.setLevel(logging.root.level)            
             logger.addHandler(handler)
             
-
         # Determine box
         if self.current_box in ['447-1','447-2','447-3']:
             mapper={
@@ -716,6 +720,8 @@ class Window(QMainWindow):
             self.current_box='{}-{}'.format(self.current_box,mapper[self.box_number])
         window_title = '{}'.format(self.current_box)
         self.window_title = window_title
+
+
 
     def _InitializeBonsai(self):
         '''
@@ -2385,6 +2391,15 @@ class Window(QMainWindow):
         self._Clear()
 
     def _StartExcitation(self):
+        if self.Teensy_COM == '':
+            logging.warning('No Teensy COM configured for this box, cannot start excitation')
+            self.TeensyWarning.setText('No Teensy COM for this box')
+            self.TeensyWarning.setStyleSheet(self.default_warning_color)
+            msg = 'No Teensy COM configured for this box, cannot start excitation'
+            reply = QMessageBox.information(self, 
+                'Box {}, StartExcitation'.format(self.box_letter), msg, QMessageBox.Ok )
+            return
+
         if self.StartExcitation.isChecked():
             logging.info('StartExcitation is checked')
             self.StartExcitation.setStyleSheet("background-color : green;")
@@ -2427,6 +2442,18 @@ class Window(QMainWindow):
 
     
     def _StartBleaching(self):
+
+        if self.Teensy_COM == '':
+            logging.warning('No Teensy COM configured for this box, cannot start bleaching')
+            self.TeensyWarning.setText('No Teensy COM for this box')
+            self.TeensyWarning.setStyleSheet(self.default_warning_color)
+            msg = 'No Teensy COM configured for this box, cannot start bleaching'
+            reply = QMessageBox.information(self, 
+                'Box {}, StartBleaching'.format(self.box_letter), msg, QMessageBox.Ok )
+            self.StartBleaching.setChecked(False)
+            self.StartBleaching.setStyleSheet("background-color : none")
+            return
+             
         if self.StartBleaching.isChecked():
             # Check if trials have stopped
             if self.ANewTrial==0:
@@ -2498,7 +2525,7 @@ class Window(QMainWindow):
         '''
             Stop either bleaching or photometry
         '''
-        if self.box_letter != "D":
+        if self.Teensy_COM == '':
             return
         logging.info('Checking that photometry is not running')
         try:
