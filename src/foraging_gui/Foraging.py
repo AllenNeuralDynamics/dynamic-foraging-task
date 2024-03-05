@@ -691,7 +691,7 @@ class Window(QMainWindow):
         self.default_saveFolder=Settings['default_saveFolder']
         self.current_box=Settings['current_box']
         self.temporary_video_folder=Settings['temporary_video_folder']
-        self.Teensy_COM = Settings['Teensy_COM_box'+self.box_number]
+        self.Teensy_COM = Settings['Teensy_COM_box'+str(self.box_number)]
         self.bonsai_path=Settings['bonsai_path']
         self.bonsaiworkflow_path=Settings['bonsaiworkflow_path']
         self.newscale_serial_num_box1=Settings['newscale_serial_num_box1']
