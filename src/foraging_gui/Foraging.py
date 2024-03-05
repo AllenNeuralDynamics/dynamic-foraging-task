@@ -2847,7 +2847,7 @@ class Window(QMainWindow):
             if self.Teensy_COM == '':
                 logging.warning('No Teensy COM configured for this box, cannot start excitation')
                 msg = 'Photometry is set to "on", but no Teensy COM configured for this box, cannot start excitation.'
-                reply = QMessageBox.info(self,'Box {}, Start'.format(self.box_letter), 
+                reply = QMessageBox.information(self,'Box {}, Start'.format(self.box_letter), 
                     msg, QMessageBox.Ok)
                 self.Start.setStyleSheet("background-color : none")
                 self.Start.setChecked(False)
