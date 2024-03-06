@@ -9,11 +9,11 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 ## TODO
 # What is finish=1?
 
-
 class PlotV(FigureCanvas):
     def __init__(self,win,GeneratedTrials=None,parent=None,dpi=100,width=5, height=4):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
-        gs = GridSpec(10, 30, wspace = 3, hspace = 0.1, bottom = 0.1, top = 0.95, left = 0.04, right = 0.98)
+        gs = GridSpec(10, 30, wspace = 3, hspace = 0.1, bottom = 0.1, 
+            top = 0.95, left = 0.04, right = 0.98)
         self.ax1 = self.fig.add_subplot(gs[0:4, 0:20])
         self.ax2 = self.fig.add_subplot(gs[4:10, 0:20])
         self.ax3 = self.fig.add_subplot(gs[1:9, 22:])
@@ -29,14 +29,19 @@ class PlotV(FigureCanvas):
         self.main_win = win
 
     def _Update(self,GeneratedTrials=None,Channel=None):
+
         if GeneratedTrials is None:
+            # If we have no trials, clear the plots
             self.ax1.cla()
             self.ax2.cla()
             self.ax3.cla() 
             self.draw()        
             return
+
         if Channel is not None:
             GeneratedTrials._GetLicks(Channel)
+
+        # Unpack data 
         self.B_AnimalResponseHistory=GeneratedTrials.B_AnimalResponseHistory
         self.B_LickPortN=GeneratedTrials.B_LickPortN
         self.B_RewardProHistory=GeneratedTrials.B_RewardProHistory
@@ -61,6 +66,7 @@ class PlotV(FigureCanvas):
             self.B_Time=self.B_RewardOutcomeTime-GeneratedTrials.B_TrialStartTime[0]
         else:
             self.B_Time=self.B_RewardOutcomeTime
+
         self.B_BTime=self.B_Time.copy()
         if self.B_TrialEndTime.size!=0:
             Delta=self.B_TrialEndTime[-1]-self.B_TrialStartTime[0]
@@ -70,15 +76,26 @@ class PlotV(FigureCanvas):
 
         try:
             self._PlotBlockStructure()
+        except Exception as e:
+            logging.error(str(e))
+
+        try:
             self._PlotChoice()
+        except Exception as e:
+            logging.error(str(e))
+
+        try:
             self._PlotLicks()
         except Exception as e:
             logging.error(str(e))
+
         try:
             self._PlotMatching()
         except Exception as e:
             logging.error(str(e))
-        self.finish=1
+
+        #self.finish=1
+
     def _PlotBlockStructure(self):
         ax2=self.ax2
         ax2.cla()

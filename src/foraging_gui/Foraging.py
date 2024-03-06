@@ -2759,7 +2759,7 @@ class Window(QMainWindow):
             self.GeneratedTrials=GeneratedTrials
             self.StartANewSession=0
             PlotM=PlotV(win=self,GeneratedTrials=GeneratedTrials,width=5, height=4)
-            PlotM.finish=1
+            #PlotM.finish=1
             self.PlotM=PlotM
             #generate the first trial outside the loop, only for new session
             self.ToReceiveLicks=1
