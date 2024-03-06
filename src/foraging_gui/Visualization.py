@@ -26,6 +26,10 @@ class PlotV(FigureCanvas):
         self.main_win = win
 
     def _Update(self,GeneratedTrials=None,Channel=None):
+        if GeneratedTrials is None:
+            self.ax1.cla()
+            self.ax2.cla()
+            self.ax3.cla()          
         if Channel is not None:
             GeneratedTrials._GetLicks(Channel)
         self.B_AnimalResponseHistory=GeneratedTrials.B_AnimalResponseHistory
