@@ -6,6 +6,9 @@ from matplotlib.figure import Figure
 from matplotlib.gridspec import GridSpec
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
+## TODO
+# What is finish=1?
+
 
 class PlotV(FigureCanvas):
     def __init__(self,win,GeneratedTrials=None,parent=None,dpi=100,width=5, height=4):
@@ -29,7 +32,9 @@ class PlotV(FigureCanvas):
         if GeneratedTrials is None:
             self.ax1.cla()
             self.ax2.cla()
-            self.ax3.cla()          
+            self.ax3.cla() 
+            self.draw()        
+            return
         if Channel is not None:
             GeneratedTrials._GetLicks(Channel)
         self.B_AnimalResponseHistory=GeneratedTrials.B_AnimalResponseHistory
