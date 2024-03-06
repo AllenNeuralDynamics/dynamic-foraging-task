@@ -11,8 +11,9 @@
                  xmlns:harp="clr-namespace:Bonsai.Harp;assembly=Bonsai.Harp"
                  xmlns:p1="clr-namespace:Harp.SoundCard;assembly=Harp.SoundCard"
                  xmlns:wie="clr-namespace:Bonsai.Windows.Input;assembly=Bonsai.Windows.Input"
+                 xmlns:p2="clr-namespace:AllenNeuralDynamics.LicketySplitLickDetector;assembly=AllenNeuralDynamics.LicketySplitLickDetector"
                  xmlns:dsp="clr-namespace:Bonsai.Dsp;assembly=Bonsai.Dsp"
-                 xmlns:p2="clr-namespace:Bonsai.DAQmx;assembly=Extensions"
+                 xmlns:p3="clr-namespace:Bonsai.DAQmx;assembly=Extensions"
                  xmlns:vid="clr-namespace:Bonsai.Video;assembly=Bonsai.Video"
                  xmlns:cv="clr-namespace:Bonsai.Vision;assembly=Bonsai.Vision"
                  xmlns:io="clr-namespace:Bonsai.IO;assembly=Bonsai.System"
@@ -2694,6 +2695,114 @@
             <Expression xsi:type="rx:PublishSubject">
               <Name>Licks</Name>
             </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="SubscribeSubject">
+                <Name>LickometerEventsRight</Name>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="p2:Parse">
+                <harp:Register xsi:type="p2:TimestampedLickState" />
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="MemberSelector">
+                <Selector>Value</Selector>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="BitwiseAnd">
+                <Operand xsi:type="WorkflowProperty" TypeArguments="p2:LickChannels">
+                  <Value>None</Value>
+                </Operand>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="GreaterThan">
+                <Operand xsi:type="WorkflowProperty" TypeArguments="sys:Byte">
+                  <Value>0</Value>
+                </Operand>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="rx:DistinctUntilChanged" />
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="rx:Condition">
+                <Workflow>
+                  <Nodes>
+                    <Expression xsi:type="WorkflowInput">
+                      <Name>Source1</Name>
+                    </Expression>
+                    <Expression xsi:type="WorkflowOutput" />
+                  </Nodes>
+                  <Edges>
+                    <Edge From="0" To="1" Label="Source1" />
+                  </Edges>
+                </Workflow>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="rx:WithLatestFrom" />
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="SubscribeSubject">
+                <Name>LickometerEventsLeft</Name>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="p2:Parse">
+                <harp:Register xsi:type="p2:TimestampedLickState" />
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="MemberSelector">
+                <Selector>Value</Selector>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="BitwiseAnd">
+                <Operand xsi:type="WorkflowProperty" TypeArguments="p2:LickChannels">
+                  <Value>None</Value>
+                </Operand>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="GreaterThan">
+                <Operand xsi:type="WorkflowProperty" TypeArguments="sys:Byte">
+                  <Value>0</Value>
+                </Operand>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="rx:DistinctUntilChanged" />
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="rx:Condition">
+                <Workflow>
+                  <Nodes>
+                    <Expression xsi:type="WorkflowInput">
+                      <Name>Source1</Name>
+                    </Expression>
+                    <Expression xsi:type="WorkflowOutput" />
+                  </Nodes>
+                  <Edges>
+                    <Edge From="0" To="1" Label="Source1" />
+                  </Edges>
+                </Workflow>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="rx:WithLatestFrom" />
+              </Builder>
+            </Expression>
           </Nodes>
           <Edges>
             <Edge From="0" To="4" Label="Source1" />
@@ -2735,6 +2844,22 @@
             <Edge From="36" To="37" Label="Source1" />
             <Edge From="37" To="38" Label="Source4" />
             <Edge From="38" To="39" Label="Source1" />
+            <Edge From="40" To="41" Label="Source1" />
+            <Edge From="41" To="42" Label="Source1" />
+            <Edge From="41" To="47" Label="Source2" />
+            <Edge From="42" To="43" Label="Source1" />
+            <Edge From="43" To="44" Label="Source1" />
+            <Edge From="44" To="45" Label="Source1" />
+            <Edge From="45" To="46" Label="Source1" />
+            <Edge From="46" To="47" Label="Source1" />
+            <Edge From="48" To="49" Label="Source1" />
+            <Edge From="49" To="50" Label="Source1" />
+            <Edge From="49" To="55" Label="Source2" />
+            <Edge From="50" To="51" Label="Source1" />
+            <Edge From="51" To="52" Label="Source1" />
+            <Edge From="52" To="53" Label="Source1" />
+            <Edge From="53" To="54" Label="Source1" />
+            <Edge From="54" To="55" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
@@ -3787,29 +3912,29 @@
                     <Property Name="TriggerSource" />
                   </Expression>
                   <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="p2:TriggeredAnalogOutput">
-                      <p2:SignalSource />
-                      <p2:TriggerSource>/Dev1/PFI0</p2:TriggerSource>
-                      <p2:SampleRate>5000</p2:SampleRate>
-                      <p2:ActiveEdge>Rising</p2:ActiveEdge>
-                      <p2:SampleMode>FiniteSamples</p2:SampleMode>
-                      <p2:BufferSize>50002</p2:BufferSize>
-                      <p2:Channels>
-                        <p2:AnalogOutputChannelConfiguration>
-                          <p2:ChannelName />
-                          <p2:MinimumValue>-10</p2:MinimumValue>
-                          <p2:MaximumValue>10</p2:MaximumValue>
-                          <p2:PhysicalChannel>Dev1/ao0</p2:PhysicalChannel>
-                          <p2:VoltageUnits>Volts</p2:VoltageUnits>
-                        </p2:AnalogOutputChannelConfiguration>
-                        <p2:AnalogOutputChannelConfiguration>
-                          <p2:ChannelName />
-                          <p2:MinimumValue>-10</p2:MinimumValue>
-                          <p2:MaximumValue>10</p2:MaximumValue>
-                          <p2:PhysicalChannel>Dev1/ao1</p2:PhysicalChannel>
-                          <p2:VoltageUnits>Volts</p2:VoltageUnits>
-                        </p2:AnalogOutputChannelConfiguration>
-                      </p2:Channels>
+                    <Combinator xsi:type="p3:TriggeredAnalogOutput">
+                      <p3:SignalSource />
+                      <p3:TriggerSource>/Dev1/PFI0</p3:TriggerSource>
+                      <p3:SampleRate>5000</p3:SampleRate>
+                      <p3:ActiveEdge>Rising</p3:ActiveEdge>
+                      <p3:SampleMode>FiniteSamples</p3:SampleMode>
+                      <p3:BufferSize>50002</p3:BufferSize>
+                      <p3:Channels>
+                        <p3:AnalogOutputChannelConfiguration>
+                          <p3:ChannelName />
+                          <p3:MinimumValue>-10</p3:MinimumValue>
+                          <p3:MaximumValue>10</p3:MaximumValue>
+                          <p3:PhysicalChannel>Dev1/ao0</p3:PhysicalChannel>
+                          <p3:VoltageUnits>Volts</p3:VoltageUnits>
+                        </p3:AnalogOutputChannelConfiguration>
+                        <p3:AnalogOutputChannelConfiguration>
+                          <p3:ChannelName />
+                          <p3:MinimumValue>-10</p3:MinimumValue>
+                          <p3:MaximumValue>10</p3:MaximumValue>
+                          <p3:PhysicalChannel>Dev1/ao1</p3:PhysicalChannel>
+                          <p3:VoltageUnits>Volts</p3:VoltageUnits>
+                        </p3:AnalogOutputChannelConfiguration>
+                      </p3:Channels>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
