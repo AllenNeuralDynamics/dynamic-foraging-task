@@ -2189,13 +2189,14 @@ class Window(QMainWindow):
                             self.WeightAfter.setText('')
                             continue
                         widget = widget_dict[key]
-                        try: # load the paramter used by last trial
+
+                        if 'TP_{}'.format(key) in CurrentObj:
                             value=np.array([CurrentObj['TP_'+key][-2]])
                             Tag=0
-                        except Exception as e: # sometimes we only have training parameters, no behavior parameters
-                            logging.error(str(e))
+                        else:
                             value=CurrentObj[key]
                             Tag=1
+
                         if key in {'BaseWeight','TotalWater','TargetWeight','WeightAfter','SuggestedWater','TargetRatio'}:
                             self.BaseWeight.disconnect()
                             self.TargetRatio.disconnect()
