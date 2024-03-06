@@ -214,7 +214,6 @@ class Window(QMainWindow):
         self.Randomness.currentIndexChanged.connect(self._Randomness)
         self.TrainingStage.currentIndexChanged.connect(self._TrainingStage)
         self.TrainingStage.activated.connect(self._TrainingStage)
-        self.SaveTraining.clicked.connect(self._SaveTraining)
         self.actionTemporary_Logging.triggered.connect(self._startTemporaryLogging)
         self.actionFormal_logging.triggered.connect(self._startFormalLogging)
         self.actionOpen_logging_folder.triggered.connect(self._OpenLoggingFolder)
@@ -1021,8 +1020,8 @@ class Window(QMainWindow):
 
     def _TrainingStage(self):
         '''Change the parameters automatically based on training stage and task'''
-        self.WarningLabel_SaveTrainingStage.setText('')
-        self.WarningLabel_SaveTrainingStage.setStyleSheet("color: none;")
+        #self.WarningLabel_SaveTrainingStage.setText('')
+        #self.WarningLabel_SaveTrainingStage.setStyleSheet("color: none;")
         # load the prestored training stage parameters
         self._LoadTrainingPar()
         # set the training parameters in the GUI
@@ -1109,38 +1108,6 @@ class Window(QMainWindow):
             if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
                 pass
                 #widget.clear()
-
-    def _SaveTraining(self):
-        '''Save the training stage parameters'''
-        logging.info('Saving training stage parameters')
-        # load the pre-stored training stage parameters
-        self._LoadTrainingPar()
-        # get the current training stage parameters
-        widget_dict = {w.objectName(): w for w in self.TrainingParameters.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-        Task=self.Task.currentText()
-        CurrentTrainingStage=self.TrainingStage.currentText()
-        for key in widget_dict.keys():
-            widget = widget_dict[key]
-            if Task not in self.TrainingStagePar:
-                self.TrainingStagePar[Task]={}
-            if CurrentTrainingStage not in self.TrainingStagePar[Task]:
-                self.TrainingStagePar[Task][CurrentTrainingStage]={}
-            if isinstance(widget, QtWidgets.QPushButton):
-                self.TrainingStagePar[Task][CurrentTrainingStage][widget.objectName()]=widget.isChecked()
-            elif isinstance(widget, QtWidgets.QTextEdit):
-                self.TrainingStagePar[Task][CurrentTrainingStage][widget.objectName()]=widget.toPlainText()
-            elif isinstance(widget, QtWidgets.QDoubleSpinBox) or isinstance(widget, QtWidgets.QLineEdit)  or isinstance(widget, QtWidgets.QSpinBox):
-                self.TrainingStagePar[Task][CurrentTrainingStage][widget.objectName()]=widget.text()
-            elif isinstance(widget, QtWidgets.QComboBox):
-                self.TrainingStagePar[Task][CurrentTrainingStage][widget.objectName()]=widget.currentText()
-        # save
-        if not os.path.exists(os.path.dirname(self.TrainingStageFiles)):
-            os.makedirs(os.path.dirname(self.TrainingStageFiles))
-        with open(self.TrainingStageFiles, "w") as file:
-            json.dump(self.TrainingStagePar, file,indent=4) 
-        self.WarningLabel_SaveTrainingStage.setText('Training stage parameters were saved!')
-        self.WarningLabel_SaveTrainingStage.setStyleSheet(self.default_warning_color)
-        self.SaveTraining.setChecked(False)
 
     def _LoadTrainingPar(self):
         '''load the training stage parameters'''
@@ -2683,8 +2650,8 @@ class Window(QMainWindow):
  
         # Clear warnings
         self.WarningLabelInitializeBonsai.setText('')
-        self.WarningLabel_SaveTrainingStage.setText('')
-        self.WarningLabel_SaveTrainingStage.setStyleSheet("color: none;")
+        #self.WarningLabel_SaveTrainingStage.setText('')
+        #self.WarningLabel_SaveTrainingStage.setStyleSheet("color: none;")
         self.NewSession.setDisabled(False)
             
         # Toggle button colors
