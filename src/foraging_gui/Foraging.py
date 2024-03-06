@@ -2577,6 +2577,9 @@ class Window(QMainWindow):
         self.PhotometryRun=0
         self.unsaved_data=False
         self.ManualWaterVolume=[0,0]       
+    
+        # Clear Plots
+        self.PlotLick._Update(GeneratedTrials=None)
 
         # Add note to log
         logging.info('New Session complete')

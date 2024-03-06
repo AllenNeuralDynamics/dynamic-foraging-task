@@ -255,12 +255,14 @@ class PlotV(FigureCanvas):
             SeInd=~np.logical_or(np.logical_or(np.isinf(x),np.isinf(y)), np.logical_or(np.isnan(x),np.isnan(y)))
             x=x[SeInd]
             y=y[SeInd]
+
+            # check we have enough data to do regression
             if len(np.unique(x)) > 1:
                 slope, intercept, r_value, p_value, _ = stats.linregress(x, y)
                 fit_x = x
                 fit_y = x * slope + intercept
             
-                # Save intercept to show bias in performane info
+                # Save intercept to show bias in performance info
                 self.main_win.B_Bias_R=intercept
             
                 ax.plot(fit_x, fit_y, 'r', label=f'r = {r_value:.3f}\np = {p_value:.2e}')
