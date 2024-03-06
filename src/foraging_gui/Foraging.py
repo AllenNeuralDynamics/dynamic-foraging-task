@@ -2139,13 +2139,14 @@ class Window(QMainWindow):
                             self.WeightAfter.setText('')
                             continue
                         widget = widget_dict[key]
-                        try: # load the paramter used by last trial
+
+                        if 'TP_{}'.format(key) in CurrentObj:
                             value=np.array([CurrentObj['TP_'+key][-2]])
                             Tag=0
-                        except Exception as e: # sometimes we only have training parameters, no behavior parameters
-                            logging.error(str(e))
+                        else:
                             value=CurrentObj[key]
                             Tag=1
+
                         if key in {'BaseWeight','TotalWater','TargetWeight','WeightAfter','SuggestedWater','TargetRatio'}:
                             self.BaseWeight.disconnect()
                             self.TargetRatio.disconnect()
@@ -2551,6 +2552,9 @@ class Window(QMainWindow):
         self.PhotometryRun=0
         self.unsaved_data=False
         self.ManualWaterVolume=[0,0]       
+    
+        # Clear Plots
+        self.PlotM._Update(GeneratedTrials=None,Channel=None)
 
         # Add note to log
         logging.info('New Session complete')
@@ -2741,7 +2745,7 @@ class Window(QMainWindow):
             self.GeneratedTrials=GeneratedTrials
             self.StartANewSession=0
             PlotM=PlotV(win=self,GeneratedTrials=GeneratedTrials,width=5, height=4)
-            PlotM.finish=1
+            #PlotM.finish=1
             self.PlotM=PlotM
             #generate the first trial outside the loop, only for new session
             self.ToReceiveLicks=1
