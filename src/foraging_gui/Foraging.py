@@ -2579,7 +2579,7 @@ class Window(QMainWindow):
         self.ManualWaterVolume=[0,0]       
     
         # Clear Plots
-        self.PlotLick._Update(GeneratedTrials=None)
+        self.PlotM._Update(GeneratedTrials=None,Channel=None):
 
         # Add note to log
         logging.info('New Session complete')
