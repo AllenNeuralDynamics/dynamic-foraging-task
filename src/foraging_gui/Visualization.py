@@ -255,19 +255,20 @@ class PlotV(FigureCanvas):
             SeInd=~np.logical_or(np.logical_or(np.isinf(x),np.isinf(y)), np.logical_or(np.isnan(x),np.isnan(y)))
             x=x[SeInd]
             y=y[SeInd]
-            slope, intercept, r_value, p_value, _ = stats.linregress(x, y)
-            fit_x = x
-            fit_y = x * slope + intercept
+            if len(np.unique(x)) > 1:
+                slope, intercept, r_value, p_value, _ = stats.linregress(x, y)
+                fit_x = x
+                fit_y = x * slope + intercept
             
-            # Save intercept to show bias in performane info
-            self.main_win.B_Bias_R=intercept
+                # Save intercept to show bias in performane info
+                self.main_win.B_Bias_R=intercept
             
-            ax.plot(fit_x, fit_y, 'r', label=f'r = {r_value:.3f}\np = {p_value:.2e}')
-            ax.set_title(f'slope = {slope:.2f}, bias_R = {intercept:.2f}', fontsize=9)
-            ax.legend(loc='upper left', fontsize=8)
-            ax.axis('equal')
-            ax.set_xlim([fit_x.min()-2, fit_x.max()+2])
-            ax.set_ylim([fit_y.min()-2, fit_y.max()+2])
+                ax.plot(fit_x, fit_y, 'r', label=f'r = {r_value:.3f}\np = {p_value:.2e}')
+                ax.set_title(f'slope = {slope:.2f}, bias_R = {intercept:.2f}', fontsize=9)
+                ax.legend(loc='upper left', fontsize=8)
+                ax.axis('equal')
+                ax.set_xlim([fit_x.min()-2, fit_x.max()+2])
+                ax.set_ylim([fit_y.min()-2, fit_y.max()+2])
         except Exception as e:
             logging.error(str(e))
         self.draw()
