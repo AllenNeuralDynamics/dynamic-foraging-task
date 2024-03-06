@@ -2062,29 +2062,6 @@ class Window(QMainWindow):
                 W.combo.currentText(),
             )        
 
-            # Version 1, keeping it for the moment 
-            ### Prompt user to enter mouse ID, with auto-completion
-            ##dialog = QtWidgets.QInputDialog(self)
-            ##dialog.setWindowTitle('Box {}, Load mouse'.format(self.box_letter))
-            ##dialog.setLabelText('Enter the mouse ID')
-            ##dialog.setTextValue('')
-            ##lineEdit = dialog.findChild(QtWidgets.QLineEdit)
-        
-            ### Set auto complete
-            ##mice = self._Open_getListOfMice()
-            ##completer = QtWidgets.QCompleter(mice, lineEdit)
-            ##lineEdit.setCompleter(completer)
-            ##
-            ### Only accept integers
-            ##onlyInt = QtGui.QIntValidator()
-            ##onlyInt.setRange(0, 100000000)
-            ##lineEdit.setValidator(onlyInt)
-        
-            ### Get response
-            ##ok, mouse_id = (
-            ##    dialog.exec_() == QtWidgets.QDialog.Accepted, 
-            ##    dialog.textValue(),
-            ##)
             if not ok: 
                 logging.info('Quick load failed, user hit cancel or X')
                 return                                
@@ -2539,6 +2516,7 @@ class Window(QMainWindow):
         self._set_metadata_enabled(True)
 
         # Reset state variables
+        self._StopPhotometry() # Make sure photoexcitation is stopped 
         self.StartANewSession=1
         self.CreateNewFolder=1
         self.PhotometryRun=0
@@ -2678,9 +2656,20 @@ class Window(QMainWindow):
             # disable metadata fields
             self._set_metadata_enabled(False)
         else:
-            logging.info('Start button pressed: ending trial loop')
-            self.Start.setStyleSheet("background-color : none")
- 
+            # Prompt user to confirm stopping trials
+            reply = QMessageBox.question(self, 
+                'Box {}, Start'.format(self.box_letter), 
+                'Stop current session?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+            if reply == QMessageBox.Yes:
+                # End trials
+                logging.info('Start button pressed: ending trial loop')
+                self.Start.setStyleSheet("background-color : none")
+            else:
+                # Continue trials
+                logging.info('Start button pressed: user continued session')               
+                self.Start.setChecked(True)
+                return 
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
