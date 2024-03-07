@@ -54,6 +54,7 @@ class MouseSelectorDialog(QDialog):
     
     def __init__(self, MainWindow, mice, parent=None):
         super().__init__(parent)
+        self.mice = ['']+ mice
         self.MainWindow = MainWindow
         self.setWindowTitle('Box {}, Load Mouse'.format(self.MainWindow.box_letter))
         self.setFixedSize(250,125)
