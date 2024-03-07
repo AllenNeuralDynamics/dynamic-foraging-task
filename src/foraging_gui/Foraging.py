@@ -2050,7 +2050,7 @@ class Window(QMainWindow):
                     break
         return mice  
 
-    def _Open_getSchedule():
+    def _Open_getSchedule(self):
         '''
             Loads the local copy of the schedule
             if the schedule is not found, then returns None
@@ -2079,7 +2079,7 @@ class Window(QMainWindow):
         
         print(datetime.datetime.now())                     
 
-
+        return schedule
 
     def _Open(self,open_last = False):
 
