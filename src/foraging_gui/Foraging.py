@@ -61,7 +61,7 @@ class Window(QMainWindow):
         # Load Settings that are specific to this computer  
         self.SettingFolder=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings")
         self.SettingFile=os.path.join(self.SettingFolder,'ForagingSettings.json')
-        self.ScheduleFile=os.path.join(self.SettingFolder,'ForagingSchedule.xlsx')
+        self.ScheduleFile=os.path.join(self.SettingFolder,'ForagingSchedule.csv')
         self._GetSettings()
 
         # Load Settings that are specific to this box 
@@ -2065,7 +2065,7 @@ class Window(QMainWindow):
         # Load schedule
         try:
             logging.info('Loading schedule file: {}'.format(self.ScheduleFile))
-            schedule = pd.read_excel(self.ScheduleFile)
+            schedule = pd.read_csv(self.ScheduleFile)
         except Exception as e:
             # Error, return None
             logging.error(str(e))
