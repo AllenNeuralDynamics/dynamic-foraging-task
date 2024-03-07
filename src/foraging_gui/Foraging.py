@@ -2076,6 +2076,7 @@ class Window(QMainWindow):
         # Clean up, check its current
         schedule_date =  schedule.iloc[0]['Mouse ID']  
         schedule = schedule[['Mouse ID','Box','Time Slot']].dropna()
+        schedule['Box'] = ['447-'+x[0]+'-'+x[1] for x in schedule['Box']]
 
         # Is this schedule current?
         print(schedule)
@@ -2083,7 +2084,7 @@ class Window(QMainWindow):
         print(self.current_box)
         
         print(datetime.now())                     
-
+    
         return schedule
 
     def _Open(self,open_last = False):
