@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 class MouseSelectorDialog(QDialog):
     
-    def __init__(self, MainWindow, mice, parent=None):
+    def __init__(self, MainWindow, schedule, mice, parent=None):
         super().__init__(parent)
         self.mice = ['']+mice
         self.MainWindow = MainWindow

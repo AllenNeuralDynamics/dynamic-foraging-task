@@ -60,6 +60,7 @@ class Window(QMainWindow):
         # Load Settings that are specific to this computer  
         self.SettingFolder=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings")
         self.SettingFile=os.path.join(self.SettingFolder,'ForagingSettings.json')
+        self.ScheduleFile=os.path.join(self.SettingFolder,'ForagingSchedule.xlsx')
         self._GetSettings()
 
         # Load Settings that are specific to this box 
@@ -2049,6 +2050,37 @@ class Window(QMainWindow):
                     break
         return mice  
 
+    def _Open_getSchedule():
+        '''
+            Loads the local copy of the schedule
+            if the schedule is not found, then returns None
+        '''        
+    
+        # Schedule not found
+        if not os.path.exists(self.ScheduleFile):
+            return None
+
+        # Load schedule
+        try:
+            schedule = pd.read_excel(self.ScheduleFile)
+        except Exception as e:
+            # Error, return None
+            logging.error(str(e))
+            return None
+        
+        # Clean up, check its current
+        schedule_date =  schedule.iloc[0]['Mouse ID']  
+        schedule = schedule[['Mouse ID','Box','Time Slot']].dropna()
+
+        # Is this schedule current?
+        print(schedule)
+
+        print(self.current_box)
+        
+        print(datetime.datetime.now())                     
+
+
+
     def _Open(self,open_last = False):
 
         # stop current session first
@@ -2060,8 +2092,9 @@ class Window(QMainWindow):
             return
 
         if open_last:
+            schedule = self._Open_getSchedule()
             mice = self._Open_getListOfMice()
-            W = MouseSelectorDialog(self, mice)
+            W = MouseSelectorDialog(self, schedule mice)
 
             ok, mouse_id = (
                 W.exec_() == QtWidgets.QDialog.Accepted, 
