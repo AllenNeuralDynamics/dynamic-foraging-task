@@ -2116,7 +2116,7 @@ class Window(QMainWindow):
         '''
         afternoon_cutoff = '01:30 PM'
         if datetime.now().time() > datetime.strptime(afternoon_cutoff,'%I:%M %p').time():
-            logging.info('After {}, no scheduled time'.format(afternoon cutoff))
+            logging.info('After {}, no scheduled time'.format(afternoon_cutoff))
             slot = ''
             return slot
         starts = [datetime.strptime(x,'%I:%M %p').time() for x in starts]
