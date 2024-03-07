@@ -2080,7 +2080,7 @@ class Window(QMainWindow):
 
         print(self.current_box)
         
-        print(datetime.datetime.now())                     
+        print(datetime.now())                     
 
         return schedule
 
