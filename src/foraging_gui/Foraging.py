@@ -7,7 +7,8 @@ import subprocess
 import math
 import logging
 import socket
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+from datetime import time as dtime
 
 import serial 
 import numpy as np
@@ -2074,18 +2075,44 @@ class Window(QMainWindow):
             return None
         
         # Clean up, check its current
-        schedule_date =  schedule.iloc[0]['Mouse ID']  
-        schedule = schedule[['Mouse ID','Box','Time Slot']].dropna()
-        schedule['Box'] = ['447-'+x[0]+'-'+x[1] for x in schedule['Box']]
+        try:
+            # Is this schedule current?
+            schedule_date_str =  schedule.iloc[0]['Mouse ID']  
+            schedule_date = datetime.strptime(schedule_date_str, '%m/%d/%y').date()
+            current_date = datetime.now().date()
+            if (current_date - schedule_date).days > 7:
+                logging.info('Schedule is out of date: {}'.format(schedule_date_str)) 
+                return None
 
-        # Is this schedule current?
-        print(schedule)
+            schedule = schedule[['Mouse ID','Box','Time Slot']].dropna()
+            schedule['Box'] = ['447-'+x[0]+'-'+x[1] for x in schedule['Box']]
+            schedule['start'] = [x.split('-')[0] for x in schedule['Time Slot']]
+            schedule['start'] = [datetime.strftime(datetime.strptime(x,'%I:%M') - timedelta(hours=0,minutes=30),'%I:%M') for x in schedule['start']]
+            schedule['start'] = [x+' AM' if int(x.split(':')[0])>=8 else x+' PM' for x in schedule['start']]
+            starts = schedule['start'].unique()
+            slot = self._Open_findScheduleSlot(starts)
 
-        print(self.current_box)
-        
-        print(datetime.now())                     
+            output = schedule.query('(Box==@self.current_box)&(start == @slot)')
+            if len(output) ==1:
+                mouse_slot = output.iloc[0].to_dict()
+                return mouse_slot
+            else:
+                return None
+        except Exception as e:
+            logging.error(str(e))
+            return None
     
-        return schedule
+    def _Open_findScheduleSlot(starts):
+        starts = [datetime.strptime(x,'%I:%M %p').time() for x in starts]
+        starts.sort()
+        after_start = np.where(np.array(starts) < datetime.now().time())[0]
+        
+        if len(after_start) >=1:
+            slot = starts[after_start[-1]]
+            slot = dtime.strftime(slot, '%I:%M %p')
+        else:
+            slot = ''
+        return slot
 
     def _Open(self,open_last = False):
 
@@ -2096,6 +2123,7 @@ class Window(QMainWindow):
 
         if open_last:
             schedule = self._Open_getSchedule()
+            print(schedule)
             mice = self._Open_getListOfMice()
             W = MouseSelectorDialog(self, schedule, mice)
 
