@@ -35,8 +35,9 @@ class MouseScheduleDialog(QDialog):
         self.setWindowTitle('Box {}, Load Mouse'.format(self.MainWindow.box_letter))
         self.setFixedSize(250,125)
 
-        QBtns = QDialogButtonBox.Yes | QDialogButtonBox.No
         self.buttonBox = QDialogButtonBox(QBtns)
+        self.buttonBox.addButton('Yes',QDialogButtonBox.AcceptRole)
+        self.buttonBox.addButton('No',QDialogButtonBox.RejectRole)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
@@ -46,8 +47,8 @@ class MouseScheduleDialog(QDialog):
         msg.setFont(font)
 
         self.layout = QVBoxLayout(self)
-        self.layout.addWidget(self.buttonBox)
         self.layout.addWidget(msg)
+        self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
 
 class MouseSelectorDialog(QDialog):
