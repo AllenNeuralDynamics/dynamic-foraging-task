@@ -2129,23 +2129,30 @@ class Window(QMainWindow):
 
         if open_last:
             scheduled_mouse = self._Open_getSchedule()
+            mice = self._Open_getListOfMice()
 
             mouse_id = None
+            ok = False
+            
+            # Found a scheduled mouse, ask user
             if scheduled_mouse is not None:
                 W = MouseScheduleDialog(self, scheduled_mouse)
                 outcome = W.exec_()
                 if outcome == QtWidgets.QDialog.Accepted:
                     mouse_id = scheduled_mouse['Mouse ID']
+                    ok = True
                 print(mouse_id)
- 
+                 
+            # User rejected schedule mouse, or no scheduled mouse
             if mouse_id is None:
-                mice = self._Open_getListOfMice()
+
                 W = MouseSelectorDialog(self, mice)
                 ok, mouse_id = (
                     W.exec_() == QtWidgets.QDialog.Accepted, 
                     W.combo.currentText(),
                 )        
 
+            # We don't have a mouse id
             if not ok: 
                 logging.info('Quick load failed, user hit cancel or X')
                 return                                
