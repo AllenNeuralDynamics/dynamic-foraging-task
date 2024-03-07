@@ -46,17 +46,17 @@ class MouseScheduleDialog(QDialog):
         font.setPointSize(12)
         msg0.setFont(font)
 
-        msg = QLabel('mouse:'.ljust(12)+'<span style="color:purple;font-weight:bold">{}</span>'.format(scheduled_mouse['Mouse ID']))
+        msg = QLabel('mouse:'.ljust(9)+'<span style="color:purple;font-weight:bold">{}</span>'.format(scheduled_mouse['Mouse ID']))
         font = msg.font()
         font.setPointSize(12)
         msg.setFont(font)
 
-        msg1 = QLabel('box:'.ljust(12)+'{}'.format(scheduled_mouse['Box']))
+        msg1 = QLabel('box:'.ljust(9)+'{}'.format(scheduled_mouse['Box']))
         font = msg1.font()
         font.setPointSize(12)
         msg1.setFont(font)
 
-        msg2 = QLabel('time:'.ljust(12)+'{}'.format(scheduled_mouse['Time Slot']))
+        msg2 = QLabel('time:'.ljust(9)+'{}'.format(scheduled_mouse['Time Slot']))
         font = msg2.font()
         font.setPointSize(12)
         msg2.setFont(font)
