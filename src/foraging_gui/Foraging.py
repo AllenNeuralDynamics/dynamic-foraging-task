@@ -2094,7 +2094,7 @@ class Window(QMainWindow):
         if open_last:
             schedule = self._Open_getSchedule()
             mice = self._Open_getListOfMice()
-            W = MouseSelectorDialog(self, schedule mice)
+            W = MouseSelectorDialog(self, schedule, mice)
 
             ok, mouse_id = (
                 W.exec_() == QtWidgets.QDialog.Accepted, 
