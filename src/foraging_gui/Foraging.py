@@ -27,7 +27,7 @@ from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistri
 from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog
 from foraging_gui.Dialogs import LaserCalibrationDialog
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
-from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
+from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog, MouseScheduleDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY
 from foraging_gui.stage import Stage
 
@@ -2129,14 +2129,21 @@ class Window(QMainWindow):
 
         if open_last:
             scheduled_mouse = self._Open_getSchedule()
-            print(scheduled_mouse)
-            mice = self._Open_getListOfMice()
-            W = MouseSelectorDialog(self, scheduled_mouse, mice)
 
-            ok, mouse_id = (
-                W.exec_() == QtWidgets.QDialog.Accepted, 
-                W.combo.currentText(),
-            )        
+            if schedule_mouse is not None:
+            W = MouseScheduleDialog(self, schedule_mouse)
+            ok = (
+                W.exec_() == QtWidgets.QDialog.Accepted,
+            )
+            if ok:
+                mouse_id == scheduled_mouse['Mouse ID']
+            else:  
+                mice = self._Open_getListOfMice()
+                W = MouseSelectorDialog(self, mice)
+                ok, mouse_id = (
+                    W.exec_() == QtWidgets.QDialog.Accepted, 
+                    W.combo.currentText(),
+                )        
 
             if not ok: 
                 logging.info('Quick load failed, user hit cancel or X')

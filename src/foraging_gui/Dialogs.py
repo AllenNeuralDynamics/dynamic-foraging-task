@@ -28,14 +28,32 @@ codebase_curriculum_schema_version = DynamicForagingCurriculum.model_fields['cur
 
 logger = logging.getLogger(__name__)
 
+class MouseScheduleDialog(QDialog):
+    def __init__(self, MainWindow, schedule_mouse, parent=None):
+        super().__init__(parent)
+        self.MainWindow = MainWindow
+        self.setWindowTitle('Box {}, Load Mouse'.format(self.MainWindow.box_letter))
+        self.setFixedSize(250,125)
+
+        QBtns = QDialogButtonBox.Yes | QDialogButtonBox.No
+        self.buttonBox = QDialogButtonBox(QBtns)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        msg = QLabel('Scheduled mouse: {}'.format(scheduled_mouse['Mouse ID']))
+        font = msg.font()
+        font.setPointSize(12)
+        msg.setFont(font)
+
+        self.layout = QVBoxLayout(self)
+        self.layout.addWidget(self.buttonBox)
+        self.layout.addWidget(msg)
+        self.setLayout(self.layout)
+
 class MouseSelectorDialog(QDialog):
     
-    def __init__(self, MainWindow, scheduled_mouse, mice, parent=None):
+    def __init__(self, MainWindow, mice, parent=None):
         super().__init__(parent)
-        if scheduled_mouse is None:
-            self.mice = ['']+mice
-        else:
-            self.mice = [scheduled_mouse['Mouse ID']] + mice
         self.MainWindow = MainWindow
         self.setWindowTitle('Box {}, Load Mouse'.format(self.MainWindow.box_letter))
         self.setFixedSize(250,125)
@@ -61,12 +79,12 @@ class MouseSelectorDialog(QDialog):
         msg.setFont(font)
 
         self.layout = QVBoxLayout(self)
-        if scheduled_mouse is not None:
-            mouse = scheduled_mouse['Mouse ID']
-            box = scheduled_mouse['Box']
-            timeslot = scheduled_mouse['Time Slot']
-            schedule_info = QLabel('Scheduled mouse: {}\nSchedule Box: {}\nScheduled Time: {}'.format(mouse, box, timeslot))
-            self.layout.addWidget(schedule_info)
+        #if scheduled_mouse is not None:
+        #    mouse = scheduled_mouse['Mouse ID']
+        #    box = scheduled_mouse['Box']
+        #    timeslot = scheduled_mouse['Time Slot']
+        #    schedule_info = QLabel('Scheduled mouse: {}\nSchedule Box: {}\nScheduled Time: {}'.format(mouse, box, timeslot))
+        #    self.layout.addWidget(schedule_info)
         self.layout.addWidget(msg)
         self.layout.addWidget(self.combo)
         self.layout.addWidget(self.buttonBox)
