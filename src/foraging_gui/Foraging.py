@@ -2114,7 +2114,7 @@ class Window(QMainWindow):
         ''' 
             Returns the string of the start window for the most recent start window
         '''
-        if datetime.now().time() > datetime.strptime('05:00 PM').time():
+        if datetime.now().time() > datetime.strptime('05:00 PM','%I:%M %p').time():
             logging.info('After 5pm, no scheduled time')
             slot = ''
             return slot
