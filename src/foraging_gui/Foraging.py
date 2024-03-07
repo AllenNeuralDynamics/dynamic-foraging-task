@@ -2131,8 +2131,8 @@ class Window(QMainWindow):
             scheduled_mouse = self._Open_getSchedule()
 
             mouse_id = None
-            if schedule_mouse is not None:
-                W = MouseScheduleDialog(self, schedule_mouse)
+            if scheduled_mouse is not None:
+                W = MouseScheduleDialog(self, scheduled_mouse)
                 ok = (
                     W.exec_() == QtWidgets.QDialog.Accepted,
                 )
