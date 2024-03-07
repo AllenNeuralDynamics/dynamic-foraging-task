@@ -2114,7 +2114,7 @@ class Window(QMainWindow):
         ''' 
             Returns the string of the start window for the most recent start window
         '''
-        afternoon_cutoff = '01:30 PM'
+        afternoon_cutoff = '04:00 PM'
         if datetime.now().time() > datetime.strptime(afternoon_cutoff,'%I:%M %p').time():
             logging.info('After {}, no scheduled time'.format(afternoon_cutoff))
             slot = ''
