@@ -2058,10 +2058,12 @@ class Window(QMainWindow):
     
         # Schedule not found
         if not os.path.exists(self.ScheduleFile):
+            logging.warning('Schedule file not found at: {}'.format(self.ScheduleFile))
             return None
 
         # Load schedule
         try:
+            logging.info('Loading schedule file: {}'.format(self.ScheduleFile))
             schedule = pd.read_excel(self.ScheduleFile)
         except Exception as e:
             # Error, return None
