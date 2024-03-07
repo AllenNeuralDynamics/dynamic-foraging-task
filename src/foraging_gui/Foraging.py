@@ -2554,7 +2554,8 @@ class Window(QMainWindow):
         self.ManualWaterVolume=[0,0]       
     
         # Clear Plots
-        self.PlotM._Update(GeneratedTrials=None,Channel=None)
+        if hasattr(self, 'PlotM'): 
+            self.PlotM._Update(GeneratedTrials=None,Channel=None)
 
         # Add note to log
         logging.info('New Session complete')
