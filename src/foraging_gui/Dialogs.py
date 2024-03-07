@@ -35,7 +35,7 @@ class MouseSelectorDialog(QDialog):
         if scheduled_mouse is None:
             self.mice = ['']+mice
         else:
-            self.mice = [schedule_mouse['Mouse ID'] + mice
+            self.mice = [schedule_mouse['Mouse ID']] + mice
         self.MainWindow = MainWindow
         self.setWindowTitle('Box {}, Load Mouse'.format(self.MainWindow.box_letter))
         self.setFixedSize(250,125)
