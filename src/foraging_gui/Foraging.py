@@ -2102,7 +2102,10 @@ class Window(QMainWindow):
             logging.error(str(e))
             return None
     
-    def _Open_findScheduleSlot(starts):
+    def _Open_findScheduleSlot(self, starts):
+        ''' 
+            Returns the string of the start window for the most recent start window
+        '''
         starts = [datetime.strptime(x,'%I:%M %p').time() for x in starts]
         starts.sort()
         after_start = np.where(np.array(starts) < datetime.now().time())[0]
