@@ -2138,7 +2138,9 @@ class Window(QMainWindow):
                 )
                 if ok:
                     mouse_id == scheduled_mouse['Mouse ID']
-            
+                print(ok)
+                print(W.exec_())           
+ 
             if mouse_id is None:
                 mice = self._Open_getListOfMice()
                 W = MouseSelectorDialog(self, mice)
