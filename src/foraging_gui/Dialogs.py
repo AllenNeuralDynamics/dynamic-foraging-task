@@ -35,7 +35,7 @@ class MouseScheduleDialog(QDialog):
         self.setWindowTitle('Box {}, Load Mouse'.format(self.MainWindow.box_letter))
         self.setFixedSize(250,125)
 
-        self.buttonBox = QDialogButtonBox(QBtns)
+        self.buttonBox = QDialogButtonBox()
         self.buttonBox.addButton('Yes',QDialogButtonBox.AcceptRole)
         self.buttonBox.addButton('No',QDialogButtonBox.RejectRole)
         self.buttonBox.accepted.connect(self.accept)
