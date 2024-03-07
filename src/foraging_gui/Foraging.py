@@ -2098,8 +2098,13 @@ class Window(QMainWindow):
             output = schedule.query('(Box==@self.current_box)&(start == @slot)')
             if len(output) ==1:
                 mouse_slot = output.iloc[0].to_dict()
+                logging.info('Found schedule entry: mouse {}, box {}, start window{}'.format(mouse_slot['Mouse ID'],self.current_box, slot))
                 return mouse_slot
+            elif len(output) == 0:
+                logging.info('No schedule entries matching box {}, and start window {}'.format(self.current_box, slot))
+                return None
             else:
+                logging.info('Multiple schedule entries matching box {}, and start window {}'.format(self.current_box, slot))
                 return None
         except Exception as e:
             logging.error(str(e))
@@ -2109,6 +2114,10 @@ class Window(QMainWindow):
         ''' 
             Returns the string of the start window for the most recent start window
         '''
+        if datetime.now().time() > datetime.strptime('05:00 PM').time():
+            logging.info('After 5pm, no scheduled time')
+            slot = ''
+            return slot
         starts = [datetime.strptime(x,'%I:%M %p').time() for x in starts]
         starts.sort()
         after_start = np.where(np.array(starts) < datetime.now().time())[0]
@@ -2116,8 +2125,10 @@ class Window(QMainWindow):
         if len(after_start) >=1:
             slot = starts[after_start[-1]]
             slot = dtime.strftime(slot, '%I:%M %p')
+            logging.info('Using scheduled slot window of {}'.format(slot))
         else:
             slot = ''
+            logging.info('Its before all scheduled start times')
         return slot
 
     def _Open(self,open_last = False):
@@ -2141,11 +2152,12 @@ class Window(QMainWindow):
                 if outcome == QtWidgets.QDialog.Accepted:
                     mouse_id = scheduled_mouse['Mouse ID']
                     ok = True
-                print(mouse_id)
+                    logging.info('User accepted scheduled mouse')
+                else:
+                    logging.info('User rejected scheduled mouse')
                  
             # User rejected schedule mouse, or no scheduled mouse
             if mouse_id is None:
-
                 W = MouseSelectorDialog(self, mice)
                 ok, mouse_id = (
                     W.exec_() == QtWidgets.QDialog.Accepted, 
