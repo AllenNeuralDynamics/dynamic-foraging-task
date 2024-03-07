@@ -11,6 +11,7 @@ from datetime import date, datetime
 
 import serial 
 import numpy as np
+import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
@@ -2084,9 +2085,6 @@ class Window(QMainWindow):
         return schedule
 
     def _Open(self,open_last = False):
-
-        # stop current session first
-        self._StopCurrentSession() 
 
         # Start new session
         new_session = self._NewSession()
