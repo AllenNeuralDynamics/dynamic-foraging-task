@@ -2056,8 +2056,9 @@ class Window(QMainWindow):
 
     def _Open_getSchedule(self):
         '''
-            Loads the local copy of the schedule
+            Loads the local copy of the schedule, and parses for the box/time
             if the schedule is not found, then returns None
+            if a scheduled mouse is found, returns a dictionary with the schedule info
         '''        
     
         # Schedule not found
@@ -2084,6 +2085,7 @@ class Window(QMainWindow):
                 logging.info('Schedule is out of date: {}'.format(schedule_date_str)) 
                 return None
 
+            # Parse schedule, figure out 30 minute time start before each window
             schedule = schedule[['Mouse ID','Box','Time Slot']].dropna()
             schedule['Box'] = ['447-'+x[0]+'-'+x[1] for x in schedule['Box']]
             schedule['start'] = [x.split('-')[0] for x in schedule['Time Slot']]
@@ -2092,6 +2094,7 @@ class Window(QMainWindow):
             starts = schedule['start'].unique()
             slot = self._Open_findScheduleSlot(starts)
 
+            # See if there is a mouse for this time slot on this box
             output = schedule.query('(Box==@self.current_box)&(start == @slot)')
             if len(output) ==1:
                 mouse_slot = output.iloc[0].to_dict()
@@ -2125,10 +2128,10 @@ class Window(QMainWindow):
             return
 
         if open_last:
-            schedule = self._Open_getSchedule()
-            print(schedule)
+            scheduled_mouse = self._Open_getSchedule()
+            print(scheduled_mouse)
             mice = self._Open_getListOfMice()
-            W = MouseSelectorDialog(self, schedule, mice)
+            W = MouseSelectorDialog(self, scheduled_mouse, mice)
 
             ok, mouse_id = (
                 W.exec_() == QtWidgets.QDialog.Accepted, 
