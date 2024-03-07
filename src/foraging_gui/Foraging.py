@@ -2130,14 +2130,16 @@ class Window(QMainWindow):
         if open_last:
             scheduled_mouse = self._Open_getSchedule()
 
+            mouse_id = None
             if schedule_mouse is not None:
-            W = MouseScheduleDialog(self, schedule_mouse)
-            ok = (
-                W.exec_() == QtWidgets.QDialog.Accepted,
-            )
-            if ok:
-                mouse_id == scheduled_mouse['Mouse ID']
-            else:  
+                W = MouseScheduleDialog(self, schedule_mouse)
+                ok = (
+                    W.exec_() == QtWidgets.QDialog.Accepted,
+                )
+                if ok:
+                    mouse_id == scheduled_mouse['Mouse ID']
+            
+            if mouse_id is None:
                 mice = self._Open_getListOfMice()
                 W = MouseSelectorDialog(self, mice)
                 ok, mouse_id = (
