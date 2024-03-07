@@ -41,13 +41,25 @@ class MouseScheduleDialog(QDialog):
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
-        msg = QLabel('Scheduled mouse: {}'.format(scheduled_mouse['Mouse ID']))
+        msg = QLabel('Scheduled mouse: <span style="color:purple;font-weight:bold">{}</span>'.format(scheduled_mouse['Mouse ID']))
         font = msg.font()
         font.setPointSize(12)
         msg.setFont(font)
 
+        msg1 = QLabel('Scheduled box: {}'.format(scheduled_mouse['Box']))
+        font = msg1.font()
+        font.setPointSize(12)
+        msg1.setFont(font)
+
+        msg2 = QLabel('Scheduled Time: {}'.format(scheduled_mouse['Time Slot']))
+        font = msg2.font()
+        font.setPointSize(12)
+        msg2.setFont(font)
+
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(msg)
+        self.layout.addWidget(msg1)
+        self.layout.addWidget(msg2)
         self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
 
