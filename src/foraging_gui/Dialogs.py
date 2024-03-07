@@ -29,7 +29,7 @@ codebase_curriculum_schema_version = DynamicForagingCurriculum.model_fields['cur
 logger = logging.getLogger(__name__)
 
 class MouseScheduleDialog(QDialog):
-    def __init__(self, MainWindow, schedule_mouse, parent=None):
+    def __init__(self, MainWindow, scheduled_mouse, parent=None):
         super().__init__(parent)
         self.MainWindow = MainWindow
         self.setWindowTitle('Box {}, Load Mouse'.format(self.MainWindow.box_letter))
