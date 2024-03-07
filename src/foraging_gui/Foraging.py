@@ -2036,6 +2036,8 @@ class Window(QMainWindow):
             Returns a list of mice with data saved on this computer
         '''
         filepath = os.path.join(self.default_saveFolder,self.current_box)
+        if not os.path.isdir(filepath):
+            return mice
         mouse_dirs = os.listdir(filepath)      
         mice = []
         for m in mouse_dirs:
