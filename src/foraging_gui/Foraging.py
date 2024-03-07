@@ -2037,7 +2037,7 @@ class Window(QMainWindow):
         '''
         filepath = os.path.join(self.default_saveFolder,self.current_box)
         if not os.path.isdir(filepath):
-            return mice
+            return []
         mouse_dirs = os.listdir(filepath)      
         mice = []
         for m in mouse_dirs:
