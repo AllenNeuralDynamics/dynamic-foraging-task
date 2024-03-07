@@ -73,7 +73,7 @@ class MouseSelectorDialog(QDialog):
     
     def __init__(self, MainWindow, mice, parent=None):
         super().__init__(parent)
-        self.mice = ['']+ mice
+        self.mice = ['']+mice
         self.MainWindow = MainWindow
         self.setWindowTitle('Box {}, Load Mouse'.format(self.MainWindow.box_letter))
         self.setFixedSize(250,125)
@@ -99,12 +99,6 @@ class MouseSelectorDialog(QDialog):
         msg.setFont(font)
 
         self.layout = QVBoxLayout(self)
-        #if scheduled_mouse is not None:
-        #    mouse = scheduled_mouse['Mouse ID']
-        #    box = scheduled_mouse['Box']
-        #    timeslot = scheduled_mouse['Time Slot']
-        #    schedule_info = QLabel('Scheduled mouse: {}\nSchedule Box: {}\nScheduled Time: {}'.format(mouse, box, timeslot))
-        #    self.layout.addWidget(schedule_info)
         self.layout.addWidget(msg)
         self.layout.addWidget(self.combo)
         self.layout.addWidget(self.buttonBox)
