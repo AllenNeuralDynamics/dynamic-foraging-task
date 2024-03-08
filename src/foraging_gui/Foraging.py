@@ -2122,7 +2122,7 @@ class Window(QMainWindow):
         return mice  
 
     def _Open(self,open_last = False,input_file = ''):
-        if input_file == '' or input_file == False:
+        if input_file == '':
             # stop current session first
             self._StopCurrentSession() 
 
