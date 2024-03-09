@@ -1,7 +1,10 @@
 {
     "default_saveFolder": "C:\\behavior_data\\",
     "current_box":"",
-    "Teensy_COM":"",
+    "Teensy_COM_box1":"",
+    "Teensy_COM_box2":"",
+    "Teensy_COM_box3":"",
+    "Teensy_COM_box4":"",
     "bonsai_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\bonsai\\Bonsai.exe",
     "bonsaiworkflow_path":"C:\\Users\\svc_aind_behavior\\Documents\\Github\\dynamic-foraging-task\\src\\workflows\\foraging.bonsai",
     "temporary_video_folder":"C:\\Users\\svc_aind_behavior\\Documents\\temporaryvideo\\",
