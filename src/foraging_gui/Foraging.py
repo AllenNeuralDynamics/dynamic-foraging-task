@@ -237,6 +237,8 @@ class Window(QMainWindow):
         self.GetPositions.clicked.connect(self._GetPositions)
         self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
         self.warmup.currentIndexChanged.connect(self._warmup)
+        self.Sessionlist.currentIndexChanged.connect(self._session_list)
+        self.SessionlistSpin.textChanged.connect(self._session_list_spin)
 
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
@@ -249,6 +251,74 @@ class Window(QMainWindow):
             for child in container.findChildren((QtWidgets.QLineEdit)):        
                 child.returnPressed.connect(self.keyPressEvent)
     
+    def _session_list(self):
+        '''show all sessions of the current animal and load the selected session by drop down list'''
+        if not hasattr(self,'fname'):
+            return 0
+        # open the selected session
+        if self.Sessionlist.currentText()!='':
+            selected_index=self.Sessionlist.currentIndex()
+            fname=self.session_full_path_list[self.Sessionlist.currentIndex()]
+            self._Open(input_file=fname)
+            # set the selected index back to the current session
+            self._connect_Sessionlist(connect=False)
+            self.Sessionlist.setCurrentIndex(selected_index)
+            self.SessionlistSpin.setValue(int(selected_index+1))
+            self._connect_Sessionlist(connect=True)
+
+    def _session_list_spin(self):
+        '''show all sessions of the current animal and load the selected session by spin box'''
+        if not hasattr(self,'fname'):
+            return 0
+        if self.SessionlistSpin.text()!='':
+            self._connect_Sessionlist(connect=False)
+            if int(self.SessionlistSpin.text())>self.Sessionlist.count():
+                self.SessionlistSpin.setValue(int(self.Sessionlist.count()))
+            if int(self.SessionlistSpin.text())<1:
+                self.SessionlistSpin.setValue(1)
+            fname=self.session_full_path_list[int(self.SessionlistSpin.text())-1]
+            self.Sessionlist.setCurrentIndex(int(self.SessionlistSpin.text())-1)
+            self._connect_Sessionlist(connect=True)
+            self._Open(input_file=fname)
+
+    def _connect_Sessionlist(self,connect=True):
+        '''connect or disconnect the Sessionlist and SessionlistSpin'''
+        if connect:
+            self.Sessionlist.currentIndexChanged.connect(self._session_list)
+            self.SessionlistSpin.textChanged.connect(self._session_list_spin)
+        else:
+            self.Sessionlist.disconnect()
+            self.SessionlistSpin.disconnect()
+
+    def _show_sessions(self):
+        '''list all sessions of the current animal'''
+        if not hasattr(self,'fname'):
+            return 0
+        animal_folder=os.path.dirname(os.path.dirname(os.path.dirname(self.fname)))
+        session_full_path_list=[]
+        session_path_list=[]
+        for session_folder in os.listdir(animal_folder):
+            training_folder = os.path.join(animal_folder,session_folder, 'TrainingFolder')
+            if not os.path.exists(training_folder):
+                continue
+            for file_name in os.listdir(training_folder):
+                if not file_name.endswith('.json'):
+                    continue
+                session_full_path_list.append(os.path.join(training_folder, file_name))
+                session_path_list.append(session_folder) 
+        sorted_indices = sorted(enumerate(session_path_list), key=lambda x: x[1], reverse=True)
+        sorted_dates = [date for index, date in sorted_indices]
+        # Extract just the indices
+        indices = [index for index, date in sorted_indices]
+        # Apply sorted index
+        self.session_full_path_list = [session_full_path_list[index] for index in indices]  
+        self.session_path_list=sorted_dates
+
+        self._connect_Sessionlist(connect=False)
+        self.Sessionlist.clear()
+        self.Sessionlist.addItems(sorted_dates)
+        self._connect_Sessionlist(connect=True)
+        
     def _warmup(self):
         '''warm up the session before starting.
             Use warm up with caution. Usually, it is only used for the first time training. 
@@ -1856,10 +1926,12 @@ class Window(QMainWindow):
         self.Save.setStyleSheet("background-color : None;")
         self.Save.setStyleSheet("color: black;")
 
-
         short_file = self.SaveFile.split('\\')[-1]
         self.WarningLabel.setText('Saved: {}'.format(short_file))
         self.WarningLabel.setStyleSheet(self.default_warning_color)
+        
+        self.SessionlistSpin.setEnabled(True)
+        self.Sessionlist.setEnabled(True)
 
     def _GetSaveFolder(self,CTrainingFolder=1,CHarpFolder=1,CVideoFolder=1,CPhotometryFolder=1,CEphysFolder=1):
         '''The new data storage structure. Each session forms an independent folder. Training data, Harp register events, video data, photometry data and ephys data are in different subfolders'''
@@ -2049,50 +2121,76 @@ class Window(QMainWindow):
                     break
         return mice  
 
-    def _Open(self,open_last = False):
+    def _Open(self,open_last = False,input_file = ''):
+        if input_file == '':
+            # stop current session first
+            self._StopCurrentSession() 
 
-        # stop current session first
-        self._StopCurrentSession() 
-
-        # Start new session
-        new_session = self._NewSession()
-        if not new_session:
-            return
-
-        if open_last:
-            mice = self._Open_getListOfMice()
-            W = MouseSelectorDialog(self, mice)
-
-            ok, mouse_id = (
-                W.exec_() == QtWidgets.QDialog.Accepted, 
-                W.combo.currentText(),
-            )        
-
-            if not ok: 
-                logging.info('Quick load failed, user hit cancel or X')
-                return                                
-            
-            # Mouse ID not in list of mice:
-            if mouse_id not in mice:
-                # figureout out new Mouse
-                logging.info('User entered the ID for a mouse with no data: {}'.format(mouse_id))
-                self._OpenNewMouse(mouse_id)
+            # Start new session
+            new_session = self._NewSession()
+            if not new_session:
                 return
- 
-            # attempt to load last session from mouse
-            good_load, fname = self._OpenLast_find_session(mouse_id)  
-            if not good_load:
-                logging.info('Quick load failed')
-                return        
-            logging.info('Quick load success: {}'.format(fname))
-        else:
-            # Open dialog box
-            fname, _ = QFileDialog.getOpenFileName(self, 'Open file', 
-                self.default_saveFolder+'\\'+self.current_box, 
-                "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
-            logging.info('User selected: {}'.format(fname))    
 
-        self.fname=fname
+            if open_last:
+                mice = self._Open_getListOfMice()
+                W = MouseSelectorDialog(self, mice)
+
+                ok, mouse_id = (
+                    W.exec_() == QtWidgets.QDialog.Accepted, 
+                    W.combo.currentText(),
+                )        
+
+                # Version 1, keeping it for the moment 
+                ### Prompt user to enter mouse ID, with auto-completion
+                ##dialog = QtWidgets.QInputDialog(self)
+                ##dialog.setWindowTitle('Box {}, Load mouse'.format(self.box_letter))
+                ##dialog.setLabelText('Enter the mouse ID')
+                ##dialog.setTextValue('')
+                ##lineEdit = dialog.findChild(QtWidgets.QLineEdit)
+            
+                ### Set auto complete
+                ##mice = self._Open_getListOfMice()
+                ##completer = QtWidgets.QCompleter(mice, lineEdit)
+                ##lineEdit.setCompleter(completer)
+                ##
+                ### Only accept integers
+                ##onlyInt = QtGui.QIntValidator()
+                ##onlyInt.setRange(0, 100000000)
+                ##lineEdit.setValidator(onlyInt)
+            
+                ### Get response
+                ##ok, mouse_id = (
+                ##    dialog.exec_() == QtWidgets.QDialog.Accepted, 
+                ##    dialog.textValue(),
+                ##)
+                if not ok: 
+                    logging.info('Quick load failed, user hit cancel or X')
+                    return                                
+                
+                # Mouse ID not in list of mice:
+                if mouse_id not in mice:
+                    # figureout out new Mouse
+                    logging.info('User entered the ID for a mouse with no data: {}'.format(mouse_id))
+                    self._OpenNewMouse(mouse_id)
+                    return
+    
+                # attempt to load last session from mouse
+                good_load, fname = self._OpenLast_find_session(mouse_id)  
+                if not good_load:
+                    logging.info('Quick load failed')
+                    return        
+                logging.info('Quick load success: {}'.format(fname))
+            else:
+                # Open dialog box
+                fname, _ = QFileDialog.getOpenFileName(self, 'Open file', 
+                    self.default_saveFolder+'\\'+self.current_box, 
+                    "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
+                logging.info('User selected: {}'.format(fname))    
+
+            self.fname=fname
+        else:
+            fname=input_file
+            self.fname=fname
         if fname:
             if fname.endswith('.mat'):
                 Obj = loadmat(fname)
@@ -2135,7 +2233,7 @@ class Window(QMainWindow):
                         continue
                     if key in CurrentObj:
                         # skip some keys; skip warmup
-                        if key in ['Start','warmup']:
+                        if key in ['Start','warmup','SessionlistSpin']:
                             self.WeightAfter.setText('')
                             continue
                         widget = widget_dict[key]
@@ -2254,7 +2352,15 @@ class Window(QMainWindow):
                         logging.error(str(e))
             else:
                 pass
-                    
+            # show session list related to that animal
+            tag=self._show_sessions()
+            if tag!=0:
+                fname_session_folder=os.path.basename(os.path.dirname(os.path.dirname(fname)))
+                Ind=self.Sessionlist.findText(fname_session_folder)
+                self._connect_Sessionlist(connect=False)
+                self.Sessionlist.setCurrentIndex(Ind)
+                self.SessionlistSpin.setValue(Ind+1)
+                self._connect_Sessionlist(connect=True)
         else:
             self.NewSession.setDisabled(False)
         self.StartExcitation.setChecked(False)
@@ -2659,7 +2765,15 @@ class Window(QMainWindow):
             self.Start.setChecked(False)
             self.Start.setStyleSheet('background-color:none;')
             return
- 
+        
+        # clear the session list
+        self._connect_Sessionlist(connect=False)
+        self.Sessionlist.clear()
+        self.SessionlistSpin.setValue(1)
+        self._connect_Sessionlist(connect=True)
+        self.SessionlistSpin.setEnabled(False)
+        self.Sessionlist.setEnabled(False)
+
         # Clear warnings
         self.WarningLabelInitializeBonsai.setText('')
         #self.WarningLabel_SaveTrainingStage.setText('')
