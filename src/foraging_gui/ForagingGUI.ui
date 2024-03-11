@@ -4892,7 +4892,6 @@ Current pair:
     </property>
     <addaction name="action_New"/>
     <addaction name="action_Open"/>
-    <addaction name="action_Open_Recent"/>
     <addaction name="action_Save"/>
     <addaction name="action_Exit"/>
     <addaction name="action_Clear"/>
@@ -5114,11 +5113,6 @@ Current pair:
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
-   </property>
-  </action>
-  <action name="action_Open_Recent">
-   <property name="text">
-    <string>Open &amp;Recent</string>
    </property>
   </action>
   <action name="action_Save">
