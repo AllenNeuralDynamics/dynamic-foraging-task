@@ -176,7 +176,6 @@ class Window(QMainWindow):
         self.action_Open.triggered.connect(self._Open)
         self.action_Save.triggered.connect(self._Save)
         self.actionForce_save.triggered.connect(self._ForceSave)
-        self.SaveContinue.triggered.connect(self._SaveContinue)
         self.SaveAs.triggered.connect(self._SaveAs)
         self.action_Exit.triggered.connect(self._Exit)
         self.action_New.triggered.connect(self._New)
@@ -939,10 +938,6 @@ class Window(QMainWindow):
     def _ForceSave(self):
         '''Save whether the current trial is complete or not'''
         self._Save(ForceSave=1)
-
-    def _SaveContinue(self):
-        '''Do not restart a session after saving'''
-        self._Save(SaveContinue=1)
 
     def _SaveAs(self):
         '''Do not restart a session after saving'''
@@ -1759,8 +1754,8 @@ class Window(QMainWindow):
             "<p></p>",
         )
    
-    def _Save(self,ForceSave=0,SaveContinue=1,SaveAs=0):
-        logging.info('Saving current session, ForceSave={},SaveContinue={}'.format(ForceSave,SaveContinue))
+    def _Save(self,ForceSave=0,SaveAs=0):
+        logging.info('Saving current session, ForceSave={}'.format(ForceSave))
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
         if self.BaseWeight.text()=='' or self.WeightAfter.text()=='' or self.TargetRatio.text()=='':
@@ -1910,16 +1905,6 @@ class Window(QMainWindow):
         if self.Camera_dialog.AutoControl.currentText()=='Yes':
             self.Camera_dialog.StartCamera.setChecked(False)
             self.Camera_dialog._StartCamera()
-        if SaveContinue==0:
-            # must start a new session 
-            self.NewSession.setStyleSheet("background-color : green;")
-            self.NewSession.setDisabled(True) 
-            self.StartANewSession=1
-            self.CreateNewFolder=1
-            try:
-                self.Channel.StopLogging('s')
-            except Exception as e:
-                logging.error(str(e))
 
         # Toggle unsaved data to False
         self.unsaved_data=False
