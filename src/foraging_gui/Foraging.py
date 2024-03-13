@@ -214,7 +214,6 @@ class Window(QMainWindow):
         self.Randomness.currentIndexChanged.connect(self._Randomness)
         self.TrainingStage.currentIndexChanged.connect(self._TrainingStage)
         self.TrainingStage.activated.connect(self._TrainingStage)
-        self.SaveTraining.clicked.connect(self._SaveTraining)
         self.actionTemporary_Logging.triggered.connect(self._startTemporaryLogging)
         self.actionFormal_logging.triggered.connect(self._startFormalLogging)
         self.actionOpen_logging_folder.triggered.connect(self._OpenLoggingFolder)
@@ -603,6 +602,7 @@ class Window(QMainWindow):
         if os.path.exists(self.LaserCalibrationFiles):
             with open(self.LaserCalibrationFiles, 'r') as f:
                 self.LaserCalibrationResults = json.load(f)
+
     def _GetWaterCalibration(self):
         '''
             Load the water calibration file.
@@ -646,7 +646,10 @@ class Window(QMainWindow):
             'default_saveFolder':os.path.join(os.path.expanduser("~"), "Documents")+'\\',
             'current_box':'',
             'temporary_video_folder':os.path.join(os.path.expanduser("~"), "Documents",'temporaryvideo'),
-            'Teensy_COM':'',
+            'Teensy_COM_box1':'',
+            'Teensy_COM_box2':'',
+            'Teensy_COM_box3':'',
+            'Teensy_COM_box4':'',
             'bonsai_path':os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe'),
             'bonsaiworkflow_path':os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai'),
             'newscale_serial_num_box1':'',
@@ -687,7 +690,7 @@ class Window(QMainWindow):
         self.default_saveFolder=Settings['default_saveFolder']
         self.current_box=Settings['current_box']
         self.temporary_video_folder=Settings['temporary_video_folder']
-        self.Teensy_COM=Settings['Teensy_COM']
+        self.Teensy_COM = Settings['Teensy_COM_box'+str(self.box_number)]
         self.bonsai_path=Settings['bonsai_path']
         self.bonsaiworkflow_path=Settings['bonsaiworkflow_path']
         self.newscale_serial_num_box1=Settings['newscale_serial_num_box1']
@@ -695,6 +698,7 @@ class Window(QMainWindow):
         self.newscale_serial_num_box3=Settings['newscale_serial_num_box3']
         self.newscale_serial_num_box4=Settings['newscale_serial_num_box4']
         self.default_ui=Settings['default_ui']
+
         # Also stream log info to the console if enabled
         if  Settings['show_log_info_in_console']:
             logger = logging.getLogger()
@@ -704,7 +708,6 @@ class Window(QMainWindow):
             handler.setLevel(logging.root.level)            
             logger.addHandler(handler)
             
-
         # Determine box
         if self.current_box in ['447-1','447-2','447-3']:
             mapper={
@@ -716,6 +719,8 @@ class Window(QMainWindow):
             self.current_box='{}-{}'.format(self.current_box,mapper[self.box_number])
         window_title = '{}'.format(self.current_box)
         self.window_title = window_title
+
+
 
     def _InitializeBonsai(self):
         '''
@@ -1021,8 +1026,8 @@ class Window(QMainWindow):
 
     def _TrainingStage(self):
         '''Change the parameters automatically based on training stage and task'''
-        self.WarningLabel_SaveTrainingStage.setText('')
-        self.WarningLabel_SaveTrainingStage.setStyleSheet("color: none;")
+        #self.WarningLabel_SaveTrainingStage.setText('')
+        #self.WarningLabel_SaveTrainingStage.setStyleSheet("color: none;")
         # load the prestored training stage parameters
         self._LoadTrainingPar()
         # set the training parameters in the GUI
@@ -1109,38 +1114,6 @@ class Window(QMainWindow):
             if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
                 pass
                 #widget.clear()
-
-    def _SaveTraining(self):
-        '''Save the training stage parameters'''
-        logging.info('Saving training stage parameters')
-        # load the pre-stored training stage parameters
-        self._LoadTrainingPar()
-        # get the current training stage parameters
-        widget_dict = {w.objectName(): w for w in self.TrainingParameters.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-        Task=self.Task.currentText()
-        CurrentTrainingStage=self.TrainingStage.currentText()
-        for key in widget_dict.keys():
-            widget = widget_dict[key]
-            if Task not in self.TrainingStagePar:
-                self.TrainingStagePar[Task]={}
-            if CurrentTrainingStage not in self.TrainingStagePar[Task]:
-                self.TrainingStagePar[Task][CurrentTrainingStage]={}
-            if isinstance(widget, QtWidgets.QPushButton):
-                self.TrainingStagePar[Task][CurrentTrainingStage][widget.objectName()]=widget.isChecked()
-            elif isinstance(widget, QtWidgets.QTextEdit):
-                self.TrainingStagePar[Task][CurrentTrainingStage][widget.objectName()]=widget.toPlainText()
-            elif isinstance(widget, QtWidgets.QDoubleSpinBox) or isinstance(widget, QtWidgets.QLineEdit)  or isinstance(widget, QtWidgets.QSpinBox):
-                self.TrainingStagePar[Task][CurrentTrainingStage][widget.objectName()]=widget.text()
-            elif isinstance(widget, QtWidgets.QComboBox):
-                self.TrainingStagePar[Task][CurrentTrainingStage][widget.objectName()]=widget.currentText()
-        # save
-        if not os.path.exists(os.path.dirname(self.TrainingStageFiles)):
-            os.makedirs(os.path.dirname(self.TrainingStageFiles))
-        with open(self.TrainingStageFiles, "w") as file:
-            json.dump(self.TrainingStagePar, file,indent=4) 
-        self.WarningLabel_SaveTrainingStage.setText('Training stage parameters were saved!')
-        self.WarningLabel_SaveTrainingStage.setStyleSheet(self.default_warning_color)
-        self.SaveTraining.setChecked(False)
 
     def _LoadTrainingPar(self):
         '''load the training stage parameters'''
@@ -2095,29 +2068,6 @@ class Window(QMainWindow):
                 W.combo.currentText(),
             )        
 
-            # Version 1, keeping it for the moment 
-            ### Prompt user to enter mouse ID, with auto-completion
-            ##dialog = QtWidgets.QInputDialog(self)
-            ##dialog.setWindowTitle('Box {}, Load mouse'.format(self.box_letter))
-            ##dialog.setLabelText('Enter the mouse ID')
-            ##dialog.setTextValue('')
-            ##lineEdit = dialog.findChild(QtWidgets.QLineEdit)
-        
-            ### Set auto complete
-            ##mice = self._Open_getListOfMice()
-            ##completer = QtWidgets.QCompleter(mice, lineEdit)
-            ##lineEdit.setCompleter(completer)
-            ##
-            ### Only accept integers
-            ##onlyInt = QtGui.QIntValidator()
-            ##onlyInt.setRange(0, 100000000)
-            ##lineEdit.setValidator(onlyInt)
-        
-            ### Get response
-            ##ok, mouse_id = (
-            ##    dialog.exec_() == QtWidgets.QDialog.Accepted, 
-            ##    dialog.textValue(),
-            ##)
             if not ok: 
                 logging.info('Quick load failed, user hit cancel or X')
                 return                                
@@ -2189,13 +2139,14 @@ class Window(QMainWindow):
                             self.WeightAfter.setText('')
                             continue
                         widget = widget_dict[key]
-                        try: # load the paramter used by last trial
+
+                        if 'TP_{}'.format(key) in CurrentObj:
                             value=np.array([CurrentObj['TP_'+key][-2]])
                             Tag=0
-                        except Exception as e: # sometimes we only have training parameters, no behavior parameters
-                            logging.error(str(e))
+                        else:
                             value=CurrentObj[key]
                             Tag=1
+
                         if key in {'BaseWeight','TotalWater','TargetWeight','WeightAfter','SuggestedWater','TargetRatio'}:
                             self.BaseWeight.disconnect()
                             self.TargetRatio.disconnect()
@@ -2385,6 +2336,17 @@ class Window(QMainWindow):
         self._Clear()
 
     def _StartExcitation(self):
+        if self.Teensy_COM == '':
+            logging.warning('No Teensy COM configured for this box, cannot start excitation')
+            self.TeensyWarning.setText('No Teensy COM for this box')
+            self.TeensyWarning.setStyleSheet(self.default_warning_color)
+            msg = 'No Teensy COM configured for this box, cannot start excitation'
+            reply = QMessageBox.information(self, 
+                'Box {}, StartExcitation'.format(self.box_letter), msg, QMessageBox.Ok )
+            self.StartExcitation.setChecked(False)
+            self.StartExcitation.setStyleSheet("background-color : none")
+            return
+
         if self.StartExcitation.isChecked():
             logging.info('StartExcitation is checked')
             self.StartExcitation.setStyleSheet("background-color : green;")
@@ -2427,6 +2389,18 @@ class Window(QMainWindow):
 
     
     def _StartBleaching(self):
+
+        if self.Teensy_COM == '':
+            logging.warning('No Teensy COM configured for this box, cannot start bleaching')
+            self.TeensyWarning.setText('No Teensy COM for this box')
+            self.TeensyWarning.setStyleSheet(self.default_warning_color)
+            msg = 'No Teensy COM configured for this box, cannot start bleaching'
+            reply = QMessageBox.information(self, 
+                'Box {}, StartBleaching'.format(self.box_letter), msg, QMessageBox.Ok )
+            self.StartBleaching.setChecked(False)
+            self.StartBleaching.setStyleSheet("background-color : none")
+            return
+             
         if self.StartBleaching.isChecked():
             # Check if trials have stopped
             if self.ANewTrial==0:
@@ -2498,7 +2472,7 @@ class Window(QMainWindow):
         '''
             Stop either bleaching or photometry
         '''
-        if self.box_letter != "D":
+        if self.Teensy_COM == '':
             return
         logging.info('Checking that photometry is not running')
         try:
@@ -2572,11 +2546,16 @@ class Window(QMainWindow):
         self._set_metadata_enabled(True)
 
         # Reset state variables
+        self._StopPhotometry() # Make sure photoexcitation is stopped 
         self.StartANewSession=1
         self.CreateNewFolder=1
         self.PhotometryRun=0
         self.unsaved_data=False
         self.ManualWaterVolume=[0,0]       
+    
+        # Clear Plots
+        if hasattr(self, 'PlotM'): 
+            self.PlotM._Update(GeneratedTrials=None,Channel=None)
 
         # Add note to log
         logging.info('New Session complete')
@@ -2683,8 +2662,8 @@ class Window(QMainWindow):
  
         # Clear warnings
         self.WarningLabelInitializeBonsai.setText('')
-        self.WarningLabel_SaveTrainingStage.setText('')
-        self.WarningLabel_SaveTrainingStage.setStyleSheet("color: none;")
+        #self.WarningLabel_SaveTrainingStage.setText('')
+        #self.WarningLabel_SaveTrainingStage.setStyleSheet("color: none;")
         self.NewSession.setDisabled(False)
             
         # Toggle button colors
@@ -2711,9 +2690,20 @@ class Window(QMainWindow):
             # disable metadata fields
             self._set_metadata_enabled(False)
         else:
-            logging.info('Start button pressed: ending trial loop')
-            self.Start.setStyleSheet("background-color : none")
- 
+            # Prompt user to confirm stopping trials
+            reply = QMessageBox.question(self, 
+                'Box {}, Start'.format(self.box_letter), 
+                'Stop current session?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+            if reply == QMessageBox.Yes:
+                # End trials
+                logging.info('Start button pressed: ending trial loop')
+                self.Start.setStyleSheet("background-color : none")
+            else:
+                # Continue trials
+                logging.info('Start button pressed: user continued session')               
+                self.Start.setChecked(True)
+                return 
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
@@ -2756,7 +2746,7 @@ class Window(QMainWindow):
             self.GeneratedTrials=GeneratedTrials
             self.StartANewSession=0
             PlotM=PlotV(win=self,GeneratedTrials=GeneratedTrials,width=5, height=4)
-            PlotM.finish=1
+            #PlotM.finish=1
             self.PlotM=PlotM
             #generate the first trial outside the loop, only for new session
             self.ToReceiveLicks=1
@@ -2814,6 +2804,16 @@ class Window(QMainWindow):
         # Check if photometry excitation is running or not
         if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and (not self.StartExcitation.isChecked()):
             logging.warning('photometry is set to "on", but excitation is not running')
+            
+            if self.Teensy_COM == '':
+                logging.warning('No Teensy COM configured for this box, cannot start excitation')
+                msg = 'Photometry is set to "on", but no Teensy COM configured for this box, cannot start excitation.'
+                reply = QMessageBox.information(self,'Box {}, Start'.format(self.box_letter), 
+                    msg, QMessageBox.Ok)
+                self.Start.setStyleSheet("background-color : none")
+                self.Start.setChecked(False)
+                return
+
             reply = QMessageBox.question(self, 
                 'Box {}, Start'.format(self.box_letter), 
                 'Photometry is set to "on", but excitation is not running. Start excitation now?',

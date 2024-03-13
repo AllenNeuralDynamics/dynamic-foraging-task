@@ -17,9 +17,8 @@ from scipy.io import loadmat
 save_folder=R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\nwb'
 
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler())
 
-def _get_field(obj, field_list, index=None, default=np.nan):
+def _get_field(obj, field_list, reject_list=[], index=None, default=np.nan):
     """get field from obj, if not found, return default
 
     Parameters
@@ -27,6 +26,8 @@ def _get_field(obj, field_list, index=None, default=np.nan):
     obj : the object to get the field from
     field : str or list
             if is a list, try one by one until one is found in the obj (for back-compatibility)
+    reject_list: list, optional
+            if the value is in the reject_list, reject this value and continue to search the next field name in the field_list
     index: int, optional
             if index is not None and the field is a list, return the index-th element of the field
             otherwise, return default
@@ -39,16 +40,18 @@ def _get_field(obj, field_list, index=None, default=np.nan):
     for f in field_list:
         if hasattr(obj, f):
             value = getattr(obj, f)
+            if value in reject_list:
+                continue
             if index is None:
                 return value
             # If index is int, try to get the index-th element of the field
             try:
                 return value[index]
             except:
-                logger.warning(f"Field {field_list} is iterable or index {index} is out of range")
+                logger.debug(f"Field {field_list} is iterable or index {index} is out of range")
                 return default
     else:
-        logger.warning(f"Field {field_list} not found in the object")
+        logger.debug(f"Field {field_list} not found in the object")
         return default
     
 
@@ -83,14 +86,18 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     # Some fields are not provided in some cases
     if not hasattr(obj, 'Experimenter'):
         setattr(obj, 'Experimenter', '')
-    if not hasattr(obj, 'ExtraWater'):
-        setattr(obj, 'ExtraWater', '')
     if not hasattr(obj, 'Other_CurrentTime'):
         setattr(obj, 'Other_CurrentTime', '')
     if not hasattr(obj, 'WeightAfter'):
         setattr(obj, 'WeightAfter', '')
     if not hasattr(obj, 'WeightBefore'):
         setattr(obj, 'WeightBefore', '')
+        
+    # Early return if missing some key fields
+    if any([not hasattr(obj, field) for field in ['B_TrialEndTime', 'TP_BaseRewardSum']]):
+        logger.warning(f"Missing key fields! Skipping {fname}")
+        return
+    
         
     if not hasattr(obj, 'Other_SessionStartTime'):
         session_start_timeC=datetime.datetime.strptime('2023-04-26', "%Y-%m-%d") # specific for LA30_2023-04-27.json
@@ -102,7 +109,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
 
     ### session related information ###
     nwbfile = NWBFile(
-        session_description='Session end time:'+obj.Other_CurrentTime+'  Give extra water(ml):'+obj.ExtraWater+'  box:'+obj.box,  
+        session_description='Session end time:'+obj.Other_CurrentTime,  
         identifier=str(uuid4()),  # required
         session_start_time= session_start_timeC,  # required
         session_id=os.path.basename(fname),  # optional
@@ -130,15 +137,21 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     
     ### Add some meta data to the scratch (rather than the session description) ###
     # Handle water info (with better names)
-    water_in_session_foraging = _get_field(obj, 'BS_TotalReward') / 1000  # Turn uL to mL
-    water_after_session = float(_get_field(obj, ['SuggestedWater', 'ExtraWater']))  # Old name: "ExtraWater"
-    water_day_total = float(_get_field(obj, 'TotalWater'))
+    BS_TotalReward = _get_field(obj, 'BS_TotalReward')
+    # Turn uL to mL if the value is too large
+    water_in_session_foraging = BS_TotalReward / 1000 if BS_TotalReward > 5.0 else BS_TotalReward 
+    # Old name "ExtraWater" goes first because old json has a wrong Suggested Water
+    water_after_session = float(_get_field(obj, 
+                                           field_list=['ExtraWater', 'SuggestedWater'], 
+                                           reject_list=['']
+                                           ))
+    water_day_total = float(_get_field(obj, 'TotalWater', reject_list=['']))
     water_in_session_total = water_day_total - water_after_session
     water_in_session_manual = water_in_session_total - water_in_session_foraging
     
     metadata = {
         # Meta
-        'box': _get_field(obj, 'box'),
+        'box': _get_field(obj, ['box', 'Tower']),
         'session_end_time': _get_field(obj, 'Other_CurrentTime'),
         'session_run_time_in_min': _get_field(obj, 'Other_RunningTime'),
         
@@ -150,10 +163,10 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         'water_day_total': water_day_total,
 
         # Weight
-        'base_weight': _get_field(obj, 'BaseWeight'),
-        'target_weight': _get_field(obj, 'TargetWeight'),
-        'target_weight_ratio': _get_field(obj, 'TargetRatio'),
-        'weight_after': _get_field(obj, 'WeightAfter'),
+        'base_weight': float(_get_field(obj, 'BaseWeight', reject_list=[''])),
+        'target_weight': float(_get_field(obj, 'TargetWeight', reject_list=[''])),
+        'target_weight_ratio': float(_get_field(obj, 'TargetRatio', reject_list=[''])),
+        'weight_after': float(_get_field(obj, 'WeightAfter', reject_list=[''])),
         
         # Performance
         'foraging_efficiency': _get_field(obj, 'B_for_eff_optimal'),
@@ -187,6 +200,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_trial_column(name='base_reward_probability_sum', description=f'The summation of left and right reward probability')
     nwbfile.add_trial_column(name='reward_probabilityL', description=f'The reward probability of left lick port')
     nwbfile.add_trial_column(name='reward_probabilityR', description=f'The reward probability of right lick port')
+    nwbfile.add_trial_column(name='reward_random_number_left', description=f'The random number used to determine the reward of left lick port')
+    nwbfile.add_trial_column(name='reward_random_number_right', description=f'The random number used to determine the reward of right lick port')
     nwbfile.add_trial_column(name='left_valve_open_time', description=f'The left valve open time')
     nwbfile.add_trial_column(name='right_valve_open_time', description=f'The right valve open time')
     # block
@@ -314,6 +329,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                           base_reward_probability_sum=float(obj.TP_BaseRewardSum[i]),
                           reward_probabilityL=float(obj.B_RewardProHistory[0][i]),
                           reward_probabilityR=float(obj.B_RewardProHistory[1][i]),
+                          reward_random_number_left=_get_field(obj, 'B_CurrentRewardProbRandomNumber', index=i, default=[np.nan] * 2)[0],
+                          reward_random_number_right=_get_field(obj, 'B_CurrentRewardProbRandomNumber', index=i, default=[np.nan] * 2)[1],
                           left_valve_open_time=float(obj.TP_LeftValue[i]),
                           right_valve_open_time=float(obj.TP_RightValue[i]),
                           block_beta=float(obj.TP_BlockBeta[i]),
@@ -349,17 +366,17 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                           laser_pulse_duration=LaserPulseDurC,
 
                           # add all auto training parameters (eventually should be in session.json)
-                          auto_train_engaged=obj.TP_auto_train_engaged[i],
-                          auto_train_curriculum_name=obj.TP_auto_train_curriculum_name[i] or 'none',
-                          auto_train_curriculum_version=obj.TP_auto_train_curriculum_version[i] or 'none',
-                          auto_train_curriculum_schema_version=obj.TP_auto_train_curriculum_schema_version[i] or 'none',
-                          auto_train_stage=obj.TP_auto_train_stage[i] or 'none',
-                          auto_train_stage_overridden=obj.TP_auto_train_stage_overridden[i] or np.nan,
+                          auto_train_engaged=_get_field(obj, 'TP_auto_train_engaged', index=i),
+                          auto_train_curriculum_name=_get_field(obj, 'TP_auto_train_curriculum_name', index=i, default=None) or 'none',
+                          auto_train_curriculum_version=_get_field(obj, 'TP_auto_train_curriculum_version', index=i, default=None) or 'none',
+                          auto_train_curriculum_schema_version=_get_field(obj, 'TP_auto_train_curriculum_schema_version', index=i, default=None) or 'none',
+                          auto_train_stage=_get_field(obj, 'TP_auto_train_stage', index=i, default=None) or 'none',
+                          auto_train_stage_overridden=_get_field(obj, 'TP_auto_train_stage_overridden', index=i, default=None) or np.nan,
                           
                           # lickspout position
-                          lickspout_position_x=obj.B_NewscalePositions[i][0] if hasattr(obj, 'B_NewscalePositions') else np.nan,
-                          lickspout_position_y=obj.B_NewscalePositions[i][1] if hasattr(obj, 'B_NewscalePositions') else np.nan,
-                          lickspout_position_z=obj.B_NewscalePositions[i][2] if hasattr(obj, 'B_NewscalePositions') else np.nan,
+                          lickspout_position_x=_get_field(obj, 'B_NewscalePositions', index=i, default=[np.nan] * 3)[0],
+                          lickspout_position_y=_get_field(obj, 'B_NewscalePositions', index=i, default=[np.nan] * 3)[1],
+                          lickspout_position_z=_get_field(obj, 'B_NewscalePositions', index=i, default=[np.nan] * 3)[2],
                           
                           # reward size
                           reward_size_left=float(_get_field(obj, 'TP_LeftValue_volume', index=i)),
@@ -462,11 +479,20 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
 
     # save NWB file
     base_filename = os.path.splitext(os.path.basename(fname))[0] + '.nwb'
-    NWBName = os.path.join(save_folder, base_filename)
-    io = NWBHDF5IO(NWBName, mode="w")
-    io.write(nwbfile)
-    io.close()
+    if len(nwbfile.trials) > 0:
+        NWBName = os.path.join(save_folder, base_filename)
+        io = NWBHDF5IO(NWBName, mode="w")
+        io.write(nwbfile)
+        io.close()
+        logger.info(f'Successfully converted: {NWBName}')
+    else:
+        logger.warning(f"No trials found! Skipping {fname}")
 
 
 if __name__ == '__main__':
-    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(logging.StreamHandler())
+    
+    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-G1\668546\668546_2023-09-19.json')
+    
+    # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
