@@ -647,6 +647,7 @@ class Window(QMainWindow):
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
             log_folder=os.path.join(log_folder,formatted_datetime,'HarpFolder')
+            # TODO, not sure what is happening here
         # stop the logging first
         self.Channel.StopLogging('s')
         self.Channel.StartLogging(log_folder)
@@ -1930,11 +1931,11 @@ class Window(QMainWindow):
         self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
         self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}_par.json')
         # Harp folder
-        self.HarpFolder=os.path.join(self.SessionFolder,'HarpFolder')
+        self.HarpFolder=os.path.join(self.TrainingFolder,'raw.harp')
         # video data
-        self.VideoFolder=os.path.join(self.SessionFolder,'VideoFolder')
+        self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
         # photometry folder
-        self.PhotometryFolder=os.path.join(self.SessionFolder,'PhotometryFolder')
+        self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
         # ephys folder
         self.EphysFolder=os.path.join(self.SessionFolder,'ecephys')
 
