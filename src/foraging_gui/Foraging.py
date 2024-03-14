@@ -2065,7 +2065,7 @@ class Window(QMainWindow):
                     logging.info('User hit cancel')
                     return False, ''
                 else: 
-                    return True, json_file
+                    return True, json_file_old
             elif os.path.isfile(json_file): 
                 date = s.split('_')[2] 
                 session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
