@@ -1933,8 +1933,7 @@ class Window(QMainWindow):
         current_time = datetime.now()
         formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
         self.SessionFolder=os.path.join(self.default_saveFolder, 
-            self.current_box,self.ID.text(), f'{self.ID.text()}_{formatted_datetime}')
-        # TODO, need to format with "behavior_"
+            self.current_box,self.ID.text(), f'behavior_{self.ID.text()}_{formatted_datetime}')
 
         # Training folder
         self.TrainingFolder=os.path.join(self.SessionFolder,'behavior')
@@ -2049,8 +2048,9 @@ class Window(QMainWindow):
                 self.current_box, mouse_id, s,'behavior',s+'.json')
             ## TODO: need to handle new folder name
             if os.path.isfile(json_file_old): 
-                date = s.split('_')[1]
+                date = s.split('_')[1] # TODO, probably broken by new behavior_mouse_date_time
                 session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
+                # TODO, probably broken by new format
                 reply = QMessageBox.information(self,
                     'Box {}, Please verify'.format(self.box_letter),
                     '<span style="color:purple;font-weight:bold">Mouse ID: {}</span><br>Last session: {}<br>Filename: {}'.format(mouse_id, session_date, s),
@@ -2129,29 +2129,6 @@ class Window(QMainWindow):
                     W.combo.currentText(),
                 )        
 
-                # Version 1, keeping it for the moment 
-                ### Prompt user to enter mouse ID, with auto-completion
-                ##dialog = QtWidgets.QInputDialog(self)
-                ##dialog.setWindowTitle('Box {}, Load mouse'.format(self.box_letter))
-                ##dialog.setLabelText('Enter the mouse ID')
-                ##dialog.setTextValue('')
-                ##lineEdit = dialog.findChild(QtWidgets.QLineEdit)
-            
-                ### Set auto complete
-                ##mice = self._Open_getListOfMice()
-                ##completer = QtWidgets.QCompleter(mice, lineEdit)
-                ##lineEdit.setCompleter(completer)
-                ##
-                ### Only accept integers
-                ##onlyInt = QtGui.QIntValidator()
-                ##onlyInt.setRange(0, 100000000)
-                ##lineEdit.setValidator(onlyInt)
-            
-                ### Get response
-                ##ok, mouse_id = (
-                ##    dialog.exec_() == QtWidgets.QDialog.Accepted, 
-                ##    dialog.textValue(),
-                ##)
                 if not ok: 
                     logging.info('Quick load failed, user hit cancel or X')
                     return                                
