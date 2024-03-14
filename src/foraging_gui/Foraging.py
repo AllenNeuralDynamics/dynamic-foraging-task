@@ -297,6 +297,7 @@ class Window(QMainWindow):
         session_full_path_list=[]
         session_path_list=[]
         for session_folder in os.listdir(animal_folder):
+            # TODO: need to handle new data format name
             training_folder = os.path.join(animal_folder,session_folder, 'TrainingFolder')
             if not os.path.exists(training_folder):
                 continue
@@ -1924,7 +1925,7 @@ class Window(QMainWindow):
         formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
         self.SessionFolder=os.path.join(self.default_saveFolder, self.current_box,self.ID.text(), f'{self.ID.text()}_{formatted_datetime}')
         # Training folder
-        self.TrainingFolder=os.path.join(self.SessionFolder,'TrainingFolder')
+        self.TrainingFolder=os.path.join(self.SessionFolder,'behavior')
         self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
         self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
         self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}_par.json')
@@ -2043,9 +2044,12 @@ class Window(QMainWindow):
         # do any of the sessions have saved data? Grab the most recent        
         for i in range(len(sessions)-1, -1, -1):
             s = sessions[i]
-            json_file = os.path.join(self.default_saveFolder, 
+            json_file_old = os.path.join(self.default_saveFolder, 
                 self.current_box, mouse_id, s,'TrainingFolder',s+'.json')
-            if os.path.isfile(json_file):
+            json_file = os.path.join(self.default_saveFolder, 
+                self.current_box, mouse_id, s,'behavior',s+'.json')
+            ## TODO: need to handle new folder name
+            if os.path.isfile(json_file_old): 
                 date = s.split('_')[1]
                 session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
                 reply = QMessageBox.information(self,
@@ -2101,6 +2105,7 @@ class Window(QMainWindow):
             for s in sessions:
                 json_file = os.path.join(self.default_saveFolder, 
                     self.current_box, str(m), s,'TrainingFolder',s+'.json')
+                # TODO need to handle new file name
                 if os.path.isfile(json_file):
                     mice.append(m)
                     break
