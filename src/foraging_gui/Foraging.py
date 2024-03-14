@@ -1938,8 +1938,14 @@ class Window(QMainWindow):
         self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
         # ephys folder
         self.EphysFolder=os.path.join(self.SessionFolder,'ecephys')
+        
+        # Metadata folder
+        self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
 
         # create folders
+        if not os.path.exists(self.MetadataFolder):
+            os.makedirs(self.MetadataFolder)
+            logging.info(f"Created new folder: {self.MetadataFolder}")
         if CTrainingFolder==1:
             if not os.path.exists(self.TrainingFolder):
                 os.makedirs(self.TrainingFolder)
