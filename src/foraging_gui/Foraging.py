@@ -2046,12 +2046,10 @@ class Window(QMainWindow):
         # do any of the sessions have saved data? Grab the most recent        
         for i in range(len(sessions)-1, -1, -1):
             s = sessions[i]
-            print(s)
             ## TODO fix_300
             if 'behavior' in s:
                 json_file = os.path.join(self.default_saveFolder, 
                     self.current_box, mouse_id, s,'behavior',s.split('behavior_')[1]+'.json')
-                print(json_file)
                 if os.path.isfile(json_file): 
                     date = s.split('_')[2] 
                     session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
@@ -2064,8 +2062,6 @@ class Window(QMainWindow):
                         return False, ''
                     else: 
                         return True, json_file
-                else:
-                    print('    skipping')
             else:
                 json_file = os.path.join(self.default_saveFolder, 
                     self.current_box, mouse_id, s,'TrainingFolder',s+'.json')
@@ -2082,8 +2078,6 @@ class Window(QMainWindow):
                         return False, ''
                     else: 
                         return True, json_file
-                else:
-                    print('    skipping')
  
         # none of the sessions have saved data.  
         reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
@@ -2128,17 +2122,19 @@ class Window(QMainWindow):
             for s in sessions:
                 # Check for data with old format name
                 # TODO fix_300
-                json_file_old = os.path.join(self.default_saveFolder, 
-                    self.current_box, str(m), s,'TrainingFolder',s+'.json')
-                if os.path.isfile(json_file_old):
-                    mice.append(m)
-                    break
-                # Check for data in new format name
-                json_file = os.path.join(self.default_saveFolder, 
-                    self.current_box, str(m), s,'behavior',s+'.json')
-                if os.path.isfile(json_file):
-                    mice.append(m)
-                    break
+                if 'behavior' in s:
+                    # Check for data in new format name
+                    json_file = os.path.join(self.default_saveFolder, 
+                        self.current_box, str(m), s,'behavior',s.split('behavior_')[1]+'.json')
+                    if os.path.isfile(json_file):
+                        mice.append(m)
+                        break
+                else:
+                    json_file_old = os.path.join(self.default_saveFolder, 
+                        self.current_box, str(m), s,'TrainingFolder',s+'.json')
+                    if os.path.isfile(json_file_old):
+                        mice.append(m)
+                        break
         return mice  
 
     def _Open(self,open_last = False,input_file = ''):
