@@ -297,15 +297,20 @@ class Window(QMainWindow):
         session_full_path_list=[]
         session_path_list=[]
         for session_folder in os.listdir(animal_folder):
-            # TODO: need to handle new data format name
-            training_folder = os.path.join(animal_folder,session_folder, 'TrainingFolder')
-            if not os.path.exists(training_folder):
-                continue
-            for file_name in os.listdir(training_folder):
-                if not file_name.endswith('.json'):
-                    continue
-                session_full_path_list.append(os.path.join(training_folder, file_name))
-                session_path_list.append(session_folder) 
+            # TODO fix_300
+            training_folder_old = os.path.join(animal_folder,session_folder, 'TrainingFolder')
+            training_folder_new = os.path.join(animal_folder,session_folder, 'behavior')
+            if os.path.exists(training_folder_old):
+                for file_name in os.listdir(training_folder_old):
+                    if file_name.endswith('.json'): 
+                        session_full_path_list.append(os.path.join(training_folder_old, file_name))
+                        session_path_list.append(session_folder) 
+            elif os.path.exists(training_folder_new):
+                for file_name in os.listdir(training_folder_new):
+                    if file_name.endswith('.json'): 
+                        session_full_path_list.append(os.path.join(training_folder_new, file_name))
+                        session_path_list.append(session_folder) 
+
         sorted_indices = sorted(enumerate(session_path_list), key=lambda x: x[1], reverse=True)
         sorted_dates = [date for index, date in sorted_indices]
         # Extract just the indices
@@ -2102,9 +2107,16 @@ class Window(QMainWindow):
             if len(sessions) == 0 :
                 continue
             for s in sessions:
-                json_file = os.path.join(self.default_saveFolder, 
+                # Check for data with old format name
+                # TODO fix_300
+                json_file_old = os.path.join(self.default_saveFolder, 
                     self.current_box, str(m), s,'TrainingFolder',s+'.json')
-                # TODO need to handle new file name
+                if os.path.isfile(json_file_old):
+                    mice.append(m)
+                    break
+                # Check for data in new format name
+                json_file = os.path.join(self.default_saveFolder, 
+                    self.current_box, str(m), s,'behavior',s+'.json')
                 if os.path.isfile(json_file):
                     mice.append(m)
                     break
