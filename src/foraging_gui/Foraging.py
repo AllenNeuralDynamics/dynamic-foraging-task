@@ -2051,6 +2051,8 @@ class Window(QMainWindow):
                 self.current_box, mouse_id, s,'TrainingFolder',s+'.json')
             json_file = os.path.join(self.default_saveFolder, 
                 self.current_box, mouse_id, s,'behavior',s+'.json')
+            print('  '+json_file_old)
+            print('  '+json_file_new)
             ## TODO fix_300
             if os.path.isfile(json_file_old): 
                 date = s.split('_')[1] 
