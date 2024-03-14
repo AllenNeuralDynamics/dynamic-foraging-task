@@ -2050,7 +2050,7 @@ class Window(QMainWindow):
             json_file_old = os.path.join(self.default_saveFolder, 
                 self.current_box, mouse_id, s,'TrainingFolder',s+'.json')
             json_file = os.path.join(self.default_saveFolder, 
-                self.current_box, mouse_id, s,'behavior',s+'.json')
+                self.current_box, mouse_id, s,'behavior',s.split('behavior_')[1]+'.json')
             print('  '+json_file_old)
             print('  '+json_file)
             ## TODO fix_300
