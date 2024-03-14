@@ -1936,7 +1936,7 @@ class Window(QMainWindow):
         # photometry folder
         self.PhotometryFolder=os.path.join(self.SessionFolder,'PhotometryFolder')
         # ephys folder
-        self.EphysFolder=os.path.join(self.SessionFolder,'EphysFolder')
+        self.EphysFolder=os.path.join(self.SessionFolder,'ecephys')
 
         # create folders
         if CTrainingFolder==1:
