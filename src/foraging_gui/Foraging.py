@@ -2046,6 +2046,7 @@ class Window(QMainWindow):
         # do any of the sessions have saved data? Grab the most recent        
         for i in range(len(sessions)-1, -1, -1):
             s = sessions[i]
+            print(s)
             json_file_old = os.path.join(self.default_saveFolder, 
                 self.current_box, mouse_id, s,'TrainingFolder',s+'.json')
             json_file = os.path.join(self.default_saveFolder, 
