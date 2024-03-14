@@ -651,8 +651,7 @@ class Window(QMainWindow):
             loggingtype=1
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-            log_folder=os.path.join(log_folder,formatted_datetime,'HarpFolder')
-            # TODO, not sure what is happening here
+            log_folder=os.path.join(log_folder,formatted_datetime,'raw.harp')
         # stop the logging first
         self.Channel.StopLogging('s')
         self.Channel.StartLogging(log_folder)
