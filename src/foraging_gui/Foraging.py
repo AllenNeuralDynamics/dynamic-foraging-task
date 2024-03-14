@@ -2050,11 +2050,22 @@ class Window(QMainWindow):
                 self.current_box, mouse_id, s,'TrainingFolder',s+'.json')
             json_file = os.path.join(self.default_saveFolder, 
                 self.current_box, mouse_id, s,'behavior',s+'.json')
-            ## TODO: need to handle new folder name
+            ## TODO fix_300
             if os.path.isfile(json_file_old): 
-                date = s.split('_')[1] # TODO, probably broken by new behavior_mouse_date_time
+                date = s.split('_')[1] 
                 session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
-                # TODO, probably broken by new format
+                reply = QMessageBox.information(self,
+                    'Box {}, Please verify'.format(self.box_letter),
+                    '<span style="color:purple;font-weight:bold">Mouse ID: {}</span><br>Last session: {}<br>Filename: {}'.format(mouse_id, session_date, s),
+                    QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
+                if reply == QMessageBox.Cancel:
+                    logging.info('User hit cancel')
+                    return False, ''
+                else: 
+                    return True, json_file
+            elif os.path.isfile(json_file): 
+                date = s.split('_')[2] 
+                session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
                 reply = QMessageBox.information(self,
                     'Box {}, Please verify'.format(self.box_letter),
                     '<span style="color:purple;font-weight:bold">Mouse ID: {}</span><br>Last session: {}<br>Filename: {}'.format(mouse_id, session_date, s),
