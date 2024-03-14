@@ -2052,7 +2052,7 @@ class Window(QMainWindow):
             json_file = os.path.join(self.default_saveFolder, 
                 self.current_box, mouse_id, s,'behavior',s+'.json')
             print('  '+json_file_old)
-            print('  '+json_file_new)
+            print('  '+json_file)
             ## TODO fix_300
             if os.path.isfile(json_file_old): 
                 date = s.split('_')[1] 
@@ -2078,6 +2078,8 @@ class Window(QMainWindow):
                     return False, ''
                 else: 
                     return True, json_file
+            else:
+                print('    skipping')
        
         # none of the sessions have saved data.  
         reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
