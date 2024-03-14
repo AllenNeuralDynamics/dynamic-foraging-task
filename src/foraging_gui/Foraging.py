@@ -1920,22 +1920,37 @@ class Window(QMainWindow):
         self.SessionlistSpin.setEnabled(True)
         self.Sessionlist.setEnabled(True)
 
-    def _GetSaveFolder(self,CTrainingFolder=1,CHarpFolder=1,CVideoFolder=1,CPhotometryFolder=1,CEphysFolder=1):
-        '''The new data storage structure. Each session forms an independent folder. Training data, Harp register events, video data, photometry data and ephys data are in different subfolders'''
+    def _GetSaveFolder(self):
+        '''
+        Create folders with structure requested by Sci.Comp.
+        Each session forms an independent folder, with subfolders:
+            Training data
+                Harp register events
+            video data
+            photometry data
+            ephys data
+        '''
         current_time = datetime.now()
         formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-        self.SessionFolder=os.path.join(self.default_saveFolder, self.current_box,self.ID.text(), f'{self.ID.text()}_{formatted_datetime}')
+        self.SessionFolder=os.path.join(self.default_saveFolder, 
+            self.current_box,self.ID.text(), f'{self.ID.text()}_{formatted_datetime}')
+        # TODO, need to format with "behavior_"
+
         # Training folder
         self.TrainingFolder=os.path.join(self.SessionFolder,'behavior')
         self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
         self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
         self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}_par.json')
+
         # Harp folder
         self.HarpFolder=os.path.join(self.TrainingFolder,'raw.harp')
+
         # video data
         self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
+
         # photometry folder
         self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
+
         # ephys folder
         self.EphysFolder=os.path.join(self.SessionFolder,'ecephys')
         
@@ -1943,50 +1958,27 @@ class Window(QMainWindow):
         self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
 
         # create folders
+        if not os.path.exists(self.SessionFolder):
+            os.makedirs(self.SessionFolder)
+            logging.info(f"Created new folder: {self.SessionFolder}")
         if not os.path.exists(self.MetadataFolder):
             os.makedirs(self.MetadataFolder)
             logging.info(f"Created new folder: {self.MetadataFolder}")
-        if CTrainingFolder==1:
-            if not os.path.exists(self.TrainingFolder):
-                os.makedirs(self.TrainingFolder)
-                logging.info(f"Created new folder: {self.TrainingFolder}")
-        if CHarpFolder==1:
-            if not os.path.exists(self.HarpFolder):
-                os.makedirs(self.HarpFolder)
-                logging.info(f"Created new folder: {self.HarpFolder}")
-        if CVideoFolder==1:
-            if not os.path.exists(self.VideoFolder):
-                os.makedirs(self.VideoFolder)
-                logging.info(f"Created new folder: {self.VideoFolder}")
-        if CPhotometryFolder==1:
-            if not os.path.exists(self.PhotometryFolder):
-                os.makedirs(self.PhotometryFolder)
-                logging.info(f"Created new folder: {self.PhotometryFolder}")
-        if CEphysFolder==1:
-            if not os.path.exists(self.EphysFolder):
-                os.makedirs(self.EphysFolder)
-                logging.info(f"Created new folder: {self.EphysFolder}")
-
-    def _GetSaveFileName(self):
-        '''Get the name of the save file. This is an old data structure and has been deprecated.'''
-        SaveFileMat = os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}.mat')
-        SaveFileJson= os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}.json')
-        SaveFileParJson= os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}_par.json')
-        if not os.path.exists(os.path.dirname(SaveFileJson)):
-            os.makedirs(os.path.dirname(SaveFileJson))
-            logging.info(f"Created new folder: {os.path.dirname(SaveFileJson)}")
-        N=0
-        while 1:
-            if os.path.isfile(SaveFileMat) or os.path.isfile(SaveFileJson)or os.path.isfile(SaveFileParJson):
-                N=N+1
-                SaveFileMat=os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}_{N}.mat')
-                SaveFileJson=os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}_{N}.json')
-                SaveFileParJson=os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}_{N}_par.json')
-            else:
-                break
-        self.SaveFileMat=SaveFileMat
-        self.SaveFileJson=SaveFileJson
-        self.SaveFileParJson=SaveFileParJson
+        if not os.path.exists(self.TrainingFolder):
+            os.makedirs(self.TrainingFolder)
+            logging.info(f"Created new folder: {self.TrainingFolder}")
+        if not os.path.exists(self.HarpFolder):
+            os.makedirs(self.HarpFolder)
+            logging.info(f"Created new folder: {self.HarpFolder}")
+        if not os.path.exists(self.VideoFolder):
+            os.makedirs(self.VideoFolder)
+            logging.info(f"Created new folder: {self.VideoFolder}")
+        if not os.path.exists(self.PhotometryFolder):
+            os.makedirs(self.PhotometryFolder)
+            logging.info(f"Created new folder: {self.PhotometryFolder}")
+        if not os.path.exists(self.EphysFolder):
+            os.makedirs(self.EphysFolder)
+            logging.info(f"Created new folder: {self.EphysFolder}")
 
     def _Concat(self,widget_dict,Obj,keyname):
         '''Help manage save different dialogs'''
