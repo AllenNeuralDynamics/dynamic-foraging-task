@@ -4432,12 +4432,10 @@
     </property>
     <addaction name="action_New"/>
     <addaction name="action_Open"/>
-    <addaction name="action_Open_Recent"/>
     <addaction name="action_Save"/>
     <addaction name="action_Exit"/>
     <addaction name="action_Clear"/>
     <addaction name="actionForce_save"/>
-    <addaction name="SaveContinue"/>
     <addaction name="SaveAs"/>
    </widget>
    <widget class="QMenu" name="menuTools">
@@ -4656,11 +4654,6 @@
     <string>Ctrl+O</string>
    </property>
   </action>
-  <action name="action_Open_Recent">
-   <property name="text">
-    <string>Open &amp;Recent</string>
-   </property>
-  </action>
   <action name="action_Save">
    <property name="icon">
     <iconset>
@@ -4797,11 +4790,6 @@
    </property>
    <property name="text">
     <string>Licks distribution</string>
-   </property>
-  </action>
-  <action name="SaveContinue">
-   <property name="text">
-    <string>Save (without restarting a session)</string>
    </property>
   </action>
   <action name="SaveAs">
