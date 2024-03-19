@@ -297,14 +297,20 @@ class Window(QMainWindow):
         session_full_path_list=[]
         session_path_list=[]
         for session_folder in os.listdir(animal_folder):
-            training_folder = os.path.join(animal_folder,session_folder, 'TrainingFolder')
-            if not os.path.exists(training_folder):
-                continue
-            for file_name in os.listdir(training_folder):
-                if not file_name.endswith('.json'):
-                    continue
-                session_full_path_list.append(os.path.join(training_folder, file_name))
-                session_path_list.append(session_folder) 
+            # TODO fix_300
+            training_folder_old = os.path.join(animal_folder,session_folder, 'TrainingFolder')
+            training_folder_new = os.path.join(animal_folder,session_folder, 'behavior')
+            if os.path.exists(training_folder_old):
+                for file_name in os.listdir(training_folder_old):
+                    if file_name.endswith('.json'): 
+                        session_full_path_list.append(os.path.join(training_folder_old, file_name))
+                        session_path_list.append(session_folder) 
+            elif os.path.exists(training_folder_new):
+                for file_name in os.listdir(training_folder_new):
+                    if file_name.endswith('.json'): 
+                        session_full_path_list.append(os.path.join(training_folder_new, file_name))
+                        session_path_list.append(session_folder) 
+
         sorted_indices = sorted(enumerate(session_path_list), key=lambda x: x[1], reverse=True)
         sorted_dates = [date for index, date in sorted_indices]
         # Extract just the indices
@@ -645,7 +651,7 @@ class Window(QMainWindow):
             loggingtype=1
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-            log_folder=os.path.join(log_folder,formatted_datetime,'HarpFolder')
+            log_folder=os.path.join(log_folder,formatted_datetime,'raw.harp')
         # stop the logging first
         self.Channel.StopLogging('s')
         self.Channel.StartLogging(log_folder)
@@ -1918,67 +1924,64 @@ class Window(QMainWindow):
         self.SessionlistSpin.setEnabled(True)
         self.Sessionlist.setEnabled(True)
 
-    def _GetSaveFolder(self,CTrainingFolder=1,CHarpFolder=1,CVideoFolder=1,CPhotometryFolder=1,CEphysFolder=1):
-        '''The new data storage structure. Each session forms an independent folder. Training data, Harp register events, video data, photometry data and ephys data are in different subfolders'''
+    def _GetSaveFolder(self):
+        '''
+        Create folders with structure requested by Sci.Comp.
+        Each session forms an independent folder, with subfolders:
+            Training data
+                Harp register events
+            video data
+            photometry data
+            ephys data
+        '''
         current_time = datetime.now()
         formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-        self.SessionFolder=os.path.join(self.default_saveFolder, self.current_box,self.ID.text(), f'{self.ID.text()}_{formatted_datetime}')
+        self.SessionFolder=os.path.join(self.default_saveFolder, 
+            self.current_box,self.ID.text(), f'behavior_{self.ID.text()}_{formatted_datetime}')
+
         # Training folder
-        self.TrainingFolder=os.path.join(self.SessionFolder,'TrainingFolder')
+        self.TrainingFolder=os.path.join(self.SessionFolder,'behavior')
         self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
         self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
         self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}_par.json')
+
         # Harp folder
-        self.HarpFolder=os.path.join(self.SessionFolder,'HarpFolder')
+        self.HarpFolder=os.path.join(self.TrainingFolder,'raw.harp')
+
         # video data
-        self.VideoFolder=os.path.join(self.SessionFolder,'VideoFolder')
+        self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
+
         # photometry folder
-        self.PhotometryFolder=os.path.join(self.SessionFolder,'PhotometryFolder')
+        self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
+
         # ephys folder
-        self.EphysFolder=os.path.join(self.SessionFolder,'EphysFolder')
+        self.EphysFolder=os.path.join(self.SessionFolder,'ecephys')
+        
+        # Metadata folder
+        self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
 
         # create folders
-        if CTrainingFolder==1:
-            if not os.path.exists(self.TrainingFolder):
-                os.makedirs(self.TrainingFolder)
-                logging.info(f"Created new folder: {self.TrainingFolder}")
-        if CHarpFolder==1:
-            if not os.path.exists(self.HarpFolder):
-                os.makedirs(self.HarpFolder)
-                logging.info(f"Created new folder: {self.HarpFolder}")
-        if CVideoFolder==1:
-            if not os.path.exists(self.VideoFolder):
-                os.makedirs(self.VideoFolder)
-                logging.info(f"Created new folder: {self.VideoFolder}")
-        if CPhotometryFolder==1:
-            if not os.path.exists(self.PhotometryFolder):
-                os.makedirs(self.PhotometryFolder)
-                logging.info(f"Created new folder: {self.PhotometryFolder}")
-        if CEphysFolder==1:
-            if not os.path.exists(self.EphysFolder):
-                os.makedirs(self.EphysFolder)
-                logging.info(f"Created new folder: {self.EphysFolder}")
-
-    def _GetSaveFileName(self):
-        '''Get the name of the save file. This is an old data structure and has been deprecated.'''
-        SaveFileMat = os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}.mat')
-        SaveFileJson= os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}.json')
-        SaveFileParJson= os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}_par.json')
-        if not os.path.exists(os.path.dirname(SaveFileJson)):
-            os.makedirs(os.path.dirname(SaveFileJson))
-            logging.info(f"Created new folder: {os.path.dirname(SaveFileJson)}")
-        N=0
-        while 1:
-            if os.path.isfile(SaveFileMat) or os.path.isfile(SaveFileJson)or os.path.isfile(SaveFileParJson):
-                N=N+1
-                SaveFileMat=os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}_{N}.mat')
-                SaveFileJson=os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}_{N}.json')
-                SaveFileParJson=os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}_{N}_par.json')
-            else:
-                break
-        self.SaveFileMat=SaveFileMat
-        self.SaveFileJson=SaveFileJson
-        self.SaveFileParJson=SaveFileParJson
+        if not os.path.exists(self.SessionFolder):
+            os.makedirs(self.SessionFolder)
+            logging.info(f"Created new folder: {self.SessionFolder}")
+        if not os.path.exists(self.MetadataFolder):
+            os.makedirs(self.MetadataFolder)
+            logging.info(f"Created new folder: {self.MetadataFolder}")
+        if not os.path.exists(self.TrainingFolder):
+            os.makedirs(self.TrainingFolder)
+            logging.info(f"Created new folder: {self.TrainingFolder}")
+        if not os.path.exists(self.HarpFolder):
+            os.makedirs(self.HarpFolder)
+            logging.info(f"Created new folder: {self.HarpFolder}")
+        if not os.path.exists(self.VideoFolder):
+            os.makedirs(self.VideoFolder)
+            logging.info(f"Created new folder: {self.VideoFolder}")
+        if not os.path.exists(self.PhotometryFolder):
+            os.makedirs(self.PhotometryFolder)
+            logging.info(f"Created new folder: {self.PhotometryFolder}")
+        if not os.path.exists(self.EphysFolder):
+            os.makedirs(self.EphysFolder)
+            logging.info(f"Created new folder: {self.EphysFolder}")
 
     def _Concat(self,widget_dict,Obj,keyname):
         '''Help manage save different dialogs'''
@@ -2043,21 +2046,39 @@ class Window(QMainWindow):
         # do any of the sessions have saved data? Grab the most recent        
         for i in range(len(sessions)-1, -1, -1):
             s = sessions[i]
-            json_file = os.path.join(self.default_saveFolder, 
-                self.current_box, mouse_id, s,'TrainingFolder',s+'.json')
-            if os.path.isfile(json_file):
-                date = s.split('_')[1]
-                session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
-                reply = QMessageBox.information(self,
-                    'Box {}, Please verify'.format(self.box_letter),
-                    '<span style="color:purple;font-weight:bold">Mouse ID: {}</span><br>Last session: {}<br>Filename: {}'.format(mouse_id, session_date, s),
-                    QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
-                if reply == QMessageBox.Cancel:
-                    logging.info('User hit cancel')
-                    return False, ''
-                else: 
-                    return True, json_file
-       
+            ## TODO fix_300
+            if 'behavior' in s:
+                json_file = os.path.join(self.default_saveFolder, 
+                    self.current_box, mouse_id, s,'behavior',s.split('behavior_')[1]+'.json')
+                if os.path.isfile(json_file): 
+                    date = s.split('_')[2] 
+                    session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
+                    reply = QMessageBox.information(self,
+                        'Box {}, Please verify'.format(self.box_letter),
+                        '<span style="color:purple;font-weight:bold">Mouse ID: {}</span><br>Last session: {}<br>Filename: {}'.format(mouse_id, session_date, s),
+                        QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
+                    if reply == QMessageBox.Cancel:
+                        logging.info('User hit cancel')
+                        return False, ''
+                    else: 
+                        return True, json_file
+            else:
+                json_file = os.path.join(self.default_saveFolder, 
+                    self.current_box, mouse_id, s,'TrainingFolder',s+'.json')
+                print(json_file)
+                if os.path.isfile(json_file): 
+                    date = s.split('_')[1] 
+                    session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
+                    reply = QMessageBox.information(self,
+                        'Box {}, Please verify'.format(self.box_letter),
+                        '<span style="color:purple;font-weight:bold">Mouse ID: {}</span><br>Last session: {}<br>Filename: {}'.format(mouse_id, session_date, s),
+                        QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
+                    if reply == QMessageBox.Cancel:
+                        logging.info('User hit cancel')
+                        return False, ''
+                    else: 
+                        return True, json_file
+ 
         # none of the sessions have saved data.  
         reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
             'Mouse ID {} does not have any saved sessions on this computer'.format(mouse_id),
@@ -2099,11 +2120,21 @@ class Window(QMainWindow):
             if len(sessions) == 0 :
                 continue
             for s in sessions:
-                json_file = os.path.join(self.default_saveFolder, 
-                    self.current_box, str(m), s,'TrainingFolder',s+'.json')
-                if os.path.isfile(json_file):
-                    mice.append(m)
-                    break
+                # Check for data with old format name
+                # TODO fix_300
+                if 'behavior' in s:
+                    # Check for data in new format name
+                    json_file = os.path.join(self.default_saveFolder, 
+                        self.current_box, str(m), s,'behavior',s.split('behavior_')[1]+'.json')
+                    if os.path.isfile(json_file):
+                        mice.append(m)
+                        break
+                else:
+                    json_file_old = os.path.join(self.default_saveFolder, 
+                        self.current_box, str(m), s,'TrainingFolder',s+'.json')
+                    if os.path.isfile(json_file_old):
+                        mice.append(m)
+                        break
         return mice  
 
     def _Open(self,open_last = False,input_file = ''):
@@ -2125,29 +2156,6 @@ class Window(QMainWindow):
                     W.combo.currentText(),
                 )        
 
-                # Version 1, keeping it for the moment 
-                ### Prompt user to enter mouse ID, with auto-completion
-                ##dialog = QtWidgets.QInputDialog(self)
-                ##dialog.setWindowTitle('Box {}, Load mouse'.format(self.box_letter))
-                ##dialog.setLabelText('Enter the mouse ID')
-                ##dialog.setTextValue('')
-                ##lineEdit = dialog.findChild(QtWidgets.QLineEdit)
-            
-                ### Set auto complete
-                ##mice = self._Open_getListOfMice()
-                ##completer = QtWidgets.QCompleter(mice, lineEdit)
-                ##lineEdit.setCompleter(completer)
-                ##
-                ### Only accept integers
-                ##onlyInt = QtGui.QIntValidator()
-                ##onlyInt.setRange(0, 100000000)
-                ##lineEdit.setValidator(onlyInt)
-            
-                ### Get response
-                ##ok, mouse_id = (
-                ##    dialog.exec_() == QtWidgets.QDialog.Accepted, 
-                ##    dialog.textValue(),
-                ##)
                 if not ok: 
                     logging.info('Quick load failed, user hit cancel or X')
                     return                                
