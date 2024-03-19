@@ -1721,11 +1721,6 @@ class GenerateTrials():
                 # Set an attribute in self with the name 'TP_' followed by the child's object name
                 # and store whether the child is checked or not
                 setattr(self, 'TP_'+child.objectName(), child.isChecked())
-        # log folder
-        try:
-            self.TP_log_folder=win.Ot_log_folder
-        except Exception as e:
-            logging.error(str(e))
             
         # Manually attach auto training parameters 
         if hasattr(win, 'AutoTrain_dialog') and win.AutoTrain_dialog.auto_train_engaged:
