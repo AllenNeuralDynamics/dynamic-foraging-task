@@ -2769,8 +2769,6 @@ class Window(QMainWindow):
 
         # Clear warnings
         self.WarningLabelInitializeBonsai.setText('')
-        #self.WarningLabel_SaveTrainingStage.setText('')
-        #self.WarningLabel_SaveTrainingStage.setStyleSheet("color: none;")
         self.NewSession.setDisabled(False)
             
         # Toggle button colors
@@ -2787,6 +2785,18 @@ class Window(QMainWindow):
                     self.Start.setChecked(False)
                     logging.info('User declines continuation of session')
                     return
+
+            # check experimenter name
+            if self.Experimenter.text() == "the ghost in the shell":
+                reply = QMessageBox.question(self,
+                    'Box {}, Start'.format(self.box_letter),    
+                    'Experimenter field set to default, continue anyways?',
+                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                if reply == QMessageBox.No:
+                    self.Start.setChecked(False)
+                    logging.info('User declines using default name')
+                    return                
+            logging.info('Starting session, with experimenter: {}'.format(self.Experimenter.text()))
 
             # change button color and mark the state change
             self.Start.setStyleSheet("background-color : green;")
