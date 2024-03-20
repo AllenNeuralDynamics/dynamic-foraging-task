@@ -1953,9 +1953,6 @@ class Window(QMainWindow):
 
         # photometry folder
         self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
-
-        # ephys folder
-        self.EphysFolder=os.path.join(self.SessionFolder,'ecephys')
         
         # Metadata folder
         self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
@@ -1979,9 +1976,6 @@ class Window(QMainWindow):
         if not os.path.exists(self.PhotometryFolder):
             os.makedirs(self.PhotometryFolder)
             logging.info(f"Created new folder: {self.PhotometryFolder}")
-        if not os.path.exists(self.EphysFolder):
-            os.makedirs(self.EphysFolder)
-            logging.info(f"Created new folder: {self.EphysFolder}")
 
     def _Concat(self,widget_dict,Obj,keyname):
         '''Help manage save different dialogs'''
