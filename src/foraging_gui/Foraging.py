@@ -2789,6 +2789,7 @@ class Window(QMainWindow):
             # check experimenter name
             if self.Experimenter.text() == "the ghost in the shell":
                 reply = QMessageBox.question(self,
+                    'Box {}, Start'.format(self.box_letter),    
                     'Experimenter field set to default, continue anyways?',
                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
                 if reply == QMessageBox.No:
