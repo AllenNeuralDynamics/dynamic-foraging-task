@@ -1498,7 +1498,7 @@ class GenerateTrials():
             if np.random.random(1)<0.1: # no response
                 self.B_AnimalCurrentResponse=2
             else:
-                self.B_AnimalCurrentResponse=0#random.choice(range(2)) ##DEBUGGING
+                self.B_AnimalCurrentResponse=random.choice(range(2))
 
         if self.B_AnimalCurrentResponse==2:
             self.B_CurrentRewarded[0]=False
