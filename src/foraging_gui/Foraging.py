@@ -2120,7 +2120,6 @@ class Window(QMainWindow):
             if len(sessions) == 0 :
                 continue
             for s in sessions:
-                # Check for data with old format name
                 # TODO fix_300
                 if 'behavior' in s:
                     # Check for data in new format name
@@ -2130,6 +2129,7 @@ class Window(QMainWindow):
                         mice.append(m)
                         break
                 else:
+                    # Check for data with old format name
                     json_file_old = os.path.join(self.default_saveFolder, 
                         self.current_box, str(m), s,'TrainingFolder',s+'.json')
                     if os.path.isfile(json_file_old):
