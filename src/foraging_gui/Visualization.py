@@ -269,7 +269,8 @@ class PlotV(FigureCanvas):
             choice_R_frac[idx]=LeftChoiceN/(LeftChoiceN+RightChoiceN)
             if LeftRewardN+RightRewardN!=0:
                 reward_R_frac[idx]=LeftRewardN/(LeftRewardN+RightRewardN)
-            if (RightChoiceN!=0) and (LeftChoiceN!=0) and (RightRewardN!=0) and (LeftRewardN!=0):
+            #if (RightChoiceN!=0) and (LeftChoiceN!=0) and (RightRewardN!=0) and (LeftRewardN!=0):
+            if RightChoiceN and LeftChoiceN and RightRewardN and LeftRewardN:
                 choice_log_ratio[idx]=np.log(RightChoiceN / LeftChoiceN)
                 reward_log_ratio[idx]=np.log(RightRewardN / LeftRewardN)
             WinStartN=WinStartN+StepSize
