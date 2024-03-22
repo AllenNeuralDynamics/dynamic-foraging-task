@@ -1,5 +1,5 @@
-name: production-merge-action
-run-name: create production merge 
+name: update-main-action
+run-name: create update main  
 on:
     schedule:
     - cron: '0 8 * * 2'
