@@ -352,14 +352,18 @@ To configure automatic updates consistent with the [update protocol](https://git
 
 Data for each session is saved as a JSON file with the following files:
 
-### Task structure
+### Behavioral events and timestamps
 - **animal_response**:'The response of the animal. 0, left choice; 1, right choice; 2, no response'
 - **rewarded_historyL**:'The reward history of left lick sprout'
 - **rewarded_historyR**: 'The reward history of right lick sprout'
 - **delay_start_time**: 'The delay start time'
 - **goCue_start_time**: 'The go cue start time'
 - **reward_outcome_time**: 'The reward outcome time (reward/no reward/no response)'
+
 ### Training paramters 
+Here is an overview of the trial structure using a rewarded trial, an unrewarded trial, and an ignored trial as examples.
+![image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/2530ff82-8b78-4feb-af03-410dcdcbfcc6)
+
 #### Behavior structure
 - **bait_left**:'Whether the current left licksprout has a bait or not'
 - **bait_right**:'Whether the current right licksprout has a bait or not'
