@@ -172,7 +172,6 @@ class Window(QMainWindow):
         self.actionTime_distribution.triggered.connect(self._TimeDistribution)
         self.action_Calibration.triggered.connect(self._WaterCalibration)
         self.actionLaser_Calibration.triggered.connect(self._LaserCalibration)
-        self.action_Snipping.triggered.connect(self._Snipping)
         self.action_Open.triggered.connect(self._Open)
         self.action_Save.triggered.connect(self._Save)
         self.actionForce_save.triggered.connect(self._ForceSave)
@@ -1643,10 +1642,6 @@ class Window(QMainWindow):
         logging.info('closing the GUI')
         self.close()      
  
-    def _Snipping(self):
-        '''Open the snipping tool'''
-        os.system("start %windir%\system32\SnippingTool.exe") 
-
     def _Optogenetics(self):
         '''will be triggered when the optogenetics icon is pressed'''
         if self.OpenOptogenetics==0:
