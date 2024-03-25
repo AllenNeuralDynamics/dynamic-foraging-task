@@ -1291,7 +1291,7 @@ class Window(QMainWindow):
                         if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))                       
                         continue
-                    if (child.objectName() == 'LatestCalibrationDate'):
+                    if (child.objectName() in ['LatestCalibrationDate','SessionlistSpin']):
                         continue
 
 
