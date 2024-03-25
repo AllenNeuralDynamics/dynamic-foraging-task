@@ -17,5 +17,5 @@ echo waiting thirty second for long running processes >>%logfile%
 timeout 30>NUL
 git status >>%logfile% 2>&1
 echo removing old gui logs >>%logfile%
-forfiles /p "C:\Users\%USERNAME%\Documents\foraging_gui_logs" /s /m *.* /D -30 "cmd /c del @path"
+forfiles /p "C:\Users\%USERNAME%\Documents\foraging_gui_logs" /s /m *.* /D -30 /C "cmd /c del @path"
 echo done >>%logfile%
