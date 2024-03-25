@@ -1924,6 +1924,13 @@ class Window(QMainWindow):
         self.SessionlistSpin.setEnabled(True)
         self.Sessionlist.setEnabled(True)
 
+        # Drop `finished` file with date/time
+        filepath = os.path.join(self.SessionFolder, 'finished') 
+        contents = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        with open(filepath, 'w') as finished_file:
+            finished_file.write(contents)
+        
+
     def _GetSaveFolder(self):
         '''
         Create folders with structure requested by Sci.Comp.
