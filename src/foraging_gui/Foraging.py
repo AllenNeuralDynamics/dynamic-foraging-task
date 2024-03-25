@@ -175,11 +175,9 @@ class Window(QMainWindow):
         self.actionTime_distribution.triggered.connect(self._TimeDistribution)
         self.action_Calibration.triggered.connect(self._WaterCalibration)
         self.actionLaser_Calibration.triggered.connect(self._LaserCalibration)
-        self.action_Snipping.triggered.connect(self._Snipping)
         self.action_Open.triggered.connect(self._Open)
         self.action_Save.triggered.connect(self._Save)
         self.actionForce_save.triggered.connect(self._ForceSave)
-        self.SaveContinue.triggered.connect(self._SaveContinue)
         self.SaveAs.triggered.connect(self._SaveAs)
         self.action_Exit.triggered.connect(self._Exit)
         self.action_New.triggered.connect(self._New)
@@ -240,6 +238,8 @@ class Window(QMainWindow):
         self.GetPositions.clicked.connect(self._GetPositions)
         self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
         self.warmup.currentIndexChanged.connect(self._warmup)
+        self.Sessionlist.currentIndexChanged.connect(self._session_list)
+        self.SessionlistSpin.textChanged.connect(self._session_list_spin)
 
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
@@ -252,6 +252,80 @@ class Window(QMainWindow):
             for child in container.findChildren((QtWidgets.QLineEdit)):        
                 child.returnPressed.connect(self.keyPressEvent)
     
+    def _session_list(self):
+        '''show all sessions of the current animal and load the selected session by drop down list'''
+        if not hasattr(self,'fname'):
+            return 0
+        # open the selected session
+        if self.Sessionlist.currentText()!='':
+            selected_index=self.Sessionlist.currentIndex()
+            fname=self.session_full_path_list[self.Sessionlist.currentIndex()]
+            self._Open(input_file=fname)
+            # set the selected index back to the current session
+            self._connect_Sessionlist(connect=False)
+            self.Sessionlist.setCurrentIndex(selected_index)
+            self.SessionlistSpin.setValue(int(selected_index+1))
+            self._connect_Sessionlist(connect=True)
+
+    def _session_list_spin(self):
+        '''show all sessions of the current animal and load the selected session by spin box'''
+        if not hasattr(self,'fname'):
+            return 0
+        if self.SessionlistSpin.text()!='':
+            self._connect_Sessionlist(connect=False)
+            if int(self.SessionlistSpin.text())>self.Sessionlist.count():
+                self.SessionlistSpin.setValue(int(self.Sessionlist.count()))
+            if int(self.SessionlistSpin.text())<1:
+                self.SessionlistSpin.setValue(1)
+            fname=self.session_full_path_list[int(self.SessionlistSpin.text())-1]
+            self.Sessionlist.setCurrentIndex(int(self.SessionlistSpin.text())-1)
+            self._connect_Sessionlist(connect=True)
+            self._Open(input_file=fname)
+
+    def _connect_Sessionlist(self,connect=True):
+        '''connect or disconnect the Sessionlist and SessionlistSpin'''
+        if connect:
+            self.Sessionlist.currentIndexChanged.connect(self._session_list)
+            self.SessionlistSpin.textChanged.connect(self._session_list_spin)
+        else:
+            self.Sessionlist.disconnect()
+            self.SessionlistSpin.disconnect()
+
+    def _show_sessions(self):
+        '''list all sessions of the current animal'''
+        if not hasattr(self,'fname'):
+            return 0
+        animal_folder=os.path.dirname(os.path.dirname(os.path.dirname(self.fname)))
+        session_full_path_list=[]
+        session_path_list=[]
+        for session_folder in os.listdir(animal_folder):
+            # TODO fix_300
+            training_folder_old = os.path.join(animal_folder,session_folder, 'TrainingFolder')
+            training_folder_new = os.path.join(animal_folder,session_folder, 'behavior')
+            if os.path.exists(training_folder_old):
+                for file_name in os.listdir(training_folder_old):
+                    if file_name.endswith('.json'): 
+                        session_full_path_list.append(os.path.join(training_folder_old, file_name))
+                        session_path_list.append(session_folder) 
+            elif os.path.exists(training_folder_new):
+                for file_name in os.listdir(training_folder_new):
+                    if file_name.endswith('.json'): 
+                        session_full_path_list.append(os.path.join(training_folder_new, file_name))
+                        session_path_list.append(session_folder) 
+
+        sorted_indices = sorted(enumerate(session_path_list), key=lambda x: x[1], reverse=True)
+        sorted_dates = [date for index, date in sorted_indices]
+        # Extract just the indices
+        indices = [index for index, date in sorted_indices]
+        # Apply sorted index
+        self.session_full_path_list = [session_full_path_list[index] for index in indices]  
+        self.session_path_list=sorted_dates
+
+        self._connect_Sessionlist(connect=False)
+        self.Sessionlist.clear()
+        self.Sessionlist.addItems(sorted_dates)
+        self._connect_Sessionlist(connect=True)
+        
     def _warmup(self):
         '''warm up the session before starting.
             Use warm up with caution. Usually, it is only used for the first time training. 
@@ -579,7 +653,7 @@ class Window(QMainWindow):
             loggingtype=1
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-            log_folder=os.path.join(log_folder,formatted_datetime,'HarpFolder')
+            log_folder=os.path.join(log_folder,formatted_datetime,'raw.harp')
         # stop the logging first
         self.Channel.StopLogging('s')
         self.Channel.StartLogging(log_folder)
@@ -872,10 +946,6 @@ class Window(QMainWindow):
     def _ForceSave(self):
         '''Save whether the current trial is complete or not'''
         self._Save(ForceSave=1)
-
-    def _SaveContinue(self):
-        '''Do not restart a session after saving'''
-        self._Save(SaveContinue=1)
 
     def _SaveAs(self):
         '''Do not restart a session after saving'''
@@ -1224,7 +1294,7 @@ class Window(QMainWindow):
                         if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))                       
                         continue
-                    if (child.objectName() == 'LatestCalibrationDate') and (child.text() == 'NA'):
+                    if (child.objectName() in ['LatestCalibrationDate','SessionlistSpin']):
                         continue
 
 
@@ -1575,10 +1645,6 @@ class Window(QMainWindow):
         logging.info('closing the GUI')
         self.close()      
  
-    def _Snipping(self):
-        '''Open the snipping tool'''
-        os.system("start %windir%\system32\SnippingTool.exe") 
-
     def _Optogenetics(self):
         '''will be triggered when the optogenetics icon is pressed'''
         if self.OpenOptogenetics==0:
@@ -1692,8 +1758,8 @@ class Window(QMainWindow):
             "<p></p>",
         )
    
-    def _Save(self,ForceSave=0,SaveContinue=1,SaveAs=0):
-        logging.info('Saving current session, ForceSave={},SaveContinue={}'.format(ForceSave,SaveContinue))
+    def _Save(self,ForceSave=0,SaveAs=0):
+        logging.info('Saving current session, ForceSave={}'.format(ForceSave))
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
         if self.BaseWeight.text()=='' or self.WeightAfter.text()=='' or self.TargetRatio.text()=='':
@@ -1843,88 +1909,78 @@ class Window(QMainWindow):
         if self.Camera_dialog.AutoControl.currentText()=='Yes':
             self.Camera_dialog.StartCamera.setChecked(False)
             self.Camera_dialog._StartCamera()
-        if SaveContinue==0:
-            # must start a new session 
-            self.NewSession.setStyleSheet("background-color : green;")
-            self.NewSession.setDisabled(True) 
-            self.StartANewSession=1
-            self.CreateNewFolder=1
-            try:
-                self.Channel.StopLogging('s')
-            except Exception as e:
-                logging.error(str(e))
 
         # Toggle unsaved data to False
         self.unsaved_data=False
         self.Save.setStyleSheet("background-color : None;")
         self.Save.setStyleSheet("color: black;")
 
-
         short_file = self.SaveFile.split('\\')[-1]
         self.WarningLabel.setText('Saved: {}'.format(short_file))
         self.WarningLabel.setStyleSheet(self.default_warning_color)
+        
+        self.SessionlistSpin.setEnabled(True)
+        self.Sessionlist.setEnabled(True)
 
-    def _GetSaveFolder(self,CTrainingFolder=1,CHarpFolder=1,CVideoFolder=1,CPhotometryFolder=1,CEphysFolder=1):
-        '''The new data storage structure. Each session forms an independent folder. Training data, Harp register events, video data, photometry data and ephys data are in different subfolders'''
+        # Drop `finished` file with date/time
+        filepath = os.path.join(self.SessionFolder, 'finished') 
+        contents = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        with open(filepath, 'w') as finished_file:
+            finished_file.write(contents)
+        
+
+    def _GetSaveFolder(self):
+        '''
+        Create folders with structure requested by Sci.Comp.
+        Each session forms an independent folder, with subfolders:
+            Training data
+                Harp register events
+            video data
+            photometry data
+            ephys data
+        '''
         current_time = datetime.now()
         formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-        self.SessionFolder=os.path.join(self.default_saveFolder, self.current_box,self.ID.text(), f'{self.ID.text()}_{formatted_datetime}')
+        self.SessionFolder=os.path.join(self.default_saveFolder, 
+            self.current_box,self.ID.text(), f'behavior_{self.ID.text()}_{formatted_datetime}')
+
         # Training folder
-        self.TrainingFolder=os.path.join(self.SessionFolder,'TrainingFolder')
+        self.TrainingFolder=os.path.join(self.SessionFolder,'behavior')
         self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
         self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
         self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}_par.json')
+
         # Harp folder
-        self.HarpFolder=os.path.join(self.SessionFolder,'HarpFolder')
+        self.HarpFolder=os.path.join(self.TrainingFolder,'raw.harp')
+
         # video data
-        self.VideoFolder=os.path.join(self.SessionFolder,'VideoFolder')
+        self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
+
         # photometry folder
-        self.PhotometryFolder=os.path.join(self.SessionFolder,'PhotometryFolder')
-        # ephys folder
-        self.EphysFolder=os.path.join(self.SessionFolder,'EphysFolder')
+        self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
+        
+        # Metadata folder
+        self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
 
         # create folders
-        if CTrainingFolder==1:
-            if not os.path.exists(self.TrainingFolder):
-                os.makedirs(self.TrainingFolder)
-                logging.info(f"Created new folder: {self.TrainingFolder}")
-        if CHarpFolder==1:
-            if not os.path.exists(self.HarpFolder):
-                os.makedirs(self.HarpFolder)
-                logging.info(f"Created new folder: {self.HarpFolder}")
-        if CVideoFolder==1:
-            if not os.path.exists(self.VideoFolder):
-                os.makedirs(self.VideoFolder)
-                logging.info(f"Created new folder: {self.VideoFolder}")
-        if CPhotometryFolder==1:
-            if not os.path.exists(self.PhotometryFolder):
-                os.makedirs(self.PhotometryFolder)
-                logging.info(f"Created new folder: {self.PhotometryFolder}")
-        if CEphysFolder==1:
-            if not os.path.exists(self.EphysFolder):
-                os.makedirs(self.EphysFolder)
-                logging.info(f"Created new folder: {self.EphysFolder}")
-
-    def _GetSaveFileName(self):
-        '''Get the name of the save file. This is an old data structure and has been deprecated.'''
-        SaveFileMat = os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}.mat')
-        SaveFileJson= os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}.json')
-        SaveFileParJson= os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}_par.json')
-        if not os.path.exists(os.path.dirname(SaveFileJson)):
-            os.makedirs(os.path.dirname(SaveFileJson))
-            logging.info(f"Created new folder: {os.path.dirname(SaveFileJson)}")
-        N=0
-        while 1:
-            if os.path.isfile(SaveFileMat) or os.path.isfile(SaveFileJson)or os.path.isfile(SaveFileParJson):
-                N=N+1
-                SaveFileMat=os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}_{N}.mat')
-                SaveFileJson=os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}_{N}.json')
-                SaveFileParJson=os.path.join(self.default_saveFolder, self.current_box, self.ID.text(), f'{self.ID.text()}_{date.today()}_{N}_par.json')
-            else:
-                break
-        self.SaveFileMat=SaveFileMat
-        self.SaveFileJson=SaveFileJson
-        self.SaveFileParJson=SaveFileParJson
+        if not os.path.exists(self.SessionFolder):
+            os.makedirs(self.SessionFolder)
+            logging.info(f"Created new folder: {self.SessionFolder}")
+        if not os.path.exists(self.MetadataFolder):
+            os.makedirs(self.MetadataFolder)
+            logging.info(f"Created new folder: {self.MetadataFolder}")
+        if not os.path.exists(self.TrainingFolder):
+            os.makedirs(self.TrainingFolder)
+            logging.info(f"Created new folder: {self.TrainingFolder}")
+        if not os.path.exists(self.HarpFolder):
+            os.makedirs(self.HarpFolder)
+            logging.info(f"Created new folder: {self.HarpFolder}")
+        if not os.path.exists(self.VideoFolder):
+            os.makedirs(self.VideoFolder)
+            logging.info(f"Created new folder: {self.VideoFolder}")
+        if not os.path.exists(self.PhotometryFolder):
+            os.makedirs(self.PhotometryFolder)
+            logging.info(f"Created new folder: {self.PhotometryFolder}")
 
     def _Concat(self,widget_dict,Obj,keyname):
         '''Help manage save different dialogs'''
@@ -1989,21 +2045,39 @@ class Window(QMainWindow):
         # do any of the sessions have saved data? Grab the most recent        
         for i in range(len(sessions)-1, -1, -1):
             s = sessions[i]
-            json_file = os.path.join(self.default_saveFolder, 
-                self.current_box, mouse_id, s,'TrainingFolder',s+'.json')
-            if os.path.isfile(json_file):
-                date = s.split('_')[1]
-                session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
-                reply = QMessageBox.information(self,
-                    'Box {}, Please verify'.format(self.box_letter),
-                    '<span style="color:purple;font-weight:bold">Mouse ID: {}</span><br>Last session: {}<br>Filename: {}'.format(mouse_id, session_date, s),
-                    QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
-                if reply == QMessageBox.Cancel:
-                    logging.info('User hit cancel')
-                    return False, ''
-                else: 
-                    return True, json_file
-       
+            ## TODO fix_300
+            if 'behavior' in s:
+                json_file = os.path.join(self.default_saveFolder, 
+                    self.current_box, mouse_id, s,'behavior',s.split('behavior_')[1]+'.json')
+                if os.path.isfile(json_file): 
+                    date = s.split('_')[2] 
+                    session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
+                    reply = QMessageBox.information(self,
+                        'Box {}, Please verify'.format(self.box_letter),
+                        '<span style="color:purple;font-weight:bold">Mouse ID: {}</span><br>Last session: {}<br>Filename: {}'.format(mouse_id, session_date, s),
+                        QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
+                    if reply == QMessageBox.Cancel:
+                        logging.info('User hit cancel')
+                        return False, ''
+                    else: 
+                        return True, json_file
+            else:
+                json_file = os.path.join(self.default_saveFolder, 
+                    self.current_box, mouse_id, s,'TrainingFolder',s+'.json')
+                print(json_file)
+                if os.path.isfile(json_file): 
+                    date = s.split('_')[1] 
+                    session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
+                    reply = QMessageBox.information(self,
+                        'Box {}, Please verify'.format(self.box_letter),
+                        '<span style="color:purple;font-weight:bold">Mouse ID: {}</span><br>Last session: {}<br>Filename: {}'.format(mouse_id, session_date, s),
+                        QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
+                    if reply == QMessageBox.Cancel:
+                        logging.info('User hit cancel')
+                        return False, ''
+                    else: 
+                        return True, json_file
+ 
         # none of the sessions have saved data.  
         reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
             'Mouse ID {} does not have any saved sessions on this computer'.format(mouse_id),
@@ -2047,12 +2121,23 @@ class Window(QMainWindow):
             if len(sessions) == 0 :
                 continue
             for s in sessions:
-                json_file = os.path.join(self.default_saveFolder, 
-                    self.current_box, str(m), s,'TrainingFolder',s+'.json')
-                if os.path.isfile(json_file):
-                    mice.append(m)
-                    break
+                # Check for data with old format name
+                # TODO fix_300
+                if 'behavior' in s:
+                    # Check for data in new format name
+                    json_file = os.path.join(self.default_saveFolder, 
+                        self.current_box, str(m), s,'behavior',s.split('behavior_')[1]+'.json')
+                    if os.path.isfile(json_file):
+                        mice.append(m)
+                        break
+                else:
+                    json_file_old = os.path.join(self.default_saveFolder, 
+                        self.current_box, str(m), s,'TrainingFolder',s+'.json')
+                    if os.path.isfile(json_file_old):
+                        mice.append(m)
+                        break
         return mice  
+
 
     def _Open_getSchedule(self):
         '''
@@ -2132,13 +2217,15 @@ class Window(QMainWindow):
             logging.info('Its before all scheduled start times')
         return slot
 
-    def _Open(self,open_last = False):
-
-        # Start new session
-        new_session = self._NewSession()
-        if not new_session:
-            return
-
+    def _Open(self,open_last = False,input_file = ''):
+        if input_file == '':
+            # Start new session
+            new_session = self._NewSession()
+            if not new_session:
+                return
+        else:
+            self.fname=input_file
+            
         if open_last:
             scheduled_mouse = self._Open_getSchedule()
             mice = self._Open_getListOfMice()
@@ -2183,6 +2270,8 @@ class Window(QMainWindow):
                 logging.info('Quick load failed')
                 return        
             logging.info('Quick load success: {}'.format(fname))
+            self.fname=fname
+            
         else:
             # Open dialog box
             fname, _ = QFileDialog.getOpenFileName(self, 'Open file', 
@@ -2190,7 +2279,8 @@ class Window(QMainWindow):
                 "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
             logging.info('User selected: {}'.format(fname))    
 
-        self.fname=fname
+            self.fname=fname
+            
         if fname:
             if fname.endswith('.mat'):
                 Obj = loadmat(fname)
@@ -2233,7 +2323,7 @@ class Window(QMainWindow):
                         continue
                     if key in CurrentObj:
                         # skip some keys; skip warmup
-                        if key in ['Start','warmup']:
+                        if key in ['Start','warmup','SessionlistSpin']:
                             self.WeightAfter.setText('')
                             continue
                         widget = widget_dict[key]
@@ -2352,7 +2442,15 @@ class Window(QMainWindow):
                         logging.error(str(e))
             else:
                 pass
-                    
+            # show session list related to that animal
+            tag=self._show_sessions()
+            if tag!=0:
+                fname_session_folder=os.path.basename(os.path.dirname(os.path.dirname(fname)))
+                Ind=self.Sessionlist.findText(fname_session_folder)
+                self._connect_Sessionlist(connect=False)
+                self.Sessionlist.setCurrentIndex(Ind)
+                self.SessionlistSpin.setValue(Ind+1)
+                self._connect_Sessionlist(connect=True)
         else:
             self.NewSession.setDisabled(False)
         self.StartExcitation.setChecked(False)
@@ -2757,11 +2855,17 @@ class Window(QMainWindow):
             self.Start.setChecked(False)
             self.Start.setStyleSheet('background-color:none;')
             return
- 
+        
+        # clear the session list
+        self._connect_Sessionlist(connect=False)
+        self.Sessionlist.clear()
+        self.SessionlistSpin.setValue(1)
+        self._connect_Sessionlist(connect=True)
+        self.SessionlistSpin.setEnabled(False)
+        self.Sessionlist.setEnabled(False)
+
         # Clear warnings
         self.WarningLabelInitializeBonsai.setText('')
-        #self.WarningLabel_SaveTrainingStage.setText('')
-        #self.WarningLabel_SaveTrainingStage.setStyleSheet("color: none;")
         self.NewSession.setDisabled(False)
             
         # Toggle button colors
@@ -2778,6 +2882,18 @@ class Window(QMainWindow):
                     self.Start.setChecked(False)
                     logging.info('User declines continuation of session')
                     return
+
+            # check experimenter name
+            if self.Experimenter.text() == "the ghost in the shell":
+                reply = QMessageBox.question(self,
+                    'Box {}, Start'.format(self.box_letter),    
+                    'Experimenter field set to default, continue anyways?',
+                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                if reply == QMessageBox.No:
+                    self.Start.setChecked(False)
+                    logging.info('User declines using default name')
+                    return                
+            logging.info('Starting session, with experimenter: {}'.format(self.Experimenter.text()))
 
             # change button color and mark the state change
             self.Start.setStyleSheet("background-color : green;")
