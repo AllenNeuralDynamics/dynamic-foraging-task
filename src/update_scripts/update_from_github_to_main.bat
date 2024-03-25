@@ -2,7 +2,7 @@ set "logfile=C:\Users\%USERNAME%\Documents\foraging_gui_logs\github_log.txt"
 set "repo=C:\Users\%USERNAME%\Documents\GitHub\dynamic-foraging-task"
 set "branch=main"
 cd %repo%
-echo --------------------------- >>%logfile%
+echo --------------------------- >%logfile%
 echo %date% %time% >>%logfile%
 echo dynamic-foraging-gui update to %branch% >>%logfile%
 echo running git fetch >>%logfile%
