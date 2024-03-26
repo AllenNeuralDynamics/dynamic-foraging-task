@@ -1913,10 +1913,6 @@ class TimerWorker(QtCore.QObject):
     finished = QtCore.pyqtSignal()
     progress = QtCore.pyqtSignal(int)
     cancel = QtCore.pyqtSignal()
-    
-    def __init__(self):
-        super(TimerWorker, self).__init__()
-        self._isRunning=True
 
     @QtCore.pyqtSlot(int)
     def _Timer(self,Time):
@@ -1927,9 +1923,13 @@ class TimerWorker(QtCore.QObject):
         self.progress.emit(int(Time))
 
         # Iterate through intervals 
-        while (num_updates >0)and(self._isRunning):
+        while (num_updates >0):
             time.sleep(interval)
             Time -=interval
+            interrupt = self.isInterruptionRequested()
+            if interrupt:
+                print('breaking')
+                break
             self.progress.emit(int(Time))
             num_updates -= 1
         
@@ -1937,5 +1937,3 @@ class TimerWorker(QtCore.QObject):
         time.sleep(Time)
         self.finished.emit()
 
-    def stop(self):
-        self._isRunning=False
