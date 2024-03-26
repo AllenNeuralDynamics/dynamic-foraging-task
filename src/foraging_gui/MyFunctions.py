@@ -1926,10 +1926,6 @@ class TimerWorker(QtCore.QObject):
         while (num_updates >0):
             time.sleep(interval)
             Time -=interval
-            interrupt = self.isInterruptionRequested()
-            if interrupt:
-                print('breaking')
-                break
             self.progress.emit(int(Time))
             num_updates -= 1
         

@@ -2838,9 +2838,8 @@ class Window(QMainWindow):
                     #self.workertimer.moveToThread(self.workertimer_thread)
                     #self.workertimer_thread.start()
                     #self.workertimer.stop()
-                    #self.workertimer_thread.quit()
+                    self.workertimer_thread.quit()
                     #self.workertimer_thread.wait()
-                    self.workertimer.requestInterruption()
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
