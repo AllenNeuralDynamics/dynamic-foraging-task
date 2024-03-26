@@ -2825,11 +2825,9 @@ class Window(QMainWindow):
             
             if self.finish_Timer==0:
                 self.ignore_timer=True
-                self.PhotometryRun=0
                 logging.info('canceling photometry baseline timer')
                 self.WarningLabelStop.setText('')
                 self.WarningLabelStop.setStyleSheet(self.default_warning_color)              
- 
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
@@ -2953,7 +2951,7 @@ class Window(QMainWindow):
                 logging.info('User selected not to start excitation')
   
         # collecting the base signal for photometry. Only run once
-        if self.PhotometryB.currentText()=='on' and (self.PhotometryRun==0 & not self.ignore_timer):
+        if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and self.PhotometryRun==0:
             logging.info('Starting photometry baseline timer')
             self.finish_Timer=0
             self.PhotometryRun=1
