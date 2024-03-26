@@ -2822,7 +2822,8 @@ class Window(QMainWindow):
                 logging.info('Start button pressed: user continued session')               
                 self.Start.setChecked(True)
                 return 
-            
+           
+            # If the photometry timer is running, stop it 
             if self.finish_Timer==0:
                 self.ignore_timer=True
                 self.PhotometryRun=0
@@ -2830,16 +2831,10 @@ class Window(QMainWindow):
                 self.WarningLabelStop.setText('')
                 self.WarningLabelStop.setStyleSheet(self.default_warning_color)              
                 if hasattr(self, 'workertimer'):
-                    #self.workertimer = TimerWorker()
-                    #self.workertimer_thread = QThread()
-                    #self.workertimer.progress.connect(self._update_photometery_timer)
-                    #self.workertimer.finished.connect(self._thread_complete_timer)
-                    #self.Time.connect(self.workertimer._Timer)
-                    #self.workertimer.moveToThread(self.workertimer_thread)
-                    #self.workertimer_thread.start()
+                    # Stop the worker, this has a 1 second delay before taking effect
+                    # so we set the text to get ignored as well
                     self.workertimer._stop()
-                    #self.workertimer_thread.quit()
-                    #self.workertimer_thread.wait()
+
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish

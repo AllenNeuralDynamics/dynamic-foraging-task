@@ -1941,4 +1941,8 @@ class TimerWorker(QtCore.QObject):
         self.finished.emit()
 
     def _stop(self):
+        # Will halt the timer at the next interval
         self._isRunning=False
+
+
+
