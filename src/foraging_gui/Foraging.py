@@ -111,6 +111,7 @@ class Window(QMainWindow):
         self.TimeDistribution_ToInitializeVisual=1
         self.finish_Timer=1     # for photometry baseline recordings
         self.PhotometryRun=0    # 1. Photometry has been run; 0. Photometry has not been carried out.
+        self.ignore_timer=False
         self._Optogenetics()    # open the optogenetics panel 
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
@@ -2952,7 +2953,7 @@ class Window(QMainWindow):
                 logging.info('User selected not to start excitation')
   
         # collecting the base signal for photometry. Only run once
-        if self.PhotometryB.currentText()=='on' and self.PhotometryRun==0:
+        if self.PhotometryB.currentText()=='on' and (self.PhotometryRun==0 & not self.ignore_timer):
             logging.info('Starting photometry baseline timer')
             self.finish_Timer=0
             self.PhotometryRun=1
