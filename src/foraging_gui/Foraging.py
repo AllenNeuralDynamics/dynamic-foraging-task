@@ -2837,8 +2837,8 @@ class Window(QMainWindow):
                     #self.Time.connect(self.workertimer._Timer)
                     #self.workertimer.moveToThread(self.workertimer_thread)
                     #self.workertimer_thread.start()
-                    #self.workertimer.stop()
-                    self.workertimer_thread.quit()
+                    self.workertimer._stop()
+                    #self.workertimer_thread.quit()
                     #self.workertimer_thread.wait()
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
