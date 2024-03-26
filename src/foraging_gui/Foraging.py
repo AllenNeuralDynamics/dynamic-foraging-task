@@ -2431,16 +2431,17 @@ class Window(QMainWindow):
         self._Clear()
 
     def _StartExcitation(self):
-        if self.Teensy_COM == '':
-            logging.warning('No Teensy COM configured for this box, cannot start excitation')
-            self.TeensyWarning.setText('No Teensy COM for this box')
-            self.TeensyWarning.setStyleSheet(self.default_warning_color)
-            msg = 'No Teensy COM configured for this box, cannot start excitation'
-            reply = QMessageBox.information(self, 
-                'Box {}, StartExcitation'.format(self.box_letter), msg, QMessageBox.Ok )
-            self.StartExcitation.setChecked(False)
-            self.StartExcitation.setStyleSheet("background-color : none")
-            return
+        ## DEBUGGING CODE
+        #if self.Teensy_COM == '':
+        #    logging.warning('No Teensy COM configured for this box, cannot start excitation')
+        #    self.TeensyWarning.setText('No Teensy COM for this box')
+        #    self.TeensyWarning.setStyleSheet(self.default_warning_color)
+        #    msg = 'No Teensy COM configured for this box, cannot start excitation'
+        #    reply = QMessageBox.information(self, 
+        #        'Box {}, StartExcitation'.format(self.box_letter), msg, QMessageBox.Ok )
+        #    self.StartExcitation.setChecked(False)
+        #    self.StartExcitation.setStyleSheet("background-color : none")
+        #    return
 
         if self.StartExcitation.isChecked():
             logging.info('StartExcitation is checked')
