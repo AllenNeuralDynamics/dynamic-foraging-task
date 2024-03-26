@@ -1922,6 +1922,7 @@ class TimerWorker(QtCore.QObject):
     def _Timer(self,Time):
         '''sleep some time'''
         # Emit initial status
+        self._isRunning=True
         interval = 1
         num_updates = int(np.floor(Time/interval))
         self.progress.emit(int(Time))
