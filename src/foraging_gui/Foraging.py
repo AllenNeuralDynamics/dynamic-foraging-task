@@ -2829,6 +2829,17 @@ class Window(QMainWindow):
                 logging.info('canceling photometry baseline timer')
                 self.WarningLabelStop.setText('')
                 self.WarningLabelStop.setStyleSheet(self.default_warning_color)              
+                if hasattr(self, 'workertimer'):
+                    #self.workertimer = TimerWorker()
+                    #self.workertimer_thread = QThread()
+                    #self.workertimer.progress.connect(self._update_photometery_timer)
+                    #self.workertimer.finished.connect(self._thread_complete_timer)
+                    #self.Time.connect(self.workertimer._Timer)
+                    #self.workertimer.moveToThread(self.workertimer_thread)
+                    #self.workertimer_thread.start()
+                    self.workertimer.stop()
+                    self.workertimer_thread.quit()
+                    self.workertimer_thread.wait()
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
