@@ -1927,7 +1927,7 @@ class TimerWorker(QtCore.QObject):
         self.progress.emit(int(Time))
 
         # Iterate through intervals 
-        while (num_updates >0):
+        while num_updates >0:
             time.sleep(interval)
             if not self._isRunning:
                 return 
@@ -1942,6 +1942,4 @@ class TimerWorker(QtCore.QObject):
     def _stop(self):
         # Will halt the timer at the next interval
         self._isRunning=False
-
-
 
