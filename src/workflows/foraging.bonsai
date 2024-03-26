@@ -2829,7 +2829,7 @@
                   </Expression>
                   <Expression xsi:type="BitwiseAnd">
                     <Operand xsi:type="WorkflowProperty" TypeArguments="p2:LickChannels">
-                      <Value>None</Value>
+                      <Value>Channel0</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="GreaterThan">
@@ -2878,7 +2878,7 @@
                   </Expression>
                   <Expression xsi:type="BitwiseAnd">
                     <Operand xsi:type="WorkflowProperty" TypeArguments="p2:LickChannels">
-                      <Value>None</Value>
+                      <Value>Channel0</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="GreaterThan">
