@@ -2723,11 +2723,12 @@ class Window(QMainWindow):
     
     def _thread_complete_timer(self):
         '''complete of _Timer'''
-        self.finish_Timer=1
-        logging.info('Finished photometry baseline timer')
-        self.WarningLabelStop.setText('')
-        self.WarningLabelStop.setStyleSheet(self.default_warning_color)
-   
+        if not self.ignore_timer:
+            self.finish_Timer=1
+            logging.info('Finished photometry baseline timer')
+            self.WarningLabelStop.setText('')
+            self.WarningLabelStop.setStyleSheet(self.default_warning_color)
+
     def _update_photometery_timer(self,time):
         '''
             Updates photometry baseline timer
@@ -2736,8 +2737,9 @@ class Window(QMainWindow):
         seconds = np.remainder(time,60)
         if len(str(seconds)) == 1:
             seconds = '0{}'.format(seconds)
-        self.WarningLabelStop.setText('Running photometry baseline: {}:{}'.format(minutes,seconds))
-        self.WarningLabelStop.setStyleSheet(self.default_warning_color)       
+        if not self.ignore_timer:
+            self.WarningLabelStop.setText('Running photometry baseline: {}:{}'.format(minutes,seconds))
+            self.WarningLabelStop.setStyleSheet(self.default_warning_color)       
      
     def _set_metadata_enabled(self, enable: bool):
         '''Enable or disable metadata fields'''
@@ -2819,6 +2821,13 @@ class Window(QMainWindow):
                 logging.info('Start button pressed: user continued session')               
                 self.Start.setChecked(True)
                 return 
+            
+            if self.finish_Timer==0:
+                self.ignore_timer=True
+                logging.info('canceling photometry baseline timer')
+                self.WarningLabelStop.setText('')
+                self.WarningLabelStop.setStyleSheet(self.default_warning_color)              
+ 
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
@@ -2946,6 +2955,7 @@ class Window(QMainWindow):
             logging.info('Starting photometry baseline timer')
             self.finish_Timer=0
             self.PhotometryRun=1
+            self.ignore_timer=False
             
             # If we already created a workertimer and thread we can reuse them
             if not hasattr(self, 'workertimer'):

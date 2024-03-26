@@ -1912,6 +1912,7 @@ class TimerWorker(QtCore.QObject):
     '''
     finished = QtCore.pyqtSignal()
     progress = QtCore.pyqtSignal(int)
+    cancel = QtCore.pyqtSignal()
 
     @QtCore.pyqtSlot(int)
     def _Timer(self,Time):
