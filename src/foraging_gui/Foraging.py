@@ -2432,17 +2432,16 @@ class Window(QMainWindow):
         self._Clear()
 
     def _StartExcitation(self):
-        ## DEBUGGING CODE
-        #if self.Teensy_COM == '':
-        #    logging.warning('No Teensy COM configured for this box, cannot start excitation')
-        #    self.TeensyWarning.setText('No Teensy COM for this box')
-        #    self.TeensyWarning.setStyleSheet(self.default_warning_color)
-        #    msg = 'No Teensy COM configured for this box, cannot start excitation'
-        #    reply = QMessageBox.information(self, 
-        #        'Box {}, StartExcitation'.format(self.box_letter), msg, QMessageBox.Ok )
-        #    self.StartExcitation.setChecked(False)
-        #    self.StartExcitation.setStyleSheet("background-color : none")
-        #    return
+        if self.Teensy_COM == '':
+            logging.warning('No Teensy COM configured for this box, cannot start excitation')
+            self.TeensyWarning.setText('No Teensy COM for this box')
+            self.TeensyWarning.setStyleSheet(self.default_warning_color)
+            msg = 'No Teensy COM configured for this box, cannot start excitation'
+            reply = QMessageBox.information(self, 
+                'Box {}, StartExcitation'.format(self.box_letter), msg, QMessageBox.Ok )
+            self.StartExcitation.setChecked(False)
+            self.StartExcitation.setStyleSheet("background-color : none")
+            return
 
         if self.StartExcitation.isChecked():
             logging.info('StartExcitation is checked')
@@ -2456,12 +2455,11 @@ class Window(QMainWindow):
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
                 logging.error(str(e))
-                # DEBUGGING CODE
-                #self.TeensyWarning.setText('Error: start excitation!')
-                #self.TeensyWarning.setStyleSheet(self.default_warning_color)
-                #reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
-                #self.StartExcitation.setChecked(False)
-                #self.StartExcitation.setStyleSheet("background-color : none")
+                self.TeensyWarning.setText('Error: start excitation!')
+                self.TeensyWarning.setStyleSheet(self.default_warning_color)
+                reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
+                self.StartExcitation.setChecked(False)
+                self.StartExcitation.setStyleSheet("background-color : none")
             else:
                 self.TeensyWarning.setText('')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)               
@@ -2936,15 +2934,14 @@ class Window(QMainWindow):
         if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and (not self.StartExcitation.isChecked()):
             logging.warning('photometry is set to "on", but excitation is not running')
             
-            # DEBUGGING CODE
-            #if self.Teensy_COM == '':
-            #    logging.warning('No Teensy COM configured for this box, cannot start excitation')
-            #    msg = 'Photometry is set to "on", but no Teensy COM configured for this box, cannot start excitation.'
-            #    reply = QMessageBox.information(self,'Box {}, Start'.format(self.box_letter), 
-            #        msg, QMessageBox.Ok)
-            #    self.Start.setStyleSheet("background-color : none")
-            #    self.Start.setChecked(False)
-            #    return
+            if self.Teensy_COM == '':
+                logging.warning('No Teensy COM configured for this box, cannot start excitation')
+                msg = 'Photometry is set to "on", but no Teensy COM configured for this box, cannot start excitation.'
+                reply = QMessageBox.information(self,'Box {}, Start'.format(self.box_letter), 
+                    msg, QMessageBox.Ok)
+                self.Start.setStyleSheet("background-color : none")
+                self.Start.setChecked(False)
+                return
 
             reply = QMessageBox.question(self, 
                 'Box {}, Start'.format(self.box_letter), 
