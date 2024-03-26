@@ -2825,6 +2825,7 @@ class Window(QMainWindow):
             
             if self.finish_Timer==0:
                 self.ignore_timer=True
+                self.PhotometryRun=0
                 logging.info('canceling photometry baseline timer')
                 self.WarningLabelStop.setText('')
                 self.WarningLabelStop.setStyleSheet(self.default_warning_color)              
