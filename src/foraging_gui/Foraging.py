@@ -3272,7 +3272,9 @@ class Window(QMainWindow):
 
         # Build session json
         session = {}
-        session['experimenter_full_name']   = d['Experimenter']
+        session['describedBy']              = 'https://raw.githubusercontent.com/AllenNeuralDynamics/aind-data-schema/main/src/aind_data_schema/core/session.py'
+        session['schema_version']           = '?'
+        session['experimenter_full_name']   = [d['Experimenter']]
         session['session_start_time']       = d['Other_SessionStartTime']
         session['session_end_time']         = d['Other_CurrentTime']
         session['subject_id']               = d['ID']
@@ -3281,13 +3283,15 @@ class Window(QMainWindow):
         session['protocol_id']              = '?'
         session['rig_id']                   = d['box'] # This should be the rig_id from the rig.json, but that doesnt exist yet.
         session['animal_weight_post']       = d['WeightAfter']
-        session['data_streams']             = '?'
-        session['Calibrations']             = '?'
-        session['maintenance_class']        = '?'
-        session['reward_delivery']          = '?'
-        session['reward_consumed_total']    = '?'
-        session['reward_consumed_unit']     = '?'
-        session['stimulus_epoch']           = '?'     
+        session['weight_unit']              = 'gram'
+        session['data_streams']             = []#?
+        session['Calibrations']             = []#?
+        session['maintenance_class']        = []#?
+        session['reward_delivery']          = None #?
+        session['reward_consumed_total']    = d['water_in_session_total'] # Should we specify earned rewards, manual rewards?
+        session['reward_consumed_unit']     = 'milliliter'
+        session['stimulus_epoch']           = []#?
+        session['notes']                    = None #?    
  
         # Write to file
         filepath = os.path.join(self.MetadataFolder, 'session.json')
