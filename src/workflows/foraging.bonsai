@@ -2756,7 +2756,7 @@
             </Expression>
             <Expression xsi:type="Index">
               <Operand xsi:type="StringProperty">
-                <Value>NewLickDetector</Value>
+                <Value>AINDLickDetector</Value>
               </Operand>
             </Expression>
             <Expression xsi:type="NotEqual">
@@ -2963,7 +2963,7 @@
             </Expression>
             <Expression xsi:type="Index">
               <Operand xsi:type="StringProperty">
-                <Value>NewLickDetector</Value>
+                <Value>AINDLickDetector</Value>
               </Operand>
             </Expression>
             <Expression xsi:type="NotEqual">
