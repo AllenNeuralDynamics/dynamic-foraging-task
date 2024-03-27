@@ -2314,8 +2314,8 @@ class Window(QMainWindow):
             if self.default_ui=='ForagingGUI.ui':  
                 if 'info_task' in Obj:
                     self.label_info_task.setText(Obj['info_task'])
-                if 'info_other_perf' in Obj:
-                    self.label_info_performance_others.setText(Obj['info_other_perf'])
+                if 'info_performance_others' in Obj:
+                    self.label_info_performance_others.setText(Obj['info_performance_others'])
                 if 'info_performance_essential_1' in Obj:
                     self.label_info_performance_essential_1.setText(Obj['info_performance_essential_1'])
                 if 'info_performance_essential_2' in Obj:
