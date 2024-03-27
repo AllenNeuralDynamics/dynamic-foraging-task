@@ -11,8 +11,9 @@
                  xmlns:harp="clr-namespace:Bonsai.Harp;assembly=Bonsai.Harp"
                  xmlns:p1="clr-namespace:Harp.SoundCard;assembly=Harp.SoundCard"
                  xmlns:wie="clr-namespace:Bonsai.Windows.Input;assembly=Bonsai.Windows.Input"
+                 xmlns:p2="clr-namespace:AllenNeuralDynamics.LicketySplitLickDetector;assembly=AllenNeuralDynamics.LicketySplitLickDetector"
                  xmlns:dsp="clr-namespace:Bonsai.Dsp;assembly=Bonsai.Dsp"
-                 xmlns:p2="clr-namespace:Bonsai.DAQmx;assembly=Extensions"
+                 xmlns:p3="clr-namespace:Bonsai.DAQmx;assembly=Extensions"
                  xmlns:vid="clr-namespace:Bonsai.Video;assembly=Bonsai.Video"
                  xmlns:cv="clr-namespace:Bonsai.Vision;assembly=Bonsai.Vision"
                  xmlns:io="clr-namespace:Bonsai.IO;assembly=Bonsai.System"
@@ -383,6 +384,14 @@
                       <Value>false</Value>
                     </Combinator>
                   </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>Licks2</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="BooleanProperty">
+                      <Value>false</Value>
+                    </Combinator>
+                  </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:Merge" />
                   </Expression>
@@ -419,14 +428,16 @@
                   <Edge From="0" To="2" Label="Source1" />
                   <Edge From="1" To="2" Label="Source2" />
                   <Edge From="2" To="3" Label="Source1" />
-                  <Edge From="3" To="6" Label="Source1" />
+                  <Edge From="3" To="8" Label="Source1" />
                   <Edge From="4" To="5" Label="Source1" />
-                  <Edge From="5" To="6" Label="Source2" />
+                  <Edge From="5" To="8" Label="Source2" />
                   <Edge From="6" To="7" Label="Source1" />
-                  <Edge From="7" To="8" Label="Source1" />
+                  <Edge From="7" To="8" Label="Source3" />
                   <Edge From="8" To="9" Label="Source1" />
                   <Edge From="9" To="10" Label="Source1" />
                   <Edge From="10" To="11" Label="Source1" />
+                  <Edge From="11" To="12" Label="Source1" />
+                  <Edge From="12" To="13" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -465,6 +476,9 @@
                   <Expression xsi:type="SubscribeSubject">
                     <Name>Licks</Name>
                   </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>Licks2</Name>
+                  </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:Merge" />
                   </Expression>
@@ -478,10 +492,11 @@
                 <Edges>
                   <Edge From="0" To="1" Label="Source1" />
                   <Edge From="1" To="2" Label="Source1" />
-                  <Edge From="2" To="4" Label="Source1" />
-                  <Edge From="3" To="4" Label="Source2" />
-                  <Edge From="4" To="5" Label="Source1" />
+                  <Edge From="2" To="5" Label="Source1" />
+                  <Edge From="3" To="5" Label="Source2" />
+                  <Edge From="4" To="5" Label="Source3" />
                   <Edge From="5" To="6" Label="Source1" />
+                  <Edge From="6" To="7" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -1324,7 +1339,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Disabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM14</harp:PortName>
+                      <harp:PortName>COM4</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject">
@@ -2550,67 +2565,204 @@
             <Expression xsi:type="rx:BehaviorSubject">
               <Name>Timestamps</Name>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="wie:KeyDown">
-                  <wie:Filter>L</wie:Filter>
-                  <wie:SuppressRepetitions>false</wie:SuppressRepetitions>
-                </Combinator>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="rx:PublishSubject">
-                <Name>LeftKeyPress</Name>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="StringProperty">
-                  <Value>Left</Value>
-                </Combinator>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="wie:KeyDown">
-                  <wie:Filter>R</wie:Filter>
-                  <wie:SuppressRepetitions>false</wie:SuppressRepetitions>
-                </Combinator>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="rx:PublishSubject">
-                <Name>RightKeyPress</Name>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="StringProperty">
-                  <Value>Right</Value>
-                </Combinator>
-              </Builder>
+            <Expression xsi:type="GroupWorkflow">
+              <Name>JaneliaLickDetector</Name>
+              <Workflow>
+                <Nodes>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="Combinator">
+                      <Combinator xsi:type="wie:KeyDown">
+                        <wie:Filter>L</wie:Filter>
+                        <wie:SuppressRepetitions>false</wie:SuppressRepetitions>
+                      </Combinator>
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="rx:PublishSubject">
+                      <Name>LeftKeyPress</Name>
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="Combinator">
+                      <Combinator xsi:type="StringProperty">
+                        <Value>Left</Value>
+                      </Combinator>
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="Combinator">
+                      <Combinator xsi:type="wie:KeyDown">
+                        <wie:Filter>R</wie:Filter>
+                        <wie:SuppressRepetitions>false</wie:SuppressRepetitions>
+                      </Combinator>
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="rx:PublishSubject">
+                      <Name>RightKeyPress</Name>
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="Combinator">
+                      <Combinator xsi:type="StringProperty">
+                        <Value>Right</Value>
+                      </Combinator>
+                    </Builder>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>BehaviorEvents</Name>
+                  </Expression>
+                  <Expression xsi:type="beh:Parse">
+                    <harp:Register xsi:type="beh:TimestampedDigitalInputState" />
+                  </Expression>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Value</Selector>
+                  </Expression>
+                  <Expression xsi:type="BitwiseAnd">
+                    <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalInputs">
+                      <Value>DIPort0</Value>
+                    </Operand>
+                  </Expression>
+                  <Expression xsi:type="GreaterThan">
+                    <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
+                      <Value>0</Value>
+                    </Operand>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:DistinctUntilChanged" />
+                  </Expression>
+                  <Expression xsi:type="rx:Condition">
+                    <Workflow>
+                      <Nodes>
+                        <Expression xsi:type="WorkflowInput">
+                          <Name>Source1</Name>
+                        </Expression>
+                        <Expression xsi:type="WorkflowOutput" />
+                      </Nodes>
+                      <Edges>
+                        <Edge From="0" To="1" Label="Source1" />
+                      </Edges>
+                    </Workflow>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:WithLatestFrom" />
+                  </Expression>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Item2.Seconds</Selector>
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>LeftLickTime</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="StringProperty">
+                      <Value>Left</Value>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>BehaviorEvents</Name>
+                  </Expression>
+                  <Expression xsi:type="beh:Parse">
+                    <harp:Register xsi:type="beh:TimestampedDigitalInputState" />
+                  </Expression>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Value</Selector>
+                  </Expression>
+                  <Expression xsi:type="BitwiseAnd">
+                    <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalInputs">
+                      <Value>DIPort1</Value>
+                    </Operand>
+                  </Expression>
+                  <Expression xsi:type="GreaterThan">
+                    <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
+                      <Value>0</Value>
+                    </Operand>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:DistinctUntilChanged" />
+                  </Expression>
+                  <Expression xsi:type="rx:Condition">
+                    <Workflow>
+                      <Nodes>
+                        <Expression xsi:type="WorkflowInput">
+                          <Name>Source1</Name>
+                        </Expression>
+                        <Expression xsi:type="WorkflowOutput" />
+                      </Nodes>
+                      <Edges>
+                        <Edge From="0" To="1" Label="Source1" />
+                      </Edges>
+                    </Workflow>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:WithLatestFrom" />
+                  </Expression>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Item2.Seconds</Selector>
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>RightLickTime</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="StringProperty">
+                      <Value>Right</Value>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:Merge" />
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>Licks</Name>
+                  </Expression>
+                  <Expression xsi:type="WorkflowOutput" />
+                </Nodes>
+                <Edges>
+                  <Edge From="0" To="1" Label="Source1" />
+                  <Edge From="1" To="2" Label="Source1" />
+                  <Edge From="2" To="28" Label="Source1" />
+                  <Edge From="3" To="4" Label="Source1" />
+                  <Edge From="4" To="5" Label="Source1" />
+                  <Edge From="5" To="28" Label="Source2" />
+                  <Edge From="6" To="7" Label="Source1" />
+                  <Edge From="7" To="8" Label="Source1" />
+                  <Edge From="7" To="13" Label="Source2" />
+                  <Edge From="8" To="9" Label="Source1" />
+                  <Edge From="9" To="10" Label="Source1" />
+                  <Edge From="10" To="11" Label="Source1" />
+                  <Edge From="11" To="12" Label="Source1" />
+                  <Edge From="12" To="13" Label="Source1" />
+                  <Edge From="13" To="14" Label="Source1" />
+                  <Edge From="14" To="15" Label="Source1" />
+                  <Edge From="15" To="16" Label="Source1" />
+                  <Edge From="16" To="28" Label="Source3" />
+                  <Edge From="17" To="18" Label="Source1" />
+                  <Edge From="18" To="19" Label="Source1" />
+                  <Edge From="18" To="24" Label="Source2" />
+                  <Edge From="19" To="20" Label="Source1" />
+                  <Edge From="20" To="21" Label="Source1" />
+                  <Edge From="21" To="22" Label="Source1" />
+                  <Edge From="22" To="23" Label="Source1" />
+                  <Edge From="23" To="24" Label="Source1" />
+                  <Edge From="24" To="25" Label="Source1" />
+                  <Edge From="25" To="26" Label="Source1" />
+                  <Edge From="26" To="27" Label="Source1" />
+                  <Edge From="27" To="28" Label="Source4" />
+                  <Edge From="28" To="29" Label="Source1" />
+                  <Edge From="29" To="30" Label="Source1" />
+                </Edges>
+              </Workflow>
             </Expression>
             <Expression xsi:type="SubscribeSubject">
-              <Name>BehaviorEvents</Name>
+              <Name>ComPorts</Name>
             </Expression>
-            <Expression xsi:type="beh:Parse">
-              <harp:Register xsi:type="beh:TimestampedDigitalInputState" />
-            </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Value</Selector>
-            </Expression>
-            <Expression xsi:type="BitwiseAnd">
-              <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalInputs">
-                <Value>DIPort0</Value>
+            <Expression xsi:type="Index">
+              <Operand xsi:type="StringProperty">
+                <Value>AINDLickDetector</Value>
               </Operand>
             </Expression>
-            <Expression xsi:type="GreaterThan">
-              <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
-                <Value>0</Value>
+            <Expression xsi:type="NotEqual">
+              <Operand xsi:type="StringProperty">
+                <Value>1</Value>
               </Operand>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:DistinctUntilChanged" />
             </Expression>
             <Expression xsi:type="rx:Condition">
               <Workflow>
@@ -2626,40 +2778,230 @@
               </Workflow>
             </Expression>
             <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:WithLatestFrom" />
+              <Combinator xsi:type="rx:SubscribeWhen" />
             </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Item2.Seconds</Selector>
-            </Expression>
-            <Expression xsi:type="rx:PublishSubject">
-              <Name>LeftLickTime</Name>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="StringProperty">
-                <Value>Left</Value>
-              </Combinator>
+            <Expression xsi:type="GroupWorkflow">
+              <Name>NewLickDetector</Name>
+              <Workflow>
+                <Nodes>
+                  <Expression xsi:type="rx:BehaviorSubject" TypeArguments="harp:HarpMessage">
+                    <rx:Name>LickometerLeftCommands</rx:Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>ComPorts</Name>
+                  </Expression>
+                  <Expression xsi:type="Index">
+                    <Operand xsi:type="StringProperty">
+                      <Value>LeftLickDetector</Value>
+                    </Operand>
+                  </Expression>
+                  <Expression xsi:type="PropertyMapping">
+                    <PropertyMappings>
+                      <Property Name="PortName" />
+                    </PropertyMappings>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="p2:Device">
+                      <harp:OperationMode>Active</harp:OperationMode>
+                      <harp:OperationLed>On</harp:OperationLed>
+                      <harp:DumpRegisters>true</harp:DumpRegisters>
+                      <harp:VisualIndicators>On</harp:VisualIndicators>
+                      <harp:Heartbeat>Enabled</harp:Heartbeat>
+                      <harp:IgnoreErrors>false</harp:IgnoreErrors>
+                      <harp:PortName>COM8</harp:PortName>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>LickometerEventsLeft</Name>
+                  </Expression>
+                  <Expression xsi:type="rx:BehaviorSubject" TypeArguments="harp:HarpMessage">
+                    <rx:Name>LickometerRightCommands</rx:Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>ComPorts</Name>
+                  </Expression>
+                  <Expression xsi:type="Index">
+                    <Operand xsi:type="StringProperty">
+                      <Value>RightLickDetector</Value>
+                    </Operand>
+                  </Expression>
+                  <Expression xsi:type="PropertyMapping">
+                    <PropertyMappings>
+                      <Property Name="PortName" />
+                    </PropertyMappings>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="p2:Device">
+                      <harp:OperationMode>Active</harp:OperationMode>
+                      <harp:OperationLed>On</harp:OperationLed>
+                      <harp:DumpRegisters>true</harp:DumpRegisters>
+                      <harp:VisualIndicators>On</harp:VisualIndicators>
+                      <harp:Heartbeat>Enabled</harp:Heartbeat>
+                      <harp:IgnoreErrors>false</harp:IgnoreErrors>
+                      <harp:PortName>COM9</harp:PortName>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>LickometerEventsRight</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>LickometerEventsLeft</Name>
+                  </Expression>
+                  <Expression xsi:type="p2:Parse">
+                    <harp:Register xsi:type="p2:TimestampedLickState" />
+                  </Expression>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Value</Selector>
+                  </Expression>
+                  <Expression xsi:type="BitwiseAnd">
+                    <Operand xsi:type="WorkflowProperty" TypeArguments="p2:LickChannels">
+                      <Value>Channel0</Value>
+                    </Operand>
+                  </Expression>
+                  <Expression xsi:type="GreaterThan">
+                    <Operand xsi:type="WorkflowProperty" TypeArguments="sys:Byte">
+                      <Value>0</Value>
+                    </Operand>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:DistinctUntilChanged" />
+                  </Expression>
+                  <Expression xsi:type="rx:Condition">
+                    <Workflow>
+                      <Nodes>
+                        <Expression xsi:type="WorkflowInput">
+                          <Name>Source1</Name>
+                        </Expression>
+                        <Expression xsi:type="WorkflowOutput" />
+                      </Nodes>
+                      <Edges>
+                        <Edge From="0" To="1" Label="Source1" />
+                      </Edges>
+                    </Workflow>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:WithLatestFrom" />
+                  </Expression>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Item2.Seconds</Selector>
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>LeftLickTime2</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="StringProperty">
+                      <Value>Left</Value>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>LickometerEventsRight</Name>
+                  </Expression>
+                  <Expression xsi:type="p2:Parse">
+                    <harp:Register xsi:type="p2:TimestampedLickState" />
+                  </Expression>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Value</Selector>
+                  </Expression>
+                  <Expression xsi:type="BitwiseAnd">
+                    <Operand xsi:type="WorkflowProperty" TypeArguments="p2:LickChannels">
+                      <Value>Channel0</Value>
+                    </Operand>
+                  </Expression>
+                  <Expression xsi:type="GreaterThan">
+                    <Operand xsi:type="WorkflowProperty" TypeArguments="sys:Byte">
+                      <Value>0</Value>
+                    </Operand>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:DistinctUntilChanged" />
+                  </Expression>
+                  <Expression xsi:type="rx:Condition">
+                    <Workflow>
+                      <Nodes>
+                        <Expression xsi:type="WorkflowInput">
+                          <Name>Source1</Name>
+                        </Expression>
+                        <Expression xsi:type="WorkflowOutput" />
+                      </Nodes>
+                      <Edges>
+                        <Edge From="0" To="1" Label="Source1" />
+                      </Edges>
+                    </Workflow>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:WithLatestFrom" />
+                  </Expression>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Item2.Seconds</Selector>
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>RightLickTime2</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="StringProperty">
+                      <Value>Right</Value>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:Merge" />
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>Licks2</Name>
+                  </Expression>
+                  <Expression xsi:type="WorkflowOutput" />
+                </Nodes>
+                <Edges>
+                  <Edge From="0" To="4" Label="Source1" />
+                  <Edge From="1" To="2" Label="Source1" />
+                  <Edge From="2" To="3" Label="Source1" />
+                  <Edge From="3" To="4" Label="Source2" />
+                  <Edge From="4" To="5" Label="Source1" />
+                  <Edge From="6" To="10" Label="Source1" />
+                  <Edge From="7" To="8" Label="Source1" />
+                  <Edge From="8" To="9" Label="Source1" />
+                  <Edge From="9" To="10" Label="Source2" />
+                  <Edge From="10" To="11" Label="Source1" />
+                  <Edge From="12" To="13" Label="Source1" />
+                  <Edge From="13" To="14" Label="Source1" />
+                  <Edge From="13" To="19" Label="Source2" />
+                  <Edge From="14" To="15" Label="Source1" />
+                  <Edge From="15" To="16" Label="Source1" />
+                  <Edge From="16" To="17" Label="Source1" />
+                  <Edge From="17" To="18" Label="Source1" />
+                  <Edge From="18" To="19" Label="Source1" />
+                  <Edge From="19" To="20" Label="Source1" />
+                  <Edge From="20" To="21" Label="Source1" />
+                  <Edge From="21" To="22" Label="Source1" />
+                  <Edge From="22" To="34" Label="Source1" />
+                  <Edge From="23" To="24" Label="Source1" />
+                  <Edge From="24" To="25" Label="Source1" />
+                  <Edge From="24" To="30" Label="Source2" />
+                  <Edge From="25" To="26" Label="Source1" />
+                  <Edge From="26" To="27" Label="Source1" />
+                  <Edge From="27" To="28" Label="Source1" />
+                  <Edge From="28" To="29" Label="Source1" />
+                  <Edge From="29" To="30" Label="Source1" />
+                  <Edge From="30" To="31" Label="Source1" />
+                  <Edge From="31" To="32" Label="Source1" />
+                  <Edge From="32" To="33" Label="Source1" />
+                  <Edge From="33" To="34" Label="Source2" />
+                  <Edge From="34" To="35" Label="Source1" />
+                  <Edge From="35" To="36" Label="Source1" />
+                </Edges>
+              </Workflow>
             </Expression>
             <Expression xsi:type="SubscribeSubject">
-              <Name>BehaviorEvents</Name>
+              <Name>ComPorts</Name>
             </Expression>
-            <Expression xsi:type="beh:Parse">
-              <harp:Register xsi:type="beh:TimestampedDigitalInputState" />
-            </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Value</Selector>
-            </Expression>
-            <Expression xsi:type="BitwiseAnd">
-              <Operand xsi:type="WorkflowProperty" TypeArguments="beh:DigitalInputs">
-                <Value>DIPort1</Value>
+            <Expression xsi:type="Index">
+              <Operand xsi:type="StringProperty">
+                <Value>AINDLickDetector</Value>
               </Operand>
             </Expression>
-            <Expression xsi:type="GreaterThan">
-              <Operand xsi:type="WorkflowProperty" TypeArguments="sys:UInt16">
+            <Expression xsi:type="NotEqual">
+              <Operand xsi:type="StringProperty">
                 <Value>0</Value>
               </Operand>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:DistinctUntilChanged" />
             </Expression>
             <Expression xsi:type="rx:Condition">
               <Workflow>
@@ -2675,24 +3017,7 @@
               </Workflow>
             </Expression>
             <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:WithLatestFrom" />
-            </Expression>
-            <Expression xsi:type="MemberSelector">
-              <Selector>Item2.Seconds</Selector>
-            </Expression>
-            <Expression xsi:type="rx:PublishSubject">
-              <Name>RightLickTime</Name>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="StringProperty">
-                <Value>Right</Value>
-              </Combinator>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:Merge" />
-            </Expression>
-            <Expression xsi:type="rx:PublishSubject">
-              <Name>Licks</Name>
+              <Combinator xsi:type="rx:SubscribeWhen" />
             </Expression>
           </Nodes>
           <Edges>
@@ -2704,37 +3029,16 @@
             <Edge From="6" To="7" Label="Source1" />
             <Edge From="7" To="8" Label="Source1" />
             <Edge From="8" To="9" Label="Source1" />
-            <Edge From="10" To="11" Label="Source1" />
+            <Edge From="10" To="15" Label="Source1" />
             <Edge From="11" To="12" Label="Source1" />
-            <Edge From="12" To="38" Label="Source1" />
+            <Edge From="12" To="13" Label="Source1" />
             <Edge From="13" To="14" Label="Source1" />
-            <Edge From="14" To="15" Label="Source1" />
-            <Edge From="15" To="38" Label="Source2" />
-            <Edge From="16" To="17" Label="Source1" />
+            <Edge From="14" To="15" Label="Source2" />
+            <Edge From="16" To="21" Label="Source1" />
             <Edge From="17" To="18" Label="Source1" />
-            <Edge From="17" To="23" Label="Source2" />
             <Edge From="18" To="19" Label="Source1" />
             <Edge From="19" To="20" Label="Source1" />
-            <Edge From="20" To="21" Label="Source1" />
-            <Edge From="21" To="22" Label="Source1" />
-            <Edge From="22" To="23" Label="Source1" />
-            <Edge From="23" To="24" Label="Source1" />
-            <Edge From="24" To="25" Label="Source1" />
-            <Edge From="25" To="26" Label="Source1" />
-            <Edge From="26" To="38" Label="Source3" />
-            <Edge From="27" To="28" Label="Source1" />
-            <Edge From="28" To="29" Label="Source1" />
-            <Edge From="28" To="34" Label="Source2" />
-            <Edge From="29" To="30" Label="Source1" />
-            <Edge From="30" To="31" Label="Source1" />
-            <Edge From="31" To="32" Label="Source1" />
-            <Edge From="32" To="33" Label="Source1" />
-            <Edge From="33" To="34" Label="Source1" />
-            <Edge From="34" To="35" Label="Source1" />
-            <Edge From="35" To="36" Label="Source1" />
-            <Edge From="36" To="37" Label="Source1" />
-            <Edge From="37" To="38" Label="Source4" />
-            <Edge From="38" To="39" Label="Source1" />
+            <Edge From="20" To="21" Label="Source2" />
           </Edges>
         </Workflow>
       </Expression>
@@ -3448,6 +3752,24 @@
                     <Name>ToBonsaiOSC2</Name>
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
+                    <Name>RightLickTime2</Name>
+                  </Expression>
+                  <Expression xsi:type="osc:Format">
+                    <osc:Address>/RightLickTime</osc:Address>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>ToBonsaiOSC2</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>LeftLickTime2</Name>
+                  </Expression>
+                  <Expression xsi:type="osc:Format">
+                    <osc:Address>/LeftLickTime</osc:Address>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>ToBonsaiOSC2</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
                     <Name>Start</Name>
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
@@ -3679,62 +4001,66 @@
                   <Edge From="1" To="2" Label="Source1" />
                   <Edge From="3" To="4" Label="Source1" />
                   <Edge From="4" To="5" Label="Source1" />
-                  <Edge From="6" To="8" Label="Source1" />
-                  <Edge From="7" To="8" Label="Source2" />
-                  <Edge From="8" To="9" Label="Source1" />
+                  <Edge From="6" To="7" Label="Source1" />
+                  <Edge From="7" To="8" Label="Source1" />
                   <Edge From="9" To="10" Label="Source1" />
                   <Edge From="10" To="11" Label="Source1" />
-                  <Edge From="11" To="12" Label="Source1" />
-                  <Edge From="13" To="15" Label="Source1" />
-                  <Edge From="14" To="15" Label="Source2" />
+                  <Edge From="12" To="14" Label="Source1" />
+                  <Edge From="13" To="14" Label="Source2" />
+                  <Edge From="14" To="15" Label="Source1" />
                   <Edge From="15" To="16" Label="Source1" />
                   <Edge From="16" To="17" Label="Source1" />
                   <Edge From="17" To="18" Label="Source1" />
-                  <Edge From="18" To="19" Label="Source1" />
-                  <Edge From="20" To="22" Label="Source1" />
-                  <Edge From="21" To="22" Label="Source2" />
+                  <Edge From="19" To="21" Label="Source1" />
+                  <Edge From="20" To="21" Label="Source2" />
+                  <Edge From="21" To="22" Label="Source1" />
                   <Edge From="22" To="23" Label="Source1" />
                   <Edge From="23" To="24" Label="Source1" />
                   <Edge From="24" To="25" Label="Source1" />
-                  <Edge From="25" To="26" Label="Source1" />
-                  <Edge From="27" To="29" Label="Source1" />
-                  <Edge From="28" To="29" Label="Source2" />
+                  <Edge From="26" To="28" Label="Source1" />
+                  <Edge From="27" To="28" Label="Source2" />
+                  <Edge From="28" To="29" Label="Source1" />
                   <Edge From="29" To="30" Label="Source1" />
                   <Edge From="30" To="31" Label="Source1" />
                   <Edge From="31" To="32" Label="Source1" />
-                  <Edge From="32" To="33" Label="Source1" />
-                  <Edge From="34" To="36" Label="Source1" />
-                  <Edge From="35" To="36" Label="Source2" />
+                  <Edge From="33" To="35" Label="Source1" />
+                  <Edge From="34" To="35" Label="Source2" />
+                  <Edge From="35" To="36" Label="Source1" />
                   <Edge From="36" To="37" Label="Source1" />
                   <Edge From="37" To="38" Label="Source1" />
                   <Edge From="38" To="39" Label="Source1" />
-                  <Edge From="39" To="40" Label="Source1" />
-                  <Edge From="41" To="43" Label="Source1" />
-                  <Edge From="42" To="43" Label="Source2" />
+                  <Edge From="40" To="42" Label="Source1" />
+                  <Edge From="41" To="42" Label="Source2" />
+                  <Edge From="42" To="43" Label="Source1" />
                   <Edge From="43" To="44" Label="Source1" />
                   <Edge From="44" To="45" Label="Source1" />
                   <Edge From="45" To="46" Label="Source1" />
-                  <Edge From="46" To="47" Label="Source1" />
-                  <Edge From="48" To="50" Label="Source1" />
-                  <Edge From="49" To="50" Label="Source2" />
+                  <Edge From="47" To="49" Label="Source1" />
+                  <Edge From="48" To="49" Label="Source2" />
+                  <Edge From="49" To="50" Label="Source1" />
                   <Edge From="50" To="51" Label="Source1" />
                   <Edge From="51" To="52" Label="Source1" />
                   <Edge From="52" To="53" Label="Source1" />
-                  <Edge From="53" To="54" Label="Source1" />
-                  <Edge From="55" To="56" Label="Source1" />
+                  <Edge From="54" To="56" Label="Source1" />
+                  <Edge From="55" To="56" Label="Source2" />
                   <Edge From="56" To="57" Label="Source1" />
-                  <Edge From="58" To="60" Label="Source1" />
-                  <Edge From="59" To="60" Label="Source2" />
-                  <Edge From="60" To="61" Label="Source1" />
+                  <Edge From="57" To="58" Label="Source1" />
+                  <Edge From="58" To="59" Label="Source1" />
+                  <Edge From="59" To="60" Label="Source1" />
                   <Edge From="61" To="62" Label="Source1" />
                   <Edge From="62" To="63" Label="Source1" />
-                  <Edge From="63" To="64" Label="Source1" />
-                  <Edge From="65" To="67" Label="Source1" />
-                  <Edge From="66" To="67" Label="Source2" />
+                  <Edge From="64" To="66" Label="Source1" />
+                  <Edge From="65" To="66" Label="Source2" />
+                  <Edge From="66" To="67" Label="Source1" />
                   <Edge From="67" To="68" Label="Source1" />
                   <Edge From="68" To="69" Label="Source1" />
                   <Edge From="69" To="70" Label="Source1" />
-                  <Edge From="70" To="71" Label="Source1" />
+                  <Edge From="71" To="73" Label="Source1" />
+                  <Edge From="72" To="73" Label="Source2" />
+                  <Edge From="73" To="74" Label="Source1" />
+                  <Edge From="74" To="75" Label="Source1" />
+                  <Edge From="75" To="76" Label="Source1" />
+                  <Edge From="76" To="77" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -3787,29 +4113,29 @@
                     <Property Name="TriggerSource" />
                   </Expression>
                   <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="p2:TriggeredAnalogOutput">
-                      <p2:SignalSource />
-                      <p2:TriggerSource>/Dev1/PFI0</p2:TriggerSource>
-                      <p2:SampleRate>5000</p2:SampleRate>
-                      <p2:ActiveEdge>Rising</p2:ActiveEdge>
-                      <p2:SampleMode>FiniteSamples</p2:SampleMode>
-                      <p2:BufferSize>50002</p2:BufferSize>
-                      <p2:Channels>
-                        <p2:AnalogOutputChannelConfiguration>
-                          <p2:ChannelName />
-                          <p2:MinimumValue>-10</p2:MinimumValue>
-                          <p2:MaximumValue>10</p2:MaximumValue>
-                          <p2:PhysicalChannel>Dev1/ao0</p2:PhysicalChannel>
-                          <p2:VoltageUnits>Volts</p2:VoltageUnits>
-                        </p2:AnalogOutputChannelConfiguration>
-                        <p2:AnalogOutputChannelConfiguration>
-                          <p2:ChannelName />
-                          <p2:MinimumValue>-10</p2:MinimumValue>
-                          <p2:MaximumValue>10</p2:MaximumValue>
-                          <p2:PhysicalChannel>Dev1/ao1</p2:PhysicalChannel>
-                          <p2:VoltageUnits>Volts</p2:VoltageUnits>
-                        </p2:AnalogOutputChannelConfiguration>
-                      </p2:Channels>
+                    <Combinator xsi:type="p3:TriggeredAnalogOutput">
+                      <p3:SignalSource />
+                      <p3:TriggerSource>/Dev1/PFI0</p3:TriggerSource>
+                      <p3:SampleRate>5000</p3:SampleRate>
+                      <p3:ActiveEdge>Rising</p3:ActiveEdge>
+                      <p3:SampleMode>FiniteSamples</p3:SampleMode>
+                      <p3:BufferSize>50002</p3:BufferSize>
+                      <p3:Channels>
+                        <p3:AnalogOutputChannelConfiguration>
+                          <p3:ChannelName />
+                          <p3:MinimumValue>-10</p3:MinimumValue>
+                          <p3:MaximumValue>10</p3:MaximumValue>
+                          <p3:PhysicalChannel>Dev1/ao0</p3:PhysicalChannel>
+                          <p3:VoltageUnits>Volts</p3:VoltageUnits>
+                        </p3:AnalogOutputChannelConfiguration>
+                        <p3:AnalogOutputChannelConfiguration>
+                          <p3:ChannelName />
+                          <p3:MinimumValue>-10</p3:MinimumValue>
+                          <p3:MaximumValue>10</p3:MaximumValue>
+                          <p3:PhysicalChannel>Dev1/ao1</p3:PhysicalChannel>
+                          <p3:VoltageUnits>Volts</p3:VoltageUnits>
+                        </p3:AnalogOutputChannelConfiguration>
+                      </p3:Channels>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
