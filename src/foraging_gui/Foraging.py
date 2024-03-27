@@ -3265,10 +3265,16 @@ class Window(QMainWindow):
         )
         
     def _write_session_json(self):
+        # Load saved data. I'm doing this way so we can hand this function off to Sci.Comp
+        # and the saved data is a interface for making the session.json file
+        with open(self.SaveFileJson,'r') as f:
+            d = json.load(f)
+
         # Build session json
         session = {}
         session['test'] = 'hey'
-
+        session['experimenter_full_name'] = d['Experimenter']
+        
         # Write to file
         filepath = os.path.join(self.MetadataFolder, 'session.json')
         with open(filepath, 'w') as f:
