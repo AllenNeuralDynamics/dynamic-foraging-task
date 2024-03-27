@@ -3272,9 +3272,23 @@ class Window(QMainWindow):
 
         # Build session json
         session = {}
-        session['test'] = 'hey'
-        session['experimenter_full_name'] = d['Experimenter']
-        
+        session['experimenter_full_name']   = d['Experimenter']
+        session['session_start_time']       = d['Other_SessionStartTime']
+        session['session_end_time']         = d['Other_CurrentTime']
+        session['subject_id']               = d['ID']
+        session['session_type']             = 'dynamic-foraging-behavior' # should stage/curriculum go here?
+        session['iacuc_protocol']           = '?'
+        session['protocol_id']              = '?'
+        session['rig_id']                   = d['box'] # This should be the rig_id from the rig.json, but that doesnt exist yet.
+        session['animal_weight_post']       = d['WeightAfter']
+        session['data_streams']             = '?'
+        session['Calibrations']             = '?'
+        session['maintenance_class']        = '?'
+        session['reward_delivery']          = '?'
+        session['reward_consumed_total']    = '?'
+        session['reward_consumed_unit']     = '?'
+        session['stimulus_epoch']           = '?'     
+ 
         # Write to file
         filepath = os.path.join(self.MetadataFolder, 'session.json')
         with open(filepath, 'w') as f:
