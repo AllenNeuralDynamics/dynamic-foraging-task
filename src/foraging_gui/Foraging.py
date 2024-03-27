@@ -1919,6 +1919,9 @@ class Window(QMainWindow):
         self.SessionlistSpin.setEnabled(True)
         self.Sessionlist.setEnabled(True)
 
+        # Write session JSON
+        self._write_session_json()
+
         # Drop `finished` file with date/time
         filepath = os.path.join(self.SessionFolder, 'finished') 
         contents = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
