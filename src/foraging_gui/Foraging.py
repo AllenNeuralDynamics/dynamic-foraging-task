@@ -2313,7 +2313,7 @@ class Window(QMainWindow):
             # show basic information
             if self.default_ui=='ForagingGUI.ui':  
                 if 'info_task' in Obj:
-                    self.label_info_task.setTitle(Obj['info_task'])
+                    self.label_info_task.setText(Obj['info_task'])
                 if 'info_other_perf' in Obj:
                     self.label_info_performance_others.setText(Obj['info_other_perf'])
             elif self.default_ui=='ForagingGUI_Ephys.ui':
