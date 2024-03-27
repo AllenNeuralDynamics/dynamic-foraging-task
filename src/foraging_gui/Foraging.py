@@ -3288,7 +3288,7 @@ class Window(QMainWindow):
         session['Calibrations']             = []#?
         session['maintenance_class']        = []#?
         session['reward_delivery']          = None #?
-        session['reward_consumed_total']    = d['water_in_session'] # does not include supplemental water 
+        session['reward_consumed_total']    = #?d['water_in_session'] # does not include supplemental water 
         session['reward_consumed_unit']     = 'milliliter'
         session['stimulus_epoch']           = []#?
         session['notes']                    = None #?    
