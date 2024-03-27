@@ -1868,7 +1868,7 @@ class Window(QMainWindow):
                             Obj[attr_name]=Value
         # save other events, e.g. session start time
         for attr_name in dir(self):
-            if attr_name.startswith('Other_'):
+            if attr_name.startswith('Other_') or attr_name.startswith('info_'):
                 Obj[attr_name] = getattr(self, attr_name)
         # save laser calibration results (only for the calibration session)
         if hasattr(self, 'LaserCalibration_dialog'):
