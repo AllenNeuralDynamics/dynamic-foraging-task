@@ -2316,6 +2316,9 @@ class Window(QMainWindow):
                     self.label_info_task.setText(Obj['info_task'])
                 if 'info_other_perf' in Obj:
                     self.label_info_performance_others.setText(Obj['info_other_perf'])
+                if 'info_performance_essential_1' in Obj:
+                    self.label_info_performance_essential_1.setText(Obj['info_performance_essential_1'])
+
             elif self.default_ui=='ForagingGUI_Ephys.ui':
                 if 'Other_inforTitle' in Obj:
                     self.infor.setTitle(Obj['Other_inforTitle'])
