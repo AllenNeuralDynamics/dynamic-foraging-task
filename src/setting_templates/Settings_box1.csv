@@ -8,3 +8,5 @@ HighSpeedCamera,0
 SideCamera,12345678
 BottomCamera,12345678
 AINDLickDetector,0
+LeftLickDetector,COM8
+RightLickDetector,COM9
