@@ -3265,10 +3265,26 @@ class Window(QMainWindow):
         )
         
     def _write_session_json(self):
+        '''
+            I'm not worried about formatting or data types for the moment, I'm just trying to compile a list of the fields we need
+            and where I can load them from
+        '''
         # Load saved data. I'm doing this way so we can hand this function off to Sci.Comp
         # and the saved data is a interface for making the session.json file
         with open(self.SaveFileJson,'r') as f:
             d = json.load(f)
+
+    
+        # Build data streams
+        #data_streams = {
+        #    'stream_start_time':,
+        #    'stream_end_time':,
+        #    'daq_names':,
+        #    'camera_names':,
+        #    'light_sources':,
+        #    'manipulator_modules':,
+        #    
+        #}
 
         # Build session json
         session = {}
@@ -3284,14 +3300,14 @@ class Window(QMainWindow):
         session['rig_id']                   = d['box'] # This should be the rig_id from the rig.json, but that doesnt exist yet.
         session['animal_weight_post']       = d['WeightAfter']
         session['weight_unit']              = 'gram'
-        session['data_streams']             = []#?
-        session['Calibrations']             = []#?
+        session['data_streams']             = ?
+        session['Calibrations']             = []# Should load water calibration, and laser calibration if present
         session['maintenance_class']        = []#?
         session['reward_delivery']          = None #?
         session['reward_consumed_total']    = None #d['water_in_session'] # does not include supplemental water 
         session['reward_consumed_unit']     = 'milliliter'
         session['stimulus_epoch']           = []#?
-        session['notes']                    = None #?    
+        session['notes']                    = None #? Should we put ForagingSettings.json, and Settings_box.csv here?  
  
         # Write to file
         filepath = os.path.join(self.MetadataFolder, 'session.json')
