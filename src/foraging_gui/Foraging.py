@@ -700,7 +700,7 @@ class Window(QMainWindow):
                 self.RecentWaterCalibrationDate=sorted_dates[-1]
             logging.info('Loaded Water Calibration')
         else:
-            self.WaterCalibrateionResults = {}
+            self.WaterCalibrationResults = {}
             self.RecentWaterCalibrationDate='None'
             logging.warning('Did not find a recent water calibration file')
 
