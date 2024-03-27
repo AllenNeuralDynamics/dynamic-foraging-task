@@ -3261,6 +3261,17 @@ class Window(QMainWindow):
                          '&x_y_plot_dot_size=20&x_y_plot_dot_opacity=0.8&x_y_plot_line_width=3.0'
         )
         
+    def _write_session_json(self):
+        # Build session json
+        session = {}
+        session['test'] = 'hey'
+
+        # Write to file
+        filepath = os.path.join(self.MetadataFolder, 'session.json')
+        with open(filepath, 'w') as f:
+            json.dump(session,f)
+        logging.info('Finished writing session.json') 
+        
 def map_hostname_to_box(hostname,box_num):
     host_mapping = {
         'W10DT714033':'447-1-',
