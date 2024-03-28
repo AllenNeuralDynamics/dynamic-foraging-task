@@ -1920,6 +1920,9 @@ class Window(QMainWindow):
         self.SessionlistSpin.setEnabled(True)
         self.Sessionlist.setEnabled(True)
 
+        # Write session JSON
+        self._write_session_json()
+
         # Drop `finished` file with date/time
         filepath = os.path.join(self.SessionFolder, 'finished') 
         contents = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -3283,6 +3286,57 @@ class Window(QMainWindow):
                          '&x_y_plot_if_aggr_all=False&x_y_plot_smooth_factor=5'
                          '&x_y_plot_dot_size=20&x_y_plot_dot_opacity=0.8&x_y_plot_line_width=3.0'
         )
+        
+    def _write_session_json(self):
+        '''
+            I'm not worried about formatting or data types for the moment, I'm just trying to compile a list of the fields we need
+            and where I can load them from
+        '''
+        # Load saved data. I'm doing this way so we can hand this function off to Sci.Comp
+        # and the saved data is a interface for making the session.json file
+        with open(self.SaveFileJson,'r') as f:
+            d = json.load(f)
+
+    
+        # Build data streams
+        #data_streams = {
+        #    'stream_start_time':,
+        #    'stream_end_time':,
+        #    'daq_names':,
+        #    'camera_names':,
+        #    'light_sources':,
+        #    'manipulator_modules':,
+        #    
+        #}
+
+        # Build session json
+        session = {}
+        session['describedBy']              = 'https://raw.githubusercontent.com/AllenNeuralDynamics/aind-data-schema/main/src/aind_data_schema/core/session.py'
+        session['schema_version']           = '?'
+        session['experimenter_full_name']   = [d['Experimenter']]
+        session['session_start_time']       = d['Other_SessionStartTime']
+        session['session_end_time']         = d['Other_CurrentTime']
+        session['subject_id']               = d['ID']
+        session['session_type']             = 'dynamic-foraging-behavior' # should stage/curriculum go here?
+        session['iacuc_protocol']           = '?'
+        session['protocol_id']              = '?'
+        session['rig_id']                   = d['box'] # This should be the rig_id from the rig.json, but that doesnt exist yet.
+        session['animal_weight_post']       = d['WeightAfter']
+        session['weight_unit']              = 'gram'
+        session['data_streams']             = ?
+        session['Calibrations']             = []# Should load water calibration, and laser calibration if present
+        session['maintenance_class']        = []#?
+        session['reward_delivery']          = None #?
+        session['reward_consumed_total']    = None #d['water_in_session'] # does not include supplemental water 
+        session['reward_consumed_unit']     = 'milliliter'
+        session['stimulus_epoch']           = []#?
+        session['notes']                    = None #? Should we put ForagingSettings.json, and Settings_box.csv here?  
+ 
+        # Write to file
+        filepath = os.path.join(self.MetadataFolder, 'session.json')
+        with open(filepath, 'w') as f:
+            json.dump(session,f)
+        logging.info('Finished writing session.json') 
         
 def map_hostname_to_box(hostname,box_num):
     host_mapping = {
