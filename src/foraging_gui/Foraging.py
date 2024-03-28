@@ -547,6 +547,7 @@ class Window(QMainWindow):
             self._no_stage()
             msg = 'Could not find newscale with serial number: {}'
             logging.error(msg.format(self.newscale_serial_num))
+            self.newscale_serial_num = ''
             return
         else:
             stage_index = index[0]
