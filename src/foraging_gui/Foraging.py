@@ -700,7 +700,7 @@ class Window(QMainWindow):
                 self.RecentWaterCalibrationDate=sorted_dates[-1]
             logging.info('Loaded Water Calibration')
         else:
-            self.WaterCalibrateionResults = {}
+            self.WaterCalibrationResults = {}
             self.RecentWaterCalibrationDate='None'
             logging.warning('Did not find a recent water calibration file')
 
@@ -2222,6 +2222,9 @@ class Window(QMainWindow):
                         logging.error(str(e))
                         continue
                     if key in CurrentObj:
+                        # skip LeftValue, RightValue, GiveWaterL, GiveWaterR if WaterCalibrationResults is not empty as they will be set by the corresponding volume. 
+                        if (key in ['LeftValue','RightValue','GiveWaterL','GiveWaterR']) and self.WaterCalibrationResults!={}:
+                            continue
                         # skip some keys; skip warmup
                         if key in ['Start','warmup','SessionlistSpin']:
                             self.WeightAfter.setText('')
