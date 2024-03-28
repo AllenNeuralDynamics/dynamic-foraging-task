@@ -67,6 +67,7 @@ class Window(QMainWindow):
         self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration_{}.json'.format(box_number))
         self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_{}.json'.format(box_number))
         self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json')
+        self.RigJson=os.path.join(self.SettingFolder, 'rig_{}.json'.format(box_number))
 
         # Load Laser and Water Calibration Files
         self._GetLaserCalibration()
@@ -132,6 +133,7 @@ class Window(QMainWindow):
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
         self._StopPhotometry() # Make sure photoexcitation is stopped 
+        self._CheckRigJson()
  
         if not self.start_bonsai_ide:
             '''
@@ -1680,6 +1682,32 @@ class Window(QMainWindow):
             self.LaserCalibration_dialog.show()
         else:
             self.LaserCalibration_dialog.hide()
+    
+    def _CheckRigJson(self):
+        # Check if the rig json file exists
+        if os.path.isfile(self.RigJson):
+            # if it does, load it
+            with open(self.RigJson) as f:
+                rig = json.load(f)
+             logging.info('loaded rig.json')
+        else:
+            # If not, give warning           
+            reply = QMessageBox.critical(self, 'Box {}, CheckRigJson'.format(self.box_letter),
+                'No rig.json found! Please configure this file from the settings template. In the future this will force stop the session.',
+                QMessageBox.Ok)
+            logging.warning('No rig json found')
+            return    
+               
+        # Load LaserCalibration, add to rig.json
+        # Load WaterCalibration, add to rig.json
+        # Load Newscale Serial Num, add to rig.json
+        # Check if rig.json matches Settings_box<num>.csv entries for AINDLickDetector, and HighSpeedCamera
+        # Validate rig.json against AIND schema
+        # Save rig.json to metadata directory
+        output_file = os.path.join(self.MetadataFolder, 'rig.json')
+        with open(output_file, 'w') as f:
+            json.dump(rig,f)
+        logging.info('Saved rig.json to metadata directory')
 
     def _TimeDistribution(self):
         '''Plot simulated ITI/delay/block distribution'''
