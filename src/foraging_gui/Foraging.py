@@ -1699,14 +1699,19 @@ class Window(QMainWindow):
             return    
                
         # TODO Load LaserCalibration, add to rig.json
+        #if hasattr(self, 'LaserCalibrationResults'):
+        #    rig['laser_calibration_file'] = self.LaserCalibrationResults
+        
         # TODO Load WaterCalibration, add to rig.json
+        #if hasattr(self, 'WaterCalibrationResults'):
+        #    rig['water_calibration_file']=self.WaterCalibrationResults
 
-        # Load Newscale Serial Num, add to rig.json
-        if hasattr(self, 'newscale_serial_num'):
-            rig['newscale_serial_num'] = self.newscale_serial_num # TODO, need to put it in the right place
-        else:
-            logging.info('Could not save newscale serial num to rig.json')
-            rig['newscale_serial_num'] = ''
+        # TODO Load Newscale Serial Num, add to rig.json
+        #if hasattr(self, 'newscale_serial_num'):
+        #    rig['newscale_serial_num'] = self.newscale_serial_num # TODO, need to put it in the right place
+        #else:
+        #    logging.info('Could not save newscale serial num to rig.json')
+        #    rig['newscale_serial_num'] = ''
 
         # TODO Check if rig.json matches Settings_box<num>.csv entries for AINDLickDetector, and HighSpeedCamera
 
