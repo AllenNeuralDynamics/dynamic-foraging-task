@@ -1703,6 +1703,9 @@ class Window(QMainWindow):
         # Load Newscale Serial Num, add to rig.json
         if hasattr(self, 'newscale_serial_num'):
             rig['newscale_serial_num'] = self.newscale_serial_num # TODO, need to put it in the right place
+        else:
+            logging.info('Could not save newscale serial num to rig.json')
+            rig['newscale_serial_num'] = ''
 
         # TODO Check if rig.json matches Settings_box<num>.csv entries for AINDLickDetector, and HighSpeedCamera
 
