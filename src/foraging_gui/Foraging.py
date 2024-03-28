@@ -1864,7 +1864,7 @@ class Window(QMainWindow):
                             Obj[attr_name]=Value
         # save other events, e.g. session start time
         for attr_name in dir(self):
-            if attr_name.startswith('Other_'):
+            if attr_name.startswith('Other_') or attr_name.startswith('info_'):
                 Obj[attr_name] = getattr(self, attr_name)
         # save laser calibration results (only for the calibration session)
         if hasattr(self, 'LaserCalibration_dialog'):
@@ -2319,9 +2319,13 @@ class Window(QMainWindow):
             # show basic information
             if self.default_ui=='ForagingGUI.ui':  
                 if 'info_task' in Obj:
-                    self.label_info_task.setTitle(Obj['info_task'])
-                if 'info_other_perf' in Obj:
-                    self.label_info_performance_others.setText(Obj['info_other_perf'])
+                    self.label_info_task.setText(Obj['info_task'])
+                if 'info_performance_others' in Obj:
+                    self.label_info_performance_others.setText(Obj['info_performance_others'])
+                if 'info_performance_essential_1' in Obj:
+                    self.label_info_performance_essential_1.setText(Obj['info_performance_essential_1'])
+                if 'info_performance_essential_2' in Obj:
+                    self.label_info_performance_essential_2.setText(Obj['info_performance_essential_2'])
             elif self.default_ui=='ForagingGUI_Ephys.ui':
                 if 'Other_inforTitle' in Obj:
                     self.infor.setTitle(Obj['Other_inforTitle'])
