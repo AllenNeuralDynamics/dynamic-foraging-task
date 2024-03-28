@@ -133,7 +133,6 @@ class Window(QMainWindow):
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
         self._StopPhotometry() # Make sure photoexcitation is stopped 
-        self._CheckRigJson()
  
         if not self.start_bonsai_ide:
             '''
@@ -2007,6 +2006,9 @@ class Window(QMainWindow):
         if not os.path.exists(self.PhotometryFolder):
             os.makedirs(self.PhotometryFolder)
             logging.info(f"Created new folder: {self.PhotometryFolder}")
+
+        # Create Rig Json
+        self._CheckRigJson() 
 
     def _Concat(self,widget_dict,Obj,keyname):
         '''Help manage save different dialogs'''
