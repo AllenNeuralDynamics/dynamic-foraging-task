@@ -1697,11 +1697,17 @@ class Window(QMainWindow):
             logging.warning('No rig json found')
             return    
                
-        # Load LaserCalibration, add to rig.json
-        # Load WaterCalibration, add to rig.json
+        # TODO Load LaserCalibration, add to rig.json
+        # TODO Load WaterCalibration, add to rig.json
+
         # Load Newscale Serial Num, add to rig.json
-        # Check if rig.json matches Settings_box<num>.csv entries for AINDLickDetector, and HighSpeedCamera
-        # Validate rig.json against AIND schema
+        if hasattr(self, 'newscale_serial_num'):
+            rig['newscale_serial_num'] = self.newscale_serial_num # TODO, need to put it in the right place
+
+        # TODO Check if rig.json matches Settings_box<num>.csv entries for AINDLickDetector, and HighSpeedCamera
+
+        # TODO Validate rig.json against AIND schema
+
         # Save rig.json to metadata directory
         output_file = os.path.join(self.MetadataFolder, 'rig.json')
         with open(output_file, 'w') as f:
