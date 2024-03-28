@@ -1689,7 +1689,7 @@ class Window(QMainWindow):
             # if it does, load it
             with open(self.RigJson) as f:
                 rig = json.load(f)
-             logging.info('loaded rig.json')
+            logging.info('loaded rig.json')
         else:
             # If not, give warning           
             reply = QMessageBox.critical(self, 'Box {}, CheckRigJson'.format(self.box_letter),
