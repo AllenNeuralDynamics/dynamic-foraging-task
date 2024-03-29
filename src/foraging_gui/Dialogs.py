@@ -1147,6 +1147,7 @@ class CameraDialog(QDialog):
         else:
             self.StartCamera.setStyleSheet("background-color : none")
             self.MainWindow.Channel.CameraControl(int(2))
+            time.sleep(2)
             self.MainWindow.WarningLabelCamera.setText('Camera is off!')
             self.MainWindow.WarningLabelCamera.setStyleSheet(self.MainWindow.default_warning_color)
             self.WarningLabelCameraOn.setText('Camera is off!')
