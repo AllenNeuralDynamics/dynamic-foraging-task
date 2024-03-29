@@ -1721,11 +1721,6 @@ class GenerateTrials():
                 # Set an attribute in self with the name 'TP_' followed by the child's object name
                 # and store whether the child is checked or not
                 setattr(self, 'TP_'+child.objectName(), child.isChecked())
-        # log folder
-        try:
-            self.TP_log_folder=win.Ot_log_folder
-        except Exception as e:
-            logging.error(str(e))
             
         # Manually attach auto training parameters 
         if hasattr(win, 'AutoTrain_dialog') and win.AutoTrain_dialog.auto_train_engaged:
@@ -1918,10 +1913,15 @@ class TimerWorker(QtCore.QObject):
     finished = QtCore.pyqtSignal()
     progress = QtCore.pyqtSignal(int)
 
+    def __init__(self):
+        super(TimerWorker, self).__init__()
+        self._isRunning=True
+
     @QtCore.pyqtSlot(int)
     def _Timer(self,Time):
         '''sleep some time'''
         # Emit initial status
+        self._isRunning=True
         interval = 1
         num_updates = int(np.floor(Time/interval))
         self.progress.emit(int(Time))
@@ -1929,6 +1929,8 @@ class TimerWorker(QtCore.QObject):
         # Iterate through intervals 
         while num_updates >0:
             time.sleep(interval)
+            if not self._isRunning:
+                return 
             Time -=interval
             self.progress.emit(int(Time))
             num_updates -= 1
@@ -1937,4 +1939,7 @@ class TimerWorker(QtCore.QObject):
         time.sleep(Time)
         self.finished.emit()
 
+    def _stop(self):
+        # Will halt the timer at the next interval
+        self._isRunning=False
 

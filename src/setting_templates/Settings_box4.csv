@@ -4,3 +4,9 @@ BonsaiOsc1,4032
 BonsaiOsc2,4033
 BonsaiOsc3,4034
 BonsaiOsc4,4035
+HighSpeedCamera,0
+SideCamera,12345678
+BottomCamera,12345678
+AINDLickDetector,0
+LeftLickDetector,COM8
+RightLickDetector,COM9

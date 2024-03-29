@@ -2377,8 +2377,7 @@ class AutoTrainDialog(QDialog):
                 return
                 
             self.widgets_locked_by_auto_train.extend(
-                [self.MainWindow.TrainingStage,
-                self.MainWindow.SaveTraining]
+                [self.MainWindow.TrainingStage]
                 )
 
             # lock the widgets that have been set by auto training 
