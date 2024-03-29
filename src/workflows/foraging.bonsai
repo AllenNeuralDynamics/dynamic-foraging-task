@@ -1339,7 +1339,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Disabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM4</harp:PortName>
+                      <harp:PortName>COM5</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject">
@@ -7191,6 +7191,18 @@
                 </Workflow>
               </Builder>
             </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>LickometerEventsLeft</Name>
+            </Expression>
+            <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogHarpDemux.bonsai">
+              <LogName>LickometerEventsLeft</LogName>
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>LickometerEventsRight</Name>
+            </Expression>
+            <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogHarpDemux.bonsai">
+              <LogName>LickometerEventsRight</LogName>
+            </Expression>
             <Expression xsi:type="GroupWorkflow">
               <Name>HighSpeedCamera</Name>
               <Workflow>
@@ -7574,11 +7586,13 @@
             <Edge From="32" To="33" Label="Source1" />
             <Edge From="34" To="35" Label="Source1" />
             <Edge From="36" To="37" Label="Source1" />
-            <Edge From="39" To="44" Label="Source1" />
-            <Edge From="40" To="41" Label="Source1" />
+            <Edge From="39" To="40" Label="Source1" />
             <Edge From="41" To="42" Label="Source1" />
-            <Edge From="42" To="43" Label="Source1" />
-            <Edge From="43" To="44" Label="Source2" />
+            <Edge From="43" To="48" Label="Source1" />
+            <Edge From="44" To="45" Label="Source1" />
+            <Edge From="45" To="46" Label="Source1" />
+            <Edge From="46" To="47" Label="Source1" />
+            <Edge From="47" To="48" Label="Source2" />
           </Edges>
         </Workflow>
       </Expression>
