@@ -2636,6 +2636,11 @@ class Window(QMainWindow):
                 logging.info('New Session declined')
                 return False
         
+        # stop the camera 
+        if self.Camera_dialog.AutoControl.currentText()=='Yes':
+            self.Camera_dialog.StartCamera.setChecked(False)
+            self.Camera_dialog._StartCamera()
+            
         # Reset logging
         try:
             self.Channel.StopLogging('s')
