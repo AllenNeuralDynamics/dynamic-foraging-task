@@ -654,7 +654,6 @@ class Window(QMainWindow):
             log_folder=os.path.join(log_folder,formatted_datetime,'raw.harp')
         # stop the logging first
         self.Channel.StopLogging('s')
-        time.sleep(2)
         self.Channel.StartLogging(log_folder)
         Rec=self.Channel.receive()
         if Rec[0].address=='/loggerstarted':
