@@ -1105,6 +1105,10 @@ class CameraDialog(QDialog):
         if self.StartCamera.isChecked():
             self.StartCamera.setStyleSheet("background-color : green;")
             if self.AutoControl.currentText()=='No':
+                # If the behavior start button is checked, set the CollectVideo to Yes.
+                if self.MainWindow.Start.isChecked():
+                    index=self.CollectVideo.findText('Yes')
+                    self.CollectVideo.setCurrentIndex(index)
                 # Do not restart logging when automatic control is "yes" as logging will start in behavior control
                 if self.CollectVideo.currentText()=='Yes':
                     # Start logging if the formal logging is not started
