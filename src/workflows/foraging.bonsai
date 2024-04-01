@@ -7399,7 +7399,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="ffmpeg:VideoWriter">
-                      <ffmpeg:FileName>C:\Users\svc_aind_ephys\Documents\temporaryvideo\2024-03-21_09-52-50\HarpFolder/../VideoFolder/bottom_camera.avi</ffmpeg:FileName>
+                      <ffmpeg:FileName>C:\Users\svc_aind_ephys\Documents\temporaryvideo\2024-03-21_09-52-50\HarpFolder/../../behavior-videos/bottom_camera.avi</ffmpeg:FileName>
                       <ffmpeg:Suffix>None</ffmpeg:Suffix>
                       <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                       <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
@@ -7457,7 +7457,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="ffmpeg:VideoWriter">
-                      <ffmpeg:FileName>C:\Users\svc_aind_ephys\Documents\temporaryvideo\2024-03-21_09-52-50\HarpFolder/../VideoFolder/side_camera.avi</ffmpeg:FileName>
+                      <ffmpeg:FileName>C:\Users\svc_aind_ephys\Documents\temporaryvideo\2024-03-21_09-52-50\HarpFolder/../../behavior-videos/side_camera.avi</ffmpeg:FileName>
                       <ffmpeg:Suffix>None</ffmpeg:Suffix>
                       <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                       <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
