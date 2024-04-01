@@ -1627,7 +1627,7 @@ class Window(QMainWindow):
         self.Start.setChecked(False)
         if self.InitializeBonsaiSuccessfully==1:
             # stop the camera 
-            if self.Camera_dialog.AutoControl.currentText()=='Yes':
+            if self.Camera_dialog.StartCamera.isChecked():
                 self.Camera_dialog.StartCamera.setChecked(False)
                 self.Camera_dialog._StartCamera()
             # stop the logging
@@ -2637,7 +2637,7 @@ class Window(QMainWindow):
                 return False
         
         # stop the camera 
-        if self.Camera_dialog.AutoControl.currentText()=='Yes':
+        if self.Camera_dialog.StartCamera.isChecked():
             self.Camera_dialog.StartCamera.setChecked(False)
             self.Camera_dialog._StartCamera()
             
