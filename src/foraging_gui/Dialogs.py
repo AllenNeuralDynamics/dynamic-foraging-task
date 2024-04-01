@@ -1050,6 +1050,7 @@ class CameraDialog(QDialog):
             return
         if self.CollectVideo.currentText()=='Yes':
             # formal logging
+            self.MainWindow.CreateNewFolder=1
             self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
         else:
             # temporary logging
