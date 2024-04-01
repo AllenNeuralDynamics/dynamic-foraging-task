@@ -2864,6 +2864,7 @@ class Window(QMainWindow):
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
                 if not (self.Camera_dialog.StartCamera.isChecked() and self.Camera_dialog.CollectVideo.currentText()=='Yes' and self.Camera_dialog.AutoControl.currentText()=='No'):
+                    self.CreateNewFolder=1
                     self.Ot_log_folder=self._restartlogging()
             except Exception as e:
                 if 'ConnectionAbortedError' in str(e):
