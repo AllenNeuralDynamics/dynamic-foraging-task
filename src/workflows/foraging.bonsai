@@ -7421,7 +7421,7 @@
                       <ffmpeg:Suffix>None</ffmpeg:Suffix>
                       <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                       <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                      <ffmpeg:OutputArguments>-vcodec libx264 -crf 23 -preset fast</ffmpeg:OutputArguments>
+                      <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 1 -preset medium -b:v 100M</ffmpeg:OutputArguments>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
@@ -7479,7 +7479,7 @@
                       <ffmpeg:Suffix>None</ffmpeg:Suffix>
                       <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                       <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                      <ffmpeg:OutputArguments>-vcodec libx264 -crf 23 -preset fast</ffmpeg:OutputArguments>
+                      <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 1 -preset medium -b:v 100M</ffmpeg:OutputArguments>
                     </Combinator>
                   </Expression>
                 </Nodes>
