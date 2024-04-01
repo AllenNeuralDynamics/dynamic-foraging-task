@@ -2854,9 +2854,6 @@ class Window(QMainWindow):
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
             self._StopCurrentSession() 
-        # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
-        if self.Camera_dialog.StartCamera.isChecked():
-            self.StartANewSession=0
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
             # generate a new session id
@@ -2865,7 +2862,9 @@ class Window(QMainWindow):
             self.WarmupWarning.setText('')
             # start a new logging
             try:
-                self.Ot_log_folder=self._restartlogging()
+                # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
+                if not (self.Camera_dialog.StartCamera.isChecked() and self.Camera_dialog.CollectVideo.currentText()=='Yes' and self.Camera_dialog.AutoControl.currentText()=='No'):
+                    self.Ot_log_folder=self._restartlogging()
             except Exception as e:
                 if 'ConnectionAbortedError' in str(e):
                     logging.info('lost bonsai connection: restartlogging()')
