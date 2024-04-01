@@ -7559,46 +7559,50 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="rx:SubscribeWhen" />
             </Expression>
-            <Expression xsi:type="rx:Defer">
-              <Name>HarpDeviceDump</Name>
-              <Workflow>
-                <Nodes>
-                  <Expression xsi:type="harp:CreateMessage">
-                    <harp:MessageType>Write</harp:MessageType>
-                    <harp:Payload xsi:type="harp:CreateOperationControlPayload">
-                      <harp:OperationMode>Active</harp:OperationMode>
-                      <harp:DumpRegisters>true</harp:DumpRegisters>
-                      <harp:MuteReplies>false</harp:MuteReplies>
-                      <harp:VisualIndicators>On</harp:VisualIndicators>
-                      <harp:OperationLed>On</harp:OperationLed>
-                      <harp:Heartbeat>Enabled</harp:Heartbeat>
-                    </harp:Payload>
-                  </Expression>
-                  <Expression xsi:type="MulticastSubject">
-                    <Name>BehaviorCommands</Name>
-                  </Expression>
-                  <Expression xsi:type="MulticastSubject">
-                    <Name>SoundCardCommands</Name>
-                  </Expression>
-                  <Expression xsi:type="MulticastSubject">
-                    <Name>LickometerLeftCommands</Name>
-                  </Expression>
-                  <Expression xsi:type="MulticastSubject">
-                    <Name>LickometerRightCommands</Name>
-                  </Expression>
-                </Nodes>
-                <Edges>
-                  <Edge From="0" To="1" Label="Source1" />
-                  <Edge From="1" To="2" Label="Source1" />
-                  <Edge From="2" To="3" Label="Source1" />
-                  <Edge From="3" To="4" Label="Source1" />
-                </Edges>
-              </Workflow>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="rx:Defer">
+                <Name>HarpDeviceDump</Name>
+                <Workflow>
+                  <Nodes>
+                    <Expression xsi:type="harp:CreateMessage">
+                      <harp:MessageType>Write</harp:MessageType>
+                      <harp:Payload xsi:type="harp:CreateOperationControlPayload">
+                        <harp:OperationMode>Active</harp:OperationMode>
+                        <harp:DumpRegisters>true</harp:DumpRegisters>
+                        <harp:MuteReplies>false</harp:MuteReplies>
+                        <harp:VisualIndicators>On</harp:VisualIndicators>
+                        <harp:OperationLed>On</harp:OperationLed>
+                        <harp:Heartbeat>Enabled</harp:Heartbeat>
+                      </harp:Payload>
+                    </Expression>
+                    <Expression xsi:type="MulticastSubject">
+                      <Name>BehaviorCommands</Name>
+                    </Expression>
+                    <Expression xsi:type="MulticastSubject">
+                      <Name>SoundCardCommands</Name>
+                    </Expression>
+                    <Expression xsi:type="MulticastSubject">
+                      <Name>LickometerLeftCommands</Name>
+                    </Expression>
+                    <Expression xsi:type="MulticastSubject">
+                      <Name>LickometerRightCommands</Name>
+                    </Expression>
+                  </Nodes>
+                  <Edges>
+                    <Edge From="0" To="1" Label="Source1" />
+                    <Edge From="1" To="2" Label="Source1" />
+                    <Edge From="2" To="3" Label="Source1" />
+                    <Edge From="3" To="4" Label="Source1" />
+                  </Edges>
+                </Workflow>
+              </Builder>
             </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:DelaySubscription">
-                <rx:DueTime>PT2S</rx:DueTime>
-              </Combinator>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="rx:DelaySubscription">
+                  <rx:DueTime>PT2S</rx:DueTime>
+                </Combinator>
+              </Builder>
             </Expression>
           </Nodes>
           <Edges>
