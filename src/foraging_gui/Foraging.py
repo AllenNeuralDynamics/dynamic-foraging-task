@@ -1909,10 +1909,8 @@ class Window(QMainWindow):
             with open(self.SaveFile, "w") as outfile:
                 json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
                         
-        # close the camera
-        if self.Camera_dialog.AutoControl.currentText()=='Yes':
-            self.Camera_dialog.StartCamera.setChecked(False)
-            self.Camera_dialog._StartCamera()
+        # stop the camera
+        self._stop_camera()
 
         # Toggle unsaved data to False
         self.unsaved_data=False
