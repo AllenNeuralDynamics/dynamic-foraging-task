@@ -7613,7 +7613,7 @@
                         </Expression>
                         <Expression xsi:type="Index">
                           <Operand xsi:type="StringProperty">
-                            <Value>SideCamera</Value>
+                            <Value>SideCameraRight</Value>
                           </Operand>
                         </Expression>
                         <Expression xsi:type="PropertyMapping">
