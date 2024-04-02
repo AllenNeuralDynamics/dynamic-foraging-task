@@ -7358,7 +7358,7 @@
                     <Name>RootPath</Name>
                   </Expression>
                   <Expression xsi:type="Format">
-                    <Format>{0}/../VideoFolder/bottom_camera.csv</Format>
+                    <Format>{0}/../../behavior-videos/bottom_camera.csv</Format>
                     <Selector />
                   </Expression>
                   <Expression xsi:type="PropertyMapping">
@@ -7381,7 +7381,7 @@
                     <Name>RootPath</Name>
                   </Expression>
                   <Expression xsi:type="Format">
-                    <Format>{0}/../VideoFolder/bottom_camera.avi</Format>
+                    <Format>{0}/../../behavior-videos/bottom_camera.avi</Format>
                     <Selector />
                   </Expression>
                   <Expression xsi:type="PropertyMapping">
@@ -7416,7 +7416,7 @@
                     <Name>RootPath</Name>
                   </Expression>
                   <Expression xsi:type="Format">
-                    <Format>{0}/../VideoFolder/side_camera.csv</Format>
+                    <Format>{0}/../../behavior-videos/side_camera.csv</Format>
                     <Selector />
                   </Expression>
                   <Expression xsi:type="PropertyMapping">
@@ -7439,7 +7439,7 @@
                     <Name>RootPath</Name>
                   </Expression>
                   <Expression xsi:type="Format">
-                    <Format>{0}/../VideoFolder/side_camera.avi</Format>
+                    <Format>{0}/../../behavior-videos/side_camera.avi</Format>
                     <Selector />
                   </Expression>
                   <Expression xsi:type="PropertyMapping">
