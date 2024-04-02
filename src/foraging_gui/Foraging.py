@@ -1627,9 +1627,7 @@ class Window(QMainWindow):
         self.Start.setChecked(False)
         if self.InitializeBonsaiSuccessfully==1:
             # stop the camera 
-            if self.Camera_dialog.StartCamera.isChecked():
-                self.Camera_dialog.StartCamera.setChecked(False)
-                self.Camera_dialog._StartCamera()
+            self._stop_camera()
             # stop the logging
             try:
                 self.Channel.StopLogging('s')
