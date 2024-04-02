@@ -653,7 +653,7 @@ class Window(QMainWindow):
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
             log_folder=os.path.join(log_folder,formatted_datetime,'raw.harp')
         # stop the logging first
-        self.Channel.StopLogging('s')
+        self._stop_logging()
         self.Channel.StartLogging(log_folder)
         Rec=self.Channel.receive()
         if Rec[0].address=='/loggerstarted':
@@ -1629,10 +1629,7 @@ class Window(QMainWindow):
             # stop the camera 
             self._stop_camera()
             # stop the logging
-            try:
-                self.Channel.StopLogging('s')
-            except Exception as e:
-                logging.error(str(e))
+            self._stoplogging()
             self.client.close()
             self.client2.close()
             self.client3.close()
@@ -2627,7 +2624,7 @@ class Window(QMainWindow):
             self.Channel.StopLogging('s')
         except Exception as e:
             logging.error(str(e))
-            
+
     def _NewSession(self):
         logging.info('New Session pressed')
         self._StopCurrentSession() 
@@ -2646,12 +2643,9 @@ class Window(QMainWindow):
         
         # stop the camera 
         self._stop_camera()
-            
+
         # Reset logging
-        try:
-            self.Channel.StopLogging('s')
-        except Exception as e:
-            logging.error(str(e))
+        self._stop_logging()
 
         # Reset GUI visuals
         self.Save.setStyleSheet("color:black;background-color:None;")
