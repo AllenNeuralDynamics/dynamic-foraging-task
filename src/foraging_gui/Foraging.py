@@ -2621,7 +2621,13 @@ class Window(QMainWindow):
         if self.Camera_dialog.StartCamera.isChecked():
             self.Camera_dialog.StartCamera.setChecked(False)
             self.Camera_dialog._StartCamera()
-
+    def _stop_logging(self):
+        '''Stop the logging'''
+        try:
+            self.Channel.StopLogging('s')
+        except Exception as e:
+            logging.error(str(e))
+            
     def _NewSession(self):
         logging.info('New Session pressed')
         self._StopCurrentSession() 
