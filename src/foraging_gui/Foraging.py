@@ -2620,6 +2620,12 @@ class Window(QMainWindow):
         else:
             self.NextBlock.setStyleSheet("background-color : none")
 
+    def _stop_camera(self):
+        '''Stop the camera if it is running'''
+        if self.Camera_dialog.StartCamera.isChecked():
+            self.Camera_dialog.StartCamera.setChecked(False)
+            self.Camera_dialog._StartCamera()
+
     def _NewSession(self):
         logging.info('New Session pressed')
         self._StopCurrentSession() 
@@ -2637,9 +2643,7 @@ class Window(QMainWindow):
                 return False
         
         # stop the camera 
-        if self.Camera_dialog.StartCamera.isChecked():
-            self.Camera_dialog.StartCamera.setChecked(False)
-            self.Camera_dialog._StartCamera()
+        self._stop_camera()
             
         # Reset logging
         try:
