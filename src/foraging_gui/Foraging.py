@@ -1629,7 +1629,7 @@ class Window(QMainWindow):
             # stop the camera 
             self._stop_camera()
             # stop the logging
-            self._stoplogging()
+            self._stop_logging()
             self.client.close()
             self.client2.close()
             self.client3.close()
