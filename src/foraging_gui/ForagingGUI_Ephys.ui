@@ -4460,7 +4460,6 @@
     </widget>
     <addaction name="action_Calibration"/>
     <addaction name="actionLaser_Calibration"/>
-    <addaction name="action_Snipping"/>
     <addaction name="separator"/>
     <addaction name="menuSimulation"/>
     <addaction name="actionDrawing_after_stopping"/>
@@ -4564,8 +4563,6 @@
    <addaction name="action_New"/>
    <addaction name="action_Open"/>
    <addaction name="action_Save"/>
-   <addaction name="separator"/>
-   <addaction name="action_Snipping"/>
    <addaction name="separator"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
@@ -4673,18 +4670,6 @@
    </property>
    <property name="text">
     <string>&amp;Exit</string>
-   </property>
-  </action>
-  <action name="action_Snipping">
-   <property name="icon">
-    <iconset>
-     <normaloff>resources/edit-cut.png</normaloff>resources/edit-cut.png</iconset>
-   </property>
-   <property name="text">
-    <string>Snipping</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+X</string>
    </property>
   </action>
   <action name="action_About">

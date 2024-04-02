@@ -111,6 +111,7 @@ class Window(QMainWindow):
         self.TimeDistribution_ToInitializeVisual=1
         self.finish_Timer=1     # for photometry baseline recordings
         self.PhotometryRun=0    # 1. Photometry has been run; 0. Photometry has not been carried out.
+        self.ignore_timer=False # Used for canceling the photometry baseline timer
         self._Optogenetics()    # open the optogenetics panel 
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
@@ -172,7 +173,6 @@ class Window(QMainWindow):
         self.actionTime_distribution.triggered.connect(self._TimeDistribution)
         self.action_Calibration.triggered.connect(self._WaterCalibration)
         self.actionLaser_Calibration.triggered.connect(self._LaserCalibration)
-        self.action_Snipping.triggered.connect(self._Snipping)
         self.action_Open.triggered.connect(self._Open)
         self.action_Save.triggered.connect(self._Save)
         self.actionForce_save.triggered.connect(self._ForceSave)
@@ -700,7 +700,7 @@ class Window(QMainWindow):
                 self.RecentWaterCalibrationDate=sorted_dates[-1]
             logging.info('Loaded Water Calibration')
         else:
-            self.WaterCalibrateionResults = {}
+            self.WaterCalibrationResults = {}
             self.RecentWaterCalibrationDate='None'
             logging.warning('Did not find a recent water calibration file')
 
@@ -1292,7 +1292,7 @@ class Window(QMainWindow):
                         if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))                       
                         continue
-                    if (child.objectName() == 'LatestCalibrationDate'):
+                    if (child.objectName() in ['LatestCalibrationDate','SessionlistSpin']):
                         continue
 
 
@@ -1643,10 +1643,6 @@ class Window(QMainWindow):
         logging.info('closing the GUI')
         self.close()      
  
-    def _Snipping(self):
-        '''Open the snipping tool'''
-        os.system("start %windir%\system32\SnippingTool.exe") 
-
     def _Optogenetics(self):
         '''will be triggered when the optogenetics icon is pressed'''
         if self.OpenOptogenetics==0:
@@ -1868,7 +1864,7 @@ class Window(QMainWindow):
                             Obj[attr_name]=Value
         # save other events, e.g. session start time
         for attr_name in dir(self):
-            if attr_name.startswith('Other_'):
+            if attr_name.startswith('Other_') or attr_name.startswith('info_'):
                 Obj[attr_name] = getattr(self, attr_name)
         # save laser calibration results (only for the calibration session)
         if hasattr(self, 'LaserCalibration_dialog'):
@@ -1923,6 +1919,13 @@ class Window(QMainWindow):
         
         self.SessionlistSpin.setEnabled(True)
         self.Sessionlist.setEnabled(True)
+
+        # Drop `finished` file with date/time
+        filepath = os.path.join(self.SessionFolder, 'finished') 
+        contents = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        with open(filepath, 'w') as finished_file:
+            finished_file.write(contents)
+        
 
     def _GetSaveFolder(self):
         '''
@@ -2219,6 +2222,9 @@ class Window(QMainWindow):
                         logging.error(str(e))
                         continue
                     if key in CurrentObj:
+                        # skip LeftValue, RightValue, GiveWaterL, GiveWaterR if WaterCalibrationResults is not empty as they will be set by the corresponding volume. 
+                        if (key in ['LeftValue','RightValue','GiveWaterL','GiveWaterR']) and self.WaterCalibrationResults!={}:
+                            continue
                         # skip some keys; skip warmup
                         if key in ['Start','warmup','SessionlistSpin']:
                             self.WeightAfter.setText('')
@@ -2313,9 +2319,13 @@ class Window(QMainWindow):
             # show basic information
             if self.default_ui=='ForagingGUI.ui':  
                 if 'info_task' in Obj:
-                    self.label_info_task.setTitle(Obj['info_task'])
-                if 'info_other_perf' in Obj:
-                    self.label_info_performance_others.setText(Obj['info_other_perf'])
+                    self.label_info_task.setText(Obj['info_task'])
+                if 'info_performance_others' in Obj:
+                    self.label_info_performance_others.setText(Obj['info_performance_others'])
+                if 'info_performance_essential_1' in Obj:
+                    self.label_info_performance_essential_1.setText(Obj['info_performance_essential_1'])
+                if 'info_performance_essential_2' in Obj:
+                    self.label_info_performance_essential_2.setText(Obj['info_performance_essential_2'])
             elif self.default_ui=='ForagingGUI_Ephys.ui':
                 if 'Other_inforTitle' in Obj:
                     self.infor.setTitle(Obj['Other_inforTitle'])
@@ -2719,11 +2729,12 @@ class Window(QMainWindow):
     
     def _thread_complete_timer(self):
         '''complete of _Timer'''
-        self.finish_Timer=1
-        logging.info('Finished photometry baseline timer')
-        self.WarningLabelStop.setText('')
-        self.WarningLabelStop.setStyleSheet(self.default_warning_color)
-   
+        if not self.ignore_timer:
+            self.finish_Timer=1
+            logging.info('Finished photometry baseline timer')
+            self.WarningLabelStop.setText('')
+            self.WarningLabelStop.setStyleSheet(self.default_warning_color)
+
     def _update_photometery_timer(self,time):
         '''
             Updates photometry baseline timer
@@ -2732,8 +2743,9 @@ class Window(QMainWindow):
         seconds = np.remainder(time,60)
         if len(str(seconds)) == 1:
             seconds = '0{}'.format(seconds)
-        self.WarningLabelStop.setText('Running photometry baseline: {}:{}'.format(minutes,seconds))
-        self.WarningLabelStop.setStyleSheet(self.default_warning_color)       
+        if not self.ignore_timer:
+            self.WarningLabelStop.setText('Running photometry baseline: {}:{}'.format(minutes,seconds))
+            self.WarningLabelStop.setStyleSheet(self.default_warning_color)       
      
     def _set_metadata_enabled(self, enable: bool):
         '''Enable or disable metadata fields'''
@@ -2815,6 +2827,18 @@ class Window(QMainWindow):
                 logging.info('Start button pressed: user continued session')               
                 self.Start.setChecked(True)
                 return 
+           
+            # If the photometry timer is running, stop it 
+            if self.finish_Timer==0:
+                self.ignore_timer=True
+                self.PhotometryRun=0
+                logging.info('canceling photometry baseline timer')
+                self.WarningLabelStop.setText('')
+                self.WarningLabelStop.setStyleSheet(self.default_warning_color)              
+                if hasattr(self, 'workertimer'):
+                    # Stop the worker, this has a 1 second delay before taking effect
+                    # so we set the text to get ignored as well
+                    self.workertimer._stop()
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
@@ -2937,10 +2961,11 @@ class Window(QMainWindow):
                 logging.info('User selected not to start excitation')
   
         # collecting the base signal for photometry. Only run once
-        if self.PhotometryB.currentText()=='on' and self.PhotometryRun==0:
+        if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and self.PhotometryRun==0:
             logging.info('Starting photometry baseline timer')
             self.finish_Timer=0
             self.PhotometryRun=1
+            self.ignore_timer=False
             
             # If we already created a workertimer and thread we can reuse them
             if not hasattr(self, 'workertimer'):
