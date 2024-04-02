@@ -7305,7 +7305,7 @@
                     <Workflow>
                       <Nodes>
                         <Expression xsi:type="SubscribeSubject">
-                          <Name>SideCameraFrames</Name>
+                          <Name>SideCameraLeftFrames</Name>
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="harp:CreateTimestamped" />
@@ -7314,7 +7314,7 @@
                           <Name>RootPath</Name>
                         </Expression>
                         <Expression xsi:type="Format">
-                          <Format>{0}/../../behavior-videos/side_camera.csv</Format>
+                          <Format>{0}/../../behavior-videos/side_camera_left.csv</Format>
                           <Selector />
                         </Expression>
                         <Expression xsi:type="PropertyMapping">
@@ -7337,7 +7337,7 @@
                           <Name>RootPath</Name>
                         </Expression>
                         <Expression xsi:type="Format">
-                          <Format>{0}/../../behavior-videos/side_camera.avi</Format>
+                          <Format>{0}/../../behavior-videos/side_camera_left.avi</Format>
                           <Selector />
                         </Expression>
                         <Expression xsi:type="PropertyMapping">
@@ -7367,7 +7367,7 @@
                         </Expression>
                         <Expression xsi:type="Index">
                           <Operand xsi:type="StringProperty">
-                            <Value>SideCamera</Value>
+                            <Value>SideCameraLeft</Value>
                           </Operand>
                         </Expression>
                         <Expression xsi:type="PropertyMapping">
@@ -7395,7 +7395,7 @@
                           <Combinator xsi:type="rx:Zip" />
                         </Expression>
                         <Expression xsi:type="rx:PublishSubject">
-                          <Name>SideCameraFrames</Name>
+                          <Name>SideCameraLeftFrames</Name>
                         </Expression>
                       </Nodes>
                       <Edges>
