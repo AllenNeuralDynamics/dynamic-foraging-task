@@ -7305,6 +7305,42 @@
                     <Workflow>
                       <Nodes>
                         <Expression xsi:type="SubscribeSubject">
+                          <Name>ComPorts</Name>
+                        </Expression>
+                        <Expression xsi:type="Index">
+                          <Operand xsi:type="StringProperty">
+                            <Value>SideCameraLeft</Value>
+                          </Operand>
+                        </Expression>
+                        <Expression xsi:type="PropertyMapping">
+                          <PropertyMappings>
+                            <Property Name="SerialNumber" />
+                          </PropertyMappings>
+                        </Expression>
+                        <Expression xsi:type="Combinator">
+                          <Combinator xsi:type="spk:SpinnakerCapture">
+                            <spk:Index xsi:nil="true" />
+                            <spk:SerialNumber>23022724</spk:SerialNumber>
+                            <spk:ColorProcessing>Default</spk:ColorProcessing>
+                          </Combinator>
+                        </Expression>
+                        <Expression xsi:type="SubscribeSubject">
+                          <Name>BehaviorEvents</Name>
+                        </Expression>
+                        <Expression xsi:type="beh:Parse">
+                          <harp:Register xsi:type="beh:TimestampedCamera1Frame" />
+                        </Expression>
+                        <Expression xsi:type="MemberSelector">
+                          <Selector>Seconds</Selector>
+                        </Expression>
+                        <Expression xsi:type="Combinator">
+                          <Combinator xsi:type="rx:Zip" />
+                        </Expression>
+                        <Expression xsi:type="rx:PublishSubject">
+                          <Name>SideCameraLeftFrames</Name>
+                        </Expression>
+                        <Expression xsi:type="WorkflowOutput" />
+                        <Expression xsi:type="SubscribeSubject">
                           <Name>SideCameraLeftFrames</Name>
                         </Expression>
                         <Expression xsi:type="Combinator">
@@ -7362,63 +7398,29 @@
                             <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 1 -preset medium -b:v 100M</ffmpeg:OutputArguments>
                           </Combinator>
                         </Expression>
-                        <Expression xsi:type="SubscribeSubject">
-                          <Name>ComPorts</Name>
-                        </Expression>
-                        <Expression xsi:type="Index">
-                          <Operand xsi:type="StringProperty">
-                            <Value>SideCameraLeft</Value>
-                          </Operand>
-                        </Expression>
-                        <Expression xsi:type="PropertyMapping">
-                          <PropertyMappings>
-                            <Property Name="SerialNumber" />
-                          </PropertyMappings>
-                        </Expression>
-                        <Expression xsi:type="Combinator">
-                          <Combinator xsi:type="spk:SpinnakerCapture">
-                            <spk:Index xsi:nil="true" />
-                            <spk:SerialNumber>23022724</spk:SerialNumber>
-                            <spk:ColorProcessing>Default</spk:ColorProcessing>
-                          </Combinator>
-                        </Expression>
-                        <Expression xsi:type="SubscribeSubject">
-                          <Name>BehaviorEvents</Name>
-                        </Expression>
-                        <Expression xsi:type="beh:Parse">
-                          <harp:Register xsi:type="beh:TimestampedCamera1Frame" />
-                        </Expression>
-                        <Expression xsi:type="MemberSelector">
-                          <Selector>Seconds</Selector>
-                        </Expression>
-                        <Expression xsi:type="Combinator">
-                          <Combinator xsi:type="rx:Zip" />
-                        </Expression>
-                        <Expression xsi:type="rx:PublishSubject">
-                          <Name>SideCameraLeftFrames</Name>
-                        </Expression>
                       </Nodes>
                       <Edges>
                         <Edge From="0" To="1" Label="Source1" />
-                        <Edge From="1" To="5" Label="Source1" />
+                        <Edge From="1" To="2" Label="Source1" />
                         <Edge From="2" To="3" Label="Source1" />
-                        <Edge From="3" To="4" Label="Source1" />
-                        <Edge From="4" To="5" Label="Source2" />
+                        <Edge From="3" To="7" Label="Source1" />
+                        <Edge From="4" To="5" Label="Source1" />
                         <Edge From="5" To="6" Label="Source1" />
-                        <Edge From="6" To="12" Label="Source1" />
+                        <Edge From="6" To="7" Label="Source2" />
                         <Edge From="7" To="8" Label="Source1" />
                         <Edge From="8" To="9" Label="Source1" />
-                        <Edge From="9" To="12" Label="Source2" />
                         <Edge From="10" To="11" Label="Source1" />
-                        <Edge From="11" To="12" Label="Source3" />
+                        <Edge From="11" To="15" Label="Source1" />
+                        <Edge From="12" To="13" Label="Source1" />
                         <Edge From="13" To="14" Label="Source1" />
-                        <Edge From="14" To="15" Label="Source1" />
+                        <Edge From="14" To="15" Label="Source2" />
                         <Edge From="15" To="16" Label="Source1" />
-                        <Edge From="16" To="20" Label="Source1" />
+                        <Edge From="16" To="22" Label="Source1" />
                         <Edge From="17" To="18" Label="Source1" />
                         <Edge From="18" To="19" Label="Source1" />
-                        <Edge From="19" To="20" Label="Source2" />
+                        <Edge From="19" To="22" Label="Source2" />
                         <Edge From="20" To="21" Label="Source1" />
+                        <Edge From="21" To="22" Label="Source3" />
                       </Edges>
                     </Workflow>
                   </Expression>
@@ -7551,6 +7553,42 @@
                     <Workflow>
                       <Nodes>
                         <Expression xsi:type="SubscribeSubject">
+                          <Name>ComPorts</Name>
+                        </Expression>
+                        <Expression xsi:type="Index">
+                          <Operand xsi:type="StringProperty">
+                            <Value>SideCameraRight</Value>
+                          </Operand>
+                        </Expression>
+                        <Expression xsi:type="PropertyMapping">
+                          <PropertyMappings>
+                            <Property Name="SerialNumber" />
+                          </PropertyMappings>
+                        </Expression>
+                        <Expression xsi:type="Combinator">
+                          <Combinator xsi:type="spk:SpinnakerCapture">
+                            <spk:Index xsi:nil="true" />
+                            <spk:SerialNumber>23022724</spk:SerialNumber>
+                            <spk:ColorProcessing>Default</spk:ColorProcessing>
+                          </Combinator>
+                        </Expression>
+                        <Expression xsi:type="SubscribeSubject">
+                          <Name>BehaviorEvents</Name>
+                        </Expression>
+                        <Expression xsi:type="beh:Parse">
+                          <harp:Register xsi:type="beh:TimestampedCamera1Frame" />
+                        </Expression>
+                        <Expression xsi:type="MemberSelector">
+                          <Selector>Seconds</Selector>
+                        </Expression>
+                        <Expression xsi:type="Combinator">
+                          <Combinator xsi:type="rx:Zip" />
+                        </Expression>
+                        <Expression xsi:type="rx:PublishSubject">
+                          <Name>SideCameraRightFrames</Name>
+                        </Expression>
+                        <Expression xsi:type="WorkflowOutput" />
+                        <Expression xsi:type="SubscribeSubject">
                           <Name>SideCameraRightFrames</Name>
                         </Expression>
                         <Expression xsi:type="Combinator">
@@ -7608,63 +7646,29 @@
                             <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 1 -preset medium -b:v 100M</ffmpeg:OutputArguments>
                           </Combinator>
                         </Expression>
-                        <Expression xsi:type="SubscribeSubject">
-                          <Name>ComPorts</Name>
-                        </Expression>
-                        <Expression xsi:type="Index">
-                          <Operand xsi:type="StringProperty">
-                            <Value>SideCameraRight</Value>
-                          </Operand>
-                        </Expression>
-                        <Expression xsi:type="PropertyMapping">
-                          <PropertyMappings>
-                            <Property Name="SerialNumber" />
-                          </PropertyMappings>
-                        </Expression>
-                        <Expression xsi:type="Combinator">
-                          <Combinator xsi:type="spk:SpinnakerCapture">
-                            <spk:Index xsi:nil="true" />
-                            <spk:SerialNumber>23022724</spk:SerialNumber>
-                            <spk:ColorProcessing>Default</spk:ColorProcessing>
-                          </Combinator>
-                        </Expression>
-                        <Expression xsi:type="SubscribeSubject">
-                          <Name>BehaviorEvents</Name>
-                        </Expression>
-                        <Expression xsi:type="beh:Parse">
-                          <harp:Register xsi:type="beh:TimestampedCamera1Frame" />
-                        </Expression>
-                        <Expression xsi:type="MemberSelector">
-                          <Selector>Seconds</Selector>
-                        </Expression>
-                        <Expression xsi:type="Combinator">
-                          <Combinator xsi:type="rx:Zip" />
-                        </Expression>
-                        <Expression xsi:type="rx:PublishSubject">
-                          <Name>SideCameraRightFrames</Name>
-                        </Expression>
                       </Nodes>
                       <Edges>
                         <Edge From="0" To="1" Label="Source1" />
-                        <Edge From="1" To="5" Label="Source1" />
+                        <Edge From="1" To="2" Label="Source1" />
                         <Edge From="2" To="3" Label="Source1" />
-                        <Edge From="3" To="4" Label="Source1" />
-                        <Edge From="4" To="5" Label="Source2" />
+                        <Edge From="3" To="7" Label="Source1" />
+                        <Edge From="4" To="5" Label="Source1" />
                         <Edge From="5" To="6" Label="Source1" />
-                        <Edge From="6" To="12" Label="Source1" />
+                        <Edge From="6" To="7" Label="Source2" />
                         <Edge From="7" To="8" Label="Source1" />
                         <Edge From="8" To="9" Label="Source1" />
-                        <Edge From="9" To="12" Label="Source2" />
                         <Edge From="10" To="11" Label="Source1" />
-                        <Edge From="11" To="12" Label="Source3" />
+                        <Edge From="11" To="15" Label="Source1" />
+                        <Edge From="12" To="13" Label="Source1" />
                         <Edge From="13" To="14" Label="Source1" />
-                        <Edge From="14" To="15" Label="Source1" />
+                        <Edge From="14" To="15" Label="Source2" />
                         <Edge From="15" To="16" Label="Source1" />
-                        <Edge From="16" To="20" Label="Source1" />
+                        <Edge From="16" To="22" Label="Source1" />
                         <Edge From="17" To="18" Label="Source1" />
                         <Edge From="18" To="19" Label="Source1" />
-                        <Edge From="19" To="20" Label="Source2" />
+                        <Edge From="19" To="22" Label="Source2" />
                         <Edge From="20" To="21" Label="Source1" />
+                        <Edge From="21" To="22" Label="Source3" />
                       </Edges>
                     </Workflow>
                   </Expression>
@@ -7677,7 +7681,7 @@
                         </Expression>
                         <Expression xsi:type="Index">
                           <Operand xsi:type="StringProperty">
-                            <Value>BottomCamera</Value>
+                            <Value>BodyCamera</Value>
                           </Operand>
                         </Expression>
                         <Expression xsi:type="PropertyMapping">
@@ -7705,11 +7709,11 @@
                           <Combinator xsi:type="rx:Zip" />
                         </Expression>
                         <Expression xsi:type="rx:PublishSubject">
-                          <Name>BottomCameraFrames</Name>
+                          <Name>BodyCameraFrames</Name>
                         </Expression>
                         <Expression xsi:type="WorkflowOutput" />
                         <Expression xsi:type="SubscribeSubject">
-                          <Name>BottomCameraFrames</Name>
+                          <Name>BodyCameraFrames</Name>
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="harp:CreateTimestamped" />
@@ -7718,7 +7722,7 @@
                           <Name>RootPath</Name>
                         </Expression>
                         <Expression xsi:type="Format">
-                          <Format>{0}/../../behavior-videos/bottom_camera.csv</Format>
+                          <Format>{0}/../../behavior-videos/body_camera.csv</Format>
                           <Selector />
                         </Expression>
                         <Expression xsi:type="PropertyMapping">
@@ -7741,7 +7745,7 @@
                           <Name>RootPath</Name>
                         </Expression>
                         <Expression xsi:type="Format">
-                          <Format>{0}/../../behavior-videos/bottom_camera.avi</Format>
+                          <Format>{0}/../../behavior-videos/body_camera.avi</Format>
                           <Selector />
                         </Expression>
                         <Expression xsi:type="PropertyMapping">
