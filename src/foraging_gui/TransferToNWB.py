@@ -356,6 +356,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                           laser_location=LaserLocationC,
                           laser_power_left=LaserPowerLeftC,
                           laser_power_right=LaserPowerRightC,
+                          laser_on_probability=LaserOnProbablityC,
                           laser_duration=LaserDurationC,
                           laser_condition=LaserConditionC,
                           laser_condition_probability=LaserConditionProC,
