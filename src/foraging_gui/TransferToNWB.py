@@ -274,18 +274,18 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         Sc = obj.B_SelectedCondition[i] # the optogenetics conditions
         if Sc == 0:
             LaserWavelengthC = 0
-            LaserLocationC = 0
+            LaserLocationC = '0'
             LaserPowerLeftC = 0
             LaserPowerRightC = 0
             LaserOnProbablityC = 0
             LaserDurationC = 0
-            LaserConditionC = 0
+            LaserConditionC = '0'
             LaserConditionProC = 0
-            LaserStartC = 0
+            LaserStartC = '0'
             LaserStartOffsetC = 0
-            LaserEndC = 0
+            LaserEndC = '0'
             LaserEndOffsetC = 0
-            LaserProtocolC = 0
+            LaserProtocolC = '0'
             LaserFrequencyC = 0
             LaserRampingDownC = 0
             LaserPulseDurC = 0
@@ -296,27 +296,27 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                 LaserWavelengthC = 647
             elif getattr(obj, f'TP_Laser_{Sc}')[i] == 'Green':
                 LaserWavelengthC = 547
-            LaserLocationC = getattr(obj, f'TP_Location_{Sc}')[i]
+            LaserLocationC = str(getattr(obj, f'TP_Location_{Sc}')[i])
             if getattr(obj, f'TP_LaserPowerLeft_{Sc}')[i]!='':
-                LaserPowerLeftC = eval(getattr(obj, f'TP_LaserPowerLeft_{Sc}')[i])[1]
+                LaserPowerLeftC = float(eval(getattr(obj, f'TP_LaserPowerLeft_{Sc}')[i])[1])
             else:
                 LaserPowerLeftC=0
             if getattr(obj, f'TP_LaserPowerRight_{Sc}')[i]!='':
-                LaserPowerRightC = eval(getattr(obj, f'TP_LaserPowerRight_{Sc}')[i])[1]
+                LaserPowerRightC = float(eval(getattr(obj, f'TP_LaserPowerRight_{Sc}')[i])[1])
             else:
                 LaserPowerRightC=0
-            LaserOnProbablityC = getattr(obj, f'TP_Probability_{Sc}')[i]
-            LaserDurationC = getattr(obj, f'TP_Duration_{Sc}')[i]
-            LaserConditionC = getattr(obj, f'TP_Condition_{Sc}')[i]
-            LaserConditionProC = getattr(obj, f'TP_ConditionP_{Sc}')[i]
-            LaserStartC = getattr(obj, f'TP_LaserStart_{Sc}')[i]
-            LaserStartOffsetC = getattr(obj, f'TP_OffsetStart_{Sc}')[i]
-            LaserEndC = getattr(obj, f'TP_LaserEnd_{Sc}')[i]
-            LaserEndOffsetC = getattr(obj, f'TP_OffsetEnd_{Sc}')[i]
-            LaserProtocolC = getattr(obj, f'TP_Protocol_{Sc}')[i]
-            LaserFrequencyC = getattr(obj, f'TP_Frequency_{Sc}')[i]
-            LaserRampingDownC = getattr(obj, f'TP_RD_{Sc}')[i]
-            LaserPulseDurC = getattr(obj, f'TP_PulseDur_{Sc}')[i]
+            LaserOnProbablityC = float(getattr(obj, f'TP_Probability_{Sc}')[i])
+            LaserDurationC = float(getattr(obj, f'TP_Duration_{Sc}')[i])
+            LaserConditionC = str(getattr(obj, f'TP_Condition_{Sc}')[i])
+            LaserConditionProC = float(getattr(obj, f'TP_ConditionP_{Sc}')[i])
+            LaserStartC = str(getattr(obj, f'TP_LaserStart_{Sc}')[i])
+            LaserStartOffsetC = float(getattr(obj, f'TP_OffsetStart_{Sc}')[i])
+            LaserEndC = str(getattr(obj, f'TP_LaserEnd_{Sc}')[i])
+            LaserEndOffsetC = float(getattr(obj, f'TP_OffsetEnd_{Sc}')[i])
+            LaserProtocolC = str(getattr(obj, f'TP_Protocol_{Sc}')[i])
+            LaserFrequencyC = float(getattr(obj, f'TP_Frequency_{Sc}')[i])
+            LaserRampingDownC = float(getattr(obj, f'TP_RD_{Sc}')[i])
+            LaserPulseDurC = float(getattr(obj, f'TP_PulseDur_{Sc}')[i])
          
         if Harp == '':
             goCue_start_time_t = getattr(obj, f'B_GoCueTime')[i]  # Use CPU time
