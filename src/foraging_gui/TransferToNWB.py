@@ -230,7 +230,9 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_trial_column(name='laser_on_trial', description=f'Trials with laser stimulation')
     nwbfile.add_trial_column(name='laser_wavelength', description=f'The wavelength of laser or LED')
     nwbfile.add_trial_column(name='laser_location', description=f'The target brain areas')
-    nwbfile.add_trial_column(name='laser_power', description=f'The laser power(mw)')
+    nwbfile.add_trial_column(name='laser_power_left', description=f'The laser power of the left hemisphere(mw)')
+    nwbfile.add_trial_column(name='laser_power_right', description=f'The laser power of the right hemisphere(mw)')
+    nwbfile.add_trial_column(name='laser_on_probability', description=f'The laser on probability')
     nwbfile.add_trial_column(name='laser_duration', description=f'The laser duration')
     nwbfile.add_trial_column(name='laser_condition', description=f'The laser on is conditioned on LaserCondition')
     nwbfile.add_trial_column(name='laser_condition_probability', description=f'The laser on is conditioned on LaserCondition with a probability LaserConditionPro')
@@ -295,8 +297,14 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
             elif getattr(obj, f'TP_Laser_{Sc}')[i] == 'Green':
                 LaserWavelengthC = 547
             LaserLocationC = getattr(obj, f'TP_Location_{Sc}')[i]
-            LaserPowerLeftC = getattr(obj, f'TP_LaserPowerLeft_{Sc}')[i]
-            LaserPowerRightC = getattr(obj, f'TP_LaserPowerRight_{Sc}')[i]
+            if getattr(obj, f'TP_LaserPowerLeft_{Sc}')[i]!='':
+                LaserPowerLeftC = eval(getattr(obj, f'TP_LaserPowerLeft_{Sc}')[i])[1]
+            else:
+                LaserPowerLeftC=0
+            if getattr(obj, f'TP_LaserPowerRight_{Sc}')[i]!='':
+                LaserPowerRightC = eval(getattr(obj, f'TP_LaserPowerRight_{Sc}')[i])[1]
+            else:
+                LaserPowerRightC=0
             LaserOnProbablityC = getattr(obj, f'TP_Probability_{Sc}')[i]
             LaserDurationC = getattr(obj, f'TP_Duration_{Sc}')[i]
             LaserConditionC = getattr(obj, f'TP_Condition_{Sc}')[i]
