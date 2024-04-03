@@ -286,27 +286,25 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
             LaserRampingDownC = 0
             LaserPulseDurC = 0
         else:
-            # if there is no training paramters history stored (for old Bonsai behavior control)
-            if not hasattr(obj, 'TP_Laser_1'):
-                if getattr(obj, f'TP_Laser_{Sc}')[i] == 'Blue':
-                    LaserWavelengthC = 473
-                elif getattr(obj, f'TP_Laser_{Sc}')[i] == 'Red':
-                    LaserWavelengthC = 647
-                elif getattr(obj, f'TP_Laser_{Sc}')[i] == 'Green':
-                    LaserWavelengthC = 547
-                LaserLocationC = getattr(obj, f'TP_Location_{Sc}')[i]
-                LaserPowerC = getattr(obj, f'TP_LaserPower_{Sc}')[i]
-                LaserDurationC = getattr(obj, f'TP_Duration_{Sc}')[i]
-                LaserConditionC = getattr(obj, f'TP_Condition_{Sc}')[i]
-                LaserConditionProC = getattr(obj, f'TP_ConditionP_{Sc}')[i]
-                LaserStartC = getattr(obj, f'TP_LaserStart_{Sc}')[i]
-                LaserStartOffsetC = getattr(obj, f'TP_OffsetStart_{Sc}')[i]
-                LaserEndC = getattr(obj, f'TP_LaserEnd_{Sc}')[i]
-                LaserEndOffsetC = getattr(obj, f'TP_OffsetEnd_{Sc}')[i]
-                LaserProtocolC = getattr(obj, f'TP_Protocol_{Sc}')[i]
-                LaserFrequencyC = getattr(obj, f'TP_Frequency_{Sc}')[i]
-                LaserRampingDownC = getattr(obj, f'TP_RD_{Sc}')[i]
-                LaserPulseDurC = getattr(obj, f'TP_PulseDur_{Sc}')[i]
+            if getattr(obj, f'TP_Laser_{Sc}')[i] == 'Blue':
+                LaserWavelengthC = 473
+            elif getattr(obj, f'TP_Laser_{Sc}')[i] == 'Red':
+                LaserWavelengthC = 647
+            elif getattr(obj, f'TP_Laser_{Sc}')[i] == 'Green':
+                LaserWavelengthC = 547
+            LaserLocationC = getattr(obj, f'TP_Location_{Sc}')[i]
+            LaserPowerC = getattr(obj, f'TP_LaserPower_{Sc}')[i]
+            LaserDurationC = getattr(obj, f'TP_Duration_{Sc}')[i]
+            LaserConditionC = getattr(obj, f'TP_Condition_{Sc}')[i]
+            LaserConditionProC = getattr(obj, f'TP_ConditionP_{Sc}')[i]
+            LaserStartC = getattr(obj, f'TP_LaserStart_{Sc}')[i]
+            LaserStartOffsetC = getattr(obj, f'TP_OffsetStart_{Sc}')[i]
+            LaserEndC = getattr(obj, f'TP_LaserEnd_{Sc}')[i]
+            LaserEndOffsetC = getattr(obj, f'TP_OffsetEnd_{Sc}')[i]
+            LaserProtocolC = getattr(obj, f'TP_Protocol_{Sc}')[i]
+            LaserFrequencyC = getattr(obj, f'TP_Frequency_{Sc}')[i]
+            LaserRampingDownC = getattr(obj, f'TP_RD_{Sc}')[i]
+            LaserPulseDurC = getattr(obj, f'TP_PulseDur_{Sc}')[i]
          
         if Harp == '':
             goCue_start_time_t = getattr(obj, f'B_GoCueTime')[i]  # Use CPU time
