@@ -273,7 +273,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         if Sc == 0:
             LaserWavelengthC = 0
             LaserLocationC = 0
-            LaserPowerC = 0
+            LaserPowerLeftC = 0
+            LaserPowerRightC = 0
             LaserDurationC = 0
             LaserConditionC = 0
             LaserConditionProC = 0
@@ -293,7 +294,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
             elif getattr(obj, f'TP_Laser_{Sc}')[i] == 'Green':
                 LaserWavelengthC = 547
             LaserLocationC = getattr(obj, f'TP_Location_{Sc}')[i]
-            LaserPowerC = getattr(obj, f'TP_LaserPower_{Sc}')[i]
+            LaserPowerLeftC = getattr(obj, f'TP_LaserPowerLeft_{Sc}')[i]
+            LaserPowerRightC = getattr(obj, f'TP_LaserPowerRight_{Sc}')[i]
             LaserDurationC = getattr(obj, f'TP_Duration_{Sc}')[i]
             LaserConditionC = getattr(obj, f'TP_Condition_{Sc}')[i]
             LaserConditionProC = getattr(obj, f'TP_ConditionP_{Sc}')[i]
