@@ -177,6 +177,7 @@ class Window(QMainWindow):
         self.action_Save.triggered.connect(self._Save)
         self.actionForce_save.triggered.connect(self._ForceSave)
         self.SaveAs.triggered.connect(self._SaveAs)
+        self.Save_continue.triggered.connect(self._Save_continue)
         self.action_Exit.triggered.connect(self._Exit)
         self.action_New.triggered.connect(self._New)
         self.action_Clear.triggered.connect(self._Clear)
@@ -1756,8 +1757,11 @@ class Window(QMainWindow):
             "<p>Analysis</p>"
             "<p></p>",
         )
-   
-    def _Save(self,ForceSave=0,SaveAs=0):
+    def _Save_continue(self):
+        '''Save the current session witout restarting the logging'''
+        self._Save(SaveContinue=1)
+
+    def _Save(self,ForceSave=0,SaveAs=0,SaveContinue=0):
         logging.info('Saving current session, ForceSave={}'.format(ForceSave))
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
@@ -1903,9 +1907,6 @@ class Window(QMainWindow):
         elif self.SaveFile.endswith('.json'):
             with open(self.SaveFile, "w") as outfile:
                 json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
-                        
-        # stop the camera
-        self._stop_camera()
 
         # Toggle unsaved data to False
         self.unsaved_data=False
@@ -1924,6 +1925,10 @@ class Window(QMainWindow):
         contents = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         with open(filepath, 'w') as finished_file:
             finished_file.write(contents)
+        
+        if SaveContinue==0:
+            # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
+            self._NewSession()
         
 
     def _GetSaveFolder(self):
