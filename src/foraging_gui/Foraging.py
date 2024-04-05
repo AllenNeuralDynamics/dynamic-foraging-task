@@ -1461,7 +1461,7 @@ class Window(QMainWindow):
             self.RewardFamily.setEnabled(True)
             self.label_20.setEnabled(False)
             self.UncoupledReward.setEnabled(False)
-
+            self.IncludeAutoReward.setEnabled(True)
             self.label_12.setEnabled(True)
             self.label_11.setEnabled(True)
             self.BlockBeta.setEnabled(True)
@@ -1469,6 +1469,7 @@ class Window(QMainWindow):
             self.BlockMax.setEnabled(True)
             self.label_12.setStyleSheet("color: black;")
             self.label_11.setStyleSheet("color: black;")
+            self.label_14.setStyleSheet("color: black;")
             self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
             self.BlockMin.setStyleSheet("color: black;""border: 1px solid gray;")
             self.BlockMax.setStyleSheet("color: black;""border: 1px solid gray;")
@@ -1514,6 +1515,7 @@ class Window(QMainWindow):
             self.BlockMax.setEnabled(True)
             self.label_12.setStyleSheet("color: black;")
             self.label_11.setStyleSheet("color: black;")
+            self.label_14.setStyleSheet("color: black;")
             self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
             self.BlockMin.setStyleSheet("color: black;""border: 1px solid gray;")
             self.BlockMax.setStyleSheet("color: black;""border: 1px solid gray;")
@@ -1540,7 +1542,7 @@ class Window(QMainWindow):
             self.SwitchThr.setEnabled(False)
             self.PointsInARow.setEnabled(False)
             self.BlockMinReward.setEnabled(False)
-            
+            self.IncludeAutoReward.setEnabled(False)
         elif self.Task.currentText() in ['RewardN']:
             self.label_6.setEnabled(True)
             self.label_7.setEnabled(True)
@@ -1553,6 +1555,7 @@ class Window(QMainWindow):
             self.label_20.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             self.UncoupledReward.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             # block
+            self.IncludeAutoReward.setEnabled(True)
             self.label_14.setEnabled(False)
             self.label_12.setEnabled(False)
             self.label_11.setEnabled(False)
