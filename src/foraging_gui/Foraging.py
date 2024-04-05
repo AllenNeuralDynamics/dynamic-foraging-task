@@ -1760,7 +1760,7 @@ class Window(QMainWindow):
     def _Save_continue(self):
         '''Save the current session witout restarting the logging'''
         self._Save(SaveContinue=1)
-        
+
     def _Save(self,ForceSave=0,SaveAs=0,SaveContinue=0):
         logging.info('Saving current session, ForceSave={}'.format(ForceSave))
         if ForceSave==0:
@@ -1907,9 +1907,10 @@ class Window(QMainWindow):
         elif self.SaveFile.endswith('.json'):
             with open(self.SaveFile, "w") as outfile:
                 json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
-    
-        # force to start a new session                
-        self._NewSession()
+
+        if SaveContinue==0:
+            # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
+            self._NewSession()
 
         # Toggle unsaved data to False
         self.unsaved_data=False
