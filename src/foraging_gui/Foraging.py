@@ -1903,9 +1903,9 @@ class Window(QMainWindow):
         elif self.SaveFile.endswith('.json'):
             with open(self.SaveFile, "w") as outfile:
                 json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
-                        
-        # stop the camera
-        self._stop_camera()
+
+        # force to start a new session                
+        self._NewSession()
 
         # Toggle unsaved data to False
         self.unsaved_data=False
