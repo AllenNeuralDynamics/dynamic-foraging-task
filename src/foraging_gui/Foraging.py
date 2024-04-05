@@ -1908,10 +1908,6 @@ class Window(QMainWindow):
             with open(self.SaveFile, "w") as outfile:
                 json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
 
-        if SaveContinue==0:
-            # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
-            self._NewSession()
-
         # Toggle unsaved data to False
         self.unsaved_data=False
         self.Save.setStyleSheet("background-color : None;")
@@ -1929,6 +1925,10 @@ class Window(QMainWindow):
         contents = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         with open(filepath, 'w') as finished_file:
             finished_file.write(contents)
+        
+        if SaveContinue==0:
+            # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
+            self._NewSession()
         
 
     def _GetSaveFolder(self):
