@@ -653,7 +653,7 @@ class Window(QMainWindow):
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
             log_folder=os.path.join(log_folder,formatted_datetime,'raw.harp')
         # stop the logging first
-        self.Channel.StopLogging('s')
+        self._stop_logging()
         self.Channel.StartLogging(log_folder)
         Rec=self.Channel.receive()
         if Rec[0].address=='/loggerstarted':
@@ -1626,15 +1626,16 @@ class Window(QMainWindow):
         event.accept()
         self.Start.setChecked(False)
         if self.InitializeBonsaiSuccessfully==1:
+            # stop the camera 
+            self._stop_camera()
+            # stop the logging
+            self._stop_logging()
             self.client.close()
             self.client2.close()
             self.client3.close()
             self.client4.close()
         self.Opto_dialog.close()
         self._StopPhotometry()  # Make sure photo excitation is stopped 
-        if self.Camera_dialog.AutoControl.currentText()=='Yes':
-            self.Camera_dialog.StartCamera.setChecked(False)
-            self.Camera_dialog._StartCamera()
         print('GUI Window closed')
         logging.info('GUI Window closed') 
 
@@ -1903,10 +1904,8 @@ class Window(QMainWindow):
             with open(self.SaveFile, "w") as outfile:
                 json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
                         
-        # close the camera
-        if self.Camera_dialog.AutoControl.currentText()=='Yes':
-            self.Camera_dialog.StartCamera.setChecked(False)
-            self.Camera_dialog._StartCamera()
+        # stop the camera
+        self._stop_camera()
 
         # Toggle unsaved data to False
         self.unsaved_data=False
@@ -2614,6 +2613,18 @@ class Window(QMainWindow):
         else:
             self.NextBlock.setStyleSheet("background-color : none")
 
+    def _stop_camera(self):
+        '''Stop the camera if it is running'''
+        if self.Camera_dialog.StartCamera.isChecked():
+            self.Camera_dialog.StartCamera.setChecked(False)
+            self.Camera_dialog._StartCamera()
+    def _stop_logging(self):
+        '''Stop the logging'''
+        try:
+            self.Channel.StopLogging('s')
+        except Exception as e:
+            logging.error(str(e))
+
     def _NewSession(self):
         logging.info('New Session pressed')
         self._StopCurrentSession() 
@@ -2630,11 +2641,11 @@ class Window(QMainWindow):
                 logging.info('New Session declined')
                 return False
         
+        # stop the camera 
+        self._stop_camera()
+
         # Reset logging
-        try:
-            self.Channel.StopLogging('s')
-        except Exception as e:
-            logging.error(str(e))
+        self._stop_logging()
 
         # Reset GUI visuals
         self.Save.setStyleSheet("color:black;background-color:None;")
@@ -2843,7 +2854,6 @@ class Window(QMainWindow):
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
             self._StopCurrentSession() 
-
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
             # generate a new session id
@@ -2852,7 +2862,10 @@ class Window(QMainWindow):
             self.WarmupWarning.setText('')
             # start a new logging
             try:
-                self.Ot_log_folder=self._restartlogging()
+                # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
+                if not (self.Camera_dialog.StartCamera.isChecked() and self.Camera_dialog.CollectVideo.currentText()=='Yes' and self.Camera_dialog.AutoControl.currentText()=='No'):
+                    self.CreateNewFolder=1
+                    self.Ot_log_folder=self._restartlogging()
             except Exception as e:
                 if 'ConnectionAbortedError' in str(e):
                     logging.info('lost bonsai connection: restartlogging()')

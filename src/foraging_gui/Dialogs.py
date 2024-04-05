@@ -1050,6 +1050,7 @@ class CameraDialog(QDialog):
             return
         if self.CollectVideo.currentText()=='Yes':
             # formal logging
+            self.MainWindow.CreateNewFolder=1
             self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
         else:
             # temporary logging
@@ -1103,8 +1104,11 @@ class CameraDialog(QDialog):
                 return 
         if self.StartCamera.isChecked():
             self.StartCamera.setStyleSheet("background-color : green;")
-            self.MainWindow.Channel.CameraFrequency(int(self.FrameRate.text()))
             if self.AutoControl.currentText()=='No':
+                # If the behavior start button is checked, set the CollectVideo to Yes.
+                if self.MainWindow.Start.isChecked():
+                    index=self.CollectVideo.findText('Yes')
+                    self.CollectVideo.setCurrentIndex(index)
                 # Do not restart logging when automatic control is "yes" as logging will start in behavior control
                 if self.CollectVideo.currentText()=='Yes':
                     # Start logging if the formal logging is not started
@@ -1133,8 +1137,11 @@ class CameraDialog(QDialog):
                 self.MainWindow.Channel.SideCameraCSV(side_camera_csv)
                 self.MainWindow.Channel.BottomCameraCSV(bottom_camera_csv)
             '''
+            # set the camera frequency. It's better to set the frequency after the temporary logging. 
+            self.MainWindow.Channel.CameraFrequency(int(self.FrameRate.text()))
             # start the video triggers
             self.MainWindow.Channel.CameraControl(int(1))
+            time.sleep(2)
             self.MainWindow.WarningLabelCamera.setText('Camera is on!')
             self.MainWindow.WarningLabelCamera.setStyleSheet(self.MainWindow.default_warning_color)
             self.WarningLabelCameraOn.setText('Camera is on!')
@@ -1145,6 +1152,7 @@ class CameraDialog(QDialog):
         else:
             self.StartCamera.setStyleSheet("background-color : none")
             self.MainWindow.Channel.CameraControl(int(2))
+            time.sleep(2)
             self.MainWindow.WarningLabelCamera.setText('Camera is off!')
             self.MainWindow.WarningLabelCamera.setStyleSheet(self.MainWindow.default_warning_color)
             self.WarningLabelCameraOn.setText('Camera is off!')
