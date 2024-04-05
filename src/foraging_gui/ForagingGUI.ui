@@ -597,7 +597,7 @@
                       <x>0</x>
                       <y>0</y>
                       <width>178</width>
-                      <height>199</height>
+                      <height>182</height>
                      </rect>
                     </property>
                     <layout class="QVBoxLayout" name="verticalLayout">
@@ -2587,8 +2587,8 @@ Double dipping:
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>1077</width>
-                  <height>460</height>
+                  <width>1072</width>
+                  <height>457</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -4897,6 +4897,7 @@ Current pair:
     <addaction name="action_Clear"/>
     <addaction name="actionForce_save"/>
     <addaction name="SaveAs"/>
+    <addaction name="Save_continue"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="sizePolicy">
@@ -5277,6 +5278,11 @@ Current pair:
   <action name="actionReconnect_bonsai">
    <property name="text">
     <string>Reconnect bonsai</string>
+   </property>
+  </action>
+  <action name="Save_continue">
+   <property name="text">
+    <string>Save (without starting a new session)</string>
    </property>
   </action>
  </widget>
