@@ -1462,8 +1462,6 @@ class Window(QMainWindow):
             self.label_20.setEnabled(False)
             self.UncoupledReward.setEnabled(False)
             self.IncludeAutoReward.setEnabled(True)
-            self.label_12.setEnabled(True)
-            self.label_11.setEnabled(True)
             self.BlockBeta.setEnabled(True)
             self.BlockMin.setEnabled(True)
             self.BlockMax.setEnabled(True)
@@ -1508,8 +1506,6 @@ class Window(QMainWindow):
             self.label_20.setEnabled(True)
             self.UncoupledReward.setEnabled(True)
 
-            self.label_12.setEnabled(True)
-            self.label_11.setEnabled(True)
             self.BlockBeta.setEnabled(True)
             self.BlockMin.setEnabled(True)
             self.BlockMax.setEnabled(True)
@@ -1556,9 +1552,6 @@ class Window(QMainWindow):
             self.UncoupledReward.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             # block
             self.IncludeAutoReward.setEnabled(True)
-            self.label_14.setEnabled(False)
-            self.label_12.setEnabled(False)
-            self.label_11.setEnabled(False)
             self.BlockBeta.setEnabled(False)
             self.BlockMin.setEnabled(False)
             self.BlockMax.setEnabled(False)
