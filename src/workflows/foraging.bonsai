@@ -7320,7 +7320,7 @@
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="spk:SpinnakerCapture">
                             <spk:Index xsi:nil="true" />
-                            <spk:SerialNumber>23022724</spk:SerialNumber>
+                            <spk:SerialNumber>23022717</spk:SerialNumber>
                             <spk:ColorProcessing>Default</spk:ColorProcessing>
                           </Combinator>
                         </Expression>
@@ -7339,7 +7339,6 @@
                         <Expression xsi:type="rx:PublishSubject">
                           <Name>SideCameraLeftFrames</Name>
                         </Expression>
-                        <Expression xsi:type="WorkflowOutput" />
                         <Expression xsi:type="SubscribeSubject">
                           <Name>SideCameraLeftFrames</Name>
                         </Expression>
@@ -7359,7 +7358,7 @@
                           </PropertyMappings>
                         </Expression>
                         <Expression xsi:type="io:CsvWriter">
-                          <io:FileName>C:\Users\svc_aind_ephys\Documents\temporaryvideo\2024-03-21_09-52-50\HarpFolder/../VideoFolder/side_camera.csv</io:FileName>
+                          <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_left.csv</io:FileName>
                           <io:Append>false</io:Append>
                           <io:Overwrite>true</io:Overwrite>
                           <io:Suffix>None</io:Suffix>
@@ -7391,7 +7390,7 @@
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="ffmpeg:VideoWriter">
-                            <ffmpeg:FileName>C:\Users\svc_aind_ephys\Documents\temporaryvideo\2024-03-21_09-52-50\HarpFolder/../VideoFolder/side_camera.avi</ffmpeg:FileName>
+                            <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_left.avi</ffmpeg:FileName>
                             <ffmpeg:Suffix>None</ffmpeg:Suffix>
                             <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                             <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
@@ -7408,19 +7407,18 @@
                         <Edge From="5" To="6" Label="Source1" />
                         <Edge From="6" To="7" Label="Source2" />
                         <Edge From="7" To="8" Label="Source1" />
-                        <Edge From="8" To="9" Label="Source1" />
-                        <Edge From="10" To="11" Label="Source1" />
-                        <Edge From="11" To="15" Label="Source1" />
+                        <Edge From="9" To="10" Label="Source1" />
+                        <Edge From="10" To="14" Label="Source1" />
+                        <Edge From="11" To="12" Label="Source1" />
                         <Edge From="12" To="13" Label="Source1" />
-                        <Edge From="13" To="14" Label="Source1" />
-                        <Edge From="14" To="15" Label="Source2" />
-                        <Edge From="15" To="16" Label="Source1" />
-                        <Edge From="16" To="22" Label="Source1" />
+                        <Edge From="13" To="14" Label="Source2" />
+                        <Edge From="14" To="15" Label="Source1" />
+                        <Edge From="15" To="21" Label="Source1" />
+                        <Edge From="16" To="17" Label="Source1" />
                         <Edge From="17" To="18" Label="Source1" />
-                        <Edge From="18" To="19" Label="Source1" />
-                        <Edge From="19" To="22" Label="Source2" />
-                        <Edge From="20" To="21" Label="Source1" />
-                        <Edge From="21" To="22" Label="Source3" />
+                        <Edge From="18" To="21" Label="Source2" />
+                        <Edge From="19" To="20" Label="Source1" />
+                        <Edge From="20" To="21" Label="Source3" />
                       </Edges>
                     </Workflow>
                   </Expression>
@@ -7473,7 +7471,7 @@
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="spk:SpinnakerCapture">
                             <spk:Index xsi:nil="true" />
-                            <spk:SerialNumber>23022709</spk:SerialNumber>
+                            <spk:SerialNumber>23045805</spk:SerialNumber>
                             <spk:ColorProcessing>Default</spk:ColorProcessing>
                           </Combinator>
                         </Expression>
@@ -7492,7 +7490,6 @@
                         <Expression xsi:type="rx:PublishSubject">
                           <Name>BottomCameraFrames</Name>
                         </Expression>
-                        <Expression xsi:type="WorkflowOutput" />
                         <Expression xsi:type="SubscribeSubject">
                           <Name>BottomCameraFrames</Name>
                         </Expression>
@@ -7512,7 +7509,7 @@
                           </PropertyMappings>
                         </Expression>
                         <Expression xsi:type="io:CsvWriter">
-                          <io:FileName>C:\Users\svc_aind_ephys\Documents\temporaryvideo\2024-03-21_09-52-50\HarpFolder/../VideoFolder/bottom_camera.csv</io:FileName>
+                          <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/bottom_camera.csv</io:FileName>
                           <io:Append>false</io:Append>
                           <io:Overwrite>true</io:Overwrite>
                           <io:Suffix>None</io:Suffix>
@@ -7544,7 +7541,7 @@
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="ffmpeg:VideoWriter">
-                            <ffmpeg:FileName>C:\Users\svc_aind_ephys\Documents\temporaryvideo\2024-03-21_09-52-50\HarpFolder/../VideoFolder/bottom_camera.avi</ffmpeg:FileName>
+                            <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/bottom_camera.avi</ffmpeg:FileName>
                             <ffmpeg:Suffix>None</ffmpeg:Suffix>
                             <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                             <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
@@ -7561,19 +7558,18 @@
                         <Edge From="5" To="6" Label="Source1" />
                         <Edge From="6" To="7" Label="Source2" />
                         <Edge From="7" To="8" Label="Source1" />
-                        <Edge From="8" To="9" Label="Source1" />
-                        <Edge From="10" To="11" Label="Source1" />
-                        <Edge From="11" To="15" Label="Source1" />
+                        <Edge From="9" To="10" Label="Source1" />
+                        <Edge From="10" To="14" Label="Source1" />
+                        <Edge From="11" To="12" Label="Source1" />
                         <Edge From="12" To="13" Label="Source1" />
-                        <Edge From="13" To="14" Label="Source1" />
-                        <Edge From="14" To="15" Label="Source2" />
-                        <Edge From="15" To="16" Label="Source1" />
-                        <Edge From="16" To="22" Label="Source1" />
+                        <Edge From="13" To="14" Label="Source2" />
+                        <Edge From="14" To="15" Label="Source1" />
+                        <Edge From="15" To="21" Label="Source1" />
+                        <Edge From="16" To="17" Label="Source1" />
                         <Edge From="17" To="18" Label="Source1" />
-                        <Edge From="18" To="19" Label="Source1" />
-                        <Edge From="19" To="22" Label="Source2" />
-                        <Edge From="20" To="21" Label="Source1" />
-                        <Edge From="21" To="22" Label="Source3" />
+                        <Edge From="18" To="21" Label="Source2" />
+                        <Edge From="19" To="20" Label="Source1" />
+                        <Edge From="20" To="21" Label="Source3" />
                       </Edges>
                     </Workflow>
                   </Expression>
@@ -7626,7 +7622,7 @@
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="spk:SpinnakerCapture">
                             <spk:Index xsi:nil="true" />
-                            <spk:SerialNumber>23022724</spk:SerialNumber>
+                            <spk:SerialNumber>23022710</spk:SerialNumber>
                             <spk:ColorProcessing>Default</spk:ColorProcessing>
                           </Combinator>
                         </Expression>
@@ -7645,7 +7641,6 @@
                         <Expression xsi:type="rx:PublishSubject">
                           <Name>SideCameraRightFrames</Name>
                         </Expression>
-                        <Expression xsi:type="WorkflowOutput" />
                         <Expression xsi:type="SubscribeSubject">
                           <Name>SideCameraRightFrames</Name>
                         </Expression>
@@ -7665,7 +7660,7 @@
                           </PropertyMappings>
                         </Expression>
                         <Expression xsi:type="io:CsvWriter">
-                          <io:FileName>C:\Users\svc_aind_ephys\Documents\temporaryvideo\2024-03-21_09-52-50\HarpFolder/../VideoFolder/side_camera.csv</io:FileName>
+                          <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_right.csv</io:FileName>
                           <io:Append>false</io:Append>
                           <io:Overwrite>true</io:Overwrite>
                           <io:Suffix>None</io:Suffix>
@@ -7697,7 +7692,7 @@
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="ffmpeg:VideoWriter">
-                            <ffmpeg:FileName>C:\Users\svc_aind_ephys\Documents\temporaryvideo\2024-03-21_09-52-50\HarpFolder/../VideoFolder/side_camera.avi</ffmpeg:FileName>
+                            <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_right.avi</ffmpeg:FileName>
                             <ffmpeg:Suffix>None</ffmpeg:Suffix>
                             <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                             <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
@@ -7714,19 +7709,18 @@
                         <Edge From="5" To="6" Label="Source1" />
                         <Edge From="6" To="7" Label="Source2" />
                         <Edge From="7" To="8" Label="Source1" />
-                        <Edge From="8" To="9" Label="Source1" />
-                        <Edge From="10" To="11" Label="Source1" />
-                        <Edge From="11" To="15" Label="Source1" />
+                        <Edge From="9" To="10" Label="Source1" />
+                        <Edge From="10" To="14" Label="Source1" />
+                        <Edge From="11" To="12" Label="Source1" />
                         <Edge From="12" To="13" Label="Source1" />
-                        <Edge From="13" To="14" Label="Source1" />
-                        <Edge From="14" To="15" Label="Source2" />
-                        <Edge From="15" To="16" Label="Source1" />
-                        <Edge From="16" To="22" Label="Source1" />
+                        <Edge From="13" To="14" Label="Source2" />
+                        <Edge From="14" To="15" Label="Source1" />
+                        <Edge From="15" To="21" Label="Source1" />
+                        <Edge From="16" To="17" Label="Source1" />
                         <Edge From="17" To="18" Label="Source1" />
-                        <Edge From="18" To="19" Label="Source1" />
-                        <Edge From="19" To="22" Label="Source2" />
-                        <Edge From="20" To="21" Label="Source1" />
-                        <Edge From="21" To="22" Label="Source3" />
+                        <Edge From="18" To="21" Label="Source2" />
+                        <Edge From="19" To="20" Label="Source1" />
+                        <Edge From="20" To="21" Label="Source3" />
                       </Edges>
                     </Workflow>
                   </Expression>
@@ -7779,7 +7773,7 @@
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="spk:SpinnakerCapture">
                             <spk:Index xsi:nil="true" />
-                            <spk:SerialNumber>23022709</spk:SerialNumber>
+                            <spk:SerialNumber>22511912</spk:SerialNumber>
                             <spk:ColorProcessing>Default</spk:ColorProcessing>
                           </Combinator>
                         </Expression>
@@ -7798,7 +7792,6 @@
                         <Expression xsi:type="rx:PublishSubject">
                           <Name>BodyCameraFrames</Name>
                         </Expression>
-                        <Expression xsi:type="WorkflowOutput" />
                         <Expression xsi:type="SubscribeSubject">
                           <Name>BodyCameraFrames</Name>
                         </Expression>
@@ -7818,7 +7811,7 @@
                           </PropertyMappings>
                         </Expression>
                         <Expression xsi:type="io:CsvWriter">
-                          <io:FileName>C:\Users\svc_aind_ephys\Documents\temporaryvideo\2024-03-21_09-52-50\HarpFolder/../VideoFolder/bottom_camera.csv</io:FileName>
+                          <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/body_camera.csv</io:FileName>
                           <io:Append>false</io:Append>
                           <io:Overwrite>true</io:Overwrite>
                           <io:Suffix>None</io:Suffix>
@@ -7850,7 +7843,7 @@
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="ffmpeg:VideoWriter">
-                            <ffmpeg:FileName>C:\Users\svc_aind_ephys\Documents\temporaryvideo\2024-03-21_09-52-50\HarpFolder/../VideoFolder/bottom_camera.avi</ffmpeg:FileName>
+                            <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/body_camera.avi</ffmpeg:FileName>
                             <ffmpeg:Suffix>None</ffmpeg:Suffix>
                             <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                             <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
@@ -7867,19 +7860,18 @@
                         <Edge From="5" To="6" Label="Source1" />
                         <Edge From="6" To="7" Label="Source2" />
                         <Edge From="7" To="8" Label="Source1" />
-                        <Edge From="8" To="9" Label="Source1" />
-                        <Edge From="10" To="11" Label="Source1" />
-                        <Edge From="11" To="15" Label="Source1" />
+                        <Edge From="9" To="10" Label="Source1" />
+                        <Edge From="10" To="14" Label="Source1" />
+                        <Edge From="11" To="12" Label="Source1" />
                         <Edge From="12" To="13" Label="Source1" />
-                        <Edge From="13" To="14" Label="Source1" />
-                        <Edge From="14" To="15" Label="Source2" />
-                        <Edge From="15" To="16" Label="Source1" />
-                        <Edge From="16" To="22" Label="Source1" />
+                        <Edge From="13" To="14" Label="Source2" />
+                        <Edge From="14" To="15" Label="Source1" />
+                        <Edge From="15" To="21" Label="Source1" />
+                        <Edge From="16" To="17" Label="Source1" />
                         <Edge From="17" To="18" Label="Source1" />
-                        <Edge From="18" To="19" Label="Source1" />
-                        <Edge From="19" To="22" Label="Source2" />
-                        <Edge From="20" To="21" Label="Source1" />
-                        <Edge From="21" To="22" Label="Source3" />
+                        <Edge From="18" To="21" Label="Source2" />
+                        <Edge From="19" To="20" Label="Source1" />
+                        <Edge From="20" To="21" Label="Source3" />
                       </Edges>
                     </Workflow>
                   </Expression>
