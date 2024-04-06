@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1442</width>
-    <height>785</height>
+    <height>805</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -3062,7 +3062,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>740</y>
+     <y>760</y>
      <width>131</width>
      <height>20</height>
     </rect>
@@ -3078,7 +3078,7 @@
    <property name="geometry">
     <rect>
      <x>150</x>
-     <y>740</y>
+     <y>760</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -3581,7 +3581,7 @@
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>690</y>
+     <y>710</y>
      <width>131</width>
      <height>20</height>
     </rect>
@@ -3597,7 +3597,7 @@
    <property name="geometry">
     <rect>
      <x>390</x>
-     <y>690</y>
+     <y>710</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -3610,7 +3610,7 @@
    <property name="geometry">
     <rect>
      <x>110</x>
-     <y>690</y>
+     <y>710</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -3623,7 +3623,7 @@
    <property name="geometry">
     <rect>
      <x>150</x>
-     <y>690</y>
+     <y>710</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -3662,19 +3662,6 @@
      <string>NA</string>
     </property>
    </item>
-  </widget>
-  <widget class="Line" name="line">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>670</y>
-     <width>1411</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
   </widget>
   <widget class="QComboBox" name="SessionAlternating">
    <property name="geometry">
@@ -3915,6 +3902,20 @@
     <string>Session parameters</string>
    </property>
   </widget>
+  <widget class="QGroupBox" name="groupBox_2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>680</y>
+     <width>1421</width>
+     <height>111</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Calibration date and Nidaq sample frequency</string>
+   </property>
+  </widget>
+  <zorder>groupBox_2</zorder>
   <zorder>groupBox</zorder>
   <zorder>OptoPar</zorder>
   <zorder>Laser_1</zorder>
@@ -4051,7 +4052,6 @@
   <zorder>LatestCalibrationDate</zorder>
   <zorder>label1_17</zorder>
   <zorder>Laser_calibration</zorder>
-  <zorder>line</zorder>
   <zorder>SessionAlternating</zorder>
   <zorder>label3_17</zorder>
   <zorder>label3_18</zorder>
