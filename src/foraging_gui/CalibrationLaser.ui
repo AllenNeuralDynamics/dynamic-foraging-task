@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1140</width>
+    <width>1272</width>
     <height>863</height>
    </rect>
   </property>
@@ -587,7 +587,7 @@
     <rect>
      <x>1040</x>
      <y>40</y>
-     <width>41</width>
+     <width>211</width>
      <height>20</height>
     </rect>
    </property>
@@ -972,6 +972,28 @@
    </property>
    <property name="orientation">
     <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="CopyToSession">
+   <property name="geometry">
+    <rect>
+     <x>1100</x>
+     <y>80</y>
+     <width>151</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="text">
+    <string>Copy to session calibration</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
    </property>
   </widget>
  </widget>
