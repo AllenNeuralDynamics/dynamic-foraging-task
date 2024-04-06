@@ -107,8 +107,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     # add local time zone explicitly
     session_start_timeC = session_start_timeC.replace(tzinfo=tzlocal())
 
-    Laser_1_target_areas = _get_field(obj, 'laser_1_target') or 'none'
-    Laser_2_target_areas = _get_field(obj, 'laser_2_target') or 'none'
+    Laser_1_target_areas = _get_field(obj, 'laser_1_target',default='None') or 'None'
+    Laser_2_target_areas = _get_field(obj, 'laser_2_target',default='None') or 'None'
     optogenetics_target_areas="Laser 1 target areas:"+Laser_1_target_areas+"; Laser 2 target areas:"+Laser_2_target_areas
     ### session related information ###
     nwbfile = NWBFile(
@@ -301,13 +301,13 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                 LaserWavelengthC = 547
             LaserLocationC = str(getattr(obj, f'TP_Location_{Sc}')[i])
             if getattr(obj, f'TP_LaserPowerLeft_{Sc}')[i]!='':
-                Laser1Power_old=_get_field(obj, f'TP_LaserPowerLeft_{Sc}', default=None) or '0' # old format
-                Laser1Power=float(_get_field(obj, f'TP_Laser1_power_{Sc}', default=None) or Laser1Power_old) # new format
+                Laser1Power_old=eval(_get_field(obj, f'TP_LaserPowerLeft_{Sc}',index=i, default=None))[1] or '0' # old format
+                Laser1Power=float(_get_field(obj, f'TP_Laser1_power_{Sc}',index=i, default=None) or Laser1Power_old) # new format
             else:
                 Laser1Power=0
             if getattr(obj, f'TP_LaserPowerRight_{Sc}')[i]!='':
-                Laser2Power_old=_get_field(obj, f'TP_LaserPowerRight_{Sc}', default=None) or '0' # old format
-                Laser2Power=float(_get_field(obj, f'TP_Laser2_power_{Sc}', default=None) or Laser1Power_old) # new format
+                Laser2Power_old=eval(_get_field(obj, f'TP_LaserPowerRight_{Sc}',index=i, default=None))[1] or '0' # old format
+                Laser2Power=float(_get_field(obj, f'TP_Laser2_power_{Sc}',index=i, default=None) or Laser1Power_old) # new format
             else:
                 Laser2Power=0
             LaserOnProbablityC = float(getattr(obj, f'TP_Probability_{Sc}')[i])
@@ -513,6 +513,6 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
     
-    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-G1\668546\668546_2023-09-19.json')
+    bonsai_to_nwb(R'Z:\Xinxin\TestNWB\689514_2024-01-29_21-28-02\TrainingFolder\689514_2024-01-29_21-28-02.json')
     
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
