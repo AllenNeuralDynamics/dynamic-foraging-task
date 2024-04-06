@@ -1496,8 +1496,6 @@ class Window(QMainWindow):
             self.AdvancedBlockAuto.setEnabled(True)
             self._AdvancedBlockAuto() # Update states of SwitchThr and PointsInARow
             
-            self.BlockMinReward.setEnabled(True)
-            
         elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
             self.label_6.setEnabled(False)
             self.label_7.setEnabled(False)
