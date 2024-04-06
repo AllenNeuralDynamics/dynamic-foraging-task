@@ -1530,7 +1530,6 @@ class Window(QMainWindow):
             # move auto-reward
             self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 128, 80, 20))
             self.label_26.setGeometry(QtCore.QRect(929, 128, 146, 16))
-            
             # Disable block beta, NextBlock, and AutoBlock panel
             self.BlockBeta.setEnabled(False)
             self.NextBlock.setEnabled(False)
