@@ -1254,6 +1254,16 @@ class LaserCalibrationDialog(QDialog):
         self.Flush_DO2.clicked.connect(self._FLush_DO2)
         self.Flush_DO3.clicked.connect(self._FLush_DO3)
         self.Flush_Port2.clicked.connect(self._FLush_Port2)
+        self.CopyToSession.clicked.connect(self._CopyToSession)
+    def _CopyToSession(self):
+        '''Copy the calibration data to the session calibration'''
+        if self.Location_1.currentText()=='Laser_1':
+            self.MainWindow.Opto_dialog.laser_1_calibration_voltage.setText(self.voltage.text())
+            self.MainWindow.Opto_dialog.laser_1_calibration_power.setText(self.LaserPowerMeasured.text())
+        elif self.Location_1.currentText()=='Laser_2':
+            self.MainWindow.Opto_dialog.laser_2_calibration_voltage.setText(self.voltage.text())
+            self.MainWindow.Opto_dialog.laser_2_calibration_power.setText(self.LaserPowerMeasured.text())
+            
     def _FLush_DO0(self):
         self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
