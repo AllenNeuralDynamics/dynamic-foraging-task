@@ -174,6 +174,10 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         # Performance
         'foraging_efficiency': _get_field(obj, 'B_for_eff_optimal'),
         'foraging_efficiency_with_actual_random_seed': _get_field(obj, 'B_for_eff_optimal_random_seed'),
+
+        # Optogenetics
+        'laser_1_calibration_power': float(_get_field(obj, 'laser_1_calibration_power')),
+        'laser_2_calibration_power': float(_get_field(obj, 'laser_2_calibration_power')),
     }
 
     # Turn the metadata into a DataFrame in order to add it to the scratch
