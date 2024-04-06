@@ -1786,7 +1786,7 @@ class Window(QMainWindow):
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
                 return
         # check if the laser power and target are entered
-        if self.OptogeneticsB.currentText()=='on' and (self.Opto_dialog.laser_1_target.text()=='' or self.Opto_dialog.laser_1_calibration_power.text()=='' or self.Opto_dialog.laser_2_target.text()=='' or self.Opto_dialog.laser_2_calibration_power.text()=='' or self.Opto_dialog.laser_1_calibration_voltage.text()='' or self.Opto_dialog.laser_2_calibration_voltage.text()=''):
+        if self.OptogeneticsB.currentText()=='on' and (self.Opto_dialog.laser_1_target.text()=='' or self.Opto_dialog.laser_1_calibration_power.text()=='' or self.Opto_dialog.laser_2_target.text()=='' or self.Opto_dialog.laser_2_calibration_power.text()=='' or self.Opto_dialog.laser_1_calibration_voltage.text()=='' or self.Opto_dialog.laser_2_calibration_voltage.text()==''):
             response = QMessageBox.question(self,
                 'Box {}, Save without laser target or laser power:'.format(self.box_letter), 
                 "Do you want to save without complete laser target or laser power calibration information provided?",
