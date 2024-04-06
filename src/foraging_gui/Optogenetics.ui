@@ -457,7 +457,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>laser power left (v,mw)=</string>
+    <string>laser_1  power (v,mw)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -1143,7 +1143,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>laser power left (v,mw)=</string>
+    <string>laser_1  power (v,mw)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -3486,7 +3486,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>laser power right (v,mw)=</string>
+    <string>laser_2  power (v,mw)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -3508,7 +3508,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>laser power right (v,mw)=</string>
+    <string>laser_2  power (v,mw)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
