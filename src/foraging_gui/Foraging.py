@@ -1278,7 +1278,7 @@ class Window(QMainWindow):
                         child.setStyleSheet('background-color: white;')
                         self._Task()
                     
-                    if child.objectName() in {'Experimenter','TotalWater','WeightAfter','ExtraWater','laser_1_target','laser_2_target'}:
+                    if child.objectName() in {'Experimenter','TotalWater','WeightAfter','ExtraWater','laser_1_target','laser_2_target','laser_1_power','laser_2_power'}:
                         continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
