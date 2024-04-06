@@ -247,7 +247,11 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_trial_column(name='laser_frequency', description=f'The laser waveform frequency')
     nwbfile.add_trial_column(name='laser_rampingdown', description=f'The ramping down time of the laser')
     nwbfile.add_trial_column(name='laser_pulse_duration', description=f'The pulse duration for Pulse protocol')
-    
+    nwbfile.add_trial_column(name='session_wide_control', description=f'Control the optogenetics session wide (e.g. only turn on opto in half of the session)')
+    nwbfile.add_trial_column(name='fraction_of_session', description=f'Turn on/off opto in a fraction of the session (related to session_wide_control)')
+    nwbfile.add_trial_column(name='session_start_witn', description=f'The session start with opto on or off (related to session_wide_control)')
+    nwbfile.add_trial_column(name='session_alternation', description=f'Turn on/off opto in every other session (related to session_wide_control)')
+
     # auto training parameters
     nwbfile.add_trial_column(name='auto_train_engaged', description=f'Whether the auto training is engaged')
     nwbfile.add_trial_column(name='auto_train_curriculum_name', description=f'The name of the auto training curriculum')
@@ -292,6 +296,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
             LaserFrequencyC = 0
             LaserRampingDownC = 0
             LaserPulseDurC = 0
+
         else:
             if getattr(obj, f'TP_Laser_{Sc}')[i] == 'Blue':
                 LaserWavelengthC = 473
@@ -382,7 +387,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                           laser_frequency=LaserFrequencyC,
                           laser_rampingdown=LaserRampingDownC,
                           laser_pulse_duration=LaserPulseDurC,
-
+                        
+                       
                           # add all auto training parameters (eventually should be in session.json)
                           auto_train_engaged=_get_field(obj, 'TP_auto_train_engaged', index=i),
                           auto_train_curriculum_name=_get_field(obj, 'TP_auto_train_curriculum_name', index=i, default=None) or 'none',
