@@ -107,8 +107,6 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     # add local time zone explicitly
     session_start_timeC = session_start_timeC.replace(tzinfo=tzlocal())
 
-    Laser_1_target_areas = _get_field(obj, 'laser_1_target',default='None') or 'None'
-    Laser_2_target_areas = _get_field(obj, 'laser_2_target',default='None') or 'None'
     ### session related information ###
     nwbfile = NWBFile(
         session_description='Session end time:'+obj.Other_CurrentTime,  
@@ -177,6 +175,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         # Optogenetics
         'laser_1_calibration_power': float(_get_field(obj, 'laser_1_calibration_power')),
         'laser_2_calibration_power': float(_get_field(obj, 'laser_2_calibration_power')),
+        'laser_1_target_areas': _get_field(obj, 'laser_1_target',default='None') or 'None',
+        'laser_2_target_areas': _get_field(obj, 'laser_2_target',default='None') or 'None',
     }
 
     # Turn the metadata into a DataFrame in order to add it to the scratch
