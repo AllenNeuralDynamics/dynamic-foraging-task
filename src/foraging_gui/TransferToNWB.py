@@ -359,6 +359,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                           reward_consumption_duration=float(obj.TP_RewardConsumeTime[i]),
                           auto_waterL=obj.B_AutoWaterTrial[0][i] if type(obj.B_AutoWaterTrial[0]) is list else obj.B_AutoWaterTrial[i],   # Back-compatible with old autowater format
                           auto_waterR=obj.B_AutoWaterTrial[1][i] if type(obj.B_AutoWaterTrial[0]) is list else obj.B_AutoWaterTrial[i],
+                          # optogenetics
                           laser_on_trial=obj.B_LaserOnTrial[i],
                           laser_wavelength=LaserWavelengthC,
                           laser_location=LaserLocationC,
