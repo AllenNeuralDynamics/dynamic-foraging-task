@@ -38,8 +38,17 @@ def _get_field(obj, field_list, reject_list=[], index=None, default=np.nan):
         field_list = [field_list]
         
     for f in field_list:
-        if hasattr(obj, f):
-            value = getattr(obj, f)
+            tag=0
+            if type(obj) is type:
+                if hasattr(obj, f):
+                    value = getattr(obj, f)
+                    tag=1
+            elif type(obj) is dict:
+                if f in obj:
+                    value = obj[f]
+                    tag=1
+            if tag==0:
+                continue
             if value in reject_list:
                 continue
             if index is None:
@@ -173,10 +182,10 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         'foraging_efficiency_with_actual_random_seed': _get_field(obj, 'B_for_eff_optimal_random_seed'),
 
         # Optogenetics
-        'laser_1_calibration_power': float(_get_field(obj, 'laser_1_calibration_power')),
-        'laser_2_calibration_power': float(_get_field(obj, 'laser_2_calibration_power')),
-        'laser_1_target_areas': _get_field(obj, 'laser_1_target',default='None') or 'None',
-        'laser_2_target_areas': _get_field(obj, 'laser_2_target',default='None') or 'None',
+        'laser_1_calibration_power': float(_get_field(obj.Opto_dialog, 'laser_1_calibration_power')),
+        'laser_2_calibration_power': float(_get_field(obj.Opto_dialog, 'laser_2_calibration_power')),
+        'laser_1_target_areas': _get_field(obj.Opto_dialog, 'laser_1_target',default='None') or 'None',
+        'laser_2_target_areas': _get_field(obj.Opto_dialog, 'laser_2_target',default='None') or 'None',
     }
 
     # Turn the metadata into a DataFrame in order to add it to the scratch
@@ -525,6 +534,6 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
     
-    bonsai_to_nwb(R'Z:\Xinxin\TestNWB\689514_2024-01-29_21-28-02\TrainingFolder\689514_2024-01-29_21-28-02.json')
+    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-G1\668546\668546_2023-09-19.json')
     
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
