@@ -1176,8 +1176,8 @@ class GenerateTrials():
         # CLP, current laser parameter
         self.CLP_Color=eval('self.TP_Laser_'+N)
         self.CLP_Location=eval('self.TP_Location_'+N)
-        self.CLP_LaserPowerLeft=eval('self.TP_LaserPowerLeft_'+N)
-        self.CLP_LaserPowerRight=eval('self.TP_LaserPowerRight_'+N)
+        self.CLP_LaserPowerLeft=eval('self.TP_Laser1_power_'+N)
+        self.CLP_LaserPowerRight=eval('self.TP_Laser2_power_'+N)
         self.CLP_Duration=float(eval('self.TP_Duration_'+N))
         self.CLP_Protocol=eval('self.TP_Protocol_'+N)
         if not self.CLP_Protocol=='Constant':

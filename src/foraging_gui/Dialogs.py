@@ -211,8 +211,8 @@ class OptogeneticsDialog(QDialog):
             Color=eval('self.Laser_'+str(Numb)+'.currentText()')
             Protocol=eval('self.Protocol_'+str(Numb)+'.currentText()')
             CurrentFrequency=eval('self.Frequency_'+str(Numb)+'.currentText()')
-            CurrentlaserPowerLeft=eval('self.LaserPowerLeft_'+str(Numb)+'.currentText()')
-            CurrentlaserPowerRight=eval('self.LaserPowerRight_'+str(Numb)+'.currentText()')
+            CurrentlaserPowerLeft=eval('self.Laser1_power_'+str(Numb)+'.currentText()')
+            CurrentlaserPowerRight=eval('self.Laser2_power_'+str(Numb)+'.currentText()')
             latest_calibration_date=self._FindLatestCalibrationDate(Color)
             if latest_calibration_date=='NA':
                 RecentLaserCalibration={}
@@ -231,18 +231,18 @@ class OptogeneticsDialog(QDialog):
                     ItemsRight.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'][i]))
             ItemsLeft=sorted(ItemsLeft)
             ItemsRight=sorted(ItemsRight)
-            eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
-            eval('self.LaserPowerLeft_'+str(Numb)+'.addItems(ItemsLeft)')
-            if eval('self.LaserPowerLeft_'+str(Numb)+'.findText(CurrentlaserPowerLeft)'):
-                index = eval('self.LaserPowerLeft_'+str(Numb)+'.findText(CurrentlaserPowerLeft)')
+            eval('self.Laser1_power_'+str(Numb)+'.clear()')
+            eval('self.Laser1_power_'+str(Numb)+'.addItems(ItemsLeft)')
+            if eval('self.Laser1_power_'+str(Numb)+'.findText(CurrentlaserPowerLeft)'):
+                index = eval('self.Laser1_power_'+str(Numb)+'.findText(CurrentlaserPowerLeft)')
                 if index != -1:
-                    eval('self.LaserPowerLeft_'+str(Numb)+'.setCurrentIndex(index)')
-            eval('self.LaserPowerRight_'+str(Numb)+'.clear()')
-            eval('self.LaserPowerRight_'+str(Numb)+'.addItems(ItemsRight)')
-            if eval('self.LaserPowerRight_'+str(Numb)+'.findText(CurrentlaserPowerRight)'):
-                index = eval('self.LaserPowerRight_'+str(Numb)+'.findText(CurrentlaserPowerRight)')
+                    eval('self.Laser1_power_'+str(Numb)+'.setCurrentIndex(index)')
+            eval('self.Laser2_power_'+str(Numb)+'.clear()')
+            eval('self.Laser2_power_'+str(Numb)+'.addItems(ItemsRight)')
+            if eval('self.Laser2_power_'+str(Numb)+'.findText(CurrentlaserPowerRight)'):
+                index = eval('self.Laser2_power_'+str(Numb)+'.findText(CurrentlaserPowerRight)')
                 if index != -1:
-                    eval('self.LaserPowerRight_'+str(Numb)+'.setCurrentIndex(index)')
+                    eval('self.Laser2_power_'+str(Numb)+'.setCurrentIndex(index)')
         except Exception as e:
             logging.error(str(e))
 
@@ -324,10 +324,10 @@ class OptogeneticsDialog(QDialog):
                                 ItemsRight.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'][i]))
                             ItemsLeft=sorted(ItemsLeft)
                             ItemsRight=sorted(ItemsRight)
-                            eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
-                            eval('self.LaserPowerLeft_'+str(Numb)+'.addItems(ItemsLeft)')
-                            eval('self.LaserPowerRight_'+str(Numb)+'.clear()')
-                            eval('self.LaserPowerRight_'+str(Numb)+'.addItems(ItemsRight)')
+                            eval('self.Laser1_power_'+str(Numb)+'.clear()')
+                            eval('self.Laser1_power_'+str(Numb)+'.addItems(ItemsLeft)')
+                            eval('self.Laser2_power_'+str(Numb)+'.clear()')
+                            eval('self.Laser2_power_'+str(Numb)+'.addItems(ItemsRight)')
                         elif Protocol=='Constant' or Protocol=='Pulse':
                             ItemsLeft=[]
                             ItemsRight=[]
@@ -337,31 +337,31 @@ class OptogeneticsDialog(QDialog):
                                 ItemsRight.append(str(RecentLaserCalibration[Color][Protocol]['Right']['LaserPowerVoltage'][i]))
                             ItemsLeft=sorted(ItemsLeft)
                             ItemsRight=sorted(ItemsRight)
-                            eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
-                            eval('self.LaserPowerLeft_'+str(Numb)+'.addItems(ItemsLeft)')
-                            eval('self.LaserPowerRight_'+str(Numb)+'.clear()')
-                            eval('self.LaserPowerRight_'+str(Numb)+'.addItems(ItemsRight)')
+                            eval('self.Laser1_power_'+str(Numb)+'.clear()')
+                            eval('self.Laser1_power_'+str(Numb)+'.addItems(ItemsLeft)')
+                            eval('self.Laser2_power_'+str(Numb)+'.clear()')
+                            eval('self.Laser2_power_'+str(Numb)+'.addItems(ItemsRight)')
                         self.MainWindow.WarningLabel.setText('')
                         self.MainWindow.WarningLabel.setStyleSheet("color: gray;")
                     else:
-                        eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
-                        eval('self.LaserPowerRight_'+str(Numb)+'.clear()')
+                        eval('self.Laser1_power_'+str(Numb)+'.clear()')
+                        eval('self.Laser2_power_'+str(Numb)+'.clear()')
                         self.MainWindow.WarningLabel.setText('No calibration for this protocol identified!')
                         self.MainWindow.WarningLabel.setStyleSheet(self.MainWindow.default_warning_color)
                 else:
-                    eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
-                    eval('self.LaserPowerRight_'+str(Numb)+'.clear()')
+                    eval('self.Laser1_power_'+str(Numb)+'.clear()')
+                    eval('self.Laser2_power_'+str(Numb)+'.clear()')
                     self.MainWindow.WarningLabel.setText('No calibration for this laser identified!')
                     self.MainWindow.WarningLabel.setStyleSheet(self.MainWindow.default_warning_color)
             else:
-                eval('self.LaserPowerLeft_'+str(Numb)+'.clear()')
-                eval('self.LaserPowerRight_'+str(Numb)+'.clear()')
+                eval('self.Laser1_power_'+str(Numb)+'.clear()')
+                eval('self.Laser2_power_'+str(Numb)+'.clear()')
                 self.MainWindow.WarningLabel.setText('No calibration for this laser identified!')
                 self.MainWindow.WarningLabel.setStyleSheet(self.MainWindow.default_warning_color)
 
         eval('self.Location_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.LaserPowerLeft_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.LaserPowerRight_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.Laser1_power_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        eval('self.Laser2_power_'+str(Numb)+'.setEnabled('+str(Label)+')')
         eval('self.Probability_'+str(Numb)+'.setEnabled('+str(Label)+')')
         eval('self.Duration_'+str(Numb)+'.setEnabled('+str(Label)+')')
         eval('self.Condition_'+str(Numb)+'.setEnabled('+str(Label)+')')
