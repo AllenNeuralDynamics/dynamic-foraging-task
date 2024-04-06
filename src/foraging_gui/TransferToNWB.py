@@ -233,8 +233,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_trial_column(name='laser_on_trial', description=f'Trials with laser stimulation')
     nwbfile.add_trial_column(name='laser_wavelength', description=f'The wavelength of laser or LED')
     nwbfile.add_trial_column(name='laser_location', description=f'The target brain areas')
-    nwbfile.add_trial_column(name='laser_power_left', description=f'The laser power of the left hemisphere(mw)')
-    nwbfile.add_trial_column(name='laser_power_right', description=f'The laser power of the right hemisphere(mw)')
+    nwbfile.add_trial_column(name='laser_1_power', description=f'The laser power of the left hemisphere(mw)')
+    nwbfile.add_trial_column(name='laser_2_power', description=f'The laser power of the right hemisphere(mw)')
     nwbfile.add_trial_column(name='laser_on_probability', description=f'The laser on probability')
     nwbfile.add_trial_column(name='laser_duration', description=f'The laser duration')
     nwbfile.add_trial_column(name='laser_condition', description=f'The laser on is conditioned on LaserCondition')
@@ -366,8 +366,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                           laser_on_trial=obj.B_LaserOnTrial[i],
                           laser_wavelength=LaserWavelengthC,
                           laser_location=LaserLocationC,
-                          laser_power_left=LaserPowerLeftC,
-                          laser_power_right=LaserPowerRightC,
+                          laser_1_power=LaserPowerLeftC,
+                          laser_2_power=LaserPowerRightC,
                           laser_on_probability=LaserOnProbablityC,
                           laser_duration=LaserDurationC,
                           laser_condition=LaserConditionC,
