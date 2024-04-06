@@ -107,6 +107,9 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     # add local time zone explicitly
     session_start_timeC = session_start_timeC.replace(tzinfo=tzlocal())
 
+    Laser_1_target_areas = _get_field(obj, 'laser_1_target') or 'none'
+    Laser_2_target_areas = _get_field(obj, 'laser_2_target') or 'none'
+    optogenetics_target_areas="Laser 1 target areas:"+Laser_1_target_areas+"; Laser 2 target areas:"+Laser_2_target_areas
     ### session related information ###
     nwbfile = NWBFile(
         session_description='Session end time:'+obj.Other_CurrentTime,  
@@ -119,7 +122,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         lab="",  # optional
         institution="Allen Institute for Neural Dynamics",  # optional
         ### add optogenetics description (the target brain areas). 
-        experiment_description="Optogenetics target brain areas:",  # optional
+        experiment_description="Optogenetics target brain areas:"+optogenetics_target_areas,  # optional
         related_publications="",  # optional
         notes=obj.ShowNotes,
         protocol=obj.Task
