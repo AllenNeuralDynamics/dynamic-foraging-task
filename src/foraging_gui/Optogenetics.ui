@@ -3919,33 +3919,33 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>40</y>
+     <y>20</y>
      <width>111</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>Laser_1 target area=</string>
+    <string>Laser_1  target area=</string>
    </property>
   </widget>
   <widget class="QLabel" name="label3">
    <property name="geometry">
     <rect>
      <x>370</x>
-     <y>40</y>
+     <y>20</y>
      <width>111</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>Laser_2 target area =</string>
+    <string>Laser_2  target area=</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="laser_1_target">
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>40</y>
+     <y>20</y>
      <width>191</width>
      <height>20</height>
     </rect>
@@ -3958,13 +3958,65 @@
    <property name="geometry">
     <rect>
      <x>480</x>
-     <y>40</y>
+     <y>20</y>
      <width>191</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
     <string/>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="laser_2_power">
+   <property name="geometry">
+    <rect>
+     <x>480</x>
+     <y>50</y>
+     <width>191</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label2_17">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>50</y>
+     <width>111</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Laser_1  power (mw)=</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="laser_1_power">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>50</y>
+     <width>191</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label3_22">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>50</y>
+     <width>111</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Laser_2  power (mw)=</string>
    </property>
   </widget>
   <zorder>groupBox_2</zorder>
@@ -4118,6 +4170,10 @@
   <zorder>label3</zorder>
   <zorder>laser_1_target</zorder>
   <zorder>laser_2_target</zorder>
+  <zorder>laser_2_power</zorder>
+  <zorder>label2_17</zorder>
+  <zorder>laser_1_power</zorder>
+  <zorder>label3_22</zorder>
  </widget>
  <resources/>
  <connections/>
