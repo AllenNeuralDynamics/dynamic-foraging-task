@@ -1352,12 +1352,12 @@
    </item>
    <item>
     <property name="text">
-     <string>Left</string>
+     <string>Laser_1</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>Right</string>
+     <string>Laser_2</string>
     </property>
    </item>
   </widget>
