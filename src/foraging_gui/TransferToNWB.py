@@ -278,8 +278,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         if Sc == 0:
             LaserWavelengthC = 0
             LaserLocationC = '0'
-            LaserPowerLeftC = 0
-            LaserPowerRightC = 0
+            Laser1Power = 0
+            Laser2Power = 0
             LaserOnProbablityC = 0
             LaserDurationC = 0
             LaserConditionC = '0'
@@ -301,13 +301,15 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                 LaserWavelengthC = 547
             LaserLocationC = str(getattr(obj, f'TP_Location_{Sc}')[i])
             if getattr(obj, f'TP_LaserPowerLeft_{Sc}')[i]!='':
-                LaserPowerLeftC = float(eval(getattr(obj, f'TP_LaserPowerLeft_{Sc}')[i])[1])
+                Laser1Power_old=_get_field(obj, f'TP_LaserPowerLeft_{Sc}', default=None) or '0' # old format
+                Laser1Power=float(_get_field(obj, f'TP_Laser1_power_{Sc}', default=None) or Laser1Power_old) # new format
             else:
-                LaserPowerLeftC=0
+                Laser1Power=0
             if getattr(obj, f'TP_LaserPowerRight_{Sc}')[i]!='':
-                LaserPowerRightC = float(eval(getattr(obj, f'TP_LaserPowerRight_{Sc}')[i])[1])
+                Laser2Power_old=_get_field(obj, f'TP_LaserPowerRight_{Sc}', default=None) or '0' # old format
+                Laser2Power=float(_get_field(obj, f'TP_Laser2_power_{Sc}', default=None) or Laser1Power_old) # new format
             else:
-                LaserPowerRightC=0
+                Laser2Power=0
             LaserOnProbablityC = float(getattr(obj, f'TP_Probability_{Sc}')[i])
             LaserDurationC = float(getattr(obj, f'TP_Duration_{Sc}')[i])
             LaserConditionC = str(getattr(obj, f'TP_Condition_{Sc}')[i])
@@ -366,8 +368,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                           laser_on_trial=obj.B_LaserOnTrial[i],
                           laser_wavelength=LaserWavelengthC,
                           laser_location=LaserLocationC,
-                          laser_1_power=LaserPowerLeftC,
-                          laser_2_power=LaserPowerRightC,
+                          laser_1_power=Laser1Power,
+                          laser_2_power=Laser2Power,
                           laser_on_probability=LaserOnProbablityC,
                           laser_duration=LaserDurationC,
                           laser_condition=LaserConditionC,
