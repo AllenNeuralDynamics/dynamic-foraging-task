@@ -398,7 +398,7 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="LaserPowerLeft_1">
+  <widget class="QComboBox" name="Laser1_power_1">
    <property name="geometry">
     <rect>
      <x>470</x>
@@ -1196,7 +1196,7 @@
     </property>
    </item>
   </widget>
-  <widget class="QComboBox" name="LaserPowerLeft_2">
+  <widget class="QComboBox" name="Laser1_power_2">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -2217,7 +2217,7 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="LaserPowerLeft_3">
+  <widget class="QComboBox" name="Laser1_power_3">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -2939,7 +2939,7 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="LaserPowerLeft_4">
+  <widget class="QComboBox" name="Laser1_power_4">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -3280,7 +3280,7 @@
     </property>
    </item>
   </widget>
-  <widget class="QComboBox" name="LaserPowerRight_1">
+  <widget class="QComboBox" name="Laser2_power_1">
    <property name="geometry">
     <rect>
      <x>730</x>
@@ -3329,7 +3329,7 @@
     </property>
    </item>
   </widget>
-  <widget class="QComboBox" name="LaserPowerRight_2">
+  <widget class="QComboBox" name="Laser2_power_2">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -3378,7 +3378,7 @@
     </property>
    </item>
   </widget>
-  <widget class="QComboBox" name="LaserPowerRight_3">
+  <widget class="QComboBox" name="Laser2_power_3">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -3427,7 +3427,7 @@
     </property>
    </item>
   </widget>
-  <widget class="QComboBox" name="LaserPowerRight_4">
+  <widget class="QComboBox" name="Laser2_power_4">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -4116,7 +4116,7 @@
   <zorder>label1_14</zorder>
   <zorder>PulseDur_1</zorder>
   <zorder>label1_15</zorder>
-  <zorder>LaserPowerLeft_1</zorder>
+  <zorder>Laser1_power_1</zorder>
   <zorder>label1_3</zorder>
   <zorder>label1_9</zorder>
   <zorder>OffsetStart_1</zorder>
@@ -4144,7 +4144,7 @@
   <zorder>ConditionP_2</zorder>
   <zorder>label2_3</zorder>
   <zorder>Laser_2</zorder>
-  <zorder>LaserPowerLeft_2</zorder>
+  <zorder>Laser1_power_2</zorder>
   <zorder>OffsetEnd_2</zorder>
   <zorder>label2_12</zorder>
   <zorder>label2_4</zorder>
@@ -4183,7 +4183,7 @@
   <zorder>Probability_3</zorder>
   <zorder>Laser_3</zorder>
   <zorder>label3_14</zorder>
-  <zorder>LaserPowerLeft_3</zorder>
+  <zorder>Laser1_power_3</zorder>
   <zorder>OffsetStart_3</zorder>
   <zorder>RD_4</zorder>
   <zorder>Location_4</zorder>
@@ -4208,7 +4208,7 @@
   <zorder>Duration_4</zorder>
   <zorder>label4_8</zorder>
   <zorder>label4_4</zorder>
-  <zorder>LaserPowerLeft_4</zorder>
+  <zorder>Laser1_power_4</zorder>
   <zorder>OffsetStart_4</zorder>
   <zorder>label4_11</zorder>
   <zorder>ConditionP_4</zorder>
@@ -4222,10 +4222,10 @@
   <zorder>Frequency_3</zorder>
   <zorder>label4_13</zorder>
   <zorder>Frequency_4</zorder>
-  <zorder>LaserPowerRight_1</zorder>
-  <zorder>LaserPowerRight_2</zorder>
-  <zorder>LaserPowerRight_3</zorder>
-  <zorder>LaserPowerRight_4</zorder>
+  <zorder>Laser2_power_1</zorder>
+  <zorder>Laser2_power_2</zorder>
+  <zorder>Laser2_power_3</zorder>
+  <zorder>Laser2_power_4</zorder>
   <zorder>label1_16</zorder>
   <zorder>label2_16</zorder>
   <zorder>label3_16</zorder>
