@@ -1461,7 +1461,7 @@ class Window(QMainWindow):
             self.RewardFamily.setEnabled(True)
             self.label_20.setEnabled(False)
             self.UncoupledReward.setEnabled(False)
-
+            # block
             self.BlockMinReward.setEnabled(True)
             self.IncludeAutoReward.setEnabled(True)
             self.BlockBeta.setEnabled(True)
@@ -1505,7 +1505,7 @@ class Window(QMainWindow):
             self.RewardFamily.setEnabled(False)
             self.label_20.setEnabled(True)
             self.UncoupledReward.setEnabled(True)
-
+            # block
             self.BlockBeta.setEnabled(True)
             self.BlockMin.setEnabled(True)
             self.BlockMax.setEnabled(True)
