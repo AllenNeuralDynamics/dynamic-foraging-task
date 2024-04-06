@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1442</width>
-    <height>805</height>
+    <height>878</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -3062,7 +3062,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>760</y>
+     <y>780</y>
      <width>131</width>
      <height>20</height>
     </rect>
@@ -3078,7 +3078,7 @@
    <property name="geometry">
     <rect>
      <x>150</x>
-     <y>760</y>
+     <y>780</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -3581,7 +3581,7 @@
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>710</y>
+     <y>730</y>
      <width>131</width>
      <height>20</height>
     </rect>
@@ -3597,7 +3597,7 @@
    <property name="geometry">
     <rect>
      <x>390</x>
-     <y>710</y>
+     <y>730</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -3610,7 +3610,7 @@
    <property name="geometry">
     <rect>
      <x>110</x>
-     <y>710</y>
+     <y>730</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -3623,7 +3623,7 @@
    <property name="geometry">
     <rect>
      <x>150</x>
-     <y>710</y>
+     <y>730</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -3906,13 +3906,65 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>680</y>
+     <y>700</y>
      <width>1421</width>
      <height>111</height>
     </rect>
    </property>
    <property name="title">
     <string>Calibration date and Nidaq sample frequency</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label2">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>40</y>
+     <width>111</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Laser_1 target area=</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label3">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>40</y>
+     <width>111</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Laser_2 target area =</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="laser_1_target">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>40</y>
+     <width>191</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="laser_2_target">
+   <property name="geometry">
+    <rect>
+     <x>480</x>
+     <y>40</y>
+     <width>191</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
    </property>
   </widget>
   <zorder>groupBox_2</zorder>
@@ -4062,6 +4114,10 @@
   <zorder>label3_20</zorder>
   <zorder>SessionControlWarning</zorder>
   <zorder>label3_21</zorder>
+  <zorder>label2</zorder>
+  <zorder>label3</zorder>
+  <zorder>laser_1_target</zorder>
+  <zorder>laser_2_target</zorder>
  </widget>
  <resources/>
  <connections/>
