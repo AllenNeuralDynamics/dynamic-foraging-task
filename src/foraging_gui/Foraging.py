@@ -1785,6 +1785,27 @@ class Window(QMainWindow):
                 self.WarningLabel.setText('')
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
                 return
+        # check if the laser power and target are entered
+        if self.OptogeneticsB.currentText()=='on' and (self.laser_1_target.text()=='' or self.laser_1_power.text()=='' or self.laser_2_target.text()=='' or self.laser_2_power.text()==''):
+            response = QMessageBox.question(self,
+                'Box {}, Save without laser target or laser power:'.format(self.box_letter), 
+                "Do you want to save without complete laser target or laser power information provided?",
+                 QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
+            if response==QMessageBox.Yes:
+                pass
+                self.WarningLabel.setText('Saving without laser target or laser power!')
+                self.WarningLabel.setStyleSheet(self.default_warning_color)
+                logging.info('saving without laser target or laser power')
+            elif response==QMessageBox.No:
+                logging.info('saving declined by user')
+                self.WarningLabel.setText('')
+                self.WarningLabel.setStyleSheet(self.default_warning_color)
+                return
+            elif response==QMessageBox.Cancel:
+                logging.info('saving canceled by user')
+                self.WarningLabel.setText('')
+                self.WarningLabel.setStyleSheet(self.default_warning_color)
+                return
 
         # this should be improved in the future. Need to get the last LeftRewardDeliveryTime and RightRewardDeliveryTime
         if hasattr(self, 'GeneratedTrials'):
