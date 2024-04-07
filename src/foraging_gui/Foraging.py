@@ -11,6 +11,7 @@ from datetime import date, datetime
 
 import serial 
 import numpy as np
+import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
@@ -737,7 +738,21 @@ class Window(QMainWindow):
             'default_ui':'ForagingGUI.ui'
         }
         
-        
+        # Try to load Settings_box#.csv
+        self.SettingsBox={}
+        try:
+            if os.path.exists(self.SettingsBoxFile):
+                # Open the csv settings file
+                self.SettingsBox = pd.read_csv(self.SettingsBoxFile)
+                logging.info('Loaded settings_box file')
+            else:
+                logging.error('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
+                raise Exception('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
+        except Exception as e:
+            logging.error('Could not load settings_box file at: {}, {}'.format(self.SettingFile,str(e)))
+            self.WarningLabel.setText('Could not load settings_box file!')
+            self.WarningLabel.setStyleSheet(self.default_warning_color)
+            raise e
         # Try to load the settings file        
         self.Settings = {}
         try:
