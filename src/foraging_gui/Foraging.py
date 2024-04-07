@@ -1461,16 +1461,23 @@ class Window(QMainWindow):
             self.RewardFamily.setEnabled(True)
             self.label_20.setEnabled(False)
             self.UncoupledReward.setEnabled(False)
-
-            self.label_12.setEnabled(True)
-            self.label_11.setEnabled(True)
+            # block
+            self.BlockMinReward.setEnabled(True)
+            self.IncludeAutoReward.setEnabled(True)
             self.BlockBeta.setEnabled(True)
             self.BlockMin.setEnabled(True)
             self.BlockMax.setEnabled(True)
+            self.label_12.setStyleSheet("color: black;")
+            self.label_11.setStyleSheet("color: black;")
+            self.label_14.setStyleSheet("color: black;")
+            self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
+            self.BlockMin.setStyleSheet("color: black;""border: 1px solid gray;")
+            self.BlockMax.setStyleSheet("color: black;""border: 1px solid gray;")
 
             self.label_27.setEnabled(False)
             self.InitiallyInactiveN.setEnabled(False)
-
+            self.label_27.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.InitiallyInactiveN.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
             # change name of min reward each block
             self.label_13.setText('min reward each block=')
@@ -1489,9 +1496,6 @@ class Window(QMainWindow):
             self.AdvancedBlockAuto.setEnabled(True)
             self._AdvancedBlockAuto() # Update states of SwitchThr and PointsInARow
             
-            self.BlockMinReward.setEnabled(True)
-            self.IncludeAutoReward.setEnabled(True)
-            
         elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
             self.label_6.setEnabled(False)
             self.label_7.setEnabled(False)
@@ -1501,14 +1505,21 @@ class Window(QMainWindow):
             self.RewardFamily.setEnabled(False)
             self.label_20.setEnabled(True)
             self.UncoupledReward.setEnabled(True)
-
-            self.label_12.setEnabled(True)
-            self.label_11.setEnabled(True)
+            # block
+            self.BlockBeta.setEnabled(True)
             self.BlockMin.setEnabled(True)
             self.BlockMax.setEnabled(True)
+            self.label_12.setStyleSheet("color: black;")
+            self.label_11.setStyleSheet("color: black;")
+            self.label_14.setStyleSheet("color: black;")
+            self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
+            self.BlockMin.setStyleSheet("color: black;""border: 1px solid gray;")
+            self.BlockMax.setStyleSheet("color: black;""border: 1px solid gray;")
 
             self.label_27.setEnabled(False)
             self.InitiallyInactiveN.setEnabled(False)
+            self.label_27.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.InitiallyInactiveN.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
             # change name of min reward each block
             self.label_13.setText('min reward each block=')
@@ -1519,7 +1530,6 @@ class Window(QMainWindow):
             # move auto-reward
             self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 128, 80, 20))
             self.label_26.setGeometry(QtCore.QRect(929, 128, 146, 16))
-            
             # Disable block beta, NextBlock, and AutoBlock panel
             self.BlockBeta.setEnabled(False)
             self.NextBlock.setEnabled(False)
@@ -1528,8 +1538,6 @@ class Window(QMainWindow):
             self.PointsInARow.setEnabled(False)
             self.BlockMinReward.setEnabled(False)
             self.IncludeAutoReward.setEnabled(False)
-            
-            
         elif self.Task.currentText() in ['RewardN']:
             self.label_6.setEnabled(True)
             self.label_7.setEnabled(True)
@@ -1539,19 +1547,25 @@ class Window(QMainWindow):
             self.RewardFamily.setEnabled(True)
             self.label_20.setEnabled(False)
             self.UncoupledReward.setEnabled(False)
-
+            self.label_20.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.UncoupledReward.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             # block
-            self.label_14.setEnabled(False)
-            self.label_12.setEnabled(False)
-            self.label_11.setEnabled(False)
+            self.BlockMinReward.setEnabled(True)
+            self.IncludeAutoReward.setEnabled(True)
             self.BlockBeta.setEnabled(False)
             self.BlockMin.setEnabled(False)
             self.BlockMax.setEnabled(False)
-
+            self.label_14.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.label_12.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.label_11.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.BlockBeta.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.BlockMin.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.BlockMax.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             # block; no reward when initially active
             self.label_27.setEnabled(True)
             self.InitiallyInactiveN.setEnabled(True)
-
+            self.label_27.setStyleSheet("color: black;")
+            self.InitiallyInactiveN.setStyleSheet("color: black;""border: 1px solid gray;")
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(403, 128, 80, 20))
             # change name of min reward each block
             self.label_13.setText('RewardN=')
