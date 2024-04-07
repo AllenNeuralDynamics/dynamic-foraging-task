@@ -38,16 +38,16 @@ def _get_field(obj, field_list, reject_list=[], index=None, default=np.nan):
         field_list = [field_list]
         
     for f in field_list:
-            tag=0
+            has_field=0
             if type(obj) is type:
                 if hasattr(obj, f):
                     value = getattr(obj, f)
-                    tag=1
+                    has_field=1
             elif type(obj) is dict:
                 if f in obj:
                     value = obj[f]
-                    tag=1
-            if tag==0:
+                    has_field=1
+            if has_field==0:
                 continue
             if value in reject_list:
                 continue
