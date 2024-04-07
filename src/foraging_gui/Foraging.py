@@ -1787,7 +1787,7 @@ class Window(QMainWindow):
                 return
 
         # this should be improved in the future. Need to get the last LeftRewardDeliveryTime and RightRewardDeliveryTime
-        if hasattr(self, 'GeneratedTrials'):
+        if hasattr(self, 'GeneratedTrials') and self.InitializeBonsaiSuccessfully==1:
             self.GeneratedTrials._GetLicks(self.Channel2)
         
         # Create new folders
