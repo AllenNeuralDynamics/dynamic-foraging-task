@@ -43,6 +43,7 @@ def _get_field(obj, field_list, reject_list=[], index=None, default=np.nan):
                 if hasattr(obj, f):
                     value = getattr(obj, f)
                     has_field=1
+            # the obj.Opto_dialog is a dictionary
             elif type(obj) is dict:
                 if f in obj:
                     value = obj[f]
