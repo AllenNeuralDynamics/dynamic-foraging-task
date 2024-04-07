@@ -143,7 +143,7 @@ class Window(QMainWindow):
             self._ReconnectBonsai()   
         logging.info('Start up complete')
     
-    def get_file_commit_hash(self,file_path):
+    def get_file_commit_ID(self,file_path):
         try:
             # Get the absolute path of the file
             abs_file_path = os.path.abspath(file_path)
@@ -832,7 +832,7 @@ class Window(QMainWindow):
         self.window_title = window_title
 
         # Get the commit hash of the current version of this Python file
-        self.commit_hash = self.get_file_commit_hash(__file__)
+        self.commit_ID = self.get_file_commit_ID(__file__)
 
     def _InitializeBonsai(self):
         '''
@@ -1938,8 +1938,8 @@ class Window(QMainWindow):
         Obj['settings_box']=self.SettingsBox
 
         # save the commit hash
-        Obj['commit_hash']=self.commit_hash
-        
+        Obj['commit_ID']=self.commit_ID
+
         # save Json or mat
         if self.SaveFile.endswith('.mat'):
         # Save data to a .mat file
