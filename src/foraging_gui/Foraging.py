@@ -1896,7 +1896,10 @@ class Window(QMainWindow):
 
         # Save the current box
         Obj['box'] = self.current_box
-    
+
+        # save settings
+        Obj['settings'] = self.Settings
+
         # save Json or mat
         if self.SaveFile.endswith('.mat'):
         # Save data to a .mat file
