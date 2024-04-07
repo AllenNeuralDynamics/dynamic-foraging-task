@@ -1936,6 +1936,10 @@ class Window(QMainWindow):
         # save settings
         Obj['settings'] = self.Settings
         Obj['settings_box']=self.SettingsBox
+
+        # save the commit hash
+        Obj['commit_hash']=self.commit_hash
+        
         # save Json or mat
         if self.SaveFile.endswith('.mat'):
         # Save data to a .mat file
