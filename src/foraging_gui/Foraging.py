@@ -737,12 +737,12 @@ class Window(QMainWindow):
         }
         
         # Try to load the settings file        
-        Settings = {}
+        self.Settings = {}
         try:
             if os.path.exists(self.SettingFile):
                 # Open the JSON settings file
                 with open(self.SettingFile, 'r') as f:
-                    Settings = json.load(f)
+                    self.Settings = json.load(f)
                 logging.info('Loaded settings file')
             else:
                 logging.error('Could not find settings file at: {}'.format(self.SettingFile))
@@ -755,28 +755,28 @@ class Window(QMainWindow):
 
         # If any settings are missing, use the default values
         for key in defaults:
-            if key not in Settings:
-                Settings[key] = defaults[key]
-                logging.warning('Missing setting ({}), using default: {}'.format(key,Settings[key]))
+            if key not in self.Settings:
+                self.Settings[key] = defaults[key]
+                logging.warning('Missing setting ({}), using default: {}'.format(key,self.Settings[key]))
                 if key in ['default_saveFolder','current_box']:
                     logging.error('Missing setting ({}), is required'.format(key))               
                     raise Exception('Missing setting ({}), is required'.format(key)) 
 
         # Save all settings
-        self.default_saveFolder=Settings['default_saveFolder']
-        self.current_box=Settings['current_box']
-        self.temporary_video_folder=Settings['temporary_video_folder']
-        self.Teensy_COM = Settings['Teensy_COM_box'+str(self.box_number)]
-        self.bonsai_path=Settings['bonsai_path']
-        self.bonsaiworkflow_path=Settings['bonsaiworkflow_path']
-        self.newscale_serial_num_box1=Settings['newscale_serial_num_box1']
-        self.newscale_serial_num_box2=Settings['newscale_serial_num_box2']
-        self.newscale_serial_num_box3=Settings['newscale_serial_num_box3']
-        self.newscale_serial_num_box4=Settings['newscale_serial_num_box4']
-        self.default_ui=Settings['default_ui']
+        self.default_saveFolder=self.Settings['default_saveFolder']
+        self.current_box=self.Settings['current_box']
+        self.temporary_video_folder=self.Settings['temporary_video_folder']
+        self.Teensy_COM = self.Settings['Teensy_COM_box'+str(self.box_number)]
+        self.bonsai_path=self.Settings['bonsai_path']
+        self.bonsaiworkflow_path=self.Settings['bonsaiworkflow_path']
+        self.newscale_serial_num_box1=self.Settings['newscale_serial_num_box1']
+        self.newscale_serial_num_box2=self.Settings['newscale_serial_num_box2']
+        self.newscale_serial_num_box3=self.Settings['newscale_serial_num_box3']
+        self.newscale_serial_num_box4=self.Settings['newscale_serial_num_box4']
+        self.default_ui=self.Settings['default_ui']
 
         # Also stream log info to the console if enabled
-        if  Settings['show_log_info_in_console']:
+        if  self.Settings['show_log_info_in_console']:
             logger = logging.getLogger()
             handler = logging.StreamHandler()
             # Using the same format and level as the root logger
