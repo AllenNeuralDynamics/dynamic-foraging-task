@@ -401,7 +401,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                         laser_rampingdown=LaserRampingDownC,
                         laser_pulse_duration=LaserPulseDurC,
                         
-                        session_wide_control=_get_field(obj, 'TP_SessionWideControl', index=i, default=None)',
+                        session_wide_control=_get_field(obj, 'TP_SessionWideControl', index=i, default=None),
                         fraction_of_session=float(_get_field(obj, 'TP_FractionOfSession', index=i, default=np.nan)),
                         session_start_with=_get_field(obj, 'TP_SessionStartWith', index=i, default=None),
                         session_alternation=_get_field(obj, 'TP_SessionAlternating', index=i, default=None),
