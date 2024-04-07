@@ -143,6 +143,20 @@ class Window(QMainWindow):
             self._ReconnectBonsai()   
         logging.info('Start up complete')
     
+    def get_file_commit_hash(self,file_path):
+        try:
+            # Get the absolute path of the file
+            abs_file_path = os.path.abspath(file_path)
+            
+            # Run the git log command to get the commit hash of the file
+            result = subprocess.run(['git', 'log', '-n', '1', '--pretty=format:%H', '--', abs_file_path], stdout=subprocess.PIPE)
+            
+            # Decode the output and return it
+            return result.stdout.decode('utf-8').strip()
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+    
     def _LoadUI(self):
         '''
             Determine which user interface to use
@@ -817,7 +831,8 @@ class Window(QMainWindow):
         window_title = '{}'.format(self.current_box)
         self.window_title = window_title
 
-
+        # Get the commit hash of the current version of this Python file
+        self.commit_hash = self.get_file_commit_hash(__file__)
 
     def _InitializeBonsai(self):
         '''
