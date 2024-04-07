@@ -60,6 +60,7 @@ class Window(QMainWindow):
         # Load Settings that are specific to this computer  
         self.SettingFolder=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings")
         self.SettingFile=os.path.join(self.SettingFolder,'ForagingSettings.json')
+        self.SettingsBoxFile=os.path.join(self.SettingFolder,'Settings_box'+str(self.box_number)+'.csv')
         self._GetSettings()
 
         # Load Settings that are specific to this box 
@@ -735,6 +736,7 @@ class Window(QMainWindow):
             'show_log_info_in_console':False,
             'default_ui':'ForagingGUI.ui'
         }
+        
         
         # Try to load the settings file        
         self.Settings = {}
