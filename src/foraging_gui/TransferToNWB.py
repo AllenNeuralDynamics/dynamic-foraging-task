@@ -406,12 +406,12 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                         session_start_with=_get_field(obj, 'TP_SessionStartWith', index=i, default=None),
                         session_alternation=_get_field(obj, 'TP_SessionAlternating', index=i, default=None),
                         # add all auto training parameters (eventually should be in session.json)
-                        auto_train_engaged=_get_field(obj, 'TP_auto_train_engaged', index=i),
-                        auto_train_curriculum_name=_get_field(obj, 'TP_auto_train_curriculum_name', index=i, default=None),
-                        auto_train_curriculum_version=_get_field(obj, 'TP_auto_train_curriculum_version', index=i, default=None) ,
-                        auto_train_curriculum_schema_version=_get_field(obj, 'TP_auto_train_curriculum_schema_version', index=i, default=None),
-                        auto_train_stage=_get_field(obj, 'TP_auto_train_stage', index=i, default=None),
-                        auto_train_stage_overridden=_get_field(obj, 'TP_auto_train_stage_overridden', index=i, default=None) or np.nan,
+                        auto_train_engaged=_get_field(obj, 'TP_auto_train_engaged', index=i,default='None') or 'None',
+                        auto_train_curriculum_name=_get_field(obj, 'TP_auto_train_curriculum_name', index=i, default='None') or 'None',
+                        auto_train_curriculum_version=_get_field(obj, 'TP_auto_train_curriculum_version', index=i, default='None') or 'None' ,
+                        auto_train_curriculum_schema_version=_get_field(obj, 'TP_auto_train_curriculum_schema_version', index=i, default='None') or 'None',
+                        auto_train_stage=_get_field(obj, 'TP_auto_train_stage', index=i, default='None') or 'None',
+                        auto_train_stage_overridden=_get_field(obj, 'TP_auto_train_stage_overridden', index=i, default='None') or np.nan,
                         
                         # lickspout position
                         lickspout_position_x=_get_field(obj, 'B_NewscalePositions', index=i, default=[np.nan] * 3)[0],
@@ -535,6 +535,6 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
     
-    bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-G1\668546\668546_2023-09-19.json')
+    bonsai_to_nwb(R'Z:\Xinxin\TestNWB\689514_2024-01-29_21-28-02\TrainingFolder\689514_2024-01-29_21-28-02.json',save_folder=r'H:\NWBFile')
     
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
