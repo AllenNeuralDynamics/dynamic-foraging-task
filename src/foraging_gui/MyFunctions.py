@@ -1608,8 +1608,8 @@ class GenerateTrials():
                     self.B_Baited[1]=False
                     self.B_CurrentRewarded[0]=False
                     self.B_CurrentRewarded[1]=False
-                self.B_RewardedHistory=np.append(self.B_RewardedHistory,self.B_CurrentRewarded,axis=1)
-                self.B_AnimalResponseHistory=np.append(self.B_AnimalResponseHistory,self.B_AnimalCurrentResponse)
+                B_CurrentRewarded=self.B_CurrentRewarded.copy()
+                B_AnimalCurrentResponse=self.B_AnimalCurrentResponse.copy()
             elif Rec[0].address=='/TrialEndTime':
                 TrialEndTime=Rec[1][1][0]
             elif Rec[0].address=='/GoCueTimeSoundCard':
@@ -1638,6 +1638,9 @@ class GenerateTrials():
                     elif N==1:
                         TrialEndTimeHarp=Rec[1][1][0]
                 N=N+1
+        
+        self.B_RewardedHistory=np.append(self.B_RewardedHistory,B_CurrentRewarded,axis=1)
+        self.B_AnimalResponseHistory=np.append(self.B_AnimalResponseHistory,B_AnimalCurrentResponse)
         # get the event harp time
         self.B_TrialStartTimeHarp=np.append(self.B_TrialStartTimeHarp,TrialStartTimeHarp)
         self.B_DelayStartTimeHarp=np.append(self.B_DelayStartTimeHarp,DelayStartTimeHarp)
