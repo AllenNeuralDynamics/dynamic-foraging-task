@@ -1572,7 +1572,7 @@ class GenerateTrials():
         elif self.CurrentStartType==1:
             ReceiveN=11
         N=0
-        for i in range(ReceiveN):
+        while 1:
             Rec=Channel1.receive()
             if Rec[0].address=='/TrialStartTime':
                 TrialStartTime=Rec[1][1][0]
