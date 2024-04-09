@@ -133,7 +133,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         subject_id=obj.ID,
         description='Animal name:'+obj.ID,
         species="Mus musculus",
-        weight=_get_field(obj, 'WeightBefore'),
+        weight=_get_field(obj, 'WeightAfter'),
     )
     # print(nwbfile)
     
@@ -531,7 +531,7 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
     
-    bonsai_to_nwb(R'Z:\Xinxin\TestNWB\689514_2024-01-29_21-28-02\TrainingFolder\689514_2024-01-29_21-28-02.json',save_folder=r'H:\NWBFile')
-    #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\behavior_1_2024-04-06_16-31-06\behavior\1_2024-04-06_16-31-06.json',save_folder=r'H:\NWBFile')
+    #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\689514_2024-01-29_21-28-02\TrainingFolder\689514_2024-01-29_21-28-02.json',save_folder=r'H:\NWBFile')
+    bonsai_to_nwb(R'Z:\Xinxin\TestNWB\behavior_1_2024-04-06_16-31-06\behavior\1_2024-04-06_16-31-06.json',save_folder=r'H:\NWBFile')
     
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
