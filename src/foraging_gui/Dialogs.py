@@ -87,21 +87,21 @@ class OptogeneticsDialog(QDialog):
         
         self._connectSignalsSlots()
         self.MainWindow=MainWindow
-        self._StimulationCondition_1()
-        self._StimulationCondition_2()
-        self._StimulationCondition_3()
-        self._StimulationCondition_4()
+        self._LaserColor_1()
+        self._LaserColor_2()
+        self._LaserColor_3()
+        self._LaserColor_4()
         self._Laser_calibration()
         self._SessionWideControl()
     def _connectSignalsSlots(self):
-        self.Laser_1.currentIndexChanged.connect(self._StimulationCondition_1)
-        self.Laser_2.currentIndexChanged.connect(self._StimulationCondition_2)
-        self.Laser_3.currentIndexChanged.connect(self._StimulationCondition_3)
-        self.Laser_4.currentIndexChanged.connect(self._StimulationCondition_4)
-        self.Laser_1.activated.connect(self._StimulationCondition_1)
-        self.Laser_2.activated.connect(self._StimulationCondition_2)
-        self.Laser_3.activated.connect(self._StimulationCondition_3)
-        self.Laser_4.activated.connect(self._StimulationCondition_4)
+        self.Laser_1.currentIndexChanged.connect(self._LaserColor_1)
+        self.Laser_2.currentIndexChanged.connect(self._LaserColor_2)
+        self.Laser_3.currentIndexChanged.connect(self._LaserColor_3)
+        self.Laser_4.currentIndexChanged.connect(self._LaserColor_4)
+        self.Laser_1.activated.connect(self._LaserColor_1)
+        self.Laser_2.activated.connect(self._LaserColor_2)
+        self.Laser_3.activated.connect(self._LaserColor_3)
+        self.Laser_4.activated.connect(self._LaserColor_4)
         self.Protocol_1.activated.connect(self._activated_1)
         self.Protocol_2.activated.connect(self._activated_2)
         self.Protocol_3.activated.connect(self._activated_3)
@@ -110,14 +110,14 @@ class OptogeneticsDialog(QDialog):
         self.Protocol_2.currentIndexChanged.connect(self._activated_2)
         self.Protocol_3.currentIndexChanged.connect(self._activated_3)
         self.Protocol_4.currentIndexChanged.connect(self._activated_4)
-        self.Protocol_1.activated.connect(self._StimulationCondition_1)
-        self.Protocol_2.activated.connect(self._StimulationCondition_2)
-        self.Protocol_3.activated.connect(self._StimulationCondition_3)
-        self.Protocol_4.activated.connect(self._StimulationCondition_4)
-        self.Protocol_1.currentIndexChanged.connect(self._StimulationCondition_1)
-        self.Protocol_2.currentIndexChanged.connect(self._StimulationCondition_2)
-        self.Protocol_3.currentIndexChanged.connect(self._StimulationCondition_3)
-        self.Protocol_4.currentIndexChanged.connect(self._StimulationCondition_4)
+        self.Protocol_1.activated.connect(self._LaserColor_1)
+        self.Protocol_2.activated.connect(self._LaserColor_2)
+        self.Protocol_3.activated.connect(self._LaserColor_3)
+        self.Protocol_4.activated.connect(self._LaserColor_4)
+        self.Protocol_1.currentIndexChanged.connect(self._LaserColor_1)
+        self.Protocol_2.currentIndexChanged.connect(self._LaserColor_2)
+        self.Protocol_3.currentIndexChanged.connect(self._LaserColor_3)
+        self.Protocol_4.currentIndexChanged.connect(self._LaserColor_4)
         self.Frequency_1.activated.connect(self._Frequency_1)
         self.Frequency_2.activated.connect(self._Frequency_2)
         self.Frequency_3.activated.connect(self._Frequency_3)
@@ -188,14 +188,14 @@ class OptogeneticsDialog(QDialog):
         self._Frequency(3)
     def _Frequency_4(self):
         self._Frequency(4)
-    def _StimulationCondition_1(self):
-        self._StimulationCondition(1)
-    def _StimulationCondition_2(self):
-        self._StimulationCondition(2)
-    def _StimulationCondition_3(self):
-        self._StimulationCondition(3)
-    def _StimulationCondition_4(self):
-        self._StimulationCondition(4)
+    def _LaserColor_1(self):
+        self._LaserColor(1)
+    def _LaserColor_2(self):
+        self._LaserColor(2)
+    def _LaserColor_3(self):
+        self._LaserColor(3)
+    def _LaserColor_4(self):
+        self._LaserColor(4)
     def _activated_1(self):
         self._activated(1)
     def _activated_2(self):
@@ -288,7 +288,7 @@ class OptogeneticsDialog(QDialog):
         else:
             eval('self.label'+str(Numb)+'_'+str(11)+'.setEnabled('+str(True)+')')
             eval('self.OffsetEnd_'+str(Numb)+'.setEnabled('+str(True)+')')
-    def _StimulationCondition(self,Numb):
+    def _LaserColor(self,Numb):
         ''' enable/disable items based on laser (blue/green/orange/red/NA)'''
         Inactlabel=range(2,17)
         if eval('self.Laser_'+str(Numb)+'.currentText()')=='NA':
@@ -1246,7 +1246,7 @@ class LaserCalibrationDialog(QDialog):
         self.CopyFromOpto.clicked.connect(self._CopyFromOpto)
         self.Save.clicked.connect(self._Save)
         self.Capture.clicked.connect(self._Capture)
-        self.Laser_1.currentIndexChanged.connect(self._StimulationCondition_1)
+        self.Laser_1.currentIndexChanged.connect(self._LaserColor_1)
         self.Protocol_1.activated.connect(self._activated_1)
         self.Protocol_1.currentIndexChanged.connect(self._activated_1)
         self.Flush_DO0.clicked.connect(self._FLush_DO0)
@@ -1293,8 +1293,8 @@ class LaserCalibrationDialog(QDialog):
             return
         self.MainWindow.Channel.Port2(int(1))
 
-    def _StimulationCondition_1(self):
-        self._StimulationCondition(1)
+    def _LaserColor_1(self):
+        self._LaserColor(1)
     def _activated_1(self):
         self._activated(1)
     def _activated(self,Numb):
@@ -1324,7 +1324,7 @@ class LaserCalibrationDialog(QDialog):
             eval('self.label'+str(Numb)+'_'+str(Inactlabel3)+'.setEnabled('+str(True)+')')
             eval('self.RD_'+str(Numb)+'.setEnabled('+str(True)+')')
     
-    def _StimulationCondition(self,Numb):
+    def _LaserColor(self,Numb):
         ''' enable/disable items based on laser (blue/green/orange/red/NA)'''
         Inactlabel=[2,3,5,12,13,14,15]
         if eval('self.Laser_'+str(Numb)+'.currentText()')=='NA':
@@ -1719,10 +1719,10 @@ class LaserCalibrationDialog(QDialog):
             return
         self.MainWindow.LaserCalibrationResults=LaserCalibrationResults
         self.MainWindow._GetLaserCalibration()
-        self.MainWindow.Opto_dialog._StimulationCondition_1()
-        self.MainWindow.Opto_dialog._StimulationCondition_2()
-        self.MainWindow.Opto_dialog._StimulationCondition_3()
-        self.MainWindow.Opto_dialog._StimulationCondition_4()
+        self.MainWindow.Opto_dialog._LaserColor_1()
+        self.MainWindow.Opto_dialog._LaserColor_2()
+        self.MainWindow.Opto_dialog._LaserColor_3()
+        self.MainWindow.Opto_dialog._LaserColor_4()
         time.sleep(0.01)
         self.Save.setStyleSheet("background-color : none")
         self.Save.setChecked(False)
