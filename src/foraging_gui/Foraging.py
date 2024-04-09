@@ -147,25 +147,25 @@ class Window(QMainWindow):
         try:
             # Get the absolute path of the file
             abs_file_path = os.path.abspath(file_path)
-            
-            # Run the git log command to get the commit hash of the file
-            result = subprocess.run(['git', 'log', '-n', '1', '--pretty=format:%H', '--', abs_file_path], stdout=subprocess.PIPE)
-            
             # Get the directory of the file
             directory = os.path.dirname(abs_file_path)
 
+            # Run the git log command to get the commit hash of the file
+            result_ID = subprocess.run(['git', 'log', '-n', '1', '--pretty=format:%H', '--', abs_file_path], stdout=subprocess.PIPE)
+            commit_ID=result_ID.stdout.decode('utf-8').strip()
+
             # Get the URL of the current repository
             repo_url_command = ['git', 'remote', 'get-url', 'origin']
-            result = subprocess.run(repo_url_command, stdout=subprocess.PIPE, cwd=directory, text=True)
-            repo_url = result.stdout.strip()
+            result_url = subprocess.run(repo_url_command, stdout=subprocess.PIPE, cwd=directory, text=True)
+            repo_url = result_url.stdout.strip()
 
             # Get the name of the current branch
             branch_name_command = ['git', 'rev-parse', '--abbrev-ref', 'HEAD']
-            result = subprocess.run(branch_name_command, stdout=subprocess.PIPE, cwd=directory, text=True)
-            current_branch = result.stdout.strip()
+            result_branch = subprocess.run(branch_name_command, stdout=subprocess.PIPE, cwd=directory, text=True)
+            current_branch = result_branch.stdout.strip()
 
             # Decode the output and return it
-            return result.stdout.decode('utf-8').strip(), repo_url, current_branch
+            return commit_ID, repo_url, current_branch
         except Exception as e:
             logging.info(f"Error: {e}")
             return None, None, None
