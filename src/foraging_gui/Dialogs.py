@@ -1438,9 +1438,9 @@ class LaserCalibrationDialog(QDialog):
 
     def _GetLaserAmplitude(self):
         '''the voltage amplitude dependens on Protocol, Laser Power, Laser color, and the stimulation locations<>'''
-        if self.CLP_Location=='Left':
+        if self.CLP_Location=='Laser_1':
             self.CurrentLaserAmplitude=[self.CLP_InputVoltage,0]
-        elif self.CLP_Location=='Right':
+        elif self.CLP_Location=='Laser_2':
             self.CurrentLaserAmplitude=[0,self.CLP_InputVoltage]
         elif self.CLP_Location=='Both':
             self.CurrentLaserAmplitude=[self.CLP_InputVoltage,self.CLP_InputVoltage]
