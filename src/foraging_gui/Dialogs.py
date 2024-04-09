@@ -224,8 +224,8 @@ class OptogeneticsDialog(QDialog):
                 ItemsLaser=sorted(ItemsLaser)
                 eval('self.Laser'+str(laser_tag)+'_power_'+str(Numb)+'.clear()')
                 eval('self.Laser'+str(laser_tag)+'_power_'+str(Numb)+'.addItems(ItemsLaser)')
-                if eval('self.Laser'+str(laser_tag)+'_power_'+str(Numb)+'.findText(CurrentlaserPowerLaser_'+str(laser_tag)+')'):
-                    index = eval('self.Laser'+str(laser_tag)+'_power_'+str(Numb)+'.findText(CurrentlaserPowerLaser_'+str(laser_tag)+')')
+                if eval('self.Laser'+str(laser_tag)+'_power_'+str(Numb)+'.findText(CurrentlaserPowerLaser)'):
+                    index = eval('self.Laser'+str(laser_tag)+'_power_'+str(Numb)+'.findText(CurrentlaserPowerLaser')
                     if index != -1:
                         eval('self.Laser1_power_'+str(Numb)+'.setCurrentIndex(index)')
         except Exception as e:
