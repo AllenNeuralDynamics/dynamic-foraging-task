@@ -187,6 +187,11 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         'laser_2_calibration_power': float(_get_field(obj.Opto_dialog, 'laser_2_calibration_power')),
         'laser_1_target_areas': _get_field(obj.Opto_dialog, 'laser_1_target',default='None') or 'None',
         'laser_2_target_areas': _get_field(obj.Opto_dialog, 'laser_2_target',default='None') or 'None',
+
+        # Behavior control software version
+        'commit_ID':_get_field(obj, 'commit_ID', reject_list=[''],default='None'),
+        'repo_url':_get_field(obj, 'repo_url', reject_list=[''],default='None'),
+        'current_branch':_get_field(obj, 'current_branch', reject_list=[''],default='None'),
     }
 
     # Turn the metadata into a DataFrame in order to add it to the scratch
