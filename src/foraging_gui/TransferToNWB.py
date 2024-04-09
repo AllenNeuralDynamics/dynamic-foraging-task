@@ -95,22 +95,12 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         pass
     for attr_name in Obj.keys():
         setattr(obj, attr_name, Obj[attr_name])
-    # Some fields are not provided in some cases
-    if not hasattr(obj, 'Experimenter'):
-        setattr(obj, 'Experimenter', '')
-    if not hasattr(obj, 'Other_CurrentTime'):
-        setattr(obj, 'Other_CurrentTime', '')
-    if not hasattr(obj, 'WeightAfter'):
-        setattr(obj, 'WeightAfter', '')
-    if not hasattr(obj, 'WeightBefore'):
-        setattr(obj, 'WeightBefore', '')
-        
+     
     # Early return if missing some key fields
     if any([not hasattr(obj, field) for field in ['B_TrialEndTime', 'TP_BaseRewardSum']]):
         logger.warning(f"Missing key fields! Skipping {fname}")
         return 'incomplete_json'
     
-        
     if not hasattr(obj, 'Other_SessionStartTime'):
         session_start_timeC=datetime.datetime.strptime('2023-04-26', "%Y-%m-%d") # specific for LA30_2023-04-27.json
     else:
@@ -121,12 +111,12 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
 
     ### session related information ###
     nwbfile = NWBFile(
-        session_description='Session end time:'+obj.Other_CurrentTime,  
+        session_description='Session end time:'+_get_field(obj, 'Other_CurrentTime', default='None'),  
         identifier=str(uuid4()),  # required
         session_start_time= session_start_timeC,  # required
         session_id=os.path.basename(fname),  # optional
         experimenter=[
-            obj.Experimenter,
+            _get_field(obj, 'experimenter', default='None'),
         ],  # optional
         lab="",  # optional
         institution="Allen Institute for Neural Dynamics",  # optional
@@ -141,9 +131,9 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     # need to get more subject information through subject_id
     nwbfile.subject = Subject(
         subject_id=obj.ID,
-        description='Animal name:'+obj.ID+'  Weight after(g):'+obj.WeightAfter,
+        description='Animal name:'+obj.ID+'  Weight after(g):'+_get_field(obj, 'WeightAfter', default='None'),
         species="Mus musculus",
-        weight=obj.WeightBefore,
+        weight=_get_field(obj, 'WeightBefore', default='None'),
     )
     # print(nwbfile)
     
@@ -541,7 +531,7 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
     
-    #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\689514_2024-01-29_21-28-02\TrainingFolder\689514_2024-01-29_21-28-02.json',save_folder=r'H:\NWBFile')
-    bonsai_to_nwb(R'Z:\Xinxin\TestNWB\behavior_1_2024-04-06_16-31-06\behavior\1_2024-04-06_16-31-06.json',save_folder=r'H:\NWBFile')
+    bonsai_to_nwb(R'Z:\Xinxin\TestNWB\689514_2024-01-29_21-28-02\TrainingFolder\689514_2024-01-29_21-28-02.json',save_folder=r'H:\NWBFile')
+    #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\behavior_1_2024-04-06_16-31-06\behavior\1_2024-04-06_16-31-06.json',save_folder=r'H:\NWBFile')
     
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
