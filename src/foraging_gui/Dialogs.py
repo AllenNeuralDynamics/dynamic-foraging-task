@@ -227,7 +227,7 @@ class OptogeneticsDialog(QDialog):
                 if eval('self.Laser'+str(laser_tag)+'_power_'+str(Numb)+'.findText(CurrentlaserPowerLaser)'):
                     index = eval('self.Laser'+str(laser_tag)+'_power_'+str(Numb)+'.findText(CurrentlaserPowerLaser')
                     if index != -1:
-                        eval('self.Laser1_power_'+str(Numb)+'.setCurrentIndex(index)')
+                        eval('self.Laser'+str(laser_tag)+'_power_'+str(Numb)+'.setCurrentIndex(index)')
         except Exception as e:
             logging.error(str(e))
 
