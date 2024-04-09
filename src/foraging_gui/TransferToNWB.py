@@ -406,17 +406,17 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                         laser_rampingdown=LaserRampingDownC,
                         laser_pulse_duration=LaserPulseDurC,
                         
-                        session_wide_control=_get_field(obj, 'TP_SessionWideControl', index=i, default=None),
-                        fraction_of_session=float(_get_field(obj, 'TP_FractionOfSession', index=i, default=np.nan)),
-                        session_start_with=_get_field(obj, 'TP_SessionStartWith', index=i, default=None),
-                        session_alternation=_get_field(obj, 'TP_SessionAlternating', index=i, default=None),
+                        session_wide_control=_get_field(obj, 'TP_SessionWideControl', index=i, default='None'),
+                        fraction_of_session=float(_get_field(obj, 'TP_FractionOfSession', index=i, default=np.nan, reject_list=[''])),
+                        session_start_with=_get_field(obj, 'TP_SessionStartWith', index=i, default='None',reject_list=['']),
+                        session_alternation=_get_field(obj, 'TP_SessionAlternating', index=i, default='None',reject_list=['']),
                         # add all auto training parameters (eventually should be in session.json)
-                        auto_train_engaged=_get_field(obj, 'TP_auto_train_engaged', index=i,default='None') or 'None',
-                        auto_train_curriculum_name=_get_field(obj, 'TP_auto_train_curriculum_name', index=i, default='None') or 'None',
-                        auto_train_curriculum_version=_get_field(obj, 'TP_auto_train_curriculum_version', index=i, default='None') or 'None' ,
-                        auto_train_curriculum_schema_version=_get_field(obj, 'TP_auto_train_curriculum_schema_version', index=i, default='None') or 'None',
-                        auto_train_stage=_get_field(obj, 'TP_auto_train_stage', index=i, default='None') or 'None',
-                        auto_train_stage_overridden=_get_field(obj, 'TP_auto_train_stage_overridden', index=i, default='None') or np.nan,
+                        auto_train_engaged=_get_field(obj, 'TP_auto_train_engaged', index=i,default='None',reject_list=['']),
+                        auto_train_curriculum_name=_get_field(obj, 'TP_auto_train_curriculum_name', index=i, default='None',reject_list=['']),
+                        auto_train_curriculum_version=_get_field(obj, 'TP_auto_train_curriculum_version', index=i, default='None',reject_list=['']),
+                        auto_train_curriculum_schema_version=_get_field(obj, 'TP_auto_train_curriculum_schema_version', index=i, default='None',reject_list=['']),
+                        auto_train_stage=_get_field(obj, 'TP_auto_train_stage', index=i, default='None',reject_list=['']),
+                        auto_train_stage_overridden=_get_field(obj, 'TP_auto_train_stage_overridden', index=i, default='None',reject_list=['']),
                         
                         # lickspout position
                         lickspout_position_x=_get_field(obj, 'B_NewscalePositions', index=i, default=[np.nan] * 3)[0],
