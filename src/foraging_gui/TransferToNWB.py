@@ -18,7 +18,7 @@ save_folder=R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\nwb'
 
 logger = logging.getLogger(__name__)
 
-def _get_field(obj, field_list, reject_list=[None, np.nan,''], index=None, default='None'):
+def _get_field(obj, field_list, reject_list=[None, np.nan,''], index=None, default=np.nan):
     """get field from obj, if not found, return default
 
     Parameters
@@ -156,7 +156,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     water_after_session = float(_get_field(obj, 
                                            field_list=['ExtraWater', 'SuggestedWater'], default=np.nan
                                            ))
-    water_day_total = float(_get_field(obj, 'TotalWater', reject_list=['']))
+    water_day_total = float(_get_field(obj, 'TotalWater'))
     water_in_session_total = water_day_total - water_after_session
     water_in_session_manual = water_in_session_total - water_in_session_foraging
     
@@ -174,10 +174,10 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         'water_day_total': water_day_total,
 
         # Weight
-        'base_weight': float(_get_field(obj, 'BaseWeight', reject_list=[''])),
-        'target_weight': float(_get_field(obj, 'TargetWeight', reject_list=[''])),
-        'target_weight_ratio': float(_get_field(obj, 'TargetRatio', reject_list=[''])),
-        'weight_after': float(_get_field(obj, 'WeightAfter', reject_list=[''])),
+        'base_weight': float(_get_field(obj, 'BaseWeight')),
+        'target_weight': float(_get_field(obj, 'TargetWeight')),
+        'target_weight_ratio': float(_get_field(obj, 'TargetRatio')),
+        'weight_after': float(_get_field(obj, 'WeightAfter')),
         
         # Performance
         'foraging_efficiency': _get_field(obj, 'B_for_eff_optimal'),
@@ -190,9 +190,9 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         'laser_2_target_areas': _get_field(obj.Opto_dialog, 'laser_2_target',default='None') or 'None',
 
         # Behavior control software version
-        'commit_ID':_get_field(obj, 'commit_ID', reject_list=[''],default='None'),
-        'repo_url':_get_field(obj, 'repo_url', reject_list=[''],default='None'),
-        'current_branch':_get_field(obj, 'current_branch', reject_list=[''],default='None'),
+        'commit_ID':_get_field(obj, 'commit_ID',default='None'),
+        'repo_url':_get_field(obj, 'repo_url',default='None'),
+        'current_branch':_get_field(obj, 'current_branch',default='None'),
     }
 
     # Turn the metadata into a DataFrame in order to add it to the scratch
@@ -408,16 +408,16 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                         laser_pulse_duration=LaserPulseDurC,
                         
                         session_wide_control=_get_field(obj, 'TP_SessionWideControl', index=i, default='None'),
-                        fraction_of_session=float(_get_field(obj, 'TP_FractionOfSession', index=i, default=np.nan, reject_list=[''])),
-                        session_start_with=_get_field(obj, 'TP_SessionStartWith', index=i, default='None',reject_list=['']),
-                        session_alternation=_get_field(obj, 'TP_SessionAlternating', index=i, default='None',reject_list=['']),
+                        fraction_of_session=float(_get_field(obj, 'TP_FractionOfSession', index=i, default=np.nan)),
+                        session_start_with=_get_field(obj, 'TP_SessionStartWith', index=i, default='None'),
+                        session_alternation=_get_field(obj, 'TP_SessionAlternating', index=i, default='None'),
                         # add all auto training parameters (eventually should be in session.json)
-                        auto_train_engaged=_get_field(obj, 'TP_auto_train_engaged', index=i,default='None',reject_list=['']),
-                        auto_train_curriculum_name=_get_field(obj, 'TP_auto_train_curriculum_name', index=i, default='None',reject_list=['']),
-                        auto_train_curriculum_version=_get_field(obj, 'TP_auto_train_curriculum_version', index=i, default='None',reject_list=['']),
-                        auto_train_curriculum_schema_version=_get_field(obj, 'TP_auto_train_curriculum_schema_version', index=i, default='None',reject_list=['']),
-                        auto_train_stage=_get_field(obj, 'TP_auto_train_stage', index=i, default='None',reject_list=['']),
-                        auto_train_stage_overridden=_get_field(obj, 'TP_auto_train_stage_overridden', index=i, default='None',reject_list=['']),
+                        auto_train_engaged=_get_field(obj, 'TP_auto_train_engaged', index=i,default='None'),
+                        auto_train_curriculum_name=_get_field(obj, 'TP_auto_train_curriculum_name', index=i, default='None'),
+                        auto_train_curriculum_version=_get_field(obj, 'TP_auto_train_curriculum_version', index=i, default='None'),
+                        auto_train_curriculum_schema_version=_get_field(obj, 'TP_auto_train_curriculum_schema_version', index=i, default='None'),
+                        auto_train_stage=_get_field(obj, 'TP_auto_train_stage', index=i, default='None'),
+                        auto_train_stage_overridden=_get_field(obj, 'TP_auto_train_stage_overridden', index=i, default='None'),
                         
                         # lickspout position
                         lickspout_position_x=_get_field(obj, 'B_NewscalePositions', index=i, default=[np.nan] * 3)[0],
