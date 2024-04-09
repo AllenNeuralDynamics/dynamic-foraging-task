@@ -167,7 +167,7 @@ class Window(QMainWindow):
             # Decode the output and return it
             return result.stdout.decode('utf-8').strip(), repo_url, current_branch
         except Exception as e:
-            print(f"Error: {e}")
+            logging.info(f"Error: {e}")
             return None, None, None
     
     def _LoadUI(self):
