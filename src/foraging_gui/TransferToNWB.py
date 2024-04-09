@@ -299,41 +299,41 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     for i in range(len(obj.B_TrialEndTime)):
         Sc = obj.B_SelectedCondition[i] # the optogenetics conditions
         if Sc == 0:
-            LaserWavelengthC = 0
-            LaserLocationC = '0'
-            Laser1Power = 0
-            Laser2Power = 0
-            LaserOnProbablityC = 0
-            LaserDurationC = 0
+            LaserWavelengthC = np.nan
+            LaserLocationC = 'None'
+            Laser1Power = np.nan
+            Laser2Power = np.nan
+            LaserOnProbablityC = np.nan
+            LaserDurationC = np.nan
             LaserConditionC = 'None'
-            LaserConditionProC = 0
+            LaserConditionProC = np.nan
             LaserStartC = 'None'
-            LaserStartOffsetC = 0
+            LaserStartOffsetC = np.nan
             LaserEndC = 'None'
-            LaserEndOffsetC = 0
+            LaserEndOffsetC = np.nan
             LaserProtocolC = 'None'
-            LaserFrequencyC = 0
-            LaserRampingDownC = 0
-            LaserPulseDurC = 0
+            LaserFrequencyC = np.nan
+            LaserRampingDownC = np.nan
+            LaserPulseDurC = np.nan
 
         else:
             if getattr(obj, f'TP_Laser_{Sc}')[i] == 'Blue':
-                LaserWavelengthC = 473
+                LaserWavelengthC = float(473)
             elif getattr(obj, f'TP_Laser_{Sc}')[i] == 'Red':
-                LaserWavelengthC = 647
+                LaserWavelengthC = float(647)
             elif getattr(obj, f'TP_Laser_{Sc}')[i] == 'Green':
-                LaserWavelengthC = 547
+                LaserWavelengthC = float(547)
             LaserLocationC = str(getattr(obj, f'TP_Location_{Sc}')[i])
             if getattr(obj, f'TP_LaserPowerLeft_{Sc}')[i]!='':
-                Laser1Power_old=eval(_get_field(obj, f'TP_LaserPowerLeft_{Sc}',index=i, default=None))[1] or '0' # old format
-                Laser1Power=float(_get_field(obj, f'TP_Laser1_power_{Sc}',index=i, default=None) or Laser1Power_old) # new format
+                Laser1Power_old=float(eval(_get_field(obj, f'TP_LaserPowerLeft_{Sc}',index=i, default=np.nan))[1]) # old format
+                Laser1Power=float(_get_field(obj, f'TP_Laser1_power_{Sc}',index=i, default=np.nan) or Laser1Power_old) # new format
             else:
-                Laser1Power=0
+                Laser1Power=float(0)
             if getattr(obj, f'TP_LaserPowerRight_{Sc}')[i]!='':
-                Laser2Power_old=eval(_get_field(obj, f'TP_LaserPowerRight_{Sc}',index=i, default=None))[1] or '0' # old format
+                Laser2Power_old=float(eval(_get_field(obj, f'TP_LaserPowerRight_{Sc}',index=i, default=np.nan))[1]) # old format
                 Laser2Power=float(_get_field(obj, f'TP_Laser2_power_{Sc}',index=i, default=None) or Laser1Power_old) # new format
             else:
-                Laser2Power=0
+                Laser2Power=float(0)
             LaserOnProbablityC = float(getattr(obj, f'TP_Probability_{Sc}')[i])
             LaserDurationC = float(getattr(obj, f'TP_Duration_{Sc}')[i])
             LaserConditionC = str(getattr(obj, f'TP_Condition_{Sc}')[i])
@@ -541,7 +541,7 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
     
-    bonsai_to_nwb(R'Z:\Xinxin\TestNWB\689514_2024-01-29_21-28-02\TrainingFolder\689514_2024-01-29_21-28-02.json',save_folder=r'H:\NWBFile')
-    #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\behavior_1_2024-04-06_16-31-06\behavior\1_2024-04-06_16-31-06.json',save_folder=r'H:\NWBFile')
+    #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\689514_2024-01-29_21-28-02\TrainingFolder\689514_2024-01-29_21-28-02.json',save_folder=r'H:\NWBFile')
+    bonsai_to_nwb(R'Z:\Xinxin\TestNWB\behavior_1_2024-04-06_16-31-06\behavior\1_2024-04-06_16-31-06.json',save_folder=r'H:\NWBFile')
     
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
