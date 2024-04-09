@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Optogenetics</string>
   </property>
-  <widget class="QComboBox" name="StimulationCondition_1">
+  <widget class="QComboBox" name="LaserColor_1">
    <property name="geometry">
     <rect>
      <x>90</x>
@@ -1152,7 +1152,7 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="StimulationCondition_2">
+  <widget class="QComboBox" name="LaserColor_2">
    <property name="geometry">
     <rect>
      <x>90</x>
@@ -2151,7 +2151,7 @@
     <string>0.25</string>
    </property>
   </widget>
-  <widget class="QComboBox" name="StimulationCondition_3">
+  <widget class="QComboBox" name="LaserColor_3">
    <property name="geometry">
     <rect>
      <x>90</x>
@@ -2835,7 +2835,7 @@
     <string>0</string>
    </property>
   </widget>
-  <widget class="QComboBox" name="StimulationCondition_4">
+  <widget class="QComboBox" name="LaserColor_4">
    <property name="geometry">
     <rect>
      <x>90</x>
@@ -4100,7 +4100,7 @@
   <zorder>groupBox_2</zorder>
   <zorder>groupBox</zorder>
   <zorder>OptoPar</zorder>
-  <zorder>StimulationCondition_1</zorder>
+  <zorder>LaserColor_1</zorder>
   <zorder>label1_2</zorder>
   <zorder>Location_1</zorder>
   <zorder>LaserStart_1</zorder>
@@ -4143,7 +4143,7 @@
   <zorder>LaserStart_2</zorder>
   <zorder>ConditionP_2</zorder>
   <zorder>label2_3</zorder>
-  <zorder>StimulationCondition_2</zorder>
+  <zorder>LaserColor_2</zorder>
   <zorder>Laser1_power_2</zorder>
   <zorder>OffsetEnd_2</zorder>
   <zorder>label2_12</zorder>
@@ -4181,7 +4181,7 @@
   <zorder>label3_4</zorder>
   <zorder>label3_2</zorder>
   <zorder>Probability_3</zorder>
-  <zorder>StimulationCondition_3</zorder>
+  <zorder>LaserColor_3</zorder>
   <zorder>label3_14</zorder>
   <zorder>Laser1_power_3</zorder>
   <zorder>OffsetStart_3</zorder>
@@ -4204,7 +4204,7 @@
   <zorder>Protocol_4</zorder>
   <zorder>label4_15</zorder>
   <zorder>OffsetEnd_4</zorder>
-  <zorder>StimulationCondition_4</zorder>
+  <zorder>LaserColor_4</zorder>
   <zorder>Duration_4</zorder>
   <zorder>label4_8</zorder>
   <zorder>label4_4</zorder>

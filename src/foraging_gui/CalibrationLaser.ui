@@ -245,7 +245,7 @@
     <string>1</string>
    </property>
   </widget>
-  <widget class="QComboBox" name="Laser_1">
+  <widget class="QComboBox" name="LaserColor_1">
    <property name="geometry">
     <rect>
      <x>271</x>
