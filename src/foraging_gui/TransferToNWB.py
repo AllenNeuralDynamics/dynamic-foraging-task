@@ -18,7 +18,7 @@ save_folder=R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\nwb'
 
 logger = logging.getLogger(__name__)
 
-def _get_field(obj, field_list, reject_list=[], index=None, default=np.nan):
+def _get_field(obj, field_list, reject_list=[None, np.nan,''], index=None, default='None'):
     """get field from obj, if not found, return default
 
     Parameters
@@ -56,6 +56,8 @@ def _get_field(obj, field_list, reject_list=[], index=None, default=np.nan):
                 return value
             # If index is int, try to get the index-th element of the field
             try:
+                if value[index] in reject_list:
+                    continue
                 return value[index]
             except:
                 logger.debug(f"Field {field_list} is iterable or index {index} is out of range")
@@ -152,8 +154,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     water_in_session_foraging = BS_TotalReward / 1000 if BS_TotalReward > 5.0 else BS_TotalReward 
     # Old name "ExtraWater" goes first because old json has a wrong Suggested Water
     water_after_session = float(_get_field(obj, 
-                                           field_list=['ExtraWater', 'SuggestedWater'], 
-                                           reject_list=['']
+                                           field_list=['ExtraWater', 'SuggestedWater'], default=np.nan
                                            ))
     water_day_total = float(_get_field(obj, 'TotalWater', reject_list=['']))
     water_in_session_total = water_day_total - water_after_session
@@ -540,6 +541,7 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
     
-    bonsai_to_nwb(R'Z:\Xinxin\TestNWB\689514_2024-01-29_21-28-02\TrainingFolder\689514_2024-01-29_21-28-02.json',save_folder=r'H:\NWBFile')
+    #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\689514_2024-01-29_21-28-02\TrainingFolder\689514_2024-01-29_21-28-02.json',save_folder=r'H:\NWBFile')
+    bonsai_to_nwb(R'Z:\Xinxin\TestNWB\behavior_1_2024-04-06_16-31-06\behavior\1_2024-04-06_16-31-06.json',save_folder=r'H:\NWBFile')
     
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
