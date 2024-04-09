@@ -845,7 +845,7 @@ class Window(QMainWindow):
         self.window_title = window_title
 
         # Get the commit hash of the current version of this Python file
-        self.commit_ID = self.get_file_commit_ID(__file__)
+        self.commit_ID,self.repo_url, self.current_branch = self.get_file_commit_ID(__file__)
 
     def _InitializeBonsai(self):
         '''
@@ -1952,7 +1952,9 @@ class Window(QMainWindow):
 
         # save the commit hash
         Obj['commit_ID']=self.commit_ID
-
+        Obj['repo_url']=self.repo_url
+        Obj['current_branch'] =self.current_branch
+        
         # save Json or mat
         if self.SaveFile.endswith('.mat'):
         # Save data to a .mat file
