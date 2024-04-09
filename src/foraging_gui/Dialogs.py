@@ -206,41 +206,41 @@ class OptogeneticsDialog(QDialog):
         self._activated(4)
     def _Frequency(self,Numb):
         try:
-            ItemsLeft=[]
-            ItemsRight=[]
+            ItemsLaser_1=[]
+            ItemsLaser_2=[]
             Color=eval('self.Laser_'+str(Numb)+'.currentText()')
             Protocol=eval('self.Protocol_'+str(Numb)+'.currentText()')
             CurrentFrequency=eval('self.Frequency_'+str(Numb)+'.currentText()')
-            CurrentlaserPowerLeft=eval('self.Laser1_power_'+str(Numb)+'.currentText()')
-            CurrentlaserPowerRight=eval('self.Laser2_power_'+str(Numb)+'.currentText()')
+            CurrentlaserPowerLaser_1=eval('self.Laser1_power_'+str(Numb)+'.currentText()')
+            CurrentlaserPowerLaser_2=eval('self.Laser2_power_'+str(Numb)+'.currentText()')
             latest_calibration_date=self._FindLatestCalibrationDate(Color)
             if latest_calibration_date=='NA':
                 RecentLaserCalibration={}
             else:
                 RecentLaserCalibration=self.MainWindow.LaserCalibrationResults[latest_calibration_date]
             if Protocol=='Sine':
-                for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'])):
-                    ItemsLeft.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'][i]))
-                for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'])):
-                    ItemsRight.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'][i]))
+                for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Laser_1']['LaserPowerVoltage'])):
+                    ItemsLaser_1.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Laser_1']['LaserPowerVoltage'][i]))
+                for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Laser_2']['LaserPowerVoltage'])):
+                    ItemsLaser_2.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Laser_2']['LaserPowerVoltage'][i]))
 
             elif Protocol=='Constant' or Protocol=='Pulse':
-                for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'])):
-                    ItemsLeft.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'][i]))
-                for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'])):
-                    ItemsRight.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'][i]))
-            ItemsLeft=sorted(ItemsLeft)
-            ItemsRight=sorted(ItemsRight)
+                for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Laser_1']['LaserPowerVoltage'])):
+                    ItemsLaser_1.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Laser_1']['LaserPowerVoltage'][i]))
+                for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Laser_2']['LaserPowerVoltage'])):
+                    ItemsLaser_2.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Laser_2']['LaserPowerVoltage'][i]))
+            ItemsLaser_1=sorted(ItemsLaser_1)
+            ItemsLaser_2=sorted(ItemsLaser_2)
             eval('self.Laser1_power_'+str(Numb)+'.clear()')
-            eval('self.Laser1_power_'+str(Numb)+'.addItems(ItemsLeft)')
-            if eval('self.Laser1_power_'+str(Numb)+'.findText(CurrentlaserPowerLeft)'):
-                index = eval('self.Laser1_power_'+str(Numb)+'.findText(CurrentlaserPowerLeft)')
+            eval('self.Laser1_power_'+str(Numb)+'.addItems(ItemsLaser_1)')
+            if eval('self.Laser1_power_'+str(Numb)+'.findText(CurrentlaserPowerLaser_1)'):
+                index = eval('self.Laser1_power_'+str(Numb)+'.findText(CurrentlaserPowerLaser_1)')
                 if index != -1:
                     eval('self.Laser1_power_'+str(Numb)+'.setCurrentIndex(index)')
             eval('self.Laser2_power_'+str(Numb)+'.clear()')
-            eval('self.Laser2_power_'+str(Numb)+'.addItems(ItemsRight)')
-            if eval('self.Laser2_power_'+str(Numb)+'.findText(CurrentlaserPowerRight)'):
-                index = eval('self.Laser2_power_'+str(Numb)+'.findText(CurrentlaserPowerRight)')
+            eval('self.Laser2_power_'+str(Numb)+'.addItems(ItemsLaser_2)')
+            if eval('self.Laser2_power_'+str(Numb)+'.findText(CurrentlaserPowerLaser_2)'):
+                index = eval('self.Laser2_power_'+str(Numb)+'.findText(CurrentlaserPowerLaser_2)')
                 if index != -1:
                     eval('self.Laser2_power_'+str(Numb)+'.setCurrentIndex(index)')
         except Exception as e:
@@ -316,31 +316,31 @@ class OptogeneticsDialog(QDialog):
                             eval('self.Frequency_'+str(Numb)+'.addItems(ItemsFrequency)')
                             if not CurrentFrequency in Frequency:
                                 CurrentFrequency=eval('self.Frequency_'+str(Numb)+'.currentText()')
-                            ItemsLeft=[]
-                            ItemsRight=[]
-                            for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'])):
-                                ItemsLeft.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Left']['LaserPowerVoltage'][i]))
-                            for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'])):
-                                ItemsRight.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Right']['LaserPowerVoltage'][i]))
-                            ItemsLeft=sorted(ItemsLeft)
-                            ItemsRight=sorted(ItemsRight)
+                            ItemsLaser_1=[]
+                            ItemsLaser_2=[]
+                            for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Laser_1']['LaserPowerVoltage'])):
+                                ItemsLaser_1.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Laser_1']['LaserPowerVoltage'][i]))
+                            for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Laser_2']['LaserPowerVoltage'])):
+                                ItemsLaser_2.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Laser_2']['LaserPowerVoltage'][i]))
+                            ItemsLaser_1=sorted(ItemsLaser_1)
+                            ItemsLaser_2=sorted(ItemsLaser_2)
                             eval('self.Laser1_power_'+str(Numb)+'.clear()')
-                            eval('self.Laser1_power_'+str(Numb)+'.addItems(ItemsLeft)')
+                            eval('self.Laser1_power_'+str(Numb)+'.addItems(ItemsLaser_1)')
                             eval('self.Laser2_power_'+str(Numb)+'.clear()')
-                            eval('self.Laser2_power_'+str(Numb)+'.addItems(ItemsRight)')
+                            eval('self.Laser2_power_'+str(Numb)+'.addItems(ItemsLaser_2)')
                         elif Protocol=='Constant' or Protocol=='Pulse':
-                            ItemsLeft=[]
-                            ItemsRight=[]
-                            for i in range(len(RecentLaserCalibration[Color][Protocol]['Left']['LaserPowerVoltage'])):
-                                ItemsLeft.append(str(RecentLaserCalibration[Color][Protocol]['Left']['LaserPowerVoltage'][i]))
-                            for i in range(len(RecentLaserCalibration[Color][Protocol]['Right']['LaserPowerVoltage'])):
-                                ItemsRight.append(str(RecentLaserCalibration[Color][Protocol]['Right']['LaserPowerVoltage'][i]))
-                            ItemsLeft=sorted(ItemsLeft)
-                            ItemsRight=sorted(ItemsRight)
+                            ItemsLaser_1=[]
+                            ItemsLaser_2=[]
+                            for i in range(len(RecentLaserCalibration[Color][Protocol]['Laser_1']['LaserPowerVoltage'])):
+                                ItemsLaser_1.append(str(RecentLaserCalibration[Color][Protocol]['Laser_1']['LaserPowerVoltage'][i]))
+                            for i in range(len(RecentLaserCalibration[Color][Protocol]['Laser_2']['LaserPowerVoltage'])):
+                                ItemsLaser_2.append(str(RecentLaserCalibration[Color][Protocol]['Laser_2']['LaserPowerVoltage'][i]))
+                            ItemsLaser_1=sorted(ItemsLaser_1)
+                            ItemsLaser_2=sorted(ItemsLaser_2)
                             eval('self.Laser1_power_'+str(Numb)+'.clear()')
-                            eval('self.Laser1_power_'+str(Numb)+'.addItems(ItemsLeft)')
+                            eval('self.Laser1_power_'+str(Numb)+'.addItems(ItemsLaser_1)')
                             eval('self.Laser2_power_'+str(Numb)+'.clear()')
-                            eval('self.Laser2_power_'+str(Numb)+'.addItems(ItemsRight)')
+                            eval('self.Laser2_power_'+str(Numb)+'.addItems(ItemsLaser_2)')
                         self.MainWindow.WarningLabel.setText('')
                         self.MainWindow.WarningLabel.setStyleSheet("color: gray;")
                     else:
