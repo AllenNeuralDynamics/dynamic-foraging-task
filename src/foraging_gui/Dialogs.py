@@ -94,14 +94,14 @@ class OptogeneticsDialog(QDialog):
         self._Laser_calibration()
         self._SessionWideControl()
     def _connectSignalsSlots(self):
-        self.Laser_1.currentIndexChanged.connect(self._LaserColor_1)
-        self.Laser_2.currentIndexChanged.connect(self._LaserColor_2)
-        self.Laser_3.currentIndexChanged.connect(self._LaserColor_3)
-        self.Laser_4.currentIndexChanged.connect(self._LaserColor_4)
-        self.Laser_1.activated.connect(self._LaserColor_1)
-        self.Laser_2.activated.connect(self._LaserColor_2)
-        self.Laser_3.activated.connect(self._LaserColor_3)
-        self.Laser_4.activated.connect(self._LaserColor_4)
+        self.LaserColor_1.currentIndexChanged.connect(self._LaserColor_1)
+        self.LaserColor_2.currentIndexChanged.connect(self._LaserColor_2)
+        self.LaserColor_3.currentIndexChanged.connect(self._LaserColor_3)
+        self.LaserColor_4.currentIndexChanged.connect(self._LaserColor_4)
+        self.LaserColor_1.activated.connect(self._LaserColor_1)
+        self.LaserColor_2.activated.connect(self._LaserColor_2)
+        self.LaserColor_3.activated.connect(self._LaserColor_3)
+        self.LaserColor_4.activated.connect(self._LaserColor_4)
         self.Protocol_1.activated.connect(self._activated_1)
         self.Protocol_2.activated.connect(self._activated_2)
         self.Protocol_3.activated.connect(self._activated_3)
@@ -291,11 +291,11 @@ class OptogeneticsDialog(QDialog):
     def _LaserColor(self,Numb):
         ''' enable/disable items based on laser (blue/green/orange/red/NA)'''
         Inactlabel=range(2,17)
-        if eval('self.Laser_'+str(Numb)+'.currentText()')=='NA':
+        if eval('self.LaserColor_'+str(Numb)+'.currentText()')=='NA':
             Label=False
         else:
             Label=True
-            Color=eval('self.Laser_'+str(Numb)+'.currentText()')
+            Color=eval('self.LaserColor_'+str(Numb)+'.currentText()')
             Protocol=eval('self.Protocol_'+str(Numb)+'.currentText()')
             CurrentFrequency=eval('self.Frequency_'+str(Numb)+'.currentText()')
             latest_calibration_date=self._FindLatestCalibrationDate(Color)
@@ -376,7 +376,7 @@ class OptogeneticsDialog(QDialog):
         eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(Label)+')')
         for i in Inactlabel:
             eval('self.label'+str(Numb)+'_'+str(i)+'.setEnabled('+str(Label)+')')
-        if eval('self.Laser_'+str(Numb)+'.currentText()')!='NA':    
+        if eval('self.LaserColor_'+str(Numb)+'.currentText()')!='NA':    
             eval('self._activated_'+str(Numb)+'()')
 
 class WaterCalibrationDialog(QDialog):
@@ -1246,7 +1246,7 @@ class LaserCalibrationDialog(QDialog):
         self.CopyFromOpto.clicked.connect(self._CopyFromOpto)
         self.Save.clicked.connect(self._Save)
         self.Capture.clicked.connect(self._Capture)
-        self.Laser_1.currentIndexChanged.connect(self._LaserColor_1)
+        self.LaserColor_1.currentIndexChanged.connect(self._LaserColor_1)
         self.Protocol_1.activated.connect(self._activated_1)
         self.Protocol_1.currentIndexChanged.connect(self._activated_1)
         self.Flush_DO0.clicked.connect(self._FLush_DO0)
@@ -1327,7 +1327,7 @@ class LaserCalibrationDialog(QDialog):
     def _LaserColor(self,Numb):
         ''' enable/disable items based on laser (blue/green/orange/red/NA)'''
         Inactlabel=[2,3,5,12,13,14,15]
-        if eval('self.Laser_'+str(Numb)+'.currentText()')=='NA':
+        if eval('self.LaserColor_'+str(Numb)+'.currentText()')=='NA':
             Label=False
         else:
             Label=True
@@ -1340,14 +1340,14 @@ class LaserCalibrationDialog(QDialog):
         eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(Label)+')')
         for i in Inactlabel:
             eval('self.label'+str(Numb)+'_'+str(i)+'.setEnabled('+str(Label)+')')
-        if eval('self.Laser_'+str(Numb)+'.currentText()')!='NA':    
+        if eval('self.LaserColor_'+str(Numb)+'.currentText()')!='NA':    
             eval('self._activated_'+str(Numb)+'()')
     
     def _GetLaserWaveForm(self):
         '''Get the waveform of the laser. It dependens on color/duration/protocol(frequency/RD/pulse duration)/locations/laser power'''
         N=str(1)
         # CLP, current laser parameter
-        self.CLP_Color=eval('self.LC_Laser_'+N)
+        self.CLP_Color=eval('self.LC_LaserColor_'+N)
         self.CLP_Location=eval('self.LC_Location_'+N)
         self.CLP_LaserPower=eval('self.LC_LaserPower_'+N)
         self.CLP_Duration=float(eval('self.LC_Duration_'+N))
@@ -1478,7 +1478,7 @@ class LaserCalibrationDialog(QDialog):
         '''Copy the optogenetics parameters'''
         N=[]
         for i in range(100):
-            variable_name = "Laser_" + str(i)
+            variable_name = "LaserColor_" + str(i)
             if hasattr(self.MainWindow.Opto_dialog,variable_name):
                 current_text = self.MainWindow.Opto_dialog.__getattribute__(variable_name).currentText()
                 if current_text !='NA':
@@ -1490,7 +1490,7 @@ class LaserCalibrationDialog(QDialog):
         self.Frequency_1.setText(self.MainWindow.Opto_dialog.__getattribute__("Frequency_" + str(N)).currentText())
         self.RD_1.setText(self.MainWindow.Opto_dialog.__getattribute__("RD_" + str(N)).text())
         self.PulseDur_1.setText(self.MainWindow.Opto_dialog.__getattribute__("PulseDur_" + str(N)).text())
-        self.Laser_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Laser_" + str(N)).currentIndex())
+        self.LaserColor_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("LaserColor_" + str(N)).currentIndex())
         self.Location_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Location_" + str(N)).currentIndex())
         self.LaserPower_1.clear()
         items=[]
@@ -1556,7 +1556,7 @@ class LaserCalibrationDialog(QDialog):
             return
         # delete invalid indices
         LCM_MeasureTime=self.LCM_MeasureTime.copy()
-        LCM_Laser_1=self.LCM_Laser_1.copy()
+        LCM_LaserColor_1=self.LCM_LaserColor_1.copy()
         LCM_Protocol_1=self.LCM_Protocol_1.copy()
         LCM_Frequency_1=self.LCM_Frequency_1.copy()
         LCM_LaserPowerMeasured=self.LCM_LaserPowerMeasured.copy()
@@ -1569,7 +1569,7 @@ class LaserCalibrationDialog(QDialog):
         delete_indices.sort(reverse=True)
         for index in delete_indices:
             del LCM_MeasureTime[index]
-            del LCM_Laser_1[index]
+            del LCM_LaserColor_1[index]
             del LCM_Protocol_1[index]
             del LCM_Frequency_1[index]
             del LCM_LaserPowerMeasured[index]
@@ -1593,7 +1593,7 @@ class LaserCalibrationDialog(QDialog):
                     break
             '''
             current_date_ind=[index for index, value in enumerate(LCM_MeasureTime_date) if value == current_date]
-            laser_colors= self._extract_elements(LCM_Laser_1,current_date_ind) 
+            laser_colors= self._extract_elements(LCM_LaserColor_1,current_date_ind) 
             laser_colors_unique= list(set(laser_colors))
             for j in range(len(laser_colors_unique)):
                 current_color=laser_colors_unique[j]
