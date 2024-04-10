@@ -1643,28 +1643,16 @@ class LaserCalibrationDialog(QDialog):
                                     ItemsLaserPower.append([float(current_voltage), measured_power_mean])
                                     # Check and assign items to the nested dictionary
                                     LaserCalibrationResults=initialize_dic(LaserCalibrationResults,key_list=[current_date_name,current_color,current_protocol,f"Laser_{laser_tag}"])
-
                                     if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol][f"Laser_{laser_tag}"]:
                                         LaserCalibrationResults[current_date_name][current_color][current_protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage']=ItemsLaserPower
                                     else:
                                         LaserCalibrationResults[current_date_name][current_color][current_protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage']=self._unique(LaserCalibrationResults[current_date_name][current_color][current_protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage']+ItemsLaserPower)
-                            
                                     if current_protocol=='Constant':# copy results of constant to pulse 
-                                        if 'Pulse' not in LaserCalibrationResults[current_date_name][current_color]:
-                                            LaserCalibrationResults[current_date_name][current_color]['Pulse'] = {}
-                                        if 'Laser_1' not in LaserCalibrationResults[current_date_name][current_color]['Pulse']:
-                                            LaserCalibrationResults[current_date_name][current_color]['Pulse']['Laser_1']={}
-                                        if 'Laser_2' not in LaserCalibrationResults[current_date_name][current_color]['Pulse']:
-                                            LaserCalibrationResults[current_date_name][current_color]['Pulse']['Laser_2']={}
-                                        if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color]['Pulse']['Laser_1']:
-                                            LaserCalibrationResults[current_date_name][current_color]['Pulse']['Laser_1']['LaserPowerVoltage']=ItemsLaser_1
+                                        LaserCalibrationResults=initialize_dic(LaserCalibrationResults,key_list=[current_date_name,current_color,'Pulse',f"Laser_{laser_tag}"])
+                                        if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color]['Pulse'][f"Laser_{laser_tag}"]:
+                                            LaserCalibrationResults[current_date_name][current_color]['Pulse'][f"Laser_{laser_tag}"]['LaserPowerVoltage']=ItemsLaserPower
                                         else:
-                                            LaserCalibrationResults[current_date_name][current_color]['Pulse']['Laser_1']['LaserPowerVoltage']=self._unique(LaserCalibrationResults[current_date_name][current_color]['Pulse']['Laser_1']['LaserPowerVoltage']+ItemsLaser_1)
-                                        if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color]['Pulse']['Laser_2']:
-                                            LaserCalibrationResults[current_date_name][current_color]['Pulse']['Laser_2']['LaserPowerVoltage']=ItemsLaser_2
-                                        else:
-                                            LaserCalibrationResults[current_date_name][current_color]['Pulse']['Laser_2']['LaserPowerVoltage']=self._unique(LaserCalibrationResults[current_date_name][current_color]['Pulse']['Laser_2']['LaserPowerVoltage']+ItemsLaser_2)
-        
+                                            LaserCalibrationResults[current_date_name][current_color]['Pulse'][f"Laser_{laser_tag}"]['LaserPowerVoltage']=self._unique(LaserCalibrationResults[current_date_name][current_color]['Pulse'][f"Laser_{laser_tag}"]['LaserPowerVoltage']+ItemsLaserPower)
         # save to json file
         if not os.path.exists(os.path.dirname(self.MainWindow.LaserCalibrationFiles)):
             os.makedirs(os.path.dirname(self.MainWindow.LaserCalibrationFiles))
