@@ -292,6 +292,7 @@ class OptogeneticsDialog(QDialog):
                 RecentLaserCalibration={}
             else:
                 RecentLaserCalibration=self.MainWindow.LaserCalibrationResults[latest_calibration_date]
+            no_calibration=False
             if not RecentLaserCalibration=={}:
                 if Color in RecentLaserCalibration.keys():
                     if Protocol in RecentLaserCalibration[Color].keys():
@@ -313,34 +314,26 @@ class OptogeneticsDialog(QDialog):
                                 eval(f"self.Laser{laser_tag}_power_{str(Numb)}.clear()")
                                 eval(f"self.Laser{laser_tag}_power_{str(Numb)}.addItems(ItemsLaser_1)")
                         elif Protocol=='Constant' or Protocol=='Pulse':
-                            ItemsLaser_1=[]
-                            ItemsLaser_2=[]
-                            for i in range(len(RecentLaserCalibration[Color][Protocol]['Laser_1']['LaserPowerVoltage'])):
-                                ItemsLaser_1.append(str(RecentLaserCalibration[Color][Protocol]['Laser_1']['LaserPowerVoltage'][i]))
-                            for i in range(len(RecentLaserCalibration[Color][Protocol]['Laser_2']['LaserPowerVoltage'])):
-                                ItemsLaser_2.append(str(RecentLaserCalibration[Color][Protocol]['Laser_2']['LaserPowerVoltage'][i]))
-                            ItemsLaser_1=sorted(ItemsLaser_1)
-                            ItemsLaser_2=sorted(ItemsLaser_2)
-                            eval('self.Laser1_power_'+str(Numb)+'.clear()')
-                            eval('self.Laser1_power_'+str(Numb)+'.addItems(ItemsLaser_1)')
-                            eval('self.Laser2_power_'+str(Numb)+'.clear()')
-                            eval('self.Laser2_power_'+str(Numb)+'.addItems(ItemsLaser_2)')
+                               for laser_tag in laser_tags:
+                                ItemsLaserPower=[]
+                                for i in range(len(RecentLaserCalibration[Color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
+                                    ItemsLaserPower.append(str(RecentLaserCalibration[Color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
+                                ItemsLaserPower=sorted(ItemsLaserPower)
+                                eval(f"self.Laser{laser_tag}_power_{str(Numb)}.clear()")
+                                eval(f"self.Laser{laser_tag}_power_{str(Numb)}.addItems(ItemsLaser_1)")
                         self.MainWindow.WarningLabel.setText('')
                         self.MainWindow.WarningLabel.setStyleSheet("color: gray;")
                     else:
-                        eval('self.Laser1_power_'+str(Numb)+'.clear()')
-                        eval('self.Laser2_power_'+str(Numb)+'.clear()')
-                        self.MainWindow.WarningLabel.setText('No calibration for this protocol identified!')
-                        self.MainWindow.WarningLabel.setStyleSheet(self.MainWindow.default_warning_color)
+                        no_calibration=True
                 else:
-                    eval('self.Laser1_power_'+str(Numb)+'.clear()')
-                    eval('self.Laser2_power_'+str(Numb)+'.clear()')
-                    self.MainWindow.WarningLabel.setText('No calibration for this laser identified!')
-                    self.MainWindow.WarningLabel.setStyleSheet(self.MainWindow.default_warning_color)
+                    no_calibration=True
             else:
-                eval('self.Laser1_power_'+str(Numb)+'.clear()')
-                eval('self.Laser2_power_'+str(Numb)+'.clear()')
-                self.MainWindow.WarningLabel.setText('No calibration for this laser identified!')
+                no_calibration=True
+
+        if no_calibration:
+            for laser_tag in laser_tags:
+                eval(f"self.Laser{laser_tag}_power_{str(Numb)}.clear()")
+                self.MainWindow.WarningLabel.setText('No calibration for this protocol identified!')
                 self.MainWindow.WarningLabel.setStyleSheet(self.MainWindow.default_warning_color)
 
         eval('self.Location_'+str(Numb)+'.setEnabled('+str(Label)+')')
