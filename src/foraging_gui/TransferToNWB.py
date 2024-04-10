@@ -492,16 +492,24 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_acquisition(PhotometryRisingTimeHarp)
     
     # Add optogenetics time stamps
-    # There are two sources of optogenetics time stamps depending on which event it is aligned to. 
-    # The first source is the optogenetics time stamps aligned to the trial start time (from the DO0 stored in ), 
-    # and the second source is the optogenetics time stamps aligned to other events (e.g go cue and reward outcome; from the DO3 stored in B_OptogeneticsTimeHarp).
-    
-    start_time=_get_field(obj, f'B_TrialStartTime{Harp}')
-
-    if not hasattr(obj, 'B_OptogeneticsTimeHarp') or obj.B_OptogeneticsTimeHarp == []:
-        B_OptogeneticsTimeHarp = [np.nan]
-    else:
-        B_OptogeneticsTimeHarp = obj.B_OptogeneticsTimeHarp
+    ''' 
+    There are two sources of optogenetics time stamps depending on which event it is aligned to. 
+    The first source is the optogenetics time stamps aligned to the trial start time (from the 
+    DO0 stored in B_TrialStartTimeHarp), and the second source is the optogenetics time stamps aligned to other events 
+    (e.g go cue and reward outcome; from the DO3 stored in B_OptogeneticsTimeHarp).
+    '''
+    start_time=np.array(_get_field(obj, f'B_TrialStartTime{Harp}'))
+    LaserStart=[]
+    for i in range(len(obj.B_TrialEndTime)):
+        Sc = obj.B_SelectedCondition[i] # the optogenetics conditions
+        if Sc == 0:
+            LaserStart.append('None')
+            continue
+        LaserStart.append(str(getattr(obj, f'TP_LaserStart_{Sc}')[i]))
+    OptogeneticsTimeHarp_ITI_Stimulation=start_time[np.array(LaserStart) == 'Trial start'].tolist()
+    OptogeneticsTimeHarp_other=_get_field(obj, 'B_OptogeneticsTimeHarp',default=[np.nan])
+    B_OptogeneticsTimeHarp=OptogeneticsTimeHarp_ITI_Stimulation+OptogeneticsTimeHarp_other
+    B_OptogeneticsTimeHarp.sort()
     OptogeneticsTimeHarp = TimeSeries(
         name="optogenetics_time",
         unit="second",
@@ -533,5 +541,5 @@ if __name__ == '__main__':
     #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\behavior_1_2024-04-06_16-31-06\behavior\1_2024-04-06_16-31-06.json',save_folder=r'H:\NWBFile')
     #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\668551_2023-06-16.json',save_folder=r'H:\NWBFile')
     #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\704151_2024-02-27_09-59-17.json',save_folder=r'H:\NWBFile')
-    #bonsai_to_nwb(R'Z:\ephys_rig_behavior_transfer\323_EPHYS3\706893\behavior_706893_2024-04-09_14-27-56\behavior\706893_2024-04-09_14-27-56.json',save_folder=r'H:\NWBFile')
+    bonsai_to_nwb(R'Z:\ephys_rig_behavior_transfer\323_EPHYS3\706893\behavior_706893_2024-04-09_14-27-56\behavior\706893_2024-04-09_14-27-56.json',save_folder=r'H:\NWBFile')
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
