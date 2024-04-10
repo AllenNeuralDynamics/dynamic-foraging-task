@@ -416,8 +416,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     #left/right lick time; give left/right reward time
     B_LeftRewardDeliveryTime=_get_field(obj, f'B_LeftRewardDeliveryTime{Harp}',default=[np.nan])
     B_RightRewardDeliveryTime=_get_field(obj, f'B_RightRewardDeliveryTime{Harp}',default=[np.nan])
-    B_LeftLickTime=_get_field(obj, B_LeftLickTime,default=[np.nan])
-    B_RightLickTime=_get_field(obj, B_RightLickTime,default=[np.nan])
+    B_LeftLickTime=_get_field(obj, 'B_LeftLickTime',default=[np.nan])
+    B_RightLickTime=_get_field(obj, 'B_RightLickTime',default=[np.nan])
     B_PhotometryFallingTimeHarp=_get_field(obj, 'B_PhotometryFallingTimeHarp',default=[np.nan])
     B_PhotometryRisingTimeHarp=_get_field(obj, 'B_PhotometryRisingTimeHarp',default=[np.nan])
 
@@ -447,7 +447,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         description='The time of left licks'
     )
     nwbfile.add_acquisition(LeftLickTime)
-    
+
     RightLickTime = TimeSeries(
         name="right_lick_time",
         unit="second",
@@ -522,9 +522,9 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
     
-    #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\689514_2024-01-29_21-28-02\TrainingFolder\689514_2024-01-29_21-28-02.json',save_folder=r'H:\NWBFile')
-    #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\behavior_1_2024-04-06_16-31-06\behavior\1_2024-04-06_16-31-06.json',save_folder=r'H:\NWBFile')
-    #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\668551_2023-06-16.json',save_folder=r'H:\NWBFile')
-    #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\704151_2024-02-27_09-59-17.json',save_folder=r'H:\NWBFile')
-    #bonsai_to_nwb(R'Z:\ephys_rig_behavior_transfer\323_EPHYS3\706893\behavior_706893_2024-04-09_14-27-56\behavior\706893_2024-04-09_14-27-56.json',save_folder=r'H:\NWBFile')
+    bonsai_to_nwb(R'Z:\Xinxin\TestNWB\689514_2024-01-29_21-28-02\TrainingFolder\689514_2024-01-29_21-28-02.json',save_folder=r'H:\NWBFile')
+    bonsai_to_nwb(R'Z:\Xinxin\TestNWB\behavior_1_2024-04-06_16-31-06\behavior\1_2024-04-06_16-31-06.json',save_folder=r'H:\NWBFile')
+    bonsai_to_nwb(R'Z:\Xinxin\TestNWB\668551_2023-06-16.json',save_folder=r'H:\NWBFile')
+    bonsai_to_nwb(R'Z:\Xinxin\TestNWB\704151_2024-02-27_09-59-17.json',save_folder=r'H:\NWBFile')
+    bonsai_to_nwb(R'Z:\ephys_rig_behavior_transfer\323_EPHYS3\706893\behavior_706893_2024-04-09_14-27-56\behavior\706893_2024-04-09_14-27-56.json',save_folder=r'H:\NWBFile')
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
