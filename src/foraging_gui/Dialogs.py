@@ -330,11 +330,11 @@ class OptogeneticsDialog(QDialog):
             else:
                 no_calibration=True
 
-        if no_calibration:
-            for laser_tag in laser_tags:
-                eval(f"self.Laser{laser_tag}_power_{str(Numb)}.clear()")
-                self.MainWindow.WarningLabel.setText('No calibration for this protocol identified!')
-                self.MainWindow.WarningLabel.setStyleSheet(self.MainWindow.default_warning_color)
+            if no_calibration:
+                for laser_tag in laser_tags:
+                    eval(f"self.Laser{laser_tag}_power_{str(Numb)}.clear()")
+                    self.MainWindow.WarningLabel.setText('No calibration for this protocol identified!')
+                    self.MainWindow.WarningLabel.setStyleSheet(self.MainWindow.default_warning_color)
 
         eval('self.Location_'+str(Numb)+'.setEnabled('+str(Label)+')')
         eval('self.Laser1_power_'+str(Numb)+'.setEnabled('+str(Label)+')')
