@@ -149,7 +149,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     water_day_total = float(_get_field(obj, 'TotalWater'))
     water_in_session_total = water_day_total - water_after_session
     water_in_session_manual = water_in_session_total - water_in_session_foraging
-    
+    Opto_dialog=_get_field(obj, 'Opto_dialog',default='None')
     metadata = {
         # Meta
         'box': _get_field(obj, ['box', 'Tower']),
@@ -174,10 +174,10 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         'foraging_efficiency_with_actual_random_seed': _get_field(obj, 'B_for_eff_optimal_random_seed'),
 
         # Optogenetics
-        'laser_1_calibration_power': float(_get_field(obj.Opto_dialog, 'laser_1_calibration_power')),
-        'laser_2_calibration_power': float(_get_field(obj.Opto_dialog, 'laser_2_calibration_power')),
-        'laser_1_target_areas': _get_field(obj.Opto_dialog, 'laser_1_target',default='None'),
-        'laser_2_target_areas': _get_field(obj.Opto_dialog, 'laser_2_target',default='None'),
+        'laser_1_calibration_power': float(_get_field(Opto_dialog, 'laser_1_calibration_power')),
+        'laser_2_calibration_power': float(_get_field(Opto_dialog, 'laser_2_calibration_power')),
+        'laser_1_target_areas': _get_field(Opto_dialog, 'laser_1_target',default='None'),
+        'laser_2_target_areas': _get_field(Opto_dialog, 'laser_2_target',default='None'),
 
         # Behavior control software version
         'commit_ID':_get_field(obj, 'commit_ID',default='None'),
@@ -533,5 +533,6 @@ if __name__ == '__main__':
     
     #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\689514_2024-01-29_21-28-02\TrainingFolder\689514_2024-01-29_21-28-02.json',save_folder=r'H:\NWBFile')
     #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\behavior_1_2024-04-06_16-31-06\behavior\1_2024-04-06_16-31-06.json',save_folder=r'H:\NWBFile')
+    bonsai_to_nwb(R'Z:\Xinxin\TestNWB\668551_2023-06-16.json',save_folder=r'H:\NWBFile')
     
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
