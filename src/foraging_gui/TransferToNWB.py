@@ -321,7 +321,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                 Laser1Power=float(0)
             if getattr(obj, f'TP_LaserPowerRight_{Sc}')[i]!='':
                 Laser2Power_old=float(eval(_get_field(obj, f'TP_LaserPowerRight_{Sc}',index=i, default=np.nan))[1]) # old format
-                Laser2Power=float(_get_field(obj, f'TP_Laser2_power_{Sc}',index=i, default=None) or Laser1Power_old) # new format
+                Laser2Power=float(_get_field(obj, f'TP_Laser2_power_{Sc}',index=i, default=None) or Laser2Power_old) # new format
             else:
                 Laser2Power=float(0)
             LaserOnProbablityC = float(getattr(obj, f'TP_Probability_{Sc}')[i])
@@ -500,6 +500,12 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_acquisition(PhotometryRisingTimeHarp)
     
     # Add optogenetics time stamps
+    # There are two sources of optogenetics time stamps depending on which event it is aligned to. 
+    # The first source is the optogenetics time stamps aligned to the trial start time (from the DO0 stored in ), 
+    # and the second source is the optogenetics time stamps aligned to other events (e.g go cue and reward outcome; from the DO3 stored in B_OptogeneticsTimeHarp).
+    
+    start_time=_get_field(obj, f'B_TrialStartTime{Harp}')
+
     if not hasattr(obj, 'B_OptogeneticsTimeHarp') or obj.B_OptogeneticsTimeHarp == []:
         B_OptogeneticsTimeHarp = [np.nan]
     else:
@@ -509,7 +515,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         unit="second",
         timestamps=B_OptogeneticsTimeHarp,
         data=np.ones(len(B_OptogeneticsTimeHarp)).tolist(),
-        description='Optogenetics time (from Harp)'
+        description='Optogenetics start time (from Harp)'
     )
     nwbfile.add_acquisition(OptogeneticsTimeHarp)
 
@@ -535,5 +541,5 @@ if __name__ == '__main__':
     #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\behavior_1_2024-04-06_16-31-06\behavior\1_2024-04-06_16-31-06.json',save_folder=r'H:\NWBFile')
     #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\668551_2023-06-16.json',save_folder=r'H:\NWBFile')
     #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\704151_2024-02-27_09-59-17.json',save_folder=r'H:\NWBFile')
-    
+    bonsai_to_nwb(R'Z:\ephys_rig_behavior_transfer\323_EPHYS3\706893\behavior_706893_2024-04-09_14-27-56\behavior\706893_2024-04-09_14-27-56.json',save_folder=r'H:\NWBFile')
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
