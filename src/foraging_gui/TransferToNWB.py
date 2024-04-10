@@ -515,15 +515,56 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         return 'empty_trials'
 
 
-if __name__ == '__main__':
+def test_bonsai_json_to_nwb(test_json_urls):
+    """Test preloaded json files from GitHub that cover many versions of our json files
+    
+    See this issue https://github.com/AllenNeuralDynamics/dynamic-foraging-task/issues/377
+    Add new example json files to the issue and test_json_urls here to include them in the test.
+    """
     import requests
     
+    results = []
+    os.makedirs('test_nwb', exist_ok=True)
+    for json_url in test_json_urls:
+        # Get json from GitHub link
+        file_name = json_url.split('/')[-1].replace('.json', '')
+        temp_json_name = f'test_nwb/test_{file_name}.json'
+        r = requests.get(json_url, allow_redirects=True)
+        open(temp_json_name, 'wb').write(r.content)
+        
+        # Try convert nwb and round-trip test
+        try:
+            result = bonsai_to_nwb(temp_json_name, 'test_nwb/')
+            results.append(f'Converting {file_name} to nwb: {result}')
+            
+            # Try read the nwb file and show number of trials
+            temp_nwb_name = temp_json_name.replace("json", "nwb")
+            io = NWBHDF5IO(temp_nwb_name, mode='r')
+            nwbfile = io.read()
+            results.append(f'   Reload nwb and get {len(nwbfile.trials)} trials!\n')
+            io.close()
+            print(temp_nwb_name)
+            os.remove(temp_nwb_name)
+        except Exception as e:
+            results.append(f'{file_name} failed!!\n    {e}\n')
+            
+        os.remove(temp_json_name)
+               
+    # Clean up
+    os.rmdir('test_nwb')
+    logger.info('\n\n================= Test Results =================')
+    logger.info('\n'.join(results))
+    if 'failed' not in ''.join(results):
+        logger.info('======= All tests passed! =======')
+    else:
+        logger.error('======= Some tests failed!! =======')
+
+
+if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
     
-    # -- Testing --
-    # see this issue https://github.com/AllenNeuralDynamics/dynamic-foraging-task/issues/377
-    json_urls = [
+    test_json_urls = [
         'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936281/668551_2023-06-16.json',
         'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936313/662914_2023-09-22.json',
         'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936315/684039_2023-12-01_08-22-32.json',
@@ -531,19 +572,5 @@ if __name__ == '__main__':
         'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936356/1_2024-04-06_16-31-06.json',
         'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936359/706893_2024-04-09_14-27-56_ephys.json',
     ]
-    
-    results = []
-    for json_url in json_urls:
-        file_name = json_url.split('/')[-1]
-        r = requests.get(json_url, allow_redirects=True)
-        open('test_temp.json', 'wb').write(r.content)
-        try:
-            result = bonsai_to_nwb('test_temp.json', 'test_nwb/')
-            results.append(f'{file_name}: {result}\n')
-        except Exception as e:
-            results.append(f'{file_name} failed!! {e}\n')
-    logger.info('\n\n================= Test Results =================')
-    logger.info('\n'.join(results))
-    os.remove('test_temp.json')
-    
-        
+
+    test_bonsai_json_to_nwb(test_json_urls)
