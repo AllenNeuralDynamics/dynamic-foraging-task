@@ -414,22 +414,10 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
 
     #######  Other time series  #######
     #left/right lick time; give left/right reward time
-    if getattr(obj, f'B_LeftRewardDeliveryTime{Harp}') == []:
-        B_LeftRewardDeliveryTime = [np.nan]
-    else:
-        B_LeftRewardDeliveryTime = getattr(obj, f'B_LeftRewardDeliveryTime{Harp}')
-    if getattr(obj, f'B_RightRewardDeliveryTime{Harp}') == []:
-        B_RightRewardDeliveryTime = [np.nan]
-    else:
-        B_RightRewardDeliveryTime = getattr(obj, f'B_RightRewardDeliveryTime{Harp}')
-    if obj.B_LeftLickTime == []:
-        B_LeftLickTime = [np.nan]
-    else:
-        B_LeftLickTime = obj.B_LeftLickTime
-    if obj.B_RightLickTime == []:
-        B_RightLickTime = [np.nan]
-    else:
-        B_RightLickTime = obj.B_RightLickTime
+    B_LeftRewardDeliveryTime=_get_field(obj, f'B_LeftRewardDeliveryTime{Harp}',default=[np.nan])
+    B_RightRewardDeliveryTime=_get_field(obj, f'B_RightRewardDeliveryTime{Harp}',default=[np.nan])
+    B_LeftLickTime=_get_field(obj, B_LeftLickTime,default=[np.nan])
+    B_RightLickTime=_get_field(obj, B_RightLickTime,default=[np.nan])
 
     LeftRewardDeliveryTime = TimeSeries(
         name="left_reward_delivery_time",
