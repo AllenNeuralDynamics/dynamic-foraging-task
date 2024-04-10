@@ -216,14 +216,14 @@ class OptogeneticsDialog(QDialog):
             else:
                 RecentLaserCalibration=self.MainWindow.LaserCalibrationResults[latest_calibration_date]
             for laser_tag in laser_tags:
-                ItemsLaser=[]
+                ItemsLaserPower=[]
                 CurrentlaserPowerLaser=eval(f"self.Laser{str(laser_tag)}_power_{str(Numb)}.currentText()")
                 if Protocol in ['Sine', 'Constant','Pulse']:
                     for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{str(laser_tag)}"]['LaserPowerVoltage'])):
-                        ItemsLaser.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{str(laser_tag)}"]['LaserPowerVoltage'][i]))
-                ItemsLaser=sorted(ItemsLaser)
+                        ItemsLaserPower.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{str(laser_tag)}"]['LaserPowerVoltage'][i]))
+                ItemsLaserPower=sorted(ItemsLaserPower)
                 eval(f"self.Laser{str(laser_tag)}_power_{str(Numb)}.clear()")
-                eval(f"self.Laser{str(laser_tag)}_power_{str(Numb)}.addItems(ItemsLaser)")
+                eval(f"self.Laser{str(laser_tag)}_power_{str(Numb)}.addItems(ItemsLaserPower)")
                 if eval(f"self.Laser{str(laser_tag)}_power_{str(Numb)}.findText(CurrentlaserPowerLaser)"):
                     index = eval(f"self.Laser{str(laser_tag)}_power_{str(Numb)}.findText(CurrentlaserPowerLaser)")
                     if index != -1:
