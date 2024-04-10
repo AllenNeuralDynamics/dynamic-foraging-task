@@ -206,7 +206,7 @@ class OptogeneticsDialog(QDialog):
         self._activated(4)
     def _Frequency(self,Numb):
         try:
-            laser_tags=[1,2]
+            laser_tags=[1,2] # corresponding to Laser_1 and Laser_2
             Color=eval(f"self.LaserColor_{str(Numb)}.currentText()")
             Protocol=eval(f"self.Protocol_{str(Numb)}.currentText()")
             CurrentFrequency=eval(f"self.Frequency_{str(Numb)}.currentText()")
