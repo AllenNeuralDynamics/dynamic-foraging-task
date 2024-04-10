@@ -18,7 +18,7 @@ save_folder=R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\nwb'
 
 logger = logging.getLogger(__name__)
 
-def _get_field(obj, field_list, reject_list=[None, np.nan,''], index=None, default=np.nan):
+def _get_field(obj, field_list, reject_list=[None, np.nan,'',[]], index=None, default=np.nan):
     """get field from obj, if not found, return default
 
     Parameters
@@ -507,7 +507,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
             continue
         LaserStart.append(str(getattr(obj, f'TP_LaserStart_{Sc}')[i]))
     OptogeneticsTimeHarp_ITI_Stimulation=start_time[np.array(LaserStart) == 'Trial start'].tolist()
-    OptogeneticsTimeHarp_other=_get_field(obj, 'B_OptogeneticsTimeHarp',reject_list=[[]],default=[np.nan])
+    OptogeneticsTimeHarp_other=_get_field(obj, 'B_OptogeneticsTimeHarp',default=[np.nan])
     B_OptogeneticsTimeHarp=OptogeneticsTimeHarp_ITI_Stimulation+OptogeneticsTimeHarp_other
     B_OptogeneticsTimeHarp.sort()
     OptogeneticsTimeHarp = TimeSeries(
