@@ -399,8 +399,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                         auto_train_curriculum_version=_get_field(obj, 'TP_auto_train_curriculum_version', index=i, default='None'),
                         auto_train_curriculum_schema_version=_get_field(obj, 'TP_auto_train_curriculum_schema_version', index=i, default='None'),
                         auto_train_stage=_get_field(obj, 'TP_auto_train_stage', index=i, default='None'),
-                        auto_train_stage_overridden=_get_field(obj, 'TP_auto_train_stage_overridden', index=i, default=False),
-                        
+                        auto_train_stage_overridden=_get_field(obj, 'TP_auto_train_stage_overridden', index=i, default=np.nan),
+
                         # lickspout position
                         lickspout_position_x=_get_field(obj, 'B_NewscalePositions', index=i, default=[np.nan] * 3)[0],
                         lickspout_position_y=_get_field(obj, 'B_NewscalePositions', index=i, default=[np.nan] * 3)[1],
