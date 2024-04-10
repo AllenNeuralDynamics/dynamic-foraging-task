@@ -279,6 +279,7 @@ class OptogeneticsDialog(QDialog):
     def _LaserColor(self,Numb):
         ''' enable/disable items based on laser (blue/green/orange/red/NA)'''
         Inactlabel=range(2,17)
+        laser_tags=[1,2] # corresponding to Laser_1 and Laser_2
         if eval('self.LaserColor_'+str(Numb)+'.currentText()')=='NA':
             Label=False
         else:
@@ -304,18 +305,13 @@ class OptogeneticsDialog(QDialog):
                             eval('self.Frequency_'+str(Numb)+'.addItems(ItemsFrequency)')
                             if not CurrentFrequency in Frequency:
                                 CurrentFrequency=eval('self.Frequency_'+str(Numb)+'.currentText()')
-                            ItemsLaser_1=[]
-                            ItemsLaser_2=[]
-                            for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Laser_1']['LaserPowerVoltage'])):
-                                ItemsLaser_1.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Laser_1']['LaserPowerVoltage'][i]))
-                            for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Laser_2']['LaserPowerVoltage'])):
-                                ItemsLaser_2.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency]['Laser_2']['LaserPowerVoltage'][i]))
-                            ItemsLaser_1=sorted(ItemsLaser_1)
-                            ItemsLaser_2=sorted(ItemsLaser_2)
-                            eval('self.Laser1_power_'+str(Numb)+'.clear()')
-                            eval('self.Laser1_power_'+str(Numb)+'.addItems(ItemsLaser_1)')
-                            eval('self.Laser2_power_'+str(Numb)+'.clear()')
-                            eval('self.Laser2_power_'+str(Numb)+'.addItems(ItemsLaser_2)')
+                            for laser_tag in laser_tags:
+                                ItemsLaserPower=[]
+                                for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
+                                    ItemsLaserPower.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
+                                ItemsLaserPower=sorted(ItemsLaserPower)
+                                eval(f"self.Laser{laser_tag}_power_{str(Numb)}.clear()")
+                                eval(f"self.Laser{laser_tag}_power_{str(Numb)}.addItems(ItemsLaser_1)")
                         elif Protocol=='Constant' or Protocol=='Pulse':
                             ItemsLaser_1=[]
                             ItemsLaser_2=[]
