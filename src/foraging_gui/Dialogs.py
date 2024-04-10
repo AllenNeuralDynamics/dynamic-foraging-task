@@ -1773,7 +1773,8 @@ def initialize_dic(dic_name,key_list=[]):
     key_list_new = key_list[1:]
     if key not in dic_name:
         dic_name[key]={}
-    initialize_dic(dic_name[key],key_list_new)
+    initialize_dic(dic_name[key],key_list=key_list_new)
+    return dic_name
 
 class AutoTrainDialog(QDialog):
     '''For automatic training'''
