@@ -207,9 +207,9 @@ class OptogeneticsDialog(QDialog):
     def _Frequency(self,Numb):
         try:
             laser_tags=[1,2]
-            Color=eval(f"self.LaserColor_{str(Numb)}.currentText()")
-            Protocol=eval(f"self.Protocol_{str(Numb)}.currentText()")
-            CurrentFrequency=eval(f"self.Frequency_{str(Numb)}.currentText()")
+            Color=getattr(self,f"LaserColor_{str(Numb)}.currentText()")
+            Protocol=getattr(self,f"Protocol_{str(Numb)}.currentText()")
+            CurrentFrequency=getattr(self,f"Frequency_{str(Numb)}.currentText()")
             latest_calibration_date=self._FindLatestCalibrationDate(Color)
             if latest_calibration_date=='NA':
                 RecentLaserCalibration={}
@@ -217,7 +217,7 @@ class OptogeneticsDialog(QDialog):
                 RecentLaserCalibration=self.MainWindow.LaserCalibrationResults[latest_calibration_date]
             for laser_tag in laser_tags:
                 ItemsLaserPower=[]
-                CurrentlaserPowerLaser=eval(f"self.Laser{str(laser_tag)}_power_{str(Numb)}.currentText()")
+                CurrentlaserPowerLaser=getattr(self,f"Laser{str(laser_tag)}_power_{str(Numb)}.currentText()")
                 if Protocol in ['Sine']:
                     for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{str(laser_tag)}"]['LaserPowerVoltage'])):
                         ItemsLaserPower.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{str(laser_tag)}"]['LaserPowerVoltage'][i]))
