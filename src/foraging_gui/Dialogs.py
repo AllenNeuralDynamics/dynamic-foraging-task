@@ -312,7 +312,7 @@ class OptogeneticsDialog(QDialog):
                                     ItemsLaserPower.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
                                 ItemsLaserPower=sorted(ItemsLaserPower)
                                 eval(f"self.Laser{laser_tag}_power_{str(Numb)}.clear()")
-                                eval(f"self.Laser{laser_tag}_power_{str(Numb)}.addItems(ItemsLaser_1)")
+                                eval(f"self.Laser{laser_tag}_power_{str(Numb)}.addItems(ItemsLaserPower)")
                         elif Protocol=='Constant' or Protocol=='Pulse':
                                for laser_tag in laser_tags:
                                 ItemsLaserPower=[]
@@ -320,7 +320,7 @@ class OptogeneticsDialog(QDialog):
                                     ItemsLaserPower.append(str(RecentLaserCalibration[Color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
                                 ItemsLaserPower=sorted(ItemsLaserPower)
                                 eval(f"self.Laser{laser_tag}_power_{str(Numb)}.clear()")
-                                eval(f"self.Laser{laser_tag}_power_{str(Numb)}.addItems(ItemsLaser_1)")
+                                eval(f"self.Laser{laser_tag}_power_{str(Numb)}.addItems(ItemsLaserPower)")
                         self.MainWindow.WarningLabel.setText('')
                         self.MainWindow.WarningLabel.setStyleSheet("color: gray;")
                     else:
