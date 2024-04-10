@@ -532,10 +532,18 @@ if __name__ == '__main__':
         'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936359/706893_2024-04-09_14-27-56_ephys.json',
     ]
     
+    results = []
     for json_url in json_urls:
+        file_name = json_url.split('/')[-1]
         r = requests.get(json_url, allow_redirects=True)
         open('test_temp.json', 'wb').write(r.content)
-        bonsai_to_nwb('test_temp.json', 'test_nwb/')
-        
+        try:
+            result = bonsai_to_nwb('test_temp.json', 'test_nwb/')
+            results.append(f'{file_name}: {result}\n')
+        except Exception as e:
+            results.append(f'{file_name} failed!! {e}\n')
+    logger.info('\n\n================= Test Results =================')
+    logger.info('\n'.join(results))
     os.remove('test_temp.json')
+    
         
