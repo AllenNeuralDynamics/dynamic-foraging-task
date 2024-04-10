@@ -314,16 +314,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
             elif getattr(obj, f'TP_Laser_{Sc}')[i] == 'Green':
                 LaserWavelengthC = float(547)
             LaserLocationC = str(getattr(obj, f'TP_Location_{Sc}')[i])
-            if getattr(obj, f'TP_LaserPowerLeft_{Sc}')[i]!='':
-                Laser1Power_old=float(eval(_get_field(obj, f'TP_LaserPowerLeft_{Sc}',index=i, default=np.nan))[1]) # old format
-                Laser1Power=float(_get_field(obj, f'TP_Laser1_power_{Sc}',index=i, default=np.nan) or Laser1Power_old) # new format
-            else:
-                Laser1Power=float(0)
-            if getattr(obj, f'TP_LaserPowerRight_{Sc}')[i]!='':
-                Laser2Power_old=float(eval(_get_field(obj, f'TP_LaserPowerRight_{Sc}',index=i, default=np.nan))[1]) # old format
-                Laser2Power=float(_get_field(obj, f'TP_Laser2_power_{Sc}',index=i, default=None) or Laser2Power_old) # new format
-            else:
-                Laser2Power=float(0)
+            Laser1Power=float(eval(_get_field(obj, field_list=[f'TP_Laser1_power_{Sc}',f'TP_LaserPowerLeft_{Sc}'],index=i,default='[np.nan,np.nan]'))[1])
+            Laser2Power=float(eval(_get_field(obj, field_list=[f'TP_Laser2_power_{Sc}',f'TP_LaserPowerRight_{Sc}'],index=i,default='[np.nan,np.nan]'))[1]) 
             LaserOnProbablityC = float(getattr(obj, f'TP_Probability_{Sc}')[i])
             LaserDurationC = float(getattr(obj, f'TP_Duration_{Sc}')[i])
             LaserConditionC = str(getattr(obj, f'TP_Condition_{Sc}')[i])
@@ -537,9 +529,9 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
     
-    #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\689514_2024-01-29_21-28-02\TrainingFolder\689514_2024-01-29_21-28-02.json',save_folder=r'H:\NWBFile')
+    bonsai_to_nwb(R'Z:\Xinxin\TestNWB\689514_2024-01-29_21-28-02\TrainingFolder\689514_2024-01-29_21-28-02.json',save_folder=r'H:\NWBFile')
     #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\behavior_1_2024-04-06_16-31-06\behavior\1_2024-04-06_16-31-06.json',save_folder=r'H:\NWBFile')
     #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\668551_2023-06-16.json',save_folder=r'H:\NWBFile')
     #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\704151_2024-02-27_09-59-17.json',save_folder=r'H:\NWBFile')
-    bonsai_to_nwb(R'Z:\ephys_rig_behavior_transfer\323_EPHYS3\706893\behavior_706893_2024-04-09_14-27-56\behavior\706893_2024-04-09_14-27-56.json',save_folder=r'H:\NWBFile')
+    #bonsai_to_nwb(R'Z:\ephys_rig_behavior_transfer\323_EPHYS3\706893\behavior_706893_2024-04-09_14-27-56\behavior\706893_2024-04-09_14-27-56.json',save_folder=r'H:\NWBFile')
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
