@@ -407,7 +407,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                         auto_train_curriculum_version=_get_field(obj, 'TP_auto_train_curriculum_version', index=i, default='None'),
                         auto_train_curriculum_schema_version=_get_field(obj, 'TP_auto_train_curriculum_schema_version', index=i, default='None'),
                         auto_train_stage=_get_field(obj, 'TP_auto_train_stage', index=i, default='None'),
-                        auto_train_stage_overridden=_get_field(obj, 'TP_auto_train_stage_overridden', index=i, default='None'),
+                        auto_train_stage_overridden=_get_field(obj, 'TP_auto_train_stage_overridden', index=i, default=False),
                         
                         # lickspout position
                         lickspout_position_x=_get_field(obj, 'B_NewscalePositions', index=i, default=[np.nan] * 3)[0],
@@ -533,6 +533,7 @@ if __name__ == '__main__':
     
     #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\689514_2024-01-29_21-28-02\TrainingFolder\689514_2024-01-29_21-28-02.json',save_folder=r'H:\NWBFile')
     #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\behavior_1_2024-04-06_16-31-06\behavior\1_2024-04-06_16-31-06.json',save_folder=r'H:\NWBFile')
-    bonsai_to_nwb(R'Z:\Xinxin\TestNWB\668551_2023-06-16.json',save_folder=r'H:\NWBFile')
+    #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\668551_2023-06-16.json',save_folder=r'H:\NWBFile')
+    bonsai_to_nwb(R'Z:\Xinxin\TestNWB\704151_2024-02-27_09-59-17.json',save_folder=r'H:\NWBFile')
     
     # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
