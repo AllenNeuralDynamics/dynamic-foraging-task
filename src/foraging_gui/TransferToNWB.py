@@ -133,7 +133,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         subject_id=obj.ID,
         description='Animal name:'+obj.ID,
         species="Mus musculus",
-        weight=_get_field(obj, 'WeightAfter'),
+        weight=_get_field(obj, 'WeightAfter',default=np.nan),
     )
     # print(nwbfile)
     
