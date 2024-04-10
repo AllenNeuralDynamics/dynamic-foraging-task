@@ -516,12 +516,26 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
 
 
 if __name__ == '__main__':
+    import requests
+    
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
     
-    #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\689514_2024-01-29_21-28-02\TrainingFolder\689514_2024-01-29_21-28-02.json',save_folder=r'H:\NWBFile')
-    #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\behavior_1_2024-04-06_16-31-06\behavior\1_2024-04-06_16-31-06.json',save_folder=r'H:\NWBFile')
-    #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\668551_2023-06-16.json',save_folder=r'H:\NWBFile')
-    #bonsai_to_nwb(R'Z:\Xinxin\TestNWB\704151_2024-02-27_09-59-17.json',save_folder=r'H:\NWBFile')
-    #bonsai_to_nwb(R'Z:\ephys_rig_behavior_transfer\323_EPHYS3\706893\behavior_706893_2024-04-09_14-27-56\behavior\706893_2024-04-09_14-27-56.json',save_folder=r'H:\NWBFile')
-    # bonsai_to_nwb(R'F:\Data_for_ingestion\Foraging_behavior\Bonsai\AIND-447-3-A\704151\704151_2024-02-27_09-59-17\TrainingFolder\704151_2024-02-27_09-59-17.json')
+    # -- Testing --
+    # see this issue https://github.com/AllenNeuralDynamics/dynamic-foraging-task/issues/377
+    json_urls = [
+        'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936281/668551_2023-06-16.json',
+        'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936313/662914_2023-09-22.json',
+        'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936315/684039_2023-12-01_08-22-32.json',
+        'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936331/704151_2024-02-27_09-59-17.json',
+        'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936356/1_2024-04-06_16-31-06.json',
+        'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936359/706893_2024-04-09_14-27-56_ephys.json',
+    ]
+    
+    for json_url in json_urls:
+        r = requests.get(json_url, allow_redirects=True)
+        open('test_temp.json', 'wb').write(r.content)
+        bonsai_to_nwb('test_temp.json', 'test_nwb/')
+        
+    os.remove('test_temp.json')
+        
