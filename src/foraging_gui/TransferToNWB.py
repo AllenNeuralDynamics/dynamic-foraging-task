@@ -133,7 +133,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         subject_id=obj.ID,
         description='Animal name:'+obj.ID,
         species="Mus musculus",
-        weight=_get_field(obj, 'WeightAfter'),
+        weight=_get_field(obj, 'WeightAfter',default=np.nan),
     )
     # print(nwbfile)
     
@@ -399,8 +399,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                         auto_train_curriculum_version=_get_field(obj, 'TP_auto_train_curriculum_version', index=i, default='None'),
                         auto_train_curriculum_schema_version=_get_field(obj, 'TP_auto_train_curriculum_schema_version', index=i, default='None'),
                         auto_train_stage=_get_field(obj, 'TP_auto_train_stage', index=i, default='None'),
-                        auto_train_stage_overridden=_get_field(obj, 'TP_auto_train_stage_overridden', index=i, default=False),
-                        
+                        auto_train_stage_overridden=_get_field(obj, 'TP_auto_train_stage_overridden', index=i, default=np.nan),
+
                         # lickspout position
                         lickspout_position_x=_get_field(obj, 'B_NewscalePositions', index=i, default=[np.nan] * 3)[0],
                         lickspout_position_y=_get_field(obj, 'B_NewscalePositions', index=i, default=[np.nan] * 3)[1],
@@ -416,8 +416,10 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     #left/right lick time; give left/right reward time
     B_LeftRewardDeliveryTime=_get_field(obj, f'B_LeftRewardDeliveryTime{Harp}',default=[np.nan])
     B_RightRewardDeliveryTime=_get_field(obj, f'B_RightRewardDeliveryTime{Harp}',default=[np.nan])
-    B_LeftLickTime=_get_field(obj, B_LeftLickTime,default=[np.nan])
-    B_RightLickTime=_get_field(obj, B_RightLickTime,default=[np.nan])
+    B_LeftLickTime=_get_field(obj, 'B_LeftLickTime',default=[np.nan])
+    B_RightLickTime=_get_field(obj, 'B_RightLickTime',default=[np.nan])
+    B_PhotometryFallingTimeHarp=_get_field(obj, 'B_PhotometryFallingTimeHarp',default=[np.nan])
+    B_PhotometryRisingTimeHarp=_get_field(obj, 'B_PhotometryRisingTimeHarp',default=[np.nan])
 
     LeftRewardDeliveryTime = TimeSeries(
         name="left_reward_delivery_time",
@@ -427,6 +429,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         description='The reward delivery time of the left lick port'
     )
     nwbfile.add_acquisition(LeftRewardDeliveryTime)
+
     RightRewardDeliveryTime = TimeSeries(
         name="right_reward_delivery_time",
         unit="second",
@@ -435,6 +438,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         description='The reward delivery time of the right lick port'
     )
     nwbfile.add_acquisition(RightRewardDeliveryTime)
+
     LeftLickTime = TimeSeries(
         name="left_lick_time",
         unit="second",
@@ -443,6 +447,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         description='The time of left licks'
     )
     nwbfile.add_acquisition(LeftLickTime)
+
     RightLickTime = TimeSeries(
         name="right_lick_time",
         unit="second",
@@ -453,7 +458,6 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_acquisition(RightLickTime)
 
     # Add photometry time stamps
-    B_PhotometryFallingTimeHarp=_get_field(obj, 'B_PhotometryFallingTimeHarp',default=[np.nan])
     PhotometryFallingTimeHarp = TimeSeries(
         name="FIP_falling_time",
         unit="second",
@@ -463,7 +467,6 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     )
     nwbfile.add_acquisition(PhotometryFallingTimeHarp)
 
-    B_PhotometryRisingTimeHarp=_get_field(obj, 'B_PhotometryRisingTimeHarp',default=[np.nan])
     PhotometryRisingTimeHarp = TimeSeries(
         name="FIP_rising_time",
         unit="second",
