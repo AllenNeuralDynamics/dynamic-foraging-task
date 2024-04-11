@@ -1638,10 +1638,7 @@ class LaserCalibrationDialog(QDialog):
         input_voltages_unique=list(set(input_voltages))
         for n in range(len(input_voltages_unique)):
             current_voltage=input_voltages_unique[n]
-            laser_ind=[]
-            for k in range(len(input_voltages)):
-                if input_voltages[k]==current_voltage and LCM_Location_1[k]==f"Laser_{laser_tag}" and LCM_Protocol_1[k]==current_protocol and LCM_LaserColor_1[k]==current_color:
-                    laser_ind.append(k)
+            laser_ind = [k for k in range(len(input_voltages)) if input_voltages[k] == current_voltage and LCM_Location_1[k] == f"Laser_{laser_tag}" and LCM_Protocol_1[k] == current_protocol and LCM_LaserColor_1[k] == current_color]
             measured_power=self._extract_elements(LCM_LaserPowerMeasured,laser_ind) 
             measured_power_mean=self._getmean(measured_power)
             ItemsLaserPower.append([float(current_voltage), measured_power_mean])
