@@ -72,7 +72,7 @@
   <widget class="QComboBox" name="Location_1">
    <property name="geometry">
     <rect>
-     <x>640</x>
+     <x>770</x>
      <y>40</y>
      <width>80</width>
      <height>20</height>
@@ -156,7 +156,7 @@
   <widget class="QLineEdit" name="Duration_1">
    <property name="geometry">
     <rect>
-     <x>833</x>
+     <x>930</x>
      <y>40</y>
      <width>41</width>
      <height>20</height>
@@ -194,7 +194,7 @@
   <widget class="QComboBox" name="LaserColor_1">
    <property name="geometry">
     <rect>
-     <x>470</x>
+     <x>620</x>
      <y>40</y>
      <width>80</width>
      <height>20</height>
@@ -230,7 +230,7 @@
   <widget class="QLabel" name="label1_1">
    <property name="geometry">
     <rect>
-     <x>430</x>
+     <x>580</x>
      <y>40</y>
      <width>41</width>
      <height>20</height>
@@ -299,7 +299,7 @@
   <widget class="QLabel" name="label1_2">
    <property name="geometry">
     <rect>
-     <x>586</x>
+     <x>716</x>
      <y>40</y>
      <width>48</width>
      <height>16</height>
@@ -352,7 +352,7 @@
   <widget class="QLabel" name="label1_5">
    <property name="geometry">
     <rect>
-     <x>760</x>
+     <x>857</x>
      <y>40</y>
      <width>67</width>
      <height>16</height>
@@ -478,7 +478,7 @@
   <widget class="QLabel" name="label1_17">
    <property name="geometry">
     <rect>
-     <x>880</x>
+     <x>970</x>
      <y>40</y>
      <width>151</width>
      <height>20</height>
@@ -503,9 +503,9 @@
   <widget class="QLineEdit" name="LaserPowerMeasured">
    <property name="geometry">
     <rect>
-     <x>1040</x>
+     <x>1130</x>
      <y>40</y>
-     <width>211</width>
+     <width>121</width>
      <height>20</height>
     </rect>
    </property>
@@ -917,7 +917,7 @@
   <widget class="QComboBox" name="CopyCondition">
    <property name="geometry">
     <rect>
-     <x>300</x>
+     <x>290</x>
      <y>40</y>
      <width>91</width>
      <height>20</height>
@@ -967,6 +967,51 @@
    </property>
    <property name="text">
     <string>copy condition=</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="CopyCondition_2">
+   <property name="geometry">
+    <rect>
+     <x>460</x>
+     <y>40</y>
+     <width>91</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <item>
+    <property name="text">
+     <string>Laser_1</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Laser_2</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label1_4">
+   <property name="geometry">
+    <rect>
+     <x>400</x>
+     <y>40</y>
+     <width>91</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="text">
+    <string>copy laser=</string>
    </property>
   </widget>
  </widget>
