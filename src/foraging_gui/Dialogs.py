@@ -1588,9 +1588,8 @@ class LaserCalibrationDialog(QDialog):
                             current_frequency=Frequency_unique[m]
                             current_frequency_ind=[index for index, value in enumerate(Frequency) if value == current_frequency]
                             input_voltages= self._extract_elements(LCM_voltage,current_frequency_ind)
-                            input_voltages_unique=list(set(input_voltages))
                             for laser_tag in laser_tags:
-                                ItemsLaserPower=self._module_1(input_voltages_unique,input_voltages,LCM_Location_1,LCM_LaserPowerMeasured,LCM_Protocol_1,current_protocol,LCM_LaserColor_1,current_color,laser_tag)
+                                ItemsLaserPower=self._module_1(input_voltages,LCM_Location_1,LCM_LaserPowerMeasured,LCM_Protocol_1,current_protocol,LCM_LaserColor_1,current_color,laser_tag)
                                 LaserCalibrationResults=initialize_dic(LaserCalibrationResults,key_list=[current_date_name,current_color,current_protocol,current_frequency,f"Laser_{laser_tag}"])
                                 if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]:
                                     LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage']=ItemsLaserPower
@@ -1598,9 +1597,8 @@ class LaserCalibrationDialog(QDialog):
                                     LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage']=self._unique(LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage']+ItemsLaserPower)
                     elif current_protocol=='Constant' or current_protocol=='Pulse':
                             input_voltages= self._extract_elements(LCM_voltage,current_protocol_ind)
-                            input_voltages_unique=list(set(input_voltages))
                             for laser_tag in laser_tags:
-                                ItemsLaserPower=self._module_1(input_voltages_unique,input_voltages,LCM_Location_1,LCM_LaserPowerMeasured,LCM_Protocol_1,current_protocol,LCM_LaserColor_1,current_color,laser_tag)
+                                ItemsLaserPower=self._module_1(input_voltages,LCM_Location_1,LCM_LaserPowerMeasured,LCM_Protocol_1,current_protocol,LCM_LaserColor_1,current_color,laser_tag)
                                 # Check and assign items to the nested dictionary
                                 LaserCalibrationResults=initialize_dic(LaserCalibrationResults,key_list=[current_date_name,current_color,current_protocol,f"Laser_{laser_tag}"])
                                 if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol][f"Laser_{laser_tag}"]:
@@ -1634,9 +1632,10 @@ class LaserCalibrationDialog(QDialog):
         self.Save.setStyleSheet("background-color : none")
         self.Save.setChecked(False)
     
-    def _module_1(self,input_voltages_unique,input_voltages,LCM_Location_1,LCM_LaserPowerMeasured,LCM_Protocol_1,current_protocol,LCM_LaserColor_1,current_color,laser_tag):
+    def _module_1(self,input_voltages,LCM_Location_1,LCM_LaserPowerMeasured,LCM_Protocol_1,current_protocol,LCM_LaserColor_1,current_color,laser_tag):
         '''module to get the laser power list'''
         ItemsLaserPower=[]
+        input_voltages_unique=list(set(input_voltages))
         for n in range(len(input_voltages_unique)):
             current_voltage=input_voltages_unique[n]
             laser_ind=[]
