@@ -314,7 +314,7 @@ class OptogeneticsDialog(QDialog):
                                 eval(f"self.Laser{laser_tag}_power_{str(Numb)}.clear()")
                                 eval(f"self.Laser{laser_tag}_power_{str(Numb)}.addItems(ItemsLaserPower)")
                         elif Protocol=='Constant' or Protocol=='Pulse':
-                               for laser_tag in laser_tags:
+                            for laser_tag in laser_tags:
                                 ItemsLaserPower=[]
                                 for i in range(len(RecentLaserCalibration[Color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
                                     ItemsLaserPower.append(str(RecentLaserCalibration[Color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
