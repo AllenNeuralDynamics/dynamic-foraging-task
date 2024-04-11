@@ -1625,7 +1625,14 @@ class LaserCalibrationDialog(QDialog):
         time.sleep(0.01)
         self.Save.setStyleSheet("background-color : none")
         self.Save.setChecked(False)
-    
+        # Clear captured data
+        self.LCM_MeasureTime=[]
+        self.LCM_LaserColor_1=[]
+        self.LCM_Protocol_1=[]
+        self.LCM_Frequency_1=[]
+        self.LCM_LaserPowerMeasured=[]
+        self.LCM_Location_1=[]
+        self.LCM_voltage=[]
     def _module_1(self,ind,laser_tag):
         '''module to get the laser power list'''
         ItemsLaserPower=[]
