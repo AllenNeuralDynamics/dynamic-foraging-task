@@ -1590,14 +1590,7 @@ class LaserCalibrationDialog(QDialog):
                             input_voltages= self._extract_elements(LCM_voltage,current_frequency_ind)
                             input_voltages_unique=list(set(input_voltages))
                             for laser_tag in laser_tags:
-                                for laser_tag in laser_tags:
-                                    ItemsLaserPower=[]
-                                    for n in range(len(input_voltages_unique)):
-                                        current_voltage=input_voltages_unique[n]
-                                        laser_ind=[]
-                                        for k in range(len(input_voltages)):
-                                            if input_voltages[k]==current_voltage and LCM_Location_1[k]==f"Laser_{laser_tag}":
-                                                laser_ind.append(k)
+                                ItemsLaserPower=self._module_1(self,input_voltages_unique,input_voltages,LCM_Location_1,LCM_LaserPowerMeasured,laser_tag)
                                 LaserCalibrationResults=initialize_dic(LaserCalibrationResults,key_list=[current_date_name,current_color,current_protocol,current_frequency,f"Laser_{laser_tag}"])
                                 if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]:
                                     LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage']=ItemsLaserPower
@@ -1607,28 +1600,19 @@ class LaserCalibrationDialog(QDialog):
                             input_voltages= self._extract_elements(LCM_voltage,current_protocol_ind)
                             input_voltages_unique=list(set(input_voltages))
                             for laser_tag in laser_tags:
-                                ItemsLaserPower=[]
-                                for n in range(len(input_voltages_unique)):
-                                    current_voltage=input_voltages_unique[n]
-                                    laser_ind=[]
-                                    for k in range(len(input_voltages)):
-                                        if input_voltages[k]==current_voltage and LCM_Location_1[k]==f"Laser_{laser_tag}":
-                                            laser_ind.append(k)
-                                    measured_power=self._extract_elements(LCM_LaserPowerMeasured,laser_ind) 
-                                    measured_power_mean=self._getmean(measured_power)
-                                    ItemsLaserPower.append([float(current_voltage), measured_power_mean])
-                                    # Check and assign items to the nested dictionary
-                                    LaserCalibrationResults=initialize_dic(LaserCalibrationResults,key_list=[current_date_name,current_color,current_protocol,f"Laser_{laser_tag}"])
-                                    if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol][f"Laser_{laser_tag}"]:
-                                        LaserCalibrationResults[current_date_name][current_color][current_protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage']=ItemsLaserPower
+                                ItemsLaserPower=self._module_1(self,input_voltages_unique,input_voltages,LCM_Location_1,LCM_LaserPowerMeasured,laser_tag)
+                                # Check and assign items to the nested dictionary
+                                LaserCalibrationResults=initialize_dic(LaserCalibrationResults,key_list=[current_date_name,current_color,current_protocol,f"Laser_{laser_tag}"])
+                                if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol][f"Laser_{laser_tag}"]:
+                                    LaserCalibrationResults[current_date_name][current_color][current_protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage']=ItemsLaserPower
+                                else:
+                                    LaserCalibrationResults[current_date_name][current_color][current_protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage']=self._unique(LaserCalibrationResults[current_date_name][current_color][current_protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage']+ItemsLaserPower)
+                                if current_protocol=='Constant':# copy results of constant to pulse 
+                                    LaserCalibrationResults=initialize_dic(LaserCalibrationResults,key_list=[current_date_name,current_color,'Pulse',f"Laser_{laser_tag}"])
+                                    if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color]['Pulse'][f"Laser_{laser_tag}"]:
+                                        LaserCalibrationResults[current_date_name][current_color]['Pulse'][f"Laser_{laser_tag}"]['LaserPowerVoltage']=ItemsLaserPower
                                     else:
-                                        LaserCalibrationResults[current_date_name][current_color][current_protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage']=self._unique(LaserCalibrationResults[current_date_name][current_color][current_protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage']+ItemsLaserPower)
-                                    if current_protocol=='Constant':# copy results of constant to pulse 
-                                        LaserCalibrationResults=initialize_dic(LaserCalibrationResults,key_list=[current_date_name,current_color,'Pulse',f"Laser_{laser_tag}"])
-                                        if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color]['Pulse'][f"Laser_{laser_tag}"]:
-                                            LaserCalibrationResults[current_date_name][current_color]['Pulse'][f"Laser_{laser_tag}"]['LaserPowerVoltage']=ItemsLaserPower
-                                        else:
-                                            LaserCalibrationResults[current_date_name][current_color]['Pulse'][f"Laser_{laser_tag}"]['LaserPowerVoltage']=self._unique(LaserCalibrationResults[current_date_name][current_color]['Pulse'][f"Laser_{laser_tag}"]['LaserPowerVoltage']+ItemsLaserPower)
+                                        LaserCalibrationResults[current_date_name][current_color]['Pulse'][f"Laser_{laser_tag}"]['LaserPowerVoltage']=self._unique(LaserCalibrationResults[current_date_name][current_color]['Pulse'][f"Laser_{laser_tag}"]['LaserPowerVoltage']+ItemsLaserPower)
         # save to json file
         if not os.path.exists(os.path.dirname(self.MainWindow.LaserCalibrationFiles)):
             os.makedirs(os.path.dirname(self.MainWindow.LaserCalibrationFiles))
