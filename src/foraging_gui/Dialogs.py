@@ -1590,7 +1590,7 @@ class LaserCalibrationDialog(QDialog):
                             input_voltages= self._extract_elements(LCM_voltage,current_frequency_ind)
                             input_voltages_unique=list(set(input_voltages))
                             for laser_tag in laser_tags:
-                                ItemsLaserPower=self._module_1(self,input_voltages_unique,input_voltages,LCM_Location_1,LCM_LaserPowerMeasured,laser_tag)
+                                ItemsLaserPower=self._module_1(input_voltages_unique,input_voltages,LCM_Location_1,LCM_LaserPowerMeasured,laser_tag)
                                 LaserCalibrationResults=initialize_dic(LaserCalibrationResults,key_list=[current_date_name,current_color,current_protocol,current_frequency,f"Laser_{laser_tag}"])
                                 if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]:
                                     LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage']=ItemsLaserPower
@@ -1600,7 +1600,7 @@ class LaserCalibrationDialog(QDialog):
                             input_voltages= self._extract_elements(LCM_voltage,current_protocol_ind)
                             input_voltages_unique=list(set(input_voltages))
                             for laser_tag in laser_tags:
-                                ItemsLaserPower=self._module_1(self,input_voltages_unique,input_voltages,LCM_Location_1,LCM_LaserPowerMeasured,laser_tag)
+                                ItemsLaserPower=self._module_1(input_voltages_unique,input_voltages,LCM_Location_1,LCM_LaserPowerMeasured,laser_tag)
                                 # Check and assign items to the nested dictionary
                                 LaserCalibrationResults=initialize_dic(LaserCalibrationResults,key_list=[current_date_name,current_color,current_protocol,f"Laser_{laser_tag}"])
                                 if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol][f"Laser_{laser_tag}"]:
