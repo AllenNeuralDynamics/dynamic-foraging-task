@@ -1309,7 +1309,6 @@ class LaserCalibrationDialog(QDialog):
         else:
             Label=True
         eval('self.Location_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.LaserPower_'+str(Numb)+'.setEnabled('+str(Label)+')')
         eval('self.Duration_'+str(Numb)+'.setEnabled('+str(Label)+')')
         eval('self.Protocol_'+str(Numb)+'.setEnabled('+str(Label)+')')
         eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(Label)+')')
