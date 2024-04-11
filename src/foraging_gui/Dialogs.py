@@ -1453,6 +1453,7 @@ class LaserCalibrationDialog(QDialog):
     def _CopyFromOpto(self):
         '''Copy the optogenetics parameters'''
         condition=self.CopyCondition.currentText().split('_')[1]
+        copylaser=self.CopyLaser.currentText().split('_')[1]
         if self.MainWindow.Opto_dialog.__getattribute__("LaserColor_" + condition).currentText()=="NA":
             return
         self.Duration_1.setText(self.MainWindow.Opto_dialog.__getattribute__("Duration_" + condition).text())
@@ -1462,6 +1463,7 @@ class LaserCalibrationDialog(QDialog):
         self.LaserColor_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("LaserColor_" + condition).currentIndex())
         self.Location_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Location_" + condition).currentIndex())
         self.Protocol_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Protocol_" + condition).currentIndex())
+        self.voltage.setText(str(eval(self.MainWindow.Opto_dialog.__getattribute__(f"Laser{copylaser}_power_{condition}").currentText())[0]))
 
     def _Capture(self):
         '''Save the measured laser power'''

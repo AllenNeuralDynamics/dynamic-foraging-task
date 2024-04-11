@@ -969,7 +969,7 @@
     <string>copy condition=</string>
    </property>
   </widget>
-  <widget class="QComboBox" name="CopyCondition_2">
+  <widget class="QComboBox" name="CopyLaser">
    <property name="geometry">
     <rect>
      <x>460</x>
