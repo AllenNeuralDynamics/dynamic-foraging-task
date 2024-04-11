@@ -116,7 +116,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         session_start_time= session_start_timeC,  # required
         session_id=os.path.basename(fname),  # optional
         experimenter=[
-            _get_field(obj, 'experimenter', default='None'),
+            _get_field(obj, 'Experimenter', default='None'),
         ],  # optional
         lab="",  # optional
         institution="Allen Institute for Neural Dynamics",  # optional
