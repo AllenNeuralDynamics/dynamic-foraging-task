@@ -1453,24 +1453,17 @@ class LaserCalibrationDialog(QDialog):
         self.MainWindow.Channel.receive()
     def _CopyFromOpto(self):
         '''Copy the optogenetics parameters'''
-        N=[]
-        for i in range(100):
-            variable_name = "LaserColor_" + str(i)
-            if hasattr(self.MainWindow.Opto_dialog,variable_name):
-                current_text = self.MainWindow.Opto_dialog.__getattribute__(variable_name).currentText()
-                if current_text !='NA':
-                    N=i
-                    break
-        if N==[]:
+        condition=self.CopyCondition.currentText().split('_')[1]
+        if self.MainWindow.Opto_dialog.__getattribute__("LaserColor_" + condition).currentText()=="NA":
             return
-        self.Duration_1.setText(self.MainWindow.Opto_dialog.__getattribute__("Duration_" + str(N)).text())
-        self.Frequency_1.setText(self.MainWindow.Opto_dialog.__getattribute__("Frequency_" + str(N)).currentText())
-        self.RD_1.setText(self.MainWindow.Opto_dialog.__getattribute__("RD_" + str(N)).text())
-        self.PulseDur_1.setText(self.MainWindow.Opto_dialog.__getattribute__("PulseDur_" + str(N)).text())
-        self.LaserColor_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("LaserColor_" + str(N)).currentIndex())
-        self.Location_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Location_" + str(N)).currentIndex())
+        self.Duration_1.setText(self.MainWindow.Opto_dialog.__getattribute__("Duration_" + condition).text())
+        self.Frequency_1.setText(self.MainWindow.Opto_dialog.__getattribute__("Frequency_" + condition).currentText())
+        self.RD_1.setText(self.MainWindow.Opto_dialog.__getattribute__("RD_" + condition).text())
+        self.PulseDur_1.setText(self.MainWindow.Opto_dialog.__getattribute__("PulseDur_" + condition).text())
+        self.LaserColor_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("LaserColor_" + condition).currentIndex())
+        self.Location_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Location_" + condition).currentIndex())
         self.LaserPower_1.clear()
-        self.Protocol_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Protocol_" + str(N)).currentIndex())
+        self.Protocol_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Protocol_" + condition).currentIndex())
 
     def _Capture(self):
         '''Save the measured laser power'''
