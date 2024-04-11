@@ -1596,7 +1596,8 @@ class LaserCalibrationDialog(QDialog):
                                         current_voltage=input_voltages_unique[n]
                                         laser_ind=[]
                                         for k in range(len(input_voltages)):
-                                            laser_ind.append(k)
+                                            if input_voltages[k]==current_voltage and LCM_Location_1[k]==f"Laser_{laser_tag}":
+                                                laser_ind.append(k)
                                 LaserCalibrationResults=initialize_dic(LaserCalibrationResults,key_list=[current_date_name,current_color,current_protocol,current_frequency,f"Laser_{laser_tag}"])
                                 if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]:
                                     LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage']=ItemsLaserPower
@@ -1611,7 +1612,8 @@ class LaserCalibrationDialog(QDialog):
                                     current_voltage=input_voltages_unique[n]
                                     laser_ind=[]
                                     for k in range(len(input_voltages)):
-                                        laser_ind.append(k)
+                                        if input_voltages[k]==current_voltage and LCM_Location_1[k]==f"Laser_{laser_tag}":
+                                            laser_ind.append(k)
                                     measured_power=self._extract_elements(LCM_LaserPowerMeasured,laser_ind) 
                                     measured_power_mean=self._getmean(measured_power)
                                     ItemsLaserPower.append([float(current_voltage), measured_power_mean])
@@ -1647,6 +1649,21 @@ class LaserCalibrationDialog(QDialog):
         time.sleep(0.01)
         self.Save.setStyleSheet("background-color : none")
         self.Save.setChecked(False)
+    
+    def _modeule_1(self,input_voltages_unique,input_voltages,LCM_Location_1,LCM_LaserPowerMeasured,laser_tag):
+        '''modeule to get the laser power list'''
+        ItemsLaserPower=[]
+        for n in range(len(input_voltages_unique)):
+            current_voltage=input_voltages_unique[n]
+            laser_ind=[]
+            for k in range(len(input_voltages)):
+                if input_voltages[k]==current_voltage and LCM_Location_1[k]==f"Laser_{laser_tag}":
+                    laser_ind.append(k)
+            measured_power=self._extract_elements(LCM_LaserPowerMeasured,laser_ind) 
+            measured_power_mean=self._getmean(measured_power)
+            ItemsLaserPower.append([float(current_voltage), measured_power_mean])
+        return ItemsLaserPower
+    
     def _unique(self,input):
         '''average the laser power with the same input voltage'''
         items=[]
