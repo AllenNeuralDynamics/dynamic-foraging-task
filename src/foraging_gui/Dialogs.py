@@ -1462,7 +1462,6 @@ class LaserCalibrationDialog(QDialog):
         self.PulseDur_1.setText(self.MainWindow.Opto_dialog.__getattribute__("PulseDur_" + condition).text())
         self.LaserColor_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("LaserColor_" + condition).currentIndex())
         self.Location_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Location_" + condition).currentIndex())
-        self.LaserPower_1.clear()
         self.Protocol_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Protocol_" + condition).currentIndex())
 
     def _Capture(self):
