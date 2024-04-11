@@ -1470,12 +1470,6 @@ class LaserCalibrationDialog(QDialog):
         self.LaserColor_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("LaserColor_" + str(N)).currentIndex())
         self.Location_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Location_" + str(N)).currentIndex())
         self.LaserPower_1.clear()
-        items=[]
-        for index in range(self.MainWindow.Opto_dialog.__getattribute__("LaserPower_" + str(N)).count()):
-            item = self.MainWindow.Opto_dialog.__getattribute__("LaserPower_" + str(N)).itemText(index)
-            items.append(item)
-        self.LaserPower_1.addItems(items)
-        self.LaserPower_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("LaserPower_" + str(N)).currentIndex())
         self.Protocol_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Protocol_" + str(N)).currentIndex())
 
     def _Capture(self):
