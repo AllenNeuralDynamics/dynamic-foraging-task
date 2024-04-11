@@ -1650,8 +1650,8 @@ class LaserCalibrationDialog(QDialog):
         self.Save.setStyleSheet("background-color : none")
         self.Save.setChecked(False)
     
-    def _modeule_1(self,input_voltages_unique,input_voltages,LCM_Location_1,LCM_LaserPowerMeasured,laser_tag):
-        '''modeule to get the laser power list'''
+    def _module_1(self,input_voltages_unique,input_voltages,LCM_Location_1,LCM_LaserPowerMeasured,laser_tag):
+        '''module to get the laser power list'''
         ItemsLaserPower=[]
         for n in range(len(input_voltages_unique)):
             current_voltage=input_voltages_unique[n]
