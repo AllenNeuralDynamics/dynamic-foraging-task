@@ -72,7 +72,7 @@
   <widget class="QComboBox" name="Location_1">
    <property name="geometry">
     <rect>
-     <x>441</x>
+     <x>640</x>
      <y>40</y>
      <width>80</width>
      <height>20</height>
@@ -194,7 +194,7 @@
   <widget class="QComboBox" name="LaserColor_1">
    <property name="geometry">
     <rect>
-     <x>271</x>
+     <x>470</x>
      <y>40</y>
      <width>80</width>
      <height>20</height>
@@ -230,7 +230,7 @@
   <widget class="QLabel" name="label1_1">
    <property name="geometry">
     <rect>
-     <x>231</x>
+     <x>430</x>
      <y>40</y>
      <width>41</width>
      <height>20</height>
@@ -299,7 +299,7 @@
   <widget class="QLabel" name="label1_2">
    <property name="geometry">
     <rect>
-     <x>387</x>
+     <x>586</x>
      <y>40</y>
      <width>48</width>
      <height>16</height>
@@ -912,6 +912,61 @@
    </property>
    <property name="checkable">
     <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="CopyCondition">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>40</y>
+     <width>91</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <item>
+    <property name="text">
+     <string>Condition_1</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Condition_2</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Condition_3</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Condition_4</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label1_3">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>40</y>
+     <width>91</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="text">
+    <string>copy condition=</string>
    </property>
   </widget>
  </widget>
