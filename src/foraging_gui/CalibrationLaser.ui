@@ -22,8 +22,8 @@
   <widget class="QLineEdit" name="Frequency_1">
    <property name="geometry">
     <rect>
-     <x>448</x>
-     <y>80</y>
+     <x>580</x>
+     <y>110</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -41,7 +41,7 @@
   <widget class="QComboBox" name="Protocol_1">
    <property name="geometry">
     <rect>
-     <x>271</x>
+     <x>420</x>
      <y>80</y>
      <width>80</width>
      <height>20</height>
@@ -72,8 +72,8 @@
   <widget class="QComboBox" name="Location_1">
    <property name="geometry">
     <rect>
-     <x>770</x>
-     <y>40</y>
+     <x>420</x>
+     <y>110</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -106,7 +106,7 @@
   <widget class="QLabel" name="label1_12">
    <property name="geometry">
     <rect>
-     <x>214</x>
+     <x>363</x>
      <y>80</y>
      <width>51</width>
      <height>20</height>
@@ -131,8 +131,8 @@
   <widget class="QLabel" name="label1_14">
    <property name="geometry">
     <rect>
-     <x>512</x>
-     <y>80</y>
+     <x>642</x>
+     <y>110</y>
      <width>51</width>
      <height>20</height>
     </rect>
@@ -156,8 +156,8 @@
   <widget class="QLineEdit" name="Duration_1">
    <property name="geometry">
     <rect>
-     <x>930</x>
-     <y>40</y>
+     <x>583</x>
+     <y>50</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -175,8 +175,8 @@
   <widget class="QLineEdit" name="RD_1">
    <property name="geometry">
     <rect>
-     <x>570</x>
-     <y>80</y>
+     <x>700</x>
+     <y>110</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -194,8 +194,8 @@
   <widget class="QComboBox" name="LaserColor_1">
    <property name="geometry">
     <rect>
-     <x>620</x>
-     <y>40</y>
+     <x>420</x>
+     <y>50</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -230,8 +230,8 @@
   <widget class="QLabel" name="label1_1">
    <property name="geometry">
     <rect>
-     <x>580</x>
-     <y>40</y>
+     <x>380</x>
+     <y>50</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -253,7 +253,7 @@
    <property name="geometry">
     <rect>
      <x>700</x>
-     <y>80</y>
+     <y>50</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -274,8 +274,8 @@
   <widget class="QLabel" name="label1_13">
    <property name="geometry">
     <rect>
-     <x>371</x>
-     <y>80</y>
+     <x>503</x>
+     <y>110</y>
      <width>71</width>
      <height>20</height>
     </rect>
@@ -299,8 +299,8 @@
   <widget class="QLabel" name="label1_2">
    <property name="geometry">
     <rect>
-     <x>716</x>
-     <y>40</y>
+     <x>366</x>
+     <y>110</y>
      <width>48</width>
      <height>16</height>
     </rect>
@@ -328,7 +328,7 @@
    <property name="geometry">
     <rect>
      <x>627</x>
-     <y>80</y>
+     <y>50</y>
      <width>71</width>
      <height>20</height>
     </rect>
@@ -352,8 +352,8 @@
   <widget class="QLabel" name="label1_5">
    <property name="geometry">
     <rect>
-     <x>857</x>
-     <y>40</y>
+     <x>510</x>
+     <y>50</y>
      <width>67</width>
      <height>16</height>
     </rect>
@@ -374,36 +374,14 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QPushButton" name="Open">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>80</y>
-     <width>131</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="text">
-    <string>open</string>
-   </property>
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-  </widget>
   <widget class="QPushButton" name="KeepOpen">
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>120</y>
+     <x>830</x>
+     <y>180</y>
      <width>131</width>
      <height>23</height>
     </rect>
@@ -457,7 +435,7 @@
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>40</y>
+     <y>50</y>
      <width>131</width>
      <height>23</height>
     </rect>
@@ -478,10 +456,10 @@
   <widget class="QLabel" name="label1_17">
    <property name="geometry">
     <rect>
-     <x>970</x>
+     <x>897</x>
      <y>40</y>
-     <width>151</width>
-     <height>20</height>
+     <width>101</width>
+     <height>41</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -499,12 +477,15 @@
    <property name="alignment">
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
+   <property name="wordWrap">
+    <bool>true</bool>
+   </property>
   </widget>
   <widget class="QLineEdit" name="LaserPowerMeasured">
    <property name="geometry">
     <rect>
-     <x>1130</x>
-     <y>40</y>
+     <x>1007</x>
+     <y>50</y>
      <width>121</width>
      <height>20</height>
     </rect>
@@ -522,8 +503,8 @@
   <widget class="QPushButton" name="Save">
    <property name="geometry">
     <rect>
-     <x>1000</x>
-     <y>80</y>
+     <x>880</x>
+     <y>110</y>
      <width>81</width>
      <height>23</height>
     </rect>
@@ -544,8 +525,8 @@
   <widget class="QLineEdit" name="voltage">
    <property name="geometry">
     <rect>
-     <x>833</x>
-     <y>80</y>
+     <x>867</x>
+     <y>50</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -563,10 +544,10 @@
   <widget class="QLabel" name="label1_6">
    <property name="geometry">
     <rect>
-     <x>760</x>
-     <y>80</y>
-     <width>67</width>
-     <height>16</height>
+     <x>770</x>
+     <y>50</y>
+     <width>91</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -576,7 +557,7 @@
     </sizepolicy>
    </property>
    <property name="text">
-    <string>voltage (v)=</string>
+    <string>input voltage (v)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -588,8 +569,8 @@
   <widget class="QPushButton" name="Capture">
    <property name="geometry">
     <rect>
-     <x>900</x>
-     <y>80</y>
+     <x>780</x>
+     <y>110</y>
      <width>81</width>
      <height>23</height>
     </rect>
@@ -895,8 +876,8 @@
   <widget class="QPushButton" name="CopyToSession">
    <property name="geometry">
     <rect>
-     <x>1100</x>
-     <y>80</y>
+     <x>980</x>
+     <y>110</y>
      <width>151</width>
      <height>23</height>
     </rect>
@@ -917,8 +898,8 @@
   <widget class="QComboBox" name="CopyCondition">
    <property name="geometry">
     <rect>
-     <x>290</x>
-     <y>40</y>
+     <x>90</x>
+     <y>85</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -953,8 +934,8 @@
   <widget class="QLabel" name="label1_3">
    <property name="geometry">
     <rect>
-     <x>210</x>
-     <y>40</y>
+     <x>10</x>
+     <y>85</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -972,8 +953,8 @@
   <widget class="QComboBox" name="CopyLaser">
    <property name="geometry">
     <rect>
-     <x>460</x>
-     <y>40</y>
+     <x>90</x>
+     <y>120</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -998,8 +979,8 @@
   <widget class="QLabel" name="label1_4">
    <property name="geometry">
     <rect>
-     <x>400</x>
-     <y>40</y>
+     <x>30</x>
+     <y>120</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -1012,6 +993,28 @@
    </property>
    <property name="text">
     <string>copy laser=</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="Open">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>50</y>
+     <width>131</width>
+     <height>91</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="text">
+    <string>open</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
    </property>
   </widget>
  </widget>
