@@ -1532,29 +1532,22 @@ class LaserCalibrationDialog(QDialog):
             self.Warning.setAlignment(Qt.AlignCenter)
             return
         # delete invalid indices
-        LCM_MeasureTime=self.LCM_MeasureTime.copy()
-        LCM_LaserColor_1=self.LCM_LaserColor_1.copy()
-        LCM_Protocol_1=self.LCM_Protocol_1.copy()
-        LCM_Frequency_1=self.LCM_Frequency_1.copy()
-        LCM_LaserPowerMeasured=self.LCM_LaserPowerMeasured.copy()
-        LCM_Location_1=self.LCM_Location_1.copy()
-        LCM_voltage=self.LCM_voltage.copy()
         empty_indices = [index for index, value in enumerate(self.LCM_LaserPowerMeasured) if value == '']
         both_indices = [index for index, value in enumerate(self.LCM_Location_1) if value == 'Both']
         delete_indices=both_indices+empty_indices
         delete_indices=list(set(delete_indices))
         delete_indices.sort(reverse=True)
         for index in delete_indices:
-            del LCM_MeasureTime[index]
-            del LCM_LaserColor_1[index]
-            del LCM_Protocol_1[index]
-            del LCM_Frequency_1[index]
-            del LCM_LaserPowerMeasured[index]
-            del LCM_Location_1[index]
-            del LCM_voltage[index]
+            del self.LCM_MeasureTime[index]
+            del self.LCM_LaserColor_1[index]
+            del self.LCM_Protocol_1[index]
+            del self.LCM_Frequency_1[index]
+            del self.LCM_LaserPowerMeasured[index]
+            del self.LCM_Location_1[index]
+            del self.LCM_voltage[index]
         LCM_MeasureTime_date=[]
-        for i in range(len(LCM_MeasureTime)):
-            LCM_MeasureTime_date.append(LCM_MeasureTime[i].split()[0])
+        for i in range(len(self.LCM_MeasureTime)):
+            LCM_MeasureTime_date.append(self.LCM_MeasureTime[i].split()[0])
         laser_tags = [1,2] # corresponding to Laser_1 and Laser_2
         date_unique = list(set(LCM_MeasureTime_date))
         for i in range(len(date_unique)):
@@ -1571,34 +1564,35 @@ class LaserCalibrationDialog(QDialog):
                     break
             '''
             current_date_ind=[index for index, value in enumerate(LCM_MeasureTime_date) if value == current_date]
-            laser_colors= self._extract_elements(LCM_LaserColor_1,current_date_ind) 
+            laser_colors= self._extract_elements(self.LCM_LaserColor_1,current_date_ind) 
             laser_colors_unique= list(set(laser_colors))
             for j in range(len(laser_colors_unique)):
                 current_color=laser_colors_unique[j]
                 current_color_ind=[index for index, value in enumerate(laser_colors) if value == current_color]
-                Protocols= self._extract_elements(LCM_Protocol_1,current_color_ind)
+                current_color_ind=list(set(current_color_ind) & set(current_date_ind))
+                Protocols= self._extract_elements(self.LCM_Protocol_1,current_color_ind)
                 Protocols_unique=list(set(Protocols))
                 for k in range(len(Protocols_unique)):
                     current_protocol=Protocols_unique[k]
                     current_protocol_ind=[index for index, value in enumerate(Protocols) if value == current_protocol]
+                    current_protocol_ind = list(set(current_protocol_ind) & set(current_color_ind))
                     if current_protocol=='Sine':
-                        Frequency=self._extract_elements(LCM_Frequency_1,current_protocol_ind)
+                        Frequency=self._extract_elements(self.LCM_Frequency_1,current_protocol_ind)
                         Frequency_unique=list(set(Frequency))
                         for m in range(len(Frequency_unique)):
                             current_frequency=Frequency_unique[m]
                             current_frequency_ind=[index for index, value in enumerate(Frequency) if value == current_frequency]
-                            input_voltages= self._extract_elements(LCM_voltage,current_frequency_ind)
+                            current_frequency_ind = list(set(current_frequency_ind) & set(current_protocol_ind))
                             for laser_tag in laser_tags:
-                                ItemsLaserPower=self._module_1(input_voltages,LCM_Location_1,LCM_LaserPowerMeasured,LCM_Protocol_1,current_protocol,LCM_LaserColor_1,current_color,laser_tag)
+                                ItemsLaserPower=self._module_1(current_frequency_ind,laser_tag)
                                 LaserCalibrationResults=initialize_dic(LaserCalibrationResults,key_list=[current_date_name,current_color,current_protocol,current_frequency,f"Laser_{laser_tag}"])
                                 if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]:
                                     LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage']=ItemsLaserPower
                                 else:
                                     LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage']=self._unique(LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage']+ItemsLaserPower)
                     elif current_protocol=='Constant' or current_protocol=='Pulse':
-                            input_voltages= self._extract_elements(LCM_voltage,current_protocol_ind)
                             for laser_tag in laser_tags:
-                                ItemsLaserPower=self._module_1(input_voltages,LCM_Location_1,LCM_LaserPowerMeasured,LCM_Protocol_1,current_protocol,LCM_LaserColor_1,current_color,laser_tag)
+                                ItemsLaserPower=self._module_1(current_protocol_ind,laser_tag)
                                 # Check and assign items to the nested dictionary
                                 LaserCalibrationResults=initialize_dic(LaserCalibrationResults,key_list=[current_date_name,current_color,current_protocol,f"Laser_{laser_tag}"])
                                 if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol][f"Laser_{laser_tag}"]:
@@ -1632,14 +1626,18 @@ class LaserCalibrationDialog(QDialog):
         self.Save.setStyleSheet("background-color : none")
         self.Save.setChecked(False)
     
-    def _module_1(self,input_voltages,LCM_Location_1,LCM_LaserPowerMeasured,LCM_Protocol_1,current_protocol,LCM_LaserColor_1,current_color,laser_tag):
+    def _module_1(self,ind,laser_tag):
         '''module to get the laser power list'''
         ItemsLaserPower=[]
+        current_laser_tag_ind=[index for index, value in enumerate(self.LCM_Location_1) if value == f"Laser_{laser_tag}"]
+        ind = list(set(ind) & set(current_laser_tag_ind))
+        input_voltages= self._extract_elements(self.LCM_voltage,ind)
+        laser_power_measured=self._extract_elements(self.LCM_LaserPowerMeasured,ind)
         input_voltages_unique=list(set(input_voltages))
         for n in range(len(input_voltages_unique)):
             current_voltage=input_voltages_unique[n]
-            laser_ind = [k for k in range(len(input_voltages)) if input_voltages[k] == current_voltage and LCM_Location_1[k] == f"Laser_{laser_tag}" and LCM_Protocol_1[k] == current_protocol and LCM_LaserColor_1[k] == current_color]
-            measured_power=self._extract_elements(LCM_LaserPowerMeasured,laser_ind) 
+            laser_ind = [k for k in range(len(input_voltages)) if input_voltages[k] == current_voltage]
+            measured_power=self._extract_elements(laser_power_measured,laser_ind) 
             measured_power_mean=self._getmean(measured_power)
             ItemsLaserPower.append([float(current_voltage), measured_power_mean])
         return ItemsLaserPower
