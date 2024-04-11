@@ -1568,20 +1568,20 @@ class LaserCalibrationDialog(QDialog):
             laser_colors_unique= list(set(laser_colors))
             for j in range(len(laser_colors_unique)):
                 current_color=laser_colors_unique[j]
-                current_color_ind=[index for index, value in enumerate(laser_colors) if value == current_color]
+                current_color_ind=[index for index, value in enumerate(self.LCM_LaserColor_1) if value == current_color]
                 current_color_ind=list(set(current_color_ind) & set(current_date_ind))
                 Protocols= self._extract_elements(self.LCM_Protocol_1,current_color_ind)
                 Protocols_unique=list(set(Protocols))
                 for k in range(len(Protocols_unique)):
                     current_protocol=Protocols_unique[k]
-                    current_protocol_ind=[index for index, value in enumerate(Protocols) if value == current_protocol]
+                    current_protocol_ind=[index for index, value in enumerate(self.LCM_Protocol_1) if value == current_protocol]
                     current_protocol_ind = list(set(current_protocol_ind) & set(current_color_ind))
                     if current_protocol=='Sine':
                         Frequency=self._extract_elements(self.LCM_Frequency_1,current_protocol_ind)
                         Frequency_unique=list(set(Frequency))
                         for m in range(len(Frequency_unique)):
                             current_frequency=Frequency_unique[m]
-                            current_frequency_ind=[index for index, value in enumerate(Frequency) if value == current_frequency]
+                            current_frequency_ind=[index for index, value in enumerate(self.LCM_Frequency_1) if value == current_frequency]
                             current_frequency_ind = list(set(current_frequency_ind) & set(current_protocol_ind))
                             for laser_tag in laser_tags:
                                 ItemsLaserPower=self._module_1(current_frequency_ind,laser_tag)
@@ -1644,6 +1644,8 @@ class LaserCalibrationDialog(QDialog):
     
     def _unique(self,input):
         '''average the laser power with the same input voltage'''
+        if input==[]:
+            return []
         items=[]
         input_array=np.array(input)
         voltage_unique=list(set(input_array[:,0]))
