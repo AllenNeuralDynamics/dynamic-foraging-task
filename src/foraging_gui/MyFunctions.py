@@ -1174,7 +1174,7 @@ class GenerateTrials():
         '''Get the waveform of the laser. It dependens on color/duration/protocol(frequency/RD/pulse duration)/locations/laser power'''
         N=self.SelctedCondition
         # CLP, current laser parameter
-        self.CLP_Color=eval('self.TP_Laser_'+N)
+        self.CLP_Color=eval('self.TP_LaserColor_'+N)
         self.CLP_Location=eval('self.TP_Location_'+N)
         self.CLP_LaserPowerLeft=eval('self.TP_Laser1_power_'+N)
         self.CLP_LaserPowerRight=eval('self.TP_Laser2_power_'+N)
