@@ -1316,23 +1316,23 @@ class GenerateTrials():
                 self.win.WarningLabel.setText('No amplitude for left laser defined!')
                 self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
             else:
-                LaserPowerAmpLeft=eval(self.CLP_Laser1Power)
-                self.CurrentLaserAmplitude=[LaserPowerAmpLeft[0],0]
+                Laser1PowerAmp=eval(self.CLP_Laser1Power)
+                self.CurrentLaserAmplitude=[Laser1PowerAmp[0],0]
         elif self.CLP_Location=='Laser_2':
             if self.CLP_Laser2Power=='':
                 self.win.WarningLabel.setText('No amplitude for right laser defined!')
                 self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
             else:
-                LaserPowerAmpRight=eval(self.CLP_Laser2Power)
-                self.CurrentLaserAmplitude=[0,LaserPowerAmpRight[0]]
+                Laser2PowerAmp=eval(self.CLP_Laser2Power)
+                self.CurrentLaserAmplitude=[0,Laser2PowerAmp[0]]
         elif self.CLP_Location=='Both':
             if  self.CLP_Laser1Power=='' or self.CLP_Location=='Right':
                 self.win.WarningLabel.setText('No amplitude for left or right laser defined!')
                 self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
             else:
-                LaserPowerAmpLeft=eval(self.CLP_Laser1Power)
-                LaserPowerAmpRight=eval(self.CLP_Laser2Power)
-                self.CurrentLaserAmplitude=[LaserPowerAmpLeft[0],LaserPowerAmpRight[0]]
+                Laser1PowerAmp=eval(self.CLP_Laser1Power)
+                Laser2PowerAmp=eval(self.CLP_Laser2Power)
+                self.CurrentLaserAmplitude=[Laser1PowerAmp[0],Laser2PowerAmp[0]]
         else:
             self.win.WarningLabel.setText('No stimulation location defined!')
             self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
