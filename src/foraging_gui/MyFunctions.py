@@ -184,6 +184,7 @@ class GenerateTrials():
     def _PerformOptogenetics(self,Channel4):
         '''Optogenetics section to generate optogenetics parameters and send waveform to Bonsai'''
         control_trial=0
+        self.opto_error_tag=0
         try:
             if self.TP_OptogeneticsB=='on': # optogenetics is turned on
                 # select the current optogenetics condition
@@ -199,12 +200,11 @@ class GenerateTrials():
                 else:
                     # this is the control trial
                     control_trial=1
-                    self.LaserOn=0
             else:
                 # optogenetics is turned off
                 control_trial=1
                 self.B_session_control_state.append(0)
-            self.B_opto_error.append(0)
+            self.B_opto_error.append(self.opto_error_tag)
         except Exception as e:
             # optogenetics is turned off
             control_trial=1
@@ -1229,10 +1229,14 @@ class GenerateTrials():
                 self.win.WarningLabel.setText('Pulse duration is NA!')
                 self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
                 self.CLP_PulseDur=0
+                self.my_wave=np.empty(0)
+                self.opto_error_tag=1
             elif self.CLP_Frequency=='':
                 self.win.WarningLabel.setText('Pulse frequency is NA!')
                 self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
                 self.CLP_Frequency=0
+                self.my_wave=np.empty(0)
+                self.opto_error_tag=1
             else:
                 self.CLP_PulseDur=float(self.CLP_PulseDur)
                 PointsEachPulse=int(self.CLP_SampleFrequency*self.CLP_PulseDur)
