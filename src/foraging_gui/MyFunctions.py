@@ -1221,10 +1221,7 @@ class GenerateTrials():
             # add ramping down
             self._get_ramping_down()
             # add offset
-            if self.CLP_OffsetStart>0:
-                OffsetPoints=int(self.CLP_SampleFrequency*self.CLP_OffsetStart)
-                Offset=np.zeros(OffsetPoints)
-                self.my_wave=np.concatenate((Offset,self.my_wave),axis=0)
+            self._add_offset()
             self.my_wave=np.append(self.my_wave,[0,0])
 
         elif self.CLP_Protocol=='Pulse':
@@ -1272,10 +1269,7 @@ class GenerateTrials():
                 # add ramping down
                 self._get_ramping_down()
             # add offset
-            if self.CLP_OffsetStart>0:
-                OffsetPoints=int(self.CLP_SampleFrequency*self.CLP_OffsetStart)
-                Offset=np.zeros(OffsetPoints)
-                self.my_wave=np.concatenate((Offset,self.my_wave),axis=0)
+            self._add_offset()
             self.my_wave=np.append(self.my_wave,[0,0])
         else:
             self.win.WarningLabel.setText('Unidentified optogenetics protocol!')
@@ -1297,6 +1291,13 @@ class GenerateTrials():
             RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
             RampingDown = np.concatenate((Constant, RD), axis=0)
             self.my_wave=self.my_wave*RampingDown
+
+    def _add_offset(self):
+        '''Add offset to the waveform'''            
+        if self.CLP_OffsetStart>0:
+            OffsetPoints=int(self.CLP_SampleFrequency*self.CLP_OffsetStart)
+            Offset=np.zeros(OffsetPoints)
+            self.my_wave=np.concatenate((Offset,self.my_wave),axis=0)
 
     def _GetLaserAmplitude(self):
         '''the voltage amplitude dependens on Protocol, Laser Power, Laser color, and the stimulation locations<>'''
