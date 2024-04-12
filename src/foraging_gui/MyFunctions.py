@@ -1257,17 +1257,13 @@ class GenerateTrials():
                 self.my_wave=np.concatenate((self.my_wave, EachPulse), axis=0)
                 self.my_wave=np.concatenate((self.my_wave, np.zeros(TotalPoints-np.shape(self.my_wave)[0])), axis=0)
                 # add offset
-                if self.CLP_OffsetStart>0:
-                    OffsetPoints=int(self.CLP_SampleFrequency*self.CLP_OffsetStart)
-                    Offset=np.zeros(OffsetPoints)
-                    self.my_wave=np.concatenate((Offset,self.my_wave),axis=0)
+                self._add_offset()
                 self.my_wave=np.append(self.my_wave,[0,0])
         elif self.CLP_Protocol=='Constant':
             resolution=self.CLP_SampleFrequency*self.CLP_CurrentDuration # how many datapoints to generate
             self.my_wave=Amplitude*np.ones(int(resolution))
-            if self.CLP_RampingDown>0:
-                # add ramping down
-                self._get_ramping_down()
+            # add ramping down
+            self._get_ramping_down()
             # add offset
             self._add_offset()
             self.my_wave=np.append(self.my_wave,[0,0])
@@ -1283,14 +1279,15 @@ class GenerateTrials():
         '''
     def _get_ramping_down(self):
         '''Add ramping down to the waveform'''
-        if self.CLP_RampingDown>self.CLP_CurrentDuration:
-            self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
-            self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
-        else:
-            Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
-            RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
-            RampingDown = np.concatenate((Constant, RD), axis=0)
-            self.my_wave=self.my_wave*RampingDown
+        if self.CLP_RampingDown>0:
+            if self.CLP_RampingDown>self.CLP_CurrentDuration:
+                self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
+                self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
+            else:
+                Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
+                RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
+                RampingDown = np.concatenate((Constant, RD), axis=0)
+                self.my_wave=self.my_wave*RampingDown
 
     def _add_offset(self):
         '''Add offset to the waveform'''            
