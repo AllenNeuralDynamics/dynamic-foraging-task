@@ -183,6 +183,7 @@ class GenerateTrials():
         self.GeneFinish=1
     def _PerformOptogenetics(self,Channel4):
         '''Optogenetics section to generate optogenetics parameters and send waveform to Bonsai'''
+        control_trial=0
         try:
             if self.TP_OptogeneticsB=='on': # optogenetics is turned on
                 # select the current optogenetics condition
@@ -197,34 +198,27 @@ class GenerateTrials():
                     self.B_SelectedCondition.append(self.SelctedCondition)
                 else:
                     # this is the control trial
+                    control_trial=1
                     self.LaserOn=0
-                    self.B_LaserOnTrial.append(self.LaserOn) 
-                    self.B_LaserAmplitude.append([0,0])
-                    self.B_LaserDuration.append(0)
-                    self.B_SelectedCondition.append(0)
-                    self.CurrentLaserAmplitude=[0,0]
             else:
                 # optogenetics is turned off
-                self.LaserOn=0
-                self.B_LaserOnTrial.append(self.LaserOn)
-                self.B_LaserAmplitude.append([0,0])
-                self.B_LaserDuration.append(0)
-                self.B_SelectedCondition.append(0)
-                self.CurrentLaserAmplitude=[0,0]
+                control_trial=1
                 self.B_session_control_state.append(0)
             self.B_opto_error.append(0)
         except Exception as e:
             # optogenetics is turned off
+            control_trial=1
             self.B_opto_error.append(1)
-            self.LaserOn=0
-            self.B_LaserOnTrial.append(self.LaserOn)
-            self.B_LaserAmplitude.append([0,0]) # corresponding to two locations
-            self.B_LaserDuration.append(0) # corresponding to two locations
-            self.B_SelectedCondition.append(0)
-            self.CurrentLaserAmplitude=[0,0]
             self.B_session_control_state.append(0)
             # Catch the exception and print error information
             logging.error(str(e))
+        if control_trial==1:
+            self.LaserOn=0
+            self.B_LaserOnTrial.append(self.LaserOn)
+            self.B_LaserAmplitude.append([0,0])
+            self.B_LaserDuration.append(0)
+            self.B_SelectedCondition.append(0)
+            self.CurrentLaserAmplitude=[0,0]
 
     def _CheckSessionControl(self):
         '''Check if the session control is on'''
