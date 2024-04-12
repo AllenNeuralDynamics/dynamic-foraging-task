@@ -1325,7 +1325,6 @@ class LaserCalibrationDialog(QDialog):
         # CLP, current laser parameter
         self.CLP_Color=eval('self.LC_LaserColor_'+N)
         self.CLP_Location=eval('self.LC_Location_'+N)
-        self.CLP_LaserPower=eval('self.LC_LaserPower_'+N)
         self.CLP_Duration=float(eval('self.LC_Duration_'+N))
         self.CLP_Protocol=eval('self.LC_Protocol_'+N)
         self.CLP_Frequency=float(eval('self.LC_Frequency_'+N))
