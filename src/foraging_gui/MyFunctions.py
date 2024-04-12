@@ -1219,15 +1219,7 @@ class GenerateTrials():
             length = np.pi * 2 * cycles
             self.my_wave = Amplitude*(1+np.sin(np.arange(0+1.5*math.pi, length+1.5*math.pi, length / resolution)))/2
             # add ramping down
-            if self.CLP_RampingDown>0:
-                if self.CLP_RampingDown>self.CLP_CurrentDuration:
-                    self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
-                    self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
-                else:
-                    Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
-                    RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
-                    RampingDown = np.concatenate((Constant, RD), axis=0)
-                    self.my_wave=self.my_wave*RampingDown
+            self._get_ramping_down()
             # add offset
             if self.CLP_OffsetStart>0:
                 OffsetPoints=int(self.CLP_SampleFrequency*self.CLP_OffsetStart)
@@ -1277,15 +1269,8 @@ class GenerateTrials():
             resolution=self.CLP_SampleFrequency*self.CLP_CurrentDuration # how many datapoints to generate
             self.my_wave=Amplitude*np.ones(int(resolution))
             if self.CLP_RampingDown>0:
-            # add ramping down
-                if self.CLP_RampingDown>self.CLP_CurrentDuration:
-                    self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
-                    self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
-                else:
-                    Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
-                    RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
-                    RampingDown = np.concatenate((Constant, RD), axis=0)
-                    self.my_wave=self.my_wave*RampingDown
+                # add ramping down
+                self._get_ramping_down()
             # add offset
             if self.CLP_OffsetStart>0:
                 OffsetPoints=int(self.CLP_SampleFrequency*self.CLP_OffsetStart)
@@ -1302,6 +1287,17 @@ class GenerateTrials():
         plt.plot(np.arange(0, length, length / resolution), self.my_wave)   
         plt.show()
         '''
+    def _get_ramping_down(self):
+        '''Add ramping down to the waveform'''
+        if self.CLP_RampingDown>self.CLP_CurrentDuration:
+            self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
+            self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
+        else:
+            Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
+            RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
+            RampingDown = np.concatenate((Constant, RD), axis=0)
+            self.my_wave=self.my_wave*RampingDown
+
     def _GetLaserAmplitude(self):
         '''the voltage amplitude dependens on Protocol, Laser Power, Laser color, and the stimulation locations<>'''
         self.CurrentLaserAmplitude=[0,0]
