@@ -1168,20 +1168,20 @@ class GenerateTrials():
         '''Get the waveform of the laser. It dependens on color/duration/protocol(frequency/RD/pulse duration)/locations/laser power'''
         N=self.SelctedCondition
         # CLP, current laser parameter
-        self.CLP_Color=eval('self.TP_LaserColor_'+N)
-        self.CLP_Location=eval('self.TP_Location_'+N)
-        self.CLP_Laser1Power=eval('self.TP_Laser1_power_'+N)
-        self.CLP_Laser2Power=eval('self.TP_Laser2_power_'+N)
-        self.CLP_Duration=float(eval('self.TP_Duration_'+N))
-        self.CLP_Protocol=eval('self.TP_Protocol_'+N)
+        self.CLP_Color=getattr(self,f"TP_LaserColor_{N}")
+        self.CLP_Location=getattr(self,f"TP_Location_{N}")
+        self.CLP_Laser1Power=getattr(self,f"TP_Laser1_power_{N}")
+        self.CLP_Laser2Power=getattr(self,f"TP_Laser2_power_{N}")
+        self.CLP_Duration=float(getattr(self,f"TP_Duration_{N}"))
+        self.CLP_Protocol=getattr(self,f"TP_Protocol_{N}")
         if not self.CLP_Protocol=='Constant':
-            self.CLP_Frequency=float(eval('self.TP_Frequency_'+N))
-        self.CLP_RampingDown=float(eval('self.TP_RD_'+N))
-        self.CLP_PulseDur=eval('self.TP_PulseDur_'+N)
-        self.CLP_LaserStart=eval('self.TP_LaserStart_'+N)
-        self.CLP_OffsetStart=float(eval('self.TP_OffsetStart_'+N))
-        self.CLP_LaserEnd=eval('self.TP_LaserEnd_'+N)
-        self.CLP_OffsetEnd=float(eval('self.TP_OffsetEnd_'+N)) # negative, backward; positive forward
+            self.CLP_Frequency=float(getattr(self,f"TP_Frequency_{N}"))
+        self.CLP_RampingDown=float(getattr(self,f"TP_RD_{N}"))
+        self.CLP_PulseDur=getattr(self,f"TP_PulseDur_{N}")
+        self.CLP_LaserStart=getattr(self,f"TP_LaserStart_{N}")
+        self.CLP_OffsetStart=float(getattr(self,f"TP_OffsetStart_{N}"))
+        self.CLP_LaserEnd=getattr(self,f"TP_LaserEnd_{N}")
+        self.CLP_OffsetEnd=float(getattr(self,f"TP_OffsetEnd_{N}"))# negative, backward; positive forward
         self.CLP_SampleFrequency=float(self.TP_SampleFrequency)
         # align to trial start
         if (self.CLP_LaserStart=='Trial start' or self.CLP_LaserStart=='Go cue' or self.CLP_LaserStart=='Reward outcome') and self.CLP_LaserEnd=='NA':
