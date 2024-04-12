@@ -177,6 +177,7 @@ class Window(QMainWindow):
         self.action_Save.triggered.connect(self._Save)
         self.actionForce_save.triggered.connect(self._ForceSave)
         self.SaveAs.triggered.connect(self._SaveAs)
+        self.Save_continue.triggered.connect(self._Save_continue)
         self.action_Exit.triggered.connect(self._Exit)
         self.action_New.triggered.connect(self._New)
         self.action_Clear.triggered.connect(self._Clear)
@@ -1461,16 +1462,23 @@ class Window(QMainWindow):
             self.RewardFamily.setEnabled(True)
             self.label_20.setEnabled(False)
             self.UncoupledReward.setEnabled(False)
-
-            self.label_12.setEnabled(True)
-            self.label_11.setEnabled(True)
+            # block
+            self.BlockMinReward.setEnabled(True)
+            self.IncludeAutoReward.setEnabled(True)
             self.BlockBeta.setEnabled(True)
             self.BlockMin.setEnabled(True)
             self.BlockMax.setEnabled(True)
+            self.label_12.setStyleSheet("color: black;")
+            self.label_11.setStyleSheet("color: black;")
+            self.label_14.setStyleSheet("color: black;")
+            self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
+            self.BlockMin.setStyleSheet("color: black;""border: 1px solid gray;")
+            self.BlockMax.setStyleSheet("color: black;""border: 1px solid gray;")
 
             self.label_27.setEnabled(False)
             self.InitiallyInactiveN.setEnabled(False)
-
+            self.label_27.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.InitiallyInactiveN.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
             # change name of min reward each block
             self.label_13.setText('min reward each block=')
@@ -1489,9 +1497,6 @@ class Window(QMainWindow):
             self.AdvancedBlockAuto.setEnabled(True)
             self._AdvancedBlockAuto() # Update states of SwitchThr and PointsInARow
             
-            self.BlockMinReward.setEnabled(True)
-            self.IncludeAutoReward.setEnabled(True)
-            
         elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
             self.label_6.setEnabled(False)
             self.label_7.setEnabled(False)
@@ -1501,14 +1506,21 @@ class Window(QMainWindow):
             self.RewardFamily.setEnabled(False)
             self.label_20.setEnabled(True)
             self.UncoupledReward.setEnabled(True)
-
-            self.label_12.setEnabled(True)
-            self.label_11.setEnabled(True)
+            # block
+            self.BlockBeta.setEnabled(True)
             self.BlockMin.setEnabled(True)
             self.BlockMax.setEnabled(True)
+            self.label_12.setStyleSheet("color: black;")
+            self.label_11.setStyleSheet("color: black;")
+            self.label_14.setStyleSheet("color: black;")
+            self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
+            self.BlockMin.setStyleSheet("color: black;""border: 1px solid gray;")
+            self.BlockMax.setStyleSheet("color: black;""border: 1px solid gray;")
 
             self.label_27.setEnabled(False)
             self.InitiallyInactiveN.setEnabled(False)
+            self.label_27.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.InitiallyInactiveN.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
             # change name of min reward each block
             self.label_13.setText('min reward each block=')
@@ -1519,7 +1531,6 @@ class Window(QMainWindow):
             # move auto-reward
             self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 128, 80, 20))
             self.label_26.setGeometry(QtCore.QRect(929, 128, 146, 16))
-            
             # Disable block beta, NextBlock, and AutoBlock panel
             self.BlockBeta.setEnabled(False)
             self.NextBlock.setEnabled(False)
@@ -1528,8 +1539,6 @@ class Window(QMainWindow):
             self.PointsInARow.setEnabled(False)
             self.BlockMinReward.setEnabled(False)
             self.IncludeAutoReward.setEnabled(False)
-            
-            
         elif self.Task.currentText() in ['RewardN']:
             self.label_6.setEnabled(True)
             self.label_7.setEnabled(True)
@@ -1539,19 +1548,25 @@ class Window(QMainWindow):
             self.RewardFamily.setEnabled(True)
             self.label_20.setEnabled(False)
             self.UncoupledReward.setEnabled(False)
-
+            self.label_20.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.UncoupledReward.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             # block
-            self.label_14.setEnabled(False)
-            self.label_12.setEnabled(False)
-            self.label_11.setEnabled(False)
+            self.BlockMinReward.setEnabled(True)
+            self.IncludeAutoReward.setEnabled(True)
             self.BlockBeta.setEnabled(False)
             self.BlockMin.setEnabled(False)
             self.BlockMax.setEnabled(False)
-
+            self.label_14.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.label_12.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.label_11.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.BlockBeta.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.BlockMin.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.BlockMax.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             # block; no reward when initially active
             self.label_27.setEnabled(True)
             self.InitiallyInactiveN.setEnabled(True)
-
+            self.label_27.setStyleSheet("color: black;")
+            self.InitiallyInactiveN.setStyleSheet("color: black;""border: 1px solid gray;")
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(403, 128, 80, 20))
             # change name of min reward each block
             self.label_13.setText('RewardN=')
@@ -1756,8 +1771,11 @@ class Window(QMainWindow):
             "<p>Analysis</p>"
             "<p></p>",
         )
-   
-    def _Save(self,ForceSave=0,SaveAs=0):
+    def _Save_continue(self):
+        '''Save the current session witout restarting the logging'''
+        self._Save(SaveContinue=1)
+
+    def _Save(self,ForceSave=0,SaveAs=0,SaveContinue=0):
         logging.info('Saving current session, ForceSave={}'.format(ForceSave))
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
@@ -1783,7 +1801,7 @@ class Window(QMainWindow):
                 return
 
         # this should be improved in the future. Need to get the last LeftRewardDeliveryTime and RightRewardDeliveryTime
-        if hasattr(self, 'GeneratedTrials'):
+        if hasattr(self, 'GeneratedTrials') and self.InitializeBonsaiSuccessfully==1:
             self.GeneratedTrials._GetLicks(self.Channel2)
         
         # Create new folders
@@ -1903,9 +1921,6 @@ class Window(QMainWindow):
         elif self.SaveFile.endswith('.json'):
             with open(self.SaveFile, "w") as outfile:
                 json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
-                        
-        # stop the camera
-        self._stop_camera()
 
         # Toggle unsaved data to False
         self.unsaved_data=False
@@ -1925,6 +1940,11 @@ class Window(QMainWindow):
         with open(filepath, 'w') as finished_file:
             finished_file.write(contents)
         
+        if SaveContinue==0:
+            # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
+            self._NewSession()
+            # do not create a new folder
+            self.CreateNewFolder=0
 
     def _GetSaveFolder(self):
         '''

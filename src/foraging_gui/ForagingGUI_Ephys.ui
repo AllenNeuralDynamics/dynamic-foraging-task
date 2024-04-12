@@ -4437,6 +4437,7 @@
     <addaction name="action_Clear"/>
     <addaction name="actionForce_save"/>
     <addaction name="SaveAs"/>
+    <addaction name="Save_continue"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="sizePolicy">
@@ -4817,6 +4818,11 @@
   <action name="actionReconnect_bonsai">
    <property name="text">
     <string>Reconnect bonsai</string>
+   </property>
+  </action>
+  <action name="Save_continue">
+   <property name="text">
+    <string>Save (without starting a new session)</string>
    </property>
   </action>
  </widget>
