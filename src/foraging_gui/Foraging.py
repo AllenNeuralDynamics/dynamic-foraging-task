@@ -339,8 +339,8 @@ class Window(QMainWindow):
             # sleep some time to wait for the finish of saving video
             time.sleep(3)
             if hasattr(self,'HarpFolder'):
-                HarpFolder=self.Obj['HarpFolder']
-                video_folder=self.Obj['VideoFolder']
+                HarpFolder=self.HarpFolder
+                video_folder=self.VideoFolder
         elif save_tag==0:
             if 'HarpFolder' in self.Obj:
                 # check the drop frames of the loaded session
