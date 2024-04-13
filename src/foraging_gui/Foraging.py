@@ -1984,7 +1984,7 @@ class Window(QMainWindow):
         # check drop of frames
         self._check_drop_frames(save_tag=1)
         # save drop frames information
-        Obj['drop_frames_tag']=Obj.self.drop_frames_tag
+        Obj['drop_frames_tag']=self.drop_frames_tag
         Obj['trigger_length']=self.trigger_length
         Obj['drop_frames_warning_text']=self.drop_frames_warning_text
         Obj['frame_num']=self.frame_num
