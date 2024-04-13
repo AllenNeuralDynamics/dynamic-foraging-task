@@ -2877,7 +2877,7 @@ class Window(QMainWindow):
         # Clear warnings
         self.WarningLabelInitializeBonsai.setText('')
         self.NewSession.setDisabled(False)
-            
+        self.WarningLabelCamera.setText('')     
         # Toggle button colors
         if self.Start.isChecked():
             logging.info('Start button pressed: starting trial loop')
