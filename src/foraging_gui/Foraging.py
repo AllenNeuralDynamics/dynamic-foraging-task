@@ -329,6 +329,10 @@ class Window(QMainWindow):
 
     def _check_drop_frames(self):
         '''check if there are any drop frames in the video'''
+        self.drop_frames_tag=0
+        self.trigger_length=0
+        self.drop_frames_warning_text = ''
+        self.frames={}
         if 'HarpFolder' in self.Obj:
             HarpFolder=self.Obj['HarpFolder']
             video_folder=self.Obj['VideoFolder']
@@ -342,30 +346,30 @@ class Window(QMainWindow):
         camera_trigger_file=os.path.join(HarpFolder,'BehaviorEvents','Event_94.bin')
         if os.path.exists(camera_trigger_file):
             triggers = harp.read(camera_trigger_file)
-            trigger_length = len(triggers)
+            self.trigger_length = len(triggers)
         else:
+            self.trigger_length=0
             self.WarningLabelCamera.setText('No camera trigger file found!')
             self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
             return
         csv_files = [file for file in os.listdir(video_folder) if file.endswith(".csv")]
         avi_files = [file for file in os.listdir(video_folder) if file.endswith(".avi")]
 
-        warning_text = ''
-        error_tag=0
         for avi_file in avi_files:
             csv_file = avi_file.replace('.avi', '.csv')
             if csv_file not in csv_files:
-                warning_text+=f'No csv file found for {avi_file}\n'
+                self.drop_frames_warning_text+=f'No csv file found for {avi_file}\n'
             else:
                 current_frames = pd.read_csv(os.path.join(video_folder, csv_file), header=None)
                 num_frames = len(current_frames)
-                if num_frames != trigger_length:
-                    warning_text+=f"Error: {avi_file} has {num_frames} frames, but {trigger_length} triggers\n"
-                    error_tag=1
+                if num_frames != self.trigger_length:
+                    self.drop_frames_warning_text+=f"Error: {avi_file} has {num_frames} frames, but {self.trigger_length} triggers\n"
+                    self.drop_frames_tag=1
                 else:
-                    warning_text+=f"Correct: {avi_file} has {num_frames} frames and {trigger_length} triggers\n"
-        self.WarningLabelCamera.setText(warning_text)
-        if error_tag:
+                    self.drop_frames_warning_text+=f"Correct: {avi_file} has {num_frames} frames and {self.trigger_length} triggers\n"
+                self.frames[avi_file] = num_frames
+        self.WarningLabelCamera.setText(self.drop_frames_warning_text)
+        if self.drop_frames_tag:
             self.WarningLabelCamera.setStyleSheet("color: red;")
         else:
             self.WarningLabelCamera.setStyleSheet("color: green;")  
