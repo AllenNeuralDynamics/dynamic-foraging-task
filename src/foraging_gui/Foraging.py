@@ -383,7 +383,7 @@ class Window(QMainWindow):
                     self.drop_frames_tag=1
                 else:
                     self.drop_frames_warning_text+=f"Correct: {avi_file} has {num_frames} frames and {self.trigger_length} triggers\n"
-                self.frame_num[avi_file] = num_frames
+                self.frame_num[csv_file] = num_frames
         self.WarningLabelCamera.setText(self.drop_frames_warning_text)
         if self.drop_frames_tag:
             self.WarningLabelCamera.setStyleSheet("color: red;")
