@@ -351,10 +351,9 @@ class Window(QMainWindow):
         avi_files = [file for file in os.listdir(video_folder) if file.endswith(".avi")]
 
         warning_text = ''
-        csv_files_set = set(csv_files)  # Convert csv_files to a set for faster lookup
         for avi_file in avi_files:
             csv_file = avi_file.replace('.avi', '.csv')
-            if csv_file not in csv_files_set:
+            if csv_file not in csv_files:
                 warning_text+=f'No csv file found for {avi_file}\n'
             else:
                 current_frames = pd.read_csv(os.path.join(video_folder, csv_file), header=None)
