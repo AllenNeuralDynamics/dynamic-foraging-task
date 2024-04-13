@@ -328,7 +328,21 @@ class Window(QMainWindow):
 
     def _check_drop_frames(self):
         '''check if there are any drop frames in the video'''
-        pass
+        if 'HarpFolder' in self.Obj:
+            HarpFolder=self.Obj['HarpFolder']
+            video_folder=[self.Obj['VideoFolder']]
+        else:
+            HarpFolder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'HarpFolder')# old folder structure
+            video_folder.append(os.path.join(os.path.dirname(os.path.dirname(self.fname)),'VideoFolder')) # old folder structure
+            if not os.path.exists(HarpFolder):
+                HarpFolder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'raw.harp')# new folder structure
+                video_folder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'behavior-videos') # new folder structure
+
+        camera_trigger_file=os.path.join(HarpFolder,'BehaviorEvents','Event_94.bin')
+        if os.path.exists(camera_trigger_file):
+            triggers = harp.read(camera_trigger_file)
+        else:
+            pass
 
     def _warmup(self):
         '''warm up the session before starting.
