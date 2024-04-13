@@ -346,7 +346,7 @@ class Window(QMainWindow):
             if save_tag==1:
                 # check the drop frames of the current session
                 # sleep some time to wait for the finish of saving video
-                time.sleep(3)
+                time.sleep(5)
                 if hasattr(self,'HarpFolder'):
                     HarpFolder=self.HarpFolder
                     video_folder=self.VideoFolder
