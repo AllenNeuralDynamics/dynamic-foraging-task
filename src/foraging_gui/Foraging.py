@@ -8,6 +8,7 @@ import math
 import logging
 import socket
 import harp
+import pandas as pd
 from datetime import date, datetime
 
 import serial 
@@ -330,19 +331,40 @@ class Window(QMainWindow):
         '''check if there are any drop frames in the video'''
         if 'HarpFolder' in self.Obj:
             HarpFolder=self.Obj['HarpFolder']
-            video_folder=[self.Obj['VideoFolder']]
+            video_folder=self.Obj['VideoFolder']
         else:
             HarpFolder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'HarpFolder')# old folder structure
-            video_folder.append(os.path.join(os.path.dirname(os.path.dirname(self.fname)),'VideoFolder')) # old folder structure
+            video_folder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'VideoFolder') # old folder structure
             if not os.path.exists(HarpFolder):
-                HarpFolder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'raw.harp')# new folder structure
+                HarpFolder=os.path.join(os.path.dirname(self.fname),'raw.harp')# new folder structure
                 video_folder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'behavior-videos') # new folder structure
 
         camera_trigger_file=os.path.join(HarpFolder,'BehaviorEvents','Event_94.bin')
         if os.path.exists(camera_trigger_file):
             triggers = harp.read(camera_trigger_file)
+            trigger_length = len(triggers)
         else:
-            pass
+            self.WarningLabelCamera.setText('No camera trigger file found!')
+            self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
+            return
+        csv_files = [file for file in os.listdir(video_folder) if file.endswith(".csv")]
+        avi_files = [file for file in os.listdir(video_folder) if file.endswith(".avi")]
+
+        warning_text = ''
+        csv_files_set = set(csv_files)  # Convert csv_files to a set for faster lookup
+        for avi_file in avi_files:
+            csv_file = avi_file.replace('.avi', '.csv')
+            if csv_file not in csv_files_set:
+                warning_text+=f'No csv file found for {avi_file}\n'
+            else:
+                current_frames = pd.read_csv(os.path.join(video_folder, csv_file), header=None)
+                num_frames = len(current_frames)
+                if num_frames != trigger_length:
+                    warning_text+=f"{avi_file} has {num_frames} frames, but {trigger_length} triggers\n"
+                else:
+                    warning_text+=f"Correct: {avi_file} has {num_frames} frames and {trigger_length} triggers\n"
+        self.WarningLabelCamera.setText(warning_text)
+        self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
 
     def _warmup(self):
         '''warm up the session before starting.
