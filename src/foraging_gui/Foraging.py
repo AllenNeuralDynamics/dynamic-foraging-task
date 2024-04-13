@@ -334,6 +334,7 @@ class Window(QMainWindow):
         self.drop_frames_warning_text = ''
         self.frame_num={}
 
+        use_default_folder_structure=0
         if save_tag==1:
             # check the drop frames of the current session
             # sleep some time to wait for the finish of saving video
@@ -341,12 +342,16 @@ class Window(QMainWindow):
             if hasattr(self,'HarpFolder'):
                 HarpFolder=self.HarpFolder
                 video_folder=self.VideoFolder
+            else:
+                use_default_folder_structure=1
         elif save_tag==0:
             if 'HarpFolder' in self.Obj:
                 # check the drop frames of the loaded session
                 HarpFolder=self.Obj['HarpFolder']
                 video_folder=self.Obj['VideoFolder']
-        else:
+            else:
+                use_default_folder_structure=1
+        if use_default_folder_structure:
             # use the default folder structure
             HarpFolder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'HarpFolder')# old folder structure
             video_folder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'VideoFolder') # old folder structure
