@@ -327,16 +327,25 @@ class Window(QMainWindow):
         self.Sessionlist.addItems(sorted_dates)
         self._connect_Sessionlist(connect=True)
 
-    def _check_drop_frames(self):
+    def _check_drop_frames(self,save_tag=1):
         '''check if there are any drop frames in the video'''
         self.drop_frames_tag=0
         self.trigger_length=0
         self.drop_frames_warning_text = ''
         self.frames={}
-        if 'HarpFolder' in self.Obj:
-            HarpFolder=self.Obj['HarpFolder']
-            video_folder=self.Obj['VideoFolder']
+
+        if save_tag==1:
+            # check the drop frames of the current session
+            if hasattr(self,'HarpFolder'):
+                HarpFolder=self.Obj['HarpFolder']
+                video_folder=self.Obj['VideoFolder']
+        elif save_tag==0:
+            if 'HarpFolder' in self.Obj:
+                # check the drop frames of the loaded session
+                HarpFolder=self.Obj['HarpFolder']
+                video_folder=self.Obj['VideoFolder']
         else:
+            # use the default folder structure
             HarpFolder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'HarpFolder')# old folder structure
             video_folder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'VideoFolder') # old folder structure
             if not os.path.exists(HarpFolder):
@@ -2427,7 +2436,7 @@ class Window(QMainWindow):
                 self.SessionlistSpin.setValue(Ind+1)
                 self._connect_Sessionlist(connect=True)
             # check dropping frames
-            self._check_drop_frames()
+            self._check_drop_frames(save_tag=0)
         else:
             self.NewSession.setDisabled(False)
         self.StartExcitation.setChecked(False)
