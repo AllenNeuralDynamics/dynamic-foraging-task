@@ -7,6 +7,7 @@ import subprocess
 import math
 import logging
 import socket
+import harp
 from datetime import date, datetime
 
 import serial 
@@ -324,7 +325,11 @@ class Window(QMainWindow):
         self.Sessionlist.clear()
         self.Sessionlist.addItems(sorted_dates)
         self._connect_Sessionlist(connect=True)
-        
+
+    def _check_drop_frames(self):
+        '''check if there are any drop frames in the video'''
+        pass
+
     def _warmup(self):
         '''warm up the session before starting.
             Use warm up with caution. Usually, it is only used for the first time training. 
@@ -2377,6 +2382,8 @@ class Window(QMainWindow):
                 self.Sessionlist.setCurrentIndex(Ind)
                 self.SessionlistSpin.setValue(Ind+1)
                 self._connect_Sessionlist(connect=True)
+            # check dropping frames
+            self._check_drop_frames()
         else:
             self.NewSession.setDisabled(False)
         self.StartExcitation.setChecked(False)
