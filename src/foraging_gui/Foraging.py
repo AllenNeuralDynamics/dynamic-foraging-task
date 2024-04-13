@@ -351,6 +351,7 @@ class Window(QMainWindow):
         avi_files = [file for file in os.listdir(video_folder) if file.endswith(".avi")]
 
         warning_text = ''
+        error_tag=0
         for avi_file in avi_files:
             csv_file = avi_file.replace('.avi', '.csv')
             if csv_file not in csv_files:
@@ -359,11 +360,15 @@ class Window(QMainWindow):
                 current_frames = pd.read_csv(os.path.join(video_folder, csv_file), header=None)
                 num_frames = len(current_frames)
                 if num_frames != trigger_length:
-                    warning_text+=f"{avi_file} has {num_frames} frames, but {trigger_length} triggers\n"
+                    warning_text+=f"Error: {avi_file} has {num_frames} frames, but {trigger_length} triggers\n"
+                    error_tag=1
                 else:
                     warning_text+=f"Correct: {avi_file} has {num_frames} frames and {trigger_length} triggers\n"
         self.WarningLabelCamera.setText(warning_text)
-        self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
+        if error_tag:
+            self.WarningLabelCamera.setStyleSheet("color: red;")
+        else:
+            self.WarningLabelCamera.setStyleSheet("color: green;")  
 
     def _warmup(self):
         '''warm up the session before starting.
