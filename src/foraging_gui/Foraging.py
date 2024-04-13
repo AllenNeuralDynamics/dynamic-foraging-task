@@ -1955,6 +1955,13 @@ class Window(QMainWindow):
         Obj['repo_url']=self.repo_url
         Obj['current_branch'] =self.current_branch
         
+        # save folders
+        Obj['TrainingFolder']=self.TrainingFolder
+        Obj['HarpFolder']=self.HarpFolder
+        Obj['VideoFolder']=self.VideoFolder
+        Obj['PhotometryFolder']=self.PhotometryFolder
+        Obj['MetadataFolder']=self.MetadataFolder
+
         # save Json or mat
         if self.SaveFile.endswith('.mat'):
         # Save data to a .mat file
