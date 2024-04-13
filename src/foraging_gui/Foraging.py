@@ -143,7 +143,7 @@ class Window(QMainWindow):
             self._ReconnectBonsai()   
         logging.info('Start up complete')
     
-    def get_file_commit_ID(self,file_path):
+    def get_file_git_infor(self,file_path):
         try:
             # Get the absolute path of the file
             abs_file_path = os.path.abspath(file_path)
@@ -845,7 +845,7 @@ class Window(QMainWindow):
         self.window_title = window_title
 
         # Get the commit hash of the current version of this Python file
-        self.commit_ID,self.repo_url, self.current_branch = self.get_file_commit_ID(__file__)
+        self.commit_ID,self.repo_url, self.current_branch = self.get_file_git_infor(__file__)
 
     def _InitializeBonsai(self):
         '''
