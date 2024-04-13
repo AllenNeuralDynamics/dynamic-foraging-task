@@ -332,7 +332,7 @@ class Window(QMainWindow):
         self.drop_frames_tag=0
         self.trigger_length=0
         self.drop_frames_warning_text = ''
-        self.frames={}
+        self.frame_num={}
 
         if save_tag==1:
             # check the drop frames of the current session
@@ -378,7 +378,7 @@ class Window(QMainWindow):
                     self.drop_frames_tag=1
                 else:
                     self.drop_frames_warning_text+=f"Correct: {avi_file} has {num_frames} frames and {self.trigger_length} triggers\n"
-                self.frames[avi_file] = num_frames
+                self.frame_num[avi_file] = num_frames
         self.WarningLabelCamera.setText(self.drop_frames_warning_text)
         if self.drop_frames_tag:
             self.WarningLabelCamera.setStyleSheet("color: red;")
@@ -1970,7 +1970,20 @@ class Window(QMainWindow):
 
         # Save the current box
         Obj['box'] = self.current_box
-    
+
+        if SaveContinue==0:
+            # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
+            self._NewSession()
+            # do not create a new folder
+            self.CreateNewFolder=0
+        # check drop of frames
+        self._check_drop_frames(save_tag=1)
+        # save drop frames information
+        Obj['drop_frames_tag']=Obj.self.drop_frames_tag
+        Obj['trigger_length']=self.trigger_length
+        Obj['drop_frames_warning_text']=self.drop_frames_warning_text
+        Obj['frame_num']=self.frame_num
+
         # save Json or mat
         if self.SaveFile.endswith('.mat'):
         # Save data to a .mat file
@@ -2000,13 +2013,7 @@ class Window(QMainWindow):
         with open(filepath, 'w') as finished_file:
             finished_file.write(contents)
         
-        if SaveContinue==0:
-            # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
-            self._NewSession()
-            # do not create a new folder
-            self.CreateNewFolder=0
-            # check drop of frames
-            self._check_drop_frames(save_tag=1)
+
     def _GetSaveFolder(self):
         '''
         Create folders with structure requested by Sci.Comp.
