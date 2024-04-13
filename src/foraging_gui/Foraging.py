@@ -336,6 +336,8 @@ class Window(QMainWindow):
 
         if save_tag==1:
             # check the drop frames of the current session
+            # sleep some time to wait for the finish of saving video
+            time.sleep(3)
             if hasattr(self,'HarpFolder'):
                 HarpFolder=self.Obj['HarpFolder']
                 video_folder=self.Obj['VideoFolder']
@@ -2003,7 +2005,8 @@ class Window(QMainWindow):
             self._NewSession()
             # do not create a new folder
             self.CreateNewFolder=0
-
+            # check drop of frames
+            self._check_drop_frames(save_tag=1)
     def _GetSaveFolder(self):
         '''
         Create folders with structure requested by Sci.Comp.
