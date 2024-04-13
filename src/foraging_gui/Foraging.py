@@ -1978,7 +1978,7 @@ class Window(QMainWindow):
 
         if SaveContinue==0:
             # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
-            self._NewSession()
+            self._NewSession(dont_ask=True)
             # do not create a new folder
             self.CreateNewFolder=0
         # check drop of frames
@@ -2720,21 +2720,22 @@ class Window(QMainWindow):
         except Exception as e:
             logging.error(str(e))
 
-    def _NewSession(self):
+    def _NewSession(self,dont_ask=False):
         logging.info('New Session pressed')
         self._StopCurrentSession() 
 
-        # If we have unsaved data, prompt to save
-        if (self.ToInitializeVisual==0) and (self.unsaved_data): 
-            reply = QMessageBox.critical(self, 
-                'Box {}, New Session:'.format(self.box_letter), 
-                'Start new session without saving?',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-            if reply == QMessageBox.No:
-                self.NewSession.setStyleSheet("background-color : none")
-                self.NewSession.setChecked(False)
-                logging.info('New Session declined')
-                return False
+        if dont_ask==False:
+            # If we have unsaved data, prompt to save
+            if (self.ToInitializeVisual==0) and (self.unsaved_data): 
+                reply = QMessageBox.critical(self, 
+                    'Box {}, New Session:'.format(self.box_letter), 
+                    'Start new session without saving?',
+                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                if reply == QMessageBox.No:
+                    self.NewSession.setStyleSheet("background-color : none")
+                    self.NewSession.setChecked(False)
+                    logging.info('New Session declined')
+                    return False
         
         # stop the camera 
         self._stop_camera()
