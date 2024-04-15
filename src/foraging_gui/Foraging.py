@@ -7,8 +7,6 @@ import subprocess
 import math
 import logging
 import socket
-import harp
-import pandas as pd
 from datetime import date, datetime
 
 import serial 
@@ -326,78 +324,7 @@ class Window(QMainWindow):
         self.Sessionlist.clear()
         self.Sessionlist.addItems(sorted_dates)
         self._connect_Sessionlist(connect=True)
-
-    def _check_drop_frames(self,save_tag=1):
-        '''check if there are any drop frames in the video'''
-        return_tag=0
-        if save_tag==0:
-            if "drop_frames_warning_text" in self.Obj:
-                self.drop_frames_warning_text=self.Obj['drop_frames_warning_text']
-                self.drop_frames_tag=self.Obj['drop_frames_tag']
-                self.trigger_length=self.Obj['trigger_length']
-                self.frame_num=self.Obj['frame_num']
-                return_tag=1
-        if return_tag==0:
-            self.drop_frames_tag=0
-            self.trigger_length=0
-            self.drop_frames_warning_text = ''
-            self.frame_num={}
-            use_default_folder_structure=0
-            if save_tag==1:
-                # check the drop frames of the current session
-                # sleep some time to wait for the finish of saving video
-                time.sleep(5)
-                if hasattr(self,'HarpFolder'):
-                    HarpFolder=self.HarpFolder
-                    video_folder=self.VideoFolder
-                else:
-                    use_default_folder_structure=1
-            elif save_tag==0:
-                if 'HarpFolder' in self.Obj:
-                    # check the drop frames of the loaded session
-                    HarpFolder=self.Obj['HarpFolder']
-                    video_folder=self.Obj['VideoFolder']
-                else:
-                    use_default_folder_structure=1
-            if use_default_folder_structure:
-                # use the default folder structure
-                HarpFolder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'HarpFolder')# old folder structure
-                video_folder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'VideoFolder') # old folder structure
-                if not os.path.exists(HarpFolder):
-                    HarpFolder=os.path.join(os.path.dirname(self.fname),'raw.harp')# new folder structure
-                    video_folder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'behavior-videos') # new folder structure
-
-            camera_trigger_file=os.path.join(HarpFolder,'BehaviorEvents','Event_94.bin')
-            if os.path.exists(camera_trigger_file):
-                triggers = harp.read(camera_trigger_file)
-                self.trigger_length = len(triggers)
-            else:
-                self.trigger_length=0
-                self.WarningLabelCamera.setText('No camera trigger file found!')
-                self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
-                return
-            csv_files = [file for file in os.listdir(video_folder) if file.endswith(".csv")]
-            avi_files = [file for file in os.listdir(video_folder) if file.endswith(".avi")]
-
-            for avi_file in avi_files:
-                csv_file = avi_file.replace('.avi', '.csv')
-                if csv_file not in csv_files:
-                    self.drop_frames_warning_text+=f'No csv file found for {avi_file}\n'
-                else:
-                    current_frames = pd.read_csv(os.path.join(video_folder, csv_file), header=None)
-                    num_frames = len(current_frames)
-                    if num_frames != self.trigger_length:
-                        self.drop_frames_warning_text+=f"Error: {avi_file} has {num_frames} frames, but {self.trigger_length} triggers\n"
-                        self.drop_frames_tag=1
-                    else:
-                        self.drop_frames_warning_text+=f"Correct: {avi_file} has {num_frames} frames and {self.trigger_length} triggers\n"
-                    self.frame_num[csv_file] = num_frames
-        self.WarningLabelCamera.setText(self.drop_frames_warning_text)
-        if self.drop_frames_tag:
-            self.WarningLabelCamera.setStyleSheet("color: red;")
-        else:
-            self.WarningLabelCamera.setStyleSheet("color: green;")  
-
+        
     def _warmup(self):
         '''warm up the session before starting.
             Use warm up with caution. Usually, it is only used for the first time training. 
@@ -1983,20 +1910,7 @@ class Window(QMainWindow):
 
         # Save the current box
         Obj['box'] = self.current_box
-
-        if SaveContinue==0:
-            # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
-            self._NewSession(dont_ask=True)
-            # do not create a new folder
-            self.CreateNewFolder=0
-        # check drop of frames
-        self._check_drop_frames(save_tag=1)
-        # save drop frames information
-        Obj['drop_frames_tag']=self.drop_frames_tag
-        Obj['trigger_length']=self.trigger_length
-        Obj['drop_frames_warning_text']=self.drop_frames_warning_text
-        Obj['frame_num']=self.frame_num
-
+    
         # save Json or mat
         if self.SaveFile.endswith('.mat'):
         # Save data to a .mat file
@@ -2026,6 +1940,11 @@ class Window(QMainWindow):
         with open(filepath, 'w') as finished_file:
             finished_file.write(contents)
         
+        if SaveContinue==0:
+            # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
+            self._NewSession()
+            # do not create a new folder
+            self.CreateNewFolder=0
 
     def _GetSaveFolder(self):
         '''
@@ -2458,8 +2377,6 @@ class Window(QMainWindow):
                 self.Sessionlist.setCurrentIndex(Ind)
                 self.SessionlistSpin.setValue(Ind+1)
                 self._connect_Sessionlist(connect=True)
-            # check dropping frames
-            self._check_drop_frames(save_tag=0)
         else:
             self.NewSession.setDisabled(False)
         self.StartExcitation.setChecked(False)
@@ -2728,22 +2645,21 @@ class Window(QMainWindow):
         except Exception as e:
             logging.error(str(e))
 
-    def _NewSession(self,dont_ask=False):
+    def _NewSession(self):
         logging.info('New Session pressed')
         self._StopCurrentSession() 
 
-        if dont_ask==False:
-            # If we have unsaved data, prompt to save
-            if (self.ToInitializeVisual==0) and (self.unsaved_data): 
-                reply = QMessageBox.critical(self, 
-                    'Box {}, New Session:'.format(self.box_letter), 
-                    'Start new session without saving?',
-                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-                if reply == QMessageBox.No:
-                    self.NewSession.setStyleSheet("background-color : none")
-                    self.NewSession.setChecked(False)
-                    logging.info('New Session declined')
-                    return False
+        # If we have unsaved data, prompt to save
+        if (self.ToInitializeVisual==0) and (self.unsaved_data): 
+            reply = QMessageBox.critical(self, 
+                'Box {}, New Session:'.format(self.box_letter), 
+                'Start new session without saving?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if reply == QMessageBox.No:
+                self.NewSession.setStyleSheet("background-color : none")
+                self.NewSession.setChecked(False)
+                logging.info('New Session declined')
+                return False
         
         # stop the camera 
         self._stop_camera()
@@ -2891,7 +2807,7 @@ class Window(QMainWindow):
         # Clear warnings
         self.WarningLabelInitializeBonsai.setText('')
         self.NewSession.setDisabled(False)
-        self.WarningLabelCamera.setText('')     
+            
         # Toggle button colors
         if self.Start.isChecked():
             logging.info('Start button pressed: starting trial loop')
