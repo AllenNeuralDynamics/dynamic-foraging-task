@@ -152,23 +152,23 @@ class Window(QMainWindow):
 
             # Run the git log command to get the commit hash of the file
             result_ID = subprocess.run(['git', 'log', '-n', '1', '--pretty=format:%H', '--', abs_file_path], stdout=subprocess.PIPE)
-            commit_ID=result_ID.stdout.decode('utf-8').strip()
+            self.commit_ID=result_ID.stdout.decode('utf-8').strip()
 
             # Get the URL of the current repository
             repo_url_command = ['git', 'remote', 'get-url', 'origin']
             result_url = subprocess.run(repo_url_command, stdout=subprocess.PIPE, cwd=directory, text=True)
-            repo_url = result_url.stdout.strip()
+            self.repo_url = result_url.stdout.strip()
 
             # Get the name of the current branch
             branch_name_command = ['git', 'rev-parse', '--abbrev-ref', 'HEAD']
             result_branch = subprocess.run(branch_name_command, stdout=subprocess.PIPE, cwd=directory, text=True)
-            current_branch = result_branch.stdout.strip()
+            self.current_branch = result_branch.stdout.strip()
 
-            # Decode the output and return it
-            return commit_ID, repo_url, current_branch
         except Exception as e:
             logging.info(f"Error: {e}")
-            return None, None, None
+            self.commit_ID=None
+            self.repo_url=None
+            self.current_branch=None
     
     def _LoadUI(self):
         '''
