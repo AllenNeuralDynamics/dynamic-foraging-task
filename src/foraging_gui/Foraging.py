@@ -845,7 +845,7 @@ class Window(QMainWindow):
         self.window_title = window_title
 
         # Get the commit hash of the current version of this Python file
-        self.commit_ID,self.repo_url, self.current_branch = self.get_file_git_infor(__file__)
+        self.get_file_git_infor(__file__)
 
     def _InitializeBonsai(self):
         '''
