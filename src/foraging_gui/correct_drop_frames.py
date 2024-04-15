@@ -4,7 +4,7 @@ import json
 
 import pandas as pd
 
-def correct_drop_frames(json_file=None,harp_folder=None,video_folder=None):
+def correct_drop_frames(save_data=None,json_file=None,harp_folder=None,video_folder=None):
     '''correcting drop frames in videos
     
     video_folder: folder containing the videos. Optionally, could be read from the json_file
@@ -13,7 +13,7 @@ def correct_drop_frames(json_file=None,harp_folder=None,video_folder=None):
     output: corrected timestamps of different cameras
 
     '''
-    if (json_file is None) and (harp_folder is None or video_folder is None):
+    if (save_data is None) and (json_file is None) and (harp_folder is None or video_folder is None):
         print('json_file or harp_folder and video_folder must be provided')
         return
     
@@ -35,6 +35,14 @@ def correct_drop_frames(json_file=None,harp_folder=None,video_folder=None):
             else:
                 print('HarpFolder or VideoFolder not found in the json file')
                 return
+    elif save_data is not None:
+        if hasattr(save_data,'harp_folder'):
+            # check the drop frames of the loaded session
+            harp_folder=save_data.HarpFolder
+            video_folder=save_data.VideoFolder
+        else:
+            print('harp_folder or video_folder not found in the save_data')
+            return
     else:
         print('json_file or harp_folder and video_folder must be provided')
         return
