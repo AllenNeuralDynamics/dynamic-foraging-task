@@ -818,7 +818,7 @@ class Window(QMainWindow):
         self.window_title = window_title
 
         # Get the commit hash of the current version of this Python file
-        self.commit_ID, self.current_branch, self.result_url=log_git_hash()
+        self.commit_ID, self.current_branch, self.repo_url=log_git_hash()
 
     def _InitializeBonsai(self):
         '''
@@ -3408,7 +3408,7 @@ def log_git_hash():
     try:
         git_hash = subprocess.check_output(['git','rev-parse','--short', 'HEAD']).decode('ascii').strip()
         git_branch = subprocess.check_output(['git','branch','--show-current']).decode('ascii').strip()
-        result_url = subprocess.check_outputn(['git', 'remote', 'get-url', 'origin']).decode('ascii').strip()
+        repo_url = subprocess.check_outputn(['git', 'remote', 'get-url', 'origin']).decode('ascii').strip()
         logging.info('Current git commit branch, hash: {}, {}'.format(git_branch,git_hash))
         return git_hash, git_branch, result_url
     except Exception as e:
