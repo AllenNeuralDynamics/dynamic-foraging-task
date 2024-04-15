@@ -1998,7 +1998,7 @@ class Window(QMainWindow):
         Obj['drop_frames_warning_text']=self.drop_frames_warning_text
         Obj['frame_num']=self.frame_num
         # correct drop of frames
-        correct_drop_frames(self)
+        video_info=correct_drop_frames(save_data=self)
 
         # save Json or mat
         if self.SaveFile.endswith('.mat'):
