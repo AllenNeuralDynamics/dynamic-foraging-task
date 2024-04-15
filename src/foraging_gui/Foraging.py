@@ -3410,7 +3410,7 @@ def log_git_hash():
         git_branch = subprocess.check_output(['git','branch','--show-current']).decode('ascii').strip()
         repo_url = subprocess.check_outputn(['git', 'remote', 'get-url', 'origin']).decode('ascii').strip()
         logging.info('Current git commit branch, hash: {}, {}'.format(git_branch,git_hash))
-        return git_hash, git_branch, result_url
+        return git_hash, git_branch, repo_url
     except Exception as e:
         logging.error('Could not log git branch and hash: {}'.format(str(e)))
         return None, None, None
