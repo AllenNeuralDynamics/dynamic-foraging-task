@@ -155,13 +155,11 @@ class Window(QMainWindow):
             self.commit_ID=result_ID.stdout.decode('utf-8').strip()
 
             # Get the URL of the current repository
-            repo_url_command = ['git', 'remote', 'get-url', 'origin']
-            result_url = subprocess.run(repo_url_command, stdout=subprocess.PIPE, cwd=directory, text=True)
+            result_url = subprocess.run(['git', 'remote', 'get-url', 'origin'], stdout=subprocess.PIPE, cwd=directory, text=True)
             self.repo_url = result_url.stdout.strip()
 
             # Get the name of the current branch
-            branch_name_command = ['git', 'rev-parse', '--abbrev-ref', 'HEAD']
-            result_branch = subprocess.run(branch_name_command, stdout=subprocess.PIPE, cwd=directory, text=True)
+            result_branch = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], stdout=subprocess.PIPE, cwd=directory, text=True)
             self.current_branch = result_branch.stdout.strip()
 
         except Exception as e:
