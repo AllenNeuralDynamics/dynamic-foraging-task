@@ -143,31 +143,6 @@ class Window(QMainWindow):
             self._ReconnectBonsai()   
         logging.info('Start up complete')
     
-    def get_file_git_infor(self,file_path):
-        try:
-            # Get the absolute path of the file
-            abs_file_path = os.path.abspath(file_path)
-            # Get the directory of the file
-            directory = os.path.dirname(abs_file_path)
-
-            # Run the git log command to get the commit hash of the file
-            result_ID = subprocess.run(['git', 'log', '-n', '1', '--pretty=format:%H', '--', abs_file_path], stdout=subprocess.PIPE)
-            self.commit_ID=result_ID.stdout.decode('utf-8').strip()
-
-            # Get the URL of the current repository
-            result_url = subprocess.run(['git', 'remote', 'get-url', 'origin'], stdout=subprocess.PIPE, cwd=directory, text=True)
-            self.repo_url = result_url.stdout.strip()
-
-            # Get the name of the current branch
-            result_branch = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], stdout=subprocess.PIPE, cwd=directory, text=True)
-            self.current_branch = result_branch.stdout.strip()
-
-        except Exception as e:
-            logging.info(f"Error: {e}")
-            self.commit_ID=None
-            self.repo_url=None
-            self.current_branch=None
-    
     def _LoadUI(self):
         '''
             Determine which user interface to use
