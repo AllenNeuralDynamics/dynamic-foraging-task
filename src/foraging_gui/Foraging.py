@@ -9,6 +9,7 @@ import logging
 import socket
 import harp
 import pandas as pd
+import webbrowser
 from datetime import date, datetime
 
 import serial 
@@ -20,7 +21,7 @@ from PyQt5.QtWidgets import QFileDialog,QVBoxLayout
 from PyQt5 import QtWidgets,QtGui,QtCore, uic
 from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
-import webbrowser
+from correct_drop_frames import correct_drop_frames
 
 import foraging_gui.rigcontrol as rigcontrol
 from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
@@ -1996,6 +1997,8 @@ class Window(QMainWindow):
         Obj['trigger_length']=self.trigger_length
         Obj['drop_frames_warning_text']=self.drop_frames_warning_text
         Obj['frame_num']=self.frame_num
+        # correct drop of frames
+        correct_drop_frames(self)
 
         # save Json or mat
         if self.SaveFile.endswith('.mat'):
