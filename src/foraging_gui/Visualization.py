@@ -9,12 +9,12 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 class PlotV(FigureCanvas):
     def __init__(self,win,GeneratedTrials=None,parent=None,dpi=100,width=5, height=4):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
-        gs = GridSpec(10, 30, wspace = 3, hspace = 0.1, bottom = 0.1, 
-            top = 0.95, left = 0.04, right = 0.98)
+        gs = GridSpec(10, 30, wspace=3, hspace=0.1, bottom=0.1, top=0.95, left=0.04, right=0.98)
+
         self.ax1 = self.fig.add_subplot(gs[0:4, 0:20])
-        self.ax2 = self.fig.add_subplot(gs[4:10, 0:20])
+        self.ax2 = self.fig.add_subplot(gs[4:10, 0:20], sharex=self.ax1)
         self.ax3 = self.fig.add_subplot(gs[1:9, 22:])
-        self.ax1.get_shared_x_axes().join(self.ax1, self.ax2)
+
         FigureCanvas.__init__(self, self.fig)
         self.RunLength=win.RunLength.text
         self.RunLengthSetValue=win.RunLength.setValue
@@ -430,15 +430,14 @@ class PlotWaterCalibration(FigureCanvas):
 class PlotLickDistribution(FigureCanvas):
     def __init__(self,GeneratedTrials=None,dpi=100,width=5, height=4):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
-        gs = GridSpec(10, 51, wspace = 3, hspace = 0.1, bottom = 0.1, top = 0.95, left = 0.04, right = 0.98)
-        self.ax1 = self.fig.add_subplot(gs[1:9, 2:11])
-        self.ax2 = self.fig.add_subplot(gs[1:9, 12:21])
-        self.ax3 = self.fig.add_subplot(gs[1:9, 22:31])
-        self.ax4 = self.fig.add_subplot(gs[1:9, 32:41])
-        self.ax5 = self.fig.add_subplot(gs[1:9, 42:51])
+        gs = GridSpec(10, 51, wspace=3, hspace=0.1, bottom=0.1, top=0.95, left=0.04, right=0.98)
 
-        self.ax1.get_shared_y_axes().join(self.ax1, self.ax2,self.ax3,self.ax4,self.ax5)
-        self.ax1.get_shared_x_axes().join(self.ax1, self.ax2,self.ax3,self.ax4,self.ax5)
+        self.ax1 = self.fig.add_subplot(gs[1:9, 2:11])
+        self.ax2 = self.fig.add_subplot(gs[1:9, 12:21], sharey=self.ax1, sharex=self.ax1)
+        self.ax3 = self.fig.add_subplot(gs[1:9, 22:31], sharey=self.ax1, sharex=self.ax1)
+        self.ax4 = self.fig.add_subplot(gs[1:9, 32:41], sharey=self.ax1, sharex=self.ax1)
+        self.ax5 = self.fig.add_subplot(gs[1:9, 42:51], sharey=self.ax1, sharex=self.ax1)
+
         self.ax2.set_yticks([])
         self.ax3.set_yticks([])
         self.ax4.set_yticks([])
