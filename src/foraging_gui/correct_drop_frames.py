@@ -1,6 +1,7 @@
 import os
 import harp
 import json
+import logging
 
 import pandas as pd
 
@@ -14,15 +15,15 @@ def correct_drop_frames(save_data=None,json_file=None,harp_folder=None,video_fol
 
     '''
     if (save_data is None) and (json_file is None) and (harp_folder is None or video_folder is None):
-        print('json_file or harp_folder and video_folder must be provided')
+        logging.info('json_file or harp_folder and video_folder must be provided')
         return
     
     if harp_folder is not None and video_folder is not None:
         if not os.path.exists(harp_folder):
-            print('harp_folder does not exist')
+            logging.info('harp_folder does not exist')
             return
         if not os.path.exists(video_folder):
-            print('video_folder does not exist')
+            logging.info('video_folder does not exist')
             return
     # use the folder from the json file
     elif json_file is not None:
@@ -33,7 +34,7 @@ def correct_drop_frames(save_data=None,json_file=None,harp_folder=None,video_fol
                 harp_folder=Obj['HarpFolder']
                 video_folder=Obj['VideoFolder']
             else:
-                print('HarpFolder or VideoFolder not found in the json file')
+                logging.info('HarpFolder or VideoFolder not found in the json file')
                 return
     elif save_data is not None:
         if hasattr(save_data,'HarpFolder'):
@@ -41,10 +42,10 @@ def correct_drop_frames(save_data=None,json_file=None,harp_folder=None,video_fol
             harp_folder=save_data.HarpFolder
             video_folder=save_data.VideoFolder
         else:
-            print('harp_folder or video_folder not found in the save_data')
+            logging.info('harp_folder or video_folder not found in the save_data')
             return
     else:
-        print('json_file or harp_folder and video_folder must be provided')
+        logging.info('json_file or harp_folder and video_folder must be provided')
         return
 
     # read the video files
@@ -54,7 +55,7 @@ def correct_drop_frames(save_data=None,json_file=None,harp_folder=None,video_fol
         trigger_length = len(triggers)
     else:
         trigger_length=0
-        print('No camera trigger file found!')
+        logging.info('No camera trigger file found!')
         return
     csv_files = [file for file in os.listdir(video_folder) if file.endswith(".csv")]
     avi_files = [file for file in os.listdir(video_folder) if file.endswith(".avi")]
