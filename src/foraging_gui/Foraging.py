@@ -1358,7 +1358,6 @@ class Window(QMainWindow):
                         if Correct ==0: # incorrect format; don't change
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
-                    print('here: {}'.format(child.objectName()))
                     if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight','WeightAfter']) and
                         (child.text() == '')):
                         # These attributes can have the empty string, but we can't set the value as the empty string, unless we allow resets
@@ -1417,7 +1416,7 @@ class Window(QMainWindow):
                 try:
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                         self.Continue=0
-                        if child.objectName() in {'Experimenter', 'UncoupledReward', 'WeightAfter', 'ExtraWater'}:
+                        if child.objectName() in {'Experimenter', 'UncoupledReward', 'ExtraWater'}:
                             child.setStyleSheet(self.default_text_color)
                             self.Continue=1
                         if child.text()=='': # If empty, change background color and wait for confirmation
