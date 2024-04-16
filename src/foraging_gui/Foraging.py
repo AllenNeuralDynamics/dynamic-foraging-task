@@ -1351,14 +1351,14 @@ class Window(QMainWindow):
                         child.setStyleSheet('background-color: white;')
                         self._Task()
                     
-                    if child.objectName() in {'Experimenter','TotalWater','WeightAfter','ExtraWater'}:
+                    if child.objectName() in {'Experimenter','TotalWater','ExtraWater'}:
                         continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
                         if Correct ==0: # incorrect format; don't change
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
-                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight']) and
+                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight','WeightAfter']) and
                         (child.text() == '')):
                         # These attributes can have the empty string, but we can't set the value as the empty string, unless we allow resets
                         if allow_reset:
