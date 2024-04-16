@@ -346,8 +346,6 @@ class Window(QMainWindow):
             use_default_folder_structure=0
             if save_tag==1:
                 # check the drop frames of the current session
-                # sleep some time to wait for the finish of saving video
-                time.sleep(5)
                 if hasattr(self,'HarpFolder'):
                     HarpFolder=self.HarpFolder
                     video_folder=self.VideoFolder
@@ -370,6 +368,9 @@ class Window(QMainWindow):
 
             camera_trigger_file=os.path.join(HarpFolder,'BehaviorEvents','Event_94.bin')
             if os.path.exists(camera_trigger_file):
+                if save_tag==1:
+                    # sleep some time to wait for the finish of saving video
+                    time.sleep(5)
                 triggers = harp.read(camera_trigger_file)
                 self.trigger_length = len(triggers)
             else:
