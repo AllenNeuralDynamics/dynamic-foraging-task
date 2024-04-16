@@ -890,9 +890,6 @@ class Window(QMainWindow):
         window_title = '{}'.format(self.current_box)
         self.window_title = window_title
 
-        # Get the commit hash of the current version of this Python file
-        self.commit_ID, self.current_branch, self.repo_url=log_git_hash()
-
     def _InitializeBonsai(self):
         '''
             Connect to Bonsai using OSC messages to establish a connection. 
@@ -3609,7 +3606,7 @@ if __name__ == "__main__":
    
     # Start logging
     start_gui_log_file(box_number)
-    log_git_hash()
+    commit_ID, current_branch, repo_url=log_git_hash()
 
     # Formating GUI graphics
     logging.info('Setting QApplication attributes')
@@ -3628,6 +3625,10 @@ if __name__ == "__main__":
 
     # Start GUI window
     win = Window(box_number=box_number,start_bonsai_ide=start_bonsai_ide)
+    # Get the commit hash of the current version of this Python file
+    win.commit_ID=commit_ID
+    win.current_branch=current_branch
+    win.repo_url=repo_url
     win.show()
    
      # Run your application's event loop and stop after closing all windows
