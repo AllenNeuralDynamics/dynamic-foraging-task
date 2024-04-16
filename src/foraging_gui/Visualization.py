@@ -320,7 +320,6 @@ class PlotV(FigureCanvas):
         self.draw()
 
     def _UpdateAxis(self):
-        self.ax1.set_xticks([])
         self.ax1.set_yticks([0,1])
         self.ax1.set_yticklabels(['L', 'R'])
         self.ax1.set_ylim(-0.6, 1.6)
