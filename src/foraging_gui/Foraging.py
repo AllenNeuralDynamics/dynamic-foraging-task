@@ -1442,7 +1442,9 @@ class Window(QMainWindow):
                             # Invalid float. Do not change the parameter
                             if child.objectName() in ['BaseWeight', 'WeightAfter']:
                                 child.setText(child.text()[:-1]) 
-                                print(child.text())
+                                print(child.text())        
+                                self.UpdateParameters=0
+                                continue
                             elif isinstance(child, QtWidgets.QDoubleSpinBox):
                                 child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
                             elif isinstance(child, QtWidgets.QSpinBox):
