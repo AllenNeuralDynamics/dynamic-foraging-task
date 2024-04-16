@@ -1351,14 +1351,14 @@ class Window(QMainWindow):
                         child.setStyleSheet('background-color: white;')
                         self._Task()
                     
-                    if child.objectName() in {'Experimenter','TotalWater','WeightAfter','ExtraWater'}:
+                    if child.objectName() in {'Experimenter','TotalWater','ExtraWater'}:
                         continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
                         if Correct ==0: # incorrect format; don't change
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
-                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight']) and
+                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight','WeightAfter']) and
                         (child.text() == '')):
                         # These attributes can have the empty string, but we can't set the value as the empty string, unless we allow resets
                         if allow_reset:
@@ -1416,7 +1416,7 @@ class Window(QMainWindow):
                 try:
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                         self.Continue=0
-                        if child.objectName() in {'Experimenter', 'UncoupledReward', 'WeightAfter', 'ExtraWater'}:
+                        if child.objectName() in {'Experimenter', 'UncoupledReward', 'ExtraWater'}:
                             child.setStyleSheet(self.default_text_color)
                             self.Continue=1
                         if child.text()=='': # If empty, change background color and wait for confirmation
@@ -1440,7 +1440,12 @@ class Window(QMainWindow):
                         except Exception as e:
                             #logging.error(str(e))
                             # Invalid float. Do not change the parameter
-                            if isinstance(child, QtWidgets.QDoubleSpinBox):
+                            if child.objectName() in ['BaseWeight', 'WeightAfter']:
+                                # Strip the last character which triggered the invalid float
+                                child.setText(child.text()[:-1]) 
+                                self.UpdateParameters=0
+                                continue
+                            elif isinstance(child, QtWidgets.QDoubleSpinBox):
                                 child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
                             elif isinstance(child, QtWidgets.QSpinBox):
                                 child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
@@ -3319,6 +3324,18 @@ class Window(QMainWindow):
 
     def _UpdateSuggestedWater(self,ManualWater=0):
         '''Update the suggested water from the manually give water'''
+        try:
+            if self.BaseWeight.text()!='':
+                float(self.BaseWeight.text())
+        except Exception as e:
+            logging.warning(str(e))
+            return
+        try:
+            if self.WeightAfter.text()!='':
+                float(self.WeightAfter.text())
+        except Exception as e:
+            logging.warning(str(e))
+            return
         try:
             if self.BaseWeight.text()!='' and self.TargetRatio.text()!='':
                 # set the target weight
