@@ -7,6 +7,8 @@ import subprocess
 import math
 import logging
 import socket
+import harp
+import pandas as pd
 from datetime import date, datetime
 
 import serial 
@@ -324,7 +326,78 @@ class Window(QMainWindow):
         self.Sessionlist.clear()
         self.Sessionlist.addItems(sorted_dates)
         self._connect_Sessionlist(connect=True)
-        
+
+    def _check_drop_frames(self,save_tag=1):
+        '''check if there are any drop frames in the video'''
+        return_tag=0
+        if save_tag==0:
+            if "drop_frames_warning_text" in self.Obj:
+                self.drop_frames_warning_text=self.Obj['drop_frames_warning_text']
+                self.drop_frames_tag=self.Obj['drop_frames_tag']
+                self.trigger_length=self.Obj['trigger_length']
+                self.frame_num=self.Obj['frame_num']
+                return_tag=1
+        if return_tag==0:
+            self.drop_frames_tag=0
+            self.trigger_length=0
+            self.drop_frames_warning_text = ''
+            self.frame_num={}
+            use_default_folder_structure=0
+            if save_tag==1:
+                # check the drop frames of the current session
+                # sleep some time to wait for the finish of saving video
+                time.sleep(5)
+                if hasattr(self,'HarpFolder'):
+                    HarpFolder=self.HarpFolder
+                    video_folder=self.VideoFolder
+                else:
+                    use_default_folder_structure=1
+            elif save_tag==0:
+                if 'HarpFolder' in self.Obj:
+                    # check the drop frames of the loaded session
+                    HarpFolder=self.Obj['HarpFolder']
+                    video_folder=self.Obj['VideoFolder']
+                else:
+                    use_default_folder_structure=1
+            if use_default_folder_structure:
+                # use the default folder structure
+                HarpFolder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'HarpFolder')# old folder structure
+                video_folder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'VideoFolder') # old folder structure
+                if not os.path.exists(HarpFolder):
+                    HarpFolder=os.path.join(os.path.dirname(self.fname),'raw.harp')# new folder structure
+                    video_folder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'behavior-videos') # new folder structure
+
+            camera_trigger_file=os.path.join(HarpFolder,'BehaviorEvents','Event_94.bin')
+            if os.path.exists(camera_trigger_file):
+                triggers = harp.read(camera_trigger_file)
+                self.trigger_length = len(triggers)
+            else:
+                self.trigger_length=0
+                self.WarningLabelCamera.setText('No camera trigger file found!')
+                self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
+                return
+            csv_files = [file for file in os.listdir(video_folder) if file.endswith(".csv")]
+            avi_files = [file for file in os.listdir(video_folder) if file.endswith(".avi")]
+
+            for avi_file in avi_files:
+                csv_file = avi_file.replace('.avi', '.csv')
+                if csv_file not in csv_files:
+                    self.drop_frames_warning_text+=f'No csv file found for {avi_file}\n'
+                else:
+                    current_frames = pd.read_csv(os.path.join(video_folder, csv_file), header=None)
+                    num_frames = len(current_frames)
+                    if num_frames != self.trigger_length:
+                        self.drop_frames_warning_text+=f"Error: {avi_file} has {num_frames} frames, but {self.trigger_length} triggers\n"
+                        self.drop_frames_tag=1
+                    else:
+                        self.drop_frames_warning_text+=f"Correct: {avi_file} has {num_frames} frames and {self.trigger_length} triggers\n"
+                    self.frame_num[csv_file] = num_frames
+        self.WarningLabelCamera.setText(self.drop_frames_warning_text)
+        if self.drop_frames_tag:
+            self.WarningLabelCamera.setStyleSheet("color: red;")
+        else:
+            self.WarningLabelCamera.setStyleSheet("color: green;")  
+
     def _warmup(self):
         '''warm up the session before starting.
             Use warm up with caution. Usually, it is only used for the first time training. 
@@ -1278,14 +1351,14 @@ class Window(QMainWindow):
                         child.setStyleSheet('background-color: white;')
                         self._Task()
                     
-                    if child.objectName() in {'Experimenter','TotalWater','WeightAfter','ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
+                    if child.objectName() in {'Experimenter','TotalWater','ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
                         continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
                         if Correct ==0: # incorrect format; don't change
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
-                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight']) and
+                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight','WeightAfter']) and
                         (child.text() == '')):
                         # These attributes can have the empty string, but we can't set the value as the empty string, unless we allow resets
                         if allow_reset:
@@ -1343,7 +1416,7 @@ class Window(QMainWindow):
                 try:
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                         self.Continue=0
-                        if child.objectName() in {'Experimenter', 'UncoupledReward', 'WeightAfter', 'ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
+                        if child.objectName() in {'Experimenter', 'UncoupledReward', 'ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
                             child.setStyleSheet(self.default_text_color)
                             self.Continue=1
                         if child.text()=='': # If empty, change background color and wait for confirmation
@@ -1367,7 +1440,12 @@ class Window(QMainWindow):
                         except Exception as e:
                             #logging.error(str(e))
                             # Invalid float. Do not change the parameter
-                            if isinstance(child, QtWidgets.QDoubleSpinBox):
+                            if child.objectName() in ['BaseWeight', 'WeightAfter']:
+                                # Strip the last character which triggered the invalid float
+                                child.setText(child.text()[:-1]) 
+                                self.UpdateParameters=0
+                                continue
+                            elif isinstance(child, QtWidgets.QDoubleSpinBox):
                                 child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
                             elif isinstance(child, QtWidgets.QSpinBox):
                                 child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
@@ -1462,16 +1540,23 @@ class Window(QMainWindow):
             self.RewardFamily.setEnabled(True)
             self.label_20.setEnabled(False)
             self.UncoupledReward.setEnabled(False)
-
-            self.label_12.setEnabled(True)
-            self.label_11.setEnabled(True)
+            # block
+            self.BlockMinReward.setEnabled(True)
+            self.IncludeAutoReward.setEnabled(True)
             self.BlockBeta.setEnabled(True)
             self.BlockMin.setEnabled(True)
             self.BlockMax.setEnabled(True)
+            self.label_12.setStyleSheet("color: black;")
+            self.label_11.setStyleSheet("color: black;")
+            self.label_14.setStyleSheet("color: black;")
+            self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
+            self.BlockMin.setStyleSheet("color: black;""border: 1px solid gray;")
+            self.BlockMax.setStyleSheet("color: black;""border: 1px solid gray;")
 
             self.label_27.setEnabled(False)
             self.InitiallyInactiveN.setEnabled(False)
-
+            self.label_27.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.InitiallyInactiveN.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
             # change name of min reward each block
             self.label_13.setText('min reward each block=')
@@ -1490,9 +1575,6 @@ class Window(QMainWindow):
             self.AdvancedBlockAuto.setEnabled(True)
             self._AdvancedBlockAuto() # Update states of SwitchThr and PointsInARow
             
-            self.BlockMinReward.setEnabled(True)
-            self.IncludeAutoReward.setEnabled(True)
-            
         elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
             self.label_6.setEnabled(False)
             self.label_7.setEnabled(False)
@@ -1502,14 +1584,21 @@ class Window(QMainWindow):
             self.RewardFamily.setEnabled(False)
             self.label_20.setEnabled(True)
             self.UncoupledReward.setEnabled(True)
-
-            self.label_12.setEnabled(True)
-            self.label_11.setEnabled(True)
+            # block
+            self.BlockBeta.setEnabled(True)
             self.BlockMin.setEnabled(True)
             self.BlockMax.setEnabled(True)
+            self.label_12.setStyleSheet("color: black;")
+            self.label_11.setStyleSheet("color: black;")
+            self.label_14.setStyleSheet("color: black;")
+            self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
+            self.BlockMin.setStyleSheet("color: black;""border: 1px solid gray;")
+            self.BlockMax.setStyleSheet("color: black;""border: 1px solid gray;")
 
             self.label_27.setEnabled(False)
             self.InitiallyInactiveN.setEnabled(False)
+            self.label_27.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.InitiallyInactiveN.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
             # change name of min reward each block
             self.label_13.setText('min reward each block=')
@@ -1520,7 +1609,6 @@ class Window(QMainWindow):
             # move auto-reward
             self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 128, 80, 20))
             self.label_26.setGeometry(QtCore.QRect(929, 128, 146, 16))
-            
             # Disable block beta, NextBlock, and AutoBlock panel
             self.BlockBeta.setEnabled(False)
             self.NextBlock.setEnabled(False)
@@ -1529,8 +1617,6 @@ class Window(QMainWindow):
             self.PointsInARow.setEnabled(False)
             self.BlockMinReward.setEnabled(False)
             self.IncludeAutoReward.setEnabled(False)
-            
-            
         elif self.Task.currentText() in ['RewardN']:
             self.label_6.setEnabled(True)
             self.label_7.setEnabled(True)
@@ -1540,19 +1626,25 @@ class Window(QMainWindow):
             self.RewardFamily.setEnabled(True)
             self.label_20.setEnabled(False)
             self.UncoupledReward.setEnabled(False)
-
+            self.label_20.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.UncoupledReward.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             # block
-            self.label_14.setEnabled(False)
-            self.label_12.setEnabled(False)
-            self.label_11.setEnabled(False)
+            self.BlockMinReward.setEnabled(True)
+            self.IncludeAutoReward.setEnabled(True)
             self.BlockBeta.setEnabled(False)
             self.BlockMin.setEnabled(False)
             self.BlockMax.setEnabled(False)
-
+            self.label_14.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.label_12.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.label_11.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.BlockBeta.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.BlockMin.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
+            self.BlockMax.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
             # block; no reward when initially active
             self.label_27.setEnabled(True)
             self.InitiallyInactiveN.setEnabled(True)
-
+            self.label_27.setStyleSheet("color: black;")
+            self.InitiallyInactiveN.setStyleSheet("color: black;""border: 1px solid gray;")
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(403, 128, 80, 20))
             # change name of min reward each block
             self.label_13.setText('RewardN=')
@@ -1808,7 +1900,7 @@ class Window(QMainWindow):
                 return
 
         # this should be improved in the future. Need to get the last LeftRewardDeliveryTime and RightRewardDeliveryTime
-        if hasattr(self, 'GeneratedTrials'):
+        if hasattr(self, 'GeneratedTrials') and self.InitializeBonsaiSuccessfully==1:
             self.GeneratedTrials._GetLicks(self.Channel2)
         
         # Create new folders
@@ -1917,7 +2009,20 @@ class Window(QMainWindow):
 
         # Save the current box
         Obj['box'] = self.current_box
-    
+
+        if SaveContinue==0:
+            # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
+            self._NewSession(dont_ask=True)
+            # do not create a new folder
+            self.CreateNewFolder=0
+        # check drop of frames
+        self._check_drop_frames(save_tag=1)
+        # save drop frames information
+        Obj['drop_frames_tag']=self.drop_frames_tag
+        Obj['trigger_length']=self.trigger_length
+        Obj['drop_frames_warning_text']=self.drop_frames_warning_text
+        Obj['frame_num']=self.frame_num
+
         # save Json or mat
         if self.SaveFile.endswith('.mat'):
         # Save data to a .mat file
@@ -1946,10 +2051,6 @@ class Window(QMainWindow):
         contents = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         with open(filepath, 'w') as finished_file:
             finished_file.write(contents)
-        
-        if SaveContinue==0:
-            # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
-            self._NewSession()
         
 
     def _GetSaveFolder(self):
@@ -2383,6 +2484,8 @@ class Window(QMainWindow):
                 self.Sessionlist.setCurrentIndex(Ind)
                 self.SessionlistSpin.setValue(Ind+1)
                 self._connect_Sessionlist(connect=True)
+            # check dropping frames
+            self._check_drop_frames(save_tag=0)
         else:
             self.NewSession.setDisabled(False)
         self.StartExcitation.setChecked(False)
@@ -2651,21 +2754,22 @@ class Window(QMainWindow):
         except Exception as e:
             logging.error(str(e))
 
-    def _NewSession(self):
+    def _NewSession(self,dont_ask=False):
         logging.info('New Session pressed')
         self._StopCurrentSession() 
 
-        # If we have unsaved data, prompt to save
-        if (self.ToInitializeVisual==0) and (self.unsaved_data): 
-            reply = QMessageBox.critical(self, 
-                'Box {}, New Session:'.format(self.box_letter), 
-                'Start new session without saving?',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-            if reply == QMessageBox.No:
-                self.NewSession.setStyleSheet("background-color : none")
-                self.NewSession.setChecked(False)
-                logging.info('New Session declined')
-                return False
+        if dont_ask==False:
+            # If we have unsaved data, prompt to save
+            if (self.ToInitializeVisual==0) and (self.unsaved_data): 
+                reply = QMessageBox.critical(self, 
+                    'Box {}, New Session:'.format(self.box_letter), 
+                    'Start new session without saving?',
+                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                if reply == QMessageBox.No:
+                    self.NewSession.setStyleSheet("background-color : none")
+                    self.NewSession.setChecked(False)
+                    logging.info('New Session declined')
+                    return False
         
         # stop the camera 
         self._stop_camera()
@@ -2813,7 +2917,7 @@ class Window(QMainWindow):
         # Clear warnings
         self.WarningLabelInitializeBonsai.setText('')
         self.NewSession.setDisabled(False)
-            
+        self.WarningLabelCamera.setText('')     
         # Toggle button colors
         if self.Start.isChecked():
             logging.info('Start button pressed: starting trial loop')
@@ -3241,6 +3345,18 @@ class Window(QMainWindow):
 
     def _UpdateSuggestedWater(self,ManualWater=0):
         '''Update the suggested water from the manually give water'''
+        try:
+            if self.BaseWeight.text()!='':
+                float(self.BaseWeight.text())
+        except Exception as e:
+            logging.warning(str(e))
+            return
+        try:
+            if self.WeightAfter.text()!='':
+                float(self.WeightAfter.text())
+        except Exception as e:
+            logging.warning(str(e))
+            return
         try:
             if self.BaseWeight.text()!='' and self.TargetRatio.text()!='':
                 # set the target weight
