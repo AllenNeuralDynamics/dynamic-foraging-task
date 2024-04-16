@@ -3320,12 +3320,14 @@ class Window(QMainWindow):
     def _UpdateSuggestedWater(self,ManualWater=0):
         '''Update the suggested water from the manually give water'''
         try:
-            float(self.BaseWeight.text())
+            if self.BaseWeight.text()!='':
+                float(self.BaseWeight.text())
         except:
             print('error on baseweight')
             return
         try:
-            float(self.WeightAfter.text())
+            if self.WeightAfter.text()!='':
+                float(self.WeightAfter.text())
         except:
             print('error on post weight')
             return
