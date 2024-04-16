@@ -3322,14 +3322,14 @@ class Window(QMainWindow):
         try:
             if self.BaseWeight.text()!='':
                 float(self.BaseWeight.text())
-        except:
-            print('error on baseweight')
+        except Exception as e:
+            logging.error(str(e))
             return
         try:
             if self.WeightAfter.text()!='':
                 float(self.WeightAfter.text())
-        except:
-            print('error on post weight')
+        except Exception as e:
+            logging.error(str(e))
             return
         try:
             if self.BaseWeight.text()!='' and self.TargetRatio.text()!='':
