@@ -36,7 +36,7 @@ def correct_drop_frames(save_data=None,json_file=None,harp_folder=None,video_fol
                 print('HarpFolder or VideoFolder not found in the json file')
                 return
     elif save_data is not None:
-        if hasattr(save_data,'harp_folder'):
+        if hasattr(save_data,'HarpFolder'):
             # check the drop frames of the loaded session
             harp_folder=save_data.HarpFolder
             video_folder=save_data.VideoFolder
