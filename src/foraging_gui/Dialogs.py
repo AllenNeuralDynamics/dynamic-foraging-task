@@ -1034,7 +1034,7 @@ class CameraDialog(QDialog):
         '''Open the log/save folder of the camera'''
         if hasattr(self.MainWindow,'Ot_log_folder'):
             try:
-                subprocess.Popen(['explorer', os.path.join(os.path.dirname(self.MainWindow.Ot_log_folder),'VideoFolder')])
+                subprocess.Popen(['explorer', os.path.join(os.path.dirname(os.path.dirname(self.MainWindow.Ot_log_folder)),'behavior-videos')])
             except Exception as e:
                 logging.error(str(e))
                 self.WarningLabelOpenSave.setText('No logging folder found!')
