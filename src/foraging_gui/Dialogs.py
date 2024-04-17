@@ -1520,7 +1520,7 @@ class LaserCalibrationDialog(QDialog):
                             current_frequency_ind=[index for index, value in enumerate(self.LCM_Frequency_1) if value == current_frequency]
                             current_frequency_ind = list(set(current_frequency_ind) & set(current_protocol_ind))
                             for laser_tag in laser_tags:
-                                ItemsLaserPower=self._module_1(current_frequency_ind,laser_tag)
+                                ItemsLaserPower=self._get_laser_power_list(current_frequency_ind,laser_tag)
                                 LaserCalibrationResults=initialize_dic(LaserCalibrationResults,key_list=[current_date_name,current_color,current_protocol,current_frequency,f"Laser_{laser_tag}"])
                                 if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]:
                                     LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage']=ItemsLaserPower
@@ -1528,7 +1528,7 @@ class LaserCalibrationDialog(QDialog):
                                     LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage']=self._unique(LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage']+ItemsLaserPower)
                     elif current_protocol=='Constant' or current_protocol=='Pulse':
                             for laser_tag in laser_tags:
-                                ItemsLaserPower=self._module_1(current_protocol_ind,laser_tag)
+                                ItemsLaserPower=self._get_laser_power_list(current_protocol_ind,laser_tag)
                                 # Check and assign items to the nested dictionary
                                 LaserCalibrationResults=initialize_dic(LaserCalibrationResults,key_list=[current_date_name,current_color,current_protocol,f"Laser_{laser_tag}"])
                                 if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol][f"Laser_{laser_tag}"]:
@@ -1569,7 +1569,7 @@ class LaserCalibrationDialog(QDialog):
         self.LCM_LaserPowerMeasured=[]
         self.LCM_Location_1=[]
         self.LCM_voltage=[]
-    def _module_1(self,ind,laser_tag):
+    def _get_laser_power_list(self,ind,laser_tag):
         '''module to get the laser power list'''
         ItemsLaserPower=[]
         current_laser_tag_ind=[index for index, value in enumerate(self.LCM_Location_1) if value == f"Laser_{laser_tag}"]
