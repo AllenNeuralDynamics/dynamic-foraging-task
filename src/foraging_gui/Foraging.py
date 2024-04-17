@@ -2945,7 +2945,7 @@ class Window(QMainWindow):
 
             # check experimenter name
             if self.Experimenter.text() == "the ghost in the shell":
-                reply = QMessageBox.question(self,
+                reply = QMessageBox.critical(self,
                     'Box {}, Start'.format(self.box_letter),    
                     'Experimenter field set to default, continue anyways?',
                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
@@ -2958,7 +2958,7 @@ class Window(QMainWindow):
             # check repo status
             if (self.current_branch not in ['main','production_testing']) & (self.ID.text() != '0'):
                 # Prompt user over off-pipeline branch
-                reply = QMessageBox.question(self,
+                reply = QMessageBox.critical(self,
                     'Box {}, Start'.format(self.box_letter),    
                     'Running on branch \"{}\", continue anyways?'.format(self.current_branch),
                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
@@ -2974,7 +2974,7 @@ class Window(QMainWindow):
             # Check for untracked local changes
             if repo_dirty_flag & (self.ID.text() != '0'):
                 # prompt user over untracked local changes
-                reply = QMessageBox.question(self,
+                reply = QMessageBox.critical(self,
                     'Box {}, Start'.format(self.box_letter),    
                     'Local repository has untracked changes, continue anyways?',
                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
