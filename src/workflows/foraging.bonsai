@@ -2132,7 +2132,7 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="harp:FilterMessageType">
                 <harp:FilterType>Include</harp:FilterType>
-                <harp:MessageType>Write</harp:MessageType>
+                <harp:MessageType>Event</harp:MessageType>
               </Combinator>
             </Expression>
             <Expression xsi:type="p1:Parse">
