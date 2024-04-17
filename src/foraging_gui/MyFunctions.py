@@ -826,7 +826,7 @@ class GenerateTrials():
                 else:
                     self.DD_PerTrial_GoCue_NextStart='nan'
             CurrentStart_GoCue=(self.B_TrialStartTime[i],self.B_GoCueTime[i])
-            CurrentStart_Delay=(self.B_TrialStartTime[i],self.B_DelayStartTime[i][0])
+            CurrentStart_Delay=(self.B_TrialStartTime[i],self.B_DelayStartTime[i][0]) # using the first delay start time
             CurrentDelay_GoCue=(self.B_DelayStartTime[i][0],self.B_GoCueTime[i])
             CurrentGoCue_GoCue1=(self.B_GoCueTime[i],self.B_GoCueTime[i]+1)
             # licks in different intervals
