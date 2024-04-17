@@ -172,12 +172,12 @@ class OptogeneticsDialog(QDialog):
                     for i in range(len(RecentLaserCalibration[Color][Protocol][f"Laser_{str(laser_tag)}"]['LaserPowerVoltage'])):
                         ItemsLaserPower.append(str(RecentLaserCalibration[Color][Protocol][f"Laser_{str(laser_tag)}"]['LaserPowerVoltage'][i]))
                 ItemsLaserPower=sorted(ItemsLaserPower)
-                eval(f"self.Laser{str(laser_tag)}_power_{str(Numb)}.clear()")
-                eval(f"self.Laser{str(laser_tag)}_power_{str(Numb)}.addItems(ItemsLaserPower)")
-                if eval(f"self.Laser{str(laser_tag)}_power_{str(Numb)}.findText(CurrentlaserPowerLaser)"):
-                    index = eval(f"self.Laser{str(laser_tag)}_power_{str(Numb)}.findText(CurrentlaserPowerLaser)")
-                    if index != -1:
-                        eval(f"self.Laser{str(laser_tag)}_power_{str(Numb)}.setCurrentIndex(index)")
+                getattr(self, f"Laser{str(laser_tag)}_power_{str(Numb)}").clear()
+                getattr(self, f"Laser{str(laser_tag)}_power_{str(Numb)}").addItems(ItemsLaserPower)
+                index = getattr(self, f"Laser{str(laser_tag)}_power_{str(Numb)}").findText(CurrentlaserPowerLaser)
+                if index != -1:
+                    getattr(self, f"Laser{str(laser_tag)}_power_{str(Numb)}").setCurrentIndex(index)
+
         except Exception as e:
             logging.error(str(e))
 
