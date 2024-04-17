@@ -1578,15 +1578,19 @@ class GenerateTrials():
         behavior_eventN=0
         in_delay=0 #0, the next /BehaviorEvent is not the delay; 1, the next /BehaviorEvent is the delay following the /TrialStartTime
         first_behavior_event=0
+        first_delay_start=0
         while 1:
             Rec=Channel1.receive()
-            if Rec[0].address!='/BehaviorEvent':
+            if Rec[0].address not in ['/BehaviorEvent','/DelayStartTime']:
                 current_receiveN+=1
             if Rec[0].address=='/TrialStartTime':
                 TrialStartTime=Rec[1][1][0]
                 in_delay=1 # the next /BehaviorEvent is the delay
             elif Rec[0].address=='/DelayStartTime':
                 DelayStartTime.append(Rec[1][1][0])
+                if first_delay_start==0:
+                    first_delay_start=1
+                    current_receiveN+=1
             elif Rec[0].address=='/GoCueTime':
                 GoCueTime=Rec[1][1][0]
                 in_delay=0
