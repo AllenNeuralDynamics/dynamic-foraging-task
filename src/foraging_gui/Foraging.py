@@ -13,6 +13,7 @@ from datetime import date, datetime
 
 import serial 
 import numpy as np
+import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
@@ -62,6 +63,7 @@ class Window(QMainWindow):
         # Load Settings that are specific to this computer  
         self.SettingFolder=os.path.join(os.path.expanduser("~"), "Documents","ForagingSettings")
         self.SettingFile=os.path.join(self.SettingFolder,'ForagingSettings.json')
+        self.SettingsBoxFile=os.path.join(self.SettingFolder,'Settings_box'+str(self.box_number)+'.csv')
         self._GetSettings()
 
         # Load Settings that are specific to this box 
@@ -809,13 +811,29 @@ class Window(QMainWindow):
             'default_ui':'ForagingGUI.ui'
         }
         
+        # Try to load Settings_box#.csv
+        self.SettingsBox={}
+        try:
+            if os.path.exists(self.SettingsBoxFile):
+                # Open the csv settings file
+                df = pd.read_csv(self.SettingsBoxFile,index_col=None)
+                self.SettingsBox = {row[0]: row[1] for _, row in df.iterrows()}
+                logging.info('Loaded settings_box file')
+            else:
+                logging.error('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
+                raise Exception('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
+        except Exception as e:
+            logging.error('Could not load settings_box file at: {}, {}'.format(self.SettingFile,str(e)))
+            self.WarningLabel.setText('Could not load settings_box file!')
+            self.WarningLabel.setStyleSheet(self.default_warning_color)
+            raise e
         # Try to load the settings file        
-        Settings = {}
+        self.Settings = {}
         try:
             if os.path.exists(self.SettingFile):
                 # Open the JSON settings file
                 with open(self.SettingFile, 'r') as f:
-                    Settings = json.load(f)
+                    self.Settings = json.load(f)
                 logging.info('Loaded settings file')
             else:
                 logging.error('Could not find settings file at: {}'.format(self.SettingFile))
@@ -828,28 +846,28 @@ class Window(QMainWindow):
 
         # If any settings are missing, use the default values
         for key in defaults:
-            if key not in Settings:
-                Settings[key] = defaults[key]
-                logging.warning('Missing setting ({}), using default: {}'.format(key,Settings[key]))
+            if key not in self.Settings:
+                self.Settings[key] = defaults[key]
+                logging.warning('Missing setting ({}), using default: {}'.format(key,self.Settings[key]))
                 if key in ['default_saveFolder','current_box']:
                     logging.error('Missing setting ({}), is required'.format(key))               
                     raise Exception('Missing setting ({}), is required'.format(key)) 
 
         # Save all settings
-        self.default_saveFolder=Settings['default_saveFolder']
-        self.current_box=Settings['current_box']
-        self.temporary_video_folder=Settings['temporary_video_folder']
-        self.Teensy_COM = Settings['Teensy_COM_box'+str(self.box_number)]
-        self.bonsai_path=Settings['bonsai_path']
-        self.bonsaiworkflow_path=Settings['bonsaiworkflow_path']
-        self.newscale_serial_num_box1=Settings['newscale_serial_num_box1']
-        self.newscale_serial_num_box2=Settings['newscale_serial_num_box2']
-        self.newscale_serial_num_box3=Settings['newscale_serial_num_box3']
-        self.newscale_serial_num_box4=Settings['newscale_serial_num_box4']
-        self.default_ui=Settings['default_ui']
+        self.default_saveFolder=self.Settings['default_saveFolder']
+        self.current_box=self.Settings['current_box']
+        self.temporary_video_folder=self.Settings['temporary_video_folder']
+        self.Teensy_COM = self.Settings['Teensy_COM_box'+str(self.box_number)]
+        self.bonsai_path=self.Settings['bonsai_path']
+        self.bonsaiworkflow_path=self.Settings['bonsaiworkflow_path']
+        self.newscale_serial_num_box1=self.Settings['newscale_serial_num_box1']
+        self.newscale_serial_num_box2=self.Settings['newscale_serial_num_box2']
+        self.newscale_serial_num_box3=self.Settings['newscale_serial_num_box3']
+        self.newscale_serial_num_box4=self.Settings['newscale_serial_num_box4']
+        self.default_ui=self.Settings['default_ui']
 
         # Also stream log info to the console if enabled
-        if  Settings['show_log_info_in_console']:
+        if  self.Settings['show_log_info_in_console']:
             logger = logging.getLogger()
             handler = logging.StreamHandler()
             # Using the same format and level as the root logger
@@ -868,8 +886,6 @@ class Window(QMainWindow):
             self.current_box='{}-{}'.format(self.current_box,mapper[self.box_number])
         window_title = '{}'.format(self.current_box)
         self.window_title = window_title
-
-
 
     def _InitializeBonsai(self):
         '''
@@ -1988,6 +2004,22 @@ class Window(QMainWindow):
         # Save the current box
         Obj['box'] = self.current_box
 
+        # save settings
+        Obj['settings'] = self.Settings
+        Obj['settings_box']=self.SettingsBox
+
+        # save the commit hash
+        Obj['commit_ID']=self.commit_ID
+        Obj['repo_url']=self.repo_url
+        Obj['current_branch'] =self.current_branch
+        
+        # save folders
+        Obj['TrainingFolder']=self.TrainingFolder
+        Obj['HarpFolder']=self.HarpFolder
+        Obj['VideoFolder']=self.VideoFolder
+        Obj['PhotometryFolder']=self.PhotometryFolder
+        Obj['MetadataFolder']=self.MetadataFolder
+        
         if SaveContinue==0:
             # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
             self._NewSession(dont_ask=True)
@@ -3483,11 +3515,14 @@ def log_git_hash():
         Add a note to the GUI log about the current branch and hash. Assumes the local repo is clean
     '''
     try:
-        git_hash = subprocess.check_output(['git','rev-parse','--short', 'HEAD']).decode('ascii').strip()
+        git_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
         git_branch = subprocess.check_output(['git','branch','--show-current']).decode('ascii').strip()
+        repo_url = subprocess.check_output(['git', 'remote', 'get-url', 'origin']).decode('ascii').strip()
         logging.info('Current git commit branch, hash: {}, {}'.format(git_branch,git_hash))
+        return git_hash, git_branch, repo_url
     except Exception as e:
         logging.error('Could not log git branch and hash: {}'.format(str(e)))
+        return None, None, None
 
 def show_exception_box(log_msg):
     '''
@@ -3567,7 +3602,7 @@ if __name__ == "__main__":
    
     # Start logging
     start_gui_log_file(box_number)
-    log_git_hash()
+    commit_ID, current_branch, repo_url=log_git_hash()
 
     # Formating GUI graphics
     logging.info('Setting QApplication attributes')
@@ -3586,6 +3621,10 @@ if __name__ == "__main__":
 
     # Start GUI window
     win = Window(box_number=box_number,start_bonsai_ide=start_bonsai_ide)
+    # Get the commit hash of the current version of this Python file
+    win.commit_ID=commit_ID
+    win.current_branch=current_branch
+    win.repo_url=repo_url
     win.show()
    
      # Run your application's event loop and stop after closing all windows
