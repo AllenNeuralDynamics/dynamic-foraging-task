@@ -1618,8 +1618,8 @@ class GenerateTrials():
                     self.B_Baited[1]=False
                     self.B_CurrentRewarded[0]=False
                     self.B_CurrentRewarded[1]=False
-                B_CurrentRewarded=self.B_CurrentRewarded.copy()
-                B_AnimalCurrentResponse=self.B_AnimalCurrentResponse.copy()
+                B_CurrentRewarded=self.B_CurrentRewarded
+                B_AnimalCurrentResponse=self.B_AnimalCurrentResponse
             elif Rec[0].address=='/TrialEndTime':
                 TrialEndTime=Rec[1][1][0]
             elif Rec[0].address=='/GoCueTimeSoundCard':
