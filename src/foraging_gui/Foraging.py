@@ -2972,7 +2972,7 @@ class Window(QMainWindow):
                     logging.error('Starting session on branch: {}'.format(self.current_branch))
 
             # Check for untracked local changes
-            if repo_dirty_flag:
+            if repo_dirty_flag & (self.ID.text() != '0'):
                 # prompt user over untracked local changes
                 reply = QMessageBox.question(self,
                     'Box {}, Start'.format(self.box_letter),    
