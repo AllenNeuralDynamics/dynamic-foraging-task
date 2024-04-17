@@ -2960,7 +2960,7 @@ class Window(QMainWindow):
                 # Prompt user over off-pipeline branch
                 reply = QMessageBox.critical(self,
                     'Box {}, Start'.format(self.box_letter),    
-                    'Running on branch \"{}\", continue anyways?'.format(self.current_branch),
+                    'Running on branch <span style="color:purple;font-weight:bold">{}</span>, continue anyways?'.format(self.current_branch),
                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
                 if reply == QMessageBox.No:
                     # Stop session
