@@ -45,6 +45,9 @@
             <Expression xsi:type="rx:BehaviorSubject" TypeArguments="sys:Boolean">
               <rx:Name>GoCue</rx:Name>
             </Expression>
+            <Expression xsi:type="rx:BehaviorSubject" TypeArguments="sys:Boolean">
+              <rx:Name>Pass</rx:Name>
+            </Expression>
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="gl:CreateWindow">
                 <gl:Width>640</gl:Width>
@@ -348,7 +351,7 @@
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="gl:Delay">
-                            <gl:DueTime>PT2.642S</gl:DueTime>
+                            <gl:DueTime>PT1.68S</gl:DueTime>
                           </Combinator>
                         </Expression>
                         <Expression xsi:type="WorkflowOutput" />
@@ -370,7 +373,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT1.251S</gl:DueTime>
+                      <gl:DueTime>PT1.5S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -382,12 +385,165 @@
                     <Name>Licks</Name>
                   </Expression>
                   <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="IntProperty">
+                      <Value>1</Value>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>GoCue2</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="IntProperty">
+                      <Value>0</Value>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>DelayStart2</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="IntProperty">
+                      <Value>1</Value>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>Pass2</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="IntProperty">
+                      <Value>0</Value>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:Merge" />
+                  </Expression>
+                  <Expression xsi:type="PropertyMapping">
+                    <PropertyMappings>
+                      <Property Name="Value" />
+                    </PropertyMappings>
+                  </Expression>
+                  <Expression xsi:type="rx:SelectMany">
+                    <Name>Pass</Name>
+                    <Workflow>
+                      <Nodes>
+                        <Expression xsi:type="WorkflowInput">
+                          <Name>Source1</Name>
+                        </Expression>
+                        <Expression xsi:type="ExternalizedMapping">
+                          <Property Name="Value" />
+                        </Expression>
+                        <Expression xsi:type="Equal">
+                          <Operand xsi:type="IntProperty">
+                            <Value>1</Value>
+                          </Operand>
+                        </Expression>
+                        <Expression xsi:type="rx:Condition">
+                          <Workflow>
+                            <Nodes>
+                              <Expression xsi:type="WorkflowInput">
+                                <Name>Source1</Name>
+                              </Expression>
+                              <Expression xsi:type="WorkflowOutput" />
+                            </Nodes>
+                            <Edges>
+                              <Edge From="0" To="1" Label="Source1" />
+                            </Edges>
+                          </Workflow>
+                        </Expression>
+                        <Expression xsi:type="WorkflowOutput" />
+                      </Nodes>
+                      <Edges>
+                        <Edge From="0" To="2" Label="Source1" />
+                        <Edge From="1" To="2" Label="Source2" />
+                        <Edge From="2" To="3" Label="Source1" />
+                        <Edge From="3" To="4" Label="Source1" />
+                      </Edges>
+                    </Workflow>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>Pass</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
                     <Combinator xsi:type="BooleanProperty">
                       <Value>false</Value>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
                     <Name>Licks2</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="IntProperty">
+                      <Value>1</Value>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>GoCue2</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="IntProperty">
+                      <Value>0</Value>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>DelayStart2</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="IntProperty">
+                      <Value>1</Value>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>Pass2</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="IntProperty">
+                      <Value>0</Value>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:Merge" />
+                  </Expression>
+                  <Expression xsi:type="PropertyMapping">
+                    <PropertyMappings>
+                      <Property Name="Value" />
+                    </PropertyMappings>
+                  </Expression>
+                  <Expression xsi:type="rx:SelectMany">
+                    <Name>Pass</Name>
+                    <Workflow>
+                      <Nodes>
+                        <Expression xsi:type="WorkflowInput">
+                          <Name>Source1</Name>
+                        </Expression>
+                        <Expression xsi:type="ExternalizedMapping">
+                          <Property Name="Value" />
+                        </Expression>
+                        <Expression xsi:type="Equal">
+                          <Operand xsi:type="IntProperty">
+                            <Value>1</Value>
+                          </Operand>
+                        </Expression>
+                        <Expression xsi:type="rx:Condition">
+                          <Workflow>
+                            <Nodes>
+                              <Expression xsi:type="WorkflowInput">
+                                <Name>Source1</Name>
+                              </Expression>
+                              <Expression xsi:type="WorkflowOutput" />
+                            </Nodes>
+                            <Edges>
+                              <Edge From="0" To="1" Label="Source1" />
+                            </Edges>
+                          </Workflow>
+                        </Expression>
+                        <Expression xsi:type="WorkflowOutput" />
+                      </Nodes>
+                      <Edges>
+                        <Edge From="0" To="2" Label="Source1" />
+                        <Edge From="1" To="2" Label="Source2" />
+                        <Edge From="2" To="3" Label="Source1" />
+                        <Edge From="3" To="4" Label="Source1" />
+                      </Edges>
+                    </Workflow>
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="BooleanProperty">
@@ -433,16 +589,37 @@
                   <Edge From="3" To="5" Label="Source1" />
                   <Edge From="4" To="5" Label="Source2" />
                   <Edge From="5" To="6" Label="Source1" />
-                  <Edge From="6" To="11" Label="Source1" />
+                  <Edge From="6" To="32" Label="Source1" />
                   <Edge From="7" To="8" Label="Source1" />
-                  <Edge From="8" To="11" Label="Source2" />
+                  <Edge From="8" To="17" Label="Source1" />
                   <Edge From="9" To="10" Label="Source1" />
-                  <Edge From="10" To="11" Label="Source3" />
+                  <Edge From="10" To="15" Label="Source1" />
                   <Edge From="11" To="12" Label="Source1" />
-                  <Edge From="12" To="13" Label="Source1" />
+                  <Edge From="12" To="15" Label="Source2" />
                   <Edge From="13" To="14" Label="Source1" />
-                  <Edge From="14" To="15" Label="Source1" />
+                  <Edge From="14" To="15" Label="Source3" />
                   <Edge From="15" To="16" Label="Source1" />
+                  <Edge From="16" To="17" Label="Source2" />
+                  <Edge From="17" To="18" Label="Source1" />
+                  <Edge From="18" To="19" Label="Source1" />
+                  <Edge From="19" To="32" Label="Source2" />
+                  <Edge From="20" To="21" Label="Source1" />
+                  <Edge From="21" To="30" Label="Source1" />
+                  <Edge From="22" To="23" Label="Source1" />
+                  <Edge From="23" To="28" Label="Source1" />
+                  <Edge From="24" To="25" Label="Source1" />
+                  <Edge From="25" To="28" Label="Source2" />
+                  <Edge From="26" To="27" Label="Source1" />
+                  <Edge From="27" To="28" Label="Source3" />
+                  <Edge From="28" To="29" Label="Source1" />
+                  <Edge From="29" To="30" Label="Source2" />
+                  <Edge From="30" To="31" Label="Source1" />
+                  <Edge From="31" To="32" Label="Source3" />
+                  <Edge From="32" To="33" Label="Source1" />
+                  <Edge From="33" To="34" Label="Source1" />
+                  <Edge From="34" To="35" Label="Source1" />
+                  <Edge From="35" To="36" Label="Source1" />
+                  <Edge From="36" To="37" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -2051,6 +2228,24 @@
               <Name>BehaviorCommands</Name>
             </Expression>
             <Expression xsi:type="SubscribeSubject">
+              <Name>DelayStart</Name>
+            </Expression>
+            <Expression xsi:type="rx:PublishSubject">
+              <Name>DelayStart2</Name>
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>GoCue</Name>
+            </Expression>
+            <Expression xsi:type="rx:PublishSubject">
+              <Name>GoCue2</Name>
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>Pass</Name>
+            </Expression>
+            <Expression xsi:type="rx:PublishSubject">
+              <Name>Pass2</Name>
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
               <Name>TrialEnd</Name>
             </Expression>
             <Expression xsi:type="beh:CreateMessage">
@@ -2481,48 +2676,51 @@
             <Edge From="114" To="115" Label="Source1" />
             <Edge From="115" To="116" Label="Source1" />
             <Edge From="117" To="118" Label="Source1" />
-            <Edge From="118" To="119" Label="Source1" />
-            <Edge From="120" To="121" Label="Source1" />
+            <Edge From="119" To="120" Label="Source1" />
             <Edge From="121" To="122" Label="Source1" />
-            <Edge From="122" To="123" Label="Source1" />
+            <Edge From="123" To="124" Label="Source1" />
             <Edge From="124" To="125" Label="Source1" />
-            <Edge From="125" To="128" Label="Source1" />
             <Edge From="126" To="127" Label="Source1" />
-            <Edge From="127" To="128" Label="Source2" />
+            <Edge From="127" To="128" Label="Source1" />
             <Edge From="128" To="129" Label="Source1" />
-            <Edge From="129" To="130" Label="Source1" />
-            <Edge From="131" To="132" Label="Source1" />
-            <Edge From="133" To="134" Label="Source1" />
+            <Edge From="130" To="131" Label="Source1" />
+            <Edge From="131" To="134" Label="Source1" />
+            <Edge From="132" To="133" Label="Source1" />
+            <Edge From="133" To="134" Label="Source2" />
             <Edge From="134" To="135" Label="Source1" />
-            <Edge From="134" To="139" Label="Source2" />
             <Edge From="135" To="136" Label="Source1" />
-            <Edge From="136" To="137" Label="Source1" />
             <Edge From="137" To="138" Label="Source1" />
-            <Edge From="138" To="139" Label="Source1" />
             <Edge From="139" To="140" Label="Source1" />
             <Edge From="140" To="141" Label="Source1" />
+            <Edge From="140" To="145" Label="Source2" />
             <Edge From="141" To="142" Label="Source1" />
             <Edge From="142" To="143" Label="Source1" />
+            <Edge From="143" To="144" Label="Source1" />
             <Edge From="144" To="145" Label="Source1" />
             <Edge From="145" To="146" Label="Source1" />
-            <Edge From="145" To="150" Label="Source2" />
             <Edge From="146" To="147" Label="Source1" />
             <Edge From="147" To="148" Label="Source1" />
             <Edge From="148" To="149" Label="Source1" />
-            <Edge From="149" To="150" Label="Source1" />
             <Edge From="150" To="151" Label="Source1" />
             <Edge From="151" To="152" Label="Source1" />
+            <Edge From="151" To="156" Label="Source2" />
             <Edge From="152" To="153" Label="Source1" />
             <Edge From="153" To="154" Label="Source1" />
+            <Edge From="154" To="155" Label="Source1" />
             <Edge From="155" To="156" Label="Source1" />
             <Edge From="156" To="157" Label="Source1" />
-            <Edge From="156" To="158" Label="Source1" />
+            <Edge From="157" To="158" Label="Source1" />
+            <Edge From="158" To="159" Label="Source1" />
             <Edge From="159" To="160" Label="Source1" />
-            <Edge From="160" To="163" Label="Source1" />
             <Edge From="161" To="162" Label="Source1" />
-            <Edge From="162" To="163" Label="Source2" />
-            <Edge From="163" To="164" Label="Source1" />
-            <Edge From="164" To="165" Label="Source1" />
+            <Edge From="162" To="163" Label="Source1" />
+            <Edge From="162" To="164" Label="Source1" />
+            <Edge From="165" To="166" Label="Source1" />
+            <Edge From="166" To="169" Label="Source1" />
+            <Edge From="167" To="168" Label="Source1" />
+            <Edge From="168" To="169" Label="Source2" />
+            <Edge From="169" To="170" Label="Source1" />
+            <Edge From="170" To="171" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
