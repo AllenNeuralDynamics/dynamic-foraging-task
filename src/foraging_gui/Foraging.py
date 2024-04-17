@@ -3519,8 +3519,10 @@ def log_git_hash():
         git_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
         git_branch = subprocess.check_output(['git','branch','--show-current']).decode('ascii').strip()
         repo_url = subprocess.check_output(['git', 'remote', 'get-url', 'origin']).decode('ascii').strip()
-        local_dirty = subprocess.check_output(['git','diff-index','HEAD']).decode('ascii').strip()
-        print('<{}>'.format(local_dirty))
+        local_dirty = subprocess.check_output(['git','diff-index','--name-only', 'HEAD']).decode('ascii').strip()
+        if local_dirty != '':
+            logging.warning('local repository has untracked changes to the following files: {}'.format(local_dirty))
+            print('local repository has untracked changes to the following files: {}'.format(local_dirty))
         logging.info('Current git commit branch, hash: {}, {}'.format(git_branch,git_hash))
         print('Current git commit branch, hash: {}, {}'.format(git_branch,git_hash))
         
