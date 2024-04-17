@@ -85,6 +85,7 @@ class OptogeneticsDialog(QDialog):
         super().__init__(parent)
         uic.loadUi('Optogenetics.ui', self)
         self.condition_idx = [1, 2, 3, 4]
+        self.laser_tags=[1,2] # corresponding to Laser_1 and Laser_2
         self._connectSignalsSlots()
         self.MainWindow=MainWindow
         for i in self.condition_idx:
@@ -153,7 +154,6 @@ class OptogeneticsDialog(QDialog):
 
     def _Frequency(self,Numb):
         try:
-            laser_tags=[1,2] # corresponding to Laser_1 and Laser_2
             Color = getattr(self, f"LaserColor_{str(Numb)}").currentText()
             Protocol = getattr(self, f"Protocol_{str(Numb)}").currentText()
             CurrentFrequency = getattr(self, f"Frequency_{str(Numb)}").currentText()
@@ -162,7 +162,7 @@ class OptogeneticsDialog(QDialog):
                 RecentLaserCalibration={}
             else:
                 RecentLaserCalibration=self.MainWindow.LaserCalibrationResults[latest_calibration_date]
-            for laser_tag in laser_tags:
+            for laser_tag in self.laser_tags:
                 ItemsLaserPower=[]
                 CurrentlaserPowerLaser = getattr(self, f"Laser{str(laser_tag)}_power_{str(Numb)}").currentText()
                 if Protocol in ['Sine']:
@@ -226,7 +226,6 @@ class OptogeneticsDialog(QDialog):
     def _LaserColor(self,Numb):
         ''' enable/disable items based on laser (blue/green/orange/red/NA)'''
         Inactlabel=range(2,17)
-        laser_tags=[1,2] # corresponding to Laser_1 and Laser_2
         if getattr(self, 'LaserColor_' + str(Numb)).currentText() == 'NA':
             Label=False
         else:
@@ -253,7 +252,7 @@ class OptogeneticsDialog(QDialog):
                             getattr(self, f'Frequency_{Numb}').addItems(ItemsFrequency)
                             if not CurrentFrequency in Frequency:
                                 CurrentFrequency = getattr(self, 'Frequency_' + str(Numb)).currentText()
-                            for laser_tag in laser_tags:
+                            for laser_tag in self.laser_tags:
                                 ItemsLaserPower=[]
                                 for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
                                     ItemsLaserPower.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
@@ -261,7 +260,7 @@ class OptogeneticsDialog(QDialog):
                                 getattr(self, f"Laser{laser_tag}_power_{str(Numb)}").clear()
                                 getattr(self, f"Laser{laser_tag}_power_{str(Numb)}").addItems(ItemsLaserPower)
                         elif Protocol=='Constant' or Protocol=='Pulse':
-                            for laser_tag in laser_tags:
+                            for laser_tag in self.laser_tags:
                                 ItemsLaserPower=[]
                                 for i in range(len(RecentLaserCalibration[Color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
                                     ItemsLaserPower.append(str(RecentLaserCalibration[Color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
@@ -278,7 +277,7 @@ class OptogeneticsDialog(QDialog):
                 no_calibration=True
 
             if no_calibration:
-                for laser_tag in laser_tags:
+                for laser_tag in self.laser_tags:
                     getattr(self, f"Laser{laser_tag}_power_{str(Numb)}").clear()
                     self.MainWindow.WarningLabel.setText('No calibration for this protocol identified!')
                     self.MainWindow.WarningLabel.setStyleSheet(self.MainWindow.default_warning_color)
@@ -1166,6 +1165,8 @@ class LaserCalibrationDialog(QDialog):
         self.Initialize2=0
         self.threadpool1=QThreadPool()
         self.threadpool2=QThreadPool()
+        self.laser_tags=[1,2]
+        
     def _connectSignalsSlots(self):
         self.Open.clicked.connect(self._Open)
         self.KeepOpen.clicked.connect(self._KeepOpen)
@@ -1484,7 +1485,6 @@ class LaserCalibrationDialog(QDialog):
         LCM_MeasureTime_date=[]
         for i in range(len(self.LCM_MeasureTime)):
             LCM_MeasureTime_date.append(self.LCM_MeasureTime[i].split()[0])
-        laser_tags = [1,2] # corresponding to Laser_1 and Laser_2
         date_unique = list(set(LCM_MeasureTime_date))
         for i in range(len(date_unique)):
             current_date=date_unique[i]
@@ -1519,7 +1519,7 @@ class LaserCalibrationDialog(QDialog):
                             current_frequency=Frequency_unique[m]
                             current_frequency_ind=[index for index, value in enumerate(self.LCM_Frequency_1) if value == current_frequency]
                             current_frequency_ind = list(set(current_frequency_ind) & set(current_protocol_ind))
-                            for laser_tag in laser_tags:
+                            for laser_tag in self.laser_tags:
                                 ItemsLaserPower=self._get_laser_power_list(current_frequency_ind,laser_tag)
                                 LaserCalibrationResults=initialize_dic(LaserCalibrationResults,key_list=[current_date_name,current_color,current_protocol,current_frequency,f"Laser_{laser_tag}"])
                                 if 'LaserPowerVoltage' not in LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]:
@@ -1527,7 +1527,7 @@ class LaserCalibrationDialog(QDialog):
                                 else:
                                     LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage']=self._unique(LaserCalibrationResults[current_date_name][current_color][current_protocol][current_frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage']+ItemsLaserPower)
                     elif current_protocol=='Constant' or current_protocol=='Pulse':
-                            for laser_tag in laser_tags:
+                            for laser_tag in self.laser_tags:
                                 ItemsLaserPower=self._get_laser_power_list(current_protocol_ind,laser_tag)
                                 # Check and assign items to the nested dictionary
                                 LaserCalibrationResults=initialize_dic(LaserCalibrationResults,key_list=[current_date_name,current_color,current_protocol,f"Laser_{laser_tag}"])
