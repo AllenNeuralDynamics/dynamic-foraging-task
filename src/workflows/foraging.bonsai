@@ -2774,33 +2774,45 @@
               <Name>JaneliaLickDetector</Name>
               <Workflow>
                 <Nodes>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="wie:KeyDown">
-                      <wie:Filter>L</wie:Filter>
-                      <wie:SuppressRepetitions>false</wie:SuppressRepetitions>
-                    </Combinator>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="Combinator">
+                      <Combinator xsi:type="wie:KeyDown">
+                        <wie:Filter>L</wie:Filter>
+                        <wie:SuppressRepetitions>false</wie:SuppressRepetitions>
+                      </Combinator>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="rx:PublishSubject">
-                    <Name>LeftKeyPress</Name>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="rx:PublishSubject">
+                      <Name>LeftKeyPress</Name>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="StringProperty">
-                      <Value>Left</Value>
-                    </Combinator>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="Combinator">
+                      <Combinator xsi:type="StringProperty">
+                        <Value>Left</Value>
+                      </Combinator>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="wie:KeyDown">
-                      <wie:Filter>R</wie:Filter>
-                      <wie:SuppressRepetitions>false</wie:SuppressRepetitions>
-                    </Combinator>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="Combinator">
+                      <Combinator xsi:type="wie:KeyDown">
+                        <wie:Filter>R</wie:Filter>
+                        <wie:SuppressRepetitions>false</wie:SuppressRepetitions>
+                      </Combinator>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="rx:PublishSubject">
-                    <Name>RightKeyPress</Name>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="rx:PublishSubject">
+                      <Name>RightKeyPress</Name>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="StringProperty">
-                      <Value>Right</Value>
-                    </Combinator>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="Combinator">
+                      <Combinator xsi:type="StringProperty">
+                        <Value>Right</Value>
+                      </Combinator>
+                    </Builder>
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
                     <Name>BehaviorEvents</Name>
@@ -4118,47 +4130,75 @@
                   <Expression xsi:type="MulticastSubject">
                     <Name>ToBonsaiOSC</Name>
                   </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>RightKeyPress</Name>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="SubscribeSubject">
+                      <Name>RightKeyPress</Name>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>Timestamps</Name>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="SubscribeSubject">
+                      <Name>Timestamps</Name>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:WithLatestFrom" />
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="Combinator">
+                      <Combinator xsi:type="rx:WithLatestFrom" />
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="MemberSelector">
-                    <Selector>Item2</Selector>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="MemberSelector">
+                      <Selector>Item2</Selector>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="scr:ExpressionTransform">
-                    <scr:Expression>new(it as Seconds)</scr:Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="scr:ExpressionTransform">
+                      <scr:Expression>new(it as Seconds)</scr:Expression>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="osc:Format">
-                    <osc:Address>/RightLickTime</osc:Address>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="osc:Format">
+                      <osc:Address>/RightLickTime</osc:Address>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="MulticastSubject">
-                    <Name>ToBonsaiOSC2</Name>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="MulticastSubject">
+                      <Name>ToBonsaiOSC2</Name>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>LeftKeyPress</Name>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="SubscribeSubject">
+                      <Name>LeftKeyPress</Name>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>Timestamps</Name>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="SubscribeSubject">
+                      <Name>Timestamps</Name>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:WithLatestFrom" />
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="Combinator">
+                      <Combinator xsi:type="rx:WithLatestFrom" />
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="MemberSelector">
-                    <Selector>Item2</Selector>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="MemberSelector">
+                      <Selector>Item2</Selector>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="scr:ExpressionTransform">
-                    <scr:Expression>new(it as Seconds)</scr:Expression>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="scr:ExpressionTransform">
+                      <scr:Expression>new(it as Seconds)</scr:Expression>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="osc:Format">
-                    <osc:Address>/LeftLickTime</osc:Address>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="osc:Format">
+                      <osc:Address>/LeftLickTime</osc:Address>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="MulticastSubject">
-                    <Name>ToBonsaiOSC2</Name>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="MulticastSubject">
+                      <Name>ToBonsaiOSC2</Name>
+                    </Builder>
                   </Expression>
                 </Nodes>
                 <Edges>
