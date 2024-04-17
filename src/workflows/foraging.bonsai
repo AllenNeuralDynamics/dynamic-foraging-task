@@ -313,7 +313,7 @@
               </PropertyMappings>
             </Expression>
             <Expression xsi:type="rx:SelectMany">
-              <Name>ITI</Name>
+              <Name>ITIAndDelay</Name>
               <Workflow>
                 <Nodes>
                   <Expression xsi:type="ExternalizedMapping">
