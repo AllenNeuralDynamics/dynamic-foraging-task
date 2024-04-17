@@ -84,10 +84,9 @@ class OptogeneticsDialog(QDialog):
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
         uic.loadUi('Optogenetics.ui', self)
-        
+        self.condition_idx = [1, 2, 3, 4]
         self._connectSignalsSlots()
         self.MainWindow=MainWindow
-        self.condition_idx = [1, 2, 3, 4]
         for i in self.condition_idx:
             getattr(self, f'_LaserColor_{i}')()
         self._Laser_calibration()
