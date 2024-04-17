@@ -1346,7 +1346,7 @@ class GenerateTrials():
                 if getattr(self, attr_name) !='NA':
                     parts = attr_name.split('_')
                     ConditionsOn.append(parts[-1])
-                    Probabilities.append(float(eval('self.TP_Probability_'+parts[-1])))
+                    Probabilities.append(float(getattr(self, 'TP_Probability_' + parts[-1])))
                     empty=0
         if empty==1:
             self.SelctedCondition=0
