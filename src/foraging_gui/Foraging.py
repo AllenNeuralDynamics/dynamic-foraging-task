@@ -817,10 +817,7 @@ class Window(QMainWindow):
             if os.path.exists(self.SettingsBoxFile):
                 # Open the csv settings file
                 df = pd.read_csv(self.SettingsBoxFile,index_col=None)
-                for idx, row in df.iterrows():
-                    key = row.iloc[0]  # First column
-                    value = row.iloc[1]  # Second column
-                    self.SettingsBox[key] = value
+                self.SettingsBox = {row[0]: row[1] for _, row in df.iterrows()}
                 logging.info('Loaded settings_box file')
             else:
                 logging.error('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
