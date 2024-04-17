@@ -87,10 +87,9 @@ class OptogeneticsDialog(QDialog):
         
         self._connectSignalsSlots()
         self.MainWindow=MainWindow
-        self._LaserColor_1()
-        self._LaserColor_2()
-        self._LaserColor_3()
-        self._LaserColor_4()
+        self.condition_idx = [1, 2, 3, 4]
+        for i in self.condition_idx:
+            getattr(self, f'_LaserColor_{i}')()
         self._Laser_calibration()
         self._SessionWideControl()
     def _connectSignalsSlots(self):
