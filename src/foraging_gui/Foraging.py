@@ -3685,11 +3685,6 @@ if __name__ == "__main__":
     win.current_branch=current_branch
     win.repo_url=repo_url
     win.repo_dirty_flag=repo_dirty_flag
-    win.commit_ID=None
-    win.current_branch=None
-    win.repo_url=None
-    win.repo_dirty_flag=None
-
     win.show()
    
      # Run your application's event loop and stop after closing all windows
