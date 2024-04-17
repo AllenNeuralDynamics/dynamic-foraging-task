@@ -227,13 +227,13 @@ class OptogeneticsDialog(QDialog):
         ''' enable/disable items based on laser (blue/green/orange/red/NA)'''
         Inactlabel=range(2,17)
         laser_tags=[1,2] # corresponding to Laser_1 and Laser_2
-        if eval('self.LaserColor_'+str(Numb)+'.currentText()')=='NA':
+        if getattr(self, 'LaserColor_' + str(Numb)).currentText() == 'NA':
             Label=False
         else:
             Label=True
-            Color=eval('self.LaserColor_'+str(Numb)+'.currentText()')
-            Protocol=eval('self.Protocol_'+str(Numb)+'.currentText()')
-            CurrentFrequency=eval('self.Frequency_'+str(Numb)+'.currentText()')
+            Color = getattr(self, 'LaserColor_' + str(Numb)).currentText()
+            Protocol = getattr(self, 'Protocol_' + str(Numb)).currentText()
+            CurrentFrequency = getattr(self, 'Frequency_' + str(Numb)).currentText()
             latest_calibration_date=self._FindLatestCalibrationDate(Color)
             if latest_calibration_date=='NA':
                 RecentLaserCalibration={}
@@ -249,8 +249,8 @@ class OptogeneticsDialog(QDialog):
                             for Fre in Frequency:
                                 ItemsFrequency.append(Fre)
                             ItemsFrequency=sorted(ItemsFrequency)
-                            eval('self.Frequency_'+str(Numb)+'.clear()')
-                            eval('self.Frequency_'+str(Numb)+'.addItems(ItemsFrequency)')
+                            getattr(self, f'Frequency_{Numb}').clear()
+                            getattr(self, f'Frequency_{Numb}').addItems(ItemsFrequency)
                             if not CurrentFrequency in Frequency:
                                 CurrentFrequency=eval('self.Frequency_'+str(Numb)+'.currentText()')
                             for laser_tag in laser_tags:
@@ -258,16 +258,16 @@ class OptogeneticsDialog(QDialog):
                                 for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
                                     ItemsLaserPower.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
                                 ItemsLaserPower=sorted(ItemsLaserPower)
-                                eval(f"self.Laser{laser_tag}_power_{str(Numb)}.clear()")
-                                eval(f"self.Laser{laser_tag}_power_{str(Numb)}.addItems(ItemsLaserPower)")
+                                getattr(self, f"Laser{laser_tag}_power_{str(Numb)}").clear()
+                                getattr(self, f"Laser{laser_tag}_power_{str(Numb)}").addItems(ItemsLaserPower)
                         elif Protocol=='Constant' or Protocol=='Pulse':
                             for laser_tag in laser_tags:
                                 ItemsLaserPower=[]
                                 for i in range(len(RecentLaserCalibration[Color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
                                     ItemsLaserPower.append(str(RecentLaserCalibration[Color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
                                 ItemsLaserPower=sorted(ItemsLaserPower)
-                                eval(f"self.Laser{laser_tag}_power_{str(Numb)}.clear()")
-                                eval(f"self.Laser{laser_tag}_power_{str(Numb)}.addItems(ItemsLaserPower)")
+                                getattr(self, f"Laser{laser_tag}_power_{str(Numb)}").clear()
+                                getattr(self, f"Laser{laser_tag}_power_{str(Numb)}").addItems(ItemsLaserPower)
                         self.MainWindow.WarningLabel.setText('')
                         self.MainWindow.WarningLabel.setStyleSheet("color: gray;")
                     else:
@@ -279,29 +279,31 @@ class OptogeneticsDialog(QDialog):
 
             if no_calibration:
                 for laser_tag in laser_tags:
-                    eval(f"self.Laser{laser_tag}_power_{str(Numb)}.clear()")
+                    getattr(self, f"Laser{laser_tag}_power_{str(Numb)}").clear()
                     self.MainWindow.WarningLabel.setText('No calibration for this protocol identified!')
                     self.MainWindow.WarningLabel.setStyleSheet(self.MainWindow.default_warning_color)
 
-        eval('self.Location_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.Laser1_power_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.Laser2_power_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.Probability_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.Duration_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.Condition_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.ConditionP_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.LaserStart_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.OffsetStart_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.LaserEnd_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.OffsetEnd_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.Protocol_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.RD_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        getattr(self, 'Location_' + str(Numb)).setEnabled(Label)
+        getattr(self, 'Laser1_power_' + str(Numb)).setEnabled(Label)
+        getattr(self, 'Laser2_power_' + str(Numb)).setEnabled(Label)
+        getattr(self, 'Probability_' + str(Numb)).setEnabled(Label)
+        getattr(self, 'Duration_' + str(Numb)).setEnabled(Label)
+        getattr(self, 'Condition_' + str(Numb)).setEnabled(Label)
+        getattr(self, 'ConditionP_' + str(Numb)).setEnabled(Label)
+        getattr(self, 'LaserStart_' + str(Numb)).setEnabled(Label)
+        getattr(self, 'OffsetStart_' + str(Numb)).setEnabled(Label)
+        getattr(self, 'LaserEnd_' + str(Numb)).setEnabled(Label)
+        getattr(self, 'OffsetEnd_' + str(Numb)).setEnabled(Label)
+        getattr(self, 'Protocol_' + str(Numb)).setEnabled(Label)
+        getattr(self, 'Frequency_' + str(Numb)).setEnabled(Label)
+        getattr(self, 'RD_' + str(Numb)).setEnabled(Label)
+        getattr(self, 'PulseDur_' + str(Numb)).setEnabled(Label)
+
         for i in Inactlabel:
-            eval('self.label'+str(Numb)+'_'+str(i)+'.setEnabled('+str(Label)+')')
-        if eval('self.LaserColor_'+str(Numb)+'.currentText()')!='NA':    
-            getattr(self, f'_activated')(Numb)
+            getattr(self, 'label' + str(Numb) + '_' + str(i)).setEnabled(Label)
+        if getattr(self, 'LaserColor_' + str(Numb)).currentText() != 'NA':
+            getattr(self, '_activated')(Numb)
+
 
 class WaterCalibrationDialog(QDialog):
     '''Water valve calibration'''
