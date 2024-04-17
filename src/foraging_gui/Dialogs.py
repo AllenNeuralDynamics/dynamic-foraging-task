@@ -1166,7 +1166,7 @@ class LaserCalibrationDialog(QDialog):
         self.threadpool1=QThreadPool()
         self.threadpool2=QThreadPool()
         self.laser_tags=[1,2]
-
+        self.condition_idx=[1,2,3,4]
     def _connectSignalsSlots(self):
         self.Open.clicked.connect(self._Open)
         self.KeepOpen.clicked.connect(self._KeepOpen)
@@ -1554,10 +1554,8 @@ class LaserCalibrationDialog(QDialog):
             return
         self.MainWindow.LaserCalibrationResults=LaserCalibrationResults
         self.MainWindow._GetLaserCalibration()
-        self.MainWindow.Opto_dialog._LaserColor_1()
-        self.MainWindow.Opto_dialog._LaserColor_2()
-        self.MainWindow.Opto_dialog._LaserColor_3()
-        self.MainWindow.Opto_dialog._LaserColor_4()
+        for i in self.condition_idx:
+            getattr(self.MainWindow.Opto_dialog, f'_LaserColor')(i)
         time.sleep(0.01)
         self.Save.setStyleSheet("background-color : none")
         self.Save.setChecked(False)
