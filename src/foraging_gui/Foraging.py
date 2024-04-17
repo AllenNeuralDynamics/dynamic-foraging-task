@@ -3524,6 +3524,8 @@ def log_git_hash():
         py_version = sys.version
         logging.info('Python version: {}'.format(py_version))
         print('Python version: {}'.format(py_version))       
+        if py_version[0:3] != '3.9':
+            logging.error('Incorrect version of python! Should be 3.9, got {}'.format(py_version[0:3]))
 
         return git_hash, git_branch, repo_url
     except Exception as e:
