@@ -252,7 +252,7 @@ class OptogeneticsDialog(QDialog):
                             getattr(self, f'Frequency_{Numb}').clear()
                             getattr(self, f'Frequency_{Numb}').addItems(ItemsFrequency)
                             if not CurrentFrequency in Frequency:
-                                CurrentFrequency=eval('self.Frequency_'+str(Numb)+'.currentText()')
+                                CurrentFrequency = getattr(self, 'Frequency_' + str(Numb)).currentText()
                             for laser_tag in laser_tags:
                                 ItemsLaserPower=[]
                                 for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
