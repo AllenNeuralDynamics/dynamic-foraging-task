@@ -3515,12 +3515,14 @@ def log_git_hash():
         Add a note to the GUI log about the current branch and hash. Assumes the local repo is clean
     '''
     try:
+        # Get information about task repository
         git_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
         git_branch = subprocess.check_output(['git','branch','--show-current']).decode('ascii').strip()
         repo_url = subprocess.check_output(['git', 'remote', 'get-url', 'origin']).decode('ascii').strip()
         logging.info('Current git commit branch, hash: {}, {}'.format(git_branch,git_hash))
         print('Current git commit branch, hash: {}, {}'.format(git_branch,git_hash))
         
+        # Get information about python
         py_version = sys.version
         logging.info('Python version: {}'.format(py_version))
         print('Python version: {}'.format(py_version))       
