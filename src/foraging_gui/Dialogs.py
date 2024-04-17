@@ -88,36 +88,34 @@ class OptogeneticsDialog(QDialog):
         self._connectSignalsSlots()
         self.MainWindow=MainWindow
         for i in self.condition_idx:
-            getattr(self, f'_LaserColor_{i}')()
+            getattr(self, f'_LaserColor')(i)
         self._Laser_calibration()
         self._SessionWideControl()
     def _connectSignalsSlots(self):
-        for i in  self.condition_idx:
+        for i in self.condition_idx:
             # Connect LaserColor signals
-            getattr(self, f'LaserColor_{i}').currentIndexChanged.connect(getattr(self, f'_LaserColor_{i}'))
-            getattr(self, f'LaserColor_{i}').activated.connect(getattr(self, f'_LaserColor_{i}'))
+            self._connectSignalSlot(f'LaserColor_{i}', self._LaserColor, i)
 
             # Connect Protocol signals
-            getattr(self, f'Protocol_{i}').activated.connect(getattr(self, f'_activated_{i}'))
-            getattr(self, f'Protocol_{i}').currentIndexChanged.connect(getattr(self, f'_activated_{i}'))
-            getattr(self, f'Protocol_{i}').activated.connect(getattr(self, f'_LaserColor_{i}'))
-            getattr(self, f'Protocol_{i}').currentIndexChanged.connect(getattr(self, f'_LaserColor_{i}'))
+            self._connectSignalSlot(f'Protocol_{i}', self._activated, i)
+            self._connectSignalSlot(f'Protocol_{i}', self._LaserColor, i)
 
             # Connect Frequency signals
-            getattr(self, f'Frequency_{i}').activated.connect(getattr(self, f'_Frequency_{i}'))
-            getattr(self, f'Frequency_{i}').currentIndexChanged.connect(getattr(self, f'_Frequency_{i}'))
+            self._connectSignalSlot(f'Frequency_{i}', self._Frequency, i)
 
-            # Connect LaserStart signals
-            getattr(self, f'LaserStart_{i}').activated.connect(getattr(self, f'_activated_{i}'))
-            getattr(self, f'LaserStart_{i}').currentIndexChanged.connect(getattr(self, f'_activated_{i}'))
-
-            # Connect LaserEnd signals
-            getattr(self, f'LaserEnd_{i}').activated.connect(getattr(self, f'_activated_{i}'))
-            getattr(self, f'LaserEnd_{i}').currentIndexChanged.connect(getattr(self, f'_activated_{i}'))
+            # Connect LaserStart and LaserEnd signals
+            self._connectSignalSlot(f'LaserStart_{i}', self._activated, i)
+            self._connectSignalSlot(f'LaserEnd_{i}', self._activated, i)
 
         self.Laser_calibration.currentIndexChanged.connect(self._Laser_calibration)
         self.Laser_calibration.activated.connect(self._Laser_calibration)
         self.SessionWideControl.currentIndexChanged.connect(self._SessionWideControl)
+
+    def _connectSignalSlot(self, signal_name, slot_method, index):
+        signal = getattr(self, signal_name)
+        signal.currentIndexChanged.connect(lambda: slot_method(index))
+        signal.activated.connect(lambda: slot_method(index))
+
     def _SessionWideControl(self):
         '''enable/disable items based on session wide control'''
         if self.SessionWideControl.currentText()=='on':
@@ -153,30 +151,6 @@ class OptogeneticsDialog(QDialog):
         else:
             return sorted_dates[-1]
 
-    def _Frequency_1(self):
-        self._Frequency(1)
-    def _Frequency_2(self):
-        self._Frequency(2)
-    def _Frequency_3(self):
-        self._Frequency(3)
-    def _Frequency_4(self):
-        self._Frequency(4)
-    def _LaserColor_1(self):
-        self._LaserColor(1)
-    def _LaserColor_2(self):
-        self._LaserColor(2)
-    def _LaserColor_3(self):
-        self._LaserColor(3)
-    def _LaserColor_4(self):
-        self._LaserColor(4)
-    def _activated_1(self):
-        self._activated(1)
-    def _activated_2(self):
-        self._activated(2)
-    def _activated_3(self):
-        self._activated(3)
-    def _activated_4(self):
-        self._activated(4)
     def _Frequency(self,Numb):
         try:
             laser_tags=[1,2] # corresponding to Laser_1 and Laser_2
@@ -327,7 +301,7 @@ class OptogeneticsDialog(QDialog):
         for i in Inactlabel:
             eval('self.label'+str(Numb)+'_'+str(i)+'.setEnabled('+str(Label)+')')
         if eval('self.LaserColor_'+str(Numb)+'.currentText()')!='NA':    
-            eval('self._activated_'+str(Numb)+'()')
+            getattr(self, f'_activated')(Numb)
 
 class WaterCalibrationDialog(QDialog):
     '''Water valve calibration'''
