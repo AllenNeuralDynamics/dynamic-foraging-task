@@ -186,43 +186,43 @@ class OptogeneticsDialog(QDialog):
         Inactlabel1=15 # pulse duration
         Inactlabel2=13 # frequency
         Inactlabel3=14 # Ramping down
-        if eval('self.Protocol_'+str(Numb)+'.currentText()')=='Sine':
-            eval('self.label'+str(Numb)+'_'+str(Inactlabel1)+'.setEnabled('+str(False)+')')
-            eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(False)+')')
-            eval('self.label'+str(Numb)+'_'+str(Inactlabel2)+'.setEnabled('+str(True)+')')
-            eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(True)+')')
-            eval('self.label'+str(Numb)+'_'+str(Inactlabel3)+'.setEnabled('+str(True)+')')
-            eval('self.RD_'+str(Numb)+'.setEnabled('+str(True)+')')
-            eval('self.Frequency_'+str(Numb)+'.setEditable(False)')
-        if eval('self.Protocol_'+str(Numb)+'.currentText()')=='Pulse':
-            eval('self.label'+str(Numb)+'_'+str(Inactlabel1)+'.setEnabled('+str(True)+')')
-            eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(True)+')')
-            eval('self.label'+str(Numb)+'_'+str(Inactlabel2)+'.setEnabled('+str(True)+')')
-            eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(True)+')')
-            eval('self.label'+str(Numb)+'_'+str(Inactlabel3)+'.setEnabled('+str(False)+')')
-            eval('self.RD_'+str(Numb)+'.setEnabled('+str(False)+')')
-            eval('self.Frequency_'+str(Numb)+'.setEditable(True)')
-        if eval('self.Protocol_'+str(Numb)+'.currentText()')=='Constant':
-            eval('self.label'+str(Numb)+'_'+str(Inactlabel1)+'.setEnabled('+str(False)+')')
-            eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(False)+')')
-            eval('self.label'+str(Numb)+'_'+str(Inactlabel2)+'.setEnabled('+str(False)+')')
-            eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(False)+')')
-            eval('self.label'+str(Numb)+'_'+str(Inactlabel3)+'.setEnabled('+str(True)+')')
-            eval('self.RD_'+str(Numb)+'.setEnabled('+str(True)+')')
-            eval('self.Frequency_'+str(Numb)+'.clear()')
-            eval('self.Frequency_'+str(Numb)+'.setEditable(False)')
-        if eval('self.LaserStart_'+str(Numb)+'.currentText()')=='NA':
-            eval('self.label'+str(Numb)+'_'+str(9)+'.setEnabled('+str(False)+')')
-            eval('self.OffsetStart_'+str(Numb)+'.setEnabled('+str(False)+')')
+        if getattr(self, f'Protocol_{Numb}').currentText() == 'Sine':
+            getattr(self, f'label{Numb}_{Inactlabel1}').setEnabled(False)
+            getattr(self, f'PulseDur_{Numb}').setEnabled(False)
+            getattr(self, f'label{Numb}_{Inactlabel2}').setEnabled(True)
+            getattr(self, f'Frequency_{Numb}').setEnabled(True)
+            getattr(self, f'label{Numb}_{Inactlabel3}').setEnabled(True)
+            getattr(self, f'RD_{Numb}').setEnabled(True)
+            getattr(self, f'Frequency_{Numb}').setEditable(False)
+        if getattr(self, f'Protocol_{Numb}').currentText() == 'Pulse':
+            getattr(self, f'label{Numb}_{Inactlabel1}').setEnabled(True)
+            getattr(self, f'PulseDur_{Numb}').setEnabled(True)
+            getattr(self, f'label{Numb}_{Inactlabel2}').setEnabled(True)
+            getattr(self, f'Frequency_{Numb}').setEnabled(True)
+            getattr(self, f'label{Numb}_{Inactlabel3}').setEnabled(False)
+            getattr(self, f'RD_{Numb}').setEnabled(False)
+            getattr(self, f'Frequency_{Numb}').setEditable(True)
+        if getattr(self, f'Protocol_{Numb}').currentText() == 'Constant':
+            getattr(self, f'label{Numb}_{Inactlabel1}').setEnabled(False)
+            getattr(self, f'PulseDur_{Numb}').setEnabled(False)
+            getattr(self, f'label{Numb}_{Inactlabel2}').setEnabled(False)
+            getattr(self, f'Frequency_{Numb}').setEnabled(False)
+            getattr(self, f'label{Numb}_{Inactlabel3}').setEnabled(True)
+            getattr(self, f'RD_{Numb}').setEnabled(True)
+            getattr(self, f'Frequency_{Numb}').clear()
+            getattr(self, f'Frequency_{Numb}').setEditable(False)
+        if getattr(self, f'LaserStart_{Numb}').currentText() == 'NA':
+            getattr(self, f'label{Numb}_9').setEnabled(False)
+            getattr(self, f'OffsetStart_{Numb}').setEnabled(False)
         else:
-            eval('self.label'+str(Numb)+'_'+str(9)+'.setEnabled('+str(True)+')')
-            eval('self.OffsetStart_'+str(Numb)+'.setEnabled('+str(True)+')')
-        if eval('self.LaserEnd_'+str(Numb)+'.currentText()')=='NA':
-            eval('self.label'+str(Numb)+'_'+str(11)+'.setEnabled('+str(False)+')')
-            eval('self.OffsetEnd_'+str(Numb)+'.setEnabled('+str(False)+')')
+            getattr(self, f'label{Numb}_9').setEnabled(True)
+            getattr(self, f'OffsetStart_{Numb}').setEnabled(True)
+        if getattr(self, f'LaserEnd_{Numb}').currentText() == 'NA':
+            getattr(self, f'label{Numb}_11').setEnabled(False)
+            getattr(self, f'OffsetEnd_{Numb}').setEnabled(False)
         else:
-            eval('self.label'+str(Numb)+'_'+str(11)+'.setEnabled('+str(True)+')')
-            eval('self.OffsetEnd_'+str(Numb)+'.setEnabled('+str(True)+')')
+            getattr(self, f'label{Numb}_11').setEnabled(True)
+            getattr(self, f'OffsetEnd_{Numb}').setEnabled(True)
     def _LaserColor(self,Numb):
         ''' enable/disable items based on laser (blue/green/orange/red/NA)'''
         Inactlabel=range(2,17)
