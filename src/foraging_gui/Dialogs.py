@@ -1411,7 +1411,7 @@ class LaserCalibrationDialog(QDialog):
         self.LaserColor_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("LaserColor_" + condition).currentIndex())
         self.Location_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Location_" + condition).currentIndex())
         self.Protocol_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Protocol_" + condition).currentIndex())
-        self.voltage.setText(str(getattr(self.MainWindow.Opto_dialog, f"Laser{copylaser}_power_{condition}").currentText()[0]))
+        self.voltage.setText(str(eval(self.MainWindow.Opto_dialog.__getattribute__(f"Laser{copylaser}_power_{condition}").currentText())[0]))
         
 
     def _Capture(self):
