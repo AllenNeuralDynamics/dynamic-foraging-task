@@ -1228,60 +1228,60 @@ class LaserCalibrationDialog(QDialog):
         Inactlabel1=15 # pulse duration
         Inactlabel2=13 # frequency
         Inactlabel3=14 # Ramping down
-        if eval('self.Protocol_'+str(Numb)+'.currentText()')=='Sine':
-            eval('self.label'+str(Numb)+'_'+str(Inactlabel1)+'.setEnabled('+str(False)+')')
-            eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(False)+')')
-            eval('self.label'+str(Numb)+'_'+str(Inactlabel2)+'.setEnabled('+str(True)+')')
-            eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(True)+')')
-            eval('self.label'+str(Numb)+'_'+str(Inactlabel3)+'.setEnabled('+str(True)+')')
-            eval('self.RD_'+str(Numb)+'.setEnabled('+str(True)+')')
-        if eval('self.Protocol_'+str(Numb)+'.currentText()')=='Pulse':
-            eval('self.label'+str(Numb)+'_'+str(Inactlabel1)+'.setEnabled('+str(True)+')')
-            eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(True)+')')
-            eval('self.label'+str(Numb)+'_'+str(Inactlabel2)+'.setEnabled('+str(True)+')')
-            eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(True)+')')
-            eval('self.label'+str(Numb)+'_'+str(Inactlabel3)+'.setEnabled('+str(False)+')')
-            eval('self.RD_'+str(Numb)+'.setEnabled('+str(False)+')')
-        if eval('self.Protocol_'+str(Numb)+'.currentText()')=='Constant':
-            eval('self.label'+str(Numb)+'_'+str(Inactlabel1)+'.setEnabled('+str(False)+')')
-            eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(False)+')')
-            eval('self.label'+str(Numb)+'_'+str(Inactlabel2)+'.setEnabled('+str(False)+')')
-            eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(False)+')')
-            eval('self.label'+str(Numb)+'_'+str(Inactlabel3)+'.setEnabled('+str(True)+')')
-            eval('self.RD_'+str(Numb)+'.setEnabled('+str(True)+')')
+        if getattr(self, 'Protocol_'+str(Numb)+'.currentText()') == 'Sine':
+            getattr(self, 'label'+str(Numb)+'_'+str(Inactlabel1)).setEnabled(False)
+            getattr(self, 'PulseDur_'+str(Numb)).setEnabled(False)
+            getattr(self, 'label'+str(Numb)+'_'+str(Inactlabel2)).setEnabled(True)
+            getattr(self, 'Frequency_'+str(Numb)).setEnabled(True)
+            getattr(self, 'label'+str(Numb)+'_'+str(Inactlabel3)).setEnabled(True)
+            getattr(self, 'RD_'+str(Numb)).setEnabled(True)
+        if getattr(self, 'Protocol_'+str(Numb)+'.currentText()')=='Pulse':
+            getattr(self, 'label'+str(Numb)+'_'+str(Inactlabel1)).setEnabled(True)
+            getattr(self, 'PulseDur_'+str(Numb)).setEnabled(True)
+            getattr(self, 'label'+str(Numb)+'_'+str(Inactlabel2)).setEnabled(True)
+            getattr(self, 'Frequency_'+str(Numb)).setEnabled(True)
+            getattr(self, 'label'+str(Numb)+'_'+str(Inactlabel3)).setEnabled(False)
+            getattr(self, 'RD_'+str(Numb)).setEnabled(False)
+        if getattr(self, 'Protocol_'+str(Numb)+'.currentText()')=='Constant':
+            getattr(self, 'label'+str(Numb)+'_'+str(Inactlabel1)).setEnabled(False)
+            getattr(self, 'PulseDur_'+str(Numb)).setEnabled(False)
+            getattr(self, 'label'+str(Numb)+'_'+str(Inactlabel2)).setEnabled(False)
+            getattr(self, 'Frequency_'+str(Numb)).setEnabled(False)
+            getattr(self, 'label'+str(Numb)+'_'+str(Inactlabel3)).setEnabled(True)
+            getattr(self, 'RD_'+str(Numb)).setEnabled(True)
     
     def _LaserColor(self,Numb):
         ''' enable/disable items based on laser (blue/green/orange/red/NA)'''
         Inactlabel=[2,3,5,12,13,14,15]
-        if eval('self.LaserColor_'+str(Numb)+'.currentText()')=='NA':
+        if getattr(self, 'LaserColor_'+str(Numb)+'.currentText()')=='NA':
             Label=False
         else:
             Label=True
-        eval('self.Location_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.Duration_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.Protocol_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.Frequency_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.RD_'+str(Numb)+'.setEnabled('+str(Label)+')')
-        eval('self.PulseDur_'+str(Numb)+'.setEnabled('+str(Label)+')')
+        getattr(self, 'Location_'+str(Numb)).setEnabled(Label)
+        getattr(self, 'Duration_'+str(Numb)).setEnabled(Label)
+        getattr(self, 'Protocol_'+str(Numb)).setEnabled(Label)
+        getattr(self, 'Frequency_'+str(Numb)).setEnabled(Label)
+        getattr(self, 'RD_'+str(Numb)).setEnabled(Label)
+        getattr(self, 'PulseDur_'+str(Numb)).setEnabled(Label)
         for i in Inactlabel:
-            eval('self.label'+str(Numb)+'_'+str(i)+'.setEnabled('+str(Label)+')')
-        if eval('self.LaserColor_'+str(Numb)+'.currentText()')!='NA':    
-            eval('self._activated_'+str(Numb)+'()')
+            getattr(self, 'label'+str(Numb)+'_'+str(i)).setEnabled(Label)
+        if getattr(self, 'LaserColor_'+str(Numb)+'.currentText')() != 'NA':
+            getattr(self, '_activated_' + str(Numb))()
     
     def _GetLaserWaveForm(self):
         '''Get the waveform of the laser. It dependens on color/duration/protocol(frequency/RD/pulse duration)/locations/laser power'''
         N=str(1)
         # CLP, current laser parameter
-        self.CLP_Color=eval('self.LC_LaserColor_'+N)
-        self.CLP_Location=eval('self.LC_Location_'+N)
-        self.CLP_Duration=float(eval('self.LC_Duration_'+N))
-        self.CLP_Protocol=eval('self.LC_Protocol_'+N)
-        self.CLP_Frequency=float(eval('self.LC_Frequency_'+N))
-        self.CLP_RampingDown=float(eval('self.LC_RD_'+N))
-        self.CLP_PulseDur=eval('self.LC_PulseDur_'+N)
-        self.CLP_SampleFrequency=float(self.LC_SampleFrequency)
-        self.CLP_CurrentDuration=self.CLP_Duration
-        self.CLP_InputVoltage=float(self.voltage.text())
+        self.CLP_Color = getattr(self, 'LC_LaserColor_' + N)
+        self.CLP_Location = getattr(self, 'LC_Location_' + N)
+        self.CLP_Duration = float(getattr(self, 'LC_Duration_' + N))
+        self.CLP_Protocol = getattr(self, 'LC_Protocol_' + N)
+        self.CLP_Frequency = float(getattr(self, 'LC_Frequency_' + N))
+        self.CLP_RampingDown = float(getattr(self, 'LC_RD_' + N))
+        self.CLP_PulseDur = getattr(self, 'LC_PulseDur_' + N)
+        self.CLP_SampleFrequency = float(self.LC_SampleFrequency)
+        self.CLP_CurrentDuration = self.CLP_Duration
+        self.CLP_InputVoltage = float(self.voltage.text())
         # generate the waveform based on self.CLP_CurrentDuration and Protocol, Frequency, RampingDown, PulseDur
         self._GetLaserAmplitude()
         # send the trigger source. It's '/Dev1/PFI0' ( P2.0 of NIdaq USB6002) by default 
@@ -1293,8 +1293,8 @@ class LaserCalibrationDialog(QDialog):
             setattr(self, 'WaveFormLocation_' + str(i+1), self.my_wave)
             setattr(self, f"Location{i+1}_Size", getattr(self, f"WaveFormLocation_{i+1}").size)
             #send waveform and send the waveform size
-            eval('self.MainWindow.Channel.Location'+str(i+1)+'_Size'+'(int(self.Location'+str(i+1)+'_Size))')
-            eval('self.MainWindow.Channel4.WaveForm' + str(1)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
+            getattr(self.MainWindow.Channel, 'Location'+str(i+1)+'_Size')(int(getattr(self, 'Location'+str(i+1)+'_Size')))
+            getattr(self.MainWindow.Channel4, 'WaveForm' + str(1)+'_'+str(i+1))(str(getattr(self, 'WaveFormLocation_'+str(i+1)).tolist())[1:-1])
         FinishOfWaveForm=self.MainWindow.Channel4.receive()  
     def _ProduceWaveForm(self,Amplitude):
         '''generate the waveform based on Duration and Protocol, Laser Power, Frequency, RampingDown, PulseDur and the sample frequency'''
@@ -1411,7 +1411,7 @@ class LaserCalibrationDialog(QDialog):
         self.LaserColor_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("LaserColor_" + condition).currentIndex())
         self.Location_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Location_" + condition).currentIndex())
         self.Protocol_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Protocol_" + condition).currentIndex())
-        self.voltage.setText(str(eval(self.MainWindow.Opto_dialog.__getattribute__(f"Laser{copylaser}_power_{condition}").currentText())[0]))
+        self.voltage.setText(str(getattr(self.MainWindow.Opto_dialog, f"Laser{copylaser}_power_{condition}").currentText())[0]))
 
     def _Capture(self):
         '''Save the measured laser power'''
