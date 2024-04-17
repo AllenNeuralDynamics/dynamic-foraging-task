@@ -2955,6 +2955,33 @@ class Window(QMainWindow):
                     return                
             logging.info('Starting session, with experimenter: {}'.format(self.Experimenter.text()))
 
+            # check repo status
+            if (self.current_branch not in ['main','production_testing']) & (self.ID.text() != '0'):
+                reply = QMessageBox.question(self,
+                    'Box {}, Start'.format(self.box_letter),    
+                    'Running on branch \"{}\", continue anyways?'.format(self.current_branch),
+                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                if reply == QMessageBox.No:
+                    self.Start.setChecked(False)
+                    logging.info('User declines starting session on branch: {}'.format(self.current_branch))
+                    return                
+                else:
+                    logging.error('Starting session on branch: {}'.format(self.current_branch))
+
+            if repo_dirty_flag:
+                reply = QMessageBox.question(self,
+                    'Box {}, Start'.format(self.box_letter),    
+                    'Local repository has untracked changes, continue anyways?',
+                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                if reply == QMessageBox.No:
+                    self.Start.setChecked(False)
+                    logging.info('User declines starting session with untracked changes')
+                    return                
+                else:
+                    logging.error('Starting session with untracked local changes')
+
+
+
             # change button color and mark the state change
             self.Start.setStyleSheet("background-color : green;")
             self.NewSession.setStyleSheet("background-color : none")
@@ -3519,11 +3546,12 @@ def log_git_hash():
         git_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
         git_branch = subprocess.check_output(['git','branch','--show-current']).decode('ascii').strip()
         repo_url = subprocess.check_output(['git', 'remote', 'get-url', 'origin']).decode('ascii').strip()
-        local_dirty = subprocess.check_output(['git','diff-index','--name-only', 'HEAD']).decode('ascii').strip()
-        if local_dirty != '':
-            local_dirty = local_dirty.replace('\n',', ')
-            logging.warning('local repository has untracked changes to the following files: {}'.format(local_dirty))
-            print('local repository has untracked changes to the following files: {}'.format(local_dirty))
+        repo_dirty = subprocess.check_output(['git','diff-index','--name-only', 'HEAD']).decode('ascii').strip()
+        repo_dirty_flag = repo_dirty != ''
+        if repo_dirty_flag:
+            repo_dirty = repo_dirty.replace('\n',', ')
+            logging.warning('local repository has untracked changes to the following files: {}'.format(repo_dirty))
+            print('local repository has untracked changes to the following files: {}'.format(repo_dirty))
         else:
             logging.warning('local repository is clean')
             print('local repository is clean')
@@ -3537,10 +3565,10 @@ def log_git_hash():
         if py_version[0:3] != '3.9':
             logging.error('Incorrect version of python! Should be 3.9, got {}'.format(py_version[0:3]))
 
-        return git_hash, git_branch, repo_url
+        return git_hash, git_branch, repo_url, repo_dirty_flag
     except Exception as e:
         logging.error('Could not log git branch and hash: {}'.format(str(e)))
-        return None, None, None
+        return None, None, None, None
 
 def show_exception_box(log_msg):
     '''
@@ -3620,7 +3648,7 @@ if __name__ == "__main__":
    
     # Start logging
     start_gui_log_file(box_number)
-    commit_ID, current_branch, repo_url=log_git_hash()
+    commit_ID, current_branch, repo_url,repo_dirty_flag =log_git_hash()
 
     # Formating GUI graphics
     logging.info('Setting QApplication attributes')
@@ -3643,6 +3671,7 @@ if __name__ == "__main__":
     win.commit_ID=commit_ID
     win.current_branch=current_branch
     win.repo_url=repo_url
+    win.repo_dirty_flag = repo_dirty_flag
     win.show()
    
      # Run your application's event loop and stop after closing all windows
