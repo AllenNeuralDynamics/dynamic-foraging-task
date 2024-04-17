@@ -826,8 +826,12 @@ class GenerateTrials():
                 else:
                     self.DD_PerTrial_GoCue_NextStart='nan'
             CurrentStart_GoCue=(self.B_TrialStartTime[i],self.B_GoCueTime[i])
-            CurrentStart_Delay=(self.B_TrialStartTime[i],self.B_DelayStartTime[i][0]) # using the first delay start time
-            CurrentDelay_GoCue=(self.B_DelayStartTime[i][0],self.B_GoCueTime[i])
+            if self.B_DelayStartTime[i][0] in [None, -999]:
+                CurrentStart_Delay=(self.B_TrialStartTime[i],self.B_GoCueTime[i]) # using the first delay start time
+                CurrentDelay_GoCue=(self.B_GoCueTime[i],self.B_GoCueTime[i])
+            else:
+                CurrentStart_Delay=(self.B_TrialStartTime[i],self.B_DelayStartTime[i][0]) # using the first delay start time
+                CurrentDelay_GoCue=(self.B_DelayStartTime[i][0],self.B_GoCueTime[i])
             CurrentGoCue_GoCue1=(self.B_GoCueTime[i],self.B_GoCueTime[i]+1)
             # licks in different intervals
             Ind_Start_GoCue=(self.AllLicksTimeSorted >= CurrentStart_GoCue[0]) &  (self.AllLicksTimeSorted < CurrentStart_GoCue[1])
