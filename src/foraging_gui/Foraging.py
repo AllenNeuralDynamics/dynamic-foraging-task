@@ -2763,11 +2763,12 @@ class Window(QMainWindow):
 
     def _NewSession(self,override_unsaved_data=False):
         logging.info('New Session pressed')
+        print('debug1: {}'.format(override_unsaved_data))
         self._StopCurrentSession() 
-        print('debug: {}'.format(override_unsaved_data))
+        print('debug2: {}'.format(override_unsaved_data))
 
         if not override_unsaved_data:
-            print('debug')
+            print('debug3')
             # If we have unsaved data, prompt to save
             if (self.ToInitializeVisual==0) and (self.unsaved_data): 
                 reply = QMessageBox.critical(self, 
