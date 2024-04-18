@@ -2766,6 +2766,7 @@ class Window(QMainWindow):
         self._StopCurrentSession() 
 
         if not override_unsaved_data:
+            print('debug')
             # If we have unsaved data, prompt to save
             if (self.ToInitializeVisual==0) and (self.unsaved_data): 
                 reply = QMessageBox.critical(self, 
