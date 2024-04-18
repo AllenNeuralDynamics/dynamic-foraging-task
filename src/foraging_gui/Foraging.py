@@ -2022,7 +2022,7 @@ class Window(QMainWindow):
         
         if SaveContinue==0:
             # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
-            self._NewSession(override_unsaved_data=True)
+            self._NewSession(override_unsaved_data=False)
             # do not create a new folder
             self.CreateNewFolder=0
         # check drop of frames
