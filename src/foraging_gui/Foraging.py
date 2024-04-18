@@ -2764,6 +2764,7 @@ class Window(QMainWindow):
     def _NewSession(self,override_unsaved_data=False):
         logging.info('New Session pressed')
         self._StopCurrentSession() 
+        print('debug: {}'.format(override_unsaved_data))
 
         if not override_unsaved_data:
             print('debug')
