@@ -183,7 +183,7 @@ class Window(QMainWindow):
         self.SaveAs.triggered.connect(self._SaveAs)
         self.Save_continue.triggered.connect(self._Save_continue)
         self.action_Exit.triggered.connect(self._Exit)
-        self.action_New.triggered.connect(self._New)
+        self.action_New.triggered.connect(self._NewSession)
         self.action_Clear.triggered.connect(self._Clear)
         self.action_Start.triggered.connect(self.Start.click)
         self.action_NewSession.triggered.connect(self.NewSession.click)
@@ -213,7 +213,7 @@ class Window(QMainWindow):
         self.Task.currentIndexChanged.connect(self._Task)
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._AdvancedBlockAuto)
         self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
-        self.WeightAfter.textChanged.connect(self._UpdateSuggestedWater)
+        self.WeightAfter.textChanged.connect(self._PostWeightChange)
         self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
         self.Randomness.currentIndexChanged.connect(self._Randomness)
         self.TrainingStage.currentIndexChanged.connect(self._TrainingStage)
@@ -2022,7 +2022,8 @@ class Window(QMainWindow):
         
         if SaveContinue==0:
             # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
-            self._NewSession(dont_ask=True)
+            self.unsaved_data=False 
+            self._NewSession()
             # do not create a new folder
             self.CreateNewFolder=0
         # check drop of frames
@@ -2573,9 +2574,6 @@ class Window(QMainWindow):
                 if child.isEnabled():
                     child.clear()
 
-    def _New(self):
-        self._Clear()
-
     def _StartExcitation(self):
         if self.Teensy_COM == '':
             logging.warning('No Teensy COM configured for this box, cannot start excitation')
@@ -2764,22 +2762,20 @@ class Window(QMainWindow):
         except Exception as e:
             logging.error(str(e))
 
-    def _NewSession(self,dont_ask=False):
+    def _NewSession(self):
         logging.info('New Session pressed')
-        self._StopCurrentSession() 
 
-        if dont_ask==False:
-            # If we have unsaved data, prompt to save
-            if (self.ToInitializeVisual==0) and (self.unsaved_data): 
-                reply = QMessageBox.critical(self, 
-                    'Box {}, New Session:'.format(self.box_letter), 
-                    'Start new session without saving?',
-                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-                if reply == QMessageBox.No:
-                    self.NewSession.setStyleSheet("background-color : none")
-                    self.NewSession.setChecked(False)
-                    logging.info('New Session declined')
-                    return False
+        # If we have unsaved data, prompt to save
+        if (self.ToInitializeVisual==0) and (self.unsaved_data): 
+            reply = QMessageBox.critical(self, 
+                'Box {}, New Session:'.format(self.box_letter), 
+                'Start new session without saving?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if reply == QMessageBox.No:
+                self.NewSession.setStyleSheet("background-color : none")
+                self.NewSession.setChecked(False)
+                logging.info('New Session declined')
+                return False
         
         # stop the camera 
         self._stop_camera()
@@ -3352,6 +3348,13 @@ class Window(QMainWindow):
         self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
         self._UpdateSuggestedWater()
 
+    def _PostWeightChange(self):
+        self.unsaved_data=True
+        self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
+        self.NewSession.setStyleSheet("background-color : none")
+        self.NewSession.setChecked(False)
+        self.WarningLabel.setText('')
+        self._UpdateSuggestedWater()
 
     def _UpdateSuggestedWater(self,ManualWater=0):
         '''Update the suggested water from the manually give water'''
