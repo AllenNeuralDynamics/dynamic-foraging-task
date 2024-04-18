@@ -183,7 +183,7 @@ class Window(QMainWindow):
         self.SaveAs.triggered.connect(self._SaveAs)
         self.Save_continue.triggered.connect(self._Save_continue)
         self.action_Exit.triggered.connect(self._Exit)
-        self.action_New.triggered.connect(self._New)
+        self.action_New.triggered.connect(self._NewSession)
         self.action_Clear.triggered.connect(self._Clear)
         self.action_Start.triggered.connect(self.Start.click)
         self.action_NewSession.triggered.connect(self.NewSession.click)
@@ -2572,9 +2572,6 @@ class Window(QMainWindow):
             for child in self.TrainingParameters.findChildren(QtWidgets.QLineEdit)+ self.centralwidget.findChildren(QtWidgets.QLineEdit):
                 if child.isEnabled():
                     child.clear()
-
-    def _New(self):
-        self._Clear()
 
     def _StartExcitation(self):
         if self.Teensy_COM == '':
