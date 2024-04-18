@@ -1863,10 +1863,10 @@ class Window(QMainWindow):
                 "Do you want to save without weight or extra water information provided?",
                  QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
             if response==QMessageBox.Yes:
-                pass
                 self.WarningLabel.setText('Saving without weight or extra water!')
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
                 logging.info('saving without weight or extra water')
+                pass
             elif response==QMessageBox.No:
                 logging.info('saving declined by user')
                 self.WarningLabel.setText('')
@@ -1884,10 +1884,10 @@ class Window(QMainWindow):
                 "Do you want to save without complete laser target or laser power calibration information provided?",
                  QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
             if response==QMessageBox.Yes:
-                pass
                 self.WarningLabel.setText('Saving without laser target or laser power!')
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
                 logging.info('saving without laser target or laser power')
+                pass
             elif response==QMessageBox.No:
                 logging.info('saving declined by user')
                 self.WarningLabel.setText('')
