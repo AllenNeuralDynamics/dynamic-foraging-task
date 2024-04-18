@@ -1,7 +1,7 @@
 
 numpy
 scipy
-matplotlib==3.5.3
+matplotlib
 PyQt5
 pandas
 psutil
@@ -10,3 +10,5 @@ pyserial
 git+https://github.com/AllenNeuralDynamics/python-newscale@axes-on-target
 git+https://github.com/AllenNeuralDynamics/aind-foraging-behavior-bonsai-automatic-training.git@main
 pynwb
+requests
+harp-python
