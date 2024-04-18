@@ -213,7 +213,7 @@ class Window(QMainWindow):
         self.Task.currentIndexChanged.connect(self._Task)
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._AdvancedBlockAuto)
         self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
-        self.WeightAfter.textChanged.connect(self._UpdateSuggestedWater)
+        self.WeightAfter.textChanged.connect(self._PostWeightChange)
         self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
         self.Randomness.currentIndexChanged.connect(self._Randomness)
         self.TrainingStage.currentIndexChanged.connect(self._TrainingStage)
