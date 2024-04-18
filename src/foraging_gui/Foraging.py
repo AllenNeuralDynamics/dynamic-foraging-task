@@ -2012,6 +2012,7 @@ class Window(QMainWindow):
         Obj['commit_ID']=self.commit_ID
         Obj['repo_url']=self.repo_url
         Obj['current_branch'] =self.current_branch
+        Obj['repo_dirty_flag'] =self.repo_dirty_flag
         
         # save folders
         Obj['TrainingFolder']=self.TrainingFolder
