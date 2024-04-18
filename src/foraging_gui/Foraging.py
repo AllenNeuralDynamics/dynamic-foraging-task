@@ -2987,7 +2987,7 @@ class Window(QMainWindow):
                     return                
                 else:
                     # Allow the session to continue, but log error
-                    logging.error('Starting session with untracked local changes: {}'.format(self.dirty_files)
+                    logging.error('Starting session with untracked local changes: {}'.format(self.dirty_files))
             elif self.repo_dirty_flag is None:
                 logging.error('Could not check for untracked local changes')
 
