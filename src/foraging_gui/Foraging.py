@@ -2761,12 +2761,13 @@ class Window(QMainWindow):
         except Exception as e:
             logging.error(str(e))
 
-    def _NewSession(self,override_unsaved_data=False):
+    def _NewSession(self):#,override_unsaved_data=False):
         logging.info('New Session pressed')
-        print('debug1: {}'.format(override_unsaved_data))
+        #print('debug1: {}'.format(override_unsaved_data))
         self._StopCurrentSession() 
+        #print('debug2: {}'.format(override_unsaved_data))
+        override_unsaved_data=False
         print('debug2: {}'.format(override_unsaved_data))
-
         if not override_unsaved_data:
             print('debug3')
             # If we have unsaved data, prompt to save
