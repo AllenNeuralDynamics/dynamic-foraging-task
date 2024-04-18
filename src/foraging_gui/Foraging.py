@@ -2013,6 +2013,7 @@ class Window(QMainWindow):
         Obj['repo_url']=self.repo_url
         Obj['current_branch'] =self.current_branch
         Obj['repo_dirty_flag'] =self.repo_dirty_flag
+        Obj['dirty_files'] =self.dirty_files
         
         # save folders
         Obj['TrainingFolder']=self.TrainingFolder
@@ -2973,7 +2974,7 @@ class Window(QMainWindow):
                     logging.error('Starting session on branch: {}'.format(self.current_branch))
 
             # Check for untracked local changes
-            if repo_dirty_flag & (self.ID.text() != '0'):
+            if self.repo_dirty_flag & (self.ID.text() != '0'):
                 # prompt user over untracked local changes
                 reply = QMessageBox.critical(self,
                     'Box {}, Start'.format(self.box_letter),    
@@ -2986,8 +2987,8 @@ class Window(QMainWindow):
                     return                
                 else:
                     # Allow the session to continue, but log error
-                    logging.error('Starting session with untracked local changes')
-            elif repo_dirty_flag is None:
+                    logging.error('Starting session with untracked local changes: {}'.format(self.dirty_files)
+            elif self.repo_dirty_flag is None:
                 logging.error('Could not check for untracked local changes')
 
             # change button color and mark the state change
@@ -3562,7 +3563,7 @@ def log_git_hash():
         git_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
         git_branch = subprocess.check_output(['git','branch','--show-current']).decode('ascii').strip()
         repo_url = subprocess.check_output(['git', 'remote', 'get-url', 'origin']).decode('ascii').strip()
-        repo_dirty = subprocess.check_output(['git','diff-index','--name-only', 'HEAD']).decode('ascii').strip()
+        dirty_files = subprocess.check_output(['git','diff-index','--name-only', 'HEAD']).decode('ascii').strip()
     except Exception as e:
         logging.error('Could not log git branch and hash: {}'.format(str(e)))
         return None, None, None, None
@@ -3572,16 +3573,16 @@ def log_git_hash():
     print('Current git commit branch, hash: {}, {}'.format(git_branch,git_hash))
 
     # Check for untracked local changes
-    repo_dirty_flag = repo_dirty != ''
+    repo_dirty_flag = dirty_files != ''
     if repo_dirty_flag:
-        repo_dirty = repo_dirty.replace('\n',', ')
-        logging.warning('local repository has untracked changes to the following files: {}'.format(repo_dirty))
-        print('local repository has untracked changes to the following files: {}'.format(repo_dirty))
+        dirty_files = dirty_files.replace('\n',', ')
+        logging.warning('local repository has untracked changes to the following files: {}'.format(dirty_files))
+        print('local repository has untracked changes to the following files: {}'.format(dirty_files))
     else:
         logging.warning('local repository is clean')
         print('local repository is clean')
 
-    return git_hash, git_branch, repo_url, repo_dirty_flag
+    return git_hash, git_branch, repo_url, repo_dirty_flag, dirty_files
 
 
 def show_exception_box(log_msg):
@@ -3662,7 +3663,7 @@ if __name__ == "__main__":
    
     # Start logging
     start_gui_log_file(box_number)
-    commit_ID, current_branch, repo_url, repo_dirty_flag = log_git_hash()
+    commit_ID, current_branch, repo_url, repo_dirty_flag, dirty_files = log_git_hash()
 
     # Formating GUI graphics
     logging.info('Setting QApplication attributes')
@@ -3686,6 +3687,7 @@ if __name__ == "__main__":
     win.current_branch=current_branch
     win.repo_url=repo_url
     win.repo_dirty_flag=repo_dirty_flag
+    win.dirty_files=dirty_files
     win.show()
    
      # Run your application's event loop and stop after closing all windows
