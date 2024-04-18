@@ -2022,7 +2022,7 @@ class Window(QMainWindow):
         
         if SaveContinue==0:
             # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
-            self._NewSession(override_unsaved_data=False)
+            self._NewSession()
             # do not create a new folder
             self.CreateNewFolder=0
         # check drop of frames
@@ -2761,26 +2761,20 @@ class Window(QMainWindow):
         except Exception as e:
             logging.error(str(e))
 
-    def _NewSession(self):#,override_unsaved_data=False):
+    def _NewSession(self):
         logging.info('New Session pressed')
-        #print('debug1: {}'.format(override_unsaved_data))
-        self._StopCurrentSession() 
-        #print('debug2: {}'.format(override_unsaved_data))
-        override_unsaved_data=False
-        print('debug2: {}'.format(override_unsaved_data))
-        if not override_unsaved_data:
-            print('debug3')
-            # If we have unsaved data, prompt to save
-            if (self.ToInitializeVisual==0) and (self.unsaved_data): 
-                reply = QMessageBox.critical(self, 
-                    'Box {}, New Session:'.format(self.box_letter), 
-                    'Start new session without saving?',
-                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-                if reply == QMessageBox.No:
-                    self.NewSession.setStyleSheet("background-color : none")
-                    self.NewSession.setChecked(False)
-                    logging.info('New Session declined')
-                    return False
+
+        # If we have unsaved data, prompt to save
+        if (self.ToInitializeVisual==0) and (self.unsaved_data): 
+            reply = QMessageBox.critical(self, 
+                'Box {}, New Session:'.format(self.box_letter), 
+                'Start new session without saving?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if reply == QMessageBox.No:
+                self.NewSession.setStyleSheet("background-color : none")
+                self.NewSession.setChecked(False)
+                logging.info('New Session declined')
+                return False
         
         # stop the camera 
         self._stop_camera()
