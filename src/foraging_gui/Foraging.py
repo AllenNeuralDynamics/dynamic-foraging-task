@@ -3348,6 +3348,10 @@ class Window(QMainWindow):
         self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
         self._UpdateSuggestedWater()
 
+    def _PostWeightChange(self):
+        self.unsaved_data=True
+        self.WarningLabel.setText('')
+        self._UpdateSuggestedWater()
 
     def _UpdateSuggestedWater(self,ManualWater=0):
         '''Update the suggested water from the manually give water'''
