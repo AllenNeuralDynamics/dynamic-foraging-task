@@ -2043,14 +2043,17 @@ class Window(QMainWindow):
         Obj['PhotometryFolder']=self.PhotometryFolder
         Obj['MetadataFolder']=self.MetadataFolder
         
-        if SaveContinue==0:
+        # only run once for each session
+        if SaveContinue==0 and self.unsaved_data==True:
             # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
             self.unsaved_data=False 
             self._NewSession()
+            self.unsaved_data=True
             # do not create a new folder
             self.CreateNewFolder=0
-        # check drop of frames
-        self._check_drop_frames(save_tag=1)
+            # check drop of frames
+            self._check_drop_frames(save_tag=1)
+            
         # save drop frames information
         Obj['drop_frames_tag']=self.drop_frames_tag
         Obj['trigger_length']=self.trigger_length
