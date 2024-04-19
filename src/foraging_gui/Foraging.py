@@ -2048,7 +2048,7 @@ class Window(QMainWindow):
         if SaveContinue==0:
             # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
             self.unsaved_data=False 
-            self._NewSession()
+            self._NewSession(initialize_figure=False)
             self.unsaved_data=True
             # do not create a new folder
             self.CreateNewFolder=0
@@ -2792,7 +2792,7 @@ class Window(QMainWindow):
         except Exception as e:
             logging.error(str(e))
 
-    def _NewSession(self):
+    def _NewSession(self,initialize_figure=True):
         logging.info('New Session pressed')
 
         # If we have unsaved data, prompt to save
@@ -2834,7 +2834,7 @@ class Window(QMainWindow):
         self.ManualWaterVolume=[0,0]       
     
         # Clear Plots
-        if hasattr(self, 'PlotM'): 
+        if hasattr(self, 'PlotM') and initialize_figure==True: 
             self.PlotM._Update(GeneratedTrials=None,Channel=None)
 
         # Add note to log
