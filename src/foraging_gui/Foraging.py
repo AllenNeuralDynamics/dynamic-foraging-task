@@ -91,7 +91,8 @@ class Window(QMainWindow):
         self.UpdateParameters = 1   # permission to update parameters
         self.loggingstarted = -1    # Have we started trial logging
         self.unsaved_data = False   # Setting unsaved data to False 
- 
+        self.to_check_drop_frames = 0 # 1, to check drop frames during saving data; 0, not to check drop frames 
+
         # Connect to Bonsai
         self._InitializeBonsai()
 
@@ -2044,16 +2045,19 @@ class Window(QMainWindow):
         Obj['MetadataFolder']=self.MetadataFolder
         
         # only run once for each session
-        if SaveContinue==0 and self.unsaved_data==True:
+        if SaveContinue==0:
             # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
             self.unsaved_data=False 
             self._NewSession()
             self.unsaved_data=True
             # do not create a new folder
             self.CreateNewFolder=0
-            # check drop of frames
+        
+        # check drop of frames only once
+        if self.to_check_drop_frames==1:
             self._check_drop_frames(save_tag=1)
-            
+            self.to_check_drop_frames=0
+
         # save drop frames information
         Obj['drop_frames_tag']=self.drop_frames_tag
         Obj['trigger_length']=self.trigger_length
@@ -2937,6 +2941,9 @@ class Window(QMainWindow):
             self.Start.setChecked(False)
             self.Start.setStyleSheet('background-color:none;')
             return
+        
+        # set the flag to check drop frames
+        self.to_check_drop_frames=1
         
         # clear the session list
         self._connect_Sessionlist(connect=False)
