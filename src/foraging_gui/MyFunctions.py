@@ -828,12 +828,12 @@ class GenerateTrials():
                 else:
                     self.DD_PerTrial_GoCue_NextStart='nan'
             CurrentStart_GoCue=(self.B_TrialStartTime[i],self.B_GoCueTime[i])
-            if self.B_DelayStartTime[i][0] in [None, -999]:
+            if self.B_DelayStartTime[i] in [None, -999]:
                 CurrentStart_Delay=(self.B_TrialStartTime[i],self.B_GoCueTime[i]) # using the first delay start time
                 CurrentDelay_GoCue=(self.B_GoCueTime[i],self.B_GoCueTime[i])
             else:
-                CurrentStart_Delay=(self.B_TrialStartTime[i],self.B_DelayStartTime[i][0]) # using the first delay start time
-                CurrentDelay_GoCue=(self.B_DelayStartTime[i][0],self.B_GoCueTime[i])
+                CurrentStart_Delay=(self.B_TrialStartTime[i],self.B_DelayStartTime[i]) # using the first delay start time
+                CurrentDelay_GoCue=(self.B_DelayStartTime[i],self.B_GoCueTime[i])
             CurrentGoCue_GoCue1=(self.B_GoCueTime[i],self.B_GoCueTime[i]+1)
             # licks in different intervals
             Ind_Start_GoCue=(self.AllLicksTimeSorted >= CurrentStart_GoCue[0]) &  (self.AllLicksTimeSorted < CurrentStart_GoCue[1])
@@ -1546,15 +1546,16 @@ class GenerateTrials():
         RewardOutcomeTime=TrialEndTimeHarp
         # get the event harp time
         self.B_TrialStartTimeHarp=np.append(self.B_TrialStartTimeHarp,TrialStartTimeHarp)
-        self.B_DelayStartTimeHarp.append(DelayStartTimeHarp)
+        self.B_DelayStartTimeHarp=np.append(self.B_DelayStartTimeHarp,DelayStartTimeHarp)
+        self.B_DelayStartTimeHarpComplete.append(DelayStartTimeHarp)
         self.B_TrialEndTimeHarp=np.append(self.B_TrialEndTimeHarp,TrialEndTimeHarp)
         self.B_GoCueTimeBehaviorBoard=np.append(self.B_GoCueTimeBehaviorBoard,GoCueTimeBehaviorBoard)
         self.B_GoCueTimeSoundCard=np.append(self.B_GoCueTimeBehaviorBoard,GoCueTimeBehaviorBoard)
         self.B_DOPort2Output=np.append(self.B_DOPort2Output,B_DOPort2Output)
         # get the event time
         self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime)
-        print(DelayStartTime)
-        self.B_DelayStartTime.append(DelayStartTime)
+        self.B_DelayStartTime=np.append(self.B_DelayStartTime,DelayStartTime)
+        self.B_DelayStartTimeComplete.append(DelayStartTime)
         self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime)
         self.B_GoCueTime=np.append(self.B_GoCueTime,GoCueTime)
         self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,RewardOutcomeTime)
