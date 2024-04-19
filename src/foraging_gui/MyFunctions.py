@@ -50,7 +50,7 @@ class GenerateTrials():
         self.B_TrialEndTime=np.array([]).astype(float)
         self.B_GoCueTime=np.array([]).astype(float)
         self.B_TrialStartTimeHarp=np.array([]).astype(float)
-        self.B_DelayStartTimeHarp=p.array([]).astype(float)
+        self.B_DelayStartTimeHarp=np.array([]).astype(float)
         self.B_DelayStartTimeHarpComplete=[]
         self.B_TrialEndTimeHarp=np.array([]).astype(float)
         self.B_GoCueTimeBehaviorBoard=np.array([]).astype(float) # the time from the behavior board
