@@ -1229,21 +1229,21 @@ class LaserCalibrationDialog(QDialog):
         Inactlabel1=15 # pulse duration
         Inactlabel2=13 # frequency
         Inactlabel3=14 # Ramping down
-        if getattr(self, 'Protocol_'+str(Numb)+'.currentText()') == 'Sine':
+        if getattr(self, 'Protocol_'+str(Numb)).currentText() == 'Sine':
             getattr(self, 'label'+str(Numb)+'_'+str(Inactlabel1)).setEnabled(False)
             getattr(self, 'PulseDur_'+str(Numb)).setEnabled(False)
             getattr(self, 'label'+str(Numb)+'_'+str(Inactlabel2)).setEnabled(True)
             getattr(self, 'Frequency_'+str(Numb)).setEnabled(True)
             getattr(self, 'label'+str(Numb)+'_'+str(Inactlabel3)).setEnabled(True)
             getattr(self, 'RD_'+str(Numb)).setEnabled(True)
-        if getattr(self, 'Protocol_'+str(Numb)+'.currentText()')=='Pulse':
+        if getattr(self, 'Protocol_'+str(Numb)).currentText() =='Pulse':
             getattr(self, 'label'+str(Numb)+'_'+str(Inactlabel1)).setEnabled(True)
             getattr(self, 'PulseDur_'+str(Numb)).setEnabled(True)
             getattr(self, 'label'+str(Numb)+'_'+str(Inactlabel2)).setEnabled(True)
             getattr(self, 'Frequency_'+str(Numb)).setEnabled(True)
             getattr(self, 'label'+str(Numb)+'_'+str(Inactlabel3)).setEnabled(False)
             getattr(self, 'RD_'+str(Numb)).setEnabled(False)
-        if getattr(self, 'Protocol_'+str(Numb)+'.currentText()')=='Constant':
+        if getattr(self, 'Protocol_'+str(Numb)).currentText() =='Constant':
             getattr(self, 'label'+str(Numb)+'_'+str(Inactlabel1)).setEnabled(False)
             getattr(self, 'PulseDur_'+str(Numb)).setEnabled(False)
             getattr(self, 'label'+str(Numb)+'_'+str(Inactlabel2)).setEnabled(False)
