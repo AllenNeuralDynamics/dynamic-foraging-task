@@ -45,11 +45,13 @@ class GenerateTrials():
         self.B_LeftLickTime=np.array([]).astype(float)
         self.B_RightLickTime=np.array([]).astype(float)
         self.B_TrialStartTime=np.array([]).astype(float)
-        self.B_DelayStartTime=[]
+        self.B_DelayStartTime=np.array([]).astype(float)
+        self.B_DelayStartTimeComplete=[]
         self.B_TrialEndTime=np.array([]).astype(float)
         self.B_GoCueTime=np.array([]).astype(float)
         self.B_TrialStartTimeHarp=np.array([]).astype(float)
-        self.B_DelayStartTimeHarp=[]
+        self.B_DelayStartTimeHarp=p.array([]).astype(float)
+        self.B_DelayStartTimeHarpComplete=[]
         self.B_TrialEndTimeHarp=np.array([]).astype(float)
         self.B_GoCueTimeBehaviorBoard=np.array([]).astype(float) # the time from the behavior board
         self.B_GoCueTimeSoundCard=np.array([]).astype(float) # the time from the soundcard
