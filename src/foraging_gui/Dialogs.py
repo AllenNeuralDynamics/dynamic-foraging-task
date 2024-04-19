@@ -1405,7 +1405,7 @@ class LaserCalibrationDialog(QDialog):
         copylaser=self.CopyLaser.currentText().split('_')[1]
         if self.MainWindow.Opto_dialog.__getattribute__("LaserColor_" + condition).currentText()=="NA":
             return
-        self.Duration_1.setText(self.MainWindow.Opto_dialog.__getattribute__("Duration_" + condition).text())
+        #self.Duration_1.setText(self.MainWindow.Opto_dialog.__getattribute__("Duration_" + condition).text())
         self.Frequency_1.setText(self.MainWindow.Opto_dialog.__getattribute__("Frequency_" + condition).currentText())
         self.RD_1.setText(self.MainWindow.Opto_dialog.__getattribute__("RD_" + condition).text())
         self.PulseDur_1.setText(self.MainWindow.Opto_dialog.__getattribute__("PulseDur_" + condition).text())
