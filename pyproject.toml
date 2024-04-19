@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "dynamic-foraging-task"
 description = "Dynamic Foraging Task used at the Allen Institute for Neural Dynamics"
 license = {text = "MIT"}
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -28,6 +28,7 @@ dependencies = [
     "aind-auto-train@git+https://github.com/AllenNeuralDynamics/aind-foraging-behavior-bonsai-automatic-training.git@main",
     "pynwb",
     "requests",
+    "harp-python",
 ]
 
 [tool.setuptools.packages.find]

@@ -7,17 +7,17 @@
     <x>0</x>
     <y>0</y>
     <width>1442</width>
-    <height>785</height>
+    <height>848</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Optogenetics</string>
   </property>
-  <widget class="QComboBox" name="Laser_1">
+  <widget class="QComboBox" name="LaserColor_1">
    <property name="geometry">
     <rect>
      <x>90</x>
-     <y>60</y>
+     <y>150</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -61,7 +61,7 @@
    <property name="geometry">
     <rect>
      <x>206</x>
-     <y>60</y>
+     <y>150</y>
      <width>48</width>
      <height>16</height>
     </rect>
@@ -80,7 +80,7 @@
    <property name="geometry">
     <rect>
      <x>260</x>
-     <y>60</y>
+     <y>150</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -98,12 +98,12 @@
    </item>
    <item>
     <property name="text">
-     <string>Left</string>
+     <string>Laser_1</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>Right</string>
+     <string>Laser_2</string>
     </property>
    </item>
   </widget>
@@ -111,7 +111,7 @@
    <property name="geometry">
     <rect>
      <x>90</x>
-     <y>90</y>
+     <y>180</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -177,7 +177,7 @@
    <property name="geometry">
     <rect>
      <x>24</x>
-     <y>90</y>
+     <y>180</y>
      <width>60</width>
      <height>16</height>
     </rect>
@@ -196,7 +196,7 @@
    <property name="geometry">
     <rect>
      <x>978</x>
-     <y>60</y>
+     <y>150</y>
      <width>67</width>
      <height>16</height>
     </rect>
@@ -215,7 +215,7 @@
    <property name="geometry">
     <rect>
      <x>1051</x>
-     <y>60</y>
+     <y>150</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -228,7 +228,7 @@
    <property name="geometry">
     <rect>
      <x>590</x>
-     <y>90</y>
+     <y>180</y>
      <width>51</width>
      <height>20</height>
     </rect>
@@ -247,7 +247,7 @@
    <property name="geometry">
     <rect>
      <x>647</x>
-     <y>90</y>
+     <y>180</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -278,7 +278,7 @@
    <property name="geometry">
     <rect>
      <x>834</x>
-     <y>60</y>
+     <y>150</y>
      <width>61</width>
      <height>16</height>
     </rect>
@@ -297,7 +297,7 @@
    <property name="geometry">
     <rect>
      <x>901</x>
-     <y>60</y>
+     <y>150</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -310,7 +310,7 @@
    <property name="geometry">
     <rect>
      <x>740</x>
-     <y>90</y>
+     <y>180</y>
      <width>81</width>
      <height>20</height>
     </rect>
@@ -329,7 +329,7 @@
    <property name="geometry">
     <rect>
      <x>950</x>
-     <y>90</y>
+     <y>180</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -342,7 +342,7 @@
    <property name="geometry">
     <rect>
      <x>890</x>
-     <y>90</y>
+     <y>180</y>
      <width>51</width>
      <height>20</height>
     </rect>
@@ -364,7 +364,7 @@
    <property name="geometry">
     <rect>
      <x>1090</x>
-     <y>90</y>
+     <y>180</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -383,7 +383,7 @@
    <property name="geometry">
     <rect>
      <x>1010</x>
-     <y>90</y>
+     <y>180</y>
      <width>71</width>
      <height>20</height>
     </rect>
@@ -398,11 +398,11 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="LaserPowerLeft_1">
+  <widget class="QComboBox" name="Laser1_power_1">
    <property name="geometry">
     <rect>
      <x>470</x>
-     <y>60</y>
+     <y>150</y>
      <width>101</width>
      <height>20</height>
     </rect>
@@ -451,13 +451,13 @@
    <property name="geometry">
     <rect>
      <x>345</x>
-     <y>60</y>
+     <y>150</y>
      <width>121</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>laser power left (v,mw)=</string>
+    <string>laser_1  power (v,mw)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -470,7 +470,7 @@
    <property name="geometry">
     <rect>
      <x>185</x>
-     <y>90</y>
+     <y>180</y>
      <width>61</width>
      <height>20</height>
     </rect>
@@ -489,7 +489,7 @@
    <property name="geometry">
     <rect>
      <x>250</x>
-     <y>90</y>
+     <y>180</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -502,7 +502,7 @@
    <property name="geometry">
     <rect>
      <x>537</x>
-     <y>90</y>
+     <y>180</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -515,7 +515,7 @@
    <property name="geometry">
     <rect>
      <x>470</x>
-     <y>90</y>
+     <y>180</y>
      <width>61</width>
      <height>20</height>
     </rect>
@@ -534,7 +534,7 @@
    <property name="geometry">
     <rect>
      <x>310</x>
-     <y>90</y>
+     <y>180</y>
      <width>61</width>
      <height>20</height>
     </rect>
@@ -553,7 +553,7 @@
    <property name="geometry">
     <rect>
      <x>380</x>
-     <y>90</y>
+     <y>180</y>
      <width>87</width>
      <height>20</height>
     </rect>
@@ -622,7 +622,7 @@
    <property name="geometry">
     <rect>
      <x>1124</x>
-     <y>60</y>
+     <y>150</y>
      <width>54</width>
      <height>16</height>
     </rect>
@@ -641,7 +641,7 @@
    <property name="geometry">
     <rect>
      <x>1184</x>
-     <y>60</y>
+     <y>150</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -695,7 +695,7 @@
    <property name="geometry">
     <rect>
      <x>1370</x>
-     <y>60</y>
+     <y>150</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -708,7 +708,7 @@
    <property name="geometry">
     <rect>
      <x>1301</x>
-     <y>60</y>
+     <y>150</y>
      <width>63</width>
      <height>16</height>
     </rect>
@@ -726,14 +726,14 @@
   <widget class="QLabel" name="label1_1">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>60</y>
-     <width>41</width>
+     <x>20</x>
+     <y>150</y>
+     <width>71</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>Laser=</string>
+    <string>Laser color=</string>
    </property>
   </widget>
   <widget class="QComboBox" name="Condition_2">
@@ -743,7 +743,7 @@
    <property name="geometry">
     <rect>
      <x>1184</x>
-     <y>171</y>
+     <y>261</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -800,7 +800,7 @@
    <property name="geometry">
     <rect>
      <x>901</x>
-     <y>171</y>
+     <y>261</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -816,7 +816,7 @@
    <property name="geometry">
     <rect>
      <x>380</x>
-     <y>200</y>
+     <y>290</y>
      <width>87</width>
      <height>20</height>
     </rect>
@@ -888,7 +888,7 @@
    <property name="geometry">
     <rect>
      <x>950</x>
-     <y>200</y>
+     <y>290</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -904,7 +904,7 @@
    <property name="geometry">
     <rect>
      <x>310</x>
-     <y>200</y>
+     <y>290</y>
      <width>61</width>
      <height>20</height>
     </rect>
@@ -926,7 +926,7 @@
    <property name="geometry">
     <rect>
      <x>890</x>
-     <y>200</y>
+     <y>290</y>
      <width>51</width>
      <height>20</height>
     </rect>
@@ -948,7 +948,7 @@
    <property name="geometry">
     <rect>
      <x>250</x>
-     <y>200</y>
+     <y>290</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -964,7 +964,7 @@
    <property name="geometry">
     <rect>
      <x>1124</x>
-     <y>171</y>
+     <y>261</y>
      <width>54</width>
      <height>16</height>
     </rect>
@@ -986,7 +986,7 @@
    <property name="geometry">
     <rect>
      <x>1010</x>
-     <y>200</y>
+     <y>290</y>
      <width>71</width>
      <height>20</height>
     </rect>
@@ -1008,7 +1008,7 @@
    <property name="geometry">
     <rect>
      <x>206</x>
-     <y>171</y>
+     <y>261</y>
      <width>48</width>
      <height>16</height>
     </rect>
@@ -1030,7 +1030,7 @@
    <property name="geometry">
     <rect>
      <x>470</x>
-     <y>200</y>
+     <y>290</y>
      <width>61</width>
      <height>20</height>
     </rect>
@@ -1052,7 +1052,7 @@
    <property name="geometry">
     <rect>
      <x>90</x>
-     <y>200</y>
+     <y>290</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -1121,7 +1121,7 @@
    <property name="geometry">
     <rect>
      <x>1370</x>
-     <y>171</y>
+     <y>261</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -1137,13 +1137,13 @@
    <property name="geometry">
     <rect>
      <x>345</x>
-     <y>171</y>
+     <y>261</y>
      <width>121</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>laser power left (v,mw)=</string>
+    <string>laser_1  power (v,mw)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -1152,11 +1152,11 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="Laser_2">
+  <widget class="QComboBox" name="LaserColor_2">
    <property name="geometry">
     <rect>
      <x>90</x>
-     <y>171</y>
+     <y>261</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -1196,14 +1196,14 @@
     </property>
    </item>
   </widget>
-  <widget class="QComboBox" name="LaserPowerLeft_2">
+  <widget class="QComboBox" name="Laser1_power_2">
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="geometry">
     <rect>
      <x>470</x>
-     <y>171</y>
+     <y>261</y>
      <width>101</width>
      <height>20</height>
     </rect>
@@ -1252,7 +1252,7 @@
    <property name="geometry">
     <rect>
      <x>537</x>
-     <y>200</y>
+     <y>290</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -1268,7 +1268,7 @@
    <property name="geometry">
     <rect>
      <x>590</x>
-     <y>200</y>
+     <y>290</y>
      <width>51</width>
      <height>20</height>
     </rect>
@@ -1290,7 +1290,7 @@
    <property name="geometry">
     <rect>
      <x>834</x>
-     <y>171</y>
+     <y>261</y>
      <width>61</width>
      <height>16</height>
     </rect>
@@ -1312,7 +1312,7 @@
    <property name="geometry">
     <rect>
      <x>24</x>
-     <y>200</y>
+     <y>290</y>
      <width>60</width>
      <height>16</height>
     </rect>
@@ -1334,7 +1334,7 @@
    <property name="geometry">
     <rect>
      <x>260</x>
-     <y>171</y>
+     <y>261</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -1352,12 +1352,12 @@
    </item>
    <item>
     <property name="text">
-     <string>Left</string>
+     <string>Laser_1</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>Right</string>
+     <string>Laser_2</string>
     </property>
    </item>
   </widget>
@@ -1368,7 +1368,7 @@
    <property name="geometry">
     <rect>
      <x>978</x>
-     <y>171</y>
+     <y>261</y>
      <width>67</width>
      <height>16</height>
     </rect>
@@ -1390,7 +1390,7 @@
    <property name="geometry">
     <rect>
      <x>1301</x>
-     <y>171</y>
+     <y>261</y>
      <width>63</width>
      <height>16</height>
     </rect>
@@ -1412,7 +1412,7 @@
    <property name="geometry">
     <rect>
      <x>185</x>
-     <y>200</y>
+     <y>290</y>
      <width>61</width>
      <height>20</height>
     </rect>
@@ -1430,14 +1430,14 @@
   <widget class="QLabel" name="label2_1">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>171</y>
-     <width>41</width>
+     <x>20</x>
+     <y>261</y>
+     <width>71</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>Laser=</string>
+    <string>Laser color=</string>
    </property>
   </widget>
   <widget class="QComboBox" name="Protocol_2">
@@ -1447,7 +1447,7 @@
    <property name="geometry">
     <rect>
      <x>647</x>
-     <y>200</y>
+     <y>290</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -1481,7 +1481,7 @@
    <property name="geometry">
     <rect>
      <x>1090</x>
-     <y>200</y>
+     <y>290</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -1500,7 +1500,7 @@
    <property name="geometry">
     <rect>
      <x>1051</x>
-     <y>171</y>
+     <y>261</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -1516,7 +1516,7 @@
    <property name="geometry">
     <rect>
      <x>1184</x>
-     <y>271</y>
+     <y>361</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -1573,7 +1573,7 @@
    <property name="geometry">
     <rect>
      <x>1051</x>
-     <y>271</y>
+     <y>361</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -1589,7 +1589,7 @@
    <property name="geometry">
     <rect>
      <x>978</x>
-     <y>271</y>
+     <y>361</y>
      <width>67</width>
      <height>16</height>
     </rect>
@@ -1611,7 +1611,7 @@
    <property name="geometry">
     <rect>
      <x>380</x>
-     <y>300</y>
+     <y>390</y>
      <width>87</width>
      <height>20</height>
     </rect>
@@ -1683,7 +1683,7 @@
    <property name="geometry">
     <rect>
      <x>260</x>
-     <y>271</y>
+     <y>361</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -1701,12 +1701,12 @@
    </item>
    <item>
     <property name="text">
-     <string>Left</string>
+     <string>Laser_1</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>Right</string>
+     <string>Laser_2</string>
     </property>
    </item>
   </widget>
@@ -1717,7 +1717,7 @@
    <property name="geometry">
     <rect>
      <x>1301</x>
-     <y>271</y>
+     <y>361</y>
      <width>63</width>
      <height>16</height>
     </rect>
@@ -1739,7 +1739,7 @@
    <property name="geometry">
     <rect>
      <x>950</x>
-     <y>300</y>
+     <y>390</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -1755,7 +1755,7 @@
    <property name="geometry">
     <rect>
      <x>647</x>
-     <y>300</y>
+     <y>390</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -1789,7 +1789,7 @@
    <property name="geometry">
     <rect>
      <x>310</x>
-     <y>300</y>
+     <y>390</y>
      <width>61</width>
      <height>20</height>
     </rect>
@@ -1807,14 +1807,14 @@
   <widget class="QLabel" name="label3_1">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>271</y>
-     <width>41</width>
+     <x>20</x>
+     <y>361</y>
+     <width>71</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>Laser=</string>
+    <string>Laser color=</string>
    </property>
   </widget>
   <widget class="QLabel" name="label3_6">
@@ -1824,7 +1824,7 @@
    <property name="geometry">
     <rect>
      <x>1124</x>
-     <y>271</y>
+     <y>361</y>
      <width>54</width>
      <height>16</height>
     </rect>
@@ -1846,7 +1846,7 @@
    <property name="geometry">
     <rect>
      <x>470</x>
-     <y>300</y>
+     <y>390</y>
      <width>61</width>
      <height>20</height>
     </rect>
@@ -1868,7 +1868,7 @@
    <property name="geometry">
     <rect>
      <x>1370</x>
-     <y>271</y>
+     <y>361</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -1884,7 +1884,7 @@
    <property name="geometry">
     <rect>
      <x>24</x>
-     <y>300</y>
+     <y>390</y>
      <width>60</width>
      <height>16</height>
     </rect>
@@ -1906,7 +1906,7 @@
    <property name="geometry">
     <rect>
      <x>1090</x>
-     <y>300</y>
+     <y>390</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -1925,13 +1925,13 @@
    <property name="geometry">
     <rect>
      <x>345</x>
-     <y>271</y>
+     <y>361</y>
      <width>121</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>laser power left (v,mw)=</string>
+    <string>laser_1  power (v,mw)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -1947,7 +1947,7 @@
    <property name="geometry">
     <rect>
      <x>1010</x>
-     <y>300</y>
+     <y>390</y>
      <width>71</width>
      <height>20</height>
     </rect>
@@ -1969,7 +1969,7 @@
    <property name="geometry">
     <rect>
      <x>537</x>
-     <y>300</y>
+     <y>390</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -1985,7 +1985,7 @@
    <property name="geometry">
     <rect>
      <x>590</x>
-     <y>300</y>
+     <y>390</y>
      <width>51</width>
      <height>20</height>
     </rect>
@@ -2007,7 +2007,7 @@
    <property name="geometry">
     <rect>
      <x>185</x>
-     <y>300</y>
+     <y>390</y>
      <width>61</width>
      <height>20</height>
     </rect>
@@ -2029,7 +2029,7 @@
    <property name="geometry">
     <rect>
      <x>90</x>
-     <y>300</y>
+     <y>390</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -2098,7 +2098,7 @@
    <property name="geometry">
     <rect>
      <x>834</x>
-     <y>271</y>
+     <y>361</y>
      <width>61</width>
      <height>16</height>
     </rect>
@@ -2120,7 +2120,7 @@
    <property name="geometry">
     <rect>
      <x>206</x>
-     <y>271</y>
+     <y>361</y>
      <width>48</width>
      <height>16</height>
     </rect>
@@ -2142,7 +2142,7 @@
    <property name="geometry">
     <rect>
      <x>901</x>
-     <y>271</y>
+     <y>361</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -2151,11 +2151,11 @@
     <string>0.25</string>
    </property>
   </widget>
-  <widget class="QComboBox" name="Laser_3">
+  <widget class="QComboBox" name="LaserColor_3">
    <property name="geometry">
     <rect>
      <x>90</x>
-     <y>271</y>
+     <y>361</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -2202,7 +2202,7 @@
    <property name="geometry">
     <rect>
      <x>890</x>
-     <y>300</y>
+     <y>390</y>
      <width>51</width>
      <height>20</height>
     </rect>
@@ -2217,14 +2217,14 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="LaserPowerLeft_3">
+  <widget class="QComboBox" name="Laser1_power_3">
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="geometry">
     <rect>
      <x>470</x>
-     <y>271</y>
+     <y>361</y>
      <width>101</width>
      <height>20</height>
     </rect>
@@ -2273,7 +2273,7 @@
    <property name="geometry">
     <rect>
      <x>250</x>
-     <y>300</y>
+     <y>390</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -2289,7 +2289,7 @@
    <property name="geometry">
     <rect>
      <x>950</x>
-     <y>399</y>
+     <y>489</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -2305,7 +2305,7 @@
    <property name="geometry">
     <rect>
      <x>260</x>
-     <y>370</y>
+     <y>460</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -2323,17 +2323,12 @@
    </item>
    <item>
     <property name="text">
-     <string>Left</string>
+     <string>Laser_1</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>Right</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>NA</string>
+     <string>Laser_2</string>
     </property>
    </item>
   </widget>
@@ -2344,7 +2339,7 @@
    <property name="geometry">
     <rect>
      <x>380</x>
-     <y>399</y>
+     <y>489</y>
      <width>87</width>
      <height>20</height>
     </rect>
@@ -2416,7 +2411,7 @@
    <property name="geometry">
     <rect>
      <x>310</x>
-     <y>399</y>
+     <y>489</y>
      <width>61</width>
      <height>20</height>
     </rect>
@@ -2438,7 +2433,7 @@
    <property name="geometry">
     <rect>
      <x>206</x>
-     <y>370</y>
+     <y>460</y>
      <width>48</width>
      <height>16</height>
     </rect>
@@ -2460,7 +2455,7 @@
    <property name="geometry">
     <rect>
      <x>901</x>
-     <y>370</y>
+     <y>460</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -2476,7 +2471,7 @@
    <property name="geometry">
     <rect>
      <x>1090</x>
-     <y>399</y>
+     <y>489</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -2495,7 +2490,7 @@
    <property name="geometry">
     <rect>
      <x>890</x>
-     <y>399</y>
+     <y>489</y>
      <width>51</width>
      <height>20</height>
     </rect>
@@ -2517,7 +2512,7 @@
    <property name="geometry">
     <rect>
      <x>590</x>
-     <y>399</y>
+     <y>489</y>
      <width>51</width>
      <height>20</height>
     </rect>
@@ -2539,7 +2534,7 @@
    <property name="geometry">
     <rect>
      <x>1124</x>
-     <y>370</y>
+     <y>460</y>
      <width>54</width>
      <height>16</height>
     </rect>
@@ -2561,13 +2556,13 @@
    <property name="geometry">
     <rect>
      <x>345</x>
-     <y>370</y>
+     <y>460</y>
      <width>121</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>laser power left (v,mw)=</string>
+    <string>laser_1  power (v,mw)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -2583,7 +2578,7 @@
    <property name="geometry">
     <rect>
      <x>90</x>
-     <y>399</y>
+     <y>489</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -2652,7 +2647,7 @@
    <property name="geometry">
     <rect>
      <x>1301</x>
-     <y>370</y>
+     <y>460</y>
      <width>63</width>
      <height>16</height>
     </rect>
@@ -2674,7 +2669,7 @@
    <property name="geometry">
     <rect>
      <x>1184</x>
-     <y>370</y>
+     <y>460</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -2731,7 +2726,7 @@
    <property name="geometry">
     <rect>
      <x>978</x>
-     <y>370</y>
+     <y>460</y>
      <width>67</width>
      <height>16</height>
     </rect>
@@ -2753,7 +2748,7 @@
    <property name="geometry">
     <rect>
      <x>185</x>
-     <y>399</y>
+     <y>489</y>
      <width>61</width>
      <height>20</height>
     </rect>
@@ -2775,7 +2770,7 @@
    <property name="geometry">
     <rect>
      <x>647</x>
-     <y>399</y>
+     <y>489</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -2809,7 +2804,7 @@
    <property name="geometry">
     <rect>
      <x>1010</x>
-     <y>399</y>
+     <y>489</y>
      <width>71</width>
      <height>20</height>
     </rect>
@@ -2831,7 +2826,7 @@
    <property name="geometry">
     <rect>
      <x>537</x>
-     <y>399</y>
+     <y>489</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -2840,11 +2835,11 @@
     <string>0</string>
    </property>
   </widget>
-  <widget class="QComboBox" name="Laser_4">
+  <widget class="QComboBox" name="LaserColor_4">
    <property name="geometry">
     <rect>
      <x>90</x>
-     <y>370</y>
+     <y>460</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -2891,7 +2886,7 @@
    <property name="geometry">
     <rect>
      <x>1051</x>
-     <y>370</y>
+     <y>460</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -2907,7 +2902,7 @@
    <property name="geometry">
     <rect>
      <x>24</x>
-     <y>399</y>
+     <y>489</y>
      <width>60</width>
      <height>16</height>
     </rect>
@@ -2929,7 +2924,7 @@
    <property name="geometry">
     <rect>
      <x>834</x>
-     <y>370</y>
+     <y>460</y>
      <width>61</width>
      <height>16</height>
     </rect>
@@ -2944,14 +2939,14 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="LaserPowerLeft_4">
+  <widget class="QComboBox" name="Laser1_power_4">
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="geometry">
     <rect>
      <x>470</x>
-     <y>370</y>
+     <y>460</y>
      <width>101</width>
      <height>20</height>
     </rect>
@@ -3000,7 +2995,7 @@
    <property name="geometry">
     <rect>
      <x>250</x>
-     <y>399</y>
+     <y>489</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -3016,7 +3011,7 @@
    <property name="geometry">
     <rect>
      <x>470</x>
-     <y>399</y>
+     <y>489</y>
      <width>61</width>
      <height>20</height>
     </rect>
@@ -3038,7 +3033,7 @@
    <property name="geometry">
     <rect>
      <x>1370</x>
-     <y>370</y>
+     <y>460</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -3050,14 +3045,14 @@
   <widget class="QLabel" name="label4_1">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>370</y>
-     <width>41</width>
+     <x>20</x>
+     <y>460</y>
+     <width>71</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>Laser=</string>
+    <string>Laser color=</string>
    </property>
   </widget>
   <widget class="QLabel" name="label1">
@@ -3067,7 +3062,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>740</y>
+     <y>780</y>
      <width>131</width>
      <height>20</height>
     </rect>
@@ -3083,7 +3078,7 @@
    <property name="geometry">
     <rect>
      <x>150</x>
-     <y>740</y>
+     <y>780</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -3096,7 +3091,7 @@
    <property name="geometry">
     <rect>
      <x>830</x>
-     <y>90</y>
+     <y>180</y>
      <width>51</width>
      <height>20</height>
     </rect>
@@ -3130,7 +3125,7 @@
    <property name="geometry">
     <rect>
      <x>740</x>
-     <y>200</y>
+     <y>290</y>
      <width>81</width>
      <height>20</height>
     </rect>
@@ -3149,7 +3144,7 @@
    <property name="geometry">
     <rect>
      <x>830</x>
-     <y>200</y>
+     <y>290</y>
      <width>51</width>
      <height>20</height>
     </rect>
@@ -3183,7 +3178,7 @@
    <property name="geometry">
     <rect>
      <x>740</x>
-     <y>300</y>
+     <y>390</y>
      <width>81</width>
      <height>20</height>
     </rect>
@@ -3202,7 +3197,7 @@
    <property name="geometry">
     <rect>
      <x>830</x>
-     <y>300</y>
+     <y>390</y>
      <width>51</width>
      <height>20</height>
     </rect>
@@ -3236,7 +3231,7 @@
    <property name="geometry">
     <rect>
      <x>740</x>
-     <y>400</y>
+     <y>490</y>
      <width>81</width>
      <height>20</height>
     </rect>
@@ -3255,7 +3250,7 @@
    <property name="geometry">
     <rect>
      <x>830</x>
-     <y>400</y>
+     <y>490</y>
      <width>51</width>
      <height>20</height>
     </rect>
@@ -3285,11 +3280,11 @@
     </property>
    </item>
   </widget>
-  <widget class="QComboBox" name="LaserPowerRight_1">
+  <widget class="QComboBox" name="Laser2_power_1">
    <property name="geometry">
     <rect>
      <x>730</x>
-     <y>60</y>
+     <y>150</y>
      <width>101</width>
      <height>20</height>
     </rect>
@@ -3334,14 +3329,14 @@
     </property>
    </item>
   </widget>
-  <widget class="QComboBox" name="LaserPowerRight_2">
+  <widget class="QComboBox" name="Laser2_power_2">
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="geometry">
     <rect>
      <x>730</x>
-     <y>170</y>
+     <y>260</y>
      <width>101</width>
      <height>20</height>
     </rect>
@@ -3383,14 +3378,14 @@
     </property>
    </item>
   </widget>
-  <widget class="QComboBox" name="LaserPowerRight_3">
+  <widget class="QComboBox" name="Laser2_power_3">
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="geometry">
     <rect>
      <x>730</x>
-     <y>270</y>
+     <y>360</y>
      <width>101</width>
      <height>20</height>
     </rect>
@@ -3432,14 +3427,14 @@
     </property>
    </item>
   </widget>
-  <widget class="QComboBox" name="LaserPowerRight_4">
+  <widget class="QComboBox" name="Laser2_power_4">
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="geometry">
     <rect>
      <x>730</x>
-     <y>370</y>
+     <y>460</y>
      <width>101</width>
      <height>20</height>
     </rect>
@@ -3485,13 +3480,13 @@
    <property name="geometry">
     <rect>
      <x>550</x>
-     <y>60</y>
+     <y>150</y>
      <width>171</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>laser power right (v,mw)=</string>
+    <string>laser_2  power (v,mw)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -3507,13 +3502,13 @@
    <property name="geometry">
     <rect>
      <x>550</x>
-     <y>170</y>
+     <y>260</y>
      <width>171</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>laser power right (v,mw)=</string>
+    <string>laser_2  power (v,mw)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -3529,13 +3524,13 @@
    <property name="geometry">
     <rect>
      <x>550</x>
-     <y>270</y>
+     <y>360</y>
      <width>171</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>laser power right (v,mw)=</string>
+    <string>laser_2  power (v,mw)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -3551,13 +3546,13 @@
    <property name="geometry">
     <rect>
      <x>550</x>
-     <y>370</y>
+     <y>460</y>
      <width>171</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>laser power right (v,mw)=</string>
+    <string>laser_2  power (v,mw)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -3570,13 +3565,13 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>40</y>
+     <y>130</y>
      <width>1421</width>
      <height>401</height>
     </rect>
    </property>
    <property name="title">
-    <string>GroupBox</string>
+    <string>Trial parameters</string>
    </property>
   </widget>
   <widget class="QLabel" name="label1_20">
@@ -3586,7 +3581,7 @@
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>690</y>
+     <y>730</y>
      <width>131</width>
      <height>20</height>
     </rect>
@@ -3602,7 +3597,7 @@
    <property name="geometry">
     <rect>
      <x>390</x>
-     <y>690</y>
+     <y>730</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -3615,7 +3610,7 @@
    <property name="geometry">
     <rect>
      <x>110</x>
-     <y>690</y>
+     <y>730</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -3628,7 +3623,7 @@
    <property name="geometry">
     <rect>
      <x>150</x>
-     <y>690</y>
+     <y>730</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -3668,37 +3663,11 @@
     </property>
    </item>
   </widget>
-  <widget class="Line" name="line">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>670</y>
-     <width>1411</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-  </widget>
-  <widget class="Line" name="line_2">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>440</y>
-     <width>1411</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-  </widget>
   <widget class="QComboBox" name="SessionAlternating">
    <property name="geometry">
     <rect>
      <x>810</x>
-     <y>470</y>
+     <y>560</y>
      <width>81</width>
      <height>20</height>
     </rect>
@@ -3727,7 +3696,7 @@
    <property name="geometry">
     <rect>
      <x>660</x>
-     <y>470</y>
+     <y>560</y>
      <width>141</width>
      <height>20</height>
     </rect>
@@ -3746,7 +3715,7 @@
    <property name="geometry">
     <rect>
      <x>215</x>
-     <y>466</y>
+     <y>556</y>
      <width>141</width>
      <height>20</height>
     </rect>
@@ -3765,7 +3734,7 @@
    <property name="geometry">
     <rect>
      <x>370</x>
-     <y>470</y>
+     <y>560</y>
      <width>81</width>
      <height>20</height>
     </rect>
@@ -3778,7 +3747,7 @@
    <property name="geometry">
     <rect>
      <x>480</x>
-     <y>470</y>
+     <y>560</y>
      <width>61</width>
      <height>20</height>
     </rect>
@@ -3797,7 +3766,7 @@
    <property name="geometry">
     <rect>
      <x>550</x>
-     <y>470</y>
+     <y>560</y>
      <width>81</width>
      <height>20</height>
     </rect>
@@ -3826,7 +3795,7 @@
    <property name="geometry">
     <rect>
      <x>110</x>
-     <y>470</y>
+     <y>560</y>
      <width>81</width>
      <height>20</height>
     </rect>
@@ -3858,7 +3827,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>470</y>
+     <y>560</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -3877,7 +3846,7 @@
    <property name="geometry">
     <rect>
      <x>920</x>
-     <y>466</y>
+     <y>560</y>
      <width>491</width>
      <height>31</height>
     </rect>
@@ -3905,7 +3874,7 @@
    <property name="geometry">
     <rect>
      <x>215</x>
-     <y>480</y>
+     <y>570</y>
      <width>141</width>
      <height>20</height>
     </rect>
@@ -3920,8 +3889,218 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
+  <widget class="QGroupBox" name="groupBox">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>540</y>
+     <width>1421</width>
+     <height>151</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Session parameters</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>700</y>
+     <width>1421</width>
+     <height>111</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Calibration date and Nidaq sample frequency</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label2">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>20</y>
+     <width>111</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Laser_1  target area=</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label3">
+   <property name="geometry">
+    <rect>
+     <x>480</x>
+     <y>20</y>
+     <width>111</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Laser_2  target area=</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="laser_1_target">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>20</y>
+     <width>191</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="laser_2_target">
+   <property name="geometry">
+    <rect>
+     <x>590</x>
+     <y>20</y>
+     <width>191</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="laser_2_calibration_voltage">
+   <property name="geometry">
+    <rect>
+     <x>590</x>
+     <y>50</y>
+     <width>191</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label6">
+   <property name="geometry">
+    <rect>
+     <x>127</x>
+     <y>80</y>
+     <width>111</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Laser_1  power (mw)=</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="laser_1_calibration_power">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>80</y>
+     <width>191</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label5">
+   <property name="geometry">
+    <rect>
+     <x>482</x>
+     <y>50</y>
+     <width>121</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Laser_2  voltage (v)=</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label4">
+   <property name="geometry">
+    <rect>
+     <x>132</x>
+     <y>50</y>
+     <width>111</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Laser_1  voltage (v)=</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="laser_1_calibration_voltage">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>50</y>
+     <width>191</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label7">
+   <property name="geometry">
+    <rect>
+     <x>480</x>
+     <y>80</y>
+     <width>111</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Laser_2  power (mw)=</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="laser_2_calibration_power">
+   <property name="geometry">
+    <rect>
+     <x>590</x>
+     <y>80</y>
+     <width>191</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="Line" name="line">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>56</y>
+     <width>20</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Vertical</enum>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label8">
+   <property name="geometry">
+    <rect>
+     <x>63</x>
+     <y>63</y>
+     <width>111</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Calibration</string>
+   </property>
+  </widget>
+  <zorder>groupBox_2</zorder>
+  <zorder>groupBox</zorder>
   <zorder>OptoPar</zorder>
-  <zorder>Laser_1</zorder>
+  <zorder>LaserColor_1</zorder>
   <zorder>label1_2</zorder>
   <zorder>Location_1</zorder>
   <zorder>LaserStart_1</zorder>
@@ -3937,7 +4116,7 @@
   <zorder>label1_14</zorder>
   <zorder>PulseDur_1</zorder>
   <zorder>label1_15</zorder>
-  <zorder>LaserPowerLeft_1</zorder>
+  <zorder>Laser1_power_1</zorder>
   <zorder>label1_3</zorder>
   <zorder>label1_9</zorder>
   <zorder>OffsetStart_1</zorder>
@@ -3964,8 +4143,8 @@
   <zorder>LaserStart_2</zorder>
   <zorder>ConditionP_2</zorder>
   <zorder>label2_3</zorder>
-  <zorder>Laser_2</zorder>
-  <zorder>LaserPowerLeft_2</zorder>
+  <zorder>LaserColor_2</zorder>
+  <zorder>Laser1_power_2</zorder>
   <zorder>OffsetEnd_2</zorder>
   <zorder>label2_12</zorder>
   <zorder>label2_4</zorder>
@@ -4002,9 +4181,9 @@
   <zorder>label3_4</zorder>
   <zorder>label3_2</zorder>
   <zorder>Probability_3</zorder>
-  <zorder>Laser_3</zorder>
+  <zorder>LaserColor_3</zorder>
   <zorder>label3_14</zorder>
-  <zorder>LaserPowerLeft_3</zorder>
+  <zorder>Laser1_power_3</zorder>
   <zorder>OffsetStart_3</zorder>
   <zorder>RD_4</zorder>
   <zorder>Location_4</zorder>
@@ -4025,11 +4204,11 @@
   <zorder>Protocol_4</zorder>
   <zorder>label4_15</zorder>
   <zorder>OffsetEnd_4</zorder>
-  <zorder>Laser_4</zorder>
+  <zorder>LaserColor_4</zorder>
   <zorder>Duration_4</zorder>
   <zorder>label4_8</zorder>
   <zorder>label4_4</zorder>
-  <zorder>LaserPowerLeft_4</zorder>
+  <zorder>Laser1_power_4</zorder>
   <zorder>OffsetStart_4</zorder>
   <zorder>label4_11</zorder>
   <zorder>ConditionP_4</zorder>
@@ -4043,10 +4222,10 @@
   <zorder>Frequency_3</zorder>
   <zorder>label4_13</zorder>
   <zorder>Frequency_4</zorder>
-  <zorder>LaserPowerRight_1</zorder>
-  <zorder>LaserPowerRight_2</zorder>
-  <zorder>LaserPowerRight_3</zorder>
-  <zorder>LaserPowerRight_4</zorder>
+  <zorder>Laser2_power_1</zorder>
+  <zorder>Laser2_power_2</zorder>
+  <zorder>Laser2_power_3</zorder>
+  <zorder>Laser2_power_4</zorder>
   <zorder>label1_16</zorder>
   <zorder>label2_16</zorder>
   <zorder>label3_16</zorder>
@@ -4055,8 +4234,6 @@
   <zorder>LatestCalibrationDate</zorder>
   <zorder>label1_17</zorder>
   <zorder>Laser_calibration</zorder>
-  <zorder>line</zorder>
-  <zorder>line_2</zorder>
   <zorder>SessionAlternating</zorder>
   <zorder>label3_17</zorder>
   <zorder>label3_18</zorder>
@@ -4067,6 +4244,20 @@
   <zorder>label3_20</zorder>
   <zorder>SessionControlWarning</zorder>
   <zorder>label3_21</zorder>
+  <zorder>label2</zorder>
+  <zorder>label3</zorder>
+  <zorder>laser_1_target</zorder>
+  <zorder>laser_2_target</zorder>
+  <zorder>laser_2_calibration_voltage</zorder>
+  <zorder>label6</zorder>
+  <zorder>laser_1_calibration_power</zorder>
+  <zorder>label5</zorder>
+  <zorder>label4</zorder>
+  <zorder>laser_1_calibration_voltage</zorder>
+  <zorder>label7</zorder>
+  <zorder>laser_2_calibration_power</zorder>
+  <zorder>line</zorder>
+  <zorder>label8</zorder>
  </widget>
  <resources/>
  <connections/>
