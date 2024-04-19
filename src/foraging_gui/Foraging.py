@@ -1367,7 +1367,7 @@ class Window(QMainWindow):
                         child.setStyleSheet('background-color: white;')
                         self._Task()
                     
-                    if child.objectName() in {'Experimenter','TotalWater','ExtraWater'}:
+                    if child.objectName() in {'Experimenter','TotalWater','ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
                         continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
@@ -1432,7 +1432,7 @@ class Window(QMainWindow):
                 try:
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                         self.Continue=0
-                        if child.objectName() in {'Experimenter', 'UncoupledReward', 'ExtraWater'}:
+                        if child.objectName() in {'Experimenter', 'UncoupledReward', 'ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
                             child.setStyleSheet(self.default_text_color)
                             self.Continue=1
                         if child.text()=='': # If empty, change background color and wait for confirmation
@@ -1878,10 +1878,31 @@ class Window(QMainWindow):
                 "Do you want to save without weight or extra water information provided?",
                  QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
             if response==QMessageBox.Yes:
-                pass
                 self.WarningLabel.setText('Saving without weight or extra water!')
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
                 logging.info('saving without weight or extra water')
+                pass
+            elif response==QMessageBox.No:
+                logging.info('saving declined by user')
+                self.WarningLabel.setText('')
+                self.WarningLabel.setStyleSheet(self.default_warning_color)
+                return
+            elif response==QMessageBox.Cancel:
+                logging.info('saving canceled by user')
+                self.WarningLabel.setText('')
+                self.WarningLabel.setStyleSheet(self.default_warning_color)
+                return
+        # check if the laser power and target are entered
+        if self.OptogeneticsB.currentText()=='on' and (self.Opto_dialog.laser_1_target.text()=='' or self.Opto_dialog.laser_1_calibration_power.text()=='' or self.Opto_dialog.laser_2_target.text()=='' or self.Opto_dialog.laser_2_calibration_power.text()=='' or self.Opto_dialog.laser_1_calibration_voltage.text()=='' or self.Opto_dialog.laser_2_calibration_voltage.text()==''):
+            response = QMessageBox.question(self,
+                'Box {}, Save without laser target or laser power:'.format(self.box_letter), 
+                "Do you want to save without complete laser target or laser power calibration information provided?",
+                 QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
+            if response==QMessageBox.Yes:
+                self.WarningLabel.setText('Saving without laser target or laser power!')
+                self.WarningLabel.setStyleSheet(self.default_warning_color)
+                logging.info('saving without laser target or laser power')
+                pass
             elif response==QMessageBox.No:
                 logging.info('saving declined by user')
                 self.WarningLabel.setText('')
