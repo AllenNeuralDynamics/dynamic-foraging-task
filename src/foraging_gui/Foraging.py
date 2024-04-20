@@ -269,12 +269,14 @@ class Window(QMainWindow):
             except Exception as e:
                 logging.error(str(e))
                 self.StartEphysRecording.setChecked(False)
-                QMessageBox.warning(self, 'Connection Error', 'Failed to connect to Open Ephys. Please check: \n1) the correct ip address is included in the settings json file. \n2) the Open Ephys software is open.')
-                                       
+                QMessageBox.warning(self, 'Connection Error', 'Failed to connect to Open Ephys. Please check: \n1) the correct ip address is included in the settings json file. \n2) the Open Ephys software is open.')                            
         else:
-            EphysControl.stop_open_ephys_recording()
+            try:
+                EphysControl.stop_open_ephys_recording()
+            except Exception as e:
+                logging.error(str(e))
+                QMessageBox.warning(self, 'Connection Error', 'Failed to stop Open Ephys recording. Please check: \n1) the open ephys software is still running')
         self._toggle_color(self.StartEphysRecording)
-        
 
     def _toggle_color(self,widget,check_color="background-color : green;",unchecked_color="background-color : none"):
         '''
@@ -297,7 +299,7 @@ class Window(QMainWindow):
         else:
             widget.setStyleSheet(unchecked_color)
 
-    def _manage_warning_labels(self,warning_labels,warning_text):
+    def _manage_warning_labels(self,warning_labels,warning_text=''):
         '''
             Manage the warning labels. 
 
@@ -312,7 +314,8 @@ class Window(QMainWindow):
         -------
         None
         '''
-
+        if not isinstance(warning_labels,list):
+            warning_labels = [warning_labels]
         for warning_label in warning_labels:
             warning_label.setText(warning_text)
             warning_label.setStyleSheet(self.default_warning_color)
