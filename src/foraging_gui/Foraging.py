@@ -262,7 +262,7 @@ class Window(QMainWindow):
 
         '''
 
-        EphysControl=EphysRecording(open_ephys_machine_ip_address="10.128.53.45",mouse_id='12321312')
+        EphysControl=EphysRecording(open_ephys_machine_ip_address=self.open_ephys_machine_ip_address,mouse_id='12321312')
         if self.StartEphysRecording.isChecked():
             EphysControl.start_open_ephys_recording()  
         else:
@@ -881,7 +881,7 @@ class Window(QMainWindow):
         self.newscale_serial_num_box4=self.Settings['newscale_serial_num_box4']
         self.default_ui=self.Settings['default_ui']
         self.open_ephys_machine_ip_address=self.Settings['open_ephys_machine_ip_address']
-        
+
         # Also stream log info to the console if enabled
         if  self.Settings['show_log_info_in_console']:
             logger = logging.getLogger()
