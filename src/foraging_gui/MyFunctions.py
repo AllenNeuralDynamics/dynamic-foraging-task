@@ -1986,6 +1986,7 @@ class EphysRecording:
     		    json={"mode" : "RECORD"}
     		    )
         return r1.json(), r2.json()
+    
     def stop_open_ephys_recording(self):
         '''
         Stops recording in Open Ephys GUI
@@ -1996,5 +1997,14 @@ class EphysRecording:
     		self.api_endpoint + "status",
     		json={"mode" : "ACQUIRE"}
     		)
+
+        return r.json()
+    
+    def get_open_ephys_recording_configuration(self):
+        '''
+        Get the recording configuration from Open Ephys GUI
+        
+        '''
+        r = requests.get(self.api_endpoint+"recording")
 
         return r.json()
