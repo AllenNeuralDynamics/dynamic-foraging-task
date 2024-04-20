@@ -293,7 +293,7 @@ class Window(QMainWindow):
                 self.unsaved_data=True
                 self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
                 EphysControl.stop_open_ephys_recording()
-                QMessageBox.warning(self, '', 'Open Ephys has stopped recording!')
+                QMessageBox.warning(self, '', 'Open Ephys has stopped recording! Please save the data again!')
             except Exception as e:
                 logging.error(str(e))
                 QMessageBox.warning(self, 'Connection Error', 'Failed to stop Open Ephys recording. Please check: \n1) the open ephys software is still running')
@@ -2177,7 +2177,7 @@ class Window(QMainWindow):
         with open(filepath, 'w') as finished_file:
             finished_file.write(contents)
         if self.StartEphysRecording.isChecked():
-            QMessageBox.warning(self, '', 'Data saved successfully! However, the ephys recording is still running. Make sure to close ephys recording and save the data again!')
+            QMessageBox.warning(self, '', 'Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!')
             self.unsaved_data=True
             self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
 
