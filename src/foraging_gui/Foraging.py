@@ -29,7 +29,7 @@ from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,Camer
 from foraging_gui.Dialogs import LaserCalibrationDialog
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
-from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY
+from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY, EphysRecording
 from foraging_gui.stage import Stage
 
 class NumpyEncoder(json.JSONEncoder):
@@ -243,7 +243,7 @@ class Window(QMainWindow):
         self.warmup.currentIndexChanged.connect(self._warmup)
         self.Sessionlist.currentIndexChanged.connect(self._session_list)
         self.SessionlistSpin.textChanged.connect(self._session_list_spin)
-
+        self.StartEphysRecording.clicked.connect(self._StartEphysRecording)
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
@@ -255,6 +255,15 @@ class Window(QMainWindow):
             for child in container.findChildren((QtWidgets.QLineEdit)):        
                 child.returnPressed.connect(self.keyPressEvent)
     
+    def _StartEphysRecording(self):
+        '''
+            Start ephys recording
+            
+           
+        '''
+
+        pass
+
     def _session_list(self):
         '''show all sessions of the current animal and load the selected session by drop down list'''
         if not hasattr(self,'fname'):
