@@ -1963,6 +1963,15 @@ class EphysRecording:
         self.api_endpoint = "http://" + self.open_ephys_machine_ip_address + ":37497/api/"
         self.mouse_id = mouse_id
 
+    def get_status(self):
+        '''
+        Get the status of the Open Ephys GUI
+
+        '''
+        r = requests.get(self.api_endpoint+"status")
+        
+        return r.json()
+    
     def start_open_ephys_recording(self):
         '''
         Starts recording in Open Ephys GUI

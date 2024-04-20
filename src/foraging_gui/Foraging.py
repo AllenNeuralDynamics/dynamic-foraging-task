@@ -257,15 +257,19 @@ class Window(QMainWindow):
     
     def _StartEphysRecording(self):
         '''
-            Start ephys recording
-
+            Start/stop ephys recording
 
         '''
 
         EphysControl=EphysRecording(open_ephys_machine_ip_address=self.open_ephys_machine_ip_address,mouse_id=self.ID.text())
         if self.StartEphysRecording.isChecked():
             try:
+                if EphysControl.get_status()['mode']=='RECORD':
+                    QMessageBox.warning(self, '', 'Open Ephys is already recording! Please stop the recording first.')
+                    self.StartEphysRecording.setChecked(False)
+                    return
                 EphysControl.start_open_ephys_recording()
+                QMessageBox.warning(self, '', 'Open Ephys has started recording!')
             except Exception as e:
                 logging.error(str(e))
                 self.StartEphysRecording.setChecked(False)
@@ -273,6 +277,7 @@ class Window(QMainWindow):
         else:
             try:
                 EphysControl.stop_open_ephys_recording()
+                QMessageBox.warning(self, '', 'Open Ephys has stopped recording!')
             except Exception as e:
                 logging.error(str(e))
                 QMessageBox.warning(self, 'Connection Error', 'Failed to stop Open Ephys recording. Please check: \n1) the open ephys software is still running')
