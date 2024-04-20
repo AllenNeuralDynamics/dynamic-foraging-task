@@ -269,8 +269,7 @@ class Window(QMainWindow):
             except Exception as e:
                 logging.error(str(e))
                 self.StartEphysRecording.setChecked(False)
-                if "No connection could be made because the target machine actively refused it" in str(e):
-                    QMessageBox.warning(self, 'Connection Error', 'Failed to connect to Open Ephys. Please check: \n1) the correct ip address is included in the settings json file. \n2) the Open Ephys software is open.')
+                QMessageBox.warning(self, 'Connection Error', 'Failed to connect to Open Ephys. Please check: \n1) the correct ip address is included in the settings json file. \n2) the Open Ephys software is open.')
                                        
         else:
             EphysControl.stop_open_ephys_recording()
