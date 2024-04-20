@@ -2176,7 +2176,10 @@ class Window(QMainWindow):
         contents = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         with open(filepath, 'w') as finished_file:
             finished_file.write(contents)
-        
+        if self.StartEphysRecording.isChecked():
+            QMessageBox.warning(self, '', 'Data saved successfully! However, the ephys recording is still running. Make sure to close ephys recording and save the data again!')
+            self.unsaved_data=True
+            self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
 
     def _GetSaveFolder(self):
         '''
