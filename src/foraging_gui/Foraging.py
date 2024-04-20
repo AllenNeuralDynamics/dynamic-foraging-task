@@ -290,6 +290,25 @@ class Window(QMainWindow):
         else:
             widget.setStyleSheet(unchecked_color)
 
+    def _manage_warning_labels(self,warning_labels,warning_text):
+        '''
+            Manage the warning labels. 
+
+            If there is a warning, set the color to self.default_warning_color. If there is no warning, set the text to ''. 
+        Parameters
+        ----------
+        warning_label : single QtWidgets.QLabel or list of QtWidgets.QLabel
+            The warning label to manage
+        warning_text : str
+            The warning text to display
+        Returns
+        -------
+        None
+        '''
+
+        for warning_label in warning_labels:
+            warning_label.setText(warning_text)
+            warning_label.setStyleSheet(self.default_warning_color)
 
     def _session_list(self):
         '''show all sessions of the current animal and load the selected session by drop down list'''
