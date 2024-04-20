@@ -136,7 +136,8 @@ class Window(QMainWindow):
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
         self._StopPhotometry() # Make sure photoexcitation is stopped 
- 
+        # Initialize open ephys saving dictionary
+        self.open_ephys=[]
         if not self.start_bonsai_ide:
             '''
                 When starting bonsai without the IDE the connection is always unstable.
@@ -269,8 +270,10 @@ class Window(QMainWindow):
                     self.StartEphysRecording.setChecked(False)
                     self._toggle_color(self.StartEphysRecording)
                     return
-                self.openephys_start_recording_time = datetime.now()
-                r1,r2=EphysControl.start_open_ephys_recording()
+                openephys_start_recording_time = datetime.now()
+                self.r1,_=EphysControl.start_open_ephys_recording()
+                self.r1['recording_type']=self.OpenEphysRecordingType.currentText()
+                self.r1['openephys_start_recording_time']=self.openephys_start_recording_time
                 QMessageBox.warning(self, '', f'Open Ephys has started recording!\n Recording type: {self.OpenEphysRecordingType.currentText()}')
             except Exception as e:
                 logging.error(str(e))
@@ -283,7 +286,9 @@ class Window(QMainWindow):
                     self.StartEphysRecording.setChecked(False)
                     self._toggle_color(self.StartEphysRecording)
                     return
-                self.openephys_stop_recording_time = datetime.now()
+                openephys_stop_recording_time = datetime.now()
+                self.r1['openephys_start_recording_time']=self.openephys_stop_recording_time
+                self.open_ephys.append(self.r1)
                 EphysControl.stop_open_ephys_recording()
                 QMessageBox.warning(self, '', 'Open Ephys has stopped recording!')
             except Exception as e:
@@ -2122,6 +2127,9 @@ class Window(QMainWindow):
         Obj['VideoFolder']=self.VideoFolder
         Obj['PhotometryFolder']=self.PhotometryFolder
         Obj['MetadataFolder']=self.MetadataFolder
+        
+        # save the open ephys recording information
+        Obj['open_ephys'] = self.open_ephys
         
         if SaveContinue==0:
             # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
