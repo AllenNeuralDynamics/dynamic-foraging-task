@@ -1970,7 +1970,7 @@ class EphysRecording:
         '''
         r = requests.put(
 		        self.api_endpoint + "recording",
-		        json={"prepend_text" : self.mouse_id})
+		        json={"prepend_text" : self.mouse_id+ "_"})
         
         r = requests.put(
     		    self.api_endpoint + "status",

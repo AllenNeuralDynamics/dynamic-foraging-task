@@ -262,7 +262,7 @@ class Window(QMainWindow):
 
         '''
 
-        EphysControl=EphysRecording(open_ephys_machine_ip_address=self.open_ephys_machine_ip_address,mouse_id='12321312')
+        EphysControl=EphysRecording(open_ephys_machine_ip_address=self.open_ephys_machine_ip_address,mouse_id=self.ID.text())
         if self.StartEphysRecording.isChecked():
             EphysControl.start_open_ephys_recording()  
         else:
