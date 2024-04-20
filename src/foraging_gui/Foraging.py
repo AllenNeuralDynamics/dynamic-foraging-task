@@ -276,6 +276,10 @@ class Window(QMainWindow):
                 QMessageBox.warning(self, 'Connection Error', 'Failed to connect to Open Ephys. Please check: \n1) the correct ip address is included in the settings json file. \n2) the Open Ephys software is open.')                            
         else:
             try:
+                if EphysControl.get_status()['mode']!='RECORD':
+                    QMessageBox.warning(self, '', 'Open Ephys is not recording! Please start the recording first.')
+                    self.StartEphysRecording.setChecked(False)
+                    return
                 EphysControl.stop_open_ephys_recording()
                 QMessageBox.warning(self, '', 'Open Ephys has stopped recording!')
             except Exception as e:
