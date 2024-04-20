@@ -258,11 +258,16 @@ class Window(QMainWindow):
     def _StartEphysRecording(self):
         '''
             Start ephys recording
-            
-           
+
+
         '''
 
-        EphysRecording(open_ephys_machine_ip_address="10.128.53.45",mouse_id='12321312')
+        EphysControl=EphysRecording(open_ephys_machine_ip_address="10.128.53.45",mouse_id='12321312')
+        if self.StartEphysRecording.isChecked():
+            EphysControl.start_open_ephys_recording()  
+        else:
+            EphysControl.stop_open_ephys_recording()
+        
 
     def _session_list(self):
         '''show all sessions of the current animal and load the selected session by drop down list'''
