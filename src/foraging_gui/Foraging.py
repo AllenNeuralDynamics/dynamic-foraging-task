@@ -264,11 +264,19 @@ class Window(QMainWindow):
 
         EphysControl=EphysRecording(open_ephys_machine_ip_address=self.open_ephys_machine_ip_address,mouse_id=self.ID.text())
         if self.StartEphysRecording.isChecked():
-            EphysControl.start_open_ephys_recording()  
+            try:
+                EphysControl.start_open_ephys_recording()
+            except Exception as e:
+                logging.error(str(e))
+                self.StartEphysRecording.setChecked(False)
+                if "No connection could be made because the target machine actively refused it" in str(e):
+                    QMessageBox.warning(self, 'Connection Error', 'Failed to connect to Open Ephys. Please check: \n1) the correct ip address is included in the settings json file. \n2) the Open Ephys software is open.')
+                                       
         else:
             EphysControl.stop_open_ephys_recording()
         self._toggle_color(self.StartEphysRecording)
         
+
     def _toggle_color(self,widget,check_color="background-color : green;",unchecked_color="background-color : none"):
         '''
         Toggle the color of the widget.
