@@ -4390,6 +4390,9 @@
     <property name="text">
      <string>Start ephys recording</string>
     </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
    </widget>
    <zorder>PhotometryB</zorder>
    <zorder>infor</zorder>
