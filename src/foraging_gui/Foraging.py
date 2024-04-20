@@ -262,7 +262,7 @@ class Window(QMainWindow):
            
         '''
 
-        pass
+        EphysRecording(open_ephys_machine_ip_address="10.128.53.45",mouse_id='12321312')
 
     def _session_list(self):
         '''show all sessions of the current animal and load the selected session by drop down list'''

@@ -1964,27 +1964,24 @@ class EphysRecording:
         self.mouse_id = mouse_id
 
     def start_open_ephys_recording(self):
-
-    	"""
-    	Changes the directory prepend text and starts recording
-
-    	"""
-
-        requests.put(
-		    self.api_endpoint + "recording",
-		    json={"prepend_text" : self.mouse_id})
+        '''
+        Starts recording in Open Ephys GUI
+        
+        '''
+        r = requests.put(
+		        self.api_endpoint + "recording",
+		        json={"prepend_text" : self.mouse_id})
         
         r = requests.put(
-    		self.api_endpoint + "status",
-    		json={"mode" : "RECORD"}
-    		)
+    		    self.api_endpoint + "status",
+    		    json={"mode" : "RECORD"}
+    		    )
 
     def stop_open_ephys_recording(self):
-
-    	"""
-    	Stops recording
-
-    	"""
+        '''
+        Stops recording in Open Ephys GUI
+        
+        '''
 
         r = requests.put(
     		self.api_endpoint + "status",
