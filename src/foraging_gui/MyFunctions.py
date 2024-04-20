@@ -1959,7 +1959,7 @@ class EphysRecording:
         None.
 
         """
-
+        self.open_ephys_machine_ip_address = open_ephys_machine_ip_address
         self.api_endpoint = "http://" + self.open_ephys_machine_ip_address + ":37497/api/"
         self.mouse_id = mouse_id
 
