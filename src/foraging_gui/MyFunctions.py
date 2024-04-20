@@ -1969,7 +1969,7 @@ class EphysRecording:
 
         '''
         r = requests.get(self.api_endpoint+"status")
-        
+
         return r.json()
     
     def start_open_ephys_recording(self):
@@ -1977,15 +1977,15 @@ class EphysRecording:
         Starts recording in Open Ephys GUI
         
         '''
-        r = requests.put(
+        r1 = requests.put(
 		        self.api_endpoint + "recording",
 		        json={"prepend_text" : self.mouse_id+ "_"})
         
-        r = requests.put(
+        r2 = requests.put(
     		    self.api_endpoint + "status",
     		    json={"mode" : "RECORD"}
     		    )
-
+        return r1.json(), r2.json()
     def stop_open_ephys_recording(self):
         '''
         Stops recording in Open Ephys GUI
@@ -1997,3 +1997,4 @@ class EphysRecording:
     		json={"mode" : "ACQUIRE"}
     		)
 
+        return r.json()

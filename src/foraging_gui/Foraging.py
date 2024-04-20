@@ -268,7 +268,7 @@ class Window(QMainWindow):
                     QMessageBox.warning(self, '', 'Open Ephys is already recording! Please stop the recording first.')
                     self.StartEphysRecording.setChecked(False)
                     return
-                EphysControl.start_open_ephys_recording()
+                r1,r2=EphysControl.start_open_ephys_recording()
                 QMessageBox.warning(self, '', 'Open Ephys has started recording!')
             except Exception as e:
                 logging.error(str(e))
