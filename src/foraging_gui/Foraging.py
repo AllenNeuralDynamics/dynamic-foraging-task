@@ -269,6 +269,30 @@ class Window(QMainWindow):
             EphysControl.stop_open_ephys_recording()
         
 
+    def _toggle_color(self,widget,check_color="background-color : green;",unchecked_color="background-color : none"):
+        '''
+        Toggle the color of the widget.
+
+        Parameters
+        ----------
+        widget : QtWidgets.QWidget
+
+            If Checked, sets the color to green. If unchecked, sets the color to None.
+
+        Returns
+        -------
+        None
+        '''
+
+
+        if widget.isChecked():
+            widget.setStyleSheet(check_color)
+        else:
+            widget.setStyleSheet(unchecked_color)
+
+
+
+
     def _session_list(self):
         '''show all sessions of the current animal and load the selected session by drop down list'''
         if not hasattr(self,'fname'):
