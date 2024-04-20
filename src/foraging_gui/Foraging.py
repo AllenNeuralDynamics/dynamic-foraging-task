@@ -270,10 +270,10 @@ class Window(QMainWindow):
                     self.StartEphysRecording.setChecked(False)
                     self._toggle_color(self.StartEphysRecording)
                     return
-                openephys_start_recording_time = datetime.now()
+                self.r1,_=EphysControl.start_open_ephys_recording()
+                openephys_start_recording_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
                 self.r1['recording_type']=self.OpenEphysRecordingType.currentText()
                 self.r1['openephys_start_recording_time']=openephys_start_recording_time
-                self.r1,_=EphysControl.start_open_ephys_recording()
                 QMessageBox.warning(self, '', f'Open Ephys has started recording!\n Recording type: {self.OpenEphysRecordingType.currentText()}')
             except Exception as e:
                 logging.error(str(e))
@@ -286,8 +286,8 @@ class Window(QMainWindow):
                     self.StartEphysRecording.setChecked(False)
                     self._toggle_color(self.StartEphysRecording)
                     return
-                openephys_stop_recording_time = datetime.now()
-                self.r1['openephys_start_recording_time']=openephys_stop_recording_time
+                openephys_stop_recording_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+                self.r1['openephys_stop_recording_time']=openephys_stop_recording_time
                 self.open_ephys.append(self.r1)
                 EphysControl.stop_open_ephys_recording()
                 QMessageBox.warning(self, '', 'Open Ephys has stopped recording!')
