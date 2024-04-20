@@ -285,7 +285,7 @@ class Window(QMainWindow):
                     self._toggle_color(self.StartEphysRecording)
                     return
                 self.openephys_stop_recording_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
-                response=self.get_open_ephys_recording_configuration()
+                response=EphysControl.get_open_ephys_recording_configuration()
                 response['openephys_start_recording_time']=self.openephys_start_recording_time
                 response['openephys_stop_recording_time']=self.openephys_stop_recording_time
                 response['recording_type']=self.OpenEphysRecordingType.currentText()
