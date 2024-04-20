@@ -267,8 +267,8 @@ class Window(QMainWindow):
             EphysControl.start_open_ephys_recording()  
         else:
             EphysControl.stop_open_ephys_recording()
+        self._toggle_color(self.StartEphysRecording)
         
-
     def _toggle_color(self,widget,check_color="background-color : green;",unchecked_color="background-color : none"):
         '''
         Toggle the color of the widget.
@@ -289,8 +289,6 @@ class Window(QMainWindow):
             widget.setStyleSheet(check_color)
         else:
             widget.setStyleSheet(unchecked_color)
-
-
 
 
     def _session_list(self):
