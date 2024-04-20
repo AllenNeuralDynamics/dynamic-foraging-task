@@ -822,7 +822,8 @@ class Window(QMainWindow):
             'newscale_serial_num_box3':'',
             'newscale_serial_num_box4':'',
             'show_log_info_in_console':False,
-            'default_ui':'ForagingGUI.ui'
+            'default_ui':'ForagingGUI.ui',
+            'open_ephys_machine_ip_address':''
         }
         
         # Try to load Settings_box#.csv
@@ -879,7 +880,8 @@ class Window(QMainWindow):
         self.newscale_serial_num_box3=self.Settings['newscale_serial_num_box3']
         self.newscale_serial_num_box4=self.Settings['newscale_serial_num_box4']
         self.default_ui=self.Settings['default_ui']
-
+        self.open_ephys_machine_ip_address=self.Settings['open_ephys_machine_ip_address']
+        
         # Also stream log info to the console if enabled
         if  self.Settings['show_log_info_in_console']:
             logger = logging.getLogger()
