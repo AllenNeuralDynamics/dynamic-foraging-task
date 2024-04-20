@@ -4381,7 +4381,7 @@
    <widget class="QPushButton" name="StartEphysRecording">
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>260</x>
       <y>858</y>
       <width>131</width>
       <height>25</height>
@@ -4393,6 +4393,67 @@
     <property name="checkable">
      <bool>true</bool>
     </property>
+   </widget>
+   <widget class="QLabel" name="label_65">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>860</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>recording type=</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="OpenEphysRecordingType">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>860</y>
+      <width>131</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <item>
+     <property name="text">
+      <string>Behavior</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Surface finding</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Testing</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>NA</string>
+     </property>
+    </item>
    </widget>
    <zorder>PhotometryB</zorder>
    <zorder>infor</zorder>
@@ -4427,6 +4488,8 @@
    <zorder>pushButton_streamlit</zorder>
    <zorder>WarningLabel_uncoupled_task</zorder>
    <zorder>StartEphysRecording</zorder>
+   <zorder>label_65</zorder>
+   <zorder>OpenEphysRecordingType</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

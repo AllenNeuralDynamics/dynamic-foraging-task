@@ -267,9 +267,10 @@ class Window(QMainWindow):
                 if EphysControl.get_status()['mode']=='RECORD':
                     QMessageBox.warning(self, '', 'Open Ephys is already recording! Please stop the recording first.')
                     self.StartEphysRecording.setChecked(False)
+                    self._toggle_color(self.StartEphysRecording)
                     return
                 r1,r2=EphysControl.start_open_ephys_recording()
-                QMessageBox.warning(self, '', 'Open Ephys has started recording!')
+                QMessageBox.warning(self, '', f'Open Ephys has started recording!\n Recording type: {self.OpenEphysRecordingType.currentText()}')
             except Exception as e:
                 logging.error(str(e))
                 self.StartEphysRecording.setChecked(False)
@@ -279,13 +280,14 @@ class Window(QMainWindow):
                 if EphysControl.get_status()['mode']!='RECORD':
                     QMessageBox.warning(self, '', 'Open Ephys is not recording! Please start the recording first.')
                     self.StartEphysRecording.setChecked(False)
+                    self._toggle_color(self.StartEphysRecording)
                     return
                 EphysControl.stop_open_ephys_recording()
                 QMessageBox.warning(self, '', 'Open Ephys has stopped recording!')
             except Exception as e:
                 logging.error(str(e))
                 QMessageBox.warning(self, 'Connection Error', 'Failed to stop Open Ephys recording. Please check: \n1) the open ephys software is still running')
-        self._toggle_color(self.StartEphysRecording)
+        
 
     def _toggle_color(self,widget,check_color="background-color : green;",unchecked_color="background-color : none"):
         '''
