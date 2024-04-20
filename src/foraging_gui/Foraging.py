@@ -289,8 +289,9 @@ class Window(QMainWindow):
                 response['openephys_start_recording_time']=self.openephys_start_recording_time
                 response['openephys_stop_recording_time']=self.openephys_stop_recording_time
                 response['recording_type']=self.OpenEphysRecordingType.currentText()
-
                 self.open_ephys.append(response)
+                self.unsaved_data=True
+                self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
                 EphysControl.stop_open_ephys_recording()
                 QMessageBox.warning(self, '', 'Open Ephys has stopped recording!')
             except Exception as e:
