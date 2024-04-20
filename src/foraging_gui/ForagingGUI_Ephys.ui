@@ -4378,6 +4378,19 @@
      <string/>
     </property>
    </widget>
+   <widget class="QPushButton" name="StartEphysRecording">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>858</y>
+      <width>131</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start ephys recording</string>
+    </property>
+   </widget>
    <zorder>PhotometryB</zorder>
    <zorder>infor</zorder>
    <zorder>line</zorder>
@@ -4410,6 +4423,7 @@
    <zorder>label_auto_train_stage</zorder>
    <zorder>pushButton_streamlit</zorder>
    <zorder>WarningLabel_uncoupled_task</zorder>
+   <zorder>StartEphysRecording</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
