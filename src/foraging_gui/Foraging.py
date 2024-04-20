@@ -269,6 +269,7 @@ class Window(QMainWindow):
                     self.StartEphysRecording.setChecked(False)
                     self._toggle_color(self.StartEphysRecording)
                     return
+                self.openephys_start_recording_time = datetime.now()
                 r1,r2=EphysControl.start_open_ephys_recording()
                 QMessageBox.warning(self, '', f'Open Ephys has started recording!\n Recording type: {self.OpenEphysRecordingType.currentText()}')
             except Exception as e:
@@ -282,6 +283,7 @@ class Window(QMainWindow):
                     self.StartEphysRecording.setChecked(False)
                     self._toggle_color(self.StartEphysRecording)
                     return
+                self.openephys_stop_recording_time = datetime.now()
                 EphysControl.stop_open_ephys_recording()
                 QMessageBox.warning(self, '', 'Open Ephys has stopped recording!')
             except Exception as e:
