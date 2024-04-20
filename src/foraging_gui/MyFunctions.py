@@ -6,6 +6,7 @@ import sys
 from sys import platform as PLATFORM
 from datetime import datetime
 import logging
+import requests
 
 import numpy as np
 from itertools import accumulate
@@ -1934,4 +1935,59 @@ class TimerWorker(QtCore.QObject):
     def _stop(self):
         # Will halt the timer at the next interval
         self._isRunning=False
+
+
+class EphysRecording:
+
+    def __init__(self,
+                 open_ephys_machine_ip_address,
+                 mouse_id):
+
+        """
+        Runs an experiment with Open Ephys GUI,
+
+        Parameters
+        ----------
+
+        open_ephys_machine_ip_address : str
+            IP address of the machine running Open Ephys GUI
+        mouse_id : str
+            ID of the mouse for this experiment
+
+        Returns
+        -------
+        None.
+
+        """
+
+        self.api_endpoint = "http://" + self.open_ephys_machine_ip_address + ":37497/api/"
+        self.mouse_id = mouse_id
+
+    def start_open_ephys_recording(self):
+
+    	"""
+    	Changes the directory prepend text and starts recording
+
+    	"""
+
+    	r = requests.put(
+		    self.api_endpoint + "recording",
+		    json={"prepend_text" : self.mouse_id})
+        
+    	r = requests.put(
+    		self.api_endpoint + "status",
+    		json={"mode" : "RECORD"}
+    		)
+
+    def stop_open_ephys_recording(self):
+
+    	"""
+    	Stops recording
+
+    	"""
+
+    	r = requests.put(
+    		self.api_endpoint + "status",
+    		json={"mode" : "ACQUIRE"}
+    		)
 
