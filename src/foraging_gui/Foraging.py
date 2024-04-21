@@ -261,7 +261,12 @@ class Window(QMainWindow):
             Start/stop ephys recording
 
         '''
-
+        if self.open_ephys_machine_ip_address=='':
+            QMessageBox.warning(self, 'Connection Error', 'Empty ip address for Open Ephys Computer. Please check the settings file.')
+            self.StartEphysRecording.setChecked(False)
+            self._toggle_color(self.StartEphysRecording)
+            return
+        
         EphysControl=EphysRecording(open_ephys_machine_ip_address=self.open_ephys_machine_ip_address,mouse_id=self.ID.text())
         if self.StartEphysRecording.isChecked():
             try:
