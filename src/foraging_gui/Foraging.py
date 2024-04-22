@@ -298,6 +298,16 @@ class Window(QMainWindow):
                     self.StartEphysRecording.setChecked(False)
                     self._toggle_color(self.StartEphysRecording)
                     return
+                
+                if self.Start.isChecked():
+                    reply = QMessageBox.question(self,  'The behavior hasn’t stopped yet! Do you want to stop ephys logging?', QMessageBox,QMessageBox.No | QMessageBox.No, QMessageBox.Yes)
+                    if reply == QMessageBox.Yes:
+                        pass
+                    elif reply == QMessageBox.No:
+                        self.StartEphysRecording.setChecked(False)
+                        self._toggle_color(self.StartEphysRecording)
+                        return
+                    
                 self.openephys_stop_recording_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
                 response=EphysControl.get_open_ephys_recording_configuration()
                 response['openephys_start_recording_time']=self.openephys_start_recording_time
