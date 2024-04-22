@@ -401,6 +401,7 @@ class Window(QMainWindow):
                 self.WarningLabelCamera.setStyleSheet("color: red;")
             else:
                 self.WarningLabelCamera.setStyleSheet("color: green;")  
+            # only check drop frames once each session
             self.to_check_drop_frames=0
 
     def _warmup(self):
