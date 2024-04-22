@@ -2526,6 +2526,7 @@ class Window(QMainWindow):
                 self.SessionlistSpin.setValue(Ind+1)
                 self._connect_Sessionlist(connect=True)
             # check dropping frames
+            self.to_check_drop_frames=1
             self._check_drop_frames(save_tag=0)
         else:
             self.NewSession.setDisabled(False)
