@@ -2056,7 +2056,6 @@ class Window(QMainWindow):
             # do not create a new folder
             self.CreateNewFolder=0
         
-        # check drop of frames only once
         self._check_drop_frames(save_tag=1)
 
         # save drop frames information
