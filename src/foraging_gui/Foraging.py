@@ -267,6 +267,15 @@ class Window(QMainWindow):
             self._toggle_color(self.StartEphysRecording)
             return
         
+        if self.Start.isChecked():
+            reply = QMessageBox.question(self,  'Behavior has started! Do you want to start ephys recording?', QMessageBox,QMessageBox.No | QMessageBox.No, QMessageBox.Yes)
+            if reply == QMessageBox.Yes:
+                pass
+            elif reply == QMessageBox.No:
+                self.StartEphysRecording.setChecked(False)
+                self._toggle_color(self.StartEphysRecording)
+                return
+        
         EphysControl=EphysRecording(open_ephys_machine_ip_address=self.open_ephys_machine_ip_address,mouse_id=self.ID.text())
         if self.StartEphysRecording.isChecked():
             try:
@@ -302,7 +311,7 @@ class Window(QMainWindow):
             except Exception as e:
                 logging.error(str(e))
                 QMessageBox.warning(self, 'Connection Error', 'Failed to stop Open Ephys recording. Please check: \n1) the open ephys software is still running')
-        
+        self._toggle_color(self.StartEphysRecording)
 
     def _toggle_color(self,widget,check_color="background-color : green;",unchecked_color="background-color : none"):
         '''
