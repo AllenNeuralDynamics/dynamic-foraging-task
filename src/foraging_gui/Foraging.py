@@ -91,7 +91,7 @@ class Window(QMainWindow):
         self.UpdateParameters = 1   # permission to update parameters
         self.loggingstarted = -1    # Have we started trial logging
         self.unsaved_data = False   # Setting unsaved data to False 
-        self.to_check_drop_frames = 0 # 1, to check drop frames during saving data; 0, not to check drop frames 
+        self.to_check_drop_frames = 1 # 1, to check drop frames during saving data; 0, not to check drop frames 
 
         # Connect to Bonsai
         self._InitializeBonsai()
@@ -3418,6 +3418,7 @@ class Window(QMainWindow):
     def _PostWeightChange(self):
         self.unsaved_data=True
         self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
+        self.NewSession.setStyleSheet("background-color : none")
         self.WarningLabel.setText('')
         self._UpdateSuggestedWater()
 
