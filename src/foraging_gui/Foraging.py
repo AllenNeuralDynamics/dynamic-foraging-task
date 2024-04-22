@@ -267,7 +267,7 @@ class Window(QMainWindow):
             self._toggle_color(self.StartEphysRecording)
             return
         
-        if self.Start.isChecked() and self.ANewTrial==0 and self.StartEphysRecording.isChecked():
+        if  (self.Start.isChecked() or self.ANewTrial==0) and self.StartEphysRecording.isChecked():
             reply = QMessageBox.question(self, '', 'Behavior has started! Do you want to start ephys recording?', QMessageBox.No | QMessageBox.No, QMessageBox.Yes)
             if reply == QMessageBox.Yes:
                 pass
@@ -299,7 +299,7 @@ class Window(QMainWindow):
                     self._toggle_color(self.StartEphysRecording)
                     return
                 
-                if  self.Start.isChecked() and self.ANewTrial==0:
+                if  self.Start.isChecked() or self.ANewTrial==0:
                     reply = QMessageBox.question(self,  '','The behavior hasn’t stopped yet! Do you want to stop ephys recording?', QMessageBox.No | QMessageBox.No, QMessageBox.Yes)
                     if reply == QMessageBox.Yes:
                         pass
