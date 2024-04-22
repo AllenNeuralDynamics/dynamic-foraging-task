@@ -6,6 +6,7 @@ import sys
 from sys import platform as PLATFORM
 from datetime import datetime
 import logging
+import requests
 
 import numpy as np
 from itertools import accumulate
@@ -1935,3 +1936,75 @@ class TimerWorker(QtCore.QObject):
         # Will halt the timer at the next interval
         self._isRunning=False
 
+
+class EphysRecording:
+
+    def __init__(self,
+                 open_ephys_machine_ip_address,
+                 mouse_id):
+
+        """
+        Runs an experiment with Open Ephys GUI,
+
+        Parameters
+        ----------
+
+        open_ephys_machine_ip_address : str
+            IP address of the machine running Open Ephys GUI
+        mouse_id : str
+            ID of the mouse for this experiment
+
+        Returns
+        -------
+        None.
+
+        """
+        self.open_ephys_machine_ip_address = open_ephys_machine_ip_address
+        self.api_endpoint = "http://" + self.open_ephys_machine_ip_address + ":37497/api/"
+        self.mouse_id = mouse_id
+
+    def get_status(self):
+        '''
+        Get the status of the Open Ephys GUI
+
+        '''
+        r = requests.get(self.api_endpoint+"status")
+
+        return r.json()
+    
+    def start_open_ephys_recording(self):
+        '''
+        Starts recording in Open Ephys GUI
+        
+        '''
+        r1 = requests.put(
+		        self.api_endpoint + "recording",
+		        json={"prepend_text" : self.mouse_id+ "_"})
+        
+        r2 = requests.put(
+    		    self.api_endpoint + "status",
+    		    json={"mode" : "RECORD"}
+    		    )
+        return r1.json(), r2.json()
+    
+    def stop_open_ephys_recording(self):
+        '''
+        Stops recording in Open Ephys GUI
+        
+        '''
+
+        r = requests.put(
+    		self.api_endpoint + "status",
+    		json={"mode" : "ACQUIRE"}
+    		)
+
+        return r.json()
+    
+    def get_open_ephys_recording_configuration(self):
+        '''
+        Get the recording configuration from Open Ephys GUI
+        
+        '''
+        r = requests.get(self.api_endpoint+"recording")
+
+        return r.json()

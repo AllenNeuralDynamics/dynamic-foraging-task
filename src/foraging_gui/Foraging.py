@@ -29,7 +29,7 @@ from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,Camer
 from foraging_gui.Dialogs import LaserCalibrationDialog
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
-from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY
+from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY, EphysRecording
 from foraging_gui.stage import Stage
 
 class NumpyEncoder(json.JSONEncoder):
@@ -137,7 +137,8 @@ class Window(QMainWindow):
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
         self._StopPhotometry() # Make sure photoexcitation is stopped 
- 
+        # Initialize open ephys saving dictionary
+        self.open_ephys=[]
         if not self.start_bonsai_ide:
             '''
                 When starting bonsai without the IDE the connection is always unstable.
@@ -244,7 +245,7 @@ class Window(QMainWindow):
         self.warmup.currentIndexChanged.connect(self._warmup)
         self.Sessionlist.currentIndexChanged.connect(self._session_list)
         self.SessionlistSpin.textChanged.connect(self._session_list_spin)
-
+        self.StartEphysRecording.clicked.connect(self._StartEphysRecording)
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
@@ -256,6 +257,115 @@ class Window(QMainWindow):
             for child in container.findChildren((QtWidgets.QLineEdit)):        
                 child.returnPressed.connect(self.keyPressEvent)
     
+    def _StartEphysRecording(self):
+        '''
+            Start/stop ephys recording
+
+        '''
+        if self.open_ephys_machine_ip_address=='':
+            QMessageBox.warning(self, 'Connection Error', 'Empty ip address for Open Ephys Computer. Please check the settings file.')
+            self.StartEphysRecording.setChecked(False)
+            self._toggle_color(self.StartEphysRecording)
+            return
+        
+        if  (self.Start.isChecked() or self.ANewTrial==0) and self.StartEphysRecording.isChecked():
+            reply = QMessageBox.question(self, '', 'Behavior has started! Do you want to start ephys recording?', QMessageBox.No | QMessageBox.No, QMessageBox.Yes)
+            if reply == QMessageBox.Yes:
+                pass
+            elif reply == QMessageBox.No:
+                self.StartEphysRecording.setChecked(False)
+                self._toggle_color(self.StartEphysRecording)
+                return
+        
+        EphysControl=EphysRecording(open_ephys_machine_ip_address=self.open_ephys_machine_ip_address,mouse_id=self.ID.text())
+        if self.StartEphysRecording.isChecked():
+            try:
+                if EphysControl.get_status()['mode']=='RECORD':
+                    QMessageBox.warning(self, '', 'Open Ephys is already recording! Please stop the recording first.')
+                    self.StartEphysRecording.setChecked(False)
+                    self._toggle_color(self.StartEphysRecording)
+                    return
+                EphysControl.start_open_ephys_recording()
+                self.openephys_start_recording_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+                QMessageBox.warning(self, '', f'Open Ephys has started recording!\n Recording type: {self.OpenEphysRecordingType.currentText()}')
+            except Exception as e:
+                logging.error(str(e))
+                self.StartEphysRecording.setChecked(False)
+                QMessageBox.warning(self, 'Connection Error', 'Failed to connect to Open Ephys. Please check: \n1) the correct ip address is included in the settings json file. \n2) the Open Ephys software is open.')                            
+        else:
+            try:
+                if EphysControl.get_status()['mode']!='RECORD':
+                    QMessageBox.warning(self, '', 'Open Ephys is not recording! Please start the recording first.')
+                    self.StartEphysRecording.setChecked(False)
+                    self._toggle_color(self.StartEphysRecording)
+                    return
+                
+                if  self.Start.isChecked() or self.ANewTrial==0:
+                    reply = QMessageBox.question(self,  '','The behavior hasn’t stopped yet! Do you want to stop ephys recording?', QMessageBox.No | QMessageBox.No, QMessageBox.Yes)
+                    if reply == QMessageBox.Yes:
+                        pass
+                    elif reply == QMessageBox.No:
+                        self.StartEphysRecording.setChecked(True)
+                        self._toggle_color(self.StartEphysRecording)
+                        return
+                    
+                self.openephys_stop_recording_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+                response=EphysControl.get_open_ephys_recording_configuration()
+                response['openephys_start_recording_time']=self.openephys_start_recording_time
+                response['openephys_stop_recording_time']=self.openephys_stop_recording_time
+                response['recording_type']=self.OpenEphysRecordingType.currentText()
+                self.open_ephys.append(response)
+                self.unsaved_data=True
+                self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
+                EphysControl.stop_open_ephys_recording()
+                QMessageBox.warning(self, '', 'Open Ephys has stopped recording! Please save the data again!')
+            except Exception as e:
+                logging.error(str(e))
+                QMessageBox.warning(self, 'Connection Error', 'Failed to stop Open Ephys recording. Please check: \n1) the open ephys software is still running')
+        self._toggle_color(self.StartEphysRecording)
+
+    def _toggle_color(self,widget,check_color="background-color : green;",unchecked_color="background-color : none"):
+        '''
+        Toggle the color of the widget.
+
+        Parameters
+        ----------
+        widget : QtWidgets.QWidget
+
+            If Checked, sets the color to green. If unchecked, sets the color to None.
+
+        Returns
+        -------
+        None
+        '''
+
+
+        if widget.isChecked():
+            widget.setStyleSheet(check_color)
+        else:
+            widget.setStyleSheet(unchecked_color)
+
+    def _manage_warning_labels(self,warning_labels,warning_text=''):
+        '''
+            Manage the warning labels. 
+
+            If there is a warning, set the color to self.default_warning_color. If there is no warning, set the text to ''. 
+        Parameters
+        ----------
+        warning_label : single QtWidgets.QLabel or list of QtWidgets.QLabel
+            The warning label to manage
+        warning_text : str
+            The warning text to display
+        Returns
+        -------
+        None
+        '''
+        if not isinstance(warning_labels,list):
+            warning_labels = [warning_labels]
+        for warning_label in warning_labels:
+            warning_label.setText(warning_text)
+            warning_label.setStyleSheet(self.default_warning_color)
+
     def _session_list(self):
         '''show all sessions of the current animal and load the selected session by drop down list'''
         if not hasattr(self,'fname'):
@@ -812,7 +922,8 @@ class Window(QMainWindow):
             'newscale_serial_num_box3':'',
             'newscale_serial_num_box4':'',
             'show_log_info_in_console':False,
-            'default_ui':'ForagingGUI.ui'
+            'default_ui':'ForagingGUI.ui',
+            'open_ephys_machine_ip_address':''
         }
         
         # Try to load Settings_box#.csv
@@ -869,6 +980,7 @@ class Window(QMainWindow):
         self.newscale_serial_num_box3=self.Settings['newscale_serial_num_box3']
         self.newscale_serial_num_box4=self.Settings['newscale_serial_num_box4']
         self.default_ui=self.Settings['default_ui']
+        self.open_ephys_machine_ip_address=self.Settings['open_ephys_machine_ip_address']
 
         # Also stream log info to the console if enabled
         if  self.Settings['show_log_info_in_console']:
@@ -2047,7 +2159,9 @@ class Window(QMainWindow):
         Obj['PhotometryFolder']=self.PhotometryFolder
         Obj['MetadataFolder']=self.MetadataFolder
         
-        # only run once for each session
+        # save the open ephys recording information
+        Obj['open_ephys'] = self.open_ephys
+        
         if SaveContinue==0:
             # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
             self.unsaved_data=False 
@@ -2092,7 +2206,10 @@ class Window(QMainWindow):
         contents = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         with open(filepath, 'w') as finished_file:
             finished_file.write(contents)
-        
+        if self.StartEphysRecording.isChecked():
+            QMessageBox.warning(self, '', 'Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!')
+            self.unsaved_data=True
+            self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
 
     def _GetSaveFolder(self):
         '''
