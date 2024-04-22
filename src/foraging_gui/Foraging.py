@@ -91,7 +91,8 @@ class Window(QMainWindow):
         self.UpdateParameters = 1   # permission to update parameters
         self.loggingstarted = -1    # Have we started trial logging
         self.unsaved_data = False   # Setting unsaved data to False 
- 
+        self.to_check_drop_frames = 1 # 1, to check drop frames during saving data; 0, not to check drop frames 
+
         # Connect to Bonsai
         self._InitializeBonsai()
 
@@ -441,74 +442,77 @@ class Window(QMainWindow):
 
     def _check_drop_frames(self,save_tag=1):
         '''check if there are any drop frames in the video'''
-        return_tag=0
-        if save_tag==0:
-            if "drop_frames_warning_text" in self.Obj:
-                self.drop_frames_warning_text=self.Obj['drop_frames_warning_text']
-                self.drop_frames_tag=self.Obj['drop_frames_tag']
-                self.trigger_length=self.Obj['trigger_length']
-                self.frame_num=self.Obj['frame_num']
-                return_tag=1
-        if return_tag==0:
-            self.drop_frames_tag=0
-            self.trigger_length=0
-            self.drop_frames_warning_text = ''
-            self.frame_num={}
-            use_default_folder_structure=0
-            if save_tag==1:
-                # check the drop frames of the current session
-                if hasattr(self,'HarpFolder'):
-                    HarpFolder=self.HarpFolder
-                    video_folder=self.VideoFolder
-                else:
-                    use_default_folder_structure=1
-            elif save_tag==0:
-                if 'HarpFolder' in self.Obj:
-                    # check the drop frames of the loaded session
-                    HarpFolder=self.Obj['HarpFolder']
-                    video_folder=self.Obj['VideoFolder']
-                else:
-                    use_default_folder_structure=1
-            if use_default_folder_structure:
-                # use the default folder structure
-                HarpFolder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'HarpFolder')# old folder structure
-                video_folder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'VideoFolder') # old folder structure
-                if not os.path.exists(HarpFolder):
-                    HarpFolder=os.path.join(os.path.dirname(self.fname),'raw.harp')# new folder structure
-                    video_folder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'behavior-videos') # new folder structure
-
-            camera_trigger_file=os.path.join(HarpFolder,'BehaviorEvents','Event_94.bin')
-            if os.path.exists(camera_trigger_file):
-                # sleep some time to wait for the finish of saving video
-                time.sleep(5)
-                triggers = harp.read(camera_trigger_file)
-                self.trigger_length = len(triggers)
-            else:
+        if self.to_check_drop_frames==1:
+            return_tag=0
+            if save_tag==0:
+                if "drop_frames_warning_text" in self.Obj:
+                    self.drop_frames_warning_text=self.Obj['drop_frames_warning_text']
+                    self.drop_frames_tag=self.Obj['drop_frames_tag']
+                    self.trigger_length=self.Obj['trigger_length']
+                    self.frame_num=self.Obj['frame_num']
+                    return_tag=1
+            if return_tag==0:
+                self.drop_frames_tag=0
                 self.trigger_length=0
-                self.WarningLabelCamera.setText('No camera trigger file found!')
-                self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
-                return
-            csv_files = [file for file in os.listdir(video_folder) if file.endswith(".csv")]
-            avi_files = [file for file in os.listdir(video_folder) if file.endswith(".avi")]
-
-            for avi_file in avi_files:
-                csv_file = avi_file.replace('.avi', '.csv')
-                if csv_file not in csv_files:
-                    self.drop_frames_warning_text+=f'No csv file found for {avi_file}\n'
-                else:
-                    current_frames = pd.read_csv(os.path.join(video_folder, csv_file), header=None)
-                    num_frames = len(current_frames)
-                    if num_frames != self.trigger_length:
-                        self.drop_frames_warning_text+=f"Error: {avi_file} has {num_frames} frames, but {self.trigger_length} triggers\n"
-                        self.drop_frames_tag=1
+                self.drop_frames_warning_text = ''
+                self.frame_num={}
+                use_default_folder_structure=0
+                if save_tag==1:
+                    # check the drop frames of the current session
+                    if hasattr(self,'HarpFolder'):
+                        HarpFolder=self.HarpFolder
+                        video_folder=self.VideoFolder
                     else:
-                        self.drop_frames_warning_text+=f"Correct: {avi_file} has {num_frames} frames and {self.trigger_length} triggers\n"
-                    self.frame_num[csv_file] = num_frames
-        self.WarningLabelCamera.setText(self.drop_frames_warning_text)
-        if self.drop_frames_tag:
-            self.WarningLabelCamera.setStyleSheet("color: red;")
-        else:
-            self.WarningLabelCamera.setStyleSheet("color: green;")  
+                        use_default_folder_structure=1
+                elif save_tag==0:
+                    if 'HarpFolder' in self.Obj:
+                        # check the drop frames of the loaded session
+                        HarpFolder=self.Obj['HarpFolder']
+                        video_folder=self.Obj['VideoFolder']
+                    else:
+                        use_default_folder_structure=1
+                if use_default_folder_structure:
+                    # use the default folder structure
+                    HarpFolder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'HarpFolder')# old folder structure
+                    video_folder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'VideoFolder') # old folder structure
+                    if not os.path.exists(HarpFolder):
+                        HarpFolder=os.path.join(os.path.dirname(self.fname),'raw.harp')# new folder structure
+                        video_folder=os.path.join(os.path.dirname(os.path.dirname(self.fname)),'behavior-videos') # new folder structure
+
+                camera_trigger_file=os.path.join(HarpFolder,'BehaviorEvents','Event_94.bin')
+                if os.path.exists(camera_trigger_file):
+                    # sleep some time to wait for the finish of saving video
+                    time.sleep(5)
+                    triggers = harp.read(camera_trigger_file)
+                    self.trigger_length = len(triggers)
+                else:
+                    self.trigger_length=0
+                    self.WarningLabelCamera.setText('No camera trigger file found!')
+                    self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
+                    return
+                csv_files = [file for file in os.listdir(video_folder) if file.endswith(".csv")]
+                avi_files = [file for file in os.listdir(video_folder) if file.endswith(".avi")]
+
+                for avi_file in avi_files:
+                    csv_file = avi_file.replace('.avi', '.csv')
+                    if csv_file not in csv_files:
+                        self.drop_frames_warning_text+=f'No csv file found for {avi_file}\n'
+                    else:
+                        current_frames = pd.read_csv(os.path.join(video_folder, csv_file), header=None)
+                        num_frames = len(current_frames)
+                        if num_frames != self.trigger_length:
+                            self.drop_frames_warning_text+=f"Error: {avi_file} has {num_frames} frames, but {self.trigger_length} triggers\n"
+                            self.drop_frames_tag=1
+                        else:
+                            self.drop_frames_warning_text+=f"Correct: {avi_file} has {num_frames} frames and {self.trigger_length} triggers\n"
+                        self.frame_num[csv_file] = num_frames
+            self.WarningLabelCamera.setText(self.drop_frames_warning_text)
+            if self.drop_frames_tag:
+                self.WarningLabelCamera.setStyleSheet("color: red;")
+            else:
+                self.WarningLabelCamera.setStyleSheet("color: green;")  
+            # only check drop frames once each session
+            self.to_check_drop_frames=0
 
     def _warmup(self):
         '''warm up the session before starting.
@@ -2157,15 +2161,17 @@ class Window(QMainWindow):
         
         # save the open ephys recording information
         Obj['open_ephys'] = self.open_ephys
-
+        
         if SaveContinue==0:
             # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
             self.unsaved_data=False 
             self._NewSession()
+            self.unsaved_data=True
             # do not create a new folder
             self.CreateNewFolder=0
-        # check drop of frames
+        
         self._check_drop_frames(save_tag=1)
+
         # save drop frames information
         Obj['drop_frames_tag']=self.drop_frames_tag
         Obj['trigger_length']=self.trigger_length
@@ -2637,6 +2643,7 @@ class Window(QMainWindow):
                 self.SessionlistSpin.setValue(Ind+1)
                 self._connect_Sessionlist(connect=True)
             # check dropping frames
+            self.to_check_drop_frames=1
             self._check_drop_frames(save_tag=0)
         else:
             self.NewSession.setDisabled(False)
@@ -3052,6 +3059,9 @@ class Window(QMainWindow):
             self.Start.setChecked(False)
             self.Start.setStyleSheet('background-color:none;')
             return
+        
+        # set the flag to check drop frames
+        self.to_check_drop_frames=1
         
         # clear the session list
         self._connect_Sessionlist(connect=False)
@@ -3527,7 +3537,6 @@ class Window(QMainWindow):
         self.unsaved_data=True
         self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
         self.NewSession.setStyleSheet("background-color : none")
-        self.NewSession.setChecked(False)
         self.WarningLabel.setText('')
         self._UpdateSuggestedWater()
 
