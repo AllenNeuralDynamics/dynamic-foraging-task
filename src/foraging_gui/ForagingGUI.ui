@@ -4890,6 +4890,11 @@ Current pair:
                         </item>
                         <item>
                          <property name="text">
+                          <string>Opto tagging</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
                           <string>Testing</string>
                          </property>
                         </item>
