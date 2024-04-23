@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox 
-from PyQt5.QtWidgets import QLabel, QDialogButtonBox
+from PyQt5.QtWidgets import QLabel, QDialogButtonBox,QFileDialog
 from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject, QEvent
 from PyQt5.QtSvg import QSvgWidget
@@ -1699,7 +1699,34 @@ class MetadataDialog(QDialog):
         super().__init__(parent)
         uic.loadUi('MetaData.ui', self)
         self.MainWindow = MainWindow
+        self._connectSignalsSlots()
 
+    def _connectSignalsSlots(self):
+        self.SelectRigMetadata.clicked.connect(lambda: self._SelectRigMetadata(rig_metadata_file=None))
+
+
+    def _SelectRigMetadata(self,rig_metadata_file=None):
+        '''Select the rig metadata file and load it
+        Parameters
+        ----------
+        rig_metadata_file : str
+            The rig metadata file path
+        
+        Returns
+        -------
+        None
+        '''
+        if rig_metadata_file is None:
+            rig_metadata_file, _ = QFileDialog.getOpenFileName(
+                self,
+                "Select Rig Metadata File",
+                "",
+                "JSON Files (*.json)"
+            )
+        if rig_metadata_file:
+            with open(rig_metadata_file, 'r') as file:
+            rig_metadata = json.load(file)
+            
 
 class AutoTrainDialog(QDialog):
     '''For automatic training'''
