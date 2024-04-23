@@ -197,7 +197,7 @@ p, li { white-space: pre-wrap; }
     <string/>
    </property>
   </widget>
-  <widget class="QLineEdit" name="RigMetadata">
+  <widget class="QLineEdit" name="RigMetadataFile">
    <property name="enabled">
     <bool>false</bool>
    </property>
