@@ -1704,10 +1704,15 @@ class MetadataDialog(QDialog):
     def _connectSignalsSlots(self):
         self.SelectRigMetadata.clicked.connect(lambda: self._SelectRigMetadata(rig_metadata_file=None))
         self.EphysProbes.currentIndexChanged.connect(self._EphysProbe)
-        self.EphysProbes.activated.connect(self._EphysProbe)
+        self.EphysProbes.activated.connect(self._ephys_probes)
+        self.ArcAngle.textChanged.connect(self._save_angle)
+        self.ModuleAngle.textChanged.connect(self._save_angle)
 
+    def _save_angle(self):
+        '''save the angles'''
+        pass
 
-    def _EphysProbe(self):
+    def _ephys_probes(self):
         '''
         '''
         pass
