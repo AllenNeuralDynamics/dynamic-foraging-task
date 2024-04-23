@@ -1692,6 +1692,15 @@ def initialize_dic(dic_name,key_list=[]):
     initialize_dic(dic_name[key],key_list=key_list_new)
     return dic_name
 
+
+class MetadataDialog(QDialog):
+    '''For adding metadata to the session'''
+    def __init__(self, MainWindow, parent=None):
+        super().__init__(parent)
+        uic.loadUi('MetaData.ui', self)
+        self.MainWindow = MainWindow
+
+
 class AutoTrainDialog(QDialog):
     '''For automatic training'''
 

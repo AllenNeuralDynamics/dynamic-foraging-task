@@ -25,7 +25,7 @@ import webbrowser
 
 import foraging_gui.rigcontrol as rigcontrol
 from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
-from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog
+from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,MetadataDialog
 from foraging_gui.Dialogs import LaserCalibrationDialog
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
@@ -1887,6 +1887,16 @@ class Window(QMainWindow):
             self.Camera_dialog.show()
         else:
             self.Camera_dialog.hide()
+
+    def _Metadata(self):
+        '''Open the metadata dialog'''
+        if self.Metadata==0:
+            self.Metadata_dialog = MetadataDialog(MainWindow=self)
+            self.Metadata=1
+        if self.action_Metadata.isChecked()==True:
+            self.Metadata_dialog.show()
+        else:
+            self.Metadata_dialog.hide()
 
     def _WaterCalibration(self):
         if self.WaterCalibration==0:
