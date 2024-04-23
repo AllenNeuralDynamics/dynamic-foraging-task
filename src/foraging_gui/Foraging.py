@@ -108,7 +108,8 @@ class Window(QMainWindow):
         self.OpenOptogenetics=0
         self.WaterCalibration=0
         self.LaserCalibration=0
-        self.Camera=0
+        self.OpenCamera=0
+        self.OpenMetadata=0
         self.NewTrialRewardOrder=0
         self.LickSta=0
         self.LickSta_ToInitializeVisual=1
@@ -174,6 +175,7 @@ class Window(QMainWindow):
         '''Define callbacks'''
         self.action_About.triggered.connect(self._about)
         self.action_Camera.triggered.connect(self._Camera)
+        self.actionMeta_Data.triggered.connect(self._Metadata)
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
         self.actionLicks_sta.triggered.connect(self._LickSta)
         self.actionTime_distribution.triggered.connect(self._TimeDistribution)
@@ -1880,9 +1882,9 @@ class Window(QMainWindow):
 
     def _Camera(self):
         '''Open the camera. It's not available now'''
-        if self.Camera==0:
+        if self.OpenCamera==0:
             self.Camera_dialog = CameraDialog(MainWindow=self)
-            self.Camera=1
+            self.OpenCamera=1
         if self.action_Camera.isChecked()==True:
             self.Camera_dialog.show()
         else:
@@ -1890,9 +1892,9 @@ class Window(QMainWindow):
 
     def _Metadata(self):
         '''Open the metadata dialog'''
-        if self.Metadata==0:
+        if self.OpenMetadata==0:
             self.Metadata_dialog = MetadataDialog(MainWindow=self)
-            self.Metadata=1
+            self.OpenMetadata=1
         if self.action_Metadata.isChecked()==True:
             self.Metadata_dialog.show()
         else:
