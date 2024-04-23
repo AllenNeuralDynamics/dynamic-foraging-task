@@ -1895,7 +1895,7 @@ class Window(QMainWindow):
         if self.OpenMetadata==0:
             self.Metadata_dialog = MetadataDialog(MainWindow=self)
             self.OpenMetadata=1
-        if self.action_Metadata.isChecked()==True:
+        if self.actionMeta_Data.isChecked()==True:
             self.Metadata_dialog.show()
         else:
             self.Metadata_dialog.hide()
