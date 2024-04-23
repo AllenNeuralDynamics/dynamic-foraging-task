@@ -2482,7 +2482,7 @@ class Window(QMainWindow):
                 Obj = json.loads(f.read())
                 f.close()
             self.Obj = Obj
-            
+
             widget_dict={}
             dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','Metadata_dialog','centralwidget','TrainingParameters']
             for dialog_name in dialogs:
@@ -2501,6 +2501,8 @@ class Window(QMainWindow):
                             CurrentObj=Obj['Camera_dialog']
                         elif widget.parent().objectName()=='CalibrationLaser':
                             CurrentObj=Obj['LaserCalibration_dialog']
+                        elif widget.parent().objectName()=='MetaData':
+                            CurrentObj=Obj['Metadata_dialog']
                         else:
                             CurrentObj=Obj.copy()
                     except Exception as e:
