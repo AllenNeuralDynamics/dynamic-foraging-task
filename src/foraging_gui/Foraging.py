@@ -2488,17 +2488,14 @@ class Window(QMainWindow):
             widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
             widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((
                 QtWidgets.QLineEdit, QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox))})  # update optogenetics parameters from the loaded file
-            if hasattr(self, 'LaserCalibration_dialog'):
-                widget_dict.update({w.objectName(): w for w in self.LaserCalibration_dialog.findChildren((
-                    QtWidgets.QLineEdit, QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox))})  
-            if hasattr(self, 'Opto_dialog'):
-                widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((
-                    QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
-                    QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox))})
-            if hasattr(self, 'Camera_dialog'):
-                widget_dict.update({w.objectName(): w for w in self.Camera_dialog.findChildren((
-                    QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
-                    QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox))})
+            
+            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','Metadata_dialog']
+            for dialog_name in dialogs:
+                if hasattr(self, dialog_name):
+                    widget_types = (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit,
+                                    QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox)
+                    widget_dict.update({w.objectName(): w for w in getattr(self, dialog_name).findChildren(widget_types)})
+
             try:
                 for key in widget_dict.keys():
                     try:
