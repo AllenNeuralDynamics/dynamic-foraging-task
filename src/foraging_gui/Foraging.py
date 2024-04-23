@@ -106,8 +106,8 @@ class Window(QMainWindow):
 
         # Set up more parameters
         self.OpenOptogenetics=0
-        self.WaterCalibration=0
-        self.LaserCalibration=0
+        self.OpenWaterCalibration=0
+        self.OpenLaserCalibration=0
         self.OpenCamera=0
         self.OpenMetadata=0
         self.NewTrialRewardOrder=0
@@ -1901,18 +1901,18 @@ class Window(QMainWindow):
             self.Metadata_dialog.hide()
 
     def _WaterCalibration(self):
-        if self.WaterCalibration==0:
+        if self.OpenWaterCalibration==0:
             self.WaterCalibration_dialog = WaterCalibrationDialog(MainWindow=self)
-            self.WaterCalibration=1
+            self.OpenWaterCalibration=1
         if self.action_Calibration.isChecked()==True:
             self.WaterCalibration_dialog.show()
         else:
             self.WaterCalibration_dialog.hide()
 
     def _LaserCalibration(self):
-        if self.LaserCalibration==0:
+        if self.OpenLaserCalibration==0:
             self.LaserCalibration_dialog = LaserCalibrationDialog(MainWindow=self)
-            self.LaserCalibration=1
+            self.OpenLaserCalibration=1
         if self.actionLaser_Calibration.isChecked()==True:
             self.LaserCalibration_dialog.show()
         else:
