@@ -948,6 +948,8 @@ class CameraDialog(QDialog):
         
         self.MainWindow=MainWindow
         self._connectSignalsSlots()
+        self.camera_start_time=''
+        self.camera_stop_time=''
     def _connectSignalsSlots(self):
         self.StartCamera.clicked.connect(self._StartCamera)
         self.ClearTemporaryVideo.clicked.connect(self._ClearTemporaryVideo)
@@ -1067,6 +1069,7 @@ class CameraDialog(QDialog):
             # start the video triggers
             self.MainWindow.Channel.CameraControl(int(1))
             time.sleep(5)
+            self.camera_start_time = str(datetime.now())
             self.MainWindow.WarningLabelCamera.setText('Camera is on!')
             self.MainWindow.WarningLabelCamera.setStyleSheet(self.MainWindow.default_warning_color)
             self.WarningLabelCameraOn.setText('Camera is on!')
@@ -1077,6 +1080,7 @@ class CameraDialog(QDialog):
         else:
             self.StartCamera.setStyleSheet("background-color : none")
             self.MainWindow.Channel.CameraControl(int(2))
+            self.camera_stop_time = str(datetime.now())
             time.sleep(2)
             self.MainWindow.WarningLabelCamera.setText('Camera is off!')
             self.MainWindow.WarningLabelCamera.setStyleSheet(self.MainWindow.default_warning_color)
