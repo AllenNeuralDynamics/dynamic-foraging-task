@@ -250,12 +250,12 @@ class Window(QMainWindow):
         self.SessionlistSpin.textChanged.connect(self._session_list_spin)
         self.StartEphysRecording.clicked.connect(self._StartEphysRecording)
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
-        for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
+        for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):        
                 child.textChanged.connect(self._CheckTextChange)
         # Opto_dialog can not detect natural enter press, so returnPressed is used here. 
-        for container in [self.Opto_dialog]:
+        for container in [self.Opto_dialog,self.Metadata_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit)):        
                 child.returnPressed.connect(self.keyPressEvent)
