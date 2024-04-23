@@ -122,6 +122,7 @@ class Window(QMainWindow):
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
         self._Camera()
+        self._Metadata()
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self.WaterPerRewardedTrial=0.005 
         self._ShowRewardPairs() # show reward pairs
