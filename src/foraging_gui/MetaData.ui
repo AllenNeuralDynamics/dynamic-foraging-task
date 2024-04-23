@@ -243,7 +243,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>534</x>
      <y>130</y>
-     <width>111</width>
+     <width>121</width>
      <height>20</height>
     </rect>
    </property>
@@ -252,6 +252,9 @@ p, li { white-space: pre-wrap; }
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
+   </property>
+   <property name="statusTip">
+    <string notr="true"/>
    </property>
    <property name="editable">
     <bool>false</bool>
@@ -263,7 +266,7 @@ p, li { white-space: pre-wrap; }
     <number>36</number>
    </property>
    <property name="sizeAdjustPolicy">
-    <enum>QComboBox::AdjustToContents</enum>
+    <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
    </property>
    <item>
     <property name="text">
