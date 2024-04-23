@@ -4642,7 +4642,7 @@ Current pair:
                <widget class="QWidget" name="scrollAreaWidgetContents_5">
                 <property name="geometry">
                  <rect>
-                  <x>-95</x>
+                  <x>0</x>
                   <y>0</y>
                   <width>722</width>
                   <height>308</height>
@@ -4994,9 +4994,11 @@ Current pair:
     </widget>
     <addaction name="action_Calibration"/>
     <addaction name="actionLaser_Calibration"/>
+    <addaction name="actionMeta_Data"/>
     <addaction name="separator"/>
     <addaction name="menuSimulation"/>
     <addaction name="actionDrawing_after_stopping"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="sizePolicy">
@@ -5115,7 +5117,9 @@ Current pair:
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="action_Camera"/>
+   <addaction name="action_Calibration"/>
+   <addaction name="actionLaser_Calibration"/>
+   <addaction name="actionMeta_Data"/>
   </widget>
   <widget class="QToolBar" name="toolBar_3">
    <property name="sizePolicy">
@@ -5133,9 +5137,8 @@ Current pair:
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="action_Calibration"/>
    <addaction name="action_Optogenetics"/>
-   <addaction name="actionLaser_Calibration"/>
+   <addaction name="action_Camera"/>
   </widget>
   <action name="action_Calibration">
    <property name="checkable">
@@ -5356,6 +5359,15 @@ Current pair:
   <action name="Save_continue">
    <property name="text">
     <string>Save (without starting a new session)</string>
+   </property>
+  </action>
+  <action name="actionMeta_Data">
+   <property name="icon">
+    <iconset>
+     <normaloff>resources/metadata.png</normaloff>resources/metadata.png</iconset>
+   </property>
+   <property name="text">
+    <string>Meta Data</string>
    </property>
   </action>
  </widget>
