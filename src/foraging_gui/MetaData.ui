@@ -166,7 +166,7 @@ p, li { white-space: pre-wrap; }
     </sizepolicy>
    </property>
    <property name="text">
-    <string>Protocol ID:</string>
+    <string>Protocols.io ID:</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
