@@ -1862,6 +1862,9 @@ class Window(QMainWindow):
             self.client3.close()
             self.client4.close()
         self.Opto_dialog.close()
+        self.Metadata_dialog.close()
+        self.Camera_dialog.close()
+        self.LaserCalibration_dialog.close()
         self._StopPhotometry()  # Make sure photo excitation is stopped 
         print('GUI Window closed')
         logging.info('GUI Window closed') 
