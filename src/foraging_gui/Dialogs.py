@@ -1700,6 +1700,9 @@ class MetadataDialog(QDialog):
         uic.loadUi('MetaData.ui', self)
         self.MainWindow = MainWindow
         self._connectSignalsSlots()
+        self.meta_data = {}
+        self.meta_data['rig_metadata'] = {}
+        self.meta_data['session_metadata'] = {}
 
     def _connectSignalsSlots(self):
         self.SelectRigMetadata.clicked.connect(lambda: self._SelectRigMetadata(rig_metadata_file=None))
@@ -1710,21 +1713,38 @@ class MetadataDialog(QDialog):
 
     def _save_angle(self):
         '''save the angles'''
-        pass
+        
+        current_probe=self.EphysProbes.currentText()
+        self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=[current_probe,'ArcAngle'])
+        self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=[current_probe,'ModuleAngle'])
+
+        self.meta_data['session_metadata'][current_probe]['ArcAngle']=self.ArcAngle.text()
+        self.meta_data['session_metadata'][current_probe]['ModuleAngle']=self.ModuleAngle.text()
 
     def _ephys_probes(self):
         '''
+        show the angles of the selected ephys probe
         '''
-        pass
+        current_probe=self.EphysProbes.currentText()
+        if current_probe=='':
+            return
+        self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=[current_probe])
+        self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=[current_probe])
+        if 'ArcAngle' not in self.meta_data['session_metadata'][current_probe]:
+            self.meta_data['session_metadata'][current_probe]['ArcAngle']=''
+        if 'ModuleAngle' not in self.meta_data['session_metadata'][current_probe]:
+            self.meta_data['session_metadata'][current_probe]['ModuleAngle']=''
+        self.ArcAngle.setText(self.meta_data['session_metadata'][current_probe]['ArcAngle'])
+        self.ModuleAngle.setText(self.meta_data['session_metadata'][current_probe]['ModuleAngle'])
 
     def _show_ephys_probes(self):
         '''setting the ephys probes from the rig metadata'''
-        if not hasattr(self,'rig_metadata'):
+        if self.meta_data['rig_metadata'] is {}:
             return
         items=[]
-        if 'ephys_assemblies' in self.rig_metadata:
-            for i in range(len(self.rig_metadata['ephys_assemblies'])):
-                items.append(self.rig_metadata['ephys_assemblies'][i]['probes'][0]['name'])
+        if 'ephys_assemblies' in self.meta_data['rig_metadata']:
+            for i in range(len(self.meta_data['rig_metadata']['ephys_assemblies'])):
+                items.append(self.meta_data['rig_metadata']['ephys_assemblies'][i]['probes'][0]['name'])
         if items==[]:
             return
         self.EphysProbes.clear()
@@ -1749,12 +1769,10 @@ class MetadataDialog(QDialog):
                 "",
                 "JSON Files (*.json)"
             )
-        self.rig_metadata_file = rig_metadata_file
+        self.meta_data['rig_metadata_file'] = rig_metadata_file
         if os.path.exists(rig_metadata_file):
             with open(rig_metadata_file, 'r') as file:
-                self.rig_metadata = json.load(file)
-        else:
-            self.rig_metadata = {}
+                self.meta_data['rig_metadata'] = json.load(file)
 
         # Update the text box
         self.RigMetadataFile.setText(os.path.basename(rig_metadata_file))
