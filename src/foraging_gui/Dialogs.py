@@ -1706,16 +1706,25 @@ class MetadataDialog(QDialog):
         self.EphysProbes.currentIndexChanged.connect(self._EphysProbe)
         self.EphysProbes.activated.connect(self._EphysProbe)
 
+
     def _EphysProbe(self):
+        '''
+        '''
+        pass
+
+    def _show_ephys_probes(self):
         '''setting the ephys probes from the rig metadata'''
+        if not hasattr(self,'rig_metadata'):
+            return
         items=[]
         if 'ephys_assemblies' in self.rig_metadata:
             for i in range(len(self.rig_metadata['ephys_assemblies'])):
                 items.append(self.rig_metadata['ephys_assemblies'][i]['probes'][0]['name'])
-                self.EphysProbes.clear()
-                self.EphysProbes.addItem(items)
-        else:
-            return 
+        if items==[]:
+            return
+        self.EphysProbes.clear()
+        self.EphysProbes.addItems(items)
+
 
     def _SelectRigMetadata(self,rig_metadata_file=None):
         '''Select the rig metadata file and load it
@@ -1745,7 +1754,7 @@ class MetadataDialog(QDialog):
         # Update the text box
         self.RigMetadataFile.setText(os.path.basename(rig_metadata_file))
         # load ephys probes from the rig metadata
-        self._EphysProbe()    
+        self._show_ephys_probes()    
 
 class AutoTrainDialog(QDialog):
     '''For automatic training'''
