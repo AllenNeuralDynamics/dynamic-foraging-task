@@ -183,6 +183,8 @@ class GenerateTrials():
         self.GeneFinish=1
     def _PerformOptogenetics(self,Channel4):
         '''Optogenetics section to generate optogenetics parameters and send waveform to Bonsai'''
+        control_trial=0
+        self.opto_error_tag=0
         try:
             if self.TP_OptogeneticsB=='on': # optogenetics is turned on
                 # select the current optogenetics condition
@@ -197,34 +199,26 @@ class GenerateTrials():
                     self.B_SelectedCondition.append(self.SelctedCondition)
                 else:
                     # this is the control trial
-                    self.LaserOn=0
-                    self.B_LaserOnTrial.append(self.LaserOn) 
-                    self.B_LaserAmplitude.append([0,0])
-                    self.B_LaserDuration.append(0)
-                    self.B_SelectedCondition.append(0)
-                    self.CurrentLaserAmplitude=[0,0]
+                    control_trial=1
             else:
                 # optogenetics is turned off
-                self.LaserOn=0
-                self.B_LaserOnTrial.append(self.LaserOn)
-                self.B_LaserAmplitude.append([0,0])
-                self.B_LaserDuration.append(0)
-                self.B_SelectedCondition.append(0)
-                self.CurrentLaserAmplitude=[0,0]
+                control_trial=1
                 self.B_session_control_state.append(0)
-            self.B_opto_error.append(0)
+            self.B_opto_error.append(self.opto_error_tag)
         except Exception as e:
             # optogenetics is turned off
+            control_trial=1
             self.B_opto_error.append(1)
-            self.LaserOn=0
-            self.B_LaserOnTrial.append(self.LaserOn)
-            self.B_LaserAmplitude.append([0,0]) # corresponding to two locations
-            self.B_LaserDuration.append(0) # corresponding to two locations
-            self.B_SelectedCondition.append(0)
-            self.CurrentLaserAmplitude=[0,0]
             self.B_session_control_state.append(0)
             # Catch the exception and print error information
             logging.error(str(e))
+        if control_trial==1:
+            self.LaserOn=0
+            self.B_LaserOnTrial.append(self.LaserOn)
+            self.B_LaserAmplitude.append([0,0])
+            self.B_LaserDuration.append(0)
+            self.B_SelectedCondition.append(0)
+            self.CurrentLaserAmplitude=[0,0]
 
     def _CheckSessionControl(self):
         '''Check if the session control is on'''
@@ -1174,20 +1168,20 @@ class GenerateTrials():
         '''Get the waveform of the laser. It dependens on color/duration/protocol(frequency/RD/pulse duration)/locations/laser power'''
         N=self.SelctedCondition
         # CLP, current laser parameter
-        self.CLP_Color=eval('self.TP_Laser_'+N)
-        self.CLP_Location=eval('self.TP_Location_'+N)
-        self.CLP_LaserPowerLeft=eval('self.TP_LaserPowerLeft_'+N)
-        self.CLP_LaserPowerRight=eval('self.TP_LaserPowerRight_'+N)
-        self.CLP_Duration=float(eval('self.TP_Duration_'+N))
-        self.CLP_Protocol=eval('self.TP_Protocol_'+N)
+        self.CLP_Color=getattr(self,f"TP_LaserColor_{N}")
+        self.CLP_Location=getattr(self,f"TP_Location_{N}")
+        self.CLP_Laser1Power=getattr(self,f"TP_Laser1_power_{N}")
+        self.CLP_Laser2Power=getattr(self,f"TP_Laser2_power_{N}")
+        self.CLP_Duration=float(getattr(self,f"TP_Duration_{N}"))
+        self.CLP_Protocol=getattr(self,f"TP_Protocol_{N}")
         if not self.CLP_Protocol=='Constant':
-            self.CLP_Frequency=float(eval('self.TP_Frequency_'+N))
-        self.CLP_RampingDown=float(eval('self.TP_RD_'+N))
-        self.CLP_PulseDur=eval('self.TP_PulseDur_'+N)
-        self.CLP_LaserStart=eval('self.TP_LaserStart_'+N)
-        self.CLP_OffsetStart=float(eval('self.TP_OffsetStart_'+N))
-        self.CLP_LaserEnd=eval('self.TP_LaserEnd_'+N)
-        self.CLP_OffsetEnd=float(eval('self.TP_OffsetEnd_'+N)) # negative, backward; positive forward
+            self.CLP_Frequency=float(getattr(self,f"TP_Frequency_{N}"))
+        self.CLP_RampingDown=float(getattr(self,f"TP_RD_{N}"))
+        self.CLP_PulseDur=getattr(self,f"TP_PulseDur_{N}")
+        self.CLP_LaserStart=getattr(self,f"TP_LaserStart_{N}")
+        self.CLP_OffsetStart=float(getattr(self,f"TP_OffsetStart_{N}"))
+        self.CLP_LaserEnd=getattr(self,f"TP_LaserEnd_{N}")
+        self.CLP_OffsetEnd=float(getattr(self,f"TP_OffsetEnd_{N}"))# negative, backward; positive forward
         self.CLP_SampleFrequency=float(self.TP_SampleFrequency)
         # align to trial start
         if (self.CLP_LaserStart=='Trial start' or self.CLP_LaserStart=='Go cue' or self.CLP_LaserStart=='Reward outcome') and self.CLP_LaserEnd=='NA':
@@ -1225,20 +1219,9 @@ class GenerateTrials():
             length = np.pi * 2 * cycles
             self.my_wave = Amplitude*(1+np.sin(np.arange(0+1.5*math.pi, length+1.5*math.pi, length / resolution)))/2
             # add ramping down
-            if self.CLP_RampingDown>0:
-                if self.CLP_RampingDown>self.CLP_CurrentDuration:
-                    self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
-                    self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
-                else:
-                    Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
-                    RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
-                    RampingDown = np.concatenate((Constant, RD), axis=0)
-                    self.my_wave=self.my_wave*RampingDown
+            self._get_ramping_down()
             # add offset
-            if self.CLP_OffsetStart>0:
-                OffsetPoints=int(self.CLP_SampleFrequency*self.CLP_OffsetStart)
-                Offset=np.zeros(OffsetPoints)
-                self.my_wave=np.concatenate((Offset,self.my_wave),axis=0)
+            self._add_offset()
             self.my_wave=np.append(self.my_wave,[0,0])
 
         elif self.CLP_Protocol=='Pulse':
@@ -1246,10 +1229,14 @@ class GenerateTrials():
                 self.win.WarningLabel.setText('Pulse duration is NA!')
                 self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
                 self.CLP_PulseDur=0
+                self.my_wave=np.empty(0)
+                self.opto_error_tag=1
             elif self.CLP_Frequency=='':
                 self.win.WarningLabel.setText('Pulse frequency is NA!')
                 self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
                 self.CLP_Frequency=0
+                self.my_wave=np.empty(0)
+                self.opto_error_tag=1
             else:
                 self.CLP_PulseDur=float(self.CLP_PulseDur)
                 PointsEachPulse=int(self.CLP_SampleFrequency*self.CLP_PulseDur)
@@ -1274,29 +1261,15 @@ class GenerateTrials():
                 self.my_wave=np.concatenate((self.my_wave, EachPulse), axis=0)
                 self.my_wave=np.concatenate((self.my_wave, np.zeros(TotalPoints-np.shape(self.my_wave)[0])), axis=0)
                 # add offset
-                if self.CLP_OffsetStart>0:
-                    OffsetPoints=int(self.CLP_SampleFrequency*self.CLP_OffsetStart)
-                    Offset=np.zeros(OffsetPoints)
-                    self.my_wave=np.concatenate((Offset,self.my_wave),axis=0)
+                self._add_offset()
                 self.my_wave=np.append(self.my_wave,[0,0])
         elif self.CLP_Protocol=='Constant':
             resolution=self.CLP_SampleFrequency*self.CLP_CurrentDuration # how many datapoints to generate
             self.my_wave=Amplitude*np.ones(int(resolution))
-            if self.CLP_RampingDown>0:
             # add ramping down
-                if self.CLP_RampingDown>self.CLP_CurrentDuration:
-                    self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
-                    self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
-                else:
-                    Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
-                    RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
-                    RampingDown = np.concatenate((Constant, RD), axis=0)
-                    self.my_wave=self.my_wave*RampingDown
+            self._get_ramping_down()
             # add offset
-            if self.CLP_OffsetStart>0:
-                OffsetPoints=int(self.CLP_SampleFrequency*self.CLP_OffsetStart)
-                Offset=np.zeros(OffsetPoints)
-                self.my_wave=np.concatenate((Offset,self.my_wave),axis=0)
+            self._add_offset()
             self.my_wave=np.append(self.my_wave,[0,0])
         else:
             self.win.WarningLabel.setText('Unidentified optogenetics protocol!')
@@ -1308,31 +1281,50 @@ class GenerateTrials():
         plt.plot(np.arange(0, length, length / resolution), self.my_wave)   
         plt.show()
         '''
+    def _get_ramping_down(self):
+        '''Add ramping down to the waveform'''
+        if self.CLP_RampingDown>0:
+            if self.CLP_RampingDown>self.CLP_CurrentDuration:
+                self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
+                self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
+            else:
+                Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
+                RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
+                RampingDown = np.concatenate((Constant, RD), axis=0)
+                self.my_wave=self.my_wave*RampingDown
+
+    def _add_offset(self):
+        '''Add offset to the waveform'''            
+        if self.CLP_OffsetStart>0:
+            OffsetPoints=int(self.CLP_SampleFrequency*self.CLP_OffsetStart)
+            Offset=np.zeros(OffsetPoints)
+            self.my_wave=np.concatenate((Offset,self.my_wave),axis=0)
+
     def _GetLaserAmplitude(self):
         '''the voltage amplitude dependens on Protocol, Laser Power, Laser color, and the stimulation locations<>'''
         self.CurrentLaserAmplitude=[0,0]
-        if self.CLP_Location=='Left':
-            if self.CLP_LaserPowerLeft=='':
-                self.win.WarningLabel.setText('No amplitude for left laser defined!')
+        if self.CLP_Location=='Laser_1':
+            if self.CLP_Laser1Power=='':
+                self.win.WarningLabel.setText('No amplitude for Laser_1 defined!')
                 self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
             else:
-                LaserPowerAmpLeft=eval(self.CLP_LaserPowerLeft)
-                self.CurrentLaserAmplitude=[LaserPowerAmpLeft[0],0]
-        elif self.CLP_Location=='Right':
-            if self.CLP_LaserPowerRight=='':
-                self.win.WarningLabel.setText('No amplitude for right laser defined!')
+                Laser1PowerAmp=eval(self.CLP_Laser1Power)
+                self.CurrentLaserAmplitude=[Laser1PowerAmp[0],0]
+        elif self.CLP_Location=='Laser_2':
+            if self.CLP_Laser2Power=='':
+                self.win.WarningLabel.setText('No amplitude for Laser_2 defined!')
                 self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
             else:
-                LaserPowerAmpRight=eval(self.CLP_LaserPowerRight)
-                self.CurrentLaserAmplitude=[0,LaserPowerAmpRight[0]]
+                Laser2PowerAmp=eval(self.CLP_Laser2Power)
+                self.CurrentLaserAmplitude=[0,Laser2PowerAmp[0]]
         elif self.CLP_Location=='Both':
-            if  self.CLP_LaserPowerLeft=='' or self.CLP_Location=='Right':
-                self.win.WarningLabel.setText('No amplitude for left or right laser defined!')
+            if  self.CLP_Laser1Power=='' or self.CLP_Location=='':
+                self.win.WarningLabel.setText('No amplitude for Laser_1 or Laser_2 laser defined!')
                 self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
             else:
-                LaserPowerAmpLeft=eval(self.CLP_LaserPowerLeft)
-                LaserPowerAmpRight=eval(self.CLP_LaserPowerRight)
-                self.CurrentLaserAmplitude=[LaserPowerAmpLeft[0],LaserPowerAmpRight[0]]
+                Laser1PowerAmp=eval(self.CLP_Laser1Power)
+                Laser2PowerAmp=eval(self.CLP_Laser2Power)
+                self.CurrentLaserAmplitude=[Laser1PowerAmp[0],Laser2PowerAmp[0]]
         else:
             self.win.WarningLabel.setText('No stimulation location defined!')
             self.win.WarningLabel.setStyleSheet(self.win.default_warning_color)
@@ -1350,11 +1342,11 @@ class GenerateTrials():
         Probabilities=[]
         empty=1
         for attr_name in dir(self):
-            if attr_name in ['TP_Laser_1','TP_Laser_2','TP_Laser_3','TP_Laser_4']:
+            if attr_name in ['TP_LaserColor_1','TP_LaserColor_2','TP_LaserColor_3','TP_LaserColor_4']:
                 if getattr(self, attr_name) !='NA':
                     parts = attr_name.split('_')
                     ConditionsOn.append(parts[-1])
-                    Probabilities.append(float(eval('self.TP_Probability_'+parts[-1])))
+                    Probabilities.append(float(getattr(self, 'TP_Probability_' + parts[-1])))
                     empty=0
         if empty==1:
             self.SelctedCondition=0
@@ -1440,7 +1432,7 @@ class GenerateTrials():
                 Channel1.Location1_Size(int(self.Location1_Size))
                 Channel1.Location2_Size(int(self.Location2_Size))
                 for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
-                    eval('Channel4.WaveForm' + str(1)+'_'+str(i+1)+'('+'str('+'self.WaveFormLocation_'+str(i+1)+'.tolist()'+')[1:-1]'+')')
+                    getattr(Channel4, 'WaveForm' + str(1)+'_'+str(i+1))(str(getattr(self, 'WaveFormLocation_'+str(i+1)).tolist())[1:-1])
                 FinishOfWaveForm=Channel4.receive()  
             else:
                 Channel1.PassGoCue(int(0))

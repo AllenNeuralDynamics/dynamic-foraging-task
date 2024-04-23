@@ -22,6 +22,12 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>1000</width>
+    <height>1000</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>Foraging</string>
   </property>
@@ -3162,7 +3168,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>60</y>
+       <y>79</y>
        <width>331</width>
        <height>21</height>
       </rect>
@@ -3728,7 +3734,7 @@
       <x>1240</x>
       <y>860</y>
       <width>361</width>
-      <height>31</height>
+      <height>71</height>
      </rect>
     </property>
     <property name="sizePolicy">
