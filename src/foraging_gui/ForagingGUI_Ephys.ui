@@ -4555,6 +4555,7 @@
     </widget>
     <addaction name="action_Calibration"/>
     <addaction name="actionLaser_Calibration"/>
+    <addaction name="actionMeta_Data"/>
     <addaction name="separator"/>
     <addaction name="menuSimulation"/>
     <addaction name="actionDrawing_after_stopping"/>
@@ -4676,7 +4677,9 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="action_Camera"/>
+   <addaction name="action_Calibration"/>
+   <addaction name="actionLaser_Calibration"/>
+   <addaction name="actionMeta_Data"/>
   </widget>
   <widget class="QToolBar" name="toolBar_3">
    <property name="sizePolicy">
@@ -4694,9 +4697,8 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="action_Calibration"/>
    <addaction name="action_Optogenetics"/>
-   <addaction name="actionLaser_Calibration"/>
+   <addaction name="action_Camera"/>
   </widget>
   <action name="action_Calibration">
    <property name="checkable">
@@ -4917,6 +4919,18 @@
   <action name="Save_continue">
    <property name="text">
     <string>Save (without starting a new session)</string>
+   </property>
+  </action>
+  <action name="actionMeta_Data">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>resources/metadata.png</normaloff>resources/metadata.png</iconset>
+   </property>
+   <property name="text">
+    <string>Meta Data</string>
    </property>
   </action>
  </widget>
