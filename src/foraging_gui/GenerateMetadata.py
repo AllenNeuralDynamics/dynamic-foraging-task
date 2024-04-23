@@ -8,7 +8,7 @@ class generate_metadata:
     '''
     def __init__(self,json_file=None,Obj=None):
         if json_file is None and Obj is None:
-            logging.info("Both json_file and Obj cannot be None")
+            logging.info("json file or Obj is not provided")
             return
         pass
 
@@ -26,3 +26,5 @@ class generate_metadata:
 
     def combined_metadata(self):
         pass
+
+generate_metadata(json_file=f"metadata.json")
