@@ -2482,14 +2482,9 @@ class Window(QMainWindow):
                 Obj = json.loads(f.read())
                 f.close()
             self.Obj = Obj
-            widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((
-                QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
-                QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox))}
-            widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
-            widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((
-                QtWidgets.QLineEdit, QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox))})  # update optogenetics parameters from the loaded file
             
-            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','Metadata_dialog']
+            widget_dict={}
+            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','Metadata_dialog','centralwidget','TrainingParameters']
             for dialog_name in dialogs:
                 if hasattr(self, dialog_name):
                     widget_types = (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit,
