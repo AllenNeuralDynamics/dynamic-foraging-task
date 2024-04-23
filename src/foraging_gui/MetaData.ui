@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <property name="accessibleDescription">
+   <string/>
+  </property>
   <widget class="QTextEdit" name="ExperimentDescription">
    <property name="geometry">
     <rect>
@@ -240,7 +243,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>534</x>
      <y>130</y>
-     <width>121</width>
+     <width>111</width>
      <height>20</height>
     </rect>
    </property>
@@ -264,7 +267,7 @@ p, li { white-space: pre-wrap; }
    </property>
    <item>
     <property name="text">
-     <string>Probe1</string>
+     <string>NA</string>
     </property>
    </item>
   </widget>
@@ -303,7 +306,7 @@ p, li { white-space: pre-wrap; }
     </sizepolicy>
    </property>
    <property name="text">
-    <string>Arc angle:</string>
+    <string>Arc angle (AP):</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -328,7 +331,7 @@ p, li { white-space: pre-wrap; }
     </sizepolicy>
    </property>
    <property name="text">
-    <string>Module angle:</string>
+    <string>Module angle (ML):</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
