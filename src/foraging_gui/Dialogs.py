@@ -1723,6 +1723,7 @@ class MetadataDialog(QDialog):
                 "",
                 "JSON Files (*.json)"
             )
+        self.rig_metadata_file = rig_metadata_file
         if os.path.exists(rig_metadata_file):
             with open(rig_metadata_file, 'r') as file:
                 self.rig_metadata = json.load(file)
@@ -1730,7 +1731,7 @@ class MetadataDialog(QDialog):
             self.rig_metadata = {}
 
         # Update the text box
-        self.RigMetadataFile.setText(rig_metadata_file)
+        self.RigMetadataFile.setText(os.path.basename(rig_metadata_file))
             
 
 class AutoTrainDialog(QDialog):
