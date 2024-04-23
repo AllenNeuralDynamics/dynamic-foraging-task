@@ -5362,6 +5362,9 @@ Current pair:
    </property>
   </action>
   <action name="actionMeta_Data">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>resources/metadata.png</normaloff>resources/metadata.png</iconset>
