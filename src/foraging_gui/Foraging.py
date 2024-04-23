@@ -2083,21 +2083,13 @@ class Window(QMainWindow):
             QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
         widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
         self._Concat(widget_dict,Obj,'None')
-        if hasattr(self, 'LaserCalibration_dialog'):
-            widget_dict_LaserCalibration={w.objectName(): w for w in self.LaserCalibration_dialog.findChildren(
-            (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
-            QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))} 
-            self._Concat(widget_dict_LaserCalibration,Obj,'LaserCalibration_dialog')
-        if hasattr(self, 'Opto_dialog'):
-            widget_dict_opto={w.objectName(): w for w in self.Opto_dialog.findChildren(
-                (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
-                QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-            self._Concat(widget_dict_opto,Obj,'Opto_dialog')
-        if hasattr(self, 'Camera_dialog'):
-            widget_dict_camera={w.objectName(): w for w in self.Camera_dialog.findChildren(
-                (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
-                QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-            self._Concat(widget_dict_camera,Obj,'Camera_dialog')
+        dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','Metadata_dialog']
+        for dialog_name in dialogs:
+            if hasattr(self, dialog_name):
+                widget_dict = {w.objectName(): w for w in getattr(self, dialog_name).findChildren(
+                    (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+                    QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox))}
+                self._Concat(widget_dict, Obj, dialog_name)
         
         Obj2=Obj.copy()
         # save behavor events
