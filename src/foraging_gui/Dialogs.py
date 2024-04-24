@@ -1740,7 +1740,7 @@ class MetadataDialog(QDialog):
             else: 
                 self._show_ephys_probes()    
                 self._show_ephys_probes_angle()
-            self.RigMetadataFile.setText(os.path.basename(self.meta_data['rig_metadata_file']))
+                self.RigMetadataFile.setText(os.path.basename(self.meta_data['rig_metadata_file']))
         if update_session_metadata:
             self.IACUCProtocol.setText(self.meta_data['session_metadata']['IACUCProtocol'])
             self.PtotocolID.setText(self.meta_data['session_metadata']['PtotocolID'])
