@@ -1717,9 +1717,11 @@ class MetadataDialog(QDialog):
         metadata_dialog_file, _ = QFileDialog.getOpenFileName(
             self,
             "Select Metadata File",
-            "",
+            self.MainWindow.metadata_dialog_folder,
             "JSON Files (*.json)"
         )
+        if not metadata_dialog_file:
+            return
         if os.path.exists(metadata_dialog_file):
             with open(metadata_dialog_file, 'r') as file:
                 self.meta_data = json.load(file)
@@ -1729,15 +1731,15 @@ class MetadataDialog(QDialog):
         self.PtotocolID.setText(self.meta_data['session_metadata']['PtotocolID'])
         self.ExperimentDescription.setPlainText(self.meta_data['session_metadata']['ExperimentDescription'])
         self.RigMetadataFile.setText(os.path.basename(self.meta_data['rig_metadata_file']))
-        
+
     def _save_metadata(self):
         '''save the metadata collected from this dialogue to an independent json file'''
         self.meta_data['session_metadata']['IACUCProtocol']=self.IACUCProtocol.text()
         self.meta_data['session_metadata']['PtotocolID']=self.PtotocolID.text()
         self.meta_data['session_metadata']['ExperimentDescription'] = self.ExperimentDescription.toPlainText()
 
+        metadata_dialog_folder=self.MainWindow.metadata_dialog_folder
         # Save self.meta_data to JSON
-        metadata_dialog_folder = os.path.join(self.MainWindow.SettingFolder,'metadata_dialog')
         if not os.path.exists(metadata_dialog_folder):
             os.makedirs(metadata_dialog_folder)
         json_file=os.path.join(metadata_dialog_folder, self.MainWindow.current_box+'_'+datetime.now().strftime("%Y-%m-%d_%H-%M-%S")+ '_metadata_dialog.json')
