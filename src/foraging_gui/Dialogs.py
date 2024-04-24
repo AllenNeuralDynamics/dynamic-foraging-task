@@ -1756,10 +1756,12 @@ class MetadataDialog(QDialog):
 
     def _save_metadata(self):
         '''save the metadata collected from this dialogue to an independent json file'''
-        self.meta_data['session_metadata']['IACUCProtocol']=self.IACUCProtocol.text()
-        self.meta_data['session_metadata']['PtotocolID']=self.PtotocolID.text()
-        self.meta_data['session_metadata']['ExperimentDescription'] = self.ExperimentDescription.toPlainText()
-
+        # save metadata parameters
+        exclude_widgets = ['EphysProbes', 'ArcAngle','ModuleAngle']
+        widget_dict = {w.objectName(): w for w in self.findChildren(
+            (QtWidgets.QLineEdit, QtWidgets.QTextEdit, QtWidgets.QComboBox))
+            if w.objectName() not in exclude_widgets}
+        self.meta_data=self.MainWindow._Concat(widget_dict, self.meta_data, 'session_metadata')
         metadata_dialog_folder=self.MainWindow.metadata_dialog_folder
         # Save self.meta_data to JSON
         if not os.path.exists(metadata_dialog_folder):
