@@ -166,6 +166,7 @@ class Window(QMainWindow):
             logging.warning('No rig metadata files found')
             self.latest_rig_metadata_file=''
             self.latest_rig_metadata={}
+            self._manage_warning_labels(self.MetadataWarning,warning_text='No rig metadata found!')
             return
         dates_string = [datetime.strptime(date_str, '%Y-%m-%d') for date_str in dates]
         max_datetime = max(dates_string)
