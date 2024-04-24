@@ -1715,7 +1715,8 @@ class MetadataDialog(QDialog):
     
     def _removing_warning(self):
         '''remove the warning'''
-        self.MainWindow._manage_warning_labels(self.MainWindow.MetadataWarning,warning_text='')
+        if self.RigMetadataFile.text()!='':
+            self.MainWindow._manage_warning_labels(self.MainWindow.MetadataWarning,warning_text='')
 
     def _load_metadata(self):
         '''load the metadata from a json file'''
@@ -1740,7 +1741,7 @@ class MetadataDialog(QDialog):
             else: 
                 self._show_ephys_probes()    
                 self._show_ephys_probes_angle()
-                self.RigMetadataFile.setText(os.path.basename(self.meta_data['rig_metadata_file']))
+            self.RigMetadataFile.setText(os.path.basename(self.meta_data['rig_metadata_file']))
         if update_session_metadata:
             self.IACUCProtocol.setText(self.meta_data['session_metadata']['IACUCProtocol'])
             self.PtotocolID.setText(self.meta_data['session_metadata']['PtotocolID'])
