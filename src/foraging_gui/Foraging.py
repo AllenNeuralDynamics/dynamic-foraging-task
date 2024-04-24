@@ -2327,7 +2327,8 @@ class Window(QMainWindow):
                 elif isinstance(widget, QtWidgets.QComboBox):
                     Obj[widget.objectName()]=widget.currentText()
         else:
-            Obj[keyname]={}
+            if keyname not in Obj.keys():
+                Obj[keyname]={}
             for key in widget_dict.keys():
                 widget = widget_dict[key]
                 if key=='Frequency_1':
