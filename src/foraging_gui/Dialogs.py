@@ -1737,12 +1737,22 @@ class MetadataDialog(QDialog):
         if update_rig_metadata or update_session_metadata:
             self._show_ephys_probes()    
             self._show_ephys_probes_angle()
+            if os.path.basename(self.meta_data['rig_metadata_file'])!=self.RigMetadataFile.text():
+                self._clear_probes_angle() 
             self.RigMetadataFile.setText(os.path.basename(self.meta_data['rig_metadata_file']))
         if update_session_metadata:
             self.IACUCProtocol.setText(self.meta_data['session_metadata']['IACUCProtocol'])
             self.PtotocolID.setText(self.meta_data['session_metadata']['PtotocolID'])
             self.ExperimentDescription.setPlainText(self.meta_data['session_metadata']['ExperimentDescription'])
-        
+    
+    def _clear_probes_angle(self):
+        '''clear the angles'''
+        for i in range(self.EphysProbes.count()):
+            current_probe = self.EphysProbes.itemText(i)
+            self.meta_data['session_metadata'][current_probe]={}
+        self._show_ephys_probes()
+        self._show_ephys_probes_angle()
+
     def _save_metadata(self):
         '''save the metadata collected from this dialogue to an independent json file'''
         self.meta_data['session_metadata']['IACUCProtocol']=self.IACUCProtocol.text()
