@@ -141,6 +141,9 @@ class Window(QMainWindow):
         self._StopPhotometry() # Make sure photoexcitation is stopped 
         # Initialize open ephys saving dictionary
         self.open_ephys=[]
+        # load the rig metadata
+        self._load_rig_metadata()
+        # 
         if not self.start_bonsai_ide:
             '''
                 When starting bonsai without the IDE the connection is always unstable.
@@ -149,6 +152,28 @@ class Window(QMainWindow):
             self._ReconnectBonsai()   
         logging.info('Start up complete')
     
+    def _load_rig_metadata(self):
+        '''Load the latest rig metadata'''
+        json_files = [f for f in os.listdir(self.rig_metadata_folder) if f.endswith('.json')]
+        dates=[]
+        for file in json_files:
+            file_path = os.path.join(self.rig_metadata_folder, file)
+            #Assume the file name has the structure 'rig' + rig name+'_'+date+'.json'
+            if file.startswith('rig'+self.current_box):
+                date_str = file.split('_')[-1].split('.')[0]
+                dates.append(date_str)
+        if len(dates)==0:
+            logging.warning('No rig metadata files found')
+            self.latest_rig_metadata_file=''
+            self.latest_rig_metadata={}
+            return
+        dates_string = [datetime.strptime(date_str, '%Y-%m-%d') for date_str in dates]
+        max_datetime = max(dates_string)
+        max_datetime_index = dates_string.index(max_datetime)
+        self.latest_rig_metadata_file = os.path.join(self.rig_metadata_folder, json_files[max_datetime_index])
+        with open(self.latest_rig_metadata_file) as f:
+            self.latest_rig_metadata = json.load(f)
+
     def _LoadUI(self):
         '''
             Determine which user interface to use
