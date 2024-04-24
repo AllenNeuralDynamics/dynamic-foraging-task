@@ -154,6 +154,9 @@ class Window(QMainWindow):
     
     def _load_rig_metadata(self):
         '''Load the latest rig metadata'''
+        if not os.path.exists(self.rig_metadata_folder):
+            self._manage_warning_labels(self.MetadataWarning,warning_text='No rig metadata found!')
+            return
         json_files = [f for f in os.listdir(self.rig_metadata_folder) if f.endswith('.json')]
         dates=[]
         for file in json_files:
