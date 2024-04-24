@@ -1710,7 +1710,26 @@ class MetadataDialog(QDialog):
         self.ArcAngle.textChanged.connect(self._save_angle)
         self.ModuleAngle.textChanged.connect(self._save_angle)
         self.SaveMeta.clicked.connect(self._save_metadata)
-
+        self.LoadMeta.clicked.connect(self._load_metadata)
+    
+    def _load_metadata(self):
+        '''load the metadata from a json file'''
+        metadata_dialog_file, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select Metadata File",
+            "",
+            "JSON Files (*.json)"
+        )
+        if os.path.exists(metadata_dialog_file):
+            with open(metadata_dialog_file, 'r') as file:
+                self.meta_data = json.load(file)
+        self._show_ephys_probes()    
+        self._show_ephys_probes_angle()
+        self.IACUCProtocol.setText(self.meta_data['session_metadata']['IACUCProtocol'])
+        self.PtotocolID.setText(self.meta_data['session_metadata']['PtotocolID'])
+        self.ExperimentDescription.setPlainText(self.meta_data['session_metadata']['ExperimentDescription'])
+        self.RigMetadataFile.setText(os.path.basename(self.meta_data['rig_metadata_file']))
+        
     def _save_metadata(self):
         '''save the metadata collected from this dialogue to an independent json file'''
         self.meta_data['session_metadata']['IACUCProtocol']=self.IACUCProtocol.text()
