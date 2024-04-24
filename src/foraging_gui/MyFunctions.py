@@ -1667,13 +1667,15 @@ class GenerateTrials():
         self.B_AnimalResponseHistory=np.append(self.B_AnimalResponseHistory,B_AnimalCurrentResponse)
         # get the event harp time
         self.B_TrialStartTimeHarp=np.append(self.B_TrialStartTimeHarp,TrialStartTimeHarp)
-        self.B_DelayStartTimeHarp.append(DelayStartTimeHarp)
+        self.B_DelayStartTimeHarp=np.append(self.B_DelayStartTimeHarp,DelayStartTimeHarp[0])
+        self.B_DelayStartTimeHarpComplete.append(DelayStartTimeHarp)
         self.B_TrialEndTimeHarp=np.append(self.B_TrialEndTimeHarp,TrialEndTimeHarp)
         self.B_GoCueTimeBehaviorBoard=np.append(self.B_GoCueTimeBehaviorBoard,GoCueTimeBehaviorBoard)
         self.B_GoCueTimeSoundCard=np.append(self.B_GoCueTimeSoundCard,GoCueTimeSoundCard)
         # get the event time
         self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime)
-        self.B_DelayStartTime.append(DelayStartTime)
+        self.B_DelayStartTime=np.append(self.B_DelayStartTime,DelayStartTime[0])
+        self.B_DelayStartTimeComplete.append(DelayStartTime)
         self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime)
         self.B_GoCueTime=np.append(self.B_GoCueTime,GoCueTime)
         self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,RewardOutcomeTime)
