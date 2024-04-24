@@ -1709,6 +1709,11 @@ class MetadataDialog(QDialog):
         self.EphysProbes.currentIndexChanged.connect(self._show_ephys_probes_angle)
         self.ArcAngle.textChanged.connect(self._save_angle)
         self.ModuleAngle.textChanged.connect(self._save_angle)
+        self.SaveMeta.clicked.connect(self._save_metadata)
+
+    def _save_metadata(self):
+        '''save the metadata to a independent json file'''
+        pass
 
     def _save_angle(self):
         '''save the angles'''
