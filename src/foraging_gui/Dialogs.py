@@ -1735,10 +1735,11 @@ class MetadataDialog(QDialog):
     def _update_metadata(self,update_rig_metadata=True,update_session_metadata=True):
         '''update the metadata'''
         if update_rig_metadata or update_session_metadata:
-            self._show_ephys_probes()    
-            self._show_ephys_probes_angle()
             if os.path.basename(self.meta_data['rig_metadata_file'])!=self.RigMetadataFile.text():
-                self._clear_probes_angle() 
+                self._clear_probes_angle()
+            else: 
+                self._show_ephys_probes()    
+                self._show_ephys_probes_angle()
             self.RigMetadataFile.setText(os.path.basename(self.meta_data['rig_metadata_file']))
         if update_session_metadata:
             self.IACUCProtocol.setText(self.meta_data['session_metadata']['IACUCProtocol'])
