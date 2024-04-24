@@ -1712,12 +1712,17 @@ class MetadataDialog(QDialog):
         self.SaveMeta.clicked.connect(self._save_metadata)
 
     def _save_metadata(self):
-        '''save the metadata to a independent json file'''
-        pass
-
+        '''save the metadata collected from this dialogue to an independent json file'''
+        self.meta_data['session_metadata']['IACUCProtocol']=self.IACUCProtocol.text()
+        self.meta_data['session_metadata']['PtotocolID']=self.PtotocolID.text()
+        self.meta_data['session_metadata']['ExperimentDescription']=self.ExperimentDescription.text()
+        # Save self.meta_data to JSON
+        json_file = 'metadata.json'
+        with open(json_file, 'w') as file:
+            json.dump(self.meta_data, file)
+        
     def _save_angle(self):
         '''save the angles'''
-        
         current_probe=self.EphysProbes.currentText()
         self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=[current_probe])
         self.meta_data['session_metadata'][current_probe]['ArcAngle']=self.ArcAngle.text()
