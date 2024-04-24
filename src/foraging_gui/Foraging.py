@@ -175,7 +175,7 @@ class Window(QMainWindow):
             self.latest_rig_metadata = json.load(f)
         self.Metadata_dialog.meta_data['rig_metadata']=self.latest_rig_metadata
         self.Metadata_dialog.meta_data['rig_metadata_file']=self.latest_rig_metadata_file
-        self.Metadata_dialog.update_metadata()
+        self.Metadata_dialog._update_metadata()
 
     def _LoadUI(self):
         '''
