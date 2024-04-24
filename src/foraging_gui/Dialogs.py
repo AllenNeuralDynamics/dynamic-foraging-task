@@ -1727,15 +1727,17 @@ class MetadataDialog(QDialog):
                 self.meta_data = json.load(file)
         self._update_metadata()
         
-    def _update_metadata(self):
+    def _update_metadata(self,update_rig_metadata=True,update_session_metadata=True):
         '''update the metadata'''
-        self._show_ephys_probes()    
-        self._show_ephys_probes_angle()
-        self.IACUCProtocol.setText(self.meta_data['session_metadata']['IACUCProtocol'])
-        self.PtotocolID.setText(self.meta_data['session_metadata']['PtotocolID'])
-        self.ExperimentDescription.setPlainText(self.meta_data['session_metadata']['ExperimentDescription'])
-        self.RigMetadataFile.setText(os.path.basename(self.meta_data['rig_metadata_file']))
-
+        if update_rig_metadata or update_session_metadata:
+            self._show_ephys_probes()    
+            self._show_ephys_probes_angle()
+            self.RigMetadataFile.setText(os.path.basename(self.meta_data['rig_metadata_file']))
+        if update_session_metadata:
+            self.IACUCProtocol.setText(self.meta_data['session_metadata']['IACUCProtocol'])
+            self.PtotocolID.setText(self.meta_data['session_metadata']['PtotocolID'])
+            self.ExperimentDescription.setPlainText(self.meta_data['session_metadata']['ExperimentDescription'])
+        
     def _save_metadata(self):
         '''save the metadata collected from this dialogue to an independent json file'''
         self.meta_data['session_metadata']['IACUCProtocol']=self.IACUCProtocol.text()
