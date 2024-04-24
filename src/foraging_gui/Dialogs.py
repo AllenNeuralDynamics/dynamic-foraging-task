@@ -1750,7 +1750,8 @@ class MetadataDialog(QDialog):
         '''clear the angles'''
         for i in range(self.EphysProbes.count()):
             current_probe = self.EphysProbes.itemText(i)
-            self.meta_data['session_metadata'][current_probe]={}
+            self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=['probes',current_probe])
+            self.meta_data['session_metadata']['probes'][current_probe]={}
         self._show_ephys_probes()
         self._show_ephys_probes_angle()
 
@@ -1774,9 +1775,9 @@ class MetadataDialog(QDialog):
     def _save_angle(self):
         '''save the angles'''
         current_probe=self.EphysProbes.currentText()
-        self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=[current_probe])
-        self.meta_data['session_metadata'][current_probe]['ArcAngle']=self.ArcAngle.text()
-        self.meta_data['session_metadata'][current_probe]['ModuleAngle']=self.ModuleAngle.text()
+        self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=['probes',current_probe])
+        self.meta_data['session_metadata']['probes'][current_probe]['ArcAngle']=self.ArcAngle.text()
+        self.meta_data['session_metadata']['probes'][current_probe]['ModuleAngle']=self.ModuleAngle.text()
 
     def _show_ephys_probes_angle(self):
         '''
@@ -1784,13 +1785,13 @@ class MetadataDialog(QDialog):
         '''
         self._disconnect_signals()
         current_probe=self.EphysProbes.currentText()
-        self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=[current_probe])
-        if 'ArcAngle' not in self.meta_data['session_metadata'][current_probe]:
-            self.meta_data['session_metadata'][current_probe]['ArcAngle']=''
-        if 'ModuleAngle' not in self.meta_data['session_metadata'][current_probe]:
-            self.meta_data['session_metadata'][current_probe]['ModuleAngle']=''
-        self.ArcAngle.setText(self.meta_data['session_metadata'][current_probe]['ArcAngle'])
-        self.ModuleAngle.setText(self.meta_data['session_metadata'][current_probe]['ModuleAngle'])
+        self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=['probes',current_probe])
+        if 'ArcAngle' not in self.meta_data['session_metadata']['probes'][current_probe]:
+            self.meta_data['session_metadata']['probes'][current_probe]['ArcAngle']=''
+        if 'ModuleAngle' not in self.meta_data['session_metadata']['probes'][current_probe]:
+            self.meta_data['session_metadata']['probes'][current_probe]['ModuleAngle']=''
+        self.ArcAngle.setText(self.meta_data['session_metadata']['probes'][current_probe]['ArcAngle'])
+        self.ModuleAngle.setText(self.meta_data['session_metadata']['probes'][current_probe]['ModuleAngle'])
         self._connect_signals()
 
     def _show_ephys_probes(self):
