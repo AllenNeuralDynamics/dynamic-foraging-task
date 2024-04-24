@@ -1706,8 +1706,7 @@ class MetadataDialog(QDialog):
 
     def _connectSignalsSlots(self):
         self.SelectRigMetadata.clicked.connect(lambda: self._SelectRigMetadata(rig_metadata_file=None))
-        self.EphysProbes.currentIndexChanged.connect(self._ephys_probes)
-        self.EphysProbes.activated.connect(self._ephys_probes)
+        self.EphysProbes.currentIndexChanged.connect(self._show_ephys_probes_angle)
         self.ArcAngle.textChanged.connect(self._save_angle)
         self.ModuleAngle.textChanged.connect(self._save_angle)
 
@@ -1715,20 +1714,16 @@ class MetadataDialog(QDialog):
         '''save the angles'''
         
         current_probe=self.EphysProbes.currentText()
-        self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=[current_probe,'ArcAngle'])
-        self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=[current_probe,'ModuleAngle'])
-
+        self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=[current_probe])
         self.meta_data['session_metadata'][current_probe]['ArcAngle']=self.ArcAngle.text()
         self.meta_data['session_metadata'][current_probe]['ModuleAngle']=self.ModuleAngle.text()
 
-    def _ephys_probes(self):
+    def _show_ephys_probes_angle(self):
         '''
         show the angles of the selected ephys probe
         '''
+        self._disconnect_signals()
         current_probe=self.EphysProbes.currentText()
-        if current_probe=='':
-            return
-        self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=[current_probe])
         self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=[current_probe])
         if 'ArcAngle' not in self.meta_data['session_metadata'][current_probe]:
             self.meta_data['session_metadata'][current_probe]['ArcAngle']=''
@@ -1736,6 +1731,7 @@ class MetadataDialog(QDialog):
             self.meta_data['session_metadata'][current_probe]['ModuleAngle']=''
         self.ArcAngle.setText(self.meta_data['session_metadata'][current_probe]['ArcAngle'])
         self.ModuleAngle.setText(self.meta_data['session_metadata'][current_probe]['ModuleAngle'])
+        self._connect_signals()
 
     def _show_ephys_probes(self):
         '''setting the ephys probes from the rig metadata'''
@@ -1747,9 +1743,23 @@ class MetadataDialog(QDialog):
                 items.append(self.meta_data['rig_metadata']['ephys_assemblies'][i]['probes'][0]['name'])
         if items==[]:
             return
+        
+        self._disconnect_signals()
         self.EphysProbes.clear()
         self.EphysProbes.addItems(items)
-
+        self._connect_signals()
+    
+    def _disconnect_signals(self):
+        '''disconnect signals'''
+        self.EphysProbes.currentIndexChanged.disconnect(self._show_ephys_probes_angle)
+        self.ArcAngle.textChanged.disconnect(self._save_angle)
+        self.ModuleAngle.textChanged.disconnect(self._save_angle)
+    
+    def _connect_signals(self):
+        '''connect signals'''
+        self.EphysProbes.currentIndexChanged.connect(self._show_ephys_probes_angle)
+        self.ArcAngle.textChanged.connect(self._save_angle)
+        self.ModuleAngle.textChanged.connect(self._save_angle)
 
     def _SelectRigMetadata(self,rig_metadata_file=None):
         '''Select the rig metadata file and load it
@@ -1778,7 +1788,8 @@ class MetadataDialog(QDialog):
         self.RigMetadataFile.setText(os.path.basename(rig_metadata_file))
         # load ephys probes from the rig metadata
         self._show_ephys_probes()    
-
+        self._show_ephys_probes_angle()
+        
 class AutoTrainDialog(QDialog):
     '''For automatic training'''
 
