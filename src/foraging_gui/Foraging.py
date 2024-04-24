@@ -2646,6 +2646,12 @@ class Window(QMainWindow):
                         logging.error(str(e))
             else:
                 pass
+            
+            # load metadata to the metadata dialog
+            if 'meta_data_partial' in Obj:
+                self.Metadata_dialog.meta_data = Obj['meta_data_partial']
+                self.Metadata_dialog._update_metadata()
+
             # show session list related to that animal
             tag=self._show_sessions()
             if tag!=0:

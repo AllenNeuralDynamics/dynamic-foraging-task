@@ -1725,6 +1725,10 @@ class MetadataDialog(QDialog):
         if os.path.exists(metadata_dialog_file):
             with open(metadata_dialog_file, 'r') as file:
                 self.meta_data = json.load(file)
+        self._update_metadata()
+        
+    def _update_metadata(self):
+        '''update the metadata'''
         self._show_ephys_probes()    
         self._show_ephys_probes_angle()
         self.IACUCProtocol.setText(self.meta_data['session_metadata']['IACUCProtocol'])
