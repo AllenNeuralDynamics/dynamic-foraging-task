@@ -927,7 +927,8 @@ class Window(QMainWindow):
             'show_log_info_in_console':False,
             'default_ui':'ForagingGUI.ui',
             'open_ephys_machine_ip_address':'',
-            'metadata_dialog_folder':os.path.join(self.SettingFolder,"metadata_dialog")+'\\' 
+            'metadata_dialog_folder':os.path.join(self.SettingFolder,"metadata_dialog")+'\\',
+            'rig_metadata_folder':os.path.join(self.SettingFolder,"rig_metadata")+'\\',
         }
         
         # Try to load Settings_box#.csv
@@ -986,7 +987,7 @@ class Window(QMainWindow):
         self.default_ui=self.Settings['default_ui']
         self.open_ephys_machine_ip_address=self.Settings['open_ephys_machine_ip_address']
         self.metadata_dialog_folder = self.Settings['metadata_dialog_folder'] 
-
+        self.rig_metadata_folder = self.Settings['rig_metadata_folder']
 
         # Also stream log info to the console if enabled
         if  self.Settings['show_log_info_in_console']:
@@ -2646,7 +2647,7 @@ class Window(QMainWindow):
                         logging.error(str(e))
             else:
                 pass
-            
+
             # load metadata to the metadata dialog
             if 'meta_data_partial' in Obj:
                 self.Metadata_dialog.meta_data = Obj['meta_data_partial']
