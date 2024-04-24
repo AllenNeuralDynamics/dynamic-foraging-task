@@ -1711,7 +1711,12 @@ class MetadataDialog(QDialog):
         self.ModuleAngle.textChanged.connect(self._save_angle)
         self.SaveMeta.clicked.connect(self._save_metadata)
         self.LoadMeta.clicked.connect(self._load_metadata)
+        self.RigMetadataFile.textChanged.connect(self._removing_warning)
     
+    def _removing_warning(self):
+        '''remove the warning'''
+        self.MainWindow._manage_warning_labels(self.MainWindow.MetadataWarning,warning_text='')
+
     def _load_metadata(self):
         '''load the metadata from a json file'''
         metadata_dialog_file, _ = QFileDialog.getOpenFileName(
