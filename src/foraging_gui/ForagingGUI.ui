@@ -5074,6 +5074,7 @@ Current pair:
     <addaction name="actionRestartLogging_2"/>
     <addaction name="actionOpen_behavior_folder"/>
     <addaction name="actionOpen_logging_folder"/>
+    <addaction name="actionOpen_rig_metadata_folder"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="sizePolicy">
@@ -5393,6 +5394,11 @@ Current pair:
    </property>
    <property name="text">
     <string>Meta Data</string>
+   </property>
+  </action>
+  <action name="actionOpen_rig_metadata_folder">
+   <property name="text">
+    <string>Open rig metadata folder</string>
    </property>
   </action>
  </widget>
