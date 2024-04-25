@@ -1858,7 +1858,7 @@ class MetadataDialog(QDialog):
             rig_metadata_file, _ = QFileDialog.getOpenFileName(
                 self,
                 "Select Rig Metadata File",
-                "",
+                self.MainWindow.rig_metadata_folder,
                 "JSON Files (*.json)"
             )
         self.meta_data['rig_metadata_file'] = rig_metadata_file
