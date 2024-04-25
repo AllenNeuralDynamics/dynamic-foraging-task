@@ -1873,12 +1873,22 @@ class MetadataDialog(QDialog):
         self.EphysProbes.currentIndexChanged.disconnect(self._show_ephys_probes_angle)
         self.ArcAngle.textChanged.disconnect(self._save_probe)
         self.ModuleAngle.textChanged.disconnect(self._save_probe)
+        self.ProbeTarget.textChanged.disconnect(self._save_probe)
+        self.RotationAngle.textChanged.disconnect(self._save_probe)
+        self.ManipulatorX.textChanged.disconnect(self._save_probe)
+        self.ManipulatorY.textChanged.disconnect(self._save_probe)
+        self.ManipulatorZ.textChanged.disconnect(self._save_probe)
     
     def _connect_signals(self):
         '''connect signals'''
         self.EphysProbes.currentIndexChanged.connect(self._show_ephys_probes_angle)
         self.ArcAngle.textChanged.connect(self._save_probe)
         self.ModuleAngle.textChanged.connect(self._save_probe)
+        self.ProbeTarget.textChanged.connect(self._save_probe)
+        self.RotationAngle.textChanged.connect(self._save_probe)
+        self.ManipulatorX.textChanged.connect(self._save_probe)
+        self.ManipulatorY.textChanged.connect(self._save_probe)
+        self.ManipulatorZ.textChanged.connect(self._save_probe)
 
     def _SelectRigMetadata(self,rig_metadata_file=None):
         '''Select the rig metadata file and load it
