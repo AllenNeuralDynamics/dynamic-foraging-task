@@ -1936,7 +1936,7 @@ class MetadataDialog(QDialog):
             return
         
         self._manage_signals(enable=False,keys=['EphysProbes'],action=self._show_angles)
-        self._manage_signals(enable=False,Keys=self._get_chidldren_keys(self.Probes),action=self._save_configuration)
+        self._manage_signals(enable=False,keys=self._get_chidldren_keys(self.Probes),action=self._save_configuration)
         self.EphysProbes.clear()
         self.EphysProbes.addItems(items)
         self._manage_signals(enable=True,keys=['EphysProbes'],action=self._show_angles)
