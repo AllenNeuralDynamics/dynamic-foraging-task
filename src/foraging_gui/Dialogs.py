@@ -1709,19 +1709,19 @@ class MetadataDialog(QDialog):
         self.SelectRigMetadata.clicked.connect(lambda: self._SelectRigMetadata(rig_metadata_file=None))
         self.EphysProbes.currentIndexChanged.connect(self._show_angles)
         self.StickMicroscopes.currentIndexChanged.connect(self._show_angles)
-        self.ArcAngle.textChanged.connect(self._save_probe)
-        self.ModuleAngle.textChanged.connect(self._save_probe)
-        self.ProbeTarget.textChanged.connect(self._save_probe)
-        self.RotationAngle.textChanged.connect(self._save_probe)
-        self.ManipulatorX.textChanged.connect(self._save_probe)
-        self.ManipulatorY.textChanged.connect(self._save_probe)
-        self.ManipulatorZ.textChanged.connect(self._save_probe)
+        self.ArcAngle.textChanged.connect(self._save_configuration)
+        self.ModuleAngle.textChanged.connect(self._save_configuration)
+        self.ProbeTarget.textChanged.connect(self._save_configuration)
+        self.RotationAngle.textChanged.connect(self._save_configuration)
+        self.ManipulatorX.textChanged.connect(self._save_configuration)
+        self.ManipulatorY.textChanged.connect(self._save_configuration)
+        self.ManipulatorZ.textChanged.connect(self._save_configuration)
         self.SaveMeta.clicked.connect(self._save_metadata)
         self.LoadMeta.clicked.connect(self._load_metadata)
         self.RigMetadataFile.textChanged.connect(self._removing_warning)
         self.ClearMetadata.clicked.connect(self._clear_metadata)
-        self.Stick_ArcAngle.textChanged.connect(self._save_microscope)
-        self.Stick_ModuleAngle.textChanged.connect(self._save_microscope)
+        self.Stick_ArcAngle.textChanged.connect(self._save_configuration)
+        self.Stick_ModuleAngle.textChanged.connect(self._save_configuration)
 
     def _clear_metadata(self):
         '''clear the metadata'''
@@ -1834,21 +1834,22 @@ class MetadataDialog(QDialog):
             if w.objectName() not in exclude_widgets}
         return widget_dict
     
-    def _save_probe(self):
-        '''save the angles'''
-        current_probe=self.EphysProbes.currentText()
-        self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=['probes',current_probe])
-        keys=self._get_chidldren_keys(self.Probes)
-        for key in keys:
-            self.meta_data['session_metadata']['probes'][current_probe][key] = getattr(self, key).text()
+    def _save_configuration(self):
+        '''save the angles and target area of the selected probe type ('StickMicroscopes','EphysProbes')'''
 
-    def _save_microscope(self):
-        '''save the angles'''
-        current_probe=self.StickMicroscopes.currentText()
-        self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=['microscopes',current_probe])
-        keys=self._get_chidldren_keys(self.Microscopes)
-        for key in keys:
-            self.meta_data['session_metadata']['microscopes'][current_probe][key] = getattr(self, key).text()
+        probe_types = ['StickMicroscopes','EphysProbes']
+        metadata_keys = ['microscopes','probes']
+        widgets = [self.Microscopes,self.Probes]
+
+        for i in range(len(probe_types)):
+            probe_type=probe_types[i]
+            metadata_key=metadata_keys[i]
+            widget=widgets[i]
+            current_probe = getattr(self, probe_type).currentText()
+            self.meta_data['session_metadata'] = initialize_dic(self.meta_data['session_metadata'], key_list=[metadata_key, current_probe])
+            keys = self._get_chidldren_keys(widget)
+            for key in keys:
+                self.meta_data['session_metadata'][metadata_key][current_probe][key] = getattr(self, key).text()
 
     def _show_angles(self):
         '''
@@ -1863,11 +1864,7 @@ class MetadataDialog(QDialog):
             probe_type = probe_types[i]
             metadata_key = metadata_keys[i]
             widget = widgets[i]
-            
-            if probe_type == 'EphysProbes':
-                action=self._save_probe
-            elif probe_type == 'StickMicroscopes':
-                action=self._save_microscope
+            action=self._save_configuration
 
             self._manage_signals(enable=False, keys=[probe_type], action=self._show_angles)
             self._manage_signals(enable=False, keys=self._get_chidldren_keys(widget),action=action)
@@ -1911,11 +1908,11 @@ class MetadataDialog(QDialog):
             return
         
         self._manage_signals(enable=False,keys=['StickMicroscopes'],action=self._show_angles)
-        self._manage_signals(enable=False,keys=self._get_chidldren_keys(self.Microscopes),action=self._save_microscope)
+        self._manage_signals(enable=False,keys=self._get_chidldren_keys(self.Microscopes),action=self._save_configuration)
         self.StickMicroscopes.clear()
         self.StickMicroscopes.addItems(items)
         self._manage_signals(enable=True,keys=['StickMicroscopes'],action=self._show_angles)
-        self._manage_signals(enable=True,keys=self._get_chidldren_keys(self.Microscopes),action=self._save_microscope)
+        self._manage_signals(enable=True,keys=self._get_chidldren_keys(self.Microscopes),action=self._save_configuration)
         self._show_angles()
 
     def _show_ephys_probes(self):
@@ -1932,11 +1929,11 @@ class MetadataDialog(QDialog):
             return
         
         self._manage_signals(enable=False,keys=['EphysProbes'],action=self._show_angles)
-        self._manage_signals(enable=False)
+        self._manage_signals(enable=False,Keys=self._get_chidldren_keys(self.Probes),action=self._save_configuration)
         self.EphysProbes.clear()
         self.EphysProbes.addItems(items)
         self._manage_signals(enable=True,keys=['EphysProbes'],action=self._show_angles)
-        self._manage_signals(enable=True)
+        self._manage_signals(enable=True,keys=self._get_chidldren_keys(self.Probes),action=self._save_configuration)
         self._show_angles()
     
     def _manage_signals(self, enable=True,keys='',signals='',action=''):
@@ -1958,7 +1955,7 @@ class MetadataDialog(QDialog):
                 elif isinstance(getattr(self, attr),QtWidgets.QComboBox):
                     signals.append(getattr(self, attr).currentIndexChanged)
         if action == '':
-            action = self._save_probe
+            action = self._save_configuration
 
         for signal in signals:
             if enable:
