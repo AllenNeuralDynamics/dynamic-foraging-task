@@ -16,14 +16,6 @@ class generate_metadata:
     output_folder: str
         path to the output folder where the metadata will be saved. If not provided, the metadata will be saved in the MetadataFolder extracted from the behavior json file/object. 
 
-    Returns:
-    Obj: dict
-        dictionary containing the original dictionary and the updated dictionary with complete metadata
-    session_metadata: dict
-        dictionary containing the session metadata
-    rig_metadata: dict
-        dictionary containing the rig metadata
-
     Output:
     session metadata: json file
         json file to the metadata folder
@@ -47,7 +39,7 @@ class generate_metadata:
         
         if output_folder is not None:
             self.Obj['MetadataFolder'] = output_folder
-            
+
         self.Obj['session_metadata']= {}
         self.ephys_metadata()
         self.behavior_metadata()
