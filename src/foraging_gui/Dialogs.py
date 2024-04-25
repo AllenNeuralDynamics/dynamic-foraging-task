@@ -1755,6 +1755,7 @@ class MetadataDialog(QDialog):
             widget_dict = self._get_widgets()
             self._set_widgets_value(widget_dict, self.meta_data['session_metadata'])
         self._show_ephys_probes()    
+    
     def _set_widgets_value(self, widget_dict, metadata):
         '''set the widgets value'''
         for key, value in widget_dict.items():
@@ -1794,7 +1795,7 @@ class MetadataDialog(QDialog):
     
     def _get_widgets(self):
         '''get the widgets used for saving/loading metadata'''
-        exclude_widgets = ['EphysProbes', 'ArcAngle','ModuleAngle']
+        exclude_widgets = ['EphysProbes', 'ArcAngle','ModuleAngle','RigMetadataFile']
         widget_dict = {w.objectName(): w for w in self.findChildren(
             (QtWidgets.QLineEdit, QtWidgets.QTextEdit, QtWidgets.QComboBox))
             if w.objectName() not in exclude_widgets}
@@ -1872,6 +1873,7 @@ class MetadataDialog(QDialog):
                 "JSON Files (*.json)"
             )
         self.meta_data['rig_metadata_file'] = rig_metadata_file
+        self.meta_data['session_metadata']['RigMetadataFile'] = rig_metadata_file
         if os.path.exists(rig_metadata_file):
             with open(rig_metadata_file, 'r') as file:
                 self.meta_data['rig_metadata'] = json.load(file)
