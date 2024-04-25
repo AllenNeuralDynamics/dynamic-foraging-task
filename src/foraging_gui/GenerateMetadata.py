@@ -51,7 +51,10 @@ class generate_metadata:
         self.Obj['metadata'] = {}
         self.Obj['metadata']['session_metadata'] = {}
         self.Obj['metadata']['rig_metadata'] = self.Obj['meta_data_dialog']['rig_metadata']
-
+        self.ephys_metadata()
+        self.behavior_metadata()
+        self.ophys_metadata()
+        self.high_speed_camera_metadata()
         return self.Obj, self.Obj['metadata']['session_metadata'], self.Obj['metadata']['rig_metadata']
     
     def ephys_metadata(self):
@@ -66,5 +69,3 @@ class generate_metadata:
     def high_speed_camera_metadata(self):
         pass
 
-    def combined_metadata(self):
-        pass
