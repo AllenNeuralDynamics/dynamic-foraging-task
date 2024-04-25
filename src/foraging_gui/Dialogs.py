@@ -1800,7 +1800,8 @@ class MetadataDialog(QDialog):
     
     def _get_widgets(self):
         '''get the widgets used for saving/loading metadata'''
-        exclude_widgets = ['EphysProbes', 'ArcAngle','ModuleAngle','RigMetadataFile','RotationAngle','ManipulatorX','ManipulatorY','ManipulatorZ','ProbeTarget']
+        exclude_widgets=self._get_chidldren_keys(self.Probes)
+        exclude_widgets.append(['EphysProbes','RigMetadataFile'])
         widget_dict = {w.objectName(): w for w in self.findChildren(
             (QtWidgets.QLineEdit, QtWidgets.QTextEdit, QtWidgets.QComboBox))
             if w.objectName() not in exclude_widgets}
