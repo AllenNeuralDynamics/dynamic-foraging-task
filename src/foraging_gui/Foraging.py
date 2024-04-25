@@ -31,6 +31,7 @@ from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY, EphysRecording
 from foraging_gui.stage import Stage
+from foraging_gui.GenerateMetadata import generate_metadata
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -2236,7 +2237,7 @@ class Window(QMainWindow):
         Obj['Camera_dialog']['camera_stop_time']=self.Camera_dialog.camera_stop_time
 
         # save the metadata collected in the metadata dialogue
-        Obj['meta_data_partial'] = self.Metadata_dialog.meta_data
+        Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
 
         if SaveContinue==0:
             # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
@@ -2253,6 +2254,9 @@ class Window(QMainWindow):
         Obj['trigger_length']=self.trigger_length
         Obj['drop_frames_warning_text']=self.drop_frames_warning_text
         Obj['frame_num']=self.frame_num
+
+        # generate the metadata file
+        generate_metadata(Obj=Obj)   
 
         # save Json or mat
         if self.SaveFile.endswith('.mat'):
