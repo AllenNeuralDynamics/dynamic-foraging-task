@@ -47,15 +47,12 @@ class generate_metadata:
         
         if output_folder is not None:
             self.Obj['MetadataFolder'] = output_folder
-
-        self.Obj['metadata'] = {}
-        self.Obj['metadata']['session_metadata'] = {}
-        self.Obj['metadata']['rig_metadata'] = self.Obj['meta_data_dialog']['rig_metadata']
+            
+        self.Obj['session_metadata']= {}
         self.ephys_metadata()
         self.behavior_metadata()
         self.ophys_metadata()
         self.high_speed_camera_metadata()
-        return self.Obj, self.Obj['metadata']['session_metadata'], self.Obj['metadata']['rig_metadata']
     
     def ephys_metadata(self):
         pass
