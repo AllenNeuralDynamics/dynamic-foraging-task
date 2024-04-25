@@ -1713,7 +1713,17 @@ class MetadataDialog(QDialog):
         self.SaveMeta.clicked.connect(self._save_metadata)
         self.LoadMeta.clicked.connect(self._load_metadata)
         self.RigMetadataFile.textChanged.connect(self._removing_warning)
-    
+        self.ClearMetadata.clicked.connect(self._clear_metadata)
+
+    def _clear_metadata(self):
+        '''clear the metadata'''
+        self.meta_data = {}
+        self.meta_data['rig_metadata'] = {}
+        self.meta_data['session_metadata'] = {}
+        self.meta_data['rig_metadata_file'] = ''
+        self.ExperimentDescription.clear()
+        self._update_metadata()
+
     def _removing_warning(self):
         '''remove the warning'''
         if self.RigMetadataFile.text()!='':
