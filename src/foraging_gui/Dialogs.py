@@ -1867,10 +1867,7 @@ class MetadataDialog(QDialog):
                 self.meta_data['rig_metadata'] = json.load(file)
 
         # Update the text box
-        self.RigMetadataFile.setText(os.path.basename(rig_metadata_file))
-        # load ephys probes from the rig metadata
-        self._show_ephys_probes()    
-        self._show_ephys_probes_angle()
+        self._update_metadata()
         
 class AutoTrainDialog(QDialog):
     '''For automatic training'''
