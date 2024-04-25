@@ -1750,14 +1750,12 @@ class MetadataDialog(QDialog):
             if os.path.basename(self.meta_data['rig_metadata_file'])!=self.RigMetadataFile.text() and self.RigMetadataFile.text() != '':
                 # clear probe angles if the rig metadata file is changed
                 self._clear_probes_angle()
-            else: 
-                self._show_ephys_probes()    
-                self._show_ephys_probes_angle()
             self.RigMetadataFile.setText(os.path.basename(self.meta_data['rig_metadata_file']))
         if update_session_metadata:
             widget_dict = self._get_widgets()
             self._set_widgets_value(widget_dict, self.meta_data['session_metadata'])
-
+        self._show_ephys_probes()    
+        self._show_ephys_probes_angle()
     def _set_widgets_value(self, widget_dict, metadata):
         '''set the widgets value'''
         for key, value in widget_dict.items():
@@ -1827,7 +1825,9 @@ class MetadataDialog(QDialog):
 
     def _show_ephys_probes(self):
         '''setting the ephys probes from the rig metadata'''
-        if self.meta_data['rig_metadata'] is {}:
+        if self.meta_data['rig_metadata'] == {}:
+            self.EphysProbes.clear()
+            self._clear_probes_angle()
             return
         items=[]
         if 'ephys_assemblies' in self.meta_data['rig_metadata']:
