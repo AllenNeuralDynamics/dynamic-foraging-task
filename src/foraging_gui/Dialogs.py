@@ -1818,6 +1818,7 @@ class MetadataDialog(QDialog):
         '''
         show the angles and target area of the selected ephys probe
         '''
+        self._manage_signals(enable=False,keys=['EphysProbes'],action=self._show_ephys_probes_angle)
         self._manage_signals(enable=False)
         current_probe=self.EphysProbes.currentText()
         self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=['probes',current_probe])
@@ -1825,8 +1826,9 @@ class MetadataDialog(QDialog):
         for key in keys:
             self.meta_data['session_metadata']['probes'][current_probe].setdefault(key, '')
             getattr(self, key).setText(self.meta_data['session_metadata']['probes'][current_probe][key])
+        self._manage_signals(enable=True,keys=['EphysProbes'],action=self._show_ephys_probes_angle)
         self._manage_signals(enable=True)
-
+        
     def _get_chidldren_keys(self,parent_widget = None):
         '''get the children QLineEidt objectName'''
         if parent_widget is None:
@@ -1854,13 +1856,15 @@ class MetadataDialog(QDialog):
         if items==[]:
             return
         
+        self._manage_signals(enable=False,keys=['EphysProbes'],action=self._show_ephys_probes_angle)
         self._manage_signals(enable=False)
         self.EphysProbes.clear()
         self.EphysProbes.addItems(items)
+        self._manage_signals(enable=True,keys=['EphysProbes'],action=self._show_ephys_probes_angle)
         self._manage_signals(enable=True)
         self._show_ephys_probes_angle()
     
-    def _manage_signals(self, enable=True,signals=None,action=None):
+    def _manage_signals(self, enable=True,keys='',signals='',action=''):
         '''manage signals 
         Parameters
         ----------
@@ -1869,11 +1873,16 @@ class MetadataDialog(QDialog):
         action : function
             the function to be connected or disconnected
         '''
-        self.EphysProbes.currentIndexChanged.connect(self._show_ephys_probes_angle)
-        keys=self._get_chidldren_keys(self.Probes)
-        if signals is None:
-            signals = [getattr(self, attr).textChanged for attr in keys]
-        if action is None:
+        if keys == '':
+            keys=self._get_chidldren_keys(self.Probes)
+        if signals == '':
+            signals = []
+            for attr in keys:
+                if isinstance(getattr(self, attr),QtWidgets.QLineEdit):
+                    signals.append(getattr(self, attr).textChanged)
+                elif isinstance(getattr(self, attr),QtWidgets.QComboBox):
+                    signals.append(getattr(self, attr).currentIndexChanged)
+        if action == '':
             action = self._save_probe
 
         for signal in signals:
