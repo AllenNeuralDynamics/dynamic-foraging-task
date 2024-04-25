@@ -1749,11 +1749,11 @@ class MetadataDialog(QDialog):
     
     def _clear_probes_angle(self):
         '''clear the angles'''
+        self._show_ephys_probes()
         for i in range(self.EphysProbes.count()):
             current_probe = self.EphysProbes.itemText(i)
             self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=['probes',current_probe])
             self.meta_data['session_metadata']['probes'][current_probe]={}
-        self._show_ephys_probes()
         self._show_ephys_probes_angle()
 
     def _save_metadata(self):
