@@ -1800,7 +1800,7 @@ class MetadataDialog(QDialog):
     
     def _get_widgets(self):
         '''get the widgets used for saving/loading metadata'''
-        exclude_widgets = ['EphysProbes', 'ArcAngle','ModuleAngle','RigMetadataFile']
+        exclude_widgets = ['EphysProbes', 'ArcAngle','ModuleAngle','RigMetadataFile','RotationAngle','ManipulatorX','ManipulatorY','ManipulatorZ','ProbeTarget']
         widget_dict = {w.objectName(): w for w in self.findChildren(
             (QtWidgets.QLineEdit, QtWidgets.QTextEdit, QtWidgets.QComboBox))
             if w.objectName() not in exclude_widgets}
@@ -1820,7 +1820,7 @@ class MetadataDialog(QDialog):
         
     def _show_ephys_probes_angle(self):
         '''
-        show the angles of the selected ephys probe
+        show the angles and target area of the selected ephys probe
         '''
         self._disconnect_signals()
         current_probe=self.EphysProbes.currentText()
@@ -1829,8 +1829,24 @@ class MetadataDialog(QDialog):
             self.meta_data['session_metadata']['probes'][current_probe]['ArcAngle']=''
         if 'ModuleAngle' not in self.meta_data['session_metadata']['probes'][current_probe]:
             self.meta_data['session_metadata']['probes'][current_probe]['ModuleAngle']=''
+        if 'ProbeTarget' not in self.meta_data['session_metadata']['probes'][current_probe]:
+            self.meta_data['session_metadata']['probes'][current_probe]['ProbeTarget']=''
+        if 'RotationAngle' not in self.meta_data['session_metadata']['probes'][current_probe]:
+            self.meta_data['session_metadata']['probes'][current_probe]['RotationAngle']=''
+        if 'ManipulatorX' not in self.meta_data['session_metadata']['probes'][current_probe]:
+            self.meta_data['session_metadata']['probes'][current_probe]['ManipulatorX']=''
+        if 'ManipulatorY' not in self.meta_data['session_metadata']['probes'][current_probe]:
+            self.meta_data['session_metadata']['probes'][current_probe]['ManipulatorY']=''
+        if 'ManipulatorZ' not in self.meta_data['session_metadata']['probes'][current_probe]:
+            self.meta_data['session_metadata']['probes'][current_probe]['ManipulatorZ']=''
         self.ArcAngle.setText(self.meta_data['session_metadata']['probes'][current_probe]['ArcAngle'])
         self.ModuleAngle.setText(self.meta_data['session_metadata']['probes'][current_probe]['ModuleAngle'])
+        self.ProbeTarget.setText(self.meta_data['session_metadata']['probes'][current_probe]['ProbeTarget'])
+        self.RotationAngle.setText(self.meta_data['session_metadata']['probes'][current_probe]['RotationAngle'])
+        self.ManipulatorX.setText(self.meta_data['session_metadata']['probes'][current_probe]['ManipulatorX'])
+        self.ManipulatorY.setText(self.meta_data['session_metadata']['probes'][current_probe]['ManipulatorY'])
+        self.ManipulatorZ.setText(self.meta_data['session_metadata']['probes'][current_probe]['ManipulatorZ'])
+
         self._connect_signals()
 
     def _show_ephys_probes(self):
