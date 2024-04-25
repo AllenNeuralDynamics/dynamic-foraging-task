@@ -1704,6 +1704,7 @@ class MetadataDialog(QDialog):
         self.meta_data['rig_metadata'] = {}
         self.meta_data['session_metadata'] = {}
         self.meta_data['rig_metadata_file'] = ''
+        self._get_basics()
 
     def _connectSignalsSlots(self):
         self.SelectRigMetadata.clicked.connect(lambda: self._SelectRigMetadata(rig_metadata_file=None))
@@ -1723,6 +1724,12 @@ class MetadataDialog(QDialog):
         self.Stick_ArcAngle.textChanged.connect(self._save_configuration)
         self.Stick_ModuleAngle.textChanged.connect(self._save_configuration)
 
+    def _get_basics(self):
+        '''get the basic information'''
+        self.probe_types = ['StickMicroscopes','EphysProbes']
+        self.metadata_keys = ['microscopes','probes']
+        self.widgets = [self.Microscopes,self.Probes]
+    
     def _clear_metadata(self):
         '''clear the metadata'''
         self.meta_data = {}
@@ -1837,9 +1844,9 @@ class MetadataDialog(QDialog):
     def _save_configuration(self):
         '''save the angles and target area of the selected probe type ('StickMicroscopes','EphysProbes')'''
 
-        probe_types = ['StickMicroscopes','EphysProbes']
-        metadata_keys = ['microscopes','probes']
-        widgets = [self.Microscopes,self.Probes]
+        probe_types = self.probe_types
+        metadata_keys = self.metadata_keys
+        widgets = self.widgets  
 
         for i in range(len(probe_types)):
             probe_type=probe_types[i]
@@ -1856,9 +1863,9 @@ class MetadataDialog(QDialog):
         show the angles and target area of the selected probe type ('StickMicroscopes','EphysProbes')
         '''
         
-        probe_types = ['StickMicroscopes','EphysProbes']
-        metadata_keys = ['microscopes','probes']
-        widgets = [self.Microscopes,self.Probes]
+        probe_types = self.probe_types
+        metadata_keys = self.metadata_keys
+        widgets = self.widgets  
 
         for i in range(len(probe_types)):
             probe_type = probe_types[i]
