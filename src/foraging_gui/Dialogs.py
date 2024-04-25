@@ -1810,14 +1810,10 @@ class MetadataDialog(QDialog):
         '''save the angles'''
         current_probe=self.EphysProbes.currentText()
         self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=['probes',current_probe])
-        self.meta_data['session_metadata']['probes'][current_probe]['ArcAngle']=self.ArcAngle.text()
-        self.meta_data['session_metadata']['probes'][current_probe]['ModuleAngle']=self.ModuleAngle.text()
-        self.meta_data['session_metadata']['probes'][current_probe]['ProbeTarget']=self.ProbeTarget.text()
-        self.meta_data['session_metadata']['probes'][current_probe]['RotationAngle']=self.RotationAngle.text()
-        self.meta_data['session_metadata']['probes'][current_probe]['ManipulatorX']=self.ManipulatorX.text()
-        self.meta_data['session_metadata']['probes'][current_probe]['ManipulatorY']=self.ManipulatorY.text()
-        self.meta_data['session_metadata']['probes'][current_probe]['ManipulatorZ']=self.ManipulatorZ.text()
-        
+        keys=self._get_chidldren_keys(self.Probes)
+        for key in keys:
+            self.meta_data['session_metadata']['probes'][current_probe][key] = getattr(self, key).text()
+            
     def _show_ephys_probes_angle(self):
         '''
         show the angles and target area of the selected ephys probe
