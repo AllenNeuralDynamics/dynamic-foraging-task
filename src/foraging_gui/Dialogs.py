@@ -1744,10 +1744,22 @@ class MetadataDialog(QDialog):
                 self._show_ephys_probes_angle()
             self.RigMetadataFile.setText(os.path.basename(self.meta_data['rig_metadata_file']))
         if update_session_metadata:
-            self.IACUCProtocol.setText(self.meta_data['session_metadata']['IACUCProtocol'])
-            self.PtotocolID.setText(self.meta_data['session_metadata']['PtotocolID'])
-            self.ExperimentDescription.setPlainText(self.meta_data['session_metadata']['ExperimentDescription'])
-    
+            widget_dict = self._get_widgets()
+            self._set_widgets_value(widget_dict, self.meta_data['session_metadata'])
+
+    def _set_widgets_value(self, widget_dict, metadata):
+        '''set the widgets value'''
+        for key, value in widget_dict.items():
+            if key in metadata:
+                if isinstance(value, QtWidgets.QLineEdit):
+                    value.setText(metadata[key])
+                elif isinstance(value, QtWidgets.QTextEdit):
+                    value.setPlainText(metadata[key])
+                elif isinstance(value, QtWidgets.QComboBox):
+                    index = value.findText(metadata[key])
+                    if index != -1:
+                        value.setCurrentIndex(index)
+
     def _clear_probes_angle(self):
         '''clear the angles'''
         self._show_ephys_probes()
@@ -1760,10 +1772,7 @@ class MetadataDialog(QDialog):
     def _save_metadata(self):
         '''save the metadata collected from this dialogue to an independent json file'''
         # save metadata parameters
-        exclude_widgets = ['EphysProbes', 'ArcAngle','ModuleAngle']
-        widget_dict = {w.objectName(): w for w in self.findChildren(
-            (QtWidgets.QLineEdit, QtWidgets.QTextEdit, QtWidgets.QComboBox))
-            if w.objectName() not in exclude_widgets}
+        widget_dict = self._get_widgets()
         self.meta_data=self.MainWindow._Concat(widget_dict, self.meta_data, 'session_metadata')
         metadata_dialog_folder=self.MainWindow.metadata_dialog_folder
         # Save self.meta_data to JSON
@@ -1773,7 +1782,15 @@ class MetadataDialog(QDialog):
 
         with open(json_file, 'w') as file:
             json.dump(self.meta_data, file, indent=4)
-
+    
+    def _get_widgets(self):
+        '''get the widgets used for saving/loading metadata'''
+        exclude_widgets = ['EphysProbes', 'ArcAngle','ModuleAngle']
+        widget_dict = {w.objectName(): w for w in self.findChildren(
+            (QtWidgets.QLineEdit, QtWidgets.QTextEdit, QtWidgets.QComboBox))
+            if w.objectName() not in exclude_widgets}
+        return widget_dict
+    
     def _save_angle(self):
         '''save the angles'''
         current_probe=self.EphysProbes.currentText()
