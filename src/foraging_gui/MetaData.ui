@@ -74,7 +74,7 @@ p, li { white-space: pre-wrap; }
   <widget class="QPushButton" name="SaveMeta">
    <property name="geometry">
     <rect>
-     <x>160</x>
+     <x>120</x>
      <y>30</y>
      <width>72</width>
      <height>23</height>
@@ -388,6 +388,25 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="alignment">
     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="ClearMetadata">
+   <property name="geometry">
+    <rect>
+     <x>200</x>
+     <y>30</y>
+     <width>72</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="text">
+    <string>Clear</string>
    </property>
   </widget>
  </widget>
