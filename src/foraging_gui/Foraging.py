@@ -262,6 +262,7 @@ class Window(QMainWindow):
         self.actionOpenSettingFolder.triggered.connect(self._OpenSettingFolder)
         self.actionOpen_rig_metadata_folder.triggered.connect(self._OpenRigMetadataFolder)
         self.actionOpen_metadata_dialog_folder.triggered.connect(self._OpenMetadataDialogFolder)
+        self.actionOpen_video_folder.triggered.connect(self._OpenVideoFolder)
         self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
         self.RightValue.textChanged.connect(self._WaterVolumnManage1)
         self.GiveWaterL.textChanged.connect(self._WaterVolumnManage1)
@@ -1181,13 +1182,20 @@ class Window(QMainWindow):
         else:
             subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True)
 
+    def _OpenVideoFolder(self):
+        '''Open the video folder'''
+        try:
+            subprocess.Popen(['explorer', self.VideoFolder])
+        except Exception as e:
+            logging.error(str(e))
+                    
     def _OpenMetadataDialogFolder(self):
         '''Open the metadata dialog folder'''
         try:
             subprocess.Popen(['explorer', self.metadata_dialog_folder])
         except Exception as e:
             logging.error(str(e))
-                    
+
     def _OpenRigMetadataFolder(self):
         '''Open the rig metadata folder'''
         try:

@@ -5074,6 +5074,7 @@ Current pair:
     <addaction name="actionRestartLogging_2"/>
     <addaction name="actionOpen_behavior_folder"/>
     <addaction name="actionOpen_logging_folder"/>
+    <addaction name="actionOpen_video_folder"/>
     <addaction name="actionOpen_rig_metadata_folder"/>
     <addaction name="actionOpen_metadata_dialog_folder"/>
    </widget>
@@ -5405,6 +5406,11 @@ Current pair:
   <action name="actionOpen_metadata_dialog_folder">
    <property name="text">
     <string>Open metadata dialog folder</string>
+   </property>
+  </action>
+  <action name="actionOpen_video_folder">
+   <property name="text">
+    <string>Open video folder</string>
    </property>
   </action>
  </widget>
