@@ -1860,7 +1860,7 @@ class MetadataDialog(QDialog):
         self._manage_signals(enable=True)
         self._show_ephys_probes_angle()
     
-    def _manage_signals(self, enable=True,action=None):
+    def _manage_signals(self, enable=True,signals=None,action=None):
         '''manage signals 
         Parameters
         ----------
@@ -1871,7 +1871,8 @@ class MetadataDialog(QDialog):
         '''
         self.EphysProbes.currentIndexChanged.connect(self._show_ephys_probes_angle)
         keys=self._get_chidldren_keys(self.Probes)
-        signals = [getattr(self, attr).textChanged for attr in keys]
+        if signals is None:
+            signals = [getattr(self, attr).textChanged for attr in keys]
         if action is None:
             action = self._save_probe
 
