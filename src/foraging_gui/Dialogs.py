@@ -1757,8 +1757,8 @@ class MetadataDialog(QDialog):
         if (update_rig_metadata or update_session_metadata) and ('rig_metadata_file' in self.meta_data):
             if os.path.basename(self.meta_data['rig_metadata_file'])!=self.RigMetadataFile.text() and self.RigMetadataFile.text() != '':
                 # clear probe angles if the rig metadata file is changed
-                self._clear_probes_angle()
-                self._clear_stick_microscopes_angle()
+                self._clear_angles(self._show_ephys_probes, self.EphysProbes, 'probes')
+                self._clear_angles(self._show_stick_microscopes, self.StickMicroscopes, 'microscopes')
             self.RigMetadataFile.setText(os.path.basename(self.meta_data['rig_metadata_file']))
         if update_session_metadata:
             widget_dict = self._get_widgets()
@@ -1785,23 +1785,29 @@ class MetadataDialog(QDialog):
             elif isinstance(value, QtWidgets.QTextEdit):
                 value.setPlainText('')
 
-    def _clear_probes_angle(self):
-        '''clear the angles'''
-        self._show_ephys_probes()
-        for i in range(self.EphysProbes.count()):
-            current_probe = self.EphysProbes.itemText(i)
-            self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=['probes',current_probe])
-            self.meta_data['session_metadata']['probes'][current_probe]={}
-        self._show_ephys_probes()
-
-    def _clear_stick_microscopes_angle(self):
-        '''clear the angles'''
-        self._show_stick_microscopes()
-        for i in range(self.StickMicroscopes.count()):
-            current_probe = self.StickMicroscopes.itemText(i)
-            self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=['microscopes',current_probe])
-            self.meta_data['session_metadata']['microscopes'][current_probe]={}
-        self._show_stick_microscopes()
+    def _clear_angles(self, _show_function,widget, metadata_key):
+        '''Clear the angles and target area for the given widget
+        Parameters
+        ----------
+        _show_function : function (e.g. self._show_ephys_probes or self._show_stick_microscopes)
+            Function to show the items
+        widget : QtWidgets.QComboBox (e.g. self.EphysProbes or self.StickMicroscopes)
+            The widget to containing the items to clear
+        metadata_key : str
+            The key in the metadata dictionary to clear
+        
+        example usage:
+        self._clear_angles(self._show_ephys_probes, self.EphysProbes, 'probes')
+        self._clear_angles(self._show_stick_microscopes, self.StickMicroscopes, 'microscopes')
+        '''
+        _show_function()
+        for i in range(widget.count()):
+            current_item = widget.itemText(i)
+            self.meta_data['session_metadata'] = initialize_dic(
+                self.meta_data['session_metadata'], key_list=[metadata_key, current_item]
+            )
+            self.meta_data['session_metadata'][metadata_key][current_item] = {}
+        _show_function()
 
     def _save_metadata(self):
         '''save the metadata collected from this dialogue to an independent json file'''
