@@ -1708,6 +1708,7 @@ class MetadataDialog(QDialog):
     def _connectSignalsSlots(self):
         self.SelectRigMetadata.clicked.connect(lambda: self._SelectRigMetadata(rig_metadata_file=None))
         self.EphysProbes.currentIndexChanged.connect(self._show_ephys_probes_angle)
+        self.StickMicroscopes.currentIndexChanged.connect(self._show_stick_microscopes_angle)
         self.ArcAngle.textChanged.connect(self._save_probe)
         self.ModuleAngle.textChanged.connect(self._save_probe)
         self.ProbeTarget.textChanged.connect(self._save_probe)
@@ -1719,6 +1720,8 @@ class MetadataDialog(QDialog):
         self.LoadMeta.clicked.connect(self._load_metadata)
         self.RigMetadataFile.textChanged.connect(self._removing_warning)
         self.ClearMetadata.clicked.connect(self._clear_metadata)
+        self.Stick_ArcAngle.textChanged.connect(self._save_microscope)
+        self.Stick_ModuleAngle.textChanged.connect(self._save_microscope)
 
     def _clear_metadata(self):
         '''clear the metadata'''
@@ -1815,6 +1818,29 @@ class MetadataDialog(QDialog):
         for key in keys:
             self.meta_data['session_metadata']['probes'][current_probe][key] = getattr(self, key).text()
 
+    def _save_microscope(self):
+        '''save the angles'''
+        current_probe=self.StickMicroscopes.currentText()
+        self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=['microscopes',current_probe])
+        keys=self._get_chidldren_keys(self.Microscopes)
+        for key in keys:
+            self.meta_data['session_metadata']['microscopes'][current_probe][key] = getattr(self, key).text()
+
+    def _show_stick_microscopes_angle(self):
+        '''
+        show the angles and target area of the selected stick microscope
+        '''
+        self._manage_signals(enable=False,keys=['StickMicroscopes'],action=self._show_stick_microscopes_angle)
+        self._manage_signals(enable=False,keys=self._get_chidldren_keys(self.Microscopes),action=self._save_microscope)
+        current_probe=self.StickMicroscopes.currentText()
+        self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=['microscopes',current_probe])
+        keys=self._get_chidldren_keys(self.Microscopes)
+        for key in keys:
+            self.meta_data['session_metadata']['microscopes'][current_probe].setdefault(key, '')
+            getattr(self, key).setText(self.meta_data['session_metadata']['microscopes'][current_probe][key])
+        self._manage_signals(enable=True,keys=['StickMicroscopes'],action=self._show_stick_microscopes_angle)
+        self._manage_signals(enable=True,keys=self._get_chidldren_keys(self.Microscopes),action=self._save_microscope)
+
     def _show_ephys_probes_angle(self):
         '''
         show the angles and target area of the selected ephys probe
@@ -1844,6 +1870,27 @@ class MetadataDialog(QDialog):
                         probe_keys.append(child_widget2.objectName())   
         return probe_keys
     
+    def _show_stick_microscopes(self):
+        '''setting the stick microscopes from the rig metadata'''
+        if self.meta_data['rig_metadata'] == {}:
+            self.StickMicroscopes.clear()
+            self._show_stick_microscopes_angle()
+            return
+        items=[]
+        if 'microscopes' in self.meta_data['rig_metadata']:
+            for key in self.meta_data['rig_metadata']['microscopes']:
+                items.append(key)
+        if items==[]:
+            return
+        
+        self._manage_signals(enable=False,keys=['StickMicroscopes'],action=self._show_stick_microscopes_angle)
+        self._manage_signals(enable=False,keys=self._get_chidldren_keys(self.Microscopes),action=self._save_microscope)
+        self.StickMicroscopes.clear()
+        self.StickMicroscopes.addItems(items)
+        self._manage_signals(enable=True,keys=['StickMicroscopes'],action=self._show_stick_microscopes_angle)
+        self._manage_signals(enable=True,keys=self._get_chidldren_keys(self.Microscopes),action=self._save_microscope)
+        self._show_stick_microscopes_angle()
+
     def _show_ephys_probes(self):
         '''setting the ephys probes from the rig metadata'''
         if self.meta_data['rig_metadata'] == {}:
