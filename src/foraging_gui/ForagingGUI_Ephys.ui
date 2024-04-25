@@ -4642,6 +4642,7 @@
     <addaction name="actionOpen_behavior_folder"/>
     <addaction name="actionOpen_logging_folder"/>
     <addaction name="actionOpen_rig_metadata_folder"/>
+    <addaction name="actionOpen_metadata_dialog_folder"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="sizePolicy">
@@ -4966,6 +4967,11 @@
   <action name="actionOpen_rig_metadata_folder">
    <property name="text">
     <string>Open rig metadata folder</string>
+   </property>
+  </action>
+  <action name="actionOpen_metadata_dialog_folder">
+   <property name="text">
+    <string>Open metadata dialog folder</string>
    </property>
   </action>
  </widget>

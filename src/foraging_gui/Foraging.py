@@ -261,6 +261,7 @@ class Window(QMainWindow):
         self.actionOpen_behavior_folder.triggered.connect(self._OpenBehaviorFolder)
         self.actionOpenSettingFolder.triggered.connect(self._OpenSettingFolder)
         self.actionOpen_rig_metadata_folder.triggered.connect(self._OpenRigMetadataFolder)
+        self.actionOpen_metadata_dialog_folder.triggered.connect(self._OpenMetadataDialogFolder)
         self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
         self.RightValue.textChanged.connect(self._WaterVolumnManage1)
         self.GiveWaterL.textChanged.connect(self._WaterVolumnManage1)
@@ -1180,13 +1181,20 @@ class Window(QMainWindow):
         else:
             subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True)
 
+    def _OpenMetadataDialogFolder(self):
+        '''Open the metadata dialog folder'''
+        try:
+            subprocess.Popen(['explorer', self.metadata_dialog_folder])
+        except Exception as e:
+            logging.error(str(e))
+                    
     def _OpenRigMetadataFolder(self):
         '''Open the rig metadata folder'''
         try:
             subprocess.Popen(['explorer', self.rig_metadata_folder])
         except Exception as e:
             logging.error(str(e))
-            
+
     def _OpenSettingFolder(self):
         '''Open the setting folder'''
         try:
