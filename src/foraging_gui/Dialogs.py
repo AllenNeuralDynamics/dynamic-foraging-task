@@ -1813,19 +1813,19 @@ class MetadataDialog(QDialog):
         keys=self._get_chidldren_keys(self.Probes)
         for key in keys:
             self.meta_data['session_metadata']['probes'][current_probe][key] = getattr(self, key).text()
-            
+
     def _show_ephys_probes_angle(self):
         '''
         show the angles and target area of the selected ephys probe
         '''
-        self._disconnect_signals()
+        self._manage_signals(enable=False)
         current_probe=self.EphysProbes.currentText()
         self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=['probes',current_probe])
         keys=self._get_chidldren_keys(self.Probes)
         for key in keys:
             self.meta_data['session_metadata']['probes'][current_probe].setdefault(key, '')
             getattr(self, key).setText(self.meta_data['session_metadata']['probes'][current_probe][key])
-        self._connect_signals()
+        self._manage_signals(enable=True)
 
     def _get_chidldren_keys(self,parent_widget = None):
         '''get the children QLineEidt objectName'''
@@ -1854,33 +1854,32 @@ class MetadataDialog(QDialog):
         if items==[]:
             return
         
-        self._disconnect_signals()
+        self._manage_signals(enable=False)
         self.EphysProbes.clear()
         self.EphysProbes.addItems(items)
-        self._connect_signals()
+        self._manage_signals(enable=True)
         self._show_ephys_probes_angle()
     
-    def _disconnect_signals(self):
-        '''disconnect signals'''
-        self.EphysProbes.currentIndexChanged.disconnect(self._show_ephys_probes_angle)
-        self.ArcAngle.textChanged.disconnect(self._save_probe)
-        self.ModuleAngle.textChanged.disconnect(self._save_probe)
-        self.ProbeTarget.textChanged.disconnect(self._save_probe)
-        self.RotationAngle.textChanged.disconnect(self._save_probe)
-        self.ManipulatorX.textChanged.disconnect(self._save_probe)
-        self.ManipulatorY.textChanged.disconnect(self._save_probe)
-        self.ManipulatorZ.textChanged.disconnect(self._save_probe)
-    
-    def _connect_signals(self):
-        '''connect signals'''
+    def _manage_signals(self, enable=True,action=None):
+        '''manage signals 
+        Parameters
+        ----------
+        enable : bool
+            enable (connect) or disable (disconnect) the signals
+        action : function
+            the function to be connected or disconnected
+        '''
         self.EphysProbes.currentIndexChanged.connect(self._show_ephys_probes_angle)
-        self.ArcAngle.textChanged.connect(self._save_probe)
-        self.ModuleAngle.textChanged.connect(self._save_probe)
-        self.ProbeTarget.textChanged.connect(self._save_probe)
-        self.RotationAngle.textChanged.connect(self._save_probe)
-        self.ManipulatorX.textChanged.connect(self._save_probe)
-        self.ManipulatorY.textChanged.connect(self._save_probe)
-        self.ManipulatorZ.textChanged.connect(self._save_probe)
+        keys=self._get_chidldren_keys(self.Probes)
+        signals = [getattr(self, attr).textChanged for attr in keys]
+        if action is None:
+            action = self._save_probe
+
+        for signal in signals:
+            if enable:
+                signal.connect(action)
+            else:
+                signal.disconnect(action)
 
     def _SelectRigMetadata(self,rig_metadata_file=None):
         '''Select the rig metadata file and load it
