@@ -1755,7 +1755,6 @@ class MetadataDialog(QDialog):
             widget_dict = self._get_widgets()
             self._set_widgets_value(widget_dict, self.meta_data['session_metadata'])
         self._show_ephys_probes()    
-        self._show_ephys_probes_angle()
     def _set_widgets_value(self, widget_dict, metadata):
         '''set the widgets value'''
         for key, value in widget_dict.items():
@@ -1776,7 +1775,7 @@ class MetadataDialog(QDialog):
             current_probe = self.EphysProbes.itemText(i)
             self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=['probes',current_probe])
             self.meta_data['session_metadata']['probes'][current_probe]={}
-        self._show_ephys_probes_angle()
+        self._show_ephys_probes()
 
     def _save_metadata(self):
         '''save the metadata collected from this dialogue to an independent json file'''
@@ -1840,6 +1839,7 @@ class MetadataDialog(QDialog):
         self.EphysProbes.clear()
         self.EphysProbes.addItems(items)
         self._connect_signals()
+        self._show_ephys_probes_angle()
     
     def _disconnect_signals(self):
         '''disconnect signals'''
