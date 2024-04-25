@@ -484,7 +484,7 @@ p, li { white-space: pre-wrap; }
      <string/>
     </property>
    </widget>
-   <widget class="QGroupBox" name="groupBox_2">
+   <widget class="QGroupBox" name="ProbeManipulator">
     <property name="geometry">
      <rect>
       <x>0</x>

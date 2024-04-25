@@ -1825,30 +1825,26 @@ class MetadataDialog(QDialog):
         self._disconnect_signals()
         current_probe=self.EphysProbes.currentText()
         self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=['probes',current_probe])
-        if 'ArcAngle' not in self.meta_data['session_metadata']['probes'][current_probe]:
-            self.meta_data['session_metadata']['probes'][current_probe]['ArcAngle']=''
-        if 'ModuleAngle' not in self.meta_data['session_metadata']['probes'][current_probe]:
-            self.meta_data['session_metadata']['probes'][current_probe]['ModuleAngle']=''
-        if 'ProbeTarget' not in self.meta_data['session_metadata']['probes'][current_probe]:
-            self.meta_data['session_metadata']['probes'][current_probe]['ProbeTarget']=''
-        if 'RotationAngle' not in self.meta_data['session_metadata']['probes'][current_probe]:
-            self.meta_data['session_metadata']['probes'][current_probe]['RotationAngle']=''
-        if 'ManipulatorX' not in self.meta_data['session_metadata']['probes'][current_probe]:
-            self.meta_data['session_metadata']['probes'][current_probe]['ManipulatorX']=''
-        if 'ManipulatorY' not in self.meta_data['session_metadata']['probes'][current_probe]:
-            self.meta_data['session_metadata']['probes'][current_probe]['ManipulatorY']=''
-        if 'ManipulatorZ' not in self.meta_data['session_metadata']['probes'][current_probe]:
-            self.meta_data['session_metadata']['probes'][current_probe]['ManipulatorZ']=''
-        self.ArcAngle.setText(self.meta_data['session_metadata']['probes'][current_probe]['ArcAngle'])
-        self.ModuleAngle.setText(self.meta_data['session_metadata']['probes'][current_probe]['ModuleAngle'])
-        self.ProbeTarget.setText(self.meta_data['session_metadata']['probes'][current_probe]['ProbeTarget'])
-        self.RotationAngle.setText(self.meta_data['session_metadata']['probes'][current_probe]['RotationAngle'])
-        self.ManipulatorX.setText(self.meta_data['session_metadata']['probes'][current_probe]['ManipulatorX'])
-        self.ManipulatorY.setText(self.meta_data['session_metadata']['probes'][current_probe]['ManipulatorY'])
-        self.ManipulatorZ.setText(self.meta_data['session_metadata']['probes'][current_probe]['ManipulatorZ'])
-
+        keys=self._get_chidldren_keys(self.Probes)
+        for key in keys:
+            self.meta_data['session_metadata']['probes'][current_probe].setdefault(key, '')
+            getattr(self, key).setText(self.meta_data['session_metadata']['probes'][current_probe][key])
         self._connect_signals()
 
+    def _get_chidldren_keys(self,parent_widget = None):
+        '''get the children QLineEidt objectName'''
+        if parent_widget is None:
+            parent_widget = self.Probes
+        probe_keys = []
+        for child_widget in parent_widget.children():
+            if isinstance(child_widget, QtWidgets.QLineEdit):
+                probe_keys.append(child_widget.objectName())
+            if isinstance(child_widget, QtWidgets.QGroupBox):
+                for child_widget2 in child_widget.children():
+                    if isinstance(child_widget2, QtWidgets.QLineEdit):
+                        probe_keys.append(child_widget2.objectName())   
+        return probe_keys
+    
     def _show_ephys_probes(self):
         '''setting the ephys probes from the rig metadata'''
         if self.meta_data['rig_metadata'] == {}:
