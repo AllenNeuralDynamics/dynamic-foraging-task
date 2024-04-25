@@ -1758,11 +1758,13 @@ class MetadataDialog(QDialog):
             if os.path.basename(self.meta_data['rig_metadata_file'])!=self.RigMetadataFile.text() and self.RigMetadataFile.text() != '':
                 # clear probe angles if the rig metadata file is changed
                 self._clear_probes_angle()
+                self._clear_stick_microscopes_angle()
             self.RigMetadataFile.setText(os.path.basename(self.meta_data['rig_metadata_file']))
         if update_session_metadata:
             widget_dict = self._get_widgets()
             self._set_widgets_value(widget_dict, self.meta_data['session_metadata'])
-        self._show_ephys_probes()    
+        self._show_ephys_probes()
+        self._show_stick_microscopes()    
     
     def _set_widgets_value(self, widget_dict, metadata):
         '''set the widgets value'''
@@ -1776,6 +1778,12 @@ class MetadataDialog(QDialog):
                     index = value.findText(metadata[key])
                     if index != -1:
                         value.setCurrentIndex(index)
+            elif isinstance(value, QtWidgets.QComboBox):
+                value.setCurrentIndex(0)
+            elif isinstance(value, QtWidgets.QLineEdit):
+                value.setText('')   
+            elif isinstance(value, QtWidgets.QTextEdit):
+                value.setPlainText('')
 
     def _clear_probes_angle(self):
         '''clear the angles'''
@@ -1785,6 +1793,15 @@ class MetadataDialog(QDialog):
             self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=['probes',current_probe])
             self.meta_data['session_metadata']['probes'][current_probe]={}
         self._show_ephys_probes()
+
+    def _clear_stick_microscopes_angle(self):
+        '''clear the angles'''
+        self._show_stick_microscopes()
+        for i in range(self.StickMicroscopes.count()):
+            current_probe = self.StickMicroscopes.itemText(i)
+            self.meta_data['session_metadata']=initialize_dic(self.meta_data['session_metadata'],key_list=['microscopes',current_probe])
+            self.meta_data['session_metadata']['microscopes'][current_probe]={}
+        self._show_stick_microscopes()
 
     def _save_metadata(self):
         '''save the metadata collected from this dialogue to an independent json file'''
@@ -1804,6 +1821,7 @@ class MetadataDialog(QDialog):
     def _get_widgets(self):
         '''get the widgets used for saving/loading metadata'''
         exclude_widgets=self._get_chidldren_keys(self.Probes)
+        exclude_widgets.append(self._get_chidldren_keys(self.Microscopes))
         exclude_widgets.append(['EphysProbes','RigMetadataFile'])
         widget_dict = {w.objectName(): w for w in self.findChildren(
             (QtWidgets.QLineEdit, QtWidgets.QTextEdit, QtWidgets.QComboBox))
@@ -1877,9 +1895,9 @@ class MetadataDialog(QDialog):
             self._show_stick_microscopes_angle()
             return
         items=[]
-        if 'microscopes' in self.meta_data['rig_metadata']:
-            for key in self.meta_data['rig_metadata']['microscopes']:
-                items.append(key)
+        if 'stick_microscopes' in self.meta_data['rig_metadata']:
+            for i in range(len(self.meta_data['rig_metadata']['stick_microscopes'])):
+                items.append(self.meta_data['rig_metadata']['stick_microscopes'][i]['name'])
         if items==[]:
             return
         
