@@ -1703,6 +1703,7 @@ class MetadataDialog(QDialog):
         self.meta_data = {}
         self.meta_data['rig_metadata'] = {}
         self.meta_data['session_metadata'] = {}
+        self.meta_data['rig_metadata_file'] = ''
 
     def _connectSignalsSlots(self):
         self.SelectRigMetadata.clicked.connect(lambda: self._SelectRigMetadata(rig_metadata_file=None))
@@ -1735,7 +1736,7 @@ class MetadataDialog(QDialog):
         
     def _update_metadata(self,update_rig_metadata=True,update_session_metadata=True):
         '''update the metadata'''
-        if update_rig_metadata or update_session_metadata:
+        if (update_rig_metadata or update_session_metadata) and ('rig_metadata_file' in self.meta_data):
             if os.path.basename(self.meta_data['rig_metadata_file'])!=self.RigMetadataFile.text() and self.RigMetadataFile.text() != '':
                 # clear probe angles if the rig metadata file is changed
                 self._clear_probes_angle()
@@ -1774,6 +1775,7 @@ class MetadataDialog(QDialog):
         # save metadata parameters
         widget_dict = self._get_widgets()
         self.meta_data=self.MainWindow._Concat(widget_dict, self.meta_data, 'session_metadata')
+        self.meta_data['rig_metadata_file'] = self.RigMetadataFile.text()
         metadata_dialog_folder=self.MainWindow.metadata_dialog_folder
         # Save self.meta_data to JSON
         if not os.path.exists(metadata_dialog_folder):
