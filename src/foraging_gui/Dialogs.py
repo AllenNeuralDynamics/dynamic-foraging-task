@@ -1827,7 +1827,7 @@ class MetadataDialog(QDialog):
         '''setting the ephys probes from the rig metadata'''
         if self.meta_data['rig_metadata'] == {}:
             self.EphysProbes.clear()
-            self._clear_probes_angle()
+            self._show_ephys_probes_angle()
             return
         items=[]
         if 'ephys_assemblies' in self.meta_data['rig_metadata']:
