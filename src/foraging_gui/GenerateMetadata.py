@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import datetime
 
 from aind_data_schema.core.session import (
     CcfCoords,
@@ -100,6 +101,7 @@ class generate_metadata:
             reward_consumed_total=float(self.Obj['BS_TotalReward']),
             reward_consumed_unit= "microliter",
             reward_delivery=self.lick_spouts,
+            calibrations=self.water_calibration,
             data_streams=[],
         )
 
@@ -109,16 +111,21 @@ class generate_metadata:
         '''
         Make water calibration metadata
         '''
+        self.water_calibration =[]
         self._parse_water_calibration()
-        Calibration(
-
-            calibration_date='',
-            device_name='',
-            description='' ,
-            input= '',
-            output='' ,
-            notes='' ,
-        )
+        for side in self.parsed_watercalibration.keys():
+            if side == 'Left':
+                device_name = 'Left lick spout'
+            elif side == 'Right':
+                device_name = 'Right lick spout'
+            description= f'Water calibration for {device_name}. The input is the valve open time in second and the output is the volume of water delivered in microliters.'
+            self.water_calibration.append(Calibration(
+                calibration_date=datetime.strptime(self.RecentWaterCalibrationDate, '%Y-%m-%d').date(),
+                device_name=device_name,
+                description=description ,
+                input= {'valve open time (s)':self.parsed_watercalibration[side]['X']},
+                output={'water volume (ul)':self.parsed_watercalibration[side]['Y']} ,
+            ))
 
     def _parse_water_calibration(self):
         '''
@@ -128,6 +135,7 @@ class generate_metadata:
         sorted_dates = sorted(self.WaterCalibrationResults.keys(), key=self._custom_sort_key)
         self.RecentWaterCalibration=self.WaterCalibrationResults[sorted_dates[-1]]
         self.RecentWaterCalibrationDate=sorted_dates[-1]
+
         sides=['Left','Right']
         self.parsed_watercalibration={}
         for side in sides:
