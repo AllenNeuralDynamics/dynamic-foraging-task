@@ -72,7 +72,6 @@ class generate_metadata:
             iacuc_protocol=self.Obj['meta_data_dialog']['session_metadata']['IACUCProtocol'],
             rig_id=self.Obj['meta_data_dialog']['rig_metadata']['rig_id'],
             notes=self.Obj['ShowNotes'],
-            animal_weight_prior='',
             animal_weight_post=float(self.Obj['WeightAfter']),
             weight_unit="gram",
             stimulus_epochs=[],
@@ -95,4 +94,5 @@ class generate_metadata:
     def high_speed_camera_metadata(self):
         pass
 
-#generate_metadata(json_file=r'Y:\715083\behavior_715083_2024-04-22_14-32-07\behavior\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-04-25_22-24-01_metadata_dialog.json', output_folder=f'F:\Test\Metadata')
+if __name__ == '__main__':
+    generate_metadata(json_file=r'Y:\715083\behavior_715083_2024-04-22_14-32-07\behavior\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-04-25_22-24-01_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
