@@ -18,6 +18,7 @@ from aind_data_schema.models.devices import (
     
     RelativePosition, 
     SpoutSide,
+    Calibration,
 
 )
 
@@ -81,6 +82,7 @@ class generate_metadata:
         '''
 
         self._get_RewardDelivery()
+        self._get_WaterCalibration()
         session = Session(
             experimenter_full_name = [self.Obj['Experimenter']],
             subject_id=self.Obj['ID'],
@@ -100,6 +102,37 @@ class generate_metadata:
 
         session.write_standard_file(output_directory=self.Obj['MetadataFolder'])
 
+    def _get_WaterCalibration(self):
+        '''
+        Make water calibration metadata
+        '''
+
+        Calibration(
+
+            calibration_date='',
+            device_name='',
+            description='' ,
+            input= '',
+            output='' ,
+            notes='' ,
+        )
+
+    def _parse_water_calibration(self):
+        '''
+        Parse the water calibration information from the json file
+        '''
+        self.WaterCalibrationResults=self.Obj['WaterCalibrationResults']
+        sorted_dates = sorted(self.WaterCalibrationResults.keys(), key=self._custom_sort_key)
+        self.RecentWaterCalibration=self.WaterCalibrationResults[sorted_dates[-1]]
+        self.RecentWaterCalibrationDate=sorted_dates[-1]
+
+    def _custom_sort_key(self,key):
+        if '_' in key:
+            date_part, number_part = key.rsplit('_', 1)
+            return (date_part, int(number_part))
+        else:
+            return (key, 0)
+        
     def  _get_RewardDelivery(self):
         '''
         Make the RewardDelivery metadata
