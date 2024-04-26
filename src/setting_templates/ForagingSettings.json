@@ -13,5 +13,6 @@
     "newscale_serial_num_box2":"",
     "newscale_serial_num_box3":"",
     "newscale_serial_num_box4":"",
-    "default_ui":"ForagingGUI.ui"
+    "default_ui":"ForagingGUI.ui",
+    "open_ephys_machine_ip_address":""
 }
