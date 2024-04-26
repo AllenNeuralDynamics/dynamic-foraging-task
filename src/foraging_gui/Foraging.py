@@ -2237,6 +2237,7 @@ class Window(QMainWindow):
         Obj['Camera_dialog']['camera_stop_time']=self.Camera_dialog.camera_stop_time
 
         # save the metadata collected in the metadata dialogue
+        self.Metadata_dialog._update_metadata_parameters()
         Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
 
         if SaveContinue==0:

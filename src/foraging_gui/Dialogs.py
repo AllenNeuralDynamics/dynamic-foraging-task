@@ -1816,14 +1816,18 @@ class MetadataDialog(QDialog):
             self.meta_data['session_metadata'][metadata_key][current_item] = {}
         _show_function()
 
-    def _save_metadata(self):
-        '''save the metadata collected from this dialogue to an independent json file'''
-        # save metadata parameters
+    def _save_metadata_dialog_parameters(self):
+        '''save the metadata dialog parameters'''
         widget_dict = self._get_widgets()
         self.meta_data=self.MainWindow._Concat(widget_dict, self.meta_data, 'session_metadata')
         self.meta_data['rig_metadata_file'] = self.RigMetadataFile.text()
-        metadata_dialog_folder=self.MainWindow.metadata_dialog_folder
+        
+    def _save_metadata(self):
+        '''save the metadata collected from this dialogue to an independent json file'''
+        # save metadata parameters
+        self._save_metadata_dialog_parameters()
         # Save self.meta_data to JSON
+        metadata_dialog_folder=self.MainWindow.metadata_dialog_folder
         if not os.path.exists(metadata_dialog_folder):
             os.makedirs(metadata_dialog_folder)
         json_file=os.path.join(metadata_dialog_folder, self.MainWindow.current_box+'_'+datetime.now().strftime("%Y-%m-%d_%H-%M-%S")+ '_metadata_dialog.json')
