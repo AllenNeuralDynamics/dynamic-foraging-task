@@ -32,7 +32,7 @@ class generate_metadata:
         json file to the metadata folder
 
     '''
-    def __init__(self, json_file=None, Obj=None, dialog_metadata=None, output_folder=None):
+    def __init__(self, json_file=None, Obj=None, dialog_metadata_file=None,dialog_metadata=None, output_folder=None):
         if json_file is None and Obj is None and dialog_metadata is None:
             logging.info("json file or Obj is not provided")
             return
@@ -43,7 +43,10 @@ class generate_metadata:
         else:
             self.Obj = Obj
 
-        if dialog_metadata is not None:
+        if dialog_metadata_file is not None:
+            with open(dialog_metadata_file) as f:
+                self.Obj['meta_data_dialog'] = json.load(f)
+        elif dialog_metadata is not None:
             self.Obj['meta_data_dialog'] = dialog_metadata
         
         if output_folder is not None:
@@ -69,11 +72,11 @@ class generate_metadata:
             iacuc_protocol=self.Obj['meta_data_dialog']['session_metadata']['IACUCProtocol'],
             rig_id=self.Obj['meta_data_dialog']['rig_metadata']['rig_id'],
             notes=self.Obj['ShowNotes'],
-            animal_weight_prior=1,
-            animal_weight_post=1,
+            animal_weight_prior='',
+            animal_weight_post=float(self.Obj['WeightAfter']),
             weight_unit="gram",
             stimulus_epochs=[],
-            reward_consumed_total= 1,
+            reward_consumed_total=float(self.Obj['TotalWater']),
             reward_consumed_unit= "microliter",
             data_streams=[],
         )
@@ -92,3 +95,4 @@ class generate_metadata:
     def high_speed_camera_metadata(self):
         pass
 
+#generate_metadata(json_file=r'Y:\715083\behavior_715083_2024-04-22_14-32-07\behavior\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-04-25_22-24-01_metadata_dialog.json', output_folder=f'F:\Test\Metadata')
