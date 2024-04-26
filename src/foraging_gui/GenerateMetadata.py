@@ -1,6 +1,15 @@
 import json
 import logging
 
+from aind_data_schema.core.session import (
+    CcfCoords,
+    Coordinates3d,
+    DomeModule,
+    EphysModule,
+    EphysProbeConfig,
+    Session,
+    Stream,
+)
 
 class generate_metadata:
     '''
@@ -45,7 +54,32 @@ class generate_metadata:
         self.behavior_metadata()
         self.ophys_metadata()
         self.high_speed_camera_metadata()
+        self._session()
     
+    def _session(self):
+        '''
+        Create metadata related to Session class in the aind_data_schema
+        '''
+        session = Session(
+            experimenter_full_name = [self.Obj['Experimenter']],
+            subject_id=self.Obj['ID'],
+            session_start_time=self.Obj['Other_SessionStartTime'],
+            session_end_time=self.Obj['Other_CurrentTime'],
+            session_type=self.Obj['Task'],
+            iacuc_protocol=self.Obj['meta_data_dialog']['session_metadata']['IACUCProtocol'],
+            rig_id=self.Obj['meta_data_dialog']['rig_metadata']['rig_id'],
+            notes=self.Obj['ShowNotes'],
+            animal_weight_prior=1,
+            animal_weight_post=1,
+            weight_unit="gram",
+            stimulus_epochs=[],
+            reward_consumed_total= 1,
+            reward_consumed_unit= "microliter",
+            data_streams=[],
+        )
+
+        session.write_standard_file(output_directory=self.Obj['MetadataFolder'])
+
     def ephys_metadata(self):
         pass
     
