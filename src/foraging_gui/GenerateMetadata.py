@@ -74,12 +74,25 @@ class generate_metadata:
             self.Obj['MetadataFolder'] = output_folder
 
         self.Obj['session_metadata']= {}
+        self._mapper()
         self.ephys_metadata()
         self.behavior_metadata()
         self.ophys_metadata()
         self.high_speed_camera_metadata()
         self._session()
     
+
+    def _mapper(self):
+        '''
+        Name mapping
+        '''
+        self.name_mapper = {
+            'Oxxius Lasers 473': 'Blue',
+            'Oxxius Lasers 561': 'Yellow',
+            'Oxxius Lasers 638': 'Red',
+            'laser_tags':[1,2]
+        }
+
     def _session(self):
         '''
         Create metadata related to Session class in the aind_data_schema
@@ -112,41 +125,48 @@ class generate_metadata:
         '''
         Make the optogenetic (Laser or LED) calibration metadata
         '''
-        self.opto_calibration =[]
         self._parse_opto_calibration() 
+        
 
-    
     def _parse_opto_calibration(self):
         '''
         Parse the optogenetic calibration information from the behavior json file
         '''
         self.OptoCalibrationResults=self.Obj['LaserCalibrationResults']
         self._get_laser_names_from_rig_metadata()
-        Colors=['Blue','Green','Red','Yellow']  # Colors of the lasers
+        Colors=[self.name_mapper[laser] for laser in self.laser_tags]  # Colors of the lasers
+        self.opto_calibration=[]
         for Color in Colors:
                 latest_calibration_date=self._FindLatestCalibrationDate(Color)
                 if latest_calibration_date=='NA':
                     RecentLaserCalibration={}
                 else:
-                    RecentLaserCalibration=self.obj['LaserCalibrationResults'][latest_calibration_date]
+                    RecentLaserCalibration=self.Obj['LaserCalibrationResults'][latest_calibration_date]
                 no_calibration=False
                 if not RecentLaserCalibration=={}:
                     if Color in RecentLaserCalibration.keys():
-                        if Protocol in RecentLaserCalibration[Color].keys():
+                        for Protocol in RecentLaserCalibration[Color]:
                             if Protocol=='Sine': 
-                                Frequency=RecentLaserCalibration[Color][Protocol].keys()
-                                for CurrentFrequency in Frequency:
-                                    for laser_tag in self.laser_tags:
-                                        ItemsLaserPower=[]
-                                        for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
-                                            ItemsLaserPower.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
-                                        ItemsLaserPower=sorted(ItemsLaserPower)
+                                for Frequency in RecentLaserCalibration[Color][Protocol]:
+                                    for laser_tag in self.name_mapper['laser_tags']:
+                                        voltage=[]
+                                        power=[]
+                                        for i in range(len(RecentLaserCalibration[Color][Protocol][Frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
+                                            laser_voltage_power=eval(str(RecentLaserCalibration[Color][Protocol][Frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
+                                            voltage.append(laser_voltage_power[0])
+                                            power.append(laser_voltage_power[1])
+                                        voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
+                                        self.opto_calibration.append({'Color':Color, 'Protocol':Protocol, 'Frequency':Frequency, 'Laser':laser_tag, 'Voltage':voltage, 'Power':power})
                             elif Protocol=='Constant' or Protocol=='Pulse':
-                                for laser_tag in self.laser_tags:
-                                    ItemsLaserPower=[]
+                                for laser_tag in self.name_mapper['laser_tags']:
+                                    voltage=[]
+                                    power=[]
                                     for i in range(len(RecentLaserCalibration[Color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
-                                        ItemsLaserPower.append(str(RecentLaserCalibration[Color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
-                                    ItemsLaserPower=sorted(ItemsLaserPower)
+                                        laser_voltage_power=eval(str(RecentLaserCalibration[Color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
+                                        voltage.append(laser_voltage_power[0])
+                                        power.append(laser_voltage_power[1])
+                                    voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
+                                    self.opto_calibration.append({'Color':Color, 'Protocol':Protocol, 'Frequency':'None', 'Laser':laser_tag, 'Voltage':voltage, 'Power':power})
                         else:
                             no_calibration=True
                     else:
