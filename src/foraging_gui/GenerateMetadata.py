@@ -98,9 +98,10 @@ class generate_metadata:
         Create metadata related to Session class in the aind_data_schema
         '''
 
-        self._get_RewardDelivery()
-        self._get_WaterCalibration()
+        self._get_reward_delivery()
+        self._get_water_calibration()
         self._get_opto_calibration()
+        self.calibration=self.water_calibration+self.opto_calibration
         session = Session(
             experimenter_full_name = [self.Obj['Experimenter']],
             subject_id=self.Obj['ID'],
@@ -115,7 +116,7 @@ class generate_metadata:
             reward_consumed_total=float(self.Obj['BS_TotalReward']),
             reward_consumed_unit= "microliter",
             reward_delivery=self.lick_spouts,
-            calibrations=self.water_calibration,
+            calibrations=self.calibration,
             data_streams=[],
         )
 
@@ -126,17 +127,26 @@ class generate_metadata:
         Make the optogenetic (Laser or LED) calibration metadata
         '''
         self._parse_opto_calibration() 
-        
+        self.opto_calibration=[]
+        for current_calibration in self.parsed_optocalibration:
+                description= f'Optogenetic calibration for {current_calibration["laser name"]} {current_calibration["Color"]} Laser_{current_calibration["Laser tag"]}. Protocol: {current_calibration["Protocol"]}. Frequency: {current_calibration["Frequency"]}.'
+                self.opto_calibration.append(Calibration(
+                calibration_date=datetime.strptime(current_calibration['latest_calibration_date'], '%Y-%m-%d').date(),
+                device_name=current_calibration['laser name'],
+                description=description,
+                input= {'input voltage (v)':current_calibration['Voltage']},
+                output={'laser power (mw)':current_calibration['Power']} ,
+                ))
 
     def _parse_opto_calibration(self):
         '''
         Parse the optogenetic calibration information from the behavior json file
         '''
+        self.parsed_optocalibration=[]
         self.OptoCalibrationResults=self.Obj['LaserCalibrationResults']
         self._get_laser_names_from_rig_metadata()
-        Colors=[self.name_mapper[laser] for laser in self.laser_tags]  # Colors of the lasers
-        self.opto_calibration=[]
-        for Color in Colors:
+        for laser in self.laser_names:
+                Color=self.name_mapper[laser]
                 latest_calibration_date=self._FindLatestCalibrationDate(Color)
                 if latest_calibration_date=='NA':
                     RecentLaserCalibration={}
@@ -156,7 +166,7 @@ class generate_metadata:
                                             voltage.append(laser_voltage_power[0])
                                             power.append(laser_voltage_power[1])
                                         voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
-                                        self.opto_calibration.append({'Color':Color, 'Protocol':Protocol, 'Frequency':Frequency, 'Laser':laser_tag, 'Voltage':voltage, 'Power':power})
+                                        self.parsed_optocalibration.append({'laser name':laser,'latest_calibration_date':latest_calibration_date,'Color':Color, 'Protocol':Protocol, 'Frequency':Frequency, 'Laser tag':laser_tag, 'Voltage':voltage, 'Power':power})
                             elif Protocol=='Constant' or Protocol=='Pulse':
                                 for laser_tag in self.name_mapper['laser_tags']:
                                     voltage=[]
@@ -166,7 +176,7 @@ class generate_metadata:
                                         voltage.append(laser_voltage_power[0])
                                         power.append(laser_voltage_power[1])
                                     voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
-                                    self.opto_calibration.append({'Color':Color, 'Protocol':Protocol, 'Frequency':'None', 'Laser':laser_tag, 'Voltage':voltage, 'Power':power})
+                                    self.parsed_optocalibration.append({'laser name':laser,'latest_calibration_date':latest_calibration_date,'Color':Color, 'Protocol':Protocol, 'Frequency':'None', 'Laser tag':laser_tag, 'Voltage':voltage, 'Power':power})
                         else:
                             no_calibration=True
                     else:
@@ -178,13 +188,13 @@ class generate_metadata:
         '''
         Get the Laser/LED names from the rig metadata
         '''
-        self.laser_tags=[]
+        self.laser_names=[]
         if Obj is None:
             Obj=self.Obj
         for i in range(len(Obj['meta_data_dialog']['rig_metadata']['light_sources'])):
             if Obj['meta_data_dialog']['rig_metadata']['light_sources'][i]['device_type']=='Laser':
-                self.laser_tags.append(Obj['meta_data_dialog']['rig_metadata']['light_sources'][i]['name'])
-        return self.laser_tags
+                self.laser_names.append(Obj['meta_data_dialog']['rig_metadata']['light_sources'][i]['name'])
+        return self.laser_names
     
     def _FindLatestCalibrationDate(self,Laser):
         '''find the latest calibration date for the selected laser'''
@@ -200,7 +210,7 @@ class generate_metadata:
         else:
             return sorted_dates[-1]
         
-    def _get_WaterCalibration(self):
+    def _get_water_calibration(self):
         '''
         Make water calibration metadata
         '''
@@ -244,7 +254,7 @@ class generate_metadata:
         else:
             return (key, 0)
         
-    def  _get_RewardDelivery(self):
+    def  _get_reward_delivery(self):
         '''
         Make the RewardDelivery metadata
         '''
