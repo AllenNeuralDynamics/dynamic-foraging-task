@@ -87,6 +87,7 @@ class generate_metadata:
 
         self._get_RewardDelivery()
         self._get_WaterCalibration()
+        self._get_opto_calibration()
         session = Session(
             experimenter_full_name = [self.Obj['Experimenter']],
             subject_id=self.Obj['ID'],
@@ -107,6 +108,78 @@ class generate_metadata:
 
         session.write_standard_file(output_directory=self.Obj['MetadataFolder'])
 
+    def _get_opto_calibration(self):
+        '''
+        Make the optogenetic (Laser or LED) calibration metadata
+        '''
+        self.opto_calibration =[]
+        self._parse_opto_calibration() 
+
+    
+    def _parse_opto_calibration(self):
+        '''
+        Parse the optogenetic calibration information from the behavior json file
+        '''
+        self.OptoCalibrationResults=self.Obj['LaserCalibrationResults']
+        self._get_laser_names_from_rig_metadata()
+        Colors=['Blue','Green','Red','Yellow']  # Colors of the lasers
+        for Color in Colors:
+                latest_calibration_date=self._FindLatestCalibrationDate(Color)
+                if latest_calibration_date=='NA':
+                    RecentLaserCalibration={}
+                else:
+                    RecentLaserCalibration=self.obj['LaserCalibrationResults'][latest_calibration_date]
+                no_calibration=False
+                if not RecentLaserCalibration=={}:
+                    if Color in RecentLaserCalibration.keys():
+                        if Protocol in RecentLaserCalibration[Color].keys():
+                            if Protocol=='Sine': 
+                                Frequency=RecentLaserCalibration[Color][Protocol].keys()
+                                for CurrentFrequency in Frequency:
+                                    for laser_tag in self.laser_tags:
+                                        ItemsLaserPower=[]
+                                        for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
+                                            ItemsLaserPower.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
+                                        ItemsLaserPower=sorted(ItemsLaserPower)
+                            elif Protocol=='Constant' or Protocol=='Pulse':
+                                for laser_tag in self.laser_tags:
+                                    ItemsLaserPower=[]
+                                    for i in range(len(RecentLaserCalibration[Color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
+                                        ItemsLaserPower.append(str(RecentLaserCalibration[Color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
+                                    ItemsLaserPower=sorted(ItemsLaserPower)
+                        else:
+                            no_calibration=True
+                    else:
+                        no_calibration=True
+                else:
+                    no_calibration=True
+
+    def _get_laser_names_from_rig_metadata(self,Obj=None):
+        '''
+        Get the Laser/LED names from the rig metadata
+        '''
+        self.laser_tags=[]
+        if Obj is None:
+            Obj=self.Obj
+        for i in range(len(Obj['meta_data_dialog']['rig_metadata']['light_sources'])):
+            if Obj['meta_data_dialog']['rig_metadata']['light_sources'][i]['device_type']=='Laser':
+                self.laser_tags.append(Obj['meta_data_dialog']['rig_metadata']['light_sources'][i]['name'])
+        return self.laser_tags
+    
+    def _FindLatestCalibrationDate(self,Laser):
+        '''find the latest calibration date for the selected laser'''
+        if not ('LaserCalibrationResults' in self.Obj):
+            return 'NA'
+        Dates=[]
+        for Date in self.Obj['LaserCalibrationResults']:
+            if Laser in self.Obj['LaserCalibrationResults'][Date].keys():
+                Dates.append(Date)
+        sorted_dates = sorted(Dates)
+        if sorted_dates==[]:
+            return 'NA'
+        else:
+            return sorted_dates[-1]
+        
     def _get_WaterCalibration(self):
         '''
         Make water calibration metadata
