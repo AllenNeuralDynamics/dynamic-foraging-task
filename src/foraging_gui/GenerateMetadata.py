@@ -9,6 +9,22 @@ from aind_data_schema.core.session import (
     EphysProbeConfig,
     Session,
     Stream,
+    RewardDeliveryConfig,
+    RewardSpoutConfig,
+    RewardSolution,
+)
+
+from aind_data_schema.models.devices import (
+    
+    RelativePosition, 
+    SpoutSide,
+
+)
+
+from aind_data_schema.models.units import (
+
+    SizeUnit,
+
 )
 
 class generate_metadata:
@@ -63,6 +79,8 @@ class generate_metadata:
         '''
         Create metadata related to Session class in the aind_data_schema
         '''
+
+        self._get_RewardDelivery()
         session = Session(
             experimenter_full_name = [self.Obj['Experimenter']],
             subject_id=self.Obj['ID'],
@@ -74,13 +92,41 @@ class generate_metadata:
             notes=self.Obj['ShowNotes'],
             animal_weight_post=float(self.Obj['WeightAfter']),
             weight_unit="gram",
-            stimulus_epochs=[],
-            reward_consumed_total=float(self.Obj['TotalWater']),
+            reward_consumed_total=float(self.Obj['BS_TotalReward']),
             reward_consumed_unit= "microliter",
+            reward_delivery=self.lick_spouts,
             data_streams=[],
         )
 
         session.write_standard_file(output_directory=self.Obj['MetadataFolder'])
+
+    def  _get_RewardDelivery(self):
+        '''
+        Make the RewardDelivery metadata
+        '''
+        lick_spouts_distance=5000 # distance between the two lick spouts in um
+
+        self.lick_spouts=RewardDeliveryConfig(
+            reward_solution= RewardSolution.WATER,
+            reward_spouts=[RewardSpoutConfig(
+                side=SpoutSide.LEFT,
+                starting_position=RelativePosition(
+                    coordinate_system='Stage. x: left (+) and right (-); y: forward (+) and backward (-); z: down (+) and up (-). Both left and right lick spouts are fixed on the same stage.',
+                    x=self.Obj['B_NewscalePositions'][0][0], y=self.Obj['B_NewscalePositions'][0][1], z=self.Obj['B_NewscalePositions'][0][2],
+                    position_unit=SizeUnit.UM
+                ),
+                variable_position=True
+            ),RewardSpoutConfig(
+                side=SpoutSide.RIGHT,
+                starting_position=RelativePosition(
+                    coordinate_system='Relative to the left lick spout.',
+                    x=self.Obj['B_NewscalePositions'][0][0]-lick_spouts_distance, y=self.Obj['B_NewscalePositions'][0][1], z=self.Obj['B_NewscalePositions'][0][2],
+                    position_unit=SizeUnit.UM
+                ),
+                variable_position=True
+            )],
+            notes="Lick spout positions and reward size can be varied and the data is saved in the NWB file"
+        )
 
     def ephys_metadata(self):
         pass
