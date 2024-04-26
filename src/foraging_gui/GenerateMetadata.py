@@ -28,6 +28,9 @@ from aind_data_schema.models.units import (
 
 )
 
+from foraging_gui.Visualization import PlotWaterCalibration
+
+
 class generate_metadata:
     '''
     Parse the behavior json file and generate session and rig metadata
@@ -106,7 +109,7 @@ class generate_metadata:
         '''
         Make water calibration metadata
         '''
-
+        self._parse_water_calibration()
         Calibration(
 
             calibration_date='',
@@ -125,6 +128,13 @@ class generate_metadata:
         sorted_dates = sorted(self.WaterCalibrationResults.keys(), key=self._custom_sort_key)
         self.RecentWaterCalibration=self.WaterCalibrationResults[sorted_dates[-1]]
         self.RecentWaterCalibrationDate=sorted_dates[-1]
+        sides=['Left','Right']
+        self.parsed_watercalibration={}
+        for side in sides:
+            self.parsed_watercalibration[side]={}
+            sorted_X,sorted_Y=PlotWaterCalibration._GetWaterCalibration(self,self.WaterCalibrationResults,self.RecentWaterCalibrationDate,side)
+            self.parsed_watercalibration[side]['X']=sorted_X
+            self.parsed_watercalibration[side]['Y']=sorted_Y
 
     def _custom_sort_key(self,key):
         if '_' in key:
