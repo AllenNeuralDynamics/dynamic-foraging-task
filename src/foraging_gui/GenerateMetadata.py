@@ -114,6 +114,11 @@ class generate_metadata:
         self._get_opto_calibration()
         self.calibration=self.water_calibration+self.opto_calibration
         self._get_behavior_stream()
+        self._get_ephys_stream()
+        self._get_ophys_stream()
+        self._get_high_speed_camera_stream()
+
+        self.data_streams = self.behavior_streams+self.ephys_streams+self.ophys_streams+self.high_speed_camera_streams
         session = Session(
             experimenter_full_name = [self.Obj['Experimenter']],
             subject_id=self.Obj['ID'],
@@ -133,6 +138,24 @@ class generate_metadata:
         )
         session.write_standard_file(output_directory=self.Obj['MetadataFolder'])
 
+    def _get_high_speed_camera_stream(self):
+        '''
+        Make the high speed camera stream metadata
+        '''
+        self.high_speed_camera_streams=[]
+
+    def _get_ophys_stream(self):
+        '''
+        Make the ophys stream metadata
+        '''
+        self.ophys_streams=[]
+
+    def _get_ephys_stream(self):
+        '''
+        Make the ephys stream metadata
+        '''
+        self.ephys_streams=[]
+
     def _get_behavior_stream(self):
         '''
         Make the behavior stream metadata
@@ -142,8 +165,8 @@ class generate_metadata:
         else:
             daq_names=["Behavior board","Sound card","Synchronizer","Janelia lick detector"]
 
-        self.data_streams=[]
-        self.data_streams.append(Stream(
+        self.behavior_streams=[]
+        self.behavior_streams.append(Stream(
                 stream_modalities=[Modality.TRAINED_BEHAVIOR],
                 stream_start_time=datetime.strptime(self.Obj['Other_SessionStartTime'], '%Y-%m-%d %H:%M:%S.%f').date(),
                 stream_end_time=datetime.strptime(self.Obj['Other_CurrentTime'], '%Y-%m-%d %H:%M:%S.%f').date(),
