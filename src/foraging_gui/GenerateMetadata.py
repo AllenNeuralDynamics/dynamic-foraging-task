@@ -87,7 +87,8 @@ class generate_metadata:
             'Oxxius Lasers 473': 'Blue',
             'Oxxius Lasers 561': 'Yellow',
             'Oxxius Lasers 638': 'Red',
-            'laser_tags':[1,2]
+            'laser_tags':[1,2],
+            'sides':['Left','Right'] # lick spouts
         }
 
     def _get_box_type(self):
@@ -291,7 +292,7 @@ class generate_metadata:
         self.RecentWaterCalibration=self.WaterCalibrationResults[sorted_dates[-1]]
         self.RecentWaterCalibrationDate=sorted_dates[-1]
 
-        sides=['Left','Right']
+        sides=self.name_mapper['sides']
         self.parsed_watercalibration={}
         for side in sides:
             self.parsed_watercalibration[side]={}
