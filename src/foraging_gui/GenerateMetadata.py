@@ -88,12 +88,13 @@ class generate_metadata:
             'Oxxius Lasers 561': 'Yellow',
             'Oxxius Lasers 638': 'Red',
             'laser_tags':[1,2], # laser tags corresponding to Laser_1 and Laser_2
-            'sides':['Left','Right'] # lick spouts
+            'sides':['Left','Right'], # lick spouts
+            'lick_spouts_distance':5000, # distance between the two lick spouts in um; this value shoud be directly extracted from the rig metadata
         }
 
     def _get_box_type(self):
         '''
-        To judge the box type (ephys or behavior)
+        To judge the box type (ephys or behavior) based on the rig_id.
         '''
         if 'EPHYS' in self.Obj['meta_data_dialog']['rig_metadata']['rig_id']:
             self.box_type = 'Ephys'
@@ -311,8 +312,7 @@ class generate_metadata:
         '''
         Make the RewardDelivery metadata
         '''
-        lick_spouts_distance=5000 # distance between the two lick spouts in um
-
+        lick_spouts_distance=self.lick_spouts_distance 
         self.lick_spouts=RewardDeliveryConfig(
             reward_solution= RewardSolution.WATER,
             reward_spouts=[RewardSpoutConfig(
