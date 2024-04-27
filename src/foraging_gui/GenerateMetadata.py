@@ -72,6 +72,10 @@ class generate_metadata:
         
         if output_folder is not None:
             self.Obj['MetadataFolder'] = output_folder
+        
+        # save rig metadata
+        with open(self.Obj['MetadataFolder'] + self.Obj['meta_data_dialog']['rig_metadata_file'], 'w') as f:
+            json.dump(self.Obj['meta_data_dialog']['rig_metadata'], f, indent=4)
 
         self.Obj['session_metadata']= {}
         self._mapper()
