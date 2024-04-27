@@ -164,15 +164,16 @@ class generate_metadata:
         daq_names = [daq['name'] for daq in self.Obj['meta_data_dialog']['rig_metadata']["daqs"] if 'Neuropixels' in daq['name']]
 
         self.ephys_streams=[]
+        self._get_ephys_modules()
         self.ephys_streams.append(Stream(
                 stream_modalities=[Modality.ECEPHYS],
                 stream_start_time=datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S.%f'),
                 stream_end_time=datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S.%f'),
                 daq_names=daq_names,
-                stimulus_device_names=[''],
+                stimulus_device_names=self.stmulus_device_names,
                 mouse_platform_name=self.Obj['meta_data_dialog']['rig_metadata']['mouse_platform']['name'],
                 active_mouse_platform=False,
-                ephys_modules=[''],
+                ephys_modules=self.ephys_modules,
                 stick_microscopes=[''],
         ))
 
@@ -180,7 +181,9 @@ class generate_metadata:
         '''
         Make the ephys module metadata
         '''
+        self._get_probe_names()
         self.ephys_modules=[]
+        self.stmulus_device_names=[]
         for ind_probe, probe in enumerate(self.probe_names):
             if probe in self.Obj['meta_data_dialog']['session_metadata']['probes']:
                 self.ephys_modules.append(EphysModule(
@@ -196,8 +199,18 @@ class generate_metadata:
                         z=self.Obj['meta_data_dialog']['session_metadata']['probes'][probe]['ManipulatorZ'],
                         unit=SizeUnit.UM,
                     ),
-
                 ))
+                self.stmulus_device_names.extend(self._find_laser_name(probe))
+    
+    def _find_laser_name(self, probe_name):
+        '''
+        Find the laser name for the probe
+        '''
+        for assembly in self.Obj['meta_data_dialog']['rig_metadata']['ephys_assemblies']:
+            for probe in assembly['probes']:
+                if probe['name'] == probe_name:
+                   return probe['lasers']
+        return None
     
     def _find_assembly_name(self, probe_name):
         '''
