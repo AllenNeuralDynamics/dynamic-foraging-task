@@ -1043,6 +1043,7 @@ class Window(QMainWindow):
                 4:'D'
             }
             self.current_box='{}-{}'.format(self.current_box,mapper[self.box_number])
+        self.Other_current_box=self.current_box
         window_title = '{}'.format(self.current_box)
         self.window_title = window_title
 
