@@ -162,23 +162,25 @@ class generate_metadata:
         self._get_ephys_modules()
         self._get_stick_microscope()
         if 'open_ephys' in self.Obj:
-            if 'openephys_stat_recording_time' not in self.Obj:
-                start_time = self.Obj['Other_SessionStartTime']
-                end_time = self.Obj['Other_CurrentTime']
-            else:
-                start_time = self.Obj['openephys_stat_recording_time']
-                end_time = self.Obj['openephys_stop_recording_time']
-            self.ephys_streams.append(Stream(
-                    stream_modalities=[Modality.ECEPHYS],
-                    stream_start_time=datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S.%f'),
-                    stream_end_time=datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S.%f'),
-                    daq_names=daq_names,
-                    stimulus_device_names=self.stmulus_device_names,
-                    mouse_platform_name=self.Obj['meta_data_dialog']['rig_metadata']['mouse_platform']['name'],
-                    active_mouse_platform=False,
-                    ephys_modules=self.ephys_modules,
-                    stick_microscopes=self.stick_microscopes,
-            ))
+            for current_recording in self.Obj['open_ephys']:
+                if 'openephys_stat_recording_time' not in current_recording:
+                    start_time = self.Obj['Other_SessionStartTime']
+                    end_time = self.Obj['Other_CurrentTime']
+                else:
+                    start_time = current_recording['openephys_stat_recording_time']
+                    end_time = current_recording['openephys_stop_recording_time']
+                self.ephys_streams.append(Stream(
+                        stream_modalities=[Modality.ECEPHYS],
+                        stream_start_time=datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S.%f'),
+                        stream_end_time=datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S.%f'),
+                        daq_names=daq_names,
+                        stimulus_device_names=self.stmulus_device_names,
+                        mouse_platform_name=self.Obj['meta_data_dialog']['rig_metadata']['mouse_platform']['name'],
+                        active_mouse_platform=False,
+                        ephys_modules=self.ephys_modules,
+                        stick_microscopes=self.stick_microscopes,
+                        notes=f"recording type: {current_recording['recording_type']}; file name:{current_recording['prepend_text']}{current_recording['base_text']};  experiment number:{current_recording['record_nodes'][0]['experiment_number']};  recording number:{current_recording['record_nodes'][0]['recording_number']}",
+                ))
 
 
     def _get_stick_microscope(self):
@@ -440,4 +442,4 @@ class generate_metadata:
 
 
 if __name__ == '__main__':
-    generate_metadata(json_file=r'Y:\715083\behavior_715083_2024-04-22_14-32-07\behavior\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-04-27_14-57-06_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
+    generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-04-27_14-57-06_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
