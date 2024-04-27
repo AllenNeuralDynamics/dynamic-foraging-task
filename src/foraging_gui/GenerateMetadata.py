@@ -142,13 +142,16 @@ class generate_metadata:
         Make the high speed camera stream metadata
         '''
         self.high_speed_camera_streams=[]
+        self.Obj['Camera_dialog']['camera_start_time']=str(datetime.now())
+        self.Obj['Camera_dialog']['camera_end_time']=str(datetime.now())
+        
 
     def _get_ophys_stream(self):
         '''
         Make the ophys stream metadata
         '''
         self.ophys_streams=[]
-        
+
     def _get_stimulus(self):
         '''
         make the stimulus metadata (e.g. audio and optogenetics)
@@ -169,7 +172,6 @@ class generate_metadata:
         Make the optogenetics stimulus metadata
         '''
         self.optogenetics_stimulus=[]
-
 
     def _get_ephys_stream(self):
         '''

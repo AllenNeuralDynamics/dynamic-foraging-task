@@ -337,6 +337,7 @@ class WaterCalibrationDialog(QDialog):
         self.showrecent.textChanged.connect(self._Showrecent)
         self.showspecificcali.activated.connect(self._ShowSpecifcDay)
         self.SaveCalibrationPar.clicked.connect(self._SaveCalibrationPar)
+        
     def _SaveCalibrationPar(self):
         '''save the calibration parameters'''
         # load the pre-stored calibration parameters
