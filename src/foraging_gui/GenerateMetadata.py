@@ -177,6 +177,22 @@ class generate_metadata:
                 stick_microscopes=[''],
         ))
 
+
+    def _get_stick_microscope(self):
+        '''
+        Make the stick microscope metadata
+        '''
+        self.stick_microscopes=[]
+        self._find_stick_microscope_names()
+        for stick_microscope in self.stick_microscope_names:
+            self.stick_microscopes.append(DomeModule(
+                assembly_name=stick_microscope,
+                rotation_angle=self.Obj['meta_data_dialog']['rig_metadata']['microscopes'][stick_microscope]['Stick_RotationAngle'],
+                arc_angle=self.Obj['meta_data_dialog']['rig_metadata']['microscopes'][stick_microscope]['Stick_ArcAngle'],
+                module_angle=self.Obj['meta_data_dialog']['rig_metadata']['microscopes'][stick_microscope]['Stick_ModuleAngle'],
+                notes='Did not calibrate.',
+            ))
+
     def _get_ephys_modules(self):
         '''
         Make the ephys module metadata
@@ -191,7 +207,7 @@ class generate_metadata:
                     arc_angle=self.Obj['meta_data_dialog']['session_metadata']['probes'][probe]['ArcAngle'],
                     module_angle=self.Obj['meta_data_dialog']['session_metadata']['probes'][probe]['ModuleAngle'],
                     ephys_probes=[EphysProbeConfig(name=probe)],
-                    assembly_name=self._find_assembly_name(probe),
+                    assembly_name=self._find_assembly_names(probe),
                     primary_targeted_structure=self.Obj['meta_data_dialog']['session_metadata']['probes'][probe]['ProbeTarget'],
                     manipulator_coordinates=Coordinates3d(
                         x=self.Obj['meta_data_dialog']['session_metadata']['probes'][probe]['ManipulatorX'],
@@ -200,9 +216,19 @@ class generate_metadata:
                         unit=SizeUnit.UM,
                     ),
                 ))
-                self.stmulus_device_names.extend(self._find_laser_name(probe))
+                self.stmulus_device_names.extend(self._find_laser_names(probe))
     
-    def _find_laser_name(self, probe_name):
+
+    def _find_stick_microscope_names(self):
+        '''
+        Find the stick microscope names
+        '''
+        self.stick_microscope_names=[]
+        for stick_microscope in self.Obj['meta_data_dialog']['rig_metadata']['stick_microscopes']:
+                self.stick_microscope_names.append(stick_microscope['name'])
+
+
+    def _find_laser_names(self, probe_name):
         '''
         Find the laser name for the probe
         '''
@@ -212,7 +238,7 @@ class generate_metadata:
                    return probe['lasers']
         return None
     
-    def _find_assembly_name(self, probe_name):
+    def _find_assembly_names(self, probe_name):
         '''
         Find the assembly name for the probe
         '''
@@ -249,7 +275,6 @@ class generate_metadata:
                 mouse_platform_name=self.Obj['meta_data_dialog']['rig_metadata']['mouse_platform']['name'],
                 active_mouse_platform=False,
         ))
-
 
     def _get_opto_calibration(self):
         '''
