@@ -115,6 +115,7 @@ class generate_metadata:
         self._get_ephys_stream()
         self._get_ophys_stream()
         self._get_high_speed_camera_stream()
+        self._get_stimulus()
         self.data_streams = self.behavior_streams+self.ephys_streams+self.ophys_streams+self.high_speed_camera_streams
 
         session = Session(
@@ -147,6 +148,28 @@ class generate_metadata:
         Make the ophys stream metadata
         '''
         self.ophys_streams=[]
+        
+    def _get_stimulus(self):
+        '''
+        make the stimulus metadata (e.g. audio and optogenetics)
+        '''
+        self.stimulus=[]
+        self._get_audio_stimulus()
+        self._get_optogenetics_stimulus()
+        self.stimulus=self.audio_stimulus+self.optogenetics_stimulus
+
+    def _get_audio_stimulus(self):
+        '''
+        Make the audio stimulus metadata
+        '''
+        self.audio_stimulus=[]
+
+    def _get_optogenetics_stimulus(self):
+        '''
+        Make the optogenetics stimulus metadata
+        '''
+        self.optogenetics_stimulus=[]
+
 
     def _get_ephys_stream(self):
         '''
