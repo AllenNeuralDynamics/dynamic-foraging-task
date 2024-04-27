@@ -76,10 +76,6 @@ class generate_metadata:
         self.Obj['session_metadata']= {}
         self._mapper()
         self._get_box_type()
-        self.ephys_metadata()
-        self.behavior_metadata()
-        self.ophys_metadata()
-        self.high_speed_camera_metadata()
         self._session()
     
 
@@ -113,12 +109,13 @@ class generate_metadata:
         self._get_water_calibration()
         self._get_opto_calibration()
         self.calibration=self.water_calibration+self.opto_calibration
+
         self._get_behavior_stream()
         self._get_ephys_stream()
         self._get_ophys_stream()
         self._get_high_speed_camera_stream()
-
         self.data_streams = self.behavior_streams+self.ephys_streams+self.ophys_streams+self.high_speed_camera_streams
+
         session = Session(
             experimenter_full_name = [self.Obj['Experimenter']],
             subject_id=self.Obj['ID'],
@@ -134,7 +131,7 @@ class generate_metadata:
             reward_consumed_unit= "microliter",
             reward_delivery=self.lick_spouts,
             calibrations=self.calibration,
-            data_streams=[],
+            data_streams=self.data_streams,
         )
         session.write_standard_file(output_directory=self.Obj['MetadataFolder'])
 
@@ -168,8 +165,8 @@ class generate_metadata:
         self.behavior_streams=[]
         self.behavior_streams.append(Stream(
                 stream_modalities=[Modality.TRAINED_BEHAVIOR],
-                stream_start_time=datetime.strptime(self.Obj['Other_SessionStartTime'], '%Y-%m-%d %H:%M:%S.%f').date(),
-                stream_end_time=datetime.strptime(self.Obj['Other_CurrentTime'], '%Y-%m-%d %H:%M:%S.%f').date(),
+                stream_start_time=datetime.strptime(self.Obj['Other_SessionStartTime'], '%Y-%m-%d %H:%M:%S.%f'),
+                stream_end_time=datetime.strptime(self.Obj['Other_CurrentTime'], '%Y-%m-%d %H:%M:%S.%f'),
                 daq_names=daq_names,
                 stimulus_device_names=['NA'],
                 mouse_platform_name=self.Obj['meta_data_dialog']['rig_metadata']['mouse_platform']['name'],
@@ -337,17 +334,6 @@ class generate_metadata:
             notes="Lick spout positions and reward size can be varied and the data is saved in the NWB file"
         )
 
-    def ephys_metadata(self):
-        pass
-    
-    def behavior_metadata(self):
-        pass
-
-    def ophys_metadata(self):
-        pass
-
-    def high_speed_camera_metadata(self):
-        pass
 
 if __name__ == '__main__':
     generate_metadata(json_file=r'Y:\715083\behavior_715083_2024-04-22_14-32-07\behavior\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-04-25_22-24-01_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
