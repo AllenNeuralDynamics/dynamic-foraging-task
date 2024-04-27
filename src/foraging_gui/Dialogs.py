@@ -1723,6 +1723,7 @@ class MetadataDialog(QDialog):
         self.ClearMetadata.clicked.connect(self._clear_metadata)
         self.Stick_ArcAngle.textChanged.connect(self._save_configuration)
         self.Stick_ModuleAngle.textChanged.connect(self._save_configuration)
+        self.Stick_RotationAngle.textChanged.connect(self._save_configuration)
 
     def _get_basics(self):
         '''get the basic information'''
