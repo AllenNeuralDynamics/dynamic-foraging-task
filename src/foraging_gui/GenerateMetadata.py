@@ -213,9 +213,9 @@ class generate_metadata:
         Get the probe names from the rig metadata
         '''
         self.probe_names=[]
-        for i in range(len(self.Obj['meta_data_dialog']['rig_metadata']['ephys_assemblies'])):
-            for j in range(len(self.Obj['meta_data_dialog']['rig_metadata']['ephys_assemblies'][i]['probes'])):
-                self.probe_names.append(self.Obj['meta_data_dialog']['rig_metadata']['ephys_assemblies'][i]['probes'][j]['name'])
+        for assembly in self.Obj['meta_data_dialog']['rig_metadata']['ephys_assemblies']:
+            for probe in assembly['probes']:
+                self.probe_names.append(probe['name'])
        
     def _get_behavior_stream(self):
         '''
