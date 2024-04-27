@@ -73,6 +73,8 @@ class generate_metadata:
         if output_folder is not None:
             self.Obj['MetadataFolder'] = output_folder
         
+        self._handle_edge_cases()
+
         # save rig metadata
         with open(self.Obj['MetadataFolder'] + self.Obj['meta_data_dialog']['rig_metadata_file'], 'w') as f:
             json.dump(self.Obj['meta_data_dialog']['rig_metadata'], f, indent=4)
@@ -114,6 +116,14 @@ class generate_metadata:
         else:
             self.box_type = 'Behavior'
     
+    def _handle_edge_cases(self):
+        '''
+        handle edge cases (e.g. missing keys in the json file)
+        '''
+        if 'camera_start_time' not in self.Obj['Camera_dialog']:
+            self.Obj['Camera_dialog']['camera_start_time'] = ''
+        if 'camera_end_time' not in self.Obj['Camera_dialog']:
+            self.Obj['Camera_dialog']['camera_end_time'] = ''
 
     def _session(self):
         '''
