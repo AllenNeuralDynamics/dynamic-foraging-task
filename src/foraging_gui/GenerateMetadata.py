@@ -1,4 +1,5 @@
 import json
+import os
 import logging
 from datetime import datetime
 
@@ -76,7 +77,8 @@ class generate_metadata:
         self._handle_edge_cases()
 
         # save rig metadata
-        with open(self.Obj['MetadataFolder'] + self.Obj['meta_data_dialog']['rig_metadata_file'], 'w') as f:
+        rig_metadata_full_path=os.path.join(self.Obj['MetadataFolder'],self.Obj['meta_data_dialog']['rig_metadata_file'])
+        with open(rig_metadata_full_path, 'w') as f:
             json.dump(self.Obj['meta_data_dialog']['rig_metadata'], f, indent=4)
 
         self.Obj['session_metadata']= {}
