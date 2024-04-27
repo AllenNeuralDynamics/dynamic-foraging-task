@@ -87,7 +87,7 @@ class generate_metadata:
             'Oxxius Lasers 473': 'Blue',
             'Oxxius Lasers 561': 'Yellow',
             'Oxxius Lasers 638': 'Red',
-            'laser_tags':[1,2],
+            'laser_tags':[1,2], # laser tags corresponding to Laser_1 and Laser_2
             'sides':['Left','Right'] # lick spouts
         }
 
