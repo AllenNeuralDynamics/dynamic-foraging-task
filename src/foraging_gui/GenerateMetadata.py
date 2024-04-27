@@ -153,7 +153,29 @@ class generate_metadata:
         '''
         Make the ephys stream metadata
         '''
+        if 'openephys_stat_recording_time' not in self.Obj:
+            start_time = self.Obj['Other_SessionStartTime']
+            end_time = self.Obj['Other_CurrentTime']
+        else:
+            start_time = self.Obj['openephys_stat_recording_time']
+            end_time = self.Obj['openephys_stop_recording_time']
+
+        # find daq names for Neuropixels
+        daq_names = [daq['name'] for daq in self.Obj['meta_data_dialog']['rig_metadata']["daqs"] if 'Neuropixels' in daq['name']]
+
         self.ephys_streams=[]
+        self.ephys_streams.append(Stream(
+                stream_modalities=[Modality.ECEPHYS],
+                stream_start_time=datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S.%f'),
+                stream_end_time=datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S.%f'),
+                daq_names=daq_names,
+                stimulus_device_names=[''],
+                mouse_platform_name=self.Obj['meta_data_dialog']['rig_metadata']['mouse_platform']['name'],
+                active_mouse_platform=False,
+                ephys_modules=[''],
+                stick_microscopes=[''],
+        ))
+
 
     def _get_behavior_stream(self):
         '''
@@ -170,7 +192,7 @@ class generate_metadata:
                 stream_start_time=datetime.strptime(self.Obj['Other_SessionStartTime'], '%Y-%m-%d %H:%M:%S.%f'),
                 stream_end_time=datetime.strptime(self.Obj['Other_CurrentTime'], '%Y-%m-%d %H:%M:%S.%f'),
                 daq_names=daq_names,
-                stimulus_device_names=['NA'],
+                stimulus_device_names=[''],
                 mouse_platform_name=self.Obj['meta_data_dialog']['rig_metadata']['mouse_platform']['name'],
                 active_mouse_platform=False,
         ))
@@ -312,7 +334,7 @@ class generate_metadata:
         '''
         Make the RewardDelivery metadata
         '''
-        lick_spouts_distance=self.lick_spouts_distance 
+        lick_spouts_distance=self.name_mapper['lick_spouts_distance'] 
         self.lick_spouts=RewardDeliveryConfig(
             reward_solution= RewardSolution.WATER,
             reward_spouts=[RewardSpoutConfig(
