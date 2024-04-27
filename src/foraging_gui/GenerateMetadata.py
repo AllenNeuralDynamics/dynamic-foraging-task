@@ -84,9 +84,11 @@ class generate_metadata:
         Name mapping
         '''
         self.name_mapper = {
-            'Oxxius Lasers 473': 'Blue',
-            'Oxxius Lasers 561': 'Yellow',
-            'Oxxius Lasers 638': 'Red',
+            'laser_name_mapper':{
+                    'Oxxius Lasers 473': 'Blue', 
+                    'Oxxius Lasers 561': 'Yellow',
+                    'Oxxius Lasers 638': 'Red',
+            },# laser name in the rig metadata and the corresponding color used in the behavior GUI
             'laser_tags':[1,2], # laser tags corresponding to Laser_1 and Laser_2
             'sides':['Left','Right'], # lick spouts
             'lick_spouts_distance':5000, # distance between the two lick spouts in um; this value shoud be directly extracted from the rig metadata
@@ -367,7 +369,7 @@ class generate_metadata:
         self.OptoCalibrationResults=self.Obj['LaserCalibrationResults']
         self._get_laser_names_from_rig_metadata()
         for laser in self.laser_names:
-                Color=self.name_mapper[laser]
+                Color=self.name_mapper['laser_name_mapper'][laser]
                 latest_calibration_date=self._FindLatestCalibrationDate(Color)
                 if latest_calibration_date=='NA':
                     RecentLaserCalibration={}
