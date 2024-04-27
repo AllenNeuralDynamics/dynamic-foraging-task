@@ -30,6 +30,7 @@ from aind_data_schema.models.modalities import (
 
 from foraging_gui.Visualization import PlotWaterCalibration
 
+from aind_data_schema.models.stimulus import OptoStimulation, StimulusEpoch
 
 class generate_metadata:
     '''
@@ -89,6 +90,12 @@ class generate_metadata:
             'laser_tags':[1,2], # laser tags corresponding to Laser_1 and Laser_2
             'sides':['Left','Right'], # lick spouts
             'lick_spouts_distance':5000, # distance between the two lick spouts in um; this value shoud be directly extracted from the rig metadata
+            'camera_list':['SideCameraLeft','SideCameraRight','BottomCamera','BodyCamera'], # camera names in the settings_box.csv
+            'camera_name_mapper':{'SideCameraLeft': "Face side left",
+                                    'SideCameraRight': "Face side right",
+                                    'BottomCamera': "Bottom",
+                                    'BodyCamera': "Body"
+                                  }, # camera names in the settings_box.csv and the corresponding names in the rig metadata
         }
 
     def _get_box_type(self):
@@ -144,7 +151,25 @@ class generate_metadata:
         self.high_speed_camera_streams=[]
         self.Obj['Camera_dialog']['camera_start_time']=str(datetime.now())
         self.Obj['Camera_dialog']['camera_end_time']=str(datetime.now())
-        
+        self._get_camera_names()
+        if self.Obj['Camera_dialog']['camera_start_time'] != '' and self.Obj['Camera_dialog']['camera_end_time'] != '':
+            self.high_speed_camera_streams.append(Stream(
+                        stream_modalities=[Modality.BEHAVIOR_VIDEOS],
+                        camera_names=self.camera_names,
+                        stream_start_time=datetime.strptime(self.Obj['Camera_dialog']['camera_start_time'], '%Y-%m-%d %H:%M:%S.%f'),
+                        stream_end_time=datetime.strptime(self.Obj['Camera_dialog']['camera_end_time'], '%Y-%m-%d %H:%M:%S.%f'),
+                        mouse_platform_name=self.Obj['meta_data_dialog']['rig_metadata']['mouse_platform']['name'],
+                        active_mouse_platform=False,
+                ))
+
+    def _get_camera_names(self):
+        '''
+        get cameras used in this session    
+        '''
+        self.camera_names=[]
+        for camera in self.name_mapper['camera_list']:
+            if self.Obj['settings_box']['Has'+camera] == '1':
+                self.camera_names.append(self.name_mapper['camera_name_mapper'][camera])
 
     def _get_ophys_stream(self):
         '''
@@ -172,6 +197,24 @@ class generate_metadata:
         Make the optogenetics stimulus metadata
         '''
         self.optogenetics_stimulus=[]
+        '''
+        self.optogenetics_stimulus.append(StimulusEpoch(    
+            stimulus_start_time= datetime.strptime(self.Obj['Other_SessionStartTime'], '%Y-%m-%d %H:%M:%S.%f'),
+            stimulus_end_time= datetime.strptime(self.Obj['Other_CurrentTime'], '%Y-%m-%d %H:%M:%S.%f'),
+            stimulus= OptoStimulation(
+                stimulus_name='Optogenetics',
+                notes='Please see NWB files for more details (stimulus epoch and stimulus protocol etc.).',
+                pulse_shape='',
+                pulse_frequency='',
+                number_pulse_trains='',
+                pulse_width='',
+                pulse_train_duration='',
+                fixed_pulse_train_interval='',
+                baseline_duration='',
+            )
+        ))
+        '''
+
 
     def _get_ephys_stream(self):
         '''
