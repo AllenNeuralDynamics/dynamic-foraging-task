@@ -149,8 +149,6 @@ class generate_metadata:
         Make the high speed camera stream metadata
         '''
         self.high_speed_camera_streams=[]
-        self.Obj['Camera_dialog']['camera_start_time']=str(datetime.now())
-        self.Obj['Camera_dialog']['camera_end_time']=str(datetime.now())
         self._get_camera_names()
         if self.Obj['Camera_dialog']['camera_start_time'] != '' and self.Obj['Camera_dialog']['camera_end_time'] != '':
             self.high_speed_camera_streams.append(Stream(
