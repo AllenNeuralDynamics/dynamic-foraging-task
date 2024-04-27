@@ -187,14 +187,14 @@ class generate_metadata:
                     rotation_angle=self.Obj['meta_data_dialog']['session_metadata']['probes'][probe]['RotationAngle'],
                     arc_angle=self.Obj['meta_data_dialog']['session_metadata']['probes'][probe]['ArcAngle'],
                     module_angle=self.Obj['meta_data_dialog']['session_metadata']['probes'][probe]['ModuleAngle'],
-                    ephys_probes=[EphysProbeConfig(name=probe, probe_type='Neuropixels')],
+                    ephys_probes=[EphysProbeConfig(name=probe)],
                     assembly_name=self._find_assembly_name(probe),
                     primary_targeted_structure=self.Obj['meta_data_dialog']['session_metadata']['probes'][probe]['ProbeTarget'],
                     manipulator_coordinates=Coordinates3d(
-                        x=self.Obj['meta_data_dialog']['session_metadata']['probes'][probe]['Manipulator'][0],
-                        y=self.Obj['meta_data_dialog']['session_metadata']['probes'][probe]['Manipulator'][1],
-                        z=self.Obj['meta_data_dialog']['session_metadata']['probes'][probe]['Manipulator'][2],
-                        position_unit=SizeUnit.UM,
+                        x=self.Obj['meta_data_dialog']['session_metadata']['probes'][probe]['ManipulatorX'],
+                        y=self.Obj['meta_data_dialog']['session_metadata']['probes'][probe]['ManipulatorY'],
+                        z=self.Obj['meta_data_dialog']['session_metadata']['probes'][probe]['ManipulatorZ'],
+                        unit=SizeUnit.UM,
                     ),
 
                 ))
