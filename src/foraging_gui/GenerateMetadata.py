@@ -3,7 +3,6 @@ import logging
 from datetime import datetime
 
 from aind_data_schema.core.session import (
-    CcfCoords,
     Coordinates3d,
     DomeModule,
     EphysModule,
@@ -153,7 +152,6 @@ class generate_metadata:
         '''
         Make the ephys stream metadata
         '''
-
 
         # find daq names for Neuropixels
         daq_names = [daq['name'] for daq in self.Obj['meta_data_dialog']['rig_metadata']["daqs"] if 'Neuropixels' in daq['name']]
