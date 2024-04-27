@@ -75,6 +75,7 @@ class generate_metadata:
 
         self.Obj['session_metadata']= {}
         self._mapper()
+        self._get_box_type()
         self.ephys_metadata()
         self.behavior_metadata()
         self.ophys_metadata()
@@ -92,6 +93,16 @@ class generate_metadata:
             'Oxxius Lasers 638': 'Red',
             'laser_tags':[1,2]
         }
+
+    def _get_box_type(self):
+        '''
+        To judge the box type (ephys or behavior)
+        '''
+        if 'EPHYS' in self.Obj['meta_data_dialog']['rig_metadata']['rig_id']:
+            self.box_type = 'Ephys'
+        else:
+            self.box_type = 'Behavior'
+    
 
     def _session(self):
         '''
@@ -126,28 +137,20 @@ class generate_metadata:
         '''
         Make the behavior stream metadata
         '''
-        self.Obj
+        if self.box_type == 'Ephys':
+            daq_names=["Behavior board","Sound card","Synchronizer","Lickety Split Left","Lickety Split Right"]
+        else:
+            daq_names=["Behavior board","Sound card","Synchronizer","Janelia lick detector"]
+
         self.data_streams=[]
         self.data_streams.append(Stream(
-                stream_modalities=Modality.TRAINED_BEHAVIOR,
+                stream_modalities=[Modality.TRAINED_BEHAVIOR],
                 stream_start_time=datetime.strptime(self.Obj['Other_SessionStartTime'], '%Y-%m-%d %H:%M:%S.%f').date(),
                 stream_end_time=datetime.strptime(self.Obj['Other_CurrentTime'], '%Y-%m-%d %H:%M:%S.%f').date(),
-                daq_names=["Behavior board","Sound card","Synchronizer","Lickety Split Left","Lickety Split Right"],
-                camera_names=[],
-                light_sources=[],
-                ephys_modules=[],
-                stick_microscopes=[],
-                manipulator_modules=[],
-                detectors=[],
-                fiber_connections=[],
-                fiber_modules=[],
-                ophys_fovs=[],
-                slap_fovs=[],
-                stack_parameters=[],
-                stimulus_device_names='',
-                mouse_platform_name=[],
-                active_mouse_platform=[],
-                notes='',
+                daq_names=daq_names,
+                stimulus_device_names=['NA'],
+                mouse_platform_name=self.Obj['meta_data_dialog']['rig_metadata']['mouse_platform']['name'],
+                active_mouse_platform=False,
         ))
 
 
