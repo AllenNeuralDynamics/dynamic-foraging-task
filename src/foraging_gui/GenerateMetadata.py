@@ -199,8 +199,6 @@ class generate_metadata:
         self.optogenetics_stimulus=[]
         '''
         self.optogenetics_stimulus.append(StimulusEpoch(    
-            stimulus_start_time= datetime.strptime(self.Obj['Other_SessionStartTime'], '%Y-%m-%d %H:%M:%S.%f'),
-            stimulus_end_time= datetime.strptime(self.Obj['Other_CurrentTime'], '%Y-%m-%d %H:%M:%S.%f'),
             stimulus= OptoStimulation(
                 stimulus_name='Optogenetics',
                 notes='Please see NWB files for more details (stimulus epoch and stimulus protocol etc.).',
