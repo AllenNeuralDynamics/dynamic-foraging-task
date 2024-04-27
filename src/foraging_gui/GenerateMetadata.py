@@ -176,6 +176,22 @@ class generate_metadata:
                 stick_microscopes=[''],
         ))
 
+    def _get_ephys_modules(self):
+        '''
+        Make the ephys module metadata
+        '''
+        self.ephys_modules=[]
+        for ind_probe, probe in enumerate(self.probe_names):
+    
+    def _get_probe_names(self):
+        '''
+        Get the probe names from the rig metadata
+        '''
+        self.probe_names=[]
+        for i in range(len(self.Obj['meta_data_dialog']['rig_metadata']['ephys_assemblies'])):
+            for j in range(len(self.Obj['meta_data_dialog']['rig_metadata']['ephys_assemblies'][i]['probes'])):
+                self.probe_names.append(self.Obj['meta_data_dialog']['rig_metadata']['ephys_assemblies'][i]['probes'][j]['name'])
+            
 
     def _get_behavior_stream(self):
         '''
