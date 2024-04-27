@@ -85,19 +85,20 @@ class generate_metadata:
         '''
         self.name_mapper = {
             'laser_name_mapper':{
-                    'Oxxius Lasers 473': 'Blue', 
-                    'Oxxius Lasers 561': 'Yellow',
-                    'Oxxius Lasers 638': 'Red',
+                'Oxxius Lasers 473': 'Blue', 
+                'Oxxius Lasers 561': 'Yellow',
+                'Oxxius Lasers 638': 'Red',
             },# laser name in the rig metadata and the corresponding color used in the behavior GUI
             'laser_tags':[1,2], # laser tags corresponding to Laser_1 and Laser_2
             'sides':['Left','Right'], # lick spouts
             'lick_spouts_distance':5000, # distance between the two lick spouts in um; this value shoud be directly extracted from the rig metadata
             'camera_list':['SideCameraLeft','SideCameraRight','BottomCamera','BodyCamera'], # camera names in the settings_box.csv
-            'camera_name_mapper':{'SideCameraLeft': "Face side left",
-                                    'SideCameraRight': "Face side right",
-                                    'BottomCamera': "Bottom",
-                                    'BodyCamera': "Body"
-                                  }, # camera names in the settings_box.csv and the corresponding names in the rig metadata
+            'camera_name_mapper':{
+                'SideCameraLeft': "Face side left",
+                'SideCameraRight': "Face side right",
+                'BottomCamera': "Bottom",
+                'BodyCamera': "Body"
+            }, # camera names in the settings_box.csv and the corresponding names in the rig metadata
         }
 
     def _get_box_type(self):
