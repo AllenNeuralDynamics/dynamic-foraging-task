@@ -165,6 +165,7 @@ class generate_metadata:
 
         self.ephys_streams=[]
         self._get_ephys_modules()
+        self._get_stick_microscope()
         self.ephys_streams.append(Stream(
                 stream_modalities=[Modality.ECEPHYS],
                 stream_start_time=datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S.%f'),
@@ -174,7 +175,7 @@ class generate_metadata:
                 mouse_platform_name=self.Obj['meta_data_dialog']['rig_metadata']['mouse_platform']['name'],
                 active_mouse_platform=False,
                 ephys_modules=self.ephys_modules,
-                stick_microscopes=[''],
+                stick_microscopes=self.stick_microscopes,
         ))
 
 
@@ -187,9 +188,9 @@ class generate_metadata:
         for stick_microscope in self.stick_microscope_names:
             self.stick_microscopes.append(DomeModule(
                 assembly_name=stick_microscope,
-                rotation_angle=self.Obj['meta_data_dialog']['rig_metadata']['microscopes'][stick_microscope]['Stick_RotationAngle'],
-                arc_angle=self.Obj['meta_data_dialog']['rig_metadata']['microscopes'][stick_microscope]['Stick_ArcAngle'],
-                module_angle=self.Obj['meta_data_dialog']['rig_metadata']['microscopes'][stick_microscope]['Stick_ModuleAngle'],
+                rotation_angle=self.Obj['meta_data_dialog']['session_metadata']['microscopes'][stick_microscope]['Stick_RotationAngle'],
+                arc_angle=self.Obj['meta_data_dialog']['session_metadata']['microscopes'][stick_microscope]['Stick_ArcAngle'],
+                module_angle=self.Obj['meta_data_dialog']['session_metadata']['microscopes'][stick_microscope]['Stick_ModuleAngle'],
                 notes='Did not calibrate.',
             ))
 
