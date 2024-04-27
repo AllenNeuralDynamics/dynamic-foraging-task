@@ -16,17 +16,17 @@ from aind_data_schema.core.session import (
 )
 
 from aind_data_schema.models.devices import (
-    
     RelativePosition, 
     SpoutSide,
     Calibration,
-
 )
 
 from aind_data_schema.models.units import (
-
     SizeUnit,
+)
 
+from aind_data_schema.models.modalities import (
+    Modality,
 )
 
 from foraging_gui.Visualization import PlotWaterCalibration
@@ -102,6 +102,7 @@ class generate_metadata:
         self._get_water_calibration()
         self._get_opto_calibration()
         self.calibration=self.water_calibration+self.opto_calibration
+        self._get_behavior_stream()
         session = Session(
             experimenter_full_name = [self.Obj['Experimenter']],
             subject_id=self.Obj['ID'],
@@ -119,8 +120,36 @@ class generate_metadata:
             calibrations=self.calibration,
             data_streams=[],
         )
-
         session.write_standard_file(output_directory=self.Obj['MetadataFolder'])
+
+    def _get_behavior_stream(self):
+        '''
+        Make the behavior stream metadata
+        '''
+        self.Obj
+        self.data_streams=[]
+        self.data_streams.append(Stream(
+                stream_modalities=Modality.TRAINED_BEHAVIOR,
+                stream_start_time=datetime.strptime(self.Obj['Other_SessionStartTime'], '%Y-%m-%d %H:%M:%S.%f').date(),
+                stream_end_time=datetime.strptime(self.Obj['Other_CurrentTime'], '%Y-%m-%d %H:%M:%S.%f').date(),
+                daq_names=["Behavior board","Sound card","Synchronizer","Lickety Split Left","Lickety Split Right"],
+                camera_names=[],
+                light_sources=[],
+                ephys_modules=[],
+                stick_microscopes=[],
+                manipulator_modules=[],
+                detectors=[],
+                fiber_connections=[],
+                fiber_modules=[],
+                ophys_fovs=[],
+                slap_fovs=[],
+                stack_parameters=[],
+                stimulus_device_names='',
+                mouse_platform_name=[],
+                active_mouse_platform=[],
+                notes='',
+        ))
+
 
     def _get_opto_calibration(self):
         '''
