@@ -680,7 +680,7 @@ p, li { white-space: pre-wrap; }
      <x>700</x>
      <y>120</y>
      <width>171</width>
-     <height>141</height>
+     <height>181</height>
     </rect>
    </property>
    <property name="title">
@@ -796,6 +796,50 @@ p, li { white-space: pre-wrap; }
      <rect>
       <x>94</x>
       <y>70</y>
+      <width>71</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_88">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>130</y>
+      <width>91</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>Rotation angle:</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="Stick_RotationAngle">
+    <property name="geometry">
+     <rect>
+      <x>94</x>
+      <y>130</y>
       <width>71</width>
       <height>20</height>
      </rect>
