@@ -1935,7 +1935,8 @@ class MetadataDialog(QDialog):
         items=[]
         if 'ephys_assemblies' in self.meta_data['rig_metadata']:
             for i in range(len(self.meta_data['rig_metadata']['ephys_assemblies'])):
-                items.append(self.meta_data['rig_metadata']['ephys_assemblies'][i]['probes'][0]['name'])
+                for j in range(len(self.meta_data['rig_metadata']['ephys_assemblies'][i]['probes'])):
+                    items.append(self.meta_data['rig_metadata']['ephys_assemblies'][i]['probes'][j]['name'])
         if items==[]:
             return
         
