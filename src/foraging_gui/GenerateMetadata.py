@@ -28,9 +28,7 @@ from aind_data_schema.models.units import (
 from aind_data_schema.models.modalities import (
     Modality,
 )
-
 from foraging_gui.Visualization import PlotWaterCalibration
-
 from aind_data_schema.models.stimulus import OptoStimulation, StimulusEpoch
 
 class generate_metadata:
@@ -122,10 +120,25 @@ class generate_metadata:
         '''
         handle edge cases (e.g. missing keys in the json file)
         '''
-        if 'camera_start_time' not in self.Obj['Camera_dialog']:
-            self.Obj['Camera_dialog']['camera_start_time'] = ''
-        if 'camera_end_time' not in self.Obj['Camera_dialog']:
-            self.Obj['Camera_dialog']['camera_end_time'] = ''
+        self._initialize_fields(self,dic=self.Obj['Camera_dialog'],keys=['camera_start_time','camera_end_time'],default_value='')''
+
+    def _initialize_fields(self,dic,keys,default_value=''):
+        '''
+        Initialize fields
+            If dic has the key, do nothing
+            If dic does not have the key, add the key with the default value
+            
+        Parameters:
+        dic: dict
+            dictionary to be initialized
+        keys: list
+            key to be initialized
+        default_value: any
+        '''
+        for key in keys:
+            if key not in dic:
+                dic[key] = default_value
+
 
     def _session(self):
         '''
