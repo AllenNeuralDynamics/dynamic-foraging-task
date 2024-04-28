@@ -434,9 +434,9 @@ class generate_metadata:
         self.laser_names=[]
         if Obj is None:
             Obj=self.Obj
-        for i in range(len(Obj['meta_data_dialog']['rig_metadata']['light_sources'])):
-            if Obj['meta_data_dialog']['rig_metadata']['light_sources'][i]['device_type']=='Laser':
-                self.laser_names.append(Obj['meta_data_dialog']['rig_metadata']['light_sources'][i]['name'])
+        for light_source in Obj['meta_data_dialog']['rig_metadata']['light_sources']:
+            if light_source['device_type']=='Laser':
+                self.laser_names.append(light_source['name'])
         return self.laser_names
     
     def _FindLatestCalibrationDate(self,Laser):
