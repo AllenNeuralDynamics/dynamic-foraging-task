@@ -21,8 +21,6 @@ from aind_data_schema.core.session import (
     RewardSolution,
 )
 
-
-
 class generate_metadata:
     '''
     Parse the behavior json file and generate session and rig metadata

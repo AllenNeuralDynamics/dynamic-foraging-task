@@ -12,3 +12,4 @@ git+https://github.com/AllenNeuralDynamics/aind-foraging-behavior-bonsai-automat
 pynwb
 requests
 harp-python
+aind-data-schema

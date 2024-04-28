@@ -29,6 +29,7 @@ dependencies = [
     "pynwb",
     "requests",
     "harp-python",
+    "aind-data-schema",
 ]
 
 [tool.setuptools.packages.find]
