@@ -120,7 +120,7 @@ class generate_metadata:
         '''
         handle edge cases (e.g. missing keys in the json file)
         '''
-        self._initialize_fields(self,dic=self.Obj['Camera_dialog'],keys=['camera_start_time','camera_end_time'],default_value='')''
+        self._initialize_fields(dic=self.Obj['Camera_dialog'],keys=['camera_start_time','camera_end_time'],default_value='')
 
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
