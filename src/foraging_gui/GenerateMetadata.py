@@ -3,6 +3,12 @@ import os
 import logging
 from datetime import datetime
 
+from aind_data_schema.models.stimulus import OptoStimulation, StimulusEpoch
+from aind_data_schema.models.devices import RelativePosition,SpoutSide,Calibration
+from aind_data_schema.models.units import SizeUnit
+from aind_data_schema.models.modalities import Modality
+from foraging_gui.Visualization import PlotWaterCalibration
+
 from aind_data_schema.core.session import (
     Coordinates3d,
     DomeModule,
@@ -15,21 +21,7 @@ from aind_data_schema.core.session import (
     RewardSolution,
 )
 
-from aind_data_schema.models.devices import (
-    RelativePosition, 
-    SpoutSide,
-    Calibration,
-)
 
-from aind_data_schema.models.units import (
-    SizeUnit,
-)
-
-from aind_data_schema.models.modalities import (
-    Modality,
-)
-from foraging_gui.Visualization import PlotWaterCalibration
-from aind_data_schema.models.stimulus import OptoStimulation, StimulusEpoch
 
 class generate_metadata:
     '''
