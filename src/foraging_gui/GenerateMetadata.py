@@ -3,6 +3,8 @@ import os
 import logging
 from datetime import datetime
 
+import numpy as np
+
 from aind_data_schema.models.stimulus import OptoStimulation, StimulusEpoch
 from aind_data_schema.models.devices import RelativePosition,SpoutSide,Calibration
 from aind_data_schema.models.units import SizeUnit
@@ -110,14 +112,25 @@ class generate_metadata:
         '''
         handle edge cases (e.g. missing keys in the json file)
         '''
-        # missing fields in the json file. No camera_start_time and camera_end_time in the Camera_dialog. 
+        # Missing fields camera_start_time and camera_end_time in the Camera_dialog. 
         # Possible reason: 1) the camera is not used in the session. 2 ) the camera is used but the start and end time are not recorded for old version of the software.
         self._initialize_fields(dic=self.Obj['Camera_dialog'],keys=['camera_start_time','camera_end_time'],default_value='')
-        # missing fields in the json file. No Behavior data streams in the json file.
+        
+        # Missing Behavior data streams in the json file.
+        # Possible reason: 1) the behavior data is not started in the session. 
         if 'B_AnimalResponseHistory' not in self.Obj:
             self.has_behavior_data = False
         else:
             self.has_behavior_data = True
+        
+        # Missing fields B_NewscalePositions in the json file.
+        # Possible reason: 1) the NewScale stage is not connected to the behavior GUI. 2) the session is not started.
+        if 'B_NewscalePositions' not in self.Obj:
+            self.has_newscale_position = False
+        else:
+            self.has_newscale_position = True
+
+
         # missing fields in the json file. No WaterCalibrationResults in the json file.
         # missing fields in the json file. No LaserCalibrationResults in the json file.
         # missing fields in the json file. No open_ephys in the json file.
@@ -159,23 +172,27 @@ class generate_metadata:
         self._get_stimulus()
         self.data_streams = self.behavior_streams+self.ephys_streams+self.ophys_streams+self.high_speed_camera_streams
 
-        session = Session(
-            experimenter_full_name = [self.Obj['Experimenter']],
-            subject_id=self.Obj['ID'],
-            session_start_time=self.Obj['Other_SessionStartTime'],
-            session_end_time=self.Obj['Other_CurrentTime'],
-            session_type=self.Obj['Task'],
-            iacuc_protocol=self.Obj['meta_data_dialog']['session_metadata']['IACUCProtocol'],
-            rig_id=self.Obj['meta_data_dialog']['rig_metadata']['rig_id'],
-            notes=self.Obj['ShowNotes'],
-            animal_weight_post=float(self.Obj['WeightAfter']),
-            weight_unit="gram",
-            reward_consumed_total=float(self.Obj['BS_TotalReward']),
-            reward_consumed_unit= "microliter",
-            reward_delivery=self.lick_spouts,
-            calibrations=self.calibration,
-            data_streams=self.data_streams,
-        )
+        session_params = {
+            "experimenter_full_name": [self.Obj['Experimenter']],
+            "subject_id": self.Obj['ID'],
+            "session_start_time": self.Obj['Other_SessionStartTime'],
+            "session_end_time": self.Obj['Other_CurrentTime'],
+            "session_type": self.Obj['Task'],
+            "iacuc_protocol": self.Obj['meta_data_dialog']['session_metadata']['IACUCProtocol'],
+            "rig_id": self.Obj['meta_data_dialog']['rig_metadata']['rig_id'],
+            "notes": self.Obj['ShowNotes'],
+            "animal_weight_post": float(self.Obj['WeightAfter']),
+            "weight_unit": "gram",
+            "reward_consumed_total": float(self.Obj['BS_TotalReward']),
+            "reward_consumed_unit": "microliter",
+            "calibrations": self.calibration,
+            "data_streams": self.data_streams,
+        }
+
+        if self.has_newscale_position:
+            session_params["reward_delivery"] = self.lick_spouts
+
+        session = Session(**session_params)
         session.write_standard_file(output_directory=self.Obj['MetadataFolder'])
 
     def _get_high_speed_camera_stream(self):
@@ -361,7 +378,7 @@ class generate_metadata:
         '''
         Make the behavior stream metadata
         '''
-        
+
         if self.has_behavior_data==False:
             self.behavior_streams=[]
             return
