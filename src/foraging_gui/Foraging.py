@@ -2257,6 +2257,9 @@ class Window(QMainWindow):
         Obj['drop_frames_warning_text']=self.drop_frames_warning_text
         Obj['frame_num']=self.frame_num
 
+        # save manual water 
+        Obj['ManualWaterVolume']=self.ManualWaterVolume
+
         # generate the metadata file
         generate_metadata(Obj=Obj)   
 

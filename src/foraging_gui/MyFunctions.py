@@ -641,42 +641,11 @@ class GenerateTrials():
         for i in range(len(self.B_RewardedHistory)):
             B_RewardedHistory[i]=np.logical_or(self.B_RewardedHistory[i],self.B_AutoWaterTrial[i][Ind])
         self.BS_RewardN=np.sum(B_RewardedHistory[0]==True)+np.sum(B_RewardedHistory[1]==True)
-        
-        TP_LeftValue_volume=[]
-        n=0
-        for s in self.Obj['TP_LeftValue_volume'][0:len(Ind)]:
-            try:
-                if self.B_AutoWaterTrial[0][n]==1:
-                    multiplier=float(self.Obj['TP_Multiplier'][n])
-                else:
-                    multiplier=1
-                float_value = float(s)*multiplier
-                TP_LeftValue_volume.append(float_value)
-            except ValueError as e:
-                logging.error(str(e))
-                TP_LeftValue_volume.append(0)
-            n=n+1
-        TP_LeftValue_volume=np.array(TP_LeftValue_volume)
-        TP_LeftValue_volume=TP_LeftValue_volume[0:len(B_RewardedHistory[0])]
 
-        TP_RightValue_volume=[]
-        n=0
-        for s in self.Obj['TP_RightValue_volume'][0:len(Ind)]:
-            try:
-                if self.B_AutoWaterTrial[1][n]==1:
-                    multiplier=float(self.Obj['TP_Multiplier'][n])
-                else:
-                    multiplier=1
-                float_value = float(s)*multiplier
-                TP_RightValue_volume.append(float_value)
-            except ValueError as e:
-                logging.error(str(e))
-                TP_RightValue_volume.append(0)
-            n=n+1
-        TP_RightValue_volume=np.array(TP_RightValue_volume)
-        TP_RightValue_volume=TP_RightValue_volume[0:len(B_RewardedHistory[1])]
+        self.BS_auto_water_left,self.BS_earned_reward_left = self._process_values(self.Obj['TP_LeftValue_volume'], self.B_AutoWaterTrial[0], self.Obj['TP_Multiplier'], B_RewardedHistory[0])
+        self.BS_auto_water_right,self.BS_earned_reward_right = self.process_values(self.Obj['TP_RightValue_volume'], self.B_AutoWaterTrial[1], self.Obj['TP_Multiplier'], B_RewardedHistory[1])
 
-        self.BS_TotalReward=np.sum((B_RewardedHistory[0]==True).astype(int)*TP_LeftValue_volume+(B_RewardedHistory[1]==True).astype(int)*TP_RightValue_volume)
+        self.BS_TotalReward=self.BS_earned_reward_left+self.BS_earned_reward_right+self.BS_auto_water_left+self.BS_auto_water_right
         self.BS_LeftRewardTrialN=np.sum(self.B_RewardedHistory[0]==True)
         self.BS_RightRewardTrialN=np.sum(self.B_RewardedHistory[1]==True)
         self.BS_LeftChoiceN=np.sum(self.B_AnimalResponseHistory==0)
@@ -715,7 +684,20 @@ class GenerateTrials():
                 self.B_for_eff_optimal=np.nan
                 self.B_for_eff_optimal_random_seed=np.nan
             '''Some complex calculations can be separated from _GenerateATrial using different threads'''
-            
+    
+    def _process_values(self,values, auto_water_trial, multiplier_values, rewarded_history):
+        BS_AutoWater=0
+        BS_EarnedReward=0
+        for i, s in enumerate(values[:len(rewarded_history)]):
+            try:
+                if auto_water_trial[i] == 1 and rewarded_history[i] == 1:
+                    BS_AutoWater+=float(s) * float(multiplier_values[i])
+                elif auto_water_trial[i] == 0 and rewarded_history[i] == 1:
+                    BS_EarnedReward+=float(s)
+            except ValueError as e:
+                logging.error(str(e))
+        return BS_AutoWater,BS_EarnedReward
+
     def foraging_eff_no_baiting(self,reward_rate, p_Ls, p_Rs, random_number_L=None, random_number_R=None):  # Calculate foraging efficiency (only for 2lp)
         '''Calculating the foraging efficiency of no baiting tasks (Code is from Han)'''    
         # --- Optimal-aver (use optimal expectation as 100% efficiency) ---
