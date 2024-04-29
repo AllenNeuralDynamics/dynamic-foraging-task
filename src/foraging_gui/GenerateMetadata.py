@@ -110,7 +110,19 @@ class generate_metadata:
         '''
         handle edge cases (e.g. missing keys in the json file)
         '''
+        # missing fields in the json file. No camera_start_time and camera_end_time in the Camera_dialog. 
+        # Possible reason: 1) the camera is not used in the session. 2 ) the camera is used but the start and end time are not recorded for old version of the software.
         self._initialize_fields(dic=self.Obj['Camera_dialog'],keys=['camera_start_time','camera_end_time'],default_value='')
+        # missing fields in the json file. No Behavior data streams in the json file.
+        if 'B_AnimalResponseHistory' not in self.Obj:
+            self.has_behavior_data = False
+        else:
+            self.has_behavior_data = True
+        # missing fields in the json file. No WaterCalibrationResults in the json file.
+        # missing fields in the json file. No LaserCalibrationResults in the json file.
+        # missing fields in the json file. No open_ephys in the json file.
+        
+
 
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
@@ -349,6 +361,11 @@ class generate_metadata:
         '''
         Make the behavior stream metadata
         '''
+        
+        if self.has_behavior_data==False:
+            self.behavior_streams=[]
+            return
+
         if self.box_type == 'Ephys':
             daq_names=["Behavior board","Sound card","Synchronizer","Lickety Split Left","Lickety Split Right"]
         else:
