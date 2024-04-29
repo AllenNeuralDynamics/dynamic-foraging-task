@@ -642,10 +642,12 @@ class GenerateTrials():
             B_RewardedHistory[i]=np.logical_or(self.B_RewardedHistory[i],self.B_AutoWaterTrial[i][Ind])
         self.BS_RewardN=np.sum(B_RewardedHistory[0]==True)+np.sum(B_RewardedHistory[1]==True)
 
-        BS_auto_water_left,BS_earned_reward_left = self._process_values(self.Obj['TP_LeftValue_volume'], self.B_AutoWaterTrial[0], self.Obj['TP_Multiplier'], B_RewardedHistory[0])
-        BS_auto_water_right,BS_earned_reward_right = self.process_values(self.Obj['TP_RightValue_volume'], self.B_AutoWaterTrial[1], self.Obj['TP_Multiplier'], B_RewardedHistory[1])
+        BS_auto_water_left,BS_earned_reward_left,BS_AutoWater_N_left,BS_EarnedReward_N_left = self._process_values(self.Obj['TP_LeftValue_volume'], self.B_AutoWaterTrial[0], self.Obj['TP_Multiplier'], B_RewardedHistory[0])
+        BS_auto_water_right,BS_earned_reward_right,BS_AutoWater_N_right,BS_EarnedReward_N_right = self.process_values(self.Obj['TP_RightValue_volume'], self.B_AutoWaterTrial[1], self.Obj['TP_Multiplier'], B_RewardedHistory[1])
         self.BS_auto_water=[BS_auto_water_left,BS_auto_water_right]
         self.BS_earned_reward=[BS_earned_reward_left,BS_earned_reward_right]
+        self.BS_BS_AutoWater_N=[BS_AutoWater_N_left,BS_AutoWater_N_right]
+        self.BS_EarnedReward_N=[BS_EarnedReward_N_left,BS_EarnedReward_N_right]
 
         self.BS_TotalReward=BS_earned_reward_left+BS_earned_reward_right+BS_auto_water_left+BS_auto_water_right
         self.BS_LeftRewardTrialN=np.sum(self.B_RewardedHistory[0]==True)
@@ -690,15 +692,19 @@ class GenerateTrials():
     def _process_values(self,values, auto_water_trial, multiplier_values, rewarded_history):
         BS_AutoWater=0
         BS_EarnedReward=0
+        BS_AutoWater_N=0
+        BS_EarnedReward_N=0
         for i, s in enumerate(values[:len(rewarded_history)]):
             try:
                 if auto_water_trial[i] == 1 and rewarded_history[i] == 1:
                     BS_AutoWater+=float(s) * float(multiplier_values[i])
+                    BS_AutoWater_N+=1
                 elif auto_water_trial[i] == 0 and rewarded_history[i] == 1:
                     BS_EarnedReward+=float(s)
+                    BS_EarnedReward_N+=1
             except ValueError as e:
                 logging.error(str(e))
-        return BS_AutoWater,BS_EarnedReward
+        return BS_AutoWater,BS_EarnedReward,BS_AutoWater_N,BS_EarnedReward_N
 
     def foraging_eff_no_baiting(self,reward_rate, p_Ls, p_Rs, random_number_L=None, random_number_R=None):  # Calculate foraging efficiency (only for 2lp)
         '''Calculating the foraging efficiency of no baiting tasks (Code is from Han)'''    
@@ -936,7 +942,7 @@ class GenerateTrials():
                 self.win.info_performance_essential_1 += (
                                     f'Responded trial: {self.BS_FinisheTrialN}/{self.BS_AllTrialN} ({self.BS_RespondedRate:.2f})\n'
                                     f'Reward Trial: {self.BS_RewardTrialN}/{self.BS_AllTrialN} ({self.BS_OverallRewardRate:.2f})\n'
-                                    f'Earned Reward: {self.BS_TotalReward / 1000:.3f} mL\n'
+                                    f'Earned Reward: {sum(self.BS_earned_reward) / 1000:.3f} mL\n'
                                     f'Water in session: {self.win.water_in_session if self.B_CurrentTrialN>=0 else 0:.3f} mL'   
                 )
             self.win.label_info_performance_essential_1.setText(self.win.info_performance_essential_1)
@@ -1006,7 +1012,7 @@ class GenerateTrials():
                             'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                             'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
                             'Water in session (ul): '+str(np.round(self.win.water_in_session*1000,2)) +'\n'
-                            'Earned Reward (ul): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
+                            'Earned Reward (ul): '+ str(sum(self.BS_EarnedReward_N))+' : '+str(np.round(sum(self.BS_earned_reward),3)) +'\n'
                             'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
                             'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n')
                 self.win.ShowBasic.setText(Other_BasicText)
@@ -1017,7 +1023,7 @@ class GenerateTrials():
                             'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                             'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
                             'Water in session (ul): '+str(np.round(self.win.water_in_session*1000,2)) +'\n'
-                            'Earned Reward (ul): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
+                            'Earned Reward (ul): '+ str(sum(self.BS_EarnedReward_N))+' : '+str(np.round(sum(self.BS_earned_reward),3)) +'\n'
                             'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
                             'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n\n'
                             
@@ -1044,7 +1050,7 @@ class GenerateTrials():
                             'Responded trial: ' + str(self.BS_FinisheTrialN) + '/'+str(self.BS_AllTrialN)+' ('+str(np.round(self.BS_RespondedRate,2))+')'+'\n'
                             'Reward Trial: ' + str(self.BS_RewardTrialN) + '/' + str(self.BS_AllTrialN) + ' ('+str(np.round(self.BS_OverallRewardRate,2))+')' +'\n'
                             'Water in session (ul): '+str(np.round(self.win.water_in_session*1000,2)) +'\n'
-                            'Earned Reward (ul): '+ str(self.BS_RewardN)+' : '+str(np.round(self.BS_TotalReward,3)) +'\n'
+                            'Earned Reward (ul): '+ str(sum(self.BS_EarnedReward_N))+' : '+str(np.round(sum(self.BS_earned_reward),3)) +'\n'
                             'Left choice rewarded: ' + str(self.BS_LeftRewardTrialN) + '/' + str(self.BS_LeftChoiceN) + ' ('+str(np.round(self.BS_LeftChoiceRewardRate,2))+')' +'\n'
                             'Right choice rewarded: ' + str(self.BS_RightRewardTrialN) + '/' + str(self.BS_RightChoiceN) + ' ('+str(np.round(self.BS_RightChoiceRewardRate,2))+')' +'\n\n'
                             'Early licking (EL)\n'
