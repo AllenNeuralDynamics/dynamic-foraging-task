@@ -130,10 +130,17 @@ class generate_metadata:
         else:
             self.has_newscale_position = True
 
+        # missing field open_ephys in the json file.
+        # Possible reason: 1) the ephys data is not recorded. 2) the ephys data is recorded but not the open ephys is not controlled by the behavior GUI in the old version.
 
-        # missing fields in the json file. No WaterCalibrationResults in the json file.
+
+        # missing field WaterCalibrationResults in the json file.
+        # Possible reason: 1) the water calibration file is not included in the ForagingSettings folder. 2) the water calibration is not saved in the json file.
+        if 'WaterCalibrationResults' not in self.Obj:
+            self.Obj['WaterCalibrationResults'] = {} 
+
         # missing fields in the json file. No LaserCalibrationResults in the json file.
-        # missing fields in the json file. No open_ephys in the json file.
+        
         
 
 
@@ -491,6 +498,11 @@ class generate_metadata:
         '''
         Make water calibration metadata
         '''
+        
+        if self.Obj['WaterCalibrationResults']=={}:
+            self.water_calibration =[]
+            return
+        
         self.water_calibration =[]
         self._parse_water_calibration()
         for side in self.parsed_watercalibration.keys():
@@ -535,6 +547,8 @@ class generate_metadata:
         '''
         Make the RewardDelivery metadata
         '''
+        if not self.has_newscale_position:
+            return
         lick_spouts_distance=self.name_mapper['lick_spouts_distance'] 
         self.lick_spouts=RewardDeliveryConfig(
             reward_solution= RewardSolution.WATER,
