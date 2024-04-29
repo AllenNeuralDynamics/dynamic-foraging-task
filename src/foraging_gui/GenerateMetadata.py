@@ -103,6 +103,11 @@ class generate_metadata:
         '''
         To judge the box type (ephys or behavior) based on the rig_id.
         '''
+
+        if 'rig_id' not in self.Obj['meta_data_dialog']['rig_metadata']:
+            self.box_type = 'Unknown'
+            return
+        
         if 'EPHYS' in self.Obj['meta_data_dialog']['rig_metadata']['rig_id']:
             self.box_type = 'Ephys'
         else:
@@ -164,6 +169,17 @@ class generate_metadata:
             self.session_start_time = self.Obj['Other_SessionStartTime']
             self.session_end_time= self.Obj['Other_CurrentTime']
 
+        # Missing field 'meta_data_dialog' in the json file.
+        # Possible reason: 1) Old version of the software.
+        if 'meta_data_dialog' not in self.Obj:
+            self.Obj['meta_data_dialog'] = {}
+
+        # Missing field 'rig_metadata' in the json file.
+        # Possible reason: 1) Old version of the software. 2) the rig metadata is not provided.
+        if 'rig_metadata' not in self.Obj['meta_data_dialog']:
+            self.Obj['meta_data_dialog']['rig_metadata'] = {}
+
+
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
         Initialize fields
@@ -187,7 +203,7 @@ class generate_metadata:
         Create metadata related to Session class in the aind_data_schema
         '''
         # session_start_time and session_end_time are required fields
-        if self.session_start_time == '' or self.session_end_time == '':
+        if self.session_start_time == '' or self.session_end_time == '' or self.Obj['meta_data_dialog']['rig_metadata']=={}:
             return
         
         self._get_reward_delivery()
