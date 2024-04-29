@@ -231,7 +231,7 @@ class generate_metadata:
         '''
         self.high_speed_camera_streams=[]
         self._get_camera_names()
-        if self.Obj['Camera_dialog']['camera_start_time'] != '' and self.Obj['Camera_dialog']['camera_end_time'] != '':
+        if self.Obj['Camera_dialog']['camera_start_time'] != '' and self.Obj['Camera_dialog']['camera_end_time'] != '' and self.camera_names != []:
             self.high_speed_camera_streams.append(Stream(
                         stream_modalities=[Modality.BEHAVIOR_VIDEOS],
                         camera_names=self.camera_names,
