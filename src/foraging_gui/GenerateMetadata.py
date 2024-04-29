@@ -145,7 +145,26 @@ class generate_metadata:
         if 'open_ephys' not in self.Obj:
             self.Obj['open_ephys'] = []
         
+        # Missing field Camera_dialog in the json file.
+        # Possible reason: 1) Old version of the software.
+        if 'Camera_dialog' not in self.Obj:
+            self.Obj['Camera_dialog'] = {}
 
+        # Missing field camera_start_time and camera_end_time in the Camera_dialog.
+        # Possible reason: 1) the camera is not used in the session. 2 ) the camera is used but the start and end time are not recorded for old version of the software.
+        if 'camera_start_time' not in self.Obj['Camera_dialog']:
+            self.Obj['Camera_dialog']['camera_start_time'] = ''
+        if 'camera_end_time' not in self.Obj['Camera_dialog']:
+            self.Obj['Camera_dialog']['camera_end_time'] = ''
+
+        # Missing fields 'Other_SessionStartTime' and 'Other_CurrentTime' in the json file.
+        # Possible reason: 1) the behavior session is not started.
+        if 'Other_SessionStartTime' not in self.Obj:
+            self.session_start_time = ''
+            self.session_end_time = '' 
+        else:
+            self.session_start_time = self.Obj['Other_SessionStartTime']
+            self.session_end_time= self.Obj['Other_CurrentTime']
 
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
@@ -169,7 +188,10 @@ class generate_metadata:
         '''
         Create metadata related to Session class in the aind_data_schema
         '''
-
+        # session_start_time and session_end_time are required fields
+        if self.session_start_time == '' or self.session_end_time == '':
+            return
+        
         self._get_reward_delivery()
         self._get_water_calibration()
         self._get_opto_calibration()
@@ -185,8 +207,8 @@ class generate_metadata:
         session_params = {
             "experimenter_full_name": [self.Obj['Experimenter']],
             "subject_id": self.Obj['ID'],
-            "session_start_time": self.Obj['Other_SessionStartTime'],
-            "session_end_time": self.Obj['Other_CurrentTime'],
+            "session_start_time": self.session_start_time,
+            "session_end_time": self.session_end_time,
             "session_type": self.Obj['Task'],
             "iacuc_protocol": self.Obj['meta_data_dialog']['session_metadata']['IACUCProtocol'],
             "rig_id": self.Obj['meta_data_dialog']['rig_metadata']['rig_id'],
