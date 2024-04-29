@@ -134,12 +134,14 @@ class generate_metadata:
         # Possible reason: 1) the ephys data is not recorded. 2) the ephys data is recorded but not the open ephys is not controlled by the behavior GUI in the old version.
 
 
-        # missing field WaterCalibrationResults in the json file.
+        # Missing field WaterCalibrationResults in the json file.
         # Possible reason: 1) the water calibration file is not included in the ForagingSettings folder. 2) the water calibration is not saved in the json file.
         if 'WaterCalibrationResults' not in self.Obj:
             self.Obj['WaterCalibrationResults'] = {} 
 
-        # missing fields in the json file. No LaserCalibrationResults in the json file.
+        # Missing field LaserCalibrationResults in the json file.
+        if 'LaserCalibrationResults' not in self.Obj:
+            self.Obj['LaserCalibrationResults'] = {}
         
         
 
@@ -410,6 +412,9 @@ class generate_metadata:
         '''
         Make the optogenetic (Laser or LED) calibration metadata
         '''
+        if self.Obj['LaserCalibrationResults']=={}:
+            self.opto_calibration =[]
+            return
         self._parse_opto_calibration() 
         self.opto_calibration=[]
         for current_calibration in self.parsed_optocalibration:
@@ -498,7 +503,7 @@ class generate_metadata:
         '''
         Make water calibration metadata
         '''
-        
+
         if self.Obj['WaterCalibrationResults']=={}:
             self.water_calibration =[]
             return
