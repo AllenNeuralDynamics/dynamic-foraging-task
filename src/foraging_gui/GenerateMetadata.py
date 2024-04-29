@@ -65,12 +65,7 @@ class generate_metadata:
             self.Obj['MetadataFolder'] = output_folder
         
         self._handle_edge_cases()
-
-        # save rig metadata
-        rig_metadata_full_path=os.path.join(self.Obj['MetadataFolder'],self.Obj['meta_data_dialog']['rig_metadata_file'])
-        with open(rig_metadata_full_path, 'w') as f:
-            json.dump(self.Obj['meta_data_dialog']['rig_metadata'], f, indent=4)
-
+        self._save_rig_metadata()
         self.Obj['session_metadata']= {}
         self._mapper()
         self._get_box_type()
@@ -113,6 +108,18 @@ class generate_metadata:
         else:
             self.box_type = 'Behavior'
     
+
+    def _save_rig_metadata(self):
+        '''
+        Save the rig metadata to the MetadataFolder
+        '''
+        if self.Obj['meta_data_dialog']['rig_metadata_file']=='' or self.Obj['MetadataFolder']=='':
+            return
+        
+        rig_metadata_full_path=os.path.join(self.Obj['MetadataFolder'],self.Obj['meta_data_dialog']['rig_metadata_file'])
+        with open(rig_metadata_full_path, 'w') as f:
+            json.dump(self.Obj['meta_data_dialog']['rig_metadata'], f, indent=4)
+
     def _handle_edge_cases(self):
         '''
         handle edge cases (e.g. missing keys in the json file)
@@ -179,7 +186,12 @@ class generate_metadata:
         if 'rig_metadata' not in self.Obj['meta_data_dialog']:
             self.Obj['meta_data_dialog']['rig_metadata'] = {}
 
-
+        # Missing field 'rig_metadata_file' and 'MetadataFolder' in the json file.
+        # Possible reason: 1) Old version of the software. 2) the rig metadata is not provided.
+        self._initialize_fields(dic=self.Obj['meta_data_dialog'],keys=['rig_metadata_file'],default_value='')
+        self._initialize_fields(dic=self.Obj,keys=['MetadataFolder'],default_value='')
+    
+    
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
         Initialize fields
