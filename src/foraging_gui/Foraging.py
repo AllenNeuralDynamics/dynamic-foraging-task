@@ -3704,14 +3704,11 @@ def log_git_hash():
 
     # Get information about python
     py_version = sys.version
-    # DEBUGGGGING CODE
-    py_version = '3.11.8 |Anaconda, Inc.|'
-    # DEBUGGING CODE
-    py_version_parsed = '.'.join(py_version.split('.')[0:2])
+    py_version_parse = '.'.join(py_version.split('.')[0:2])
     logging.info('Python version: {}'.format(py_version))
     print('Python version: {}'.format(py_version))       
-    if py_version_parsed != '3.9':
-        logging.error('Incorrect version of python! Should be 3.9, got {}'.format(py_version_parsed))
+    if py_version_parse != '3.9':
+        logging.error('Incorrect version of python! Should be 3.9, got {}'.format(py_version_parse))
 
     try:
         # Get information about task repository
