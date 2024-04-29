@@ -130,19 +130,20 @@ class generate_metadata:
         else:
             self.has_newscale_position = True
 
-        # missing field open_ephys in the json file.
-        # Possible reason: 1) the ephys data is not recorded. 2) the ephys data is recorded but not the open ephys is not controlled by the behavior GUI in the old version.
-
-
         # Missing field WaterCalibrationResults in the json file.
         # Possible reason: 1) the water calibration file is not included in the ForagingSettings folder. 2) the water calibration is not saved in the json file.
         if 'WaterCalibrationResults' not in self.Obj:
             self.Obj['WaterCalibrationResults'] = {} 
 
         # Missing field LaserCalibrationResults in the json file.
+        # Possible reason: 1) the optogenetic calibration file is not included in the ForagingSettings folder. 2) the optogenetic calibration is not saved in the json file. 3) no optogenetics calibration for this rig.
         if 'LaserCalibrationResults' not in self.Obj:
             self.Obj['LaserCalibrationResults'] = {}
-        
+
+        # Missing field open_ephys in the json file.
+        # Possible reason: 1) The ephys data is recorded but the open ephys is not controlled by the behavior GUI in the old version.
+        if 'open_ephys' not in self.Obj:
+            self.Obj['open_ephys'] = []
         
 
 
@@ -277,32 +278,35 @@ class generate_metadata:
         Make the ephys stream metadata
         '''
 
+        if self.Obj['open_ephys']==[]:
+            self.ephys_streams=[]
+            return
+        
         # find daq names for Neuropixels
         daq_names = [daq['name'] for daq in self.Obj['meta_data_dialog']['rig_metadata']["daqs"] if 'Neuropixels' in daq['name']]
 
         self.ephys_streams=[]
         self._get_ephys_modules()
         self._get_stick_microscope()
-        if 'open_ephys' in self.Obj:
-            for current_recording in self.Obj['open_ephys']:
-                if 'openephys_stat_recording_time' not in current_recording:
-                    start_time = self.Obj['Other_SessionStartTime']
-                    end_time = self.Obj['Other_CurrentTime']
-                else:
-                    start_time = current_recording['openephys_stat_recording_time']
-                    end_time = current_recording['openephys_stop_recording_time']
-                self.ephys_streams.append(Stream(
-                        stream_modalities=[Modality.ECEPHYS],
-                        stream_start_time=datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S.%f'),
-                        stream_end_time=datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S.%f'),
-                        daq_names=daq_names,
-                        stimulus_device_names=self.stmulus_device_names,
-                        mouse_platform_name=self.Obj['meta_data_dialog']['rig_metadata']['mouse_platform']['name'],
-                        active_mouse_platform=False,
-                        ephys_modules=self.ephys_modules,
-                        stick_microscopes=self.stick_microscopes,
-                        notes=f"recording type: {current_recording['recording_type']}; file name:{current_recording['prepend_text']}{current_recording['base_text']};  experiment number:{current_recording['record_nodes'][0]['experiment_number']};  recording number:{current_recording['record_nodes'][0]['recording_number']}",
-                ))
+        for current_recording in self.Obj['open_ephys']:
+            if 'openephys_stat_recording_time' not in current_recording:
+                start_time = self.Obj['Other_SessionStartTime']
+                end_time = self.Obj['Other_CurrentTime']
+            else:
+                start_time = current_recording['openephys_stat_recording_time']
+                end_time = current_recording['openephys_stop_recording_time']
+            self.ephys_streams.append(Stream(
+                    stream_modalities=[Modality.ECEPHYS],
+                    stream_start_time=datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S.%f'),
+                    stream_end_time=datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S.%f'),
+                    daq_names=daq_names,
+                    stimulus_device_names=self.stmulus_device_names,
+                    mouse_platform_name=self.Obj['meta_data_dialog']['rig_metadata']['mouse_platform']['name'],
+                    active_mouse_platform=False,
+                    ephys_modules=self.ephys_modules,
+                    stick_microscopes=self.stick_microscopes,
+                    notes=f"recording type: {current_recording['recording_type']}; file name:{current_recording['prepend_text']}{current_recording['base_text']};  experiment number:{current_recording['record_nodes'][0]['experiment_number']};  recording number:{current_recording['record_nodes'][0]['recording_number']}",
+            ))
 
 
     def _get_stick_microscope(self):
