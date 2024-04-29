@@ -150,12 +150,10 @@ class generate_metadata:
         if 'Camera_dialog' not in self.Obj:
             self.Obj['Camera_dialog'] = {}
 
-        # Missing field camera_start_time and camera_end_time in the Camera_dialog.
-        # Possible reason: 1) the camera is not used in the session. 2 ) the camera is used but the start and end time are not recorded for old version of the software.
-        if 'camera_start_time' not in self.Obj['Camera_dialog']:
-            self.Obj['Camera_dialog']['camera_start_time'] = ''
-        if 'camera_end_time' not in self.Obj['Camera_dialog']:
-            self.Obj['Camera_dialog']['camera_end_time'] = ''
+        # Missing field 'settings_box' in the json file.
+        # Possible reason: 1) Old version of the software.
+        if 'settings_box' not in self.Obj:
+            self.Obj['settings_box'] = {}
 
         # Missing fields 'Other_SessionStartTime' and 'Other_CurrentTime' in the json file.
         # Possible reason: 1) the behavior session is not started.
@@ -247,10 +245,15 @@ class generate_metadata:
         '''
         get cameras used in this session    
         '''
+        if 'settings_box' not in self.Obj:
+            self.camera_names=[]
+            return
+        
         self.camera_names=[]
         for camera in self.name_mapper['camera_list']:
-            if self.Obj['settings_box']['Has'+camera] == '1':
-                self.camera_names.append(self.name_mapper['camera_name_mapper'][camera])
+            if 'Has'+camera in self.Obj['settings_box']:
+                if self.Obj['settings_box']['Has'+camera] == '1':
+                    self.camera_names.append(self.name_mapper['camera_name_mapper'][camera])
 
     def _get_ophys_stream(self):
         '''
