@@ -2776,7 +2776,7 @@ class Window(QMainWindow):
             # We will want to start the workflow, and not open the editor
             #subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+' --start --no-editor',cwd=CWD,shell=True)
 
-            subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path,cwd=CWD,shell=True)
+            subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+' -p String={}'.format(self.PhotometryFolder),cwd=CWD,shell=True)
         except Exception as e:
             logging.error(e)
         
