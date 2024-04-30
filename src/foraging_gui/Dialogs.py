@@ -1066,7 +1066,7 @@ class CameraDialog(QDialog):
             self.MainWindow.Channel.CameraFrequency(int(self.FrameRate.text()))
             # start the video triggers
             self.MainWindow.Channel.CameraControl(int(1))
-            time.sleep(2)
+            time.sleep(5)
             self.MainWindow.WarningLabelCamera.setText('Camera is on!')
             self.MainWindow.WarningLabelCamera.setStyleSheet(self.MainWindow.default_warning_color)
             self.WarningLabelCameraOn.setText('Camera is on!')

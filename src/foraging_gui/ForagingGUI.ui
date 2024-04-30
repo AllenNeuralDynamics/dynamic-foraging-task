@@ -595,7 +595,7 @@
                     <property name="geometry">
                      <rect>
                       <x>0</x>
-                      <y>-38</y>
+                      <y>0</y>
                       <width>178</width>
                       <height>211</height>
                      </rect>
@@ -888,7 +888,7 @@
             <string notr="true"/>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>3</number>
            </property>
            <widget class="QWidget" name="tab_2">
             <attribute name="title">
@@ -4642,10 +4642,10 @@ Current pair:
                <widget class="QWidget" name="scrollAreaWidgetContents_5">
                 <property name="geometry">
                  <rect>
-                  <x>0</x>
+                  <x>-95</x>
                   <y>0</y>
-                  <width>627</width>
-                  <height>325</height>
+                  <width>722</width>
+                  <height>308</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_16">
@@ -4698,57 +4698,6 @@ Current pair:
                         </property>
                        </widget>
                       </item>
-                      <item row="1" column="1" colspan="2">
-                       <widget class="QComboBox" name="PhotometryB">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="minimumSize">
-                         <size>
-                          <width>50</width>
-                          <height>0</height>
-                         </size>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>10000</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <item>
-                         <property name="text">
-                          <string>off</string>
-                         </property>
-                        </item>
-                        <item>
-                         <property name="text">
-                          <string>on</string>
-                         </property>
-                        </item>
-                       </widget>
-                      </item>
-                      <item row="1" column="0">
-                       <widget class="QLabel" name="label_61">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>photometry =</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
                       <item row="0" column="0">
                        <widget class="QLabel" name="label_55">
                         <property name="sizePolicy">
@@ -4787,6 +4736,25 @@ Current pair:
                         </property>
                        </widget>
                       </item>
+                      <item row="1" column="0">
+                       <widget class="QLabel" name="label_61">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>photometry =</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
                       <item row="1" column="4">
                        <widget class="QLineEdit" name="baselinetime">
                         <property name="sizePolicy">
@@ -4804,6 +4772,38 @@ Current pair:
                         <property name="text">
                          <string>10</string>
                         </property>
+                       </widget>
+                      </item>
+                      <item row="1" column="1" colspan="2">
+                       <widget class="QComboBox" name="PhotometryB">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="minimumSize">
+                         <size>
+                          <width>50</width>
+                          <height>0</height>
+                         </size>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>10000</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <item>
+                         <property name="text">
+                          <string>off</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>on</string>
+                         </property>
+                        </item>
                        </widget>
                       </item>
                       <item row="0" column="1" colspan="2">
@@ -4834,6 +4834,73 @@ Current pair:
                         <item>
                          <property name="text">
                           <string>on</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
+                      <item row="2" column="1">
+                       <widget class="QPushButton" name="StartEphysRecording">
+                        <property name="text">
+                         <string>Start ephys recording</string>
+                        </property>
+                        <property name="checkable">
+                         <bool>true</bool>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="2" column="3">
+                       <widget class="QLabel" name="label_65">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>recording type=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="2" column="4">
+                       <widget class="QComboBox" name="OpenEphysRecordingType">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="editable">
+                         <bool>false</bool>
+                        </property>
+                        <item>
+                         <property name="text">
+                          <string>Behavior</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>Surface finding</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>Opto tagging</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>Testing</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>NA</string>
                          </property>
                         </item>
                        </widget>
