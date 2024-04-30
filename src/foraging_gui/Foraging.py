@@ -199,6 +199,7 @@ class Window(QMainWindow):
         self.GiveRight.clicked.connect(self._GiveRight)
         self.NewSession.clicked.connect(self._NewSession)
         self.AutoReward.clicked.connect(self._AutoReward)
+        self.StartFIP.clicked.connect(self._StartFIP)
         self.StartExcitation.clicked.connect(self._StartExcitation)
         self.StartBleaching.clicked.connect(self._StartBleaching)
         self.NextBlock.clicked.connect(self._NextBlock)
@@ -2721,6 +2722,11 @@ class Window(QMainWindow):
             for child in self.TrainingParameters.findChildren(QtWidgets.QLineEdit)+ self.centralwidget.findChildren(QtWidgets.QLineEdit):
                 if child.isEnabled():
                     child.clear()
+    def _StartFIP(self):
+        reply = QMessageBox.information(self, 
+           'Box {}, Start FIP workflow:'.format(self.box_letter), 
+           'Starting FIP workflow now.',
+           QMessageBox.Ok )               
 
     def _StartExcitation(self):
         if self.Teensy_COM == '':
