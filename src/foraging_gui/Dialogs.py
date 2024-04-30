@@ -1840,8 +1840,8 @@ class MetadataDialog(QDialog):
     def _get_widgets(self):
         '''get the widgets used for saving/loading metadata'''
         exclude_widgets=self._get_chidldren_keys(self.Probes)
-        exclude_widgets.append(self._get_chidldren_keys(self.Microscopes))
-        exclude_widgets.append(['EphysProbes','RigMetadataFile'])
+        exclude_widgets+=self._get_chidldren_keys(self.Microscopes)
+        exclude_widgets+=['EphysProbes','RigMetadataFile','StickMicroscopes']
         widget_dict = {w.objectName(): w for w in self.findChildren(
             (QtWidgets.QLineEdit, QtWidgets.QTextEdit, QtWidgets.QComboBox))
             if w.objectName() not in exclude_widgets}
@@ -2002,7 +2002,7 @@ class MetadataDialog(QDialog):
                 self.meta_data['rig_metadata'] = json.load(file)
 
         # Update the text box
-        self._update_metadata()
+        self._update_metadata(update_session_metadata=False)
         
 class AutoTrainDialog(QDialog):
     '''For automatic training'''
