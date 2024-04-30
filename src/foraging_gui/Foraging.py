@@ -2723,9 +2723,8 @@ class Window(QMainWindow):
             for child in self.TrainingParameters.findChildren(QtWidgets.QLineEdit)+ self.centralwidget.findChildren(QtWidgets.QLineEdit):
                 if child.isEnabled():
                     child.clear()
+
     def _StartFIP(self):
-
-
 
         if self.Teensy_COM == '':
             logging.warning('No Teensy COM configured for this box, cannot start FIP workflow')
@@ -2743,7 +2742,8 @@ class Window(QMainWindow):
             reply = QMessageBox.information(self, 
                 'Box {}, Start FIP workflow:'.format(self.box_letter), 
                 'FIP workflow has already been started. If its not visible, please restart the GUI',
-                QMessageBox.Ok )                     
+                QMessageBox.Ok )       
+            self.StartFIP.setChecked(False)             
             return
 
         self.FIP_started=True 
