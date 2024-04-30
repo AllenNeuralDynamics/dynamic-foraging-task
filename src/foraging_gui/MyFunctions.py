@@ -643,7 +643,7 @@ class GenerateTrials():
         self.BS_RewardN=np.sum(B_RewardedHistory[0]==True)+np.sum(B_RewardedHistory[1]==True)
 
         BS_auto_water_left,BS_earned_reward_left,BS_AutoWater_N_left,BS_EarnedReward_N_left = self._process_values(self.Obj['TP_LeftValue_volume'], self.B_AutoWaterTrial[0], self.Obj['TP_Multiplier'], B_RewardedHistory[0])
-        BS_auto_water_right,BS_earned_reward_right,BS_AutoWater_N_right,BS_EarnedReward_N_right = self.process_values(self.Obj['TP_RightValue_volume'], self.B_AutoWaterTrial[1], self.Obj['TP_Multiplier'], B_RewardedHistory[1])
+        BS_auto_water_right,BS_earned_reward_right,BS_AutoWater_N_right,BS_EarnedReward_N_right = self._process_values(self.Obj['TP_RightValue_volume'], self.B_AutoWaterTrial[1], self.Obj['TP_Multiplier'], B_RewardedHistory[1])
         self.BS_auto_water=[BS_auto_water_left,BS_auto_water_right]
         self.BS_earned_reward=[BS_earned_reward_left,BS_earned_reward_right]
         self.BS_BS_AutoWater_N=[BS_AutoWater_N_left,BS_AutoWater_N_right]
