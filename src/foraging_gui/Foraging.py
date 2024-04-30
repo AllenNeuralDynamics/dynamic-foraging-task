@@ -917,6 +917,7 @@ class Window(QMainWindow):
             'Teensy_COM_box2':'',
             'Teensy_COM_box3':'',
             'Teensy_COM_box4':'',
+            'FIP_workflow_path':'',
             'bonsai_path':os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe'),
             'bonsaiworkflow_path':os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai'),
             'newscale_serial_num_box1':'',
@@ -2749,6 +2750,13 @@ class Window(QMainWindow):
         self.FIP_started=True 
         logging.info('StartFIP is checked')
         self.StartFIP.setStyleSheet("background-color : green;")
+
+        try:
+            CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
+            subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+' --start --no-editor',cwd=CWD,shell=True)
+        except Exception as e:
+            print(e)
+        
 
         reply = QMessageBox.information(self, 
            'Box {}, Start FIP workflow:'.format(self.box_letter), 
