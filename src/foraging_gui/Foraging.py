@@ -2768,7 +2768,16 @@ class Window(QMainWindow):
             return
 
         if self.StartExcitation.isChecked():
-            logging.info('StartExcitation is checked')
+            reply = QMessageBox.question(self, 
+                'Box {}, Start FIP'.format(self.box_letter), 
+                'Is the FIP workflow running?', 
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes )
+            if reply == QMessageBox.No:
+                self.StartExcitation.setChecked(False)
+                self.StartExcitation.setStyleSheet("background-color : none")
+                logging.info('User says FIP workflow is not open')
+                return
+            logging.info('StartExcitation is checked, user confirms workflow is running')
             self.StartExcitation.setStyleSheet("background-color : green;")
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
