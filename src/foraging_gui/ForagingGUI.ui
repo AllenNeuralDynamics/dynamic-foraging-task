@@ -4666,7 +4666,7 @@ Current pair:
                    <layout class="QHBoxLayout" name="horizontalLayout_15">
                     <item>
                      <layout class="QGridLayout" name="gridLayout_6">
-                      <item row="1" column="5">
+                      <item row="2" column="5">
                        <widget class="QPushButton" name="StartExcitation">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -4682,7 +4682,7 @@ Current pair:
                         </property>
                        </widget>
                       </item>
-                      <item row="1" column="6">
+                      <item row="2" column="6">
                        <widget class="QPushButton" name="StartBleaching">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
