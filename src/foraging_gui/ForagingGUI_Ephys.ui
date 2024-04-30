@@ -3851,6 +3851,28 @@
      <string>10</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="StartFIP">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>901</y>
+      <width>91</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>Start FIP workflow</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+   </widget>
    <widget class="QPushButton" name="StartExcitation">
     <property name="geometry">
      <rect>

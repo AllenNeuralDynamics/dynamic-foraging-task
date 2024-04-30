@@ -4675,7 +4675,7 @@ Current pair:
                          </sizepolicy>
                         </property>
                         <property name="text">
-                         <string>Start FIP</string>
+                         <string>Start FIP workflow</string>
                         </property>
                         <property name="checkable">
                          <bool>true</bool>
