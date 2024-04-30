@@ -2948,6 +2948,7 @@ class Window(QMainWindow):
         if self.Teensy_COM == '':
             return
         logging.info('Checking that photometry is not running')
+        FIP_was_running=self.StartFIP.isChecked()
         try:
             ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
             # Trigger Teensy with the above specified exp mode
@@ -2968,7 +2969,13 @@ class Window(QMainWindow):
             self.StartExcitation.setChecked(False)
             self.StartFIP.setChecked(False)
             self.FIP_started=False
-           
+        
+        if FIP_was_running:
+            reply = QMessageBox.critical(self, 
+                'Box {}, New Session:'.format(self.box_letter), 
+                'Please restart the FIP workflow',
+                QMessageBox.Ok)
+
     def _AutoReward(self):
         if self.AutoReward.isChecked():
             self.AutoReward.setStyleSheet("background-color : green;")
