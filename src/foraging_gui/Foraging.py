@@ -976,6 +976,7 @@ class Window(QMainWindow):
         self.current_box=self.Settings['current_box']
         self.temporary_video_folder=self.Settings['temporary_video_folder']
         self.Teensy_COM = self.Settings['Teensy_COM_box'+str(self.box_number)]
+        self.FIP_workflow_path = self.Settings['FIP_workflow_path']
         self.bonsai_path=self.Settings['bonsai_path']
         self.bonsaiworkflow_path=self.Settings['bonsaiworkflow_path']
         self.newscale_serial_num_box1=self.Settings['newscale_serial_num_box1']
