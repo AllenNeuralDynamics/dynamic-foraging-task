@@ -2743,7 +2743,7 @@ class Window(QMainWindow):
                 'Box {}, Start FIP workflow:'.format(self.box_letter), 
                 'FIP workflow has already been started. If its not visible, please restart the GUI',
                 QMessageBox.Ok )       
-            self.StartFIP.setChecked(False)             
+            self.StartFIP.setChecked(True)             
             return
 
         self.FIP_started=True 
