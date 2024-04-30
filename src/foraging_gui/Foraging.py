@@ -3214,6 +3214,10 @@ class Window(QMainWindow):
                     logging.info('User selected to start excitation')
                     started = self._StartExcitation()
                     if started == 0:
+                        reply = QMessageBox.critical(self,
+                            'Box {}, Start'.format(self.box_letter),
+                            'Could not start excitation, therefore cannot start the session',
+                            QMessageBox.Ok)
                         logging.info('could not start session, due to failure to start excitation')
                         self.Start.setChecked(False)
                         return 
