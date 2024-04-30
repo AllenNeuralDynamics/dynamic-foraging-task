@@ -2740,13 +2740,12 @@ class Window(QMainWindow):
             return
         
         if self.FIP_started:
-
+            self.StartFIP.setChecked(True)             
             reply = QMessageBox.question(self, 
                 'Box {}, Start FIP workflow:'.format(self.box_letter), 
                 'FIP workflow has already been started. Start again?',
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No )       
             if reply == QMessageBox.No:
-                self.StartFIP.setChecked(True)             
                 logging.warning('FIP workflow already started, user declines to restart')
                 return
             else:
@@ -2756,14 +2755,15 @@ class Window(QMainWindow):
         logging.info('StartFIP is checked')
         self.StartFIP.setStyleSheet("background-color : green;")
 
+        # Start the FIP workflow
         try:
-            CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
+            CWD=os.path.dirname(self.FIP_workflow_path)
+            print(CWD)
             #subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+' -start --no-editor',cwd=CWD,shell=True)
             subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path,cwd=CWD,shell=True)
         except Exception as e:
-            print(e)
+            logging.error(e)
         
-
         reply = QMessageBox.information(self, 
            'Box {}, Start FIP workflow:'.format(self.box_letter), 
            'Starting FIP workflow now.',
