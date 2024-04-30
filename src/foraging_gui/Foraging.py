@@ -2763,6 +2763,8 @@ class Window(QMainWindow):
                 'Box {}, Start Excitation:'.format(self.box_letter), 
                 'Please start the FIP workflow before running excitation',
                 QMessageBox.Ok )                     
+            self.StartExcitation.setChecked(False)
+            self.StartExcitation.setStyleSheet("background-color : none")
             return      
  
         if self.Teensy_COM == '':
