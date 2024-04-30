@@ -105,6 +105,7 @@ class Window(QMainWindow):
         self.threadpool_workertimer=QThreadPool() # for timing
 
         # Set up more parameters
+        self.FIP_started=False
         self.OpenOptogenetics=0
         self.WaterCalibration=0
         self.LaserCalibration=0
@@ -2723,6 +2724,32 @@ class Window(QMainWindow):
                 if child.isEnabled():
                     child.clear()
     def _StartFIP(self):
+
+
+
+        if self.Teensy_COM == '':
+            logging.warning('No Teensy COM configured for this box, cannot start FIP workflow')
+            self.TeensyWarning.setText('No Teensy COM for this box')
+            self.TeensyWarning.setStyleSheet(self.default_warning_color)
+            msg = 'No Teensy COM configured for this box, cannot start FIP workflow'
+            reply = QMessageBox.information(self, 
+                'Box {}, StartExcitation'.format(self.box_letter), msg, QMessageBox.Ok )
+            self.StartFIP.setChecked(False)
+            self.StartFIP.setStyleSheet("background-color : none")
+            return
+        
+        if self.FIP_started:
+            logging.warning('FIP workflow already started, cannot restart')
+            reply = QMessageBox.information(self, 
+                'Box {}, Start FIP workflow:'.format(self.box_letter), 
+                'FIP workflow has already been started. If its not visible, please restart the GUI',
+                QMessageBox.Ok )                     
+            return
+
+        self.FIP_started=True 
+        logging.info('StartFIP is checked')
+        self.StartFIP.setStyleSheet("background-color : green;")
+
         reply = QMessageBox.information(self, 
            'Box {}, Start FIP workflow:'.format(self.box_letter), 
            'Starting FIP workflow now.',
