@@ -2963,9 +2963,13 @@ class Window(QMainWindow):
             self.TeensyWarning.setStyleSheet(self.default_warning_color)      
             self.StartBleaching.setStyleSheet("background-color : none")
             self.StartExcitation.setStyleSheet("background-color : none")
+            self.StartFIP.setStyleSheet("background-color : green;")
             self.StartBleaching.setChecked(False)
             self.StartExcitation.setChecked(False)
+            self.StartFIP.setChecked(False)
             self.FIP_started=False
+
+
            
     def _AutoReward(self):
         if self.AutoReward.isChecked():
