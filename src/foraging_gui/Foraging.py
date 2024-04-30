@@ -3034,8 +3034,7 @@ class Window(QMainWindow):
         self.StartANewSession=1
         self.CreateNewFolder=1
         self.PhotometryRun=0
-        self.unsaved_data=False
-        self.ManualWaterVolume=[0,0]       
+        self.unsaved_data=False      
     
         # Clear Plots
         if hasattr(self, 'PlotM'): 
@@ -3267,6 +3266,7 @@ class Window(QMainWindow):
             self.WarningLabel.setText('')
             self.WarningLabel.setStyleSheet("color: gray;")
             self.WarmupWarning.setText('')
+            self.ManualWaterVolume=[0,0] 
             # start a new logging
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
