@@ -2756,6 +2756,15 @@ class Window(QMainWindow):
            QMessageBox.Ok )               
 
     def _StartExcitation(self):
+
+        if not self.FIP_started:
+            logging.warning('FIP workflow is not running, cannot start excitation')
+            reply = QMessageBox.information(self, 
+                'Box {}, Start Excitation:'.format(self.box_letter), 
+                'Please start the FIP workflow before running excitation',
+                QMessageBox.Ok )                     
+            return      
+ 
         if self.Teensy_COM == '':
             logging.warning('No Teensy COM configured for this box, cannot start excitation')
             self.TeensyWarning.setText('No Teensy COM for this box')
@@ -3315,7 +3324,8 @@ class Window(QMainWindow):
         # Check if photometry excitation is running or not
         if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and (not self.StartExcitation.isChecked()):
             logging.warning('photometry is set to "on", but excitation is not running')
-            
+           
+            ## DEBUGGING, need something here 
             if self.Teensy_COM == '':
                 logging.warning('No Teensy COM configured for this box, cannot start excitation')
                 msg = 'Photometry is set to "on", but no Teensy COM configured for this box, cannot start excitation.'
