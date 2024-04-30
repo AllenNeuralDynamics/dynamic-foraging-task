@@ -2765,7 +2765,7 @@ class Window(QMainWindow):
                 QMessageBox.Ok )                     
             self.StartExcitation.setChecked(False)
             self.StartExcitation.setStyleSheet("background-color : none")
-            return      
+            return 0  
  
         if self.Teensy_COM == '':
             logging.warning('No Teensy COM configured for this box, cannot start excitation')
@@ -2776,7 +2776,7 @@ class Window(QMainWindow):
                 'Box {}, StartExcitation'.format(self.box_letter), msg, QMessageBox.Ok )
             self.StartExcitation.setChecked(False)
             self.StartExcitation.setStyleSheet("background-color : none")
-            return
+            return 0 
 
         if self.StartExcitation.isChecked():
             reply = QMessageBox.question(self, 
@@ -2787,7 +2787,7 @@ class Window(QMainWindow):
                 self.StartExcitation.setChecked(False)
                 self.StartExcitation.setStyleSheet("background-color : none")
                 logging.info('User says FIP workflow is not open')
-                return
+                return 0 
             logging.info('StartExcitation is checked, user confirms workflow is running')
             self.StartExcitation.setStyleSheet("background-color : green;")
             try:
@@ -2804,6 +2804,7 @@ class Window(QMainWindow):
                 reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
                 self.StartExcitation.setChecked(False)
                 self.StartExcitation.setStyleSheet("background-color : none")
+                return 0 
             else:
                 self.TeensyWarning.setText('')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)               
@@ -2823,10 +2824,12 @@ class Window(QMainWindow):
                 self.TeensyWarning.setText('Error: stop excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
                 reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when stopping excitation: {}'.format(e), QMessageBox.Ok)
+                return 0 
             else:
                 self.TeensyWarning.setText('')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)               
 
+        return 1
     
     def _StartBleaching(self):
 
@@ -3198,6 +3201,27 @@ class Window(QMainWindow):
                 logging.info('Cannot start session without starting FIP workflow')
                 return
 
+            # Check if photometry excitation is running or not
+            if self.PhotometryB.currentText()=='on' and (not self.StartExcitation.isChecked()):
+                logging.warning('photometry is set to "on", but excitation is not running')
+
+                reply = QMessageBox.question(self, 
+                    'Box {}, Start'.format(self.box_letter), 
+                    'Photometry is set to "on", but excitation is not running. Start excitation now?',
+                    QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+                if reply == QMessageBox.Yes:
+                    self.StartExcitation.setChecked(True)
+                    logging.info('User selected to start excitation')
+                    started = self._StartExcitation()
+                    if started == 0:
+                        logging.info('could not start session, due to failure to start excitation')
+                        self.Start.setChecked(False)
+                        return 
+                else:                   
+                    logging.info('User selected not to start excitation')
+                    self.Start.setChecked(False)
+                    return
+
             # change button color and mark the state change
             self.Start.setStyleSheet("background-color : green;")
             self.NewSession.setStyleSheet("background-color : none")
@@ -3332,29 +3356,6 @@ class Window(QMainWindow):
             workerStartTrialLoop=self.workerStartTrialLoop
             workerStartTrialLoop1=self.workerStartTrialLoop1
 
-        # Check if photometry excitation is running or not
-        if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and (not self.StartExcitation.isChecked()):
-            logging.warning('photometry is set to "on", but excitation is not running')
-           
-            if self.Teensy_COM == '':
-                logging.warning('No Teensy COM configured for this box, cannot start excitation')
-                msg = 'Photometry is set to "on", but no Teensy COM configured for this box, cannot start excitation.'
-                reply = QMessageBox.information(self,'Box {}, Start'.format(self.box_letter), 
-                    msg, QMessageBox.Ok)
-                self.Start.setStyleSheet("background-color : none")
-                self.Start.setChecked(False)
-                return
-
-            reply = QMessageBox.question(self, 
-                'Box {}, Start'.format(self.box_letter), 
-                'Photometry is set to "on", but excitation is not running. Start excitation now?',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
-            if reply == QMessageBox.Yes:
-                self.StartExcitation.setChecked(True)
-                logging.info('User selected to start excitation')
-                self._StartExcitation()
-            else:                   
-                logging.info('User selected not to start excitation')
   
         # collecting the base signal for photometry. Only run once
         if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and self.PhotometryRun==0:
