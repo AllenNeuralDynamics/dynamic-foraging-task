@@ -4682,7 +4682,7 @@ Current pair:
                         </property>
                        </widget>
                       </item>
-                      <item row="2" column="2">
+                      <item row="2" column="3">
                        <widget class="QPushButton" name="StartExcitation">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -4698,7 +4698,7 @@ Current pair:
                         </property>
                        </widget>
                       </item>
-                      <item row="2" column="3">
+                      <item row="2" column="4">
                        <widget class="QPushButton" name="StartBleaching">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
