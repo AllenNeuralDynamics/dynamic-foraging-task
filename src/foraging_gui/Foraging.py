@@ -2740,13 +2740,17 @@ class Window(QMainWindow):
             return
         
         if self.FIP_started:
-            logging.warning('FIP workflow already started, cannot restart')
-            reply = QMessageBox.information(self, 
+
+            reply = QMessageBox.question(self, 
                 'Box {}, Start FIP workflow:'.format(self.box_letter), 
-                'FIP workflow has already been started. If its not visible, please restart the GUI',
-                QMessageBox.Ok )       
-            self.StartFIP.setChecked(True)             
-            return
+                'FIP workflow has already been started. Start again?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No )       
+            if QMessageBox.No:
+                self.StartFIP.setChecked(True)             
+                logging.warning('FIP workflow already started, user declines to restart')
+                return
+            else:
+                logging.warning('FIP workflow already started, user restarts')
 
         self.FIP_started=True 
         logging.info('StartFIP is checked')
