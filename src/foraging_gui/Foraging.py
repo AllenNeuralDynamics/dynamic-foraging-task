@@ -2754,7 +2754,8 @@ class Window(QMainWindow):
 
         try:
             CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
-            subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+' --start --no-editor',cwd=CWD,shell=True)
+            #subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+' -start --no-editor',cwd=CWD,shell=True)
+            subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path,cwd=CWD,shell=True)
         except Exception as e:
             print(e)
         
