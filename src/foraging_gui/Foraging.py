@@ -2965,6 +2965,7 @@ class Window(QMainWindow):
             self.StartExcitation.setStyleSheet("background-color : none")
             self.StartBleaching.setChecked(False)
             self.StartExcitation.setChecked(False)
+            self.FIP_started=False
            
     def _AutoReward(self):
         if self.AutoReward.isChecked():
