@@ -2755,6 +2755,10 @@ class Window(QMainWindow):
         logging.info('StartFIP is checked')
         self.StartFIP.setStyleSheet("background-color : green;")
 
+        # Start logging
+        self.CreateNewFolder=1
+        self.Ot_log_folder=self._restartlogging()
+
         # Start the FIP workflow
         try:
             CWD=os.path.dirname(self.FIP_workflow_path)
@@ -3300,7 +3304,7 @@ class Window(QMainWindow):
             # start a new logging
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
-                if not (self.Camera_dialog.StartCamera.isChecked() and self.Camera_dialog.CollectVideo.currentText()=='Yes' and self.Camera_dialog.AutoControl.currentText()=='No'):
+                if (not (self.Camera_dialog.StartCamera.isChecked() and self.Camera_dialog.CollectVideo.currentText()=='Yes' and self.Camera_dialog.AutoControl.currentText()=='No')) or (not self.FIP_started):
                     self.CreateNewFolder=1
                     self.Ot_log_folder=self._restartlogging()
             except Exception as e:
