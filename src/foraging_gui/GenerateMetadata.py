@@ -181,9 +181,9 @@ class generate_metadata:
         if self.ephys_streams!=[]:
             self.modality.append(Modality.ECEPHYS)
         if self.ophys_streams!=[]:
-            self.modality.append(Modality.OPTICAL)
+            self.modality.append(Modality.FIB)
         if self.high_speed_camera_streams!=[]:
-            self.modality.append(Modality.VIDEO)
+            self.modality.append(Modality.BEHAVIOR_VIDEOS)
         
     def _get_investigators(self):
         '''
@@ -194,7 +194,6 @@ class generate_metadata:
         for investigator in investigators:
             if investigator != '':
                 self.investigators.append(PIDName(name=investigator, registry=self.orcid))
-
 
     def _save_rig_metadata(self):
         '''
