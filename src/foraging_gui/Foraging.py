@@ -2734,11 +2734,22 @@ class Window(QMainWindow):
             self.TeensyWarning.setStyleSheet(self.default_warning_color)
             msg = 'No Teensy COM configured for this box, cannot start FIP workflow'
             reply = QMessageBox.information(self, 
-                'Box {}, StartExcitation'.format(self.box_letter), msg, QMessageBox.Ok )
+                'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
             self.StartFIP.setChecked(False)
             self.StartFIP.setStyleSheet("background-color : none")
             return
         
+        if self.FIP_workflow_path == "":
+            logging.warning('No FIP workflow path defined in ForagingSettings.json')
+            self.TeensyWarning.setText('FIP workflow path not defined')
+            self.TeensyWarning.setStyleSheet(self.default_warning_color)
+            msg = 'FIP workflow path not defined, cannot start FIP workflow'
+            reply = QMessageBox.information(self, 
+                'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
+            self.StartFIP.setChecked(False)
+            self.StartFIP.setStyleSheet("background-color : none")                  
+            return
+ 
         if self.FIP_started:
             self.StartFIP.setChecked(True)             
             reply = QMessageBox.question(self, 
