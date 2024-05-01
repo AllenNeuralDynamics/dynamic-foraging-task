@@ -5,11 +5,16 @@ from datetime import datetime
 
 import numpy as np
 
-from aind_data_schema.models.stimulus import OptoStimulation, StimulusEpoch
+from foraging_gui.Visualization import PlotWaterCalibration
+from aind_data_schema.models.stimulus import OptoStimulation, AuditoryStimulation
 from aind_data_schema.models.devices import RelativePosition,SpoutSide,Calibration
 from aind_data_schema.models.units import SizeUnit
 from aind_data_schema.models.modalities import Modality
-from foraging_gui.Visualization import PlotWaterCalibration
+
+from aind_data_schema.core.data_description import DataLevel, Group, Funding, RawDataDescription
+from aind_data_schema.models.modalities import Modality
+from aind_data_schema.models.platforms import Platform
+from aind_data_schema.models.pid_names import PIDName, BaseName
 
 from aind_data_schema.core.session import (
     Coordinates3d,
@@ -70,7 +75,7 @@ class generate_metadata:
         self._mapper()
         self._get_box_type()
         self._session()
-    
+        self._session_description()
 
     def _mapper(self):
         '''
@@ -108,6 +113,11 @@ class generate_metadata:
         else:
             self.box_type = 'Behavior'
     
+    def _session_description(self):
+        '''
+        Generate the session description to the MetadataFolder
+        '''
+        orcid = BaseName(name="Open Researcher and Contributor ID", abbreviation="ORCID")
 
     def _save_rig_metadata(self):
         '''
@@ -218,7 +228,7 @@ class generate_metadata:
         if self.session_start_time == '' or self.session_end_time == '' or self.Obj['meta_data_dialog']['rig_metadata']=={}:
             return
         
-        self._get_reward_delivery()
+        #self._get_reward_delivery()
         self._get_water_calibration()
         self._get_opto_calibration()
         self.calibration=self.water_calibration+self.opto_calibration
@@ -245,10 +255,12 @@ class generate_metadata:
             "reward_consumed_unit": "microliter",
             "calibrations": self.calibration,
             "data_streams": self.data_streams,
+            "mouse_platform_name": self.Obj['meta_data_dialog']['rig_metadata']['mouse_platform']['name'],
+            "active_mouse_platform": False
         }
 
-        if self.has_newscale_position:
-            session_params["reward_delivery"] = self.lick_spouts
+        #if self.has_newscale_position:
+        #    session_params["reward_delivery"] = self.lick_spouts
 
         session = Session(**session_params)
         session.write_standard_file(output_directory=self.Obj['MetadataFolder'])
@@ -265,8 +277,6 @@ class generate_metadata:
                         camera_names=self.camera_names,
                         stream_start_time=datetime.strptime(self.Obj['Camera_dialog']['camera_start_time'], '%Y-%m-%d %H:%M:%S.%f'),
                         stream_end_time=datetime.strptime(self.Obj['Camera_dialog']['camera_end_time'], '%Y-%m-%d %H:%M:%S.%f'),
-                        mouse_platform_name=self.Obj['meta_data_dialog']['rig_metadata']['mouse_platform']['name'],
-                        active_mouse_platform=False,
                 ))
 
     def _get_camera_names(self):
@@ -353,9 +363,6 @@ class generate_metadata:
                     stream_start_time=datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S.%f'),
                     stream_end_time=datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S.%f'),
                     daq_names=daq_names,
-                    stimulus_device_names=self.stmulus_device_names,
-                    mouse_platform_name=self.Obj['meta_data_dialog']['rig_metadata']['mouse_platform']['name'],
-                    active_mouse_platform=False,
                     ephys_modules=self.ephys_modules,
                     stick_microscopes=self.stick_microscopes,
                     notes=f"recording type: {current_recording['recording_type']}; file name:{current_recording['prepend_text']}{current_recording['base_text']};  experiment number:{current_recording['record_nodes'][0]['experiment_number']};  recording number:{current_recording['record_nodes'][0]['recording_number']}",
@@ -456,13 +463,10 @@ class generate_metadata:
 
         self.behavior_streams=[]
         self.behavior_streams.append(Stream(
-                stream_modalities=[Modality.TRAINED_BEHAVIOR],
+                stream_modalities=[Modality.BEHAVIOR],
                 stream_start_time=datetime.strptime(self.Obj['Other_SessionStartTime'], '%Y-%m-%d %H:%M:%S.%f'),
                 stream_end_time=datetime.strptime(self.Obj['Other_CurrentTime'], '%Y-%m-%d %H:%M:%S.%f'),
                 daq_names=daq_names,
-                stimulus_device_names=[''],
-                mouse_platform_name=self.Obj['meta_data_dialog']['rig_metadata']['mouse_platform']['name'],
-                active_mouse_platform=False,
         ))
 
     def _get_opto_calibration(self):
@@ -617,7 +621,7 @@ class generate_metadata:
             reward_spouts=[RewardSpoutConfig(
                 side=SpoutSide.LEFT,
                 starting_position=RelativePosition(
-                    coordinate_system='Stage. x: left (+) and right (-); y: forward (+) and backward (-); z: down (+) and up (-). Both left and right lick spouts are fixed on the same stage.',
+                    notes='Stage. x: left (+) and right (-); y: forward (+) and backward (-); z: down (+) and up (-). Both left and right lick spouts are fixed on the same stage.',
                     x=self.Obj['B_NewscalePositions'][0][0], y=self.Obj['B_NewscalePositions'][0][1], z=self.Obj['B_NewscalePositions'][0][2],
                     position_unit=SizeUnit.UM
                 ),
