@@ -1736,10 +1736,12 @@ class MetadataDialog(QDialog):
         self.funding_institution=self.project_infor['Funding Institution'][current_project_index]
         self.grant_number=self.project_infor['Grant Number'][current_project_index]
         self.investigators=self.project_infor['Investigators'][current_project_index]
+        self.fundee=self.project_infor['Fundee'][current_project_index]
         self.FundingSource.setText(self.funding_institution)
         self.Investigators.setText(self.investigators)
         self.GrantNumber.setText(str(self.grant_number))
         self.ProjectCode.setText(self.current_project_code)
+        self.Fundee.setText(self.fundee)
 
     def _show_project_names(self):
         '''show the project names from the project spreadsheet'''

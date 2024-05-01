@@ -861,9 +861,9 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>100</x>
-      <y>200</y>
+      <y>230</y>
       <width>141</width>
-      <height>141</height>
+      <height>121</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -890,7 +890,7 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>170</y>
+      <y>200</y>
       <width>91</width>
       <height>20</height>
      </rect>
@@ -959,7 +959,7 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>100</x>
-      <y>170</y>
+      <y>200</y>
       <width>141</width>
       <height>20</height>
      </rect>
@@ -1035,7 +1035,7 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>200</y>
+      <y>220</y>
       <width>91</width>
       <height>20</height>
      </rect>
@@ -1217,6 +1217,50 @@ p, li { white-space: pre-wrap; }
     </property>
     <property name="text">
      <string/>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="Fundee">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>170</y>
+      <width>141</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_91">
+    <property name="geometry">
+     <rect>
+      <x>6</x>
+      <y>170</y>
+      <width>91</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>Fundee:</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
   </widget>
