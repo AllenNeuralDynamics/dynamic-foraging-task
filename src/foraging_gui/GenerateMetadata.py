@@ -6,7 +6,7 @@ from datetime import datetime
 import numpy as np
 
 from foraging_gui.Visualization import PlotWaterCalibration
-from aind_data_schema.models.stimulus import OptoStimulation, AuditoryStimulation
+from aind_data_schema.models.stimulus import AuditoryStimulation
 from aind_data_schema.models.devices import RelativePosition,SpoutSide,Calibration
 from aind_data_schema.models.units import SizeUnit,FrequencyUnit,SoundIntensityUnit
 from aind_data_schema.models.modalities import Modality
