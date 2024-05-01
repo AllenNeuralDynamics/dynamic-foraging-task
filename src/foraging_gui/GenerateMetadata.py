@@ -12,6 +12,7 @@ from aind_data_schema.models.units import SizeUnit
 from aind_data_schema.models.modalities import Modality
 
 from aind_data_schema.core.data_description import DataLevel, Group, Funding, RawDataDescription
+from aind_data_schema.models.organizations import Organization
 from aind_data_schema.models.modalities import Modality
 from aind_data_schema.models.platforms import Platform
 from aind_data_schema.models.pid_names import PIDName, BaseName
@@ -97,6 +98,12 @@ class generate_metadata:
                 'BottomCamera': "Bottom",
                 'BodyCamera': "Body"
             }, # camera names in the settings_box.csv and the corresponding names in the rig metadata
+            'group':{
+                    "behavior":Group.BEHAVIOR,
+                    "ephys":Group.EPHYS,
+                    "ophys":Group.OPHYS,
+                    "MSMA":Group.MSMA,
+            }, # group names in the behavior GUI and the corresponding group names in the aind_data_schema
         }
 
     def _get_box_type(self):
@@ -117,7 +124,78 @@ class generate_metadata:
         '''
         Generate the session description to the MetadataFolder
         '''
-        orcid = BaseName(name="Open Researcher and Contributor ID", abbreviation="ORCID")
+        self.orcid = BaseName(name="Open Researcher and Contributor ID", abbreviation="ORCID")
+        self._get_session_time()
+        self._get_modality()
+        self._get_investigators()
+        self._get_group()
+        self._get_funding_source()
+        self._get_platform()
+        
+        description= RawDataDescription(
+            data_level=DataLevel.RAW,
+            data_group=self.group,
+            funding_source=self.funding_source,
+            investigators=self.investigators,
+            modality=self.modality,
+            project_name=self.Obj['meta_data_dialog']['session_metadata']['ProjectName'],
+            data_summary=self.Obj['meta_data_dialog']['session_metadata']['DataSummary'],
+            institution=Organization.AIND,
+            creation_time=self.session_start_time,
+            platform= self.platform,
+            subject_id=self.Obj['ID'],
+        )
+    def _get_platform(self):
+        '''
+        Get the platform name. This should be improved in the future.
+        '''
+        if self.box_type == 'Ephys':
+            self.platform = Platform.ECEPHYS
+        elif self.box_type == 'Behavior':
+            self.platform = Platform.BEHAVIOR
+        else:
+            self.platform = ''
+
+    def _get_session_time(self):
+        '''
+        Get the session start and session end time
+        '''
+        if 'Other_SessionStartTime' not in self.Obj:
+            self.session_start_time = ''
+            self.session_end_time = '' 
+        else:
+            self.session_start_time = self.Obj['Other_SessionStartTime']
+            self.session_end_time= self.Obj['Other_CurrentTime']
+
+    def _get_modality(self):
+        '''
+        Get all the modalities used in the session
+        '''
+        self.modality = []
+        if self.behavior_streams!=[]:
+            self.modality.append(Modality.BEHAVIOR)
+        if self.ephys_streams!=[]:
+            self.modality.append(Modality.ECEPHYS)
+        if self.ophys_streams!=[]:
+            self.modality.append(Modality.OPTICAL)
+        if self.high_speed_camera_streams!=[]:
+            self.modality.append(Modality.VIDEO)
+        
+    def _get_investigators(self):
+        '''
+        Get investigators
+        '''
+        self.investigators=[]
+        investigators=self.Obj['meta_data_dialog']['session_metadata']['Investigators'].split(',')
+        for investigator in investigators:
+            if investigator != '':
+                self.investigators.append(PIDName(name=investigator, registry=self.orcid))
+
+    def _get_group(self):
+        '''
+        Get the group name
+        '''
+        self.group=self.name_mapper['group'][self.Obj['meta_data_dialog']['session_metadata']['Group']]
 
     def _save_rig_metadata(self):
         '''
@@ -179,12 +257,7 @@ class generate_metadata:
 
         # Missing fields 'Other_SessionStartTime' and 'Other_CurrentTime' in the json file.
         # Possible reason: 1) the behavior session is not started.
-        if 'Other_SessionStartTime' not in self.Obj:
-            self.session_start_time = ''
-            self.session_end_time = '' 
-        else:
-            self.session_start_time = self.Obj['Other_SessionStartTime']
-            self.session_end_time= self.Obj['Other_CurrentTime']
+        self._get_session_time()
 
         # Missing field 'meta_data_dialog' in the json file.
         # Possible reason: 1) Old version of the software.
@@ -640,4 +713,4 @@ class generate_metadata:
 
 
 if __name__ == '__main__':
-    generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-04-27_14-57-06_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
+    generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-01_12-24-19_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
