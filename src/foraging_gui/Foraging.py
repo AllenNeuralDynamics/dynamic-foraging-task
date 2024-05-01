@@ -2776,17 +2776,13 @@ class Window(QMainWindow):
             logging.info('Starting FIP workflow in directory: {}'.format(CWD))
             folder_path = ' -p session="{}"'.format(self.SessionFolder)
             camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartCamera.isChecked())
-            # We will want to start the workflow, and not open the editor
-            # DEBUGGING - Need to test on a computer where I can start the workflow
             subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera+' --start',cwd=CWD,shell=True)
-            #subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera,cwd=CWD,shell=True)
         except Exception as e:
             logging.error(e)
-        
-        reply = QMessageBox.information(self, 
-           'Box {}, Start FIP workflow:'.format(self.box_letter), 
-           'Starting FIP workflow now.',
-           QMessageBox.Ok )               
+            reply = QMessageBox.information(self, 
+               'Box {}, Start FIP workflow:'.format(self.box_letter), 
+               'Could not start FIP workflow: {}'.format(e),
+               QMessageBox.Ok )               
 
     def _StartExcitation(self):
 
