@@ -418,12 +418,13 @@ class generate_metadata:
             return
         
         self.audio_stimulus.append(StimulusEpoch(
-            stimulus_name='Audio go cue',
+            stimulus_name='auditory go cue',
+            notes=f"The duration of go cue is 100ms. The frequency is 7500Hz. Decibel is {self.Obj['Other_go_cue_decibel']}dB.",
             stimulus_modalities=[StimulusModality.AUDITORY],
             stimulus_start_time=self.session_start_time,
             stimulus_end_time=self.session_end_time,
             stimulus_parameters=[AuditoryStimulation(
-                sitmulus_name='Audio go cue',
+                sitmulus_name='auditory go cue',
                 sample_frequency=96000,
                 frequency_unit=FrequencyUnit.HZ,
                 amplitude_modulation_frequency=7500,
