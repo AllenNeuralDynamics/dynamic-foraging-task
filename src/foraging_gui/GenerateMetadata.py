@@ -8,7 +8,7 @@ import numpy as np
 from foraging_gui.Visualization import PlotWaterCalibration
 from aind_data_schema.models.stimulus import OptoStimulation, AuditoryStimulation
 from aind_data_schema.models.devices import RelativePosition,SpoutSide,Calibration
-from aind_data_schema.models.units import SizeUnit
+from aind_data_schema.models.units import SizeUnit,FrequencyUnit,SoundIntensityUnit
 from aind_data_schema.models.modalities import Modality
 
 from aind_data_schema.core.data_description import DataLevel, Funding, RawDataDescription
@@ -27,6 +27,9 @@ from aind_data_schema.core.session import (
     RewardDeliveryConfig,
     RewardSpoutConfig,
     RewardSolution,
+    StimulusEpoch,
+    StimulusModality,
+    SpeakerConfig,
 )
 
 class generate_metadata:
@@ -102,7 +105,7 @@ class generate_metadata:
 
     def _get_box_type(self):
         '''
-        To judge the box type (ephys or behavior) based on the rig_id.
+        To judge the box type (ephys or behavior) based on the rig_id. This should be improved in the future.
         '''
 
         if 'rig_id' not in self.Obj['meta_data_dialog']['rig_metadata']:
@@ -168,8 +171,8 @@ class generate_metadata:
             self.session_start_time = ''
             self.session_end_time = '' 
         else:
-            self.session_start_time = self.Obj['Other_SessionStartTime']
-            self.session_end_time= self.Obj['Other_CurrentTime']
+            self.session_start_time = datetime.strptime(self.Obj['Other_SessionStartTime'], '%Y-%m-%d %H:%M:%S.%f')
+            self.session_end_time= datetime.strptime(self.Obj['Other_CurrentTime'], '%Y-%m-%d %H:%M:%S.%f')
 
     def _get_modality(self):
         '''
@@ -333,6 +336,10 @@ class generate_metadata:
         #if self.has_newscale_position:
         #    session_params["reward_delivery"] = self.lick_spouts
 
+        #adding go cue and opto parameters to the stimulus_epochs
+        if self.stimulus!=[]:
+            session_params["stimulus_epochs"] = self.stimulus
+
         session = Session(**session_params)
         session.write_standard_file(output_directory=self.Obj['MetadataFolder'])
 
@@ -384,27 +391,39 @@ class generate_metadata:
         Make the audio stimulus metadata
         '''
         self.audio_stimulus=[]
-
+        if self.behavior_streams==[]:
+            return
+        self.audio_stimulus.append(StimulusEpoch(
+            stimulus_name='Audio go cue',
+            stimulus_modalities=[StimulusModality.AUDITORY],
+            stimulus_start_time=self.session_start_time,
+            stimulus_end_time=self.session_end_time,
+            stimulus_parameters=[AuditoryStimulation(
+                sitmulus_name='Audio go cue',
+                sample_frequency=96000,
+                frequency_unit=FrequencyUnit.HZ,
+                amplitude_modulation_frequency=7500,
+            )],
+            speaker_config=SpeakerConfig(
+                name='Speaker',
+                volume=60,
+                volume_unit=SoundIntensityUnit.DB,
+            )
+        ))
     def _get_optogenetics_stimulus(self):
         '''
         Make the optogenetics stimulus metadata
         '''
         self.optogenetics_stimulus=[]
-        '''
+        if sum(self.Obj['B_SelectedCondition'])==0:
+            return  
         self.optogenetics_stimulus.append(StimulusEpoch(    
-            stimulus= OptoStimulation(
                 stimulus_name='Optogenetics',
+                stimulus_modalities=[StimulusModality.OPTOGENETICS],
                 notes='Please see NWB files for more details (stimulus epoch and stimulus protocol etc.).',
-                pulse_shape='',
-                pulse_frequency='',
-                number_pulse_trains='',
-                pulse_width='',
-                pulse_train_duration='',
-                fixed_pulse_train_interval='',
-                baseline_duration='',
-            )
+                stimulus_start_time=self.session_start_time,
+                stimulus_end_time=self.session_end_time,
         ))
-        '''
 
 
     def _get_ephys_stream(self):
