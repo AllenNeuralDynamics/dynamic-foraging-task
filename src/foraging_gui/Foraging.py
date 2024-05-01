@@ -1863,7 +1863,7 @@ class Window(QMainWindow):
             self.client3.close()
             self.client4.close()
         self.Opto_dialog.close()
-        self._StopPhotometry()  # Make sure photo excitation is stopped 
+        self._StopPhotometry(closing=True)  # Make sure photo excitation is stopped 
         print('GUI Window closed')
         logging.info('GUI Window closed') 
 
@@ -2775,7 +2775,7 @@ class Window(QMainWindow):
 
             # We will want to start the workflow, and not open the editor
             #subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+' --start --no-editor',cwd=CWD,shell=True)
-            folder_path = ' -p session_folder="{}"'.format(self.PhotometryFolder)
+            folder_path = ' -p Value="{}"'.format(self.PhotometryFolder)
             self.camera_running=False ## DEBUGGING
             camera = ' -p RunCamera="{}"'.format(not self.camera_running)
             subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera,cwd=CWD,shell=True)
@@ -2943,7 +2943,7 @@ class Window(QMainWindow):
                 self.TeensyWarning.setText('Error: stop bleaching!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
     
-    def _StopPhotometry(self):
+    def _StopPhotometry(self,closing=False):
         '''
             Stop either bleaching or photometry
         '''
@@ -2972,7 +2972,7 @@ class Window(QMainWindow):
             self.StartFIP.setChecked(False)
             self.FIP_started=False
         
-        if FIP_was_running:
+        if (FIP_was_running)&(not closing):
             reply = QMessageBox.critical(self, 
                 'Box {}, New Session:'.format(self.box_letter), 
                 'Please restart the FIP workflow',
