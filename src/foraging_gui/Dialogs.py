@@ -1755,7 +1755,7 @@ class MetadataDialog(QDialog):
         self.ProjectName.addItems(project_names)
         self._manage_signals(enable=True,keys=['ProjectName'],action=self._show_project_infor)
         self._show_project_infor()
-        
+
     def _get_basics(self):
         '''get the basic information'''
         self.probe_types = ['StickMicroscopes','EphysProbes']
@@ -1802,9 +1802,21 @@ class MetadataDialog(QDialog):
         if update_session_metadata:
             widget_dict = self._get_widgets()
             self._set_widgets_value(widget_dict, self.meta_data['session_metadata'])
+
         self._show_ephys_probes()
-        self._show_stick_microscopes()    
+        self._show_stick_microscopes()
+        self._iterate_probes_microscopes()    
     
+    def _iterate_probes_microscopes(self):
+        '''iterate the probes and microscopes to save the probe information'''
+        keys = ['EphysProbes', 'StickMicroscopes']
+        for key in keys:
+            current_combo = getattr(self, key)
+            current_index = current_combo.currentIndex()
+            for index in range(current_combo.count()):
+                current_combo.setCurrentIndex(index)
+            current_combo.setCurrentIndex(current_index)
+
     def _set_widgets_value(self, widget_dict, metadata):
         '''set the widgets value'''
         for key, value in widget_dict.items():

@@ -407,7 +407,7 @@ p, li { white-space: pre-wrap; }
      <bool>false</bool>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>-1</number>
     </property>
     <property name="maxVisibleItems">
      <number>36</number>
@@ -415,11 +415,6 @@ p, li { white-space: pre-wrap; }
     <property name="sizeAdjustPolicy">
      <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
     </property>
-    <item>
-     <property name="text">
-      <string>NA</string>
-     </property>
-    </item>
    </widget>
    <widget class="QLabel" name="label_74">
     <property name="geometry">
@@ -733,7 +728,7 @@ p, li { white-space: pre-wrap; }
      <bool>false</bool>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>-1</number>
     </property>
     <property name="maxVisibleItems">
      <number>36</number>
@@ -741,11 +736,6 @@ p, li { white-space: pre-wrap; }
     <property name="sizeAdjustPolicy">
      <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
     </property>
-    <item>
-     <property name="text">
-      <string>NA</string>
-     </property>
-    </item>
    </widget>
    <widget class="QLabel" name="label_90">
     <property name="geometry">
@@ -1234,7 +1224,6 @@ p, li { white-space: pre-wrap; }
   <zorder>ExperimentDescription</zorder>
   <zorder>label_3</zorder>
   <zorder>SaveMeta</zorder>
-  <zorder>LoadMeta</zorder>
   <zorder>label_72</zorder>
   <zorder>IACUCProtocol</zorder>
   <zorder>label_73</zorder>
@@ -1245,7 +1234,37 @@ p, li { white-space: pre-wrap; }
   <zorder>ClearMetadata</zorder>
   <zorder>Microscopes</zorder>
   <zorder>DataDescription</zorder>
+  <zorder>LoadMeta</zorder>
  </widget>
+ <tabstops>
+  <tabstop>ExperimentDescription</tabstop>
+  <tabstop>PtotocolID</tabstop>
+  <tabstop>IACUCProtocol</tabstop>
+  <tabstop>SelectRigMetadata</tabstop>
+  <tabstop>RigMetadataFile</tabstop>
+  <tabstop>SaveMeta</tabstop>
+  <tabstop>ClearMetadata</tabstop>
+  <tabstop>RotationAngle</tabstop>
+  <tabstop>LoadMeta</tabstop>
+  <tabstop>EphysProbes</tabstop>
+  <tabstop>ModuleAngle</tabstop>
+  <tabstop>ArcAngle</tabstop>
+  <tabstop>ProbeTarget</tabstop>
+  <tabstop>StickMicroscopes</tabstop>
+  <tabstop>Stick_ModuleAngle</tabstop>
+  <tabstop>Stick_ArcAngle</tabstop>
+  <tabstop>Stick_RotationAngle</tabstop>
+  <tabstop>DataSummary</tabstop>
+  <tabstop>FundingSource</tabstop>
+  <tabstop>Group</tabstop>
+  <tabstop>Investigators</tabstop>
+  <tabstop>ProjectName</tabstop>
+  <tabstop>GrantNumber</tabstop>
+  <tabstop>ProjectCode</tabstop>
+  <tabstop>ManipulatorX</tabstop>
+  <tabstop>ManipulatorZ</tabstop>
+  <tabstop>ManipulatorY</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
