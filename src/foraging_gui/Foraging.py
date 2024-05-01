@@ -2774,7 +2774,7 @@ class Window(QMainWindow):
         try:
             CWD=os.path.dirname(self.FIP_workflow_path)
             logging.info('Starting FIP workflow in directory: {}'.format(CWD))
-            folder_path = ' -p session="{}"'.format(self.PhotometryFolder)
+            folder_path = ' -p session="{}"'.format(self.SessionFolder)
             camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartCamera.isChecked())
             # We will want to start the workflow, and not open the editor
             # DEBUGGING - Need to test on a computer where I can start the workflow
