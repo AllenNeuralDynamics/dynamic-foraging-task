@@ -965,6 +965,7 @@ class Window(QMainWindow):
             'open_ephys_machine_ip_address':'',
             'metadata_dialog_folder':os.path.join(self.SettingFolder,"metadata_dialog")+'\\',
             'rig_metadata_folder':os.path.join(self.SettingFolder,"rig_metadata")+'\\',
+            'project_infor_file':os.path.join(self.SettingFolder,"Project Name and Funding Source v2.xlsx")
         }
         
         # Try to load Settings_box#.csv
@@ -1024,7 +1025,7 @@ class Window(QMainWindow):
         self.open_ephys_machine_ip_address=self.Settings['open_ephys_machine_ip_address']
         self.metadata_dialog_folder = self.Settings['metadata_dialog_folder'] 
         self.rig_metadata_folder = self.Settings['rig_metadata_folder']
-
+        self.project_infor_file = self.Settings['project_infor_file']
         # Also stream log info to the console if enabled
         if  self.Settings['show_log_info_in_console']:
             logger = logging.getLogger()
