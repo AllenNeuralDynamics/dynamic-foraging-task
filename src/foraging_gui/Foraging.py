@@ -2764,20 +2764,11 @@ class Window(QMainWindow):
             CWD=os.path.dirname(self.FIP_workflow_path)
             logging.info('Starting FIP workflow in directory: {}'.format(CWD))
         
-            # Notes on passing in parameters
-            # can use "-p <propertyName>=<string>" 
-            # or "-p <NestedNodeName.propertyName>=<string>"
-            # example: ' -p intProperty=100 -p NestedNode.FlipMode="Horizontal"'
-            
-            # We want to pass in the folder for the session
-            # We want to pass in whether the FIP workflow needs to handle video, or not
-            # Are there any other settings, or parameters want to merge in?
-
             # We will want to start the workflow, and not open the editor
+            # DEBUGGING - Need to test on a computer where I can start the workflow
             #subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+' --start --no-editor',cwd=CWD,shell=True)
             folder_path = ' -p session="{}"'.format(self.PhotometryFolder)
-            self.camera_running=True ## DEBUGGING
-            camera = ' -p RunCamera="{}"'.format(not self.camera_running)
+            camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartCamera.isChecked())
             subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera,cwd=CWD,shell=True)
         except Exception as e:
             logging.error(e)
