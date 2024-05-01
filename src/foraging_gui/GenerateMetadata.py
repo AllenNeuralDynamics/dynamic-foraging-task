@@ -121,6 +121,9 @@ class generate_metadata:
         '''
         Generate the session description to the MetadataFolder
         '''
+        if self.session_start_time == '' or self.session_end_time == '' or self.Obj['meta_data_dialog']['rig_metadata']=={}:
+            return
+        
         self.orcid = BaseName(name="Open Researcher and Contributor ID", abbreviation="ORCID")
         self._get_session_time()
         self._get_modality()
