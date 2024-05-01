@@ -961,7 +961,8 @@ class Window(QMainWindow):
             'open_ephys_machine_ip_address':'',
             'metadata_dialog_folder':os.path.join(self.SettingFolder,"metadata_dialog")+'\\',
             'rig_metadata_folder':os.path.join(self.SettingFolder,"rig_metadata")+'\\',
-            'project_infor_file':os.path.join(self.SettingFolder,"Project Name and Funding Source v2.csv")
+            'project_infor_file':os.path.join(self.SettingFolder,"Project Name and Funding Source v2.csv"),
+            'go_cue_decibel':60,
         }
         
         # Try to load Settings_box#.csv
@@ -1022,6 +1023,7 @@ class Window(QMainWindow):
         self.metadata_dialog_folder = self.Settings['metadata_dialog_folder'] 
         self.rig_metadata_folder = self.Settings['rig_metadata_folder']
         self.project_infor_file = self.Settings['project_infor_file']
+        self.Other_go_cue_decibel = self.Settings['go_cue_decibel']
         if not is_absolute_path(self.project_infor_file):
             self.project_infor_file = os.path.join(self.SettingFolder,self.project_infor_file)
         # Also stream log info to the console if enabled

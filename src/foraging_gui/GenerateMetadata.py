@@ -275,7 +275,11 @@ class generate_metadata:
         self._initialize_fields(dic=self.Obj['meta_data_dialog'],keys=['rig_metadata_file'],default_value='')
         self._initialize_fields(dic=self.Obj,keys=['MetadataFolder'],default_value='')
     
-    
+        # Missing field Other_go_cue_decibel is not recorded in the behavior json file.
+        # Possible reason: 1) the go cue decibel is not set in the foraging settings file. 2) old version of the software.
+        if 'Other_go_cue_decibel' not in self.Obj:
+            self.Obj['Other_go_cue_decibel'] = 60
+
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
         Initialize fields
@@ -393,6 +397,7 @@ class generate_metadata:
         self.audio_stimulus=[]
         if self.behavior_streams==[]:
             return
+        
         self.audio_stimulus.append(StimulusEpoch(
             stimulus_name='Audio go cue',
             stimulus_modalities=[StimulusModality.AUDITORY],
@@ -406,7 +411,7 @@ class generate_metadata:
             )],
             speaker_config=SpeakerConfig(
                 name='Speaker',
-                volume=60,
+                volume=self.Obj['Other_go_cue_decibel'],
                 volume_unit=SoundIntensityUnit.DB,
             )
         ))
