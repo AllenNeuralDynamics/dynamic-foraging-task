@@ -2774,14 +2774,13 @@ class Window(QMainWindow):
         try:
             CWD=os.path.dirname(self.FIP_workflow_path)
             logging.info('Starting FIP workflow in directory: {}'.format(CWD))
-        
+            folder_path = ' -p session="{}"'.format(self.PhotometryFolder)
+            camera = ' -p RunCamera="False"'       
+            #camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartCamera.isChecked())
             # We will want to start the workflow, and not open the editor
             # DEBUGGING - Need to test on a computer where I can start the workflow
-            #subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+' --start --no-editor',cwd=CWD,shell=True)
-            folder_path = ' -p session="{}"'.format(self.PhotometryFolder)
-            camera = ' -p RunCamera="False"'
-            #camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartCamera.isChecked())
-            subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera,cwd=CWD,shell=True)
+            subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+' --start --no-editor',cwd=CWD,shell=True)
+            #subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera,cwd=CWD,shell=True)
         except Exception as e:
             logging.error(e)
         
