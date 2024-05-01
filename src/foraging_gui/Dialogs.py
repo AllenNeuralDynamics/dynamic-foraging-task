@@ -1706,7 +1706,7 @@ class MetadataDialog(QDialog):
         self.meta_data['session_metadata'] = {}
         self.meta_data['rig_metadata_file'] = ''
         self._get_basics()
-        self._show_project_infor()
+        self._show_project_names()
 
     def _connectSignalsSlots(self):
         self.SelectRigMetadata.clicked.connect(lambda: self._SelectRigMetadata(rig_metadata_file=None))
@@ -1726,20 +1726,36 @@ class MetadataDialog(QDialog):
         self.Stick_ArcAngle.textChanged.connect(self._save_configuration)
         self.Stick_ModuleAngle.textChanged.connect(self._save_configuration)
         self.Stick_RotationAngle.textChanged.connect(self._save_configuration)
-
+        self.ProjectName.currentIndexChanged.connect(self._show_project_infor)
 
     def _show_project_infor(self):
-        '''show the project information from the project spreadsheet'''
+        '''show the project information based on current project name'''
+        current_project_index = self.ProjectName.currentIndex()
+        self.current_project_name=self.ProjectName.currentText()
+        self.current_project_code=self.project_infor['Project Code'][current_project_index]
+        self.funding_institution=self.project_infor['Funding Institution'][current_project_index]
+        self.grant_number=self.project_infor['Grant Number'][current_project_index]
+        self.investigators=self.project_infor['Investigators'][current_project_index]
+        self.FundingSource.setText(self.funding_institution)
+        self.Investigators.setText(self.investigators)
+        self.GrantNumber.setText(str(self.grant_number))
+        self.ProjectCode.setText(self.current_project_code)
+
+    def _show_project_names(self):
+        '''show the project names from the project spreadsheet'''
         # load the project spreadsheet
         project_infor_file = self.MainWindow.project_infor_file
         if not os.path.exists(project_infor_file):
             return
-        project_infor = pd.read_excel(project_infor_file)
-        project_names = project_infor['Project Name'].tolist()
+        self.project_infor = pd.read_excel(project_infor_file)
+        project_names = self.project_infor['Project Name'].tolist()
         # show the project information
         # adding project names to the project combobox
+        self._manage_signals(enable=False,keys=['ProjectName'],action=self._show_project_infor)
         self.ProjectName.addItems(project_names)
-
+        self._manage_signals(enable=True,keys=['ProjectName'],action=self._show_project_infor)
+        self._show_project_infor()
+        
     def _get_basics(self):
         '''get the basic information'''
         self.probe_types = ['StickMicroscopes','EphysProbes']
@@ -1972,6 +1988,8 @@ class MetadataDialog(QDialog):
             enable (connect) or disable (disconnect) the signals
         action : function
             the function to be connected or disconnected
+        keys : list
+            the keys of the widgets to be connected or disconnected
         '''
         if keys == '':
             keys=self._get_chidldren_keys(self.Probes)

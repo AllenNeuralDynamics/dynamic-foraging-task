@@ -861,7 +861,7 @@ p, li { white-space: pre-wrap; }
      <x>280</x>
      <y>220</y>
      <width>271</width>
-     <height>301</height>
+     <height>351</height>
     </rect>
    </property>
    <property name="title">
@@ -871,7 +871,7 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>100</x>
-      <y>140</y>
+      <y>200</y>
       <width>141</width>
       <height>141</height>
      </rect>
@@ -900,7 +900,7 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>110</y>
+      <y>170</y>
       <width>91</width>
       <height>20</height>
      </rect>
@@ -921,7 +921,7 @@ p, li { white-space: pre-wrap; }
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QLineEdit" name="Investigators_2">
+   <widget class="QLineEdit" name="FundingSource">
     <property name="geometry">
      <rect>
       <x>100</x>
@@ -969,7 +969,7 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>100</x>
-      <y>110</y>
+      <y>170</y>
       <width>141</width>
       <height>20</height>
      </rect>
@@ -1045,7 +1045,7 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>140</y>
+      <y>200</y>
       <width>91</width>
       <height>20</height>
      </rect>
@@ -1139,6 +1139,94 @@ p, li { white-space: pre-wrap; }
     </property>
     <property name="sizeAdjustPolicy">
      <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="GrantNumber">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>110</y>
+      <width>141</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_86">
+    <property name="geometry">
+     <rect>
+      <x>6</x>
+      <y>110</y>
+      <width>91</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>Grant number:</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_87">
+    <property name="geometry">
+     <rect>
+      <x>6</x>
+      <y>140</y>
+      <width>91</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>Project code:</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="ProjectCode">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>140</y>
+      <width>141</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
   </widget>
