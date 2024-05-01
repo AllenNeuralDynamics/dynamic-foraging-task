@@ -1735,7 +1735,10 @@ class MetadataDialog(QDialog):
         if not os.path.exists(project_infor_file):
             return
         project_infor = pd.read_excel(project_infor_file)
+        project_names = project_infor['Project Name'].tolist()
         # show the project information
+        # adding project names to the project combobox
+        self.ProjectName.addItems(project_names)
 
     def _get_basics(self):
         '''get the basic information'''

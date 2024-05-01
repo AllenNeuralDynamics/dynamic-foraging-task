@@ -1135,10 +1135,10 @@ p, li { white-space: pre-wrap; }
      <number>-1</number>
     </property>
     <property name="maxVisibleItems">
-     <number>36</number>
+     <number>3600</number>
     </property>
     <property name="sizeAdjustPolicy">
-     <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
+     <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
     </property>
    </widget>
   </widget>
