@@ -98,12 +98,6 @@ class generate_metadata:
                 'BottomCamera': "Bottom",
                 'BodyCamera': "Body"
             }, # camera names in the settings_box.csv and the corresponding names in the rig metadata
-            'group':{
-                    "behavior":Group.BEHAVIOR,
-                    "ephys":Group.EPHYS,
-                    "ophys":Group.OPHYS,
-                    "MSMA":Group.MSMA,
-            }, # group names in the behavior GUI and the corresponding group names in the aind_data_schema
         }
 
     def _get_box_type(self):
@@ -128,7 +122,6 @@ class generate_metadata:
         self._get_session_time()
         self._get_modality()
         self._get_investigators()
-        self._get_group()
         self._get_funding_source()
         self._get_platform()
 
@@ -145,7 +138,7 @@ class generate_metadata:
             subject_id=self.Obj['ID'],
         )
         description.write_standard_file(output_directory=self.Obj['MetadataFolder'])
-        
+
     def _get_funding_source(self):
         '''
         Get the funding source
@@ -202,11 +195,6 @@ class generate_metadata:
             if investigator != '':
                 self.investigators.append(PIDName(name=investigator, registry=self.orcid))
 
-    def _get_group(self):
-        '''
-        Get the group name
-        '''
-        self.group=self.name_mapper['group'][self.Obj['meta_data_dialog']['session_metadata']['Group']]
 
     def _save_rig_metadata(self):
         '''

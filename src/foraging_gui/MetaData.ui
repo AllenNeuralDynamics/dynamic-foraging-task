@@ -861,7 +861,7 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>100</x>
-      <y>230</y>
+      <y>170</y>
       <width>141</width>
       <height>121</height>
      </rect>
@@ -884,31 +884,6 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_83">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>200</y>
-      <width>91</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="text">
-     <string>Group:</string>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::AutoText</enum>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
    <widget class="QLineEdit" name="FundingSource">
@@ -955,57 +930,6 @@ p, li { white-space: pre-wrap; }
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QComboBox" name="Group">
-    <property name="geometry">
-     <rect>
-      <x>100</x>
-      <y>200</y>
-      <width>141</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="statusTip">
-     <string notr="true"/>
-    </property>
-    <property name="editable">
-     <bool>false</bool>
-    </property>
-    <property name="currentIndex">
-     <number>0</number>
-    </property>
-    <property name="maxVisibleItems">
-     <number>36</number>
-    </property>
-    <property name="sizeAdjustPolicy">
-     <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
-    </property>
-    <item>
-     <property name="text">
-      <string>behavior</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>ephys</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>MSMA</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>ophys</string>
-     </property>
-    </item>
-   </widget>
    <widget class="QLabel" name="label_81">
     <property name="geometry">
      <rect>
@@ -1035,7 +959,7 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>220</y>
+      <y>160</y>
       <width>91</width>
       <height>20</height>
      </rect>
@@ -1175,55 +1099,11 @@ p, li { white-space: pre-wrap; }
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="label_87">
-    <property name="geometry">
-     <rect>
-      <x>6</x>
-      <y>140</y>
-      <width>91</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="text">
-     <string>Project code:</string>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::AutoText</enum>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="ProjectCode">
-    <property name="geometry">
-     <rect>
-      <x>100</x>
-      <y>140</y>
-      <width>141</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
    <widget class="QLineEdit" name="Fundee">
     <property name="geometry">
      <rect>
       <x>100</x>
-      <y>170</y>
+      <y>140</y>
       <width>141</width>
       <height>20</height>
      </rect>
@@ -1242,7 +1122,7 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>6</x>
-      <y>170</y>
+      <y>140</y>
       <width>91</width>
       <height>20</height>
      </rect>
@@ -1300,11 +1180,9 @@ p, li { white-space: pre-wrap; }
   <tabstop>Stick_RotationAngle</tabstop>
   <tabstop>DataSummary</tabstop>
   <tabstop>FundingSource</tabstop>
-  <tabstop>Group</tabstop>
   <tabstop>Investigators</tabstop>
   <tabstop>ProjectName</tabstop>
   <tabstop>GrantNumber</tabstop>
-  <tabstop>ProjectCode</tabstop>
   <tabstop>ManipulatorX</tabstop>
   <tabstop>ManipulatorZ</tabstop>
   <tabstop>ManipulatorY</tabstop>

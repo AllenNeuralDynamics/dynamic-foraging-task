@@ -1732,7 +1732,6 @@ class MetadataDialog(QDialog):
         '''show the project information based on current project name'''
         current_project_index = self.ProjectName.currentIndex()
         self.current_project_name=self.ProjectName.currentText()
-        self.current_project_code=self.project_infor['Project Code'][current_project_index]
         self.funding_institution=self.project_infor['Funding Institution'][current_project_index]
         self.grant_number=self.project_infor['Grant Number'][current_project_index]
         self.investigators=self.project_infor['Investigators'][current_project_index]
@@ -1740,7 +1739,6 @@ class MetadataDialog(QDialog):
         self.FundingSource.setText(str(self.funding_institution))
         self.Investigators.setText(str(self.investigators))
         self.GrantNumber.setText(str(self.grant_number))
-        self.ProjectCode.setText(str(self.current_project_code))
         self.Fundee.setText(str(self.fundee))
 
     def _show_project_names(self):
