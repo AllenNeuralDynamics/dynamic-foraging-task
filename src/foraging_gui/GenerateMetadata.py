@@ -131,10 +131,9 @@ class generate_metadata:
         self._get_group()
         self._get_funding_source()
         self._get_platform()
-        
+
         description= RawDataDescription(
             data_level=DataLevel.RAW,
-            data_group=self.group,
             funding_source=self.funding_source,
             investigators=self.investigators,
             modality=self.modality,
@@ -145,6 +144,18 @@ class generate_metadata:
             platform= self.platform,
             subject_id=self.Obj['ID'],
         )
+        description.write_standard_file(output_directory=self.Obj['MetadataFolder'])
+        
+    def _get_funding_source(self):
+        '''
+        Get the funding source
+        '''
+        self.funding_source=[Funding(
+            funder=getattr(Organization,self.Obj['meta_data_dialog']['session_metadata']['FundingSource']),
+            grant_number=self.Obj['meta_data_dialog']['session_metadata']['GrantNumber'],
+            fundee=self.Obj['meta_data_dialog']['session_metadata']['Fundee'],
+        )]
+                
     def _get_platform(self):
         '''
         Get the platform name. This should be improved in the future.
@@ -713,4 +724,4 @@ class generate_metadata:
 
 
 if __name__ == '__main__':
-    generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-01_12-24-19_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
+    generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-01_12-52-10_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
