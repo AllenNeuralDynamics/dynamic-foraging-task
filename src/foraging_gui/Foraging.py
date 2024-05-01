@@ -961,7 +961,7 @@ class Window(QMainWindow):
             'open_ephys_machine_ip_address':'',
             'metadata_dialog_folder':os.path.join(self.SettingFolder,"metadata_dialog")+'\\',
             'rig_metadata_folder':os.path.join(self.SettingFolder,"rig_metadata")+'\\',
-            'project_infor_file':os.path.join(self.SettingFolder,"Project Name and Funding Source v2.csv"),
+            'project_info_file':os.path.join(self.SettingFolder,"Project Name and Funding Source v2.csv"),
             'go_cue_decibel_box1':60,
             'go_cue_decibel_box2':60,
             'go_cue_decibel_box3':60,
@@ -1025,14 +1025,14 @@ class Window(QMainWindow):
         self.open_ephys_machine_ip_address=self.Settings['open_ephys_machine_ip_address']
         self.metadata_dialog_folder = self.Settings['metadata_dialog_folder'] 
         self.rig_metadata_folder = self.Settings['rig_metadata_folder']
-        self.project_infor_file = self.Settings['project_infor_file']
+        self.project_info_file = self.Settings['project_info_file']
         self.go_cue_decibel_box1 = self.Settings['go_cue_decibel_box1']
         self.go_cue_decibel_box2 = self.Settings['go_cue_decibel_box2']
         self.go_cue_decibel_box3 = self.Settings['go_cue_decibel_box3']
         self.go_cue_decibel_box4 = self.Settings['go_cue_decibel_box4']
 
-        if not is_absolute_path(self.project_infor_file):
-            self.project_infor_file = os.path.join(self.SettingFolder,self.project_infor_file)
+        if not is_absolute_path(self.project_info_file):
+            self.project_info_file = os.path.join(self.SettingFolder,self.project_info_file)
         # Also stream log info to the console if enabled
         if  self.Settings['show_log_info_in_console']:
             logger = logging.getLogger()
