@@ -2778,7 +2778,7 @@ class Window(QMainWindow):
             camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartCamera.isChecked())
             # We will want to start the workflow, and not open the editor
             # DEBUGGING - Need to test on a computer where I can start the workflow
-            subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+' --start',cwd=CWD,shell=True)
+            subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera+' --start',cwd=CWD,shell=True)
             #subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera,cwd=CWD,shell=True)
         except Exception as e:
             logging.error(e)
