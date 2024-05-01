@@ -121,11 +121,13 @@ class generate_metadata:
         '''
         Generate the session description to the MetadataFolder
         '''
-        if self.session_start_time == '' or self.session_end_time == '' or self.Obj['meta_data_dialog']['rig_metadata']=={}:
+        if self.Obj['meta_data_dialog']['rig_metadata']=={}:
+            return
+        self._get_session_time()
+        if self.session_start_time == '' or self.session_end_time == '':
             return
         
         self.orcid = BaseName(name="Open Researcher and Contributor ID", abbreviation="ORCID")
-        self._get_session_time()
         self._get_modality()
         self._get_investigators()
         self._get_funding_source()
@@ -170,12 +172,22 @@ class generate_metadata:
         '''
         Get the session start and session end time
         '''
-        if 'Other_SessionStartTime' not in self.Obj:
-            self.session_start_time = ''
-            self.session_end_time = '' 
+        # priority behavior_streams>high_speed_camera_streams>ephys_streams>ophys_streams
+        if self.behavior_streams!=[]:
+            self.session_start_time = self.behavior_streams[0].stream_start_time
+            self.session_end_time = self.behavior_streams[0].stream_end_time
+        elif self.high_speed_camera_streams!=[]:
+            self.session_start_time = self.high_speed_camera_streams[0].stream_start_time
+            self.session_end_time = self.high_speed_camera_streams[0].stream_end_time
+        elif self.ephys_streams!=[]:
+            self.session_start_time = self.ephys_streams[0].stream_start_time
+            self.session_end_time = self.ephys_streams[0].stream_end_time
+        elif self.ophys_streams!=[]:
+            self.session_start_time = self.ophys_streams[0].stream_start_time
+            self.session_end_time = self.ophys_streams[0].stream_end_time
         else:
-            self.session_start_time = datetime.strptime(self.Obj['Other_SessionStartTime'], '%Y-%m-%d %H:%M:%S.%f')
-            self.session_end_time= datetime.strptime(self.Obj['Other_CurrentTime'], '%Y-%m-%d %H:%M:%S.%f')
+            self.session_start_time = ''
+            self.session_end_time = ''
 
     def _get_modality(self):
         '''
@@ -261,7 +273,7 @@ class generate_metadata:
 
         # Missing fields 'Other_SessionStartTime' and 'Other_CurrentTime' in the json file.
         # Possible reason: 1) the behavior session is not started.
-        self._get_session_time()
+        #self._get_session_time()
 
         # Missing field 'meta_data_dialog' in the json file.
         # Possible reason: 1) Old version of the software.
@@ -306,7 +318,7 @@ class generate_metadata:
         Create metadata related to Session class in the aind_data_schema
         '''
         # session_start_time and session_end_time are required fields
-        if self.session_start_time == '' or self.session_end_time == '' or self.Obj['meta_data_dialog']['rig_metadata']=={}:
+        if self.Obj['meta_data_dialog']['rig_metadata']=={}:
             return
         
         #self._get_reward_delivery()
@@ -318,6 +330,10 @@ class generate_metadata:
         self._get_ephys_stream()
         self._get_ophys_stream()
         self._get_high_speed_camera_stream()
+        self._get_session_time()
+        if self.session_start_time == '' or self.session_end_time == '':
+            return
+
         self._get_stimulus()
         self.data_streams = self.behavior_streams+self.ephys_streams+self.ophys_streams+self.high_speed_camera_streams
 
