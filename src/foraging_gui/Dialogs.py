@@ -1706,6 +1706,7 @@ class MetadataDialog(QDialog):
         self.meta_data['session_metadata'] = {}
         self.meta_data['rig_metadata_file'] = ''
         self._get_basics()
+        self._show_project_infor()
 
     def _connectSignalsSlots(self):
         self.SelectRigMetadata.clicked.connect(lambda: self._SelectRigMetadata(rig_metadata_file=None))
@@ -1725,6 +1726,16 @@ class MetadataDialog(QDialog):
         self.Stick_ArcAngle.textChanged.connect(self._save_configuration)
         self.Stick_ModuleAngle.textChanged.connect(self._save_configuration)
         self.Stick_RotationAngle.textChanged.connect(self._save_configuration)
+
+
+    def _show_project_infor(self):
+        '''show the project information from the project spreadsheet'''
+        # load the project spreadsheet
+        project_infor_file = self.MainWindow.project_infor_file
+        if not os.path.exists(project_infor_file):
+            return
+        project_infor = pd.read_excel(project_infor_file)
+        # show the project information
 
     def _get_basics(self):
         '''get the basic information'''
