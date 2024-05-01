@@ -1026,6 +1026,8 @@ class Window(QMainWindow):
         self.metadata_dialog_folder = self.Settings['metadata_dialog_folder'] 
         self.rig_metadata_folder = self.Settings['rig_metadata_folder']
         self.project_infor_file = self.Settings['project_infor_file']
+        if not is_absolute_path(self.project_infor_file):
+            self.project_infor_file = os.path.join(self.SettingFolder,self.project_infor_file)
         # Also stream log info to the console if enabled
         if  self.Settings['show_log_info_in_console']:
             logger = logging.getLogger()
@@ -3841,6 +3843,10 @@ def show_exception_box(log_msg):
         errorbox.exec_()
     else:
         logging.error('could not launch exception box')
+
+def is_absolute_path(path):
+    # Check if the path starts with a root directory identifier or drive letter (for Windows)
+    return path.startswith('/') or (len(path) > 2 and path[1] == ':' and path[2] == '\\') 
 
 class UncaughtHook(QtCore.QObject):
     '''
