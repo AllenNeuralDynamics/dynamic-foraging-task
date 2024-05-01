@@ -11,7 +11,7 @@ from aind_data_schema.models.devices import RelativePosition,SpoutSide,Calibrati
 from aind_data_schema.models.units import SizeUnit
 from aind_data_schema.models.modalities import Modality
 
-from aind_data_schema.core.data_description import DataLevel, Group, Funding, RawDataDescription
+from aind_data_schema.core.data_description import DataLevel, Funding, RawDataDescription
 from aind_data_schema.models.organizations import Organization
 from aind_data_schema.models.modalities import Modality
 from aind_data_schema.models.platforms import Platform
