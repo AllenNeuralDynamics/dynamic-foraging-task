@@ -176,11 +176,7 @@ class Window(QMainWindow):
         max_datetime = max(dates_string)
         max_datetime_index = dates_string.index(max_datetime)
         self.latest_rig_metadata_file = os.path.join(self.rig_metadata_folder, json_files[max_datetime_index])
-        with open(self.latest_rig_metadata_file) as f:
-            self.latest_rig_metadata = json.load(f)
-        self.Metadata_dialog.meta_data['rig_metadata']=self.latest_rig_metadata
-        self.Metadata_dialog.meta_data['rig_metadata_file']=self.latest_rig_metadata_file
-        self.Metadata_dialog._update_metadata(update_session_metadata=False)
+        self.Metadata_dialog._SelectRigMetadata(self.latest_rig_metadata_file)
 
     def _LoadUI(self):
         '''
