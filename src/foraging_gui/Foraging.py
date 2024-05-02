@@ -2148,7 +2148,7 @@ class Window(QMainWindow):
                 end_time = self.fiber_photometry_end_time
             else:
                 end_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") 
-            Obj['fiber_photometry_end_time'] = self.fiber_photometry_end_time
+            Obj['fiber_photometry_end_time'] = end_time
 
         # Save the current box
         Obj['box'] = self.current_box
