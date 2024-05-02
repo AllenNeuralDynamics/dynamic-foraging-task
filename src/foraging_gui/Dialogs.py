@@ -1744,10 +1744,10 @@ class MetadataDialog(QDialog):
     def _show_project_names(self):
         '''show the project names from the project spreadsheet'''
         # load the project spreadsheet
-        project_infor_file = self.MainWindow.project_infor_file
-        if not os.path.exists(project_infor_file):
+        project_info_file = self.MainWindow.project_info_file
+        if not os.path.exists(project_info_file):
             return
-        self.project_infor = pd.read_excel(project_infor_file)
+        self.project_infor = pd.read_excel(project_info_file)
         project_names = self.project_infor['Project Name'].tolist()
         # show the project information
         # adding project names to the project combobox
