@@ -30,6 +30,7 @@ dependencies = [
     "requests",
     "harp-python",
     "aind-data-schema",
+    "openpyxl",
 ]
 
 [tool.setuptools.packages.find]

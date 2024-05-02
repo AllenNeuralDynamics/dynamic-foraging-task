@@ -13,3 +13,4 @@ pynwb
 requests
 harp-python
 aind-data-schema
+openpyxl
