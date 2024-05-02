@@ -1726,16 +1726,16 @@ class MetadataDialog(QDialog):
         self.Stick_ArcAngle.textChanged.connect(self._save_configuration)
         self.Stick_ModuleAngle.textChanged.connect(self._save_configuration)
         self.Stick_RotationAngle.textChanged.connect(self._save_configuration)
-        self.ProjectName.currentIndexChanged.connect(self._show_project_infor)
+        self.ProjectName.currentIndexChanged.connect(self._show_project_info)
 
-    def _show_project_infor(self):
+    def _show_project_info(self):
         '''show the project information based on current project name'''
         current_project_index = self.ProjectName.currentIndex()
         self.current_project_name=self.ProjectName.currentText()
-        self.funding_institution=self.project_infor['Funding Institution'][current_project_index]
-        self.grant_number=self.project_infor['Grant Number'][current_project_index]
-        self.investigators=self.project_infor['Investigators'][current_project_index]
-        self.fundee=self.project_infor['Fundee'][current_project_index]
+        self.funding_institution=self.project_info['Funding Institution'][current_project_index]
+        self.grant_number=self.project_info['Grant Number'][current_project_index]
+        self.investigators=self.project_info['Investigators'][current_project_index]
+        self.fundee=self.project_info['Fundee'][current_project_index]
         self.FundingSource.setText(str(self.funding_institution))
         self.Investigators.setText(str(self.investigators))
         self.GrantNumber.setText(str(self.grant_number))
@@ -1747,14 +1747,14 @@ class MetadataDialog(QDialog):
         project_info_file = self.MainWindow.project_info_file
         if not os.path.exists(project_info_file):
             return
-        self.project_infor = pd.read_excel(project_info_file)
-        project_names = self.project_infor['Project Name'].tolist()
+        self.project_info = pd.read_excel(project_info_file)
+        project_names = self.project_info['Project Name'].tolist()
         # show the project information
         # adding project names to the project combobox
-        self._manage_signals(enable=False,keys=['ProjectName'],action=self._show_project_infor)
+        self._manage_signals(enable=False,keys=['ProjectName'],action=self._show_project_info)
         self.ProjectName.addItems(project_names)
-        self._manage_signals(enable=True,keys=['ProjectName'],action=self._show_project_infor)
-        self._show_project_infor()
+        self._manage_signals(enable=True,keys=['ProjectName'],action=self._show_project_info)
+        self._show_project_info()
 
     def _get_basics(self):
         '''get the basic information'''
