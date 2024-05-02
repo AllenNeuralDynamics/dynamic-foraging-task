@@ -167,7 +167,7 @@ class Window(QMainWindow):
                 date_str = file.split('_')[-1].split('.')[0]
                 dates.append(date_str)
         if len(dates)==0:
-            logging.warning('No rig metadata file found')
+            logging.error('No rig metadata file found')
             self.latest_rig_metadata_file=''
             self.latest_rig_metadata={}
             self._manage_warning_labels(self.MetadataWarning,warning_text='No rig metadata found!')
