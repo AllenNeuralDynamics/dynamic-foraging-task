@@ -3055,9 +3055,11 @@ class Window(QMainWindow):
         self.CreateNewFolder=1
         self.PhotometryRun=0
         self.unsaved_data=False
-        self.ManualWaterVolume=[0,0]      
-        del self.fiber_photometry_start_time
-        del self.fiber_photometry_end_time 
+        self.ManualWaterVolume=[0,0]     
+        if hasattr(self, 'fiber_photometry_start_time'): 
+            del self.fiber_photometry_start_time
+        if hasattr(self, 'fiber_photometry_end_time'): 
+            del self.fiber_photometry_end_time 
     
         # Clear Plots
         if hasattr(self, 'PlotM'): 
