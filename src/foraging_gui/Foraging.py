@@ -2141,6 +2141,14 @@ class Window(QMainWindow):
         for attr_name in dir(self):
             if attr_name.startswith('Ot_'):
                 Obj[attr_name]=getattr(self, attr_name)
+        
+        if hasattr(self, 'fiber_photometry_start_time'):
+            Obj['fiber_photometry_start_time'] = self.fiber_photometry_start_time
+            if hasattr(self, 'fiber_photometry_end_time'):
+                end_time = self.fiber_photometry_end_time
+            else:
+                end_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") 
+            Obj['fiber_photometry_end_time'] = self.fiber_photometry_end_time
 
         # Save the current box
         Obj['box'] = self.current_box
@@ -2770,6 +2778,7 @@ class Window(QMainWindow):
         self.CreateNewFolder=1
         self.Ot_log_folder=self._restartlogging()
 
+
         # Start the FIP workflow
         try:
             CWD=os.path.dirname(self.FIP_workflow_path)
@@ -2837,6 +2846,7 @@ class Window(QMainWindow):
             else:
                 self.TeensyWarning.setText('')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)               
+                self.fiber_photometry_start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
         else:
             logging.info('StartExcitation is unchecked')
@@ -2856,7 +2866,8 @@ class Window(QMainWindow):
                 return 0 
             else:
                 self.TeensyWarning.setText('')
-                self.TeensyWarning.setStyleSheet(self.default_warning_color)               
+                self.TeensyWarning.setStyleSheet(self.default_warning_color)              
+                self.fiber_photometry_end_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
         return 1
     
@@ -2968,7 +2979,7 @@ class Window(QMainWindow):
             self.StartExcitation.setChecked(False)
             self.StartFIP.setChecked(False)
             self.FIP_started=False
-        
+
         if (FIP_was_running)&(not closing):
             reply = QMessageBox.critical(self, 
                 'Box {}, New Session:'.format(self.box_letter), 
@@ -3044,7 +3055,9 @@ class Window(QMainWindow):
         self.CreateNewFolder=1
         self.PhotometryRun=0
         self.unsaved_data=False
-        self.ManualWaterVolume=[0,0]       
+        self.ManualWaterVolume=[0,0]      
+        del self.fiber_photometry_start_time
+        del self.fiber_photometry_end_time 
     
         # Clear Plots
         if hasattr(self, 'PlotM'): 
