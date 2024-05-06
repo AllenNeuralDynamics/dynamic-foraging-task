@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1008</width>
-    <height>574</height>
+    <height>684</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -1144,6 +1144,50 @@ p, li { white-space: pre-wrap; }
     </property>
    </widget>
   </widget>
+  <widget class="QLabel" name="label_83">
+   <property name="geometry">
+    <rect>
+     <x>26</x>
+     <y>390</y>
+     <width>91</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="text">
+    <string>Go cue decibel:</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="GoCueDecibel">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>390</y>
+     <width>71</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
   <zorder>Probes</zorder>
   <zorder>ExperimentDescription</zorder>
   <zorder>label_3</zorder>
@@ -1159,6 +1203,8 @@ p, li { white-space: pre-wrap; }
   <zorder>Microscopes</zorder>
   <zorder>DataDescription</zorder>
   <zorder>LoadMeta</zorder>
+  <zorder>label_83</zorder>
+  <zorder>GoCueDecibel</zorder>
  </widget>
  <tabstops>
   <tabstop>ExperimentDescription</tabstop>
