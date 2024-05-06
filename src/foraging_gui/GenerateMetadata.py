@@ -87,9 +87,12 @@ class generate_metadata:
         '''
         self.name_mapper = {
             'laser_name_mapper':{
-                'Oxxius Lasers 473': 'Blue', 
-                'Oxxius Lasers 561': 'Yellow',
-                'Oxxius Lasers 638': 'Red',
+                'Oxxius Laser 473-1': {'color':'Blue','laser_tag':1}, 
+                'Oxxius Laser 473-2': {'color':'Blue','laser_tag':2}, 
+                'Oxxius Laser 561-1': {'color':'Yellow','laser_tag':1}, 
+                'Oxxius Laser 561-2': {'color':'Yellow','laser_tag':2}, 
+                'Oxxius Laser 638-1': {'color':'Red','laser_tag':1}, 
+                'Oxxius Laser 638-2': {'color':'Red','laser_tag':2}, 
             },# laser name in the rig metadata and the corresponding color used in the behavior GUI
             'laser_tags':[1,2], # laser tags corresponding to Laser_1 and Laser_2
             'sides':['Left','Right'], # lick spouts
@@ -614,37 +617,36 @@ class generate_metadata:
         self.OptoCalibrationResults=self.Obj['LaserCalibrationResults']
         self._get_laser_names_from_rig_metadata()
         for laser in self.laser_names:
-                Color=self.name_mapper['laser_name_mapper'][laser]
-                latest_calibration_date=self._FindLatestCalibrationDate(Color)
+                color=self.name_mapper['laser_name_mapper'][laser]['color']
+                laser_tag=self.name_mapper['laser_name_mapper'][laser]['laser_tag']
+                latest_calibration_date=self._FindLatestCalibrationDate(color)
                 if latest_calibration_date=='NA':
                     RecentLaserCalibration={}
                 else:
                     RecentLaserCalibration=self.Obj['LaserCalibrationResults'][latest_calibration_date]
                 no_calibration=False
                 if not RecentLaserCalibration=={}:
-                    if Color in RecentLaserCalibration.keys():
-                        for Protocol in RecentLaserCalibration[Color]:
+                    if color in RecentLaserCalibration.keys():
+                        for Protocol in RecentLaserCalibration[color]:
                             if Protocol=='Sine': 
-                                for Frequency in RecentLaserCalibration[Color][Protocol]:
-                                    for laser_tag in self.name_mapper['laser_tags']:
-                                        voltage=[]
-                                        power=[]
-                                        for i in range(len(RecentLaserCalibration[Color][Protocol][Frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
-                                            laser_voltage_power=eval(str(RecentLaserCalibration[Color][Protocol][Frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
-                                            voltage.append(laser_voltage_power[0])
-                                            power.append(laser_voltage_power[1])
-                                        voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
-                                        self.parsed_optocalibration.append({'laser name':laser,'latest_calibration_date':latest_calibration_date,'Color':Color, 'Protocol':Protocol, 'Frequency':Frequency, 'Laser tag':laser_tag, 'Voltage':voltage, 'Power':power})
-                            elif Protocol=='Constant' or Protocol=='Pulse':
-                                for laser_tag in self.name_mapper['laser_tags']:
+                                for Frequency in RecentLaserCalibration[color][Protocol]:
                                     voltage=[]
                                     power=[]
-                                    for i in range(len(RecentLaserCalibration[Color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
-                                        laser_voltage_power=eval(str(RecentLaserCalibration[Color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
+                                    for i in range(len(RecentLaserCalibration[color][Protocol][Frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
+                                        laser_voltage_power=eval(str(RecentLaserCalibration[color][Protocol][Frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
                                         voltage.append(laser_voltage_power[0])
                                         power.append(laser_voltage_power[1])
                                     voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
-                                    self.parsed_optocalibration.append({'laser name':laser,'latest_calibration_date':latest_calibration_date,'Color':Color, 'Protocol':Protocol, 'Frequency':'None', 'Laser tag':laser_tag, 'Voltage':voltage, 'Power':power})
+                                    self.parsed_optocalibration.append({'laser name':laser,'latest_calibration_date':latest_calibration_date,'Color':color, 'Protocol':Protocol, 'Frequency':Frequency, 'Laser tag':laser_tag, 'Voltage':voltage, 'Power':power})
+                            elif Protocol=='Constant' or Protocol=='Pulse':
+                                voltage=[]
+                                power=[]
+                                for i in range(len(RecentLaserCalibration[color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
+                                    laser_voltage_power=eval(str(RecentLaserCalibration[color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
+                                    voltage.append(laser_voltage_power[0])
+                                    power.append(laser_voltage_power[1])
+                                voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
+                                self.parsed_optocalibration.append({'laser name':laser,'latest_calibration_date':latest_calibration_date,'Color':color, 'Protocol':Protocol, 'Frequency':'None', 'Laser tag':laser_tag, 'Voltage':voltage, 'Power':power})
                         else:
                             no_calibration=True
                     else:
@@ -659,8 +661,8 @@ class generate_metadata:
         self.laser_names=[]
         if Obj is None:
             Obj=self.Obj
-        for light_source in Obj['meta_data_dialog']['rig_metadata']['light_sources']:
-            if light_source['device_type']=='Laser':
+        for light_source in Obj['meta_data_dialog']['rig_metadata']['stimulus_devices']:
+            if light_source['device_type'] in ['Laser','LED']:
                 self.laser_names.append(light_source['name'])
         return self.laser_names
     
