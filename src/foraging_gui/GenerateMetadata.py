@@ -252,7 +252,7 @@ class generate_metadata:
         else:
             self.has_behavior_data = True
         
-        # Missing fields B_NewscalePositions in the json file.
+        # Missing fields B_NewscalePositions, LickSpoutReferenceArea, LickSpoutReferenceX, LickSpoutReferenceY, LickSpoutReferenceZ in the json file.
         # Possible reason: 1) the NewScale stage is not connected to the behavior GUI. 2) the session is not started.
         if ('B_NewscalePositions' not in self.Obj) or (self.Obj['session_metadata']['LickSpoutReferenceArea']=='') or (self.Obj['session_metadata']['LickSpoutReferenceX']=='') or (self.Obj['session_metadata']['LickSpoutReferenceY']=='') or (self.Obj['session_metadata']['LickSpoutReferenceZ']==''):
             self.has_reward_delivery = False
@@ -369,8 +369,8 @@ class generate_metadata:
             "active_mouse_platform": False
         }
 
-        if self.lick_spouts!=[]:
-            session_params["reward_delivery"] = self.lick_spouts
+        if self.reward_delivery!=[]:
+            session_params["reward_delivery"] = self.reward_delivery
 
         #adding go cue and opto parameters to the stimulus_epochs
         if self.stimulus!=[]:
@@ -742,7 +742,7 @@ class generate_metadata:
         Make the RewardDelivery metadata
         '''
         if not self.has_reward_delivery:
-            self.lick_spouts=[]
+            self.reward_delivery=[]
             return
 
         device_oringin=self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceArea']
@@ -754,7 +754,7 @@ class generate_metadata:
         left_lick_spout_reference_position=np.array(reference_spout_position)-np.array(start_position)
         right_lick_spout_reference_position=left_lick_spout_reference_position+np.array([-lick_spouts_distance,0,0])
 
-        self.lick_spouts=RewardDeliveryConfig(
+        self.reward_delivery=RewardDeliveryConfig(
             reward_solution= RewardSolution.WATER,
             reward_spouts=[RewardSpoutConfig(
                 side=SpoutSide.LEFT,
