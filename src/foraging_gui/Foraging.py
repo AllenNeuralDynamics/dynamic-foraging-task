@@ -281,6 +281,7 @@ class Window(QMainWindow):
         self.Sessionlist.currentIndexChanged.connect(self._session_list)
         self.SessionlistSpin.textChanged.connect(self._session_list_spin)
         self.StartEphysRecording.clicked.connect(self._StartEphysRecording)
+        self.SetReference.clicked.connect(self._set_reference)
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
@@ -292,6 +293,16 @@ class Window(QMainWindow):
             for child in container.findChildren((QtWidgets.QLineEdit)):   
                 child.returnPressed.connect(self.keyPressEvent)
     
+    def _set_reference(self):
+        '''
+        set the reference point for lick spout position in the metadata dialog
+        '''
+        # get the current position of the stage
+        current_positions=self._GetPositions()
+        # set the reference point for lick spout position in the metadata dialog
+        if current_positions is not None:
+            self.Metadata_dialog._set_reference(current_positions)
+
     def _StartEphysRecording(self):
         '''
             Start/stop ephys recording
@@ -640,7 +651,9 @@ class Window(QMainWindow):
             current_stage=self.current_stage
             current_position=current_stage.get_position()
             self._UpdatePosition(current_position,(0,0,0))
+            return current_position
         else:
+            return None
             logging.info('GetPositions pressed, but no current stage')
 
     def _StageStop(self):
