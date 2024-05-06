@@ -2053,6 +2053,8 @@ class MetadataDialog(QDialog):
                 self.MainWindow.rig_metadata_folder,
                 "JSON Files (*.json)"
             )
+        if not rig_metadata_file:
+            return
         self.meta_data['rig_metadata_file'] = rig_metadata_file
         self.meta_data['session_metadata']['RigMetadataFile'] = rig_metadata_file
         if os.path.exists(rig_metadata_file):
