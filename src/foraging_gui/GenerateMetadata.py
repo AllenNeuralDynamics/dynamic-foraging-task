@@ -254,7 +254,7 @@ class generate_metadata:
         
         # Missing fields B_NewscalePositions, LickSpoutReferenceArea, LickSpoutReferenceX, LickSpoutReferenceY, LickSpoutReferenceZ in the json file.
         # Possible reason: 1) the NewScale stage is not connected to the behavior GUI. 2) the session is not started.
-        if ('B_NewscalePositions' not in self.Obj) or (self.Obj['session_metadata']['LickSpoutReferenceArea']=='') or (self.Obj['session_metadata']['LickSpoutReferenceX']=='') or (self.Obj['session_metadata']['LickSpoutReferenceY']=='') or (self.Obj['session_metadata']['LickSpoutReferenceZ']==''):
+        if ('B_NewscalePositions' not in self.Obj) or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceArea']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceX']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceY']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceZ']==''):
             self.has_reward_delivery = False
         else:
             self.has_reward_delivery = True
