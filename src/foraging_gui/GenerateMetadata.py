@@ -254,10 +254,10 @@ class generate_metadata:
         
         # Missing fields B_NewscalePositions in the json file.
         # Possible reason: 1) the NewScale stage is not connected to the behavior GUI. 2) the session is not started.
-        if 'B_NewscalePositions' not in self.Obj:
-            self.has_newscale_position = False
+        if ('B_NewscalePositions' not in self.Obj) or (self.Obj['session_metadata']['LickSpoutReferenceArea']=='') or (self.Obj['session_metadata']['LickSpoutReferenceX']=='') or (self.Obj['session_metadata']['LickSpoutReferenceY']=='') or (self.Obj['session_metadata']['LickSpoutReferenceZ']==''):
+            self.has_reward_delivery = False
         else:
-            self.has_newscale_position = True
+            self.has_reward_delivery = True
 
         # Missing field WaterCalibrationResults in the json file.
         # Possible reason: 1) the water calibration file is not included in the ForagingSettings folder. 2) the water calibration is not saved in the json file.
@@ -369,7 +369,6 @@ class generate_metadata:
             "active_mouse_platform": False
         }
 
-        #if self.has_newscale_position:
         if self.lick_spouts!=[]:
             session_params["reward_delivery"] = self.lick_spouts
 
@@ -742,7 +741,8 @@ class generate_metadata:
         '''
         Make the RewardDelivery metadata
         '''
-        if not self.has_newscale_position:
+        if not self.has_reward_delivery:
+            self.lick_spouts=[]
             return
 
         device_oringin=self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceArea']
