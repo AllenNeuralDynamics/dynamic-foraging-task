@@ -638,7 +638,7 @@ class generate_metadata:
                                         power.append(laser_voltage_power[1])
                                     voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
                                     self.parsed_optocalibration.append({'laser name':laser,'latest_calibration_date':latest_calibration_date,'Color':color, 'Protocol':Protocol, 'Frequency':Frequency, 'Laser tag':laser_tag, 'Voltage':voltage, 'Power':power})
-                            elif Protocol=='Constant' or Protocol=='Pulse':
+                            elif Protocol=='Constant':
                                 voltage=[]
                                 power=[]
                                 for i in range(len(RecentLaserCalibration[color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
