@@ -7,7 +7,7 @@ import numpy as np
 
 from foraging_gui.Visualization import PlotWaterCalibration
 from aind_data_schema.models.stimulus import AuditoryStimulation
-from aind_data_schema.models.devices import RelativePosition,SpoutSide,Calibration
+from aind_data_schema.models.devices import SpoutSide,Calibration
 from aind_data_schema.models.units import SizeUnit,FrequencyUnit,SoundIntensityUnit
 from aind_data_schema.models.modalities import Modality
 
@@ -16,6 +16,8 @@ from aind_data_schema.models.organizations import Organization
 from aind_data_schema.models.modalities import Modality
 from aind_data_schema.models.platforms import Platform
 from aind_data_schema.models.pid_names import PIDName, BaseName
+from aind_data_schema.models.coordinates import RelativePosition, Translation3dTransform, Rotation3dTransform,Axis,AxisName
+
 
 from aind_data_schema.core.session import (
     Coordinates3d,
@@ -332,7 +334,7 @@ class generate_metadata:
         if self.Obj['meta_data_dialog']['rig_metadata']=={}:
             return
         
-        #self._get_reward_delivery()
+        self._get_reward_delivery()
         self._get_water_calibration()
         self._get_opto_calibration()
         self.calibration=self.water_calibration+self.opto_calibration
@@ -368,7 +370,8 @@ class generate_metadata:
         }
 
         #if self.has_newscale_position:
-        #    session_params["reward_delivery"] = self.lick_spouts
+        if self.lick_spouts!=[]:
+            session_params["reward_delivery"] = self.lick_spouts
 
         #adding go cue and opto parameters to the stimulus_epochs
         if self.stimulus!=[]:
@@ -741,23 +744,46 @@ class generate_metadata:
         '''
         if not self.has_newscale_position:
             return
+
+        device_oringin=self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceArea']
         lick_spouts_distance=self.name_mapper['lick_spouts_distance'] 
+        start_position=[self.Obj['B_NewscalePositions'][0][0], self.Obj['B_NewscalePositions'][0][1], self.Obj['B_NewscalePositions'][0][2]]
+
+        # assuming refering to the left lick spout
+        reference_spout_position=[float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceX']),float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceY']),float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceZ'])]
+        left_lick_spout_reference_position=np.array(reference_spout_position)-np.array(start_position)
+        right_lick_spout_reference_position=left_lick_spout_reference_position+np.array([-lick_spouts_distance,0,0])
+
         self.lick_spouts=RewardDeliveryConfig(
             reward_solution= RewardSolution.WATER,
             reward_spouts=[RewardSpoutConfig(
                 side=SpoutSide.LEFT,
                 starting_position=RelativePosition(
-                    notes='Stage. x: left (+) and right (-); y: forward (+) and backward (-); z: down (+) and up (-). Both left and right lick spouts are fixed on the same stage.',
-                    x=self.Obj['B_NewscalePositions'][0][0], y=self.Obj['B_NewscalePositions'][0][1], z=self.Obj['B_NewscalePositions'][0][2],
-                    position_unit=SizeUnit.UM
+                    device_position_transformations=[
+                        Translation3dTransform(translation=left_lick_spout_reference_position.tolist()),
+                        Rotation3dTransform(rotation=[1, 0, 0, 0, 1, 0, 0, 0, 1])
+                    ],
+                    device_origin=device_oringin,  
+                    device_axes=[
+                        Axis(name=AxisName.X, direction="Left"),
+                        Axis(name=AxisName.Y, direction="Forward"),
+                        Axis(name=AxisName.Z, direction="Down")
+                    ]
                 ),
                 variable_position=True
             ),RewardSpoutConfig(
                 side=SpoutSide.RIGHT,
                 starting_position=RelativePosition(
-                    coordinate_system='Relative to the left lick spout.',
-                    x=self.Obj['B_NewscalePositions'][0][0]-lick_spouts_distance, y=self.Obj['B_NewscalePositions'][0][1], z=self.Obj['B_NewscalePositions'][0][2],
-                    position_unit=SizeUnit.UM
+                    device_position_transformations=[
+                        Translation3dTransform(translation=right_lick_spout_reference_position.tolist()),
+                        Rotation3dTransform(rotation=[1, 0, 0, 0, 1, 0, 0, 0, 1])
+                    ],
+                    device_origin=device_oringin,  
+                    device_axes=[
+                        Axis(name=AxisName.X, direction="Left"),
+                        Axis(name=AxisName.Y, direction="Forward"),
+                        Axis(name=AxisName.Z, direction="Down")
+                    ]
                 ),
                 variable_position=True
             )],
@@ -766,4 +792,4 @@ class generate_metadata:
 
 
 if __name__ == '__main__':
-    generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_12-04-21_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
+    generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_13-43-37_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
