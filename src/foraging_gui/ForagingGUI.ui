@@ -79,7 +79,7 @@
            <x>0</x>
            <y>0</y>
            <width>894</width>
-           <height>226</height>
+           <height>236</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_17">
@@ -597,7 +597,7 @@
                       <x>0</x>
                       <y>0</y>
                       <width>178</width>
-                      <height>290</height>
+                      <height>230</height>
                      </rect>
                     </property>
                     <layout class="QVBoxLayout" name="verticalLayout">
@@ -910,7 +910,7 @@
             <string notr="true"/>
            </property>
            <property name="currentIndex">
-            <number>2</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="tab_2">
             <attribute name="title">
@@ -928,7 +928,7 @@
                   <x>0</x>
                   <y>0</y>
                   <width>627</width>
-                  <height>303</height>
+                  <height>325</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout">
@@ -972,6 +972,12 @@
                         <horstretch>0</horstretch>
                         <verstretch>8</verstretch>
                        </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>200</height>
+                       </size>
                       </property>
                       <property name="maximumSize">
                        <size>
@@ -1071,6 +1077,25 @@
                            </property>
                           </widget>
                          </item>
+                         <item row="6" column="0" colspan="3">
+                          <widget class="QPushButton" name="StageStop">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="minimumSize">
+                            <size>
+                             <width>0</width>
+                             <height>0</height>
+                            </size>
+                           </property>
+                           <property name="text">
+                            <string>Stop</string>
+                           </property>
+                          </widget>
+                         </item>
                          <item row="4" column="0" colspan="2">
                           <widget class="QPushButton" name="MoveYP">
                            <property name="sizePolicy">
@@ -1093,25 +1118,6 @@
                            </property>
                            <property name="text">
                             <string>forward</string>
-                           </property>
-                          </widget>
-                         </item>
-                         <item row="6" column="0" colspan="3">
-                          <widget class="QPushButton" name="StageStop">
-                           <property name="sizePolicy">
-                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                             <horstretch>0</horstretch>
-                             <verstretch>0</verstretch>
-                            </sizepolicy>
-                           </property>
-                           <property name="minimumSize">
-                            <size>
-                             <width>0</width>
-                             <height>0</height>
-                            </size>
-                           </property>
-                           <property name="text">
-                            <string>Stop</string>
                            </property>
                           </widget>
                          </item>
@@ -1140,25 +1146,6 @@
                            </property>
                           </widget>
                          </item>
-                         <item row="3" column="3">
-                          <widget class="QLabel" name="label_84">
-                           <property name="sizePolicy">
-                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                             <horstretch>0</horstretch>
-                             <verstretch>0</verstretch>
-                            </sizepolicy>
-                           </property>
-                           <property name="text">
-                            <string> X:</string>
-                           </property>
-                           <property name="textFormat">
-                            <enum>Qt::AutoText</enum>
-                           </property>
-                           <property name="alignment">
-                            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                           </property>
-                          </widget>
-                         </item>
                          <item row="3" column="2">
                           <widget class="QPushButton" name="MoveXN">
                            <property name="sizePolicy">
@@ -1181,6 +1168,25 @@
                            </property>
                            <property name="text">
                             <string>Right</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="6" column="3">
+                          <widget class="QLabel" name="label_87">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="text">
+                            <string>Step (um):</string>
+                           </property>
+                           <property name="textFormat">
+                            <enum>Qt::AutoText</enum>
+                           </property>
+                           <property name="alignment">
+                            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                            </property>
                           </widget>
                          </item>
@@ -1209,8 +1215,8 @@
                            </property>
                           </widget>
                          </item>
-                         <item row="2" column="3" colspan="3">
-                          <widget class="QPushButton" name="GetPositions">
+                         <item row="3" column="3">
+                          <widget class="QLabel" name="label_84">
                            <property name="sizePolicy">
                             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                              <horstretch>0</horstretch>
@@ -1218,20 +1224,7 @@
                             </sizepolicy>
                            </property>
                            <property name="text">
-                            <string>Get positions</string>
-                           </property>
-                          </widget>
-                         </item>
-                         <item row="6" column="3">
-                          <widget class="QLabel" name="label_87">
-                           <property name="sizePolicy">
-                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                             <horstretch>0</horstretch>
-                             <verstretch>0</verstretch>
-                            </sizepolicy>
-                           </property>
-                           <property name="text">
-                            <string>Step (um):</string>
+                            <string> X:</string>
                            </property>
                            <property name="textFormat">
                             <enum>Qt::AutoText</enum>
@@ -1241,7 +1234,26 @@
                            </property>
                           </widget>
                          </item>
-                         <item row="7" column="0" colspan="6">
+                         <item row="4" column="3">
+                          <widget class="QLabel" name="label_85">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="text">
+                            <string> Y:</string>
+                           </property>
+                           <property name="textFormat">
+                            <enum>Qt::AutoText</enum>
+                           </property>
+                           <property name="alignment">
+                            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="8" column="0" colspan="6">
                           <widget class="QLabel" name="Warning_Newscale">
                            <property name="sizePolicy">
                             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -1275,30 +1287,6 @@
                            </property>
                           </widget>
                          </item>
-                         <item row="4" column="4" colspan="2">
-                          <widget class="QLineEdit" name="PositionY">
-                           <property name="sizePolicy">
-                            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                             <horstretch>0</horstretch>
-                             <verstretch>0</verstretch>
-                            </sizepolicy>
-                           </property>
-                           <property name="maximumSize">
-                            <size>
-                             <width>16777215</width>
-                             <height>25</height>
-                            </size>
-                           </property>
-                           <property name="font">
-                            <font>
-                             <pointsize>7</pointsize>
-                            </font>
-                           </property>
-                           <property name="text">
-                            <string/>
-                           </property>
-                          </widget>
-                         </item>
                          <item row="5" column="4" colspan="2">
                           <widget class="QLineEdit" name="PositionZ">
                            <property name="sizePolicy">
@@ -1323,22 +1311,27 @@
                            </property>
                           </widget>
                          </item>
-                         <item row="4" column="3">
-                          <widget class="QLabel" name="label_85">
+                         <item row="4" column="4" colspan="2">
+                          <widget class="QLineEdit" name="PositionY">
                            <property name="sizePolicy">
-                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                              <horstretch>0</horstretch>
                              <verstretch>0</verstretch>
                             </sizepolicy>
                            </property>
+                           <property name="maximumSize">
+                            <size>
+                             <width>16777215</width>
+                             <height>25</height>
+                            </size>
+                           </property>
+                           <property name="font">
+                            <font>
+                             <pointsize>7</pointsize>
+                            </font>
+                           </property>
                            <property name="text">
-                            <string> Y:</string>
-                           </property>
-                           <property name="textFormat">
-                            <enum>Qt::AutoText</enum>
-                           </property>
-                           <property name="alignment">
-                            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                            <string/>
                            </property>
                           </widget>
                          </item>
@@ -1387,6 +1380,32 @@
                            </property>
                            <property name="text">
                             <string>200</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="7" column="4" colspan="2">
+                          <widget class="QPushButton" name="SetReference">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="text">
+                            <string>Set reference</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="2" column="4" colspan="2">
+                          <widget class="QPushButton" name="GetPositions">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="text">
+                            <string>Get positions</string>
                            </property>
                           </widget>
                          </item>
@@ -1985,8 +2004,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>624</width>
-                  <height>326</height>
+                  <width>627</width>
+                  <height>325</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_9">
@@ -2543,8 +2562,8 @@ Bias:</string>
                         <rect>
                          <x>0</x>
                          <y>0</y>
-                         <width>349</width>
-                         <height>150</height>
+                         <width>340</width>
+                         <height>195</height>
                         </rect>
                        </property>
                        <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -2615,8 +2634,8 @@ Double dipping:
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>1420</width>
-                  <height>504</height>
+                  <width>1072</width>
+                  <height>457</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -4666,8 +4685,8 @@ Current pair:
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>952</width>
-                  <height>286</height>
+                  <width>722</width>
+                  <height>308</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_16">
@@ -4966,7 +4985,7 @@ Current pair:
      <x>0</x>
      <y>0</y>
      <width>960</width>
-     <height>31</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="sizePolicy">

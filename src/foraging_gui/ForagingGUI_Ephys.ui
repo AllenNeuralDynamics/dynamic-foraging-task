@@ -4297,6 +4297,25 @@
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
      </property>
     </widget>
+    <widget class="QPushButton" name="SetReference">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>210</y>
+       <width>121</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Set reference</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QPushButton" name="AutoTrain">
     <property name="geometry">
@@ -4534,7 +4553,7 @@
      <x>0</x>
      <y>0</y>
      <width>1875</width>
-     <height>31</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="sizePolicy">
