@@ -1789,15 +1789,16 @@ class MetadataDialog(QDialog):
         if os.path.exists(metadata_dialog_file):
             with open(metadata_dialog_file, 'r') as file:
                 self.meta_data = json.load(file)
-        self._update_metadata()
+        self._update_metadata(dont_clear=True)
         
-    def _update_metadata(self,update_rig_metadata=True,update_session_metadata=True):
+    def _update_metadata(self,update_rig_metadata=True,update_session_metadata=True,dont_clear=False):
         '''update the metadata'''
         if (update_rig_metadata or update_session_metadata) and ('rig_metadata_file' in self.meta_data):
             if os.path.basename(self.meta_data['rig_metadata_file'])!=self.RigMetadataFile.text() and self.RigMetadataFile.text() != '':
-                # clear probe angles if the rig metadata file is changed
-                self._clear_angles(self._show_ephys_probes, self.EphysProbes, 'probes')
-                self._clear_angles(self._show_stick_microscopes, self.StickMicroscopes, 'microscopes')
+                if dont_clear==False:
+                    # clear probe angles if the rig metadata file is changed
+                    self._clear_angles(self._show_ephys_probes, self.EphysProbes, 'probes')
+                    self._clear_angles(self._show_stick_microscopes, self.StickMicroscopes, 'microscopes')
             self.RigMetadataFile.setText(os.path.basename(self.meta_data['rig_metadata_file']))
         if update_session_metadata:
             widget_dict = self._get_widgets()
