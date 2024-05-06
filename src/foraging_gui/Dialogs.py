@@ -1730,6 +1730,13 @@ class MetadataDialog(QDialog):
         self.ProjectName.currentIndexChanged.connect(self._show_project_info)
         self.GoCueDecibel.textChanged.connect(self._save_go_cue_decibel)
 
+    def _set_reference(self, reference):
+        '''set the reference'''
+        self.reference = reference
+        self.LickSpoutReferenceX.setText(str(reference[0]))
+        self.LickSpoutReferenceY.setText(str(reference[1]))
+        self.LickSpoutReferenceZ.setText(str(reference[2]))
+
     def _show_project_info(self):
         '''show the project information based on current project name'''
         current_project_index = self.ProjectName.currentIndex()
