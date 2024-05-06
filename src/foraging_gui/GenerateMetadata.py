@@ -101,6 +101,9 @@ class generate_metadata:
                 'BottomCamera': "Bottom",
                 'BodyCamera': "Body"
             }, # camera names in the settings_box.csv and the corresponding names in the rig metadata
+            'institute':{
+                'Allen Institute': 'AI',
+            }
         }
 
     def _get_box_type(self):
@@ -152,7 +155,7 @@ class generate_metadata:
         Get the funding source
         '''
         self.funding_source=[Funding(
-            funder=getattr(Organization,self.Obj['meta_data_dialog']['session_metadata']['FundingSource']),
+            funder=getattr(Organization,self.name_mapper['institute'][self.Obj['meta_data_dialog']['session_metadata']['FundingSource']]),
             grant_number=self.Obj['meta_data_dialog']['session_metadata']['GrantNumber'],
             fundee=self.Obj['meta_data_dialog']['session_metadata']['Fundee'],
         )]
