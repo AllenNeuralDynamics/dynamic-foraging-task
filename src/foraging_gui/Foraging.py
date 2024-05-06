@@ -940,7 +940,8 @@ class Window(QMainWindow):
             self.SettingsBox = {row[0]: row[1] for _, row in df.iterrows()}
             logging.info('Loaded settings_box file')
         except Exception as e:
-            logging.error('Could not load settings_box file at: {}, {}'.format(self.SettingFile,str(e)))
+            logging.error('Could not load settings_box file at: {}, {}'.format(self.SettingsBoxFile,str(e)))
+            e.args = ('Could not load settings file at: {}'.format(self.SettingsBoxFile), *e.args)
             raise e
 
         # Try to load the settings file        
