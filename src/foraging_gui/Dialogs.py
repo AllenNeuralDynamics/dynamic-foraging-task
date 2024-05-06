@@ -1705,6 +1705,7 @@ class MetadataDialog(QDialog):
         self.meta_data['rig_metadata'] = {}
         self.meta_data['session_metadata'] = {}
         self.meta_data['rig_metadata_file'] = ''
+        self.GoCueDecibel.setText(str(self.MainWindow.Other_go_cue_decibel))
         self._get_basics()
         self._show_project_names()
 
@@ -1727,6 +1728,7 @@ class MetadataDialog(QDialog):
         self.Stick_ModuleAngle.textChanged.connect(self._save_configuration)
         self.Stick_RotationAngle.textChanged.connect(self._save_configuration)
         self.ProjectName.currentIndexChanged.connect(self._show_project_info)
+        self.GoCueDecibel.textChanged.connect(self._save_go_cue_decibel)
 
     def _show_project_info(self):
         '''show the project information based on current project name'''
@@ -1740,6 +1742,10 @@ class MetadataDialog(QDialog):
         self.Investigators.setText(str(self.investigators))
         self.GrantNumber.setText(str(self.grant_number))
         self.Fundee.setText(str(self.fundee))
+
+    def _save_go_cue_decibel(self):
+        '''save the go cue decibel'''
+        self.MainWindow.Other_go_cue_decibel=self.GoCueDecibel.text()
 
     def _show_project_names(self):
         '''show the project names from the project spreadsheet'''

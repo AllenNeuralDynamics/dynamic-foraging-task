@@ -1147,9 +1147,9 @@ p, li { white-space: pre-wrap; }
   <widget class="QLabel" name="label_83">
    <property name="geometry">
     <rect>
-     <x>26</x>
+     <x>6</x>
      <y>390</y>
-     <width>91</width>
+     <width>111</width>
      <height>20</height>
     </rect>
    </property>
@@ -1160,7 +1160,7 @@ p, li { white-space: pre-wrap; }
     </sizepolicy>
    </property>
    <property name="text">
-    <string>Go cue decibel:</string>
+    <string>Go cue decibel (db):</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
