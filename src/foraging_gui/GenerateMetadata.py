@@ -98,7 +98,6 @@ class generate_metadata:
             },# laser name in the rig metadata and the corresponding color used in the behavior GUI
             'laser_tags':[1,2], # laser tags corresponding to Laser_1 and Laser_2
             'sides':['Left','Right'], # lick spouts
-            'lick_spouts_distance':5000, # distance between the two lick spouts in um; this value shoud be directly extracted from the rig metadata
             'camera_list':['SideCameraLeft','SideCameraRight','BottomCamera','BodyCamera'], # camera names in the settings_box.csv
             'camera_name_mapper':{
                 'SideCameraLeft': "Face side left",
@@ -115,6 +114,12 @@ class generate_metadata:
             'ephys_daq_names':['neuropixel basestation'],
             'optogenetics_daq_names':['optogenetics nidaq'],
         }
+
+    def _get_lick_spouts_distance(self):
+        ''' 
+        get the distance between the two lick spouts in um
+        '''
+        self.lick_spouts_distance=2500
 
     def _get_box_type(self):
         '''
@@ -746,7 +751,7 @@ class generate_metadata:
             return
 
         device_oringin=self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceArea']
-        lick_spouts_distance=self.name_mapper['lick_spouts_distance'] 
+        lick_spouts_distance=self.lick_spouts_distance
         start_position=[self.Obj['B_NewscalePositions'][0][0], self.Obj['B_NewscalePositions'][0][1], self.Obj['B_NewscalePositions'][0][2]]
 
         # assuming refering to the left lick spout
