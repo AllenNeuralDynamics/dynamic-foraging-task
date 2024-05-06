@@ -931,35 +931,32 @@ class Window(QMainWindow):
         
         # Try to load Settings_box#.csv
         self.SettingsBox={}
+        if not os.path.exists(self.SettingsBoxFile):
+            logging.error('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
+            raise Exception('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))           
         try:
-            if os.path.exists(self.SettingsBoxFile):
-                # Open the csv settings file
-                df = pd.read_csv(self.SettingsBoxFile,index_col=None)
-                self.SettingsBox = {row[0]: row[1] for _, row in df.iterrows()}
-                logging.info('Loaded settings_box file')
-            else:
-                logging.error('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
-                raise Exception('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
+            # Open the csv settings file
+            df = pd.read_csv(self.SettingsBoxFile,index_col=None)
+            self.SettingsBox = {row[0]: row[1] for _, row in df.iterrows()}
+            logging.info('Loaded settings_box file')
         except Exception as e:
-            logging.error('Could not load settings_box file at: {}, {}'.format(self.SettingFile,str(e)))
-            self.WarningLabel.setText('Could not load settings_box file!')
-            self.WarningLabel.setStyleSheet(self.default_warning_color)
+            logging.error('Could not load settings_box file at: {}, {}'.format(self.SettingsBoxFile,str(e)))
+            e.args = ('Could not load settings box file at: {}'.format(self.SettingsBoxFile), *e.args)
             raise e
+
         # Try to load the settings file        
         self.Settings = {}
+        if not os.path.exists(self.SettingFile):
+            logging.error('Could not find settings file at: {}'.format(self.SettingFile))
+            raise Exception('Could not find settings file at: {}'.format(self.SettingFile))
         try:
-            if os.path.exists(self.SettingFile):
-                # Open the JSON settings file
-                with open(self.SettingFile, 'r') as f:
-                    self.Settings = json.load(f)
-                logging.info('Loaded settings file')
-            else:
-                logging.error('Could not find settings file at: {}'.format(self.SettingFile))
-                raise Exception('Could not find settings file at: {}'.format(self.SettingFile))
+            # Open the JSON settings file
+            with open(self.SettingFile, 'r') as f:
+                self.Settings = json.load(f)
+            logging.info('Loaded settings file')
         except Exception as e:
             logging.error('Could not load settings file at: {}, {}'.format(self.SettingFile,str(e)))
-            self.WarningLabel.setText('Could not load settings file!')
-            self.WarningLabel.setStyleSheet(self.default_warning_color)
+            e.args = ('Could not load settings file at: {}'.format(self.SettingFile), *e.args)
             raise e
 
         # If any settings are missing, use the default values
@@ -3917,7 +3914,7 @@ class UncaughtHook(QtCore.QObject):
         logging.error('FATAL ERROR: \n{}'.format(tb))
 
         # Display alert box
-        tb = "<br>".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+        tb = "<br><br>".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         self._exception_caught.emit(self.box+tb)
 
 
