@@ -3913,7 +3913,7 @@ class UncaughtHook(QtCore.QObject):
         logging.error('FATAL ERROR: \n{}'.format(tb))
 
         # Display alert box
-        tb = "<br>".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+        tb = "<br><br>".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         self._exception_caught.emit(self.box+tb)
 
 
