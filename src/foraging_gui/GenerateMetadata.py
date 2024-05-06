@@ -768,7 +768,8 @@ class generate_metadata:
                         Axis(name=AxisName.X, direction="Left"),
                         Axis(name=AxisName.Y, direction="Forward"),
                         Axis(name=AxisName.Z, direction="Down")
-                    ]
+                    ],
+                    notes="X positive is left, Y positive is forward, and Z positive is down."
                 ),
                 variable_position=True
             ),RewardSpoutConfig(
@@ -783,7 +784,8 @@ class generate_metadata:
                         Axis(name=AxisName.X, direction="Left"),
                         Axis(name=AxisName.Y, direction="Forward"),
                         Axis(name=AxisName.Z, direction="Down")
-                    ]
+                    ],
+                    notes="X positive is left, Y positive is forward, and Z positive is down."
                 ),
                 variable_position=True
             )],
