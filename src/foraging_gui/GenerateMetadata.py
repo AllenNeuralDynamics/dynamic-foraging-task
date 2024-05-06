@@ -106,7 +106,12 @@ class generate_metadata:
             }, # camera names in the settings_box.csv and the corresponding names in the rig metadata
             'institute':{
                 'Allen Institute': 'AI',
-            }
+            },
+            'ephys_rig_behavior_daq_names':["harp behavior board","harp sound card","harp clock synchronization board","harp lickety split left","harp lickety split right"],
+            'behavior_rig_behavior_daq_names':["harp behavior board","harp sound card","harp clock synchronization board",'Janelia lick detector'],
+            'fiber_photometry_daq_names':[''],
+            'ephys_daq_names':['neuropixel basestation'],
+            'optogenetics_daq_names':['optogenetics nidaq'],
         }
 
     def _get_box_type(self):
@@ -454,6 +459,7 @@ class generate_metadata:
                 notes='Please see NWB files for more details (stimulus epoch and stimulus protocol etc.).',
                 stimulus_start_time=self.session_start_time,
                 stimulus_end_time=self.session_end_time,
+                daq_names=self.name_mapper['optogenetics_daq_names'],
         ))
 
 
@@ -467,7 +473,7 @@ class generate_metadata:
             return
         
         # find daq names for Neuropixels
-        daq_names = [daq['name'] for daq in self.Obj['meta_data_dialog']['rig_metadata']["daqs"] if 'Neuropixels' in daq['name']]
+        daq_names = self.name_mapper['ephys_daq_names']
 
         self.ephys_streams=[]
         self._get_ephys_modules()
@@ -578,9 +584,9 @@ class generate_metadata:
             return
 
         if self.box_type == 'Ephys':
-            daq_names=["Behavior board","Sound card","Synchronizer","Lickety Split Left","Lickety Split Right"]
+            daq_names=self.name_mapper['ephys_rig_behavior_daq_names']
         else:
-            daq_names=["Behavior board","Sound card","Synchronizer","Janelia lick detector"]
+            daq_names=self.name_mapper['behavior_rig_behavior_daq_names']
 
         self.behavior_streams=[]
         self.behavior_streams.append(Stream(
