@@ -1198,7 +1198,7 @@ p, li { white-space: pre-wrap; }
     </rect>
    </property>
    <property name="title">
-    <string>Lick spout reference positions</string>
+    <string>Left lick spout reference positions</string>
    </property>
    <widget class="QLabel" name="label_94">
     <property name="geometry">
