@@ -955,7 +955,7 @@ class Window(QMainWindow):
             logging.info('Loaded settings file')
         except Exception as e:
             logging.error('Could not load settings file at: {}, {}'.format(self.SettingFile,str(e)))
-            raise e
+            raise e('Could not load settings file at: {}'.format(self.SettingFile))
 
         # If any settings are missing, use the default values
         for key in defaults:
