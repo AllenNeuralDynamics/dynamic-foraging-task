@@ -941,7 +941,7 @@ class Window(QMainWindow):
             logging.info('Loaded settings_box file')
         except Exception as e:
             logging.error('Could not load settings_box file at: {}, {}'.format(self.SettingsBoxFile,str(e)))
-            e.args = ('Could not load settings file at: {}'.format(self.SettingsBoxFile), *e.args)
+            e.args = ('Could not load settings box file at: {}'.format(self.SettingsBoxFile), *e.args)
             raise e
 
         # Try to load the settings file        
