@@ -3753,33 +3753,13 @@ class Window(QMainWindow):
                          '&x_y_plot_if_aggr_all=False&x_y_plot_smooth_factor=5'
                          '&x_y_plot_dot_size=20&x_y_plot_dot_opacity=0.8&x_y_plot_line_width=3.0'
         )
-        
-def map_hostname_to_box(hostname,box_num):
-    host_mapping = {
-        'W10DT714033':'447-1-',
-        'W10DT714086':'447-1-',
-        'KAPPA':      '447-2-',
-        'W10DT714027':'447-2-',
-        'W10DT714028':'447-3-',
-        'W10DT714030':'447-3-'
-    }
-    box_mapping = {
-        1:'A',
-        2:'B',
-        3:'C',
-        4:'D'
-    }
-    if hostname in host_mapping:
-        return host_mapping[hostname]+box_mapping[box_num]
-    else:
-        return hostname+'-'+box_mapping[box_num]
 
 def start_gui_log_file(box_number):
     '''
         Starts a log file for the gui.
         The log file is located at C:/Users/<username>/Documents/foraging_gui_logs
         One log file is created for each time the GUI is started
-        The name of the gui file is <box_name>_gui_log_<date and time>.txt
+        The name of the gui file is <hostname>-<box letter A/B/C/D>_gui_log_<date and time>.txt
     '''
     # Check if the log folder exists, if it doesn't make it
     logging_folder = os.path.join(os.path.expanduser("~"), "Documents",'foraging_gui_logs')
@@ -3793,7 +3773,13 @@ def start_gui_log_file(box_number):
 
     # Build logfile name
     hostname = socket.gethostname()
-    box_name = map_hostname_to_box(hostname, box_number)
+    box_mapping = {
+        1:'A',
+        2:'B',
+        3:'C',
+        4:'D'
+    }
+    box_name =hostname+'-'+box_mapping[box_number]
     filename = '{}_gui_log_{}.txt'.format(box_name,formatted_datetime)
     logging_filename = os.path.join(logging_folder,filename)
 
