@@ -430,13 +430,20 @@ class generate_metadata:
         self.ophys_streams=[]
         if self.Obj['fiber_photometry_start_time']=='':
             return
-        
+        self._get_photometry_light_sources_config()
         self.ophys_streams.append(Stream(
                 stream_modalities=[Modality.FIB],
                 stream_start_time=datetime.strptime(self.Obj['fiber_photometry_start_time'], '%Y-%m-%d %H:%M:%S.%f'),
                 stream_end_time=datetime.strptime(self.Obj['fiber_photometry_end_time'], '%Y-%m-%d %H:%M:%S.%f'),
                 daq_names=self.name_mapper['fiber_photometry_daq_names'],
         ))
+
+    def _get_photometry_light_sources_config(self):
+        '''
+        get the light sources config for fiber photometry
+        '''
+        self.fib_light_sources_config=[]
+        
 
     def _get_stimulus(self):
         '''
@@ -524,7 +531,7 @@ class generate_metadata:
 
     def _get_light_names_used_in_session(self):
         '''
-        Get the laser names used in the session
+        Get the optogenetics laser names used in the session
         '''
         self.laser_names_used_in_session=[]
         light_sources=[]
@@ -882,4 +889,6 @@ class generate_metadata:
 
 
 if __name__ == '__main__':
-    generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_13-43-37_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
+    
+    #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_13-43-37_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
+    generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_18-04-44_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
