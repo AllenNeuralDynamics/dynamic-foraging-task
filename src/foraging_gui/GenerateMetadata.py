@@ -6,8 +6,8 @@ from datetime import datetime
 import numpy as np
 
 from foraging_gui.Visualization import PlotWaterCalibration
-from aind_data_schema.models.stimulus import AuditoryStimulation
-from aind_data_schema.models.devices import SpoutSide,Calibration
+from aind_data_schema.components.stimulus import AuditoryStimulation
+from aind_data_schema.components.devices import SpoutSide,Calibration
 from aind_data_schema.models.units import SizeUnit,FrequencyUnit,SoundIntensityUnit,PowerUnit
 from aind_data_schema.models.modalities import Modality
 
@@ -16,7 +16,7 @@ from aind_data_schema.models.organizations import Organization
 from aind_data_schema.models.modalities import Modality
 from aind_data_schema.models.platforms import Platform
 from aind_data_schema.models.pid_names import PIDName, BaseName
-from aind_data_schema.models.coordinates import RelativePosition, Translation3dTransform, Rotation3dTransform,Axis,AxisName
+from aind_data_schema.components.coordinates import RelativePosition, Translation3dTransform, Rotation3dTransform,Axis,AxisName
 
 
 from aind_data_schema.core.session import (
