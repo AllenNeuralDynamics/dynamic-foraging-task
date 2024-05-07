@@ -320,6 +320,10 @@ class generate_metadata:
         if 'Other_go_cue_decibel' not in self.Obj:
             self.Obj['Other_go_cue_decibel'] = 60
 
+        # Missing field 'fiber_photometry_start_time' and 'fiber_photometry_end_time' in the json file.
+        # Possible reason: 1) the fiber photometry data is not recorded in the session. 2) the fiber photometry data is recorded but the start and end time are not recorded in the old version of the software.
+        self._initialize_fields(dic=self.Obj,keys=['fiber_photometry_start_time','fiber_photometry_end_time'],default_value='')
+        
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
         Initialize fields
