@@ -145,7 +145,6 @@ class Window(QMainWindow):
         self.open_ephys=[]
         # load the rig metadata
         self._load_rig_metadata()
-        # 
         if not self.start_bonsai_ide:
             '''
                 When starting bonsai without the IDE the connection is always unstable.
@@ -983,6 +982,7 @@ class Window(QMainWindow):
             'go_cue_decibel_box2':'',
             'go_cue_decibel_box3':'',
             'go_cue_decibel_box4':'',
+            'name_mapper_file':os.path.join(self.SettingFolder,"name_mapper.json")
         }
         
         # Try to load Settings_box#.csv
@@ -1045,7 +1045,7 @@ class Window(QMainWindow):
         self.go_cue_decibel_box2 = self.Settings['go_cue_decibel_box2']
         self.go_cue_decibel_box3 = self.Settings['go_cue_decibel_box3']
         self.go_cue_decibel_box4 = self.Settings['go_cue_decibel_box4']
-
+        self.name_mapper_file = self.Settings['name_mapper_file']
         if not is_absolute_path(self.project_info_file):
             self.project_info_file = os.path.join(self.SettingFolder,self.project_info_file)
         # Also stream log info to the console if enabled

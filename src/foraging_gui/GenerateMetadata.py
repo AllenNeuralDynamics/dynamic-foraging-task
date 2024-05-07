@@ -92,6 +92,12 @@ class generate_metadata:
         '''
         Name mapping
         '''
+        if 'settings' in self.Obj:
+            if 'name_mapper_file' in self.Obj['settings']:
+                if os.path.exists(self.Obj['settings']['name_mapper_file']):
+                    with open(self.Obj['settings']['name_mapper_file']) as f:
+                        self.name_mapper_external = json.load(f)
+
         self.name_mapper = {
             'laser_name_mapper':{
                 'Oxxius Laser 473-1': {'color':'Blue','laser_tag':1}, 
@@ -126,6 +132,11 @@ class generate_metadata:
             'ephys_daq_names':['neuropixel basestation'],
             'optogenetics_daq_names':['optogenetics nidaq'],
         }
+
+        # replacing fileds with the external name mapper
+        if hasattr(self,'name_mapper_external'):
+            for key in self.name_mapper_external:
+                self.name_mapper[key] = self.name_mapper_external[key]
 
     def _get_lick_spouts_distance(self):
         ''' 
