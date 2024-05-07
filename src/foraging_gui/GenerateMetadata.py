@@ -117,6 +117,8 @@ class generate_metadata:
             }, # camera names in the settings_box.csv and the corresponding names in the rig metadata
             'institute':{
                 'Allen Institute': 'AI',
+                'NINDS': 'NINDS',
+                'Simons Foundation': 'SIMONS',
             },
             'ephys_rig_behavior_daq_names':["harp behavior board","harp sound card","harp clock synchronization board","harp lickety split left","harp lickety split right"],
             'behavior_rig_behavior_daq_names':["harp behavior board","harp sound card","harp clock synchronization board",'Janelia lick detector'],
