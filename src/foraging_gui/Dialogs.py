@@ -1810,8 +1810,8 @@ class MetadataDialog(QDialog):
             if os.path.basename(self.meta_data['rig_metadata_file'])!=self.RigMetadataFile.text() and self.RigMetadataFile.text() != '':
                 if dont_clear==False:
                     # clear probe angles if the rig metadata file is changed
-                    self._clear_angles(self._show_ephys_probes, self.EphysProbes, 'probes')
-                    self._clear_angles(self._show_stick_microscopes, self.StickMicroscopes, 'microscopes')
+                    self.meta_data['session_metadata']['probes'] = {}
+                    self.meta_data['session_metadata']['microscopes'] = {}
             self.RigMetadataFile.setText(os.path.basename(self.meta_data['rig_metadata_file']))
         if update_session_metadata:
             widget_dict = self._get_widgets()
@@ -1939,6 +1939,12 @@ class MetadataDialog(QDialog):
             self._manage_signals(enable=False, keys=self._get_chidldren_keys(widget),action=action)
             
             current_probe = getattr(self, probe_type).currentText()
+            self.meta_data['session_metadata'] = initialize_dic(self.meta_data['session_metadata'], key_list=[metadata_key])
+            if current_probe == '' or current_probe not in self.meta_data['session_metadata'][metadata_key]:
+                self._manage_signals(enable=True, keys=[probe_type], action=self._show_angles)
+                self._manage_signals(enable=True, keys=self._get_chidldren_keys(widget), action=action)
+                continue
+
             self.meta_data['session_metadata'] = initialize_dic(self.meta_data['session_metadata'], key_list=[metadata_key, current_probe])
             keys = self._get_chidldren_keys(widget)
             for key in keys:
@@ -1968,12 +1974,15 @@ class MetadataDialog(QDialog):
         if self.meta_data['rig_metadata'] == {}:
             self.StickMicroscopes.clear()
             self._show_angles()
+            self.meta_data['session_metadata']['microscopes'] = {}
             return
         items=[]
         if 'stick_microscopes' in self.meta_data['rig_metadata']:
             for i in range(len(self.meta_data['rig_metadata']['stick_microscopes'])):
                 items.append(self.meta_data['rig_metadata']['stick_microscopes'][i]['name'])
         if items==[]:
+            self.StickMicroscopes.clear()
+            self._show_angles()
             return
         
         self._manage_signals(enable=False,keys=['StickMicroscopes'],action=self._show_angles)
@@ -1996,6 +2005,8 @@ class MetadataDialog(QDialog):
                 for probe in assembly['probes']:
                     items.append(probe['name'])
         if items==[]:
+            self.EphysProbes.clear()
+            self._show_angles()
             return
         
         self._manage_signals(enable=False,keys=['EphysProbes'],action=self._show_angles)
