@@ -542,10 +542,8 @@ class generate_metadata:
                 ))
         elif self.box_type=='Behavior':
             for light_source in self.laser_names_used_in_session:
-                wavelength=self._get_light_pars(light_source)
                 self.light_source_config.append(LightEmittingDiodeConfig(
                     name=light_source,
-                    wavelength=wavelength,
                 ))
 
     def _get_light_pars(self,light_source):
