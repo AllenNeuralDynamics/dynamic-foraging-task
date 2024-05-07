@@ -105,6 +105,7 @@ class Window(QMainWindow):
         self.threadpool_workertimer=QThreadPool() # for timing
 
         # Set up more parameters
+        self.FIP_started=False
         self.OpenOptogenetics=0
         self.WaterCalibration=0
         self.LaserCalibration=0
@@ -199,6 +200,7 @@ class Window(QMainWindow):
         self.GiveRight.clicked.connect(self._GiveRight)
         self.NewSession.clicked.connect(self._NewSession)
         self.AutoReward.clicked.connect(self._AutoReward)
+        self.StartFIP.clicked.connect(self._StartFIP)
         self.StartExcitation.clicked.connect(self._StartExcitation)
         self.StartBleaching.clicked.connect(self._StartBleaching)
         self.NextBlock.clicked.connect(self._NextBlock)
@@ -915,6 +917,7 @@ class Window(QMainWindow):
             'Teensy_COM_box2':'',
             'Teensy_COM_box3':'',
             'Teensy_COM_box4':'',
+            'FIP_workflow_path':'',
             'bonsai_path':os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe'),
             'bonsaiworkflow_path':os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai'),
             'newscale_serial_num_box1':'',
@@ -973,6 +976,7 @@ class Window(QMainWindow):
         self.current_box=self.Settings['current_box']
         self.temporary_video_folder=self.Settings['temporary_video_folder']
         self.Teensy_COM = self.Settings['Teensy_COM_box'+str(self.box_number)]
+        self.FIP_workflow_path = self.Settings['FIP_workflow_path']
         self.bonsai_path=self.Settings['bonsai_path']
         self.bonsaiworkflow_path=self.Settings['bonsaiworkflow_path']
         self.newscale_serial_num_box1=self.Settings['newscale_serial_num_box1']
@@ -1859,7 +1863,7 @@ class Window(QMainWindow):
             self.client3.close()
             self.client4.close()
         self.Opto_dialog.close()
-        self._StopPhotometry()  # Make sure photo excitation is stopped 
+        self._StopPhotometry(closing=True)  # Make sure photo excitation is stopped 
         print('GUI Window closed')
         logging.info('GUI Window closed') 
 
@@ -2137,6 +2141,14 @@ class Window(QMainWindow):
         for attr_name in dir(self):
             if attr_name.startswith('Ot_'):
                 Obj[attr_name]=getattr(self, attr_name)
+        
+        if hasattr(self, 'fiber_photometry_start_time'):
+            Obj['fiber_photometry_start_time'] = self.fiber_photometry_start_time
+            if hasattr(self, 'fiber_photometry_end_time'):
+                end_time = self.fiber_photometry_end_time
+            else:
+                end_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") 
+            Obj['fiber_photometry_end_time'] = end_time
 
         # Save the current box
         Obj['box'] = self.current_box
@@ -2722,7 +2734,77 @@ class Window(QMainWindow):
                 if child.isEnabled():
                     child.clear()
 
+    def _StartFIP(self):
+
+        if self.Teensy_COM == '':
+            logging.warning('No Teensy COM configured for this box, cannot start FIP workflow')
+            self.TeensyWarning.setText('No Teensy COM for this box')
+            self.TeensyWarning.setStyleSheet(self.default_warning_color)
+            msg = 'No Teensy COM configured for this box, cannot start FIP workflow'
+            reply = QMessageBox.information(self, 
+                'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
+            self.StartFIP.setChecked(False)
+            self.StartFIP.setStyleSheet("background-color : none")
+            return
+        
+        if self.FIP_workflow_path == "":
+            logging.warning('No FIP workflow path defined in ForagingSettings.json')
+            self.TeensyWarning.setText('FIP workflow path not defined')
+            self.TeensyWarning.setStyleSheet(self.default_warning_color)
+            msg = 'FIP workflow path not defined, cannot start FIP workflow'
+            reply = QMessageBox.information(self, 
+                'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
+            self.StartFIP.setChecked(False)
+            self.StartFIP.setStyleSheet("background-color : none")                  
+            return
+ 
+        if self.FIP_started:
+            self.StartFIP.setChecked(True)             
+            reply = QMessageBox.question(self, 
+                'Box {}, Start FIP workflow:'.format(self.box_letter), 
+                'FIP workflow has already been started. Start again?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No )       
+            if reply == QMessageBox.No:
+                logging.warning('FIP workflow already started, user declines to restart')
+                return
+            else:
+                logging.warning('FIP workflow already started, user restarts')
+
+        self.FIP_started=True 
+        logging.info('StartFIP is checked')
+        self.StartFIP.setStyleSheet("background-color : green;")
+
+        # Start logging
+        self.CreateNewFolder=1
+        self.Ot_log_folder=self._restartlogging()
+
+
+        # Start the FIP workflow
+        try:
+            CWD=os.path.dirname(self.FIP_workflow_path)
+            logging.info('Starting FIP workflow in directory: {}'.format(CWD))
+            folder_path = ' -p session="{}"'.format(self.SessionFolder)
+            camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartCamera.isChecked())
+            subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera+' --start',cwd=CWD,shell=True)
+        except Exception as e:
+            logging.error(e)
+            reply = QMessageBox.information(self, 
+               'Box {}, Start FIP workflow:'.format(self.box_letter), 
+               'Could not start FIP workflow: {}'.format(e),
+               QMessageBox.Ok )               
+
     def _StartExcitation(self):
+
+        if not self.FIP_started:
+            logging.warning('FIP workflow is not running, cannot start excitation')
+            reply = QMessageBox.information(self, 
+                'Box {}, Start Excitation:'.format(self.box_letter), 
+                'Please start the FIP workflow before running excitation',
+                QMessageBox.Ok )                     
+            self.StartExcitation.setChecked(False)
+            self.StartExcitation.setStyleSheet("background-color : none")
+            return 0  
+ 
         if self.Teensy_COM == '':
             logging.warning('No Teensy COM configured for this box, cannot start excitation')
             self.TeensyWarning.setText('No Teensy COM for this box')
@@ -2732,10 +2814,19 @@ class Window(QMainWindow):
                 'Box {}, StartExcitation'.format(self.box_letter), msg, QMessageBox.Ok )
             self.StartExcitation.setChecked(False)
             self.StartExcitation.setStyleSheet("background-color : none")
-            return
+            return 0 
 
         if self.StartExcitation.isChecked():
-            logging.info('StartExcitation is checked')
+            reply = QMessageBox.question(self, 
+                'Box {}, Start FIP'.format(self.box_letter), 
+                'Is the FIP workflow running?', 
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes )
+            if reply == QMessageBox.No:
+                self.StartExcitation.setChecked(False)
+                self.StartExcitation.setStyleSheet("background-color : none")
+                logging.info('User says FIP workflow is not open')
+                return 0 
+            logging.info('StartExcitation is checked, user confirms workflow is running')
             self.StartExcitation.setStyleSheet("background-color : green;")
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
@@ -2751,9 +2842,11 @@ class Window(QMainWindow):
                 reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
                 self.StartExcitation.setChecked(False)
                 self.StartExcitation.setStyleSheet("background-color : none")
+                return 0 
             else:
                 self.TeensyWarning.setText('')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)               
+                self.fiber_photometry_start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
         else:
             logging.info('StartExcitation is unchecked')
@@ -2770,10 +2863,13 @@ class Window(QMainWindow):
                 self.TeensyWarning.setText('Error: stop excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
                 reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when stopping excitation: {}'.format(e), QMessageBox.Ok)
+                return 0 
             else:
                 self.TeensyWarning.setText('')
-                self.TeensyWarning.setStyleSheet(self.default_warning_color)               
+                self.TeensyWarning.setStyleSheet(self.default_warning_color)              
+                self.fiber_photometry_end_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
+        return 1
     
     def _StartBleaching(self):
 
@@ -2855,13 +2951,14 @@ class Window(QMainWindow):
                 self.TeensyWarning.setText('Error: stop bleaching!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
     
-    def _StopPhotometry(self):
+    def _StopPhotometry(self,closing=False):
         '''
             Stop either bleaching or photometry
         '''
         if self.Teensy_COM == '':
             return
         logging.info('Checking that photometry is not running')
+        FIP_was_running=self.StartFIP.isChecked()
         try:
             ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
             # Trigger Teensy with the above specified exp mode
@@ -2877,9 +2974,18 @@ class Window(QMainWindow):
             self.TeensyWarning.setStyleSheet(self.default_warning_color)      
             self.StartBleaching.setStyleSheet("background-color : none")
             self.StartExcitation.setStyleSheet("background-color : none")
+            self.StartFIP.setStyleSheet("background-color : none;")
             self.StartBleaching.setChecked(False)
             self.StartExcitation.setChecked(False)
-           
+            self.StartFIP.setChecked(False)
+            self.FIP_started=False
+
+        if (FIP_was_running)&(not closing):
+            reply = QMessageBox.critical(self, 
+                'Box {}, New Session:'.format(self.box_letter), 
+                'Please restart the FIP workflow',
+                QMessageBox.Ok)
+
     def _AutoReward(self):
         if self.AutoReward.isChecked():
             self.AutoReward.setStyleSheet("background-color : green;")
@@ -2949,7 +3055,11 @@ class Window(QMainWindow):
         self.CreateNewFolder=1
         self.PhotometryRun=0
         self.unsaved_data=False
-        self.ManualWaterVolume=[0,0]       
+        self.ManualWaterVolume=[0,0]     
+        if hasattr(self, 'fiber_photometry_start_time'): 
+            del self.fiber_photometry_start_time
+        if hasattr(self, 'fiber_photometry_end_time'): 
+            del self.fiber_photometry_end_time 
     
         # Clear Plots
         if hasattr(self, 'PlotM'): 
@@ -3136,6 +3246,40 @@ class Window(QMainWindow):
             elif self.repo_dirty_flag is None:
                 logging.error('Could not check for untracked local changes')
 
+            if self.PhotometryB.currentText()=='on' and (not self.FIP_started): 
+                reply = QMessageBox.critical(self,
+                    'Box {}, Start'.format(self.box_letter),
+                    'Photometry is set to "on", but the FIP workflow has not been started',
+                    QMessageBox.Ok)
+                self.Start.setChecked(False)
+                logging.info('Cannot start session without starting FIP workflow')
+                return
+
+            # Check if photometry excitation is running or not
+            if self.PhotometryB.currentText()=='on' and (not self.StartExcitation.isChecked()):
+                logging.warning('photometry is set to "on", but excitation is not running')
+
+                reply = QMessageBox.question(self, 
+                    'Box {}, Start'.format(self.box_letter), 
+                    'Photometry is set to "on", but excitation is not running. Start excitation now?',
+                    QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+                if reply == QMessageBox.Yes:
+                    self.StartExcitation.setChecked(True)
+                    logging.info('User selected to start excitation')
+                    started = self._StartExcitation()
+                    if started == 0:
+                        reply = QMessageBox.critical(self,
+                            'Box {}, Start'.format(self.box_letter),
+                            'Could not start excitation, therefore cannot start the session',
+                            QMessageBox.Ok)
+                        logging.info('could not start session, due to failure to start excitation')
+                        self.Start.setChecked(False)
+                        return 
+                else:                   
+                    logging.info('User selected not to start excitation')
+                    self.Start.setChecked(False)
+                    return
+
             # change button color and mark the state change
             self.Start.setStyleSheet("background-color : green;")
             self.NewSession.setStyleSheet("background-color : none")
@@ -3184,7 +3328,7 @@ class Window(QMainWindow):
             # start a new logging
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
-                if not (self.Camera_dialog.StartCamera.isChecked() and self.Camera_dialog.CollectVideo.currentText()=='Yes' and self.Camera_dialog.AutoControl.currentText()=='No'):
+                if (not (self.Camera_dialog.StartCamera.isChecked() and self.Camera_dialog.CollectVideo.currentText()=='Yes' and self.Camera_dialog.AutoControl.currentText()=='No')) and (not self.FIP_started):
                     self.CreateNewFolder=1
                     self.Ot_log_folder=self._restartlogging()
             except Exception as e:
@@ -3270,29 +3414,6 @@ class Window(QMainWindow):
             workerStartTrialLoop=self.workerStartTrialLoop
             workerStartTrialLoop1=self.workerStartTrialLoop1
 
-        # Check if photometry excitation is running or not
-        if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and (not self.StartExcitation.isChecked()):
-            logging.warning('photometry is set to "on", but excitation is not running')
-            
-            if self.Teensy_COM == '':
-                logging.warning('No Teensy COM configured for this box, cannot start excitation')
-                msg = 'Photometry is set to "on", but no Teensy COM configured for this box, cannot start excitation.'
-                reply = QMessageBox.information(self,'Box {}, Start'.format(self.box_letter), 
-                    msg, QMessageBox.Ok)
-                self.Start.setStyleSheet("background-color : none")
-                self.Start.setChecked(False)
-                return
-
-            reply = QMessageBox.question(self, 
-                'Box {}, Start'.format(self.box_letter), 
-                'Photometry is set to "on", but excitation is not running. Start excitation now?',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
-            if reply == QMessageBox.Yes:
-                self.StartExcitation.setChecked(True)
-                logging.info('User selected to start excitation')
-                self._StartExcitation()
-            else:                   
-                logging.info('User selected not to start excitation')
   
         # collecting the base signal for photometry. Only run once
         if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and self.PhotometryRun==0:
@@ -3704,10 +3825,11 @@ def log_git_hash():
 
     # Get information about python
     py_version = sys.version
+    py_version_parse = '.'.join(py_version.split('.')[0:2])
     logging.info('Python version: {}'.format(py_version))
     print('Python version: {}'.format(py_version))       
-    if py_version[0:3] != '3.9':
-        logging.error('Incorrect version of python! Should be 3.9, got {}'.format(py_version[0:3]))
+    if py_version_parse != '3.11':
+        logging.error('Incorrect version of python! Should be 3.11, got {}'.format(py_version_parse))
 
     try:
         # Get information about task repository
