@@ -34,6 +34,8 @@ from aind_data_schema.core.session import (
     SpeakerConfig,
     LaserConfig,
     LightEmittingDiodeConfig,
+    DetectorConfig,
+    TriggerType
 )
 
 class generate_metadata:
@@ -323,8 +325,7 @@ class generate_metadata:
         # Missing field 'fiber_photometry_start_time' and 'fiber_photometry_end_time' in the json file.
         # Possible reason: 1) the fiber photometry data is not recorded in the session. 2) the fiber photometry data is recorded but the start and end time are not recorded in the old version of the software.
         self._initialize_fields(dic=self.Obj,keys=['fiber_photometry_start_time','fiber_photometry_end_time'],default_value='')
-        self.Obj['fiber_photometry_start_time'] = str(datetime.now())
-        self.Obj['fiber_photometry_end_time'] = str(datetime.now())
+
 
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
@@ -433,14 +434,33 @@ class generate_metadata:
         if self.Obj['fiber_photometry_start_time']=='':
             return
         self._get_photometry_light_sources_config()
-    
+        self._get_photometry_detectors()
         self.ophys_streams.append(Stream(
                 stream_modalities=[Modality.FIB],
                 stream_start_time=datetime.strptime(self.Obj['fiber_photometry_start_time'], '%Y-%m-%d %H:%M:%S.%f'),
                 stream_end_time=datetime.strptime(self.Obj['fiber_photometry_end_time'], '%Y-%m-%d %H:%M:%S.%f'),
                 daq_names=self.name_mapper['fiber_photometry_daq_names'],
                 light_sources=self.fib_light_sources_config,
+                detectors=self.fib_detectors,
         ))
+
+
+    def _get_photometry_detectors(self):
+        '''
+        get the photometry detectors
+        '''
+        self.fib_detectors=[]
+        exposure_time=datetime.strptime(self.Obj['fiber_photometry_end_time'], '%Y-%m-%d %H:%M:%S.%f')-datetime.strptime(self.Obj['fiber_photometry_start_time'], '%Y-%m-%d %H:%M:%S.%f')
+        exposure_time=float(exposure_time.total_seconds())
+
+        for current_detector in self.Obj['meta_data_dialog']['rig_metadata']['detectors'] :
+            if current_detector['device_type']=='Detector':
+                self.fib_detectors.append(DetectorConfig(
+                    name=current_detector['name'],
+                    exposure_time=exposure_time,
+                    trigger_type=TriggerType.INTERNAL,
+                ))    
+                    
 
     def _get_photometry_light_sources_config(self):
         '''
