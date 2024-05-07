@@ -329,7 +329,6 @@ class generate_metadata:
         # Possible reason: 1) the fiber photometry data is not recorded in the session. 2) the fiber photometry data is recorded but the start and end time are not recorded in the old version of the software.
         self._initialize_fields(dic=self.Obj,keys=['fiber_photometry_start_time','fiber_photometry_end_time'],default_value='')
 
-
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
         Initialize fields
@@ -381,7 +380,6 @@ class generate_metadata:
             "iacuc_protocol": self.Obj['meta_data_dialog']['session_metadata']['IACUCProtocol'],
             "rig_id": self.Obj['meta_data_dialog']['rig_metadata']['rig_id'],
             "notes": self.Obj['ShowNotes'],
-            "animal_weight_post": float(self.Obj['WeightAfter']),
             "weight_unit": "gram",
             "reward_consumed_total": float(self.Obj['BS_TotalReward']),
             "reward_consumed_unit": "microliter",
@@ -397,6 +395,9 @@ class generate_metadata:
         #adding go cue and opto parameters to the stimulus_epochs
         if self.stimulus!=[]:
             session_params["stimulus_epochs"] = self.stimulus
+
+        if self.Obj['WeightAfter']!='':
+            session_params["animal_weight_post"]=float(self.Obj['WeightAfter'])
 
         session = Session(**session_params)
         session.write_standard_file(output_directory=self.Obj['MetadataFolder'])
