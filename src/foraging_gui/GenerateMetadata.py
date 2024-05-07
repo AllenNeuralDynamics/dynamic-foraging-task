@@ -323,7 +323,9 @@ class generate_metadata:
         # Missing field 'fiber_photometry_start_time' and 'fiber_photometry_end_time' in the json file.
         # Possible reason: 1) the fiber photometry data is not recorded in the session. 2) the fiber photometry data is recorded but the start and end time are not recorded in the old version of the software.
         self._initialize_fields(dic=self.Obj,keys=['fiber_photometry_start_time','fiber_photometry_end_time'],default_value='')
-        
+        self.Obj['fiber_photometry_start_time'] = str(datetime.now())
+        self.Obj['fiber_photometry_end_time'] = str(datetime.now())
+
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
         Initialize fields
@@ -431,11 +433,13 @@ class generate_metadata:
         if self.Obj['fiber_photometry_start_time']=='':
             return
         self._get_photometry_light_sources_config()
+    
         self.ophys_streams.append(Stream(
                 stream_modalities=[Modality.FIB],
                 stream_start_time=datetime.strptime(self.Obj['fiber_photometry_start_time'], '%Y-%m-%d %H:%M:%S.%f'),
                 stream_end_time=datetime.strptime(self.Obj['fiber_photometry_end_time'], '%Y-%m-%d %H:%M:%S.%f'),
                 daq_names=self.name_mapper['fiber_photometry_daq_names'],
+                light_sources=self.fib_light_sources_config,
         ))
 
     def _get_photometry_light_sources_config(self):
@@ -443,7 +447,12 @@ class generate_metadata:
         get the light sources config for fiber photometry
         '''
         self.fib_light_sources_config=[]
-        
+        for current_light_source in self.Obj['meta_data_dialog']['rig_metadata']['light_sources']:
+            if current_light_source['device_type']=='LightEmittingDiode':
+                self.fib_light_sources_config.append(LightEmittingDiodeConfig(
+                    name=current_light_source['name'],
+                    wavelength=current_light_source['wavelength'],
+                ))
 
     def _get_stimulus(self):
         '''
