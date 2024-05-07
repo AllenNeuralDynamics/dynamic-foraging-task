@@ -32,6 +32,8 @@ from aind_data_schema.core.session import (
     StimulusEpoch,
     StimulusModality,
     SpeakerConfig,
+    LaserConfig,
+    LightEmittingDiodeConfig,
 )
 
 class generate_metadata:
@@ -96,6 +98,11 @@ class generate_metadata:
                 'Oxxius Laser 638-1': {'color':'Red','laser_tag':1}, 
                 'Oxxius Laser 638-2': {'color':'Red','laser_tag':2}, 
             },# laser name in the rig metadata and the corresponding color used in the behavior GUI
+            'led_name_mapper':{
+                'LED 470-1': {'color':'Blue','laser_tag':1},
+                'LED 470-2': {'color':'Blue','laser_tag':2},
+            }, # led name in the rig metadata and the corresponding color used in the behavior GUI
+
             'laser_tags':[1,2], # laser tags corresponding to Laser_1 and Laser_2
             'sides':['Left','Right'], # lick spouts
             'camera_list':['SideCameraLeft','SideCameraRight','BottomCamera','BodyCamera'], # camera names in the settings_box.csv
@@ -460,6 +467,7 @@ class generate_metadata:
         self.optogenetics_stimulus=[]
         if sum(self.Obj['B_SelectedCondition'])==0:
             return  
+        self._get_light_source_config()
         self.optogenetics_stimulus.append(StimulusEpoch(    
                 stimulus_name='Optogenetics',
                 stimulus_modalities=[StimulusModality.OPTOGENETICS],
@@ -467,8 +475,69 @@ class generate_metadata:
                 stimulus_start_time=self.session_start_time,
                 stimulus_end_time=self.session_end_time,
                 daq_names=self.name_mapper['optogenetics_daq_names'],
+                light_source_config=self.light_source_config,
         ))
 
+
+    def _get_light_source_config(self):
+        '''
+        get the optogenetics stimulus light source config
+        '''
+        self.light_source_config=[]
+        self._get_light_names_used_in_session()
+        if self.box_type=='Ephys':
+            for light_source in self.laser_names_used_in_session:
+                wavelength=self._get_light_pars(light_source)
+                self.light_source_config.append(LaserConfig(
+                    name=light_source,
+                    wavelength=wavelength,
+                ))
+        elif self.box_type=='Behavior':
+            for light_source in self.laser_names_used_in_session:
+                wavelength=self._get_light_pars(light_source)
+                self.light_source_config.append(LightEmittingDiodeConfig(
+                    name=light_source,
+                    wavelength=wavelength,
+                ))
+
+    def _get_light_pars(self,light_source):
+        '''
+        Get the wavelength and wavelength unit for the light source
+        '''
+        for current_stimulus_device in self.Obj['meta_data_dialog']['rig_metadata']['stimulus_devices']:
+            if current_stimulus_device['name']==light_source:
+                return current_stimulus_device['wavelength']
+
+
+    def _get_light_names_used_in_session(self):
+        '''
+        Get the laser names used in the session
+        '''
+        self.laser_names_used_in_session=[]
+        light_sources=[]
+        index=np.where(np.array(self.Obj['B_SelectedCondition'])==1)[0]
+        for i in index:
+            current_condition=self.Obj['B_SelectedCondition'][i]
+            current_color=getattr(self.Obj,f'TP_LaserColor_{current_condition}')
+            current_location=getattr(self.Obj,f'TP_Location_{current_condition}')
+            if current_location=='both':
+                light_sources.append({'color':current_color,'laser_tag':1})
+                light_sources.append({'color':current_color,'laser_tag':2})
+            elif current_location=='left':
+                light_sources.append({'color':current_color,'laser_tag':1})
+            elif current_location=='right':
+                light_sources.append({'color':current_color,'laser_tag':2})
+
+        if self.box_type=='Ephys':
+            for light_source in light_sources:
+                self.laser_names_used_in_session.append([key for key, value in self.name_mapper['laser_name_mapper'].items() if value == light_source][0])
+        elif self.box_type=='Behavior':
+            for light_source in light_sources:
+                self.laser_names_used_in_session.append([key for key, value in self.name_mapper['led_name_mapper'].items() if value == light_source][0])
+
+        self.laser_names_used_in_session = list(set(self.laser_names_used_in_session))
+
+        
 
     def _get_ephys_stream(self):
         '''
@@ -751,6 +820,7 @@ class generate_metadata:
             return
 
         device_oringin=self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceArea']
+        self._get_lick_spouts_distance()
         lick_spouts_distance=self.lick_spouts_distance
         start_position=[self.Obj['B_NewscalePositions'][0][0], self.Obj['B_NewscalePositions'][0][1], self.Obj['B_NewscalePositions'][0][2]]
 
