@@ -471,7 +471,6 @@ class generate_metadata:
             if current_light_source['device_type']=='LightEmittingDiode':
                 self.fib_light_sources_config.append(LightEmittingDiodeConfig(
                     name=current_light_source['name'],
-                    wavelength=current_light_source['wavelength'],
                 ))
 
     def _get_stimulus(self):
@@ -921,5 +920,5 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_13-43-37_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
-    generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_18-46-41_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
+    generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_13-43-37_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
+    #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_18-46-41_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
