@@ -8,7 +8,7 @@ import numpy as np
 from foraging_gui.Visualization import PlotWaterCalibration
 from aind_data_schema.models.stimulus import AuditoryStimulation
 from aind_data_schema.models.devices import SpoutSide,Calibration
-from aind_data_schema.models.units import SizeUnit,FrequencyUnit,SoundIntensityUnit
+from aind_data_schema.models.units import SizeUnit,FrequencyUnit,SoundIntensityUnit,PowerUnit
 from aind_data_schema.models.modalities import Modality
 
 from aind_data_schema.core.data_description import DataLevel, Funding, RawDataDescription
@@ -35,7 +35,8 @@ from aind_data_schema.core.session import (
     LaserConfig,
     LightEmittingDiodeConfig,
     DetectorConfig,
-    TriggerType
+    TriggerType,
+    FiberConnectionConfig
 )
 
 class generate_metadata:
@@ -435,6 +436,7 @@ class generate_metadata:
             return
         self._get_photometry_light_sources_config()
         self._get_photometry_detectors()
+        self._get_fiber_connections()
         self.ophys_streams.append(Stream(
                 stream_modalities=[Modality.FIB],
                 stream_start_time=datetime.strptime(self.Obj['fiber_photometry_start_time'], '%Y-%m-%d %H:%M:%S.%f'),
@@ -442,7 +444,23 @@ class generate_metadata:
                 daq_names=self.name_mapper['fiber_photometry_daq_names'],
                 light_sources=self.fib_light_sources_config,
                 detectors=self.fib_detectors,
+                fiber_connections=self.fiber_connections,
         ))
+
+    def _get_fiber_connections(self):
+        '''
+        get the fiber connections
+        '''
+
+        # this is not complete. 
+        self.fiber_connections=[]
+        for patch_cord in self.Obj['meta_data_dialog']['rig_metadata']['patch_cords']:
+            self.fiber_connections.append(FiberConnectionConfig(
+                patch_cord_name=patch_cord['name'],
+                patch_cord_output_power=0,
+                output_power_unit=PowerUnit.MW,
+                fiber_name='NA',
+            ))
 
 
     def _get_photometry_detectors(self):
@@ -918,5 +936,5 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_13-43-37_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
-    #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_18-46-41_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
+    #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_13-43-37_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
+    generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_18-46-41_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
