@@ -424,6 +424,15 @@ class generate_metadata:
         Make the ophys stream metadata
         '''
         self.ophys_streams=[]
+        if self.Obj['fiber_photometry_start_time']=='':
+            return
+        
+        self.ophys_streams.append(Stream(
+                stream_modalities=[Modality.FIB],
+                stream_start_time=datetime.strptime(self.Obj['fiber_photometry_start_time'], '%Y-%m-%d %H:%M:%S.%f'),
+                stream_end_time=datetime.strptime(self.Obj['fiber_photometry_end_time'], '%Y-%m-%d %H:%M:%S.%f'),
+                daq_names=self.name_mapper['fiber_photometry_daq_names'],
+        ))
 
     def _get_stimulus(self):
         '''
