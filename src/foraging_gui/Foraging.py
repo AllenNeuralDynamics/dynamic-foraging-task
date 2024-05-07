@@ -2239,7 +2239,7 @@ class Window(QMainWindow):
             if hasattr(self, 'fiber_photometry_end_time'):
                 end_time = self.fiber_photometry_end_time
             else:
-                end_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") 
+                end_time = str(datetime.now())
             Obj['fiber_photometry_end_time'] = end_time
 
         # Save the current box
@@ -2953,7 +2953,7 @@ class Window(QMainWindow):
             else:
                 self.TeensyWarning.setText('')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)               
-                self.fiber_photometry_start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                self.fiber_photometry_start_time = str(datetime.now())
 
         else:
             logging.info('StartExcitation is unchecked')
