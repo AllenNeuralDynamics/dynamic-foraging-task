@@ -552,14 +552,14 @@ class generate_metadata:
         self.light_source_config=[]
         self._get_light_names_used_in_session()
         if self.box_type=='Ephys':
-            for light_source in self.laser_names_used_in_session:
+            for light_source in self.light_names_used_in_session:
                 wavelength=self._get_light_pars(light_source)
                 self.light_source_config.append(LaserConfig(
                     name=light_source,
                     wavelength=wavelength,
                 ))
         elif self.box_type=='Behavior':
-            for light_source in self.laser_names_used_in_session:
+            for light_source in self.light_names_used_in_session:
                 self.light_source_config.append(LightEmittingDiodeConfig(
                     name=light_source,
                 ))
@@ -577,7 +577,7 @@ class generate_metadata:
         '''
         Get the optogenetics laser names used in the session
         '''
-        self.laser_names_used_in_session=[]
+        self.light_names_used_in_session=[]
         light_sources=[]
         index=np.where(np.array(self.Obj['B_SelectedCondition'])==1)[0]
         for i in index:
@@ -594,12 +594,12 @@ class generate_metadata:
 
         if self.box_type=='Ephys':
             for light_source in light_sources:
-                self.laser_names_used_in_session.append([key for key, value in self.name_mapper['laser_name_mapper'].items() if value == light_source][0])
+                self.light_names_used_in_session.append([key for key, value in self.name_mapper['laser_name_mapper'].items() if value == light_source][0])
         elif self.box_type=='Behavior':
             for light_source in light_sources:
-                self.laser_names_used_in_session.append([key for key, value in self.name_mapper['led_name_mapper'].items() if value == light_source][0])
+                self.light_names_used_in_session.append([key for key, value in self.name_mapper['led_name_mapper'].items() if value == light_source][0])
 
-        self.laser_names_used_in_session = list(set(self.laser_names_used_in_session))
+        self.light_names_used_in_session = list(set(self.light_names_used_in_session))
 
         
 
@@ -809,8 +809,8 @@ class generate_metadata:
         self.laser_names=[]
         if Obj is None:
             Obj=self.Obj
-        for light_source in Obj['meta_data_dialog']['rig_metadata']['stimulus_devices']:
-            if light_source['device_type'] in ['Laser','LED']:
+        for light_source in Obj['meta_data_dialog']['rig_metadata']['light_sources']:
+            if light_source['device_type'] in ['Laser','LightEmittingDiode']:
                 self.laser_names.append(light_source['name'])
         return self.laser_names
     
@@ -936,5 +936,5 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_13-43-37_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
-    generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_18-46-41_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
+    generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_13-43-37_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
+    #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_18-46-41_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
