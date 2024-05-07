@@ -573,6 +573,8 @@ class generate_metadata:
 
         self.ephys_streams=[]
         self._get_ephys_modules()
+        if self.ephys_modules==[]:
+            return
         self._get_stick_microscope()
         for current_recording in self.Obj['open_ephys']:
             if 'openephys_stat_recording_time' not in current_recording:
@@ -891,4 +893,4 @@ class generate_metadata:
 if __name__ == '__main__':
     
     #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_13-43-37_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
-    generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_18-11-28_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
+    generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_18-46-41_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
