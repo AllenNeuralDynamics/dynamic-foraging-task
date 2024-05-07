@@ -265,8 +265,9 @@ class PlotV(FigureCanvas):
             LeftChoiceN=sum(self.B_AnimalResponseHistory[CuI]==0)
             RightChoiceN=sum(self.B_AnimalResponseHistory[CuI]==1)
             LeftRewardN=sum(self.B_RewardedHistory[0,CuI]==1)
-            RightRewardN=sum(self.B_RewardedHistory[1,CuI]==1)    
-            choice_R_frac[idx]=LeftChoiceN/(LeftChoiceN+RightChoiceN)
+            RightRewardN=sum(self.B_RewardedHistory[1,CuI]==1)   
+            if (LeftChoiceN+RightChoiceN) >0: 
+                choice_R_frac[idx]=LeftChoiceN/(LeftChoiceN+RightChoiceN)
             if LeftRewardN+RightRewardN!=0:
                 reward_R_frac[idx]=LeftRewardN/(LeftRewardN+RightRewardN)
             if (RightChoiceN!=0) and (LeftChoiceN!=0) and (RightRewardN!=0) and (LeftRewardN!=0):
