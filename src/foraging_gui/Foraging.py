@@ -978,10 +978,10 @@ class Window(QMainWindow):
             'metadata_dialog_folder':os.path.join(self.SettingFolder,"metadata_dialog")+'\\',
             'rig_metadata_folder':os.path.join(self.SettingFolder,"rig_metadata")+'\\',
             'project_info_file':os.path.join(self.SettingFolder,"Project Name and Funding Source v2.csv"),
-            'go_cue_decibel_box1':'',
-            'go_cue_decibel_box2':'',
-            'go_cue_decibel_box3':'',
-            'go_cue_decibel_box4':'',
+            'go_cue_decibel_box1':60,
+            'go_cue_decibel_box2':60,
+            'go_cue_decibel_box3':60,
+            'go_cue_decibel_box4':60,
             'name_mapper_file':os.path.join(self.SettingFolder,"name_mapper.json")
         }
         
