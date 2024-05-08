@@ -780,6 +780,8 @@ class generate_metadata:
         self.OptoCalibrationResults=self.Obj['LaserCalibrationResults']
         self._get_laser_names_from_rig_metadata()
         for laser in self.laser_names:
+                if laser not in self.name_mapper['laser_name_mapper']:
+                    continue
                 color=self.name_mapper['laser_name_mapper'][laser]['color']
                 laser_tag=self.name_mapper['laser_name_mapper'][laser]['laser_tag']
                 latest_calibration_date=self._FindLatestCalibrationDate(color)
