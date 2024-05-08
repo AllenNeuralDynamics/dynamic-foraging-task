@@ -1397,7 +1397,7 @@ p, li { white-space: pre-wrap; }
   <zorder>groupBox</zorder>
  </widget>
  <tabstops>
-  <tabstop>ExperimentDescription</tabstop>
+  <tabstop>LoadMeta</tabstop>
   <tabstop>PtotocolID</tabstop>
   <tabstop>IACUCProtocol</tabstop>
   <tabstop>SelectRigMetadata</tabstop>
@@ -1405,7 +1405,7 @@ p, li { white-space: pre-wrap; }
   <tabstop>SaveMeta</tabstop>
   <tabstop>ClearMetadata</tabstop>
   <tabstop>RotationAngle</tabstop>
-  <tabstop>LoadMeta</tabstop>
+  <tabstop>ExperimentDescription</tabstop>
   <tabstop>EphysProbes</tabstop>
   <tabstop>ModuleAngle</tabstop>
   <tabstop>ArcAngle</tabstop>
@@ -1422,6 +1422,12 @@ p, li { white-space: pre-wrap; }
   <tabstop>ManipulatorX</tabstop>
   <tabstop>ManipulatorZ</tabstop>
   <tabstop>ManipulatorY</tabstop>
+  <tabstop>GoCueDecibel</tabstop>
+  <tabstop>Fundee</tabstop>
+  <tabstop>LickSpoutReferenceZ</tabstop>
+  <tabstop>LickSpoutReferenceY</tabstop>
+  <tabstop>LickSpoutReferenceX</tabstop>
+  <tabstop>LickSpoutReferenceArea</tabstop>
  </tabstops>
  <resources/>
  <connections/>
