@@ -546,7 +546,8 @@ class generate_metadata:
         '''
         self.optogenetics_stimulus=[]
         a=np.array(self.Obj['B_SelectedCondition'])
-        if sum(a.astype(int))==0:
+        self.Obj['B_SelectedCondition']=a.astype(int)
+        if sum( self.Obj['B_SelectedCondition'])==0:
             return  
         self._get_light_source_config()
         self.optogenetics_stimulus.append(StimulusEpoch(    
@@ -597,14 +598,14 @@ class generate_metadata:
         index=np.where(np.array(self.Obj['B_SelectedCondition'])==1)[0]
         for i in index:
             current_condition=self.Obj['B_SelectedCondition'][i]
-            current_color=getattr(self.Obj,f'TP_LaserColor_{current_condition}')
-            current_location=getattr(self.Obj,f'TP_Location_{current_condition}')
-            if current_location=='both':
+            current_color=self.Obj[f'TP_LaserColor_{current_condition}'][i]
+            current_location=self.Obj[f'TP_Location_{current_condition}'][i]
+            if current_location=='Both':
                 light_sources.append({'color':current_color,'laser_tag':1})
                 light_sources.append({'color':current_color,'laser_tag':2})
-            elif current_location=='left':
+            elif current_location=='Left':
                 light_sources.append({'color':current_color,'laser_tag':1})
-            elif current_location=='right':
+            elif current_location=='Right':
                 light_sources.append({'color':current_color,'laser_tag':2})
 
         if self.box_type=='Ephys':
