@@ -2271,9 +2271,7 @@ class Window(QMainWindow):
         Obj['Camera_dialog']['camera_start_time']=self.Camera_dialog.camera_start_time
         Obj['Camera_dialog']['camera_stop_time']=self.Camera_dialog.camera_stop_time
 
-        # save the metadata collected in the metadata dialogue
-        self.Metadata_dialog._save_metadata_dialog_parameters()
-        Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
+
 
         if SaveContinue==0:
             # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
@@ -2293,6 +2291,10 @@ class Window(QMainWindow):
 
         # save manual water 
         Obj['ManualWaterVolume']=self.ManualWaterVolume
+
+        # save the metadata collected in the metadata dialogue
+        self.Metadata_dialog._save_metadata_dialog_parameters()
+        Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
 
         # generate the metadata file
         generate_metadata(Obj=Obj)   
