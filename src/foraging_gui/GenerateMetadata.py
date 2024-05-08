@@ -269,9 +269,9 @@ class generate_metadata:
         '''
         handle edge cases (e.g. missing keys in the json file)
         '''
-        # Missing fields camera_start_time and camera_end_time in the Camera_dialog. 
+        # Missing fields camera_start_time and camera_stop_time in the Camera_dialog. 
         # Possible reason: 1) the camera is not used in the session. 2 ) the camera is used but the start and end time are not recorded for old version of the software.
-        self._initialize_fields(dic=self.Obj['Camera_dialog'],keys=['camera_start_time','camera_end_time'],default_value='')
+        self._initialize_fields(dic=self.Obj['Camera_dialog'],keys=['camera_start_time','camera_stop_time'],default_value='')
         
         # Missing Behavior data streams in the json file.
         # Possible reason: 1) the behavior data is not started in the session. 
@@ -419,12 +419,12 @@ class generate_metadata:
         '''
         self.high_speed_camera_streams=[]
         self._get_camera_names()
-        if self.Obj['Camera_dialog']['camera_start_time'] != '' and self.Obj['Camera_dialog']['camera_end_time'] != '' and self.camera_names != []:
+        if self.Obj['Camera_dialog']['camera_start_time'] != '' and self.Obj['Camera_dialog']['camera_stop_time'] != '' and self.camera_names != []:
             self.high_speed_camera_streams.append(Stream(
                         stream_modalities=[Modality.BEHAVIOR_VIDEOS],
                         camera_names=self.camera_names,
                         stream_start_time=datetime.strptime(self.Obj['Camera_dialog']['camera_start_time'], '%Y-%m-%d %H:%M:%S.%f'),
-                        stream_end_time=datetime.strptime(self.Obj['Camera_dialog']['camera_end_time'], '%Y-%m-%d %H:%M:%S.%f'),
+                        stream_end_time=datetime.strptime(self.Obj['Camera_dialog']['camera_stop_time'], '%Y-%m-%d %H:%M:%S.%f'),
                 ))
 
     def _get_camera_names(self):
