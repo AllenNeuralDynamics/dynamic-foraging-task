@@ -545,7 +545,8 @@ class generate_metadata:
         Make the optogenetics stimulus metadata
         '''
         self.optogenetics_stimulus=[]
-        if sum(self.Obj['B_SelectedCondition'])==0:
+        a=np.array(self.Obj['B_SelectedCondition'])
+        if sum(a.astype(int))==0:
             return  
         self._get_light_source_config()
         self.optogenetics_stimulus.append(StimulusEpoch(    
