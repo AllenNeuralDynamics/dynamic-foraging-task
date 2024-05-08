@@ -1850,29 +1850,16 @@ class MetadataDialog(QDialog):
             elif isinstance(value, QtWidgets.QTextEdit):
                 value.setPlainText('')
 
-    def _clear_angles(self, _show_function,widget, metadata_key):
+    def _clear_angles(self, keys):
         '''Clear the angles and target area for the given widget
         Parameters
         ----------
-        _show_function : function (e.g. self._show_ephys_probes or self._show_stick_microscopes)
-            Function to show the items
-        widget : QtWidgets.QComboBox (e.g. self.EphysProbes or self.StickMicroscopes)
-            The widget to containing the items to clear
-        metadata_key : str
-            The key in the metadata dictionary to clear
+        keys : List of str
+            The key to clear
         
-        example usage:
-        self._clear_angles(self._show_ephys_probes, self.EphysProbes, 'probes')
-        self._clear_angles(self._show_stick_microscopes, self.StickMicroscopes, 'microscopes')
         '''
-        _show_function()
-        for i in range(widget.count()):
-            current_item = widget.itemText(i)
-            self.meta_data['session_metadata'] = initialize_dic(
-                self.meta_data['session_metadata'], key_list=[metadata_key, current_item]
-            )
-            self.meta_data['session_metadata'][metadata_key][current_item] = {}
-        _show_function()
+        for key in keys:
+            getattr(self, key).setText('')
 
     def _save_metadata_dialog_parameters(self):
         '''save the metadata dialog parameters'''
@@ -1935,12 +1922,13 @@ class MetadataDialog(QDialog):
             widget = widgets[i]
             action=self._save_configuration
 
-            self._manage_signals(enable=False, keys=[probe_type], action=self._show_angles)
             self._manage_signals(enable=False, keys=self._get_chidldren_keys(widget),action=action)
+            self._manage_signals(enable=False, keys=[probe_type], action=self._show_angles)
             
             current_probe = getattr(self, probe_type).currentText()
             self.meta_data['session_metadata'] = initialize_dic(self.meta_data['session_metadata'], key_list=[metadata_key])
             if current_probe == '' or current_probe not in self.meta_data['session_metadata'][metadata_key]:
+                self._clear_angles(self._get_chidldren_keys(widget))
                 self._manage_signals(enable=True, keys=[probe_type], action=self._show_angles)
                 self._manage_signals(enable=True, keys=self._get_chidldren_keys(widget), action=action)
                 continue
@@ -1951,9 +1939,9 @@ class MetadataDialog(QDialog):
                 self.meta_data['session_metadata'][metadata_key][current_probe].setdefault(key, '')
                 getattr(self, key).setText(self.meta_data['session_metadata'][metadata_key][current_probe][key])
 
-            self._manage_signals(enable=True, keys=[probe_type], action=self._show_angles)
             self._manage_signals(enable=True, keys=self._get_chidldren_keys(widget), action=action)
-
+            self._manage_signals(enable=True, keys=[probe_type], action=self._show_angles)
+            
 
     def _get_chidldren_keys(self,parent_widget = None):
         '''get the children QLineEidt objectName'''
