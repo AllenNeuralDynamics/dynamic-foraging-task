@@ -584,7 +584,7 @@ class generate_metadata:
         '''
         Get the wavelength and wavelength unit for the light source
         '''
-        for current_stimulus_device in self.Obj['meta_data_dialog']['rig_metadata']['stimulus_devices']:
+        for current_stimulus_device in self.Obj['meta_data_dialog']['rig_metadata']['light_sources']:
             if current_stimulus_device['name']==light_source:
                 return current_stimulus_device['wavelength']
 
