@@ -556,7 +556,6 @@ class generate_metadata:
                 notes='Please see NWB files for more details (stimulus epoch and stimulus protocol etc.).',
                 stimulus_start_time=self.session_start_time,
                 stimulus_end_time=self.session_end_time,
-                daq_names=self.name_mapper['optogenetics_daq_names'],
                 light_source_config=self.light_source_config,
         ))
 
