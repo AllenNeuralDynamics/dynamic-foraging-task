@@ -2801,18 +2801,21 @@ class Window(QMainWindow):
             return 0 
 
         if self.StartExcitation.isChecked():
-            logging.info('StartExcitation is checked')
+            logging.info('StartExcitation is checked, photometry mode: {}'.format(self.FIPMode.CurrentText())
             self.StartExcitation.setStyleSheet("background-color : green;")
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
                 # Trigger Teensy with the above specified exp mode
-                ser.write(b'c')
+                if self.FIPMode.CurrentText() == "Normal":
+                    ser.write(b'c')
+                elif self.FIPMode.CurrentText() == "Axon":
+                    ser.write(b'e')       
                 ser.close()
-                self.TeensyWarning.setText('Start excitation!')
+                self.TeensyWarning.setText('Started FIP excitation')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
                 logging.error(str(e))
-                self.TeensyWarning.setText('Error: start excitation!')
+                self.TeensyWarning.setText('Error: starting excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
                 reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
                 self.StartExcitation.setChecked(False)
@@ -2831,11 +2834,11 @@ class Window(QMainWindow):
                 # Trigger Teensy with the above specified exp mode
                 ser.write(b's')
                 ser.close()
-                self.TeensyWarning.setText('Stop excitation!')
+                self.TeensyWarning.setText('Stopped FIP excitation')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
                 logging.error(str(e))
-                self.TeensyWarning.setText('Error: stop excitation!')
+                self.TeensyWarning.setText('Error stopping excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
                 reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when stopping excitation: {}'.format(e), QMessageBox.Ok)
                 return 0 
