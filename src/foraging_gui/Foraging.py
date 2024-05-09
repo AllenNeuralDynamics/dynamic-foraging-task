@@ -2801,7 +2801,7 @@ class Window(QMainWindow):
             return 0 
 
         if self.StartExcitation.isChecked():
-            logging.info('StartExcitation is checked, photometry mode: {}'.format(self.FIPMode.CurrentText())
+            logging.info('StartExcitation is checked, photometry mode: {}'.format(self.FIPMode.CurrentText()))
             self.StartExcitation.setStyleSheet("background-color : green;")
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
