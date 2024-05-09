@@ -207,6 +207,7 @@ class Window(QMainWindow):
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
         self.OptogeneticsB.currentIndexChanged.connect(self._keyPressEvent)
         self.PhotometryB.currentIndexChanged.connect(self._keyPressEvent)
+        self.FIPMode.currentIndexChanged.connect(self._keyPressEvent)
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._keyPressEvent)
         self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
