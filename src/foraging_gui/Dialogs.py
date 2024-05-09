@@ -2050,7 +2050,7 @@ class AutoTrainDialog(QDialog):
     def _show_curriculum_in_streamlit(self):
         if self.selected_curriculum is not None:
             webbrowser.open(
-                'https://foraging-behavior-browser.streamlit.app/'
+                'https://foraging-behavior-browser.allenneuraldynamics-test.org/'
                 '?tab_id=tab_auto_train_curriculum'
                 f'&auto_training_curriculum_name={self.selected_curriculum["curriculum"].curriculum_name}'
                 f'&auto_training_curriculum_version={self.selected_curriculum["curriculum"].curriculum_version}'
@@ -2059,10 +2059,10 @@ class AutoTrainDialog(QDialog):
                         
     def _show_auto_training_history_in_streamlit(self):
         webbrowser.open(
-            'https://foraging-behavior-browser.streamlit.app/?'
+            'https://foraging-behavior-browser.allenneuraldynamics-test.org/?'
             f'&filter_subject_id={self.selected_subject_id}'
             f'&tab_id=tab_auto_train_history'
-            f'&auto_training_history_x_axis=date'
+            f'&auto_training_history_x_axis=session'
             f'&auto_training_history_sort_by=subject_id'
             f'&auto_training_history_sort_order=descending'
         )
@@ -2086,6 +2086,7 @@ class AutoTrainDialog(QDialog):
 
                 
     def _override_stage_clicked(self, state):
+        logger.info(f"Override stage clicked: state={state}")
         if state:
             self.comboBox_override_stage.setEnabled(True)
         else:
@@ -2093,6 +2094,7 @@ class AutoTrainDialog(QDialog):
         self._update_stage_to_apply()
         
     def _override_curriculum_clicked(self, state):
+        logger.info(f"Override stage clicked: state={state}")
         if state:
             self.pushButton_apply_curriculum.setEnabled(True)
             self._add_border_curriculum_selection()
@@ -2106,6 +2108,7 @@ class AutoTrainDialog(QDialog):
     def _update_stage_to_apply(self):
         if self.checkBox_override_stage.isChecked():
             self.stage_in_use = self.comboBox_override_stage.currentText()
+            logger.info(f"Stage overridden to: {self.stage_in_use}")
         elif self.last_session is not None:
             self.stage_in_use = self.last_session['next_stage_suggested']
         else:
@@ -2116,6 +2119,9 @@ class AutoTrainDialog(QDialog):
             + '\n'.join(get_curriculum_string(self.curriculum_in_use).split('(')).strip(')') 
             + f"\n{self.stage_in_use}"
         )
+        
+        logger.info(f"Current stage to apply: {self.stage_in_use} @"
+                    f"{get_curriculum_string(self.curriculum_in_use)}")
                 
     def _apply_curriculum(self):
         # Check if a curriculum is selected
@@ -2241,6 +2247,8 @@ class AutoTrainDialog(QDialog):
                     
     def update_auto_train_lock(self, engaged):
         if engaged:
+            logger.info(f"AutoTrain engaged! {self.stage_in_use} @ {get_curriculum_string(self.curriculum_in_use)}")
+            
             # Update the flag
             self.auto_train_engaged = True
 
@@ -2289,6 +2297,8 @@ class AutoTrainDialog(QDialog):
             self.pushButton_preview_auto_train_paras.setEnabled(False)
                                     
         else:
+            logger.info("AutoTrain disengaged!")
+
             # Update the flag
             self.auto_train_engaged = False
             
