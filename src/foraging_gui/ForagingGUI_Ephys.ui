@@ -3920,7 +3920,7 @@
    <widget class="QLabel" name="label_65">
     <property name="geometry">
      <rect>
-      <x>740</x>
+      <x>720</x>
       <y>900</y>
       <width>81</width>
       <height>20</height>
@@ -3945,7 +3945,7 @@
    <widget class="QComboBox" name="FIPMode">
     <property name="geometry">
      <rect>
-      <x>820</x>
+      <x>810</x>
       <y>900</y>
       <width>81</width>
       <height>20</height>
