@@ -2803,14 +2803,14 @@ class Window(QMainWindow):
             return 0 
 
         if self.StartExcitation.isChecked():
-            logging.info('StartExcitation is checked, photometry mode: {}'.format(self.FIPMode.CurrentText()))
+            logging.info('StartExcitation is checked, photometry mode: {}'.format(self.FIPMode.currentText()))
             self.StartExcitation.setStyleSheet("background-color : green;")
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
                 # Trigger Teensy with the above specified exp mode
-                if self.FIPMode.CurrentText() == "Normal":
+                if self.FIPMode.currentText() == "Normal":
                     ser.write(b'c')
-                elif self.FIPMode.CurrentText() == "Axon":
+                elif self.FIPMode.currentText() == "Axon":
                     ser.write(b'e')       
                 ser.close()
                 self.TeensyWarning.setText('Started FIP excitation')
