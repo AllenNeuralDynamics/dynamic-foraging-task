@@ -205,8 +205,9 @@ class Window(QMainWindow):
         self.StartBleaching.clicked.connect(self._StartBleaching)
         self.NextBlock.clicked.connect(self._NextBlock)
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
-        self.OptogeneticsB.currentIndexChanged.connect(self._keyPressEvent)
-        self.PhotometryB.currentIndexChanged.connect(self._keyPressEvent)
+        self.OptogeneticsB.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('Optogenetics',self.OptogeneticsB.currentText()))
+        self.PhotometryB.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('Photometry',self.PhotometryB.currentText()))
+        self.FIPMode.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('FIPMode', self.FIPMode.currentText()))
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._keyPressEvent)
         self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
@@ -1437,6 +1438,10 @@ class Window(QMainWindow):
             self.SwitchThr.setEnabled(True)
             self.PointsInARow.setEnabled(True)
 
+    def _QComboBoxUpdate(self, parameter,value):
+        logging.info('Field updated: {}:{}'.format(parameter, value))       
+ 
+
     def keyPressEvent(self, event=None,allow_reset=False):
         '''
             Enter press to allow change of parameters
@@ -1471,6 +1476,7 @@ class Window(QMainWindow):
             self.UpdateParameters=1 # Changes are allowed
             # change color to black
             for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
+
                 # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
                 for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
                     if child.objectName()=='qt_spinbox_lineedit':
@@ -2657,6 +2663,7 @@ class Window(QMainWindow):
         else:
             self.NewSession.setDisabled(False)
         self.StartExcitation.setChecked(False)
+        self.keyPressEvent() # Accept all updates
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
@@ -2732,6 +2739,7 @@ class Window(QMainWindow):
                     child.clear()
 
     def _StartFIP(self):
+        self.StartFIP.setChecked(False)
 
         if self.Teensy_COM == '':
             logging.warning('No Teensy COM configured for this box, cannot start FIP workflow')
@@ -2740,8 +2748,6 @@ class Window(QMainWindow):
             msg = 'No Teensy COM configured for this box, cannot start FIP workflow'
             reply = QMessageBox.information(self, 
                 'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
-            self.StartFIP.setChecked(False)
-            self.StartFIP.setStyleSheet("background-color : none")
             return
         
         if self.FIP_workflow_path == "":
@@ -2751,12 +2757,9 @@ class Window(QMainWindow):
             msg = 'FIP workflow path not defined, cannot start FIP workflow'
             reply = QMessageBox.information(self, 
                 'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
-            self.StartFIP.setChecked(False)
-            self.StartFIP.setStyleSheet("background-color : none")                  
             return
  
         if self.FIP_started:
-            self.StartFIP.setChecked(True)             
             reply = QMessageBox.question(self, 
                 'Box {}, Start FIP workflow:'.format(self.box_letter), 
                 'FIP workflow has already been started. Start again?',
@@ -2767,14 +2770,9 @@ class Window(QMainWindow):
             else:
                 logging.warning('FIP workflow already started, user restarts')
 
-        self.FIP_started=True 
-        logging.info('StartFIP is checked')
-        self.StartFIP.setStyleSheet("background-color : green;")
-
         # Start logging
         self.CreateNewFolder=1
         self.Ot_log_folder=self._restartlogging()
-
 
         # Start the FIP workflow
         try:
@@ -2783,6 +2781,7 @@ class Window(QMainWindow):
             folder_path = ' -p session="{}"'.format(self.SessionFolder)
             camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartCamera.isChecked())
             subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera+' --start',cwd=CWD,shell=True)
+            self.FIP_started=True 
         except Exception as e:
             logging.error(e)
             reply = QMessageBox.information(self, 
@@ -2791,16 +2790,6 @@ class Window(QMainWindow):
                QMessageBox.Ok )               
 
     def _StartExcitation(self):
-
-        if not self.FIP_started:
-            logging.warning('FIP workflow is not running, cannot start excitation')
-            reply = QMessageBox.information(self, 
-                'Box {}, Start Excitation:'.format(self.box_letter), 
-                'Please start the FIP workflow before running excitation',
-                QMessageBox.Ok )                     
-            self.StartExcitation.setChecked(False)
-            self.StartExcitation.setStyleSheet("background-color : none")
-            return 0  
  
         if self.Teensy_COM == '':
             logging.warning('No Teensy COM configured for this box, cannot start excitation')
@@ -2814,27 +2803,21 @@ class Window(QMainWindow):
             return 0 
 
         if self.StartExcitation.isChecked():
-            reply = QMessageBox.question(self, 
-                'Box {}, Start FIP'.format(self.box_letter), 
-                'Is the FIP workflow running?', 
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes )
-            if reply == QMessageBox.No:
-                self.StartExcitation.setChecked(False)
-                self.StartExcitation.setStyleSheet("background-color : none")
-                logging.info('User says FIP workflow is not open')
-                return 0 
-            logging.info('StartExcitation is checked, user confirms workflow is running')
+            logging.info('StartExcitation is checked, photometry mode: {}'.format(self.FIPMode.currentText()))
             self.StartExcitation.setStyleSheet("background-color : green;")
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
                 # Trigger Teensy with the above specified exp mode
-                ser.write(b'c')
+                if self.FIPMode.currentText() == "Normal":
+                    ser.write(b'c')
+                elif self.FIPMode.currentText() == "Axon":
+                    ser.write(b'e')       
                 ser.close()
-                self.TeensyWarning.setText('Start excitation!')
+                self.TeensyWarning.setText('Started FIP excitation')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
                 logging.error(str(e))
-                self.TeensyWarning.setText('Error: start excitation!')
+                self.TeensyWarning.setText('Error: starting excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
                 reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
                 self.StartExcitation.setChecked(False)
@@ -2853,11 +2836,11 @@ class Window(QMainWindow):
                 # Trigger Teensy with the above specified exp mode
                 ser.write(b's')
                 ser.close()
-                self.TeensyWarning.setText('Stop excitation!')
+                self.TeensyWarning.setText('Stopped FIP excitation')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
                 logging.error(str(e))
-                self.TeensyWarning.setText('Error: stop excitation!')
+                self.TeensyWarning.setText('Error stopping excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
                 reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when stopping excitation: {}'.format(e), QMessageBox.Ok)
                 return 0 
@@ -2955,7 +2938,7 @@ class Window(QMainWindow):
         if self.Teensy_COM == '':
             return
         logging.info('Checking that photometry is not running')
-        FIP_was_running=self.StartFIP.isChecked()
+        FIP_was_running=self.FIP_started
         try:
             ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
             # Trigger Teensy with the above specified exp mode
@@ -2971,10 +2954,8 @@ class Window(QMainWindow):
             self.TeensyWarning.setStyleSheet(self.default_warning_color)      
             self.StartBleaching.setStyleSheet("background-color : none")
             self.StartExcitation.setStyleSheet("background-color : none")
-            self.StartFIP.setStyleSheet("background-color : none;")
             self.StartBleaching.setChecked(False)
             self.StartExcitation.setChecked(False)
-            self.StartFIP.setChecked(False)
             self.FIP_started=False
 
         if (FIP_was_running)&(not closing):
