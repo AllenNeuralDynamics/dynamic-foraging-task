@@ -3747,11 +3747,10 @@ class Window(QMainWindow):
     def _open_mouse_on_streamlit(self):
         '''open the training history of the current mouse on the streamlit app'''
         # See this PR: https://github.com/AllenNeuralDynamics/foraging-behavior-browser/pull/25
-        webbrowser.open(f'https://foraging-behavior-browser.streamlit.app/?filter_subject_id={self.ID.text()}'
-                         '&tab_id=tab_session_x_y&x_y_plot_xname=session&x_y_plot_yname=foraging_eff'
-                         '&x_y_plot_group_by=h2o&x_y_plot_if_show_dots=True&x_y_plot_if_aggr_each_group=True&x_y_plot_aggr_method_group=lowess'
-                         '&x_y_plot_if_aggr_all=False&x_y_plot_smooth_factor=5'
-                         '&x_y_plot_dot_size=20&x_y_plot_dot_opacity=0.8&x_y_plot_line_width=3.0'
+        webbrowser.open(f'https://foraging-behavior-browser.allenneuraldynamics-test.org/?filter_subject_id={self.ID.text()}'
+                         '&tab_id=tab_session_inspector'
+                         '&session_plot_mode=all+sessions+filtered+from+sidebar'
+                         '&session_plot_selected_draw_types=1.+Choice+history'
         )
 
 def start_gui_log_file(box_number):

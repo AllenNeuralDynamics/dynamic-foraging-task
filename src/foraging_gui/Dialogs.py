@@ -2050,7 +2050,7 @@ class AutoTrainDialog(QDialog):
     def _show_curriculum_in_streamlit(self):
         if self.selected_curriculum is not None:
             webbrowser.open(
-                'https://foraging-behavior-browser.streamlit.app/'
+                'https://foraging-behavior-browser.allenneuraldynamics-test.org/'
                 '?tab_id=tab_auto_train_curriculum'
                 f'&auto_training_curriculum_name={self.selected_curriculum["curriculum"].curriculum_name}'
                 f'&auto_training_curriculum_version={self.selected_curriculum["curriculum"].curriculum_version}'
@@ -2059,10 +2059,10 @@ class AutoTrainDialog(QDialog):
                         
     def _show_auto_training_history_in_streamlit(self):
         webbrowser.open(
-            'https://foraging-behavior-browser.streamlit.app/?'
+            'https://foraging-behavior-browser.allenneuraldynamics-test.org/?'
             f'&filter_subject_id={self.selected_subject_id}'
             f'&tab_id=tab_auto_train_history'
-            f'&auto_training_history_x_axis=date'
+            f'&auto_training_history_x_axis=session'
             f'&auto_training_history_sort_by=subject_id'
             f'&auto_training_history_sort_order=descending'
         )
