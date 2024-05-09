@@ -237,8 +237,9 @@ class Window(QMainWindow):
         self.StartBleaching.clicked.connect(self._StartBleaching)
         self.NextBlock.clicked.connect(self._NextBlock)
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
-        self.OptogeneticsB.currentIndexChanged.connect(self._keyPressEvent)
-        self.PhotometryB.currentIndexChanged.connect(self._keyPressEvent)
+        self.OptogeneticsB.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('Optogenetics',self.OptogeneticsB.currentText()))
+        self.PhotometryB.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('Photometry',self.PhotometryB.currentText()))
+        self.FIPMode.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('FIPMode', self.FIPMode.currentText()))
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._keyPressEvent)
         self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
@@ -1525,6 +1526,10 @@ class Window(QMainWindow):
             self.SwitchThr.setEnabled(True)
             self.PointsInARow.setEnabled(True)
 
+    def _QComboBoxUpdate(self, parameter,value):
+        logging.info('Field updated: {}:{}'.format(parameter, value))       
+ 
+
     def keyPressEvent(self, event=None,allow_reset=False):
         '''
             Enter press to allow change of parameters
@@ -2772,6 +2777,7 @@ class Window(QMainWindow):
         else:
             self.NewSession.setDisabled(False)
         self.StartExcitation.setChecked(False)
+        self.keyPressEvent() # Accept all updates
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
@@ -2847,6 +2853,7 @@ class Window(QMainWindow):
                     child.clear()
 
     def _StartFIP(self):
+        self.StartFIP.setChecked(False)
 
         if self.Teensy_COM == '':
             logging.warning('No Teensy COM configured for this box, cannot start FIP workflow')
@@ -2855,8 +2862,6 @@ class Window(QMainWindow):
             msg = 'No Teensy COM configured for this box, cannot start FIP workflow'
             reply = QMessageBox.information(self, 
                 'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
-            self.StartFIP.setChecked(False)
-            self.StartFIP.setStyleSheet("background-color : none")
             return
         
         if self.FIP_workflow_path == "":
@@ -2866,12 +2871,9 @@ class Window(QMainWindow):
             msg = 'FIP workflow path not defined, cannot start FIP workflow'
             reply = QMessageBox.information(self, 
                 'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
-            self.StartFIP.setChecked(False)
-            self.StartFIP.setStyleSheet("background-color : none")                  
             return
  
         if self.FIP_started:
-            self.StartFIP.setChecked(True)             
             reply = QMessageBox.question(self, 
                 'Box {}, Start FIP workflow:'.format(self.box_letter), 
                 'FIP workflow has already been started. Start again?',
@@ -2882,14 +2884,9 @@ class Window(QMainWindow):
             else:
                 logging.warning('FIP workflow already started, user restarts')
 
-        self.FIP_started=True 
-        logging.info('StartFIP is checked')
-        self.StartFIP.setStyleSheet("background-color : green;")
-
         # Start logging
         self.CreateNewFolder=1
         self.Ot_log_folder=self._restartlogging()
-
 
         # Start the FIP workflow
         try:
@@ -2898,6 +2895,7 @@ class Window(QMainWindow):
             folder_path = ' -p session="{}"'.format(self.SessionFolder)
             camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartCamera.isChecked())
             subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera+' --start',cwd=CWD,shell=True)
+            self.FIP_started=True 
         except Exception as e:
             logging.error(e)
             reply = QMessageBox.information(self, 
@@ -2906,16 +2904,6 @@ class Window(QMainWindow):
                QMessageBox.Ok )               
 
     def _StartExcitation(self):
-
-        if not self.FIP_started:
-            logging.warning('FIP workflow is not running, cannot start excitation')
-            reply = QMessageBox.information(self, 
-                'Box {}, Start Excitation:'.format(self.box_letter), 
-                'Please start the FIP workflow before running excitation',
-                QMessageBox.Ok )                     
-            self.StartExcitation.setChecked(False)
-            self.StartExcitation.setStyleSheet("background-color : none")
-            return 0  
  
         if self.Teensy_COM == '':
             logging.warning('No Teensy COM configured for this box, cannot start excitation')
@@ -2929,27 +2917,21 @@ class Window(QMainWindow):
             return 0 
 
         if self.StartExcitation.isChecked():
-            reply = QMessageBox.question(self, 
-                'Box {}, Start FIP'.format(self.box_letter), 
-                'Is the FIP workflow running?', 
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes )
-            if reply == QMessageBox.No:
-                self.StartExcitation.setChecked(False)
-                self.StartExcitation.setStyleSheet("background-color : none")
-                logging.info('User says FIP workflow is not open')
-                return 0 
-            logging.info('StartExcitation is checked, user confirms workflow is running')
+            logging.info('StartExcitation is checked, photometry mode: {}'.format(self.FIPMode.currentText()))
             self.StartExcitation.setStyleSheet("background-color : green;")
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
                 # Trigger Teensy with the above specified exp mode
-                ser.write(b'c')
+                if self.FIPMode.currentText() == "Normal":
+                    ser.write(b'c')
+                elif self.FIPMode.currentText() == "Axon":
+                    ser.write(b'e')       
                 ser.close()
-                self.TeensyWarning.setText('Start excitation!')
+                self.TeensyWarning.setText('Started FIP excitation')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
                 logging.error(str(e))
-                self.TeensyWarning.setText('Error: start excitation!')
+                self.TeensyWarning.setText('Error: starting excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
                 reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
                 self.StartExcitation.setChecked(False)
@@ -2968,11 +2950,11 @@ class Window(QMainWindow):
                 # Trigger Teensy with the above specified exp mode
                 ser.write(b's')
                 ser.close()
-                self.TeensyWarning.setText('Stop excitation!')
+                self.TeensyWarning.setText('Stopped FIP excitation')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
                 logging.error(str(e))
-                self.TeensyWarning.setText('Error: stop excitation!')
+                self.TeensyWarning.setText('Error stopping excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
                 reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when stopping excitation: {}'.format(e), QMessageBox.Ok)
                 return 0 
@@ -3070,7 +3052,7 @@ class Window(QMainWindow):
         if self.Teensy_COM == '':
             return
         logging.info('Checking that photometry is not running')
-        FIP_was_running=self.StartFIP.isChecked()
+        FIP_was_running=self.FIP_started
         try:
             ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
             # Trigger Teensy with the above specified exp mode
@@ -3086,10 +3068,8 @@ class Window(QMainWindow):
             self.TeensyWarning.setStyleSheet(self.default_warning_color)      
             self.StartBleaching.setStyleSheet("background-color : none")
             self.StartExcitation.setStyleSheet("background-color : none")
-            self.StartFIP.setStyleSheet("background-color : none;")
             self.StartBleaching.setChecked(False)
             self.StartExcitation.setChecked(False)
-            self.StartFIP.setChecked(False)
             self.FIP_started=False
 
         if (FIP_was_running)&(not closing):
@@ -3864,39 +3844,18 @@ class Window(QMainWindow):
     def _open_mouse_on_streamlit(self):
         '''open the training history of the current mouse on the streamlit app'''
         # See this PR: https://github.com/AllenNeuralDynamics/foraging-behavior-browser/pull/25
-        webbrowser.open(f'https://foraging-behavior-browser.streamlit.app/?filter_subject_id={self.ID.text()}'
-                         '&tab_id=tab_session_x_y&x_y_plot_xname=session&x_y_plot_yname=foraging_eff'
-                         '&x_y_plot_group_by=h2o&x_y_plot_if_show_dots=True&x_y_plot_if_aggr_each_group=True&x_y_plot_aggr_method_group=lowess'
-                         '&x_y_plot_if_aggr_all=False&x_y_plot_smooth_factor=5'
-                         '&x_y_plot_dot_size=20&x_y_plot_dot_opacity=0.8&x_y_plot_line_width=3.0'
+        webbrowser.open(f'https://foraging-behavior-browser.allenneuraldynamics-test.org/?filter_subject_id={self.ID.text()}'
+                         '&tab_id=tab_session_inspector'
+                         '&session_plot_mode=all+sessions+filtered+from+sidebar'
+                         '&session_plot_selected_draw_types=1.+Choice+history'
         )
-        
-def map_hostname_to_box(hostname,box_num):
-    host_mapping = {
-        'W10DT714033':'447-1-',
-        'W10DT714086':'447-1-',
-        'KAPPA':      '447-2-',
-        'W10DT714027':'447-2-',
-        'W10DT714028':'447-3-',
-        'W10DT714030':'447-3-'
-    }
-    box_mapping = {
-        1:'A',
-        2:'B',
-        3:'C',
-        4:'D'
-    }
-    if hostname in host_mapping:
-        return host_mapping[hostname]+box_mapping[box_num]
-    else:
-        return hostname+'-'+box_mapping[box_num]
 
 def start_gui_log_file(box_number):
     '''
         Starts a log file for the gui.
         The log file is located at C:/Users/<username>/Documents/foraging_gui_logs
         One log file is created for each time the GUI is started
-        The name of the gui file is <box_name>_gui_log_<date and time>.txt
+        The name of the gui file is <hostname>-<box letter A/B/C/D>_gui_log_<date and time>.txt
     '''
     # Check if the log folder exists, if it doesn't make it
     logging_folder = os.path.join(os.path.expanduser("~"), "Documents",'foraging_gui_logs')
@@ -3910,7 +3869,13 @@ def start_gui_log_file(box_number):
 
     # Build logfile name
     hostname = socket.gethostname()
-    box_name = map_hostname_to_box(hostname, box_number)
+    box_mapping = {
+        1:'A',
+        2:'B',
+        3:'C',
+        4:'D'
+    }
+    box_name =hostname+'-'+box_mapping[box_number]
     filename = '{}_gui_log_{}.txt'.format(box_name,formatted_datetime)
     logging_filename = os.path.join(logging_folder,filename)
 
