@@ -4659,7 +4659,6 @@
     </property>
     <addaction name="actionLicks_sta"/>
     <addaction name="actionTime_distribution"/>
-    <addaction name="action_HideLines"/>
    </widget>
    <widget class="QMenu" name="menuOptogenetics">
     <property name="sizePolicy">
@@ -4891,11 +4890,6 @@
   <action name="action_NewSession">
    <property name="text">
     <string>New session</string>
-   </property>
-  </action>
-  <action name="action_HideLines">
-   <property name="text">
-    <string>Hide lines</string>
    </property>
   </action>
   <action name="actionLaser_Calibration">
