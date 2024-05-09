@@ -1802,6 +1802,7 @@ class MetadataDialog(QDialog):
         if os.path.exists(metadata_dialog_file):
             with open(metadata_dialog_file, 'r') as file:
                 self.meta_data = json.load(file)
+        self.meta_data['metadata_dialog_file'] = metadata_dialog_file
         self._update_metadata(dont_clear=True)
         
     def _update_metadata(self,update_rig_metadata=True,update_session_metadata=True,dont_clear=False):
