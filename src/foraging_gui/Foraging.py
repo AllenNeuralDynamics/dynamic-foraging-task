@@ -2738,6 +2738,7 @@ class Window(QMainWindow):
                     child.clear()
 
     def _StartFIP(self):
+        self.StartFIP.setChecked(False)
 
         if self.Teensy_COM == '':
             logging.warning('No Teensy COM configured for this box, cannot start FIP workflow')
@@ -2936,7 +2937,7 @@ class Window(QMainWindow):
         if self.Teensy_COM == '':
             return
         logging.info('Checking that photometry is not running')
-        FIP_was_running=self.StartFIP.isChecked()
+        FIP_was_running=self.FIP_started
         try:
             ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
             # Trigger Teensy with the above specified exp mode
@@ -2952,10 +2953,8 @@ class Window(QMainWindow):
             self.TeensyWarning.setStyleSheet(self.default_warning_color)      
             self.StartBleaching.setStyleSheet("background-color : none")
             self.StartExcitation.setStyleSheet("background-color : none")
-            self.StartFIP.setStyleSheet("background-color : none;")
             self.StartBleaching.setChecked(False)
             self.StartExcitation.setChecked(False)
-            self.StartFIP.setChecked(False)
             self.FIP_started=False
 
         if (FIP_was_running)&(not closing):
