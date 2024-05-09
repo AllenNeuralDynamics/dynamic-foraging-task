@@ -2740,8 +2740,6 @@ class Window(QMainWindow):
             msg = 'No Teensy COM configured for this box, cannot start FIP workflow'
             reply = QMessageBox.information(self, 
                 'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
-            self.StartFIP.setChecked(False)
-            self.StartFIP.setStyleSheet("background-color : none")
             return
         
         if self.FIP_workflow_path == "":
@@ -2751,12 +2749,9 @@ class Window(QMainWindow):
             msg = 'FIP workflow path not defined, cannot start FIP workflow'
             reply = QMessageBox.information(self, 
                 'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
-            self.StartFIP.setChecked(False)
-            self.StartFIP.setStyleSheet("background-color : none")                  
             return
  
         if self.FIP_started:
-            self.StartFIP.setChecked(True)             
             reply = QMessageBox.question(self, 
                 'Box {}, Start FIP workflow:'.format(self.box_letter), 
                 'FIP workflow has already been started. Start again?',
@@ -2767,14 +2762,9 @@ class Window(QMainWindow):
             else:
                 logging.warning('FIP workflow already started, user restarts')
 
-        self.FIP_started=True 
-        logging.info('StartFIP is checked')
-        self.StartFIP.setStyleSheet("background-color : green;")
-
         # Start logging
         self.CreateNewFolder=1
         self.Ot_log_folder=self._restartlogging()
-
 
         # Start the FIP workflow
         try:
@@ -2783,6 +2773,7 @@ class Window(QMainWindow):
             folder_path = ' -p session="{}"'.format(self.SessionFolder)
             camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartCamera.isChecked())
             subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera+' --start',cwd=CWD,shell=True)
+            self.FIP_started=True 
         except Exception as e:
             logging.error(e)
             reply = QMessageBox.information(self, 
