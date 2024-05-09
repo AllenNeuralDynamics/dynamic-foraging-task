@@ -1472,6 +1472,9 @@ class Window(QMainWindow):
             self.UpdateParameters=1 # Changes are allowed
             # change color to black
             for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
+                for child in container.findChildren((QtWidegets.QComboBox)):
+                    print(child.objectName())
+
                 # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
                 for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
                     if child.objectName()=='qt_spinbox_lineedit':
