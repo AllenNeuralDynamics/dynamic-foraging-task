@@ -205,9 +205,9 @@ class Window(QMainWindow):
         self.StartBleaching.clicked.connect(self._StartBleaching)
         self.NextBlock.clicked.connect(self._NextBlock)
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
-        self.OptogeneticsB.currentIndexChanged.connect(self._keyPressEvent)
-        self.PhotometryB.currentIndexChanged.connect(self._keyPressEvent)
-        self.FIPMode.currentIndexChanged.connect(self._keyPressEvent)
+        self.OptogeneticsB.currentIndexChanged.connect(self._QComboBoxUpdate, 'Optogenetics',self.OptogeneticsB.currentText())
+        self.PhotometryB.currentIndexChanged.connect(self._QComboBoxUpdate, 'Photometry',self.PhotometryB.currentText())
+        self.FIPMode.currentIndexChanged.connect(self._QComboBoxUpdate, 'FIPMode', self.FIPMode.currentText())
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._keyPressEvent)
         self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
@@ -1438,6 +1438,10 @@ class Window(QMainWindow):
             self.SwitchThr.setEnabled(True)
             self.PointsInARow.setEnabled(True)
 
+    def _QComboBoxUpdate(self, parameter,value):
+        logging.info('Field updated: {}:{}'.format(parameter, value))       
+ 
+
     def keyPressEvent(self, event=None,allow_reset=False):
         '''
             Enter press to allow change of parameters
@@ -1472,8 +1476,6 @@ class Window(QMainWindow):
             self.UpdateParameters=1 # Changes are allowed
             # change color to black
             for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
-                for child in container.findChildren((QtWidgets.QComboBox)):
-                    print(child.objectName())
 
                 # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
                 for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
