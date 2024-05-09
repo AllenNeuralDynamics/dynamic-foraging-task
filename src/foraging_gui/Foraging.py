@@ -2663,6 +2663,7 @@ class Window(QMainWindow):
         else:
             self.NewSession.setDisabled(False)
         self.StartExcitation.setChecked(False)
+        self.keyPressEvent() # Accept all updates
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
