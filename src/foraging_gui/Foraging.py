@@ -2782,16 +2782,6 @@ class Window(QMainWindow):
                QMessageBox.Ok )               
 
     def _StartExcitation(self):
-
-        if not self.FIP_started:
-            logging.warning('FIP workflow is not running, cannot start excitation')
-            reply = QMessageBox.information(self, 
-                'Box {}, Start Excitation:'.format(self.box_letter), 
-                'Please start the FIP workflow before running excitation',
-                QMessageBox.Ok )                     
-            self.StartExcitation.setChecked(False)
-            self.StartExcitation.setStyleSheet("background-color : none")
-            return 0  
  
         if self.Teensy_COM == '':
             logging.warning('No Teensy COM configured for this box, cannot start excitation')
@@ -2805,16 +2795,7 @@ class Window(QMainWindow):
             return 0 
 
         if self.StartExcitation.isChecked():
-            reply = QMessageBox.question(self, 
-                'Box {}, Start FIP'.format(self.box_letter), 
-                'Is the FIP workflow running?', 
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes )
-            if reply == QMessageBox.No:
-                self.StartExcitation.setChecked(False)
-                self.StartExcitation.setStyleSheet("background-color : none")
-                logging.info('User says FIP workflow is not open')
-                return 0 
-            logging.info('StartExcitation is checked, user confirms workflow is running')
+            logging.info('StartExcitation is checked')
             self.StartExcitation.setStyleSheet("background-color : green;")
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
