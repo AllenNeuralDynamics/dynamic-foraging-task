@@ -416,18 +416,11 @@ class Window(QMainWindow):
         session_full_path_list=[]
         session_path_list=[]
         for session_folder in os.listdir(animal_folder):
-            # TODO fix_300
-            training_folder_old = os.path.join(animal_folder,session_folder, 'TrainingFolder')
-            training_folder_new = os.path.join(animal_folder,session_folder, 'behavior')
-            if os.path.exists(training_folder_old):
-                for file_name in os.listdir(training_folder_old):
+            training_folder = os.path.join(animal_folder,session_folder, 'behavior')
+            if os.path.exists(training_folder):
+                for file_name in os.listdir(training_folder):
                     if file_name.endswith('.json'): 
-                        session_full_path_list.append(os.path.join(training_folder_old, file_name))
-                        session_path_list.append(session_folder) 
-            elif os.path.exists(training_folder_new):
-                for file_name in os.listdir(training_folder_new):
-                    if file_name.endswith('.json'): 
-                        session_full_path_list.append(os.path.join(training_folder_new, file_name))
+                        session_full_path_list.append(os.path.join(training_folder, file_name))
                         session_path_list.append(session_folder) 
 
         sorted_indices = sorted(enumerate(session_path_list), key=lambda x: x[1], reverse=True)
@@ -2342,38 +2335,20 @@ class Window(QMainWindow):
         # do any of the sessions have saved data? Grab the most recent        
         for i in range(len(sessions)-1, -1, -1):
             s = sessions[i]
-            ## TODO fix_300
-            if 'behavior' in s:
-                json_file = os.path.join(self.default_saveFolder, 
-                    self.current_box, mouse_id, s,'behavior',s.split('behavior_')[1]+'.json')
-                if os.path.isfile(json_file): 
-                    date = s.split('_')[2] 
-                    session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
-                    reply = QMessageBox.information(self,
-                        'Box {}, Please verify'.format(self.box_letter),
-                        '<span style="color:purple;font-weight:bold">Mouse ID: {}</span><br>Last session: {}<br>Filename: {}'.format(mouse_id, session_date, s),
-                        QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
-                    if reply == QMessageBox.Cancel:
-                        logging.info('User hit cancel')
-                        return False, ''
-                    else: 
-                        return True, json_file
-            else:
-                json_file = os.path.join(self.default_saveFolder, 
-                    self.current_box, mouse_id, s,'TrainingFolder',s+'.json')
-                print(json_file)
-                if os.path.isfile(json_file): 
-                    date = s.split('_')[1] 
-                    session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
-                    reply = QMessageBox.information(self,
-                        'Box {}, Please verify'.format(self.box_letter),
-                        '<span style="color:purple;font-weight:bold">Mouse ID: {}</span><br>Last session: {}<br>Filename: {}'.format(mouse_id, session_date, s),
-                        QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
-                    if reply == QMessageBox.Cancel:
-                        logging.info('User hit cancel')
-                        return False, ''
-                    else: 
-                        return True, json_file
+            json_file = os.path.join(self.default_saveFolder, 
+                self.current_box, mouse_id, s,'behavior',s.split('behavior_')[1]+'.json')
+            if os.path.isfile(json_file): 
+                date = s.split('_')[2] 
+                session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
+                reply = QMessageBox.information(self,
+                    'Box {}, Please verify'.format(self.box_letter),
+                    '<span style="color:purple;font-weight:bold">Mouse ID: {}</span><br>Last session: {}<br>Filename: {}'.format(mouse_id, session_date, s),
+                    QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
+                if reply == QMessageBox.Cancel:
+                    logging.info('User hit cancel')
+                    return False, ''
+                else: 
+                    return True, json_file
  
         # none of the sessions have saved data.  
         reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
@@ -2416,21 +2391,11 @@ class Window(QMainWindow):
             if len(sessions) == 0 :
                 continue
             for s in sessions:
-                # Check for data with old format name
-                # TODO fix_300
-                if 'behavior' in s:
-                    # Check for data in new format name
-                    json_file = os.path.join(self.default_saveFolder, 
-                        self.current_box, str(m), s,'behavior',s.split('behavior_')[1]+'.json')
-                    if os.path.isfile(json_file):
-                        mice.append(m)
-                        break
-                else:
-                    json_file_old = os.path.join(self.default_saveFolder, 
-                        self.current_box, str(m), s,'TrainingFolder',s+'.json')
-                    if os.path.isfile(json_file_old):
-                        mice.append(m)
-                        break
+                json_file = os.path.join(self.default_saveFolder, 
+                    self.current_box, str(m), s,'behavior',s.split('behavior_')[1]+'.json')
+                if os.path.isfile(json_file):
+                    mice.append(m)
+                    break
         return mice  
 
     def _Open(self,open_last = False,input_file = ''):
