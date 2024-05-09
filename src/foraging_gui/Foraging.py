@@ -2335,20 +2335,21 @@ class Window(QMainWindow):
         # do any of the sessions have saved data? Grab the most recent        
         for i in range(len(sessions)-1, -1, -1):
             s = sessions[i]
-            json_file = os.path.join(self.default_saveFolder, 
-                self.current_box, mouse_id, s,'behavior',s.split('behavior_')[1]+'.json')
-            if os.path.isfile(json_file): 
-                date = s.split('_')[2] 
-                session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
-                reply = QMessageBox.information(self,
-                    'Box {}, Please verify'.format(self.box_letter),
-                    '<span style="color:purple;font-weight:bold">Mouse ID: {}</span><br>Last session: {}<br>Filename: {}'.format(mouse_id, session_date, s),
-                    QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
-                if reply == QMessageBox.Cancel:
-                    logging.info('User hit cancel')
-                    return False, ''
-                else: 
-                    return True, json_file
+            if 'behavior_' in s:
+                json_file = os.path.join(self.default_saveFolder, 
+                    self.current_box, mouse_id, s,'behavior',s.split('behavior_')[1]+'.json')
+                if os.path.isfile(json_file): 
+                    date = s.split('_')[2] 
+                    session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
+                    reply = QMessageBox.information(self,
+                        'Box {}, Please verify'.format(self.box_letter),
+                        '<span style="color:purple;font-weight:bold">Mouse ID: {}</span><br>Last session: {}<br>Filename: {}'.format(mouse_id, session_date, s),
+                        QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
+                    if reply == QMessageBox.Cancel:
+                        logging.info('User hit cancel')
+                        return False, ''
+                    else: 
+                        return True, json_file
  
         # none of the sessions have saved data.  
         reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
@@ -2391,11 +2392,12 @@ class Window(QMainWindow):
             if len(sessions) == 0 :
                 continue
             for s in sessions:
-                json_file = os.path.join(self.default_saveFolder, 
-                    self.current_box, str(m), s,'behavior',s.split('behavior_')[1]+'.json')
-                if os.path.isfile(json_file):
-                    mice.append(m)
-                    break
+                if 'behavior_' in s:
+                    json_file = os.path.join(self.default_saveFolder, 
+                        self.current_box, str(m), s,'behavior',s.split('behavior_')[1]+'.json')
+                    if os.path.isfile(json_file):
+                        mice.append(m)
+                        break
         return mice  
 
     def _Open(self,open_last = False,input_file = ''):
