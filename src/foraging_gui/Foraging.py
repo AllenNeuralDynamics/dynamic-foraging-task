@@ -205,9 +205,9 @@ class Window(QMainWindow):
         self.StartBleaching.clicked.connect(self._StartBleaching)
         self.NextBlock.clicked.connect(self._NextBlock)
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
-        self.OptogeneticsB.currentIndexChanged.connect(self._QComboBoxUpdate, 'Optogenetics',self.OptogeneticsB.currentText())
-        self.PhotometryB.currentIndexChanged.connect(self._QComboBoxUpdate, 'Photometry',self.PhotometryB.currentText())
-        self.FIPMode.currentIndexChanged.connect(self._QComboBoxUpdate, 'FIPMode', self.FIPMode.currentText())
+        self.OptogeneticsB.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('Optogenetics',self.OptogeneticsB.currentText()))
+        self.PhotometryB.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('Photometry',self.PhotometryB.currentText()))
+        self.FIPMode.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('FIPMode', self.FIPMode.currentText()))
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._keyPressEvent)
         self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
