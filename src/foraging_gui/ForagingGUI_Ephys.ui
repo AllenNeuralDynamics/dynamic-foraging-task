@@ -3945,7 +3945,7 @@
    <widget class="QComboBox" name="FIPMode">
     <property name="geometry">
      <rect>
-      <x>860</x>
+      <x>820</x>
       <y>900</y>
       <width>81</width>
       <height>20</height>
