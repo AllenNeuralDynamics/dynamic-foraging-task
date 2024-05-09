@@ -465,7 +465,35 @@ class generate_metadata:
         '''
         get the fiber connections
         '''
-
+        # hard coded for now
+        self.fiber_connections=[
+                FiberConnectionConfig(
+                    patch_cord_name="Patch Cord A",
+                    patch_cord_output_power=20,
+                    output_power_unit="microwatt",
+                    fiber_name="Fiber 0",
+                ),
+                FiberConnectionConfig(
+                    patch_cord_name="Patch Cord B",
+                    patch_cord_output_power=20,
+                    output_power_unit="microwatt",
+                    fiber_name="Fiber 1",
+                ),
+                FiberConnectionConfig(
+                    patch_cord_name="Patch Cord C",
+                    patch_cord_output_power=20,
+                    output_power_unit="microwatt",
+                    fiber_name="Fiber 2",
+                ),
+                 FiberConnectionConfig(
+                    patch_cord_name="Patch Cord D",
+                    patch_cord_output_power=20,
+                    output_power_unit="microwatt",
+                    fiber_name="Fiber 3",
+                ),
+            ],
+        return
+        
         # this is not complete. 
         self.fiber_connections=[]
         for patch_cord in self.Obj['meta_data_dialog']['rig_metadata']['patch_cords']:
