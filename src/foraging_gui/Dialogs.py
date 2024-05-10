@@ -1871,8 +1871,8 @@ class MetadataDialog(QDialog):
     
     def _get_widgets(self):
         '''get the widgets used for saving/loading metadata'''
-        exclude_widgets=self._get_chidldren_keys(self.Probes)
-        exclude_widgets+=self._get_chidldren_keys(self.Microscopes)
+        exclude_widgets=self._get_children_keys(self.Probes)
+        exclude_widgets+=self._get_children_keys(self.Microscopes)
         exclude_widgets+=['EphysProbes','RigMetadataFile','StickMicroscopes']
         widget_dict = {w.objectName(): w for w in self.findChildren(
             (QtWidgets.QLineEdit, QtWidgets.QTextEdit, QtWidgets.QComboBox))
@@ -1892,7 +1892,7 @@ class MetadataDialog(QDialog):
             widget=widgets[i]
             current_probe = getattr(self, probe_type).currentText()
             self.meta_data['session_metadata'] = initialize_dic(self.meta_data['session_metadata'], key_list=[metadata_key, current_probe])
-            keys = self._get_chidldren_keys(widget)
+            keys = self._get_children_keys(widget)
             for key in keys:
                 self.meta_data['session_metadata'][metadata_key][current_probe][key] = getattr(self, key).text()
 
@@ -1911,28 +1911,28 @@ class MetadataDialog(QDialog):
             widget = widgets[i]
             action=self._save_configuration
 
-            self._manage_signals(enable=False, keys=self._get_chidldren_keys(widget),action=action)
+            self._manage_signals(enable=False, keys=self._get_children_keys(widget),action=action)
             self._manage_signals(enable=False, keys=[probe_type], action=self._show_angles)
             
             current_probe = getattr(self, probe_type).currentText()
             self.meta_data['session_metadata'] = initialize_dic(self.meta_data['session_metadata'], key_list=[metadata_key])
             if current_probe == '' or current_probe not in self.meta_data['session_metadata'][metadata_key]:
-                self._clear_angles(self._get_chidldren_keys(widget))
+                self._clear_angles(self._get_children_keys(widget))
                 self._manage_signals(enable=True, keys=[probe_type], action=self._show_angles)
-                self._manage_signals(enable=True, keys=self._get_chidldren_keys(widget), action=action)
+                self._manage_signals(enable=True, keys=self._get_children_keys(widget), action=action)
                 continue
 
             self.meta_data['session_metadata'] = initialize_dic(self.meta_data['session_metadata'], key_list=[metadata_key, current_probe])
-            keys = self._get_chidldren_keys(widget)
+            keys = self._get_children_keys(widget)
             for key in keys:
                 self.meta_data['session_metadata'][metadata_key][current_probe].setdefault(key, '')
                 getattr(self, key).setText(self.meta_data['session_metadata'][metadata_key][current_probe][key])
 
-            self._manage_signals(enable=True, keys=self._get_chidldren_keys(widget), action=action)
+            self._manage_signals(enable=True, keys=self._get_children_keys(widget), action=action)
             self._manage_signals(enable=True, keys=[probe_type], action=self._show_angles)
             
 
-    def _get_chidldren_keys(self,parent_widget = None):
+    def _get_children_keys(self,parent_widget = None):
         '''get the children QLineEidt objectName'''
         if parent_widget is None:
             parent_widget = self.Probes
@@ -1963,11 +1963,11 @@ class MetadataDialog(QDialog):
             return
         
         self._manage_signals(enable=False,keys=['StickMicroscopes'],action=self._show_angles)
-        self._manage_signals(enable=False,keys=self._get_chidldren_keys(self.Microscopes),action=self._save_configuration)
+        self._manage_signals(enable=False,keys=self._get_children_keys(self.Microscopes),action=self._save_configuration)
         self.StickMicroscopes.clear()
         self.StickMicroscopes.addItems(items)
         self._manage_signals(enable=True,keys=['StickMicroscopes'],action=self._show_angles)
-        self._manage_signals(enable=True,keys=self._get_chidldren_keys(self.Microscopes),action=self._save_configuration)
+        self._manage_signals(enable=True,keys=self._get_children_keys(self.Microscopes),action=self._save_configuration)
         self._show_angles()
 
     def _show_ephys_probes(self):
@@ -1987,11 +1987,11 @@ class MetadataDialog(QDialog):
             return
         
         self._manage_signals(enable=False,keys=['EphysProbes'],action=self._show_angles)
-        self._manage_signals(enable=False,keys=self._get_chidldren_keys(self.Probes),action=self._save_configuration)
+        self._manage_signals(enable=False,keys=self._get_children_keys(self.Probes),action=self._save_configuration)
         self.EphysProbes.clear()
         self.EphysProbes.addItems(items)
         self._manage_signals(enable=True,keys=['EphysProbes'],action=self._show_angles)
-        self._manage_signals(enable=True,keys=self._get_chidldren_keys(self.Probes),action=self._save_configuration)
+        self._manage_signals(enable=True,keys=self._get_children_keys(self.Probes),action=self._save_configuration)
         self._show_angles()
     
     def _manage_signals(self, enable=True,keys='',signals='',action=''):
@@ -2006,7 +2006,7 @@ class MetadataDialog(QDialog):
             the keys of the widgets to be connected or disconnected
         '''
         if keys == '':
-            keys=self._get_chidldren_keys(self.Probes)
+            keys=self._get_children_keys(self.Probes)
         if signals == '':
             signals = []
             for attr in keys:
