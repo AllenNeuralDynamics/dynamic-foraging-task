@@ -36,7 +36,8 @@ from aind_data_schema.core.session import (
     LightEmittingDiodeConfig,
     DetectorConfig,
     TriggerType,
-    FiberConnectionConfig
+    FiberConnectionConfig,
+    Software
 )
 
 class generate_metadata:
@@ -342,6 +343,11 @@ class generate_metadata:
             self.Obj['fiber_mode'] = ''
         else:
             self.Obj['fiber_mode'] = self.Obj['FIPMode']
+
+        # Missing field 'commit_ID', 'repo_url', 'current_branch' in the json file.
+        # Possible reason: 1) old version of the software.
+        if 'commit_ID' not in self.Obj:
+            self._initialize_fields(dic=self.Obj,keys=['commit_ID','repo_url','current_branch'],default_value='')
 
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
@@ -782,13 +788,25 @@ class generate_metadata:
             daq_names=self.name_mapper['behavior_rig_behavior_daq_names']
 
         self.behavior_streams=[]
+        self._get_behavior_software()
         self.behavior_streams.append(Stream(
                 stream_modalities=[Modality.BEHAVIOR],
                 stream_start_time=datetime.strptime(self.Obj['Other_SessionStartTime'], '%Y-%m-%d %H:%M:%S.%f'),
                 stream_end_time=datetime.strptime(self.Obj['Other_CurrentTime'], '%Y-%m-%d %H:%M:%S.%f'),
                 daq_names=daq_names,
+                software=self.behavior_software,
         ))
-
+    def _get_behavior_software(self):
+        '''
+        get the behavior software version information
+        '''
+        self.behavior_software=[]
+        self.behavior_software.append(Software(
+            name='dynamic-foraging-task',
+            version=f'branch:{self.Obj["current_branch"]}   commit ID:{self.Obj["commit_ID"]}',
+            url=self.Obj["repo_url"],
+        ))
+        
     def _get_opto_calibration(self):
         '''
         Make the optogenetic (Laser or LED) calibration metadata
