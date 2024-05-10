@@ -285,6 +285,8 @@ class generate_metadata:
         # Possible reason: 1) the NewScale stage is not connected to the behavior GUI. 2) the session is not started.
         if ('B_NewscalePositions' not in self.Obj) or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceArea']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceX']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceY']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceZ']==''):
             self.has_reward_delivery = False
+        elif self.Obj['B_NewscalePositions']==[]:
+            self.has_reward_delivery = False
         else:
             self.has_reward_delivery = True
 
@@ -959,7 +961,8 @@ class generate_metadata:
         device_oringin=self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceArea']
         self._get_lick_spouts_distance()
         lick_spouts_distance=self.lick_spouts_distance
-        start_position=[self.Obj['B_NewscalePositions'][0][0], self.Obj['B_NewscalePositions'][0][1], self.Obj['B_NewscalePositions'][0][2]]
+        # using the last position of the stage
+        start_position=[self.Obj['B_NewscalePositions'][-1][0], self.Obj['B_NewscalePositions'][-1][1], self.Obj['B_NewscalePositions'][-1][2]]
 
         # assuming refering to the left lick spout
         reference_spout_position=[float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceX']),float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceY']),float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceZ'])]
