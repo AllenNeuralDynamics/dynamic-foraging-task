@@ -336,6 +336,13 @@ class generate_metadata:
         # Possible reason: 1) the fiber photometry data is not recorded in the session. 2) the fiber photometry data is recorded but the start and end time are not recorded in the old version of the software.
         self._initialize_fields(dic=self.Obj,keys=['fiber_photometry_start_time','fiber_photometry_end_time'],default_value='')
 
+        # Missing field 'FIPMode' in the json file.
+        # Possible reason: 1) old version of the software.
+        if 'FIPMode' not in self.Obj:
+            self.Obj['fiber_mode'] = ''
+        else:
+            self.Obj['fiber_mode'] = self.Obj['FIPMode']
+
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
         Initialize fields
@@ -455,6 +462,7 @@ class generate_metadata:
                 light_sources=self.fib_light_sources_config,
                 detectors=self.fib_detectors,
                 fiber_connections=self.fiber_connections,
+                notes=f'fiber mode: {self.fiber_mode}',
         ))
 
     def _get_fiber_connections(self):
