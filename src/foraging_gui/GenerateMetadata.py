@@ -400,7 +400,8 @@ class generate_metadata:
             "calibrations": self.calibration,
             "data_streams": self.data_streams,
             "mouse_platform_name": self.Obj['meta_data_dialog']['rig_metadata']['mouse_platform']['name'],
-            "active_mouse_platform": False
+            "active_mouse_platform": False,
+            "protocol_id":[self.Obj['meta_data_dialog']['session_metadata']['ProtocolID']],
         }
 
         if self.reward_delivery!=[]:

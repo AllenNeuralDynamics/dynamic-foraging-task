@@ -209,7 +209,7 @@ p, li { white-space: pre-wrap; }
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="PtotocolID">
+  <widget class="QLineEdit" name="ProtocolID">
    <property name="geometry">
     <rect>
      <x>380</x>
@@ -1402,7 +1402,7 @@ p, li { white-space: pre-wrap; }
   <zorder>label_72</zorder>
   <zorder>IACUCProtocol</zorder>
   <zorder>label_73</zorder>
-  <zorder>PtotocolID</zorder>
+  <zorder>ProtocolID</zorder>
   <zorder>RigMetadataFile</zorder>
   <zorder>SelectRigMetadata</zorder>
   <zorder>SaveWarning</zorder>
@@ -1424,7 +1424,7 @@ p, li { white-space: pre-wrap; }
   <tabstop>RotationAngle</tabstop>
   <tabstop>EphysProbes</tabstop>
   <tabstop>LoadMeta</tabstop>
-  <tabstop>PtotocolID</tabstop>
+  <tabstop>ProtocolID</tabstop>
   <tabstop>ModuleAngle</tabstop>
   <tabstop>ArcAngle</tabstop>
   <tabstop>ProbeTarget</tabstop>
