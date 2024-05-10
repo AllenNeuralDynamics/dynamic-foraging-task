@@ -312,10 +312,6 @@ class generate_metadata:
         if 'settings_box' not in self.Obj:
             self.Obj['settings_box'] = {}
 
-        # Missing fields 'Other_SessionStartTime' and 'Other_CurrentTime' in the json file.
-        # Possible reason: 1) the behavior session is not started.
-        #self._get_session_time()
-
         # Missing field 'meta_data_dialog' in the json file.
         # Possible reason: 1) Old version of the software.
         if 'meta_data_dialog' not in self.Obj:
