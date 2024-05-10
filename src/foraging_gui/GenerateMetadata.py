@@ -143,7 +143,7 @@ class generate_metadata:
         ''' 
         get the distance between the two lick spouts in um
         '''
-        self.lick_spouts_distance=2500
+        self.lick_spouts_distance=5000
 
     def _get_box_type(self):
         '''
@@ -350,6 +350,11 @@ class generate_metadata:
         # Possible reason: 1) old version of the software.
         if 'commit_ID' not in self.Obj:
             self._initialize_fields(dic=self.Obj,keys=['commit_ID','repo_url','current_branch'],default_value='')
+
+        # Missing field 'Other_lick_spout_distance' in the json file.
+        # Possible reason: 1) old version of the software.
+        if 'Other_lick_spout_distance' not in self.Obj:
+            self.Obj['Other_lick_spout_distance']=5000
 
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
@@ -959,8 +964,7 @@ class generate_metadata:
             return
 
         device_oringin=self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceArea']
-        self._get_lick_spouts_distance()
-        lick_spouts_distance=self.lick_spouts_distance
+        lick_spouts_distance=self.Obj['Other_lick_spout_distance']
         # using the last position of the stage
         start_position=[self.Obj['B_NewscalePositions'][-1][0], self.Obj['B_NewscalePositions'][-1][1], self.Obj['B_NewscalePositions'][-1][2]]
 

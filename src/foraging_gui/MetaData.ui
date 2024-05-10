@@ -1209,10 +1209,10 @@ p, li { white-space: pre-wrap; }
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
-     <x>1000</x>
+     <x>980</x>
      <y>120</y>
-     <width>201</width>
-     <height>181</height>
+     <width>221</width>
+     <height>241</height>
     </rect>
    </property>
    <property name="title">
@@ -1221,7 +1221,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QLabel" name="label_94">
     <property name="geometry">
      <rect>
-      <x>6</x>
+      <x>36</x>
       <y>100</y>
       <width>91</width>
       <height>20</height>
@@ -1246,7 +1246,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QLineEdit" name="LickSpoutReferenceZ">
     <property name="geometry">
      <rect>
-      <x>100</x>
+      <x>130</x>
       <y>130</y>
       <width>71</width>
       <height>20</height>
@@ -1265,7 +1265,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QLabel" name="label_92">
     <property name="geometry">
      <rect>
-      <x>6</x>
+      <x>36</x>
       <y>70</y>
       <width>91</width>
       <height>20</height>
@@ -1290,7 +1290,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QLineEdit" name="LickSpoutReferenceY">
     <property name="geometry">
      <rect>
-      <x>100</x>
+      <x>130</x>
       <y>100</y>
       <width>71</width>
       <height>20</height>
@@ -1309,7 +1309,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QLineEdit" name="LickSpoutReferenceX">
     <property name="geometry">
      <rect>
-      <x>100</x>
+      <x>130</x>
       <y>70</y>
       <width>71</width>
       <height>20</height>
@@ -1328,7 +1328,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QLabel" name="label_93">
     <property name="geometry">
      <rect>
-      <x>6</x>
+      <x>36</x>
       <y>130</y>
       <width>91</width>
       <height>20</height>
@@ -1353,7 +1353,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QLineEdit" name="LickSpoutReferenceArea">
     <property name="geometry">
      <rect>
-      <x>100</x>
+      <x>130</x>
       <y>40</y>
       <width>71</width>
       <height>20</height>
@@ -1372,7 +1372,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QLabel" name="label_95">
     <property name="geometry">
      <rect>
-      <x>-14</x>
+      <x>16</x>
       <y>40</y>
       <width>111</width>
       <height>20</height>
@@ -1386,6 +1386,50 @@ p, li { white-space: pre-wrap; }
     </property>
     <property name="text">
      <string>Reference area:</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="LickSpoutDistance">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>200</y>
+      <width>71</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_96">
+    <property name="geometry">
+     <rect>
+      <x>-14</x>
+      <y>200</y>
+      <width>141</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>Lick spout distance (um):</string>
     </property>
     <property name="textFormat">
      <enum>Qt::AutoText</enum>

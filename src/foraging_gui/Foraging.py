@@ -990,6 +990,10 @@ class Window(QMainWindow):
             'go_cue_decibel_box2':60,
             'go_cue_decibel_box3':60,
             'go_cue_decibel_box4':60,
+            'lick_spout_distance_box1':5000,
+            'lick_spout_distance_box2':5000,
+            'lick_spout_distance_box3':5000,
+            'lick_spout_distance_box4':5000,
             'name_mapper_file':os.path.join(self.SettingFolder,"name_mapper.json")
         }
         
@@ -1053,6 +1057,10 @@ class Window(QMainWindow):
         self.go_cue_decibel_box2 = self.Settings['go_cue_decibel_box2']
         self.go_cue_decibel_box3 = self.Settings['go_cue_decibel_box3']
         self.go_cue_decibel_box4 = self.Settings['go_cue_decibel_box4']
+        self.lick_spout_distance_box1 = self.Settings['lick_spout_distance_box1']
+        self.lick_spout_distance_box2 = self.Settings['lick_spout_distance_box2']
+        self.lick_spout_distance_box3 = self.Settings['lick_spout_distance_box3']
+        self.lick_spout_distance_box4 = self.Settings['lick_spout_distance_box4']
         self.name_mapper_file = self.Settings['name_mapper_file']
         if not is_absolute_path(self.project_info_file):
             self.project_info_file = os.path.join(self.SettingFolder,self.project_info_file)
@@ -1076,6 +1084,7 @@ class Window(QMainWindow):
             self.current_box='{}-{}'.format(self.current_box,mapper[self.box_number])
         self.Other_current_box=self.current_box
         self.Other_go_cue_decibel=self.Settings['go_cue_decibel_box'+str(self.box_number)]
+        self.Other_lick_spout_distance=self.Settings['lick_spout_distance_box'+str(self.box_number)]
         window_title = '{}'.format(self.current_box)
         self.window_title = window_title
 
