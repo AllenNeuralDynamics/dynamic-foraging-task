@@ -1593,14 +1593,14 @@ class Window(QMainWindow):
                         child.setStyleSheet('background-color: white;')
                         self._Task()
                     
-                    if child.objectName() in {'ModuleAngle','ArcAngle','ProtocolID','Stick_RotationAngle','LickSpoutReferenceX','LickSpoutReferenceY','LickSpoutReferenceZ','LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','Stick_ArcAngle','Stick_ModuleAngle','RotationAngle','ManipulatorX','ManipulatorY','ManipulatorZ','ProbeTarget','RigMetadataFile','IACUCProtocol','Experimenter','TotalWater','ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
+                    if child.objectName() in {'WeightAfter','LickSpoutDistance','ModuleAngle','ArcAngle','ProtocolID','Stick_RotationAngle','LickSpoutReferenceX','LickSpoutReferenceY','LickSpoutReferenceZ','LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','Stick_ArcAngle','Stick_ModuleAngle','RotationAngle','ManipulatorX','ManipulatorY','ManipulatorZ','ProbeTarget','RigMetadataFile','IACUCProtocol','Experimenter','TotalWater','ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
                         continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
                         if Correct ==0: # incorrect format; don't change
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
-                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight','WeightAfter']) and
+                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight']) and
                         (child.text() == '')):
                         # These attributes can have the empty string, but we can't set the value as the empty string, unless we allow resets
                         if allow_reset:
