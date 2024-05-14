@@ -481,8 +481,15 @@ class Window(QMainWindow):
                     time.sleep(5)
                     triggers = harp.read(camera_trigger_file)
                     self.trigger_length = len(triggers)
+                elif len(os.listdir(video_folder)) == 0:
+                    # no video data saved.
+                    self.trigger_length=0
+                    self.WarningLabelCamera.setText('')
+                    self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
+                    return
                 else:
                     self.trigger_length=0
+                    logging.error('Saved video data, but no camera trigger file found')
                     self.WarningLabelCamera.setText('No camera trigger file found!')
                     self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
                     return
