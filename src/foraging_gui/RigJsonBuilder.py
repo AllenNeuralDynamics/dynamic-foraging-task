@@ -17,6 +17,7 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
     if FIB:
         modalities.append(Modality.FIB)
     # TODO, what other modalities do we need to include?
+    OPTO = False
 
     cameras=[
         d.CameraAssembly(
@@ -294,7 +295,29 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
             )
         ]
 
-
+    if OPTO:
+        ##Optogenetics Specific   ##Xinxin to fill in
+ 
+        light_sources.append(
+            d.LightEmittingDiode(
+                name="LED for photostimulation",
+                manufacturer=d.Organization.PRIZMATIX,
+                model="xxx",
+                wavelength=470,
+            )
+            )
+        
+        daqs.append(
+            d.DAQDevice(
+                name="NIDAQ for opto",
+                device_type="DAQ Device",
+                data_interface="USB2.0",
+                manufacturer=d.Organization.NATIONAL_INSTRUMENTS,
+                computer_name="behavior_computer",
+                channels=[
+                ],
+            )
+            )
 
     # Assemble rig schema
     rig = r.Rig(
@@ -339,41 +362,9 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
                 
             ),
         ],
-        daqs=[
-            d.DAQDevice(
-                name="NIDAQ for opto",
-                device_type="DAQ Device",
-                data_interface="USB2.0",
-                manufacturer=d.Organization.NATIONAL_INSTRUMENTS,
-                computer_name="behavior_computer",
-                channels=[
-                ],
-            )],
+
         
-        #######################################################################################################
-        ##Optogenetics Specific   ##Xinxin to fill in
-        # TODO, need to toggle whether to include this, and fill it in       
- 
-        #light_sources=[
-        #    d.LightEmittingDiode(
-        #        name="LED for photostimulation",
-        #        manufacturer=d.Organization.PRIZMATIX,
-        #        model="xxx",
-        #        wavelength=470,
-        #    ),
-        #],
-        
-        #daqs=[
-        #    d.DAQDevice(
-        #        name="NIDAQ for opto",
-        #        device_type="DAQ Device",
-        #        data_interface="USB2.0",
-        #        manufacturer=d.Organization.NATIONAL_INSTRUMENTS,
-        #        computer_name="behavior_computer",
-        #        channels=[
-        #        ],
-        #    )
-        #],
+
         
         ##Optogenetics Specific
         #######################################################################################################
