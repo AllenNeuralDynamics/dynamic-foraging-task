@@ -367,7 +367,7 @@ def build_rig_json(old_rig, settings, water_calibration, laser_calibration):
         new_rig_json = json.load(f)
 
     # Load most recent rig_json
-    old_rig_json_path = os.path.join(self.SettingFolder,'rig_metadata','rig_alex_laptop_2024-05-14_13_35_18.json')
+    old_rig_json_path = os.path.join(settings,'rig_metadata','rig_alex_laptop_2024-05-14_13_35_18.json')
     with open(old_rig_json_path, 'r') as f:
         old_rig_json = json.load(f)
 
