@@ -9,6 +9,7 @@ import logging
 import socket
 import harp
 import pandas as pd
+from pathlib import Path
 from datetime import date, datetime
 
 import serial 
@@ -925,6 +926,7 @@ class Window(QMainWindow):
             'show_log_info_in_console':False,
             'default_ui':'ForagingGUI.ui',
             'open_ephys_machine_ip_address':'',
+            'rig_metadata_folder':os.path.join(self.SettingFolder,'rig_metadata')+'\\',
             'rig_specification':os.path.join(self.SettingFolder, 'rig_specification.json')
 
         }
@@ -982,6 +984,7 @@ class Window(QMainWindow):
         self.newscale_serial_num_box4=self.Settings['newscale_serial_num_box4']
         self.default_ui=self.Settings['default_ui']
         self.open_ephys_machine_ip_address=self.Settings['open_ephys_machine_ip_address']
+        self.rig_metadata_folder=self.Settings['rig_metadata_folder']
         self.rig_specification=self.Settings['rig_specification']
 
         # Also stream log info to the console if enabled
@@ -1142,13 +1145,14 @@ class Window(QMainWindow):
         else:
             subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True)
 
-    def _LoadRigJson(self):
-        # Check if Rig Json is up to date
-        # If not, rebuild
-        
+    def _LoadRigJson(self):     
         #RIG ID: rig_name+YYYYMMDD (323_EPHYS3_20240512)
         #RIG JSON name: 'rig_<rig_name>_<YYY-MM-DD.json'
- 
+
+        # See if rig metadata folder exists 
+        if not os.path.exists(self.Settings['rig_metadata_folder']):
+            os.makedirs(self.Settings['rig_metadata_folder'])
+              
         # Load rig_specification.json
         self.rig_specification
         if os.path.isfile(self.rig_specification):
@@ -1159,17 +1163,21 @@ class Window(QMainWindow):
             except Exception as e:
                 logging.error('Error loading rig specification file: {}'.format(e))
         else:
-            raise Exception('Cannot find rig specification file at: {}'.format(self.rig_specification))
+            raise Exception('Cannot find rig specification file: {}'.format(self.rig_specification))
         
         # Load most recent rig_json
-        self.Settings['rig_metadata_folder'] = os.path.join(self.SettingFolder, 'rig_metadata')
+        files = sorted(Path(self.Settings['rig_metadata_folder']).iterdir(), key=os.path.getmtime)
+        #dates = []
+        print(files)
+        #for f in files:
+        #    if (f.startswith('rig_'+self.rig_name)) and (f.endswith('.json')):
+        #        date_str = f.split('_')[-1].split(
         old_rig_json_path = os.path.join(self.Settings['rig_metadata_folder'],'rig_alex_laptop_2024-05-14_13_35_18.json')
         with open(old_rig_json_path, 'r') as f:
             old_rig_json = json.load(f)      
 
  
         # Build, but don't save!
-        self.Settings['rig_metadata_folder'] = os.path.join(self.SettingFolder, 'rig_metadata')
         self.Settings['rig_name'] = self.rig_name 
         build_rig_json(old_rig_json,self.Settings, self.WaterCalibrationResults, self.LaserCalibrationResults)        
 
