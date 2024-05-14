@@ -18,6 +18,9 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
     # TODO, what other modalities do we need to include?
 
 
+
+
+
     cameras=[
         d.CameraAssembly(
             name="BehaviorVideography_FaceSide",
@@ -81,66 +84,10 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
         ),
     ]
 
-    # Assemble rig schema
-    rig = r.Rig(
-        rig_id="447_FIP/Behavior/Opt_FullModalityTemplate", ## TODO
-        modification_date=date.today(),
-        modalities= modalities,
-        cameras=cameras,   
-        daqs=[
-            d.HarpDevice(
-                name="Harp Behavior",
-                harp_device_type=d.HarpDeviceType.BEHAVIOR,
-                core_version="2.1",
-                firmware_version="FTDI version:",
-                computer_name="behavior_computer", # TODO should this be hostname?
-                is_clock_generator=False,
-                channels=[
-                    d.DAQChannel(channel_name="DO0", device_name="Solenoid Left", channel_type="Digital Output"),
-                    d.DAQChannel(channel_name="DO1", device_name="Solenoid Right", channel_type="Digital Output"),
-                    d.DAQChannel(channel_name="DI0", device_name="Janelia_Lick_Detector Left", channel_type="Digital Input"), # TODO, need to check this
-                    d.DAQChannel(channel_name="DI1", device_name="Janelia_Lick_Detector Right", channel_type="Digital Input"), # TODO, need to check this
-                    d.DAQChannel(channel_name="DI3", device_name="Photometry Clock", channel_type="Digital Input"),
-                ],
-            )
-        ],
-        mouse_platform=d.Tube(name="mouse_tube_foraging", diameter=4.0),
-        stimulus_devices=[
-            d.RewardDelivery(
-                reward_spouts=[
-                    d.RewardSpout(
-                        name="Janelia_Lick_Detector Left",
-                        side=d.SpoutSide.LEFT,
-                        spout_diameter=1.2,
-                        solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Left"),
-                        lick_sensor_type=d.LickSensorType("Capacitive")
-                    ),
-                    d.RewardSpout(
-                        name="Janelia_Lick_Detector Right",
-                        side=d.SpoutSide.RIGHT,
-                        spout_diameter=1.2,
-                        solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Right"),
-                        lick_sensor_type=d.LickSensorType("Capacitive")
-                    ),
-                ],
-                stage_type=d.MotorizedStage(
-                        name="NewScaleMotor for LickSpouts",
-                        serial_number="xxxx", #grabing from GUI/SettingFiles # TODO
-                        manufacturer=d.Organization.NEW_SCALE_TECHNOLOGIES,
-                        travel=15.0,  #unit is mm
-                        firmware="https://github.com/AllenNeuralDynamics/python-newscale, branch: axes-on-target, commit #7c17497",
-                ),
-                
-            ),
-        ],
-        
-        
-        ## Common
-        #######################################################################################################
-        ##FIB Specific
-        
-        # TODO, need to toggle whether to include this       
- 
+    #######################################################################################################
+    ##FIB Specific
+
+    if settings['FIP_workflow_path'] != '':
         patch_cords=[
             d.Patch(
                 name="Bundle Branching Fiber-optic Patch Cord",
@@ -149,7 +96,7 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
                 core_diameter=200,
                 numerical_aperture=0.37,
             )
-        ],
+        ]
         light_sources=[
             d.LightEmittingDiode(
                 name="470nm LED",
@@ -169,7 +116,7 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
                 model="M565F3",
                 wavelength=565,
             ),
-        ],
+        ]
         detectors=[
             d.Detector(
                 name="Green CMOS",
@@ -207,7 +154,7 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
                 chroma="Monochrome",
                 bit_depth=16,
             ),
-        ],
+        ]
         objectives=[
             d.Objective(
                 name="Objective",
@@ -218,7 +165,7 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
                 magnification=10,
                 immersion="air",
             )
-        ],
+        ]
         filters=[
             d.Filter(
                 name="Green emission filter",
@@ -296,7 +243,7 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
                 width=35.6,
                 height=23.2,
             ),
-        ],
+        ]
         lenses=[
             d.Lens(
                 manufacturer=d.Organization.THORLABS,
@@ -305,11 +252,79 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
                 focal_length=80,
                 size=1,
             )
+        ]
+        
+        additional_devices=[d.Device(device_type="Photometry Clock", name="Photometry Clock")]
+    else:
+        patch_cords = []
+        light_sources = []
+        detectors = []
+        objectives = []
+        filters = []
+        lenses = []
+        additional_devices = []
+
+
+    # Assemble rig schema
+    rig = r.Rig(
+        rig_id="447_FIP/Behavior/Opt_FullModalityTemplate", ## TODO
+        modification_date=date.today(),
+        modalities= modalities,
+        cameras=cameras,   
+        patch_cords=patch_cords,
+        light_sources=light_sources,
+        detectors=detectors,
+        objectives=objectives,
+        filters=filters,
+        lenses=lenses,
+        additional_devices=additional_devices,
+        daqs=[
+            d.HarpDevice(
+                name="Harp Behavior",
+                harp_device_type=d.HarpDeviceType.BEHAVIOR,
+                core_version="2.1",
+                firmware_version="FTDI version:",
+                computer_name="behavior_computer", # TODO should this be hostname?
+                is_clock_generator=False,
+                channels=[
+                    d.DAQChannel(channel_name="DO0", device_name="Solenoid Left", channel_type="Digital Output"),
+                    d.DAQChannel(channel_name="DO1", device_name="Solenoid Right", channel_type="Digital Output"),
+                    d.DAQChannel(channel_name="DI0", device_name="Janelia_Lick_Detector Left", channel_type="Digital Input"), # TODO, need to check this
+                    d.DAQChannel(channel_name="DI1", device_name="Janelia_Lick_Detector Right", channel_type="Digital Input"), # TODO, need to check this
+                    d.DAQChannel(channel_name="DI3", device_name="Photometry Clock", channel_type="Digital Input"),
+                ],
+            )
+        ],
+        mouse_platform=d.Tube(name="mouse_tube_foraging", diameter=4.0),
+        stimulus_devices=[
+            d.RewardDelivery(
+                reward_spouts=[
+                    d.RewardSpout(
+                        name="Janelia_Lick_Detector Left",
+                        side=d.SpoutSide.LEFT,
+                        spout_diameter=1.2,
+                        solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Left"),
+                        lick_sensor_type=d.LickSensorType("Capacitive")
+                    ),
+                    d.RewardSpout(
+                        name="Janelia_Lick_Detector Right",
+                        side=d.SpoutSide.RIGHT,
+                        spout_diameter=1.2,
+                        solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Right"),
+                        lick_sensor_type=d.LickSensorType("Capacitive")
+                    ),
+                ],
+                stage_type=d.MotorizedStage(
+                        name="NewScaleMotor for LickSpouts",
+                        serial_number="xxxx", #grabing from GUI/SettingFiles # TODO
+                        manufacturer=d.Organization.NEW_SCALE_TECHNOLOGIES,
+                        travel=15.0,  #unit is mm
+                        firmware="https://github.com/AllenNeuralDynamics/python-newscale, branch: axes-on-target, commit #7c17497",
+                ),
+                
+            ),
         ],
         
-        additional_devices=[d.Device(device_type="Photometry Clock", name="Photometry Clock")],
-        
-        ##FIB Specific
         #######################################################################################################
         ##Optogenetics Specific   ##Xinxin to fill in
         # TODO, need to toggle whether to include this, and fill it in       
@@ -377,7 +392,7 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
         new_rig_json = json.load(f)
 
     # Compare the two rig.jsons
-    differences = DeepDiff(new_rig_json, old_rig_json,ignore_order=True)
+    differences = DeepDiff(old_rig_json, new_rig_json,ignore_order=True)
 
     # Print differences
     logging.info('comparing with old rig json: {}'.format(differences))
