@@ -362,7 +362,7 @@ def build_rig_json(old_rig, settings, water_calibration, laser_calibration):
     differences['values_changed'].pop("root['rig_id']")
     differences['values_changed'].pop("root['modification_date']")
 
-    if len(differences['values_changed') > 0:
+    if len(differences['values_changed']) > 0:
         # Write to file 
         suffix = '_{}_{}.json'.format(settings['rig_name'], datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
         rig.write_standard_file(suffix=suffix, output_directory=settings['rig_metadata_folder']) 
