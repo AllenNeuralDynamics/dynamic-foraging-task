@@ -255,29 +255,6 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
         ]
         
         additional_devices=[d.Device(device_type="Photometry Clock", name="Photometry Clock")]
-    else:
-        patch_cords = []
-        light_sources = []
-        detectors = []
-        objectives = []
-        filters = []
-        lenses = []
-        additional_devices = []
-
-
-    # Assemble rig schema
-    rig = r.Rig(
-        rig_id="447_FIP/Behavior/Opt_FullModalityTemplate", ## TODO
-        modification_date=date.today(),
-        modalities= modalities,
-        cameras=cameras,   
-        patch_cords=patch_cords,
-        light_sources=light_sources,
-        detectors=detectors,
-        objectives=objectives,
-        filters=filters,
-        lenses=lenses,
-        additional_devices=additional_devices,
         daqs=[
             d.HarpDevice(
                 name="Harp Behavior",
@@ -294,7 +271,49 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
                     d.DAQChannel(channel_name="DI3", device_name="Photometry Clock", channel_type="Digital Input"),
                 ],
             )
-        ],
+        ]
+    else:
+        patch_cords = []
+        light_sources = []
+        detectors = []
+        objectives = []
+        filters = []
+        lenses = []
+        additional_devices = []
+        daqs=[
+            d.HarpDevice(
+                name="Harp Behavior",
+                harp_device_type=d.HarpDeviceType.BEHAVIOR,
+                core_version="2.1",
+                firmware_version="FTDI version:",
+                computer_name="behavior_computer", # TODO should this be hostname?
+                is_clock_generator=False,
+                channels=[
+                    d.DAQChannel(channel_name="DO0", device_name="Solenoid Left", channel_type="Digital Output"),
+                    d.DAQChannel(channel_name="DO1", device_name="Solenoid Right", channel_type="Digital Output"),
+                    d.DAQChannel(channel_name="DI0", device_name="Janelia_Lick_Detector Left", channel_type="Digital Input"), # TODO, need to check this
+                    d.DAQChannel(channel_name="DI1", device_name="Janelia_Lick_Detector Right", channel_type="Digital Input"), # TODO, need to check this
+                    d.DAQChannel(channel_name="DI3", device_name="Photometry Clock", channel_type="Digital Input"),
+                ],
+            )
+        ]
+
+
+
+    # Assemble rig schema
+    rig = r.Rig(
+        rig_id="447_FIP/Behavior/Opt_FullModalityTemplate", ## TODO
+        modification_date=date.today(),
+        modalities= modalities,
+        cameras=cameras,   
+        patch_cords=patch_cords,
+        light_sources=light_sources,
+        detectors=detectors,
+        objectives=objectives,
+        filters=filters,
+        lenses=lenses,
+        additional_devices=additional_devices,
+        daqs=daqs,
         mouse_platform=d.Tube(name="mouse_tube_foraging", diameter=4.0),
         stimulus_devices=[
             d.RewardDelivery(
