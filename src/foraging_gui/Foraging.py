@@ -1146,6 +1146,7 @@ class Window(QMainWindow):
         # Load rig_specification.json
         # Check against current rig json
         # If need to update, pass to BuildRigJson
+        self.Settings['rig_metadata_folder'] = os.path.join(self.SettingFolder, 'rig_metadata')
         build_rig_json(self.Settings, self.WaterCalibrationResults, self.LaserCalibrationResults)
 
     def _OpenSettingFolder(self):
