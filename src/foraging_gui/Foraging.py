@@ -1151,7 +1151,7 @@ class Window(QMainWindow):
  
         # Load rig_specification.json
         self.rig_specification
-        if os.path.is_file(self.rig_specification):
+        if os.path.isfile(self.rig_specification):
             logging.info('Loading rig specification file')
         else:
             raise Exception('Cannot find rig specification file at: {}'.format(self.rig_specification))
