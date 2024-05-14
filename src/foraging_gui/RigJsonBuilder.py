@@ -366,20 +366,23 @@ def build_rig_json(old_rig, settings, water_calibration, laser_calibration):
     with open(new_rig_json_path, 'r') as f:
         new_rig_json = json.load(f)
 
+    # Load most recent rig_json
+    old_rig_json_path = os.path.join(self.SettingFolder,'rig_metadata','rig_alex_laptop_2024-05-14_13_35_18.json')
+    with open(old_rig_json_path, 'r') as f:
+        old_rig_json = json.load(f)
 
     logging.info('comparing with old rig json')
-    differences = DeepDiff(new_rig_json, old_rig)
+    differences = DeepDiff(new_rig_json, old_rig_json)
     print(differences)
 
-    differences['values_changed'].pop("root['rig_id']")
-    differences['values_changed'].pop("root['modification_date']")
 
-    if len(differences['values_changed']) > 0:
-        # Write to file 
-        suffix = '_{}_{}.json'.format(settings['rig_name'], datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
-        rig.write_standard_file(suffix=suffix, output_directory=settings['rig_metadata_folder']) 
-        logging.info('Saving new rig json: rig{}'.format(suffix))
-        logging.info('values changed: {}'.format(differences['values_changed'].keys()))
+
+    #if len(differences['values_changed']) > 0:
+    #    # Write to file 
+    #    suffix = '_{}_{}.json'.format(settings['rig_name'], datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
+    #    rig.write_standard_file(suffix=suffix, output_directory=settings['rig_metadata_folder']) 
+    #    logging.info('Saving new rig json: rig{}'.format(suffix))
+    #    logging.info('values changed: {}'.format(differences['values_changed'].keys()))
 
 
 
