@@ -2977,7 +2977,7 @@ class Window(QMainWindow):
             else:
                 self.TeensyWarning.setText('')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)              
-                self.fiber_photometry_end_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                self.fiber_photometry_end_time = str(datetime.now())
 
         return 1
     

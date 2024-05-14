@@ -1014,5 +1014,5 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-06_13-43-37_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
-    generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
+    generate_metadata(json_file=r'Y:\715083\behavior_715083_2024-04-26_17-12-15\behavior\715083_2024-04-26_17-12-15.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-13_12-38-51_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
+    #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
