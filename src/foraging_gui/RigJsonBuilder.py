@@ -357,8 +357,16 @@ def build_rig_json(old_rig, settings, water_calibration, laser_calibration):
     logging.info('built rig json')
 
 
+    # Write to temporary file, so I dont need to worry about types from serialization
+    suffix = '_temp.json'
+    rig.write_standard_file(suffix=suffix, output_directory=settings['rig_metadata_folder']) 
+    new_rig_json_path = os.path.join(settings['rig_metadata_folder'],'rig_temp.json')
+    with open(new_rig_json_path, 'r') as f:
+        new_rig_json = json.load(f)
+
+
     logging.info('comparing with old rig json')
-    differences = DeepDiff(rig, old_rig)
+    differences = DeepDiff(new_rig, old_rig)
     print(differences)
 
     differences['values_changed'].pop("root['rig_id']")
