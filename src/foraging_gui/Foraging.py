@@ -1003,8 +1003,7 @@ class Window(QMainWindow):
                 4:'D'
             }
             self.current_box='{}-{}'.format(self.current_box,mapper[self.box_number])
-        window_title = '{}'.format(self.current_box)
-        self.rig_name = window_title
+        self.rig_name = '{}'.format(self.current_box)
 
     def _InitializeBonsai(self):
         '''
@@ -1144,9 +1143,6 @@ class Window(QMainWindow):
             subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True)
 
     def _LoadRigJson(self):     
-        #RIG ID: rig_name+YYYYMMDD (323_EPHYS3_20240512)
-        #RIG JSON name: 'rig_<rig_name>_<YYY-MM-DD.json'
-
         # See if rig metadata folder exists 
         if not os.path.exists(self.Settings['rig_metadata_folder']):
             print('making directory: {}'.format(self.Settings['rig_metadata_folder']))
@@ -1170,6 +1166,7 @@ class Window(QMainWindow):
         for f in files:
             print(f)
         if len(files) ==0:
+            # No rig.jsons found, this will trigger saving the new one
             old_rig_json = {}
         else:
             #old_rig_json_path = os.path.join(self.Settings['rig_metadata_folder'],'rig_alex_laptop_2024-05-14_13_35_18.json')
@@ -1177,7 +1174,7 @@ class Window(QMainWindow):
             with open(old_rig_json_path, 'r') as f:
                 old_rig_json = json.load(f)      
 
-        # Build, but don't save!
+        # Builds a new rig.json, and saves if there are changes with the most recent
         self.Settings['rig_name'] = self.rig_name 
         build_rig_json(old_rig_json,self.Settings, self.WaterCalibrationResults, self.LaserCalibrationResults)        
 

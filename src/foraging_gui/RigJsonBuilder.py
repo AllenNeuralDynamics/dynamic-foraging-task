@@ -12,7 +12,7 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
     logging.info('building rig json')
     rig = r.Rig(
         rig_id="447_FIP/Behavior/Opt_FullModalityTemplate", ## TODO
-        modification_date=date(2000, 1, 1), # TODO
+        modification_date=date.today(),
         modalities=[Modality.FIB, Modality.BEHAVIOR], # TODO
         cameras=[
             d.CameraAssembly(
@@ -358,7 +358,6 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
     )
     logging.info('built rig json')
 
-
     # Write the new rig schema to a json file and load it back 
     # I do this to ignore serialization issues when comparing the rig.jsons 
     suffix = '_temp.json'
@@ -379,7 +378,6 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
         if len(differences['values_changed']) == 0:
             differences.pop('values_changed')
     logging.info('comparing with old rig json: {}'.format(differences))
-
 
     # If any differences remain, rename the temp file
     if len(differences) > 0:
