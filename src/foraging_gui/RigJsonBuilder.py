@@ -359,6 +359,8 @@ def build_rig_json(old_rig, settings, water_calibration, laser_calibration):
 
     logging.info('comparing with old rig json')
     differences = DeepDiff(rig, old_rig)
+    print(differences)
+
     differences['values_changed'].pop("root['rig_id']")
     differences['values_changed'].pop("root['modification_date']")
 
