@@ -924,7 +924,7 @@ class Window(QMainWindow):
             'newscale_serial_num_box4':'',
             'show_log_info_in_console':False,
             'default_ui':'ForagingGUI.ui',
-            'open_ephys_machine_ip_address':''
+            'open_ephys_machine_ip_address':'',
             'rig_specification':os.path.join(self.SettingFolder, 'rig_specification.json')
 
         }
