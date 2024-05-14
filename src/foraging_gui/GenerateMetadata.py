@@ -549,7 +549,10 @@ class generate_metadata:
         self.fib_light_sources_config=[]
         for current_light_source in self.Obj['meta_data_dialog']['rig_metadata']['light_sources']:
             # caution: the light sources for the photometry are selected based on the device type, and excludes LED with camera included in the notes (LED for camera illumination). This may be wrong for some rigs.
-            if (current_light_source['device_type'] in ['LightEmittingDiode','Light emitting diode']) and ('camera' not in current_light_source['notes']):
+            if (current_light_source['device_type'] in ['LightEmittingDiode','Light emitting diode']):
+                if current_light_source['notes'] !=None:
+                    if 'camera' in current_light_source['notes']:
+                        continue
                 self.fib_light_sources_config.append(LightEmittingDiodeConfig(
                     name=current_light_source['name'],
                 ))
