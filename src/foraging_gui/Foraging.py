@@ -1165,11 +1165,9 @@ class Window(QMainWindow):
         
         # Load most recent rig_json
         files = sorted(Path(self.Settings['rig_metadata_folder']).iterdir(), key=os.path.getmtime)
-        #dates = []
-        print(files)
-        #for f in files:
-        #    if (f.startswith('rig_'+self.rig_name)) and (f.endswith('.json')):
-        #        date_str = f.split('_')[-1].split(
+        for f in files:
+            print(f)
+
         old_rig_json_path = os.path.join(self.Settings['rig_metadata_folder'],'rig_alex_laptop_2024-05-14_13_35_18.json')
         with open(old_rig_json_path, 'r') as f:
             old_rig_json = json.load(f)      
