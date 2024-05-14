@@ -80,13 +80,13 @@ def build_rig_json(settings, water_calibration, laser_calibration):
                 harp_device_type=d.HarpDeviceType.BEHAVIOR,
                 core_version="2.1",
                 firmware_version="FTDI version:",
-                computer_name="behavior_computer",
+                computer_name="behavior_computer", # TODO should this be hostname?
                 is_clock_generator=False,
                 channels=[
                     d.DAQChannel(channel_name="DO0", device_name="Solenoid Left", channel_type="Digital Output"),
                     d.DAQChannel(channel_name="DO1", device_name="Solenoid Right", channel_type="Digital Output"),
-                    d.DAQChannel(channel_name="DI0", device_name="Janelia_Lick_Detector Left", channel_type="Digital Input"),
-                    d.DAQChannel(channel_name="DI1", device_name="Janelia_Lick_Detector Right", channel_type="Digital Input"),
+                    d.DAQChannel(channel_name="DI0", device_name="Janelia_Lick_Detector Left", channel_type="Digital Input"), # TODO, need to check this
+                    d.DAQChannel(channel_name="DI1", device_name="Janelia_Lick_Detector Right", channel_type="Digital Input"), # TODO, need to check this
                     d.DAQChannel(channel_name="DI3", device_name="Photometry Clock", channel_type="Digital Input"),
                 ],
             )
@@ -126,6 +126,8 @@ def build_rig_json(settings, water_calibration, laser_calibration):
         #######################################################################################################
         ##FIB Specific
         
+        # TODO, need to toggle whether to include this       
+ 
         patch_cords=[
             d.Patch(
                 name="Bundle Branching Fiber-optic Patch Cord",
@@ -297,7 +299,8 @@ def build_rig_json(settings, water_calibration, laser_calibration):
         ##FIB Specific
         #######################################################################################################
         ##Optogenetics Specific   ##Xinxin to fill in
-        
+        # TODO, need to toggle whether to include this, and fill it in       
+ 
         #light_sources=[
         #    d.LightEmittingDiode(
         #        name="LED for photostimulation",
@@ -319,9 +322,10 @@ def build_rig_json(settings, water_calibration, laser_calibration):
         #    )
         #],
         
-        ##Optogene"tics Specific
+        ##Optogenetics Specific
         #######################################################################################################
     
+        # TODO, need to merge in laser and water calibration things
         ##Calibrations
         calibrations=[
             d.Calibration(
@@ -349,8 +353,9 @@ def build_rig_json(settings, water_calibration, laser_calibration):
             ##Water calibration comes here##
         ],
     )
-    
+   
+    # Write to file 
     suffix = '_{}_{}.json'.format(settings['rig_name'], datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
-    rig.write_standard_file(suffix=suffix, output_directory=settings['rig_metadata_folder']) #TODO
-    logging.info('built rig json')
+    rig.write_standard_file(suffix=suffix, output_directory=settings['rig_metadata_folder']) 
+    logging.info('built rig json: rig{}'.format(suffix))
 
