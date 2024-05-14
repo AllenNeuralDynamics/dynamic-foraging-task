@@ -2,8 +2,8 @@ import logging
 from datetime import date, datetime, timezone
 
 import aind_data_schema.core.rig as r
-import aind_data_schema.models.devices as d
-from aind_data_schema.models.modalities import Modality
+import aind_data_schema.components.devices as d
+from aind_data_schema_models.modalities import Modality
 
 def build_rig_json(settings, water_calibration, laser_calibration):    
     logging.info('building rig json')
