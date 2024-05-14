@@ -78,7 +78,7 @@ class Window(QMainWindow):
         self._GetWaterCalibration()
 
         # Load Rig Json
-        self._BuildRigJson()      
+        self._LoadRigJson()      
  
         # Load User interface 
         self._LoadUI()
