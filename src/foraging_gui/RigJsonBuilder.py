@@ -15,7 +15,7 @@ def build_rig_json(settings, water_calibration, laser_calibration):
             d.CameraAssembly(
                 name="BehaviorVideography_FaceSide",
                 #camera_assembly_name="BehaviorVideography_FaceBottom",
-                camera_target=d.CameraTarget.FACE_SIDE,
+                camera_target=d.CameraTarget.FACE_SIDE_RIGHT,
                 camera=d.Camera(
                     name="Side face camera",
                     detector_type="Camera",
