@@ -350,7 +350,7 @@ def build_rig_json(settings, water_calibration, laser_calibration):
         ],
     )
     
-    suffix = '_{}_{}.json'.format(settings['rig_name'], datetime.now(tzinfo=timezone.utc).strftime('%Y-%m-%d_%H_%M_%S'))
+    suffix = '_{}_{}.json'.format(settings['rig_name'], datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
     rig.write_standard_file(suffix=suffix, output_directory=settings['rig_metadata_folder']) #TODO
     logging.info('built rig json')
 
