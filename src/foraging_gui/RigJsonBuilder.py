@@ -8,7 +8,7 @@ import aind_data_schema.core.rig as r
 import aind_data_schema.components.devices as d
 from aind_data_schema_models.modalities import Modality
 
-def build_rig_json(old_rig, settings, water_calibration, laser_calibration):    
+def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration):    
     logging.info('building rig json')
     rig = r.Rig(
         rig_id="447_FIP/Behavior/Opt_FullModalityTemplate", ## TODO
@@ -359,35 +359,38 @@ def build_rig_json(old_rig, settings, water_calibration, laser_calibration):
     logging.info('built rig json')
 
 
-    # Write to temporary file, so I dont need to worry about types from serialization
+    # Write the new rig schema to a json file and load it back 
+    # I do this to ignore serialization issues when comparing the rig.jsons 
     suffix = '_temp.json'
     rig.write_standard_file(suffix=suffix, output_directory=settings['rig_metadata_folder']) 
     new_rig_json_path = os.path.join(settings['rig_metadata_folder'],'rig_temp.json')
     with open(new_rig_json_path, 'r') as f:
         new_rig_json = json.load(f)
 
-    # Load most recent rig_json
-    old_rig_json_path = os.path.join(settings['rig_metadata_folder'],'rig_alex_laptop_2024-05-14_13_35_18.json')
-    with open(old_rig_json_path, 'r') as f:
-        old_rig_json = json.load(f)
-
+    # Compare the two rig.jsons
     differences = DeepDiff(new_rig_json, old_rig_json,ignore_order=True)
+
+    # Print differences
     logging.info('comparing with old rig json: {}'.format(differences))
 
+    # Remove the modification date, since that doesnt matter for comparison purposes
     if ('values_changed' in differences) and ("root['modification_date']" in differences['values_changed']):
         differences['values_changed'].pop("root['modification_date']")
         if len(differences['values_changed']) == 0:
             differences.pop('values_changed')
-
     logging.info('comparing with old rig json: {}'.format(differences))
 
 
+    # If any differences remain, rename the temp file
     if len(differences) > 0:
         # Write to file 
-        final_path = os.path.join(settings['rig_metadata_folder'],'rig_{}_{}.json'.format(settings['rig_name'], datetime.now().strftime('%Y-%m-%d_%H_%M_%S')))
+        time_str = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')
+        filename = 'rig_{}_{}.json'.format(settings['rig_name'],time_str )
+        final_path = os.path.join(settings['rig_metadata_folder'],filename)
         os.rename(new_rig_json_path, final_path)
-        logging.info('Saving new rig json: rig{}'.format(final_path))
+        logging.info('Saving new rig json: {}'.format(filename))
     else:
+        # Delete temp file
         os.remove(new_rig_json_path)
         logging.info('Using existing rig json')
 

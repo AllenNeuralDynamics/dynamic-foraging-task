@@ -1161,10 +1161,17 @@ class Window(QMainWindow):
         else:
             raise Exception('Cannot find rig specification file at: {}'.format(self.rig_specification))
         
+        # Load most recent rig_json
+        self.Settings['rig_metadata_folder'] = os.path.join(self.SettingFolder, 'rig_metadata')
+        old_rig_json_path = os.path.join(self.Settings['rig_metadata_folder'],'rig_alex_laptop_2024-05-14_13_35_18.json')
+        with open(old_rig_json_path, 'r') as f:
+            old_rig_json = json.load(f)      
+
+ 
         # Build, but don't save!
         self.Settings['rig_metadata_folder'] = os.path.join(self.SettingFolder, 'rig_metadata')
         self.Settings['rig_name'] = self.rig_name 
-        build_rig_json({},self.Settings, self.WaterCalibrationResults, self.LaserCalibrationResults)        
+        build_rig_json(old_rig_json,self.Settings, self.WaterCalibrationResults, self.LaserCalibrationResults)        
 
         # Compare with most recent rig_json
         # if updated, save new version
