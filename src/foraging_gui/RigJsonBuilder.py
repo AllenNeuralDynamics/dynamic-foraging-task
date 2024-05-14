@@ -350,6 +350,7 @@ def build_rig_json(settings, water_calibration, laser_calibration):
         ],
     )
     
-    rig.write_standard_file(prefix="ForagingRig_", output_directory=settings['rig_metadata_folder']) #TODO
+    suffix = 'AlexLaptop_2024-05-14.json'
+    rig.write_standard_file(suffix=suffix, output_directory=settings['rig_metadata_folder']) #TODO
     logging.info('built rig json')
 

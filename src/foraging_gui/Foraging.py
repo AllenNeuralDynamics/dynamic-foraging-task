@@ -1143,6 +1143,9 @@ class Window(QMainWindow):
         # Check if Rig Json is up to date
         # If not, rebuild
         
+        #RIG ID: rig_name+YYYYMMDD (323_EPHYS3_20240512)
+        #RIG JSON name: 'rig_<rig_name>_<YYY-MM-DD.json'
+ 
         # Load rig_specification.json
         # Check against current rig json
         # If need to update, pass to BuildRigJson
