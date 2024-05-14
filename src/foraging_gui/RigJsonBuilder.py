@@ -10,73 +10,83 @@ from aind_data_schema_models.modalities import Modality
 
 def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration):    
     logging.info('building rig json')
+
+    # Determining if FIB rig
+    modalities = [Modality.BEHAVIOR]
+    if settings['FIP_workflow_path'] != '':
+        modalities.append(Modality.FIB)
+    # TODO, what other modalities do we need to include?
+
+
+    cameras=[
+        d.CameraAssembly(
+            name="BehaviorVideography_FaceSide",
+            #camera_assembly_name="BehaviorVideography_FaceBottom",
+            camera_target=d.CameraTarget.FACE_SIDE_RIGHT,
+            camera=d.Camera(
+                name="Side face camera",
+                detector_type="Camera",
+                serial_number="TBD",
+                manufacturer=d.Organization.AILIPU,
+                model="ELP-USBFHD05MT-KL170IR",
+                notes="The light intensity sensor was removed; IR illumination is constantly on",
+                data_interface="USB",
+                computer_name="W10DTJK7N0M3",
+                max_frame_rate=120,
+                sensor_width=640,
+                sensor_height=480,
+                chroma="Color",
+                cooling="Air",
+                bin_mode="Additive",
+                recording_software=d.Software(name="Bonsai", version="2.5"),
+            ),
+            lens=d.Lens(
+                name="Xenocam 1",
+                model="XC0922LENS",
+                serial_number="unknown",
+                manufacturer=d.Organization.OTHER,
+                max_aperture="f/1.4",
+                notes='Focal Length 9-22mm 1/3" IR F1.4',
+            ),
+        ),
+        d.CameraAssembly(
+            name="BehaviorVideography_FaceBottom",
+            #camera_assembly_name="BehaviorVideography_FaceBottom",
+            camera_target=d.CameraTarget.FACE_BOTTOM,
+            camera=d.Camera(
+                name="Bottom face Camera",
+                detector_type="Camera",
+                serial_number="TBD",
+                manufacturer=d.Organization.AILIPU,
+                model="ELP-USBFHD05MT-KL170IR",
+                notes="The light intensity sensor was removed; IR illumination is constantly on",
+                data_interface="USB",
+                computer_name="W10DTJK7N0M3",
+                max_frame_rate=120,
+                sensor_width=640,
+                sensor_height=480,
+                chroma="Color",
+                cooling="Air",
+                bin_mode="Additive",
+                recording_software=d.Software(name="Bonsai", version="2.5"),
+            ),
+            lens=d.Lens(
+                name="Xenocam 2",
+                model="XC0922LENS",
+                serial_number="unknown",
+                manufacturer=d.Organization.OTHER,
+                max_aperture="f/1.4",
+                notes='Focal Length 9-22mm 1/3" IR F1.4',
+            ),
+        ),
+    ]
+
+    # Assemble rig schema
     rig = r.Rig(
         rig_id="447_FIP/Behavior/Opt_FullModalityTemplate", ## TODO
         modification_date=date.today(),
-        modalities=[Modality.FIB, Modality.BEHAVIOR], # TODO
-        cameras=[
-            d.CameraAssembly(
-                name="BehaviorVideography_FaceSide",
-                #camera_assembly_name="BehaviorVideography_FaceBottom",
-                camera_target=d.CameraTarget.FACE_SIDE_RIGHT,
-                camera=d.Camera(
-                    name="Side face camera",
-                    detector_type="Camera",
-                    serial_number="TBD",
-                    manufacturer=d.Organization.AILIPU,
-                    model="ELP-USBFHD05MT-KL170IR",
-                    notes="The light intensity sensor was removed; IR illumination is constantly on",
-                    data_interface="USB",
-                    computer_name="W10DTJK7N0M3",
-                    max_frame_rate=120,
-                    sensor_width=640,
-                    sensor_height=480,
-                    chroma="Color",
-                    cooling="Air",
-                    bin_mode="Additive",
-                    recording_software=d.Software(name="Bonsai", version="2.5"),
-                ),
-                lens=d.Lens(
-                    name="Xenocam 1",
-                    model="XC0922LENS",
-                    serial_number="unknown",
-                    manufacturer=d.Organization.OTHER,
-                    max_aperture="f/1.4",
-                    notes='Focal Length 9-22mm 1/3" IR F1.4',
-                ),
-            ),
-            d.CameraAssembly(
-                name="BehaviorVideography_FaceBottom",
-                #camera_assembly_name="BehaviorVideography_FaceBottom",
-                camera_target=d.CameraTarget.FACE_BOTTOM,
-                camera=d.Camera(
-                    name="Bottom face Camera",
-                    detector_type="Camera",
-                    serial_number="TBD",
-                    manufacturer=d.Organization.AILIPU,
-                    model="ELP-USBFHD05MT-KL170IR",
-                    notes="The light intensity sensor was removed; IR illumination is constantly on",
-                    data_interface="USB",
-                    computer_name="W10DTJK7N0M3",
-                    max_frame_rate=120,
-                    sensor_width=640,
-                    sensor_height=480,
-                    chroma="Color",
-                    cooling="Air",
-                    bin_mode="Additive",
-                    recording_software=d.Software(name="Bonsai", version="2.5"),
-                ),
-                lens=d.Lens(
-                    name="Xenocam 2",
-                    model="XC0922LENS",
-                    serial_number="unknown",
-                    manufacturer=d.Organization.OTHER,
-                    max_aperture="f/1.4",
-                    notes='Focal Length 9-22mm 1/3" IR F1.4',
-                ),
-            ),
-        ],
-        
+        modalities= modalities,
+        cameras=cameras,   
         daqs=[
             d.HarpDevice(
                 name="Harp Behavior",
