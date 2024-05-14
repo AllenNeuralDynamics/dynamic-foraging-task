@@ -348,7 +348,7 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
                 computer_name="behavior_computer",
                 channels=[
                 ],
-            )]
+            )],
         
         #######################################################################################################
         ##Optogenetics Specific   ##Xinxin to fill in
