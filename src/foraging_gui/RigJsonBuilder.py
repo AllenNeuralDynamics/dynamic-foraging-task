@@ -374,6 +374,14 @@ def build_rig_json(old_rig, settings, water_calibration, laser_calibration):
     differences = DeepDiff(new_rig_json, old_rig_json,ignore_order=True)
     logging.info('comparing with old rig json: {}'.format(differences))
 
+    if ('values_changed' in differences) and ("root['modification_date']" in differences['values_changed']):
+        differences['values_changed'].pop("root['modification_date']")
+        if len(differences['values_changed']) == 0:
+            differences.pop('values_changed')
+
+    logging.info('comparing with old rig json: {}'.format(differences))
+
+
     if len(differences) > 0:
         # Write to file 
         final_path = os.path.join(settings['rig_metadata_folder'],'rig_{}_{}.json'.format(settings['rig_name'], datetime.now().strftime('%Y-%m-%d_%H_%M_%S')))
