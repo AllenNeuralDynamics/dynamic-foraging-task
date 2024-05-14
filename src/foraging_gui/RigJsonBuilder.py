@@ -372,7 +372,7 @@ def build_rig_json(old_rig, settings, water_calibration, laser_calibration):
         old_rig_json = json.load(f)
 
     logging.info('comparing with old rig json')
-    differences = DeepDiff(new_rig_json, old_rig_json)
+    differences = DeepDiff(new_rig_json, old_rig_json,ignore_order=True)
     print(differences)
 
 
