@@ -1149,7 +1149,7 @@ class Window(QMainWindow):
 
         # See if rig metadata folder exists 
         if not os.path.exists(self.Settings['rig_metadata_folder']):
-            print('making directory: {}'.format(self.Settings['rig_metadata_folder'])
+            print('making directory: {}'.format(self.Settings['rig_metadata_folder']))
             os.makedirs(self.Settings['rig_metadata_folder'])
               
         # Load rig_specification.json
