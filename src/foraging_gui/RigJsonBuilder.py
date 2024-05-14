@@ -1,5 +1,5 @@
 import logging
-from deepdiff import Deepdiff
+from deepdiff import DeepDiff
 from datetime import date, datetime, timezone
 
 import aind_data_schema.core.rig as r
