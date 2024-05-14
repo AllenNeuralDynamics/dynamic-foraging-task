@@ -925,6 +925,8 @@ class Window(QMainWindow):
             'show_log_info_in_console':False,
             'default_ui':'ForagingGUI.ui',
             'open_ephys_machine_ip_address':''
+            'rig_specification':os.path.join(self.SettingFolder, 'rig_specification.json')
+
         }
         
         # Try to load Settings_box#.csv
@@ -980,6 +982,7 @@ class Window(QMainWindow):
         self.newscale_serial_num_box4=self.Settings['newscale_serial_num_box4']
         self.default_ui=self.Settings['default_ui']
         self.open_ephys_machine_ip_address=self.Settings['open_ephys_machine_ip_address']
+        self.rig_specification=self.Settings['rig_specification']
 
         # Also stream log info to the console if enabled
         if  self.Settings['show_log_info_in_console']:
@@ -1147,6 +1150,12 @@ class Window(QMainWindow):
         #RIG JSON name: 'rig_<rig_name>_<YYY-MM-DD.json'
  
         # Load rig_specification.json
+        self.rig_specification
+        if os.path.is_file(self.rig_specification):
+            logging.info('Loading rig specification file')
+        else:
+            raise Exception('Cannot find rig specification file at: {}'.format(self.rig_specification))
+
         # Check against current rig json
         # If need to update, pass to BuildRigJson
         self.Settings['rig_metadata_folder'] = os.path.join(self.SettingFolder, 'rig_metadata')
