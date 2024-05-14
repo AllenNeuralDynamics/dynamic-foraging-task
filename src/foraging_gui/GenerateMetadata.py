@@ -476,7 +476,7 @@ class generate_metadata:
                 light_sources=self.fib_light_sources_config,
                 detectors=self.fib_detectors,
                 fiber_connections=self.fiber_connections,
-                notes=f'fib mode: {self.Obj['fiber_mode']}',
+                notes=f'fib mode: {self.Obj["fiber_mode"]}',
         ))
 
     def _get_fiber_connections(self):
