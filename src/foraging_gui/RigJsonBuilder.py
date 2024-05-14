@@ -13,13 +13,10 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
 
     # Determining if FIB rig
     modalities = [Modality.BEHAVIOR]
-    if settings['FIP_workflow_path'] != '':
+    FIB = settings['FIP_workflow_path'] != ''
+    if FIB:
         modalities.append(Modality.FIB)
     # TODO, what other modalities do we need to include?
-
-
-
-
 
     cameras=[
         d.CameraAssembly(
@@ -87,7 +84,7 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
     #######################################################################################################
     ##FIB Specific
 
-    if settings['FIP_workflow_path'] != '':
+    if FIB:
         patch_cords=[
             d.Patch(
                 name="Bundle Branching Fiber-optic Patch Cord",
@@ -318,14 +315,14 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
             d.RewardDelivery(
                 reward_spouts=[
                     d.RewardSpout(
-                        name="Janelia_Lick_Detector Left",
+                        name="Janelia_Lick_Detector Left", # TODO
                         side=d.SpoutSide.LEFT,
                         spout_diameter=1.2,
                         solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Left"),
                         lick_sensor_type=d.LickSensorType("Capacitive")
                     ),
                     d.RewardSpout(
-                        name="Janelia_Lick_Detector Right",
+                        name="Janelia_Lick_Detector Right", # TODO
                         side=d.SpoutSide.RIGHT,
                         spout_diameter=1.2,
                         solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Right"),
@@ -342,6 +339,16 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
                 
             ),
         ],
+        daqs=[
+            d.DAQDevice(
+                name="NIDAQ for opto",
+                device_type="DAQ Device",
+                data_interface="USB2.0",
+                manufacturer=d.Organization.NATIONAL_INSTRUMENTS,
+                computer_name="behavior_computer",
+                channels=[
+                ],
+            )]
         
         #######################################################################################################
         ##Optogenetics Specific   ##Xinxin to fill in
