@@ -31,6 +31,7 @@ from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY, EphysRecording
 from foraging_gui.stage import Stage
+from foraging_gui.RigJsonBuilder import build_rig_json
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -75,7 +76,10 @@ class Window(QMainWindow):
         # Load Laser and Water Calibration Files
         self._GetLaserCalibration()
         self._GetWaterCalibration()
-       
+
+        # Load Rig Json
+        self._BuildRigJson()      
+ 
         # Load User interface 
         self._LoadUI()
 
@@ -1134,6 +1138,15 @@ class Window(QMainWindow):
             subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
         else:
             subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True)
+
+    def _LoadRigJson(self):
+        # Check if Rig Json is up to date
+        # If not, rebuild
+        
+        # Load rig_specification.json
+        # Check against current rig json
+        # If need to update, pass to BuildRigJson
+        build_rig_json(self.Settings, self.WaterCalibrationResults, self.LaserCalibrationResults)
 
     def _OpenSettingFolder(self):
         '''Open the setting folder'''
