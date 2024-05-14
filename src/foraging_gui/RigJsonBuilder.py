@@ -371,18 +371,18 @@ def build_rig_json(old_rig, settings, water_calibration, laser_calibration):
     with open(old_rig_json_path, 'r') as f:
         old_rig_json = json.load(f)
 
-    logging.info('comparing with old rig json')
     differences = DeepDiff(new_rig_json, old_rig_json,ignore_order=True)
-    print(differences)
+    logging.info('comparing with old rig json: {}'.format(differences))
 
+    if len(differences) > 0:
+        # Write to file 
+        final_path = os.path.join(settings['rig_metadata_folder'],'rig_{}_{}.json'.format(settings['rig_name'], datetime.now().strftime('%Y-%m-%d_%H_%M_%S')))
+        os.rename(new_rig_json_path, final_path)
+        logging.info('Saving new rig json: rig{}'.format(final_path))
+    else:
+        os.remove(new_rig_json_path)
+        logging.info('Using existing rig json')
 
-
-    #if len(differences['values_changed']) > 0:
-    #    # Write to file 
-    #    suffix = '_{}_{}.json'.format(settings['rig_name'], datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
-    #    rig.write_standard_file(suffix=suffix, output_directory=settings['rig_metadata_folder']) 
-    #    logging.info('Saving new rig json: rig{}'.format(suffix))
-    #    logging.info('values changed: {}'.format(differences['values_changed'].keys()))
 
 
 
