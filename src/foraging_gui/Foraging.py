@@ -84,8 +84,8 @@ class Window(QMainWindow):
         self._LoadUI()
 
         # set window title
-        self.setWindowTitle(self.window_title)
-        logging.info('Setting Window title: {}'.format(self.window_title))
+        self.setWindowTitle(self.rig_name)
+        logging.info('Setting Window title: {}'.format(self.rig_name))
 
         # Set up parameters
         self.StartANewSession = 1   # to decide if should start a new session
@@ -1000,7 +1000,7 @@ class Window(QMainWindow):
             }
             self.current_box='{}-{}'.format(self.current_box,mapper[self.box_number])
         window_title = '{}'.format(self.current_box)
-        self.window_title = window_title
+        self.rig_name = window_title
 
     def _InitializeBonsai(self):
         '''
@@ -1150,6 +1150,7 @@ class Window(QMainWindow):
         # Check against current rig json
         # If need to update, pass to BuildRigJson
         self.Settings['rig_metadata_folder'] = os.path.join(self.SettingFolder, 'rig_metadata')
+        self.Settings['rig_name'] = self.rig_name 
         build_rig_json(self.Settings, self.WaterCalibrationResults, self.LaserCalibrationResults)
 
     def _OpenSettingFolder(self):
