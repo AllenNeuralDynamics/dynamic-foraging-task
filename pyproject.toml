@@ -29,6 +29,7 @@ dependencies = [
     "pynwb",
     "requests",
     "harp-python",
+    "deepdiff",
 ]
 
 [tool.setuptools.packages.find]

@@ -1,11 +1,12 @@
 import logging
+from deepdiff import Deepdiff
 from datetime import date, datetime, timezone
 
 import aind_data_schema.core.rig as r
 import aind_data_schema.components.devices as d
 from aind_data_schema_models.modalities import Modality
 
-def build_rig_json(settings, water_calibration, laser_calibration):    
+def build_rig_json(old_rig, settings, water_calibration, laser_calibration):    
     logging.info('building rig json')
     rig = r.Rig(
         rig_id="447_FIP/Behavior/Opt_FullModalityTemplate", ## TODO
@@ -353,9 +354,20 @@ def build_rig_json(settings, water_calibration, laser_calibration):
             ##Water calibration comes here##
         ],
     )
-   
-    # Write to file 
-    suffix = '_{}_{}.json'.format(settings['rig_name'], datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
-    rig.write_standard_file(suffix=suffix, output_directory=settings['rig_metadata_folder']) 
-    logging.info('built rig json: rig{}'.format(suffix))
+    logging.info('built rig json')
+
+
+    logging.info('comparing with old rig json')
+    differences = DeepDiff(rig, old_rig)
+    differences['values_changed'].pop("root['rig_id']")
+    differences['values_changed'].pop("root['modification_date']")
+
+    if len(differences['values_changed') > 0:
+        # Write to file 
+        suffix = '_{}_{}.json'.format(settings['rig_name'], datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
+        rig.write_standard_file(suffix=suffix, output_directory=settings['rig_metadata_folder']) 
+        logging.info('Saving new rig json: rig{}'.format(suffix))
+        logging.info('values changed: {}'.format(differences['values_changed'].keys()))
+
+
 

@@ -1153,14 +1153,24 @@ class Window(QMainWindow):
         self.rig_specification
         if os.path.isfile(self.rig_specification):
             logging.info('Loading rig specification file')
+            try:
+                with open(self.rig_specification, 'r') as f:
+                    rig_specification = json.load(f)
+            except Exception as e:
+                logging.error('Error loading rig specification file: {}'.format(e))
         else:
             raise Exception('Cannot find rig specification file at: {}'.format(self.rig_specification))
-
-        # Check against current rig json
-        # If need to update, pass to BuildRigJson
+    
+        # Load most recent rig_json
+        rig_json = None        
+    
+        # Build, but don't save!
         self.Settings['rig_metadata_folder'] = os.path.join(self.SettingFolder, 'rig_metadata')
         self.Settings['rig_name'] = self.rig_name 
-        build_rig_json(self.Settings, self.WaterCalibrationResults, self.LaserCalibrationResults)
+        build_rig_json({},self.Settings, self.WaterCalibrationResults, self.LaserCalibrationResults)        
+
+        # Compare with most recent rig_json
+        # if updated, save new version
 
     def _OpenSettingFolder(self):
         '''Open the setting folder'''
