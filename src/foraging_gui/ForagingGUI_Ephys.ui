@@ -3917,6 +3917,60 @@
      <bool>true</bool>
     </property>
    </widget>
+   <widget class="QLabel" name="label_65">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>900</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>FIP mode=</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="FIPMode">
+    <property name="geometry">
+     <rect>
+      <x>795</x>
+      <y>900</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="editable">
+     <bool>false</bool>
+    </property>
+    <item>
+     <property name="text">
+      <string>Normal</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Axon</string>
+     </property>
+    </item>
+   </widget>
    <widget class="QLabel" name="TeensyWarning">
     <property name="geometry">
      <rect>
@@ -4605,7 +4659,6 @@
     </property>
     <addaction name="actionLicks_sta"/>
     <addaction name="actionTime_distribution"/>
-    <addaction name="action_HideLines"/>
    </widget>
    <widget class="QMenu" name="menuOptogenetics">
     <property name="sizePolicy">
@@ -4837,11 +4890,6 @@
   <action name="action_NewSession">
    <property name="text">
     <string>New session</string>
-   </property>
-  </action>
-  <action name="action_HideLines">
-   <property name="text">
-    <string>Hide lines</string>
    </property>
   </action>
   <action name="actionLaser_Calibration">

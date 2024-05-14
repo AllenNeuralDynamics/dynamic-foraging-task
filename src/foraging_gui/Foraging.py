@@ -205,8 +205,9 @@ class Window(QMainWindow):
         self.StartBleaching.clicked.connect(self._StartBleaching)
         self.NextBlock.clicked.connect(self._NextBlock)
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
-        self.OptogeneticsB.currentIndexChanged.connect(self._keyPressEvent)
-        self.PhotometryB.currentIndexChanged.connect(self._keyPressEvent)
+        self.OptogeneticsB.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('Optogenetics',self.OptogeneticsB.currentText()))
+        self.PhotometryB.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('Photometry',self.PhotometryB.currentText()))
+        self.FIPMode.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('FIPMode', self.FIPMode.currentText()))
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._keyPressEvent)
         self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
@@ -415,18 +416,11 @@ class Window(QMainWindow):
         session_full_path_list=[]
         session_path_list=[]
         for session_folder in os.listdir(animal_folder):
-            # TODO fix_300
-            training_folder_old = os.path.join(animal_folder,session_folder, 'TrainingFolder')
-            training_folder_new = os.path.join(animal_folder,session_folder, 'behavior')
-            if os.path.exists(training_folder_old):
-                for file_name in os.listdir(training_folder_old):
+            training_folder = os.path.join(animal_folder,session_folder, 'behavior')
+            if os.path.exists(training_folder):
+                for file_name in os.listdir(training_folder):
                     if file_name.endswith('.json'): 
-                        session_full_path_list.append(os.path.join(training_folder_old, file_name))
-                        session_path_list.append(session_folder) 
-            elif os.path.exists(training_folder_new):
-                for file_name in os.listdir(training_folder_new):
-                    if file_name.endswith('.json'): 
-                        session_full_path_list.append(os.path.join(training_folder_new, file_name))
+                        session_full_path_list.append(os.path.join(training_folder, file_name))
                         session_path_list.append(session_folder) 
 
         sorted_indices = sorted(enumerate(session_path_list), key=lambda x: x[1], reverse=True)
@@ -931,35 +925,32 @@ class Window(QMainWindow):
         
         # Try to load Settings_box#.csv
         self.SettingsBox={}
+        if not os.path.exists(self.SettingsBoxFile):
+            logging.error('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
+            raise Exception('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))           
         try:
-            if os.path.exists(self.SettingsBoxFile):
-                # Open the csv settings file
-                df = pd.read_csv(self.SettingsBoxFile,index_col=None)
-                self.SettingsBox = {row[0]: row[1] for _, row in df.iterrows()}
-                logging.info('Loaded settings_box file')
-            else:
-                logging.error('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
-                raise Exception('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
+            # Open the csv settings file
+            df = pd.read_csv(self.SettingsBoxFile,index_col=None)
+            self.SettingsBox = {row[0]: row[1] for _, row in df.iterrows()}
+            logging.info('Loaded settings_box file')
         except Exception as e:
-            logging.error('Could not load settings_box file at: {}, {}'.format(self.SettingFile,str(e)))
-            self.WarningLabel.setText('Could not load settings_box file!')
-            self.WarningLabel.setStyleSheet(self.default_warning_color)
+            logging.error('Could not load settings_box file at: {}, {}'.format(self.SettingsBoxFile,str(e)))
+            e.args = ('Could not load settings box file at: {}'.format(self.SettingsBoxFile), *e.args)
             raise e
+
         # Try to load the settings file        
         self.Settings = {}
+        if not os.path.exists(self.SettingFile):
+            logging.error('Could not find settings file at: {}'.format(self.SettingFile))
+            raise Exception('Could not find settings file at: {}'.format(self.SettingFile))
         try:
-            if os.path.exists(self.SettingFile):
-                # Open the JSON settings file
-                with open(self.SettingFile, 'r') as f:
-                    self.Settings = json.load(f)
-                logging.info('Loaded settings file')
-            else:
-                logging.error('Could not find settings file at: {}'.format(self.SettingFile))
-                raise Exception('Could not find settings file at: {}'.format(self.SettingFile))
+            # Open the JSON settings file
+            with open(self.SettingFile, 'r') as f:
+                self.Settings = json.load(f)
+            logging.info('Loaded settings file')
         except Exception as e:
             logging.error('Could not load settings file at: {}, {}'.format(self.SettingFile,str(e)))
-            self.WarningLabel.setText('Could not load settings file!')
-            self.WarningLabel.setStyleSheet(self.default_warning_color)
+            e.args = ('Could not load settings file at: {}'.format(self.SettingFile), *e.args)
             raise e
 
         # If any settings are missing, use the default values
@@ -1440,6 +1431,10 @@ class Window(QMainWindow):
             self.SwitchThr.setEnabled(True)
             self.PointsInARow.setEnabled(True)
 
+    def _QComboBoxUpdate(self, parameter,value):
+        logging.info('Field updated: {}:{}'.format(parameter, value))       
+ 
+
     def keyPressEvent(self, event=None,allow_reset=False):
         '''
             Enter press to allow change of parameters
@@ -1474,6 +1469,7 @@ class Window(QMainWindow):
             self.UpdateParameters=1 # Changes are allowed
             # change color to black
             for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
+
                 # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
                 for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
                     if child.objectName()=='qt_spinbox_lineedit':
@@ -2339,28 +2335,11 @@ class Window(QMainWindow):
         # do any of the sessions have saved data? Grab the most recent        
         for i in range(len(sessions)-1, -1, -1):
             s = sessions[i]
-            ## TODO fix_300
-            if 'behavior' in s:
+            if 'behavior_' in s:
                 json_file = os.path.join(self.default_saveFolder, 
                     self.current_box, mouse_id, s,'behavior',s.split('behavior_')[1]+'.json')
                 if os.path.isfile(json_file): 
                     date = s.split('_')[2] 
-                    session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
-                    reply = QMessageBox.information(self,
-                        'Box {}, Please verify'.format(self.box_letter),
-                        '<span style="color:purple;font-weight:bold">Mouse ID: {}</span><br>Last session: {}<br>Filename: {}'.format(mouse_id, session_date, s),
-                        QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
-                    if reply == QMessageBox.Cancel:
-                        logging.info('User hit cancel')
-                        return False, ''
-                    else: 
-                        return True, json_file
-            else:
-                json_file = os.path.join(self.default_saveFolder, 
-                    self.current_box, mouse_id, s,'TrainingFolder',s+'.json')
-                print(json_file)
-                if os.path.isfile(json_file): 
-                    date = s.split('_')[1] 
                     session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
                     reply = QMessageBox.information(self,
                         'Box {}, Please verify'.format(self.box_letter),
@@ -2413,19 +2392,10 @@ class Window(QMainWindow):
             if len(sessions) == 0 :
                 continue
             for s in sessions:
-                # Check for data with old format name
-                # TODO fix_300
-                if 'behavior' in s:
-                    # Check for data in new format name
+                if 'behavior_' in s:
                     json_file = os.path.join(self.default_saveFolder, 
                         self.current_box, str(m), s,'behavior',s.split('behavior_')[1]+'.json')
                     if os.path.isfile(json_file):
-                        mice.append(m)
-                        break
-                else:
-                    json_file_old = os.path.join(self.default_saveFolder, 
-                        self.current_box, str(m), s,'TrainingFolder',s+'.json')
-                    if os.path.isfile(json_file_old):
                         mice.append(m)
                         break
         return mice  
@@ -2660,6 +2630,7 @@ class Window(QMainWindow):
         else:
             self.NewSession.setDisabled(False)
         self.StartExcitation.setChecked(False)
+        self.keyPressEvent() # Accept all updates
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
@@ -2735,6 +2706,7 @@ class Window(QMainWindow):
                     child.clear()
 
     def _StartFIP(self):
+        self.StartFIP.setChecked(False)
 
         if self.Teensy_COM == '':
             logging.warning('No Teensy COM configured for this box, cannot start FIP workflow')
@@ -2743,8 +2715,6 @@ class Window(QMainWindow):
             msg = 'No Teensy COM configured for this box, cannot start FIP workflow'
             reply = QMessageBox.information(self, 
                 'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
-            self.StartFIP.setChecked(False)
-            self.StartFIP.setStyleSheet("background-color : none")
             return
         
         if self.FIP_workflow_path == "":
@@ -2754,12 +2724,9 @@ class Window(QMainWindow):
             msg = 'FIP workflow path not defined, cannot start FIP workflow'
             reply = QMessageBox.information(self, 
                 'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
-            self.StartFIP.setChecked(False)
-            self.StartFIP.setStyleSheet("background-color : none")                  
             return
  
         if self.FIP_started:
-            self.StartFIP.setChecked(True)             
             reply = QMessageBox.question(self, 
                 'Box {}, Start FIP workflow:'.format(self.box_letter), 
                 'FIP workflow has already been started. Start again?',
@@ -2770,14 +2737,9 @@ class Window(QMainWindow):
             else:
                 logging.warning('FIP workflow already started, user restarts')
 
-        self.FIP_started=True 
-        logging.info('StartFIP is checked')
-        self.StartFIP.setStyleSheet("background-color : green;")
-
         # Start logging
         self.CreateNewFolder=1
         self.Ot_log_folder=self._restartlogging()
-
 
         # Start the FIP workflow
         try:
@@ -2786,6 +2748,7 @@ class Window(QMainWindow):
             folder_path = ' -p session="{}"'.format(self.SessionFolder)
             camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartCamera.isChecked())
             subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera+' --start',cwd=CWD,shell=True)
+            self.FIP_started=True 
         except Exception as e:
             logging.error(e)
             reply = QMessageBox.information(self, 
@@ -2794,16 +2757,6 @@ class Window(QMainWindow):
                QMessageBox.Ok )               
 
     def _StartExcitation(self):
-
-        if not self.FIP_started:
-            logging.warning('FIP workflow is not running, cannot start excitation')
-            reply = QMessageBox.information(self, 
-                'Box {}, Start Excitation:'.format(self.box_letter), 
-                'Please start the FIP workflow before running excitation',
-                QMessageBox.Ok )                     
-            self.StartExcitation.setChecked(False)
-            self.StartExcitation.setStyleSheet("background-color : none")
-            return 0  
  
         if self.Teensy_COM == '':
             logging.warning('No Teensy COM configured for this box, cannot start excitation')
@@ -2817,27 +2770,21 @@ class Window(QMainWindow):
             return 0 
 
         if self.StartExcitation.isChecked():
-            reply = QMessageBox.question(self, 
-                'Box {}, Start FIP'.format(self.box_letter), 
-                'Is the FIP workflow running?', 
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes )
-            if reply == QMessageBox.No:
-                self.StartExcitation.setChecked(False)
-                self.StartExcitation.setStyleSheet("background-color : none")
-                logging.info('User says FIP workflow is not open')
-                return 0 
-            logging.info('StartExcitation is checked, user confirms workflow is running')
+            logging.info('StartExcitation is checked, photometry mode: {}'.format(self.FIPMode.currentText()))
             self.StartExcitation.setStyleSheet("background-color : green;")
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
                 # Trigger Teensy with the above specified exp mode
-                ser.write(b'c')
+                if self.FIPMode.currentText() == "Normal":
+                    ser.write(b'c')
+                elif self.FIPMode.currentText() == "Axon":
+                    ser.write(b'e')       
                 ser.close()
-                self.TeensyWarning.setText('Start excitation!')
+                self.TeensyWarning.setText('Started FIP excitation')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
                 logging.error(str(e))
-                self.TeensyWarning.setText('Error: start excitation!')
+                self.TeensyWarning.setText('Error: starting excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
                 reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
                 self.StartExcitation.setChecked(False)
@@ -2856,11 +2803,11 @@ class Window(QMainWindow):
                 # Trigger Teensy with the above specified exp mode
                 ser.write(b's')
                 ser.close()
-                self.TeensyWarning.setText('Stop excitation!')
+                self.TeensyWarning.setText('Stopped FIP excitation')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
                 logging.error(str(e))
-                self.TeensyWarning.setText('Error: stop excitation!')
+                self.TeensyWarning.setText('Error stopping excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
                 reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when stopping excitation: {}'.format(e), QMessageBox.Ok)
                 return 0 
@@ -2958,7 +2905,7 @@ class Window(QMainWindow):
         if self.Teensy_COM == '':
             return
         logging.info('Checking that photometry is not running')
-        FIP_was_running=self.StartFIP.isChecked()
+        FIP_was_running=self.FIP_started
         try:
             ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
             # Trigger Teensy with the above specified exp mode
@@ -2974,10 +2921,8 @@ class Window(QMainWindow):
             self.TeensyWarning.setStyleSheet(self.default_warning_color)      
             self.StartBleaching.setStyleSheet("background-color : none")
             self.StartExcitation.setStyleSheet("background-color : none")
-            self.StartFIP.setStyleSheet("background-color : none;")
             self.StartBleaching.setChecked(False)
             self.StartExcitation.setChecked(False)
-            self.StartFIP.setChecked(False)
             self.FIP_started=False
 
         if (FIP_was_running)&(not closing):
@@ -3750,39 +3695,18 @@ class Window(QMainWindow):
     def _open_mouse_on_streamlit(self):
         '''open the training history of the current mouse on the streamlit app'''
         # See this PR: https://github.com/AllenNeuralDynamics/foraging-behavior-browser/pull/25
-        webbrowser.open(f'https://foraging-behavior-browser.streamlit.app/?filter_subject_id={self.ID.text()}'
-                         '&tab_id=tab_session_x_y&x_y_plot_xname=session&x_y_plot_yname=foraging_eff'
-                         '&x_y_plot_group_by=h2o&x_y_plot_if_show_dots=True&x_y_plot_if_aggr_each_group=True&x_y_plot_aggr_method_group=lowess'
-                         '&x_y_plot_if_aggr_all=False&x_y_plot_smooth_factor=5'
-                         '&x_y_plot_dot_size=20&x_y_plot_dot_opacity=0.8&x_y_plot_line_width=3.0'
+        webbrowser.open(f'https://foraging-behavior-browser.allenneuraldynamics-test.org/?filter_subject_id={self.ID.text()}'
+                         '&tab_id=tab_session_inspector'
+                         '&session_plot_mode=all+sessions+filtered+from+sidebar'
+                         '&session_plot_selected_draw_types=1.+Choice+history'
         )
-        
-def map_hostname_to_box(hostname,box_num):
-    host_mapping = {
-        'W10DT714033':'447-1-',
-        'W10DT714086':'447-1-',
-        'KAPPA':      '447-2-',
-        'W10DT714027':'447-2-',
-        'W10DT714028':'447-3-',
-        'W10DT714030':'447-3-'
-    }
-    box_mapping = {
-        1:'A',
-        2:'B',
-        3:'C',
-        4:'D'
-    }
-    if hostname in host_mapping:
-        return host_mapping[hostname]+box_mapping[box_num]
-    else:
-        return hostname+'-'+box_mapping[box_num]
 
 def start_gui_log_file(box_number):
     '''
         Starts a log file for the gui.
         The log file is located at C:/Users/<username>/Documents/foraging_gui_logs
         One log file is created for each time the GUI is started
-        The name of the gui file is <box_name>_gui_log_<date and time>.txt
+        The name of the gui file is <hostname>-<box letter A/B/C/D>_gui_log_<date and time>.txt
     '''
     # Check if the log folder exists, if it doesn't make it
     logging_folder = os.path.join(os.path.expanduser("~"), "Documents",'foraging_gui_logs')
@@ -3796,7 +3720,13 @@ def start_gui_log_file(box_number):
 
     # Build logfile name
     hostname = socket.gethostname()
-    box_name = map_hostname_to_box(hostname, box_number)
+    box_mapping = {
+        1:'A',
+        2:'B',
+        3:'C',
+        4:'D'
+    }
+    box_name =hostname+'-'+box_mapping[box_number]
     filename = '{}_gui_log_{}.txt'.format(box_name,formatted_datetime)
     logging_filename = os.path.join(logging_folder,filename)
 
@@ -3917,7 +3847,7 @@ class UncaughtHook(QtCore.QObject):
         logging.error('FATAL ERROR: \n{}'.format(tb))
 
         # Display alert box
-        tb = "<br>".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+        tb = "<br><br>".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         self._exception_caught.emit(self.box+tb)
 
 
