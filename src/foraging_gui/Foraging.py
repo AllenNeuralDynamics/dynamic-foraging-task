@@ -73,6 +73,7 @@ class Window(QMainWindow):
         self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration_{}.json'.format(box_number))
         self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_{}.json'.format(box_number))
         self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json')
+        self.rig_specification = os.path.join(self.SettingFolder, 'rig_specification.json')
 
         # Load Laser and Water Calibration Files
         self._GetLaserCalibration()
@@ -926,9 +927,7 @@ class Window(QMainWindow):
             'show_log_info_in_console':False,
             'default_ui':'ForagingGUI.ui',
             'open_ephys_machine_ip_address':'',
-            'rig_metadata_folder':os.path.join(self.SettingFolder,'rig_metadata')+'\\',
-            'rig_specification':os.path.join(self.SettingFolder, 'rig_specification.json')
-
+            'rig_metadata_folder':os.path.join(self.SettingFolder,'rig_metadata')+'\\'
         }
         
         # Try to load Settings_box#.csv
@@ -985,7 +984,6 @@ class Window(QMainWindow):
         self.default_ui=self.Settings['default_ui']
         self.open_ephys_machine_ip_address=self.Settings['open_ephys_machine_ip_address']
         self.rig_metadata_folder=self.Settings['rig_metadata_folder']
-        self.rig_specification=self.Settings['rig_specification']
 
         # Also stream log info to the console if enabled
         if  self.Settings['show_log_info_in_console']:
@@ -1151,10 +1149,10 @@ class Window(QMainWindow):
 
         # See if rig metadata folder exists 
         if not os.path.exists(self.Settings['rig_metadata_folder']):
+            print('making directory: {}'.format(self.Settings['rig_metadata_folder'])
             os.makedirs(self.Settings['rig_metadata_folder'])
               
         # Load rig_specification.json
-        self.rig_specification
         if os.path.isfile(self.rig_specification):
             logging.info('Loading rig specification file')
             try:
