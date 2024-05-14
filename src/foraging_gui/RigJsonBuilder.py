@@ -7,7 +7,7 @@ from aind_data_schema_models.modalities import Modality
 
 def build_rig_json(settings, water_calibration, laser_calibration):    
     logging.info('building rig json')
-    r = r.Rig(
+    rig = r.Rig(
         rig_id="447_FIP/Behavior/Opt_FullModalityTemplate", ## TODO
         modification_date=date(2000, 1, 1), # TODO
         modalities=[Modality.FIB, Modality.BEHAVIOR], # TODO
@@ -350,6 +350,6 @@ def build_rig_json(settings, water_calibration, laser_calibration):
         ],
     )
     
-    r.write_standard_file(prefix="ForagingRig_") #TODO
+    rig.write_standard_file(prefix="ForagingRig_") #TODO
     logging.info('built rig json')
 
