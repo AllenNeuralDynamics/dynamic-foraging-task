@@ -87,7 +87,8 @@ class generate_metadata:
         self._mapper()
         self._get_box_type()
         self._session()
-        self._session_description()
+        if self.has_data_description:
+            self._session_description()
 
     def _mapper(self):
         '''
@@ -355,6 +356,15 @@ class generate_metadata:
         # Possible reason: 1) old version of the software.
         if 'Other_lick_spout_distance' not in self.Obj:
             self.Obj['Other_lick_spout_distance']=5000
+
+        # Missing ProjectName
+        # Possible reason: 1) old version of the software. 2) the "Project Name and Funding Source v2.csv" is not provided. 
+        self._initialize_fields(dic=self.Obj['meta_data_dialog']['session_metadata'],keys=['ProjectName'],default_value='')
+
+        if self.Obj['meta_data_dialog']['session_metadata']['ProjectName']=='':
+            self.has_data_description = False
+        else:
+            self.has_data_description = True
 
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
