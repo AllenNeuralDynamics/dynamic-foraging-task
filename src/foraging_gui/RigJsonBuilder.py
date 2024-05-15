@@ -18,12 +18,11 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
     FIB = settings['Teensy_COM_box{}'.format(settings['box_number'])] != ''
     OPTO = False
 
-    modalities = [Modality.BEHAVIOR]
+    components['modalities'] = [Modality.BEHAVIOR]
     if FIB:
-        modalities.append(Modality.FIB)
-    components['modalities'] = modalities
+        components['modalities'].append(Modality.FIB)
 
-    cameras=[
+    components['cameras']=[
         d.CameraAssembly(
             name="BehaviorVideography_FaceSide",
             #camera_assembly_name="BehaviorVideography_FaceBottom",
@@ -89,7 +88,7 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
     #######################################################################################################
     ##FIB Specific
     if FIB:
-        patch_cords=[
+        components['patch_cords']=[
             d.Patch(
                 name="Bundle Branching Fiber-optic Patch Cord",
                 manufacturer=d.Organization.DORIC,
@@ -98,7 +97,8 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
                 numerical_aperture=0.37,
             )
         ]
-        light_sources=[
+
+        components['light_sources']=[
             d.LightEmittingDiode(
                 name="470nm LED",
                 manufacturer=d.Organization.THORLABS,
@@ -118,7 +118,8 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
                 wavelength=565,
             ),
         ]
-        detectors=[
+
+        components['detectors']=[
             d.Detector(
                 name="Green CMOS",
                 serial_number="21396991",
@@ -156,7 +157,8 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
                 bit_depth=16,
             ),
         ]
-        objectives=[
+
+        components['objectives']=[
             d.Objective(
                 name="Objective",
                 serial_number="128022336",
@@ -167,7 +169,8 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
                 immersion="air",
             )
         ]
-        filters=[
+
+        components['filters']=[
             d.Filter(
                 name="Green emission filter",
                 manufacturer=d.Organization.SEMROCK,
@@ -245,7 +248,7 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
                 height=23.2,
             ),
         ]
-        lenses=[
+        components['lenses']=[
             d.Lens(
                 manufacturer=d.Organization.THORLABS,
                 model="AC254-080-A-ML",
@@ -255,8 +258,8 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
             )
         ]
         
-        additional_devices=[d.Device(device_type="Photometry Clock", name="Photometry Clock")]
-        daqs=[
+        components['additional_devices']=[d.Device(device_type="Photometry Clock", name="Photometry Clock")]
+        components['daqs']=[
             d.HarpDevice(
                 name="Harp Behavior",
                 harp_device_type=d.HarpDeviceType.BEHAVIOR,
@@ -274,14 +277,7 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
             )
         ]
     else:
-        patch_cords = []
-        light_sources = []
-        detectors = []
-        objectives = []
-        filters = []
-        lenses = []
-        additional_devices = []
-        daqs=[
+        components['daqs']=[
             d.HarpDevice(
                 name="Harp Behavior",
                 harp_device_type=d.HarpDeviceType.BEHAVIOR,
@@ -301,7 +297,7 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
     if OPTO:
         ##Optogenetics Specific   ##Xinxin to fill in
  
-        light_sources.append(
+        components['light_sources'].append(
             d.LightEmittingDiode(
                 name="LED for photostimulation",
                 manufacturer=d.Organization.PRIZMATIX,
@@ -327,15 +323,6 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
         rig_id="447_FIP/Behavior/Opt_FullModalityTemplate", ## TODO
         modification_date=date.today(),
         **components,
-        cameras=cameras,   
-        patch_cords=patch_cords,
-        light_sources=light_sources,
-        detectors=detectors,
-        objectives=objectives,
-        filters=filters,
-        lenses=lenses,
-        additional_devices=additional_devices,
-        daqs=daqs,
         mouse_platform=d.Tube(name="mouse_tube_foraging", diameter=4.0),
         stimulus_devices=[
             d.RewardDelivery(
