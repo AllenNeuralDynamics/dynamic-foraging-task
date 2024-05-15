@@ -1147,7 +1147,7 @@ class Window(QMainWindow):
     
         # User can skip this step if they make rig metadata themselves
         if not self.Settings['create_rig_metadata']: 
-            logging.info('Skipping rig metadata creation because create_rig_metadata=True')
+            logging.info('Skipping rig metadata creation because create_rig_metadata=False')
             return
 
         # See if rig metadata folder exists 
