@@ -107,13 +107,9 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
                     firmware="https://github.com/AllenNeuralDynamics/python-newscale, branch: axes-on-target, commit #7c17497",
                     )
     else:
-        # TODO
         stage = d.MotorizedStage(
                     name="AIND lick spout stage",
-                    serial_number="?", 
-                    manufacturer=d.Organization.NEW_SCALE_TECHNOLOGIES,
-                    travel=15.0,  #unit is mm
-                    firmware="https://github.com/AllenNeuralDynamics/python-newscale, branch: axes-on-target, commit #7c17497",
+                    manufacturer=d.Organization.AIND
                     )       
     components['stimulus_devices']=[
         d.RewardDelivery(
