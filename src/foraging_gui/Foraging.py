@@ -1181,8 +1181,12 @@ class Window(QMainWindow):
                 existing_rig_json = json.load(f)      
 
         # Builds a new rig.json, and saves if there are changes with the most recent
-        self.Settings['rig_name'] = self.rig_name 
-        build_rig_json(existing_rig_json,self.Settings, self.WaterCalibrationResults, self.LaserCalibrationResults)        
+        rig_settings = self.Settings.copy()
+        rig_settings['rig_name'] = self.rig_name 
+        rig_settings['box_number'] = self.box_number
+        build_rig_json(existing_rig_json, rig_settings, 
+            self.WaterCalibrationResults, 
+            self.LaserCalibrationResults)        
 
     def _OpenSettingFolder(self):
         '''Open the setting folder'''

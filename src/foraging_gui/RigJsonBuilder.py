@@ -12,7 +12,7 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
     logging.info('building rig json')
 
     # TODO, what other modalities do we need to include?
-    FIB = settings['FIP_workflow_path'] != ''
+    FIB = settings['Teensy_COM_box{}'.format(settings['box_number'])] != ''
     OPTO = False
 
     modalities = [Modality.BEHAVIOR]
