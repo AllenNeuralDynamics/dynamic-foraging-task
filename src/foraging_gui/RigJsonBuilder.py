@@ -14,10 +14,11 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
     ###########################################################################
     logging.info('building rig json')
 
-    # Build dictionaries of components
+    # Build dictionary of components
     components = {}
 
     # TODO, what other modalities do we need to include?
+    # behavior video?
     FIB = settings['Teensy_COM_box{}'.format(settings['box_number'])] != ''
     OPTO = False
 
@@ -157,33 +158,40 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
 
     # Calibrations
     ###########################################################################
-    # TODO, need to merge in laser and water calibration things
-    ##Calibrations
-    components['calibrations']=[
-        d.Calibration(
-            calibration_date=datetime(2023, 10, 2, 3, 15, 22, tzinfo=timezone.utc),
-            device_name="470nm LED",
-            description="LED calibration",
-            input={"Power setting": [0]},
-            output={"Power mW": [0.02]},
-        ),
-        d.Calibration(
-            calibration_date=datetime(2023, 10, 2, 3, 15, 22, tzinfo=timezone.utc),
-            device_name="415nm LED",
-            description="LED calibration",
-            input={"Power setting": [0]},
-            output={"Power mW": [0.02]},
-        ),
-        d.Calibration(
-            calibration_date=datetime(2023, 10, 2, 3, 15, 22, tzinfo=timezone.utc),
-            device_name="560nm LED",
-            description="LED calibration",
-            input={"Power setting": [0]},
-            output={"Power mW": [0.02]},
-        ),
-    
-        ##Water calibration comes here##
-    ]
+
+    components['calibrations']=[]
+
+    # Water calibration
+    left, right = parse_water_calibration(water_calibration)
+    components['calibrations'].append(left)
+    components['calibrations'].append(right)
+
+    # Laser Calibration     # TODO, its unclear if these are for FIP, OPTO, or both?
+    # Its unclear how to include the laser calibration file
+    #components['calibrations'].append(
+    #    d.Calibration(
+    #        calibration_date=datetime(2023, 10, 2, 3, 15, 22, tzinfo=timezone.utc),
+    #        device_name="470nm LED",
+    #        description="LED calibration",
+    #        input={"Power setting": [0]},
+    #        output={"Power mW": [0.02]},
+    #    ))
+    #components['calibrations'].append(
+    #    d.Calibration(
+    #        calibration_date=datetime(2023, 10, 2, 3, 15, 22, tzinfo=timezone.utc),
+    #        device_name="415nm LED",
+    #        description="LED calibration",
+    #        input={"Power setting": [0]},
+    #        output={"Power mW": [0.02]},
+    #    ))
+    #components['calibrations'].append(
+    #    d.Calibration(
+    #        calibration_date=datetime(2023, 10, 2, 3, 15, 22, tzinfo=timezone.utc),
+    #        device_name="560nm LED",
+    #        description="LED calibration",
+    #        input={"Power setting": [0]},
+    #        output={"Power mW": [0.02]},
+    #    )
 
     # FIB specific information
     ###########################################################################
@@ -397,17 +405,16 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
     # Optogenetics specific
     ###########################################################################
     if OPTO:
-        ##Optogenetics Specific   ##Xinxin to fill in
-        # TODO
+        ##Optogenetics Specific   ## TODO Xinxin to fill in
          
-        components['light_sources'].append(
-            d.LightEmittingDiode(
-                name="LED for photostimulation",
-                manufacturer=d.Organization.PRIZMATIX,
-                model="xxx",
-                wavelength=470,
-            )
-            )
+        #components['light_sources'].append(
+        #    d.LightEmittingDiode(
+        #        name="LED for photostimulation",
+        #        manufacturer=d.Organization.PRIZMATIX,
+        #        model="xxx",
+        #        wavelength=470,
+        #    )
+        #    )
         
         #daqs.append(
         #    d.DAQDevice(
@@ -429,7 +436,7 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
         modification_date=date.today(),
         **components 
         )
-    logging.info('built rig json')
+    logging.info('finished building rig json')
 
     # Compare with existing rig schema
     ###########################################################################
@@ -452,10 +459,10 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
             if len(differences['values_changed']) == 0:
                 differences.pop('values_changed')
 
-    # Determine which to save
+    # Determine which schema to use
     ###########################################################################
-    # If any differences remain, rename the temp file
     if len(differences) > 0:
+        # If any differences remain, rename the temp file
         logging.info('differences with existing rig json: {}'.format(differences))
         # Write to file 
         time_str = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')
@@ -468,4 +475,22 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
         os.remove(new_rig_json_path)
         logging.info('Using existing rig json')
 
-
+def parse_water_calibration(water_calibration):
+    sorted_dates = sorted(water_calibration.keys())
+    print(sorted_dates)
+    date = sorted_dates[-1]
+    left = d.Calibration(
+        calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
+        device_name = 'Lick spout Left',
+        description = 'Water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delievered in microliters.',
+        input = {'valve open time (s):':''},
+        output = {'water volume (ul):':'')
+        )
+    right = d.Calibration(
+        calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
+        device_name = 'Lick spout Left',
+        description = 'Water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delievered in microliters.',
+        input = {'valve open time (s):':''},
+        output = {'water volume (ul):':'')
+        )
+    return left, right
