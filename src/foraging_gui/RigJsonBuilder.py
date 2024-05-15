@@ -8,6 +8,8 @@ import aind_data_schema.core.rig as r
 import aind_data_schema.components.devices as d
 from aind_data_schema_models.modalities import Modality
 
+from foraging_gui.Visualization import GetWaterCalibration
+
 def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibration):    
 
     # Set up
@@ -476,13 +478,11 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
         logging.info('Using existing rig json')
 
 def parse_water_calibration(water_calibration):
-    sorted_dates = sorted(water_calibration.keys())
-    print(sorted_dates)
-    date = sorted_dates[-1]
-    left_times = list(water_calibration[date]['Left'].keys())
-    right_times = list(water_calibration[date]['Right'].keys())
-    left_volumes = [water_calibration[date]['Left'][x]['0.5']['200'][0] for x in left_times]
-    right_volumes = [water_calibration[date]['Right'][x]['0.5']['200'][0] for x in right_times]
+    
+    date = sorted(water_calibration.keys())[-1]
+    left_times, left_volumes = GetWaterCalibration(water_calibration, date, 'Left')
+    right_times, right_volumes = GetWaterCalibration(water_calibration, date, 'Right')
+
     left = d.Calibration(
         calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
         device_name = 'Lick spout Left',
@@ -490,6 +490,7 @@ def parse_water_calibration(water_calibration):
         input = {'valve open time (s):':', '.join(left_times)},
         output = {'water volume (ul):':left_volumes}
         )
+
     right = d.Calibration(
         calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
         device_name = 'Lick spout Right',
@@ -497,4 +498,7 @@ def parse_water_calibration(water_calibration):
         input = {'valve open time (s):':', '.join(right_times)},
         output = {'water volume (ul):':right_volumes}
         )
+
     return left, right
+
+
