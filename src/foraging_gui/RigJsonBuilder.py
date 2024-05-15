@@ -406,7 +406,7 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
     ###########################################################################
     if OPTO:
         ##Optogenetics Specific   ## TODO Xinxin to fill in
-         
+        print('need to implement') 
         #components['light_sources'].append(
         #    d.LightEmittingDiode(
         #        name="LED for photostimulation",
