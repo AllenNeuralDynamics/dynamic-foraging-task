@@ -113,7 +113,7 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
                     manufacturer=d.Organization.AIND,
                     travel=15.0,
                     )      
-    if ('AINDLickDetector' in settings['box_settings']) and (settings['box_settings']['AINDLickDetector'] == 1:
+    if ('AINDLickDetector' in settings['box_settings']) and (settings['box_settings']['AINDLickDetector'] == 1):
         # TODO, need to add correct details
         lick_spouts=[
             d.RewardSpout(
