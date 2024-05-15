@@ -11,6 +11,9 @@ from aind_data_schema_models.modalities import Modality
 def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibration):    
     logging.info('building rig json')
 
+    # Build dictionaries of components
+    components = {}
+
     # TODO, what other modalities do we need to include?
     FIB = settings['Teensy_COM_box{}'.format(settings['box_number'])] != ''
     OPTO = False
@@ -18,6 +21,7 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
     modalities = [Modality.BEHAVIOR]
     if FIB:
         modalities.append(Modality.FIB)
+    components['modalities'] = modalities
 
     cameras=[
         d.CameraAssembly(
@@ -322,7 +326,7 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
     rig = r.Rig(
         rig_id="447_FIP/Behavior/Opt_FullModalityTemplate", ## TODO
         modification_date=date.today(),
-        modalities= modalities,
+        **components,
         cameras=cameras,   
         patch_cords=patch_cords,
         light_sources=light_sources,
