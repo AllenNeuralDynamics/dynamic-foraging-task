@@ -927,7 +927,7 @@ class Window(QMainWindow):
             'show_log_info_in_console':False,
             'default_ui':'ForagingGUI.ui',
             'open_ephys_machine_ip_address':'',
-            'rig_metadata_folder':os.path.join(self.SettingFolder,'rig_metadata')+'\\'
+            'rig_metadata_folder':os.path.join(self.SettingFolder,'rig_metadata')+'\\',
             'create_rig_metadata':True,
         }
         
