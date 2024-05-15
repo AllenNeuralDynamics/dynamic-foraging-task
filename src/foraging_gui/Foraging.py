@@ -2037,6 +2037,12 @@ class Window(QMainWindow):
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
                 return
 
+        # Stop Excitation if its running
+        if self.StartExcitation.isChecked():
+            self.StartExcitation.setChecked(False)
+            self._StartExcitation()
+            logging.info('Stopping excitation before saving')
+
         # this should be improved in the future. Need to get the last LeftRewardDeliveryTime and RightRewardDeliveryTime
         if hasattr(self, 'GeneratedTrials') and self.InitializeBonsaiSuccessfully==1:
             self.GeneratedTrials._GetLicks(self.Channel2)
