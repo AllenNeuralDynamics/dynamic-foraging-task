@@ -9,6 +9,9 @@ import aind_data_schema.components.devices as d
 from aind_data_schema_models.modalities import Modality
 
 def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibration):    
+
+    # Set up
+    ###########################################################################
     logging.info('building rig json')
 
     # Build dictionaries of components
@@ -18,10 +21,14 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
     FIB = settings['Teensy_COM_box{}'.format(settings['box_number'])] != ''
     OPTO = False
 
+    # Modalities
+    ###########################################################################
     components['modalities'] = [Modality.BEHAVIOR]
     if FIB:
         components['modalities'].append(Modality.FIB)
 
+    # Cameras
+    ###########################################################################
     components['cameras']=[
         d.CameraAssembly(
             name="BehaviorVideography_FaceSide",
@@ -85,8 +92,73 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
         ),
     ]
 
-    #######################################################################################################
-    ##FIB Specific
+    # Mouse Platform
+    ###########################################################################
+    components['mouse_platform']=d.Tube(name="mouse_tube_foraging", diameter=4.0)
+
+    # Stimulus devices
+    ###########################################################################
+    components['stimulus_devices']=[
+        d.RewardDelivery(
+            reward_spouts=[
+                d.RewardSpout(
+                    name="Janelia_Lick_Detector Left", # TODO
+                    side=d.SpoutSide.LEFT,
+                    spout_diameter=1.2,
+                    solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Left"),
+                    lick_sensor_type=d.LickSensorType("Capacitive")
+                ),
+                d.RewardSpout(
+                    name="Janelia_Lick_Detector Right", # TODO
+                    side=d.SpoutSide.RIGHT,
+                    spout_diameter=1.2,
+                    solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Right"),
+                    lick_sensor_type=d.LickSensorType("Capacitive")
+                ),
+            ],
+            stage_type=d.MotorizedStage(
+                    name="NewScaleMotor for LickSpouts",
+                    serial_number="xxxx", #grabing from GUI/SettingFiles # TODO
+                    manufacturer=d.Organization.NEW_SCALE_TECHNOLOGIES,
+                    travel=15.0,  #unit is mm
+                    firmware="https://github.com/AllenNeuralDynamics/python-newscale, branch: axes-on-target, commit #7c17497",
+            ),
+            
+        ),
+        ]
+
+    # Calibrations
+    ###########################################################################
+    # TODO, need to merge in laser and water calibration things
+    ##Calibrations
+    components['calibrations']=[
+        d.Calibration(
+            calibration_date=datetime(2023, 10, 2, 3, 15, 22, tzinfo=timezone.utc),
+            device_name="470nm LED",
+            description="LED calibration",
+            input={"Power setting": [0]},
+            output={"Power mW": [0.02]},
+        ),
+        d.Calibration(
+            calibration_date=datetime(2023, 10, 2, 3, 15, 22, tzinfo=timezone.utc),
+            device_name="415nm LED",
+            description="LED calibration",
+            input={"Power setting": [0]},
+            output={"Power mW": [0.02]},
+        ),
+        d.Calibration(
+            calibration_date=datetime(2023, 10, 2, 3, 15, 22, tzinfo=timezone.utc),
+            device_name="560nm LED",
+            description="LED calibration",
+            input={"Power setting": [0]},
+            output={"Power mW": [0.02]},
+        ),
+    
+        ##Water calibration comes here##
+    ]
+
+    # FIB specific information
+    ###########################################################################
     if FIB:
         components['patch_cords']=[
             d.Patch(
@@ -294,6 +366,8 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
             )
         ]
 
+    # Optogenetics specific
+    ###########################################################################
     if OPTO:
         ##Optogenetics Specific   ##Xinxin to fill in
  
@@ -318,71 +392,18 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
         #    )
         #    )
 
+    # Generate Rig Schema
+    ###########################################################################
     # Assemble rig schema
     rig = r.Rig(
         rig_id="447_FIP/Behavior/Opt_FullModalityTemplate", ## TODO
         modification_date=date.today(),
-        **components,
-        mouse_platform=d.Tube(name="mouse_tube_foraging", diameter=4.0),
-        stimulus_devices=[
-            d.RewardDelivery(
-                reward_spouts=[
-                    d.RewardSpout(
-                        name="Janelia_Lick_Detector Left", # TODO
-                        side=d.SpoutSide.LEFT,
-                        spout_diameter=1.2,
-                        solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Left"),
-                        lick_sensor_type=d.LickSensorType("Capacitive")
-                    ),
-                    d.RewardSpout(
-                        name="Janelia_Lick_Detector Right", # TODO
-                        side=d.SpoutSide.RIGHT,
-                        spout_diameter=1.2,
-                        solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Right"),
-                        lick_sensor_type=d.LickSensorType("Capacitive")
-                    ),
-                ],
-                stage_type=d.MotorizedStage(
-                        name="NewScaleMotor for LickSpouts",
-                        serial_number="xxxx", #grabing from GUI/SettingFiles # TODO
-                        manufacturer=d.Organization.NEW_SCALE_TECHNOLOGIES,
-                        travel=15.0,  #unit is mm
-                        firmware="https://github.com/AllenNeuralDynamics/python-newscale, branch: axes-on-target, commit #7c17497",
-                ),
-                
-            ),
-        ],
-  
-        # TODO, need to merge in laser and water calibration things
-        ##Calibrations
-        calibrations=[
-            d.Calibration(
-                calibration_date=datetime(2023, 10, 2, 3, 15, 22, tzinfo=timezone.utc),
-                device_name="470nm LED",
-                description="LED calibration",
-                input={"Power setting": [0]},
-                output={"Power mW": [0.02]},
-            ),
-            d.Calibration(
-                calibration_date=datetime(2023, 10, 2, 3, 15, 22, tzinfo=timezone.utc),
-                device_name="415nm LED",
-                description="LED calibration",
-                input={"Power setting": [0]},
-                output={"Power mW": [0.02]},
-            ),
-            d.Calibration(
-                calibration_date=datetime(2023, 10, 2, 3, 15, 22, tzinfo=timezone.utc),
-                device_name="560nm LED",
-                description="LED calibration",
-                input={"Power setting": [0]},
-                output={"Power mW": [0.02]},
-            ),
-    
-            ##Water calibration comes here##
-        ],
-    )
+        **components 
+        )
     logging.info('built rig json')
 
+    # Compare with existing rig schema
+    ###########################################################################
     # Write the new rig schema to a json file and load it back 
     # I do this to ignore serialization issues when comparing the rig.jsons 
     suffix = '_temp.json'
@@ -400,6 +421,8 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
         if len(differences['values_changed']) == 0:
             differences.pop('values_changed')
 
+    # Determine which to save
+    ###########################################################################
     # If any differences remain, rename the temp file
     if len(differences) > 0:
         logging.info('differences with existing rig json: {}'.format(differences))
@@ -413,7 +436,5 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
         # Delete temp file
         os.remove(new_rig_json_path)
         logging.info('Using existing rig json')
-
-
 
 
