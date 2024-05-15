@@ -11,14 +11,13 @@ from aind_data_schema_models.modalities import Modality
 def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration):    
     logging.info('building rig json')
 
-    # Determining if FIB rig
-    modalities = [Modality.BEHAVIOR]
+    # TODO, what other modalities do we need to include?
     FIB = settings['FIP_workflow_path'] != ''
+    OPTO = False
+
+    modalities = [Modality.BEHAVIOR]
     if FIB:
         modalities.append(Modality.FIB)
-    # TODO, what other modalities do we need to include?
-    OPTO = True
-
 
     cameras=[
         d.CameraAssembly(
@@ -85,7 +84,6 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
 
     #######################################################################################################
     ##FIB Specific
-
     if FIB:
         patch_cords=[
             d.Patch(
@@ -363,13 +361,7 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
                 
             ),
         ],
-
-        
-
-        
-        ##Optogenetics Specific
-        #######################################################################################################
-    
+  
         # TODO, need to merge in laser and water calibration things
         ##Calibrations
         calibrations=[
