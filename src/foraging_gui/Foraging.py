@@ -928,6 +928,7 @@ class Window(QMainWindow):
             'default_ui':'ForagingGUI.ui',
             'open_ephys_machine_ip_address':'',
             'rig_metadata_folder':os.path.join(self.SettingFolder,'rig_metadata')+'\\'
+            'create_rig_metadata':True,
         }
         
         # Try to load Settings_box#.csv
@@ -1142,7 +1143,13 @@ class Window(QMainWindow):
         else:
             subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True)
 
-    def _LoadRigJson(self):     
+    def _LoadRigJson(self):    
+    
+        # User can skip this step if they make rig metadata themselves
+        if not self.Settings['create_rig_metadata']: 
+            logging.info('Skipping rig metadata creation because create_rig_metadata=True')
+            return
+
         # See if rig metadata folder exists 
         if not os.path.exists(self.Settings['rig_metadata_folder']):
             print('making directory: {}'.format(self.Settings['rig_metadata_folder']))
