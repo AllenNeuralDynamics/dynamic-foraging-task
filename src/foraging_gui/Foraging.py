@@ -73,7 +73,7 @@ class Window(QMainWindow):
         self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration_{}.json'.format(box_number))
         self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_{}.json'.format(box_number))
         self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json')
-        self.rig_specification = os.path.join(self.SettingFolder, 'rig_specification.json')
+        self.rig_specification = os.path.join(self.SettingFolder, 'rig_specification_{}.json'.format(box_number))
 
         # Load Laser and Water Calibration Files
         self._GetLaserCalibration()
