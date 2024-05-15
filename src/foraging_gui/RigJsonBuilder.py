@@ -114,7 +114,6 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
                     travel=15.0,
                     )      
     if ('AINDLickDetector' in settings['box_settings']) and (settings['box_settings']['AINDLickDetector'] == "1"):
-        # TODO, need to add correct details
         lick_spouts=[
             d.RewardSpout(
                 name="AIND_Lick_Detector Left",
@@ -366,7 +365,7 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
                 harp_device_type=d.HarpDeviceType.BEHAVIOR,
                 core_version="2.1",
                 firmware_version="FTDI version:",
-                computer_name="behavior_computer", # TODO should this be hostname?
+                computer_name="behavior_computer", 
                 is_clock_generator=False,
                 channels=[
                     d.DAQChannel(channel_name="DO0", device_name="Solenoid Left", channel_type="Digital Output"),
@@ -384,7 +383,7 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
                 harp_device_type=d.HarpDeviceType.BEHAVIOR,
                 core_version="2.1",
                 firmware_version="FTDI version:",
-                computer_name="behavior_computer", # TODO should this be hostname?
+                computer_name="behavior_computer", 
                 is_clock_generator=False,
                 channels=[
                     d.DAQChannel(channel_name="DO0", device_name="Solenoid Left", channel_type="Digital Output"),
@@ -399,7 +398,8 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
     ###########################################################################
     if OPTO:
         ##Optogenetics Specific   ##Xinxin to fill in
- 
+        # TODO
+         
         components['light_sources'].append(
             d.LightEmittingDiode(
                 name="LED for photostimulation",
@@ -425,7 +425,7 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
     ###########################################################################
     # Assemble rig schema
     rig = r.Rig(
-        rig_id="447_FIP/Behavior/Opt_FullModalityTemplate", ## TODO
+        rig_id="{}_{}".format(settings['rig_name'],datetime.now().strftime('%Y-%m-%d') 
         modification_date=date.today(),
         **components 
         )
@@ -445,10 +445,12 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
     differences = DeepDiff(existing_rig_json, new_rig_json,ignore_order=True)
 
     # Remove the modification date, since that doesnt matter for comparison purposes
-    if ('values_changed' in differences) and ("root['modification_date']" in differences['values_changed']):
-        differences['values_changed'].pop("root['modification_date']")
-        if len(differences['values_changed']) == 0:
-            differences.pop('values_changed')
+    values_to_ignore = ['modification_date','rig_id']
+    for value in values_to_ignore:
+        if ('values_changed' in differences) and ("root['{}']".format(value) in differences['values_changed']):
+            differences['values_changed'].pop("root['{}']".format(value))
+            if len(differences['values_changed']) == 0:
+                differences.pop('values_changed')
 
     # Determine which to save
     ###########################################################################
