@@ -403,18 +403,15 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
     # Compare the two rig.jsons
     differences = DeepDiff(existing_rig_json, new_rig_json,ignore_order=True)
 
-    # Print differences
-    logging.info('comparing with old rig json: {}'.format(differences))
-
     # Remove the modification date, since that doesnt matter for comparison purposes
     if ('values_changed' in differences) and ("root['modification_date']" in differences['values_changed']):
         differences['values_changed'].pop("root['modification_date']")
         if len(differences['values_changed']) == 0:
             differences.pop('values_changed')
-    logging.info('comparing with old rig json: {}'.format(differences))
 
     # If any differences remain, rename the temp file
     if len(differences) > 0:
+        logging.info('differences with existing rig json: {}'.format(differences))
         # Write to file 
         time_str = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')
         filename = 'rig_{}_{}.json'.format(settings['rig_name'],time_str )

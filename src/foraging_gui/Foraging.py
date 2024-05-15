@@ -1170,13 +1170,13 @@ class Window(QMainWindow):
         files = sorted(Path(self.Settings['rig_metadata_folder']).iterdir(), key=os.path.getmtime)
         files = [f.__str__().split('\\')[-1] for f in files]
         files = [f for f in files if (f.startswith('rig_'+self.rig_name) and f.endswith('.json'))]
-        for f in files:
-            print(f)
         if len(files) ==0:
             # No rig.jsons found, this will trigger saving the new one
             existing_rig_json = {}
+            logging.info('Did not find any existing rig.json files')
         else:
             existing_rig_json_path = os.path.join(self.Settings['rig_metadata_folder'],files[-1])
+            logging.info('Found existing rig.json: {}'.format(files[-1]))
             with open(existing_rig_json_path, 'r') as f:
                 existing_rig_json = json.load(f)      
 
