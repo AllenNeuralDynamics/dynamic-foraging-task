@@ -110,6 +110,7 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
         stage = d.MotorizedStage(
                     name="AIND lick spout stage",
                     manufacturer=d.Organization.AIND
+                    travel=15.0,
                     )       
     components['stimulus_devices']=[
         d.RewardDelivery(
