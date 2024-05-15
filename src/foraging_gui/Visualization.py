@@ -410,7 +410,7 @@ class PlotWaterCalibration(FigureCanvas):
         x,y = GetWaterCalibration(WaterCalibrationResult, current_date, current_valve)   
         return x, y
  
-def GetWaterCalibration(self,WaterCalibrationResults,current_date,current_valve):
+def GetWaterCalibration(WaterCalibrationResults,current_date,current_valve):
     '''Get the water calibration results from a specific date and valve'''
     X=[]
     Y=[]
