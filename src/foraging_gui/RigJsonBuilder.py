@@ -479,18 +479,22 @@ def parse_water_calibration(water_calibration):
     sorted_dates = sorted(water_calibration.keys())
     print(sorted_dates)
     date = sorted_dates[-1]
+    left_times = list(water_calibration[date]['Left'].keys())
+    right_times = list(water_calibration[date]['Right'].keys())
+    left_volumes = [water_calibration[date]['Left'][x]['0.5']['200'][0] for x in left_times]
+    right_volumes = [water_calibration[date]['Right'][x]['0.5']['200'][0] for x in right_times]
     left = d.Calibration(
         calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
         device_name = 'Lick spout Left',
         description = 'Water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delievered in microliters.',
-        input = {'valve open time (s):':', '.join(list(water_calibration[date]['Left'].keys()))},
-        output = {'water volume (ul):':''}
+        input = {'valve open time (s):':', '.join(left_times)},
+        output = {'water volume (ul):':left_volumes}
         )
     right = d.Calibration(
         calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
-        device_name = 'Lick spout Left',
+        device_name = 'Lick spout Right',
         description = 'Water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delievered in microliters.',
-        input = {'valve open time (s):':', '.join(list(water_calibration[date]['Right'].keys()))},
-        output = {'water volume (ul):':''}
+        input = {'valve open time (s):':', '.join(right_times)},
+        output = {'water volume (ul):':right_volumes}
         )
     return left, right
