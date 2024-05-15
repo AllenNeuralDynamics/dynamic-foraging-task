@@ -996,7 +996,7 @@ class Window(QMainWindow):
             logger.addHandler(handler)
             
         # Determine box
-        if self.current_box in ['447-1','447-2','447-3','alex_laptop']:
+        if self.current_box in ['447-1','447-2','447-3']:
             mapper={
                 1:'A',
                 2:'B',
@@ -1174,16 +1174,15 @@ class Window(QMainWindow):
             print(f)
         if len(files) ==0:
             # No rig.jsons found, this will trigger saving the new one
-            old_rig_json = {}
+            existing_rig_json = {}
         else:
-            #old_rig_json_path = os.path.join(self.Settings['rig_metadata_folder'],'rig_alex_laptop_2024-05-14_13_35_18.json')
-            old_rig_json_path = os.path.join(self.Settings['rig_metadata_folder'],files[-1])
-            with open(old_rig_json_path, 'r') as f:
-                old_rig_json = json.load(f)      
+            existing_rig_json_path = os.path.join(self.Settings['rig_metadata_folder'],files[-1])
+            with open(existing_rig_json_path, 'r') as f:
+                existing_rig_json = json.load(f)      
 
         # Builds a new rig.json, and saves if there are changes with the most recent
         self.Settings['rig_name'] = self.rig_name 
-        build_rig_json(old_rig_json,self.Settings, self.WaterCalibrationResults, self.LaserCalibrationResults)        
+        build_rig_json(existing_rig_json,self.Settings, self.WaterCalibrationResults, self.LaserCalibrationResults)        
 
     def _OpenSettingFolder(self):
         '''Open the setting folder'''

@@ -8,7 +8,7 @@ import aind_data_schema.core.rig as r
 import aind_data_schema.components.devices as d
 from aind_data_schema_models.modalities import Modality
 
-def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration):    
+def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibration):    
     logging.info('building rig json')
 
     # TODO, what other modalities do we need to include?
@@ -401,7 +401,7 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
         new_rig_json = json.load(f)
 
     # Compare the two rig.jsons
-    differences = DeepDiff(old_rig_json, new_rig_json,ignore_order=True)
+    differences = DeepDiff(existing_rig_json, new_rig_json,ignore_order=True)
 
     # Print differences
     logging.info('comparing with old rig json: {}'.format(differences))
