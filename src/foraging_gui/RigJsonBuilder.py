@@ -17,7 +17,8 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
     if FIB:
         modalities.append(Modality.FIB)
     # TODO, what other modalities do we need to include?
-    OPTO = False
+    OPTO = True
+
 
     cameras=[
         d.CameraAssembly(
