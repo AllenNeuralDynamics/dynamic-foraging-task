@@ -996,7 +996,7 @@ class Window(QMainWindow):
             logger.addHandler(handler)
             
         # Determine box
-        if self.current_box in ['447-1','447-2','447-3','alex_laptop']:
+        if self.current_box in ['447-1','447-2','447-3']:
             mapper={
                 1:'A',
                 2:'B',
