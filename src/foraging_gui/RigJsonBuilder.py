@@ -308,17 +308,17 @@ def build_rig_json(old_rig_json, settings, water_calibration, laser_calibration)
             )
             )
         
-        daqs.append(
-            d.DAQDevice(
-                name="NIDAQ for opto",
-                device_type="DAQ Device",
-                data_interface="USB2.0",
-                manufacturer=d.Organization.NATIONAL_INSTRUMENTS,
-                computer_name="behavior_computer",
-                channels=[
-                ],
-            )
-            )
+        #daqs.append(
+        #    d.DAQDevice(
+        #        name="NIDAQ for opto",
+        #        device_type="DAQ Device",
+        #        data_interface="USB2.0",
+        #        manufacturer=d.Organization.NATIONAL_INSTRUMENTS,
+        #        computer_name="behavior_computer",
+        #        channels=[
+        #        ],
+        #    )
+        #    )
 
     # Assemble rig schema
     rig = r.Rig(
