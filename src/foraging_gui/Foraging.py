@@ -1165,7 +1165,7 @@ class Window(QMainWindow):
                 logging.error('Error loading rig specification file: {}'.format(e))
                 rig_specification = {}
         else:
-            logging.info'Cannot find rig specification file: {}'.format(self.rig_specification))
+            logging.info('Cannot find rig specification file: {}'.format(self.rig_specification))
             rig_specification = {}
         
         # Load most recent rig_json
