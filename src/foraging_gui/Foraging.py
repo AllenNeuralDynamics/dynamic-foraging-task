@@ -1187,9 +1187,7 @@ class Window(QMainWindow):
         rig_settings['rig_name'] = self.rig_name 
         rig_settings['box_number'] = self.box_number
         df = pd.read_csv(self.SettingsBoxFile,index_col=None,header=None)
-        df = {row[0]:row[1] for index, row in df.iterrows()}
-        print(df)
-        rig_settings['box_settings'] = df
+        rig_settings['box_settings'] = {row[0]:row[1] for index, row in df.iterrows()}
         rig_settings['rig_specification'] = rig_specification
  
         build_rig_json(existing_rig_json, rig_settings, 
