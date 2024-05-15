@@ -98,6 +98,23 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
 
     # Stimulus devices
     ###########################################################################
+    if settings['newscale_serial_num_box{}'.format(settings['box_number'])] != '':
+        stage = d.MotorizedStage(
+                    name="NewScaleMotor for LickSpouts",
+                    serial_number=settings['newscale_serial_num_box{}'.format(settings['box_number'])], 
+                    manufacturer=d.Organization.NEW_SCALE_TECHNOLOGIES,
+                    travel=15.0,  #unit is mm
+                    firmware="https://github.com/AllenNeuralDynamics/python-newscale, branch: axes-on-target, commit #7c17497",
+                    )
+    else:
+        # TODO
+        stage = d.MotorizedStage(
+                    name="AIND lick spout stage",
+                    serial_number="?", 
+                    manufacturer=d.Organization.NEW_SCALE_TECHNOLOGIES,
+                    travel=15.0,  #unit is mm
+                    firmware="https://github.com/AllenNeuralDynamics/python-newscale, branch: axes-on-target, commit #7c17497",
+                    )       
     components['stimulus_devices']=[
         d.RewardDelivery(
             reward_spouts=[
@@ -116,14 +133,7 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
                     lick_sensor_type=d.LickSensorType("Capacitive")
                 ),
             ],
-            stage_type=d.MotorizedStage(
-                    name="NewScaleMotor for LickSpouts",
-                    serial_number="xxxx", #grabing from GUI/SettingFiles # TODO
-                    manufacturer=d.Organization.NEW_SCALE_TECHNOLOGIES,
-                    travel=15.0,  #unit is mm
-                    firmware="https://github.com/AllenNeuralDynamics/python-newscale, branch: axes-on-target, commit #7c17497",
-            ),
-            
+            stage_type = stage,
         ),
         ]
 
