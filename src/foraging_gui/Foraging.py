@@ -1163,8 +1163,10 @@ class Window(QMainWindow):
                     rig_specification = json.load(f)
             except Exception as e:
                 logging.error('Error loading rig specification file: {}'.format(e))
+                rig_specification = {}
         else:
-            raise Exception('Cannot find rig specification file: {}'.format(self.rig_specification))
+            logging.info'Cannot find rig specification file: {}'.format(self.rig_specification))
+            rig_specification = {}
         
         # Load most recent rig_json
         files = sorted(Path(self.Settings['rig_metadata_folder']).iterdir(), key=os.path.getmtime)
@@ -1186,6 +1188,7 @@ class Window(QMainWindow):
         rig_settings['box_number'] = self.box_number
         df = pd.read_csv(self.SettingsBoxFile,index_col=None)
         rig_settings['box_settings'] = {row[0]: row[1] for _, row in df.iterrows()}
+        rig_settings['rig_specification'] = rig_specification
  
         build_rig_json(existing_rig_json, rig_settings, 
             self.WaterCalibrationResults, 

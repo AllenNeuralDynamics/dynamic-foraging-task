@@ -32,6 +32,7 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
 
     # Cameras
     ###########################################################################
+    # TODO, ensure this toggles with rig
     components['cameras']=[
         d.CameraAssembly(
             name="BehaviorVideography_FaceSide",
