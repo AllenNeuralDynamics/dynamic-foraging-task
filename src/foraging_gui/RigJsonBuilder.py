@@ -107,29 +107,51 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
                     firmware="https://github.com/AllenNeuralDynamics/python-newscale, branch: axes-on-target, commit #7c17497",
                     )
     else:
+        # TODO need to add correct details
         stage = d.MotorizedStage(
                     name="AIND lick spout stage",
                     manufacturer=d.Organization.AIND,
                     travel=15.0,
-                    )       
+                    )      
+    if ('AINDLickDetector' in settings['box_settings']) and (settings['box_settings']['AINDLickDetector'] == 1:
+        # TODO, need to add correct details
+        lick_spouts=[
+            d.RewardSpout(
+                name="AIND_Lick_Detector Left",
+                side=d.SpoutSide.LEFT,
+                spout_diameter=1.2,
+                solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Left"),
+                lick_sensor_type=d.LickSensorType("Capacitive")
+            ),
+            d.RewardSpout(
+                name="AIND_Lick_Detector Right",
+                side=d.SpoutSide.RIGHT,
+                spout_diameter=1.2,
+                solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Right"),
+                lick_sensor_type=d.LickSensorType("Capacitive")
+            ),
+            ]   
+    else:
+        lick_spouts=[
+            d.RewardSpout(
+                name="Janelia_Lick_Detector Left",
+                side=d.SpoutSide.LEFT,
+                spout_diameter=1.2,
+                solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Left"),
+                lick_sensor_type=d.LickSensorType("Capacitive")
+            ),
+            d.RewardSpout(
+                name="Janelia_Lick_Detector Right",
+                side=d.SpoutSide.RIGHT,
+                spout_diameter=1.2,
+                solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Right"),
+                lick_sensor_type=d.LickSensorType("Capacitive")
+            ),
+            ]
+    # TODO, should add speaker
     components['stimulus_devices']=[
         d.RewardDelivery(
-            reward_spouts=[
-                d.RewardSpout(
-                    name="Janelia_Lick_Detector Left", # TODO
-                    side=d.SpoutSide.LEFT,
-                    spout_diameter=1.2,
-                    solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Left"),
-                    lick_sensor_type=d.LickSensorType("Capacitive")
-                ),
-                d.RewardSpout(
-                    name="Janelia_Lick_Detector Right", # TODO
-                    side=d.SpoutSide.RIGHT,
-                    spout_diameter=1.2,
-                    solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Right"),
-                    lick_sensor_type=d.LickSensorType("Capacitive")
-                ),
-            ],
+            reward_spouts=lick_spouts,
             stage_type = stage,
         ),
         ]

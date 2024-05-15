@@ -1184,6 +1184,10 @@ class Window(QMainWindow):
         rig_settings = self.Settings.copy()
         rig_settings['rig_name'] = self.rig_name 
         rig_settings['box_number'] = self.box_number
+        df = pd.read_csv(self.SettingsBoxFile,index_col=None)
+        rig_settings['box_settings'] = {row[0]: row[1] for _, row in df.iterrows()}
+        print(rig_settings)
+ 
         build_rig_json(existing_rig_json, rig_settings, 
             self.WaterCalibrationResults, 
             self.LaserCalibrationResults)        
