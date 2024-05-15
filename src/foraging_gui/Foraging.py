@@ -1186,7 +1186,7 @@ class Window(QMainWindow):
         rig_settings = self.Settings.copy()
         rig_settings['rig_name'] = self.rig_name 
         rig_settings['box_number'] = self.box_number
-        df = pd.read_csv(self.SettingsBoxFile,index_col=None).to_dict()
+        df = pd.read_csv(self.SettingsBoxFile,index_col=None).to_dict(orient='series')
         for row in df:
             print(row)
         rig_settings['box_settings'] = df
