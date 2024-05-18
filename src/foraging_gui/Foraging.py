@@ -416,7 +416,9 @@ class Window(QMainWindow):
         session_full_path_list=[]
         session_path_list=[]
         for session_folder in os.listdir(animal_folder):
-            training_folder = os.path.join(animal_folder,session_folder, 'behavior')
+            training_folder = os.path.join(animal_folder,session_folder, 'behavior') # new folder structure
+            if not os.path.exists(training_folder):
+                training_folder =  os.path.join(animal_folder,session_folder, 'TrainingFolder') # old folder structure
             if os.path.exists(training_folder):
                 for file_name in os.listdir(training_folder):
                     if file_name.endswith('.json'): 
