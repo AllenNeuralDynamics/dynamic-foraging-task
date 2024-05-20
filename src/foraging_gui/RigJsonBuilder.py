@@ -64,11 +64,11 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     FIB = settings['Teensy_COM_box{}'.format(settings['box_number'])] != ''
     OPTO = ('HasOpto' in settings['box_settings']) and (settings['box_settings']['HasOpto'] == "1")
     HIGH_SPEED_CAMERA = ('HighSpeedCamera' in settings['box_settings']) and (settings['box_settings']['HighSpeedCamera'] == "1")
-    LEFT_CAMERA = ('HasSideCameraLeft' in settings['box_settings']) and (settings['HasSideCameraLeft'] == "1")
-    RIGHT_CAMERA = ('HasSideCameraRight' in settings['box_settings']) and (settings['HasSideCameraRight'] == "1")
-    BODY_CAMERA = ('HasBodyCamera' in settings['box_settings']) and (settings['HasBodyCamera'] == "1")
-    BOTTOM_CAMERA = ('HasBottomCamera' in settings['box_settings']) and (settings['HasBottomCamera'] == "1")
-    AIND_LICK_DETECTOR = ('AINDLickDetector' in settings['box_settings']) and (settings['AINDLickDetector'] == "1")
+    LEFT_CAMERA = ('HasSideCameraLeft' in settings['box_settings']) and (settings['box_settings']['HasSideCameraLeft'] == "1")
+    RIGHT_CAMERA = ('HasSideCameraRight' in settings['box_settings']) and (settings['box_settings']['HasSideCameraRight'] == "1")
+    BODY_CAMERA = ('HasBodyCamera' in settings['box_settings']) and (settings['box_settings']['HasBodyCamera'] == "1")
+    BOTTOM_CAMERA = ('HasBottomCamera' in settings['box_settings']) and (settings['box_settings']['HasBottomCamera'] == "1")
+    AIND_LICK_DETECTOR = ('AINDLickDetector' in settings['box_settings']) and (settings['box_settings']['AINDLickDetector'] == "1")
 
     # Modalities
     ###########################################################################
