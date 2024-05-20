@@ -1199,7 +1199,7 @@ class Window(QMainWindow):
 
     def _get_bonsai_version(self,config_path):
         with open(config_path, "r") as f:
-            for line in fp:
+            for line in f:
                 if 'Package id="Bonsai"' in line:
                    return line.split('version="')[1].split('"')[0] 
         return '0.0.0'
