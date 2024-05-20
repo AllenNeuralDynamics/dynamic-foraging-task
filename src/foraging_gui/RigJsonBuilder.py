@@ -79,7 +79,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         components['modalities'].append(Modality.FIB)
 
 
-    # Cameras # TODO
+    # Cameras 
     ###########################################################################
     if HIGH_SPEED_CAMERA:
         components['cameras']=[]
@@ -236,7 +236,8 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         stage = d.MotorizedStage(
                     name="AIND lick spout stage",
                     manufacturer=d.Organization.AIND,
-                    travel=0, #TODO, need to fill in this value
+                    travel=30, 
+                    travel_unit=SizeUnit.MM
                     )      
 
     if ('AINDLickDetector' in settings['box_settings']) and (settings['box_settings']['AINDLickDetector'] == "1"):
