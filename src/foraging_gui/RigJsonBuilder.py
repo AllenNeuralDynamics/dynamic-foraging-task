@@ -82,7 +82,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     components['cameras']=[
         d.CameraAssembly(
             name="BehaviorVideography_FaceSide",
-            #camera_assembly_name="BehaviorVideography_FaceBottom",
             camera_target=d.CameraTarget.FACE_SIDE_RIGHT,
             camera=d.Camera(
                 name="Side face camera",
@@ -112,7 +111,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         ),
         d.CameraAssembly(
             name="BehaviorVideography_FaceBottom",
-            #camera_assembly_name="BehaviorVideography_FaceBottom",
             camera_target=d.CameraTarget.FACE_BOTTOM,
             camera=d.Camera(
                 name="Bottom face Camera",
@@ -157,7 +155,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     firmware="https://github.com/AllenNeuralDynamics/python-newscale, branch: axes-on-target, commit #7c17497",
                     )
     else:
-        # TODO need to add correct details
         stage = d.MotorizedStage(
                     name="AIND lick spout stage",
                     manufacturer=d.Organization.AIND,
@@ -197,13 +194,68 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 lick_sensor_type=d.LickSensorType("Capacitive")
             ),
             ]
-    # TODO, should add speaker
     components['stimulus_devices']=[
         d.RewardDelivery(
             reward_spouts=lick_spouts,
             stage_type = stage,
         ),
+        d.Speaker(
+            name="Stimulus speaker",
+            manufacturer=d.Organization.OTHER,
+        )
         ]
+
+
+    # DAQS
+    ###########################################################################
+
+    components['daqs']=[
+        d.HarpDevice(
+            name="Harp Behavior",
+            harp_device_type=d.HarpDeviceType.BEHAVIOR,
+            manufacturer:d.Organization.CHAMPALIMAUD,
+            core_version="2.1",
+            firmware_version="FTDI version:",
+            computer_name=settings['computer_name'], 
+            is_clock_generator=False,
+            channels=[
+                d.DAQChannel(channel_name="DO0", device_name="Solenoid Left", channel_type="Digital Output"),
+                d.DAQChannel(channel_name="DO1", device_name="Solenoid Right", channel_type="Digital Output"),
+                d.DAQChannel(channel_name="DI0", device_name=lick_spouts[0].name, channel_type="Digital Input"),
+                d.DAQChannel(channel_name="DI1", device_name=lick_spouts[1].name, channel_type="Digital Input") 
+            ],
+        )
+        d.HarpDevice(
+            name="Harp Sound",
+            harp_device_type=d.HarpDeviceType.SOUND_CARD,
+            manufacturer:d.Organization.CHAMPALIMAUD,
+            core_version="2.1",
+            firmware_version="FTDI version:",
+            computer_name=settings['computer_name'], 
+            is_clock_generator=False,
+            data_interface=d.DataInterface.USB
+        )
+        d.HarpDevice(
+            name="Harp clock synchronization board",
+            harp_device_type=d.HarpDeviceType.CLOCK_SYNCHRONIZER,
+            manufacturer:d.Organization.CHAMPALIMAUD,
+            core_version="2.1",
+            firmware_version="FTDI version:",
+            computer_name=settings['computer_name'], 
+            is_clock_generator=True,
+            data_interface=d.DataInterface.USB
+        )       
+        d.HarpDevice(
+            name="Harp sound amplifier",
+            harp_device_type=d.HarpDeviceType.INPUT_EXPANDER,
+            manufacturer:d.Organization.CHAMPALIMAUD,
+            core_version="2.1",
+            firmware_version="FTDI version:",
+            computer_name=settings['computer_name'], 
+            is_clock_generator=False,
+            data_interface=d.DataInterface.USB
+        )
+    ]
 
     # Calibrations
     ###########################################################################
@@ -416,40 +468,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         ]
         
         components['additional_devices']=[d.Device(device_type="Photometry Clock", name="Photometry Clock")]
-        components['daqs']=[
-            d.HarpDevice(
-                name="Harp Behavior",
-                harp_device_type=d.HarpDeviceType.BEHAVIOR,
-                core_version="2.1",
-                firmware_version="FTDI version:",
-                computer_name=settings['computer_name'], 
-                is_clock_generator=False,
-                channels=[
-                    d.DAQChannel(channel_name="DO0", device_name="Solenoid Left", channel_type="Digital Output"),
-                    d.DAQChannel(channel_name="DO1", device_name="Solenoid Right", channel_type="Digital Output"),
-                    d.DAQChannel(channel_name="DI0", device_name=lick_spouts[0].name, channel_type="Digital Input"),
-                    d.DAQChannel(channel_name="DI1", device_name=lick_spouts[1].name, channel_type="Digital Input"),
-                    d.DAQChannel(channel_name="DI3", device_name="Photometry Clock", channel_type="Digital Input"),
-                ],
-            )
-        ]
-    else:
-        components['daqs']=[
-            d.HarpDevice(
-                name="Harp Behavior",
-                harp_device_type=d.HarpDeviceType.BEHAVIOR,
-                core_version="2.1",
-                firmware_version="FTDI version:",
-                computer_name=settings['computer_name'], 
-                is_clock_generator=False,
-                channels=[
-                    d.DAQChannel(channel_name="DO0", device_name="Solenoid Left", channel_type="Digital Output"),
-                    d.DAQChannel(channel_name="DO1", device_name="Solenoid Right", channel_type="Digital Output"),
-                    d.DAQChannel(channel_name="DI0", device_name=lick_spouts[0].name, channel_type="Digital Input"),
-                    d.DAQChannel(channel_name="DI1", device_name=lick_spouts[1].name, channel_type="Digital Input") 
-                ],
-            )
-        ]
+        components['daqs'][0].channels.append(d.DAQChannel(channel_name="DI3", device_name="Photometry Clock", channel_type="Digital Input"))
 
     # Optogenetics specific
     ###########################################################################
@@ -493,12 +512,15 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     # Platforms
     # FIP
     # OPTO
-    # Speaker
     # Reward/lick spouts
-    # Lick spout stages
     # Lick detector
     # Harp boards
     # Parse laser calibration
+    #
+    # TODO, later
+    # Lick spout stages - Need to add details for AIND stages
+    # Speaker - needs manufactor, any details
+    # What if water calibration is null?
 
 def parse_water_calibration(water_calibration):
     
