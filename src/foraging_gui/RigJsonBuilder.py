@@ -83,6 +83,50 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     ###########################################################################
     if HIGH_SPEED_CAMERA:
         components['cameras']=[]
+        if LEFT_CAMERA:
+            components['cameras'].append(
+                d.CameraAssembly(
+                    name="Left Camera",
+                    computer_name=settings['computer_name'],
+                    camera_target=d.CameraTarget.FACE_SIDE_LEFT,
+                    #lens=,
+                    #filter=,
+                    camera=d.Camera(
+                        detector_type="Camera",
+                        manufacturer=d.Organization.FLIR,
+                        data_interface="USB",
+                        chroma="Monochrome",
+                        cooling="Air", 
+                        sensor_format="1/2.9",
+                        sensor_format_unit=SizeUnit.IN,
+                        sensor_width=720,
+                        sensor_height=540,
+                        max_frame_rate=522,
+                        model="Blackfly S BFS-U3-04S2M",
+                    )
+                )
+            )
+        if RIGHT_CAMERA:
+            components['cameras'].append(
+                d.CameraAssembly(
+                    name="Right Camera",
+                    camera_target=d.CameraTarget.FACE_SIDE_RIGHT,
+                )
+            )
+        if BOTTOM_CAMERA:
+            components['cameras'].append(
+                d.CameraAssembly(
+                    name="Bottom Camera",
+                    camera_target=d.CameraTarget.FACE_BOTTOM,
+                )
+            )
+        if BODY_CAMERA:
+            components['cameras'].append(
+                d.CameraAssembly(
+                    name="Body Camera",
+                    camera_target=d.CameraTarget.BODY,
+                )
+            )
     else:
         components['cameras']=[
             d.CameraAssembly(
