@@ -64,9 +64,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     FIB = settings['Teensy_COM_box{}'.format(settings['box_number'])] != ''
     OPTO = ('HasOpto' in settings['box_settings']) and (settings['box_settings']['HasOpto'] == "1")
     HIGH_SPEED_CAMERA = ('HighSpeedCamera' in settings['box_settings']) and (settings['box_settings']['HighSpeedCamera'] == "1")
-    LEFT_CAMERA = ('HasSideCameraLeft' in settings['box_settings']) and (settings['box_settings']['HasSideCameraLeft'] == "1")
     RIGHT_CAMERA = ('HasSideCameraRight' in settings['box_settings']) and (settings['box_settings']['HasSideCameraRight'] == "1")
-    BODY_CAMERA = ('HasBodyCamera' in settings['box_settings']) and (settings['box_settings']['HasBodyCamera'] == "1")
     BOTTOM_CAMERA = ('HasBottomCamera' in settings['box_settings']) and (settings['box_settings']['HasBottomCamera'] == "1")
     AIND_LICK_DETECTOR = ('AINDLickDetector' in settings['box_settings']) and (settings['box_settings']['AINDLickDetector'] == "1")
 
@@ -83,12 +81,12 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     ###########################################################################
     if HIGH_SPEED_CAMERA:
         components['cameras']=[]
-        if LEFT_CAMERA:
+        if RIGHT_CAMERA:
             components['cameras'].append(
                 d.CameraAssembly(
-                    name="Left Camera",
+                    name="Right Camera",
                     computer_name=settings['computer_name'],
-                    camera_target=d.CameraTarget.FACE_SIDE_LEFT,
+                    camera_target=d.CameraTarget.FACE_SIDE_RIGHT,
                     lens=d.Lens( 
                         manufacturer=d.Organization.FUJINON,
                         focal_length=16
@@ -107,15 +105,8 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                         sensor_height=540,
                         max_frame_rate=522,
                         model="Blackfly S BFS-U3-04S2M",
-                        serial_number=settings['box_settings']['SideCameraLeft'],
+                        serial_number=settings['box_settings']['SideCameraRight'],
                     )
-                )
-            )
-        if RIGHT_CAMERA:
-            components['cameras'].append(
-                d.CameraAssembly(
-                    name="Right Camera",
-                    camera_target=d.CameraTarget.FACE_SIDE_RIGHT,
                 )
             )
         if BOTTOM_CAMERA:
@@ -144,13 +135,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                         model="Blackfly S BFS-U3-04S2M",
                         serial_number=settings['box_settings']['BottomCamera'],
                     )
-                )
-            )
-        if BODY_CAMERA:
-            components['cameras'].append(
-                d.CameraAssembly(
-                    name="Body Camera",
-                    camera_target=d.CameraTarget.BODY,
                 )
             )
     else:
