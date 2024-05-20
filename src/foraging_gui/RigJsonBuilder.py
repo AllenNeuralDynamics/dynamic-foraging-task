@@ -89,8 +89,12 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     name="Left Camera",
                     computer_name=settings['computer_name'],
                     camera_target=d.CameraTarget.FACE_SIDE_LEFT,
-                    #lens=,
-                    #filter=,
+                    lens=d.Lens( 
+                        manufacturer=d.Organization.FUJINON,
+                        focal_length=16
+                        focal_length_unit=SizeUnit.MM,
+                        model="CF16ZA-1S",
+                        ),
                     camera=d.Camera(
                         detector_type="Camera",
                         manufacturer=d.Organization.FLIR,
@@ -103,6 +107,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                         sensor_height=540,
                         max_frame_rate=522,
                         model="Blackfly S BFS-U3-04S2M",
+                        serial_number=settings['box_settings']['SideCameraLeft'],
                     )
                 )
             )
@@ -117,7 +122,28 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             components['cameras'].append(
                 d.CameraAssembly(
                     name="Bottom Camera",
+                    computer_name=settings['computer_name'],
                     camera_target=d.CameraTarget.FACE_BOTTOM,
+                    lens=d.Lens( 
+                        manufacturer=d.Organization.KOWA,
+                        focal_length=25
+                        focal_length_unit=SizeUnit.MM,
+                        model="LM25HC",
+                        ), 
+                    camera=d.Camera(
+                        detector_type="Camera",
+                        manufacturer=d.Organization.FLIR,
+                        data_interface="USB",
+                        chroma="Monochrome",
+                        cooling="Air", 
+                        sensor_format="1/2.9",
+                        sensor_format_unit=SizeUnit.IN,
+                        sensor_width=720,
+                        sensor_height=540,
+                        max_frame_rate=522,
+                        model="Blackfly S BFS-U3-04S2M",
+                        serial_number=settings['box_settings']['BottomCamera'],
+                    )
                 )
             )
         if BODY_CAMERA:
