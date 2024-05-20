@@ -148,7 +148,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     ###########################################################################
     components['mouse_platform']=d.Tube(
         name="mouse_tube_foraging", 
-        diameter=3.0
+        diameter=3.0,
         diameter_unit=SizeUnit.CM
         )
 
