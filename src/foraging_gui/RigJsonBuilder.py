@@ -60,9 +60,15 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     # Build dictionary of components
     components = {}
 
-    # Determine what extra components are present
+    # Determine what extra components are present using settings files
     FIB = settings['Teensy_COM_box{}'.format(settings['box_number'])] != ''
     OPTO = ('HasOpto' in settings['box_settings']) and (settings['box_settings']['HasOpto'] == "1")
+    HIGH_SPEED_CAMERA = ('HighSpeedCamera' in settings['box_settings']) and (settings['box_settings']['HighSpeedCamera'] == "1")
+    LEFT_CAMERA = ('HasSideCameraLeft' in settings['box_settings']) and (settings['HasSideCameraLeft'] == "1")
+    RIGHT_CAMERA = ('HasSideCameraRight' in settings['box_settings']) and (settings['HasSideCameraRight'] == "1")
+    BODY_CAMERA = ('HasBodyCamera' in settings['box_settings']) and (settings['HasBodyCamera'] == "1")
+    BOTTOM_CAMERA = ('HasBottomCamera' in settings['box_settings']) and (settings['HasBottomCamera'] == "1")
+    AIND_LICK_DETECTOR = ('AINDLickDetector' in settings['box_settings']) and (settings['AINDLickDetector'] == "1")
 
     # Modalities
     ###########################################################################
@@ -71,10 +77,8 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     if FIB:
         components['modalities'].append(Modality.FIB)
 
-
     # Cameras
     ###########################################################################
-    # TODO, ensure this toggles with rig
     components['cameras']=[
         d.CameraAssembly(
             name="BehaviorVideography_FaceSide",
@@ -88,14 +92,14 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 model="ELP-USBFHD05MT-KL170IR",
                 notes="The light intensity sensor was removed; IR illumination is constantly on",
                 data_interface="USB",
-                computer_name="W10DTJK7N0M3",
+                computer_name=settings['computer_name'],
                 max_frame_rate=120,
                 sensor_width=640,
                 sensor_height=480,
                 chroma="Color",
                 cooling="Air",
                 bin_mode="Additive",
-                recording_software=d.Software(name="Bonsai", version="2.5"),
+                recording_software=d.Software(name="Bonsai", version=settings['bonsai_version']),
             ),
             lens=d.Lens(
                 name="Xenocam 1",
@@ -118,14 +122,14 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 model="ELP-USBFHD05MT-KL170IR",
                 notes="The light intensity sensor was removed; IR illumination is constantly on",
                 data_interface="USB",
-                computer_name="W10DTJK7N0M3",
+                computer_name=settings['computer_name'],
                 max_frame_rate=120,
                 sensor_width=640,
                 sensor_height=480,
                 chroma="Color",
                 cooling="Air",
                 bin_mode="Additive",
-                recording_software=d.Software(name="Bonsai", version="2.5"),
+                recording_software=d.Software(name="Bonsai", version=settings['bonsai_version']),
             ),
             lens=d.Lens(
                 name="Xenocam 2",
@@ -418,7 +422,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 harp_device_type=d.HarpDeviceType.BEHAVIOR,
                 core_version="2.1",
                 firmware_version="FTDI version:",
-                computer_name="behavior_computer", 
+                computer_name=settings['computer_name'], 
                 is_clock_generator=False,
                 channels=[
                     d.DAQChannel(channel_name="DO0", device_name="Solenoid Left", channel_type="Digital Output"),
@@ -436,7 +440,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 harp_device_type=d.HarpDeviceType.BEHAVIOR,
                 core_version="2.1",
                 firmware_version="FTDI version:",
-                computer_name="behavior_computer", 
+                computer_name=settings['computer_name'], 
                 is_clock_generator=False,
                 channels=[
                     d.DAQChannel(channel_name="DO0", device_name="Solenoid Left", channel_type="Digital Output"),
@@ -467,7 +471,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         #        device_type="DAQ Device",
         #        data_interface="USB2.0",
         #        manufacturer=d.Organization.NATIONAL_INSTRUMENTS,
-        #        computer_name="behavior_computer",
+        #        computer_name=settings['computer_name'],
         #        channels=[
         #        ],
         #    )
@@ -483,6 +487,18 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         )
     logging.info('finished building rig json')
     return rig
+
+    # TODO
+    # Cameras
+    # Platforms
+    # FIP
+    # OPTO
+    # Speaker
+    # Reward/lick spouts
+    # Lick spout stages
+    # Lick detector
+    # Harp boards
+    # Parse laser calibration
 
 def parse_water_calibration(water_calibration):
     

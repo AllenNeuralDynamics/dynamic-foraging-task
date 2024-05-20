@@ -919,6 +919,7 @@ class Window(QMainWindow):
             'Teensy_COM_box4':'',
             'FIP_workflow_path':'',
             'bonsai_path':os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe'),
+            'bonsai_config_path':os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.config'),
             'bonsaiworkflow_path':os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai'),
             'newscale_serial_num_box1':'',
             'newscale_serial_num_box2':'',
@@ -1189,10 +1190,19 @@ class Window(QMainWindow):
         df = pd.read_csv(self.SettingsBoxFile,index_col=None,header=None)
         rig_settings['box_settings'] = {row[0]:row[1] for index, row in df.iterrows()}
         rig_settings['rig_specification'] = rig_specification
+        rig_settings['computer_name'] = socket.gethostname()
+        rig_settings['bonsai_version'] = self._get_bonsai_version(rig_settings['bonsai_config_path'])
  
         build_rig_json(existing_rig_json, rig_settings, 
             self.WaterCalibrationResults, 
             self.LaserCalibrationResults)        
+
+    def _get_bonsai_version(self,config_path):
+        with open(config_path, "r") as f:
+            for line in fp:
+                if 'Package id="Bonsai"' in line:
+                   return line.split('version="')[1].split('"')[0] 
+        return '0.0.0'
 
     def _OpenSettingFolder(self):
         '''Open the setting folder'''
