@@ -325,6 +325,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     # FIB specific information
     ###########################################################################
     if FIB:
+        # TODO FIB calibration needs to be recorded and incorporated here
         components['patch_cords']=[
             d.Patch(
                 name="Bundle Branching Fiber-optic Patch Cord",
