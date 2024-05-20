@@ -213,7 +213,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         d.HarpDevice(
             name="Harp Behavior",
             harp_device_type=d.HarpDeviceType.BEHAVIOR,
-            manufacturer:d.Organization.CHAMPALIMAUD,
+            manufacturer=d.Organization.CHAMPALIMAUD,
             core_version="2.1",
             firmware_version="FTDI version:",
             computer_name=settings['computer_name'], 
@@ -224,31 +224,31 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 d.DAQChannel(channel_name="DI0", device_name=lick_spouts[0].name, channel_type="Digital Input"),
                 d.DAQChannel(channel_name="DI1", device_name=lick_spouts[1].name, channel_type="Digital Input") 
             ],
-        )
+        ),
         d.HarpDevice(
             name="Harp Sound",
             harp_device_type=d.HarpDeviceType.SOUND_CARD,
-            manufacturer:d.Organization.CHAMPALIMAUD,
+            manufacturer=d.Organization.CHAMPALIMAUD,
             core_version="2.1",
             firmware_version="FTDI version:",
             computer_name=settings['computer_name'], 
             is_clock_generator=False,
             data_interface=d.DataInterface.USB
-        )
+        ),
         d.HarpDevice(
             name="Harp clock synchronization board",
             harp_device_type=d.HarpDeviceType.CLOCK_SYNCHRONIZER,
-            manufacturer:d.Organization.CHAMPALIMAUD,
+            manufacturer=d.Organization.CHAMPALIMAUD,
             core_version="2.1",
             firmware_version="FTDI version:",
             computer_name=settings['computer_name'], 
             is_clock_generator=True,
             data_interface=d.DataInterface.USB
-        )       
+        ),       
         d.HarpDevice(
             name="Harp sound amplifier",
             harp_device_type=d.HarpDeviceType.INPUT_EXPANDER,
-            manufacturer:d.Organization.CHAMPALIMAUD,
+            manufacturer=d.Organization.CHAMPALIMAUD,
             core_version="2.1",
             firmware_version="FTDI version:",
             computer_name=settings['computer_name'], 
