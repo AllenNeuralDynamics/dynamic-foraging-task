@@ -17,4 +17,7 @@ HasBottomCamera,0
 HasSideCameraRight,0
 HasBodyCamera,0
 HasOpto,0
+FipRedCMOSSerialNumber,0
+FipGreenCMOSSerialNumber,0
+FipObjectiveSerialNumber,0
 codec,-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M

@@ -331,7 +331,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         components['detectors']=[
             d.Detector(
                 name="Green CMOS",
-                serial_number="21396991",
+                serial_number=settings["box_settings"]["FipGreenCMOSSerialNumber"],
                 manufacturer=d.Organization.FLIR,
                 model="BFS-U3-20S40M",
                 detector_type="Camera",
@@ -349,7 +349,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             ),
             d.Detector(
                 name="Red CMOS",
-                serial_number="21396991",
+                serial_number=settings["box_settings"]["FipRedCMOSSerialNumber"],,
                 manufacturer=d.Organization.FLIR,
                 model="BFS-U3-20S40M",
                 detector_type="Camera",
@@ -370,7 +370,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         components['objectives']=[
             d.Objective(
                 name="Objective",
-                serial_number="128022336",
+                serial_number=settings['box_settings']['FipObjectiveSerialNumber'],
                 manufacturer=d.Organization.NIKON,
                 model="CFI Plan Apochromat Lambda D 10x",
                 numerical_aperture=0.45,
