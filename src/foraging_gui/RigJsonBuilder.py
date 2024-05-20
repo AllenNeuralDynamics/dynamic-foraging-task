@@ -60,17 +60,17 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     # Build dictionary of components
     components = {}
 
-    # TODO, what other modalities do we need to include?
-    # behavior video?
-    # Opto?
+    # Determine what extra components are present
     FIB = settings['Teensy_COM_box{}'.format(settings['box_number'])] != ''
-    OPTO = False
+    OPTO = ('HasOpto' in settings['box_settings']) and (settings['box_settings']['HasOpto'] == "1"):
 
     # Modalities
     ###########################################################################
-    components['modalities'] = [Modality.BEHAVIOR]
+    # Opto is not a modality, its a stimulus
+    components['modalities'] = [Modality.BEHAVIOR, Modality.BEHAVIOR_VIDEOS]
     if FIB:
         components['modalities'].append(Modality.FIB)
+
 
     # Cameras
     ###########################################################################
