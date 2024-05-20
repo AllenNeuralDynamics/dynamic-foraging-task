@@ -473,28 +473,22 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     # Optogenetics specific
     ###########################################################################
     if OPTO:
-        ##Optogenetics Specific   ## TODO Xinxin to fill in
         print('need to implement') 
-        #components['light_sources'].append(
-        #    d.LightEmittingDiode(
-        #        name="LED for photostimulation",
-        #        manufacturer=d.Organization.PRIZMATIX,
-        #        model="xxx",
-        #        wavelength=470,
-        #    )
-        #    )
+        # TODO Xinxin to fill in
+        # Lasers/LEDS?
+        # Filters?
+        # Cables?
         
-        #daqs.append(
-        #    d.DAQDevice(
-        #        name="NIDAQ for opto",
-        #        device_type="DAQ Device",
-        #        data_interface="USB2.0",
-        #        manufacturer=d.Organization.NATIONAL_INSTRUMENTS,
-        #        computer_name=settings['computer_name'],
-        #        channels=[
-        #        ],
-        #    )
-        #    )
+        daqs.append(
+            d.DAQDevice(
+                name="optogenetics nidaq",
+                device_type="DAQ_Device",
+                data_interface=DataInterface.USB,
+                manufacturer=Organization.NATIONAL_INSTRUMENTS,
+                model="USB-6002",
+            )
+        )
+
 
     # Generate Rig Schema
     ###########################################################################
@@ -510,17 +504,16 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     # TODO
     # Cameras
     # Platforms
-    # FIP
-    # OPTO
     # Reward/lick spouts
     # Lick detector
-    # Harp boards
     # Parse laser calibration
     #
     # TODO, later
     # Lick spout stages - Need to add details for AIND stages
     # Speaker - needs manufactor, any details
     # What if water calibration is null?
+    # OPTO
+
 
 def parse_water_calibration(water_calibration):
     
