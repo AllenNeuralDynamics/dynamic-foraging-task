@@ -53,10 +53,6 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
 
 
 def build_rig_json_core(settings, water_calibration, laser_calibration):
-
-    # TODO
-    # Cameras
-
     # Set up
     ###########################################################################
     logging.info('building rig json')
@@ -74,6 +70,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     BOTTOM_CAMERA = ('HasBottomCamera' in settings['box_settings']) and (settings['box_settings']['HasBottomCamera'] == "1")
     AIND_LICK_DETECTOR = ('AINDLickDetector' in settings['box_settings']) and (settings['box_settings']['AINDLickDetector'] == "1")
 
+
     # Modalities
     ###########################################################################
     # Opto is not a modality, its a stimulus
@@ -81,68 +78,69 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     if FIB:
         components['modalities'].append(Modality.FIB)
 
-    # Cameras
+
+    # Cameras # TODO
     ###########################################################################
-    components['cameras']=[
-        d.CameraAssembly(
-            name="BehaviorVideography_FaceSide",
-            camera_target=d.CameraTarget.FACE_SIDE_RIGHT,
-            camera=d.Camera(
-                name="Side face camera",
-                detector_type="Camera",
-                serial_number="TBD",
-                manufacturer=d.Organization.AILIPU,
-                model="ELP-USBFHD05MT-KL170IR",
-                notes="The light intensity sensor was removed; IR illumination is constantly on",
-                data_interface="USB",
-                computer_name=settings['computer_name'],
-                max_frame_rate=120,
-                sensor_width=640,
-                sensor_height=480,
-                chroma="Color",
-                cooling="Air",
-                bin_mode="Additive",
-                recording_software=d.Software(name="Bonsai", version=settings['bonsai_version']),
+    if HIGH_SPEED_CAMERA:
+        components['cameras']=[]
+    else:
+        components['cameras']=[
+            d.CameraAssembly(
+                name="BehaviorVideography_FaceSide",
+                camera_target=d.CameraTarget.FACE_SIDE_RIGHT,
+                camera=d.Camera(
+                    name="Side face camera",
+                    detector_type="Camera",
+                    manufacturer=d.Organization.AILIPU,
+                    model="ELP-USBFHD05MT-KL170IR",
+                    notes="The light intensity sensor was removed; IR illumination is constantly on",
+                    data_interface="USB",
+                    computer_name=settings['computer_name'],
+                    max_frame_rate=120,
+                    sensor_width=640,
+                    sensor_height=480,
+                    chroma="Color",
+                    cooling="Air",
+                    bin_mode="Additive",
+                    recording_software=d.Software(name="Bonsai", version=settings['bonsai_version']),
+                ),
+                lens=d.Lens(
+                    name="Xenocam 1",
+                    model="XC0922LENS",
+                    manufacturer=d.Organization.OTHER,
+                    max_aperture="f/1.4",
+                    notes='Focal Length 9-22mm 1/3" IR F1.4',
+                ),
             ),
-            lens=d.Lens(
-                name="Xenocam 1",
-                model="XC0922LENS",
-                serial_number="unknown",
-                manufacturer=d.Organization.OTHER,
-                max_aperture="f/1.4",
-                notes='Focal Length 9-22mm 1/3" IR F1.4',
+            d.CameraAssembly(
+                name="BehaviorVideography_FaceBottom",
+                camera_target=d.CameraTarget.FACE_BOTTOM,
+                camera=d.Camera(
+                    name="Bottom face Camera",
+                    detector_type="Camera",
+                    manufacturer=d.Organization.AILIPU,
+                    model="ELP-USBFHD05MT-KL170IR",
+                    notes="The light intensity sensor was removed; IR illumination is constantly on",
+                    data_interface="USB",
+                    computer_name=settings['computer_name'],
+                    max_frame_rate=120,
+                    sensor_width=640,
+                    sensor_height=480,
+                    chroma="Color",
+                    cooling="Air",
+                    bin_mode="Additive",
+                    recording_software=d.Software(name="Bonsai", version=settings['bonsai_version']),
+                ),
+                lens=d.Lens(
+                    name="Xenocam 2",
+                    model="XC0922LENS",
+                    manufacturer=d.Organization.OTHER,
+                    max_aperture="f/1.4",
+                    notes='Focal Length 9-22mm 1/3" IR F1.4',
+                ),
             ),
-        ),
-        d.CameraAssembly(
-            name="BehaviorVideography_FaceBottom",
-            camera_target=d.CameraTarget.FACE_BOTTOM,
-            camera=d.Camera(
-                name="Bottom face Camera",
-                detector_type="Camera",
-                serial_number="TBD",
-                manufacturer=d.Organization.AILIPU,
-                model="ELP-USBFHD05MT-KL170IR",
-                notes="The light intensity sensor was removed; IR illumination is constantly on",
-                data_interface="USB",
-                computer_name=settings['computer_name'],
-                max_frame_rate=120,
-                sensor_width=640,
-                sensor_height=480,
-                chroma="Color",
-                cooling="Air",
-                bin_mode="Additive",
-                recording_software=d.Software(name="Bonsai", version=settings['bonsai_version']),
-            ),
-            lens=d.Lens(
-                name="Xenocam 2",
-                model="XC0922LENS",
-                serial_number="unknown",
-                manufacturer=d.Organization.OTHER,
-                max_aperture="f/1.4",
-                notes='Focal Length 9-22mm 1/3" IR F1.4',
-            ),
-        ),
-    ]
+        ]
+
 
     # Mouse Platform
     ###########################################################################
@@ -151,6 +149,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         diameter=3.0,
         diameter_unit=SizeUnit.CM
         )
+
 
     # Stimulus devices
     ###########################################################################
@@ -169,42 +168,29 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     manufacturer=d.Organization.AIND,
                     travel=0, #TODO, need to fill in this value
                     )      
+
     if ('AINDLickDetector' in settings['box_settings']) and (settings['box_settings']['AINDLickDetector'] == "1"):
-        lick_spouts=[
-            d.RewardSpout(
-                name="AIND_Lick_Detector Left",
-                side=d.SpoutSide.LEFT,
-                spout_diameter=1.2,
-                solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Left"),
-                lick_sensor_type=d.LickSensorType("Capacitive")
-            ),
-            d.RewardSpout(
-                name="AIND_Lick_Detector Right",
-                side=d.SpoutSide.RIGHT,
-                spout_diameter=1.2,
-                spout_diameter_unit=SizeUnit.MM,
-                solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Right"),
-                lick_sensor_type=d.LickSensorType("Capacitive")
-            ),
-            ]   
+        lick_spout_name = 'AIND_Lick_Detector'
     else:
-        lick_spouts=[
-            d.RewardSpout(
-                name="Janelia_Lick_Detector Left",
-                side=d.SpoutSide.LEFT,
-                spout_diameter=1.2,
-                spout_diameter_unit=SizeUnit.MM,
-                solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Left"),
-                lick_sensor_type=d.LickSensorType("Capacitive")
-            ),
-            d.RewardSpout(
-                name="Janelia_Lick_Detector Right",
-                side=d.SpoutSide.RIGHT,
-                spout_diameter=1.2,
-                solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Right"),
-                lick_sensor_type=d.LickSensorType("Capacitive")
-            ),
-            ]
+        lick_spout_name = 'Janelia_Lick_Detector'
+    lick_spouts=[
+        d.RewardSpout(
+            name="{} Left".format(lick_spout_name),
+            side=d.SpoutSide.LEFT,
+            spout_diameter=1.2,
+            solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Left"),
+            lick_sensor_type=d.LickSensorType("Capacitive")
+        ),
+        d.RewardSpout(
+            name="{} Right".format(lick_spout_name),
+            side=d.SpoutSide.RIGHT,
+            spout_diameter=1.2,
+            spout_diameter_unit=SizeUnit.MM,
+            solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Right"),
+            lick_sensor_type=d.LickSensorType("Capacitive")
+        ),
+        ]   
+
     components['stimulus_devices']=[
         d.RewardDelivery(
             reward_spouts=lick_spouts,
@@ -268,6 +254,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         )
     ]
 
+
     # Calibrations
     ###########################################################################
 
@@ -278,6 +265,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         left, right = parse_water_calibration(water_calibration)
         components['calibrations'].append(left)
         components['calibrations'].append(right)
+
 
     # FIB specific information
     ###########################################################################
