@@ -349,7 +349,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             ),
             d.Detector(
                 name="Red CMOS",
-                serial_number=settings["box_settings"]["FipRedCMOSSerialNumber"],,
+                serial_number=settings["box_settings"]["FipRedCMOSSerialNumber"],
                 manufacturer=d.Organization.FLIR,
                 model="BFS-U3-20S40M",
                 detector_type="Camera",
