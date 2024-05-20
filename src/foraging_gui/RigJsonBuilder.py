@@ -62,6 +62,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
 
     # TODO, what other modalities do we need to include?
     # behavior video?
+    # Opto?
     FIB = settings['Teensy_COM_box{}'.format(settings['box_number'])] != ''
     OPTO = False
 
