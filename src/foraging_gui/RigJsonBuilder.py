@@ -7,6 +7,7 @@ from datetime import date, datetime, timezone
 import aind_data_schema.core.rig as r
 import aind_data_schema.components.devices as d
 from aind_data_schema_models.modalities import Modality
+from aind_data_schema_models.units import SizeUnit
 
 from foraging_gui.Visualization import GetWaterCalibration
 
@@ -52,6 +53,9 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
 
 
 def build_rig_json_core(settings, water_calibration, laser_calibration):
+
+    # TODO
+    # Cameras
 
     # Set up
     ###########################################################################
@@ -142,7 +146,11 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
 
     # Mouse Platform
     ###########################################################################
-    components['mouse_platform']=d.Tube(name="mouse_tube_foraging", diameter=4.0)
+    components['mouse_platform']=d.Tube(
+        name="mouse_tube_foraging", 
+        diameter=3.0
+        diameter_unit=SizeUnit.CM
+        )
 
     # Stimulus devices
     ###########################################################################
@@ -151,14 +159,15 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     name="NewScaleMotor for LickSpouts",
                     serial_number=settings['newscale_serial_num_box{}'.format(settings['box_number'])], 
                     manufacturer=d.Organization.NEW_SCALE_TECHNOLOGIES,
-                    travel=15.0,  #unit is mm
+                    travel=15.0,
+                    travel_unit=SizeUnit.MM,
                     firmware="https://github.com/AllenNeuralDynamics/python-newscale, branch: axes-on-target, commit #7c17497",
                     )
     else:
         stage = d.MotorizedStage(
                     name="AIND lick spout stage",
                     manufacturer=d.Organization.AIND,
-                    travel=15.0,
+                    travel=0, #TODO, need to fill in this value
                     )      
     if ('AINDLickDetector' in settings['box_settings']) and (settings['box_settings']['AINDLickDetector'] == "1"):
         lick_spouts=[
@@ -173,6 +182,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 name="AIND_Lick_Detector Right",
                 side=d.SpoutSide.RIGHT,
                 spout_diameter=1.2,
+                spout_diameter_unit=SizeUnit.MM,
                 solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Right"),
                 lick_sensor_type=d.LickSensorType("Capacitive")
             ),
@@ -183,6 +193,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 name="Janelia_Lick_Detector Left",
                 side=d.SpoutSide.LEFT,
                 spout_diameter=1.2,
+                spout_diameter_unit=SizeUnit.MM,
                 solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Left"),
                 lick_sensor_type=d.LickSensorType("Capacitive")
             ),
@@ -263,36 +274,10 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     components['calibrations']=[]
 
     # Water calibration
-    left, right = parse_water_calibration(water_calibration)
-    components['calibrations'].append(left)
-    components['calibrations'].append(right)
-
-    # Laser Calibration     # TODO, its unclear if these are for FIP, OPTO, or both?
-    # Its unclear how to include the laser calibration file
-    #components['calibrations'].append(
-    #    d.Calibration(
-    #        calibration_date=datetime(2023, 10, 2, 3, 15, 22, tzinfo=timezone.utc),
-    #        device_name="470nm LED",
-    #        description="LED calibration",
-    #        input={"Power setting": [0]},
-    #        output={"Power mW": [0.02]},
-    #    ))
-    #components['calibrations'].append(
-    #    d.Calibration(
-    #        calibration_date=datetime(2023, 10, 2, 3, 15, 22, tzinfo=timezone.utc),
-    #        device_name="415nm LED",
-    #        description="LED calibration",
-    #        input={"Power setting": [0]},
-    #        output={"Power mW": [0.02]},
-    #    ))
-    #components['calibrations'].append(
-    #    d.Calibration(
-    #        calibration_date=datetime(2023, 10, 2, 3, 15, 22, tzinfo=timezone.utc),
-    #        device_name="560nm LED",
-    #        description="LED calibration",
-    #        input={"Power setting": [0]},
-    #        output={"Power mW": [0.02]},
-    #    )
+    if water_calibration != {}:
+        left, right = parse_water_calibration(water_calibration)
+        components['calibrations'].append(left)
+        components['calibrations'].append(right)
 
     # FIB specific information
     ###########################################################################
@@ -470,15 +455,16 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         components['additional_devices']=[d.Device(device_type="Photometry Clock", name="Photometry Clock")]
         components['daqs'][0].channels.append(d.DAQChannel(channel_name="DI3", device_name="Photometry Clock", channel_type="Digital Input"))
 
+
     # Optogenetics specific
     ###########################################################################
     if OPTO:
-        print('need to implement') 
         # TODO Xinxin to fill in
         # Lasers/LEDS?
         # Filters?
         # Cables?
-        
+        # Laser calibration
+ 
         daqs.append(
             d.DAQDevice(
                 name="optogenetics nidaq",
@@ -488,6 +474,68 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 model="USB-6002",
             )
         )
+
+        # Copied from other repo
+        #Oxxius_Lasers_473_1={
+        #    "name":"Oxxius Laser 473-1",
+        #    "device_type":"Laser",
+        #    "manufacturer":Organization.OXXIUS,
+        #    "wavelength":473,
+        #    "wavelength_unit":SizeUnit.NM,
+        #    "model": "L6CC-CSB-2422",
+        #    "serial_number": "LNC-00771",
+        #}
+
+
+        #Oxxius_Lasers_473_2={
+        #    "name":"Oxxius Laser 473-2",
+        #    "device_type":"Laser",
+        #    "manufacturer":Organization.OXXIUS,
+        #    "wavelength":473,
+        #    "wavelength_unit":SizeUnit.NM,
+        #    "model": "L6CC-CSB-2422",
+        #    "serial_number": "LNC-00771",
+        #}
+
+        #Oxxius_Lasers_561_1={
+        #    "name":"Oxxius Laser 561-1",
+        #    "device_type":"Laser",
+        #    "manufacturer":Organization.OXXIUS,
+        #    "wavelength":473,
+        #    "wavelength_unit":SizeUnit.NM,
+        #    "model": "L6CC-CSB-2422",
+        #    "serial_number": "LNC-00771",
+        #}
+
+        #Oxxius_Lasers_561_2={
+        #    "name":"Oxxius Laser 561-2",
+        #    "device_type":"Laser",
+        #    "manufacturer":Organization.OXXIUS,
+        #    "wavelength":473,
+        #    "wavelength_unit":SizeUnit.NM,
+        #    "model": "L6CC-CSB-2422",
+        #    "serial_number": "LNC-00771",
+        #}
+
+        #Oxxius_Lasers_638_1={
+        #    "name":"Oxxius Laser 638-1",
+        #    "device_type":"Laser",
+        #    "manufacturer":Organization.OXXIUS,
+        #    "wavelength":473,
+        #    "wavelength_unit":SizeUnit.NM,
+        #    "model": "L6CC-CSB-2422",
+        #    "serial_number": "LNC-00771",
+        #}
+
+        #Oxxius_Lasers_638_2={
+        #    "name":"Oxxius Laser 638-2",
+        #    "device_type":"Laser",
+        #    "manufacturer":Organization.OXXIUS,
+        #    "wavelength":473,
+        #    "wavelength_unit":SizeUnit.NM,
+        #    "model": "L6CC-CSB-2422",
+        #    "serial_number": "LNC-00771",
+        #}
 
 
     # Generate Rig Schema
@@ -500,19 +548,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         )
     logging.info('finished building rig json')
     return rig
-
-    # TODO
-    # Cameras
-    # Platforms
-    # Reward/lick spouts
-    # Lick detector
-    # Parse laser calibration
-    #
-    # TODO, later
-    # Lick spout stages - Need to add details for AIND stages
-    # Speaker - needs manufactor, any details
-    # What if water calibration is null?
-    # OPTO
 
 
 def parse_water_calibration(water_calibration):
