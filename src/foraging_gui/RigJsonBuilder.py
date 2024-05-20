@@ -62,7 +62,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
 
     # Determine what extra components are present
     FIB = settings['Teensy_COM_box{}'.format(settings['box_number'])] != ''
-    OPTO = ('HasOpto' in settings['box_settings']) and (settings['box_settings']['HasOpto'] == "1"):
+    OPTO = ('HasOpto' in settings['box_settings']) and (settings['box_settings']['HasOpto'] == "1")
 
     # Modalities
     ###########################################################################
