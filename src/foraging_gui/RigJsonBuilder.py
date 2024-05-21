@@ -91,7 +91,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         if False:#RIGHT_CAMERA:
             components['cameras'].append(
                 d.CameraAssembly(
-                    name="Right Camera",
+                    name="Right Camera assembly",
                     computer_name=settings['computer_name'],
                     camera_target=d.CameraTarget.FACE_SIDE_RIGHT,
                     lens=d.Lens( 
@@ -102,6 +102,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                         model="CF16ZA-1S",
                         ),
                     camera=d.Camera(
+                        name = "Right size of face camera"
                         detector_type="Camera",
                         manufacturer=d.Organization.FLIR,
                         data_interface="USB",
@@ -120,7 +121,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         if BOTTOM_CAMERA:
             components['cameras'].append(
                 d.CameraAssembly(
-                    name="Bottom Camera",
+                    name="Bottom Camera assembly",
                     computer_name=settings['computer_name'],
                     camera_target=d.CameraTarget.FACE_BOTTOM,
                     lens=d.Lens(
@@ -132,6 +133,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                         notes='Manufacturer is Kowa'
                         ), 
                     camera=d.Camera(
+                        name="bottom of face camera",
                         detector_type="Camera",
                         manufacturer=d.Organization.FLIR,
                         data_interface="USB",
