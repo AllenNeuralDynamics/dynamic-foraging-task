@@ -538,7 +538,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             d.Laser(
                 name="Optogenetics Laser 1",
                 manufacturer=getattr(d.Organization,settings['box_settings']['OptoLaser1Manufacturer']),
-                wavelength=getattr(d.Organization,settings['box_settings']['OptoLaser1Wavelength']),
+                wavelength=settings['box_settings']['OptoLaser1Wavelength'],
                 wavelength_unit=SizeUnit.NM,
                 model=settings["box_settings"]["OptoLaser1Model"],
                 serial_number=settings["box_settings"]["OptoLaser1SerialNumber"],
@@ -546,7 +546,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             d.Laser(
                 name="Optogenetics Laser 2",
                 manufacturer=getattr(d.Organization,settings['box_settings']['OptoLaser2Manufacturer']),
-                wavelength=getattr(d.Organization,settings['box_settings']['OptoLaser2Wavelength']),
+                wavelength=settings['box_settings']['OptoLaser2Wavelength'],
                 wavelength_unit=SizeUnit.NM,
                 model=settings["box_settings"]["OptoLaser2Model"],
                 serial_number=settings["box_settings"]["OptoLaser2SerialNumber"],
