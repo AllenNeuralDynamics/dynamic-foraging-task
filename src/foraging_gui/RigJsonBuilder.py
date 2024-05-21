@@ -598,7 +598,7 @@ def parse_laser_calibration(laser_calibration):
     laser_colors = get_laser_names(laser_calibration) 
     for laser in laser_colors:
         # find the last calibration for this laser color        
-        latest_calibration_date = FindLatestCalibrationDate(laser, laser_calibration):
+        latest_calibration_date = FindLatestCalibrationDate(laser, laser_calibration)
         if latest_calibration_date == 'NA':
             continue
 
