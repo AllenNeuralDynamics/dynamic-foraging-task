@@ -79,6 +79,13 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
 
     # Cameras 
     ###########################################################################
+    lens=d.Lens( 
+        name="Behavior Video Lens Right Side",
+        manufacturer=d.Organization.FUJINON,
+        focal_length=16,
+        focal_length_unit=SizeUnit.MM,
+        model="CF16ZA-1S",
+        )
     if HIGH_SPEED_CAMERA:
         components['cameras']=[]
         if RIGHT_CAMERA:
@@ -93,7 +100,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                         focal_length=16,
                         focal_length_unit=SizeUnit.MM,
                         model="CF16ZA-1S",
-                        type="lens",
                         ),
                     camera=d.Camera(
                         detector_type="Camera",
