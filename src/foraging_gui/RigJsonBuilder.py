@@ -554,7 +554,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                         serial_number=settings["box_settings"]["OptoLaser2SerialNumber"],
                         )],
                 name = 'Optogenetic laser assembly',
-                manipulator = d.Manipulator(manufacturer=d.Organization.OTHER)
+                manipulator = d.Manipulator(manufacturer=d.Organization.OTHER,name='optogenetic laser manipulator')
                 )
             ]
 
