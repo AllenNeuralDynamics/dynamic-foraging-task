@@ -79,20 +79,12 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
 
     # Cameras 
     ###########################################################################
-    lens=d.Lens( 
-        name="Behavior Video Lens Right Side",
-        manufacturer=d.Organization.FUJINON,
-        focal_length=16,
-        focal_length_unit=SizeUnit.MM,
-        model="CF16ZA-1S",
-        )
     if HIGH_SPEED_CAMERA:
         components['cameras']=[]
         if False:#RIGHT_CAMERA:
             components['cameras'].append(
                 d.CameraAssembly(
                     name="Right Camera assembly",
-                    computer_name=settings['computer_name'],
                     camera_target=d.CameraTarget.FACE_SIDE_RIGHT,
                     lens=d.Lens( 
                         name="Behavior Video Lens Right Side",
@@ -106,6 +98,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                         detector_type="Camera",
                         manufacturer=d.Organization.FLIR,
                         data_interface="USB",
+                        computer_name=settings['computer_name'],
                         chroma="Monochrome",
                         cooling="Air", 
                         sensor_format="1/2.9",
@@ -122,7 +115,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             components['cameras'].append(
                 d.CameraAssembly(
                     name="Bottom Camera assembly",
-                    computer_name=settings['computer_name'],
                     camera_target=d.CameraTarget.FACE_BOTTOM,
                     lens=d.Lens(
                         name="Behavior Video Lens Bottom of face", 
@@ -134,6 +126,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                         ), 
                     camera=d.Camera(
                         name="bottom of face camera",
+                        computer_name=settings['computer_name'],
                         detector_type="Camera",
                         manufacturer=d.Organization.FLIR,
                         data_interface="USB",
