@@ -530,6 +530,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 data_interface=d.DataInterface.USB,
                 manufacturer=d.Organization.NATIONAL_INSTRUMENTS,
                 model="USB-6002",
+                computer_name=settings['computer_name'],
             )
         )
 
