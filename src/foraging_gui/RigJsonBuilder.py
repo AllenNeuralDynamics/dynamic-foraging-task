@@ -81,7 +81,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     ###########################################################################
     if HIGH_SPEED_CAMERA:
         components['cameras']=[]
-        if False:#RIGHT_CAMERA:
+        if RIGHT_CAMERA:
             components['cameras'].append(
                 d.CameraAssembly(
                     name="Right Camera assembly",
