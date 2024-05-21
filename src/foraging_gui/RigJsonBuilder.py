@@ -206,7 +206,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 manufacturer=d.Organization.THORLABS,
                 model="M810L5",
                 wavelength=810,
-                bandwith=30,
+                bandwidth=30,
             )
         ]
 
