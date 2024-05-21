@@ -73,7 +73,6 @@ class Window(QMainWindow):
         self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration_{}.json'.format(box_number))
         self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_{}.json'.format(box_number))
         self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json')
-        self.rig_specification = os.path.join(self.SettingFolder, 'rig_specification_{}.json'.format(box_number))
 
         # Load Laser and Water Calibration Files
         self._GetLaserCalibration()
@@ -919,6 +918,7 @@ class Window(QMainWindow):
             'Teensy_COM_box4':'',
             'FIP_workflow_path':'',
             'bonsai_path':os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe'),
+            'bonsai_config_path':os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.config'),
             'bonsaiworkflow_path':os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai'),
             'newscale_serial_num_box1':'',
             'newscale_serial_num_box2':'',
@@ -1155,19 +1155,6 @@ class Window(QMainWindow):
             print('making directory: {}'.format(self.Settings['rig_metadata_folder']))
             os.makedirs(self.Settings['rig_metadata_folder'])
               
-        # Load rig_specification.json
-        if os.path.isfile(self.rig_specification):
-            logging.info('Loading rig specification file')
-            try:
-                with open(self.rig_specification, 'r') as f:
-                    rig_specification = json.load(f)
-            except Exception as e:
-                logging.error('Error loading rig specification file: {}'.format(e))
-                rig_specification = {}
-        else:
-            logging.info('Cannot find rig specification file: {}'.format(self.rig_specification))
-            rig_specification = {}
-        
         # Load most recent rig_json
         files = sorted(Path(self.Settings['rig_metadata_folder']).iterdir(), key=os.path.getmtime)
         files = [f.__str__().split('\\')[-1] for f in files]
@@ -1188,11 +1175,19 @@ class Window(QMainWindow):
         rig_settings['box_number'] = self.box_number
         df = pd.read_csv(self.SettingsBoxFile,index_col=None,header=None)
         rig_settings['box_settings'] = {row[0]:row[1] for index, row in df.iterrows()}
-        rig_settings['rig_specification'] = rig_specification
+        rig_settings['computer_name'] = socket.gethostname()
+        rig_settings['bonsai_version'] = self._get_bonsai_version(rig_settings['bonsai_config_path'])
  
         build_rig_json(existing_rig_json, rig_settings, 
             self.WaterCalibrationResults, 
             self.LaserCalibrationResults)        
+
+    def _get_bonsai_version(self,config_path):
+        with open(config_path, "r") as f:
+            for line in f:
+                if 'Package id="Bonsai"' in line:
+                   return line.split('version="')[1].split('"')[0] 
+        return '0.0.0'
 
     def _OpenSettingFolder(self):
         '''Open the setting folder'''
