@@ -534,7 +534,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             )
         )
 
-        components['laser_assemblies'].append(
+        components['laser_assemblies'] = [
             d.LaserAssembly(
                 lasers = [
                     d.Laser(
@@ -555,7 +555,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                         )],
                 name = 'Optogenetic laser assembly',
                 )
-            )
+            ]
 
         # laser calibration
         components['calibrations'].extend(parse_laser_calibration(laser_calibration))
