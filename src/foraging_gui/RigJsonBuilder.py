@@ -200,6 +200,16 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             ),
         ]
 
+    components['light_sources'] = [
+             d.LightEmittingDiode(
+                name="IR LED",
+                manufacturer=d.Organization.THORLABS,
+                model="M810L5",
+                wavelength=810,
+                bandwith=30,
+            )
+        ]
+
 
     # Mouse Platform
     ###########################################################################
@@ -341,26 +351,27 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             )
         ]
 
-        components['light_sources']=[
+        components['light_sources'].append(
             d.LightEmittingDiode(
                 name="470nm LED",
                 manufacturer=d.Organization.THORLABS,
                 model="M470F3",
                 wavelength=470,
-            ),
+            ))
+        components['light_sources'].append(
             d.LightEmittingDiode(
                 name="415nm LED",
                 manufacturer=d.Organization.THORLABS,
                 model="M415F3",
                 wavelength=415,
-            ),
+            ))
+        components['light_sources'].append(
             d.LightEmittingDiode(
                 name="565nm LED",
                 manufacturer=d.Organization.THORLABS,
                 model="M565F3",
                 wavelength=565,
-            ),
-        ]
+            ))
 
         components['detectors']=[
             d.Detector(
