@@ -534,7 +534,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             )
         )
 
-        components['stimulus_devices'].append(
+        components['stimulus_devices'].extend([
             d.Laser(
                 name="Optogenetics Laser 1",
                 manufacturer=getattr(d.Organization,settings['box_settings']['OptoLaser1Manufacturer'].upper()),
@@ -551,7 +551,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 model=settings["box_settings"]["OptoLaser2Model"],
                 serial_number=settings["box_settings"]["OptoLaser2SerialNumber"],
             )
-        )
+        ])
 
         # laser calibration
         components['calibrations'].extend(parse_laser_calibration(laser_calibration))
