@@ -520,12 +520,10 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     ###########################################################################
     if OPTO:
         # TODO Xinxin to fill in
-        # Lasers/LEDS?
-        # Filters?
-        # Cables?
-        # Laser calibration
+        # Cables/Fibers/patch_cords?
+        # Laser Assembly?
  
-        daqs.append(
+        components['daqs'].append(
             d.DAQDevice(
                 name="optogenetics nidaq",
                 device_type="DAQ_Device",
@@ -535,68 +533,30 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             )
         )
 
-        # Copied from other repo
-        #Oxxius_Lasers_473_1={
-        #    "name":"Oxxius Laser 473-1",
-        #    "device_type":"Laser",
-        #    "manufacturer":Organization.OXXIUS,
-        #    "wavelength":473,
-        #    "wavelength_unit":SizeUnit.NM,
-        #    "model": "L6CC-CSB-2422",
-        #    "serial_number": "LNC-00771",
-        #}
+        components['stimulus_devices'].append(
+            d.Laser(
+                name="Optogenetics Laser 1",
+                manufacturer=getattr(Organization,settings['box_settings']['OptoLaser1Manufacturer']),
+                wavelength=getattr(Organization,settings['box_settings']['OptoLaser1Wavelength']),
+                wavelength_unit=SizeUnit.NM,
+                model=settings["box_settings"]["OptoLaser1Model"],
+                serial_number=settings["box_settings"]["OptoLaser1SerialNumber"],
+            )
+            d.Laser(
+                name="Optogenetics Laser 2",
+                manufacturer=getattr(Organization,settings['box_settings']['OptoLaser2Manufacturer']),
+                wavelength=getattr(Organization,settings['box_settings']['OptoLaser2Wavelength']),
+                wavelength_unit=SizeUnit.NM,
+                model=settings["box_settings"]["OptoLaser2Model"],
+                serial_number=settings["box_settings"]["OptoLaser2SerialNumber"],
+            )
+        )
 
+        # TODO Laser calibration
 
-        #Oxxius_Lasers_473_2={
-        #    "name":"Oxxius Laser 473-2",
-        #    "device_type":"Laser",
-        #    "manufacturer":Organization.OXXIUS,
-        #    "wavelength":473,
-        #    "wavelength_unit":SizeUnit.NM,
-        #    "model": "L6CC-CSB-2422",
-        #    "serial_number": "LNC-00771",
-        #}
-
-        #Oxxius_Lasers_561_1={
-        #    "name":"Oxxius Laser 561-1",
-        #    "device_type":"Laser",
-        #    "manufacturer":Organization.OXXIUS,
-        #    "wavelength":473,
-        #    "wavelength_unit":SizeUnit.NM,
-        #    "model": "L6CC-CSB-2422",
-        #    "serial_number": "LNC-00771",
-        #}
-
-        #Oxxius_Lasers_561_2={
-        #    "name":"Oxxius Laser 561-2",
-        #    "device_type":"Laser",
-        #    "manufacturer":Organization.OXXIUS,
-        #    "wavelength":473,
-        #    "wavelength_unit":SizeUnit.NM,
-        #    "model": "L6CC-CSB-2422",
-        #    "serial_number": "LNC-00771",
-        #}
-
-        #Oxxius_Lasers_638_1={
-        #    "name":"Oxxius Laser 638-1",
-        #    "device_type":"Laser",
-        #    "manufacturer":Organization.OXXIUS,
-        #    "wavelength":473,
-        #    "wavelength_unit":SizeUnit.NM,
-        #    "model": "L6CC-CSB-2422",
-        #    "serial_number": "LNC-00771",
-        #}
-
-        #Oxxius_Lasers_638_2={
-        #    "name":"Oxxius Laser 638-2",
-        #    "device_type":"Laser",
-        #    "manufacturer":Organization.OXXIUS,
-        #    "wavelength":473,
-        #    "wavelength_unit":SizeUnit.NM,
-        #    "model": "L6CC-CSB-2422",
-        #    "serial_number": "LNC-00771",
-        #}
-
+    # laser calibration
+    if laser_calibration != {}:
+        components['calibrations'].extend(parse_laser_calibration(laser_calibration))
 
     # Generate Rig Schema
     ###########################################################################
@@ -634,4 +594,24 @@ def parse_water_calibration(water_calibration):
 
     return left, right
 
+def parse_laser_calibration(laser_calibration):
+    calibrations = []
+
+    laser1 = d.Calibration(
+        calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
+        device_name = 'Laser 1 Calibration',
+        description = 'Water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delievered in microliters.',
+        input = {'valve open time (s):':left_times},
+        output = {'water volume (ul):':left_volumes}
+        )
+
+    laser2 = d.Calibration(
+        calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
+        device_name = 'Laser 2 Calibration',
+        description = 'Water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delievered in microliters.',
+        input = {'valve open time (s):':right_times},
+        output = {'water volume (ul):':right_volumes}
+        )
+
+    return calibrations
 
