@@ -524,16 +524,16 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         # Cables/Fibers/patch_cords?
         # Laser Assembly?
  
-        components['daqs'].append(
-            d.DAQDevice(
-                name="optogenetics nidaq",
-                device_type="DAQ Device",
-                data_interface=d.DataInterface.USB,
-                manufacturer=d.Organization.NATIONAL_INSTRUMENTS,
-                model="USB-6002",
-                computer_name=settings['computer_name'],
-            )
-        )
+        #components['daqs'].append(
+        #    d.DAQDevice(
+        #        name="optogenetics nidaq",
+        #        device_type="DAQ Device",
+        #        data_interface=d.DataInterface.USB,
+        #        manufacturer=d.Organization.NATIONAL_INSTRUMENTS,
+        #        model="USB-6002",
+        #        computer_name=settings['computer_name'],
+        #    )
+        #)
 
         components['stimulus_devices'].extend([
             d.Laser(
