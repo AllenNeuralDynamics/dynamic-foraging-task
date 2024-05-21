@@ -527,7 +527,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             d.DAQDevice(
                 name="optogenetics nidaq",
                 device_type="DAQ_Device",
-                data_interface=DataInterface.USB,
+                data_interface=d.DataInterface.USB,
                 manufacturer=Organization.NATIONAL_INSTRUMENTS,
                 model="USB-6002",
             )
