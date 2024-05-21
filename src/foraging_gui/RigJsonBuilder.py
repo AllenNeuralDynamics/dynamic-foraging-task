@@ -520,8 +520,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     # Optogenetics specific
     ###########################################################################
     if OPTO:
-        # TODO Xinxin to fill in
-        # Cables/Fibers/patch_cords?
+        # TODO need to fill in details on cables, fibers, patch cords, manipulator 
  
         components['daqs'].append(
             d.DAQDevice(
