@@ -370,7 +370,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                         ITI_duration=obj.B_ITIHistory[i],
                         response_duration=float(obj.TP_ResponseTime[i]),
                         reward_consumption_duration=float(obj.TP_RewardConsumeTime[i]),
-                        reward_delay=float(obj.TP_RewardDelay[i]),
+                        reward_delay=float(_get_field(obj, 'TP_RewardDelay', index=i, default=0)),
                         auto_waterL=obj.B_AutoWaterTrial[0][i] if type(obj.B_AutoWaterTrial[0]) is list else obj.B_AutoWaterTrial[i],   # Back-compatible with old autowater format
                         auto_waterR=obj.B_AutoWaterTrial[1][i] if type(obj.B_AutoWaterTrial[0]) is list else obj.B_AutoWaterTrial[i],
                         # optogenetics
