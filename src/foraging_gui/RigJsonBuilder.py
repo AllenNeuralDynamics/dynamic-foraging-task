@@ -124,10 +124,11 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     computer_name=settings['computer_name'],
                     camera_target=d.CameraTarget.FACE_BOTTOM,
                     lens=d.Lens( 
-                        manufacturer=d.Organization.OTHER(name="Kowa"),
+                        manufacturer=d.Organization.OTHER,
                         focal_length=25,
                         focal_length_unit=SizeUnit.MM,
                         model="LM25HC",
+                        notes='Manufacturer is Kowa'
                         ), 
                     camera=d.Camera(
                         detector_type="Camera",
