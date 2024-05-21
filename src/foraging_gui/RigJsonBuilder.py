@@ -528,7 +528,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 name="optogenetics nidaq",
                 device_type="DAQ_Device",
                 data_interface=d.DataInterface.USB,
-                manufacturer=Organization.NATIONAL_INSTRUMENTS,
+                manufacturer=d.Organization.NATIONAL_INSTRUMENTS,
                 model="USB-6002",
             )
         )
@@ -536,16 +536,16 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         components['stimulus_devices'].append(
             d.Laser(
                 name="Optogenetics Laser 1",
-                manufacturer=getattr(Organization,settings['box_settings']['OptoLaser1Manufacturer']),
-                wavelength=getattr(Organization,settings['box_settings']['OptoLaser1Wavelength']),
+                manufacturer=getattr(d.Organization,settings['box_settings']['OptoLaser1Manufacturer']),
+                wavelength=getattr(d.Organization,settings['box_settings']['OptoLaser1Wavelength']),
                 wavelength_unit=SizeUnit.NM,
                 model=settings["box_settings"]["OptoLaser1Model"],
                 serial_number=settings["box_settings"]["OptoLaser1SerialNumber"],
             ),
             d.Laser(
                 name="Optogenetics Laser 2",
-                manufacturer=getattr(Organization,settings['box_settings']['OptoLaser2Manufacturer']),
-                wavelength=getattr(Organization,settings['box_settings']['OptoLaser2Wavelength']),
+                manufacturer=getattr(d.Organization,settings['box_settings']['OptoLaser2Manufacturer']),
+                wavelength=getattr(d.Organization,settings['box_settings']['OptoLaser2Wavelength']),
                 wavelength_unit=SizeUnit.NM,
                 model=settings["box_settings"]["OptoLaser2Model"],
                 serial_number=settings["box_settings"]["OptoLaser2SerialNumber"],
