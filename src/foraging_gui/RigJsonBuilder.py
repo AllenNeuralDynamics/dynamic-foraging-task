@@ -617,7 +617,7 @@ def parse_laser_calibration(laser_calibration):
                         voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
                         
                         datestr = datetime.strptime(latest_calibration_date,'%Y-%m-%d').date()
-                        description= f'Optogenetic calibration for {laser}, Laser_{laser_name}, protocol: {protocol}, frequency: {freq}.'
+                        description= f'Optogenetic calibration for {laser} {laser_name}, protocol: {protocol}, frequency: {freq}.'
                         calibrations.append(
                             d.Calibration(
                                 calibration_date = datestr,
@@ -635,7 +635,7 @@ def parse_laser_calibration(laser_calibration):
                     voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
                     
                     datestr = datetime.strptime(latest_calibration_date,'%Y-%m-%d').date()
-                    description= f'Optogenetic calibration for {laser}, Laser_{laser_name}, protocol: {protocol}'
+                    description= f'Optogenetic calibration for {laser} {laser_name}, protocol: {protocol}'
                     calibrations.append(
                         d.Calibration(
                             calibration_date = datestr,
