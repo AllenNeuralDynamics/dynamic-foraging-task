@@ -123,7 +123,8 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     name="Bottom Camera",
                     computer_name=settings['computer_name'],
                     camera_target=d.CameraTarget.FACE_BOTTOM,
-                    lens=d.Lens( 
+                    lens=d.Lens(
+                        name="Behavior Video Lens Bottom of face", 
                         manufacturer=d.Organization.OTHER,
                         focal_length=25,
                         focal_length_unit=SizeUnit.MM,
