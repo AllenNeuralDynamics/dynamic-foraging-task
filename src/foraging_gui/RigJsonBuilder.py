@@ -89,7 +89,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     camera_target=d.CameraTarget.FACE_SIDE_RIGHT,
                     lens=d.Lens( 
                         manufacturer=d.Organization.FUJINON,
-                        focal_length=16
+                        focal_length=16,
                         focal_length_unit=SizeUnit.MM,
                         model="CF16ZA-1S",
                         ),
