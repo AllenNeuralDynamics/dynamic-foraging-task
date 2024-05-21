@@ -102,7 +102,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                         model="CF16ZA-1S",
                         ),
                     camera=d.Camera(
-                        name = "Right size of face camera"
+                        name = "Right size of face camera",
                         detector_type="Camera",
                         manufacturer=d.Organization.FLIR,
                         data_interface="USB",
