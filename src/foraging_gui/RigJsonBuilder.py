@@ -117,7 +117,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     camera_target=d.CameraTarget.FACE_BOTTOM,
                     lens=d.Lens( 
                         manufacturer=d.Organization.KOWA,
-                        focal_length=25
+                        focal_length=25,
                         focal_length_unit=SizeUnit.MM,
                         model="LM25HC",
                         ), 
