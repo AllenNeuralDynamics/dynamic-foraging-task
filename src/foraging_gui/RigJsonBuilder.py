@@ -66,8 +66,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     HIGH_SPEED_CAMERA = ('HighSpeedCamera' in settings['box_settings']) and (settings['box_settings']['HighSpeedCamera'] == "1")
     RIGHT_CAMERA = ('HasSideCameraRight' in settings['box_settings']) and (settings['box_settings']['HasSideCameraRight'] == "1")
     BOTTOM_CAMERA = ('HasBottomCamera' in settings['box_settings']) and (settings['box_settings']['HasBottomCamera'] == "1")
-    AIND_LICK_DETECTOR = ('AINDLickDetector' in settings['box_settings']) and (settings['box_settings']['AINDLickDetector'] == "1")
-
 
     # Modalities
     ###########################################################################
@@ -324,7 +322,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     ]
 
 
-    # Calibrations
+    # Water Calibration
     ###########################################################################
 
     components['calibrations']=[]
@@ -340,6 +338,9 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     ###########################################################################
     if FIB:
         # TODO FIB calibration needs to be recorded and incorporated here
+        # This is waiting for the FIB calibration to be tracked after upcoming
+        # hardware/firmware changes
+
         components['patch_cords']=[
             d.Patch(
                 name="Bundle Branching Fiber-optic Patch Cord",
