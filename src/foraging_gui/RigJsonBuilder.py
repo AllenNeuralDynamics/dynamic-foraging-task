@@ -624,24 +624,24 @@ def parse_laser_calibration(laser_calibration):
                                 input = {'input voltage (v)':voltage},
                                 output = {'laser power (mw)':power},
                             ))
-                elif protocol in ['Constant', 'Pulse']:
-                    for laser_name in this_calibration[protocol].keys():
-                        voltage = [x[0] for x in 
-                            this_calibration[protocol][laser_name]['LaserPowerVoltage']]
-                        power = [x[1] for x in 
-                            this_calibration[protocol][laser_name]['LaserPowerVoltage']]
-                        voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
-                        
-                        datestr = datetime.strptime(latest_calibration_date,'%Y-%m-%d').date()
-                        description= f'Optogenetic calibration for {laser}, Laser_{laser_name}, protocol: {protocol}'
-                        calibrations.append(
-                            d.Calibration(
-                                calibration_date = datestr,
-                                device_name = laser_name, 
-                                description = description, 
-                                input = {'input voltage (v)':voltage},
-                                output = {'laser power (mw)':power},
-                            ))
+            elif protocol in ['Constant', 'Pulse']:
+                for laser_name in this_calibration[protocol].keys():
+                    voltage = [x[0] for x in 
+                        this_calibration[protocol][laser_name]['LaserPowerVoltage']]
+                    power = [x[1] for x in 
+                        this_calibration[protocol][laser_name]['LaserPowerVoltage']]
+                    voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
+                    
+                    datestr = datetime.strptime(latest_calibration_date,'%Y-%m-%d').date()
+                    description= f'Optogenetic calibration for {laser}, Laser_{laser_name}, protocol: {protocol}'
+                    calibrations.append(
+                        d.Calibration(
+                            calibration_date = datestr,
+                            device_name = laser_name, 
+                            description = description, 
+                            input = {'input voltage (v)':voltage},
+                            output = {'laser power (mw)':power},
+                        ))
 
     return calibrations
 
