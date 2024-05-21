@@ -552,10 +552,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             )
         )
 
-        # TODO Laser calibration
-
-    # laser calibration
-    if laser_calibration != {}:
+        # laser calibration
         components['calibrations'].extend(parse_laser_calibration(laser_calibration))
 
     # Generate Rig Schema
@@ -597,21 +594,72 @@ def parse_water_calibration(water_calibration):
 def parse_laser_calibration(laser_calibration):
     calibrations = []
 
-    laser1 = d.Calibration(
-        calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
-        device_name = 'Laser 1 Calibration',
-        description = 'Water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delievered in microliters.',
-        input = {'valve open time (s):':left_times},
-        output = {'water volume (ul):':left_volumes}
-        )
+    # Iterate through laser colors
+    laser_colors = get_laser_names(laser_calibration) 
+    for laser in laser_colors:
+        # find the last calibration for this laser color        
+        latest_calibration_date = FindLatestCalibrationDate(laser, laser_calibration):
+        if latest_calibration_date == 'NA':
+            continue
 
-    laser2 = d.Calibration(
-        calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
-        device_name = 'Laser 2 Calibration',
-        description = 'Water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delievered in microliters.',
-        input = {'valve open time (s):':right_times},
-        output = {'water volume (ul):':right_volumes}
-        )
+        # Iterate through calibration protocols for this laser color
+        this_calibration = laser_calibration[latest_calibration_date][laser]
+        for protocol in this_calibration.keys():
+            if protocol == 'Sine':
+                for freq in this_calibration[protocol]:
+                    for laser_name in this_calibration[protocol][freq].keys():
+                        voltage = [x[0] for x in 
+                            this_calibration[protocol][freq][laser_name]['LaserPowerVoltage']]
+                        power = [x[1] for x in 
+                            this_calibration[protocol][freq][laser_name]['LaserPowerVoltage']]
+                        voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
+                        
+                        datestr = datetime.strptime(latest_calibration_date,'%Y-%m-%d').date()
+                        description= f'Optogenetic calibration for {laser}, Laser_{laser_name}, protocol: {protocol}, frequency: {freq}.'
+                        calibrations.append(
+                            d.Calibration(
+                                calibration_date = datestr,
+                                device_name = laser_name, 
+                                description = description, 
+                                input = {'input voltage (v)':voltage},
+                                output = {'laser power (mw)':power},
+                            ))
+                elif protocol in ['Constant', 'Pulse']:
+                    for laser_name in this_calibration[protocol].keys():
+                        voltage = [x[0] for x in 
+                            this_calibration[protocol][laser_name]['LaserPowerVoltage']]
+                        power = [x[1] for x in 
+                            this_calibration[protocol][laser_name]['LaserPowerVoltage']]
+                        voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
+                        
+                        datestr = datetime.strptime(latest_calibration_date,'%Y-%m-%d').date()
+                        description= f'Optogenetic calibration for {laser}, Laser_{laser_name}, protocol: {protocol}'
+                        calibrations.append(
+                            d.Calibration(
+                                calibration_date = datestr,
+                                device_name = laser_name, 
+                                description = description, 
+                                input = {'input voltage (v)':voltage},
+                                output = {'laser power (mw)':power},
+                            ))
 
     return calibrations
+
+def get_laser_names(laser_calibration):
+    names = []
+    for date in laser_calibration:
+        names.extend(list(laser_calibration[date].keys()))
+    return np.unique(names)
+
+def FindLatestCalibrationDate(laser, laser_calibration):
+        '''find the latest calibration date for the selected laser'''
+        dates=[]
+        for date in laser_calibration:
+            if laser in laser_calibration[date].keys():
+                dates.append(date)
+        sorted_dates = sorted(dates)
+        if sorted_dates==[]:
+            return 'NA'
+        else:
+            return sorted_dates[-1]
 
