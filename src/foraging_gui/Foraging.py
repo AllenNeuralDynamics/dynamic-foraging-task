@@ -1177,10 +1177,18 @@ class Window(QMainWindow):
         rig_settings['box_settings'] = {row[0]:row[1] for index, row in df.iterrows()}
         rig_settings['computer_name'] = socket.gethostname()
         rig_settings['bonsai_version'] = self._get_bonsai_version(rig_settings['bonsai_config_path'])
- 
+
+        if hasattr(self, 'LaserCalibrationResults'):
+            LaserCalibrationResults = self.LaserCalibrationResults
+        else:
+            LaserCalibrationResults={} 
+        if hasattr(self, 'WaterCalibrationResults'):
+            WaterCalibrationResults = self.WaterCalibrationResults
+        else:
+            WaterCalibrationResults={} 
         build_rig_json(existing_rig_json, rig_settings, 
-            self.WaterCalibrationResults, 
-            self.LaserCalibrationResults)        
+            WaterCalibrationResults, 
+            LaserCalibrationResults)        
 
     def _get_bonsai_version(self,config_path):
         with open(config_path, "r") as f:
