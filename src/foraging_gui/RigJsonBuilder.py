@@ -12,6 +12,7 @@ from aind_data_schema_models.units import SizeUnit
 
 from foraging_gui.Visualization import GetWaterCalibration
 
+
 def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibration):    
 
     # Build the new rig schema
@@ -54,6 +55,7 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
 
 
 def build_rig_json_core(settings, water_calibration, laser_calibration):
+
     # Set up
     ###########################################################################
     logging.info('building rig json')
@@ -67,6 +69,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     HIGH_SPEED_CAMERA = ('HighSpeedCamera' in settings['box_settings']) and (settings['box_settings']['HighSpeedCamera'] == "1")
     RIGHT_CAMERA = ('HasSideCameraRight' in settings['box_settings']) and (settings['box_settings']['HasSideCameraRight'] == "1")
     BOTTOM_CAMERA = ('HasBottomCamera' in settings['box_settings']) and (settings['box_settings']['HasBottomCamera'] == "1")
+
 
     # Modalities
     ###########################################################################
@@ -564,6 +567,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         # laser calibration
         components['calibrations'].extend(parse_laser_calibration(laser_calibration))
 
+
     # Generate Rig Schema
     ###########################################################################
     # Assemble rig schema
@@ -599,6 +603,7 @@ def parse_water_calibration(water_calibration):
         )
 
     return left, right
+
 
 def parse_laser_calibration(laser_calibration):
     calibrations = []
@@ -654,11 +659,13 @@ def parse_laser_calibration(laser_calibration):
 
     return calibrations
 
+
 def get_laser_names(laser_calibration):
     names = []
     for date in laser_calibration:
         names.extend(list(laser_calibration[date].keys()))
     return np.unique(names)
+
 
 def FindLatestCalibrationDate(laser, laser_calibration):
         '''find the latest calibration date for the selected laser'''
