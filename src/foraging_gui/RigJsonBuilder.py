@@ -282,7 +282,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             name="Harp Behavior",
             harp_device_type=d.HarpDeviceType.BEHAVIOR,
             manufacturer=d.Organization.CHAMPALIMAUD,
-            firmware_version="FTDI version:",
             computer_name=settings['computer_name'], 
             is_clock_generator=False,
             channels=[
@@ -296,7 +295,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             name="Harp Sound",
             harp_device_type=d.HarpDeviceType.SOUND_CARD,
             manufacturer=d.Organization.CHAMPALIMAUD,
-            firmware_version="FTDI version:",
             computer_name=settings['computer_name'], 
             is_clock_generator=False,
             data_interface=d.DataInterface.USB
@@ -305,7 +303,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             name="Harp clock synchronization board",
             harp_device_type=d.HarpDeviceType.CLOCK_SYNCHRONIZER,
             manufacturer=d.Organization.CHAMPALIMAUD,
-            firmware_version="FTDI version:",
             computer_name=settings['computer_name'], 
             is_clock_generator=True,
             data_interface=d.DataInterface.USB
@@ -314,7 +311,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             name="Harp sound amplifier",
             harp_device_type=d.HarpDeviceType.INPUT_EXPANDER,
             manufacturer=d.Organization.CHAMPALIMAUD,
-            firmware_version="FTDI version:",
             computer_name=settings['computer_name'], 
             is_clock_generator=False,
             data_interface=d.DataInterface.USB
