@@ -520,8 +520,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     # Optogenetics specific
     ###########################################################################
     if OPTO:
-        # TODO need to fill in details on cables, fibers, patch cords, manipulator 
- 
         components['daqs'].append(
             d.DAQDevice(
                 name="optogenetics nidaq",
@@ -532,30 +530,36 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 computer_name=settings['computer_name'],
             )
         )
+        components['light_sources'].append(
+            d.LightEmittingDiode(
+                name="Optogenetics LED",
+                manufacturer=d.Organization.PRIZMATIX,
+                model="Dual-Optogenetics-LED-Blue",
+                wavelength=460,
+                wavelength_unit=Size.NM,
+                notes="This LED is used for optogenetics"
+            ))
 
-        components['laser_assemblies'] = [
-            d.LaserAssembly(
-                lasers = [
-                    d.Laser(
-                        name="Optogenetics Laser 1",
-                        manufacturer=getattr(d.Organization,settings['box_settings']['OptoLaser1Manufacturer'].upper()),
-                        wavelength=settings['box_settings']['OptoLaser1Wavelength'],
-                        wavelength_unit=SizeUnit.NM,
-                        model=settings["box_settings"]["OptoLaser1Model"],
-                        serial_number=settings["box_settings"]["OptoLaser1SerialNumber"],
-                        ),
-                    d.Laser(
-                        name="Optogenetics Laser 2",
-                        manufacturer=getattr(d.Organization,settings['box_settings']['OptoLaser2Manufacturer'].upper()),
-                        wavelength=settings['box_settings']['OptoLaser2Wavelength'],
-                        wavelength_unit=SizeUnit.NM,
-                        model=settings["box_settings"]["OptoLaser2Model"],
-                        serial_number=settings["box_settings"]["OptoLaser2SerialNumber"],
-                        )],
-                name = 'Optogenetic laser assembly',
-                manipulator = d.Manipulator(manufacturer=d.Organization.OTHER,name='optogenetic laser manipulator')
-                )
-            ]
+        components['patch_cords'].append(
+            d.Patch(
+                name="Optogenetics Fiber to FC",
+                manufacturer=d.Organization.PRIZMATIX,
+                model="Optogenetics-Fiber-1000",
+                core_diameter=1000,
+                numerical_aperture=0.63,
+                notes="SMA to FC"
+            )
+        )
+        components['patch_cords'].append(
+            d.Patch(
+                name="Optogenetics Fiber to ferrule",
+                manufacturer=d.Organization.PRIZMATIX,
+                model="Optogenetics-Fiber-500",
+                core_diameter=500,
+                numerical_aperture=0.63,
+                notes="FC to ferrule; ferrule size 1.25mm"
+            )
+        )
 
         # laser calibration
         components['calibrations'].extend(parse_laser_calibration(laser_calibration))
