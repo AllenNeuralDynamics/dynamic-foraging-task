@@ -536,7 +536,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 manufacturer=d.Organization.PRIZMATIX,
                 model="Dual-Optogenetics-LED-Blue",
                 wavelength=460,
-                wavelength_unit=Size.NM,
+                wavelength_unit=SizeUnit.NM,
                 notes="This LED is used for optogenetics"
             ))
 
