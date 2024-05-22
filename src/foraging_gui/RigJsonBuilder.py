@@ -78,6 +78,8 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     if FIB:
         components['modalities'].append(Modality.FIB)
 
+    if OPTO or FIB:
+        components['patch_cords'] = []
 
     # Cameras 
     ###########################################################################
@@ -333,7 +335,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         # This is waiting for the FIB calibration to be tracked after upcoming
         # hardware/firmware changes
 
-        components['patch_cords']=[
+        components['patch_cords'].append(
             d.Patch(
                 name="Bundle Branching Fiber-optic Patch Cord",
                 manufacturer=d.Organization.DORIC,
@@ -341,7 +343,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 core_diameter=200,
                 numerical_aperture=0.37,
             )
-        ]
+        )
 
         components['light_sources'].append(
             d.LightEmittingDiode(
