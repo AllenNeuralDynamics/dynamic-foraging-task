@@ -65,13 +65,13 @@ class generate_metadata:
         if json_file is None and Obj is None and dialog_metadata is None:
             logging.info("json file or Obj is not provided")
             return
-        
+        print('debug 1')  
         if json_file is not None:
             with open(json_file) as f:
                 self.Obj = json.load(f)
         else:
             self.Obj = Obj
-
+        print('debug 2') 
         if dialog_metadata_file is not None:
             with open(dialog_metadata_file) as f:
                 self.Obj['meta_data_dialog'] = json.load(f)
@@ -80,13 +80,18 @@ class generate_metadata:
         
         if output_folder is not None:
             self.Obj['MetadataFolder'] = output_folder
-        
+        print('debug 3') 
         self._handle_edge_cases()
+        print('debug 4') 
         self._save_rig_metadata()
+        print('debug 5') 
         self.Obj['session_metadata']= {}
         self._mapper()
+        print('debug 6') 
         self._get_box_type()
+        print('debug 7') 
         self._session()
+        print('debug 8') 
         if self.has_data_description:
             self._session_description()
 
