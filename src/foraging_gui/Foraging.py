@@ -175,6 +175,7 @@ class Window(QMainWindow):
         dates=[]
         for file in json_files:
             #Assume the file name has the structure 'rig' + rig name+'_'+date+'.json'
+            print(file)
             if file.startswith('rig'+self.current_box):
                 date_str = file.split('_')[-1].split('.')[0]
                 dates.append(date_str)
