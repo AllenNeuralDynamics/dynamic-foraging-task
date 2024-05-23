@@ -173,6 +173,7 @@ class Window(QMainWindow):
             return
         json_files = [f for f in os.listdir(self.rig_metadata_folder) if f.endswith('.json')]
         dates=[]
+        print('rig'+self.current_box)
         for file in json_files:
             #Assume the file name has the structure 'rig' + rig name+'_'+date+'.json'
             print(file)
