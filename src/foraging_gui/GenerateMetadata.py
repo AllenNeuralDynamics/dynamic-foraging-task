@@ -280,6 +280,7 @@ class generate_metadata:
         # Possible reason: 1) the behavior data is not started in the session. 
         if 'B_AnimalResponseHistory' not in self.Obj:
             self.has_behavior_data = False
+            logging.info('No animal response history to log in session metadata')
         else:
             self.has_behavior_data = True
         
@@ -298,36 +299,43 @@ class generate_metadata:
         # Possible reason: 1) the water calibration file is not included in the ForagingSettings folder. 2) the water calibration is not saved in the json file.
         if 'WaterCalibrationResults' not in self.Obj:
             self.Obj['WaterCalibrationResults'] = {} 
+            logging.info('No water calibration file for session metadata')
 
         # Missing field LaserCalibrationResults in the json file.
         # Possible reason: 1) the optogenetic calibration file is not included in the ForagingSettings folder. 2) the optogenetic calibration is not saved in the json file. 3) no optogenetics calibration for this rig.
         if 'LaserCalibrationResults' not in self.Obj:
             self.Obj['LaserCalibrationResults'] = {}
+            logging.info('No laser calibration file for session metadata')
 
         # Missing field open_ephys in the json file.
         # Possible reason: 1) The ephys data is recorded but the open ephys is not controlled by the behavior GUI in the old version.
         if 'open_ephys' not in self.Obj:
             self.Obj['open_ephys'] = []
+            logging.info('no open ephys data for session metadata')
         
         # Missing field Camera_dialog in the json file.
         # Possible reason: 1) Old version of the software.
         if 'Camera_dialog' not in self.Obj:
             self.Obj['Camera_dialog'] = {}
+            logging.info('no camera data for session metadata')
 
         # Missing field 'settings_box' in the json file.
         # Possible reason: 1) Old version of the software.
         if 'settings_box' not in self.Obj:
             self.Obj['settings_box'] = {}
+            logging.info('Missing settings_box.csv file for session metadata')
 
         # Missing field 'meta_data_dialog' in the json file.
         # Possible reason: 1) Old version of the software.
         if 'meta_data_dialog' not in self.Obj:
             self.Obj['meta_data_dialog'] = {}
+            logging.info('Missing metadata dialog for session metadata')
 
         # Missing field 'rig_metadata' in the json file.
         # Possible reason: 1) Old version of the software. 2) the rig metadata is not provided.
         if 'rig_metadata' not in self.Obj['meta_data_dialog']:
             self.Obj['meta_data_dialog']['rig_metadata'] = {}
+            logging.info('Missing rig metadata for session metadata')
 
         # Missing field 'rig_metadata_file' and 'MetadataFolder' in the json file.
         # Possible reason: 1) Old version of the software. 2) the rig metadata is not provided.
@@ -366,6 +374,7 @@ class generate_metadata:
 
         if self.Obj['meta_data_dialog']['session_metadata']['ProjectName']=='':
             self.has_data_description = False
+            logging.info('No data description for session metadata')
         else:
             self.has_data_description = True
 
