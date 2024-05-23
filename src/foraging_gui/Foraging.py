@@ -1194,11 +1194,11 @@ class Window(QMainWindow):
         if os.path.isfile(green_cmos):
             with open(green_cmos, 'r') as f:
                 green_cmos_sn = f.read()      
-            rig_settings["FipGreenCMOSSerialNumber"] = green_cmos_sn.strip('\n')
+            rig_settings['box_settings']["FipGreenCMOSSerialNumber"] = green_cmos_sn.strip('\n')
         if os.path.isfile(red_cmos):
             with open(red_cmos, 'r') as f:
                 red_cmos_sn = f.read() 
-            rig_settings["FipRedCMOSSerialNumber"] = red_cmos_sn.strip('\n')
+            rig_settings['box_settings']["FipRedCMOSSerialNumber"] = red_cmos_sn.strip('\n')
 
         build_rig_json(existing_rig_json, rig_settings, 
             WaterCalibrationResults, 
