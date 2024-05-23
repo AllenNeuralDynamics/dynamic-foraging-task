@@ -173,11 +173,9 @@ class Window(QMainWindow):
             return
         json_files = [f for f in os.listdir(self.rig_metadata_folder) if f.endswith('.json')]
         dates=[]
-        print('rig'+self.current_box)
         for file in json_files:
-            #Assume the file name has the structure 'rig' + rig name+'_'+date+'.json'
-            print(file)
-            if file.startswith('rig'+self.current_box):
+            #Assume the file name has the structure 'rig_' + rig name+'_'+date+'.json'
+            if file.startswith('rig_'+self.current_box):
                 date_str = file.split('_')[-1].split('.')[0]
                 dates.append(date_str)
         if len(dates)==0:
@@ -189,7 +187,7 @@ class Window(QMainWindow):
         dates_string = [datetime.strptime(date_str, '%Y-%m-%d') for date_str in dates]
         max_datetime = max(dates_string)
         max_datetime_index = dates_string.index(max_datetime)
-        selected_json_file = 'rig'+self.current_box+'_'+dates[max_datetime_index]+'.json'
+        selected_json_file = 'rig_'+self.current_box+'_'+dates[max_datetime_index]+'.json'
         self.latest_rig_metadata_file = os.path.join(self.rig_metadata_folder, selected_json_file)
         self.Metadata_dialog._SelectRigMetadata(self.latest_rig_metadata_file)
 
