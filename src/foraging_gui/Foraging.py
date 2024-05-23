@@ -1298,7 +1298,7 @@ class Window(QMainWindow):
             logging.info('Skipping rig metadata creation because create_rig_metadata=False')
             return
 
-        existing_rig_json = self._load_most_recent_rig_json(error_if_none=False) 
+        existing_rig_json, rig_json_path = self._load_most_recent_rig_json(error_if_none=False) 
 
         # Builds a new rig.json, and saves if there are changes with the most recent
         rig_settings = self.Settings.copy()
