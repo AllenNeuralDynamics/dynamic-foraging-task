@@ -9,6 +9,7 @@ import logging
 import socket
 import harp
 import pandas as pd
+from pathlib import Path
 from datetime import date, datetime
 
 import serial 
@@ -32,6 +33,7 @@ from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY, EphysRecording
 from foraging_gui.stage import Stage
 from foraging_gui.GenerateMetadata import generate_metadata
+from foraging_gui.RigJsonBuilder import build_rig_json
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -76,13 +78,16 @@ class Window(QMainWindow):
         # Load Laser and Water Calibration Files
         self._GetLaserCalibration()
         self._GetWaterCalibration()
-       
+
+        # Load Rig Json
+        self._LoadRigJson()      
+ 
         # Load User interface 
         self._LoadUI()
 
         # set window title
-        self.setWindowTitle(self.window_title)
-        logging.info('Setting Window title: {}'.format(self.window_title))
+        self.setWindowTitle(self.rig_name)
+        logging.info('Setting Window title: {}'.format(self.rig_name))
 
         # Set up parameters
         self.StartANewSession = 1   # to decide if should start a new session
@@ -469,18 +474,11 @@ class Window(QMainWindow):
         session_full_path_list=[]
         session_path_list=[]
         for session_folder in os.listdir(animal_folder):
-            # TODO fix_300
-            training_folder_old = os.path.join(animal_folder,session_folder, 'TrainingFolder')
-            training_folder_new = os.path.join(animal_folder,session_folder, 'behavior')
-            if os.path.exists(training_folder_old):
-                for file_name in os.listdir(training_folder_old):
+            training_folder = os.path.join(animal_folder,session_folder, 'behavior')
+            if os.path.exists(training_folder):
+                for file_name in os.listdir(training_folder):
                     if file_name.endswith('.json'): 
-                        session_full_path_list.append(os.path.join(training_folder_old, file_name))
-                        session_path_list.append(session_folder) 
-            elif os.path.exists(training_folder_new):
-                for file_name in os.listdir(training_folder_new):
-                    if file_name.endswith('.json'): 
-                        session_full_path_list.append(os.path.join(training_folder_new, file_name))
+                        session_full_path_list.append(os.path.join(training_folder, file_name))
                         session_path_list.append(session_folder) 
 
         sorted_indices = sorted(enumerate(session_path_list), key=lambda x: x[1], reverse=True)
@@ -541,8 +539,15 @@ class Window(QMainWindow):
                     time.sleep(5)
                     triggers = harp.read(camera_trigger_file)
                     self.trigger_length = len(triggers)
+                elif len(os.listdir(video_folder)) == 0:
+                    # no video data saved.
+                    self.trigger_length=0
+                    self.WarningLabelCamera.setText('')
+                    self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
+                    return
                 else:
                     self.trigger_length=0
+                    logging.error('Saved video data, but no camera trigger file found')
                     self.WarningLabelCamera.setText('No camera trigger file found!')
                     self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
                     return
@@ -974,7 +979,9 @@ class Window(QMainWindow):
             'Teensy_COM_box3':'',
             'Teensy_COM_box4':'',
             'FIP_workflow_path':'',
+            'FIP_settings':os.path.join(os.path.expanduser("~"),"Documents","FIPSettings"),
             'bonsai_path':os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe'),
+            'bonsai_config_path':os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.config'),
             'bonsaiworkflow_path':os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai'),
             'newscale_serial_num_box1':'',
             'newscale_serial_num_box2':'',
@@ -995,6 +1002,7 @@ class Window(QMainWindow):
             'lick_spout_distance_box3':5000,
             'lick_spout_distance_box4':5000,
             'name_mapper_file':os.path.join(self.SettingFolder,"name_mapper.json")
+            'create_rig_metadata':True,
         }
         
         # Try to load Settings_box#.csv
@@ -1085,8 +1093,8 @@ class Window(QMainWindow):
         self.Other_current_box=self.current_box
         self.Other_go_cue_decibel=self.Settings['go_cue_decibel_box'+str(self.box_number)]
         self.Other_lick_spout_distance=self.Settings['lick_spout_distance_box'+str(self.box_number)]
-        window_title = '{}'.format(self.current_box)
-        self.window_title = window_title
+        self.rig_name = '{}'.format(self.current_box)
+
 
     def _InitializeBonsai(self):
         '''
@@ -1245,6 +1253,73 @@ class Window(QMainWindow):
             subprocess.Popen(['explorer', self.rig_metadata_folder])
         except Exception as e:
             logging.error(str(e))
+            
+    def _LoadRigJson(self):    
+    
+        # User can skip this step if they make rig metadata themselves
+        if not self.Settings['create_rig_metadata']: 
+            logging.info('Skipping rig metadata creation because create_rig_metadata=False')
+            return
+
+        # See if rig metadata folder exists 
+        if not os.path.exists(self.Settings['rig_metadata_folder']):
+            print('making directory: {}'.format(self.Settings['rig_metadata_folder']))
+            os.makedirs(self.Settings['rig_metadata_folder'])
+              
+        # Load most recent rig_json
+        files = sorted(Path(self.Settings['rig_metadata_folder']).iterdir(), key=os.path.getmtime)
+        files = [f.__str__().split('\\')[-1] for f in files]
+        files = [f for f in files if (f.startswith('rig_'+self.rig_name) and f.endswith('.json'))]
+        if len(files) ==0:
+            # No rig.jsons found, this will trigger saving the new one
+            existing_rig_json = {}
+            logging.info('Did not find any existing rig.json files')
+        else:
+            existing_rig_json_path = os.path.join(self.Settings['rig_metadata_folder'],files[-1])
+            logging.info('Found existing rig.json: {}'.format(files[-1]))
+            with open(existing_rig_json_path, 'r') as f:
+                existing_rig_json = json.load(f)      
+
+        # Builds a new rig.json, and saves if there are changes with the most recent
+        rig_settings = self.Settings.copy()
+        rig_settings['rig_name'] = self.rig_name 
+        rig_settings['box_number'] = self.box_number
+        df = pd.read_csv(self.SettingsBoxFile,index_col=None,header=None)
+        rig_settings['box_settings'] = {row[0]:row[1] for index, row in df.iterrows()}
+        rig_settings['computer_name'] = socket.gethostname()
+        rig_settings['bonsai_version'] = self._get_bonsai_version(rig_settings['bonsai_config_path'])
+
+        if hasattr(self, 'LaserCalibrationResults'):
+            LaserCalibrationResults = self.LaserCalibrationResults
+        else:
+            LaserCalibrationResults={} 
+        if hasattr(self, 'WaterCalibrationResults'):
+            WaterCalibrationResults = self.WaterCalibrationResults
+        else:
+            WaterCalibrationResults={}
+        
+        # Load CMOS serial numbers for FIP if they exist 
+        green_cmos = os.path.join(self.Settings['FIP_settings'], 'CameraSerial_Green.csv')
+        red_cmos = os.path.join(self.Settings['FIP_settings'], 'CameraSerial_Red.csv')
+        if os.path.isfile(green_cmos):
+            with open(green_cmos, 'r') as f:
+                green_cmos_sn = f.read()      
+            rig_settings['box_settings']["FipGreenCMOSSerialNumber"] = green_cmos_sn.strip('\n')
+        if os.path.isfile(red_cmos):
+            with open(red_cmos, 'r') as f:
+                red_cmos_sn = f.read() 
+            rig_settings['box_settings']["FipRedCMOSSerialNumber"] = red_cmos_sn.strip('\n')
+
+        build_rig_json(existing_rig_json, rig_settings, 
+            WaterCalibrationResults, 
+            LaserCalibrationResults)        
+
+    def _get_bonsai_version(self,config_path):
+        with open(config_path, "r") as f:
+            for line in f:
+                if 'Package id="Bonsai"' in line:
+                   return line.split('version="')[1].split('"')[0] 
+        return '0.0.0'
 
     def _OpenSettingFolder(self):
         '''Open the setting folder'''
@@ -2156,6 +2231,12 @@ class Window(QMainWindow):
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
                 return
 
+        # Stop Excitation if its running
+        if self.StartExcitation.isChecked():
+            self.StartExcitation.setChecked(False)
+            self._StartExcitation()
+            logging.info('Stopping excitation before saving')
+
         # this should be improved in the future. Need to get the last LeftRewardDeliveryTime and RightRewardDeliveryTime
         if hasattr(self, 'GeneratedTrials') and self.InitializeBonsaiSuccessfully==1:
             self.GeneratedTrials._GetLicks(self.Channel2)
@@ -2472,28 +2553,11 @@ class Window(QMainWindow):
         # do any of the sessions have saved data? Grab the most recent        
         for i in range(len(sessions)-1, -1, -1):
             s = sessions[i]
-            ## TODO fix_300
-            if 'behavior' in s:
+            if 'behavior_' in s:
                 json_file = os.path.join(self.default_saveFolder, 
                     self.current_box, mouse_id, s,'behavior',s.split('behavior_')[1]+'.json')
                 if os.path.isfile(json_file): 
                     date = s.split('_')[2] 
-                    session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
-                    reply = QMessageBox.information(self,
-                        'Box {}, Please verify'.format(self.box_letter),
-                        '<span style="color:purple;font-weight:bold">Mouse ID: {}</span><br>Last session: {}<br>Filename: {}'.format(mouse_id, session_date, s),
-                        QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
-                    if reply == QMessageBox.Cancel:
-                        logging.info('User hit cancel')
-                        return False, ''
-                    else: 
-                        return True, json_file
-            else:
-                json_file = os.path.join(self.default_saveFolder, 
-                    self.current_box, mouse_id, s,'TrainingFolder',s+'.json')
-                print(json_file)
-                if os.path.isfile(json_file): 
-                    date = s.split('_')[1] 
                     session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
                     reply = QMessageBox.information(self,
                         'Box {}, Please verify'.format(self.box_letter),
@@ -2546,19 +2610,10 @@ class Window(QMainWindow):
             if len(sessions) == 0 :
                 continue
             for s in sessions:
-                # Check for data with old format name
-                # TODO fix_300
-                if 'behavior' in s:
-                    # Check for data in new format name
+                if 'behavior_' in s:
                     json_file = os.path.join(self.default_saveFolder, 
                         self.current_box, str(m), s,'behavior',s.split('behavior_')[1]+'.json')
                     if os.path.isfile(json_file):
-                        mice.append(m)
-                        break
-                else:
-                    json_file_old = os.path.join(self.default_saveFolder, 
-                        self.current_box, str(m), s,'TrainingFolder',s+'.json')
-                    if os.path.isfile(json_file_old):
                         mice.append(m)
                         break
         return mice  
