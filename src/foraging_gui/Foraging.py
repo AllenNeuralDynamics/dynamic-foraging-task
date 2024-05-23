@@ -917,6 +917,7 @@ class Window(QMainWindow):
             'Teensy_COM_box3':'',
             'Teensy_COM_box4':'',
             'FIP_workflow_path':'',
+            'FIP_settings':os.path.join(os.path.expanduser("~"),"Documents","FIPSettings"),
             'bonsai_path':os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe'),
             'bonsai_config_path':os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.config'),
             'bonsaiworkflow_path':os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai'),
@@ -1185,7 +1186,20 @@ class Window(QMainWindow):
         if hasattr(self, 'WaterCalibrationResults'):
             WaterCalibrationResults = self.WaterCalibrationResults
         else:
-            WaterCalibrationResults={} 
+            WaterCalibrationResults={}
+        
+        # Load CMOS serial numbers for FIP if they exist 
+        green_cmos = os.path.join(self.Settings['FIP_settings'], 'CameraSerial_Green.csv')
+        red_cmos = os.path.join(self.Settings['FIP_settings'], 'CameraSerial_Red.csv')
+        if os.path.isfile(green_cmos):
+            with open(green_cmos, 'r') as f:
+                green_cmos_sn = f.read()      
+            rig_settings["FipGreenCMOSSerialNumber"] = green_cmos_sn.strip('\n')
+        if os.path.isfile(red_cmos):
+            with open(red_cmos, 'r') as f:
+                red_cmos_sn = f.read() 
+            rig_settings["FipRedCMOSSerialNumber"] = red_cmos_sn.strip('\n')
+
         build_rig_json(existing_rig_json, rig_settings, 
             WaterCalibrationResults, 
             LaserCalibrationResults)        
