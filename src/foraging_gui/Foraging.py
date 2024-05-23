@@ -1001,7 +1001,7 @@ class Window(QMainWindow):
             'lick_spout_distance_box2':5000,
             'lick_spout_distance_box3':5000,
             'lick_spout_distance_box4':5000,
-            'name_mapper_file':os.path.join(self.SettingFolder,"name_mapper.json")
+            'name_mapper_file':os.path.join(self.SettingFolder,"name_mapper.json"),
             'create_rig_metadata':True,
         }
         
