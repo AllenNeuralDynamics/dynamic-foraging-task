@@ -571,7 +571,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
 
 
 def parse_water_calibration(water_calibration):
-    dates = sorted(water_calibration.keys()):
+    dates = sorted(water_calibration.keys())
     for date in dates[::-1]:
         if 'Left' in water_calibration[date]:
             left_times, left_volumes = GetWaterCalibration(water_calibration, date, 'Left')
