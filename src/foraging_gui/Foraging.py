@@ -9,6 +9,7 @@ import logging
 import socket
 import harp
 import pandas as pd
+from pathlib import Path
 from datetime import date, datetime
 
 import serial 
@@ -31,6 +32,7 @@ from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY, EphysRecording
 from foraging_gui.stage import Stage
+from foraging_gui.RigJsonBuilder import build_rig_json
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -75,13 +77,16 @@ class Window(QMainWindow):
         # Load Laser and Water Calibration Files
         self._GetLaserCalibration()
         self._GetWaterCalibration()
-       
+
+        # Load Rig Json
+        self._LoadRigJson()      
+ 
         # Load User interface 
         self._LoadUI()
 
         # set window title
-        self.setWindowTitle(self.window_title)
-        logging.info('Setting Window title: {}'.format(self.window_title))
+        self.setWindowTitle(self.rig_name)
+        logging.info('Setting Window title: {}'.format(self.rig_name))
 
         # Set up parameters
         self.StartANewSession = 1   # to decide if should start a new session
@@ -919,7 +924,9 @@ class Window(QMainWindow):
             'Teensy_COM_box3':'',
             'Teensy_COM_box4':'',
             'FIP_workflow_path':'',
+            'FIP_settings':os.path.join(os.path.expanduser("~"),"Documents","FIPSettings"),
             'bonsai_path':os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe'),
+            'bonsai_config_path':os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.config'),
             'bonsaiworkflow_path':os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai'),
             'newscale_serial_num_box1':'',
             'newscale_serial_num_box2':'',
@@ -927,7 +934,9 @@ class Window(QMainWindow):
             'newscale_serial_num_box4':'',
             'show_log_info_in_console':False,
             'default_ui':'ForagingGUI.ui',
-            'open_ephys_machine_ip_address':''
+            'open_ephys_machine_ip_address':'',
+            'rig_metadata_folder':os.path.join(self.SettingFolder,'rig_metadata')+'\\',
+            'create_rig_metadata':True,
         }
         
         # Try to load Settings_box#.csv
@@ -983,6 +992,7 @@ class Window(QMainWindow):
         self.newscale_serial_num_box4=self.Settings['newscale_serial_num_box4']
         self.default_ui=self.Settings['default_ui']
         self.open_ephys_machine_ip_address=self.Settings['open_ephys_machine_ip_address']
+        self.rig_metadata_folder=self.Settings['rig_metadata_folder']
 
         # Also stream log info to the console if enabled
         if  self.Settings['show_log_info_in_console']:
@@ -1002,8 +1012,7 @@ class Window(QMainWindow):
                 4:'D'
             }
             self.current_box='{}-{}'.format(self.current_box,mapper[self.box_number])
-        window_title = '{}'.format(self.current_box)
-        self.window_title = window_title
+        self.rig_name = '{}'.format(self.current_box)
 
     def _InitializeBonsai(self):
         '''
@@ -1141,6 +1150,73 @@ class Window(QMainWindow):
             subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
         else:
             subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True)
+
+    def _LoadRigJson(self):    
+    
+        # User can skip this step if they make rig metadata themselves
+        if not self.Settings['create_rig_metadata']: 
+            logging.info('Skipping rig metadata creation because create_rig_metadata=False')
+            return
+
+        # See if rig metadata folder exists 
+        if not os.path.exists(self.Settings['rig_metadata_folder']):
+            print('making directory: {}'.format(self.Settings['rig_metadata_folder']))
+            os.makedirs(self.Settings['rig_metadata_folder'])
+              
+        # Load most recent rig_json
+        files = sorted(Path(self.Settings['rig_metadata_folder']).iterdir(), key=os.path.getmtime)
+        files = [f.__str__().split('\\')[-1] for f in files]
+        files = [f for f in files if (f.startswith('rig_'+self.rig_name) and f.endswith('.json'))]
+        if len(files) ==0:
+            # No rig.jsons found, this will trigger saving the new one
+            existing_rig_json = {}
+            logging.info('Did not find any existing rig.json files')
+        else:
+            existing_rig_json_path = os.path.join(self.Settings['rig_metadata_folder'],files[-1])
+            logging.info('Found existing rig.json: {}'.format(files[-1]))
+            with open(existing_rig_json_path, 'r') as f:
+                existing_rig_json = json.load(f)      
+
+        # Builds a new rig.json, and saves if there are changes with the most recent
+        rig_settings = self.Settings.copy()
+        rig_settings['rig_name'] = self.rig_name 
+        rig_settings['box_number'] = self.box_number
+        df = pd.read_csv(self.SettingsBoxFile,index_col=None,header=None)
+        rig_settings['box_settings'] = {row[0]:row[1] for index, row in df.iterrows()}
+        rig_settings['computer_name'] = socket.gethostname()
+        rig_settings['bonsai_version'] = self._get_bonsai_version(rig_settings['bonsai_config_path'])
+
+        if hasattr(self, 'LaserCalibrationResults'):
+            LaserCalibrationResults = self.LaserCalibrationResults
+        else:
+            LaserCalibrationResults={} 
+        if hasattr(self, 'WaterCalibrationResults'):
+            WaterCalibrationResults = self.WaterCalibrationResults
+        else:
+            WaterCalibrationResults={}
+        
+        # Load CMOS serial numbers for FIP if they exist 
+        green_cmos = os.path.join(self.Settings['FIP_settings'], 'CameraSerial_Green.csv')
+        red_cmos = os.path.join(self.Settings['FIP_settings'], 'CameraSerial_Red.csv')
+        if os.path.isfile(green_cmos):
+            with open(green_cmos, 'r') as f:
+                green_cmos_sn = f.read()      
+            rig_settings['box_settings']["FipGreenCMOSSerialNumber"] = green_cmos_sn.strip('\n')
+        if os.path.isfile(red_cmos):
+            with open(red_cmos, 'r') as f:
+                red_cmos_sn = f.read() 
+            rig_settings['box_settings']["FipRedCMOSSerialNumber"] = red_cmos_sn.strip('\n')
+
+        build_rig_json(existing_rig_json, rig_settings, 
+            WaterCalibrationResults, 
+            LaserCalibrationResults)        
+
+    def _get_bonsai_version(self,config_path):
+        with open(config_path, "r") as f:
+            for line in f:
+                if 'Package id="Bonsai"' in line:
+                   return line.split('version="')[1].split('"')[0] 
+        return '0.0.0'
 
     def _OpenSettingFolder(self):
         '''Open the setting folder'''

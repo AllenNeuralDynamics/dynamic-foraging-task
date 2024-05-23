@@ -29,6 +29,9 @@ dependencies = [
     "pynwb",
     "requests",
     "harp-python",
+    "deepdiff",
+    "aind-data-schema==0.36.0",
+    "aind-data-schema-models==0.1.5"
 ]
 
 [tool.setuptools.packages.find]
