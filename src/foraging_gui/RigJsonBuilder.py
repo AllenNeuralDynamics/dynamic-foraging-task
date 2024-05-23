@@ -571,26 +571,30 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
 
 
 def parse_water_calibration(water_calibration):
+    dates = sorted(water_calibration.keys()):
+    for date in dates[::-1]:
+        if 'Left' in water_calibration[date]:
+            left_times, left_volumes = GetWaterCalibration(water_calibration, date, 'Left')
+            left = d.Calibration(
+                calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
+                device_name = 'Lick spout Left',
+                description = 'Water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delievered in microliters.',
+                input = {'valve open time (s):':left_times},
+                output = {'water volume (ul):':left_volumes}
+                )
+            break
     
-    date = sorted(water_calibration.keys())[-1]
-    left_times, left_volumes = GetWaterCalibration(water_calibration, date, 'Left')
-    right_times, right_volumes = GetWaterCalibration(water_calibration, date, 'Right')
-
-    left = d.Calibration(
-        calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
-        device_name = 'Lick spout Left',
-        description = 'Water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delievered in microliters.',
-        input = {'valve open time (s):':left_times},
-        output = {'water volume (ul):':left_volumes}
-        )
-
-    right = d.Calibration(
-        calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
-        device_name = 'Lick spout Right',
-        description = 'Water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delievered in microliters.',
-        input = {'valve open time (s):':right_times},
-        output = {'water volume (ul):':right_volumes}
-        )
+    for date in dates[::-1]:
+        if 'Right' in water_calibration[date]:
+            right_times, right_volumes = GetWaterCalibration(water_calibration, date, 'Right')
+            right = d.Calibration(
+                calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
+                device_name = 'Lick spout Right',
+                description = 'Water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delievered in microliters.',
+                input = {'valve open time (s):':right_times},
+                output = {'water volume (ul):':right_volumes}
+                )
+            break
 
     return left, right
 
