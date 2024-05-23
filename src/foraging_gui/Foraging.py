@@ -160,35 +160,9 @@ class Window(QMainWindow):
     
     def _load_rig_metadata(self):
         '''Load the latest rig metadata'''
-        if not os.path.exists(self.rig_metadata_folder):
-            try:
-                os.makedirs(self.rig_metadata_folder)
-                logging.error(str(e))
-                self._manage_warning_labels(self.MetadataWarning,warning_text='No rig metadata folder found!')
-                logging.warning('No rig metadata folder found!')
-            except Exception as e:
-                logging.error(str(e))
-                self._manage_warning_labels(self.MetadataWarning,warning_text='No rig metadata folder found! Failed to create new folder!')
-                logging.warning('No rig metadata folder found! Failed to create new folder!')
-            return
-        json_files = [f for f in os.listdir(self.rig_metadata_folder) if f.endswith('.json')]
-        dates=[]
-        for file in json_files:
-            #Assume the file name has the structure 'rig' + rig name+'_'+date+'.json'
-            if file.startswith('rig'+self.current_box):
-                date_str = file.split('_')[-1].split('.')[0]
-                dates.append(date_str)
-        if len(dates)==0:
-            logging.error('No rig metadata file found')
-            self.latest_rig_metadata_file=''
-            self.latest_rig_metadata={}
-            self._manage_warning_labels(self.MetadataWarning,warning_text='No rig metadata found!')
-            return
-        dates_string = [datetime.strptime(date_str, '%Y-%m-%d') for date_str in dates]
-        max_datetime = max(dates_string)
-        max_datetime_index = dates_string.index(max_datetime)
-        selected_json_file = 'rig'+self.current_box+'_'+dates[max_datetime_index]+'.json'
-        self.latest_rig_metadata_file = os.path.join(self.rig_metadata_folder, selected_json_file)
+ 
+        rig_json, rig_json_file= self._load_most_recent_rig_json()
+        self.latest_rig_metadata_file = rig_json_file 
         self.Metadata_dialog._SelectRigMetadata(self.latest_rig_metadata_file)
 
     def _LoadUI(self):
@@ -1001,7 +975,7 @@ class Window(QMainWindow):
             'lick_spout_distance_box2':5000,
             'lick_spout_distance_box3':5000,
             'lick_spout_distance_box4':5000,
-            'name_mapper_file':os.path.join(self.SettingFolder,"name_mapper.json")
+            'name_mapper_file':os.path.join(self.SettingFolder,"name_mapper.json"),
             'create_rig_metadata':True,
         }
         
@@ -1253,7 +1227,35 @@ class Window(QMainWindow):
             subprocess.Popen(['explorer', self.rig_metadata_folder])
         except Exception as e:
             logging.error(str(e))
-            
+
+    def _load_most_recent_rig_json(self,error_if_none=True):
+        # See if rig metadata folder exists 
+        if not os.path.exists(self.Settings['rig_metadata_folder']):
+            print('making directory: {}'.format(self.Settings['rig_metadata_folder']))
+            os.makedirs(self.Settings['rig_metadata_folder'])
+
+        # Load most recent rig_json
+        files = sorted(Path(self.Settings['rig_metadata_folder']).iterdir(), key=os.path.getmtime)
+        files = [f.__str__().split('\\')[-1] for f in files]
+        files = [f for f in files if (f.startswith('rig_'+self.rig_name) and f.endswith('.json'))]
+
+        if len(files) ==0:
+            # No rig.jsons found
+            rig_json = {}
+            rig_json_path = ''
+            if error_if_none:
+                logging.error('Did not find any existing rig.json files')      
+                self._manage_warning_labels(self.MetadataWarning,warning_text='No rig metadata found!')
+            else:
+                logging.info('Did not find any existing rig.json files')
+        else:
+            rig_json_path = os.path.join(self.Settings['rig_metadata_folder'],files[-1])
+            logging.info('Found existing rig.json: {}'.format(files[-1]))
+            with open(rig_json_path, 'r') as f:
+                rig_json = json.load(f)      
+
+        return rig_json, rig_json_path
+ 
     def _LoadRigJson(self):    
     
         # User can skip this step if they make rig metadata themselves
@@ -1261,24 +1263,7 @@ class Window(QMainWindow):
             logging.info('Skipping rig metadata creation because create_rig_metadata=False')
             return
 
-        # See if rig metadata folder exists 
-        if not os.path.exists(self.Settings['rig_metadata_folder']):
-            print('making directory: {}'.format(self.Settings['rig_metadata_folder']))
-            os.makedirs(self.Settings['rig_metadata_folder'])
-              
-        # Load most recent rig_json
-        files = sorted(Path(self.Settings['rig_metadata_folder']).iterdir(), key=os.path.getmtime)
-        files = [f.__str__().split('\\')[-1] for f in files]
-        files = [f for f in files if (f.startswith('rig_'+self.rig_name) and f.endswith('.json'))]
-        if len(files) ==0:
-            # No rig.jsons found, this will trigger saving the new one
-            existing_rig_json = {}
-            logging.info('Did not find any existing rig.json files')
-        else:
-            existing_rig_json_path = os.path.join(self.Settings['rig_metadata_folder'],files[-1])
-            logging.info('Found existing rig.json: {}'.format(files[-1]))
-            with open(existing_rig_json_path, 'r') as f:
-                existing_rig_json = json.load(f)      
+        existing_rig_json, rig_json_path = self._load_most_recent_rig_json(error_if_none=False) 
 
         # Builds a new rig.json, and saves if there are changes with the most recent
         rig_settings = self.Settings.copy()
@@ -2397,11 +2382,12 @@ class Window(QMainWindow):
         Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
 
         # generate the metadata file
-        try:
-            generate_metadata(Obj=Obj)
-        except Exception as e:
-            self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved succuessfully!')
-            logging.error(str(e))
+        #DEBUGGING
+        #try:
+        generate_metadata(Obj=Obj)
+        #except Exception as e:
+        #    self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved succuessfully!')
+        #    logging.error('Error generating session metadata: '+str(e))
 
         # save Json or mat
         if self.SaveFile.endswith('.mat'):
