@@ -287,8 +287,10 @@ class generate_metadata:
         # Possible reason: 1) the NewScale stage is not connected to the behavior GUI. 2) the session is not started.
         if ('B_NewscalePositions' not in self.Obj) or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceArea']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceX']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceY']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceZ']==''):
             self.has_reward_delivery = False
+            logging.info('Cannot log reward delivery in session metadata - missing fields')
         elif self.Obj['B_NewscalePositions']==[]:
             self.has_reward_delivery = False
+            logging.info('Cannot log reward delivery in session metadata - missing newscale positions')
         else:
             self.has_reward_delivery = True
 
@@ -392,23 +394,14 @@ class generate_metadata:
         # session_start_time and session_end_time are required fields
         if self.Obj['meta_data_dialog']['rig_metadata']=={}:
             return
-        print('debug a') 
         self._get_reward_delivery()
-        print('debug b') 
         self._get_water_calibration()
-        print('debug c') 
         self._get_opto_calibration()
-        print('debug d') 
         self.calibration=self.water_calibration+self.opto_calibration
-        print('debug e') 
         self._get_behavior_stream()
-        print('debug f') 
         self._get_ephys_stream()
-        print('debug g') 
         self._get_ophys_stream()
-        print('debug h') 
         self._get_high_speed_camera_stream()
-        print('debug i') 
         self._get_session_time()
         if self.session_start_time == '' or self.session_end_time == '':
             return
