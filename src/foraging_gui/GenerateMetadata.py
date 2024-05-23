@@ -62,16 +62,17 @@ class generate_metadata:
 
     '''
     def __init__(self, json_file=None, Obj=None, dialog_metadata_file=None,dialog_metadata=None, output_folder=None):
+        
         if json_file is None and Obj is None and dialog_metadata is None:
             logging.info("json file or Obj is not provided")
             return
-        print('debug 1')  
+
         if json_file is not None:
             with open(json_file) as f:
                 self.Obj = json.load(f)
         else:
             self.Obj = Obj
-        print('debug 2') 
+
         if dialog_metadata_file is not None:
             with open(dialog_metadata_file) as f:
                 self.Obj['meta_data_dialog'] = json.load(f)
@@ -80,18 +81,13 @@ class generate_metadata:
         
         if output_folder is not None:
             self.Obj['MetadataFolder'] = output_folder
-        print('debug 3') 
+
         self._handle_edge_cases()
-        print('debug 4') 
         self._save_rig_metadata()
-        print('debug 5') 
         self.Obj['session_metadata']= {}
         self._mapper()
-        print('debug 6') 
         self._get_box_type()
-        print('debug 7') 
         self._session()
-        print('debug 8') 
         if self.has_data_description:
             self._session_description()
 
@@ -396,16 +392,23 @@ class generate_metadata:
         # session_start_time and session_end_time are required fields
         if self.Obj['meta_data_dialog']['rig_metadata']=={}:
             return
-        
+        print('debug a') 
         self._get_reward_delivery()
+        print('debug b') 
         self._get_water_calibration()
+        print('debug c') 
         self._get_opto_calibration()
+        print('debug d') 
         self.calibration=self.water_calibration+self.opto_calibration
-
+        print('debug e') 
         self._get_behavior_stream()
+        print('debug f') 
         self._get_ephys_stream()
+        print('debug g') 
         self._get_ophys_stream()
+        print('debug h') 
         self._get_high_speed_camera_stream()
+        print('debug i') 
         self._get_session_time()
         if self.session_start_time == '' or self.session_end_time == '':
             return
