@@ -160,42 +160,7 @@ class Window(QMainWindow):
     
     def _load_rig_metadata(self):
         '''Load the latest rig metadata'''
-
-        ## check if folder exists
-        #if not os.path.exists(self.rig_metadata_folder):
-        #    try:
-        #        os.makedirs(self.rig_metadata_folder)
-        #        logging.error(str(e))
-        #        self._manage_warning_labels(self.MetadataWarning,warning_text='No rig metadata folder found!')
-        #        logging.warning('No rig metadata folder found!')
-        #    except Exception as e:
-        #        logging.error(str(e))
-        #        self._manage_warning_labels(self.MetadataWarning,warning_text='No rig metadata folder found! Failed to create new folder!')
-        #        logging.warning('No rig metadata folder found! Failed to create new folder!')
-        #    return
-
-        ## Get the most recent
-        #files = sorted(Path(self.Settings['rig_metadata_folder']).iterdir(), key=os.path.getmtime)
-        #files = [f.__str__().split('\\')[-1] for f in files]
-        #json_files = [f for f in files if (f.startswith('rig_'+self.rig_name) and f.endswith('.json'))]
-
-        #dates=[]
-        #for file in json_files:
-        #    #Assume the file name has the structure 'rig_' + rig name+'_'+date+'.json'
-        #    if file.startswith('rig_'+self.current_box):
-        #        date_str = file.split('_')[-1].split('.')[0]
-        #        dates.append(date_str)
-        #if len(dates)==0:
-        #    logging.error('No rig metadata file found')
-        #    self.latest_rig_metadata_file=''
-        #    self.latest_rig_metadata={}
-        #    self._manage_warning_labels(self.MetadataWarning,warning_text='No rig metadata found!')
-        #    return
-        #dates_string = [datetime.strptime(date_str, '%Y-%m-%d') for date_str in dates]
-        #max_datetime = max(dates_string)
-        #max_datetime_index = dates_string.index(max_datetime)
-        #selected_json_file = 'rig_'+self.current_box+'_'+dates[max_datetime_index]+'.json'
-
+ 
         rig_json, rig_json_file= self._load_most_recent_rig_json()
         self.latest_rig_metadata_file = rig_json_file 
         self.Metadata_dialog._SelectRigMetadata(self.latest_rig_metadata_file)
@@ -1275,7 +1240,7 @@ class Window(QMainWindow):
         files = [f for f in files if (f.startswith('rig_'+self.rig_name) and f.endswith('.json'))]
 
         if len(files) ==0:
-            # No rig.jsons found, this will trigger saving the new one
+            # No rig.jsons found
             rig_json = {}
             rig_json_path = ''
             if error_if_none:
