@@ -692,7 +692,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>260</x>
      <y>520</y>
-     <width>170</width>
+     <width>260</width>
      <height>150</height>
     </rect>
    </property>
@@ -702,7 +702,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QLabel" name="label_89">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>50</x>
       <y>80</y>
       <width>91</width>
       <height>20</height>
@@ -758,7 +758,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QLabel" name="label_90">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>50</x>
       <y>50</y>
       <width>91</width>
       <height>20</height>
@@ -783,7 +783,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QLineEdit" name="Stick_ModuleAngle">
     <property name="geometry">
      <rect>
-      <x>94</x>
+      <x>144</x>
       <y>80</y>
       <width>71</width>
       <height>20</height>
@@ -802,7 +802,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QLineEdit" name="Stick_ArcAngle">
     <property name="geometry">
      <rect>
-      <x>94</x>
+      <x>144</x>
       <y>50</y>
       <width>71</width>
       <height>20</height>
@@ -821,7 +821,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QLabel" name="label_88">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>50</x>
       <y>110</y>
       <width>91</width>
       <height>20</height>
@@ -846,7 +846,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QLineEdit" name="Stick_RotationAngle">
     <property name="geometry">
      <rect>
-      <x>94</x>
+      <x>144</x>
       <y>110</y>
       <width>71</width>
       <height>20</height>
@@ -1211,7 +1211,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>260</x>
      <y>340</y>
-     <width>220</width>
+     <width>260</width>
      <height>170</height>
     </rect>
    </property>
