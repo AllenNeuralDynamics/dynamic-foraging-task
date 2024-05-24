@@ -404,7 +404,7 @@ class generate_metadata:
         if self.Obj['meta_data_dialog']['rig_metadata']=={}:
             return
         self._get_reward_delivery()
-        self._get_water_calibration()
+        #self._get_water_calibration()
         self._get_opto_calibration()
         self.calibration=self.water_calibration+self.opto_calibration
         self._get_behavior_stream()
