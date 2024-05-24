@@ -378,6 +378,17 @@ class generate_metadata:
         else:
             self.has_data_description = True
 
+        # Missing field 'B_AnimalResponseHistory' in the json file.
+        # Possible reason: 1) the behavior data is not started in the session.
+        if 'B_AnimalResponseHistory' not in self.Obj:
+            self.trials_total=0
+            self.trials_finished=0
+            self.trials_rewarded=0
+        else:
+            self.trials_total=len(self.Obj['B_AnimalResponseHistory'])
+            self.trials_finished=np.count_nonzero(self.Obj['B_AnimalResponseHistory']!=2)
+            self.trials_rewarded=np.count_nonzero(np.logical_or(self.Obj['B_RewardedHistory'][0],self.Obj['B_RewardedHistory'][1]))
+
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
         Initialize fields
@@ -610,7 +621,10 @@ class generate_metadata:
                 name='Speaker',
                 volume=self.Obj['Other_go_cue_decibel'],
                 volume_unit=SoundIntensityUnit.DB,
-            )
+            ),
+            trials_total= self.trials_total,
+            trials_finished= self.trials_finished,
+            trials_rewarded=self.trials_rewarded
         ))
     def _get_optogenetics_stimulus(self):
         '''
