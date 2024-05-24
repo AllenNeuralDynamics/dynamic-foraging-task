@@ -867,9 +867,9 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>260</x>
-     <y>200</y>
+     <y>190</y>
      <width>260</width>
-     <height>280</height>
+     <height>250</height>
     </rect>
    </property>
    <property name="title">
@@ -881,7 +881,7 @@ p, li { white-space: pre-wrap; }
       <x>100</x>
       <y>170</y>
       <width>141</width>
-      <height>80</height>
+      <height>50</height>
      </rect>
     </property>
     <property name="sizePolicy">
