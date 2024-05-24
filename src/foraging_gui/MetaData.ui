@@ -39,7 +39,7 @@
      <x>20</x>
      <y>100</y>
      <width>230</width>
-     <height>200</height>
+     <height>100</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -143,8 +143,8 @@ p, li { white-space: pre-wrap; }
   <widget class="QLabel" name="label_72">
    <property name="geometry">
     <rect>
-     <x>260</x>
-     <y>100</y>
+     <x>20</x>
+     <y>200</y>
      <width>90</width>
      <height>20</height>
     </rect>
@@ -168,8 +168,8 @@ p, li { white-space: pre-wrap; }
   <widget class="QLineEdit" name="IACUCProtocol">
    <property name="geometry">
     <rect>
-     <x>360</x>
-     <y>100</y>
+     <x>120</x>
+     <y>200</y>
      <width>70</width>
      <height>20</height>
     </rect>
