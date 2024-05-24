@@ -36,8 +36,8 @@
   <widget class="QTextEdit" name="ExperimentDescription">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>130</y>
+     <x>20</x>
+     <y>110</y>
      <width>221</width>
      <height>211</height>
     </rect>
@@ -93,7 +93,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    <set>Qt::AlignLeft|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QPushButton" name="SaveMeta">
