@@ -68,7 +68,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>20</x>
      <y>70</y>
-     <width>120</width>
+     <width>130</width>
      <height>30</height>
     </rect>
    </property>
@@ -1166,8 +1166,8 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>260</x>
-     <y>170</y>
-     <width>111</width>
+     <y>160</y>
+     <width>100</width>
      <height>20</height>
     </rect>
    </property>
@@ -1178,7 +1178,7 @@ p, li { white-space: pre-wrap; }
     </sizepolicy>
    </property>
    <property name="text">
-    <string>Go cue decibel (db):</string>
+    <string>Go cue (db):</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -1190,9 +1190,9 @@ p, li { white-space: pre-wrap; }
   <widget class="QLineEdit" name="GoCueDecibel">
    <property name="geometry">
     <rect>
-     <x>260</x>
-     <y>170</y>
-     <width>71</width>
+     <x>360</x>
+     <y>160</y>
+     <width>70</width>
      <height>20</height>
     </rect>
    </property>
