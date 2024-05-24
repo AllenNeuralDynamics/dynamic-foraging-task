@@ -866,10 +866,10 @@ p, li { white-space: pre-wrap; }
   <widget class="QGroupBox" name="DataDescription">
    <property name="geometry">
     <rect>
-     <x>280</x>
-     <y>220</y>
-     <width>271</width>
-     <height>351</height>
+     <x>260</x>
+     <y>200</y>
+     <width>260</width>
+     <height>300</height>
     </rect>
    </property>
    <property name="title">
@@ -1192,7 +1192,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>360</x>
      <y>160</y>
-     <width>70</width>
+     <width>90</width>
      <height>20</height>
     </rect>
    </property>
