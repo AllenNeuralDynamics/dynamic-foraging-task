@@ -2382,12 +2382,11 @@ class Window(QMainWindow):
         Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
 
         # generate the metadata file
-        #DEBUGGING
-        #try:
-        generate_metadata(Obj=Obj)
-        #except Exception as e:
-        #    self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved succuessfully!')
-        #    logging.error('Error generating session metadata: '+str(e))
+        try:
+            generate_metadata(Obj=Obj)
+        except Exception as e:
+            self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved succuessfully!')
+            logging.error('Error generating session metadata: '+str(e))
 
         # save Json or mat
         if self.SaveFile.endswith('.mat'):
