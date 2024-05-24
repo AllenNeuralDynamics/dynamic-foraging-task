@@ -37,7 +37,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>100</y>
+     <y>110</y>
      <width>230</width>
      <height>100</height>
     </rect>
@@ -67,7 +67,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>70</y>
+     <y>80</y>
      <width>130</width>
      <height>30</height>
     </rect>
@@ -326,7 +326,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>320</y>
+     <y>340</y>
      <width>200</width>
      <height>310</height>
     </rect>
@@ -1209,8 +1209,8 @@ p, li { white-space: pre-wrap; }
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
-     <x>260</x>
-     <y>320</y>
+     <x>280</x>
+     <y>340</y>
      <width>220</width>
      <height>170</height>
     </rect>
