@@ -415,7 +415,7 @@ class generate_metadata:
         if self.Obj['meta_data_dialog']['rig_metadata']=={}:
             return
         self._get_reward_delivery()
-        #self._get_water_calibration()
+        self._get_water_calibration()
         self._get_opto_calibration()
         self.calibration=self.water_calibration+self.opto_calibration
         self._get_behavior_stream()
@@ -947,7 +947,10 @@ class generate_metadata:
         '''
         Make water calibration metadata
         '''
-
+        self.water_calibration =[]
+        return
+    
+        # removing the water calibration as it is contained in the rig metadata
         if self.Obj['WaterCalibrationResults']=={}:
             self.water_calibration =[]
             return
