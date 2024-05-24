@@ -68,7 +68,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>20</x>
      <y>70</y>
-     <width>100</width>
+     <width>120</width>
      <height>30</height>
     </rect>
    </property>
@@ -189,7 +189,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>260</x>
      <y>130</y>
-     <width>70</width>
+     <width>90</width>
      <height>20</height>
     </rect>
    </property>
@@ -1190,7 +1190,7 @@ p, li { white-space: pre-wrap; }
   <widget class="QLineEdit" name="GoCueDecibel">
    <property name="geometry">
     <rect>
-     <x>2600</x>
+     <x>260</x>
      <y>170</y>
      <width>71</width>
      <height>20</height>
