@@ -144,7 +144,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>210</y>
+     <y>220</y>
      <width>90</width>
      <height>20</height>
     </rect>
@@ -169,7 +169,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>210</y>
+     <y>220</y>
      <width>70</width>
      <height>20</height>
     </rect>
@@ -188,7 +188,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>240</y>
+     <y>250</y>
      <width>90</width>
      <height>20</height>
     </rect>
@@ -213,7 +213,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>240</y>
+     <y>250</y>
      <width>70</width>
      <height>20</height>
     </rect>
@@ -867,7 +867,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>260</x>
-     <y>80</y>
+     <y>90</y>
      <width>260</width>
      <height>230</height>
     </rect>
@@ -1166,7 +1166,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>270</y>
+     <y>280</y>
      <width>90</width>
      <height>20</height>
     </rect>
@@ -1191,7 +1191,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>270</y>
+     <y>280</y>
      <width>70</width>
      <height>20</height>
     </rect>
@@ -1209,7 +1209,7 @@ p, li { white-space: pre-wrap; }
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
-     <x>280</x>
+     <x>260</x>
      <y>340</y>
      <width>220</width>
      <height>170</height>
