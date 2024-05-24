@@ -597,7 +597,7 @@
                       <x>0</x>
                       <y>0</y>
                       <width>178</width>
-                      <height>211</height>
+                      <height>230</height>
                      </rect>
                     </property>
                     <layout class="QVBoxLayout" name="verticalLayout">
@@ -640,6 +640,28 @@
                         <font>
                          <pointsize>7</pointsize>
                         </font>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                       <property name="textFormat">
+                        <enum>Qt::AutoText</enum>
+                       </property>
+                       <property name="scaledContents">
+                        <bool>false</bool>
+                       </property>
+                       <property name="alignment">
+                        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="MetadataWarning">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
                        </property>
                        <property name="text">
                         <string/>
@@ -888,7 +910,7 @@
             <string notr="true"/>
            </property>
            <property name="currentIndex">
-            <number>3</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="tab_2">
             <attribute name="title">
@@ -950,6 +972,12 @@
                         <horstretch>0</horstretch>
                         <verstretch>8</verstretch>
                        </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>200</height>
+                       </size>
                       </property>
                       <property name="maximumSize">
                        <size>
@@ -1049,6 +1077,25 @@
                            </property>
                           </widget>
                          </item>
+                         <item row="6" column="0" colspan="3">
+                          <widget class="QPushButton" name="StageStop">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="minimumSize">
+                            <size>
+                             <width>0</width>
+                             <height>0</height>
+                            </size>
+                           </property>
+                           <property name="text">
+                            <string>Stop</string>
+                           </property>
+                          </widget>
+                         </item>
                          <item row="4" column="0" colspan="2">
                           <widget class="QPushButton" name="MoveYP">
                            <property name="sizePolicy">
@@ -1071,25 +1118,6 @@
                            </property>
                            <property name="text">
                             <string>forward</string>
-                           </property>
-                          </widget>
-                         </item>
-                         <item row="6" column="0" colspan="3">
-                          <widget class="QPushButton" name="StageStop">
-                           <property name="sizePolicy">
-                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                             <horstretch>0</horstretch>
-                             <verstretch>0</verstretch>
-                            </sizepolicy>
-                           </property>
-                           <property name="minimumSize">
-                            <size>
-                             <width>0</width>
-                             <height>0</height>
-                            </size>
-                           </property>
-                           <property name="text">
-                            <string>Stop</string>
                            </property>
                           </widget>
                          </item>
@@ -1118,25 +1146,6 @@
                            </property>
                           </widget>
                          </item>
-                         <item row="3" column="3">
-                          <widget class="QLabel" name="label_84">
-                           <property name="sizePolicy">
-                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                             <horstretch>0</horstretch>
-                             <verstretch>0</verstretch>
-                            </sizepolicy>
-                           </property>
-                           <property name="text">
-                            <string> X:</string>
-                           </property>
-                           <property name="textFormat">
-                            <enum>Qt::AutoText</enum>
-                           </property>
-                           <property name="alignment">
-                            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                           </property>
-                          </widget>
-                         </item>
                          <item row="3" column="2">
                           <widget class="QPushButton" name="MoveXN">
                            <property name="sizePolicy">
@@ -1159,6 +1168,25 @@
                            </property>
                            <property name="text">
                             <string>Right</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="6" column="3">
+                          <widget class="QLabel" name="label_87">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="text">
+                            <string>Step (um):</string>
+                           </property>
+                           <property name="textFormat">
+                            <enum>Qt::AutoText</enum>
+                           </property>
+                           <property name="alignment">
+                            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                            </property>
                           </widget>
                          </item>
@@ -1187,8 +1215,8 @@
                            </property>
                           </widget>
                          </item>
-                         <item row="2" column="3" colspan="3">
-                          <widget class="QPushButton" name="GetPositions">
+                         <item row="3" column="3">
+                          <widget class="QLabel" name="label_84">
                            <property name="sizePolicy">
                             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                              <horstretch>0</horstretch>
@@ -1196,20 +1224,7 @@
                             </sizepolicy>
                            </property>
                            <property name="text">
-                            <string>Get positions</string>
-                           </property>
-                          </widget>
-                         </item>
-                         <item row="6" column="3">
-                          <widget class="QLabel" name="label_87">
-                           <property name="sizePolicy">
-                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                             <horstretch>0</horstretch>
-                             <verstretch>0</verstretch>
-                            </sizepolicy>
-                           </property>
-                           <property name="text">
-                            <string>Step (um):</string>
+                            <string> X:</string>
                            </property>
                            <property name="textFormat">
                             <enum>Qt::AutoText</enum>
@@ -1219,7 +1234,26 @@
                            </property>
                           </widget>
                          </item>
-                         <item row="7" column="0" colspan="6">
+                         <item row="4" column="3">
+                          <widget class="QLabel" name="label_85">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="text">
+                            <string> Y:</string>
+                           </property>
+                           <property name="textFormat">
+                            <enum>Qt::AutoText</enum>
+                           </property>
+                           <property name="alignment">
+                            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="8" column="0" colspan="6">
                           <widget class="QLabel" name="Warning_Newscale">
                            <property name="sizePolicy">
                             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -1253,30 +1287,6 @@
                            </property>
                           </widget>
                          </item>
-                         <item row="4" column="4" colspan="2">
-                          <widget class="QLineEdit" name="PositionY">
-                           <property name="sizePolicy">
-                            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                             <horstretch>0</horstretch>
-                             <verstretch>0</verstretch>
-                            </sizepolicy>
-                           </property>
-                           <property name="maximumSize">
-                            <size>
-                             <width>16777215</width>
-                             <height>25</height>
-                            </size>
-                           </property>
-                           <property name="font">
-                            <font>
-                             <pointsize>7</pointsize>
-                            </font>
-                           </property>
-                           <property name="text">
-                            <string/>
-                           </property>
-                          </widget>
-                         </item>
                          <item row="5" column="4" colspan="2">
                           <widget class="QLineEdit" name="PositionZ">
                            <property name="sizePolicy">
@@ -1301,22 +1311,27 @@
                            </property>
                           </widget>
                          </item>
-                         <item row="4" column="3">
-                          <widget class="QLabel" name="label_85">
+                         <item row="4" column="4" colspan="2">
+                          <widget class="QLineEdit" name="PositionY">
                            <property name="sizePolicy">
-                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                              <horstretch>0</horstretch>
                              <verstretch>0</verstretch>
                             </sizepolicy>
                            </property>
+                           <property name="maximumSize">
+                            <size>
+                             <width>16777215</width>
+                             <height>25</height>
+                            </size>
+                           </property>
+                           <property name="font">
+                            <font>
+                             <pointsize>7</pointsize>
+                            </font>
+                           </property>
                            <property name="text">
-                            <string> Y:</string>
-                           </property>
-                           <property name="textFormat">
-                            <enum>Qt::AutoText</enum>
-                           </property>
-                           <property name="alignment">
-                            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                            <string/>
                            </property>
                           </widget>
                          </item>
@@ -1365,6 +1380,32 @@
                            </property>
                            <property name="text">
                             <string>200</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="7" column="4" colspan="2">
+                          <widget class="QPushButton" name="SetReference">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="text">
+                            <string>Set reference</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="2" column="4" colspan="2">
+                          <widget class="QPushButton" name="GetPositions">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="text">
+                            <string>Get positions</string>
                            </property>
                           </widget>
                          </item>
@@ -4642,7 +4683,7 @@ Current pair:
                <widget class="QWidget" name="scrollAreaWidgetContents_5">
                 <property name="geometry">
                  <rect>
-                  <x>-95</x>
+                  <x>0</x>
                   <y>0</y>
                   <width>722</width>
                   <height>308</height>
@@ -5052,9 +5093,11 @@ Current pair:
     </widget>
     <addaction name="action_Calibration"/>
     <addaction name="actionLaser_Calibration"/>
+    <addaction name="actionMeta_Data"/>
     <addaction name="separator"/>
     <addaction name="menuSimulation"/>
     <addaction name="actionDrawing_after_stopping"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="sizePolicy">
@@ -5107,6 +5150,9 @@ Current pair:
     <addaction name="actionRestartLogging_2"/>
     <addaction name="actionOpen_behavior_folder"/>
     <addaction name="actionOpen_logging_folder"/>
+    <addaction name="actionOpen_video_folder"/>
+    <addaction name="actionOpen_rig_metadata_folder"/>
+    <addaction name="actionOpen_metadata_dialog_folder"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="sizePolicy">
@@ -5172,7 +5218,9 @@ Current pair:
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="action_Camera"/>
+   <addaction name="action_Calibration"/>
+   <addaction name="actionLaser_Calibration"/>
+   <addaction name="actionMeta_Data"/>
   </widget>
   <widget class="QToolBar" name="toolBar_3">
    <property name="sizePolicy">
@@ -5190,9 +5238,8 @@ Current pair:
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="action_Calibration"/>
    <addaction name="action_Optogenetics"/>
-   <addaction name="actionLaser_Calibration"/>
+   <addaction name="action_Camera"/>
   </widget>
   <action name="action_Calibration">
    <property name="checkable">
@@ -5408,6 +5455,33 @@ Current pair:
   <action name="Save_continue">
    <property name="text">
     <string>Save (without starting a new session)</string>
+   </property>
+  </action>
+  <action name="actionMeta_Data">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>resources/metadata.png</normaloff>resources/metadata.png</iconset>
+   </property>
+   <property name="text">
+    <string>Meta Data</string>
+   </property>
+  </action>
+  <action name="actionOpen_rig_metadata_folder">
+   <property name="text">
+    <string>Open rig metadata folder</string>
+   </property>
+  </action>
+  <action name="actionOpen_metadata_dialog_folder">
+   <property name="text">
+    <string>Open metadata dialog folder</string>
+   </property>
+  </action>
+  <action name="actionOpen_video_folder">
+   <property name="text">
+    <string>Open video folder</string>
    </property>
   </action>
  </widget>

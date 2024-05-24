@@ -204,7 +204,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_trial_column(name='rewarded_historyR', description=f'The reward history of right lick port')
     nwbfile.add_trial_column(name='delay_start_time', description=f'The delay start time')
     nwbfile.add_trial_column(name='goCue_start_time', description=f'The go cue start time')
-    nwbfile.add_trial_column(name='reward_outcome_time', description=f'The reward outcome time (reward/no reward/no response)')
+    nwbfile.add_trial_column(name='reward_outcome_time', description=f'The reward outcome time (reward/no reward/no response) Note: This is in fact time when choice is registered.')
     ## training paramters ##
     # behavior structure
     nwbfile.add_trial_column(name='bait_left', description=f'Whether the current left lickport has a bait or not')
@@ -235,6 +235,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_trial_column(name='response_duration', description=f'The maximum time that the animal must make a choce in order to get a reward')
     # reward consumption duration
     nwbfile.add_trial_column(name='reward_consumption_duration', description=f'The duration for the animal to consume the reward')
+    # reward delay
+    nwbfile.add_trial_column(name='reward_delay', description=f'The delay between choice and reward delivery')
     # auto water
     nwbfile.add_trial_column(name='auto_waterL', description=f'Autowater given at Left')
     nwbfile.add_trial_column(name='auto_waterR', description=f'Autowater given at Right')
@@ -368,6 +370,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                         ITI_duration=obj.B_ITIHistory[i],
                         response_duration=float(obj.TP_ResponseTime[i]),
                         reward_consumption_duration=float(obj.TP_RewardConsumeTime[i]),
+                        reward_delay=float(_get_field(obj, 'TP_RewardDelay', index=i, default=0)),
                         auto_waterL=obj.B_AutoWaterTrial[0][i] if type(obj.B_AutoWaterTrial[0]) is list else obj.B_AutoWaterTrial[i],   # Back-compatible with old autowater format
                         auto_waterR=obj.B_AutoWaterTrial[1][i] if type(obj.B_AutoWaterTrial[0]) is list else obj.B_AutoWaterTrial[i],
                         # optogenetics
