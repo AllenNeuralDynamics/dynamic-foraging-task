@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox 
-from PyQt5.QtWidgets import QLabel, QDialogButtonBox
+from PyQt5.QtWidgets import QLabel, QDialogButtonBox,QFileDialog
 from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject, QEvent
 from PyQt5.QtSvg import QSvgWidget
@@ -337,6 +337,7 @@ class WaterCalibrationDialog(QDialog):
         self.showrecent.textChanged.connect(self._Showrecent)
         self.showspecificcali.activated.connect(self._ShowSpecifcDay)
         self.SaveCalibrationPar.clicked.connect(self._SaveCalibrationPar)
+        
     def _SaveCalibrationPar(self):
         '''save the calibration parameters'''
         # load the pre-stored calibration parameters
@@ -948,6 +949,8 @@ class CameraDialog(QDialog):
         
         self.MainWindow=MainWindow
         self._connectSignalsSlots()
+        self.camera_start_time=''
+        self.camera_stop_time=''
     def _connectSignalsSlots(self):
         self.StartCamera.clicked.connect(self._StartCamera)
         self.ClearTemporaryVideo.clicked.connect(self._ClearTemporaryVideo)
@@ -1067,6 +1070,7 @@ class CameraDialog(QDialog):
             # start the video triggers
             self.MainWindow.Channel.CameraControl(int(1))
             time.sleep(5)
+            self.camera_start_time = str(datetime.now())
             self.MainWindow.WarningLabelCamera.setText('Camera is on!')
             self.MainWindow.WarningLabelCamera.setStyleSheet(self.MainWindow.default_warning_color)
             self.WarningLabelCameraOn.setText('Camera is on!')
@@ -1077,7 +1081,8 @@ class CameraDialog(QDialog):
         else:
             self.StartCamera.setStyleSheet("background-color : none")
             self.MainWindow.Channel.CameraControl(int(2))
-            time.sleep(2)
+            self.camera_stop_time = str(datetime.now())
+            time.sleep(5)
             self.MainWindow.WarningLabelCamera.setText('Camera is off!')
             self.MainWindow.WarningLabelCamera.setStyleSheet(self.MainWindow.default_warning_color)
             self.WarningLabelCameraOn.setText('Camera is off!')
@@ -1676,6 +1681,383 @@ def initialize_dic(dic_name,key_list=[]):
     initialize_dic(dic_name[key],key_list=key_list_new)
     return dic_name
 
+
+class MetadataDialog(QDialog):
+    '''For adding metadata to the session'''
+    def __init__(self, MainWindow, parent=None):
+        super().__init__(parent)
+        uic.loadUi('MetaData.ui', self)
+        self.MainWindow = MainWindow
+        self._connectSignalsSlots()
+        self.meta_data = {}
+        self.meta_data['rig_metadata'] = {}
+        self.meta_data['session_metadata'] = {}
+        self.meta_data['rig_metadata_file'] = ''
+        self.GoCueDecibel.setText(str(self.MainWindow.Other_go_cue_decibel))
+        self.LickSpoutDistance.setText(str(self.MainWindow.Other_lick_spout_distance))
+        self._get_basics()
+        self._show_project_names()
+
+    def _connectSignalsSlots(self):
+        self.SelectRigMetadata.clicked.connect(lambda: self._SelectRigMetadata(rig_metadata_file=None))
+        self.EphysProbes.currentIndexChanged.connect(self._show_angles)
+        self.StickMicroscopes.currentIndexChanged.connect(self._show_angles)
+        self.ArcAngle.textChanged.connect(self._save_configuration)
+        self.ModuleAngle.textChanged.connect(self._save_configuration)
+        self.ProbeTarget.textChanged.connect(self._save_configuration)
+        self.RotationAngle.textChanged.connect(self._save_configuration)
+        self.ManipulatorX.textChanged.connect(self._save_configuration)
+        self.ManipulatorY.textChanged.connect(self._save_configuration)
+        self.ManipulatorZ.textChanged.connect(self._save_configuration)
+        self.SaveMeta.clicked.connect(self._save_metadata)
+        self.LoadMeta.clicked.connect(self._load_metadata)
+        self.RigMetadataFile.textChanged.connect(self._removing_warning)
+        self.ClearMetadata.clicked.connect(self._clear_metadata)
+        self.Stick_ArcAngle.textChanged.connect(self._save_configuration)
+        self.Stick_ModuleAngle.textChanged.connect(self._save_configuration)
+        self.Stick_RotationAngle.textChanged.connect(self._save_configuration)
+        self.ProjectName.currentIndexChanged.connect(self._show_project_info)
+        self.GoCueDecibel.textChanged.connect(self._save_go_cue_decibel)
+        self.LickSpoutDistance.textChanged.connect(self._save_lick_spout_distance)
+
+    def _set_reference(self, reference):
+        '''set the reference'''
+        self.reference = reference
+        self.LickSpoutReferenceX.setText(str(reference[0]))
+        self.LickSpoutReferenceY.setText(str(reference[1]))
+        self.LickSpoutReferenceZ.setText(str(reference[2]))
+
+    def _show_project_info(self):
+        '''show the project information based on current project name'''
+        current_project_index = self.ProjectName.currentIndex()
+        self.current_project_name=self.ProjectName.currentText()
+        self.funding_institution=self.project_info['Funding Institution'][current_project_index]
+        self.grant_number=self.project_info['Grant Number'][current_project_index]
+        self.investigators=self.project_info['Investigators'][current_project_index]
+        self.fundee=self.project_info['Fundee'][current_project_index]
+        self.FundingSource.setText(str(self.funding_institution))
+        self.Investigators.setText(str(self.investigators))
+        self.GrantNumber.setText(str(self.grant_number))
+        self.Fundee.setText(str(self.fundee))
+
+    def _save_lick_spout_distance(self):
+        '''save the lick spout distance'''
+        self.MainWindow.Other_lick_spout_distance=self.LickSpoutDistance.text()
+
+    def _save_go_cue_decibel(self):
+        '''save the go cue decibel'''
+        self.MainWindow.Other_go_cue_decibel=self.GoCueDecibel.text()
+
+    def _show_project_names(self):
+        '''show the project names from the project spreadsheet'''
+        # load the project spreadsheet
+        project_info_file = self.MainWindow.project_info_file
+        if not os.path.exists(project_info_file):
+            return
+        self.project_info = pd.read_excel(project_info_file)
+        project_names = self.project_info['Project Name'].tolist()
+        # show the project information
+        # adding project names to the project combobox
+        self._manage_signals(enable=False,keys=['ProjectName'],action=self._show_project_info)
+        self.ProjectName.addItems(project_names)
+        self._manage_signals(enable=True,keys=['ProjectName'],action=self._show_project_info)
+        self._show_project_info()
+
+    def _get_basics(self):
+        '''get the basic information'''
+        self.probe_types = ['StickMicroscopes','EphysProbes']
+        self.metadata_keys = ['microscopes','probes']
+        self.widgets = [self.Microscopes,self.Probes]
+    
+    def _clear_metadata(self):
+        '''clear the metadata'''
+        self.meta_data = {}
+        self.meta_data['rig_metadata'] = {}
+        self.meta_data['session_metadata'] = {}
+        self.meta_data['rig_metadata_file'] = ''
+        self.ExperimentDescription.clear()
+        self._update_metadata()
+
+    def _removing_warning(self):
+        '''remove the warning'''
+        if self.RigMetadataFile.text()!='':
+            self.MainWindow._manage_warning_labels(self.MainWindow.MetadataWarning,warning_text='')
+
+    def _load_metadata(self):
+        '''load the metadata from a json file'''
+        metadata_dialog_file, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select Metadata File",
+            self.MainWindow.metadata_dialog_folder,
+            "JSON Files (*.json)"
+        )
+        if not metadata_dialog_file:
+            return
+        if os.path.exists(metadata_dialog_file):
+            with open(metadata_dialog_file, 'r') as file:
+                self.meta_data = json.load(file)
+        self.meta_data['metadata_dialog_file'] = metadata_dialog_file
+        self._update_metadata(dont_clear=True)
+        
+    def _update_metadata(self,update_rig_metadata=True,update_session_metadata=True,dont_clear=False):
+        '''update the metadata'''
+        if (update_rig_metadata or update_session_metadata) and ('rig_metadata_file' in self.meta_data):
+            if os.path.basename(self.meta_data['rig_metadata_file'])!=self.RigMetadataFile.text() and self.RigMetadataFile.text() != '':
+                if dont_clear==False:
+                    # clear probe angles if the rig metadata file is changed
+                    self.meta_data['session_metadata']['probes'] = {}
+                    self.meta_data['session_metadata']['microscopes'] = {}
+            self.RigMetadataFile.setText(os.path.basename(self.meta_data['rig_metadata_file']))
+        if update_session_metadata:
+            widget_dict = self._get_widgets()
+            self._set_widgets_value(widget_dict, self.meta_data['session_metadata'])
+
+        self._show_ephys_probes()
+        self._show_stick_microscopes()
+        self._iterate_probes_microscopes()    
+    
+    def _iterate_probes_microscopes(self):
+        '''iterate the probes and microscopes to save the probe information'''
+        keys = ['EphysProbes', 'StickMicroscopes']
+        for key in keys:
+            current_combo = getattr(self, key)
+            current_index = current_combo.currentIndex()
+            for index in range(current_combo.count()):
+                current_combo.setCurrentIndex(index)
+            current_combo.setCurrentIndex(current_index)
+
+    def _set_widgets_value(self, widget_dict, metadata):
+        '''set the widgets value'''
+        for key, value in widget_dict.items():
+            if key in metadata:
+                if isinstance(value, QtWidgets.QLineEdit):
+                    value.setText(metadata[key])
+                elif isinstance(value, QtWidgets.QTextEdit):
+                    value.setPlainText(metadata[key])
+                elif isinstance(value, QtWidgets.QComboBox):
+                    index = value.findText(metadata[key])
+                    if index != -1:
+                        value.setCurrentIndex(index)
+            elif isinstance(value, QtWidgets.QComboBox):
+                value.setCurrentIndex(0)
+            elif isinstance(value, QtWidgets.QLineEdit):
+                value.setText('')   
+            elif isinstance(value, QtWidgets.QTextEdit):
+                value.setPlainText('')
+
+    def _clear_angles(self, keys):
+        '''Clear the angles and target area for the given widget
+        Parameters
+        ----------
+        keys : List of str
+            The key to clear
+        
+        '''
+        for key in keys:
+            getattr(self, key).setText('')
+
+    def _save_metadata_dialog_parameters(self):
+        '''save the metadata dialog parameters'''
+        widget_dict = self._get_widgets()
+        self.meta_data=self.MainWindow._Concat(widget_dict, self.meta_data, 'session_metadata')
+        self.meta_data['rig_metadata_file'] = self.RigMetadataFile.text()
+        
+    def _save_metadata(self):
+        '''save the metadata collected from this dialogue to an independent json file'''
+        # save metadata parameters
+        self._save_metadata_dialog_parameters()
+        # Save self.meta_data to JSON
+        metadata_dialog_folder=self.MainWindow.metadata_dialog_folder
+        if not os.path.exists(metadata_dialog_folder):
+            os.makedirs(metadata_dialog_folder)
+        json_file=os.path.join(metadata_dialog_folder, self.MainWindow.current_box+'_'+datetime.now().strftime("%Y-%m-%d_%H-%M-%S")+ '_metadata_dialog.json')
+
+        with open(json_file, 'w') as file:
+            json.dump(self.meta_data, file, indent=4)
+    
+    def _get_widgets(self):
+        '''get the widgets used for saving/loading metadata'''
+        exclude_widgets=self._get_children_keys(self.Probes)
+        exclude_widgets+=self._get_children_keys(self.Microscopes)
+        exclude_widgets+=['EphysProbes','RigMetadataFile','StickMicroscopes']
+        widget_dict = {w.objectName(): w for w in self.findChildren(
+            (QtWidgets.QLineEdit, QtWidgets.QTextEdit, QtWidgets.QComboBox))
+            if w.objectName() not in exclude_widgets}
+        return widget_dict
+    
+    def _save_configuration(self):
+        '''save the angles and target area of the selected probe type ('StickMicroscopes','EphysProbes')'''
+
+        probe_types = self.probe_types
+        metadata_keys = self.metadata_keys
+        widgets = self.widgets  
+
+        for i in range(len(probe_types)):
+            probe_type=probe_types[i]
+            metadata_key=metadata_keys[i]
+            widget=widgets[i]
+            current_probe = getattr(self, probe_type).currentText()
+            self.meta_data['session_metadata'] = initialize_dic(self.meta_data['session_metadata'], key_list=[metadata_key, current_probe])
+            keys = self._get_children_keys(widget)
+            for key in keys:
+                self.meta_data['session_metadata'][metadata_key][current_probe][key] = getattr(self, key).text()
+
+    def _show_angles(self):
+        '''
+        show the angles and target area of the selected probe type ('StickMicroscopes','EphysProbes')
+        '''
+        
+        probe_types = self.probe_types
+        metadata_keys = self.metadata_keys
+        widgets = self.widgets  
+
+        for i in range(len(probe_types)):
+            probe_type = probe_types[i]
+            metadata_key = metadata_keys[i]
+            widget = widgets[i]
+            action=self._save_configuration
+
+            self._manage_signals(enable=False, keys=self._get_children_keys(widget),action=action)
+            self._manage_signals(enable=False, keys=[probe_type], action=self._show_angles)
+            
+            current_probe = getattr(self, probe_type).currentText()
+            self.meta_data['session_metadata'] = initialize_dic(self.meta_data['session_metadata'], key_list=[metadata_key])
+            if current_probe == '' or current_probe not in self.meta_data['session_metadata'][metadata_key]:
+                self._clear_angles(self._get_children_keys(widget))
+                self._manage_signals(enable=True, keys=[probe_type], action=self._show_angles)
+                self._manage_signals(enable=True, keys=self._get_children_keys(widget), action=action)
+                continue
+
+            self.meta_data['session_metadata'] = initialize_dic(self.meta_data['session_metadata'], key_list=[metadata_key, current_probe])
+            keys = self._get_children_keys(widget)
+            for key in keys:
+                self.meta_data['session_metadata'][metadata_key][current_probe].setdefault(key, '')
+                getattr(self, key).setText(self.meta_data['session_metadata'][metadata_key][current_probe][key])
+
+            self._manage_signals(enable=True, keys=self._get_children_keys(widget), action=action)
+            self._manage_signals(enable=True, keys=[probe_type], action=self._show_angles)
+            
+
+    def _get_children_keys(self,parent_widget = None):
+        '''get the children QLineEidt objectName'''
+        if parent_widget is None:
+            parent_widget = self.Probes
+        probe_keys = []
+        for child_widget in parent_widget.children():
+            if isinstance(child_widget, QtWidgets.QLineEdit):
+                probe_keys.append(child_widget.objectName())
+            if isinstance(child_widget, QtWidgets.QGroupBox):
+                for child_widget2 in child_widget.children():
+                    if isinstance(child_widget2, QtWidgets.QLineEdit):
+                        probe_keys.append(child_widget2.objectName())   
+        return probe_keys
+    
+    def _show_stick_microscopes(self):
+        '''setting the stick microscopes from the rig metadata'''
+        if self.meta_data['rig_metadata'] == {}:
+            self.StickMicroscopes.clear()
+            self._show_angles()
+            self.meta_data['session_metadata']['microscopes'] = {}
+            return
+        items=[]
+        if 'stick_microscopes' in self.meta_data['rig_metadata']:
+            for i in range(len(self.meta_data['rig_metadata']['stick_microscopes'])):
+                items.append(self.meta_data['rig_metadata']['stick_microscopes'][i]['name'])
+        if items==[]:
+            self.StickMicroscopes.clear()
+            self._show_angles()
+            return
+        
+        self._manage_signals(enable=False,keys=['StickMicroscopes'],action=self._show_angles)
+        self._manage_signals(enable=False,keys=self._get_children_keys(self.Microscopes),action=self._save_configuration)
+        self.StickMicroscopes.clear()
+        self.StickMicroscopes.addItems(items)
+        self._manage_signals(enable=True,keys=['StickMicroscopes'],action=self._show_angles)
+        self._manage_signals(enable=True,keys=self._get_children_keys(self.Microscopes),action=self._save_configuration)
+        self._show_angles()
+
+    def _show_ephys_probes(self):
+        '''setting the ephys probes from the rig metadata'''
+        if self.meta_data['rig_metadata'] == {}:
+            self.EphysProbes.clear()
+            self._show_angles()
+            return
+        items=[]
+        if 'ephys_assemblies' in self.meta_data['rig_metadata']:
+            for assembly in self.meta_data['rig_metadata']['ephys_assemblies']:
+                for probe in assembly['probes']:
+                    items.append(probe['name'])
+        if items==[]:
+            self.EphysProbes.clear()
+            self._show_angles()
+            return
+        
+        self._manage_signals(enable=False,keys=['EphysProbes'],action=self._show_angles)
+        self._manage_signals(enable=False,keys=self._get_children_keys(self.Probes),action=self._save_configuration)
+        self.EphysProbes.clear()
+        self.EphysProbes.addItems(items)
+        self._manage_signals(enable=True,keys=['EphysProbes'],action=self._show_angles)
+        self._manage_signals(enable=True,keys=self._get_children_keys(self.Probes),action=self._save_configuration)
+        self._show_angles()
+    
+    def _manage_signals(self, enable=True,keys='',signals='',action=''):
+        '''manage signals 
+        Parameters
+        ----------
+        enable : bool
+            enable (connect) or disable (disconnect) the signals
+        action : function
+            the function to be connected or disconnected
+        keys : list
+            the keys of the widgets to be connected or disconnected
+        '''
+        if keys == '':
+            keys=self._get_children_keys(self.Probes)
+        if signals == '':
+            signals = []
+            for attr in keys:
+                if isinstance(getattr(self, attr),QtWidgets.QLineEdit):
+                    signals.append(getattr(self, attr).textChanged)
+                elif isinstance(getattr(self, attr),QtWidgets.QComboBox):
+                    signals.append(getattr(self, attr).currentIndexChanged)
+        if action == '':
+            action = self._save_configuration
+
+        for signal in signals:
+            if enable:
+                signal.connect(action)
+            else:
+                signal.disconnect(action)
+
+    def _SelectRigMetadata(self,rig_metadata_file=None):
+        '''Select the rig metadata file and load it
+        Parameters
+        ----------
+        rig_metadata_file : str
+            The rig metadata file path
+        
+        Returns
+        -------
+        None
+        '''
+        if rig_metadata_file is None:
+            rig_metadata_file, _ = QFileDialog.getOpenFileName(
+                self,
+                "Select Rig Metadata File",
+                self.MainWindow.rig_metadata_folder,
+                "JSON Files (*.json)"
+            )
+        if not rig_metadata_file:
+            return
+        self.meta_data['rig_metadata_file'] = rig_metadata_file
+        self.meta_data['session_metadata']['RigMetadataFile'] = rig_metadata_file
+        if os.path.exists(rig_metadata_file):
+            with open(rig_metadata_file, 'r') as file:
+                self.meta_data['rig_metadata'] = json.load(file)
+
+        # Update the text box
+        self._update_metadata(update_session_metadata=False)
+        
 class AutoTrainDialog(QDialog):
     '''For automatic training'''
 

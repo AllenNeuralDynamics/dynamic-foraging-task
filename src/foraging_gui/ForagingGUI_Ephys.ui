@@ -4373,6 +4373,25 @@
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
      </property>
     </widget>
+    <widget class="QPushButton" name="SetReference">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>210</y>
+       <width>121</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Set reference</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QPushButton" name="AutoTrain">
     <property name="geometry">
@@ -4539,6 +4558,34 @@
      </property>
     </item>
    </widget>
+   <widget class="QLabel" name="MetadataWarning">
+    <property name="geometry">
+     <rect>
+      <x>1240</x>
+      <y>920</y>
+      <width>361</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="scaledContents">
+     <bool>false</bool>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+    </property>
+   </widget>
    <zorder>PhotometryB</zorder>
    <zorder>infor</zorder>
    <zorder>line</zorder>
@@ -4574,6 +4621,7 @@
    <zorder>StartEphysRecording</zorder>
    <zorder>label_65</zorder>
    <zorder>OpenEphysRecordingType</zorder>
+   <zorder>MetadataWarning</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -4631,6 +4679,7 @@
     </widget>
     <addaction name="action_Calibration"/>
     <addaction name="actionLaser_Calibration"/>
+    <addaction name="actionMeta_Data"/>
     <addaction name="separator"/>
     <addaction name="menuSimulation"/>
     <addaction name="actionDrawing_after_stopping"/>
@@ -4686,6 +4735,9 @@
     <addaction name="actionRestartLogging_2"/>
     <addaction name="actionOpen_behavior_folder"/>
     <addaction name="actionOpen_logging_folder"/>
+    <addaction name="actionOpen_video_folder"/>
+    <addaction name="actionOpen_rig_metadata_folder"/>
+    <addaction name="actionOpen_metadata_dialog_folder"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="sizePolicy">
@@ -4751,7 +4803,9 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="action_Camera"/>
+   <addaction name="action_Calibration"/>
+   <addaction name="actionLaser_Calibration"/>
+   <addaction name="actionMeta_Data"/>
   </widget>
   <widget class="QToolBar" name="toolBar_3">
    <property name="sizePolicy">
@@ -4769,9 +4823,8 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="action_Calibration"/>
    <addaction name="action_Optogenetics"/>
-   <addaction name="actionLaser_Calibration"/>
+   <addaction name="action_Camera"/>
   </widget>
   <action name="action_Calibration">
    <property name="checkable">
@@ -4987,6 +5040,33 @@
   <action name="Save_continue">
    <property name="text">
     <string>Save (without starting a new session)</string>
+   </property>
+  </action>
+  <action name="actionMeta_Data">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>resources/metadata.png</normaloff>resources/metadata.png</iconset>
+   </property>
+   <property name="text">
+    <string>Meta Data</string>
+   </property>
+  </action>
+  <action name="actionOpen_rig_metadata_folder">
+   <property name="text">
+    <string>Open rig metadata folder</string>
+   </property>
+  </action>
+  <action name="actionOpen_metadata_dialog_folder">
+   <property name="text">
+    <string>Open metadata dialog folder</string>
+   </property>
+  </action>
+  <action name="actionOpen_video_folder">
+   <property name="text">
+    <string>Open video folder</string>
    </property>
   </action>
  </widget>

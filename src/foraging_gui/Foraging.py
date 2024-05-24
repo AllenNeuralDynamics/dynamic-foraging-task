@@ -26,12 +26,13 @@ import webbrowser
 
 import foraging_gui.rigcontrol as rigcontrol
 from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
-from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog
+from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,MetadataDialog
 from foraging_gui.Dialogs import LaserCalibrationDialog
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY, EphysRecording
 from foraging_gui.stage import Stage
+from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
 
 class NumpyEncoder(json.JSONEncoder):
@@ -112,9 +113,10 @@ class Window(QMainWindow):
         # Set up more parameters
         self.FIP_started=False
         self.OpenOptogenetics=0
-        self.WaterCalibration=0
-        self.LaserCalibration=0
-        self.Camera=0
+        self.OpenWaterCalibration=0
+        self.OpenLaserCalibration=0
+        self.OpenCamera=0
+        self.OpenMetadata=0
         self.NewTrialRewardOrder=0
         self.LickSta=0
         self.LickSta_ToInitializeVisual=1
@@ -127,6 +129,7 @@ class Window(QMainWindow):
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
         self._Camera()
+        self._Metadata()
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self.WaterPerRewardedTrial=0.005 
         self._ShowRewardPairs() # show reward pairs
@@ -145,6 +148,8 @@ class Window(QMainWindow):
         self._StopPhotometry() # Make sure photoexcitation is stopped 
         # Initialize open ephys saving dictionary
         self.open_ephys=[]
+        # load the rig metadata
+        self._load_rig_metadata()
         if not self.start_bonsai_ide:
             '''
                 When starting bonsai without the IDE the connection is always unstable.
@@ -153,6 +158,13 @@ class Window(QMainWindow):
             self._ReconnectBonsai()   
         logging.info('Start up complete')
     
+    def _load_rig_metadata(self):
+        '''Load the latest rig metadata'''
+ 
+        rig_json, rig_json_file= self._load_most_recent_rig_json()
+        self.latest_rig_metadata_file = rig_json_file 
+        self.Metadata_dialog._SelectRigMetadata(self.latest_rig_metadata_file)
+
     def _LoadUI(self):
         '''
             Determine which user interface to use
@@ -180,6 +192,7 @@ class Window(QMainWindow):
         '''Define callbacks'''
         self.action_About.triggered.connect(self._about)
         self.action_Camera.triggered.connect(self._Camera)
+        self.actionMeta_Data.triggered.connect(self._Metadata)
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
         self.actionLicks_sta.triggered.connect(self._LickSta)
         self.actionTime_distribution.triggered.connect(self._TimeDistribution)
@@ -233,6 +246,9 @@ class Window(QMainWindow):
         self.actionOpen_logging_folder.triggered.connect(self._OpenLoggingFolder)
         self.actionOpen_behavior_folder.triggered.connect(self._OpenBehaviorFolder)
         self.actionOpenSettingFolder.triggered.connect(self._OpenSettingFolder)
+        self.actionOpen_rig_metadata_folder.triggered.connect(self._OpenRigMetadataFolder)
+        self.actionOpen_metadata_dialog_folder.triggered.connect(self._OpenMetadataDialogFolder)
+        self.actionOpen_video_folder.triggered.connect(self._OpenVideoFolder)
         self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
         self.RightValue.textChanged.connect(self._WaterVolumnManage1)
         self.GiveWaterL.textChanged.connect(self._WaterVolumnManage1)
@@ -254,17 +270,28 @@ class Window(QMainWindow):
         self.Sessionlist.currentIndexChanged.connect(self._session_list)
         self.SessionlistSpin.textChanged.connect(self._session_list_spin)
         self.StartEphysRecording.clicked.connect(self._StartEphysRecording)
+        self.SetReference.clicked.connect(self._set_reference)
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
-        for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
+        for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
-            for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):        
+            for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):     
                 child.textChanged.connect(self._CheckTextChange)
         # Opto_dialog can not detect natural enter press, so returnPressed is used here. 
-        for container in [self.Opto_dialog]:
+        for container in [self.Opto_dialog,self.Metadata_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
-            for child in container.findChildren((QtWidgets.QLineEdit)):        
+            for child in container.findChildren((QtWidgets.QLineEdit)):   
                 child.returnPressed.connect(self.keyPressEvent)
     
+    def _set_reference(self):
+        '''
+        set the reference point for lick spout position in the metadata dialog
+        '''
+        # get the current position of the stage
+        current_positions=self._GetPositions()
+        # set the reference point for lick spout position in the metadata dialog
+        if current_positions is not None:
+            self.Metadata_dialog._set_reference(current_positions)
+
     def _StartEphysRecording(self):
         '''
             Start/stop ephys recording
@@ -294,7 +321,7 @@ class Window(QMainWindow):
                     self._toggle_color(self.StartEphysRecording)
                     return
                 EphysControl.start_open_ephys_recording()
-                self.openephys_start_recording_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+                self.openephys_start_recording_time = str(datetime.now())
                 QMessageBox.warning(self, '', f'Open Ephys has started recording!\n Recording type: {self.OpenEphysRecordingType.currentText()}')
             except Exception as e:
                 logging.error(str(e))
@@ -317,7 +344,7 @@ class Window(QMainWindow):
                         self._toggle_color(self.StartEphysRecording)
                         return
                     
-                self.openephys_stop_recording_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+                self.openephys_stop_recording_time = str(datetime.now())
                 response=EphysControl.get_open_ephys_recording_configuration()
                 response['openephys_start_recording_time']=self.openephys_start_recording_time
                 response['openephys_stop_recording_time']=self.openephys_stop_recording_time
@@ -613,7 +640,9 @@ class Window(QMainWindow):
             current_stage=self.current_stage
             current_position=current_stage.get_position()
             self._UpdatePosition(current_position,(0,0,0))
+            return current_position
         else:
+            return None
             logging.info('GetPositions pressed, but no current stage')
 
     def _StageStop(self):
@@ -935,7 +964,18 @@ class Window(QMainWindow):
             'show_log_info_in_console':False,
             'default_ui':'ForagingGUI.ui',
             'open_ephys_machine_ip_address':'',
-            'rig_metadata_folder':os.path.join(self.SettingFolder,'rig_metadata')+'\\',
+            'metadata_dialog_folder':os.path.join(self.SettingFolder,"metadata_dialog")+'\\',
+            'rig_metadata_folder':os.path.join(self.SettingFolder,"rig_metadata")+'\\',
+            'project_info_file':os.path.join(self.SettingFolder,"Project Name and Funding Source v2.csv"),
+            'go_cue_decibel_box1':60,
+            'go_cue_decibel_box2':60,
+            'go_cue_decibel_box3':60,
+            'go_cue_decibel_box4':60,
+            'lick_spout_distance_box1':5000,
+            'lick_spout_distance_box2':5000,
+            'lick_spout_distance_box3':5000,
+            'lick_spout_distance_box4':5000,
+            'name_mapper_file':os.path.join(self.SettingFolder,"name_mapper.json"),
             'create_rig_metadata':True,
         }
         
@@ -992,8 +1032,20 @@ class Window(QMainWindow):
         self.newscale_serial_num_box4=self.Settings['newscale_serial_num_box4']
         self.default_ui=self.Settings['default_ui']
         self.open_ephys_machine_ip_address=self.Settings['open_ephys_machine_ip_address']
-        self.rig_metadata_folder=self.Settings['rig_metadata_folder']
-
+        self.metadata_dialog_folder = self.Settings['metadata_dialog_folder'] 
+        self.rig_metadata_folder = self.Settings['rig_metadata_folder']
+        self.project_info_file = self.Settings['project_info_file']
+        self.go_cue_decibel_box1 = self.Settings['go_cue_decibel_box1']
+        self.go_cue_decibel_box2 = self.Settings['go_cue_decibel_box2']
+        self.go_cue_decibel_box3 = self.Settings['go_cue_decibel_box3']
+        self.go_cue_decibel_box4 = self.Settings['go_cue_decibel_box4']
+        self.lick_spout_distance_box1 = self.Settings['lick_spout_distance_box1']
+        self.lick_spout_distance_box2 = self.Settings['lick_spout_distance_box2']
+        self.lick_spout_distance_box3 = self.Settings['lick_spout_distance_box3']
+        self.lick_spout_distance_box4 = self.Settings['lick_spout_distance_box4']
+        self.name_mapper_file = self.Settings['name_mapper_file']
+        if not is_absolute_path(self.project_info_file):
+            self.project_info_file = os.path.join(self.SettingFolder,self.project_info_file)
         # Also stream log info to the console if enabled
         if  self.Settings['show_log_info_in_console']:
             logger = logging.getLogger()
@@ -1012,7 +1064,11 @@ class Window(QMainWindow):
                 4:'D'
             }
             self.current_box='{}-{}'.format(self.current_box,mapper[self.box_number])
+        self.Other_current_box=self.current_box
+        self.Other_go_cue_decibel=self.Settings['go_cue_decibel_box'+str(self.box_number)]
+        self.Other_lick_spout_distance=self.Settings['lick_spout_distance_box'+str(self.box_number)]
         self.rig_name = '{}'.format(self.current_box)
+
 
     def _InitializeBonsai(self):
         '''
@@ -1151,6 +1207,55 @@ class Window(QMainWindow):
         else:
             subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True)
 
+    def _OpenVideoFolder(self):
+        '''Open the video folder'''
+        try:
+            subprocess.Popen(['explorer', self.VideoFolder])
+        except Exception as e:
+            logging.error(str(e))
+                    
+    def _OpenMetadataDialogFolder(self):
+        '''Open the metadata dialog folder'''
+        try:
+            subprocess.Popen(['explorer', self.metadata_dialog_folder])
+        except Exception as e:
+            logging.error(str(e))
+
+    def _OpenRigMetadataFolder(self):
+        '''Open the rig metadata folder'''
+        try:
+            subprocess.Popen(['explorer', self.rig_metadata_folder])
+        except Exception as e:
+            logging.error(str(e))
+
+    def _load_most_recent_rig_json(self,error_if_none=True):
+        # See if rig metadata folder exists 
+        if not os.path.exists(self.Settings['rig_metadata_folder']):
+            print('making directory: {}'.format(self.Settings['rig_metadata_folder']))
+            os.makedirs(self.Settings['rig_metadata_folder'])
+
+        # Load most recent rig_json
+        files = sorted(Path(self.Settings['rig_metadata_folder']).iterdir(), key=os.path.getmtime)
+        files = [f.__str__().split('\\')[-1] for f in files]
+        files = [f for f in files if (f.startswith('rig_'+self.rig_name) and f.endswith('.json'))]
+
+        if len(files) ==0:
+            # No rig.jsons found
+            rig_json = {}
+            rig_json_path = ''
+            if error_if_none:
+                logging.error('Did not find any existing rig.json files')      
+                self._manage_warning_labels(self.MetadataWarning,warning_text='No rig metadata found!')
+            else:
+                logging.info('Did not find any existing rig.json files')
+        else:
+            rig_json_path = os.path.join(self.Settings['rig_metadata_folder'],files[-1])
+            logging.info('Found existing rig.json: {}'.format(files[-1]))
+            with open(rig_json_path, 'r') as f:
+                rig_json = json.load(f)      
+
+        return rig_json, rig_json_path
+ 
     def _LoadRigJson(self):    
     
         # User can skip this step if they make rig metadata themselves
@@ -1158,24 +1263,7 @@ class Window(QMainWindow):
             logging.info('Skipping rig metadata creation because create_rig_metadata=False')
             return
 
-        # See if rig metadata folder exists 
-        if not os.path.exists(self.Settings['rig_metadata_folder']):
-            print('making directory: {}'.format(self.Settings['rig_metadata_folder']))
-            os.makedirs(self.Settings['rig_metadata_folder'])
-              
-        # Load most recent rig_json
-        files = sorted(Path(self.Settings['rig_metadata_folder']).iterdir(), key=os.path.getmtime)
-        files = [f.__str__().split('\\')[-1] for f in files]
-        files = [f for f in files if (f.startswith('rig_'+self.rig_name) and f.endswith('.json'))]
-        if len(files) ==0:
-            # No rig.jsons found, this will trigger saving the new one
-            existing_rig_json = {}
-            logging.info('Did not find any existing rig.json files')
-        else:
-            existing_rig_json_path = os.path.join(self.Settings['rig_metadata_folder'],files[-1])
-            logging.info('Found existing rig.json: {}'.format(files[-1]))
-            with open(existing_rig_json_path, 'r') as f:
-                existing_rig_json = json.load(f)      
+        existing_rig_json, rig_json_path = self._load_most_recent_rig_json(error_if_none=False) 
 
         # Builds a new rig.json, and saves if there are changes with the most recent
         rig_settings = self.Settings.copy()
@@ -1551,8 +1639,7 @@ class Window(QMainWindow):
             event.accept()
             self.UpdateParameters=1 # Changes are allowed
             # change color to black
-            for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
-
+            for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
                 # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
                 for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
                     if child.objectName()=='qt_spinbox_lineedit':
@@ -1566,14 +1653,14 @@ class Window(QMainWindow):
                         child.setStyleSheet('background-color: white;')
                         self._Task()
                     
-                    if child.objectName() in {'Experimenter','TotalWater','ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
+                    if child.objectName() in {'WeightAfter','LickSpoutDistance','ModuleAngle','ArcAngle','ProtocolID','Stick_RotationAngle','LickSpoutReferenceX','LickSpoutReferenceY','LickSpoutReferenceZ','LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','Stick_ArcAngle','Stick_ModuleAngle','RotationAngle','ManipulatorX','ManipulatorY','ManipulatorZ','ProbeTarget','RigMetadataFile','IACUCProtocol','Experimenter','TotalWater','ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
                         continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
                         if Correct ==0: # incorrect format; don't change
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
-                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight','WeightAfter']) and
+                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight']) and
                         (child.text() == '')):
                         # These attributes can have the empty string, but we can't set the value as the empty string, unless we allow resets
                         if allow_reset:
@@ -1618,7 +1705,7 @@ class Window(QMainWindow):
             Parameters=self.GeneratedTrials
         else:
             Parameters=self
-        for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
+        for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
                 if child.objectName()=='qt_spinbox_lineedit' or child.isEnabled()==False: # I don't understand where the qt_spinbox_lineedit comes from. 
@@ -1631,7 +1718,7 @@ class Window(QMainWindow):
                 try:
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                         self.Continue=0
-                        if child.objectName() in {'Experimenter', 'UncoupledReward', 'ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
+                        if child.objectName() in {'LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','ProbeTarget','RigMetadataFile','Experimenter', 'UncoupledReward', 'ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
                             child.setStyleSheet(self.default_text_color)
                             self.Continue=1
                         if child.text()=='': # If empty, change background color and wait for confirmation
@@ -1720,7 +1807,7 @@ class Window(QMainWindow):
     def _GetTrainingParameters(self,prefix='TP_'):
         '''Get training parameters'''
         # Iterate over each container to find child widgets and store their values in self
-        for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog]:
+        for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit, QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
                 if child.objectName()=='qt_spinbox_lineedit':
@@ -1942,7 +2029,13 @@ class Window(QMainWindow):
             self.client3.close()
             self.client4.close()
         self.Opto_dialog.close()
+
+        self.Metadata_dialog.close()
+        self.Camera_dialog.close()
+        self.LaserCalibration_dialog.close()
+        self.WaterCalibration_dialog.close()
         self._StopPhotometry(closing=True)  # Make sure photo excitation is stopped 
+
         print('GUI Window closed')
         logging.info('GUI Window closed') 
 
@@ -1963,27 +2056,37 @@ class Window(QMainWindow):
 
     def _Camera(self):
         '''Open the camera. It's not available now'''
-        if self.Camera==0:
+        if self.OpenCamera==0:
             self.Camera_dialog = CameraDialog(MainWindow=self)
-            self.Camera=1
+            self.OpenCamera=1
         if self.action_Camera.isChecked()==True:
             self.Camera_dialog.show()
         else:
             self.Camera_dialog.hide()
 
+    def _Metadata(self):
+        '''Open the metadata dialog'''
+        if self.OpenMetadata==0:
+            self.Metadata_dialog = MetadataDialog(MainWindow=self)
+            self.OpenMetadata=1
+        if self.actionMeta_Data.isChecked()==True:
+            self.Metadata_dialog.show()
+        else:
+            self.Metadata_dialog.hide()
+
     def _WaterCalibration(self):
-        if self.WaterCalibration==0:
+        if self.OpenWaterCalibration==0:
             self.WaterCalibration_dialog = WaterCalibrationDialog(MainWindow=self)
-            self.WaterCalibration=1
+            self.OpenWaterCalibration=1
         if self.action_Calibration.isChecked()==True:
             self.WaterCalibration_dialog.show()
         else:
             self.WaterCalibration_dialog.hide()
 
     def _LaserCalibration(self):
-        if self.LaserCalibration==0:
+        if self.OpenLaserCalibration==0:
             self.LaserCalibration_dialog = LaserCalibrationDialog(MainWindow=self)
-            self.LaserCalibration=1
+            self.OpenLaserCalibration=1
         if self.actionLaser_Calibration.isChecked()==True:
             self.LaserCalibration_dialog.show()
         else:
@@ -2160,21 +2263,13 @@ class Window(QMainWindow):
             QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
         widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
         self._Concat(widget_dict,Obj,'None')
-        if hasattr(self, 'LaserCalibration_dialog'):
-            widget_dict_LaserCalibration={w.objectName(): w for w in self.LaserCalibration_dialog.findChildren(
-            (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
-            QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))} 
-            self._Concat(widget_dict_LaserCalibration,Obj,'LaserCalibration_dialog')
-        if hasattr(self, 'Opto_dialog'):
-            widget_dict_opto={w.objectName(): w for w in self.Opto_dialog.findChildren(
-                (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
-                QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-            self._Concat(widget_dict_opto,Obj,'Opto_dialog')
-        if hasattr(self, 'Camera_dialog'):
-            widget_dict_camera={w.objectName(): w for w in self.Camera_dialog.findChildren(
-                (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
-                QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-            self._Concat(widget_dict_camera,Obj,'Camera_dialog')
+        dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','Metadata_dialog']
+        for dialog_name in dialogs:
+            if hasattr(self, dialog_name):
+                widget_dict = {w.objectName(): w for w in getattr(self, dialog_name).findChildren(
+                    (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+                    QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox))}
+                self._Concat(widget_dict, Obj, dialog_name)
         
         Obj2=Obj.copy()
         # save behavor events
@@ -2232,7 +2327,7 @@ class Window(QMainWindow):
             if hasattr(self, 'fiber_photometry_end_time'):
                 end_time = self.fiber_photometry_end_time
             else:
-                end_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") 
+                end_time = str(datetime.now())
             Obj['fiber_photometry_end_time'] = end_time
 
         # Save the current box
@@ -2274,6 +2369,24 @@ class Window(QMainWindow):
         Obj['trigger_length']=self.trigger_length
         Obj['drop_frames_warning_text']=self.drop_frames_warning_text
         Obj['frame_num']=self.frame_num
+
+        # save manual water 
+        Obj['ManualWaterVolume']=self.ManualWaterVolume
+
+        # save camera start/stop time
+        Obj['Camera_dialog']['camera_start_time']=self.Camera_dialog.camera_start_time
+        Obj['Camera_dialog']['camera_stop_time']=self.Camera_dialog.camera_stop_time
+
+        # save the metadata collected in the metadata dialogue
+        self.Metadata_dialog._save_metadata_dialog_parameters()
+        Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
+
+        # generate the metadata file
+        try:
+            generate_metadata(Obj=Obj)
+        except Exception as e:
+            self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved succuessfully!')
+            logging.error('Error generating session metadata: '+str(e))
 
         # save Json or mat
         if self.SaveFile.endswith('.mat'):
@@ -2375,7 +2488,8 @@ class Window(QMainWindow):
                 elif isinstance(widget, QtWidgets.QComboBox):
                     Obj[widget.objectName()]=widget.currentText()
         else:
-            Obj[keyname]={}
+            if keyname not in Obj.keys():
+                Obj[keyname]={}
             for key in widget_dict.keys():
                 widget = widget_dict[key]
                 if key=='Frequency_1':
@@ -2544,23 +2658,15 @@ class Window(QMainWindow):
                 Obj = json.loads(f.read())
                 f.close()
             self.Obj = Obj
-            widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((
-                QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
-                QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox))}
-            widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
-            widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((
-                QtWidgets.QLineEdit, QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox))})  # update optogenetics parameters from the loaded file
-            if hasattr(self, 'LaserCalibration_dialog'):
-                widget_dict.update({w.objectName(): w for w in self.LaserCalibration_dialog.findChildren((
-                    QtWidgets.QLineEdit, QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox))})  
-            if hasattr(self, 'Opto_dialog'):
-                widget_dict.update({w.objectName(): w for w in self.Opto_dialog.findChildren((
-                    QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
-                    QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox))})
-            if hasattr(self, 'Camera_dialog'):
-                widget_dict.update({w.objectName(): w for w in self.Camera_dialog.findChildren((
-                    QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
-                    QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox))})
+
+            widget_dict={}
+            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','centralwidget','TrainingParameters']
+            for dialog_name in dialogs:
+                if hasattr(self, dialog_name):
+                    widget_types = (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit,
+                                    QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox)
+                    widget_dict.update({w.objectName(): w for w in getattr(self, dialog_name).findChildren(widget_types)})
+
             try:
                 for key in widget_dict.keys():
                     try:
@@ -2571,6 +2677,8 @@ class Window(QMainWindow):
                             CurrentObj=Obj['Camera_dialog']
                         elif widget.parent().objectName()=='CalibrationLaser':
                             CurrentObj=Obj['LaserCalibration_dialog']
+                        elif widget.parent().objectName()=='MetaData':
+                            CurrentObj=Obj['Metadata_dialog']
                         else:
                             CurrentObj=Obj.copy()
                     except Exception as e:
@@ -2704,6 +2812,12 @@ class Window(QMainWindow):
                         logging.error(str(e))
             else:
                 pass
+
+            # load metadata to the metadata dialog
+            if 'meta_data_dialog' in Obj:
+                self.Metadata_dialog.meta_data = Obj['meta_data_dialog']
+                self.Metadata_dialog._update_metadata()
+
             # show session list related to that animal
             tag=self._show_sessions()
             if tag!=0:
@@ -2882,7 +2996,7 @@ class Window(QMainWindow):
             else:
                 self.TeensyWarning.setText('')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)               
-                self.fiber_photometry_start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                self.fiber_photometry_start_time = str(datetime.now())
 
         else:
             logging.info('StartExcitation is unchecked')
@@ -2903,7 +3017,7 @@ class Window(QMainWindow):
             else:
                 self.TeensyWarning.setText('')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)              
-                self.fiber_photometry_end_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                self.fiber_photometry_end_time = str(datetime.now())
 
         return 1
     
@@ -3088,13 +3202,14 @@ class Window(QMainWindow):
         self.StartANewSession=1
         self.CreateNewFolder=1
         self.PhotometryRun=0
+
         self.unsaved_data=False
         self.ManualWaterVolume=[0,0]     
         if hasattr(self, 'fiber_photometry_start_time'): 
             del self.fiber_photometry_start_time
         if hasattr(self, 'fiber_photometry_end_time'): 
             del self.fiber_photometry_end_time 
-    
+
         # Clear Plots
         if hasattr(self, 'PlotM'): 
             self.PlotM._Update(GeneratedTrials=None,Channel=None)
@@ -3359,6 +3474,7 @@ class Window(QMainWindow):
             self.WarningLabel.setText('')
             self.WarningLabel.setStyleSheet("color: gray;")
             self.WarmupWarning.setText('')
+            self.ManualWaterVolume=[0,0] 
             # start a new logging
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
@@ -3895,6 +4011,10 @@ def show_exception_box(log_msg):
         errorbox.exec_()
     else:
         logging.error('could not launch exception box')
+
+def is_absolute_path(path):
+    # Check if the path starts with a root directory identifier or drive letter (for Windows)
+    return path.startswith('/') or (len(path) > 2 and path[1] == ':' and path[2] == '\\') 
 
 class UncaughtHook(QtCore.QObject):
     '''
