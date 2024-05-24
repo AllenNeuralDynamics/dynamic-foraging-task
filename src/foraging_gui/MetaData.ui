@@ -325,10 +325,10 @@ p, li { white-space: pre-wrap; }
   <widget class="QGroupBox" name="Probes">
    <property name="geometry">
     <rect>
-     <x>590</x>
-     <y>120</y>
-     <width>171</width>
-     <height>311</height>
+     <x>20</x>
+     <y>320</y>
+     <width>170</width>
+     <height>310</height>
     </rect>
    </property>
    <property name="title">
@@ -690,10 +690,10 @@ p, li { white-space: pre-wrap; }
   <widget class="QGroupBox" name="Microscopes">
    <property name="geometry">
     <rect>
-     <x>790</x>
+     <x>210</x>
      <y>120</y>
-     <width>171</width>
-     <height>181</height>
+     <width>170</width>
+     <height>180</height>
     </rect>
    </property>
    <property name="title">
@@ -869,7 +869,7 @@ p, li { white-space: pre-wrap; }
      <x>260</x>
      <y>80</y>
      <width>260</width>
-     <height>240</height>
+     <height>230</height>
     </rect>
    </property>
    <property name="title">
@@ -1209,8 +1209,8 @@ p, li { white-space: pre-wrap; }
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
-     <x>980</x>
-     <y>120</y>
+     <x>410</x>
+     <y>320</y>
      <width>221</width>
      <height>241</height>
     </rect>
