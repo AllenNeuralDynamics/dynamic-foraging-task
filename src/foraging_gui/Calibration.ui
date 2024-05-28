@@ -993,6 +993,19 @@
      <x>30</x>
      <y>20</y>
      <width>1011</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Flush lines</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>120</y>
+     <width>1011</width>
      <height>161</height>
     </rect>
    </property>
