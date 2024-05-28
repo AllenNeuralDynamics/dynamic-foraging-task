@@ -2752,7 +2752,7 @@
                 <harp:VisualIndicators>On</harp:VisualIndicators>
                 <harp:Heartbeat>Disabled</harp:Heartbeat>
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                <harp:PortName>COM3</harp:PortName>
+                <harp:PortName>COM4</harp:PortName>
               </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
@@ -4277,94 +4277,112 @@
         <Name>Optogenetics2</Name>
         <Workflow>
           <Nodes>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>WaveForm1_1</Name>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="SubscribeSubject">
+                <Name>WaveForm1_1</Name>
+              </Builder>
             </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>WaveForm1_2</Name>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="SubscribeSubject">
+                <Name>WaveForm1_2</Name>
+              </Builder>
             </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:Zip" />
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="rx:Zip" />
+              </Builder>
             </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="dsp:Concat">
-                <dsp:Axis>0</dsp:Axis>
-              </Combinator>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="dsp:Concat">
+                  <dsp:Axis>0</dsp:Axis>
+                </Combinator>
+              </Builder>
             </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>Location1Size</Name>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="SubscribeSubject">
+                <Name>Location1Size</Name>
+              </Builder>
             </Expression>
-            <Expression xsi:type="PropertyMapping">
-              <PropertyMappings>
-                <Property Name="BufferSize" />
-              </PropertyMappings>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="PropertyMapping">
+                <PropertyMappings>
+                  <Property Name="BufferSize" />
+                </PropertyMappings>
+              </Builder>
             </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>TriggerSource</Name>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="SubscribeSubject">
+                <Name>TriggerSource</Name>
+              </Builder>
             </Expression>
-            <Expression xsi:type="PropertyMapping">
-              <PropertyMappings>
-                <Property Name="TriggerSource" />
-              </PropertyMappings>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="PropertyMapping">
+                <PropertyMappings>
+                  <Property Name="TriggerSource" />
+                </PropertyMappings>
+              </Builder>
             </Expression>
-            <Expression xsi:type="rx:SelectMany">
-              <Workflow>
-                <Nodes>
-                  <Expression xsi:type="WorkflowInput">
-                    <Name>Source1</Name>
-                  </Expression>
-                  <Expression xsi:type="ExternalizedMapping">
-                    <Property Name="BufferSize" />
-                    <Property Name="TriggerSource" />
-                  </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="p3:TriggeredAnalogOutput">
-                      <p3:SignalSource />
-                      <p3:TriggerSource>/Dev1/PFI0</p3:TriggerSource>
-                      <p3:SampleRate>5000</p3:SampleRate>
-                      <p3:ActiveEdge>Rising</p3:ActiveEdge>
-                      <p3:SampleMode>FiniteSamples</p3:SampleMode>
-                      <p3:BufferSize>50002</p3:BufferSize>
-                      <p3:Channels>
-                        <p3:AnalogOutputChannelConfiguration>
-                          <p3:ChannelName />
-                          <p3:MinimumValue>-10</p3:MinimumValue>
-                          <p3:MaximumValue>10</p3:MaximumValue>
-                          <p3:PhysicalChannel>Dev1/ao0</p3:PhysicalChannel>
-                          <p3:VoltageUnits>Volts</p3:VoltageUnits>
-                        </p3:AnalogOutputChannelConfiguration>
-                        <p3:AnalogOutputChannelConfiguration>
-                          <p3:ChannelName />
-                          <p3:MinimumValue>-10</p3:MinimumValue>
-                          <p3:MaximumValue>10</p3:MaximumValue>
-                          <p3:PhysicalChannel>Dev1/ao1</p3:PhysicalChannel>
-                          <p3:VoltageUnits>Volts</p3:VoltageUnits>
-                        </p3:AnalogOutputChannelConfiguration>
-                      </p3:Channels>
-                    </Combinator>
-                  </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="IntProperty">
-                      <Value>1</Value>
-                    </Combinator>
-                  </Expression>
-                  <Expression xsi:type="osc:Format">
-                    <osc:Address>/FinishOfWave1_1</osc:Address>
-                  </Expression>
-                  <Expression xsi:type="MulticastSubject">
-                    <Name>ToBonsaiOSC4</Name>
-                  </Expression>
-                  <Expression xsi:type="WorkflowOutput" />
-                </Nodes>
-                <Edges>
-                  <Edge From="0" To="2" Label="Source2" />
-                  <Edge From="1" To="2" Label="Source2" />
-                  <Edge From="2" To="3" Label="Source1" />
-                  <Edge From="3" To="4" Label="Source1" />
-                  <Edge From="4" To="5" Label="Source1" />
-                  <Edge From="5" To="6" Label="Source1" />
-                </Edges>
-              </Workflow>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="rx:SelectMany">
+                <Workflow>
+                  <Nodes>
+                    <Expression xsi:type="WorkflowInput">
+                      <Name>Source1</Name>
+                    </Expression>
+                    <Expression xsi:type="ExternalizedMapping">
+                      <Property Name="BufferSize" />
+                      <Property Name="TriggerSource" />
+                    </Expression>
+                    <Expression xsi:type="Combinator">
+                      <Combinator xsi:type="p3:TriggeredAnalogOutput">
+                        <p3:SignalSource />
+                        <p3:TriggerSource>/Dev1/PFI0</p3:TriggerSource>
+                        <p3:SampleRate>5000</p3:SampleRate>
+                        <p3:ActiveEdge>Rising</p3:ActiveEdge>
+                        <p3:SampleMode>FiniteSamples</p3:SampleMode>
+                        <p3:BufferSize>50002</p3:BufferSize>
+                        <p3:Channels>
+                          <p3:AnalogOutputChannelConfiguration>
+                            <p3:ChannelName />
+                            <p3:MinimumValue>-10</p3:MinimumValue>
+                            <p3:MaximumValue>10</p3:MaximumValue>
+                            <p3:PhysicalChannel>Dev1/ao0</p3:PhysicalChannel>
+                            <p3:VoltageUnits>Volts</p3:VoltageUnits>
+                          </p3:AnalogOutputChannelConfiguration>
+                          <p3:AnalogOutputChannelConfiguration>
+                            <p3:ChannelName />
+                            <p3:MinimumValue>-10</p3:MinimumValue>
+                            <p3:MaximumValue>10</p3:MaximumValue>
+                            <p3:PhysicalChannel>Dev1/ao1</p3:PhysicalChannel>
+                            <p3:VoltageUnits>Volts</p3:VoltageUnits>
+                          </p3:AnalogOutputChannelConfiguration>
+                        </p3:Channels>
+                      </Combinator>
+                    </Expression>
+                    <Expression xsi:type="Combinator">
+                      <Combinator xsi:type="IntProperty">
+                        <Value>1</Value>
+                      </Combinator>
+                    </Expression>
+                    <Expression xsi:type="osc:Format">
+                      <osc:Address>/FinishOfWave1_1</osc:Address>
+                    </Expression>
+                    <Expression xsi:type="MulticastSubject">
+                      <Name>ToBonsaiOSC4</Name>
+                    </Expression>
+                    <Expression xsi:type="WorkflowOutput" />
+                  </Nodes>
+                  <Edges>
+                    <Edge From="0" To="2" Label="Source2" />
+                    <Edge From="1" To="2" Label="Source2" />
+                    <Edge From="2" To="3" Label="Source1" />
+                    <Edge From="3" To="4" Label="Source1" />
+                    <Edge From="4" To="5" Label="Source1" />
+                    <Edge From="5" To="6" Label="Source1" />
+                  </Edges>
+                </Workflow>
+              </Builder>
             </Expression>
             <Expression xsi:type="SubscribeSubject">
               <Name>OptogeneticsCalibration</Name>
@@ -8331,7 +8349,7 @@
         <Property Name="FileName" DisplayName="SettingsPath" />
       </Expression>
       <Expression xsi:type="io:CsvReader">
-        <io:FileName>C:\Users\xinxin.yin\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
+        <io:FileName>C:\Users\yoni.browning\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
         <io:ScanPattern>%s,%s</io:ScanPattern>
         <io:SkipRows>0</io:SkipRows>
       </Expression>

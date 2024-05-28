@@ -1991,6 +1991,127 @@ class Window(QMainWindow):
         '''Save the current session witout restarting the logging'''
         self._Save(SaveContinue=1)
 
+    def _SetupCheckpointSavingFolder(self):
+        """Setup the timer to save checkpoints"""
+
+
+    def _SaveSettings(self):
+        """Save the current settings"""
+
+
+
+        # Create a new folder, if necessary
+        if self.CreateNewFolder==1:
+            self._GetSaveFolder()
+            self.CreateNewFolder=0
+
+        save_me = {}
+
+        # Get settings from the GUI
+        widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren(
+            (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+            QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+        widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
+        self._Concat(widget_dict,save_me,'None')
+        if hasattr(self, 'LaserCalibration_dialog'):
+            widget_dict_LaserCalibration={w.objectName(): w for w in self.LaserCalibration_dialog.findChildren(
+            (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+            QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))} 
+            self._Concat(widget_dict_LaserCalibration,save_me,'LaserCalibration_dialog')
+        if hasattr(self, 'Opto_dialog'):
+            widget_dict_opto={w.objectName(): w for w in self.Opto_dialog.findChildren(
+                (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+                QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+            self._Concat(widget_dict_opto,save_me,'Opto_dialog')
+        if hasattr(self, 'Camera_dialog'):
+            widget_dict_camera={w.objectName(): w for w in self.Camera_dialog.findChildren(
+                (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+                QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+            self._Concat(widget_dict_camera,save_me,'Camera_dialog')
+
+
+        # get other events, e.g. session start time
+        for attr_name in dir(self):
+            if attr_name.startswith('Other_') or attr_name.startswith('info_'):
+                save_me[attr_name] = getattr(self, attr_name)
+                
+        # get laser calibration results (only for the calibration session)
+        if hasattr(self, 'LaserCalibration_dialog'):
+            # Do something if self has the GeneratedTrials attribute
+            # Iterate over all attributes of the GeneratedTrials object
+            for attr_name in dir(self.LaserCalibration_dialog):
+                if attr_name.startswith('LCM_'):
+                    save_me[attr_name] = getattr(self.LaserCalibration_dialog, attr_name)
+
+        # get laser calibration results from the json file
+        if hasattr(self, 'LaserCalibrationResults'):
+            self._GetLaserCalibration()
+            save_me['LaserCalibrationResults']=self.LaserCalibrationResults
+
+        # get water calibration results
+        if hasattr(self, 'WaterCalibrationResults'):
+            self._GetWaterCalibration()
+            save_me['WaterCalibrationResults']=self.WaterCalibrationResults
+        
+        # get other fields start with Ot_
+        for attr_name in dir(self):
+            if attr_name.startswith('Ot_'):
+                save_me[attr_name]=getattr(self, attr_name)
+
+        # get the current box
+        save_me['box'] = self.current_box
+
+        # get settings
+        save_me['settings'] = self.Settings
+        save_me['settings_box']=self.SettingsBox
+
+        # get the commit hash
+        save_me['commit_ID']=self.commit_ID
+        save_me['repo_url']=self.repo_url
+        save_me['current_branch'] =self.current_branch
+        save_me['repo_dirty_flag'] =self.repo_dirty_flag
+        save_me['dirty_files'] =self.dirty_files
+        
+        # get folders
+        save_me['TrainingFolder']=self.TrainingFolder
+        save_me['HarpFolder']=self.HarpFolder
+        save_me['VideoFolder']=self.VideoFolder
+        save_me['PhotometryFolder']=self.PhotometryFolder
+        save_me['MetadataFolder']=self.MetadataFolder
+        
+        # get the open ephys recording information
+        save_me['open_ephys'] = self.open_ephys
+
+        # ADD CODE TO SAVE HERE!!
+        # Get datetime for saving
+        current_time = datetime.now()
+        formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+        # Get the file name to save to.
+        this_settings_json = f'settings_{self.ID.text()}_{formatted_datetime}'
+        full_output_file = os.path.join(self.CheckpointFolder, this_settings_json + '.json')
+        with open(full_output_file, "w") as outfile:
+            json.dump(save_me, outfile, indent=4, cls=NumpyEncoder)
+        logging.info(f"Saved settings to {full_output_file}")
+
+    def _SaveLastTrial(self):
+        """
+        Save the last trial information.
+        """
+        if hasattr(self, 'GeneratedTrials'):
+            if hasattr(self.GeneratedTrials, 'Obj'):
+                trial_obj=self.GeneratedTrials.Obj
+                this_trial_obj = {}
+                for ii,key in enumerate(trial_obj.keys()):
+                    this_trial_obj[key] = trial_obj[key][self.GeneratedTrials.B_CurrentTrialN]
+                # Get datetime for saving
+                current_time = datetime.now()
+                formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+                # Get the file name to save to.
+                this_trial_json = f'trial_{self.GeneratedTrials.B_CurrentTrialN}_{self.ID.text()}_{formatted_datetime}'
+                with open(os.path.join(self.CheckpointFolder, this_trial_json + '.json'), "w") as outfile:
+                    json.dump(this_trial_obj, outfile, indent=4, cls=NumpyEncoder)
+        
+
     def _Save(self,ForceSave=0,SaveAs=0,SaveContinue=0):
         logging.info('Saving current session, ForceSave={}'.format(ForceSave))
         if ForceSave==0:
@@ -2071,6 +2192,7 @@ class Window(QMainWindow):
                 return
 
 
+        ## GET THE DATA FROM TRIALS WE HAVE RUN
         # Do we have trials to save?
         if hasattr(self, 'GeneratedTrials'):
             if hasattr(self.GeneratedTrials, 'Obj'):
@@ -2079,6 +2201,9 @@ class Window(QMainWindow):
                 Obj={}
         else:
             Obj={}
+
+
+        ## GET SETTINGS DATA
         widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren(
             (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
             QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
@@ -2100,6 +2225,7 @@ class Window(QMainWindow):
                 QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
             self._Concat(widget_dict_camera,Obj,'Camera_dialog')
         
+        ## 
         Obj2=Obj.copy()
         # save behavor events
         if hasattr(self, 'GeneratedTrials'):
@@ -2128,6 +2254,7 @@ class Window(QMainWindow):
         for attr_name in dir(self):
             if attr_name.startswith('Other_') or attr_name.startswith('info_'):
                 Obj[attr_name] = getattr(self, attr_name)
+
         # save laser calibration results (only for the calibration session)
         if hasattr(self, 'LaserCalibration_dialog'):
             # Do something if self has the GeneratedTrials attribute
@@ -2249,6 +2376,7 @@ class Window(QMainWindow):
 
         # Training folder
         self.TrainingFolder=os.path.join(self.SessionFolder,'behavior')
+        self.CheckpointFolder=os.path.join(self.TrainingFolder,'per_trial_checkpoints')
         self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
         self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
         self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}_par.json')
@@ -2269,12 +2397,18 @@ class Window(QMainWindow):
         if not os.path.exists(self.SessionFolder):
             os.makedirs(self.SessionFolder)
             logging.info(f"Created new folder: {self.SessionFolder}")
+        if not os.path.exists(self.CheckpointFolder):
+            os.makedirs(self.CheckpointFolder)
+            logging.info(f"Created new folder: {self.CheckpointFolder}")
         if not os.path.exists(self.MetadataFolder):
             os.makedirs(self.MetadataFolder)
             logging.info(f"Created new folder: {self.MetadataFolder}")
         if not os.path.exists(self.TrainingFolder):
             os.makedirs(self.TrainingFolder)
             logging.info(f"Created new folder: {self.TrainingFolder}")
+        if not os.path.exists(self.CheckpointFolder):
+            os.makedirs(self.CheckpointFolder)
+            logging.info(f"Created new folder: {self.CheckpointFolder}")
         if not os.path.exists(self.HarpFolder):
             os.makedirs(self.HarpFolder)
             logging.info(f"Created new folder: {self.HarpFolder}")
@@ -3394,6 +3528,8 @@ class Window(QMainWindow):
             self.WarningLabelStop.setText('Running photometry baseline')
             self.WarningLabelStop.setStyleSheet(self.default_warning_color)
         
+        #
+        self._SaveSettings()
         self._StartTrialLoop(GeneratedTrials,worker1)
 
         if self.actionDrawing_after_stopping.isChecked()==True:
@@ -3482,6 +3618,7 @@ class Window(QMainWindow):
                     self.threadpool.start(worker1)
                 #generate a new trial
                 if self.NewTrialRewardOrder==1:
+                    self._SaveLastTrial()
                     GeneratedTrials._GenerateATrial(self.Channel4)   
 
             elif (time.time() - last_trial_start) >stall_duration*stall_iteration:
