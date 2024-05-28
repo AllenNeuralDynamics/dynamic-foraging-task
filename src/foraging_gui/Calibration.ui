@@ -16,8 +16,8 @@
   <widget class="QDoubleSpinBox" name="OpenRightTime">
    <property name="geometry">
     <rect>
-     <x>434</x>
-     <y>130</y>
+     <x>240</x>
+     <y>140</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -35,8 +35,8 @@
   <widget class="QDoubleSpinBox" name="OpenLeftTime">
    <property name="geometry">
     <rect>
-     <x>434</x>
-     <y>90</y>
+     <x>240</x>
+     <y>110</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -54,9 +54,9 @@
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>356</x>
+     <x>110</x>
      <y>105</y>
-     <width>71</width>
+     <width>111</width>
      <height>23</height>
     </rect>
    </property>
@@ -73,9 +73,9 @@
   <widget class="QLabel" name="label_4">
    <property name="geometry">
     <rect>
-     <x>340</x>
+     <x>104</x>
      <y>140</y>
-     <width>91</width>
+     <width>121</width>
      <height>23</height>
     </rect>
    </property>
@@ -617,7 +617,7 @@
   <widget class="QLabel" name="label_19">
    <property name="geometry">
     <rect>
-     <x>755</x>
+     <x>435</x>
      <y>140</y>
      <width>91</width>
      <height>23</height>
@@ -636,9 +636,9 @@
   <widget class="QLineEdit" name="TotalWaterSingleLeft">
    <property name="geometry">
     <rect>
-     <x>850</x>
+     <x>530</x>
      <y>105</y>
-     <width>80</width>
+     <width>41</width>
      <height>20</height>
     </rect>
    </property>
@@ -649,7 +649,7 @@
   <widget class="QLabel" name="label_20">
    <property name="geometry">
     <rect>
-     <x>755</x>
+     <x>440</x>
      <y>105</y>
      <width>91</width>
      <height>23</height>
@@ -668,9 +668,9 @@
   <widget class="QLineEdit" name="TotalWaterSingleRight">
    <property name="geometry">
     <rect>
-     <x>850</x>
+     <x>530</x>
      <y>140</y>
-     <width>80</width>
+     <width>41</width>
      <height>20</height>
     </rect>
    </property>
@@ -681,8 +681,8 @@
   <widget class="QPushButton" name="SaveLeft">
    <property name="geometry">
     <rect>
-     <x>950</x>
-     <y>90</y>
+     <x>580</x>
+     <y>100</y>
      <width>80</width>
      <height>23</height>
     </rect>
@@ -697,8 +697,8 @@
   <widget class="QPushButton" name="SaveRight">
    <property name="geometry">
     <rect>
-     <x>950</x>
-     <y>130</y>
+     <x>580</x>
+     <y>140</y>
      <width>80</width>
      <height>23</height>
     </rect>
@@ -865,13 +865,51 @@
     <rect>
      <x>10</x>
      <y>85</y>
-     <width>1011</width>
+     <width>671</width>
      <height>90</height>
     </rect>
    </property>
    <property name="title">
     <string>Spot check</string>
    </property>
+   <widget class="QLabel" name="label_28">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>20</y>
+      <width>61</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Total water(g)=</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_29">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>60</y>
+      <width>61</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Total water(g)=</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
   </widget>
   <widget class="QGroupBox" name="groupBox_2">
    <property name="geometry">
@@ -1074,20 +1112,39 @@
     <bool>true</bool>
    </property>
   </widget>
+  <widget class="QLineEdit" name="TotalWaterSingleLeft_2">
+   <property name="geometry">
+    <rect>
+     <x>410</x>
+     <y>140</y>
+     <width>51</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="TotalWaterSingleLeft_3">
+   <property name="geometry">
+    <rect>
+     <x>410</x>
+     <y>110</y>
+     <width>51</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <zorder>groupBox</zorder>
   <zorder>groupBox_2</zorder>
   <zorder>groupBox</zorder>
   <zorder>OpenRightTime</zorder>
   <zorder>OpenLeftTime</zorder>
   <zorder>label_3</zorder>
   <zorder>label_4</zorder>
-  <zorder>IntervalLeft</zorder>
-  <zorder>label_5</zorder>
-  <zorder>label_6</zorder>
-  <zorder>IntervalRight</zorder>
-  <zorder>label_7</zorder>
-  <zorder>label_8</zorder>
-  <zorder>CycleLeft</zorder>
-  <zorder>CycleRight</zorder>
   <zorder>OpenLeft</zorder>
   <zorder>OpenRight</zorder>
   <zorder>OpenLeftForever</zorder>
@@ -1129,6 +1186,8 @@
   <zorder>IntervalLeft_2</zorder>
   <zorder>SaveCalibrationPar</zorder>
   <zorder>EmergencyStop</zorder>
+  <zorder>TotalWaterSingleLeft_2</zorder>
+  <zorder>TotalWaterSingleLeft_3</zorder>
  </widget>
  <resources/>
  <connections/>
