@@ -264,10 +264,10 @@
   <widget class="QPushButton" name="OpenLeftForever">
    <property name="geometry">
     <rect>
-     <x>49</x>
-     <y>50</y>
-     <width>121</width>
-     <height>23</height>
+     <x>20</x>
+     <y>20</y>
+     <width>100</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
@@ -280,10 +280,10 @@
   <widget class="QPushButton" name="OpenRightForever">
    <property name="geometry">
     <rect>
-     <x>200</x>
-     <y>50</y>
-     <width>121</width>
-     <height>23</height>
+     <x>130</x>
+     <y>20</y>
+     <width>100</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
@@ -990,10 +990,10 @@
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>20</y>
-     <width>1011</width>
-     <height>61</height>
+     <x>10</x>
+     <y>10</y>
+     <width>600</width>
+     <height>50</height>
     </rect>
    </property>
    <property name="title">
