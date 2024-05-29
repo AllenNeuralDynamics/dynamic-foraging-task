@@ -976,6 +976,7 @@ class WaterCalibrationDialog(QDialog):
         # change button color
         logging.info('starting spot check right')
         self.SpotCheckRight.setStyleSheet("background-color : green;")
+        reply = QMessageBox.question(self, 'Spot check left', 'Please enter empty tube weight:', QMessageBox.No | QMessageBox.No, QMessageBox.Yes)
 
         # start the open/close/delay cycle
         self.SpotRightFinished=0
@@ -1002,6 +1003,7 @@ class WaterCalibrationDialog(QDialog):
             self.SpotRightFinished=1
         if self.SpotRightFinished == 1:
             self.Warning.setText('Spot Check Right complete, please record final weight')
+            reply = QMessageBox.question(self, 'Spot check left', 'Please enter final weight:', QMessageBox.No | QMessageBox.No, QMessageBox.Yes)
 
         self.SpotCheckRight.setChecked(False)        
         self.SpotCheckRight.setStyleSheet("background-color : none")
