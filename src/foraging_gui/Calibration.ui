@@ -171,9 +171,9 @@
         <property name="geometry">
             <rect>
                 <x>370</x>
-                <y>15</y>
+                <y>20</y>
                 <width>290</width>
-                <height>55</height>
+                <height>45</height>
             </rect>
         </property>
         <property name="text">
@@ -181,7 +181,7 @@
         </property>
         <property name="font">
             <font>
-                <pointsize>20</pointsize>
+                <pointsize>16</pointsize>
                 <bold>true</bold>
             </font>
         </property>
@@ -490,7 +490,7 @@
                 <rect>
                     <x>10</x>
                     <y>20</y>
-                    <width>120</width>
+                    <width>100</width>
                     <height>25</height>
                 </rect>
             </property>
@@ -506,7 +506,7 @@
                 <rect>
                     <x>10</x>
                     <y>55</y>
-                    <width>120</width>
+                    <width>100</width>
                     <height>25</height>
                 </rect>
             </property>
@@ -520,7 +520,7 @@
         <widget class="QLabel" name="label_13"><!-- label 13-->
             <property name="geometry">
                 <rect>
-                    <x>10</x>
+                    <x>400</x>
                     <y>100</y>
                     <width>100</width>
                     <height>25</height>
@@ -539,7 +539,7 @@
         <widget class="QLabel" name="label_16"><!-- label 16-->
             <property name="geometry">
                 <rect>
-                    <x>10</x>
+                    <x>400</x>
                     <y>150</y>
                     <width>100</width>
                     <height>25</height>
@@ -558,9 +558,9 @@
         <widget class="QLineEdit" name="WeightAfterLeft">
             <property name="geometry">
                 <rect>
-                    <x>205</x>
+                    <x>500</x>
                     <y>100</y>
-                    <width>80</width>
+                    <width>60</width>
                     <height>25</height>
                 </rect>
             </property>
@@ -571,9 +571,9 @@
         <widget class="QLineEdit" name="WeightAfterRight">
             <property name="geometry">
                 <rect>
-                    <x>205</x>
+                    <x>500</x>
                     <y>150</y>
-                    <width>80</width>
+                    <width>60</width>
                     <height>25</height>
              </rect>
             </property>
@@ -629,9 +629,9 @@
         <widget class="QPushButton" name="Continue">
             <property name="geometry">
                 <rect>
-                    <x>520</x>
+                    <x>580</x>
                     <y>20</y>
-                    <width>120</width>
+                    <width>80</width>
                     <height>60</height>
                 </rect>
             </property>
@@ -645,7 +645,7 @@
         <widget class="QLabel" name="WeightBeforeLeftLabel"><!-- label 24-->
             <property name="geometry">
                 <rect>
-                    <x>300</x>
+                    <x>240</x>
                     <y>20</y>
                     <width>100</width>
                     <height>25</height>
@@ -664,7 +664,7 @@
         <widget class="QLabel" name="WeightBeforeRightLabel"><!-- label 25-->
             <property name="geometry">
                 <rect>
-                    <x>300</x>
+                    <x>240</x>
                     <y>55</y>
                     <width>100</width>
                     <height>25</height>
@@ -683,9 +683,9 @@
         <widget class="QLineEdit" name="WeightBeforeLeft">
             <property name="geometry">
                 <rect>
-                    <x>400</x>
+                    <x>340</x>
                     <y>20</y>
-                    <width>80</width>
+                    <width>60</width>
                     <height>25</height>
                 </rect>
             </property>
@@ -696,9 +696,9 @@
         <widget class="QLineEdit" name="WeightBeforeRight">
             <property name="geometry">
                 <rect>
-                    <x>400</x>
+                    <x>340</x>
                     <y>55</y>
-                    <width>80</width>
+                    <width>60</width>
                     <height>25</height>
                 </rect>
             </property>
@@ -737,7 +737,7 @@
         <widget class="QLineEdit" name="TubeWeightLeft">
             <property name="geometry">
                 <rect>
-                    <x>220</x>
+                    <x>200</x>
                     <y>20</y>
                     <width>80</width>
                     <height>25</height>
@@ -750,9 +750,9 @@
         <widget class="QLabel" name="TubeWeightLeftLabel"><!-- label 26-->
             <property name="geometry">
                 <rect>
-                    <x>120</x>
+                    <x>100</x>
                     <y>20</y>
-                    <width>100</width>
+                    <width>60</width>
                     <height>25</height>
                 </rect>
             </property>
@@ -769,7 +769,7 @@
         <widget class="QLineEdit" name="TubeWeightRight">
             <property name="geometry">
                 <rect>
-                    <x>220</x>
+                    <x>200</x>
                     <y>55</y>
                     <width>80</width>
                     <height>25</height>
@@ -782,9 +782,9 @@
         <widget class="QLabel" name="TubeWeightRightLabel"><!-- label_27-->
             <property name="geometry">
                 <rect>
-                    <x>120</x>
+                    <x>100</x>
                     <y>55</y>
-                    <width>100</width>
+                    <width>60</width>
                     <height>25</height>
                 </rect>
             </property>
