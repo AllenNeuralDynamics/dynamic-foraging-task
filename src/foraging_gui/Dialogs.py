@@ -921,7 +921,7 @@ class WaterCalibrationDialog(QDialog):
         total_seconds = (cycles-i)*(opentime+interval)
         minutes = int(np.floor(total_seconds/60))
         seconds = int(np.ceil(np.mod(total_seconds,60)))
-        return '{}:{}'.format(minutes, seconds)
+        return '{}:{n:02}'.format(minutes, seconds)
 
     def _SpotCheckLeft(self):    
         '''Calibration of left valve in a different thread'''
@@ -939,9 +939,9 @@ class WaterCalibrationDialog(QDialog):
             QApplication.processEvents()
             if self.SpotCheckLeft.isChecked():
                 self.Warning.setText(
-                    'Spot Checking Left valve: {}'.format(self.SpotLeftOpenTime.text()) + \
-                    '\nCurrent cycle:'+str(i+1)+'/{}'.format(self.SpotCycle) + \
-                    '\nTime remaining: {}'.format(self._TimeRemaining(i,self.SpotCycle,float(self.SpotLeftOpenTime.text()),self.SpotInterval))
+                    'Measuring Left valve: {}'.format(self.SpotLeftOpenTime.text()) + \
+                    '\nCurrent cycle:      '+str(i+1)+'/{}'.format(self.SpotCycle) + \
+                    '\nTime remaining:     {}'.format(self._TimeRemaining(i,self.SpotCycle,float(self.SpotLeftOpenTime.text()),self.SpotInterval))
                     )
                 self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
 
