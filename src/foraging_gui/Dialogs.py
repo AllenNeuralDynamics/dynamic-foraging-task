@@ -336,7 +336,7 @@ class WaterCalibrationDialog(QDialog):
         self.EmergencyStop.clicked.connect(self._EmergencyStop)
         self.showrecent.textChanged.connect(self._Showrecent)
         self.showspecificcali.activated.connect(self._ShowSpecifcDay)
-        self.SaveCalibrationPar.clicked.connect(self._SaveCalibrationPar)
+        #self.SaveCalibrationPar.clicked.connect(self._SaveCalibrationPar)
         
     def _SaveCalibrationPar(self):
         '''save the calibration parameters'''
