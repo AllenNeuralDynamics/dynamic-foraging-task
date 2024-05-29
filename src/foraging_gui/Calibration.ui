@@ -7,7 +7,7 @@
             <x>0</x>
             <y>0</y>
             <width>690</width>
-            <height>750</height>
+            <height>730</height>
         </rect>
     </property>
     <property name="windowTitle">
@@ -53,9 +53,9 @@
         <widget class="QLabel" name="label_69"><!--label 69-->
             <property name="geometry">
                 <rect>
-                    <x>475</x>
+                    <x>520</x>
                     <y>20</y>
-                    <width>120</width>
+                    <width>100</width>
                     <height>25</height>
                 </rect>
             </property>
@@ -66,7 +66,7 @@
                 </sizepolicy>
             </property>
             <property name="text">
-                <string>show last=</string>
+                <string>show last =</string>
             </property>
             <property name="textFormat">
                 <enum>Qt::AutoText</enum>
@@ -78,10 +78,10 @@
        <widget class="QLabel" name="label_70"><!-- label 70-->
             <property name="geometry">
                 <rect>
-                    <x>220</x>
+                    <x>250</x>
                     <y>20</y>
                     <width>141</width>
-                    <height>24</height>
+                    <height>25</height>
                 </rect>
             </property>
             <property name="sizePolicy">
@@ -91,7 +91,7 @@
                 </sizepolicy>
             </property>
             <property name="text">
-                <string>show specific=</string>
+                <string>show specific =</string>
             </property>
             <property name="textFormat">
                 <enum>Qt::AutoText</enum>
@@ -103,10 +103,10 @@
        <widget class="QComboBox" name="showspecificcali">
             <property name="geometry">
                 <rect>
-                    <x>370</x>
+                    <x>400</x>
                     <y>20</y>
-                    <width>101</width>
-                    <height>20</height>
+                    <width>100</width>
+                    <height>25</height>
                 </rect>
             </property>
             <property name="sizePolicy">
@@ -710,9 +710,9 @@
             <property name="geometry">
                 <rect>
                     <x>10</x>
-                    <y>135</y>
+                    <y>125</y>
                     <width>650</width>
-                    <height>75</height>
+                    <height>85</height>
                 </rect>
             </property>
             <property name="styleSheet">
