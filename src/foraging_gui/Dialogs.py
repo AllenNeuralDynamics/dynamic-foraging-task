@@ -323,8 +323,8 @@ class WaterCalibrationDialog(QDialog):
         self.setWindowTitle('Water Calibration: {}'.format(self.MainWindow.current_box))
 
     def _connectSignalsSlots(self):
-        self.OpenLeft.clicked.connect(self._OpenLeft)
-        self.OpenRight.clicked.connect(self._OpenRight)
+        self.SpotCheckLeft.clicked.connect(self._OpenLeft)
+        self.SpotCheckRight.clicked.connect(self._OpenRight)
         self.OpenLeftForever.clicked.connect(self._OpenLeftForever)
         self.OpenRightForever.clicked.connect(self._OpenRightForever)
         self.SaveLeft.clicked.connect(self._SaveLeft)
