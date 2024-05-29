@@ -780,9 +780,9 @@
     <widget class="QLabel" name="SpotCheckPreWeightLeftLabel">
         <property name="geometry">
             <rect>
-                <x>250</x>
+                <x>275</x>
                 <y>20</y>
-                <width>50</width>
+                <width>75</width>
                 <height>25</height>
             </rect>
         </property>
@@ -799,9 +799,9 @@
     <widget class="QLabel" name="SpotCheckPreWeightRightLabel">
         <property name="geometry">
             <rect>
-                <x>250</x>
+                <x>275</x>
                 <y>55</y>
-                <width>50</width>
+                <width>75</width>
                 <height>25</height>
             </rect>
         </property>
@@ -818,10 +818,10 @@
     <widget class="QLineEdit" name="SpotCheckPreWeightLeft">
         <property name="geometry">
             <rect>
-                <x>300</x>
+                <x>360</x>
                 <y>20</y>
-                <width>50</width>
-                <height>20</height>
+                <width>40</width>
+                <height>25</height>
             </rect>
         </property>
         <property name="text">
@@ -831,10 +831,10 @@
     <widget class="QLineEdit" name="SpotCheckPreWeightRight">
         <property name="geometry">
             <rect>
-                <x>300</x>
+                <x>360</x>
                 <y>55</y>
-                <width>50</width>
-                <height>20</height>
+                <width>40</width>
+                <height>25</height>
             </rect>
         </property>
         <property name="text">
@@ -844,7 +844,7 @@
     <widget class="QLabel" name="SpotCheckTotalWaterLeftLabel">
         <property name="geometry">
             <rect>
-                <x>375</x>
+                <x>410</x>
                 <y>20</y>
                 <width>100</width>
                 <height>25</height>
@@ -863,7 +863,7 @@
     <widget class="QLabel" name="SpotCheckTotalWaterRightLabel">
         <property name="geometry">
             <rect>
-                <x>375</x>
+                <x>410</x>
                 <y>55</y>
                 <width>100</width>
                 <height>25</height>
@@ -882,7 +882,7 @@
     <widget class="QLineEdit" name="TotalWaterSingleLeft">
         <property name="geometry">
             <rect>
-                <x>530</x>
+                <x>520</x>
                 <y>20</y>
                 <width>40</width>
                 <height>25</height>
@@ -895,7 +895,7 @@
     <widget class="QLineEdit" name="TotalWaterSingleRight">
         <property name="geometry">
             <rect>
-                <x>530</x>
+                <x>520</x>
                 <y>55</y>
                 <width>40</width>
                 <height>25</height>
