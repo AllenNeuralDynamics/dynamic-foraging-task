@@ -23,7 +23,7 @@
             </rect>
         </property>
         <property name="title">
-            <string>Last calibration date:</string>
+            <string>Last calibration date: </string>
         </property>
         <widget class="QSpinBox" name="showrecent">
             <property name="geometry">
@@ -170,15 +170,16 @@
     <widget class="QPushButton" name="EmergencyStop">
         <property name="geometry">
             <rect>
-                <x>390</x>
+                <x>410</x>
                 <y>20</y>
-                <width>230</width>
+                <width>190</width>
                 <height>45</height>
             </rect>
         </property>
         <property name="text">
             <string>Emergency stop</string>
         </property>
+        <!--
         <property name="font">
             <font>
                 <pointsize>14</pointsize>
@@ -188,6 +189,7 @@
         <property name="styleSheet">
             <string notr="true">background-color: rgb(255, 170, 255)</string>
         </property>
+        -->
         <property name="checkable">
             <bool>true</bool>
         </property>
@@ -322,7 +324,7 @@
                 </rect>
             </property>
             <property name="text">
-                <string>Pre weight (g)=</string>
+                <string>empty tube (g)=</string>
             </property>
             <property name="textFormat">
                 <enum>Qt::AutoText</enum>
@@ -341,7 +343,7 @@
                 </rect>
             </property>
             <property name="text">
-                <string>Pre weight (g)=</string>
+                <string>empty tube (g)=</string>
             </property>
             <property name="textFormat">
                 <enum>Qt::AutoText</enum>
@@ -386,7 +388,7 @@
                 </rect>
             </property>
             <property name="text">
-                <string>Final water (g)=</string>
+                <string>weight after (g)=</string>
             </property>
             <property name="textFormat">
                 <enum>Qt::AutoText</enum>
@@ -405,7 +407,7 @@
                 </rect>
             </property>
             <property name="text">
-                <string>Final water (g)=</string>
+                <string>weight after (g)=</string>
             </property>
             <property name="textFormat">
                 <enum>Qt::AutoText</enum>
