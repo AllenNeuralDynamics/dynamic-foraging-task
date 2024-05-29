@@ -322,7 +322,7 @@ class WaterCalibrationDialog(QDialog):
         self.ToInitializeVisual=1
         self._UpdateFigure()
         self.setWindowTitle('Water Calibration: {}'.format(self.MainWindow.current_box))
-        self.Warning.setText('Hello World!')
+        self.Warning.setText('')
         self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
 
     def _connectSignalsSlots(self):
@@ -917,7 +917,7 @@ class WaterCalibrationDialog(QDialog):
             # set the default valve open time
             self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
 
-    def _TimeRemaining(i, cycles, opentime, interval):
+    def _TimeRemaining(self,i, cycles, opentime, interval):
         total_seconds = (cycles-i)*(opentime+interval)
         minutes = int(np.floor(total_seconds/60))
         seconds = int(np.ceil(np.mod(total_seconds,60)))
