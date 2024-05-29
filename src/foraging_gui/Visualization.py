@@ -406,26 +406,30 @@ class PlotWaterCalibration(FigureCanvas):
             self.ax1.plot(fit_x, fit_y,color=color,linestyle='--')
         return slope, intercept
     
-    def _GetWaterCalibration(self,WaterCalibrationResults,current_date,current_valve):
-        '''Get the water calibration results from a specific date and valve'''
-        X=[]
-        Y=[]
-        all_valve_opentime=WaterCalibrationResults[current_date][current_valve].keys()
-        for current_valve_opentime in all_valve_opentime:
-            average_water=[]
-            X.append(current_valve_opentime)
-            all_valve_openinterval=WaterCalibrationResults[current_date][current_valve][current_valve_opentime].keys()
-            for current_valve_openinterval in all_valve_openinterval:
-                all_cycle=WaterCalibrationResults[current_date][current_valve][current_valve_opentime][current_valve_openinterval].keys()
-                for current_cycle in all_cycle:
-                    total_water=np.nanmean(WaterCalibrationResults[current_date][current_valve][current_valve_opentime][current_valve_openinterval][current_cycle])
-                    if total_water != '':
-                        average_water.append(total_water/float(current_cycle))
-            Y.append(np.nanmean(average_water))
-        sorted_X=sorted(map(float, X))
-        sorted_indices = sorted(range(len(X)), key=lambda i: float(X[i]))
-        sorted_Y = [Y[i] for i in sorted_indices]
-        return sorted_X,sorted_Y
+    def _GetWaterCalibration(self,WaterCalibrationResult, current_date, current_valve):
+        x,y = GetWaterCalibration(WaterCalibrationResult, current_date, current_valve)   
+        return x, y
+ 
+def GetWaterCalibration(WaterCalibrationResults,current_date,current_valve):
+    '''Get the water calibration results from a specific date and valve'''
+    X=[]
+    Y=[]
+    all_valve_opentime=WaterCalibrationResults[current_date][current_valve].keys()
+    for current_valve_opentime in all_valve_opentime:
+        average_water=[]
+        X.append(current_valve_opentime)
+        all_valve_openinterval=WaterCalibrationResults[current_date][current_valve][current_valve_opentime].keys()
+        for current_valve_openinterval in all_valve_openinterval:
+            all_cycle=WaterCalibrationResults[current_date][current_valve][current_valve_opentime][current_valve_openinterval].keys()
+            for current_cycle in all_cycle:
+                total_water=np.nanmean(WaterCalibrationResults[current_date][current_valve][current_valve_opentime][current_valve_openinterval][current_cycle])
+                if total_water != '':
+                    average_water.append(total_water/float(current_cycle))
+        Y.append(np.nanmean(average_water))
+    sorted_X=sorted(map(float, X))
+    sorted_indices = sorted(range(len(X)), key=lambda i: float(X[i]))
+    sorted_Y = [Y[i] for i in sorted_indices]
+    return sorted_X,sorted_Y
 
 class PlotLickDistribution(FigureCanvas):
     def __init__(self,GeneratedTrials=None,dpi=100,width=5, height=4):
