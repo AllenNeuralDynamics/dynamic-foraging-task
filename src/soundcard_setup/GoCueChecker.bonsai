@@ -35,8 +35,20 @@
       </Expression>
       <Expression xsi:type="p1:CreateMessage">
         <harp:MessageType>Write</harp:MessageType>
+        <harp:Payload xsi:type="p1:CreateAttenuationBothPayload">
+          <p1:AttenuationBoth>
+            <p1:unsignedShort>400</p1:unsignedShort>
+            <p1:unsignedShort>200</p1:unsignedShort>
+          </p1:AttenuationBoth>
+        </harp:Payload>
+      </Expression>
+      <Expression xsi:type="MulticastSubject">
+        <Name>sound command</Name>
+      </Expression>
+      <Expression xsi:type="p1:CreateMessage">
+        <harp:MessageType>Write</harp:MessageType>
         <harp:Payload xsi:type="p1:CreatePlaySoundOrFrequencyPayload">
-          <p1:PlaySoundOrFrequency>2</p1:PlaySoundOrFrequency>
+          <p1:PlaySoundOrFrequency>4</p1:PlaySoundOrFrequency>
         </harp:Payload>
       </Expression>
       <Expression xsi:type="MulticastSubject">
@@ -48,6 +60,8 @@
       <Edge From="2" To="3" Label="Source1" />
       <Edge From="3" To="4" Label="Source1" />
       <Edge From="4" To="5" Label="Source1" />
+      <Edge From="5" To="6" Label="Source1" />
+      <Edge From="6" To="7" Label="Source1" />
     </Edges>
   </Workflow>
 </WorkflowBuilder>
