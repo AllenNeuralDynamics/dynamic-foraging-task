@@ -7,7 +7,7 @@
             <x>0</x>
             <y>0</y>
             <width>690</width>
-            <height>800</height>
+            <height>750</height>
         </rect>
     </property>
     <property name="windowTitle">
@@ -28,10 +28,10 @@
         <widget class="QSpinBox" name="showrecent">
             <property name="geometry">
                 <rect>
-                    <x>600</x>
+                    <x>620</x>
                     <y>20</y>
-                    <width>61</width>
-                    <height>22</height>
+                    <width>40</width>
+                    <height>25</height>
                 </rect>
             </property>
             <property name="sizePolicy">
@@ -55,8 +55,8 @@
                 <rect>
                     <x>475</x>
                     <y>20</y>
-                    <width>121</width>
-                    <height>20</height>
+                    <width>120</width>
+                    <height>25</height>
                 </rect>
             </property>
             <property name="sizePolicy">
@@ -66,7 +66,7 @@
                 </sizepolicy>
             </property>
             <property name="text">
-                <string>show recent calibration=</string>
+                <string>show last=</string>
             </property>
             <property name="textFormat">
                 <enum>Qt::AutoText</enum>
@@ -78,10 +78,10 @@
        <widget class="QLabel" name="label_70"><!-- label 70-->
             <property name="geometry">
                 <rect>
-                    <x>200</x>
+                    <x>220</x>
                     <y>20</y>
                     <width>141</width>
-                    <height>20</height>
+                    <height>24</height>
                 </rect>
             </property>
             <property name="sizePolicy">
@@ -91,7 +91,7 @@
                 </sizepolicy>
             </property>
             <property name="text">
-                <string>show specific calibration=</string>
+                <string>show specific=</string>
             </property>
             <property name="textFormat">
                 <enum>Qt::AutoText</enum>
@@ -103,7 +103,7 @@
        <widget class="QComboBox" name="showspecificcali">
             <property name="geometry">
                 <rect>
-                    <x>350</x>
+                    <x>370</x>
                     <y>20</y>
                     <width>101</width>
                     <height>20</height>
