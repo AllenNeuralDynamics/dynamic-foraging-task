@@ -18,7 +18,7 @@
     <rect>
      <x>180</x>
      <y>140</y>
-     <width>80</width>
+     <width>60</width>
      <height>25</height>
     </rect>
    </property>
@@ -37,7 +37,7 @@
     <rect>
      <x>180</x>
      <y>105</y>
-     <width>80</width>
+     <width>60</width>
      <height>25</height>
     </rect>
    </property>
@@ -56,7 +56,7 @@
     <rect>
      <x>100</x>
      <y>105</y>
-     <width>80</width>
+     <width>75</width>
      <height>25</height>
     </rect>
    </property>
@@ -75,7 +75,7 @@
     <rect>
      <x>100</x>
      <y>140</y>
-     <width>80</width>
+     <width>75</width>
      <height>25</height>
     </rect>
    </property>
@@ -614,17 +614,17 @@
     <string/>
    </property>
   </widget>
-  <widget class="QLabel" name="label_19">
+  <widget class="QLabel" name="SpotCheckTotalWaterRightLabel">
    <property name="geometry">
     <rect>
      <x>435</x>
      <y>140</y>
-     <width>91</width>
+     <width>100</width>
      <height>25</height>
     </rect>
    </property>
    <property name="text">
-    <string>Total water1(g)=</string>
+    <string>Final water (g)</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -638,7 +638,7 @@
     <rect>
      <x>530</x>
      <y>105</y>
-     <width>41</width>
+     <width>40</width>
      <height>25</height>
     </rect>
    </property>
@@ -646,17 +646,17 @@
     <string/>
    </property>
   </widget>
-  <widget class="QLabel" name="label_20">
+  <widget class="QLabel" name="SpotCheckTotalWaterLeftLabel">
    <property name="geometry">
     <rect>
      <x>440</x>
      <y>105</y>
-     <width>91</width>
-     <height>23</height>
+     <width>100</width>
+     <height>25</height>
     </rect>
    </property>
    <property name="text">
-    <string>Total water2(g)=</string>
+    <string>Final water(g)</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -670,8 +670,8 @@
     <rect>
      <x>530</x>
      <y>140</y>
-     <width>41</width>
-     <height>20</height>
+     <width>40</width>
+     <height>25</height>
     </rect>
    </property>
    <property name="text">
