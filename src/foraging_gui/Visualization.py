@@ -331,7 +331,7 @@ class PlotV(FigureCanvas):
         self.ax2.legend(loc='lower left', fontsize=8)
 
 class PlotWaterCalibration(FigureCanvas):
-    def __init__(self,water_win,dpi=100,width=5, height=2):
+    def __init__(self,water_win,dpi=100,width=5, height=4):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         gs = GridSpec(10, 30, wspace = 3, hspace = 0.1, bottom = 0.1, top = 0.95, left = 0.04, right = 0.98)
         self.ax1 = self.fig.add_subplot(gs[0:9, 1:30])
