@@ -390,14 +390,14 @@ class WaterCalibrationDialog(QDialog):
         self.SaveLeft.setStyleSheet("background-color : green;")
         QApplication.processEvents()
         valve='Left'
-        valve_open_time=str(float(self.OpenLeftTime.text()))
+        valve_open_time=str(float(self.SpotLeftOpenTime.text()))
         valve_open_interval=str(float(self.IntervalLeft.text()))
         try:
             total_water=float(self.TotalWaterSingleLeft.text())  
         except Exception as e:
             total_water=''
             logging.error(str(e))
-        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=self.Cycle,total_water=total_water,tube_weight=0)
+        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=self.SpotCycle,total_water=total_water,tube_weight=0)
         self.SaveLeft.setStyleSheet("background-color : none")
         self.SaveLeft.setChecked(False)
     def _SaveRight(self):
@@ -405,14 +405,14 @@ class WaterCalibrationDialog(QDialog):
         self.SaveRight.setStyleSheet("background-color : green;")
         QApplication.processEvents()
         valve='Right'
-        valve_open_time=str(float(self.OpenRightTime.text()))
+        valve_open_time=str(float(self.SpotRightOpenTime.text()))
         valve_open_interval=str(float(self.IntervalRight.text()))
         try:
             total_water=float(self.TotalWaterSingleRight.text()) 
         except Exception as e:
             total_water=''
             logging.error(str(e))
-        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=self.Cycle,total_water=total_water,tube_weight=0)
+        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=self.SpotCycle,total_water=total_water,tube_weight=0)
         self.SaveRight.setStyleSheet("background-color : none")
         self.SaveRight.setChecked(False)
     def _CalibrationType(self):
@@ -442,7 +442,7 @@ class WaterCalibrationDialog(QDialog):
         else:
             logging.error('could not find water calibration parameters: {}'.format(self.MainWindow.WaterCalibrationParFiles))
             raise Exception('Missing water calibration parameter file: {}'.format(self.MainWindow.WaterCalibrationParFiles))
-        self.Cycle = self.WaterCalibrationPar['Spot']['Cycle']
+        self.SpotCycle = self.WaterCalibrationPar['Spot']['Cycle']
 
     def _LoadCaliPar(self):
         '''load the pre-stored calibration parameters'''
@@ -912,15 +912,15 @@ class WaterCalibrationDialog(QDialog):
         else:
             self.SpotCheckLeft.setStyleSheet("background-color : none")
         # start the open/close/delay cycle
-        for i in range(int(self.Cycle)):
+        for i in range(int(self.SpotCycle)):
             QApplication.processEvents()
             if self.SpotCheckLeft.isChecked():
                 # set the valve open time
-                self.MainWindow.Channel.LeftValue(float(self.OpenLeftTime.text())*1000) 
+                self.MainWindow.Channel.LeftValue(float(self.SpotLeftOpenTime.text())*1000) 
                 # open the valve
                 self.MainWindow.Channel3.ManualWater_Left(int(1))
                 # delay
-                time.sleep(float(self.OpenLeftTime.text())+float(self.IntervalLeft.text()))
+                time.sleep(float(self.SpotLeftOpenTime.text())+float(self.IntervalLeft.text()))
             else:
                 break
         self.SpotCheckLeft.setChecked(False)        
@@ -937,15 +937,15 @@ class WaterCalibrationDialog(QDialog):
         else:
             self.SpotCheckRight.setStyleSheet("background-color : none")
         # start the open/close/delay cycle
-        for i in range(int(self.Cycle)):
+        for i in range(int(self.SpotCycle)):
             QApplication.processEvents()
             if self.SpotCheckRight.isChecked():
                 # set the valve open time
-                self.MainWindow.Channel.RightValue(float(self.OpenRightTime.text())*1000) 
+                self.MainWindow.Channel.RightValue(float(self.SpotRightOpenTime.text())*1000) 
                 # open the valve
                 self.MainWindow.Channel3.ManualWater_Right(int(1))
                 # delay
-                time.sleep(float(self.OpenRightTime.text())+float(self.IntervalRight.text()))
+                time.sleep(float(self.SpotRightOpenTime.text())+float(self.IntervalRight.text()))
             else:
                 break
         self.SpotCheckRight.setChecked(False)  
