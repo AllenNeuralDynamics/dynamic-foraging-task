@@ -463,8 +463,8 @@
         <widget class="QPushButton" name="EmergencyStop">
             <property name="geometry">
                 <rect>
-                    <x>910</x>
-                    <y>380</y>
+                    <x>600</x>
+                    <y>20</y>
                     <width>121</width>
                     <height>61</height>
                 </rect>
@@ -479,14 +479,14 @@
         <widget class="QPushButton" name="StartCalibratingLeft">
             <property name="geometry">
                 <rect>
-                    <x>50</x>
-                    <y>290</y>
-                    <width>121</width>
-                    <height>31</height>
+                    <x>10</x>
+                    <y>20</y>
+                    <width>120</width>
+                    <height>25</height>
                 </rect>
             </property>
             <property name="text">
-                <string>Start calibrating left</string>
+                <string>Calibrate left</string>
             </property>
             <property name="checkable">
                 <bool>true</bool>
@@ -495,14 +495,14 @@
         <widget class="QPushButton" name="StartCalibratingRight">
             <property name="geometry">
                 <rect>
-                    <x>50</x>
-                    <y>332</y>
-                    <width>121</width>
-                    <height>31</height>
+                    <x>10</x>
+                    <y>60</y>
+                    <width>120</width>
+                    <height>25</height>
                 </rect>
             </property>
             <property name="text">
-                <string>Start calibrating right</string>
+                <string>Calibrate right</string>
             </property>
             <property name="checkable">
                 <bool>true</bool>
