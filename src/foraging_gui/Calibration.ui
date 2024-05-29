@@ -13,38 +13,6 @@
   <property name="windowTitle">
    <string>Water calibration</string>
   </property>
-  <widget class="QPushButton" name="OpenLeftForever">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>30</y>
-     <width>100</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Keep left open</string>
-   </property>
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="OpenRightForever">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>30</y>
-     <width>100</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Keep right open</string>
-   </property>
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-  </widget>
   <widget class="QPushButton" name="StartCalibratingLeft">
    <property name="geometry">
     <rect>
@@ -644,19 +612,51 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QGroupBox" name="groupBox">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>600</width>
-     <height>60</height>
-    </rect>
-   </property>
-   <property name="title">
-    <string>Flush lines</string>
-   </property>
-  </widget>
+<widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+        <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>600</width>
+            <height>60</height>
+        </rect>
+    </property>
+    <property name="title">
+        <string>Flush lines</string>
+    </property>
+    <widget class="QPushButton" name="OpenLeftForever">
+        <property name="geometry">
+            <rect>
+                <x>20</x>
+                <y>30</y>
+                <width>100</width>
+                <height>25</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Keep left open</string>
+        </property>
+        <property name="checkable">
+            <bool>true</bool>
+        </property>
+    </widget>
+    <widget class="QPushButton" name="OpenRightForever">
+        <property name="geometry">
+            <rect>
+                <x>130</x>
+                <y>30</y>
+                <width>100</width>
+                <height>25</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Keep right open</string>
+        </property>
+        <property name="checkable">
+            <bool>true</bool>
+        </property>
+    </widget>
+</widget>
 <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
         <rect>
@@ -780,9 +780,9 @@
     <widget class="QLabel" name="SpotCheckPreWeightLeftLabel">
         <property name="geometry">
             <rect>
-                <x>275</x>
+                <x>270</x>
                 <y>20</y>
-                <width>75</width>
+                <width>80</width>
                 <height>25</height>
             </rect>
         </property>
@@ -799,9 +799,9 @@
     <widget class="QLabel" name="SpotCheckPreWeightRightLabel">
         <property name="geometry">
             <rect>
-                <x>275</x>
+                <x>270</x>
                 <y>55</y>
-                <width>75</width>
+                <width>80</width>
                 <height>25</height>
             </rect>
         </property>
@@ -882,7 +882,7 @@
     <widget class="QLineEdit" name="TotalWaterSingleLeft">
         <property name="geometry">
             <rect>
-                <x>520</x>
+                <x>515</x>
                 <y>20</y>
                 <width>40</width>
                 <height>25</height>
@@ -895,7 +895,7 @@
     <widget class="QLineEdit" name="TotalWaterSingleRight">
         <property name="geometry">
             <rect>
-                <x>520</x>
+                <x>515</x>
                 <y>55</y>
                 <width>40</width>
                 <height>25</height>
