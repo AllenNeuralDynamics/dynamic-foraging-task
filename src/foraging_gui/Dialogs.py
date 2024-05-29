@@ -391,13 +391,18 @@ class WaterCalibrationDialog(QDialog):
         QApplication.processEvents()
         valve='Left'
         valve_open_time=str(float(self.SpotLeftOpenTime.text()))
-        valve_open_interval=str(float(self.IntervalLeft.text()))
         try:
             total_water=float(self.TotalWaterSingleLeft.text())  
         except Exception as e:
             total_water=''
             logging.error(str(e))
-        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=self.SpotCycle,total_water=total_water,tube_weight=0)
+        self._Save(
+            valve=valve,
+            valve_open_time=valve_open_time,
+            valve_open_interval=self.SpotInterval,
+            cycle=self.SpotCycle,
+            total_water=total_water,
+            tube_weight=0) ##DEBUG, why is this 0?
         self.SaveLeft.setStyleSheet("background-color : none")
         self.SaveLeft.setChecked(False)
     def _SaveRight(self):
@@ -406,13 +411,19 @@ class WaterCalibrationDialog(QDialog):
         QApplication.processEvents()
         valve='Right'
         valve_open_time=str(float(self.SpotRightOpenTime.text()))
-        valve_open_interval=str(float(self.IntervalRight.text()))
         try:
             total_water=float(self.TotalWaterSingleRight.text()) 
         except Exception as e:
             total_water=''
             logging.error(str(e))
-        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=self.SpotCycle,total_water=total_water,tube_weight=0)
+        self._Save(
+            valve=valve,
+            valve_open_time=valve_open_time,
+            valve_open_interval=self.SpotInterval,
+            cycle=self.SpotCycle,
+            total_water=total_water,
+            tube_weight=0
+            )
         self.SaveRight.setStyleSheet("background-color : none")
         self.SaveRight.setChecked(False)
     def _CalibrationType(self):
@@ -442,7 +453,8 @@ class WaterCalibrationDialog(QDialog):
         else:
             logging.error('could not find water calibration parameters: {}'.format(self.MainWindow.WaterCalibrationParFiles))
             raise Exception('Missing water calibration parameter file: {}'.format(self.MainWindow.WaterCalibrationParFiles))
-        self.SpotCycle = self.WaterCalibrationPar['Spot']['Cycle']
+        self.SpotCycle = float(self.WaterCalibrationPar['Spot']['Cycle'])
+        self.SpotInterval = float(self.WaterCalibrationPar['Spot']['Interval'])
 
     def _LoadCaliPar(self):
         '''load the pre-stored calibration parameters'''
@@ -920,7 +932,7 @@ class WaterCalibrationDialog(QDialog):
                 # open the valve
                 self.MainWindow.Channel3.ManualWater_Left(int(1))
                 # delay
-                time.sleep(float(self.SpotLeftOpenTime.text())+float(self.IntervalLeft.text()))
+                time.sleep(float(self.SpotLeftOpenTime.text())+self.SpotInterval))
             else:
                 break
         self.SpotCheckLeft.setChecked(False)        
