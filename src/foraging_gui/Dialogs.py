@@ -959,13 +959,14 @@ class WaterCalibrationDialog(QDialog):
         if self.SpotLeftFinished == 1:
             self.Warning.setText('Spot Check Left complete, please record final weight')
 
+        # set the default valve open time
+        self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
+
         self.SpotCheckLeft.setChecked(False)        
         self.SpotCheckLeft.setStyleSheet("background-color : none")
         logging.info('Done with spot check Left')
         
-        # DEBUG, what does this do?
-        ## set the default valve open time
-        #self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
+
 
     def _SpotCheckRight(self):
         '''Calibration of right valve in a different thread'''
@@ -976,7 +977,11 @@ class WaterCalibrationDialog(QDialog):
         # change button color
         logging.info('starting spot check right')
         self.SpotCheckRight.setStyleSheet("background-color : green;")
+        
+        # Need to make a WeightDialog
+        # Prompt to enter
         reply = QMessageBox.question(self, 'Spot check left', 'Please enter empty tube weight:', QMessageBox.No | QMessageBox.No, QMessageBox.Yes)
+        # Put start weight on GUI
 
         # start the open/close/delay cycle
         self.SpotRightFinished=0
@@ -1003,15 +1008,21 @@ class WaterCalibrationDialog(QDialog):
             self.SpotRightFinished=1
         if self.SpotRightFinished == 1:
             self.Warning.setText('Spot Check Right complete, please record final weight')
+            # Use dialog
             reply = QMessageBox.question(self, 'Spot check left', 'Please enter final weight:', QMessageBox.No | QMessageBox.No, QMessageBox.Yes)
+            # Calculate difference
+            # Check against expected distribution
+            # report outcome
+            # save spot check
+
+        # set the default valve open time
+        self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
 
         self.SpotCheckRight.setChecked(False)        
         self.SpotCheckRight.setStyleSheet("background-color : none")
         logging.info('Done with spot check Right')
         
-        # DEBUG, what does this do?
-        ## set the default valve open time
-        #self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
+
 
 class CameraDialog(QDialog):
     def __init__(self, MainWindow, parent=None):
