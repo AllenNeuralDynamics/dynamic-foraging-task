@@ -453,8 +453,8 @@
             <rect>
                 <x>10</x>
                 <y>180</y>
-                <width>1011</width>
-                <height>321</height>
+                <width>1200</width>
+                <height>500</height>
             </rect>
         </property>
         <property name="title">
@@ -463,10 +463,10 @@
         <widget class="QPushButton" name="EmergencyStop">
             <property name="geometry">
                 <rect>
-                    <x>600</x>
+                    <x>520</x>
                     <y>20</y>
-                    <width>121</width>
-                    <height>61</height>
+                    <width>120</width>
+                    <height>60</height>
                 </rect>
             </property>
             <property name="text">
@@ -496,7 +496,7 @@
             <property name="geometry">
                 <rect>
                     <x>10</x>
-                    <y>60</y>
+                    <y>55</y>
                     <width>120</width>
                     <height>25</height>
                 </rect>
