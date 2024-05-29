@@ -918,15 +918,18 @@ class WaterCalibrationDialog(QDialog):
         self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
-        if self.SpotCheckLeft.isChecked():
-            # change button color
-            self.SpotCheckLeft.setStyleSheet("background-color : green;")
-        else:
-            self.SpotCheckLeft.setStyleSheet("background-color : none")
+
+        # change button color
+        logging.info('starting spot check left')
+        self.SpotCheckLeft.setStyleSheet("background-color : green;")
+
         # start the open/close/delay cycle
         for i in range(int(self.SpotCycle)):
             QApplication.processEvents()
             if self.SpotCheckLeft.isChecked():
+                self.Warning.setText('Spot Checking Left valve: {}'.format(self.SpotLeftOpenTime)+'\nCurrent cycle:'+str(i+1)+'/{}'.format(self.SpotCycle))
+                self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+
                 # set the valve open time
                 self.MainWindow.Channel.LeftValue(float(self.SpotLeftOpenTime.text())*1000) 
                 # open the valve
@@ -935,9 +938,15 @@ class WaterCalibrationDialog(QDialog):
                 time.sleep(float(self.SpotLeftOpenTime.text())+self.SpotInterval)
             else:
                 break
+
         self.SpotCheckLeft.setChecked(False)        
-        # set the default valve open time
-        self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
+        self.SpotCheckLeft.setStyleSheet("background-color : none")
+        logging.info('Done with spot check Left')
+        
+        # DEBUG, what does this do?
+        ## set the default valve open time
+        #self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
+
     def _SpotCheckRight(self):
         '''Calibration of right valve'''
         self.MainWindow._ConnectBonsai()
