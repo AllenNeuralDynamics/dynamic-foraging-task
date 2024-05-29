@@ -489,7 +489,7 @@
             <property name="geometry">
                 <rect>
                     <x>10</x>
-                    <y>20</y>
+                    <y>55</y>
                     <width>80</width>
                     <height>25</height>
                 </rect>
@@ -505,7 +505,7 @@
             <property name="geometry">
                 <rect>
                     <x>10</x>
-                    <y>55</y>
+                    <y>90</y>
                     <width>80</width>
                     <height>25</height>
                 </rect>
@@ -521,7 +521,7 @@
             <property name="geometry">
                 <rect>
                     <x>410</x>
-                    <y>20</y>
+                    <y>55</y>
                     <width>100</width>
                     <height>25</height>
                 </rect>
@@ -540,7 +540,7 @@
             <property name="geometry">
                 <rect>
                     <x>410</x>
-                    <y>55</y>
+                    <y>90</y>
                     <width>100</width>
                     <height>25</height>
                 </rect>
@@ -559,7 +559,7 @@
             <property name="geometry">
                 <rect>
                     <x>510</x>
-                    <y>20</y>
+                    <y>55</y>
                     <width>40</width>
                     <height>25</height>
                 </rect>
@@ -572,7 +572,7 @@
             <property name="geometry">
                 <rect>
                     <x>510</x>
-                    <y>55</y>
+                    <y>90</y>
                     <width>40</width>
                     <height>25</height>
              </rect>
@@ -584,8 +584,8 @@
         <widget class="QLabel" name="label_21"><!-- label 21-->
             <property name="geometry">
                 <rect>
-                    <x>10</x>
-                    <y>90</y>
+                    <x>360</x>
+                    <y>55</y>
                     <width>85</width>
                     <height>25</height>
                 </rect>
@@ -603,8 +603,8 @@
         <widget class="QComboBox" name="CalibrationType">
             <property name="geometry">
                 <rect>
-                    <x>100</x>
-                    <y>90</y>
+                    <x>550</x>
+                    <y>20</y>
                     <width>100</width>
                     <height>25</height>
                 </rect>
@@ -630,7 +630,7 @@
             <property name="geometry">
                 <rect>
                     <x>580</x>
-                    <y>30</y>
+                    <y>65</y>
                     <width>80</width>
                     <height>40</height>
                 </rect>
@@ -646,7 +646,7 @@
             <property name="geometry">
                 <rect>
                     <x>260</x>
-                    <y>20</y>
+                    <y>55</y>
                     <width>100</width>
                     <height>25</height>
                 </rect>
@@ -665,7 +665,7 @@
             <property name="geometry">
                 <rect>
                     <x>260</x>
-                    <y>55</y>
+                    <y>90</y>
                     <width>100</width>
                     <height>25</height>
                 </rect>
@@ -684,7 +684,7 @@
             <property name="geometry">
                 <rect>
                     <x>360</x>
-                    <y>20</y>
+                    <y>55</y>
                     <width>40</width>
                     <height>25</height>
                 </rect>
@@ -697,7 +697,7 @@
             <property name="geometry">
                 <rect>
                     <x>360</x>
-                    <y>55</y>
+                    <y>90</y>
                     <width>40</width>
                     <height>25</height>
                 </rect>
@@ -739,7 +739,7 @@
             <property name="geometry">
                 <rect>
                     <x>90</x>
-                    <y>20</y>
+                    <y>55</y>
                     <width>100</width>
                     <height>25</height>
                 </rect>
@@ -758,7 +758,7 @@
             <property name="geometry">
                 <rect>
                     <x>90</x>
-                    <y>55</y>
+                    <y>90</y>
                     <width>100</width>
                     <height>25</height>
                 </rect>
@@ -777,7 +777,7 @@
             <property name="geometry">
                 <rect>
                     <x>200</x>
-                    <y>20</y>
+                    <y>55</y>
                     <width>40</width>
                     <height>25</height>
                 </rect>
@@ -790,7 +790,7 @@
             <property name="geometry">
                 <rect>
                     <x>200</x>
-                    <y>55</y>
+                    <y>90</y>
                     <width>40</width>
                     <height>25</height>
                 </rect>
