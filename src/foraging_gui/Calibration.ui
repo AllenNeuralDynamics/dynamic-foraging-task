@@ -16,7 +16,7 @@
   <widget class="QDoubleSpinBox" name="SpotRightOpenTime">
    <property name="geometry">
     <rect>
-     <x>240</x>
+     <x>200</x>
      <y>140</y>
      <width>80</width>
      <height>25</height>
@@ -35,8 +35,8 @@
   <widget class="QDoubleSpinBox" name="SpotLeftOpenTime">
    <property name="geometry">
     <rect>
-     <x>240</x>
-     <y>10</y>
+     <x>200</x>
+     <y>105</y>
      <width>80</width>
      <height>25</height>
     </rect>
@@ -54,7 +54,7 @@
   <widget class="QLabel" name="SpotLeftOpenTimeLabel">
    <property name="geometry">
     <rect>
-     <x>110</x>
+     <x>100</x>
      <y>105</y>
      <width>100</width>
      <height>25</height>
@@ -73,10 +73,10 @@
   <widget class="QLabel" name="SpotRightOpenTimeLabel">
    <property name="geometry">
     <rect>
-     <x>104</x>
+     <x>100</x>
      <y>140</y>
      <width>100</width>
-     <height>23</height>
+     <height>25</height>
     </rect>
    </property>
    <property name="text">
