@@ -672,7 +672,7 @@
     <widget class="QPushButton" name="SpotCheckLeft">
         <property name="geometry">
             <rect>
-                <x>20</x>
+                <x>10</x>
                 <y>20</y>
                 <width>80</width>
                 <height>25</height>
@@ -688,7 +688,7 @@
     <widget class="QPushButton" name="SpotCheckRight">
         <property name="geometry">
             <rect>
-                <x>20</x>
+                <x>10</x>
                 <y>55</y>
                 <width>80</width>
                 <height>25</height>
@@ -782,7 +782,7 @@
             <rect>
                 <x>250</x>
                 <y>20</y>
-                <width>100</width>
+                <width>50</width>
                 <height>25</height>
             </rect>
         </property>
@@ -801,7 +801,7 @@
             <rect>
                 <x>250</x>
                 <y>55</y>
-                <width>100</width>
+                <width>50</width>
                 <height>25</height>
             </rect>
         </property>
@@ -815,10 +815,36 @@
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
     </widget>
+    <widget class="QLineEdit" name="SpotCheckPreWeightLeft">
+        <property name="geometry">
+            <rect>
+                <x>300</x>
+                <y>20</y>
+                <width>50</width>
+                <height>20</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string/>
+        </property>
+    </widget>
+    <widget class="QLineEdit" name="SpotCheckPreWeightRight">
+        <property name="geometry">
+            <rect>
+                <x>300</x>
+                <y>55</y>
+                <width>50</width>
+                <height>20</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string/>
+        </property>
+    </widget>
     <widget class="QLabel" name="SpotCheckTotalWaterLeftLabel">
         <property name="geometry">
             <rect>
-                <x>440</x>
+                <x>375</x>
                 <y>20</y>
                 <width>100</width>
                 <height>25</height>
@@ -837,7 +863,7 @@
     <widget class="QLabel" name="SpotCheckTotalWaterRightLabel">
         <property name="geometry">
             <rect>
-                <x>435</x>
+                <x>375</x>
                 <y>55</y>
                 <width>100</width>
                 <height>25</height>
@@ -1111,32 +1137,6 @@
    </property>
    <property name="checkable">
     <bool>true</bool>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="TotalWaterSingleLeft_2">
-   <property name="geometry">
-    <rect>
-     <x>410</x>
-     <y>140</y>
-     <width>51</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="TotalWaterSingleLeft_3">
-   <property name="geometry">
-    <rect>
-     <x>410</x>
-     <y>110</y>
-     <width>51</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
    </property>
   </widget>
   <zorder>groupBox</zorder>
