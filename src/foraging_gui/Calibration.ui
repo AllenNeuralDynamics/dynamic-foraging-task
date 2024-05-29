@@ -127,7 +127,7 @@
             <rect>
                 <x>10</x>
                 <y>10</y>
-                <width>670</width>
+                <width>330</width>
                 <height>60</height>
             </rect>
         </property>
@@ -166,23 +166,22 @@
                 <bool>true</bool>
             </property>
         </widget>
-        <widget class="QPushButton" name="EmergencyStop">
-            <property name="geometry">
-                <rect>
-                    <x>450</x>
-                    <y>20</y>
-                    <width>120</width>
-                    <height>25</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>Emergency stop</string>
-            </property>
-            <property name="checkable">
-                <bool>true</bool>
-            </property>
-        </widget>
-
+    </widget>
+    <widget class="QPushButton" name="EmergencyStop">
+        <property name="geometry">
+            <rect>
+                <x>340</x>
+                <y>30</y>
+                <width>330</width>
+                <height>60</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Emergency stop</string>
+        </property>
+        <property name="checkable">
+            <bool>true</bool>
+        </property>
     </widget>
     <widget class="QGroupBox" name="groupBox">
         <property name="geometry">
@@ -469,9 +468,9 @@
         <property name="geometry">
             <rect>
                 <x>10</x>
-                <y>180</y>
-                <width>1200</width>
-                <height>500</height>
+                <y>190</y>
+                <width>670</width>
+                <height>400</height>
             </rect>
         </property>
         <property name="title">
