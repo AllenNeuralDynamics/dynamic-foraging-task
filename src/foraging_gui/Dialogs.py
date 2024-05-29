@@ -312,6 +312,7 @@ class WaterCalibrationDialog(QDialog):
         
         self.MainWindow=MainWindow
         self.FinishLeftValve=0
+        self._LoadCalibrationParameters(self)
         if not hasattr(self.MainWindow,'WaterCalibrationResults'):
             self.MainWindow.WaterCalibrationResults={}
             self.WaterCalibrationResults={}
@@ -433,6 +434,18 @@ class WaterCalibrationDialog(QDialog):
                         widget.setText(str(self.WaterCalibrationPar[CalibrationType][K]))
                 except Exception as e:
                     logging.error(str(e))
+
+    def _LoadCalibrationParameters(self):
+        self.WaterCalibrationPar={}       
+        if os.path.exists(self.MainWindow.WaterCalibrationParFiles):
+            with open(self.MainWindow.WaterCalibrationParFiles, 'r') as f:
+                self.WaterCalibrationPar = json.load(f)
+            logging.info('loaded water calibration parameters')
+        else:
+            logging.error('could not find water calibration parameters: {}'.format(self.MainWindow.WaterCalibrationParFiles)
+            raise Exception('Missing water calibration parameter file: {}'.format(self.MainWindow.WaterCalibrationParFiles))
+        self.CycleRight = self.WaterCalibrationPart['Spot']['Cycle']
+        self.CycleLeft = self.WaterCalibrationPart['Spot']['Cycle']
 
     def _LoadCaliPar(self):
         '''load the pre-stored calibration parameters'''
