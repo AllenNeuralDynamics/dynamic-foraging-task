@@ -921,7 +921,7 @@ class WaterCalibrationDialog(QDialog):
         total_seconds = (cycles-i)*(opentime+interval)
         minutes = int(np.floor(total_seconds/60))
         seconds = int(np.ceil(np.mod(total_seconds,60)))
-        return '{}:{n:02}'.format(minutes, seconds)
+        return '{}:{:02}'.format(minutes, seconds)
 
     def _SpotCheckLeft(self):    
         '''Calibration of left valve in a different thread'''
