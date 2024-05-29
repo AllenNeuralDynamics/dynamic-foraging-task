@@ -787,7 +787,7 @@
             </rect>
         </property>
         <property name="text">
-            <string>Pre weight(g)=</string>
+            <string>Pre weight (g)=</string>
         </property>
         <property name="textFormat">
             <enum>Qt::AutoText</enum>
@@ -806,7 +806,7 @@
             </rect>
         </property>
         <property name="text">
-            <string>Pre weight(g)=</string>
+            <string>Pre weight (g)=</string>
         </property>
         <property name="textFormat">
             <enum>Qt::AutoText</enum>
@@ -818,7 +818,7 @@
     <widget class="QLineEdit" name="SpotCheckPreWeightLeft">
         <property name="geometry">
             <rect>
-                <x>360</x>
+                <x>355</x>
                 <y>20</y>
                 <width>40</width>
                 <height>25</height>
@@ -831,7 +831,7 @@
     <widget class="QLineEdit" name="SpotCheckPreWeightRight">
         <property name="geometry">
             <rect>
-                <x>360</x>
+                <x>355</x>
                 <y>55</y>
                 <width>40</width>
                 <height>25</height>
@@ -851,7 +851,7 @@
             </rect>
         </property>
         <property name="text">
-            <string>Final water(g)</string>
+            <string>Final water (g)=</string>
         </property>
         <property name="textFormat">
             <enum>Qt::AutoText</enum>
@@ -870,7 +870,7 @@
             </rect>
         </property>
         <property name="text">
-            <string>Final water (g)</string>
+            <string>Final water (g)=</string>
         </property>
         <property name="textFormat">
             <enum>Qt::AutoText</enum>
