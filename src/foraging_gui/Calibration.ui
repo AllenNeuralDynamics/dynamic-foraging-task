@@ -50,7 +50,7 @@
                 <number>10</number>
             </property>
         </widget>
-        <widget class="QLabel" name="label_69">
+        <widget class="QLabel" name="label_69"><!--label 69-->
             <property name="geometry">
                 <rect>
                     <x>475</x>
@@ -75,7 +75,7 @@
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
        </widget>
-       <widget class="QLabel" name="label_70">
+       <widget class="QLabel" name="label_70"><!-- label 70-->
             <property name="geometry">
                 <rect>
                     <x>200</x>
@@ -509,7 +509,7 @@
                 <bool>true</bool>
             </property>
         </widget>
-        <widget class="QLabel" name="label_9">
+        <widget class="QLabel" name="label_9"><!--label 9-->
             <property name="geometry">
                 <rect>
                     <x>190</x>
@@ -528,7 +528,7 @@
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
         </widget>
-        <widget class="QLabel" name="label_10">
+        <widget class="QLabel" name="label_10"><!-- label 10-->
             <property name="geometry">
                 <rect>
                     <x>360</x>
@@ -547,7 +547,7 @@
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
         </widget>
-        <widget class="QLabel" name="label_11">
+        <widget class="QLabel" name="label_11"><!-- label 11-->
             <property name="geometry">
                 <rect>
                     <x>530</x>
@@ -566,7 +566,7 @@
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
         </widget>
-        <widget class="QLabel" name="label_12">
+        <widget class="QLabel" name="label_12"><!-- label 12 -->
             <property name="geometry">
                 <rect>
                     <x>670</x>
@@ -585,7 +585,7 @@
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
         </widget>
-        <widget class="QLabel" name="label_13">
+        <widget class="QLabel" name="label_13"><!-- label 13-->
             <property name="geometry">
                 <rect>
                     <x>500</x>
@@ -604,7 +604,7 @@
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
         </widget>
-        <widget class="QLabel" name="label_14">
+        <widget class="QLabel" name="label_14"><!-- label 14-->
             <property name="geometry">
                 <rect>
                     <x>360</x>
@@ -623,7 +623,7 @@
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
         </widget>
-        <widget class="QLabel" name="label_15">
+        <widget class="QLabel" name="label_15"><!-- label 15-->
             <property name="geometry">
                 <rect>
                     <x>190</x>
@@ -642,7 +642,7 @@
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
         </widget>
-        <widget class="QLabel" name="label_16">
+        <widget class="QLabel" name="label_16"><!-- label 16-->
             <property name="geometry">
                 <rect>
                     <x>500</x>
@@ -661,7 +661,7 @@
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
         </widget>
-        <widget class="QLabel" name="label_17">
+        <widget class="QLabel" name="label_17"><!--label 17-->
             <property name="geometry">
                 <rect>
                     <x>670</x>
@@ -680,7 +680,7 @@
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
         </widget>
-        <widget class="QLabel" name="label_18">
+        <widget class="QLabel" name="label_18"><!--label 18-->
             <property name="geometry">
                 <rect>
                     <x>530</x>
@@ -829,7 +829,7 @@
                 <string/>
             </property>
         </widget>
-        <widget class="QLabel" name="label_21">
+        <widget class="QLabel" name="label_21"><!-- label 21-->
             <property name="geometry">
                 <rect>
                     <x>50</x>
@@ -874,7 +874,7 @@
                 </property>
             </item>
         </widget>
-        <widget class="QLabel" name="label_22">
+        <widget class="QLabel" name="label_22"><!-- label 22-->
             <property name="geometry">
                 <rect>
                     <x>852</x>
@@ -912,7 +912,7 @@
                 <double>0.500000000000000</double>
             </property>
         </widget>
-        <widget class="QLabel" name="label_23">
+        <widget class="QLabel" name="label_23"><!-- label 23 -->
             <property name="geometry">
                 <rect>
                     <x>852</x>
@@ -949,24 +949,7 @@
             <property name="value">
                 <double>0.500000000000000</double>
             </property>
-        </widget>
-        <widget class="QPushButton" name="SaveCalibrationPar">
-            <property name="geometry">
-                <rect>
-                    <x>870</x>
-                    <y>240</y>
-                    <width>161</width>
-                    <height>31</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>Save calibration parameters</string>
-            </property>
-            <property name="checkable">
-                <bool>true</bool>
-            </property>
-        </widget>
-    
+        </widget>    
         <widget class="QPushButton" name="Continue">
             <property name="geometry">
                 <rect>
@@ -983,13 +966,32 @@
                 <bool>true</bool>
             </property>
         </widget>
-        <widget class="QLabel" name="label_25">
+        <widget class="QLabel" name="WeightBeforeLeftLabel"><!-- label 24-->
             <property name="geometry">
                 <rect>
-                    <x>235</x>
-                    <y>210</y>
-                    <width>111</width>
-                    <height>23</height>
+                    <x>300</x>
+                    <y>20</y>
+                    <width>100</width>
+                    <height>25</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>weight before (g)=</string>
+            </property>
+            <property name="textFormat">
+                <enum>Qt::AutoText</enum>
+            </property>
+            <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+        </widget>
+        <widget class="QLabel" name="WeightBeforeRightLabel"><!-- label 25-->
+            <property name="geometry">
+                <rect>
+                    <x>300</x>
+                    <y>55</y>
+                    <width>100</width>
+                    <height>25</height>
                 </rect>
             </property>
             <property name="text">
@@ -1005,42 +1007,23 @@
         <widget class="QLineEdit" name="WeightBeforeLeft">
             <property name="geometry">
                 <rect>
-                    <x>350</x>
-                    <y>171</y>
+                    <x>400</x>
+                    <y>20</y>
                     <width>80</width>
-                    <height>20</height>
+                    <height>25</height>
                 </rect>
             </property>
             <property name="text">
                 <string/>
             </property>
         </widget>
-        <widget class="QLabel" name="label_24">
-            <property name="geometry">
-                <rect>
-                    <x>245</x>
-                    <y>170</y>
-                    <width>101</width>
-                    <height>23</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>weight before (g)=</string>
-            </property>
-            <property name="textFormat">
-                <enum>Qt::AutoText</enum>
-            </property>
-            <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-        </widget>
         <widget class="QLineEdit" name="WeightBeforeRight">
             <property name="geometry">
                 <rect>
-                    <x>350</x>
-                    <y>210</y>
+                    <x>400</x>
+                    <y>55</y>
                     <width>80</width>
-                    <height>20</height>
+                    <height>25</height>
                 </rect>
             </property>
             <property name="text">
@@ -1091,8 +1074,8 @@
         <widget class="QLabel" name="TubeWeightLeftLabel"><!-- label 26-->
             <property name="geometry">
                 <rect>
-                    <x>25</x>
-                    <y>120</y>
+                    <x>120</x>
+                    <y>20</y>
                     <width>100</width>
                     <height>25</height>
                 </rect>
