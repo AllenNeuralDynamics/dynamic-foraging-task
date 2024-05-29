@@ -932,7 +932,11 @@ class WaterCalibrationDialog(QDialog):
         for i in range(int(self.SpotCycle)):
             QApplication.processEvents()
             if self.SpotCheckLeft.isChecked():
-                self.Warning.setText('Spot Checking Left valve: {}'.format(self.SpotLeftOpenTime)+'\nCurrent cycle:'+str(i+1)+'/{}'.format(self.SpotCycle))
+                self.Warning.setText(
+                    'Spot Checking Left valve: {}'.format(self.SpotLeftOpenTime.text()) + \\
+                    '\nCurrent cycle:'+str(i+1)+'/{}'.format(self.SpotCycle) + \\
+                    '\nTime remaining: {}'.format((float(self.SpotCycle)-i)*(float(self.SpotLeftOpenTime.text())+float(self.SpotInterval)))
+                    )
                 self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
 
                 # set the valve open time
@@ -942,8 +946,11 @@ class WaterCalibrationDialog(QDialog):
                 # delay
                 time.sleep(float(self.SpotLeftOpenTime.text())+self.SpotInterval)
             else:
+                self.Warning.setText('Spot check left cancelled')
+                # TODO, reset empty tube measurement
                 break
             self.SpotLeftFinished=1
+            self.Warning.setText('Spot Check Left complete, please record final weight')
 
         self.SpotCheckLeft.setChecked(False)        
         self.SpotCheckLeft.setStyleSheet("background-color : none")
