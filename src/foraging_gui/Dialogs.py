@@ -932,7 +932,7 @@ class WaterCalibrationDialog(QDialog):
                 # open the valve
                 self.MainWindow.Channel3.ManualWater_Left(int(1))
                 # delay
-                time.sleep(float(self.SpotLeftOpenTime.text())+self.SpotInterval))
+                time.sleep(float(self.SpotLeftOpenTime.text())+self.SpotInterval)
             else:
                 break
         self.SpotCheckLeft.setChecked(False)        
