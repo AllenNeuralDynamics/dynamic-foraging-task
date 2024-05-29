@@ -392,13 +392,12 @@ class WaterCalibrationDialog(QDialog):
         valve='Left'
         valve_open_time=str(float(self.OpenLeftTime.text()))
         valve_open_interval=str(float(self.IntervalLeft.text()))
-        cycle=str(float(self.CycleLeft.text()))
         try:
             total_water=float(self.TotalWaterSingleLeft.text())  
         except Exception as e:
             total_water=''
             logging.error(str(e))
-        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water,tube_weight=0)
+        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=self.Cycle,total_water=total_water,tube_weight=0)
         self.SaveLeft.setStyleSheet("background-color : none")
         self.SaveLeft.setChecked(False)
     def _SaveRight(self):
@@ -408,13 +407,12 @@ class WaterCalibrationDialog(QDialog):
         valve='Right'
         valve_open_time=str(float(self.OpenRightTime.text()))
         valve_open_interval=str(float(self.IntervalRight.text()))
-        cycle=str(float(self.CycleRight.text()))
         try:
             total_water=float(self.TotalWaterSingleRight.text()) 
         except Exception as e:
             total_water=''
             logging.error(str(e))
-        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water,tube_weight=0)
+        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=self.Cycle,total_water=total_water,tube_weight=0)
         self.SaveRight.setStyleSheet("background-color : none")
         self.SaveRight.setChecked(False)
     def _CalibrationType(self):
@@ -444,8 +442,7 @@ class WaterCalibrationDialog(QDialog):
         else:
             logging.error('could not find water calibration parameters: {}'.format(self.MainWindow.WaterCalibrationParFiles))
             raise Exception('Missing water calibration parameter file: {}'.format(self.MainWindow.WaterCalibrationParFiles))
-        self.CycleRight = self.WaterCalibrationPar['Spot']['Cycle']
-        self.CycleLeft = self.WaterCalibrationPar['Spot']['Cycle']
+        self.Cycle = self.WaterCalibrationPar['Spot']['Cycle']
 
     def _LoadCaliPar(self):
         '''load the pre-stored calibration parameters'''
@@ -915,7 +912,7 @@ class WaterCalibrationDialog(QDialog):
         else:
             self.SpotCheckLeft.setStyleSheet("background-color : none")
         # start the open/close/delay cycle
-        for i in range(int(self.CycleLeft.text())):
+        for i in range(int(self.Cycle)):
             QApplication.processEvents()
             if self.SpotCheckLeft.isChecked():
                 # set the valve open time
@@ -940,7 +937,7 @@ class WaterCalibrationDialog(QDialog):
         else:
             self.SpotCheckRight.setStyleSheet("background-color : none")
         # start the open/close/delay cycle
-        for i in range(int(self.CycleRight.text())):
+        for i in range(int(self.Cycle)):
             QApplication.processEvents()
             if self.SpotCheckRight.isChecked():
                 # set the valve open time
