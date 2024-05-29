@@ -137,7 +137,7 @@
         <widget class="QPushButton" name="OpenLeftForever">
             <property name="geometry">
                 <rect>
-                    <x>35</x>
+                    <x>40</x>
                     <y>20</y>
                     <width>100</width>
                     <height>25</height>
@@ -153,7 +153,7 @@
         <widget class="QPushButton" name="OpenRightForever">
             <property name="geometry">
                 <rect>
-                    <x>185</x>
+                    <x>180</x>
                     <y>20</y>
                     <width>100</width>
                     <height>25</height>
@@ -604,8 +604,8 @@
             <property name="geometry">
                 <rect>
                     <x>100</x>
-                    <y>100</y>
-                    <width>90</width>
+                    <y>90</y>
+                    <width>100</width>
                     <height>25</height>
                 </rect>
             </property>
@@ -709,10 +709,10 @@
         <widget class="QLabel" name="Warning">
             <property name="geometry">
                 <rect>
-                    <x>230</x>
-                    <y>250</y>
-                    <width>521</width>
-                    <height>51</height>
+                    <x>10</x>
+                    <y>135</y>
+                    <width>650</width>
+                    <height>75</height>
                 </rect>
             </property>
             <property name="styleSheet">
