@@ -323,8 +323,8 @@ class WaterCalibrationDialog(QDialog):
         self.setWindowTitle('Water Calibration: {}'.format(self.MainWindow.current_box))
 
     def _connectSignalsSlots(self):
-        self.SpotCheckLeft.clicked.connect(self._OpenLeft)
-        self.SpotCheckRight.clicked.connect(self._OpenRight)
+        self.SpotCheckLeft.clicked.connect(self._SpotCheckLeft)
+        self.SpotCheckRight.clicked.connect(self._SpotCheckRight)
         self.OpenLeftForever.clicked.connect(self._OpenLeftForever)
         self.OpenRightForever.clicked.connect(self._OpenRightForever)
         self.SaveLeft.clicked.connect(self._SaveLeft)
@@ -891,20 +891,20 @@ class WaterCalibrationDialog(QDialog):
             # set the default valve open time
             self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
 
-    def _OpenLeft(self):    
+    def _SpotCheckLeft(self):    
         '''Calibration of left valve in a different thread'''
         self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
-        if self.OpenLeft.isChecked():
+        if self.SpotCheckLeft.isChecked():
             # change button color
-            self.OpenLeft.setStyleSheet("background-color : green;")
+            self.SpotCheckLeft.setStyleSheet("background-color : green;")
         else:
-            self.OpenLeft.setStyleSheet("background-color : none")
+            self.SpotCheckLeft.setStyleSheet("background-color : none")
         # start the open/close/delay cycle
         for i in range(int(self.CycleLeft.text())):
             QApplication.processEvents()
-            if self.OpenLeft.isChecked():
+            if self.SpotCheckLeft.isChecked():
                 # set the valve open time
                 self.MainWindow.Channel.LeftValue(float(self.OpenLeftTime.text())*1000) 
                 # open the valve
@@ -913,23 +913,23 @@ class WaterCalibrationDialog(QDialog):
                 time.sleep(float(self.OpenLeftTime.text())+float(self.IntervalLeft.text()))
             else:
                 break
-        self.OpenLeft.setChecked(False)        
+        self.SpotCheckLeft.setChecked(False)        
         # set the default valve open time
         self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
-    def _OpenRight(self):
+    def _SpotCheckRight(self):
         '''Calibration of right valve'''
         self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
-        if self.OpenRight.isChecked():
+        if self.SpotCheckRight.isChecked():
             # change button color
-            self.OpenRight.setStyleSheet("background-color : green;")
+            self.SpotCheckRight.setStyleSheet("background-color : green;")
         else:
-            self.OpenRight.setStyleSheet("background-color : none")
+            self.SpotCheckRight.setStyleSheet("background-color : none")
         # start the open/close/delay cycle
         for i in range(int(self.CycleRight.text())):
             QApplication.processEvents()
-            if self.OpenRight.isChecked():
+            if self.SpotCheckRight.isChecked():
                 # set the valve open time
                 self.MainWindow.Channel.RightValue(float(self.OpenRightTime.text())*1000) 
                 # open the valve
@@ -938,7 +938,7 @@ class WaterCalibrationDialog(QDialog):
                 time.sleep(float(self.OpenRightTime.text())+float(self.IntervalRight.text()))
             else:
                 break
-        self.OpenRight.setChecked(False)  
+        self.SpotCheckRight.setChecked(False)  
         # set the default valve open time
         self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
 
