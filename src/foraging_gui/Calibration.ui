@@ -509,131 +509,17 @@
                 <bool>true</bool>
             </property>
         </widget>
-        <widget class="QLabel" name="label_9"><!--label 9-->
-            <property name="geometry">
-                <rect>
-                    <x>190</x>
-                    <y>296</y>
-                    <width>71</width>
-                    <height>23</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>time min(s)=</string>
-            </property>
-            <property name="textFormat">
-                <enum>Qt::AutoText</enum>
-            </property>
-            <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-        </widget>
-        <widget class="QLabel" name="label_10"><!-- label 10-->
-            <property name="geometry">
-                <rect>
-                    <x>360</x>
-                    <y>296</y>
-                    <width>71</width>
-                    <height>23</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>time max(s)=</string>
-            </property>
-            <property name="textFormat">
-                <enum>Qt::AutoText</enum>
-            </property>
-            <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-        </widget>
-        <widget class="QLabel" name="label_11"><!-- label 11-->
-            <property name="geometry">
-                <rect>
-                    <x>530</x>
-                    <y>296</y>
-                    <width>71</width>
-                    <height>23</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>stride(s)=</string>
-            </property>
-            <property name="textFormat">
-                <enum>Qt::AutoText</enum>
-            </property>
-            <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-        </widget>
-        <widget class="QLabel" name="label_12"><!-- label 12 -->
-            <property name="geometry">
-                <rect>
-                    <x>670</x>
-                    <y>296</y>
-                    <width>71</width>
-                    <height>23</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>cycle=</string>
-            </property>
-            <property name="textFormat">
-                <enum>Qt::AutoText</enum>
-            </property>
-            <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-        </widget>
         <widget class="QLabel" name="label_13"><!-- label 13-->
             <property name="geometry">
                 <rect>
-                    <x>500</x>
-                    <y>380</y>
-                    <width>101</width>
-                    <height>23</height>
+                    <x>10</x>
+                    <y>100</y>
+                    <width>100</width>
+                    <height>25</height>
                 </rect>
             </property>
             <property name="text">
                 <string>weight after(g)=</string>
-            </property>
-            <property name="textFormat">
-                <enum>Qt::AutoText</enum>
-            </property>
-            <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-        </widget>
-        <widget class="QLabel" name="label_14"><!-- label 14-->
-            <property name="geometry">
-                <rect>
-                    <x>360</x>
-                    <y>336</y>
-                    <width>71</width>
-                    <height>23</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>time max(s)=</string>
-            </property>
-            <property name="textFormat">
-                <enum>Qt::AutoText</enum>
-            </property>
-            <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-        </widget>
-        <widget class="QLabel" name="label_15"><!-- label 15-->
-            <property name="geometry">
-                <rect>
-                    <x>190</x>
-                    <y>336</y>
-                    <width>71</width>
-                    <height>23</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>time min(s)=</string>
             </property>
             <property name="textFormat">
                 <enum>Qt::AutoText</enum>
@@ -645,10 +531,10 @@
         <widget class="QLabel" name="label_16"><!-- label 16-->
             <property name="geometry">
                 <rect>
-                    <x>500</x>
-                    <y>420</y>
-                    <width>101</width>
-                    <height>23</height>
+                    <x>10</x>
+                    <y>150</y>
+                    <width>100</width>
+                    <height>25</height>
                 </rect>
             </property>
             <property name="text">
@@ -661,155 +547,13 @@
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
         </widget>
-        <widget class="QLabel" name="label_17"><!--label 17-->
-            <property name="geometry">
-                <rect>
-                    <x>670</x>
-                    <y>336</y>
-                    <width>71</width>
-                    <height>23</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>cycle=</string>
-            </property>
-            <property name="textFormat">
-                <enum>Qt::AutoText</enum>
-            </property>
-            <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-        </widget>
-        <widget class="QLabel" name="label_18"><!--label 18-->
-            <property name="geometry">
-                <rect>
-                    <x>530</x>
-                    <y>336</y>
-                    <width>71</width>
-                    <height>23</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>stride(s)=</string>
-            </property>
-            <property name="textFormat">
-                <enum>Qt::AutoText</enum>
-            </property>
-            <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-        </widget>
-        <widget class="QLineEdit" name="TimeLeftMin">
-            <property name="geometry">
-                <rect>
-                    <x>266</x>
-                    <y>296</y>
-                    <width>80</width>
-                    <height>20</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>0.005</string>
-            </property>
-        </widget>
-        <widget class="QLineEdit" name="TimeRightMin">
-            <property name="geometry">
-                <rect>
-                    <x>266</x>
-                    <y>336</y>
-                    <width>80</width>
-                    <height>20</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>0.005</string>
-            </property>
-        </widget>
-        <widget class="QLineEdit" name="TimeLeftMax">
-            <property name="geometry">
-                <rect>
-                    <x>436</x>
-                    <y>296</y>
-                    <width>80</width>
-                    <height>20</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>0.08</string>
-            </property>
-        </widget>
-        <widget class="QLineEdit" name="TimeRightMax">
-            <property name="geometry">
-                <rect>
-                    <x>436</x>
-                    <y>336</y>
-                    <width>80</width>
-                    <height>20</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>0.08</string>
-            </property>
-        </widget>
-        <widget class="QLineEdit" name="StrideLeft">
-            <property name="geometry">
-                <rect>
-                    <x>605</x>
-                    <y>296</y>
-                    <width>80</width>
-                    <height>20</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>0.005</string>
-            </property>
-        </widget>
-        <widget class="QLineEdit" name="StrideRight">
-            <property name="geometry">
-                <rect>
-                    <x>605</x>
-                    <y>336</y>
-                    <width>80</width>
-                    <height>20</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>0.005</string>
-            </property>
-        </widget>
-        <widget class="QLineEdit" name="CycleCaliLeft">
-            <property name="geometry">
-                <rect>
-                    <x>746</x>
-                    <y>296</y>
-                    <width>80</width>
-                    <height>20</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>200</string>
-            </property>
-        </widget>
-        <widget class="QLineEdit" name="CycleCaliRight">
-            <property name="geometry">
-                <rect>
-                    <x>746</x>
-                    <y>336</y>
-                    <width>80</width>
-                    <height>20</height>
-             </rect>
-            </property>
-            <property name="text">
-                <string>200</string>
-            </property>
-        </widget>
         <widget class="QLineEdit" name="WeightAfterLeft">
             <property name="geometry">
                 <rect>
-                    <x>605</x>
-                    <y>380</y>
+                    <x>205</x>
+                    <y>100</y>
                     <width>80</width>
-                    <height>20</height>
+                    <height>25</height>
                 </rect>
             </property>
             <property name="text">
@@ -819,10 +563,10 @@
         <widget class="QLineEdit" name="WeightAfterRight">
             <property name="geometry">
                 <rect>
-                    <x>605</x>
-                    <y>420</y>
+                    <x>205</x>
+                    <y>150</y>
                     <width>80</width>
-                    <height>20</height>
+                    <height>25</height>
              </rect>
             </property>
             <property name="text">
@@ -874,82 +618,6 @@
                 </property>
             </item>
         </widget>
-        <widget class="QLabel" name="label_22"><!-- label 22-->
-            <property name="geometry">
-                <rect>
-                    <x>852</x>
-                    <y>336</y>
-                    <width>91</width>
-                    <height>23</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>interval right (s)=</string>
-            </property>
-            <property name="textFormat">
-                <enum>Qt::AutoText</enum>
-            </property>
-            <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-        </widget>
-        <widget class="QDoubleSpinBox" name="IntervalRight_2">
-            <property name="geometry">
-                <rect>
-                    <x>950</x>
-                    <y>336</y>
-                    <width>80</width>
-                    <height>20</height>
-                </rect>
-            </property>
-            <property name="decimals">
-                <number>3</number>
-            </property>
-            <property name="singleStep">
-                <double>0.005000000000000</double>
-            </property>
-            <property name="value">
-                <double>0.500000000000000</double>
-            </property>
-        </widget>
-        <widget class="QLabel" name="label_23"><!-- label 23 -->
-            <property name="geometry">
-                <rect>
-                    <x>852</x>
-                    <y>296</y>
-                    <width>91</width>
-                    <height>23</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>interval left (s)=</string>
-            </property>
-            <property name="textFormat">
-                <enum>Qt::AutoText</enum>
-            </property>
-            <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-        </widget>
-        <widget class="QDoubleSpinBox" name="IntervalLeft_2">
-            <property name="geometry">
-                <rect>
-                    <x>950</x>
-                    <y>296</y>
-                    <width>80</width>
-                    <height>20</height>
-                </rect>
-            </property>
-            <property name="decimals">
-                <number>3</number>
-            </property>
-            <property name="singleStep">
-                <double>0.005000000000000</double>
-            </property>
-            <property name="value">
-                <double>0.500000000000000</double>
-            </property>
-        </widget>    
         <widget class="QPushButton" name="Continue">
             <property name="geometry">
                 <rect>
