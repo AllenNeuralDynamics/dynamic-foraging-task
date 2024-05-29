@@ -939,9 +939,9 @@ class WaterCalibrationDialog(QDialog):
             QApplication.processEvents()
             if self.SpotCheckLeft.isChecked():
                 self.Warning.setText(
-                    'Measuring Left valve: {}'.format(self.SpotLeftOpenTime.text()) + \
-                    '\nCurrent cycle:      '+str(i+1)+'/{}'.format(self.SpotCycle) + \
-                    '\nTime remaining:     {}'.format(self._TimeRemaining(i,self.SpotCycle,float(self.SpotLeftOpenTime.text()),self.SpotInterval))
+                    'Measuring left valve: {}'.format(self.SpotLeftOpenTime.text()) + \
+                    '\nCurrent cycle: '+str(i+1)+'/{}'.format(int(self.SpotCycle)) + \
+                    '\nTime remaining: {}'.format(self._TimeRemaining(i,self.SpotCycle,float(self.SpotLeftOpenTime.text()),self.SpotInterval))
                     )
                 self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
 
@@ -968,30 +968,48 @@ class WaterCalibrationDialog(QDialog):
         #self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
 
     def _SpotCheckRight(self):
-        '''Calibration of right valve'''
+        '''Calibration of right valve in a different thread'''
         self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
-        if self.SpotCheckRight.isChecked():
-            # change button color
-            self.SpotCheckRight.setStyleSheet("background-color : green;")
-        else:
-            self.SpotCheckRight.setStyleSheet("background-color : none")
+
+        # change button color
+        logging.info('starting spot check right')
+        self.SpotCheckRight.setStyleSheet("background-color : green;")
+
         # start the open/close/delay cycle
+        self.SpotRightFinished=0
         for i in range(int(self.SpotCycle)):
             QApplication.processEvents()
             if self.SpotCheckRight.isChecked():
+                self.Warning.setText(
+                    'Measuring right valve: {}'.format(self.SpotRightOpenTime.text()) + \
+                    '\nCurrent cycle: '+str(i+1)+'/{}'.format(int(self.SpotCycle)) + \
+                    '\nTime remaining: {}'.format(self._TimeRemaining(i,self.SpotCycle,float(self.SpotRightOpenTime.text()),self.SpotInterval))
+                    )
+                self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+
                 # set the valve open time
                 self.MainWindow.Channel.RightValue(float(self.SpotRightOpenTime.text())*1000) 
                 # open the valve
                 self.MainWindow.Channel3.ManualWater_Right(int(1))
                 # delay
-                time.sleep(float(self.SpotRightOpenTime.text())+float(self.IntervalRight.text()))
+                time.sleep(float(self.SpotRightOpenTime.text())+self.SpotInterval)
             else:
+                self.Warning.setText('Spot check right cancelled')
+                # TODO, reset empty tube measurement
                 break
-        self.SpotCheckRight.setChecked(False)  
-        # set the default valve open time
-        self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
+            self.SpotRightFinished=1
+        if self.SpotRightFinished == 1:
+            self.Warning.setText('Spot Check Right complete, please record final weight')
+
+        self.SpotCheckRight.setChecked(False)        
+        self.SpotCheckRight.setStyleSheet("background-color : none")
+        logging.info('Done with spot check Right')
+        
+        # DEBUG, what does this do?
+        ## set the default valve open time
+        #self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
 
 class CameraDialog(QDialog):
     def __init__(self, MainWindow, parent=None):
