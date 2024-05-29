@@ -933,8 +933,8 @@ class WaterCalibrationDialog(QDialog):
             QApplication.processEvents()
             if self.SpotCheckLeft.isChecked():
                 self.Warning.setText(
-                    'Spot Checking Left valve: {}'.format(self.SpotLeftOpenTime.text()) + \\
-                    '\nCurrent cycle:'+str(i+1)+'/{}'.format(self.SpotCycle) + \\
+                    'Spot Checking Left valve: {}'.format(self.SpotLeftOpenTime.text()) + \
+                    '\nCurrent cycle:'+str(i+1)+'/{}'.format(self.SpotCycle) + \
                     '\nTime remaining: {}'.format((float(self.SpotCycle)-i)*(float(self.SpotLeftOpenTime.text())+float(self.SpotInterval)))
                     )
                 self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
