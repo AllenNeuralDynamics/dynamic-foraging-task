@@ -312,7 +312,7 @@ class WaterCalibrationDialog(QDialog):
         
         self.MainWindow=MainWindow
         self.FinishLeftValve=0
-        self._LoadCalibrationParameters(self)
+        self._LoadCalibrationParameters()
         if not hasattr(self.MainWindow,'WaterCalibrationResults'):
             self.MainWindow.WaterCalibrationResults={}
             self.WaterCalibrationResults={}
