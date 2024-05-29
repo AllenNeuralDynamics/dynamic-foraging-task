@@ -917,6 +917,12 @@ class WaterCalibrationDialog(QDialog):
             # set the default valve open time
             self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
 
+    def _TimeRemaining(i, cycles, opentime, interval):
+        total_seconds = (cycles-i)*(opentime+interval)
+        minutes = int(np.floor(total_seconds/60))
+        seconds = int(np.ceil(np.mod(total_seconds,60)))
+        return '{}:{}'.format(minutes, seconds)
+
     def _SpotCheckLeft(self):    
         '''Calibration of left valve in a different thread'''
         self.MainWindow._ConnectBonsai()
@@ -935,7 +941,7 @@ class WaterCalibrationDialog(QDialog):
                 self.Warning.setText(
                     'Spot Checking Left valve: {}'.format(self.SpotLeftOpenTime.text()) + \
                     '\nCurrent cycle:'+str(i+1)+'/{}'.format(self.SpotCycle) + \
-                    '\nTime remaining: {}'.format((float(self.SpotCycle)-i)*(float(self.SpotLeftOpenTime.text())+float(self.SpotInterval)))
+                    '\nTime remaining: {}'.format(self._TimeRemaining(i,self.SpotCycle,float(self.SpotLeftOpenTime.text()),self.SpotInterval))
                     )
                 self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
 
@@ -950,6 +956,7 @@ class WaterCalibrationDialog(QDialog):
                 # TODO, reset empty tube measurement
                 break
             self.SpotLeftFinished=1
+        if self.SpotLeftFinished == 1:
             self.Warning.setText('Spot Check Left complete, please record final weight')
 
         self.SpotCheckLeft.setChecked(False)        
