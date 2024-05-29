@@ -13,13 +13,13 @@
   <property name="windowTitle">
    <string>Water calibration</string>
   </property>
-  <widget class="QDoubleSpinBox" name="OpenRightTime">
+  <widget class="QDoubleSpinBox" name="SpotRightOpenTime">
    <property name="geometry">
     <rect>
      <x>240</x>
      <y>140</y>
      <width>80</width>
-     <height>20</height>
+     <height>25</height>
     </rect>
    </property>
    <property name="decimals">
@@ -32,13 +32,13 @@
     <double>0.030000000000000</double>
    </property>
   </widget>
-  <widget class="QDoubleSpinBox" name="OpenLeftTime">
+  <widget class="QDoubleSpinBox" name="SpotLeftOpenTime">
    <property name="geometry">
     <rect>
      <x>240</x>
-     <y>110</y>
+     <y>10</y>
      <width>80</width>
-     <height>20</height>
+     <height>25</height>
     </rect>
    </property>
    <property name="decimals">
@@ -51,17 +51,17 @@
     <double>0.030000000000000</double>
    </property>
   </widget>
-  <widget class="QLabel" name="label_3">
+  <widget class="QLabel" name="SpotLeftOpenTimeLabel">
    <property name="geometry">
     <rect>
      <x>110</x>
      <y>105</y>
-     <width>111</width>
-     <height>23</height>
+     <width>100</width>
+     <height>25</height>
     </rect>
    </property>
    <property name="text">
-    <string>Left valve open time (s)=</string>
+    <string>open time (s)</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -70,17 +70,17 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label_4">
+  <widget class="QLabel" name="SpotRightOpenTimeLabel">
    <property name="geometry">
     <rect>
      <x>104</x>
      <y>140</y>
-     <width>121</width>
+     <width>100</width>
      <height>23</height>
     </rect>
    </property>
    <property name="text">
-    <string>Right valve open time (s)=</string>
+    <string>open time (s)</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
