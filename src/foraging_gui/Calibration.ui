@@ -170,9 +170,9 @@
     <widget class="QPushButton" name="EmergencyStop">
         <property name="geometry">
             <rect>
-                <x>340</x>
-                <y>30</y>
-                <width>330</width>
+                <x>370</x>
+                <y>10</y>
+                <width>290</width>
                 <height>60</height>
             </rect>
         </property>
@@ -470,7 +470,7 @@
                 <x>10</x>
                 <y>190</y>
                 <width>670</width>
-                <height>400</height>
+                <height>300</height>
             </rect>
         </property>
         <property name="title">
