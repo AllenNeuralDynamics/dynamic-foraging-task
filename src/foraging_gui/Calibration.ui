@@ -802,7 +802,7 @@
                 </sizepolicy>
             </property>
             <property name="text">
-                <string/>
+                <string>Hi!</string>
             </property>
             <property name="textFormat">
                 <enum>Qt::AutoText</enum>
