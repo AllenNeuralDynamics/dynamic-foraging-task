@@ -322,6 +322,8 @@ class WaterCalibrationDialog(QDialog):
         self.ToInitializeVisual=1
         self._UpdateFigure()
         self.setWindowTitle('Water Calibration: {}'.format(self.MainWindow.current_box))
+        self.Warning.setText('Hello World!')
+        self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
 
     def _connectSignalsSlots(self):
         self.SpotCheckLeft.clicked.connect(self._SpotCheckLeft)
@@ -389,6 +391,8 @@ class WaterCalibrationDialog(QDialog):
         '''save the calibration result of the single point calibration (left valve)'''
         self.SaveLeft.setStyleSheet("background-color : green;")
         QApplication.processEvents()
+        
+        # DEBUG, check if self.SpotLeftFinished ==1 
         valve='Left'
         valve_open_time=str(float(self.SpotLeftOpenTime.text()))
         try:
@@ -924,6 +928,7 @@ class WaterCalibrationDialog(QDialog):
         self.SpotCheckLeft.setStyleSheet("background-color : green;")
 
         # start the open/close/delay cycle
+        self.SpotLeftFinished=0
         for i in range(int(self.SpotCycle)):
             QApplication.processEvents()
             if self.SpotCheckLeft.isChecked():
@@ -938,6 +943,7 @@ class WaterCalibrationDialog(QDialog):
                 time.sleep(float(self.SpotLeftOpenTime.text())+self.SpotInterval)
             else:
                 break
+            self.SpotLeftFinished=1
 
         self.SpotCheckLeft.setChecked(False)        
         self.SpotCheckLeft.setStyleSheet("background-color : none")
