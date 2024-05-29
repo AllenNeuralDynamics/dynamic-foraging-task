@@ -13,114 +13,6 @@
   <property name="windowTitle">
    <string>Water calibration</string>
   </property>
-  <widget class="QDoubleSpinBox" name="SpotRightOpenTime">
-   <property name="geometry">
-    <rect>
-     <x>180</x>
-     <y>140</y>
-     <width>60</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="decimals">
-    <number>3</number>
-   </property>
-   <property name="singleStep">
-    <double>0.005000000000000</double>
-   </property>
-   <property name="value">
-    <double>0.030000000000000</double>
-   </property>
-  </widget>
-  <widget class="QDoubleSpinBox" name="SpotLeftOpenTime">
-   <property name="geometry">
-    <rect>
-     <x>180</x>
-     <y>105</y>
-     <width>60</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="decimals">
-    <number>3</number>
-   </property>
-   <property name="singleStep">
-    <double>0.005000000000000</double>
-   </property>
-   <property name="value">
-    <double>0.030000000000000</double>
-   </property>
-  </widget>
-  <widget class="QLabel" name="SpotLeftOpenTimeLabel">
-   <property name="geometry">
-    <rect>
-     <x>100</x>
-     <y>105</y>
-     <width>75</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>open time (s)</string>
-   </property>
-   <property name="textFormat">
-    <enum>Qt::AutoText</enum>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="SpotRightOpenTimeLabel">
-   <property name="geometry">
-    <rect>
-     <x>100</x>
-     <y>140</y>
-     <width>75</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>open time (s)</string>
-   </property>
-   <property name="textFormat">
-    <enum>Qt::AutoText</enum>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="OpenLeft">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>105</y>
-     <width>80</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Check left</string>
-   </property>
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="OpenRight">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>140</y>
-     <width>80</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Check right</string>
-   </property>
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-  </widget>
   <widget class="QPushButton" name="OpenLeftForever">
    <property name="geometry">
     <rect>
@@ -765,152 +657,260 @@
     <string>Flush lines</string>
    </property>
   </widget>
-  <widget class="QGroupBox" name="groupBox">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>85</y>
-     <width>671</width>
-     <height>90</height>
-    </rect>
-   </property>
-   <property name="title">
-    <string>Spot check</string>
-   </property>
-   <widget class="QLabel" name="SpotCheckPreWeightLeftLabel">
+<widget class="QGroupBox" name="groupBox">
     <property name="geometry">
-     <rect>
-      <x>250</x>
-      <y>20</y>
-      <width>100</width>
-      <height>25</height>
-     </rect>
+        <rect>
+            <x>10</x>
+            <y>85</y>
+            <width>671</width>
+            <height>90</height>
+            </rect>
+        </property>
+    <property name="title">
+        <string>Spot check</string>
     </property>
-    <property name="text">
-     <string>Pre weight(g)=</string>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::AutoText</enum>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-    </property>
-   </widget>
-   <widget class="QLabel" name="SpotCheckPreWeightRightLabel">
-    <property name="geometry">
-     <rect>
-      <x>250</x>
-      <y>55</y>
-      <width>100</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Pre weight(g)=</string>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::AutoText</enum>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-    </property>
-   </widget>
-   <widget class="QLabel" name="SpotCheckTotalWaterRightLabel">
-    <property name="geometry">
-    <rect>
-     <x>435</x>
-     <y>55</y>
-     <width>100</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Final water (g)</string>
-   </property>
-   <property name="textFormat">
-    <enum>Qt::AutoText</enum>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="TotalWaterSingleLeft">
-   <property name="geometry">
-    <rect>
-     <x>530</x>
-     <y>20</y>
-     <width>40</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
-  <widget class="QLabel" name="SpotCheckTotalWaterLeftLabel">
-   <property name="geometry">
-    <rect>
-     <x>440</x>
-     <y>20</y>
-     <width>100</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Final water(g)</string>
-   </property>
-   <property name="textFormat">
-    <enum>Qt::AutoText</enum>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="TotalWaterSingleRight">
-   <property name="geometry">
-    <rect>
-     <x>530</x>
-     <y>55</y>
-     <width>40</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="SaveLeft">
-   <property name="geometry">
-    <rect>
-     <x>580</x>
-     <y>20</y>
-     <width>80</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Save</string>
-   </property>
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="SaveRight">
-   <property name="geometry">
-    <rect>
-     <x>580</x>
-     <y>55</y>
-     <width>80</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Save</string>
-   </property>
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-  </widget>
+    <widget class="QPushButton" name="SpotCheckLeft">
+        <property name="geometry">
+            <rect>
+                <x>20</x>
+                <y>20</y>
+                <width>80</width>
+                <height>25</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Check left</string>
+        </property>
+        <property name="checkable">
+            <bool>true</bool>
+        </property>
+    </widget>
+    <widget class="QPushButton" name="SpotCheckRight">
+        <property name="geometry">
+            <rect>
+                <x>20</x>
+                <y>55</y>
+                <width>80</width>
+                <height>25</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Check right</string>
+        </property>
+        <property name="checkable">
+            <bool>true</bool>
+        </property>
+    </widget>
+    <widget class="QLabel" name="SpotLeftOpenTimeLabel">
+        <property name="geometry">
+            <rect>
+                <x>100</x>
+                <y>20</y>
+                <width>75</width>
+                <height>25</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>open time (s)</string>
+        </property>
+        <property name="textFormat">
+            <enum>Qt::AutoText</enum>
+        </property>
+        <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+    </widget>
+    <widget class="QLabel" name="SpotRightOpenTimeLabel">
+        <property name="geometry">
+            <rect>
+                <x>100</x>
+                <y>55</y>
+                <width>75</width>
+                <height>25</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>open time (s)</string>
+        </property>
+        <property name="textFormat">
+            <enum>Qt::AutoText</enum>
+        </property>
+        <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="SpotLeftOpenTime">
+        <property name="geometry">
+            <rect>
+                <x>180</x>
+                <y>20</y>
+                <width>60</width>
+                <height>25</height>
+            </rect>
+        </property>
+        <property name="decimals">
+            <number>3</number>
+        </property>
+        <property name="singleStep">
+            <double>0.005000000000000</double>
+        </property>
+        <property name="value">
+            <double>0.030000000000000</double>
+        </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="SpotRightOpenTime">
+        <property name="geometry">
+            <rect>
+                <x>180</x>
+                <y>55</y>
+                <width>60</width>
+                <height>25</height>
+            </rect>
+        </property>
+        <property name="decimals">
+            <number>3</number>
+        </property>
+        <property name="singleStep">
+            <double>0.005000000000000</double>
+        </property>
+        <property name="value">
+            <double>0.030000000000000</double>
+        </property>
+    </widget>
+    <widget class="QLabel" name="SpotCheckPreWeightLeftLabel">
+        <property name="geometry">
+            <rect>
+                <x>250</x>
+                <y>20</y>
+                <width>100</width>
+                <height>25</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Pre weight(g)=</string>
+        </property>
+        <property name="textFormat">
+            <enum>Qt::AutoText</enum>
+        </property>
+        <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+    </widget>
+    <widget class="QLabel" name="SpotCheckPreWeightRightLabel">
+        <property name="geometry">
+            <rect>
+                <x>250</x>
+                <y>55</y>
+                <width>100</width>
+                <height>25</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Pre weight(g)=</string>
+        </property>
+        <property name="textFormat">
+            <enum>Qt::AutoText</enum>
+        </property>
+        <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+    </widget>
+    <widget class="QLabel" name="SpotCheckTotalWaterLeftLabel">
+        <property name="geometry">
+            <rect>
+                <x>440</x>
+                <y>20</y>
+                <width>100</width>
+                <height>25</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Final water(g)</string>
+        </property>
+        <property name="textFormat">
+            <enum>Qt::AutoText</enum>
+        </property>
+        <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+    </widget>
+    <widget class="QLabel" name="SpotCheckTotalWaterRightLabel">
+        <property name="geometry">
+            <rect>
+                <x>435</x>
+                <y>55</y>
+                <width>100</width>
+                <height>25</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Final water (g)</string>
+        </property>
+        <property name="textFormat">
+            <enum>Qt::AutoText</enum>
+        </property>
+        <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+    </widget>
+    <widget class="QLineEdit" name="TotalWaterSingleLeft">
+        <property name="geometry">
+            <rect>
+                <x>530</x>
+                <y>20</y>
+                <width>40</width>
+                <height>25</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string/>
+        </property>
+    </widget>
+    <widget class="QLineEdit" name="TotalWaterSingleRight">
+        <property name="geometry">
+            <rect>
+                <x>530</x>
+                <y>55</y>
+                <width>40</width>
+                <height>25</height>
+            </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+    </widget>
+    <widget class="QPushButton" name="SaveLeft">
+        <property name="geometry">
+            <rect>
+                <x>580</x>
+                <y>20</y>
+                <width>80</width>
+                <height>25</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Save</string>
+        </property>
+        <property name="checkable">
+            <bool>true</bool>
+        </property>
+    </widget>
+    <widget class="QPushButton" name="SaveRight">
+        <property name="geometry">
+            <rect>
+                <x>580</x>
+                <y>55</y>
+                <width>80</width>
+                <height>25</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Save</string>
+        </property>
+        <property name="checkable">
+            <bool>true</bool>
+        </property>
+    </widget>
   </widget>
   <widget class="QGroupBox" name="groupBox_2">
    <property name="geometry">
