@@ -7,7 +7,7 @@
             <x>0</x>
             <y>0</y>
             <width>690</width>
-            <height>730</height>
+            <height>740</height>
         </rect>
     </property>
     <property name="windowTitle">
@@ -714,9 +714,6 @@
                     <width>650</width>
                     <height>85</height>
                 </rect>
-            </property>
-            <property name="styleSheet">
-                <string notr="true">background-color: rgb(255, 170, 255)</string>
             </property>
             <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
