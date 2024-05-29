@@ -442,7 +442,7 @@ class WaterCalibrationDialog(QDialog):
                 self.WaterCalibrationPar = json.load(f)
             logging.info('loaded water calibration parameters')
         else:
-            logging.error('could not find water calibration parameters: {}'.format(self.MainWindow.WaterCalibrationParFiles)
+            logging.error('could not find water calibration parameters: {}'.format(self.MainWindow.WaterCalibrationParFiles))
             raise Exception('Missing water calibration parameter file: {}'.format(self.MainWindow.WaterCalibrationParFiles))
         self.CycleRight = self.WaterCalibrationPart['Spot']['Cycle']
         self.CycleLeft = self.WaterCalibrationPart['Spot']['Cycle']
