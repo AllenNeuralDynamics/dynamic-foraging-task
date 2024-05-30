@@ -2170,11 +2170,25 @@ class Window(QMainWindow):
         '''Save the current session witout restarting the logging'''
         self._Save(SaveContinue=1)
 
-    def _Save(self,ForceSave=0,SaveAs=0,SaveContinue=0):
+    def _Save(self,ForceSave=0,SaveAs=0,SaveContinue=0,BackupSave=0):
+        '''
+        Save the current session    
+
+        parameters:
+            ForceSave (int): 0, save after finishing the current trial, 1, save without waiting for the current trial to finish
+            SaveAs (int): 0 if the user should be prompted to select a save file, 1 if the file should be saved as the current SaveFileJson
+            SaveContinue (int): 0, force to start a new session, 1 if the current session should be saved without restarting the logging
+            BackupSave (int): 1, save the current session without stopping the current session and without prompting the user for a save file, 0, save the current session and prompt the user for a save file
+        '''
+        if BackupSave==1:
+            ForceSave=1
+            SaveAs=0
+            SaveContinue=1
+
         logging.info('Saving current session, ForceSave={}'.format(ForceSave))
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
-        if self.BaseWeight.text()=='' or self.WeightAfter.text()=='' or self.TargetRatio.text()=='':
+        if (self.BaseWeight.text()=='' or self.WeightAfter.text()=='' or self.TargetRatio.text()=='') and BackupSave==0:
             response = QMessageBox.question(self,
                 'Box {}, Save without weight or extra water:'.format(self.box_letter), 
                 "Do you want to save without weight or extra water information provided?",
@@ -2195,7 +2209,7 @@ class Window(QMainWindow):
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
                 return
         # check if the laser power and target are entered
-        if self.OptogeneticsB.currentText()=='on' and (self.Opto_dialog.laser_1_target.text()=='' or self.Opto_dialog.laser_1_calibration_power.text()=='' or self.Opto_dialog.laser_2_target.text()=='' or self.Opto_dialog.laser_2_calibration_power.text()=='' or self.Opto_dialog.laser_1_calibration_voltage.text()=='' or self.Opto_dialog.laser_2_calibration_voltage.text()==''):
+        if BackupSave==0 and self.OptogeneticsB.currentText()=='on' and (self.Opto_dialog.laser_1_target.text()=='' or self.Opto_dialog.laser_1_calibration_power.text()=='' or self.Opto_dialog.laser_2_target.text()=='' or self.Opto_dialog.laser_2_calibration_power.text()=='' or self.Opto_dialog.laser_1_calibration_voltage.text()=='' or self.Opto_dialog.laser_2_calibration_voltage.text()==''):
             response = QMessageBox.question(self,
                 'Box {}, Save without laser target or laser power:'.format(self.box_letter), 
                 "Do you want to save without complete laser target or laser power calibration information provided?",
@@ -2217,7 +2231,7 @@ class Window(QMainWindow):
                 return
 
         # Stop Excitation if its running
-        if self.StartExcitation.isChecked():
+        if self.StartExcitation.isChecked() and BackupSave==0:
             self.StartExcitation.setChecked(False)
             self._StartExcitation()
             logging.info('Stopping excitation before saving')
@@ -2361,8 +2375,9 @@ class Window(QMainWindow):
             self.unsaved_data=True
             # do not create a new folder
             self.CreateNewFolder=0
-        
-        self._check_drop_frames(save_tag=1)
+
+        if BackupSave==0:
+            self._check_drop_frames(save_tag=1)
 
         # save drop frames information
         Obj['drop_frames_tag']=self.drop_frames_tag
@@ -2412,14 +2427,15 @@ class Window(QMainWindow):
         self.Sessionlist.setEnabled(True)
 
         # Drop `finished` file with date/time
-        filepath = os.path.join(self.SessionFolder, 'finished') 
-        contents = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        with open(filepath, 'w') as finished_file:
-            finished_file.write(contents)
-        if self.StartEphysRecording.isChecked():
-            QMessageBox.warning(self, '', 'Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!')
-            self.unsaved_data=True
-            self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
+        if BackupSave==0:
+            filepath = os.path.join(self.SessionFolder, 'finished') 
+            contents = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            with open(filepath, 'w') as finished_file:
+                finished_file.write(contents)
+            if self.StartEphysRecording.isChecked():
+                QMessageBox.warning(self, '', 'Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!')
+                self.unsaved_data=True
+                self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
 
     def _GetSaveFolder(self):
         '''
@@ -3664,7 +3680,10 @@ class Window(QMainWindow):
                 # update licks statistics
                 if self.actionLicks_sta.isChecked():
                     self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
-                
+                # save the data everytrial
+                if GeneratedTrials.B_CurrentTrialN>1:
+                    self._Save(BackupSave=1)
+
                 if GeneratedTrials.CurrentSimulation==True:
                     GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3,self.Channel4)
                     self.ANewTrial=1
