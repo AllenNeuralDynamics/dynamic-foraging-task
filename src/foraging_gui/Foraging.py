@@ -94,6 +94,7 @@ class Window(QMainWindow):
         self.ToInitializeVisual = 1 # Should we visualize performance
         self.FigureUpdateTooSlow = 0# if the FigureUpdateTooSlow is true, using different process to update figures
         self.ANewTrial = 1          # permission to start a new trial
+        self.to_save = 1            # permission to save backup data
         self.UpdateParameters = 1   # permission to update parameters
         self.loggingstarted = -1    # Have we started trial logging
         self.unsaved_data = False   # Setting unsaved data to False 
@@ -108,6 +109,7 @@ class Window(QMainWindow):
         self.threadpool3=QThreadPool() # visualization
         self.threadpool4=QThreadPool() # for generating a new trial
         self.threadpool5=QThreadPool() # for starting the trial loop
+        self.threadpool6=QThreadPool() # for saving data
         self.threadpool_workertimer=QThreadPool() # for timing
 
         # Set up more parameters
@@ -3610,7 +3612,7 @@ class Window(QMainWindow):
             self.WarningLabelStop.setText('Running photometry baseline')
             self.WarningLabelStop.setStyleSheet(self.default_warning_color)
         
-        self._StartTrialLoop(GeneratedTrials,worker1)
+        self._StartTrialLoop(GeneratedTrials,worker1,workderSave)
 
         if self.actionDrawing_after_stopping.isChecked()==True:
             try:
@@ -3618,7 +3620,7 @@ class Window(QMainWindow):
             except Exception as e:
                 logging.error(str(e))
 
-    def _StartTrialLoop(self,GeneratedTrials,worker1):
+    def _StartTrialLoop(self,GeneratedTrials,worker1,workderSave):
         if self.Start.isChecked():
             logging.info('starting trial loop')
         else:
@@ -3689,8 +3691,9 @@ class Window(QMainWindow):
                 if self.actionLicks_sta.isChecked():
                     self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
                 # save the data everytrial
-                if GeneratedTrials.B_CurrentTrialN>1:
-                    self._Save(BackupSave=1)
+                if GeneratedTrials.B_CurrentTrialN>0 and self.to_save==1:
+                    self.to_save=0
+                    self.threadpool6.start(workderSave)
 
                 if GeneratedTrials.CurrentSimulation==True:
                     GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3,self.Channel4)
