@@ -2415,19 +2415,19 @@ class Window(QMainWindow):
                 json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
 
         # Toggle unsaved data to False
-        self.unsaved_data=False
-        self.Save.setStyleSheet("background-color : None;")
-        self.Save.setStyleSheet("color: black;")
-
-        short_file = self.SaveFile.split('\\')[-1]
-        self.WarningLabel.setText('Saved: {}'.format(short_file))
-        self.WarningLabel.setStyleSheet(self.default_warning_color)
-        
-        self.SessionlistSpin.setEnabled(True)
-        self.Sessionlist.setEnabled(True)
-
-        # Drop `finished` file with date/time
         if BackupSave==0:
+            self.unsaved_data=False
+            self.Save.setStyleSheet("background-color : None;")
+            self.Save.setStyleSheet("color: black;")
+
+            short_file = self.SaveFile.split('\\')[-1]
+            self.WarningLabel.setText('Saved: {}'.format(short_file))
+            self.WarningLabel.setStyleSheet(self.default_warning_color)
+            
+            self.SessionlistSpin.setEnabled(True)
+            self.Sessionlist.setEnabled(True)
+
+            # Drop `finished` file with date/time
             filepath = os.path.join(self.SessionFolder, 'finished') 
             contents = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             with open(filepath, 'w') as finished_file:
