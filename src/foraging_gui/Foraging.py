@@ -10,6 +10,7 @@ import socket
 import harp
 import pandas as pd
 from datetime import date, datetime
+import copy
 
 import serial 
 import numpy as np
@@ -31,6 +32,7 @@ from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY, EphysRecording
 from foraging_gui.stage import Stage
+
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -1990,23 +1992,24 @@ class Window(QMainWindow):
     def _Save_continue(self):
         '''Save the current session witout restarting the logging'''
         self._Save(SaveContinue=1)
+    
+    # def _InitializeSaveFile(self):
+    #     # Create a new folder, if necessary
+    #     if self.CreateNewFolder==1:
+    #         self._GetSaveFolder()
+    #         self.CreateNewFolder=0
 
-    def _SetupCheckpointSavingFolder(self):
-        """Setup the timer to save checkpoints"""
+        # # Name the file based on initialization time.
+        # # Get datetime for saving
+        # current_time = datetime.now()
+        # formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+        
+        # this_data_json = f'{self.ID.text()}_{formatted_datetime}.dynamic.foraging.json'
+        # self.ContinuousFileWriter = open(os.path.join(self.CheckpointFolder,this_data_json), "w")
 
-
-    def _SaveSettings(self):
-        """Save the current settings"""
-
-
-
-        # Create a new folder, if necessary
-        if self.CreateNewFolder==1:
-            self._GetSaveFolder()
-            self.CreateNewFolder=0
-
+    def _ConstructSettingsObject(self):
+        """Construct a dictionary of settings to save to a file."""
         save_me = {}
-
         # Get settings from the GUI
         widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren(
             (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
@@ -2047,16 +2050,21 @@ class Window(QMainWindow):
         if hasattr(self, 'LaserCalibrationResults'):
             self._GetLaserCalibration()
             save_me['LaserCalibrationResults']=self.LaserCalibrationResults
+        else:
+            save_me['LaserCalibrationResults']={}
 
         # get water calibration results
         if hasattr(self, 'WaterCalibrationResults'):
             self._GetWaterCalibration()
             save_me['WaterCalibrationResults']=self.WaterCalibrationResults
-        
+        else:
+            save_me['WaterCalibrationResults']={}
+
         # get other fields start with Ot_
         for attr_name in dir(self):
             if attr_name.startswith('Ot_'):
                 save_me[attr_name]=getattr(self, attr_name)
+    
 
         # get the current box
         save_me['box'] = self.current_box
@@ -2082,35 +2090,192 @@ class Window(QMainWindow):
         # get the open ephys recording information
         save_me['open_ephys'] = self.open_ephys
 
-        # ADD CODE TO SAVE HERE!!
-        # Get datetime for saving
+        # Check to see if any frames were dropped
+        # Placing this here so that changes will be tracked and saved.
+        self._check_drop_frames(save_tag= 1)# If this is expensive we should skip.
+        save_me['drop_frames_tag']=self.drop_frames_tag
+        save_me['trigger_length']=self.trigger_length
+        save_me['drop_frames_warning_text']=self.drop_frames_warning_text
+        save_me['frame_num']=self.frame_num
+
+        return save_me
+
+    def _SaveInitialSettings(self):
+        """Save the current settings"""
+        # Create a new folder, if necessary
+        if self.CreateNewFolder==1:
+            self._GetSaveFolder()
+            self.CreateNewFolder=0
+        save_me = self._ConstructSettingsObject()
+        self.CurrentSettings = copy.copy(save_me)
+
         current_time = datetime.now()
         formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+        save_me['_whoami'] = 'settings'
+        save_me['_whenami'] = formatted_datetime
+        
         # Get the file name to save to.
-        this_settings_json = f'settings_{self.ID.text()}_{formatted_datetime}'
+        this_settings_json = f'settings_init_{self.ID.text()}_{formatted_datetime}'
         full_output_file = os.path.join(self.CheckpointFolder, this_settings_json + '.json')
         with open(full_output_file, "w") as outfile:
-            json.dump(save_me, outfile, indent=4, cls=NumpyEncoder)
+           json.dump(save_me, outfile, indent=4, cls=NumpyEncoder)
+        # Store settings to check for differential later.
         logging.info(f"Saved settings to {full_output_file}")
+
+    def _SaveSettingsChange(self):
+        save_me = self._ConstructSettingsObject()
+        # Check if the settings have changed
+        if hasattr(self, 'CurrentSettings'):
+            changed_obj={}
+            for key in save_me.keys():
+                if key not in self.CurrentSettings.keys():
+                    changed_obj[key] = save_me[key]
+                elif save_me[key] != self.CurrentSettings[key]:
+                    changed_obj[key] = save_me[key]
+            current_time = datetime.now()
+            formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+            changed_obj['_whoami'] = 'settings'
+            changed_obj['_whenami'] = formatted_datetime
+            this_settings_json = f'settings_{self.GeneratedTrials.B_CurrentTrialN}_{self.ID.text()}_{formatted_datetime}'
+            full_output_file = os.path.join(self.CheckpointFolder, this_settings_json + '.json')
+            with open(full_output_file, "w") as outfile:
+                json.dump(changed_obj, outfile, indent=4, cls=NumpyEncoder)
+        else:
+            error('CurrentSettings not found. Cannot save settings change. This should not happen, means code was called in wrong order')
+        self.CurrentSettings = copy.copy(save_me)
 
     def _SaveLastTrial(self):
         """
         Save the last trial information.
         """
+        self._SaveSettingsChange()
+        
+        # Get datetime for saving
+        current_time = datetime.now()
+        formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+
         if hasattr(self, 'GeneratedTrials'):
+            # This information is logged per trial, so we can just save the last trial
             if hasattr(self.GeneratedTrials, 'Obj'):
                 trial_obj=self.GeneratedTrials.Obj
                 this_trial_obj = {}
-                for ii,key in enumerate(trial_obj.keys()):
-                    this_trial_obj[key] = trial_obj[key][self.GeneratedTrials.B_CurrentTrialN]
-                # Get datetime for saving
                 current_time = datetime.now()
                 formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+                this_trial_obj['_whoami'] = 'trial'
+                this_trial_obj['_whenami'] = formatted_datetime
+
+                for ii,key in enumerate(trial_obj.keys()):
+                    this_trial_obj[key] = trial_obj[key][int(self.GeneratedTrials.B_CurrentTrialN)]
+
                 # Get the file name to save to.
                 this_trial_json = f'trial_{self.GeneratedTrials.B_CurrentTrialN}_{self.ID.text()}_{formatted_datetime}'
+                # The actual saving step
                 with open(os.path.join(self.CheckpointFolder, this_trial_json + '.json'), "w") as outfile:
-                    json.dump(this_trial_obj, outfile, indent=4, cls=NumpyEncoder)
-        
+                   json.dump(this_trial_obj, outfile, indent=4, cls=NumpyEncoder)
+                #self._StreamToSaveFile(this_trial_obj,whoami='trial')
+            # Now deal with behavior data this is irregular in timing.
+            tmp_state_obj = {}
+
+
+            # Iterate over all attributes of the GeneratedTrials object
+            # store as a temorary object
+            # Use copy to make threadsafe...this should be checked carfully
+            for attr_name in dir(self.GeneratedTrials):
+                if attr_name.startswith('B_') or attr_name.startswith('BS_'):
+                    Value=getattr(self.GeneratedTrials, attr_name)
+                    try:
+                        if math.isnan(Value):
+                            tmp_state_obj[attr_name]='nan'
+                        else:
+                            tmp_state_obj[attr_name]=copy.copy(list(np.array(Value)[-1,:]))
+                    except Exception as e:
+                        # Lots of B_xxx data are not real scalars and thus math.isnan(Value) will fail
+                        # e.g. B_AnimalResponseHistory. We just save them as they are. 
+                        # This is expected and no need to log an error.
+                        # I don't know the necessity of turning nan values into 'nan', 
+                        # but for backward compatibility, I keep it above.
+                        logging.info(f'{attr_name} is not a real scalar, save it as it is.')
+                        tmp_state_obj[attr_name]=copy.copy(Value)
+            
+            # Store the past state of B_ and BS_ attributes.
+            # This is to avoid having to write information more than once.
+            if not hasattr(self, 'StateVars'): # if it's the first time
+                changed_obj = {}
+                self.StateVars = tmp_state_obj
+                changed_obj = tmp_state_obj
+                changed_obj['_whoami'] = 'state'
+                changed_obj['_whenami'] = formatted_datetime
+                self.StartVarsReadAxis = {} # Declare here, will be used later for checking if the size of the array has changed.
+            else:
+                changed_obj = {}
+                changed_obj['_whoami'] = 'state'
+                changed_obj['_whenami'] = formatted_datetime
+                # Find what has changed between this and the last time
+                for ii,key in enumerate(tmp_state_obj.keys()):
+                    # Some keys are not tracked yet.
+                    if key not in self.StateVars.keys():
+                        changed_obj[key] = tmp_state_obj[key]
+                        self.StateVars[key] = tmp_state_obj[key]
+                    #Check if the value has changed
+                    elif isinstance(self.StateVars[key],np.ndarray) or isinstance(self.StateVars[key],list):
+                        # If its a list, convert to np array for easier handling
+                        if isinstance(self.StateVars[key],list) or isinstance(tmp_state_obj[key],list):
+                            try:
+                                self.StateVars[key] = np.array(self.StateVars[key])
+                                tmp_state_obj[key] = np.array(tmp_state_obj[key])
+                            except ValueError:
+                                # Special case in which array data is of unequal
+                                # size. Here we just log the new data if it
+                                # changed.
+                                if not tmp_state_obj[key] == self.StateVars[key]:
+                                    changed_obj[key] = tmp_state_obj[key]
+                                    self.StateVars[key] = tmp_state_obj[key]
+                                    continue  # Skip code assuming np arrays
+                                else:
+                                    continue # Skip code assuming np arrays
+                    
+                        if np.array_equal(tmp_state_obj[key],self.StateVars[key]):
+                            # No change, don't log
+                            continue 
+                        elif (tmp_state_obj[key].shape == self.StateVars[key].shape) or (tmp_state_obj[key].ndim==0):
+                            # Everything has changed, log.
+                            # In the special case of a scalar, we log it too.
+                            changed_obj[key] = tmp_state_obj[key]
+                        elif tmp_state_obj[key].ndim==1:
+                            # Only log any elements that have changed.
+                            changed_obj[key] = tmp_state_obj[key][len(self.StateVars[key]):]
+                        elif tmp_state_obj[key].ndim==2:
+                            if key in self.StartVarsReadAxis.keys():
+                                read_axis = self.StartVarsReadAxis[key]
+                            else:
+                                read_axis = np.argmin(self.StateVars[key].shape)
+                                self.StartVarsReadAxis[key] = read_axis
+
+                            if read_axis==0:
+                                strt = self.StateVars[key].shape[0]
+                                stp = tmp_state_obj[key].shape[0]
+                                changed_obj[key] = tmp_state_obj[key][strt:stp,:]
+                            elif read_axis ==1:
+                                strt = self.StateVars[key].shape[1]
+                                stp = tmp_state_obj[key].shape[1]
+                                changed_obj[key] = tmp_state_obj[key][:,strt:stp]
+                            else:
+                                raise ValueError(f'Shaping logging got weird for {key}')
+                        else:
+                            logging.error(f'Unknown shape for {key}')
+                    else:
+                        # For non lists, just check if the value has changed
+                        if tmp_state_obj[key] == self.StateVars[key]:
+                            continue
+                        else:
+                            changed_obj[key] = tmp_state_obj[key]
+
+                    self.StateVars[key] = tmp_state_obj[key]
+
+            # Save everything that has changed
+            this_state_json = f'state_{self.GeneratedTrials.B_CurrentTrialN}_{self.ID.text()}_{formatted_datetime}'
+            with open(os.path.join(self.CheckpointFolder, this_state_json + '.json'), "w") as outfile:
+                json.dump(changed_obj, outfile, indent=4, cls=NumpyEncoder)
 
     def _Save(self,ForceSave=0,SaveAs=0,SaveContinue=0):
         logging.info('Saving current session, ForceSave={}'.format(ForceSave))
@@ -2267,11 +2432,15 @@ class Window(QMainWindow):
         if hasattr(self, 'LaserCalibrationResults'):
             self._GetLaserCalibration()
             Obj['LaserCalibrationResults']=self.LaserCalibrationResults
+        else:
+            Obj['LaserCalibrationResults']={}
 
         # save water calibration results
         if hasattr(self, 'WaterCalibrationResults'):
             self._GetWaterCalibration()
             Obj['WaterCalibrationResults']=self.WaterCalibrationResults
+        else:
+            Obj['WaterCalibrationResults']={}
         
         # save other fields start with Ot_
         for attr_name in dir(self):
@@ -2547,6 +2716,109 @@ class Window(QMainWindow):
                         break
         return mice  
 
+    def _load_per_trial_settings_json(self,checkpoint_folder):
+        """Load all the settings files and return the data as a dictionary"""
+        checkpoint_files = os.listdir(checkpoint_folder)
+
+        ### read the settings file first ###
+        settings_files = [ii for ii in checkpoint_files if 'settings' in ii]
+        trial_number = []
+        for ii in settings_files:
+            if 'init' in ii:
+                trial_number.append(-1)
+            else:
+                trial_number.append(int(ii.split('_')[1].split('.')[0]))
+        order = np.argsort(trial_number)
+        settings_files = [settings_files[ii] for ii in order]
+        # Actual file reading.
+        with open(os.path.join(checkpoint_folder, settings_files[0]), 'r') as f:
+            settings = json.load(f)
+
+        # Override any start settings with the end settings
+        for ii in settings_files[1:]:
+            with open(os.path.join(checkpoint_folder, ii), 'r') as f:
+                this_settings = json.load(f)
+            for key in this_settings.keys():
+                settings[key] = this_settings[key]
+
+        return settings
+    
+    def _load_per_trial_data_json(self,checkpoint_folder):
+        """Load all the trial files and return the data as a dictionary"""
+        checkpoint_files = os.listdir(checkpoint_folder)
+        trial_files = [ii for ii in checkpoint_files if 'trial' in ii]
+        # Sort so that they are in the right order
+        trial_number = np.array([int(ii.split('_')[1].split('.')[0]) for ii in trial_files])
+        order = np.argsort(trial_number)
+        trial_files = [trial_files[ii] for ii in order]
+
+
+        # Combine all files into a single dictionary
+        for ii in trial_files:
+            if trial_files.index(ii) == 0:
+                with open(os.path.join(checkpoint_folder, ii), 'r') as f:
+                    trial_data = json.load(f)
+                for key in trial_data.keys():
+                    trial_data[key] = list([trial_data[key]])
+
+            else:
+                with open(os.path.join(checkpoint_folder, ii), 'r') as f:
+                    this_trial_data = json.load(f)
+                for key in this_trial_data.keys():
+                    if key in trial_data.keys():
+                        trial_data[key].append(this_trial_data[key])
+                    else:
+                        trial_data[key] = list([None]*trial_files.index(ii)).append(this_trial_data[key])
+        trial_data.pop('_whoami')
+        trial_data.pop('_whenami')
+
+        return trial_data
+    
+    def _load_per_trial_state_json(self,checkpoint_folder):
+        checkpoint_files = os.listdir(checkpoint_folder)
+
+        state_files = [ii for ii in checkpoint_files if 'state' in ii]
+        # Sort so that they are in the right order
+        state_files = sorted(state_files, key=lambda x: int(x.split('_')[1].split('.')[0]))
+        print(state_files)
+
+        # 'B_' keys that do not have a history
+        # THERE IS PROBABLY A BETTER WAY TO DO THIS
+        no_history = ['B_ANewBlock',
+                    'B_AnimalCurrentResponse',
+                    'B_AnimalCurrentStimulus',
+                    'B_Baited',
+                    'B_CurrentRewardProb',
+                    'B_CurrentRewarded',
+                    'B_CurrentTrialN',
+                    'B_for_eff_optimal',
+                    'B_for_eff_optimal_random_seed',
+                    'B_Time',
+                    'B_LickPortN',
+                    'B_RewardFamilies',]
+
+        state_data = {}
+        state_data_read_axis = {}
+        for ii in state_files:
+            with open(os.path.join(checkpoint_folder, ii), 'r') as f:
+                this_state_data = json.load(f)
+            for key in this_state_data.keys():
+                if ('BS_' in key) or (key in no_history):
+                    state_data[key] = this_state_data[key]
+                elif (key in ['_whoami', '_whenami']):
+                    continue    
+                else:
+                    # Update keys without history
+                    if len(np.array(this_state_data[key]))==0:
+                        state_data[key] = []
+                    elif key not in state_data_read_axis.keys():
+                        state_data_read_axis[key] = np.argmin(np.array(this_state_data[key]).shape)
+                        state_data[key] = this_state_data[key]
+                    else:
+                        state_data[key] = np.concatenate((state_data[key], this_state_data[key]), axis=state_data_read_axis[key])
+
+        return state_data
+    
     def _Open(self,open_last = False,input_file = ''):
         if input_file == '':
             # stop current session first
@@ -2595,12 +2867,24 @@ class Window(QMainWindow):
             fname=input_file
             self.fname=fname
         if fname:
+            # Load mat file
             if fname.endswith('.mat'):
                 Obj = loadmat(fname)
+
+            # Load the new_style json file
+            elif fname.endswith('.json') and os.path.dirname(fname).endswith('per_trial_checkpoints'):
+                checkpoint_folder = os.path.dirname(fname)
+                settings = self._load_per_trial_settings_json(checkpoint_folder)
+                trial_data = self._load_per_trial_data_json(checkpoint_folder)
+                state_data = self._load_per_trial_state_json(checkpoint_folder)
+                Obj = {**settings, **trial_data, **state_data}
+
+            # Load old-style monolithic json file
             elif fname.endswith('.json'):
                 f = open (fname, "r")
                 Obj = json.loads(f.read())
                 f.close()
+
             self.Obj = Obj
             widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren((
                 QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
@@ -3191,6 +3475,7 @@ class Window(QMainWindow):
                 if self.ANewTrial==1:
                     self.WarningLabel.setText('')
                     self.WarningLabel.setStyleSheet(self.default_warning_color)
+                    self._SaveLastTrial()
                     break
                 elif (time.time() - start_time) > stall_duration*stall_iteration:
                     elapsed_time = int(np.floor(stall_duration*stall_iteration/60))
@@ -3201,6 +3486,7 @@ class Window(QMainWindow):
                         self.ANewTrial=1
                         self.WarningLabel.setText('')
                         self.WarningLabel.setStyleSheet(self.default_warning_color)
+                        self._SaveLastTrial()
                         break
                     else:
                         stall_iteration+=1
@@ -3528,8 +3814,8 @@ class Window(QMainWindow):
             self.WarningLabelStop.setText('Running photometry baseline')
             self.WarningLabelStop.setStyleSheet(self.default_warning_color)
         
-        #
-        self._SaveSettings()
+    
+        self._SaveInitialSettings()
         self._StartTrialLoop(GeneratedTrials,worker1)
 
         if self.actionDrawing_after_stopping.isChecked()==True:
