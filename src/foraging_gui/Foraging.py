@@ -2378,12 +2378,12 @@ class Window(QMainWindow):
 
         if BackupSave==0:
             self._check_drop_frames(save_tag=1)
-
-        # save drop frames information
-        Obj['drop_frames_tag']=self.drop_frames_tag
-        Obj['trigger_length']=self.trigger_length
-        Obj['drop_frames_warning_text']=self.drop_frames_warning_text
-        Obj['frame_num']=self.frame_num
+            
+            # save drop frames information
+            Obj['drop_frames_tag']=self.drop_frames_tag
+            Obj['trigger_length']=self.trigger_length
+            Obj['drop_frames_warning_text']=self.drop_frames_warning_text
+            Obj['frame_num']=self.frame_num
 
         # save manual water 
         Obj['ManualWaterVolume']=self.ManualWaterVolume
