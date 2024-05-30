@@ -3297,6 +3297,10 @@ class Window(QMainWindow):
         '''complete of generating a trial'''
         self.ToGenerateATrial=1
     
+    def _thread_complete5(self):
+        '''complete of save data'''
+        self.to_save=1
+
     def _thread_complete_timer(self):
         '''complete of _Timer'''
         if not self.ignore_timer:
@@ -3565,12 +3569,15 @@ class Window(QMainWindow):
             workerGenerateAtrial.signals.finished.connect(self._thread_complete4)
             workerStartTrialLoop = Worker(self._StartTrialLoop,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
             workerStartTrialLoop1 = Worker(self._StartTrialLoop1,GeneratedTrials)
+            workderSave = Worker(self._Save,BackupSave=1)
+            workderSave.signals.finished.connect(self._thread_complete5)
             self.worker1=worker1
             self.workerLick=workerLick
             self.workerPlot=workerPlot
             self.workerGenerateAtrial=workerGenerateAtrial
             self.workerStartTrialLoop=workerStartTrialLoop
             self.workerStartTrialLoop1=workerStartTrialLoop1
+            self.workderSave=workderSave
         else:
             PlotM=self.PlotM
             worker1=self.worker1
@@ -3579,6 +3586,7 @@ class Window(QMainWindow):
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
             workerStartTrialLoop1=self.workerStartTrialLoop1
+            workderSave=self.workderSave
 
   
         # collecting the base signal for photometry. Only run once
