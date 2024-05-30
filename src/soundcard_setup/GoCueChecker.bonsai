@@ -5,6 +5,7 @@
                  xmlns:harp="clr-namespace:Bonsai.Harp;assembly=Bonsai.Harp"
                  xmlns:p1="clr-namespace:Harp.SoundCard;assembly=Harp.SoundCard"
                  xmlns:wie="clr-namespace:Bonsai.Windows.Input;assembly=Bonsai.Windows.Input"
+                 xmlns:io="clr-namespace:Bonsai.IO;assembly=Bonsai.System"
                  xmlns="https://bonsai-rx.org/2018/workflow">
   <Workflow>
     <Nodes>
@@ -33,13 +34,20 @@
           <Value>false</Value>
         </Combinator>
       </Expression>
+      <Expression xsi:type="io:CsvReader">
+        <io:FileName>C:\Users\svc_aind_behavior\Documents\ForagingSettings\SoundAttenuation.csv</io:FileName>
+        <io:ScanPattern>%h</io:ScanPattern>
+        <io:SkipRows>0</io:SkipRows>
+      </Expression>
+      <Expression xsi:type="PropertyMapping">
+        <PropertyMappings>
+          <Property Name="AttenuationLeft" />
+        </PropertyMappings>
+      </Expression>
       <Expression xsi:type="p1:CreateMessage">
         <harp:MessageType>Write</harp:MessageType>
-        <harp:Payload xsi:type="p1:CreateAttenuationBothPayload">
-          <p1:AttenuationBoth>
-            <p1:unsignedShort>400</p1:unsignedShort>
-            <p1:unsignedShort>200</p1:unsignedShort>
-          </p1:AttenuationBoth>
+        <harp:Payload xsi:type="p1:CreateAttenuationLeftPayload">
+          <p1:AttenuationLeft>400</p1:AttenuationLeft>
         </harp:Payload>
       </Expression>
       <Expression xsi:type="MulticastSubject">
@@ -58,10 +66,12 @@
     <Edges>
       <Edge From="0" To="1" Label="Source1" />
       <Edge From="2" To="3" Label="Source1" />
-      <Edge From="3" To="4" Label="Source1" />
+      <Edge From="3" To="6" Label="Source1" />
       <Edge From="4" To="5" Label="Source1" />
-      <Edge From="5" To="6" Label="Source1" />
+      <Edge From="5" To="6" Label="Source2" />
       <Edge From="6" To="7" Label="Source1" />
+      <Edge From="7" To="8" Label="Source1" />
+      <Edge From="8" To="9" Label="Source1" />
     </Edges>
   </Workflow>
 </WorkflowBuilder>
