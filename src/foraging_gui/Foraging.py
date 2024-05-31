@@ -3571,15 +3571,15 @@ class Window(QMainWindow):
             workerGenerateAtrial.signals.finished.connect(self._thread_complete4)
             workerStartTrialLoop = Worker(self._StartTrialLoop,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
             workerStartTrialLoop1 = Worker(self._StartTrialLoop1,GeneratedTrials)
-            workderSave = Worker(self._Save,BackupSave=1)
-            workderSave.signals.finished.connect(self._thread_complete5)
+            worker_save = Worker(self._Save,BackupSave=1)
+            worker_save.signals.finished.connect(self._thread_complete5)
             self.worker1=worker1
             self.workerLick=workerLick
             self.workerPlot=workerPlot
             self.workerGenerateAtrial=workerGenerateAtrial
             self.workerStartTrialLoop=workerStartTrialLoop
             self.workerStartTrialLoop1=workerStartTrialLoop1
-            self.workderSave=workderSave
+            self.worker_save=worker_save
         else:
             PlotM=self.PlotM
             worker1=self.worker1
@@ -3588,7 +3588,7 @@ class Window(QMainWindow):
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
             workerStartTrialLoop1=self.workerStartTrialLoop1
-            workderSave=self.workderSave
+            worker_save=self.worker_save
 
   
         # collecting the base signal for photometry. Only run once
@@ -3612,7 +3612,7 @@ class Window(QMainWindow):
             self.WarningLabelStop.setText('Running photometry baseline')
             self.WarningLabelStop.setStyleSheet(self.default_warning_color)
         
-        self._StartTrialLoop(GeneratedTrials,worker1,workderSave)
+        self._StartTrialLoop(GeneratedTrials,worker1,worker_save)
 
         if self.actionDrawing_after_stopping.isChecked()==True:
             try:
@@ -3620,7 +3620,7 @@ class Window(QMainWindow):
             except Exception as e:
                 logging.error(str(e))
 
-    def _StartTrialLoop(self,GeneratedTrials,worker1,workderSave):
+    def _StartTrialLoop(self,GeneratedTrials,worker1,worker_save):
         if self.Start.isChecked():
             logging.info('starting trial loop')
         else:
@@ -3693,7 +3693,7 @@ class Window(QMainWindow):
                 # save the data everytrial
                 if GeneratedTrials.B_CurrentTrialN>0 and self.to_save==1:
                     self.to_save=0
-                    self.threadpool6.start(workderSave)
+                    self.threadpool6.start(worker_save)
 
                 if GeneratedTrials.CurrentSimulation==True:
                     GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3,self.Channel4)
