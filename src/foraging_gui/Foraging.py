@@ -2302,16 +2302,14 @@ class Window(QMainWindow):
                     else:
                         Value=getattr(self.GeneratedTrials, attr_name)
                         try:
-                            if math.isnan(Value):
-                                Obj[attr_name]='nan'
+                            if isinstance(Value, float) or isinstance(Value, int):                                
+                                if math.isnan(Value):
+                                    Obj[attr_name]='nan'    
+                                else:
+                                    Obj[attr_name]=Value   
                             else:
-                                Obj[attr_name]=Value
+                                Obj[attr_name]=Value        
                         except Exception as e:
-                            # Lots of B_xxx data are not real scalars and thus math.isnan(Value) will fail
-                            # e.g. B_AnimalResponseHistory. We just save them as they are. 
-                            # This is expected and no need to log an error.
-                            # I don't know the necessity of turning nan values into 'nan', 
-                            # but for backward compatibility, I keep it above.
                             logging.info(f'{attr_name} is not a real scalar, save it as it is.')
                             Obj[attr_name]=Value
         # save other events, e.g. session start time
