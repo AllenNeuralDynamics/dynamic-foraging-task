@@ -979,6 +979,7 @@ class Window(QMainWindow):
             'lick_spout_distance_box4':5000,
             'name_mapper_file':os.path.join(self.SettingFolder,"name_mapper.json"),
             'create_rig_metadata':True,
+            'save_each_trial':True,
         }
         
         # Try to load Settings_box#.csv
@@ -1046,6 +1047,8 @@ class Window(QMainWindow):
         self.lick_spout_distance_box3 = self.Settings['lick_spout_distance_box3']
         self.lick_spout_distance_box4 = self.Settings['lick_spout_distance_box4']
         self.name_mapper_file = self.Settings['name_mapper_file']
+        self.save_each_trial = self.Settings['save_each_trial']
+
         if not is_absolute_path(self.project_info_file):
             self.project_info_file = os.path.join(self.SettingFolder,self.project_info_file)
         # Also stream log info to the console if enabled
@@ -3691,7 +3694,7 @@ class Window(QMainWindow):
                 if self.actionLicks_sta.isChecked():
                     self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
                 # save the data everytrial
-                if GeneratedTrials.B_CurrentTrialN>0 and self.to_save==1:
+                if GeneratedTrials.B_CurrentTrialN>0 and self.to_save==1 and self.save_each_trial:
                     self.to_save=0
                     self.threadpool6.start(worker_save)
 
