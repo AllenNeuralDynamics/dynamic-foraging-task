@@ -2276,7 +2276,7 @@ class Window(QMainWindow):
             with open(os.path.join(self.CheckpointFolder, this_state_json + '.json'), "w") as outfile:
                 json.dump(changed_obj, outfile, indent=4, cls=NumpyEncoder)
 
-    def _Save(self,ForceSave=0,SaveAs=0,SaveContinue=0):
+    def _Save(self,ForceSave=0,SaveAs=0,SaveContinue=0,RemoveCheckpoints = 0):
         logging.info('Saving current session, ForceSave={}'.format(ForceSave))
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
@@ -2422,6 +2422,13 @@ class Window(QMainWindow):
             QMessageBox.warning(self, '', 'Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!')
             self.unsaved_data=True
             self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
+        # 
+        if RemoveCheckpoints == 1:
+            # Remove the checkpoint files
+            for file in os.listdir(self.CheckpointFolder):
+                if file.endswith('.json'):
+                    os.remove(os.path.join(self.CheckpointFolder, file))
+        os.rmdir(self.CheckpointFolder)
 
     def _GetSaveFolder(self):
         '''
