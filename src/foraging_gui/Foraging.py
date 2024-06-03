@@ -1993,19 +1993,32 @@ class Window(QMainWindow):
         '''Save the current session witout restarting the logging'''
         self._Save(SaveContinue=1)
     
-    # def _InitializeSaveFile(self):
-    #     # Create a new folder, if necessary
-    #     if self.CreateNewFolder==1:
-    #         self._GetSaveFolder()
-    #         self.CreateNewFolder=0
-
-        # # Name the file based on initialization time.
-        # # Get datetime for saving
-        # current_time = datetime.now()
-        # formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-        
-        # this_data_json = f'{self.ID.text()}_{formatted_datetime}.dynamic.foraging.json'
-        # self.ContinuousFileWriter = open(os.path.join(self.CheckpointFolder,this_data_json), "w")
+    def _ConstructStateObject(self):
+        """Construct a dictionary of trials to save to a file."""
+        Obj = {}
+        if hasattr(self, 'GeneratedTrials'):
+            # Do something if self has the GeneratedTrials attribute
+            # Iterate over all attributes of the GeneratedTrials object
+            for attr_name in dir(self.GeneratedTrials):
+                if attr_name.startswith('B_') or attr_name.startswith('BS_'):
+                    if attr_name=='B_RewardFamilies' and hasattr(self,'SaveFile') and  self.SaveFile.endswith('.mat'):
+                        pass
+                    else:
+                        Value=getattr(self.GeneratedTrials, attr_name)
+                        try:
+                            if math.isnan(Value):
+                                Obj[attr_name]='nan'
+                            else:
+                                Obj[attr_name]=Value
+                        except Exception as e:
+                            # Lots of B_xxx data are not real scalars and thus math.isnan(Value) will fail
+                            # e.g. B_AnimalResponseHistory. We just save them as they are. 
+                            # This is expected and no need to log an error.
+                            # I don't know the necessity of turning nan values into 'nan', 
+                            # but for backward compatibility, I keep it above.
+                            logging.info(f'{attr_name} is not a real scalar, save it as it is.')
+                            Obj[attr_name]=Value
+        return Obj
 
     def _ConstructSettingsObject(self):
         """Construct a dictionary of settings to save to a file."""
@@ -2180,22 +2193,8 @@ class Window(QMainWindow):
             # Iterate over all attributes of the GeneratedTrials object
             # store as a temorary object
             # Use copy to make threadsafe...this should be checked carfully
-            for attr_name in dir(self.GeneratedTrials):
-                if attr_name.startswith('B_') or attr_name.startswith('BS_'):
-                    Value=getattr(self.GeneratedTrials, attr_name)
-                    try:
-                        if math.isnan(Value):
-                            tmp_state_obj[attr_name]='nan'
-                        else:
-                            tmp_state_obj[attr_name]=copy.copy(list(np.array(Value)[-1,:]))
-                    except Exception as e:
-                        # Lots of B_xxx data are not real scalars and thus math.isnan(Value) will fail
-                        # e.g. B_AnimalResponseHistory. We just save them as they are. 
-                        # This is expected and no need to log an error.
-                        # I don't know the necessity of turning nan values into 'nan', 
-                        # but for backward compatibility, I keep it above.
-                        logging.info(f'{attr_name} is not a real scalar, save it as it is.')
-                        tmp_state_obj[attr_name]=copy.copy(Value)
+
+            tmp_state_obj = self._ConstructStateObject()
             
             # Store the past state of B_ and BS_ attributes.
             # This is to avoid having to write information more than once.
@@ -2367,86 +2366,13 @@ class Window(QMainWindow):
         else:
             Obj={}
 
+        Obj = {**Obj,**self._ConstructSettingsObject()}
 
-        ## GET SETTINGS DATA
-        widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren(
-            (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
-            QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-        widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
-        self._Concat(widget_dict,Obj,'None')
-        if hasattr(self, 'LaserCalibration_dialog'):
-            widget_dict_LaserCalibration={w.objectName(): w for w in self.LaserCalibration_dialog.findChildren(
-            (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
-            QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))} 
-            self._Concat(widget_dict_LaserCalibration,Obj,'LaserCalibration_dialog')
-        if hasattr(self, 'Opto_dialog'):
-            widget_dict_opto={w.objectName(): w for w in self.Opto_dialog.findChildren(
-                (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
-                QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-            self._Concat(widget_dict_opto,Obj,'Opto_dialog')
-        if hasattr(self, 'Camera_dialog'):
-            widget_dict_camera={w.objectName(): w for w in self.Camera_dialog.findChildren(
-                (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
-                QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-            self._Concat(widget_dict_camera,Obj,'Camera_dialog')
-        
-        ## 
+        # Save task state
         Obj2=Obj.copy()
-        # save behavor events
-        if hasattr(self, 'GeneratedTrials'):
-            # Do something if self has the GeneratedTrials attribute
-            # Iterate over all attributes of the GeneratedTrials object
-            for attr_name in dir(self.GeneratedTrials):
-                if attr_name.startswith('B_') or attr_name.startswith('BS_'):
-                    if attr_name=='B_RewardFamilies' and self.SaveFile.endswith('.mat'):
-                        pass
-                    else:
-                        Value=getattr(self.GeneratedTrials, attr_name)
-                        try:
-                            if math.isnan(Value):
-                                Obj[attr_name]='nan'
-                            else:
-                                Obj[attr_name]=Value
-                        except Exception as e:
-                            # Lots of B_xxx data are not real scalars and thus math.isnan(Value) will fail
-                            # e.g. B_AnimalResponseHistory. We just save them as they are. 
-                            # This is expected and no need to log an error.
-                            # I don't know the necessity of turning nan values into 'nan', 
-                            # but for backward compatibility, I keep it above.
-                            logging.info(f'{attr_name} is not a real scalar, save it as it is.')
-                            Obj[attr_name]=Value
-        # save other events, e.g. session start time
-        for attr_name in dir(self):
-            if attr_name.startswith('Other_') or attr_name.startswith('info_'):
-                Obj[attr_name] = getattr(self, attr_name)
-
-        # save laser calibration results (only for the calibration session)
-        if hasattr(self, 'LaserCalibration_dialog'):
-            # Do something if self has the GeneratedTrials attribute
-            # Iterate over all attributes of the GeneratedTrials object
-            for attr_name in dir(self.LaserCalibration_dialog):
-                if attr_name.startswith('LCM_'):
-                    Obj[attr_name] = getattr(self.LaserCalibration_dialog, attr_name)
-
-        # save laser calibration results from the json file
-        if hasattr(self, 'LaserCalibrationResults'):
-            self._GetLaserCalibration()
-            Obj['LaserCalibrationResults']=self.LaserCalibrationResults
-        else:
-            Obj['LaserCalibrationResults']={}
-
-        # save water calibration results
-        if hasattr(self, 'WaterCalibrationResults'):
-            self._GetWaterCalibration()
-            Obj['WaterCalibrationResults']=self.WaterCalibrationResults
-        else:
-            Obj['WaterCalibrationResults']={}
+        Obj = {**Obj,**self._ConstructStateObject()}
         
-        # save other fields start with Ot_
-        for attr_name in dir(self):
-            if attr_name.startswith('Ot_'):
-                Obj[attr_name]=getattr(self, attr_name)
-        
+        # Save the start and end time of the fiber photometry
         if hasattr(self, 'fiber_photometry_start_time'):
             Obj['fiber_photometry_start_time'] = self.fiber_photometry_start_time
             if hasattr(self, 'fiber_photometry_end_time'):
@@ -2455,29 +2381,6 @@ class Window(QMainWindow):
                 end_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") 
             Obj['fiber_photometry_end_time'] = end_time
 
-        # Save the current box
-        Obj['box'] = self.current_box
-
-        # save settings
-        Obj['settings'] = self.Settings
-        Obj['settings_box']=self.SettingsBox
-
-        # save the commit hash
-        Obj['commit_ID']=self.commit_ID
-        Obj['repo_url']=self.repo_url
-        Obj['current_branch'] =self.current_branch
-        Obj['repo_dirty_flag'] =self.repo_dirty_flag
-        Obj['dirty_files'] =self.dirty_files
-        
-        # save folders
-        Obj['TrainingFolder']=self.TrainingFolder
-        Obj['HarpFolder']=self.HarpFolder
-        Obj['VideoFolder']=self.VideoFolder
-        Obj['PhotometryFolder']=self.PhotometryFolder
-        Obj['MetadataFolder']=self.MetadataFolder
-        
-        # save the open ephys recording information
-        Obj['open_ephys'] = self.open_ephys
         
         if SaveContinue==0:
             # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
@@ -2487,14 +2390,6 @@ class Window(QMainWindow):
             # do not create a new folder
             self.CreateNewFolder=0
         
-        self._check_drop_frames(save_tag=1)
-
-        # save drop frames information
-        Obj['drop_frames_tag']=self.drop_frames_tag
-        Obj['trigger_length']=self.trigger_length
-        Obj['drop_frames_warning_text']=self.drop_frames_warning_text
-        Obj['frame_num']=self.frame_num
-
         # save Json or mat
         if self.SaveFile.endswith('.mat'):
         # Save data to a .mat file

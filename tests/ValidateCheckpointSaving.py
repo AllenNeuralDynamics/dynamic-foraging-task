@@ -8,8 +8,8 @@ def load_json(file):
         data = json.load(f)
     return data
 
-def load_old_style(testfile):
-    """Load the old style file and return the data as a dictionary"""
+def load_end_of_session_style(testfile):
+    """Load the end_of_session style file and return the data as a dictionary"""
     splt = os.path.basename(testfile).split('_')
     fl = os.path.join(testfile,'behavior', f'{splt[1]}_{splt[2]}_{splt[3]}.json')
     return load_json(fl)
@@ -38,7 +38,7 @@ def load_all_settings_files(checkpoint_folder):
             this_settings = json.load(f)
         for key in this_settings.keys():
             settings[key] = this_settings[key]
-            
+
     return settings
 
 def load_all_trial_files(checkpoint_folder):
@@ -76,8 +76,8 @@ def load_all_trial_files(checkpoint_folder):
 if __name__ == "__main__":
     testfile = r"C:\Users\yoni.browning\Documents\ForagingOutData\TestBox\0\behavior_0_2024-05-30_13-33-07"
 
-    ### Load the old style file ###
-    old_data = load_old_style(testfile)
+    ### Load the end_of_session style file ###
+    end_of_session_data = load_end_of_session_style(testfile)
 
 
     # Load and combine all the checkpoint files into a single dictionary
@@ -111,8 +111,6 @@ if __name__ == "__main__":
                   'B_RewardFamilies',
                   ]
 
-
-
     state_data = {}
     state_data_read_axis = {}
     for ii in state_files:
@@ -135,29 +133,29 @@ if __name__ == "__main__":
 
 
     # Combine all files into a single dictionary
-    new_data = {**state_data, **trial_data, **settings}
+    checkpoint_data = {**state_data, **trial_data, **settings}
 
 
     # Check that the two dictionaries are the same
-    new_data_keys = list(new_data.keys())
-    old_data_keys = list(old_data.keys())
-    print(f'There are {len(new_data_keys)} keys in the new data' )
-    print(f'There are {len(old_data_keys)} keys in the old data' )
-    print(f'There are {len(set(new_data_keys).intersection(set(old_data_keys)))} shared keys between the two files.')
+    checkpoint_data_keys = list(checkpoint_data.keys())
+    end_of_session_data_keys = list(end_of_session_data.keys())
+    print(f'There are {len(checkpoint_data_keys)} keys in the checkpoint data' )
+    print(f'There are {len(end_of_session_data_keys)} keys in the end_of_session data' )
+    print(f'There are {len(set(checkpoint_data_keys).intersection(set(end_of_session_data_keys)))} shared keys between the two files.')
 
 
-    shared_keys = [key for key in new_data_keys if key in old_data_keys]
+    shared_keys = [key for key in checkpoint_data_keys if key in end_of_session_data_keys]
 
     # Check that elements are the same 
     fails = [] 
     for key in shared_keys:
-        if isinstance(new_data[key],np.ndarray) or isinstance(old_data[key],np.ndarray):
-            if np.array(new_data[key]).shape != np.array(old_data[key]).shape:
+        if isinstance(checkpoint_data[key],np.ndarray) or isinstance(end_of_session_data[key],np.ndarray):
+            if np.array(checkpoint_data[key]).shape != np.array(end_of_session_data[key]).shape:
                 fails.append(key)
                 continue
-            if not np.allclose(np.array(new_data[key]), np.array(old_data[key])):
+            if not np.allclose(np.array(checkpoint_data[key]), np.array(end_of_session_data[key])):
                 fails.append(key)
-        elif not (new_data[key] == old_data[key]):
+        elif not (checkpoint_data[key] == end_of_session_data[key]):
             fails.append(key)
 
     print('Of these shared keys, there are ', len(fails), ' keys that cannot be reconciled between the two files.')
@@ -167,24 +165,24 @@ if __name__ == "__main__":
     else:
         print('Data shared across the two files is the same!')
 
-    unique_new_keys = [key for key in new_data_keys if key not in old_data_keys]
-    unique_old_keys = [key for key in old_data_keys if key not in new_data_keys]
+    unique_checkpoint_keys = [key for key in checkpoint_data_keys if key not in end_of_session_data_keys]
+    unique_end_of_session_keys = [key for key in end_of_session_data_keys if key not in checkpoint_data_keys]
     print('\n')
-    print('There are ', len(unique_new_keys), ' keys in the new data that are not in the old data.')
+    print('There are ', len(unique_checkpoint_keys), ' keys in the checkpoint data that are not in the end_of_session data.')
     print('The expect number is 2; _whoami and _whenami')
-    if len(unique_new_keys)>2:
+    if len(unique_checkpoint_keys)>2:
         print('We found: ')
-        print(unique_new_keys)
+        print(unique_checkpoint_keys)
         print('You should fix this before deploying.')
     else:
-        print('The unique keys in the new data are _whoami and _whenami. This is expected.')
+        print('The unique keys in the checkpoint data are _whoami and _whenami. This is expected.')
 
 
-    print('There are ', len(unique_old_keys), ' keys in the old data that are not in the new data.')
+    print('There are ', len(unique_end_of_session_keys), ' keys in the end_of_session data that are not in the checkpoint data.')
     print('The expected number is 0.')
-    if len(unique_old_keys)>0:
+    if len(unique_end_of_session_keys)>0:
         print('We found: ')
-        print(unique_old_keys)
+        print(unique_end_of_session_keys)
         print('You should fix this before deploying.')
 
 
