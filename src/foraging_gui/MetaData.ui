@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1256</width>
-    <height>695</height>
+    <width>540</width>
+    <height>680</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -36,10 +36,10 @@
   <widget class="QTextEdit" name="ExperimentDescription">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>130</y>
-     <width>221</width>
-     <height>211</height>
+     <x>20</x>
+     <y>110</y>
+     <width>230</width>
+     <height>100</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -66,10 +66,10 @@ p, li { white-space: pre-wrap; }
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>100</y>
-     <width>141</width>
-     <height>31</height>
+     <x>20</x>
+     <y>80</y>
+     <width>130</width>
+     <height>30</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -93,16 +93,16 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    <set>Qt::AlignLeft|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QPushButton" name="SaveMeta">
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>30</y>
-     <width>72</width>
-     <height>23</height>
+     <x>100</x>
+     <y>20</y>
+     <width>70</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -121,10 +121,10 @@ p, li { white-space: pre-wrap; }
   <widget class="QPushButton" name="LoadMeta">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>30</y>
-     <width>72</width>
-     <height>23</height>
+     <x>20</x>
+     <y>20</y>
+     <width>70</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -143,9 +143,9 @@ p, li { white-space: pre-wrap; }
   <widget class="QLabel" name="label_72">
    <property name="geometry">
     <rect>
-     <x>286</x>
-     <y>130</y>
-     <width>91</width>
+     <x>20</x>
+     <y>220</y>
+     <width>90</width>
      <height>20</height>
     </rect>
    </property>
@@ -168,9 +168,9 @@ p, li { white-space: pre-wrap; }
   <widget class="QLineEdit" name="IACUCProtocol">
    <property name="geometry">
     <rect>
-     <x>380</x>
-     <y>130</y>
-     <width>71</width>
+     <x>120</x>
+     <y>220</y>
+     <width>70</width>
      <height>20</height>
     </rect>
    </property>
@@ -187,9 +187,9 @@ p, li { white-space: pre-wrap; }
   <widget class="QLabel" name="label_73">
    <property name="geometry">
     <rect>
-     <x>286</x>
-     <y>170</y>
-     <width>91</width>
+     <x>20</x>
+     <y>250</y>
+     <width>90</width>
      <height>20</height>
     </rect>
    </property>
@@ -212,9 +212,9 @@ p, li { white-space: pre-wrap; }
   <widget class="QLineEdit" name="ProtocolID">
    <property name="geometry">
     <rect>
-     <x>380</x>
-     <y>170</y>
-     <width>71</width>
+     <x>120</x>
+     <y>250</y>
+     <width>70</width>
      <height>20</height>
     </rect>
    </property>
@@ -234,9 +234,9 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="geometry">
     <rect>
-     <x>660</x>
-     <y>30</y>
-     <width>201</width>
+     <x>140</x>
+     <y>50</y>
+     <width>250</width>
      <height>20</height>
     </rect>
    </property>
@@ -253,10 +253,10 @@ p, li { white-space: pre-wrap; }
   <widget class="QPushButton" name="SelectRigMetadata">
    <property name="geometry">
     <rect>
-     <x>541</x>
-     <y>30</y>
-     <width>111</width>
-     <height>23</height>
+     <x>20</x>
+     <y>50</y>
+     <width>110</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -303,10 +303,10 @@ p, li { white-space: pre-wrap; }
   <widget class="QPushButton" name="ClearMetadata">
    <property name="geometry">
     <rect>
-     <x>200</x>
-     <y>30</y>
-     <width>72</width>
-     <height>23</height>
+     <x>180</x>
+     <y>20</y>
+     <width>70</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -325,10 +325,10 @@ p, li { white-space: pre-wrap; }
   <widget class="QGroupBox" name="Probes">
    <property name="geometry">
     <rect>
-     <x>590</x>
-     <y>120</y>
-     <width>171</width>
-     <height>311</height>
+     <x>20</x>
+     <y>340</y>
+     <width>200</width>
+     <height>310</height>
     </rect>
    </property>
    <property name="title">
@@ -364,7 +364,7 @@ p, li { white-space: pre-wrap; }
      <rect>
       <x>0</x>
       <y>130</y>
-      <width>91</width>
+      <width>95</width>
       <height>20</height>
      </rect>
     </property>
@@ -502,7 +502,7 @@ p, li { white-space: pre-wrap; }
      <rect>
       <x>0</x>
       <y>190</y>
-      <width>171</width>
+      <width>200</width>
       <height>121</height>
      </rect>
     </property>
@@ -690,10 +690,10 @@ p, li { white-space: pre-wrap; }
   <widget class="QGroupBox" name="Microscopes">
    <property name="geometry">
     <rect>
-     <x>790</x>
-     <y>120</y>
-     <width>171</width>
-     <height>181</height>
+     <x>260</x>
+     <y>520</y>
+     <width>260</width>
+     <height>150</height>
     </rect>
    </property>
    <property name="title">
@@ -702,9 +702,9 @@ p, li { white-space: pre-wrap; }
    <widget class="QLabel" name="label_89">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>100</y>
-      <width>91</width>
+      <x>46</x>
+      <y>80</y>
+      <width>95</width>
       <height>20</height>
      </rect>
     </property>
@@ -758,8 +758,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QLabel" name="label_90">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>70</y>
+      <x>50</x>
+      <y>50</y>
       <width>91</width>
       <height>20</height>
      </rect>
@@ -783,8 +783,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QLineEdit" name="Stick_ModuleAngle">
     <property name="geometry">
      <rect>
-      <x>94</x>
-      <y>100</y>
+      <x>144</x>
+      <y>80</y>
       <width>71</width>
       <height>20</height>
      </rect>
@@ -802,8 +802,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QLineEdit" name="Stick_ArcAngle">
     <property name="geometry">
      <rect>
-      <x>94</x>
-      <y>70</y>
+      <x>144</x>
+      <y>50</y>
       <width>71</width>
       <height>20</height>
      </rect>
@@ -821,8 +821,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QLabel" name="label_88">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>130</y>
+      <x>50</x>
+      <y>110</y>
       <width>91</width>
       <height>20</height>
      </rect>
@@ -846,8 +846,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QLineEdit" name="Stick_RotationAngle">
     <property name="geometry">
      <rect>
-      <x>94</x>
-      <y>130</y>
+      <x>144</x>
+      <y>110</y>
       <width>71</width>
       <height>20</height>
      </rect>
@@ -866,10 +866,10 @@ p, li { white-space: pre-wrap; }
   <widget class="QGroupBox" name="DataDescription">
    <property name="geometry">
     <rect>
-     <x>280</x>
-     <y>220</y>
-     <width>271</width>
-     <height>351</height>
+     <x>260</x>
+     <y>90</y>
+     <width>260</width>
+     <height>230</height>
     </rect>
    </property>
    <property name="title">
@@ -881,7 +881,7 @@ p, li { white-space: pre-wrap; }
       <x>100</x>
       <y>170</y>
       <width>141</width>
-      <height>121</height>
+      <height>50</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -1165,9 +1165,9 @@ p, li { white-space: pre-wrap; }
   <widget class="QLabel" name="label_83">
    <property name="geometry">
     <rect>
-     <x>6</x>
-     <y>390</y>
-     <width>111</width>
+     <x>20</x>
+     <y>280</y>
+     <width>90</width>
      <height>20</height>
     </rect>
    </property>
@@ -1178,7 +1178,7 @@ p, li { white-space: pre-wrap; }
     </sizepolicy>
    </property>
    <property name="text">
-    <string>Go cue decibel (db):</string>
+    <string>Go cue (db):</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
@@ -1191,8 +1191,8 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>390</y>
-     <width>71</width>
+     <y>280</y>
+     <width>70</width>
      <height>20</height>
     </rect>
    </property>
@@ -1209,10 +1209,10 @@ p, li { white-space: pre-wrap; }
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
-     <x>980</x>
-     <y>120</y>
-     <width>221</width>
-     <height>241</height>
+     <x>260</x>
+     <y>340</y>
+     <width>260</width>
+     <height>170</height>
     </rect>
    </property>
    <property name="title">
@@ -1221,8 +1221,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QLabel" name="label_94">
     <property name="geometry">
      <rect>
-      <x>36</x>
-      <y>100</y>
+      <x>40</x>
+      <y>80</y>
       <width>91</width>
       <height>20</height>
      </rect>
@@ -1246,8 +1246,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QLineEdit" name="LickSpoutReferenceZ">
     <property name="geometry">
      <rect>
-      <x>130</x>
-      <y>130</y>
+      <x>135</x>
+      <y>110</y>
       <width>71</width>
       <height>20</height>
      </rect>
@@ -1265,8 +1265,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QLabel" name="label_92">
     <property name="geometry">
      <rect>
-      <x>36</x>
-      <y>70</y>
+      <x>40</x>
+      <y>50</y>
       <width>91</width>
       <height>20</height>
      </rect>
@@ -1290,8 +1290,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QLineEdit" name="LickSpoutReferenceY">
     <property name="geometry">
      <rect>
-      <x>130</x>
-      <y>100</y>
+      <x>135</x>
+      <y>80</y>
       <width>71</width>
       <height>20</height>
      </rect>
@@ -1309,8 +1309,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QLineEdit" name="LickSpoutReferenceX">
     <property name="geometry">
      <rect>
-      <x>130</x>
-      <y>70</y>
+      <x>135</x>
+      <y>50</y>
       <width>71</width>
       <height>20</height>
      </rect>
@@ -1328,8 +1328,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QLabel" name="label_93">
     <property name="geometry">
      <rect>
-      <x>36</x>
-      <y>130</y>
+      <x>40</x>
+      <y>110</y>
       <width>91</width>
       <height>20</height>
      </rect>
@@ -1353,8 +1353,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QLineEdit" name="LickSpoutReferenceArea">
     <property name="geometry">
      <rect>
-      <x>130</x>
-      <y>40</y>
+      <x>135</x>
+      <y>20</y>
       <width>71</width>
       <height>20</height>
      </rect>
@@ -1372,8 +1372,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QLabel" name="label_95">
     <property name="geometry">
      <rect>
-      <x>16</x>
-      <y>40</y>
+      <x>20</x>
+      <y>20</y>
       <width>111</width>
       <height>20</height>
      </rect>
@@ -1397,8 +1397,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QLineEdit" name="LickSpoutDistance">
     <property name="geometry">
      <rect>
-      <x>130</x>
-      <y>200</y>
+      <x>135</x>
+      <y>140</y>
       <width>71</width>
       <height>20</height>
      </rect>
@@ -1416,8 +1416,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QLabel" name="label_96">
     <property name="geometry">
      <rect>
-      <x>-14</x>
-      <y>200</y>
+      <x>-10</x>
+      <y>140</y>
       <width>141</width>
       <height>20</height>
      </rect>
