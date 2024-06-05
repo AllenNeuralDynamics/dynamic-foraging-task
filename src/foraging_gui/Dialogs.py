@@ -940,6 +940,7 @@ class WaterCalibrationDialog(QDialog):
                 self,
                 'Box {}, Spot Check Left'.format(self.MainWindow.box_letter),
                 "Empty tube weight: ", 
+                minValue=0,
                 QLineEdit.Normal
                 )
             if not ok:
