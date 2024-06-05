@@ -248,7 +248,7 @@
                 </rect>
             </property>
             <property name="text">
-                <string>open time (s)</string>
+                <string>Volume (uL)</string>
             </property>
             <property name="textFormat">
                 <enum>Qt::AutoText</enum>
@@ -267,7 +267,7 @@
                 </rect>
             </property>
             <property name="text">
-                <string>open time (s)</string>
+                <string>Volume (uL)</string>
             </property>
             <property name="textFormat">
                 <enum>Qt::AutoText</enum>
@@ -286,13 +286,13 @@
                 </rect>
             </property>
             <property name="decimals">
-                <number>3</number>
+                <number>1</number>
             </property>
             <property name="singleStep">
-                <double>0.005000000000000</double>
+                <double>0.1</double>
             </property>
             <property name="value">
-                <double>0.030000000000000</double>
+                <double>2.0</double>
             </property>
         </widget>
         <widget class="QDoubleSpinBox" name="SpotRightOpenTime">
@@ -305,13 +305,13 @@
                 </rect>
             </property>
             <property name="decimals">
-                <number>3</number>
+                <number>1</number>
             </property>
             <property name="singleStep">
-                <double>0.005000000000000</double>
+                <double>0.1</double>
             </property>
             <property name="value">
-                <double>0.030000000000000</double>
+                <double>2.0</double>
             </property>
         </widget>
         <widget class="QLabel" name="SpotCheckPreWeightLeftLabel">
