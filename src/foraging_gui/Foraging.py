@@ -3300,7 +3300,7 @@ class Window(QMainWindow):
         '''complete of generating a trial'''
         self.ToGenerateATrial=1
     
-    def _thread_complete5(self):
+    def _thread_complete6(self):
         '''complete of save data'''
         self.to_save=1
 
@@ -3573,7 +3573,7 @@ class Window(QMainWindow):
             workerStartTrialLoop = Worker(self._StartTrialLoop,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
             workerStartTrialLoop1 = Worker(self._StartTrialLoop1,GeneratedTrials)
             worker_save = Worker(self._Save,BackupSave=1)
-            worker_save.signals.finished.connect(self._thread_complete5)
+            worker_save.signals.finished.connect(self._thread_complete6)
             self.worker1=worker1
             self.workerLick=workerLick
             self.workerPlot=workerPlot
