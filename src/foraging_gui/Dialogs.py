@@ -964,7 +964,7 @@ class WaterCalibrationDialog(QDialog):
             QApplication.processEvents()
             if self.SpotCheckLeft.isChecked():
                 self.Warning.setText(
-                    'Measuring left valve: {}s'.format(self.SpotLeftVolume.text()) + \
+                    'Measuring left valve: {}uL'.format(self.SpotLeftVolume.text()) + \
                     '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
                     '\nCurrent cycle: '+str(i+1)+'/{}'.format(int(self.SpotCycle)) + \
                     '\nTime remaining: {}'.format(self._TimeRemaining(
@@ -1000,14 +1000,14 @@ class WaterCalibrationDialog(QDialog):
             self.SaveLeft.setStyleSheet("color: white;background-color : mediumorchid;")
 
             self.Warning.setText(
-                'Measuring left valve: {}s'.format(self.SpotLeftVolume.text()) + \
+                'Measuring left valve: {}uL'.format(self.SpotLeftVolume.text()) + \
                 '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
                 '\nFinal tube weight: {}g'.format(final_tube_weight)
                 ) 
             
             # check results, are they within tolerance?
             result = (final_tube_weight - empty_tube_weight)/int(self.SpotCycle)
-            error = np.abs(result - self.SpotLeftVolume.text())
+            error = np.abs(result - float(self.SpotLeftVolume.text()))
             print(result)
             print(error)
         # set the default valve open time
