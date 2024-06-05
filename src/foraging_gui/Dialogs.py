@@ -906,25 +906,31 @@ class WaterCalibrationDialog(QDialog):
             self.SpotCheckLeft.setChecked(False)        
             self.SpotCheckLeft.setStyleSheet("background-color : none;")
             self.SaveLeft.setStyleSheet("color: black;background-color : none;")
+            self.TotalWaterSingleLeft.setText('')
+            self.SpotCheckPreWeightLeft.setText('')
             return
 
         # change button color
         if self.SpotCheckLeft.isChecked():
             logging.info('starting spot check left')
             self.SpotCheckLeft.setStyleSheet("background-color : green;")
-    
+            if self.TotalWaterSingleLeft.text() != '':
+                empty_tube_weight = float(self.SpotCheckPreWeightLeft.text()) 
+            else:
+                empty_tube_weight = 0.0 
             empty_tube_weight, ok = QInputDialog().getDouble(
                 self,
-                'Box {}, Spot Check Left'.format(self.MainWindow.box_letter),
-                "Empty tube weight: ", 
-                QLineEdit.Normal
-                ) #DEBUG - Need to get decimal precision, ensure positive number
+                'Box {}, Left'.format(self.MainWindow.box_letter),
+                "Empty tube weight (g): ", 
+                empty_tube_weight,
+                0,1000,2)
             if not ok:
                 logging.warning('user cancelled spot calibration')
                 self.SpotCheckLeft.setStyleSheet("background-color : none;")
                 self.SpotCheckLeft.setChecked(False)        
                 self.Warning.setText('Spot check left cancelled')
                 self.SpotCheckPreWeightLeft.setText('')
+                self.TotalWaterSingleLeft.setText('')
                 self.SaveLeft.setStyleSheet("color: black;background-color : none;")
                 return
             self.SpotCheckPreWeightLeft.setText(str(empty_tube_weight))
@@ -938,7 +944,8 @@ class WaterCalibrationDialog(QDialog):
                     'Measuring left valve: {}s'.format(self.SpotLeftOpenTime.text()) + \
                     '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
                     '\nCurrent cycle: '+str(i+1)+'/{}'.format(int(self.SpotCycle)) + \
-                    '\nTime remaining: {}'.format(self._TimeRemaining(i,self.SpotCycle,float(self.SpotLeftOpenTime.text()),self.SpotInterval))
+                    '\nTime remaining: {}'.format(self._TimeRemaining(
+                        i,self.SpotCycle,float(self.SpotLeftOpenTime.text()),self.SpotInterval))
                     )
                 self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
 
@@ -951,6 +958,7 @@ class WaterCalibrationDialog(QDialog):
             else:
                 self.Warning.setText('Spot check left cancelled')
                 self.SpotCheckPreWeightLeft.setText('')
+                self.TotalWaterSingleLeft.setText('')
                 self.SaveLeft.setStyleSheet("color: black;background-color : none;")
                 break
             self.SpotLeftFinished=1
@@ -961,8 +969,8 @@ class WaterCalibrationDialog(QDialog):
                 final_tube_weight = 0.0
             final_tube_weight, ok = QInputDialog().getDouble(
                 self,
-                'Box {}, Spot Check Left'.format(self.MainWindow.box_letter),
-                "Final tube weight: ", 
+                'Box {}, Left'.format(self.MainWindow.box_letter),
+                "Final tube weight (g): ", 
                 final_tube_weight,
                 0,
                 1000,
