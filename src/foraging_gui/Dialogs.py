@@ -968,7 +968,7 @@ class WaterCalibrationDialog(QDialog):
                     '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
                     '\nCurrent cycle: '+str(i+1)+'/{}'.format(int(self.SpotCycle)) + \
                     '\nTime remaining: {}'.format(self._TimeRemaining(
-                        i,self.SpotCycle,float(self.SpotLeftOpenTime.text()),self.SpotInterval))
+                        i,self.SpotCycle,self.SpotLeftOpenTime,self.SpotInterval))
                     )
                 self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
 
@@ -977,7 +977,7 @@ class WaterCalibrationDialog(QDialog):
                 # open the valve
                 ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Left(int(1))
                 # delay
-                time.sleep(float(self.SpotLeftOpenTime.text())+self.SpotInterval)
+                time.sleep(SpotLeftOpenTime+self.SpotInterval)
             else:
                 self.Warning.setText('Spot check left cancelled')
                 self.SpotCheckPreWeightLeft.setText('')
