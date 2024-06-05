@@ -948,7 +948,7 @@ class WaterCalibrationDialog(QDialog):
             if self.SpotCheckLeft.isChecked():
                 self.Warning.setText(
                     'Measuring left valve: {}s'.format(self.SpotLeftOpenTime.text()) + \
-                    'Empty tube weight: {}g'.format(empty_tube_weight) + \ 
+                    'Empty tube weight: {}g'.format(empty_tube_weight) + \
                     '\nCurrent cycle: '+str(i+1)+'/{}'.format(int(self.SpotCycle)) + \
                     '\nTime remaining: {}'.format(self._TimeRemaining(i,self.SpotCycle,float(self.SpotLeftOpenTime.text()),self.SpotInterval))
                     )
