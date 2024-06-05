@@ -343,6 +343,7 @@ class WaterCalibrationDialog(QDialog):
     def _Showrecent(self):
         '''update the calibration figure'''
         self._UpdateFigure()
+
     def _ShowSpecifcDay(self):
         '''update the calibration figure'''
         self._UpdateFigure()
@@ -353,6 +354,7 @@ class WaterCalibrationDialog(QDialog):
             self.Continue.setStyleSheet("background-color : green;")
         else:
             self.Continue.setStyleSheet("background-color : none")
+
     def _EmergencyStop(self):
         '''Change the color of the EmergencyStop button'''
         if self.EmergencyStop.isChecked():
@@ -388,7 +390,7 @@ class WaterCalibrationDialog(QDialog):
         self.SaveRight.setStyleSheet("background-color : green;")
         QApplication.processEvents()
         valve='SpotRight'
-        valve_open_time=str(self.SpotRightOpenTime.text())
+        valve_open_time=str(self.SpotRightOpenTime)
         try:
             total_water=float(self.TotalWaterSingleRight.text()) 
         except Exception as e:
@@ -404,6 +406,7 @@ class WaterCalibrationDialog(QDialog):
             )
         self.SaveRight.setStyleSheet("background-color : none")
         self.SaveRight.setChecked(False)
+
     def _CalibrationType(self):
         '''change the calibration parameters based on the calibration type'''
         # load the pre-stored calibration parameters
@@ -967,7 +970,7 @@ class WaterCalibrationDialog(QDialog):
         # start the open/close/delay cycle
         for i in range(int(self.SpotCycle)):
             QApplication.processEvents()
-            if self.SpotCheckLeft.isChecked():
+            if self.SpotCheckLeft.isChecked() and (not self.EmergencyStop.isChecked()):
                 self.Warning.setText(
                     'Measuring left valve: {}uL'.format(self.SpotLeftVolume.text()) + \
                     '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
@@ -1045,7 +1048,7 @@ class WaterCalibrationDialog(QDialog):
             self.SpotCheckPreWeightRight.setText('')
             return
 
-        if self.SpotCheckRight.isChecked():
+        if self.SpotCheckRight.isChecked() and (not self.EmergencyStop.isChecked()):
             logging.info('starting spot check right')
             self.SpotCheckRight.setStyleSheet("background-color : green;")
     
