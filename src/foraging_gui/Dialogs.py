@@ -558,7 +558,7 @@ class WaterCalibrationDialog(QDialog):
                             self.Warning.setText('You are calibrating Left valve: '+ str(round(float(current_valve_opentime),4))+'   Current cycle:'+str(i+1)+'/'+self.CycleCaliLeft.text())
                             self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
                             # set the valve open time
-                            self.MainWindow.Channel.LeftValue(float(current_valve_opentime)*1000) 
+                            ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(current_valve_opentime)*1000) 
                             # open the valve
                             ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Left(int(1))
                             # delay
@@ -635,7 +635,7 @@ class WaterCalibrationDialog(QDialog):
             self.Warning.setText('Calibration is not complete! Parameters error!')
             self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
         # set the default valve open time
-        self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
+        ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
         # enable the right valve calibration
         self.StartCalibratingRight.setEnabled(True)
         self.label_15.setEnabled(True)
@@ -723,7 +723,7 @@ class WaterCalibrationDialog(QDialog):
                             self.Warning.setText('You are calibrating Right valve: '+ str(round(float(current_valve_opentime),4))+'   Current cycle:'+str(i+1)+'/'+self.CycleCaliRight.text())
                             self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
                             # set the valve open time
-                            self.MainWindow.Channel.RightValue(float(current_valve_opentime)*1000) 
+                            ## DEBUGGING ##self.MainWindow.Channel.RightValue(float(current_valve_opentime)*1000) 
                             # open the valve
                             ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Right(int(1))
                             # delay
@@ -801,7 +801,7 @@ class WaterCalibrationDialog(QDialog):
             self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
 
         # set the default valve open time
-        self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
+        ## DEBUGGING ##self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
         # enable the left valve calibration
         self.StartCalibratingLeft.setEnabled(True)
         self.label_9.setEnabled(True)
@@ -884,17 +884,17 @@ class WaterCalibrationDialog(QDialog):
             # change button color
             self.OpenLeftForever.setStyleSheet("background-color : green;")
             # set the valve open time
-            self.MainWindow.Channel.LeftValue(float(1000)*1000) 
+            ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(1000)*1000) 
             # open the valve
             ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Left(int(1))
         else:
             # change button color
             self.OpenLeftForever.setStyleSheet("background-color : none")
             # close the valve 
-            self.MainWindow.Channel.LeftValue(float(0.001)*1000)
+            ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(0.001)*1000)
             ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Left(int(1))
             # set the default valve open time
-            self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
+            ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
 
     def _OpenRightForever(self):
         '''Open the right valve forever'''
@@ -905,17 +905,17 @@ class WaterCalibrationDialog(QDialog):
             # change button color
             self.OpenRightForever.setStyleSheet("background-color : green;")
             # set the valve open time
-            self.MainWindow.Channel.RightValue(float(1000)*1000) 
+            ## DEBUGGING ##self.MainWindow.Channel.RightValue(float(1000)*1000) 
             # open the valve
             ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Right(int(1))
         else:
             # change button color
             self.OpenRightForever.setStyleSheet("background-color : none")
             # close the valve 
-            self.MainWindow.Channel.RightValue(float(0.001)*1000)
+            ## DEBUGGING ##self.MainWindow.Channel.RightValue(float(0.001)*1000)
             ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Right(int(1))
             # set the default valve open time
-            self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
+            ## DEBUGGING ##self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
 
     def _TimeRemaining(self,i, cycles, opentime, interval):
         total_seconds = (cycles-i)*(opentime+interval)
@@ -946,7 +946,7 @@ class WaterCalibrationDialog(QDialog):
                 self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
 
                 # set the valve open time
-                self.MainWindow.Channel.LeftValue(float(self.SpotLeftOpenTime.text())*1000) 
+                ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(self.SpotLeftOpenTime.text())*1000) 
                 # open the valve
                 ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Left(int(1))
                 # delay
@@ -960,7 +960,7 @@ class WaterCalibrationDialog(QDialog):
             self.Warning.setText('Spot Check Left complete, please record final weight')
 
         # set the default valve open time
-        self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
+        ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
 
         self.SpotCheckLeft.setChecked(False)        
         self.SpotCheckLeft.setStyleSheet("background-color : none")
@@ -996,7 +996,7 @@ class WaterCalibrationDialog(QDialog):
                 self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
 
                 # set the valve open time
-                self.MainWindow.Channel.RightValue(float(self.SpotRightOpenTime.text())*1000) 
+                ## DEBUGGING ##self.MainWindow.Channel.RightValue(float(self.SpotRightOpenTime.text())*1000) 
                 # open the valve
                 ## DEBUGGING ## self.MainWindow.Channel3.ManualWater_Right(int(1))
                 # delay
@@ -1016,7 +1016,7 @@ class WaterCalibrationDialog(QDialog):
             # save spot check
 
         # set the default valve open time
-        self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
+        ## DEBUGGING ##self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
 
         self.SpotCheckRight.setChecked(False)        
         self.SpotCheckRight.setStyleSheet("background-color : none")
