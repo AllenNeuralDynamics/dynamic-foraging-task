@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox 
-from PyQt5.QtWidgets import QLabel, QDialogButtonBox,QFileDialog,QInputDialog
+from PyQt5.QtWidgets import QLabel, QDialogButtonBox,QFileDialog,QInputDialog, QLineEdit
 from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject, QEvent
 from PyQt5.QtSvg import QSvgWidget
