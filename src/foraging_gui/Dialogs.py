@@ -497,7 +497,7 @@ class WaterCalibrationDialog(QDialog):
                     # open the valve
                     ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Left(int(1))
                     # delay
-                    time.sleep(current_valve_opentime+params['Interval'])
+                    time.sleep(current_valve_opentime+float(params['Interval']))
                 else:
                     self.SpotCalibratingLeft.setStyleSheet("background-color : none;")
                     self.SpotCalibratingLeft.setChecked(False)        
