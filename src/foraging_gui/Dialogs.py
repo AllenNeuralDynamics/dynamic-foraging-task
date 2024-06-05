@@ -933,7 +933,8 @@ class WaterCalibrationDialog(QDialog):
         logging.info('starting spot check left')
         self.SpotCheckLeft.setStyleSheet("background-color : green;")
     
-        text, ok = QInputDialog().getDouble(self,"test1", "Empty Tube weight: ", QLineEdit.Normal)
+        empty_tube_weight, ok = QInputDialog().getDouble(self.MainWindow.box_letter,"Spot Check Left", "Empty tube weight: ", QLineEdit.Normal)
+        self.SpotCheckPreWeightLeft.setText(str(empty_tube_weight))
 
         # start the open/close/delay cycle
         self.SpotLeftFinished=0
