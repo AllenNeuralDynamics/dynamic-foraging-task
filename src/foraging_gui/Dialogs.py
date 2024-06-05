@@ -560,7 +560,7 @@ class WaterCalibrationDialog(QDialog):
                             # set the valve open time
                             self.MainWindow.Channel.LeftValue(float(current_valve_opentime)*1000) 
                             # open the valve
-                            self.MainWindow.Channel3.ManualWater_Left(int(1))
+                            ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Left(int(1))
                             # delay
                             time.sleep(current_valve_opentime+float(self.IntervalLeft_2.text()))
                         else:
@@ -725,7 +725,7 @@ class WaterCalibrationDialog(QDialog):
                             # set the valve open time
                             self.MainWindow.Channel.RightValue(float(current_valve_opentime)*1000) 
                             # open the valve
-                            self.MainWindow.Channel3.ManualWater_Right(int(1))
+                            ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Right(int(1))
                             # delay
                             time.sleep(current_valve_opentime+float(self.IntervalRight_2.text()))
                         else:
@@ -886,13 +886,13 @@ class WaterCalibrationDialog(QDialog):
             # set the valve open time
             self.MainWindow.Channel.LeftValue(float(1000)*1000) 
             # open the valve
-            self.MainWindow.Channel3.ManualWater_Left(int(1))
+            ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Left(int(1))
         else:
             # change button color
             self.OpenLeftForever.setStyleSheet("background-color : none")
             # close the valve 
             self.MainWindow.Channel.LeftValue(float(0.001)*1000)
-            self.MainWindow.Channel3.ManualWater_Left(int(1))
+            ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Left(int(1))
             # set the default valve open time
             self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
 
@@ -907,13 +907,13 @@ class WaterCalibrationDialog(QDialog):
             # set the valve open time
             self.MainWindow.Channel.RightValue(float(1000)*1000) 
             # open the valve
-            self.MainWindow.Channel3.ManualWater_Right(int(1))
+            ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Right(int(1))
         else:
             # change button color
             self.OpenRightForever.setStyleSheet("background-color : none")
             # close the valve 
             self.MainWindow.Channel.RightValue(float(0.001)*1000)
-            self.MainWindow.Channel3.ManualWater_Right(int(1))
+            ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Right(int(1))
             # set the default valve open time
             self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
 
@@ -948,7 +948,7 @@ class WaterCalibrationDialog(QDialog):
                 # set the valve open time
                 self.MainWindow.Channel.LeftValue(float(self.SpotLeftOpenTime.text())*1000) 
                 # open the valve
-                self.MainWindow.Channel3.ManualWater_Left(int(1))
+                ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Left(int(1))
                 # delay
                 time.sleep(float(self.SpotLeftOpenTime.text())+self.SpotInterval)
             else:
@@ -998,7 +998,7 @@ class WaterCalibrationDialog(QDialog):
                 # set the valve open time
                 self.MainWindow.Channel.RightValue(float(self.SpotRightOpenTime.text())*1000) 
                 # open the valve
-                self.MainWindow.Channel3.ManualWater_Right(int(1))
+                ## DEBUGGING ## self.MainWindow.Channel3.ManualWater_Right(int(1))
                 # delay
                 time.sleep(float(self.SpotRightOpenTime.text())+self.SpotInterval)
             else:
