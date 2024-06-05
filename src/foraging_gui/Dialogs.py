@@ -366,7 +366,7 @@ class WaterCalibrationDialog(QDialog):
         QApplication.processEvents()
         
         # DEBUG, check if self.SpotLeftFinished ==1 
-        valve='Left'
+        valve='SpotLeft'
         valve_open_time=str(float(self.SpotLeftOpenTime.text()))
         try:
             total_water=float(self.TotalWaterSingleLeft.text())  
@@ -795,7 +795,8 @@ class WaterCalibrationDialog(QDialog):
         self.TubeWeightLeft.setEnabled(True)
         # change the color to be normal
         self.StartCalibratingRight.setStyleSheet("background-color : none")
-        self.StartCalibratingRight.setChecked(False)
+        self.StartCalibratingRight.setChecked(False
+)
     def _Save(self,valve,valve_open_time,valve_open_interval,cycle,total_water,tube_weight):
         '''save the calibrated result and update the figure'''
         if total_water=='' or tube_weight=='':
