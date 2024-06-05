@@ -94,7 +94,7 @@ class Window(QMainWindow):
         self.ToInitializeVisual = 1 # Should we visualize performance
         self.FigureUpdateTooSlow = 0# if the FigureUpdateTooSlow is true, using different process to update figures
         self.ANewTrial = 1          # permission to start a new trial
-        self.to_save = 1            # permission to save backup data
+        self.save_backup_allowed = 1   # permission to save backup data; 0, the previous saving has not finished, and it will not trigger the next saving; 1, it is allowed to save backup data
         self.UpdateParameters = 1   # permission to update parameters
         self.loggingstarted = -1    # Have we started trial logging
         self.unsaved_data = False   # Setting unsaved data to False 
@@ -3302,7 +3302,7 @@ class Window(QMainWindow):
     
     def _thread_complete6(self):
         '''complete of save data'''
-        self.to_save=1
+        self.save_backup_allowed=1
 
     def _thread_complete_timer(self):
         '''complete of _Timer'''
@@ -3692,8 +3692,8 @@ class Window(QMainWindow):
                 if self.actionLicks_sta.isChecked():
                     self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
                 # save the data everytrial
-                if GeneratedTrials.B_CurrentTrialN>0 and self.to_save==1 and self.save_each_trial:
-                    self.to_save=0
+                if GeneratedTrials.B_CurrentTrialN>0 and self.save_backup_allowed==1 and self.save_each_trial:
+                    self.save_backup_allowed=0
                     self.threadpool6.start(worker_save)
 
                 if GeneratedTrials.CurrentSimulation==True:
