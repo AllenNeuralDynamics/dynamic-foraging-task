@@ -998,7 +998,7 @@ class WaterCalibrationDialog(QDialog):
             self.TotalWaterSingleLeft.setText(str(final_tube_weight))
             self.SaveLeft.setStyleSheet("color: white;background-color : mediumorchid;")
 
-            result = (final_tube_weight - empty_tube_weight)/int(self.SpotCycle)
+            result = (final_tube_weight - empty_tube_weight)/int(self.SpotCycle)*1000
             error = result - float(self.SpotLeftVolume.text())
             error = np.round(error,4)
 
