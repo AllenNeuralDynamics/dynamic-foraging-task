@@ -914,7 +914,7 @@ class WaterCalibrationDialog(QDialog):
         if self.SpotCheckLeft.isChecked():
             logging.info('starting spot check left')
             self.SpotCheckLeft.setStyleSheet("background-color : green;")
-            if self.TotalWaterSingleLeft.text() != '':
+            if self.SpotCheckPreWeightLeft.text() != '':
                 empty_tube_weight = float(self.SpotCheckPreWeightLeft.text()) 
             else:
                 empty_tube_weight = 0.0 
