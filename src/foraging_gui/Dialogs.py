@@ -454,23 +454,54 @@ class WaterCalibrationDialog(QDialog):
             self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
             self.Continue.setChecked(False)
             self.Continue.setStyleSheet("background-color : none;")
+            return
 
         params = self.WaterCalibrationPar[self.CalibrationType.currentText()]
-        print(params) ##DEBUGGING 
-        N=0
-        for current_valve_opentime in np.arange(float(params['TimeMin']),float(params['TimeMax'])+0.0001,float(params['Stride'])):
+
+        # Prompt for empty tube
+        # Get empty tube weight, using field value as default
+        if self.TubeWeightLeft.text() != '':
+            empty_tube_weight = float(self.TubeWeightLeft.text()) 
+        else:
+            empty_tube_weight = 0.0 
+        empty_tube_weight, ok = QInputDialog().getDouble(
+            self,
+            'Box {}, Left'.format(self.MainWindow.box_letter),
+            "Empty tube weight (g): ", 
+            empty_tube_weight,
+            0,1000,2)
+        if not ok:
+            # User cancels
+            logging.warning('user cancelled spot calibration')
+            self.SpotCalibratingLeft.setStyleSheet("background-color : none;")
+            self.SpotCalibratingLeft.setChecked(False)        
+            self.Warning.setText('Calibration left cancelled')
+            self.TubeWeightLeft.setText('')
+            self.WeightBeforeLeft.setText('')
+            self.WeightAfterLeft.setText('')
+            self.Continue.setStyleSheet("color: black;background-color : none;")
+            self.Continue.setChecked(False)
+            return
+
+        self.TubeWeightLeft.setText(str(empty_tube_weight))
+
+
+        #for current_valve_opentime in np.arange(float(params['TimeMin']),float(params['TimeMax'])+0.0001,float(params['Stride'])):
+            
+        
+
+
+    def _StartCalibratingLeft_v1(self):
             N=N+1
             if N==1:
                 # disable TubeWeightRight
                 self.TubeWeightLeft.setEnabled(False)
-                self.label_26.setEnabled(False)
                 if self.TubeWeightLeft.text()!='':
                     self.WeightBeforeLeft.setText(self.TubeWeightLeft.text())
                 self.TubeWeightLeft.setText('')
             else:
                 # enable TubeWeightRight
                 self.TubeWeightLeft.setEnabled(True)
-                self.label_26.setEnabled(True)
             while 1:
                 if not self.StartCalibratingLeft.isChecked():
                     break
