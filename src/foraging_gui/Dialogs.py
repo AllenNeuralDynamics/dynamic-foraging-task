@@ -899,11 +899,13 @@ class WaterCalibrationDialog(QDialog):
         seconds = int(np.ceil(np.mod(total_seconds,60)))
         return '{}:{:02}'.format(minutes, seconds)
     
-    def _VolumeToTime(self,volume):
+    def _VolumeToTime(self,volume,valve):
         # x = (y-b)/m 
         #self.WaterCalibrationResults       
         if hasattr(self.MainWindow, 'latest_fitting'):
-            print(self.MainWindow.latest_fitting)
+            fit = self.MainWindow.latest_fitting[valve]
+            m = fit[0]
+            b = fit[1] 
         else:
             m = 1
             b = 0
