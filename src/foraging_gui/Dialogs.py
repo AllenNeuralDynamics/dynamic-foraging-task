@@ -484,11 +484,44 @@ class WaterCalibrationDialog(QDialog):
             return
 
         self.TubeWeightLeft.setText(str(empty_tube_weight))
+        self.WeightBeforeLeft.setText(str(empty_tube_weight))
 
+        for current_valve_opentime in np.arange(float(params['TimeMin']),float(params['TimeMax'])+0.0001,float(params['Stride'])):
+            for i in range(int(params['Cycles'])):
+                QApplication.processEvents()
+                if self.StartCalibratingLeft.isChecked() and (not self.EmergencyStop.isChecked()):
+                    self._CalibrationStatus(self,current_valve_opentime, self.WeightBeforeLeft.text(),i,params['Cycles'], params['Interval'])
+    
+                    # set the valve open time
+                    ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(self.SpotLeftOpenTime.text())*1000) 
+                    # open the valve
+                    ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Left(int(1))
+                    # delay
+                    time.sleep(current_valve_opentime+params['Interval'])
+                else:
+                    self.SpotCalibratingLeft.setStyleSheet("background-color : none;")
+                    self.SpotCalibratingLeft.setChecked(False)        
+                    self.Warning.setText('Calibration left cancelled')
+                    self.TubeWeightLeft.setText('')
+                    self.WeightBeforeLeft.setText('')
+                    self.WeightAfterLeft.setText('')
+                    self.Continue.setStyleSheet("color: black;background-color : none;")
+                    self.Continue.setChecked(False)
+                    return
+            # Prompt for weight
+            break
 
-        #for current_valve_opentime in np.arange(float(params['TimeMin']),float(params['TimeMax'])+0.0001,float(params['Stride'])):
-            
         
+    def _CalibrationStatus(self,opentime, weight_before, i, cycles, interval):
+        self.Warning.setText(
+            'Measuring left valve: {}s'.format(opentime) + \
+            '\nEmpty tube weight: {}g'.format(weight_before) + \
+            '\nCurrent cycle: '+str(i+1)+'/{}'.format(int(cycles)) + \
+            '\nTime remaining: {}'.format(self._TimeRemaining(
+                i,cycles,opentime,interval))
+            )
+        self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+
 
 
     #def _StartCalibratingLeft_v1(self):
