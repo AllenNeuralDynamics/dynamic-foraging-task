@@ -276,7 +276,7 @@
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
         </widget>
-        <widget class="QDoubleSpinBox" name="SpotLeftOpenTime">
+        <widget class="QDoubleSpinBox" name="SpotLeftVolume">
             <property name="geometry">
                 <rect>
                     <x>180</x>
@@ -295,7 +295,7 @@
                 <double>2.0</double>
             </property>
         </widget>
-        <widget class="QDoubleSpinBox" name="SpotRightOpenTime">
+        <widget class="QDoubleSpinBox" name="SpotRightVolume">
             <property name="geometry">
                 <rect>
                     <x>180</x>

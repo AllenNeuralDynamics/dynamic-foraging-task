@@ -898,6 +898,25 @@ class WaterCalibrationDialog(QDialog):
         minutes = int(np.floor(total_seconds/60))
         seconds = int(np.ceil(np.mod(total_seconds,60)))
         return '{}:{:02}'.format(minutes, seconds)
+    
+    def _VolumeToTime(self,volume):
+        # x = (y-b)/m 
+        #self.WaterCalibrationResults       
+        if hasattr(self.MainWindow, 'latest_fitting'):
+            print(self.MainWindow.latest_fitting)
+        else:
+            m = 1
+            b = 0
+        return (volume-b)/m
+
+    def _TimeToVolume(self,time):
+        # y= mx +b        
+        if hasattr(self.MainWindow, 'latest_fitting'):
+            print(self.MainWindow.latest_fitting)
+        else:
+            m = 1
+            b = 0
+        return time*m+b
 
     def _SpotCheckLeft(self):    
         '''Calibration of left valve in a different thread'''
@@ -937,11 +956,12 @@ class WaterCalibrationDialog(QDialog):
 
         # start the open/close/delay cycle
         self.SpotLeftFinished=0
+        self.SpotLeftOpenTime = self._VolumeToTime(self.SpotLeftVolume)
         for i in range(int(self.SpotCycle)):
             QApplication.processEvents()
             if self.SpotCheckLeft.isChecked():
                 self.Warning.setText(
-                    'Measuring left valve: {}s'.format(self.SpotLeftOpenTime.text()) + \
+                    'Measuring left valve: {}s'.format(self.SpotLeftVolume) + \
                     '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
                     '\nCurrent cycle: '+str(i+1)+'/{}'.format(int(self.SpotCycle)) + \
                     '\nTime remaining: {}'.format(self._TimeRemaining(
@@ -972,21 +992,18 @@ class WaterCalibrationDialog(QDialog):
                 'Box {}, Left'.format(self.MainWindow.box_letter),
                 "Final tube weight (g): ", 
                 final_tube_weight,
-                0,
-                1000,
-                2
-                )
+                0, 1000, 2)
             self.TotalWaterSingleLeft.setText(str(final_tube_weight))
             self.SaveLeft.setStyleSheet("color: white;background-color : mediumorchid;")
 
             self.Warning.setText(
-                'Measuring left valve: {}s'.format(self.SpotLeftOpenTime.text()) + \
+                'Measuring left valve: {}s'.format(self.SpotLeftVolume) + \
                 '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
                 '\nFinal tube weight: {}g'.format(final_tube_weight)
                 ) 
             
             # check results, are they within tolerance?
-            result = final_tube_weight - empty_tube_with
+            result = final_tube_weight - empty_tube_weight
         # set the default valve open time
         ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
 
