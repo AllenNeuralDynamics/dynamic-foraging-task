@@ -905,6 +905,7 @@ class WaterCalibrationDialog(QDialog):
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             self.SpotCheckLeft.setChecked(False)        
             self.SpotCheckLeft.setStyleSheet("background-color : none;")
+            self.SaveLeft.setStyleSheet("color: black;background-color : none;")
             return
 
         # change button color
@@ -924,6 +925,7 @@ class WaterCalibrationDialog(QDialog):
                 self.SpotCheckLeft.setChecked(False)        
                 self.Warning.setText('Spot check left cancelled')
                 self.SpotCheckPreWeightLeft.setText('')
+                self.SaveLeft.setStyleSheet("color: black;background-color : none;")
                 return
             self.SpotCheckPreWeightLeft.setText(str(empty_tube_weight))
 
@@ -949,6 +951,7 @@ class WaterCalibrationDialog(QDialog):
             else:
                 self.Warning.setText('Spot check left cancelled')
                 self.SpotCheckPreWeightLeft.setText('')
+                self.SaveLeft.setStyleSheet("color: black;background-color : none;")
                 break
             self.SpotLeftFinished=1
         if self.SpotLeftFinished == 1:
@@ -959,6 +962,7 @@ class WaterCalibrationDialog(QDialog):
                 QLineEdit.Normal
                 )
             self.TotalWaterSingleLeft.setText(str(final_tube_weight))
+            self.SaveLeft.setStyleSheet("color: white;background-color : mediumorchid;")
 
             self.Warning.setText(
                 'Measuring left valve: {}s'.format(self.SpotLeftOpenTime.text()) + \
