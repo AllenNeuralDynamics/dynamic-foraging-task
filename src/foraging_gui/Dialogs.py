@@ -366,7 +366,7 @@ class WaterCalibrationDialog(QDialog):
         QApplication.processEvents()
         
         # DEBUG, check if self.SpotLeftFinished ==1 
-        valve='SpotLeft'
+        valve='Left'
         valve_open_time=str(float(self.SpotLeftOpenTime.text()))
         try:
             total_water=float(self.TotalWaterSingleLeft.text())  
@@ -379,7 +379,8 @@ class WaterCalibrationDialog(QDialog):
             valve_open_interval=self.SpotInterval,
             cycle=self.SpotCycle,
             total_water=total_water,
-            tube_weight=0) ##DEBUG, why is this 0?
+            tube_weight=0,
+            spot=True) ##DEBUG, why is this 0?
         self.SaveLeft.setStyleSheet("background-color : none")
         self.SaveLeft.setChecked(False)
     def _SaveRight(self):
@@ -399,7 +400,8 @@ class WaterCalibrationDialog(QDialog):
             valve_open_interval=self.SpotInterval,
             cycle=self.SpotCycle,
             total_water=total_water,
-            tube_weight=0
+            tube_weight=0,
+            spot=True
             )
         self.SaveRight.setStyleSheet("background-color : none")
         self.SaveRight.setChecked(False)
@@ -797,7 +799,7 @@ class WaterCalibrationDialog(QDialog):
         self.StartCalibratingRight.setStyleSheet("background-color : none")
         self.StartCalibratingRight.setChecked(False
 )
-    def _Save(self,valve,valve_open_time,valve_open_interval,cycle,total_water,tube_weight):
+    def _Save(self,valve,valve_open_time,valve_open_interval,cycle,total_water,tube_weight,spot=False):
         '''save the calibrated result and update the figure'''
         if total_water=='' or tube_weight=='':
             return
@@ -806,6 +808,8 @@ class WaterCalibrationDialog(QDialog):
         WaterCalibrationResults=self.WaterCalibrationResults.copy()
         current_time = datetime.now()
         date_str = current_time.strftime("%Y-%m-%d")
+        if spot:
+            date_str = 'Spot-'+date_str
         # Check and assign items to the nested dictionary
         if date_str not in WaterCalibrationResults:
             WaterCalibrationResults[date_str] = {}

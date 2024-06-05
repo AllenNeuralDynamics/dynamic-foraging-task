@@ -361,6 +361,7 @@ class PlotWaterCalibration(FigureCanvas):
         if hasattr(self.water_win.MainWindow,'RecentWaterCalibrationDate'):
             self.water_win.VisuCalibration.setTitle('Last calibration date:'+self.water_win.MainWindow.RecentWaterCalibrationDate)
         sorted_dates = sorted(self.WaterCalibrationResults.keys())
+        sorted_dates = [ x for x in sorted_dates if ('Spot' not in x)]
         showrecent=int(self.water_win.showrecent.text())
         if showrecent<=0:
             showrecent=1
