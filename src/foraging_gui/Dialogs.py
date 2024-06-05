@@ -958,7 +958,8 @@ class WaterCalibrationDialog(QDialog):
 
         # start the open/close/delay cycle
         self.SpotLeftFinished=0
-        self.SpotLeftOpenTime = self._VolumeToTime(self.SpotLeftVolume)
+        self.SpotLeftOpenTime = self._VolumeToTime(self.SpotLeftVolume,'Left')
+        print(self.SpotLeftOpenTime)
         for i in range(int(self.SpotCycle)):
             QApplication.processEvents()
             if self.SpotCheckLeft.isChecked():
