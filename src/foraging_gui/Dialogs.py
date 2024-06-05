@@ -940,8 +940,8 @@ class WaterCalibrationDialog(QDialog):
                 self,
                 'Box {}, Spot Check Left'.format(self.MainWindow.box_letter),
                 "Empty tube weight: ", 
-                minValue=0,
-                QLineEdit.Normal
+                QLineEdit.Normal,
+                minValue=0
                 )
             if not ok:
                 logging.warning('user cancelled spot calibration')
