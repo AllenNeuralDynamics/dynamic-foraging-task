@@ -324,6 +324,8 @@ class WaterCalibrationDialog(QDialog):
         self.setWindowTitle('Water Calibration: {}'.format(self.MainWindow.current_box))
         self.Warning.setText('')
         self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+        ## DEBUG
+        self.Warning.setStyleSheet("color: black;background-color : blue;")
 
     def _connectSignalsSlots(self):
         self.SpotCheckLeft.clicked.connect(self._SpotCheckLeft)
