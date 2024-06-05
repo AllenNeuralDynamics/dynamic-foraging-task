@@ -366,7 +366,7 @@ class WaterCalibrationDialog(QDialog):
         QApplication.processEvents()
         
         # DEBUG, check if self.SpotLeftFinished ==1 
-        valve='Left'
+        valve='SpotLeft'
         valve_open_time=str(float(self.SpotLeftOpenTime.text()))
         try:
             total_water=float(self.TotalWaterSingleLeft.text())  
@@ -387,7 +387,7 @@ class WaterCalibrationDialog(QDialog):
         '''save the calibration result of the single point calibration (right valve)'''
         self.SaveRight.setStyleSheet("background-color : green;")
         QApplication.processEvents()
-        valve='Right'
+        valve='SpotRight'
         valve_open_time=str(float(self.SpotRightOpenTime.text()))
         try:
             total_water=float(self.TotalWaterSingleRight.text()) 
@@ -808,8 +808,6 @@ class WaterCalibrationDialog(QDialog):
         WaterCalibrationResults=self.WaterCalibrationResults.copy()
         current_time = datetime.now()
         date_str = current_time.strftime("%Y-%m-%d")
-        if spot:
-            date_str = 'Spot-'+date_str
         # Check and assign items to the nested dictionary
         if date_str not in WaterCalibrationResults:
             WaterCalibrationResults[date_str] = {}
