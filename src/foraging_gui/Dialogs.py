@@ -434,6 +434,10 @@ class WaterCalibrationDialog(QDialog):
             self.StartCalibratingLeft.setStyleSheet("background-color : none")
             self.Warning.setText('Calibration was terminated!')
             self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+            self.StartCalibratingRight.setEnabled(True)
+            self.WeightAfterRight.setEnabled(True)
+            self.WeightBeforeRight.setEnabled(True)
+            self.TubeWeightRight.setEnabled(True)
             return
 
         if self.StartCalibratingLeft.isChecked():
@@ -445,15 +449,14 @@ class WaterCalibrationDialog(QDialog):
             self.WeightAfterRight.setEnabled(False)
             self.WeightBeforeRight.setEnabled(False)
             self.TubeWeightRight.setEnabled(False)
-            # check the continue button
-            self.Continue.setChecked(True)
-            self.Continue.setStyleSheet("background-color : green;")
         else:
             self.StartCalibratingLeft.setStyleSheet("background-color : none")
             self.Warning.setText('Calibration was terminated!')
             self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
-            self.Continue.setChecked(False)
-            self.Continue.setStyleSheet("background-color : none;")
+            self.StartCalibratingRight.setEnabled(True)
+            self.WeightAfterRight.setEnabled(True)
+            self.WeightBeforeRight.setEnabled(True)
+            self.TubeWeightRight.setEnabled(True)
             return
 
         params = self.WaterCalibrationPar[self.CalibrationType.currentText()]
@@ -479,14 +482,19 @@ class WaterCalibrationDialog(QDialog):
             self.TubeWeightLeft.setText('')
             self.WeightBeforeLeft.setText('')
             self.WeightAfterLeft.setText('')
-            self.Continue.setStyleSheet("color: black;background-color : none;")
-            self.Continue.setChecked(False)
+            self.StartCalibratingRight.setEnabled(True)
+            self.WeightAfterRight.setEnabled(True)
+            self.WeightBeforeRight.setEnabled(True)
+            self.TubeWeightRight.setEnabled(True)
             return
 
         self.TubeWeightLeft.setText(str(empty_tube_weight))
         self.WeightBeforeLeft.setText(str(empty_tube_weight))
 
-        for current_valve_opentime in np.arange(float(params['TimeMin']),float(params['TimeMax'])+0.0001,float(params['Stride'])):
+        opentimes = np.arange(float(params['TimeMin']),float(params['TimeMax'])+0.0001,float(params['Stride']))
+        index = 0
+        while index < len(opentimes):
+            current_valve_opentime = opentimes[index]
             for i in range(int(params['Cycle'])):
                 QApplication.processEvents()
                 if self.StartCalibratingLeft.isChecked() and (not self.EmergencyStop.isChecked()):
@@ -508,7 +516,21 @@ class WaterCalibrationDialog(QDialog):
                     self.Continue.setStyleSheet("color: black;background-color : none;")
                     self.Continue.setChecked(False)
                     return
-            # Prompt for weight
+
+             # Prompt for weight
+            final_tube_weight = 0.0
+            final_tube_weight, ok = QInputDialog().getDouble(
+                self,
+                'Box {}, Left'.format(self.MainWindow.box_letter),
+                "Weight after (g): ", 
+                final_tube_weight,
+                0, 1000, 2)
+            self.WeightAfterLeft.setText(str(final_tube_weight))
+
+            next_measurement=False
+            if next_measurement:
+                index +=1
+
             break
 
         
