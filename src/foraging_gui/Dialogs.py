@@ -927,23 +927,27 @@ class WaterCalibrationDialog(QDialog):
         '''Calibration of left valve in a different thread'''
         self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            self.SpotCheckLeft.setChecked(False)        
+            self.SpotCheckLeft.setStyleSheet("background-color : none;")
             return
 
         # change button color
-        logging.info('starting spot check left')
-        self.SpotCheckLeft.setStyleSheet("background-color : green;")
+        if self.SpotCheckLeft.isChecked():
+            logging.info('starting spot check left')
+            self.SpotCheckLeft.setStyleSheet("background-color : green;")
     
-        empty_tube_weight, ok = QInputDialog().getDouble(
-            self,
-            'Box {}, Spot Check Left'.format(self.MainWindow.box_letter),
-            "Empty tube weight: ", 
-            QLineEdit.Normal
-            )
-        if not ok:
-            logging.warning('user cancelled spot calibration')
-            self.SpotCheckLeft.setStyleSheet("background-color : none;")
-            return
-        self.SpotCheckPreWeightLeft.setText(str(empty_tube_weight))
+            empty_tube_weight, ok = QInputDialog().getDouble(
+                self,
+                'Box {}, Spot Check Left'.format(self.MainWindow.box_letter),
+                "Empty tube weight: ", 
+                QLineEdit.Normal
+                )
+            if not ok:
+                logging.warning('user cancelled spot calibration')
+                self.SpotCheckLeft.setStyleSheet("background-color : none;")
+                self.SpotCheckLeft.setChecked(False)        
+                return
+            self.SpotCheckPreWeightLeft.setText(str(empty_tube_weight))
 
         # start the open/close/delay cycle
         self.SpotLeftFinished=0
