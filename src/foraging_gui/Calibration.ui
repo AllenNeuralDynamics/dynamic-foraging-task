@@ -612,6 +612,23 @@
                 </property>
             </item>
         </widget>
+        <widget class="QPushButton" name="Finished">
+            <property name="geometry">
+                <rect>
+                    <x>580</x>
+                    <y>20</y>
+                    <width>80</width>
+                    <height>25</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Finished</string>
+            </property>
+            <property name="checkable">
+                <bool>true</bool>
+            </property>
+        </widget>
+
         <widget class="QPushButton" name="Continue">
             <property name="geometry">
                 <rect>
