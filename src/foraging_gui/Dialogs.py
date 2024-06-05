@@ -939,7 +939,7 @@ class WaterCalibrationDialog(QDialog):
             QApplication.processEvents()
             if self.SpotCheckLeft.isChecked():
                 self.Warning.setText(
-                    'Measuring left valve: {}'.format(self.SpotLeftOpenTime.text()) + \
+                    'Measuring left valve: {}s'.format(self.SpotLeftOpenTime.text()) + \
                     '\nCurrent cycle: '+str(i+1)+'/{}'.format(int(self.SpotCycle)) + \
                     '\nTime remaining: {}'.format(self._TimeRemaining(i,self.SpotCycle,float(self.SpotLeftOpenTime.text()),self.SpotInterval))
                     )
@@ -989,7 +989,7 @@ class WaterCalibrationDialog(QDialog):
             QApplication.processEvents()
             if self.SpotCheckRight.isChecked():
                 self.Warning.setText(
-                    'Measuring right valve: {}'.format(self.SpotRightOpenTime.text()) + \
+                    'Measuring right valve: {}s'.format(self.SpotRightOpenTime.text()) + \
                     '\nCurrent cycle: '+str(i+1)+'/{}'.format(int(self.SpotCycle)) + \
                     '\nTime remaining: {}'.format(self._TimeRemaining(i,self.SpotCycle,float(self.SpotRightOpenTime.text()),self.SpotInterval))
                     )
