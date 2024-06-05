@@ -900,7 +900,6 @@ class WaterCalibrationDialog(QDialog):
     
     def _VolumeToTime(self,volume,valve):
         # x = (y-b)/m 
-        #self.WaterCalibrationResults       
         if hasattr(self.MainWindow, 'latest_fitting'):
             fit = self.MainWindow.latest_fitting[valve]
             m = fit[0]
@@ -958,6 +957,7 @@ class WaterCalibrationDialog(QDialog):
         # start the open/close/delay cycle
         self.SpotLeftFinished=0
         self.SpotLeftOpenTime = self._VolumeToTime(float(self.SpotLeftVolume.text()),'Left')
+        self.SpotLeftOpenTime = np.round(self.SpotLeftOpenTime,4)
         logging.info('Using a calibration spot check of {}s to deliver {}uL'.format(self.SpotLeftOpenTime,self.SpotLeftVolume.text()))
         for i in range(int(self.SpotCycle)):
             QApplication.processEvents()
@@ -998,17 +998,18 @@ class WaterCalibrationDialog(QDialog):
             self.TotalWaterSingleLeft.setText(str(final_tube_weight))
             self.SaveLeft.setStyleSheet("color: white;background-color : mediumorchid;")
 
+            result = (final_tube_weight - empty_tube_weight)/int(self.SpotCycle)
+            error = result - float(self.SpotLeftVolume.text())
+            error = np.round(error,4)
+
             self.Warning.setText(
                 'Measuring left valve: {}uL'.format(self.SpotLeftVolume.text()) + \
                 '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
-                '\nFinal tube weight: {}g'.format(final_tube_weight)
-                ) 
-            
+                '\nFinal tube weight: {}g'.format(final_tube_weight) + \
+                '\nError from target: {}uL'.format(error)
+                )           
             # check results, are they within tolerance?
-            result = (final_tube_weight - empty_tube_weight)/int(self.SpotCycle)
-            error = np.abs(result - float(self.SpotLeftVolume.text()))
-            print(result)
-            print(error)
+
         # set the default valve open time
         ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
 
