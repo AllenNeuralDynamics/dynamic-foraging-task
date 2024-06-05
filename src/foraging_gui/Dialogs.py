@@ -966,7 +966,7 @@ class WaterCalibrationDialog(QDialog):
                 break
             self.SpotLeftFinished=1
         if self.SpotLeftFinished == 1:
-            text = self.Warning.getText()
+            text = self.Warning.text()
             self.Warning.setText(text+'\nSpot Check Left complete, please record final weight')
 
         # set the default valve open time
