@@ -490,6 +490,7 @@ class WaterCalibrationDialog(QDialog):
 
         self.TubeWeightLeft.setText(str(empty_tube_weight))
         self.WeightBeforeLeft.setText(str(empty_tube_weight))
+        self.WeightAfterLeft.setText('')
 
         opentimes = np.arange(float(params['TimeMin']),float(params['TimeMax'])+0.0001,float(params['Stride']))
         index = 0
@@ -527,9 +528,22 @@ class WaterCalibrationDialog(QDialog):
                 0, 1000, 2)
             self.WeightAfterLeft.setText(str(final_tube_weight))
 
+            self._Save(
+                valve='Left',
+                valve_open_time=current_valve_opentime,
+                valve_open_interval=params['Interval'],
+                cycle=params['Cycle'],
+                total_water=float(self.WeightAfterLeft.text()),
+                tube_weight=float(self.WeightBeforeLeft.text())
+                )
+            self._UpdateFigure()
+
             next_measurement=False
             if next_measurement:
+
                 index +=1
+                self.WeightBeforeLeft.setText(self.WeightAfterLeft.text())
+                self.WeightAfterLeft.setText('')
 
             break
 
