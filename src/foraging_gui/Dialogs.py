@@ -324,8 +324,6 @@ class WaterCalibrationDialog(QDialog):
         self.setWindowTitle('Water Calibration: {}'.format(self.MainWindow.current_box))
         self.Warning.setText('')
         self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
-        ## DEBUG
-        self.Warning.setStyleSheet("color: black;background-color : lightblue;")
 
     def _connectSignalsSlots(self):
         self.SpotCheckLeft.clicked.connect(self._SpotCheckLeft)
@@ -920,7 +918,7 @@ class WaterCalibrationDialog(QDialog):
                 'Box {}, Spot Check Left'.format(self.MainWindow.box_letter),
                 "Empty tube weight: ", 
                 QLineEdit.Normal
-                )
+                ) #DEBUG - Need to get decimal precision, ensure positive number
             if not ok:
                 logging.warning('user cancelled spot calibration')
                 self.SpotCheckLeft.setStyleSheet("background-color : none;")
@@ -957,11 +955,18 @@ class WaterCalibrationDialog(QDialog):
                 break
             self.SpotLeftFinished=1
         if self.SpotLeftFinished == 1:
+            if self.TotalWaterSingleLeft.text() != '':
+                final_tube_weight = float(self.TotalWaterSingleLeft.text()) 
+            else:
+                final_tube_weight = 0.0
             final_tube_weight, ok = QInputDialog().getDouble(
                 self,
                 'Box {}, Spot Check Left'.format(self.MainWindow.box_letter),
                 "Final tube weight: ", 
-                QLineEdit.Normal
+                final_tube_weight,
+                0,
+                1000,
+                2
                 )
             self.TotalWaterSingleLeft.setText(str(final_tube_weight))
             self.SaveLeft.setStyleSheet("color: white;background-color : mediumorchid;")
@@ -971,6 +976,9 @@ class WaterCalibrationDialog(QDialog):
                 '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
                 '\nFinal tube weight: {}g'.format(final_tube_weight)
                 ) 
+            
+            # check results, are they within tolerance?
+            result = final_tube_weight - empty_tube_with
         # set the default valve open time
         ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
 
