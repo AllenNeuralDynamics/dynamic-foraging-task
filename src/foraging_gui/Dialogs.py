@@ -1006,9 +1006,13 @@ class WaterCalibrationDialog(QDialog):
                 'Measuring left valve: {}uL'.format(self.SpotLeftVolume.text()) + \
                 '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
                 '\nFinal tube weight: {}g'.format(final_tube_weight) + \
-                '\nError from target: {}uL'.format(error)
-                )           
-            # check results, are they within tolerance?
+                '\nAvg. error from target: {}uL'.format(error)
+                )        
+            TOLERANCE = float(self.SpotLeftVolume.text())/10
+            if np.abs(error) > TOLERANCE:
+                reply = QMessageBox.question(self, 'Spot check left', 'Avg. error is outside expected tolerance. Please confirm you entered information correctly, and then repeat check', QMessageBox.Ok)
+                logging.error('Water calibration spot check exceeds tolerance: {}'/format(error))   
+
 
         # set the default valve open time
         ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
