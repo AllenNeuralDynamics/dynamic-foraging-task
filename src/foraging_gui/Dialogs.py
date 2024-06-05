@@ -487,10 +487,10 @@ class WaterCalibrationDialog(QDialog):
         self.WeightBeforeLeft.setText(str(empty_tube_weight))
 
         for current_valve_opentime in np.arange(float(params['TimeMin']),float(params['TimeMax'])+0.0001,float(params['Stride'])):
-            for i in range(int(params['Cycles'])):
+            for i in range(int(params['Cycle'])):
                 QApplication.processEvents()
                 if self.StartCalibratingLeft.isChecked() and (not self.EmergencyStop.isChecked()):
-                    self._CalibrationStatus(self,current_valve_opentime, self.WeightBeforeLeft.text(),i,params['Cycles'], params['Interval'])
+                    self._CalibrationStatus(self,current_valve_opentime, self.WeightBeforeLeft.text(),i,params['Cycle'], params['Interval'])
     
                     # set the valve open time
                     ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(self.SpotLeftOpenTime.text())*1000) 
@@ -512,13 +512,13 @@ class WaterCalibrationDialog(QDialog):
             break
 
         
-    def _CalibrationStatus(self,opentime, weight_before, i, cycles, interval):
+    def _CalibrationStatus(self,opentime, weight_before, i, cycle, interval):
         self.Warning.setText(
             'Measuring left valve: {}s'.format(opentime) + \
             '\nEmpty tube weight: {}g'.format(weight_before) + \
-            '\nCurrent cycle: '+str(i+1)+'/{}'.format(int(cycles)) + \
+            '\nCurrent cycle: '+str(i+1)+'/{}'.format(int(cycle)) + \
             '\nTime remaining: {}'.format(self._TimeRemaining(
-                i,cycles,opentime,interval))
+                i,cycle,opentime,interval))
             )
         self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
 
