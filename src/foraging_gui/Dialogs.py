@@ -966,9 +966,19 @@ class WaterCalibrationDialog(QDialog):
                 break
             self.SpotLeftFinished=1
         if self.SpotLeftFinished == 1:
-            text = self.Warning.text()
-            self.Warning.setText(text+'\nSpot Check Left complete, please record final weight')
+            final_tube_weight, ok = QInputDialog().getDouble(
+                self,
+                'Box {}, Spot Check Left'.format(self.MainWindow.box_letter),
+                "Final tube weight: ", 
+                QLineEdit.Normal
+                )
+            self.TotalWaterSingleLeft.setText(str(final_tube_weight))
 
+            self.Warning.setText(
+                'Measuring left valve: {}s'.format(self.SpotLeftOpenTime.text()) + \
+                '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
+                '\nFinal tube weight: {}g'.format(final_tube_weight)
+                ) 
         # set the default valve open time
         ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
 
