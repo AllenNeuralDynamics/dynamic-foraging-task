@@ -455,9 +455,10 @@ class WaterCalibrationDialog(QDialog):
             self.Continue.setChecked(False)
             self.Continue.setStyleSheet("background-color : none;")
 
-        params = self.WaterCalibrationPar[self.CalibrationType.currentText()] 
+        params = self.WaterCalibrationPar[self.CalibrationType.currentText()]
+        print(params) ##DEBUGGING 
         N=0
-        for current_valve_opentime in np.arange(float(params['TimeMin']),float(params['TimeMax'])+0.0001,float(params['Stide'])):
+        for current_valve_opentime in np.arange(float(params['TimeMin']),float(params['TimeMax'])+0.0001,float(params['Stride'])):
             N=N+1
             if N==1:
                 # disable TubeWeightRight
