@@ -853,35 +853,16 @@
     <zorder>StartCalibratingLeft</zorder>
     <zorder>StartCalibratingRight</zorder>
     <zorder>VisuCalibration</zorder>
-    <zorder>label_9</zorder>
-    <zorder>label_10</zorder>
-    <zorder>label_11</zorder>
-    <zorder>label_12</zorder>
     <zorder>label_13</zorder>
-    <zorder>label_14</zorder>
-    <zorder>label_15</zorder>
     <zorder>label_16</zorder>
-    <zorder>label_17</zorder>
-    <zorder>label_18</zorder>
-    <zorder>TimeLeftMin</zorder>
-    <zorder>TimeRightMin</zorder>
-    <zorder>TimeLeftMax</zorder>
-    <zorder>TimeRightMax</zorder>
-    <zorder>StrideLeft</zorder>
-    <zorder>StrideRight</zorder>
-    <zorder>CycleCaliLeft</zorder>
-    <zorder>CycleCaliRight</zorder>
     <zorder>WeightAfterLeft</zorder>
     <zorder>WeightAfterRight</zorder>
-    <zorder>label_19</zorder>
     <zorder>TotalWaterSingleLeft</zorder>
-    <zorder>label_20</zorder>
     <zorder>TotalWaterSingleRight</zorder>
     <zorder>SaveLeft</zorder>
     <zorder>SaveRight</zorder>
     <zorder>label_21</zorder>
     <zorder>CalibrationType</zorder>
-    <zorder>label_22</zorder>
     <zorder>IntervalRight_2</zorder>
     <zorder>label_23</zorder>
     <zorder>IntervalLeft_2</zorder>
