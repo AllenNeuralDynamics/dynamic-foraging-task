@@ -959,7 +959,7 @@ class WaterCalibrationDialog(QDialog):
         # start the open/close/delay cycle
         self.SpotLeftFinished=0
         self.SpotLeftOpenTime = self._VolumeToTime(float(self.SpotLeftVolume.text()),'Left')
-        print(self.SpotLeftOpenTime)
+        logging.info('Using a calibration spot check of {}s to deliver {}uL'.format(self.SpotLeftOpenTime,self.SpotLeftVolume.text()))a
         for i in range(int(self.SpotCycle)):
             QApplication.processEvents()
             if self.SpotCheckLeft.isChecked():
@@ -977,7 +977,7 @@ class WaterCalibrationDialog(QDialog):
                 # open the valve
                 ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Left(int(1))
                 # delay
-                time.sleep(SpotLeftOpenTime+self.SpotInterval)
+                time.sleep(self.SpotLeftOpenTime+self.SpotInterval)
             else:
                 self.Warning.setText('Spot check left cancelled')
                 self.SpotCheckPreWeightLeft.setText('')
