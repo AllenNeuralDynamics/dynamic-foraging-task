@@ -935,8 +935,7 @@ class WaterCalibrationDialog(QDialog):
     
         empty_tube_weight, ok = QInputDialog().getDouble(
             self,
-            'Box {}'.format(self.MainWindow.box_letter),
-            "Spot Check Left", 
+            'Box {}, Spot Check Left'.format(self.MainWindow.box_letter),
             "Empty tube weight: ", 
             QLineEdit.Normal
             )
