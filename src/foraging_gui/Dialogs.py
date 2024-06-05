@@ -946,6 +946,8 @@ class WaterCalibrationDialog(QDialog):
                 logging.warning('user cancelled spot calibration')
                 self.SpotCheckLeft.setStyleSheet("background-color : none;")
                 self.SpotCheckLeft.setChecked(False)        
+                self.Warning.setText('Spot check left cancelled')
+                self.SpotCheckPreWeightLeft.setText('')
                 return
             self.SpotCheckPreWeightLeft.setText(str(empty_tube_weight))
 
