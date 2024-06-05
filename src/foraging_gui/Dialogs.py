@@ -470,86 +470,86 @@ class WaterCalibrationDialog(QDialog):
         self.left_complete=False
 
 
-    def _CalibrateOneLeft(self):
-     
-        while index < len(opentimes):
-             # Prompt for empty tube
-             # Get empty tube weight, using field value as default
-             if self.TubeWeightLeft.text() != '':
-                 empty_tube_weight = float(self.TubeWeightLeft.text()) 
-             else:
-                 empty_tube_weight = 0.0 
-             empty_tube_weight, ok = QInputDialog().getDouble(
-                 self,
-                 'Box {}, Left'.format(self.MainWindow.box_letter),
-                 "Empty tube weight (g): ", 
-                 empty_tube_weight,
-                 0,1000,2)
-             if not ok:
-                 # User cancels
-                 logging.warning('user cancelled spot calibration')
-                 self.SpotCalibratingLeft.setStyleSheet("background-color : none;")
-                 self.SpotCalibratingLeft.setChecked(False)        
-                 self.Warning.setText('Calibration left cancelled')
-                 self.TubeWeightLeft.setText('')
-                 self.WeightBeforeLeft.setText('')
-                 self.WeightAfterLeft.setText('')
-                 self.StartCalibratingRight.setEnabled(True)
-                 self.WeightAfterRight.setEnabled(True)
-                 self.WeightBeforeRight.setEnabled(True)
-                 self.TubeWeightRight.setEnabled(True)
-                 return
-             current_valve_opentime = opentimes[index]
-             for i in range(int(params['Cycle'])):
-                 QApplication.processEvents()
-                 if self.StartCalibratingLeft.isChecked() and (not self.EmergencyStop.isChecked()):
-                     self._CalibrationStatus(float(current_valve_opentime), self.WeightBeforeLeft.text(),i,params['Cycle'], float(params['Interval']))
-         
-                     # set the valve open time
-                     ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(self.SpotLeftOpenTime.text())*1000) 
-                     # open the valve
-                     ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Left(int(1))
-                     # delay
-                     time.sleep(current_valve_opentime+float(params['Interval']))
-                 else:
-                     self.SpotCalibratingLeft.setStyleSheet("background-color : none;")
-                     self.SpotCalibratingLeft.setChecked(False)        
-                     self.Warning.setText('Calibration left cancelled')
-                     self.TubeWeightLeft.setText('')
-                     self.WeightBeforeLeft.setText('')
-                     self.WeightAfterLeft.setText('')
-                     self.Continue.setStyleSheet("color: black;background-color : none;")
-                     self.Continue.setChecked(False)
-                     return
+    #def _CalibrateOneLeft(self):
+    # 
+    #    while index < len(opentimes):
+    #         # Prompt for empty tube
+    #         # Get empty tube weight, using field value as default
+    #         if self.TubeWeightLeft.text() != '':
+    #             empty_tube_weight = float(self.TubeWeightLeft.text()) 
+    #         else:
+    #             empty_tube_weight = 0.0 
+    #         empty_tube_weight, ok = QInputDialog().getDouble(
+    #             self,
+    #             'Box {}, Left'.format(self.MainWindow.box_letter),
+    #             "Empty tube weight (g): ", 
+    #             empty_tube_weight,
+    #             0,1000,2)
+    #         if not ok:
+    #             # User cancels
+    #             logging.warning('user cancelled spot calibration')
+    #             self.SpotCalibratingLeft.setStyleSheet("background-color : none;")
+    #             self.SpotCalibratingLeft.setChecked(False)        
+    #             self.Warning.setText('Calibration left cancelled')
+    #             self.TubeWeightLeft.setText('')
+    #             self.WeightBeforeLeft.setText('')
+    #             self.WeightAfterLeft.setText('')
+    #             self.StartCalibratingRight.setEnabled(True)
+    #             self.WeightAfterRight.setEnabled(True)
+    #             self.WeightBeforeRight.setEnabled(True)
+    #             self.TubeWeightRight.setEnabled(True)
+    #             return
+    #         current_valve_opentime = opentimes[index]
+    #         for i in range(int(params['Cycle'])):
+    #             QApplication.processEvents()
+    #             if self.StartCalibratingLeft.isChecked() and (not self.EmergencyStop.isChecked()):
+    #                 self._CalibrationStatus(float(current_valve_opentime), self.WeightBeforeLeft.text(),i,params['Cycle'], float(params['Interval']))
+    #     
+    #                 # set the valve open time
+    #                 ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(self.SpotLeftOpenTime.text())*1000) 
+    #                 # open the valve
+    #                 ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Left(int(1))
+    #                 # delay
+    #                 time.sleep(current_valve_opentime+float(params['Interval']))
+    #             else:
+    #                 self.SpotCalibratingLeft.setStyleSheet("background-color : none;")
+    #                 self.SpotCalibratingLeft.setChecked(False)        
+    #                 self.Warning.setText('Calibration left cancelled')
+    #                 self.TubeWeightLeft.setText('')
+    #                 self.WeightBeforeLeft.setText('')
+    #                 self.WeightAfterLeft.setText('')
+    #                 self.Continue.setStyleSheet("color: black;background-color : none;")
+    #                 self.Continue.setChecked(False)
+    #                 return
 
-              # Prompt for weight
-             final_tube_weight = 0.0
-             final_tube_weight, ok = QInputDialog().getDouble(
-                 self,
-                 'Box {}, Left'.format(self.MainWindow.box_letter),
-                 "Weight after (g): ", 
-                 final_tube_weight,
-                 0, 1000, 2)
-             self.WeightAfterLeft.setText(str(final_tube_weight))
+    #          # Prompt for weight
+    #         final_tube_weight = 0.0
+    #         final_tube_weight, ok = QInputDialog().getDouble(
+    #             self,
+    #             'Box {}, Left'.format(self.MainWindow.box_letter),
+    #             "Weight after (g): ", 
+    #             final_tube_weight,
+    #             0, 1000, 2)
+    #         self.WeightAfterLeft.setText(str(final_tube_weight))
 
-             self._Save(
-                 valve='Left',
-                 valve_open_time=current_valve_opentime,
-                 valve_open_interval=params['Interval'],
-                 cycle=params['Cycle'],
-                 total_water=float(self.WeightAfterLeft.text()),
-                 tube_weight=float(self.WeightBeforeLeft.text())
-                 )
-             self._UpdateFigure()
+    #         self._Save(
+    #             valve='Left',
+    #             valve_open_time=current_valve_opentime,
+    #             valve_open_interval=params['Interval'],
+    #             cycle=params['Cycle'],
+    #             total_water=float(self.WeightAfterLeft.text()),
+    #             tube_weight=float(self.WeightBeforeLeft.text())
+    #             )
+    #         self._UpdateFigure()
 
-             next_measurement=False
-             if next_measurement:
+    #         next_measurement=False
+    #         if next_measurement:
 
-                 index +=1
-                 self.WeightBeforeLeft.setText(self.WeightAfterLeft.text())
-                 self.WeightAfterLeft.setText('')
+    #             index +=1
+    #             self.WeightBeforeLeft.setText(self.WeightAfterLeft.text())
+    #             self.WeightAfterLeft.setText('')
 
-             break
+    #         break
 
         
     def _CalibrationStatus(self,opentime, weight_before, i, cycle, interval):
