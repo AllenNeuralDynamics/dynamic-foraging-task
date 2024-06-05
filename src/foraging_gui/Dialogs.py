@@ -939,6 +939,10 @@ class WaterCalibrationDialog(QDialog):
             "Empty tube weight: ", 
             QLineEdit.Normal
             )
+        if not ok:
+            logging.warning('user cancelled spot calibration')
+            self.SpotCheckLeft.setStyleSheet("background-color : none;")
+            return
         self.SpotCheckPreWeightLeft.setText(str(empty_tube_weight))
 
         # start the open/close/delay cycle
