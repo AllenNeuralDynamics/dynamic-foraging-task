@@ -490,7 +490,7 @@ class WaterCalibrationDialog(QDialog):
             for i in range(int(params['Cycle'])):
                 QApplication.processEvents()
                 if self.StartCalibratingLeft.isChecked() and (not self.EmergencyStop.isChecked()):
-                    self._CalibrationStatus(self,current_valve_opentime, self.WeightBeforeLeft.text(),i,params['Cycle'], params['Interval'])
+                    self._CalibrationStatus(current_valve_opentime, self.WeightBeforeLeft.text(),i,params['Cycle'], params['Interval'])
     
                     # set the valve open time
                     ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(self.SpotLeftOpenTime.text())*1000) 
