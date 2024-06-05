@@ -2189,6 +2189,11 @@ class Window(QMainWindow):
             ForceSave=1
             SaveAs=0
             SaveContinue=1
+            saving_type_label = 'backup saving'
+        elif ForceSave==1:
+            saving_type_label = 'force saving'
+        else:
+            saving_type_label = 'normal saving'
 
         logging.info('Saving current session, ForceSave={}'.format(ForceSave))
         if ForceSave==0:
@@ -2398,6 +2403,9 @@ class Window(QMainWindow):
         # save the metadata collected in the metadata dialogue
         self.Metadata_dialog._save_metadata_dialog_parameters()
         Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
+
+        # save the saving type (normal saving, backup saving or force saving)
+        Obj['saving_type_label'] = saving_type_label
 
         # generate the metadata file
         try:
