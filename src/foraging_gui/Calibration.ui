@@ -313,7 +313,7 @@
                 </rect>
             </property>
             <property name="text">
-                <string>empty tube (g)=</string>
+                <string>weight before (g)=</string>
             </property>
             <property name="textFormat">
                 <enum>Qt::AutoText</enum>
@@ -332,7 +332,7 @@
                 </rect>
             </property>
             <property name="text">
-                <string>empty tube (g)=</string>
+                <string>weight before (g)=</string>
             </property>
             <property name="textFormat">
                 <enum>Qt::AutoText</enum>
