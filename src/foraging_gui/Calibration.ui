@@ -780,7 +780,7 @@
                 <x>20</x>
                 <y>325</y>
                 <width>650</width>
-                <height>50</height>
+                <height>100</height>
             </rect>
         </property>
         <property name="sizePolicy">
