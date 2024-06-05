@@ -339,33 +339,6 @@ class WaterCalibrationDialog(QDialog):
         self.EmergencyStop.clicked.connect(self._EmergencyStop)
         self.showrecent.textChanged.connect(self._Showrecent)
         self.showspecificcali.activated.connect(self._ShowSpecifcDay)
-        #self.SaveCalibrationPar.clicked.connect(self._SaveCalibrationPar)
-        
-    def _SaveCalibrationPar(self):
-        '''save the calibration parameters'''
-        # load the pre-stored calibration parameters
-        self._LoadCaliPar()
-        # get the current calibration parameters
-        CalibrationType=self.CalibrationType.currentText()
-        Keys=['TimeLeftMin','TimeLeftMax','StrideLeft','TimeRightMin','TimeRightMax','StrideRight','IntervalLeft_2','IntervalRight_2']
-        widget_dict = {w.objectName(): w for w in self.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-        for K in Keys:
-            for key in widget_dict.keys():
-                try:
-                    if key==K:
-                        widget = widget_dict[key]
-                        self.WaterCalibrationPar[CalibrationType][K]=widget.text()
-                except Exception as e:
-                    logging.error('Water Calibration {}'.format(str(e)))
-        # save
-        if not os.path.exists(os.path.dirname(self.MainWindow.WaterCalibrationParFiles)):
-            os.makedirs(os.path.dirname(self.MainWindow.WaterCalibrationParFiles))
-        with open(self.MainWindow.WaterCalibrationParFiles, "w") as file:
-            json.dump(self.WaterCalibrationPar, file,indent=4) 
-        self.SaveCalibrationPar.setChecked(False)
-        self.Warning
-        self.Warning.setText('Calibration parameters saved for calibration type: '+CalibrationType)
-        self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
 
     def _Showrecent(self):
         '''update the calibration figure'''
@@ -940,8 +913,7 @@ class WaterCalibrationDialog(QDialog):
                 self,
                 'Box {}, Spot Check Left'.format(self.MainWindow.box_letter),
                 "Empty tube weight: ", 
-                QLineEdit.Normal,
-                minValue=0
+                QLineEdit.Normal
                 )
             if not ok:
                 logging.warning('user cancelled spot calibration')
