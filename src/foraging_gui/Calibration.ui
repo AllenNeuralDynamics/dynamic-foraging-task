@@ -627,9 +627,9 @@
             <property name="geometry">
                 <rect>
                     <x>580</x>
-                    <y>65</y>
+                    <y>55</y>
                     <width>80</width>
-                    <height>40</height>
+                    <height>25</height>
                 </rect>
             </property>
             <property name="text">
@@ -639,6 +639,23 @@
                 <bool>true</bool>
             </property>
         </widget>
+        <widget class="QPushButton" name="Repeat">
+            <property name="geometry">
+                <rect>
+                    <x>580</x>
+                    <y>90</y>
+                    <width>80</width>
+                    <height>25</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Continue</string>
+            </property>
+            <property name="checkable">
+                <bool>true</bool>
+            </property>
+        </widget>
+
         <widget class="QLabel" name="WeightBeforeLeftLabel"><!-- label 24-->
             <property name="geometry">
                 <rect>
@@ -704,71 +721,6 @@
             </property>
         </widget>
 
-        <widget class="QLabel" name="TubeWeightLeftLabel"><!-- label 26-->
-            <property name="geometry">
-                <rect>
-                    <x>90</x>
-                    <y>55</y>
-                    <width>100</width>
-                    <height>25</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>empty tube (g)=</string>
-            </property>
-            <property name="textFormat">
-                <enum>Qt::AutoText</enum>
-            </property>
-            <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-        </widget>
-        <widget class="QLabel" name="TubeWeightRightLabel"><!-- label_27-->
-            <property name="geometry">
-                <rect>
-                    <x>90</x>
-                    <y>90</y>
-                    <width>100</width>
-                    <height>25</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>empty tube (g)=</string>
-            </property>
-            <property name="textFormat">
-                <enum>Qt::AutoText</enum>
-            </property>
-            <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-        </widget>
-        <widget class="QLineEdit" name="TubeWeightLeft">
-            <property name="geometry">
-                <rect>
-                    <x>200</x>
-                    <y>55</y>
-                    <width>40</width>
-                    <height>25</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string/>
-            </property>
-        </widget>
-        <widget class="QLineEdit" name="TubeWeightRight">
-            <property name="geometry">
-                <rect>
-                    <x>200</x>
-                    <y>90</y>
-                    <width>40</width>
-                    <height>25</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string/>
-            </property>
-        </widget>
-    </widget>
     <widget class="QLabel" name="Warning">
         <property name="geometry">
             <rect>

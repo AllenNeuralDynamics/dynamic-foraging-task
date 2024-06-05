@@ -461,40 +461,43 @@ class WaterCalibrationDialog(QDialog):
 
         params = self.WaterCalibrationPar[self.CalibrationType.currentText()]
 
-        # Prompt for empty tube
-        # Get empty tube weight, using field value as default
-        if self.TubeWeightLeft.text() != '':
-            empty_tube_weight = float(self.TubeWeightLeft.text()) 
-        else:
-            empty_tube_weight = 0.0 
-        empty_tube_weight, ok = QInputDialog().getDouble(
-            self,
-            'Box {}, Left'.format(self.MainWindow.box_letter),
-            "Empty tube weight (g): ", 
-            empty_tube_weight,
-            0,1000,2)
-        if not ok:
-            # User cancels
-            logging.warning('user cancelled spot calibration')
-            self.SpotCalibratingLeft.setStyleSheet("background-color : none;")
-            self.SpotCalibratingLeft.setChecked(False)        
-            self.Warning.setText('Calibration left cancelled')
-            self.TubeWeightLeft.setText('')
-            self.WeightBeforeLeft.setText('')
-            self.WeightAfterLeft.setText('')
-            self.StartCalibratingRight.setEnabled(True)
-            self.WeightAfterRight.setEnabled(True)
-            self.WeightBeforeRight.setEnabled(True)
-            self.TubeWeightRight.setEnabled(True)
-            return
-
-        self.TubeWeightLeft.setText(str(empty_tube_weight))
-        self.WeightBeforeLeft.setText(str(empty_tube_weight))
+        self.TubeWeightLeft.setText('')
+        self.WeightBeforeLeft.setText('')
         self.WeightAfterLeft.setText('')
 
-        opentimes = np.arange(float(params['TimeMin']),float(params['TimeMax'])+0.0001,float(params['Stride']))
-        index = 0
+        self.left_opentimes = np.arange(float(params['TimeMin']),float(params['TimeMax'])+0.0001,float(params['Stride']))
+        self.left_index = 0
+        self.left_complete=False
+
+
+def _CalibrateOneLeft(self):
         while index < len(opentimes):
+            # Prompt for empty tube
+            # Get empty tube weight, using field value as default
+            if self.TubeWeightLeft.text() != '':
+                empty_tube_weight = float(self.TubeWeightLeft.text()) 
+            else:
+                empty_tube_weight = 0.0 
+            empty_tube_weight, ok = QInputDialog().getDouble(
+                self,
+                'Box {}, Left'.format(self.MainWindow.box_letter),
+                "Empty tube weight (g): ", 
+                empty_tube_weight,
+                0,1000,2)
+            if not ok:
+                # User cancels
+                logging.warning('user cancelled spot calibration')
+                self.SpotCalibratingLeft.setStyleSheet("background-color : none;")
+                self.SpotCalibratingLeft.setChecked(False)        
+                self.Warning.setText('Calibration left cancelled')
+                self.TubeWeightLeft.setText('')
+                self.WeightBeforeLeft.setText('')
+                self.WeightAfterLeft.setText('')
+                self.StartCalibratingRight.setEnabled(True)
+                self.WeightAfterRight.setEnabled(True)
+                self.WeightBeforeRight.setEnabled(True)
+                self.TubeWeightRight.setEnabled(True)
+                return
             current_valve_opentime = opentimes[index]
             for i in range(int(params['Cycle'])):
                 QApplication.processEvents()
