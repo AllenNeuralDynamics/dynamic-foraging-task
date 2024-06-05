@@ -455,7 +455,7 @@ class WaterCalibrationDialog(QDialog):
             self.Continue.setChecked(False)
             self.Continue.setStyleSheet("background-color : none;")
 
-        params = self.WaterCalibrationPar[self.CalibrationType.text()] 
+        params = self.WaterCalibrationPar[self.CalibrationType.currentText()] 
         N=0
         for current_valve_opentime in np.arange(float(params['TimeMin']),float(params['TimeMax'])+0.0001,float(params['Stide'])):
             N=N+1
