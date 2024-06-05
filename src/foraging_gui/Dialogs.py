@@ -491,133 +491,134 @@ class WaterCalibrationDialog(QDialog):
         
 
 
-    def _StartCalibratingLeft_v1(self):
-            N=N+1
-            if N==1:
-                # disable TubeWeightRight
-                self.TubeWeightLeft.setEnabled(False)
-                if self.TubeWeightLeft.text()!='':
-                    self.WeightBeforeLeft.setText(self.TubeWeightLeft.text())
-                self.TubeWeightLeft.setText('')
-            else:
-                # enable TubeWeightRight
-                self.TubeWeightLeft.setEnabled(True)
-            while 1:
-                if not self.StartCalibratingLeft.isChecked():
-                    break
-                if self.Continue.isChecked():
-                    # start the open/close/delay cycle
-                    for i in range(int(self.CycleCaliLeft.text())):
-                        QApplication.processEvents()
-                        while 1:
-                            QApplication.processEvents()
-                            if (not self.EmergencyStop.isChecked()) or (not self.StartCalibratingLeft.isChecked()):
-                                break
-                        if self.StartCalibratingLeft.isChecked():
-                            # print the current calibration value
-                            self.Warning.setText('You are calibrating Left valve: '+ str(round(float(current_valve_opentime),4))+'   Current cycle:'+str(i+1)+'/'+self.CycleCaliLeft.text())
-                            self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
-                            # set the valve open time
-                            ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(current_valve_opentime)*1000) 
-                            # open the valve
-                            ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Left(int(1))
-                            # delay
-                            time.sleep(current_valve_opentime+float(self.IntervalLeft_2.text()))
-                        else:
-                            break
-                self.Continue.setChecked(False)
-                self.Continue.setStyleSheet("background-color : none")
-                if i==range(int(self.CycleCaliLeft.text()))[-1]:
-                    self.Warning.setText('Finish calibrating left valve: '+ str(round(float(current_valve_opentime),4))+'\nPlease enter the \"weight after(mg)\" and click the \"Continue\" button to start calibrating the next value.\nOr enter a negative value to repeat the current calibration.')
-                self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
-                self.TubeWeightLeft.setEnabled(True)
-                self.label_26.setEnabled(True)
-                # Waiting for the continue button to be clicked
-                continuetag=1
-                while 1:
-                    QApplication.processEvents()
-                    if not self.StartCalibratingLeft.isChecked():
-                        break
-                    if self.Continue.isChecked():
-                        # save the calibration data after the current calibration is completed
-                        if i==range(int(self.CycleCaliLeft.text()))[-1]:
-                            # save the data
-                            valve='Left'
-                            valve_open_time=str(round(float(current_valve_opentime),4))
-                            valve_open_interval=str(round(float(self.IntervalLeft_2.text()),4))
-                            cycle=str(int(self.CycleCaliLeft.text()))
-                            if self.WeightAfterLeft.text()=='':
-                                self.Warning.setText('Please enter the measured \"weight after(mg)\" and click the continue button again!\nOr enter a negative value to repeat the current calibration.')
-                                continuetag=0
-                                self.Continue.setChecked(False)
-                                self.Continue.setStyleSheet("background-color : none")
-                            else:
-                                try:
-                                    continuetag=1
-                                    total_water=float(self.WeightAfterLeft.text())
-                                    tube_weight=self.WeightBeforeLeft.text()
-                                    if tube_weight=='':
-                                        tube_weight=0
-                                    else:
-                                        tube_weight=float(tube_weight)
-                                    if total_water>=0:
-                                        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water,tube_weight=tube_weight)
-                                    # clear the weight before/tube/weight after
-                                    self.WeightAfterLeft.setText('')
-                                    if self.TubeWeightLeft.text()=='':
-                                        self.WeightBeforeLeft.setText(str(total_water))
-                                    else:
-                                        self.WeightBeforeLeft.setText(self.TubeWeightLeft.text())
-                                    self.TubeWeightLeft.setText('')
-                                except Exception as e:
-                                    logging.error(str(e))
-                                    continuetag=0
-                                    self.Warning.setText('Please enter the correct weight after(mg)/weight before(mg) and click the continue button again!\nOr enter a negative value to repeat the current calibration.')
-                        if continuetag==1:
-                            break
-                # Repeat current calibration when negative value is entered
-                QApplication.processEvents()
-                try:
-                    if total_water=='' or total_water<=0:
-                        pass
-                    else:
-                        break
-                except Exception as e:
-                    logging.error(str(e))
-                    break
-        try: 
-            # calibration complete indication
-            if self.StartCalibratingLeft.isChecked() and current_valve_opentime==np.arange(float(self.TimeLeftMin.text()),float(self.TimeLeftMax.text())+0.0001,float(self.StrideLeft.text()))[-1]:
-                self.Warning.setText('Calibration is complete!')
-                self._UpdateFigure()
-        except Exception as e:
-            logging.error(str(e))
-            self.Warning.setText('Calibration is not complete! Parameters error!')
-            self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
-        # set the default valve open time
-        ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
-        # enable the right valve calibration
-        self.StartCalibratingRight.setEnabled(True)
-        self.label_15.setEnabled(True)
-        self.label_14.setEnabled(True)
-        self.label_17.setEnabled(True)
-        self.label_18.setEnabled(True)
-        self.label_22.setEnabled(True)
-        self.label_13.setEnabled(True)
-        self.label_16.setEnabled(True)
-        self.label_25.setEnabled(True)
-        self.TimeRightMin.setEnabled(True)
-        self.TimeRightMax.setEnabled(True)
-        self.StrideRight.setEnabled(True)
-        self.CycleCaliRight.setEnabled(True)
-        self.IntervalRight_2.setEnabled(True)
-        self.WeightAfterRight.setEnabled(True)
-        self.WeightBeforeRight.setEnabled(True) 
-        self.label_27.setEnabled(True)
-        self.TubeWeightRight.setEnabled(True)
-        # change the color to be normal
-        self.StartCalibratingLeft.setStyleSheet("background-color : none")
-        self.StartCalibratingLeft.setChecked(False)
+    #def _StartCalibratingLeft_v1(self):
+    #    if True:
+    #        N=N+1
+    #        if N==1:
+    #            # disable TubeWeightRight
+    #            self.TubeWeightLeft.setEnabled(False)
+    #            if self.TubeWeightLeft.text()!='':
+    #                self.WeightBeforeLeft.setText(self.TubeWeightLeft.text())
+    #            self.TubeWeightLeft.setText('')
+    #        else:
+    #            # enable TubeWeightRight
+    #            self.TubeWeightLeft.setEnabled(True)
+    #        while 1:
+    #            if not self.StartCalibratingLeft.isChecked():
+    #                break
+    #            if self.Continue.isChecked():
+    #                # start the open/close/delay cycle
+    #                for i in range(int(self.CycleCaliLeft.text())):
+    #                    QApplication.processEvents()
+    #                    while 1:
+    #                        QApplication.processEvents()
+    #                        if (not self.EmergencyStop.isChecked()) or (not self.StartCalibratingLeft.isChecked()):
+    #                            break
+    #                    if self.StartCalibratingLeft.isChecked():
+    #                        # print the current calibration value
+    #                        self.Warning.setText('You are calibrating Left valve: '+ str(round(float(current_valve_opentime),4))+'   Current cycle:'+str(i+1)+'/'+self.CycleCaliLeft.text())
+    #                        self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+    #                        # set the valve open time
+    #                        ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(current_valve_opentime)*1000) 
+    #                        # open the valve
+    #                        ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Left(int(1))
+    #                        # delay
+    #                        time.sleep(current_valve_opentime+float(self.IntervalLeft_2.text()))
+    #                    else:
+    #                        break
+    #            self.Continue.setChecked(False)
+    #            self.Continue.setStyleSheet("background-color : none")
+    #            if i==range(int(self.CycleCaliLeft.text()))[-1]:
+    #                self.Warning.setText('Finish calibrating left valve: '+ str(round(float(current_valve_opentime),4))+'\nPlease enter the \"weight after(mg)\" and click the \"Continue\" button to start calibrating the next value.\nOr enter a negative value to repeat the current calibration.')
+    #            self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+    #            self.TubeWeightLeft.setEnabled(True)
+    #            self.label_26.setEnabled(True)
+    #            # Waiting for the continue button to be clicked
+    #            continuetag=1
+    #            while 1:
+    #                QApplication.processEvents()
+    #                if not self.StartCalibratingLeft.isChecked():
+    #                    break
+    #                if self.Continue.isChecked():
+    #                    # save the calibration data after the current calibration is completed
+    #                    if i==range(int(self.CycleCaliLeft.text()))[-1]:
+    #                        # save the data
+    #                        valve='Left'
+    #                        valve_open_time=str(round(float(current_valve_opentime),4))
+    #                        valve_open_interval=str(round(float(self.IntervalLeft_2.text()),4))
+    #                        cycle=str(int(self.CycleCaliLeft.text()))
+    #                        if self.WeightAfterLeft.text()=='':
+    #                            self.Warning.setText('Please enter the measured \"weight after(mg)\" and click the continue button again!\nOr enter a negative value to repeat the current calibration.')
+    #                            continuetag=0
+    #                            self.Continue.setChecked(False)
+    #                            self.Continue.setStyleSheet("background-color : none")
+    #                        else:
+    #                            try:
+    #                                continuetag=1
+    #                                total_water=float(self.WeightAfterLeft.text())
+    #                                tube_weight=self.WeightBeforeLeft.text()
+    #                                if tube_weight=='':
+    #                                    tube_weight=0
+    #                                else:
+    #                                    tube_weight=float(tube_weight)
+    #                                if total_water>=0:
+    #                                    self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water,tube_weight=tube_weight)
+    #                                # clear the weight before/tube/weight after
+    #                                self.WeightAfterLeft.setText('')
+    #                                if self.TubeWeightLeft.text()=='':
+    #                                    self.WeightBeforeLeft.setText(str(total_water))
+    #                                else:
+    #                                    self.WeightBeforeLeft.setText(self.TubeWeightLeft.text())
+    #                                self.TubeWeightLeft.setText('')
+    #                            except Exception as e:
+    #                                logging.error(str(e))
+    #                                continuetag=0
+    #                                self.Warning.setText('Please enter the correct weight after(mg)/weight before(mg) and click the continue button again!\nOr enter a negative value to repeat the current calibration.')
+    #                    if continuetag==1:
+    #                        break
+    #            # Repeat current calibration when negative value is entered
+    #            QApplication.processEvents()
+    #            try:
+    #                if total_water=='' or total_water<=0:
+    #                    pass
+    #                else:
+    #                    break
+    #            except Exception as e:
+    #                logging.error(str(e))
+    #                break
+    #    try: 
+    #        # calibration complete indication
+    #        if self.StartCalibratingLeft.isChecked() and current_valve_opentime==np.arange(float(self.TimeLeftMin.text()),float(self.TimeLeftMax.text())+0.0001,float(self.StrideLeft.text()))[-1]:
+    #            self.Warning.setText('Calibration is complete!')
+    #            self._UpdateFigure()
+    #    except Exception as e:
+    #        logging.error(str(e))
+    #        self.Warning.setText('Calibration is not complete! Parameters error!')
+    #        self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+    #    # set the default valve open time
+    #    ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
+    #    # enable the right valve calibration
+    #    self.StartCalibratingRight.setEnabled(True)
+    #    self.label_15.setEnabled(True)
+    #    self.label_14.setEnabled(True)
+    #    self.label_17.setEnabled(True)
+    #    self.label_18.setEnabled(True)
+    #    self.label_22.setEnabled(True)
+    #    self.label_13.setEnabled(True)
+    #    self.label_16.setEnabled(True)
+    #    self.label_25.setEnabled(True)
+    #    self.TimeRightMin.setEnabled(True)
+    #    self.TimeRightMax.setEnabled(True)
+    #    self.StrideRight.setEnabled(True)
+    #    self.CycleCaliRight.setEnabled(True)
+    #    self.IntervalRight_2.setEnabled(True)
+    #    self.WeightAfterRight.setEnabled(True)
+    #    self.WeightBeforeRight.setEnabled(True) 
+    #    self.label_27.setEnabled(True)
+    #    self.TubeWeightRight.setEnabled(True)
+    #    # change the color to be normal
+    #    self.StartCalibratingLeft.setStyleSheet("background-color : none")
+    #    self.StartCalibratingLeft.setChecked(False)
 
     def _StartCalibratingRight(self):
         '''start the calibration loop of right valve'''
