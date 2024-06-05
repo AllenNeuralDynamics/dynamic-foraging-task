@@ -948,7 +948,7 @@ class WaterCalibrationDialog(QDialog):
             if self.SpotCheckLeft.isChecked():
                 self.Warning.setText(
                     'Measuring left valve: {}s'.format(self.SpotLeftOpenTime.text()) + \
-                    'Empty tube weight: {}g'.format(empty_tube_weight) + \
+                    '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
                     '\nCurrent cycle: '+str(i+1)+'/{}'.format(int(self.SpotCycle)) + \
                     '\nTime remaining: {}'.format(self._TimeRemaining(i,self.SpotCycle,float(self.SpotLeftOpenTime.text()),self.SpotInterval))
                     )
@@ -966,7 +966,8 @@ class WaterCalibrationDialog(QDialog):
                 break
             self.SpotLeftFinished=1
         if self.SpotLeftFinished == 1:
-            self.Warning.setText('Spot Check Left complete, please record final weight')
+            text = self.Warning.getText()
+            self.Warning.setText(text+'\nSpot Check Left complete, please record final weight')
 
         # set the default valve open time
         ## DEBUGGING ##self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
