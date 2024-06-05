@@ -619,12 +619,7 @@
             </property>
             <item>
                 <property name="text">
-                    <string>Monthly</string>
-                </property>
-            </item>
-            <item>
-                <property name="text">
-                    <string>Biweekly</string>
+                    <string>Full</string>
                 </property>
             </item>
         </widget>
