@@ -367,7 +367,7 @@ class WaterCalibrationDialog(QDialog):
         
         # DEBUG, check if self.SpotLeftFinished ==1 
         valve='SpotLeft'
-        valve_open_time=str(float(self.SpotLeftOpenTime.text()))
+        valve_open_time=str(self.SpotLeftOpenTime)
         try:
             total_water=float(self.TotalWaterSingleLeft.text())  
         except Exception as e:
@@ -379,16 +379,16 @@ class WaterCalibrationDialog(QDialog):
             valve_open_interval=self.SpotInterval,
             cycle=self.SpotCycle,
             total_water=total_water,
-            tube_weight=0,
-            spot=True) ##DEBUG, why is this 0?
+            tube_weight=0) ##DEBUG, why is this 0?
         self.SaveLeft.setStyleSheet("background-color : none")
         self.SaveLeft.setChecked(False)
+
     def _SaveRight(self):
         '''save the calibration result of the single point calibration (right valve)'''
         self.SaveRight.setStyleSheet("background-color : green;")
         QApplication.processEvents()
         valve='SpotRight'
-        valve_open_time=str(float(self.SpotRightOpenTime.text()))
+        valve_open_time=str(self.SpotRightOpenTime.text())
         try:
             total_water=float(self.TotalWaterSingleRight.text()) 
         except Exception as e:
@@ -400,8 +400,7 @@ class WaterCalibrationDialog(QDialog):
             valve_open_interval=self.SpotInterval,
             cycle=self.SpotCycle,
             total_water=total_water,
-            tube_weight=0,
-            spot=True
+            tube_weight=0
             )
         self.SaveRight.setStyleSheet("background-color : none")
         self.SaveRight.setChecked(False)
@@ -799,7 +798,7 @@ class WaterCalibrationDialog(QDialog):
         self.StartCalibratingRight.setStyleSheet("background-color : none")
         self.StartCalibratingRight.setChecked(False
 )
-    def _Save(self,valve,valve_open_time,valve_open_interval,cycle,total_water,tube_weight,spot=False):
+    def _Save(self,valve,valve_open_time,valve_open_interval,cycle,total_water,tube_weight):
         '''save the calibrated result and update the figure'''
         if total_water=='' or tube_weight=='':
             return
