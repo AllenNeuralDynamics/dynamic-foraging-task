@@ -429,9 +429,9 @@ class WaterCalibrationDialog(QDialog):
             logging.error(str(e))
         self._Save(
             valve=valve,
-            valve_open_time=valve_open_time,
-            valve_open_interval=self.SpotInterval,
-            cycle=self.SpotCycle,
+            valve_open_time=str(valve_open_time),
+            valve_open_interval=str(self.SpotInterval),
+            cycle=str(self.SpotCycle),
             total_water=total_water,
             tube_weight=0) 
         self.SaveLeft.setStyleSheet("background-color : none")
@@ -450,9 +450,9 @@ class WaterCalibrationDialog(QDialog):
             logging.error(str(e))
         self._Save(
             valve=valve,
-            valve_open_time=valve_open_time,
-            valve_open_interval=self.SpotInterval,
-            cycle=self.SpotCycle,
+            valve_open_time=str(valve_open_time),
+            valve_open_interval=str(self.SpotInterval),
+            cycle=str(self.SpotCycle),
             total_water=total_water,
             tube_weight=0
             )
@@ -617,9 +617,9 @@ class WaterCalibrationDialog(QDialog):
         self.left_measurements[next_index] = True
         self._Save(
             valve='Left',
-            valve_open_time=current_valve_opentime,
-            valve_open_interval=self.params['Interval'],
-            cycle=self.params['Cycle'],
+            valve_open_time=str(current_valve_opentime),
+            valve_open_interval=str(self.params['Interval']),
+            cycle=str(self.params['Cycle']),
             total_water=float(self.WeightAfterLeft.text()),
             tube_weight=float(self.WeightBeforeLeft.text())
             )
@@ -768,9 +768,9 @@ class WaterCalibrationDialog(QDialog):
         self.right_measurements[next_index] = True
         self._Save(
             valve='Right',
-            valve_open_time=current_valve_opentime,
-            valve_open_interval=self.params['Interval'],
-            cycle=self.params['Cycle'],
+            valve_open_time=str(current_valve_opentime),
+            valve_open_interval=str(self.params['Interval']),
+            cycle=str(self.params['Cycle']),
             total_water=float(self.WeightAfterRight.text()),
             tube_weight=float(self.WeightBeforeRight.text())
             )
