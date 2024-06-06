@@ -351,6 +351,8 @@ class WaterCalibrationDialog(QDialog):
         self._UpdateFigure()
     
     def _Finished(self):
+        if (not self.calibrating_left) and (not self.calibrating_right):
+            return
         
         if self.calibrating_left and (not np.all(self.left_measurements)):
             reply = QMessageBox.question(self, "Box {}, Finished".format(self.MainWindow.box_letter),
@@ -384,6 +386,9 @@ class WaterCalibrationDialog(QDialog):
  
     def _Continue(self):
         '''Change the color of the continue button'''
+        if (not self.calibrating_left) and (not self.calibrating_right):
+            return
+
         self.Continue.setStyleSheet("background-color : none")
         logging.info('Continue pressed')
         if self.calibrating_left:
@@ -393,6 +398,9 @@ class WaterCalibrationDialog(QDialog):
 
     def _Repeat(self):
         '''Change the color of the continue button'''
+
+        if (not self.calibrating_left) and (not self.calibrating_right):
+            return
         self.Repeat.setStyleSheet("background-color : none")
         if self.calibrating_left:
             self._CalibrateLeftOne(repeat=True)
@@ -472,6 +480,12 @@ class WaterCalibrationDialog(QDialog):
             self.WaterCalibrationPar['Full']['Stride']=0.005
             self.WaterCalibrationPar['Full']['Interval']=0.05
 
+
+    ## DEBUG
+    # copy code to right
+    # ensure stop works
+    # determine what default settings to use
+    
     def _StartCalibratingLeft(self):
         '''start the calibration loop of left valve'''
         self.MainWindow._ConnectBonsai()
