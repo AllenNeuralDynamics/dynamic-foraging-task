@@ -815,7 +815,7 @@ class WaterCalibrationDialog(QDialog):
             WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval] = {}
         if cycle not in WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval]:
             WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle] = {}
-        WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle]=[total_water]
+        WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle]=[str(np.round(total_water,1))]
         self.WaterCalibrationResults=WaterCalibrationResults.copy()
         # save to the json file
         if not os.path.exists(os.path.dirname(self.MainWindow.WaterCalibrationFiles)):
