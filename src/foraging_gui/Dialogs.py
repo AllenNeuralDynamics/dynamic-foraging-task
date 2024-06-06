@@ -550,7 +550,7 @@ class WaterCalibrationDialog(QDialog):
             # User cancels
             self.Warning.setText('Press Continue, Repeat, or Finished')
             return
-        self.WeightBeforeLeft.setText(before_weight)
+        self.WeightBeforeLeft.setText(str(before_weight))
 
         current_valve_opentime = self.left_opentimes[next_index]
         for i in range(int(self.params['Cycle'])):
