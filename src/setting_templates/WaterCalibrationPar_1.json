@@ -3,11 +3,11 @@
         "TimeMin":0.02,
         "TimeMax":0.05,
         "Stride":0.005,
-        "Interval":0.010,
+        "Interval":0.10,
         "Cycle":200
     },
     "Spot": {
         "Cycle":200,
-        "Interval":0.010
+        "Interval":0.10
     }
 }
