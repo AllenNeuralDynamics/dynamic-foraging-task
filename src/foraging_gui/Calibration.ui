@@ -508,6 +508,74 @@
                 <bool>true</bool>
             </property>
         </widget>
+        <widget class="QLabel" name="LeftOpenTimeLabel">
+            <property name="geometry">
+                <rect>
+                    <x>100</x>
+                    <y>55</y>
+                    <width>75</width>
+                    <height>25</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>open time (s)</string>
+            </property>
+            <property name="textFormat">
+                <enum>Qt::AutoText</enum>
+            </property>
+            <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+        </widget>
+        <widget class="QLabel" name="RightOpenTimeLabel">
+            <property name="geometry">
+                <rect>
+                    <x>100</x>
+                    <y>90</y>
+                    <width>75</width>
+                    <height>25</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>open time (s)</string>
+            </property>
+            <property name="textFormat">
+                <enum>Qt::AutoText</enum>
+            </property>
+            <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+        </widget>
+        <widget class="QComboBox" name="LeftOpenTime">
+            <property name="geometry">
+                <rect>
+                    <x>180</x>
+                    <y>55</y>
+                    <width>60</width>
+                    <height>25</height>
+                </rect>
+            </property>
+            <item>
+                <property name="text">
+                    <string>0</string>
+                </property>
+            </item>
+        </widget>
+        <widget class="QComboBox" name="RightOpenTime">
+            <property name="geometry">
+                <rect>
+                    <x>180</x>
+                    <y>90</y>
+                    <width>60</width>
+                    <height>25</height>
+                </rect>
+            </property>
+            <item>
+                <property name="text">
+                    <string>0</string>
+                </property>
+            </item>
+        </widget>
         <widget class="QLabel" name="label_13"><!-- label 13-->
             <property name="geometry">
                 <rect>
