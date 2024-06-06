@@ -1005,7 +1005,7 @@ class Window(QMainWindow):
             raise Exception('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))           
         try:
             # Open the csv settings file
-            df = pd.read_csv(self.SettingsBoxFile,index_col=None)
+            df = pd.read_csv(self.SettingsBoxFile,index_col=None, header=None)
             self.SettingsBox = {row[0]: row[1] for _, row in df.iterrows()}
             logging.info('Loaded settings_box file')
         except Exception as e:
@@ -1018,6 +1018,12 @@ class Window(QMainWindow):
             logging.error('Settings box file does not have a newline at the end')
             raise Exception('Settings box file does not have a newline at the end')
 
+        # check that the SettingsBox has each of the values in mandatory_fields as a key, if not log an error for the missing key
+        csv_mandatory_fields = ['Behavior', 'Soundcard', 'BonsaiOsc1', 'BonsaiOsc2', 'BonsaiOsc3', 'BonsaiOsc4']
+        for field in csv_mandatory_fields:
+            if field not in self.SettingsBox.keys():
+                logging.error('Missing key ({}) in settings_box file'.format(field))
+                raise Exception('Missing key ({}) in settings_box file'.format(field))
 
         # Try to load the settings file        
         self.Settings = {}
