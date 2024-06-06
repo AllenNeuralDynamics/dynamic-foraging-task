@@ -424,8 +424,10 @@ class WaterCalibrationDialog(QDialog):
         valve_open_time=str(self.SpotLeftOpenTime)
         try:
             total_water=float(self.TotalWaterSingleLeft.text())  
+            before_weight = float(self.SpotCheckPreWeightLeft.text())
         except Exception as e:
             total_water=''
+            before_weight=''
             logging.error(str(e))
         self._Save(
             valve=valve,
@@ -433,7 +435,8 @@ class WaterCalibrationDialog(QDialog):
             valve_open_interval=str(self.SpotInterval),
             cycle=str(self.SpotCycle),
             total_water=total_water,
-            tube_weight=0) 
+            tube_weight=before_weight,
+            append=True) 
         self.SaveLeft.setStyleSheet("background-color : none")
         self.SaveLeft.setChecked(False)
 
@@ -445,8 +448,10 @@ class WaterCalibrationDialog(QDialog):
         valve_open_time=str(self.SpotRightOpenTime)
         try:
             total_water=float(self.TotalWaterSingleRight.text()) 
+            before_weight = float(self.SpotCheckPreWeightRight.text())
         except Exception as e:
             total_water=''
+            before_weight =''
             logging.error(str(e))
         self._Save(
             valve=valve,
@@ -454,7 +459,8 @@ class WaterCalibrationDialog(QDialog):
             valve_open_interval=str(self.SpotInterval),
             cycle=str(self.SpotCycle),
             total_water=total_water,
-            tube_weight=0
+            tube_weight=before_weight,
+            append=True
             )
         self.SaveRight.setStyleSheet("background-color : none")
         self.SaveRight.setChecked(False)
@@ -795,7 +801,7 @@ class WaterCalibrationDialog(QDialog):
             )
         self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
 
-    def _Save(self,valve,valve_open_time,valve_open_interval,cycle,total_water,tube_weight):
+    def _Save(self,valve,valve_open_time,valve_open_interval,cycle,total_water,tube_weight,append=False):
         '''save the calibrated result and update the figure'''
         if total_water=='' or tube_weight=='':
             return
@@ -814,8 +820,11 @@ class WaterCalibrationDialog(QDialog):
         if valve_open_interval not in WaterCalibrationResults[date_str][valve][valve_open_time]:
             WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval] = {}
         if cycle not in WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval]:
-            WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle] = {}
-        WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle]=[np.round(total_water,1)]
+            WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle] = []
+        if append:
+            WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle].append(np.round(total_water,1))
+        else:
+            WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle]=[np.round(total_water,1)]
         self.WaterCalibrationResults=WaterCalibrationResults.copy()
         # save to the json file
         if not os.path.exists(os.path.dirname(self.MainWindow.WaterCalibrationFiles)):
