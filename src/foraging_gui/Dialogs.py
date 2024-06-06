@@ -567,8 +567,8 @@ class WaterCalibrationDialog(QDialog):
                 self.Warning.setText('Calibration cancelled')
                 self.WeightBeforeLeft.setText('')
                 self.WeightAfterLeft.setText('')
-                self.Repeat.setStyleSheet"color: white;background-color : mediumorchid;")
-                self.Continue.setStyleSheet"color: black;background-color : none;")
+                self.Repeat.setStyleSheet("color: white;background-color : mediumorchid;")
+                self.Continue.setStyleSheet("color: black;background-color : none;")
                 return
 
         # Prompt for weight
@@ -583,8 +583,8 @@ class WaterCalibrationDialog(QDialog):
             self.Warning.setText('Calibration cancelled')
             self.WeightBeforeLeft.setText('')
             self.WeightAfterLeft.setText('')
-            self.Repeat.setStyleSheet"color: white;background-color : mediumorchid;")
-            self.Continue.setStyleSheet"color: black;background-color : none;")
+            self.Repeat.setStyleSheet("color: white;background-color : mediumorchid;")
+            self.Continue.setStyleSheet("color: black;background-color : none;")
             return
 
         self.WeightAfterLeft.setText(str(final_tube_weight))
