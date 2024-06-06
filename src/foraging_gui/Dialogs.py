@@ -466,8 +466,13 @@ class WaterCalibrationDialog(QDialog):
         self.WeightAfterLeft.setText('')
 
         self.left_opentimes = np.arange(float(params['TimeMin']),float(params['TimeMax'])+0.0001,float(params['Stride']))
-        self.left_index = 0
-        self.left_complete=False
+        for t in self.left_opentimes:
+            self.LeftOpenTime.addItem(str(t))
+        index = self.LeftOpenTime.findText('0')
+        self.LeftOpenTime.removeItem(index)
+
+        self.left_measurements = np.empty(np.shape(self.left_opentimes))
+        self.left_measurements[:] = False
 
 
     #def _CalibrateOneLeft(self):
