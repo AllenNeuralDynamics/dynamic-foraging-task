@@ -1523,7 +1523,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Disabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM5</harp:PortName>
+                      <harp:PortName>COM8</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject">
@@ -2752,7 +2752,7 @@
                 <harp:VisualIndicators>On</harp:VisualIndicators>
                 <harp:Heartbeat>Disabled</harp:Heartbeat>
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                <harp:PortName>COM4</harp:PortName>
+                <harp:PortName>COM9</harp:PortName>
               </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
@@ -3013,7 +3013,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Enabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM14</harp:PortName>
+                      <harp:PortName>COM11</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:PublishSubject">
@@ -3043,7 +3043,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Enabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM13</harp:PortName>
+                      <harp:PortName>COM6</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:PublishSubject">
@@ -3224,6 +3224,80 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="rx:SubscribeWhen" />
             </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="SubscribeSubject">
+                <Name>ComPorts</Name>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Index">
+                <Operand xsi:type="StringProperty">
+                  <Value>SniffDetector</Value>
+                </Operand>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="NotEqual">
+                <Operand xsi:type="StringProperty">
+                  <Value>0</Value>
+                </Operand>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="rx:Condition">
+                <Workflow>
+                  <Nodes>
+                    <Expression xsi:type="WorkflowInput">
+                      <Name>Source1</Name>
+                    </Expression>
+                    <Expression xsi:type="WorkflowOutput" />
+                  </Nodes>
+                  <Edges>
+                    <Edge From="0" To="1" Label="Source1" />
+                  </Edges>
+                </Workflow>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="GroupWorkflow">
+                <Name>SniffDetector</Name>
+                <Workflow>
+                  <Nodes>
+                    <Expression xsi:type="Disable">
+                      <Builder xsi:type="SubscribeSubject">
+                        <Name>Events</Name>
+                      </Builder>
+                    </Expression>
+                    <Expression xsi:type="Disable">
+                      <Builder xsi:type="rx:BehaviorSubject" TypeArguments="harp:HarpMessage">
+                        <rx:Name>Commands</rx:Name>
+                      </Builder>
+                    </Expression>
+                    <Expression xsi:type="Disable">
+                      <Builder xsi:type="Combinator">
+                        <Combinator xsi:type="harp:Device">
+                          <harp:OperationMode>Active</harp:OperationMode>
+                          <harp:OperationLed>On</harp:OperationLed>
+                          <harp:DumpRegisters>true</harp:DumpRegisters>
+                          <harp:VisualIndicators>On</harp:VisualIndicators>
+                          <harp:Heartbeat>Disabled</harp:Heartbeat>
+                          <harp:IgnoreErrors>false</harp:IgnoreErrors>
+                          <harp:PortName>COM5</harp:PortName>
+                        </Combinator>
+                      </Builder>
+                    </Expression>
+                  </Nodes>
+                  <Edges>
+                    <Edge From="1" To="2" Label="Source1" />
+                  </Edges>
+                </Workflow>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="rx:SubscribeWhen" />
+              </Builder>
+            </Expression>
           </Nodes>
           <Edges>
             <Edge From="0" To="4" Label="Source1" />
@@ -3244,6 +3318,11 @@
             <Edge From="18" To="19" Label="Source1" />
             <Edge From="19" To="20" Label="Source1" />
             <Edge From="20" To="21" Label="Source2" />
+            <Edge From="22" To="23" Label="Source1" />
+            <Edge From="23" To="24" Label="Source1" />
+            <Edge From="24" To="25" Label="Source1" />
+            <Edge From="25" To="27" Label="Source1" />
+            <Edge From="26" To="27" Label="Source2" />
           </Edges>
         </Workflow>
       </Expression>
@@ -7426,6 +7505,16 @@
             <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogHarpDemux.bonsai">
               <LogName>LickometerEventsRight</LogName>
             </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="SubscribeSubject">
+                <Name>SniffDetectorEvents</Name>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="IncludeWorkflow" Path="Extensions\LogHarpDemux.bonsai">
+                <LogName>LickometerEventsRight</LogName>
+              </Builder>
+            </Expression>
             <Expression xsi:type="GroupWorkflow">
               <Name>HighSpeedCamera</Name>
               <Workflow>
@@ -8330,12 +8419,13 @@
             <Edge From="36" To="37" Label="Source1" />
             <Edge From="39" To="40" Label="Source1" />
             <Edge From="41" To="42" Label="Source1" />
-            <Edge From="43" To="48" Label="Source1" />
-            <Edge From="44" To="45" Label="Source1" />
-            <Edge From="45" To="46" Label="Source1" />
+            <Edge From="43" To="44" Label="Source1" />
+            <Edge From="45" To="50" Label="Source1" />
             <Edge From="46" To="47" Label="Source1" />
-            <Edge From="47" To="48" Label="Source2" />
-            <Edge From="49" To="50" Label="Source1" />
+            <Edge From="47" To="48" Label="Source1" />
+            <Edge From="48" To="49" Label="Source1" />
+            <Edge From="49" To="50" Label="Source2" />
+            <Edge From="51" To="52" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
@@ -8349,7 +8439,7 @@
         <Property Name="FileName" DisplayName="SettingsPath" />
       </Expression>
       <Expression xsi:type="io:CsvReader">
-        <io:FileName>C:\Users\yoni.browning\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
+        <io:FileName>C:\Users\svc_aind_ephys\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
         <io:ScanPattern>%s,%s</io:ScanPattern>
         <io:SkipRows>0</io:SkipRows>
       </Expression>

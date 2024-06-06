@@ -2215,7 +2215,7 @@ class Window(QMainWindow):
                     if key not in self.StateVars.keys():
                         changed_obj[key] = tmp_state_obj[key]
                         self.StateVars[key] = tmp_state_obj[key]
-                    #Check if the value has changed
+
                     elif isinstance(self.StateVars[key],np.ndarray) or isinstance(self.StateVars[key],list):
                         # If its a list, convert to np array for easier handling
                         if isinstance(self.StateVars[key],list) or isinstance(tmp_state_obj[key],list):
@@ -2226,17 +2226,24 @@ class Window(QMainWindow):
                                 # Special case in which array data is of unequal
                                 # size. Here we just log the new data if it
                                 # changed.
-                                if not tmp_state_obj[key] == self.StateVars[key]:
-                                    changed_obj[key] = tmp_state_obj[key]
-                                    self.StateVars[key] = tmp_state_obj[key]
-                                    continue  # Skip code assuming np arrays
+                                if len(tmp_state_obj[key])==len(self.StateVars[key]):
+                                    if tmp_state_obj[key]==self.StateVars[key]:
+                                        continue
+                                    else:
+                                        changed_obj[key] == self.tmp_state_obj[key]
+                                        self.StateVars[key] = tmp_state_obj[key]
+                                        print(f'Changed value: {key}')
+                                        continue  
                                 else:
-                                    continue # Skip code assuming np arrays
+                                    changed_obj[key] = tmp_state_obj[key][len(self.StateVars[key]):]
+                                    self.StateVars[key] = tmp_state_obj[key]
+                                    print(f'Changed Size: {key}')
+                                    continue
                     
                         if np.array_equal(tmp_state_obj[key],self.StateVars[key]):
                             # No change, don't log
                             continue 
-                        elif (tmp_state_obj[key].shape == self.StateVars[key].shape) or (tmp_state_obj[key].ndim==0):
+                        elif (isinstance(tmp_state_obj[key],(int,float,))) or (tmp_state_obj[key].ndim==0) or  (tmp_state_obj[key].shape == self.StateVars[key].shape):
                             # Everything has changed, log.
                             # In the special case of a scalar, we log it too.
                             changed_obj[key] = tmp_state_obj[key]
@@ -2428,7 +2435,7 @@ class Window(QMainWindow):
             for file in os.listdir(self.CheckpointFolder):
                 if file.endswith('.json'):
                     os.remove(os.path.join(self.CheckpointFolder, file))
-        os.rmdir(self.CheckpointFolder)
+            os.rmdir(self.CheckpointFolder)
 
     def _GetSaveFolder(self):
         '''
