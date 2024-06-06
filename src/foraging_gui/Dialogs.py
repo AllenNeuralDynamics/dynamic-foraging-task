@@ -336,6 +336,7 @@ class WaterCalibrationDialog(QDialog):
         self.StartCalibratingLeft.clicked.connect(self._StartCalibratingLeft)
         self.StartCalibratingRight.clicked.connect(self._StartCalibratingRight)
         self.Continue.clicked.connect(self._Continue)
+        self.Repeat.clicked.connect(self._Repeat)
         self.Finished.clicked.connect(self._Finished)
         self.EmergencyStop.clicked.connect(self._EmergencyStop)
         self.showrecent.textChanged.connect(self._Showrecent)
@@ -370,7 +371,6 @@ class WaterCalibrationDialog(QDialog):
         self.calibrating_right= False
         self.Continue.setStyleSheet("background-color : none")
         self.Repeat.setStyleSheet("background-color : none")
-        self.Finished.setChecked(False)
         self.Finished.setStyleSheet("background-color : none")
         self.StartCalibratingLeft.setStyleSheet("background-color : none")
         self.StartCalibratingRight.setStyleSheet("background-color : none")
@@ -384,10 +384,20 @@ class WaterCalibrationDialog(QDialog):
  
     def _Continue(self):
         '''Change the color of the continue button'''
-        if self.Continue.isChecked():
-            self.Continue.setStyleSheet("background-color : green;")
-        else:
-            self.Continue.setStyleSheet("background-color : none")
+        self.Continue.setStyleSheet("background-color : none")
+        if self.calibrating_left:
+            self._CalibrateLeftOne()
+        if self.calibrating_right:
+            self._CalibrateRightOne()
+
+    def _Repeat(self):
+        '''Change the color of the continue button'''
+        self.Repeat.setStyleSheet("background-color : none")
+        if self.calibrating_left:
+            self._CalibrateLeftOne(repeat=True)
+        if self.calibrating_right:
+            self._CalibrateRightOne(repeat=True)
+
 
     def _EmergencyStop(self):
         '''Change the color of the EmergencyStop button'''
@@ -491,23 +501,29 @@ class WaterCalibrationDialog(QDialog):
             self.WeightBeforeRight.setEnabled(True)
             return
 
+        # Get Calibration parameters
         params = self.WaterCalibrationPar[self.CalibrationType.currentText()]
 
-        self.WeightBeforeLeft.setText('')
-        self.WeightAfterLeft.setText('')
-
+        # Populate options for calibrations
         self.left_opentimes = np.arange(float(params['TimeMin']),float(params['TimeMax'])+0.0001,float(params['Stride']))
         for t in self.left_opentimes:
             self.LeftOpenTime.addItem('{0:.3f}'.format(t))
         index = self.LeftOpenTime.findText('0')
         self.LeftOpenTime.removeItem(index)
+        self.WeightBeforeLeft.setText('')
+        self.WeightAfterLeft.setText('')
+        self.Warning.setText('')
 
+        # Keep track of calibration status
         self.calibrating_left = True
         self.left_measurements = np.empty(np.shape(self.left_opentimes))
         self.left_measurements[:] = False
 
+        # Start the first calibration
+        self._CalibrateLeftOne()
 
-    #def _CalibrateOneLeft(self):
+    def _CalibrateLeftOne(self,repeat=False):
+        self.Warning.setText('calibrate left one')
     # 
     #    while index < len(opentimes):
     #         # Prompt for empty tube

@@ -692,9 +692,6 @@
             <property name="text">
                 <string>Finished</string>
             </property>
-            <property name="checkable">
-                <bool>true</bool>
-            </property>
         </widget>
 
         <widget class="QPushButton" name="Continue">
@@ -709,9 +706,6 @@
             <property name="text">
                 <string>Continue</string>
             </property>
-            <property name="checkable">
-                <bool>true</bool>
-            </property>
         </widget>
         <widget class="QPushButton" name="Repeat">
             <property name="geometry">
@@ -724,9 +718,6 @@
             </property>
             <property name="text">
                 <string>Repeat</string>
-            </property>
-            <property name="checkable">
-                <bool>true</bool>
             </property>
         </widget>
         <widget class="QLabel" name="WeightBeforeLeftLabel"><!-- label 24-->
