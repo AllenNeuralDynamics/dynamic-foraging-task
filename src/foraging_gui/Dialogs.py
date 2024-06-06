@@ -529,7 +529,7 @@ class WaterCalibrationDialog(QDialog):
             self.LeftOpenTime.setCurrentIndex(next_index)
         else:
             next_index = self.LeftOpenTime.getCurrentIndex()
-        logging.info('Calibrating left: {}'.format(self.left_opentimes(next_index))           
+        logging.info('Calibrating left: {}'.format(self.left_opentimes(next_index))) 
  
         # Shuffle weights
         self.WeightBeforeLeft.setText(self.WeightAfterLeft.text())
