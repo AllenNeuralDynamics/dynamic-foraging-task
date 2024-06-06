@@ -401,8 +401,6 @@ class PlotWaterCalibration(FigureCanvas):
 
     def _PlotFitting(self,x,y,color,Plot):
         '''fit with linear regression and plot'''           
-        print(x)
-        print(y) ## DEBUG
         slope, intercept, r_value, p_value, _ = stats.linregress(x, y)
         fit_x = np.array(x)
         fit_y = np.array(x) * slope + intercept

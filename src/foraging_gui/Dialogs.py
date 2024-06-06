@@ -420,7 +420,6 @@ class WaterCalibrationDialog(QDialog):
         self.SaveLeft.setStyleSheet("background-color : green;")
         QApplication.processEvents()
         
-        # DEBUG, check if self.SpotLeftFinished ==1 
         valve='SpotLeft'
         valve_open_time=str(self.SpotLeftOpenTime)
         try:
@@ -434,7 +433,7 @@ class WaterCalibrationDialog(QDialog):
             valve_open_interval=self.SpotInterval,
             cycle=self.SpotCycle,
             total_water=total_water,
-            tube_weight=0) ##DEBUG, why is this 0?
+            tube_weight=0) 
         self.SaveLeft.setStyleSheet("background-color : none")
         self.SaveLeft.setChecked(False)
 
@@ -479,15 +478,6 @@ class WaterCalibrationDialog(QDialog):
             self.WaterCalibrationPar['Full']['TimeMax']=0.08
             self.WaterCalibrationPar['Full']['Stride']=0.005
             self.WaterCalibrationPar['Full']['Interval']=0.05
-
-
-    ## DEBUG
-    # copy code to right
-    # ensure stop works
-    # determine what default settings to use
-    # Remove debugs
-    # disable enter on dialog
-    # Determine precision of displaying and entering values
     
     def _StartCalibratingLeft(self):
         '''start the calibration loop of left valve'''
