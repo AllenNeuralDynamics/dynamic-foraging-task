@@ -328,7 +328,7 @@ class WaterCalibrationDialog(QDialog):
 
     def keyPressEvent(self,e):
         print('here')
-        event.ignore()
+        e.ignore()
         return
 
     def _connectSignalsSlots(self):
