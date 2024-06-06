@@ -493,12 +493,8 @@ class WaterCalibrationDialog(QDialog):
             self.WeightAfterRight.setEnabled(False)
             self.WeightBeforeRight.setEnabled(False)
         else:
-            self.StartCalibratingLeft.setStyleSheet("background-color : none")
-            self.Warning.setText('Calibration was terminated!')
-            self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
-            self.StartCalibratingRight.setEnabled(True)
-            self.WeightAfterRight.setEnabled(True)
-            self.WeightBeforeRight.setEnabled(True)
+            self.StartCalibratingLeft.setChecked(True)
+            self._Finished()
             return
 
         # Get Calibration parameters
