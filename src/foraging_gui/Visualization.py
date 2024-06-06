@@ -375,23 +375,24 @@ class PlotWaterCalibration(FigureCanvas):
         for current_date in sorted_dates:
             all_valves=self.WaterCalibrationResults[current_date].keys()
             for current_valve in all_valves:
-                sorted_X,sorted_Y=self._GetWaterCalibration(self.WaterCalibrationResults,current_date,current_valve)
-                if current_date in all_dates:
-                    if current_valve=='Left':
-                        line=self.ax1.plot(sorted_X, sorted_Y, 'o-',label=current_date+'_left valve')
-                    elif current_valve=='Right':
-                        line=self.ax1.plot(sorted_X, sorted_Y, 'o-',label=current_date+'_right valve')
-                    # fit the curve
-                    color=line[0].get_color()
-                    slope, intercept=self._PlotFitting(sorted_X,sorted_Y,color,Plot=1)
-                else:
-                    slope, intercept=self._PlotFitting(sorted_X,sorted_Y,'r',Plot=0)
-                # save fitting results
-                if current_date not in self.FittingResults:
-                    self.FittingResults[current_date]={}
-                if current_valve not in self.FittingResults[current_date]:
-                    self.FittingResults[current_date][current_valve]={}
-                self.FittingResults[current_date][current_valve]=[slope,intercept]
+                if current_valve in ['Left','Right']:
+                    sorted_X,sorted_Y=self._GetWaterCalibration(self.WaterCalibrationResults,current_date,current_valve)
+                    if current_date in all_dates:
+                        if current_valve=='Left':
+                            line=self.ax1.plot(sorted_X, sorted_Y, 'o-',label=current_date+'_left valve')
+                        elif current_valve=='Right':
+                            line=self.ax1.plot(sorted_X, sorted_Y, 'o-',label=current_date+'_right valve')
+                        # fit the curve
+                        color=line[0].get_color()
+                        slope, intercept=self._PlotFitting(sorted_X,sorted_Y,color,Plot=1)
+                    else:
+                        slope, intercept=self._PlotFitting(sorted_X,sorted_Y,'r',Plot=0)
+                    # save fitting results
+                    if current_date not in self.FittingResults:
+                        self.FittingResults[current_date]={}
+                    if current_valve not in self.FittingResults[current_date]:
+                        self.FittingResults[current_date][current_valve]={}
+                    self.FittingResults[current_date][current_valve]=[slope,intercept]
 
         self.ax1.set_xlabel('valve open time(s)')
         self.ax1.set_ylabel('water(mg)')
