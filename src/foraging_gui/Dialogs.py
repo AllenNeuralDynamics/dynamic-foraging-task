@@ -569,7 +569,7 @@ class WaterCalibrationDialog(QDialog):
                 # delay
                 time.sleep(current_valve_opentime+float(self.params['Interval']))
             else:
-                self.Warning.setText('Calibration cancelled')
+                self.Warning.setText('Please repeat measurement')
                 self.WeightBeforeLeft.setText('')
                 self.WeightAfterLeft.setText('')
                 self.Repeat.setStyleSheet("color: white;background-color : mediumorchid;")
@@ -585,7 +585,7 @@ class WaterCalibrationDialog(QDialog):
             final_tube_weight,
             0, 1000, 2)
         if not ok:
-            self.Warning.setText('Calibration cancelled')
+            self.Warning.setText('Please repeat measurement')
             self.WeightBeforeLeft.setText('')
             self.WeightAfterLeft.setText('')
             self.Repeat.setStyleSheet("color: white;background-color : mediumorchid;")
@@ -606,6 +606,7 @@ class WaterCalibrationDialog(QDialog):
         self._UpdateFigure()
         self.Continue.setStyleSheet("color: white;background-color : mediumorchid;")
         self.Repeat.setStyleSheet("color: black;background-color : none;")
+        self.Warning.setText('Please press Continue, Repeat, or Finished')
  
         
     def _CalibrationStatus(self,opentime, weight_before, i, cycle, interval):
