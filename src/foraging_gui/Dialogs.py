@@ -988,55 +988,55 @@ class WaterCalibrationDialog(QDialog):
                 self.SaveLeft.setStyleSheet("color: black;background-color : none;")
                 self.EmergencyStop.setChecked(False)
                 self.EmergencyStop.setStyleSheet("background-color : none;")
-                break
-            self.SpotLeftFinished=1
+                self.SpotCheckLeft.setChecked(False)        
+                self.SpotCheckLeft.setStyleSheet("background-color : none")
+                return
 
-        if self.SpotLeftFinished == 1:
-            # Get final value, using field as default
-            if self.TotalWaterSingleLeft.text() != '':
-                final_tube_weight = float(self.TotalWaterSingleLeft.text()) 
-            else:
-                final_tube_weight = 0.0
-            final_tube_weight, ok = QInputDialog().getDouble(
-                self,
-                'Box {}, Left'.format(self.MainWindow.box_letter),
-                "Final tube weight (g): ", 
-                final_tube_weight,
-                0, 1000, 2)
-            self.TotalWaterSingleLeft.setText(str(final_tube_weight))
+        # Get final value, using field as default
+        if self.TotalWaterSingleLeft.text() != '':
+            final_tube_weight = float(self.TotalWaterSingleLeft.text()) 
+        else:
+            final_tube_weight = 0.0
+        final_tube_weight, ok = QInputDialog().getDouble(
+            self,
+            'Box {}, Left'.format(self.MainWindow.box_letter),
+            "Final tube weight (g): ", 
+            final_tube_weight,
+            0, 1000, 2)
+        self.TotalWaterSingleLeft.setText(str(final_tube_weight))
 
-            #Determine result
-            result = (final_tube_weight - empty_tube_weight)/int(self.SpotCycle)*1000
-            error = result - float(self.SpotLeftVolume.text())
-            error = np.round(error,4)
+        #Determine result
+        result = (final_tube_weight - empty_tube_weight)/int(self.SpotCycle)*1000
+        error = result - float(self.SpotLeftVolume.text())
+        error = np.round(error,4)
+        self.Warning.setText(
+            'Measuring left valve: {}uL'.format(self.SpotLeftVolume.text()) + \
+            '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
+            '\nFinal tube weight: {}g'.format(final_tube_weight) + \
+            '\nAvg. error from target: {}uL'.format(error)
+            )        
+        TOLERANCE = float(self.SpotLeftVolume.text())/10
+        if np.abs(error) > TOLERANCE:
+            reply = QMessageBox.question(self, 'Spot check left', 
+                'Avg. error ({}uL) is outside expected tolerance. Please confirm you entered information correctly, and then repeat check'.format(error), 
+                QMessageBox.Ok)
+            logging.error('Water calibration spot check exceeds tolerance: {}'.format(error))  
+            self.SaveLeft.setStyleSheet("color: white;background-color : mediumorchid;")
             self.Warning.setText(
                 'Measuring left valve: {}uL'.format(self.SpotLeftVolume.text()) + \
                 '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
                 '\nFinal tube weight: {}g'.format(final_tube_weight) + \
                 '\nAvg. error from target: {}uL'.format(error)
-                )        
-            TOLERANCE = float(self.SpotLeftVolume.text())/10
-            if np.abs(error) > TOLERANCE:
-                reply = QMessageBox.question(self, 'Spot check left', 
-                    'Avg. error ({}uL) is outside expected tolerance. Please confirm you entered information correctly, and then repeat check'.format(error), 
-                    QMessageBox.Ok)
-                logging.error('Water calibration spot check exceeds tolerance: {}'.format(error))  
-                self.SaveLeft.setStyleSheet("color: white;background-color : mediumorchid;")
-                self.Warning.setText(
-                    'Measuring left valve: {}uL'.format(self.SpotLeftVolume.text()) + \
-                    '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
-                    '\nFinal tube weight: {}g'.format(final_tube_weight) + \
-                    '\nAvg. error from target: {}uL'.format(error)
-                    )
-            else:
-                self.Warning.setText(
-                    'Measuring left valve: {}uL'.format(self.SpotLeftVolume.text()) + \
-                    '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
-                    '\nFinal tube weight: {}g'.format(final_tube_weight) + \
-                    '\nAvg. error from target: {}uL'.format(error) + \
-                    '\nCalibration saved'
-                    )
-                self._SaveLeft()
+                )
+        else:
+            self.Warning.setText(
+                'Measuring left valve: {}uL'.format(self.SpotLeftVolume.text()) + \
+                '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
+                '\nFinal tube weight: {}g'.format(final_tube_weight) + \
+                '\nAvg. error from target: {}uL'.format(error) + \
+                '\nCalibration saved'
+                )
+            self._SaveLeft()
 
 
         # set the default valve open time
@@ -1058,7 +1058,7 @@ class WaterCalibrationDialog(QDialog):
             self.SpotCheckPreWeightRight.setText('')
             return
 
-        if self.SpotCheckRight.isChecked() and (not self.EmergencyStop.isChecked()):
+        if self.SpotCheckRight.isChecked():
             logging.info('starting spot check right')
             self.SpotCheckRight.setStyleSheet("background-color : green;")
     
@@ -1082,13 +1082,10 @@ class WaterCalibrationDialog(QDialog):
                 self.SpotCheckPreWeightRight.setText('')
                 self.TotalWaterSingleRight.setText('')
                 self.SaveRight.setStyleSheet("color: black;background-color : none;")
-                self.EmergencyStop.setChecked(False)
-                self.EmergencyStop.setStyleSheet("background-color : none;")
                 return
             self.SpotCheckPreWeightRight.setText(str(empty_tube_weight))
 
         # Determine what open time to use
-        self.SpotRightFinished=0
         self.SpotRightOpenTime = self._VolumeToTime(float(self.SpotRightVolume.text()),'Right')
         self.SpotRightOpenTime = np.round(self.SpotRightOpenTime,4)
         logging.info('Using a calibration spot check of {}s to deliver {}uL'.format(self.SpotRightOpenTime,self.SpotRightVolume.text()))
@@ -1096,7 +1093,7 @@ class WaterCalibrationDialog(QDialog):
         # start the open/close/delay cycle
         for i in range(int(self.SpotCycle)):
             QApplication.processEvents()
-            if self.SpotCheckRight.isChecked():
+            if self.SpotCheckRight.isChecked() and (not self.EmergencyStop.isChecked()):
                 self.Warning.setText(
                     'Measuring right valve: {}uL'.format(self.SpotRightVolume.text()) + \
                     '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
@@ -1117,50 +1114,52 @@ class WaterCalibrationDialog(QDialog):
                 self.SpotCheckPreWeightRight.setText('')
                 self.TotalWaterSingleRight.setText('')
                 self.SaveRight.setStyleSheet("color: black;background-color : none;")
-                break
-            self.SpotRightFinished=1
+                self.EmergencyStop.setChecked(False)
+                self.EmergencyStop.setStyleSheet("background-color : none;")
+                self.SpotCheckRight.setChecked(False)        
+                self.SpotCheckRight.setStyleSheet("background-color : none")
+                return
 
-        if self.SpotRightFinished == 1:
-            # Get final value, using field as default
-            if self.TotalWaterSingleRight.text() != '':
-                final_tube_weight = float(self.TotalWaterSingleRight.text()) 
-            else:
-                final_tube_weight = 0.0
-            final_tube_weight, ok = QInputDialog().getDouble(
-                self,
-                'Box {}, Right'.format(self.MainWindow.box_letter),
-                "Final tube weight (g): ", 
-                final_tube_weight,
-                0, 1000, 2)
-            self.TotalWaterSingleRight.setText(str(final_tube_weight))
+        # Get final value, using field as default
+        if self.TotalWaterSingleRight.text() != '':
+            final_tube_weight = float(self.TotalWaterSingleRight.text()) 
+        else:
+            final_tube_weight = 0.0
+        final_tube_weight, ok = QInputDialog().getDouble(
+            self,
+            'Box {}, Right'.format(self.MainWindow.box_letter),
+            "Final tube weight (g): ", 
+            final_tube_weight,
+            0, 1000, 2)
+        self.TotalWaterSingleRight.setText(str(final_tube_weight))
 
-            #Determine result
-            result = (final_tube_weight - empty_tube_weight)/int(self.SpotCycle)*1000
-            error = result - float(self.SpotRightVolume.text())
-            error = np.round(error,4)
+        #Determine result
+        result = (final_tube_weight - empty_tube_weight)/int(self.SpotCycle)*1000
+        error = result - float(self.SpotRightVolume.text())
+        error = np.round(error,4)
         
-            TOLERANCE = float(self.SpotRightVolume.text())/10
-            if np.abs(error) > TOLERANCE:
-                reply = QMessageBox.question(self, 'Spot check right', 
-                    'Avg. error ({}uL) is outside expected tolerance. Please confirm you entered information correctly, and then repeat check'.format(error), 
-                    QMessageBox.Ok)
-                logging.error('Water calibration spot check exceeds tolerance: {}'.format(error))  
-                self.SaveRight.setStyleSheet("color: white;background-color : mediumorchid;")
-                self.Warning.setText(
-                    'Measuring right valve: {}uL'.format(self.SpotRightVolume.text()) + \
-                    '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
-                    '\nFinal tube weight: {}g'.format(final_tube_weight) + \
-                    '\nAvg. error from target: {}uL'.format(error)
-                    )
-            else:
-                self.Warning.setText(
-                    'Measuring right valve: {}uL'.format(self.SpotRightVolume.text()) + \
-                    '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
-                    '\nFinal tube weight: {}g'.format(final_tube_weight) + \
-                    '\nAvg. error from target: {}uL'.format(error) + \
-                    '\nCalibration saved'
-                    )
-                self._SaveRight()
+        TOLERANCE = float(self.SpotRightVolume.text())/10
+        if np.abs(error) > TOLERANCE:
+            reply = QMessageBox.question(self, 'Spot check right', 
+                'Avg. error ({}uL) is outside expected tolerance. Please confirm you entered information correctly, and then repeat check'.format(error), 
+                QMessageBox.Ok)
+            logging.error('Water calibration spot check exceeds tolerance: {}'.format(error))  
+            self.SaveRight.setStyleSheet("color: white;background-color : mediumorchid;")
+            self.Warning.setText(
+                'Measuring right valve: {}uL'.format(self.SpotRightVolume.text()) + \
+                '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
+                '\nFinal tube weight: {}g'.format(final_tube_weight) + \
+                '\nAvg. error from target: {}uL'.format(error)
+                )
+        else:
+            self.Warning.setText(
+                'Measuring right valve: {}uL'.format(self.SpotRightVolume.text()) + \
+                '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
+                '\nFinal tube weight: {}g'.format(final_tube_weight) + \
+                '\nAvg. error from target: {}uL'.format(error) + \
+                '\nCalibration saved'
+                )
+            self._SaveRight()
 
         # set the default valve open time
         ## DEBUGGING ##self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
