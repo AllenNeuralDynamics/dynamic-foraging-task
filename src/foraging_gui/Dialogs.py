@@ -327,6 +327,8 @@ class WaterCalibrationDialog(QDialog):
         self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
 
     def keyPressEvent(self,e):
+        print('here')
+        event.ignore()
         return
 
     def _connectSignalsSlots(self):
