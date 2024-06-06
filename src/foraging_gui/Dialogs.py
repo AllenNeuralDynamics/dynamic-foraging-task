@@ -464,6 +464,7 @@ class WaterCalibrationDialog(QDialog):
         self.left_opentimes = np.arange(float(params['TimeMin']),float(params['TimeMax'])+0.0001,float(params['Stride']))
         for t in self.left_opentimes:
             self.LeftOpenTime.addItem(str(t))
+            print(str(t))
         index = self.LeftOpenTime.findText('0')
         self.LeftOpenTime.removeItem(index)
 
