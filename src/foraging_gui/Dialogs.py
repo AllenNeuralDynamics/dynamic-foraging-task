@@ -478,6 +478,11 @@ class WaterCalibrationDialog(QDialog):
             self.WaterCalibrationPar['Full']['TimeMax']=0.08
             self.WaterCalibrationPar['Full']['Stride']=0.005
             self.WaterCalibrationPar['Full']['Interval']=0.05
+
+        other_types = set(self.WaterCalibrationPar.keys()) - set(['Full','Spot'])
+        if len(other_types) > 0:
+            for t in other_types:
+                self.CalibrationType.addItem(t)
     
     def _StartCalibratingLeft(self):
         '''start the calibration loop of left valve'''
