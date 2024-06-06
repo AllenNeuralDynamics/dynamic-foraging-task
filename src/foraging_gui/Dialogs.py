@@ -385,6 +385,7 @@ class WaterCalibrationDialog(QDialog):
     def _Continue(self):
         '''Change the color of the continue button'''
         self.Continue.setStyleSheet("background-color : none")
+        logging.info('Continue pressed')
         if self.calibrating_left:
             self._CalibrateLeftOne()
         if self.calibrating_right:
@@ -523,10 +524,13 @@ class WaterCalibrationDialog(QDialog):
         if not repeat: 
             if np.all(self.left_measurements):
                 self.Warning.setText('All measurements have been completed. Either press Repeat, or Finished')
-            return
+                return
             next_index = np.where(self.left_measurements != True)[0][0]
             self.LeftOpenTime.setCurrentIndex(next_index)
-            
+        else:
+            next_index = self.LeftOpenTime.getCurrentIndex()
+        logging.info('Calibrating left: {}'.format(self.left_opentimes(next_index))           
+ 
         # Shuffle weights
         self.WeightBeforeLeft.setText(self.WeightAfterLeft.text())
         self.WeightAfterLeft.setText('')
