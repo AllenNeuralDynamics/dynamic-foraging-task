@@ -311,7 +311,8 @@ class WaterCalibrationDialog(QDialog):
         uic.loadUi('Calibration.ui', self)
         
         self.MainWindow=MainWindow
-        self.FinishLeftValve=0
+        self.calibrating_left = False
+        self.calibrating_right= False
         self._LoadCalibrationParameters()
         if not hasattr(self.MainWindow,'WaterCalibrationResults'):
             self.MainWindow.WaterCalibrationResults={}
@@ -335,6 +336,7 @@ class WaterCalibrationDialog(QDialog):
         self.StartCalibratingLeft.clicked.connect(self._StartCalibratingLeft)
         self.StartCalibratingRight.clicked.connect(self._StartCalibratingRight)
         self.Continue.clicked.connect(self._Continue)
+        self.Finished.clicked.connect(self._Finished)
         self.EmergencyStop.clicked.connect(self._EmergencyStop)
         self.showrecent.textChanged.connect(self._Showrecent)
         self.showspecificcali.activated.connect(self._ShowSpecifcDay)
@@ -346,7 +348,40 @@ class WaterCalibrationDialog(QDialog):
     def _ShowSpecifcDay(self):
         '''update the calibration figure'''
         self._UpdateFigure()
+    
+    def _Finished(self):
         
+        if self.calibrating_left and (not np.all(self.left_measurements)):
+            reply = QMessageBox.question(self, "Box {}, Finished".format(self.MainWindow.box_letter),
+                                             f"Calibration incomplete, are you sure you want to finish?\n",
+                                             QMessageBox.Yes | QMessageBox.No,
+                                             QMessageBox.No)
+            if reply == QMessageBox.No:                
+                return
+        if self.calibrating_right and (not np.all(self.right_measurements)):
+            reply = QMessageBox.question(self, "Box {}, Finished".format(self.MainWindow.box_letter),
+                                             f"Calibration incomplete, are you sure you want to finish?\n",
+                                             QMessageBox.Yes | QMessageBox.No,
+                                             QMessageBox.No)
+            if reply == QMessageBox.No:                
+                return              
+ 
+        self.calibrating_left = False
+        self.calibrating_right= False
+        self.Continue.setStyleSheet("background-color : none")
+        self.Repeat.setStyleSheet("background-color : none")
+        self.Finished.setChecked(False)
+        self.Finished.setStyleSheet("background-color : none")
+        self.StartCalibratingLeft.setStyleSheet("background-color : none")
+        self.StartCalibratingRight.setStyleSheet("background-color : none")
+        self.StartCalibratingLeft.setChecked(False)
+        self.StartCalibratingRight.setChecked(False)
+        self.StartCalibratingLeft.setEnabled(True)
+        self.StartCalibratingRight.setEnabled(True)
+        self.Warning.setText('Calibration Finished')
+        self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+
+ 
     def _Continue(self):
         '''Change the color of the continue button'''
         if self.Continue.isChecked():
@@ -463,11 +498,11 @@ class WaterCalibrationDialog(QDialog):
 
         self.left_opentimes = np.arange(float(params['TimeMin']),float(params['TimeMax'])+0.0001,float(params['Stride']))
         for t in self.left_opentimes:
-            self.LeftOpenTime.addItem(str(t))
-            print(str(t))
+            self.LeftOpenTime.addItem('{0:.3f}'.format(t))
         index = self.LeftOpenTime.findText('0')
         self.LeftOpenTime.removeItem(index)
 
+        self.calibrating_left = True
         self.left_measurements = np.empty(np.shape(self.left_opentimes))
         self.left_measurements[:] = False
 
