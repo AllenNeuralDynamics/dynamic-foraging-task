@@ -551,7 +551,7 @@ class WaterCalibrationDialog(QDialog):
             self.Warning.setText('Press Continue, Repeat, or Finished')
             return
 
-        current_valve_opentime = self.left_opentimes(next_index)
+        current_valve_opentime = self.left_opentimes[next_index]
         for i in range(int(params['Cycle'])):
             QApplication.processEvents()
             if (not self.EmergencyStop.isChecked()):
