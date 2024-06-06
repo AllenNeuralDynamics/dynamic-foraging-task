@@ -597,6 +597,8 @@ class WaterCalibrationDialog(QDialog):
                 self.WeightAfterLeft.setText('')
                 self.Repeat.setStyleSheet("color: white;background-color : mediumorchid;")
                 self.Continue.setStyleSheet("color: black;background-color : none;")
+                self.EmergencyStop.setChecked(False)
+                self.EmergencyStop.setStyleSheet("background-color : none;")
                 return
 
         # Prompt for weight
@@ -745,6 +747,8 @@ class WaterCalibrationDialog(QDialog):
                 self.WeightAfterRight.setText('')
                 self.Repeat.setStyleSheet("color: white;background-color : mediumorchid;")
                 self.Continue.setStyleSheet("color: black;background-color : none;")
+                self.EmergencyStop.setChecked(False)
+                self.EmergencyStop.setStyleSheet("background-color : none;")
                 return
 
         # Prompt for weight
@@ -982,6 +986,8 @@ class WaterCalibrationDialog(QDialog):
                 self.SpotCheckPreWeightLeft.setText('')
                 self.TotalWaterSingleLeft.setText('')
                 self.SaveLeft.setStyleSheet("color: black;background-color : none;")
+                self.EmergencyStop.setChecked(False)
+                self.EmergencyStop.setStyleSheet("background-color : none;")
                 break
             self.SpotLeftFinished=1
 
@@ -1076,6 +1082,8 @@ class WaterCalibrationDialog(QDialog):
                 self.SpotCheckPreWeightRight.setText('')
                 self.TotalWaterSingleRight.setText('')
                 self.SaveRight.setStyleSheet("color: black;background-color : none;")
+                self.EmergencyStop.setChecked(False)
+                self.EmergencyStop.setStyleSheet("background-color : none;")
                 return
             self.SpotCheckPreWeightRight.setText(str(empty_tube_weight))
 
