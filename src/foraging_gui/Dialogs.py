@@ -326,6 +326,9 @@ class WaterCalibrationDialog(QDialog):
         self.Warning.setText('')
         self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
 
+    def keyPressEvent(self,e):
+        return
+
     def _connectSignalsSlots(self):
         self.SpotCheckLeft.clicked.connect(self._SpotCheckLeft)
         self.SpotCheckRight.clicked.connect(self._SpotCheckRight)
@@ -562,7 +565,7 @@ class WaterCalibrationDialog(QDialog):
              'Box {}, Left'.format(self.MainWindow.box_letter),
               "Before weight (g): ", 
               before_weight,
-              0,1000,2)
+              0,1000,4)
         if not ok:
             # User cancels
             self.Warning.setText('Press Continue, Repeat, or Finished')
@@ -603,7 +606,7 @@ class WaterCalibrationDialog(QDialog):
             'Box {}, Left'.format(self.MainWindow.box_letter),
             "Weight after (g): ", 
             final_tube_weight,
-            0, 1000, 2)
+            0, 1000, 4)
         if not ok:
             self.Warning.setText('Please repeat measurement')
             self.WeightBeforeLeft.setText('')
@@ -712,7 +715,7 @@ class WaterCalibrationDialog(QDialog):
              'Box {}, Right'.format(self.MainWindow.box_letter),
               "Before weight (g): ", 
               before_weight,
-              0,1000,2)
+              0,1000,4)
         if not ok:
             # User cancels
             self.Warning.setText('Press Continue, Repeat, or Finished')
@@ -753,7 +756,7 @@ class WaterCalibrationDialog(QDialog):
             'Box {}, Right'.format(self.MainWindow.box_letter),
             "Weight after (g): ", 
             final_tube_weight,
-            0, 1000, 2)
+            0, 1000, 4)
         if not ok:
             self.Warning.setText('Please repeat measurement')
             self.WeightBeforeRight.setText('')
@@ -938,7 +941,7 @@ class WaterCalibrationDialog(QDialog):
                 'Box {}, Left'.format(self.MainWindow.box_letter),
                 "Empty tube weight (g): ", 
                 empty_tube_weight,
-                0,1000,2)
+                0,1000,4)
             if not ok:
                 # User cancels
                 logging.warning('user cancelled spot calibration')
@@ -997,7 +1000,7 @@ class WaterCalibrationDialog(QDialog):
             'Box {}, Left'.format(self.MainWindow.box_letter),
             "Final tube weight (g): ", 
             final_tube_weight,
-            0, 1000, 2)
+            0, 1000, 4)
         self.TotalWaterSingleLeft.setText(str(final_tube_weight))
 
         #Determine result
@@ -1067,7 +1070,7 @@ class WaterCalibrationDialog(QDialog):
                 'Box {}, Right'.format(self.MainWindow.box_letter),
                 "Empty tube weight (g): ", 
                 empty_tube_weight,
-                0,1000,2)
+                0,1000,4)
             if not ok:
                 # User cancels
                 logging.warning('user cancelled spot calibration')
@@ -1125,7 +1128,7 @@ class WaterCalibrationDialog(QDialog):
             'Box {}, Right'.format(self.MainWindow.box_letter),
             "Final tube weight (g): ", 
             final_tube_weight,
-            0, 1000, 2)
+            0, 1000, 4)
         self.TotalWaterSingleRight.setText(str(final_tube_weight))
 
         #Determine result
