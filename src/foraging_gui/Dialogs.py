@@ -499,10 +499,10 @@ class WaterCalibrationDialog(QDialog):
             return
 
         # Get Calibration parameters
-        params = self.WaterCalibrationPar[self.CalibrationType.currentText()]
+        self.params = self.WaterCalibrationPar[self.CalibrationType.currentText()]
 
         # Populate options for calibrations
-        self.left_opentimes = np.arange(float(params['TimeMin']),float(params['TimeMax'])+0.0001,float(params['Stride']))
+        self.left_opentimes = np.arange(float(self.params['TimeMin']),float(self.params['TimeMax'])+0.0001,float(self.params['Stride']))
         self.LeftOpenTime.clear()
         for t in self.left_opentimes:
             self.LeftOpenTime.addItem('{0:.3f}'.format(t))
@@ -552,13 +552,13 @@ class WaterCalibrationDialog(QDialog):
             return
 
         current_valve_opentime = self.left_opentimes[next_index]
-        for i in range(int(params['Cycle'])):
+        for i in range(int(self.params['Cycle'])):
             QApplication.processEvents()
             if (not self.EmergencyStop.isChecked()):
                 self._CalibrationStatus(
                     float(current_valve_opentime), 
                     self.WeightBeforeLeft.text(),
-                    i,params['Cycle'], float(params['Interval'])
+                    i,self.params['Cycle'], float(self.params['Interval'])
                     )
 
                 # set the valve open time
@@ -566,7 +566,7 @@ class WaterCalibrationDialog(QDialog):
                 # open the valve
                 ## DEBUGGING ##self.MainWindow.Channel3.ManualWater_Left(int(1))
                 # delay
-                time.sleep(current_valve_opentime+float(params['Interval']))
+                time.sleep(current_valve_opentime+float(self.params['Interval']))
             else:
                 self.Warning.setText('Calibration cancelled')
                 self.WeightBeforeLeft.setText('')
@@ -597,8 +597,8 @@ class WaterCalibrationDialog(QDialog):
         self._Save(
             valve='Left',
             valve_open_time=current_valve_opentime,
-            valve_open_interval=params['Interval'],
-            cycle=params['Cycle'],
+            valve_open_interval=self.params['Interval'],
+            cycle=self.params['Cycle'],
             total_water=float(self.WeightAfterLeft.text()),
             tube_weight=float(self.WeightBeforeLeft.text())
             )
