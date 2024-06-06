@@ -371,9 +371,9 @@ class WaterCalibrationDialog(QDialog):
  
         self.calibrating_left = False
         self.calibrating_right= False
-        self.Continue.setStyleSheet("background-color : none")
-        self.Repeat.setStyleSheet("background-color : none")
-        self.Finished.setStyleSheet("background-color : none")
+        self.Continue.setStyleSheet("color: black;background-color : none")
+        self.Repeat.setStyleSheet("color: black;background-color : none")
+        self.Finished.setStyleSheet("color: black;background-color : none")
         self.StartCalibratingLeft.setStyleSheet("background-color : none")
         self.StartCalibratingRight.setStyleSheet("background-color : none")
         self.StartCalibratingLeft.setChecked(False)
@@ -389,7 +389,7 @@ class WaterCalibrationDialog(QDialog):
         if (not self.calibrating_left) and (not self.calibrating_right):
             return
 
-        self.Continue.setStyleSheet("background-color : none")
+        self.Continue.setStyleSheet("color:  black; background-color : none")
         logging.info('Continue pressed')
         if self.calibrating_left:
             self._CalibrateLeftOne()
@@ -401,7 +401,7 @@ class WaterCalibrationDialog(QDialog):
 
         if (not self.calibrating_left) and (not self.calibrating_right):
             return
-        self.Repeat.setStyleSheet("background-color : none")
+        self.Repeat.setStyleSheet("color: black; background-color : none")
         if self.calibrating_left:
             self._CalibrateLeftOne(repeat=True)
         if self.calibrating_right:
@@ -629,6 +629,7 @@ class WaterCalibrationDialog(QDialog):
         if np.all(self.left_measurements):
             self.Warning.setText('Measurements recorded for all values. Please press Repeat, or Finished')   
             self.Repeat.setStyleSheet("color: black;background-color : none;")
+            self.Finished.setStyleSheet("color: white;background-color : mediumorchid;")
         else:
             self.Warning.setText('Please press Continue, Repeat, or Finished')
             self.Continue.setStyleSheet("color: white;background-color : mediumorchid;")
