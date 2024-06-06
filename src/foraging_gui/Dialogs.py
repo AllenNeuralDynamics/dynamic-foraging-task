@@ -528,7 +528,7 @@ class WaterCalibrationDialog(QDialog):
             next_index = np.where(self.left_measurements != True)[0][0]
             self.LeftOpenTime.setCurrentIndex(next_index)
         else:
-            next_index = self.LeftOpenTime.getCurrentIndex()
+            next_index = self.LeftOpenTime.currentIndex()
         logging.info('Calibrating left: {}'.format(self.left_opentimes[next_index])) 
  
         # Shuffle weights
@@ -550,6 +550,7 @@ class WaterCalibrationDialog(QDialog):
             # User cancels
             self.Warning.setText('Press Continue, Repeat, or Finished')
             return
+        self.WeightBeforeLeft.setText(before_weight)
 
         current_valve_opentime = self.left_opentimes[next_index]
         for i in range(int(self.params['Cycle'])):
