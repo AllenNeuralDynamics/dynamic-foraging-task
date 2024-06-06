@@ -1,7 +1,7 @@
 {
     "Full": {
         "TimeMin":0.005,
-        "TimeMax":0.08,
+        "TimeMax":0.04,
         "Stride":0.005,
         "Interval":0.010,
         "Cycle":200

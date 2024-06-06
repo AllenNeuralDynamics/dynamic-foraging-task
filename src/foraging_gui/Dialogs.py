@@ -604,6 +604,8 @@ class WaterCalibrationDialog(QDialog):
             tube_weight=float(self.WeightBeforeLeft.text())
             )
         self._UpdateFigure()
+        self.Continue.setStyleSheet("color: white;background-color : mediumorchid;")
+        self.Repeat.setStyleSheet("color: black;background-color : none;")
  
         
     def _CalibrationStatus(self,opentime, weight_before, i, cycle, interval):
