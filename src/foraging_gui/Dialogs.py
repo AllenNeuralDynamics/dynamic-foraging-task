@@ -481,8 +481,6 @@ class WaterCalibrationDialog(QDialog):
             self.Warning.setText('Calibration was terminated!')
             self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
             self.StartCalibratingRight.setEnabled(True)
-            self.WeightAfterRight.setEnabled(True)
-            self.WeightBeforeRight.setEnabled(True)
             return
 
         if self.StartCalibratingLeft.isChecked():
@@ -491,8 +489,6 @@ class WaterCalibrationDialog(QDialog):
             QApplication.processEvents()
             # disable the right valve calibration
             self.StartCalibratingRight.setEnabled(False)
-            self.WeightAfterRight.setEnabled(False)
-            self.WeightBeforeRight.setEnabled(False)
         else:
             self.StartCalibratingLeft.setChecked(True)
             self._Finished()
@@ -502,7 +498,12 @@ class WaterCalibrationDialog(QDialog):
         self.params = self.WaterCalibrationPar[self.CalibrationType.currentText()]
 
         # Populate options for calibrations
-        self.left_opentimes = np.arange(float(self.params['TimeMin']),float(self.params['TimeMax'])+0.0001,float(self.params['Stride']))
+        self.left_opentimes = np.arange(
+            float(self.params['TimeMin']),
+            float(self.params['TimeMax'])+0.0001,
+            float(self.params['Stride'])
+            )
+        self.left_opentimes = [np.round(x,3) for x in self.left_opentimes]
         self.LeftOpenTime.clear()
         for t in self.left_opentimes:
             self.LeftOpenTime.addItem('{0:.3f}'.format(t))
@@ -606,7 +607,10 @@ class WaterCalibrationDialog(QDialog):
         self._UpdateFigure()
         self.Continue.setStyleSheet("color: white;background-color : mediumorchid;")
         self.Repeat.setStyleSheet("color: black;background-color : none;")
-        self.Warning.setText('Please press Continue, Repeat, or Finished')
+        if np.all(self.left_measurements):
+            self.Warning.setText('Measurements recorded for all values. Please press Repeat, or Finished')   
+        else:
+            self.Warning.setText('Please press Continue, Repeat, or Finished')
  
         
     def _CalibrationStatus(self,opentime, weight_before, i, cycle, interval):
@@ -934,10 +938,7 @@ class WaterCalibrationDialog(QDialog):
             WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval] = {}
         if cycle not in WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval]:
             WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle] = {}
-        #if WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle]=={}:
         WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle]=[total_water]
-        #else:
-        #    WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle].append(total_water)
         self.WaterCalibrationResults=WaterCalibrationResults.copy()
         # save to the json file
         if not os.path.exists(os.path.dirname(self.MainWindow.WaterCalibrationFiles)):
