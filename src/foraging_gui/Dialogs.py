@@ -437,7 +437,6 @@ class WaterCalibrationDialog(QDialog):
             self.StartCalibratingRight.setEnabled(True)
             self.WeightAfterRight.setEnabled(True)
             self.WeightBeforeRight.setEnabled(True)
-            self.TubeWeightRight.setEnabled(True)
             return
 
         if self.StartCalibratingLeft.isChecked():
@@ -448,7 +447,6 @@ class WaterCalibrationDialog(QDialog):
             self.StartCalibratingRight.setEnabled(False)
             self.WeightAfterRight.setEnabled(False)
             self.WeightBeforeRight.setEnabled(False)
-            self.TubeWeightRight.setEnabled(False)
         else:
             self.StartCalibratingLeft.setStyleSheet("background-color : none")
             self.Warning.setText('Calibration was terminated!')
@@ -456,12 +454,10 @@ class WaterCalibrationDialog(QDialog):
             self.StartCalibratingRight.setEnabled(True)
             self.WeightAfterRight.setEnabled(True)
             self.WeightBeforeRight.setEnabled(True)
-            self.TubeWeightRight.setEnabled(True)
             return
 
         params = self.WaterCalibrationPar[self.CalibrationType.currentText()]
 
-        self.TubeWeightLeft.setText('')
         self.WeightBeforeLeft.setText('')
         self.WeightAfterLeft.setText('')
 
@@ -724,7 +720,6 @@ class WaterCalibrationDialog(QDialog):
             self.IntervalLeft_2.setEnabled(False)
             self.WeightAfterLeft.setEnabled(False)
             self.WeightBeforeLeft.setEnabled(False)
-            self.TubeWeightLeft.setEnabled(False)
             # check the continue button
             self.Continue.setChecked(True)
             self.Continue.setStyleSheet("background-color : green;")
@@ -737,7 +732,6 @@ class WaterCalibrationDialog(QDialog):
             N=N+1
             if N==1:
                 # disable TubeWeightRight
-                self.TubeWeightRight.setEnabled(False)
                 self.label_27.setEnabled(False)
                 if self.TubeWeightRight.text()!='':
                     self.WeightBeforeRight.setText(self.TubeWeightRight.text())
