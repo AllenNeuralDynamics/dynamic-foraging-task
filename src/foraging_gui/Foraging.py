@@ -94,6 +94,7 @@ class Window(QMainWindow):
         self.ToInitializeVisual = 1 # Should we visualize performance
         self.FigureUpdateTooSlow = 0# if the FigureUpdateTooSlow is true, using different process to update figures
         self.ANewTrial = 1          # permission to start a new trial
+        self.previous_backup_completed = 1   # permission to save backup data; 0, the previous saving has not finished, and it will not trigger the next saving; 1, it is allowed to save backup data
         self.UpdateParameters = 1   # permission to update parameters
         self.loggingstarted = -1    # Have we started trial logging
         self.unsaved_data = False   # Setting unsaved data to False 
@@ -108,6 +109,7 @@ class Window(QMainWindow):
         self.threadpool3=QThreadPool() # visualization
         self.threadpool4=QThreadPool() # for generating a new trial
         self.threadpool5=QThreadPool() # for starting the trial loop
+        self.threadpool6=QThreadPool() # for saving data
         self.threadpool_workertimer=QThreadPool() # for timing
 
         # Set up more parameters
@@ -977,6 +979,7 @@ class Window(QMainWindow):
             'lick_spout_distance_box4':5000,
             'name_mapper_file':os.path.join(self.SettingFolder,"name_mapper.json"),
             'create_rig_metadata':True,
+            'save_each_trial':True,
         }
         
         # Try to load Settings_box#.csv
@@ -1044,6 +1047,8 @@ class Window(QMainWindow):
         self.lick_spout_distance_box3 = self.Settings['lick_spout_distance_box3']
         self.lick_spout_distance_box4 = self.Settings['lick_spout_distance_box4']
         self.name_mapper_file = self.Settings['name_mapper_file']
+        self.save_each_trial = self.Settings['save_each_trial']
+
         if not is_absolute_path(self.project_info_file):
             self.project_info_file = os.path.join(self.SettingFolder,self.project_info_file)
         # Also stream log info to the console if enabled
@@ -2170,11 +2175,30 @@ class Window(QMainWindow):
         '''Save the current session witout restarting the logging'''
         self._Save(SaveContinue=1)
 
-    def _Save(self,ForceSave=0,SaveAs=0,SaveContinue=0):
+    def _Save(self,ForceSave=0,SaveAs=0,SaveContinue=0,BackupSave=0):
+        '''
+        Save the current session    
+
+        parameters:
+            ForceSave (int): 0, save after finishing the current trial, 1, save without waiting for the current trial to finish
+            SaveAs (int): 0 if the user should be prompted to select a save file, 1 if the file should be saved as the current SaveFileJson
+            SaveContinue (int): 0, force to start a new session, 1 if the current session should be saved without restarting the logging
+            BackupSave (int): 1, save the current session without stopping the current session and without prompting the user for a save file, 0, save the current session and prompt the user for a save file
+        '''
+        if BackupSave==1:
+            ForceSave=1
+            SaveAs=0
+            SaveContinue=1
+            saving_type_label = 'backup saving'
+        elif ForceSave==1:
+            saving_type_label = 'force saving'
+        else:
+            saving_type_label = 'normal saving'
+
         logging.info('Saving current session, ForceSave={}'.format(ForceSave))
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
-        if self.BaseWeight.text()=='' or self.WeightAfter.text()=='' or self.TargetRatio.text()=='':
+        if (self.BaseWeight.text()=='' or self.WeightAfter.text()=='' or self.TargetRatio.text()=='') and BackupSave==0:
             response = QMessageBox.question(self,
                 'Box {}, Save without weight or extra water:'.format(self.box_letter), 
                 "Do you want to save without weight or extra water information provided?",
@@ -2195,7 +2219,7 @@ class Window(QMainWindow):
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
                 return
         # check if the laser power and target are entered
-        if self.OptogeneticsB.currentText()=='on' and (self.Opto_dialog.laser_1_target.text()=='' or self.Opto_dialog.laser_1_calibration_power.text()=='' or self.Opto_dialog.laser_2_target.text()=='' or self.Opto_dialog.laser_2_calibration_power.text()=='' or self.Opto_dialog.laser_1_calibration_voltage.text()=='' or self.Opto_dialog.laser_2_calibration_voltage.text()==''):
+        if BackupSave==0 and self.OptogeneticsB.currentText()=='on' and (self.Opto_dialog.laser_1_target.text()=='' or self.Opto_dialog.laser_1_calibration_power.text()=='' or self.Opto_dialog.laser_2_target.text()=='' or self.Opto_dialog.laser_2_calibration_power.text()=='' or self.Opto_dialog.laser_1_calibration_voltage.text()=='' or self.Opto_dialog.laser_2_calibration_voltage.text()==''):
             response = QMessageBox.question(self,
                 'Box {}, Save without laser target or laser power:'.format(self.box_letter), 
                 "Do you want to save without complete laser target or laser power calibration information provided?",
@@ -2217,7 +2241,7 @@ class Window(QMainWindow):
                 return
 
         # Stop Excitation if its running
-        if self.StartExcitation.isChecked():
+        if self.StartExcitation.isChecked() and BackupSave==0:
             self.StartExcitation.setChecked(False)
             self._StartExcitation()
             logging.info('Stopping excitation before saving')
@@ -2283,16 +2307,14 @@ class Window(QMainWindow):
                     else:
                         Value=getattr(self.GeneratedTrials, attr_name)
                         try:
-                            if math.isnan(Value):
-                                Obj[attr_name]='nan'
+                            if isinstance(Value, float) or isinstance(Value, int):                                
+                                if math.isnan(Value):
+                                    Obj[attr_name]='nan'    
+                                else:
+                                    Obj[attr_name]=Value   
                             else:
-                                Obj[attr_name]=Value
+                                Obj[attr_name]=Value        
                         except Exception as e:
-                            # Lots of B_xxx data are not real scalars and thus math.isnan(Value) will fail
-                            # e.g. B_AnimalResponseHistory. We just save them as they are. 
-                            # This is expected and no need to log an error.
-                            # I don't know the necessity of turning nan values into 'nan', 
-                            # but for backward compatibility, I keep it above.
                             logging.info(f'{attr_name} is not a real scalar, save it as it is.')
                             Obj[attr_name]=Value
         # save other events, e.g. session start time
@@ -2361,14 +2383,15 @@ class Window(QMainWindow):
             self.unsaved_data=True
             # do not create a new folder
             self.CreateNewFolder=0
-        
-        self._check_drop_frames(save_tag=1)
 
-        # save drop frames information
-        Obj['drop_frames_tag']=self.drop_frames_tag
-        Obj['trigger_length']=self.trigger_length
-        Obj['drop_frames_warning_text']=self.drop_frames_warning_text
-        Obj['frame_num']=self.frame_num
+        if BackupSave==0:
+            self._check_drop_frames(save_tag=1)
+            
+            # save drop frames information
+            Obj['drop_frames_tag']=self.drop_frames_tag
+            Obj['trigger_length']=self.trigger_length
+            Obj['drop_frames_warning_text']=self.drop_frames_warning_text
+            Obj['frame_num']=self.frame_num
 
         # save manual water 
         Obj['ManualWaterVolume']=self.ManualWaterVolume
@@ -2380,6 +2403,9 @@ class Window(QMainWindow):
         # save the metadata collected in the metadata dialogue
         self.Metadata_dialog._save_metadata_dialog_parameters()
         Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
+
+        # save the saving type (normal saving, backup saving or force saving)
+        Obj['saving_type_label'] = saving_type_label
 
         # generate the metadata file
         try:
@@ -2400,26 +2426,27 @@ class Window(QMainWindow):
                 json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
 
         # Toggle unsaved data to False
-        self.unsaved_data=False
-        self.Save.setStyleSheet("background-color : None;")
-        self.Save.setStyleSheet("color: black;")
+        if BackupSave==0:
+            self.unsaved_data=False
+            self.Save.setStyleSheet("background-color : None;")
+            self.Save.setStyleSheet("color: black;")
 
-        short_file = self.SaveFile.split('\\')[-1]
-        self.WarningLabel.setText('Saved: {}'.format(short_file))
-        self.WarningLabel.setStyleSheet(self.default_warning_color)
-        
-        self.SessionlistSpin.setEnabled(True)
-        self.Sessionlist.setEnabled(True)
+            short_file = self.SaveFile.split('\\')[-1]
+            self.WarningLabel.setText('Saved: {}'.format(short_file))
+            self.WarningLabel.setStyleSheet(self.default_warning_color)
+            
+            self.SessionlistSpin.setEnabled(True)
+            self.Sessionlist.setEnabled(True)
 
-        # Drop `finished` file with date/time
-        filepath = os.path.join(self.SessionFolder, 'finished') 
-        contents = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        with open(filepath, 'w') as finished_file:
-            finished_file.write(contents)
-        if self.StartEphysRecording.isChecked():
-            QMessageBox.warning(self, '', 'Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!')
-            self.unsaved_data=True
-            self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
+            # Drop `finished` file with date/time
+            filepath = os.path.join(self.SessionFolder, 'finished') 
+            contents = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            with open(filepath, 'w') as finished_file:
+                finished_file.write(contents)
+            if self.StartEphysRecording.isChecked():
+                QMessageBox.warning(self, '', 'Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!')
+                self.unsaved_data=True
+                self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
 
     def _GetSaveFolder(self):
         '''
@@ -3281,6 +3308,10 @@ class Window(QMainWindow):
         '''complete of generating a trial'''
         self.ToGenerateATrial=1
     
+    def _thread_complete6(self):
+        '''complete of save data'''
+        self.previous_backup_completed=1
+
     def _thread_complete_timer(self):
         '''complete of _Timer'''
         if not self.ignore_timer:
@@ -3549,12 +3580,15 @@ class Window(QMainWindow):
             workerGenerateAtrial.signals.finished.connect(self._thread_complete4)
             workerStartTrialLoop = Worker(self._StartTrialLoop,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
             workerStartTrialLoop1 = Worker(self._StartTrialLoop1,GeneratedTrials)
+            worker_save = Worker(self._Save,BackupSave=1)
+            worker_save.signals.finished.connect(self._thread_complete6)
             self.worker1=worker1
             self.workerLick=workerLick
             self.workerPlot=workerPlot
             self.workerGenerateAtrial=workerGenerateAtrial
             self.workerStartTrialLoop=workerStartTrialLoop
             self.workerStartTrialLoop1=workerStartTrialLoop1
+            self.worker_save=worker_save
         else:
             PlotM=self.PlotM
             worker1=self.worker1
@@ -3563,6 +3597,7 @@ class Window(QMainWindow):
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
             workerStartTrialLoop1=self.workerStartTrialLoop1
+            worker_save=self.worker_save
 
   
         # collecting the base signal for photometry. Only run once
@@ -3586,7 +3621,7 @@ class Window(QMainWindow):
             self.WarningLabelStop.setText('Running photometry baseline')
             self.WarningLabelStop.setStyleSheet(self.default_warning_color)
         
-        self._StartTrialLoop(GeneratedTrials,worker1)
+        self._StartTrialLoop(GeneratedTrials,worker1,worker_save)
 
         if self.actionDrawing_after_stopping.isChecked()==True:
             try:
@@ -3594,7 +3629,7 @@ class Window(QMainWindow):
             except Exception as e:
                 logging.error(str(e))
 
-    def _StartTrialLoop(self,GeneratedTrials,worker1):
+    def _StartTrialLoop(self,GeneratedTrials,worker1,worker_save):
         if self.Start.isChecked():
             logging.info('starting trial loop')
         else:
@@ -3664,7 +3699,11 @@ class Window(QMainWindow):
                 # update licks statistics
                 if self.actionLicks_sta.isChecked():
                     self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
-                
+                # save the data everytrial
+                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial:
+                    self.previous_backup_completed=0
+                    self.threadpool6.start(worker_save)
+
                 if GeneratedTrials.CurrentSimulation==True:
                     GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3,self.Channel4)
                     self.ANewTrial=1
