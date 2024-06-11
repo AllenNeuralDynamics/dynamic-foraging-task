@@ -940,6 +940,25 @@ class Window(QMainWindow):
         else:
             return (key, 0)
 
+    def _check_line_terminator(self, file_path):
+        # Open the file in binary mode to read raw bytes. Check that last line has a \n terminator. 
+        with open(file_path, 'rb') as file:
+            # Move the cursor to the end of the file
+            file.seek(0, 2)
+            # Start from the end and move backwards to find the start of the last line
+            file.seek(file.tell() - 1, 0)
+            # Read the last line
+            last_line = file.readline()
+            # Detect line terminator
+            if b'\r\n' in last_line: # Windows
+                return True
+            elif b'\n' in last_line: # Unix
+                return True
+            elif b'\r' in last_line: # Old Mac
+                return True
+            else:
+                return False
+
     def _GetSettings(self):
         '''
             Load the settings that are specific to this computer
@@ -989,13 +1008,25 @@ class Window(QMainWindow):
             raise Exception('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))           
         try:
             # Open the csv settings file
-            df = pd.read_csv(self.SettingsBoxFile,index_col=None)
+            df = pd.read_csv(self.SettingsBoxFile,index_col=None, header=None)
             self.SettingsBox = {row[0]: row[1] for _, row in df.iterrows()}
             logging.info('Loaded settings_box file')
         except Exception as e:
             logging.error('Could not load settings_box file at: {}, {}'.format(self.SettingsBoxFile,str(e)))
             e.args = ('Could not load settings box file at: {}'.format(self.SettingsBoxFile), *e.args)
             raise e
+
+        # check that there is a newline for final entry of csv files
+        if not self._check_line_terminator(self.SettingsBoxFile):
+            logging.error('Settings box file does not have a newline at the end')
+            raise Exception('Settings box file does not have a newline at the end')
+
+        # check that the SettingsBox has each of the values in mandatory_fields as a key, if not log an error for the missing key
+        csv_mandatory_fields = ['Behavior', 'Soundcard', 'BonsaiOsc1', 'BonsaiOsc2', 'BonsaiOsc3', 'BonsaiOsc4']
+        for field in csv_mandatory_fields:
+            if field not in self.SettingsBox.keys():
+                logging.error('Missing key ({}) in settings_box file'.format(field))
+                raise Exception('Missing key ({}) in settings_box file'.format(field))
 
         # Try to load the settings file        
         self.Settings = {}
