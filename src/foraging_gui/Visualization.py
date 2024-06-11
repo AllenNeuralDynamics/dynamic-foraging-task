@@ -337,8 +337,8 @@ class PlotWaterCalibration(FigureCanvas):
             wspace = 3, 
             hspace = 0.1, 
             bottom = 0.1, 
-            top = 0.75, 
-            left = 0.1, 
+            top = 0.1, 
+            left = 0.08, 
             right = 0.98
             )
         self.ax1 = self.fig.add_subplot(gs[0:9, 1:30])
