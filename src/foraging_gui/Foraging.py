@@ -4144,7 +4144,7 @@ def log_subprocess_output(process):
         #else:
         #    logging.info('no output')
         #    print('no output')
-        time.sleep(.1)
+        time.sleep(5)
     logging.info('done from another thread')
      
     print('done')
