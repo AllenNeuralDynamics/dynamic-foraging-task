@@ -1244,6 +1244,11 @@ class Window(QMainWindow):
         else:
             process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True,stdout=subprocess.PIPE)
         print('making thread')
+        x = process.poll():
+        if x is None:
+            print('Still running...')
+        else:
+            print('done?')
         threading.Thread(target=log_subprocess_output, args=(process,)).start()
         print('Done making thread')
 
