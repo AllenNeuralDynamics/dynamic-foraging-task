@@ -1247,7 +1247,7 @@ class Window(QMainWindow):
                 stdout=subprocess.PIPE,stderr = subprocess.PIPE,text=True)
 
         # Log stdout and stderr from bonsai in a separate thread
-        for line in process.stderr:
+        for line in iter(process.stderr):
             print(line)
         #threading.Thread(target=log_subprocess_output, args=(process,)).start()
         #threading.Thread(target=log_subprocess_error, args=(process,)).start()
