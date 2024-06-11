@@ -1241,14 +1241,13 @@ class Window(QMainWindow):
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
         if self.start_bonsai_ide:
             process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True,
-                stdout = subprocess.PIPE, stderr = subprocess.PIPE,text=True)
+                stdout = subprocess.PIPE, stderr = subprocess.STDOUT,text=True)
         else:
             process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True,
-                stdout = subprocess.PIPE, stderr = subprocess.PIPE,text=True)
+                stdout = subprocess.PIPE, stderr = subprocess.STDOUT,text=True)
 
         # Log stdout and stderr from bonsai in a separate thread
         threading.Thread(target=log_subprocess_output, args=(process,)).start()
-        threading.Thread(target=log_subprocess_error, args=(process,)).start()
 
 
     def _OpenVideoFolder(self):
