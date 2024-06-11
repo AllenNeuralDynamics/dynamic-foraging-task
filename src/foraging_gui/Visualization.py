@@ -430,8 +430,8 @@ def GetWaterSpotCheck(WaterCalibrationResult, date, valve):
         for interval in WaterCalibrationResult[date][valve][time].keys():
             for cycles in WaterCalibrationResult[date][valve][time][interval].keys():
                 for measurement in WaterCalibrationResult[date][valve][time][interval][cycles]:
-                    x.append(time)
-                    y.append(measurement/float(cycles))
+                    x.append(float(time))
+                    y.append(float(measurement)/float(cycles))
     return x, y
  
 def GetWaterCalibration(WaterCalibrationResults,current_date,current_valve):
