@@ -4142,7 +4142,9 @@ def log_subprocess_output(process):
         inchar = process.stdout.read(1)
         if inchar:
             output = process.stdout.readline()
-            logging.info('BONSAI: '+output.strip())
+            logging.info('BONSAI: '+inchar+output.strip())
+        else:
+            logging.info('skipping')
         #stdout, stderr = process.communicate()
         #print(stdout)
         #print('split   ------')
