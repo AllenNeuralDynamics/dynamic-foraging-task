@@ -1244,11 +1244,6 @@ class Window(QMainWindow):
         else:
             process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True,stdout=subprocess.PIPE)
         print('making thread')
-        x = process.poll()
-        if x is None:
-            print('Still running...')
-        else:
-            print('done?')
         threading.Thread(target=log_subprocess_output, args=(process,)).start()
         print('Done making thread')
 
@@ -4143,14 +4138,17 @@ def log_subprocess_output(process):
     logging.info('Logging from another thread')
     while process.poll() is None:
         logging.info('Logging from another thread')
-        output = process.stdout.readline().decode()
-        if output:
-            logging.info(output)
-            print('testing: '+output)
-        else:
-            logging.info('no output')
-            print('no output')
+        #print(process.stdout.readline())
+        #output = process.stdout.readline().decode()
+        #if output:
+        #    logging.info(output)
+        #    print('testing: '+output)
+        #else:
+        #    logging.info('no output')
+        #    print('no output')
         time.sleep(.1)
+    logging.info('done from another thread')
+     
     print('done')
 
 if __name__ == "__main__":
