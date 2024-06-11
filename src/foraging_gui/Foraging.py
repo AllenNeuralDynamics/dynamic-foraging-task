@@ -4140,15 +4140,10 @@ def log_subprocess_output(process):
     logging.info('Bonsai logging starting')
     while process.poll() is None:       
         output = process.stdout.readline()
-        logging.info('BONSAI: '+output.strip())
-
-    logging.info('Bonsai logging terminating')
-
-def log_subprocess_error(process):
-    logging.info('Bonsai logging starting')
-    while process.poll() is None:       
-        output = process.stderr.readline()
-        logging.info('BONSAI: '+output.strip())
+        if 'Exception' in output:
+            logging.error('BONSAI: '+output.strip())
+        else:
+            logging.info('BONSAI: '+output.strip())
 
     logging.info('Bonsai logging terminating')
 
