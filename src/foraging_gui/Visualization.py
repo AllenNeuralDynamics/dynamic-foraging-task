@@ -423,10 +423,10 @@ class PlotWaterCalibration(FigureCanvas):
 def GetWaterSpotCheck(WaterCalibrationResult, date, valve):
     x = []
     y = []
-    for time in WaterCalibrationResults[date][valve].keys():
-        for interval in WaterCalibrationResults[date][valve][time].keys():
-            for cycles in WaterCalibrationResults[date][valve][time][interval].keys():
-                for measurement in WaterCalibrationResults[date][valve][time][interval][cycles]:
+    for time in WaterCalibrationResult[date][valve].keys():
+        for interval in WaterCalibrationResult[date][valve][time].keys():
+            for cycles in WaterCalibrationResult[date][valve][time][interval].keys():
+                for measurement in WaterCalibrationResult[date][valve][time][interval][cycles]:
                     x.append(time)
                     y.append(measurement/float(cycles))
     return x, y
