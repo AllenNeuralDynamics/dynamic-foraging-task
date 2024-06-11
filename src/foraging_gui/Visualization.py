@@ -376,20 +376,25 @@ class PlotWaterCalibration(FigureCanvas):
             showrecent=1
         if showrecent>len(sorted_dates):
             showrecent=len(sorted_dates)
+        
         print(sorted_dates)
         iterator = 1
+        counter = 0
         all_dates = []
-        while len(all_dates) < showrecent:
+        while counter < showrecent:
             if iterator > len(sorted_dates):
                 break
             if ('Left' in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()) or ('Right' in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()):
-                all_dates.append(sorted_dates[-iterator])
+                counter += 1 
             iterator +=1
-        print(sorted_dates)
-        all_dates=sorted_dates[-showrecent:]
+        all_dates = sorted_dates[-iterator:]
+        print(all_dates) 
+        #all_dates=sorted_dates[-showrecent:]
+
         # use the selected date if showspecificcali is not NA
         if self.water_win.showspecificcali.currentText()!='NA':
             all_dates=[self.water_win.showspecificcali.currentText()]
+
         #all_dates represents dates to plot
         for current_date in sorted_dates:
             all_valves=self.WaterCalibrationResults[current_date].keys()
