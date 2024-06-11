@@ -1243,7 +1243,9 @@ class Window(QMainWindow):
             process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
         else:
             process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True)
-        threading.Thread(target=log_subprocess_output, args=process)
+        print('making thread')
+        threading.Thread(target=log_subprocess_output, args=process).start()
+        print('Done making thread')
 
     def _OpenVideoFolder(self):
         '''Open the video folder'''
@@ -4132,12 +4134,14 @@ class UncaughtHook(QtCore.QObject):
         self._exception_caught.emit(self.box+tb)
 
 def log_subprocess_output(process):
+    print('hi')
     while process.poll() is None:
         output = process.stdout.readline().decode()
         if output:
             logging.info(output)
             print('testing: '+output)
         time.sleep(.1)
+    print('done')
 
 if __name__ == "__main__":
 
