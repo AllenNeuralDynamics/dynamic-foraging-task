@@ -4139,16 +4139,16 @@ def log_subprocess_output(process):
     print('hi')
     logging.info('Logging from another thread')
     while process.poll() is None:
-        for line in iter(process.stdout.readline,""):
-            logging.info(line.strip())
+        #for line in iter(process.stdout.readline,""):
+        #    logging.info(line.strip())
         #logging.info('Logging from another thread') 
-        #output = process.stdout.readline()
-        #if output:
-        #    logging.info(output)
+        output = process.stdout.readline()
+        if output:
+            logging.info(output)
         #else:
         #    logging.info('no output')
         #    print('no output')
-        #time.sleep(5)
+        time.sleep(.1)
     logging.info('done from another thread')
      
     print('done')
