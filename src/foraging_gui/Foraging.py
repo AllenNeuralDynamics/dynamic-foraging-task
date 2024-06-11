@@ -4142,6 +4142,9 @@ def log_subprocess_output(process):
         output = process.stdout.readline()
         if output:
             logging.info('BONSAI: '+output.strip().decode('ascii'))
+        output = process.stderr.readline()
+        if output:
+            logging.error('BONSAI: '+output.strip().decode('ascii'))
         time.sleep(.1)
     logging.info('Bonsai logging terminating')
 
