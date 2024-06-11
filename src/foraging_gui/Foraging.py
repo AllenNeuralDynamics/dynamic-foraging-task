@@ -1240,10 +1240,10 @@ class Window(QMainWindow):
         SettingsBox = 'Settings_box{}.csv'.format(self.box_number)
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
         if self.start_bonsai_ide:
-            process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=False,
+            process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True,
                 stdout=subprocess.PIPE,stderr = subprocess.STDOUT,text=True, bufsize=1)
         else:
-            process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=False,
+            process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True,
                 stdout=subprocess.PIPE,stderr = subprocess.STDOUT,text=True, bufsize=1)
 
         # Log stdout and stderr from bonsai in a separate thread
@@ -4139,9 +4139,13 @@ class UncaughtHook(QtCore.QObject):
 def log_subprocess_output(process):
     logging.info('Bonsai logging starting')
     while process.poll() is None:
-        output = process.stdout.readline()
-        if output:
-            logging.info('BONSAI: '+output.strip())
+        stdout, stderr = process.communicate()
+        print(stdout)
+        print('split   ------')
+        print(stderr)
+        ##output = process.stdout.readline()
+        ##if output:
+        ##    logging.info('BONSAI: '+output.strip())
         #output = process.stderr.readline()
         time.sleep(.1)
     logging.info('Bonsai logging terminating')
