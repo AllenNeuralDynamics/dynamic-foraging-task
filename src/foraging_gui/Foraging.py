@@ -4140,7 +4140,8 @@ class UncaughtHook(QtCore.QObject):
 def log_subprocess_output(process):
     logging.info('Bonsai logging starting')
     while process.poll() is None:       
-        output = process.stderr.readline()
+        stdout, output = process.communicate()
+        #output = process.stderr.readline()
         logging.info('BONSAI: '+output.strip())
 
     logging.info('Bonsai logging terminating')
