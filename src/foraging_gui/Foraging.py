@@ -1244,7 +1244,7 @@ class Window(QMainWindow):
         else:
             process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True)
         print('making thread')
-        threading.Thread(target=log_subprocess_output, args=process).start()
+        threading.Thread(target=log_subprocess_output, args=(process,)).start()
         print('Done making thread')
 
     def _OpenVideoFolder(self):
