@@ -419,6 +419,7 @@ class PlotWaterCalibration(FigureCanvas):
     
     def _GetWaterSpotCheck(self,WaterCalibrationResult, current_date, current_valve):
         x,y = GetWaterSpotCheck(WaterCalibrationResult, current_date, current_valve)
+        return x,y
 
 def GetWaterSpotCheck(WaterCalibrationResult, date, valve):
     x = []
