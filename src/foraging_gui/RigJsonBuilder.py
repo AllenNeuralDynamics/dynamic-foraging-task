@@ -19,7 +19,7 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
     rig = build_rig_json_core(settings, water_calibration, laser_calibration)
 
     # Compare with existing rig schema 
-    new_rig_json = rig.model_dump_json()
+    new_rig_json = json.loads(rig.model_dump_json())
 
     #suffix = '_temp.json'
     #rig.write_standard_file(suffix=suffix, output_directory=settings['rig_metadata_folder']) 
