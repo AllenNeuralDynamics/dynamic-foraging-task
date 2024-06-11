@@ -1247,8 +1247,10 @@ class Window(QMainWindow):
                 stdout=subprocess.PIPE,stderr = subprocess.PIPE,text=True)
 
         # Log stdout and stderr from bonsai in a separate thread
-        threading.Thread(target=log_subprocess_output, args=(process,)).start()
-        threading.Thread(target=log_subprocess_error, args=(process,)).start()
+        for line in process.stderr:
+            print(line)
+        #threading.Thread(target=log_subprocess_output, args=(process,)).start()
+        #threading.Thread(target=log_subprocess_error, args=(process,)).start()
 
 
     def _OpenVideoFolder(self):
