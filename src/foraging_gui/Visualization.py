@@ -333,8 +333,10 @@ class PlotV(FigureCanvas):
 class PlotWaterCalibration(FigureCanvas):
     def __init__(self,water_win,dpi=100,width=5, height=4):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
-        gs = GridSpec(10, 30, wspace = 3, hspace = 0.1, bottom = 0.1, top = 0.95, left = 0.04, right = 0.98)
+        gs = GridSpec(10, 30, wspace = 3, hspace = 0.1, bottom = 0.1, top = 0.95, left = 0.1, right = 0.98)
         self.ax1 = self.fig.add_subplot(gs[0:9, 1:30])
+        self.ax1.spines['right'].set_visible(False)
+        self.ax1.spines['top'].set_visible(False)
         FigureCanvas.__init__(self, self.fig)
         self.water_win=water_win
         self.WaterCalibrationResults=self.water_win.WaterCalibrationResults
