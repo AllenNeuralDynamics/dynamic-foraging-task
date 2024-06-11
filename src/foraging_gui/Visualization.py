@@ -337,7 +337,7 @@ class PlotWaterCalibration(FigureCanvas):
             wspace = 3, 
             hspace = 0.1, 
             bottom = 0.1, 
-            top = 0.1, 
+            top = 0.9, 
             left = 0.08, 
             right = 0.98
             )
