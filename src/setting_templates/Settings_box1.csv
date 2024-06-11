@@ -29,3 +29,4 @@ FipRedCMOSSerialNumber,0
 FipGreenCMOSSerialNumber,0
 FipObjectiveSerialNumber,0
 codec,-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M
+AttenuationLeft,0
