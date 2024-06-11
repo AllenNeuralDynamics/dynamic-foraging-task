@@ -361,7 +361,7 @@ class PlotWaterCalibration(FigureCanvas):
         if hasattr(self.water_win.MainWindow,'RecentWaterCalibrationDate'):
             self.water_win.VisuCalibration.setTitle('Last calibration date:'+self.water_win.MainWindow.RecentWaterCalibrationDate)
         sorted_dates = sorted(self.WaterCalibrationResults.keys())
-        sorted_dates = [ x for x in sorted_dates if ('Left' in self.WaterCalibrationResults[x].keys())or('Right' in self.WaterCalibrationResults[x].keys())]
+        #sorted_dates = [ x for x in sorted_dates if ('Left' in self.WaterCalibrationResults[x].keys())or('Right' in self.WaterCalibrationResults[x].keys())]
         showrecent=int(self.water_win.showrecent.text())
         if showrecent<=0:
             showrecent=1
@@ -380,7 +380,6 @@ class PlotWaterCalibration(FigureCanvas):
                     if current_date in all_dates:
                         if current_valve=='Left':
                             line=self.ax1.plot(sorted_X, sorted_Y, 'o-',label=current_date+'_left valve')
-                            print('X: {}, Y: {}'.format(sorted_X,sorted_Y))
                         elif current_valve=='Right':
                             line=self.ax1.plot(sorted_X, sorted_Y, 'o-',label=current_date+'_right valve')
                         # fit the curve
@@ -398,7 +397,6 @@ class PlotWaterCalibration(FigureCanvas):
                     X,Y=self._GetWaterSpotCheck(self.WaterCalibrationResults,current_date,current_valve)                   
                     if current_valve=='SpotLeft':
                         line=self.ax1.plot(X, Y, 'x',label=current_date+'_spot left')
-                        print('X: {}, Y: {}'.format(X,Y))
                     elif current_valve=='SpotRight':
                         line=self.ax1.plot(X, Y, 'x',label=current_date+'_spot right')
         self.ax1.set_xlabel('valve open time(s)')
