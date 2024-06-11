@@ -18,33 +18,28 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
     # Build the new rig schema
     rig = build_rig_json_core(settings, water_calibration, laser_calibration)
 
-    # Compare with existing rig schema
-    # Write the new rig schema to a json file and load it back 
-    # I do this to ignore serialization issues when comparing the rig.jsons 
-   
-    ## DEBUG 
-    serialized = rig.model_dump_json()
+    # Compare with existing rig schema 
+    new_rig_json = rig.model_dump_json()
 
-    suffix = '_temp.json'
-    rig.write_standard_file(suffix=suffix, output_directory=settings['rig_metadata_folder']) 
-    new_rig_json_path = os.path.join(settings['rig_metadata_folder'],'rig_temp.json')
-    with open(new_rig_json_path, 'r') as f:
-        new_rig_json = json.load(f)
+    #suffix = '_temp.json'
+    #rig.write_standard_file(suffix=suffix, output_directory=settings['rig_metadata_folder']) 
+    #new_rig_json_path = os.path.join(settings['rig_metadata_folder'],'rig_temp.json')
+    #with open(new_rig_json_path, 'r') as f:
+    #    new_rig_json = json.load(f)
 
-    ## DEBUG
-    # Compare the two rig.jsons
-    print('loading json and deserialized comparison')
-    differences = DeepDiff(serialized, new_rig_json,ignore_order=True)
+    ### DEBUG
+    ## Compare the two rig.jsons
+    #print('loading json and deserialized comparison')
+    #differences = DeepDiff(serialized, new_rig_json,ignore_order=True)
 
-    # Remove the modification date, since that doesnt matter for comparison purposes
-    values_to_ignore = ['modification_date','rig_id']
-    for value in values_to_ignore:
-        if ('values_changed' in differences) and ("root['{}']".format(value) in differences['values_changed']):
-            differences['values_changed'].pop("root['{}']".format(value))
-            if len(differences['values_changed']) == 0:
-                differences.pop('values_changed')
-    ## DEBUG
-
+    ## Remove the modification date, since that doesnt matter for comparison purposes
+    #values_to_ignore = ['modification_date','rig_id']
+    #for value in values_to_ignore:
+    #    if ('values_changed' in differences) and ("root['{}']".format(value) in differences['values_changed']):
+    #        differences['values_changed'].pop("root['{}']".format(value))
+    #        if len(differences['values_changed']) == 0:
+    #            differences.pop('values_changed')
+    ### DEBUG
 
     # Compare the two rig.jsons
     differences = DeepDiff(existing_rig_json, new_rig_json,ignore_order=True)
@@ -63,9 +58,14 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
         logging.info('differences with existing rig json: {}'.format(differences))
         # Write to file 
         time_str = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')
-        filename = 'rig_{}_{}.json'.format(settings['rig_name'],time_str )
-        final_path = os.path.join(settings['rig_metadata_folder'],filename)
-        os.rename(new_rig_json_path, final_path)
+        filename = '_{}_{}.json'.format(settings['rig_name'],time_str )
+        rig.write_standard_file(
+            suffix='_{}_{}.json'.format(settings['rig_name'],time_str ), 
+            output_directory=settings['rig_metadata_folder']
+            )
+        #final_path = os.path.join(settings['rig_metadata_folder'],filename)
+        #os.rename(new_rig_json_path, final_path)
+        filename = 'rig'+filename
         logging.info('Saving new rig json: {}'.format(filename))
     else:
         # Delete temp file
