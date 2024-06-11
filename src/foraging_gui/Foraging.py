@@ -9,6 +9,7 @@ import logging
 import socket
 import harp
 import pandas as pd
+import threading
 from pathlib import Path
 from datetime import date, datetime
 
@@ -1239,9 +1240,10 @@ class Window(QMainWindow):
         SettingsBox = 'Settings_box{}.csv'.format(self.box_number)
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
         if self.start_bonsai_ide:
-            subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
+            process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
         else:
-            subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True)
+            process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True)
+        threading.Thread(target=log_subprocess_output, args=process)
 
     def _OpenVideoFolder(self):
         '''Open the video folder'''
@@ -4129,6 +4131,13 @@ class UncaughtHook(QtCore.QObject):
         tb = "<br><br>".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         self._exception_caught.emit(self.box+tb)
 
+def log_subprocess_output(process):
+    while process.poll() is None:
+        output = process.stdout.readline().decode()
+        if output:
+            logging.info(output)
+            print('testing: '+output)
+        time.sleep(.1)
 
 if __name__ == "__main__":
 
