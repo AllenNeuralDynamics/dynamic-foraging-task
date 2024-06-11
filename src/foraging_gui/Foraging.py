@@ -1240,15 +1240,15 @@ class Window(QMainWindow):
         SettingsBox = 'Settings_box{}.csv'.format(self.box_number)
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
         if self.start_bonsai_ide:
-            process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True,
-                stderr = subprocess.PIPE,text=True)
+            process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
+            #    stderr = subprocess.PIPE,text=True)
         else:
-            process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True,
-                stderr = subprocess.PIPE,text=True)
+            process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True)
+            #    stderr = subprocess.PIPE,text=True)
 
         # Log stdout and stderr from bonsai in a separate thread
-        for line in iter(process.stderr):
-            print(line)
+        #for line in iter(process.stderr):
+        #    print(line)
         #threading.Thread(target=log_subprocess_output, args=(process,)).start()
         #threading.Thread(target=log_subprocess_error, args=(process,)).start()
 
