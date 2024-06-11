@@ -583,6 +583,11 @@ def parse_water_calibration(water_calibration):
                 output = {'water volume (ul):':left_volumes}
                 )
             break
+        elif 'SpotLeft' in water_calibration[date]:
+            times, volumes = GetWaterCalibration(water_calibration,date,'SpotLeft')
+            print(date)
+            print(times)
+            print(volumes)
     
     for date in dates[::-1]:
         if 'Right' in water_calibration[date]:
