@@ -590,8 +590,8 @@ def parse_water_calibration(water_calibration):
                 calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
                 device_name = 'Lick spout Left',
                 description = 'Spot check of water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delievered in microliters. This measurement was used to check the previous calibration, and was not used to set the calibration.',
-                input = {'valve open time (s):':left_times},
-                output = {'water volume (ul):':left_volumes}
+                input = {'valve open time (s):':times},
+                output = {'water volume (ul):':volumes}
                 )
             calibrations.append(left)
     
