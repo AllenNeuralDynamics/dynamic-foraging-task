@@ -1247,9 +1247,7 @@ class Window(QMainWindow):
                 stderr = subprocess.PIPE,text=True)
 
         # Log stdout and stderr from bonsai in a separate thread
-        for line in iter(process.stderr):
-            logging.info(line.strip())
-        #threading.Thread(target=log_subprocess_output, args=(process,)).start()
+        threading.Thread(target=log_subprocess_output, args=(process,)).start()
         #threading.Thread(target=log_subprocess_error, args=(process,)).start()
 
 
@@ -4142,22 +4140,10 @@ class UncaughtHook(QtCore.QObject):
 def log_subprocess_output(process):
     logging.info('Bonsai logging starting')
     while process.poll() is None:       
-        output = process.stdout.readline()
-        if output:
-            logging.info('BONSAI: '+output.strip())
-        time.sleep(.1)
-    logging.info('Bonsai logging terminating')
-
-def log_subprocess_error(process):
-    logging.info('Bonsai error logging starting')
-    while process.poll() is None:       
         output = process.stderr.readline()
-        if output:
-            logging.info('BONSAI: '+output.strip())
-        time.sleep(.1)
-    logging.info('Bonsai error logging terminating')
+        logging.info('BONSAI: '+output.strip())
 
-
+    logging.info('Bonsai logging terminating')
 
 if __name__ == "__main__":
 
