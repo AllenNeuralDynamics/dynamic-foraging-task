@@ -1245,9 +1245,10 @@ class Window(QMainWindow):
         else:
             process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True,
                 stdout=subprocess.PIPE,stderr = subprocess.STDOUT)
-        print('making thread')
+
+        # Log stdout and stderr from bonsai in a separate thread
         threading.Thread(target=log_subprocess_output, args=(process,)).start()
-        print('Done making thread')
+
 
     def _OpenVideoFolder(self):
         '''Open the video folder'''
@@ -4136,22 +4137,13 @@ class UncaughtHook(QtCore.QObject):
         self._exception_caught.emit(self.box+tb)
 
 def log_subprocess_output(process):
-    print('hi')
-    logging.info('Logging from another thread')
+    logging.info('Bonsai logging starting')
     while process.poll() is None:
-        #for line in iter(process.stdout.readline,""):
-        #    logging.info(line.strip())
-        #logging.info('Logging from another thread') 
         output = process.stdout.readline()
         if output:
-            logging.info(output)
-        #else:
-        #    logging.info('no output')
-        #    print('no output')
+            logging.info('BONSAI: '+output.decode('ascii'))
         time.sleep(.1)
-    logging.info('done from another thread')
-     
-    print('done')
+    logging.info('Bonsai logging terminating')
 
 if __name__ == "__main__":
 
