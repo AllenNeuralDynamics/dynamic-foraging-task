@@ -324,7 +324,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     # Water calibration
     if water_calibration != {}:
         calibrations = parse_water_calibration(water_calibration)
-        components['calibrations'].append(calibrations)
+        components['calibrations'].extend(calibrations)
 
 
     # FIB specific information
