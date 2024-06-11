@@ -593,7 +593,7 @@ def parse_water_calibration(water_calibration):
                 input = {'valve open time (s):':times},
                 output = {'water volume (ul):':volumes}
                 )
-            #calibrations.append(left)
+            calibrations.append(left)
     
     for date in dates[::-1]:
         if 'Right' in water_calibration[date]:
