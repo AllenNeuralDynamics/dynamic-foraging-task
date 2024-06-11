@@ -370,14 +370,13 @@ class PlotWaterCalibration(FigureCanvas):
         if hasattr(self.water_win.MainWindow,'RecentWaterCalibrationDate'):
             self.water_win.VisuCalibration.setTitle('Last calibration date:'+self.water_win.MainWindow.RecentWaterCalibrationDate)
         sorted_dates = sorted(self.WaterCalibrationResults.keys())
-        #sorted_dates = [ x for x in sorted_dates if ('Left' in self.WaterCalibrationResults[x].keys())or('Right' in self.WaterCalibrationResults[x].keys())]
         showrecent=int(self.water_win.showrecent.text())
         if showrecent<=0:
             showrecent=1
         if showrecent>len(sorted_dates):
             showrecent=len(sorted_dates)
         
-        print(sorted_dates)
+        # Dont count spot checks against "show last" number
         iterator = 0
         counter = 0
         all_dates = []
@@ -388,8 +387,6 @@ class PlotWaterCalibration(FigureCanvas):
             if ('Left' in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()) or ('Right' in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()):
                 counter += 1 
         all_dates = sorted_dates[-iterator:]
-        print(all_dates) 
-        #all_dates=sorted_dates[-showrecent:]
 
         # use the selected date if showspecificcali is not NA
         if self.water_win.showspecificcali.currentText()!='NA':
