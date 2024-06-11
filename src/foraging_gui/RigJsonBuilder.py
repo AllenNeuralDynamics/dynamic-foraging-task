@@ -21,11 +21,31 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
     # Compare with existing rig schema
     # Write the new rig schema to a json file and load it back 
     # I do this to ignore serialization issues when comparing the rig.jsons 
+   
+    ## DEBUG 
+    serialized = rig.model_dump_json()
+    deserialized = r.model_validate_json(serialized)
+
     suffix = '_temp.json'
     rig.write_standard_file(suffix=suffix, output_directory=settings['rig_metadata_folder']) 
     new_rig_json_path = os.path.join(settings['rig_metadata_folder'],'rig_temp.json')
     with open(new_rig_json_path, 'r') as f:
         new_rig_json = json.load(f)
+
+    ## DEBUG
+    # Compare the two rig.jsons
+    print('loading json and deserialized comparison')
+    differences = DeepDiff(deserialized, new_rig_json,ignore_order=True)
+
+    # Remove the modification date, since that doesnt matter for comparison purposes
+    values_to_ignore = ['modification_date','rig_id']
+    for value in values_to_ignore:
+        if ('values_changed' in differences) and ("root['{}']".format(value) in differences['values_changed']):
+            differences['values_changed'].pop("root['{}']".format(value))
+            if len(differences['values_changed']) == 0:
+                differences.pop('values_changed')
+    ## DEBUG
+
 
     # Compare the two rig.jsons
     differences = DeepDiff(existing_rig_json, new_rig_json,ignore_order=True)
