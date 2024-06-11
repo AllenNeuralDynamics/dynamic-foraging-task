@@ -69,7 +69,7 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
         logging.info('Saving new rig json: {}'.format(filename))
     else:
         # Delete temp file
-        os.remove(new_rig_json_path)
+        #os.remove(new_rig_json_path)
         logging.info('Using existing rig json')
 
 
