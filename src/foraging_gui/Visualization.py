@@ -394,11 +394,11 @@ class PlotWaterCalibration(FigureCanvas):
                         self.FittingResults[current_date][current_valve]={}
                     self.FittingResults[current_date][current_valve]=[slope,intercept]
                 elif (current_valve in ['SpotLeft','SpotRight'])and(current_date in all_dates):
-                    sorted_X,sorted_Y=self._GetWaterCalibration(self.WaterCalibrationResults,current_date,current_valve)                   
+                    X,Y=self._GetWaterSpotCheck(self.WaterCalibrationResults,current_date,current_valve)                   
                     if current_valve=='SpotLeft':
-                        line=self.ax1.plot(sorted_X, sorted_Y, 'x',label=current_date+'_spot left')
+                        line=self.ax1.plot(X, Y, 'x',label=current_date+'_spot left')
                     elif current_valve=='SpotRight':
-                        line=self.ax1.plot(sorted_X, sorted_Y, 'x',label=current_date+'_spot right')
+                        line=self.ax1.plot(X, Y, 'x',label=current_date+'_spot right')
         self.ax1.set_xlabel('valve open time(s)')
         self.ax1.set_ylabel('water(mg)')
         self.ax1.legend(loc='lower right', fontsize=8)
@@ -416,6 +416,20 @@ class PlotWaterCalibration(FigureCanvas):
     def _GetWaterCalibration(self,WaterCalibrationResult, current_date, current_valve):
         x,y = GetWaterCalibration(WaterCalibrationResult, current_date, current_valve)   
         return x, y
+    
+    def _GetWaterSpotCheck(self,WaterCalibrationResult, current_date, current_valve):
+        x,y = GetWaterSpotCheck(WaterCalibrationResult, current_date, current_valve)
+
+def GetWaterSpotCheck(WaterCalibrationResult, date, valve):
+    x = []
+    y = []
+    for time in WaterCalibrationResults[date][valve].keys():
+        for interval in WaterCalibrationResults[date][valve][time].keys():
+            for cycles in WaterCalibrationResults[date][valve][time][interval].keys():
+                for measurement in WaterCalibrationResults[date][valve][time][interval][cycles]:
+                    x.append(time)
+                    y.append(measurement/float(cycles))
+    return x, y
  
 def GetWaterCalibration(WaterCalibrationResults,current_date,current_valve):
     '''Get the water calibration results from a specific date and valve'''
