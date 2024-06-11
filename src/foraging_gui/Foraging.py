@@ -1241,10 +1241,10 @@ class Window(QMainWindow):
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
         if self.start_bonsai_ide:
             process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True,
-                stdout=subprocess.PIPE,stderr = subprocess.STDOUT)
+                stdout=subprocess.PIPE,stderr = subprocess.STDOUT,text=True, bufsize=1)
         else:
             process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True,
-                stdout=subprocess.PIPE,stderr = subprocess.STDOUT)
+                stdout=subprocess.PIPE,stderr = subprocess.STDOUT,text=True, bufsize=1)
 
         # Log stdout and stderr from bonsai in a separate thread
         threading.Thread(target=log_subprocess_output, args=(process,)).start()
@@ -4142,7 +4142,7 @@ def log_subprocess_output(process):
         output = process.stdout.readline()
         if output:
             logging.info('BONSAI: '+output.strip().decode('ascii'))
-        output = process.stderr.readline()
+        #output = process.stderr.readline()
         time.sleep(.1)
     logging.info('Bonsai logging terminating')
 
