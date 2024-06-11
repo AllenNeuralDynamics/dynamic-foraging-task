@@ -333,7 +333,14 @@ class PlotV(FigureCanvas):
 class PlotWaterCalibration(FigureCanvas):
     def __init__(self,water_win,dpi=100,width=5, height=4):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
-        gs = GridSpec(10, 30, wspace = 3, hspace = 0.1, bottom = 0.1, top = 0.95, left = 0.1, right = 0.98)
+        gs = GridSpec(10, 30, 
+            wspace = 3, 
+            hspace = 0.1, 
+            bottom = 0.1, 
+            top = 0.75, 
+            left = 0.1, 
+            right = 0.98
+            )
         self.ax1 = self.fig.add_subplot(gs[0:9, 1:30])
         self.ax1.spines['right'].set_visible(False)
         self.ax1.spines['top'].set_visible(False)
@@ -369,6 +376,16 @@ class PlotWaterCalibration(FigureCanvas):
             showrecent=1
         if showrecent>len(sorted_dates):
             showrecent=len(sorted_dates)
+        print(sorted_dates)
+        iterator = 1
+        all_dates = []
+        while len(all_dates) < showrecent:
+            if iterator > len(sorted_dates):
+                break
+            if ('Left' in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()) or ('Right' in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()):
+                all_dates.append(sorted_dates[-iterator])
+            iterator +=1
+        print(sorted_dates)
         all_dates=sorted_dates[-showrecent:]
         # use the selected date if showspecificcali is not NA
         if self.water_win.showspecificcali.currentText()!='NA':
