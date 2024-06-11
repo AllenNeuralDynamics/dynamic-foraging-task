@@ -1022,8 +1022,8 @@ class WaterCalibrationDialog(QDialog):
             )        
         TOLERANCE = float(self.SpotLeftVolume.text())/10
         if np.abs(error) > TOLERANCE:
-            reply = QMessageBox.question(self, 'Spot check left', 
-                'Avg. error ({}uL) is outside expected tolerance. Please confirm you entered information correctly, and then repeat check'.format(error), 
+            reply = QMessageBox.critical(self, 'Spot check left', 
+                'Avg. error ({}uL) is outside expected tolerance. \n\nPlease confirm you entered information correctly'.format(error), 
                 QMessageBox.Ok)
             logging.error('Water calibration spot check exceeds tolerance: {}'.format(error))  
             self.SaveLeft.setStyleSheet("color: white;background-color : mediumorchid;")
