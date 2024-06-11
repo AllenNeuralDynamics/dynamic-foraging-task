@@ -4140,6 +4140,8 @@ def log_subprocess_output(process):
         if output:
             logging.info(output)
             print('testing: '+output)
+        else:
+            logging.info('no output')
         time.sleep(.1)
     print('done')
 
