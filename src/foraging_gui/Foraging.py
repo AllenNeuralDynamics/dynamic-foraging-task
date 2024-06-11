@@ -1248,7 +1248,7 @@ class Window(QMainWindow):
 
         # Log stdout and stderr from bonsai in a separate thread
         threading.Thread(target=log_subprocess_output, args=(process,)).start()
-        #threading.Thread(target=log_subprocess_error, args=(process,)).start()
+        threading.Thread(target=log_subprocess_error, args=(process,)).start()
 
 
     def _OpenVideoFolder(self):
@@ -4140,8 +4140,15 @@ class UncaughtHook(QtCore.QObject):
 def log_subprocess_output(process):
     logging.info('Bonsai logging starting')
     while process.poll() is None:       
-        stdout, output = process.communicate()
-        #output = process.stderr.readline()
+        output = process.stdout.readline()
+        logging.info('BONSAI: '+output.strip())
+
+    logging.info('Bonsai logging terminating')
+
+def log_subprocess_error(process):
+    logging.info('Bonsai logging starting')
+    while process.poll() is None:       
+        output = process.stderr.readline()
         logging.info('BONSAI: '+output.strip())
 
     logging.info('Bonsai logging terminating')
