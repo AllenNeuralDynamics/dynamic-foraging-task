@@ -589,7 +589,11 @@ def parse_water_calibration(water_calibration):
             left = d.Calibration(
                 calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
                 device_name = 'Lick spout Left',
-                description = 'Spot check of water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delievered in microliters. This measurement was used to check the previous calibration, and was not used to set the calibration.',
+                description = 'Spot check of water calibration for Lick spout Left. '+\
+                    'The input is the valve open time in seconds and the output is the '+\
+                    'volume of water delievered in microliters. The valve open time was '+\
+                    'selected to produce 2ul of water. This measurement was used '+\
+                    'to check the previous calibration, and was not used to set the calibration.',
                 input = {'valve open time (s):':times},
                 output = {'water volume (ul):':volumes}
                 )
@@ -607,6 +611,21 @@ def parse_water_calibration(water_calibration):
                 )
             calibrations.append(right)
             break
+        elif 'SpotRight' in water_calibration[date]:
+            times, volumes = GetWaterCalibration(water_calibration,date,'SpotRight')
+            right = d.Calibration(
+                calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
+                device_name = 'Lick spout Right',
+                description = 'Spot check of water calibration for Lick spout Right. '+\
+                    'The input is the valve open time in seconds and the output is the '+\
+                    'volume of water delievered in microliters. The valve open time was '+\
+                    'selected to produce 2ul of water. This measurement was used '+\
+                    'to check the previous calibration, and was not used to set the calibration.',
+                input = {'valve open time (s):':times},
+                output = {'water volume (ul):':volumes}
+                )
+            calibrations.append(right)
+
 
     return calibrations
 
