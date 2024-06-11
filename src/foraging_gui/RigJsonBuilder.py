@@ -24,7 +24,6 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
    
     ## DEBUG 
     serialized = rig.model_dump_json()
-    deserialized = r.model_validate_json(serialized)
 
     suffix = '_temp.json'
     rig.write_standard_file(suffix=suffix, output_directory=settings['rig_metadata_folder']) 
@@ -35,7 +34,7 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
     ## DEBUG
     # Compare the two rig.jsons
     print('loading json and deserialized comparison')
-    differences = DeepDiff(deserialized, new_rig_json,ignore_order=True)
+    differences = DeepDiff(serialized, new_rig_json,ignore_order=True)
 
     # Remove the modification date, since that doesnt matter for comparison purposes
     values_to_ignore = ['modification_date','rig_id']
