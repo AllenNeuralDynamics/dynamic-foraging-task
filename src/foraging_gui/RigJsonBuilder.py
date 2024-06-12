@@ -242,11 +242,13 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
 
     if ('AINDLickDetector' in settings['box_settings']) and (settings['box_settings']['AINDLickDetector'] == "1"):
         lick_spout_name = 'AIND_Lick_Detector'
+        lick_spout_manufacturer=d.Organization.AIND
     else:
         lick_spout_name = 'Janelia_Lick_Detector'
+        lick_spout_manufacturer=d.Organization.JANELIA
     lick_spouts=[
         d.RewardSpout(
-            name="{} Left".format(lick_spout_name),
+            name="Left lick spout",
             side=d.SpoutSide.LEFT,
             spout_diameter=1.2,
             solenoid_valve=d.Device(
@@ -255,10 +257,15 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 manufacturer=d.Organization.LEE,
                 model='LHDA1233415H'
                 ),
-            lick_sensor_type=d.LickSensorType("Capacitive")
+            lick_sensor_type=d.LickSensorType("Capacitive"),
+            lick_sensor = d.Device(
+                device_type='Lick Sensor',
+                name="{} Left".format(lick_spout_name),
+                manufacturer=lick_spout_manufacturer
+                )
         ),
         d.RewardSpout(
-            name="{} Right".format(lick_spout_name),
+            name='Right lick spout',
             side=d.SpoutSide.RIGHT,
             spout_diameter=1.2,
             spout_diameter_unit=SizeUnit.MM,
@@ -268,7 +275,12 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 manufacturer=d.Organization.LEE,
                 model='LHDA1233415H'
                 ),
-            lick_sensor_type=d.LickSensorType("Capacitive")
+            lick_sensor_type=d.LickSensorType("Capacitive"),
+            lick_sensor = d.Device(
+                device_type='Lick Sensor',
+                name="{} Right".format(lick_spout_name),
+                manufacturer=lick_spout_manufacturer
+                )
         ),
         ]   
 
@@ -279,7 +291,8 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         ),
         d.Speaker(
             name="Stimulus speaker",
-            manufacturer=d.Organization.OTHER,
+            manufacturer=d.Organization.OTHER, ## TODO
+            model='unknown', ## TODO
         )
         ]
 
