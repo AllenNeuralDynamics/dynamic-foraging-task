@@ -249,7 +249,12 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             name="{} Left".format(lick_spout_name),
             side=d.SpoutSide.LEFT,
             spout_diameter=1.2,
-            solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Left"),
+            solenoid_valve=d.Device(
+                device_type="Solenoid", 
+                name="Solenoid Left",
+                manufacturer=d.Organization.LEE,
+                model='LHDA1233415H'
+                ),
             lick_sensor_type=d.LickSensorType("Capacitive")
         ),
         d.RewardSpout(
@@ -257,7 +262,12 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             side=d.SpoutSide.RIGHT,
             spout_diameter=1.2,
             spout_diameter_unit=SizeUnit.MM,
-            solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Right"),
+            solenoid_valve=d.Device(
+                device_type="Solenoid", 
+                name="Solenoid Right",
+                manufacturer=d.Organization.LEE,
+                model='LHDA1233415H'
+                ),
             lick_sensor_type=d.LickSensorType("Capacitive")
         ),
         ]   
