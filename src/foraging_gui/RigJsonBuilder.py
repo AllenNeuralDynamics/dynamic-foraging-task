@@ -621,7 +621,7 @@ def parse_water_calibration(water_calibration):
             left = d.Calibration(
                 calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
                 device_name = 'Lick spout Left',
-                description = 'Water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delievered in microliters.',
+                description = 'Water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delivered in microliters.',
                 input = {'valve open time (s):':left_times},
                 output = {'water volume (ul):':left_volumes}
                 )
@@ -633,7 +633,7 @@ def parse_water_calibration(water_calibration):
             right = d.Calibration(
                 calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
                 device_name = 'Lick spout Right',
-                description = 'Water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delievered in microliters.',
+                description = 'Water calibration for Lick spout Right. The input is the valve open time in seconds and the output is the volume of water delivered in microliters.',
                 input = {'valve open time (s):':right_times},
                 output = {'water volume (ul):':right_volumes}
                 )
