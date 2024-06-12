@@ -7,6 +7,7 @@ from datetime import date, datetime, timezone
 
 import aind_data_schema.core.rig as r
 import aind_data_schema.components.devices as d
+import aind_data_schema.components.coordinates as c
 from aind_data_schema_models.modalities import Modality
 from aind_data_schema_models.units import SizeUnit
 
@@ -221,6 +222,21 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         diameter=3.0,
         diameter_unit=SizeUnit.CM,
         manufacturer=d.Organization.CUSTOM,
+        )
+    
+    components['enclosure'] = d.Enclosure(
+        size=c.Size3D(
+            width=0, # TODO
+            length=0, # TODO
+            height=0, # TODO
+            unit=SizeUnit.M
+            ),
+        manufacturer=d.Organization.AIND,  # TODO
+        internal_material='unknown',
+        external_material='unknown',
+        grounded=False, # TODO
+        laser_interlock=False, # TODO
+        air_filtration=False, # TODO 
         )
 
 
