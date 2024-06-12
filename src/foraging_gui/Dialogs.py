@@ -472,18 +472,23 @@ class WaterCalibrationDialog(QDialog):
                 self.WaterCalibrationPar = json.load(f)
             logging.info('loaded water calibration parameters')
         else:
-            logging.error('could not find water calibration parameters: {}'.format(self.MainWindow.WaterCalibrationParFiles))
-            raise Exception('Missing water calibration parameter file: {}'.format(self.MainWindow.WaterCalibrationParFiles))
-
-        self.SpotCycle = float(self.WaterCalibrationPar['Spot']['Cycle'])
-        self.SpotInterval = float(self.WaterCalibrationPar['Spot']['Interval'])
+            logging.warning('could not find water calibration parameters: {}'.format(self.MainWindow.WaterCalibrationParFiles))
+            self.WaterCalibrationPar = {}
 
         # if no parameters are stored, store default parameters
         if 'Full' not in self.WaterCalibrationPar:
-            self.WaterCalibrationPar['Full']['TimeMin']=0.005
-            self.WaterCalibrationPar['Full']['TimeMax']=0.08
-            self.WaterCalibrationPar['Full']['Stride']=0.005
-            self.WaterCalibrationPar['Full']['Interval']=0.05
+            self.WaterCalibrationPar['Full']['TimeMin'] = 0.02
+            self.WaterCalibrationPar['Full']['TimeMax'] = 0.05
+            self.WaterCalibrationPar['Full']['Stride']  = 0.005
+            self.WaterCalibrationPar['Full']['Interval']= 0.1
+            self.WaterCalibrationPar['Full']['Cycle']   = 200
+
+        if 'Spot' not in self.WaterCalibrationPar:
+            self.WaterCalibrationPar['Full']['Interval']= 0.1
+            self.WaterCalibrationPar['Full']['Cycle']   = 200           
+       
+        self.SpotCycle = float(self.WaterCalibrationPar['Spot']['Cycle'])
+        self.SpotInterval = float(self.WaterCalibrationPar['Spot']['Interval'])
 
         other_types = set(self.WaterCalibrationPar.keys()) - set(['Full','Spot'])
         if len(other_types) > 0:
