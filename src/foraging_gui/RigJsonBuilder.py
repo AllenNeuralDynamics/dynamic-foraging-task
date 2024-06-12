@@ -226,6 +226,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     name="NewScaleMotor for LickSpouts",
                     serial_number=settings['newscale_serial_num_box{}'.format(settings['box_number'])], 
                     manufacturer=d.Organization.NEW_SCALE_TECHNOLOGIES,
+                    model='XYZ Stage with M30LS-3.4-15 linear stages',
                     travel=15.0,
                     travel_unit=SizeUnit.MM,
                     firmware="https://github.com/AllenNeuralDynamics/python-newscale, branch: axes-on-target, commit #7c17497",
@@ -236,6 +237,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     manufacturer=d.Organization.AIND,
                     travel=30, 
                     travel_unit=SizeUnit.MM
+                    notes="https://allenneuraldynamics.github.io/Bonsai.AllenNeuralDynamics/articles/aind-manipulator.html"
                     )      
 
     if ('AINDLickDetector' in settings['box_settings']) and (settings['box_settings']['AINDLickDetector'] == "1"):
