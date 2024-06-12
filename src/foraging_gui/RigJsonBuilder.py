@@ -557,7 +557,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     ###########################################################################
     # Assemble rig schema
     rig = r.Rig(
-        rig_id="{}_{}".format(settings['rig_name'],datetime.now().strftime('%Y-%m-%d')), 
+        rig_id="{}_{}".format(settings['rig_name'],datetime.now().strftime('%Y%m%d')), 
         modification_date=date.today(),
         **components 
         )
