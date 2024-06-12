@@ -477,6 +477,7 @@ class WaterCalibrationDialog(QDialog):
 
         # if no parameters are stored, store default parameters
         if 'Full' not in self.WaterCalibrationPar:
+            self.WaterCalibrationPar['Full'] = {}
             self.WaterCalibrationPar['Full']['TimeMin'] = 0.02
             self.WaterCalibrationPar['Full']['TimeMax'] = 0.05
             self.WaterCalibrationPar['Full']['Stride']  = 0.005
@@ -484,16 +485,22 @@ class WaterCalibrationDialog(QDialog):
             self.WaterCalibrationPar['Full']['Cycle']   = 200
 
         if 'Spot' not in self.WaterCalibrationPar:
-            self.WaterCalibrationPar['Full']['Interval']= 0.1
-            self.WaterCalibrationPar['Full']['Cycle']   = 200           
+            self.WaterCalibrationPart['Spot'] = {}
+            self.WaterCalibrationPar['Spot']['Interval']= 0.1
+            self.WaterCalibrationPar['Spot']['Cycle']   = 200           
        
         self.SpotCycle = float(self.WaterCalibrationPar['Spot']['Cycle'])
         self.SpotInterval = float(self.WaterCalibrationPar['Spot']['Interval'])
 
+        # Add other calibration types to drop down list, but only if they have all parameters
         other_types = set(self.WaterCalibrationPar.keys()) - set(['Full','Spot'])
+        required = set(['TimeMin','TimeMax','Stride','Interval','Cycle'])
         if len(other_types) > 0:
             for t in other_types:
-                self.CalibrationType.addItem(t)
+                if required.issubset(set(self.WaterCalibrationPar[t].keys())):
+                    self.CalibrationType.addItem(t)
+                else:
+                    logging.info('Calibration Type "{}" missing required fields'.format(t))
     
     def _StartCalibratingLeft(self):
         '''start the calibration loop of left valve'''
