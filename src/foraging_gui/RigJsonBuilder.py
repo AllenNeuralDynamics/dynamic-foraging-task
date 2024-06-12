@@ -488,7 +488,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 cut_off_wavelength=562,
             ),
             d.Filter(
-                name="dual-edge standard epi-fluorescence dichroic beamsplitter",
+                name="beamsplitter",
                 model="FF493/574-Di01-25x36",
                 manufacturer=d.Organization.SEMROCK,
                 notes="493/574 nm BrightLine dual-edge standard epi-fluorescence dichroic beamsplitter",
