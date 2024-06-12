@@ -318,9 +318,8 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
 
     # Water calibration
     if water_calibration != {}:
-        left, right = parse_water_calibration(water_calibration)
-        components['calibrations'].append(left)
-        components['calibrations'].append(right)
+        calibrations = parse_water_calibration(water_calibration)
+        components['calibrations'].extend(calibrations)
 
 
     # FIB specific information
@@ -566,6 +565,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
 
 
 def parse_water_calibration(water_calibration):
+    calibrations = [] 
     dates = sorted(water_calibration.keys())
     for date in dates[::-1]:
         if 'Left' in water_calibration[date]:
@@ -577,7 +577,22 @@ def parse_water_calibration(water_calibration):
                 input = {'valve open time (s):':left_times},
                 output = {'water volume (ul):':left_volumes}
                 )
+            calibrations.append(left)
             break
+        elif 'SpotLeft' in water_calibration[date]:
+            times, volumes = GetWaterCalibration(water_calibration,date,'SpotLeft')
+            left = d.Calibration(
+                calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
+                device_name = 'Lick spout Left',
+                description = 'Spot check of water calibration for Lick spout Left. '+\
+                    'The input is the valve open time in seconds and the output is the '+\
+                    'volume of water delievered in microliters. The valve open time was '+\
+                    'selected to produce 2ul of water. This measurement was used '+\
+                    'to check the previous calibration, and was not used to set the calibration.',
+                input = {'valve open time (s):':times},
+                output = {'water volume (ul):':volumes}
+                )
+            calibrations.append(left)
     
     for date in dates[::-1]:
         if 'Right' in water_calibration[date]:
@@ -589,9 +604,25 @@ def parse_water_calibration(water_calibration):
                 input = {'valve open time (s):':right_times},
                 output = {'water volume (ul):':right_volumes}
                 )
+            calibrations.append(right)
             break
+        elif 'SpotRight' in water_calibration[date]:
+            times, volumes = GetWaterCalibration(water_calibration,date,'SpotRight')
+            right = d.Calibration(
+                calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
+                device_name = 'Lick spout Right',
+                description = 'Spot check of water calibration for Lick spout Right. '+\
+                    'The input is the valve open time in seconds and the output is the '+\
+                    'volume of water delievered in microliters. The valve open time was '+\
+                    'selected to produce 2ul of water. This measurement was used '+\
+                    'to check the previous calibration, and was not used to set the calibration.',
+                input = {'valve open time (s):':times},
+                output = {'water volume (ul):':volumes}
+                )
+            calibrations.append(right)
 
-    return left, right
+
+    return calibrations
 
 
 def parse_laser_calibration(laser_calibration):
