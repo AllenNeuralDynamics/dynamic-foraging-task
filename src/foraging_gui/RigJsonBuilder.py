@@ -263,10 +263,8 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     )      
 
     if ('AINDLickDetector' in settings['box_settings']) and (settings['box_settings']['AINDLickDetector'] == "1"):
-        lick_spout_name = 'AIND_Lick_Detector'
         lick_spout_manufacturer=d.Organization.AIND
     else:
-        lick_spout_name = 'Janelia_Lick_Detector'
         lick_spout_manufacturer=d.Organization.JANELIA
     lick_spouts=[
         d.RewardSpout(
@@ -282,7 +280,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             lick_sensor_type=d.LickSensorType("Capacitive"),
             lick_sensor = d.Device(
                 device_type='Lick Sensor',
-                name="{} Left".format(lick_spout_name),
+                name="Lick Sensor Left",
                 manufacturer=lick_spout_manufacturer
                 )
         ),
@@ -300,7 +298,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             lick_sensor_type=d.LickSensorType("Capacitive"),
             lick_sensor = d.Device(
                 device_type='Lick Sensor',
-                name="{} Right".format(lick_spout_name),
+                name="Lick Sensor Right",
                 manufacturer=lick_spout_manufacturer
                 )
         ),
@@ -312,7 +310,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             stage_type = stage,
         ),
         d.Speaker(
-            name="Stimulus speaker",
+            name="Stimulus Speaker",
             manufacturer=d.Organization.OTHER, ## TODO
             model='unknown', ## TODO
         )
