@@ -494,7 +494,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 notes="493/574 nm BrightLine dual-edge standard epi-fluorescence dichroic beamsplitter",
                 filter_type="Multiband",
                 width=36,
-                height=24,
+                height=25,
             ),
             d.Filter(
                 name="Excitation filter 410nm",
