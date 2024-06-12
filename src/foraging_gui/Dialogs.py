@@ -485,7 +485,7 @@ class WaterCalibrationDialog(QDialog):
             self.WaterCalibrationPar['Full']['Cycle']   = 200
 
         if 'Spot' not in self.WaterCalibrationPar:
-            self.WaterCalibrationPart['Spot'] = {}
+            self.WaterCalibrationPar['Spot'] = {}
             self.WaterCalibrationPar['Spot']['Interval']= 0.1
             self.WaterCalibrationPar['Spot']['Cycle']   = 200           
        
