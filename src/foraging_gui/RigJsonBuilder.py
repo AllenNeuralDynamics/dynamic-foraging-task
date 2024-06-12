@@ -236,7 +236,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     name="AIND lick spout stage",
                     manufacturer=d.Organization.AIND,
                     travel=30, 
-                    travel_unit=SizeUnit.MM
+                    travel_unit=SizeUnit.MM,
                     notes="https://allenneuraldynamics.github.io/Bonsai.AllenNeuralDynamics/articles/aind-manipulator.html"
                     )      
 
