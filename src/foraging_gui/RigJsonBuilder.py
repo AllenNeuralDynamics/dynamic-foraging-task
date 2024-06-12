@@ -167,7 +167,10 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     model="XC0922LENS",
                     manufacturer=d.Organization.OTHER,
                     max_aperture="f/1.4",
-                    notes='Focal Length 9-22mm 1/3" IR F1.4',
+                    focal_length=9,
+                    focal_length_unit=SizeUnit.MM,
+                    notes='Manufacturer is Xenocam',
+
                 ),
             ),
             d.CameraAssembly(
@@ -194,7 +197,9 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     model="XC0922LENS",
                     manufacturer=d.Organization.OTHER,
                     max_aperture="f/1.4",
-                    notes='Focal Length 9-22mm 1/3" IR F1.4',
+                    focal_length=9,
+                    focal_length_unit=SizeUnit.MM,
+                    notes='Manufacturer is Xenocam',
                 ),
             ),
         ]
