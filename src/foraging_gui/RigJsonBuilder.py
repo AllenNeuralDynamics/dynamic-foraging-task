@@ -225,7 +225,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         )
     
     components['enclosure'] = d.Enclosure(
-        size=c.Size3D(
+        size=c.Size3d(
             width=0, # TODO
             length=0, # TODO
             height=0, # TODO
