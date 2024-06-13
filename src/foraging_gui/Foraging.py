@@ -98,7 +98,6 @@ class Window(QMainWindow):
         self.loggingstarted = -1    # Have we started trial logging
         self.unsaved_data = False   # Setting unsaved data to False 
         self.to_check_drop_frames = 1 # 1, to check drop frames during saving data; 0, not to check drop frames 
-        self.session_stalled=False
 
         # Connect to Bonsai
         self._InitializeBonsai()
@@ -3229,7 +3228,6 @@ class Window(QMainWindow):
         self.StartANewSession=1
         self.CreateNewFolder=1
         self.PhotometryRun=0
-        self.session_stalled=False
 
         self.unsaved_data=False
         self.ManualWaterVolume=[0,0]     
@@ -3286,7 +3284,6 @@ class Window(QMainWindow):
                         self.ANewTrial=1
                         self.WarningLabel.setText('')
                         self.WarningLabel.setStyleSheet(self.default_warning_color)
-                        self.session_stalled=True
                         break
                     else:
                         stall_iteration+=1
@@ -3371,13 +3368,6 @@ class Window(QMainWindow):
         if self.Start.isChecked():
             logging.info('Start button pressed: starting trial loop')
             self.keyPressEvent()
-    
-            if self.session_stalled:
-                reply = QMessageBox.critical(self,
-                    'Box {}, Start'.format(self.box_letter),    
-                    'Cannot continue session after trials stalled. Please start new session',
-                    QMessageBox.Ok)
-                return 
 
             if self.StartANewSession == 0 :
                 reply = QMessageBox.question(self, 
@@ -3759,7 +3749,6 @@ class Window(QMainWindow):
                     # Give warning to user
                     self.WarningLabel.setText('Trials stalled, recheck bonsai connection.')
                     self.WarningLabel.setStyleSheet(self.default_warning_color)
-                    self.session_stalled=True
                     break
                 else:
                     # User continues, wait another stall_duration and prompt again
