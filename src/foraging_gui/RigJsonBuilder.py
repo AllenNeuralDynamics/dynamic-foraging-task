@@ -5,7 +5,6 @@ import numpy as np
 from deepdiff import DeepDiff
 from datetime import date, datetime, timezone
 import serial.tools.list_ports as list_ports
-from harp.device import Device
 
 import aind_data_schema.core.rig as r
 import aind_data_schema.components.devices as d
@@ -15,23 +14,7 @@ from aind_data_schema_models.units import SizeUnit
 
 from foraging_gui.Visualization import GetWaterCalibration
 
-def tester():
-    for port in list_ports.comports():
-        if port.pid == 24577: # harp device PID
-            com_port = port.device
-            try:
-                device = Device(com_port, 'ibl.bin')
-                print(f"Device name: {device.DEVICE_NAME}\n"
-                    f"Firmware: {device.FIRMWARE_VERSION_H}.{device.FIRMWARE_VERSION_L}\n"
-                    f"\n\n")
-            except:
-                print('failed to load com port: {}'.format(com_port))
-
-
-
 def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibration):    
-    
-    tester()
 
     # Build the new rig schema
     rig = build_rig_json_core(settings, water_calibration, laser_calibration)
