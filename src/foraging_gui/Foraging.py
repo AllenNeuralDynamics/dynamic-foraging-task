@@ -415,7 +415,6 @@ class Window(QMainWindow):
         session_full_path_list=[]
         session_path_list=[]
         for session_folder in os.listdir(animal_folder):
-            # TODO fix_300
             training_folder_old = os.path.join(animal_folder,session_folder, 'TrainingFolder')
             training_folder_new = os.path.join(animal_folder,session_folder, 'behavior')
             if os.path.exists(training_folder_old):
