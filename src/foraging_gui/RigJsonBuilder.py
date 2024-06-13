@@ -311,8 +311,8 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         ),
         d.Speaker(
             name="Stimulus Speaker",
-            manufacturer=d.Organization.OTHER, ## TODO
-            model='unknown', ## TODO
+            manufacturer=d.Organization.TYMPHANY,
+            model='XT25SC90-04', 
         )
         ]
 
