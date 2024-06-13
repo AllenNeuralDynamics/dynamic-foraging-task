@@ -2881,10 +2881,6 @@ class AutoTrainDialog(QDialog):
             if self.widgets_locked_by_auto_train == []:  # Error in setting parameters
                 self.update_auto_train_lock(engaged=False)  # Uncheck the "apply" button
                 return
-                
-            self.widgets_locked_by_auto_train.extend(
-                [self.MainWindow.TrainingStage]
-                )
 
             # lock the widgets that have been set by auto training 
             for widget in self.widgets_locked_by_auto_train:
