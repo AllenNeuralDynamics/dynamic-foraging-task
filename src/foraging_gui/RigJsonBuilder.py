@@ -233,8 +233,8 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             unit=SizeUnit.M
             ),
         manufacturer=d.Organization.AIND,  # TODO
-        internal_material='unknown',
-        external_material='unknown',
+        internal_material='',
+        external_material='',
         grounded=False, # TODO
         laser_interlock=False,
         air_filtration=False, # TODO 
