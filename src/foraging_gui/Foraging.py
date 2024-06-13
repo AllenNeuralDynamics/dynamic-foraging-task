@@ -73,7 +73,6 @@ class Window(QMainWindow):
         self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration_{}.json'.format(box_number))
         self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration_{}.json'.format(box_number))
         self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_{}.json'.format(box_number))
-        self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json')
 
         # Load Laser and Water Calibration Files
         self._GetLaserCalibration()
@@ -138,7 +137,6 @@ class Window(QMainWindow):
         self._GetTrainingParameters() # get initial training parameters
         self.connectSignalsSlots()
         self._Task()
-        self._TrainingStage()
         self.keyPressEvent()
         self._WaterVolumnManage2()
         self._LickSta()
@@ -241,8 +239,6 @@ class Window(QMainWindow):
         self.WeightAfter.textChanged.connect(self._PostWeightChange)
         self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
         self.Randomness.currentIndexChanged.connect(self._Randomness)
-        self.TrainingStage.currentIndexChanged.connect(self._TrainingStage)
-        self.TrainingStage.activated.connect(self._TrainingStage)
         self.actionTemporary_Logging.triggered.connect(self._startTemporaryLogging)
         self.actionFormal_logging.triggered.connect(self._startFormalLogging)
         self.actionOpen_logging_folder.triggered.connect(self._OpenLoggingFolder)
@@ -1504,27 +1500,6 @@ class Window(QMainWindow):
         '''Restart the formal logging'''
         self.Ot_log_folder=self._restartlogging()
 
-    def _TrainingStage(self):
-        '''Change the parameters automatically based on training stage and task'''
-        #self.WarningLabel_SaveTrainingStage.setText('')
-        #self.WarningLabel_SaveTrainingStage.setStyleSheet("color: none;")
-        # load the prestored training stage parameters
-        self._LoadTrainingPar()
-        # set the training parameters in the GUI
-        widget_dict = {w.objectName(): w for w in self.TrainingParameters.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-        Task=self.Task.currentText()
-        CurrentTrainingStage=self.TrainingStage.currentText()
-        try:
-            for key in widget_dict.keys():
-                if Task not in self.TrainingStagePar:
-                    continue
-                elif CurrentTrainingStage not in self.TrainingStagePar[Task]:
-                    continue
-                self._set_parameters(key,widget_dict,self.TrainingStagePar[Task][CurrentTrainingStage])
-        except Exception as e:
-            # Catch the exception and log error information
-            logging.error(str(e))
-
     def _set_parameters(self,key,widget_dict,parameters):
         '''Set the parameters in the GUI
             key: the parameter name you want to change
@@ -1594,14 +1569,6 @@ class Window(QMainWindow):
             if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
                 pass
                 #widget.clear()
-
-    def _LoadTrainingPar(self):
-        '''load the training stage parameters'''
-        logging.info('loading training stage parameters')
-        self.TrainingStagePar={}
-        if os.path.exists(self.TrainingStageFiles):
-            with open(self.TrainingStageFiles, 'r') as f:
-                self.TrainingStagePar = json.load(f)
 
     def _Randomness(self):
         '''enable/disable some fields in the Block/Delay Period/ITI'''
