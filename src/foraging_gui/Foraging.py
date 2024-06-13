@@ -3752,8 +3752,8 @@ class Window(QMainWindow):
                     # User continues, wait another stall_duration and prompt again
                     logging.error('trial stalled {} minutes, user continued trials'.format(elapsed_time))
                     stall_iteration +=1
-                else:
-                    print(self.Channel.last_message_time)
+            else:
+                print(self.Channel.last_message_time)
 
 
     def _StartTrialLoop1(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
