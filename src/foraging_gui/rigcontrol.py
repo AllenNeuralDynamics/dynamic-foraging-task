@@ -41,7 +41,6 @@ class RigClient:
         self.msgs.put([msg,args])
         msg_str = str(CurrentMessage)
         self.last_message_time = time.time()       
-        print(self.last_message_time)
  
         # Selectively log photometry messages 
         if (('PhotometryRising' in msg_str) or ('PhotometryFalling' in msg_str)):
