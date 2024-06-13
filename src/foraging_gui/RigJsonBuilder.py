@@ -236,7 +236,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         internal_material='unknown',
         external_material='unknown',
         grounded=False, # TODO
-        laser_interlock=False, # TODO
+        laser_interlock=False,
         air_filtration=False, # TODO 
         )
 
@@ -329,7 +329,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             is_clock_generator=False,
             data_interface=d.DataInterface.ETH,
             core_version='1.11', # TODO
-            tag_version='unknown', # TODO
             notes = '{} and {}, as well as reward delivery solenoids are connected via ethernet cables'.format(lick_spouts[0].name, lick_spouts[1].name)
         ),
         d.HarpDevice(
@@ -340,7 +339,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             is_clock_generator=False,
             data_interface=d.DataInterface.USB,
             core_version='1.4', # TODO
-            tag_version='unknown', # TODO
         ),
         d.HarpDevice(
             name="Harp clock synchronization board",
@@ -349,8 +347,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             computer_name=settings['computer_name'], 
             is_clock_generator=True,
             data_interface=d.DataInterface.USB,
-            core_version='unknown', # TODO
-            tag_version='unknown', # TODO
+            core_version='', # TODO
         ),       
         d.HarpDevice(
             name="Harp sound amplifier",
@@ -359,8 +356,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             computer_name=settings['computer_name'], 
             is_clock_generator=False,
             data_interface=d.DataInterface.USB,
-            core_version='unknown', # TODO
-            tag_version='unknown', # TODO
+            core_version='', # TODO
         )
     ]
 
