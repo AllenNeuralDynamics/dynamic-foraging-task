@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox 
-from PyQt5.QtWidgets import QLabel, QDialogButtonBox
+from PyQt5.QtWidgets import QLabel, QDialogButtonBox,QFileDialog,QInputDialog, QLineEdit
 from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject, QEvent
 from PyQt5.QtSvg import QSvgWidget
@@ -311,7 +311,9 @@ class WaterCalibrationDialog(QDialog):
         uic.loadUi('Calibration.ui', self)
         
         self.MainWindow=MainWindow
-        self.FinishLeftValve=0
+        self.calibrating_left = False
+        self.calibrating_right= False
+        self._LoadCalibrationParameters()
         if not hasattr(self.MainWindow,'WaterCalibrationResults'):
             self.MainWindow.WaterCalibrationResults={}
             self.WaterCalibrationResults={}
@@ -321,61 +323,91 @@ class WaterCalibrationDialog(QDialog):
         self.ToInitializeVisual=1
         self._UpdateFigure()
         self.setWindowTitle('Water Calibration: {}'.format(self.MainWindow.current_box))
+        self.Warning.setText('')
+        self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
 
     def _connectSignalsSlots(self):
-        self.OpenLeft.clicked.connect(self._OpenLeft)
-        self.OpenRight.clicked.connect(self._OpenRight)
+        self.SpotCheckLeft.clicked.connect(self._SpotCheckLeft)
+        self.SpotCheckRight.clicked.connect(self._SpotCheckRight)
         self.OpenLeftForever.clicked.connect(self._OpenLeftForever)
         self.OpenRightForever.clicked.connect(self._OpenRightForever)
         self.SaveLeft.clicked.connect(self._SaveLeft)
         self.SaveRight.clicked.connect(self._SaveRight)
-        self.CalibrationType.currentIndexChanged.connect(self._CalibrationType)
         self.StartCalibratingLeft.clicked.connect(self._StartCalibratingLeft)
         self.StartCalibratingRight.clicked.connect(self._StartCalibratingRight)
         self.Continue.clicked.connect(self._Continue)
+        self.Repeat.clicked.connect(self._Repeat)
+        self.Finished.clicked.connect(self._Finished)
         self.EmergencyStop.clicked.connect(self._EmergencyStop)
         self.showrecent.textChanged.connect(self._Showrecent)
         self.showspecificcali.activated.connect(self._ShowSpecifcDay)
-        self.SaveCalibrationPar.clicked.connect(self._SaveCalibrationPar)
-    def _SaveCalibrationPar(self):
-        '''save the calibration parameters'''
-        # load the pre-stored calibration parameters
-        self._LoadCaliPar()
-        # get the current calibration parameters
-        CalibrationType=self.CalibrationType.currentText()
-        Keys=['TimeLeftMin','TimeLeftMax','StrideLeft','TimeRightMin','TimeRightMax','StrideRight','IntervalLeft_2','IntervalRight_2']
-        widget_dict = {w.objectName(): w for w in self.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-        for K in Keys:
-            for key in widget_dict.keys():
-                try:
-                    if key==K:
-                        widget = widget_dict[key]
-                        self.WaterCalibrationPar[CalibrationType][K]=widget.text()
-                except Exception as e:
-                    logging.error('Water Calibration {}'.format(str(e)))
-        # save
-        if not os.path.exists(os.path.dirname(self.MainWindow.WaterCalibrationParFiles)):
-            os.makedirs(os.path.dirname(self.MainWindow.WaterCalibrationParFiles))
-        with open(self.MainWindow.WaterCalibrationParFiles, "w") as file:
-            json.dump(self.WaterCalibrationPar, file,indent=4) 
-        self.SaveCalibrationPar.setChecked(False)
-        self.Warning
-        self.Warning.setText('Calibration parameters saved for calibration type: '+CalibrationType)
-        self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
 
     def _Showrecent(self):
         '''update the calibration figure'''
         self._UpdateFigure()
+
     def _ShowSpecifcDay(self):
         '''update the calibration figure'''
         self._UpdateFigure()
+    
+    def _Finished(self):
+        if (not self.calibrating_left) and (not self.calibrating_right):
+            return
         
+        if self.calibrating_left and (not np.all(self.left_measurements)):
+            reply = QMessageBox.question(self, "Box {}, Finished".format(self.MainWindow.box_letter),
+                                             f"Calibration incomplete, are you sure you want to finish?\n",
+                                             QMessageBox.Yes | QMessageBox.No,
+                                             QMessageBox.No)
+            if reply == QMessageBox.No:                
+                return
+        if self.calibrating_right and (not np.all(self.right_measurements)):
+            reply = QMessageBox.question(self, "Box {}, Finished".format(self.MainWindow.box_letter),
+                                             f"Calibration incomplete, are you sure you want to finish?\n",
+                                             QMessageBox.Yes | QMessageBox.No,
+                                             QMessageBox.No)
+            if reply == QMessageBox.No:                
+                return              
+ 
+        self.calibrating_left = False
+        self.calibrating_right= False
+        self.Continue.setStyleSheet("color: black;background-color : none")
+        self.Repeat.setStyleSheet("color: black;background-color : none")
+        self.Finished.setStyleSheet("color: black;background-color : none")
+        self.StartCalibratingLeft.setStyleSheet("background-color : none")
+        self.StartCalibratingRight.setStyleSheet("background-color : none")
+        self.StartCalibratingLeft.setChecked(False)
+        self.StartCalibratingRight.setChecked(False)
+        self.StartCalibratingLeft.setEnabled(True)
+        self.StartCalibratingRight.setEnabled(True)
+        self.Warning.setText('Calibration Finished')
+        self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+
+ 
     def _Continue(self):
         '''Change the color of the continue button'''
-        if self.Continue.isChecked():
-            self.Continue.setStyleSheet("background-color : green;")
-        else:
-            self.Continue.setStyleSheet("background-color : none")
+        if (not self.calibrating_left) and (not self.calibrating_right):
+            return
+
+        self.Continue.setStyleSheet("color:  black; background-color : none")
+        logging.info('Continue pressed')
+        if self.calibrating_left:
+            self._CalibrateLeftOne()
+        if self.calibrating_right:
+            self._CalibrateRightOne()
+
+    def _Repeat(self):
+        '''Change the color of the continue button'''
+
+        if (not self.calibrating_left) and (not self.calibrating_right):
+            return
+        self.Repeat.setStyleSheet("color: black; background-color : none")
+        if self.calibrating_left:
+            self._CalibrateLeftOne(repeat=True)
+        if self.calibrating_right:
+            self._CalibrateRightOne(repeat=True)
+
+
     def _EmergencyStop(self):
         '''Change the color of the EmergencyStop button'''
         if self.EmergencyStop.isChecked():
@@ -387,416 +419,401 @@ class WaterCalibrationDialog(QDialog):
         '''save the calibration result of the single point calibration (left valve)'''
         self.SaveLeft.setStyleSheet("background-color : green;")
         QApplication.processEvents()
-        valve='Left'
-        valve_open_time=str(float(self.OpenLeftTime.text()))
-        valve_open_interval=str(float(self.IntervalLeft.text()))
-        cycle=str(float(self.CycleLeft.text()))
+        
+        valve='SpotLeft'
+        valve_open_time=str(self.SpotLeftOpenTime)
         try:
             total_water=float(self.TotalWaterSingleLeft.text())  
+            before_weight = float(self.SpotCheckPreWeightLeft.text())
         except Exception as e:
             total_water=''
+            before_weight=''
             logging.error(str(e))
-        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water,tube_weight=0)
+        self._Save(
+            valve=valve,
+            valve_open_time=str(valve_open_time),
+            valve_open_interval=str(self.SpotInterval),
+            cycle=str(self.SpotCycle),
+            total_water=total_water,
+            tube_weight=before_weight,
+            append=True) 
         self.SaveLeft.setStyleSheet("background-color : none")
         self.SaveLeft.setChecked(False)
+
     def _SaveRight(self):
         '''save the calibration result of the single point calibration (right valve)'''
         self.SaveRight.setStyleSheet("background-color : green;")
         QApplication.processEvents()
-        valve='Right'
-        valve_open_time=str(float(self.OpenRightTime.text()))
-        valve_open_interval=str(float(self.IntervalRight.text()))
-        cycle=str(float(self.CycleRight.text()))
+        valve='SpotRight'
+        valve_open_time=str(self.SpotRightOpenTime)
         try:
             total_water=float(self.TotalWaterSingleRight.text()) 
+            before_weight = float(self.SpotCheckPreWeightRight.text())
         except Exception as e:
             total_water=''
+            before_weight =''
             logging.error(str(e))
-        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water,tube_weight=0)
+        self._Save(
+            valve=valve,
+            valve_open_time=str(valve_open_time),
+            valve_open_interval=str(self.SpotInterval),
+            cycle=str(self.SpotCycle),
+            total_water=total_water,
+            tube_weight=before_weight,
+            append=True
+            )
         self.SaveRight.setStyleSheet("background-color : none")
         self.SaveRight.setChecked(False)
-    def _CalibrationType(self):
-        '''change the calibration parameters based on the calibration type'''
-        # load the pre-stored calibration parameters
-        self._LoadCaliPar()
-        # set calibration parameters
-        CalibrationType=self.CalibrationType.currentText()
-        Keys=['TimeLeftMin','TimeLeftMax','StrideLeft','TimeRightMin','TimeRightMax','StrideRight','IntervalLeft_2','IntervalRight_2']
-        widget_dict = {w.objectName(): w for w in self.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-        # set attributes
-        for K in Keys:
-            for key in widget_dict.keys():
-                try:
-                    if key==K:
-                        widget = widget_dict[key]
-                        widget.setText(str(self.WaterCalibrationPar[CalibrationType][K]))
-                except Exception as e:
-                    logging.error(str(e))
 
-    def _LoadCaliPar(self):
-        '''load the pre-stored calibration parameters'''
-        self.WaterCalibrationPar={}
-        self.WaterCalibrationPar['Monthly']={}
-        self.WaterCalibrationPar['Biweekly']={}
+    def _LoadCalibrationParameters(self):
+        self.WaterCalibrationPar={}       
         if os.path.exists(self.MainWindow.WaterCalibrationParFiles):
             with open(self.MainWindow.WaterCalibrationParFiles, 'r') as f:
                 self.WaterCalibrationPar = json.load(f)
-        # if no parameters are stored, store default parameters
-        SaveTag=0
-        if self.WaterCalibrationPar['Monthly']=={}:
-            self.WaterCalibrationPar['Monthly']['TimeLeftMin']=0.005
-            self.WaterCalibrationPar['Monthly']['TimeLeftMax']=0.08
-            self.WaterCalibrationPar['Monthly']['StrideLeft']=0.005
-            self.WaterCalibrationPar['Monthly']['TimeRightMin']=0.005
-            self.WaterCalibrationPar['Monthly']['TimeRightMax']=0.08
-            self.WaterCalibrationPar['Monthly']['StrideRight']=0.005
-            self.WaterCalibrationPar['Monthly']['IntervalLeft_2']=0.5
-            SaveTag=1
-        if self.WaterCalibrationPar['Biweekly']=={}:
-            self.WaterCalibrationPar['Biweekly']['TimeLeftMin']=0.02
-            self.WaterCalibrationPar['Biweekly']['TimeLeftMax']=0.06
-            self.WaterCalibrationPar['Biweekly']['StrideLeft']=0.01
-            self.WaterCalibrationPar['Biweekly']['TimeRightMin']=0.02
-            self.WaterCalibrationPar['Biweekly']['TimeRightMax']=0.06
-            self.WaterCalibrationPar['Biweekly']['StrideRight']=0.01
-            self.WaterCalibrationPar['Biweekly']['IntervalLeft_2']=0.5
-            SaveTag=1
-        if SaveTag==1:
-            if not os.path.exists(os.path.dirname(self.MainWindow.WaterCalibrationParFiles)):
-                os.makedirs(os.path.dirname(self.MainWindow.WaterCalibrationParFiles))
-            with open(self.MainWindow.WaterCalibrationParFiles, "w") as file:
-                json.dump(self.WaterCalibrationPar, file,indent=4)
+            logging.info('loaded water calibration parameters')
+        else:
+            logging.warning('could not find water calibration parameters: {}'.format(self.MainWindow.WaterCalibrationParFiles))
+            self.WaterCalibrationPar = {}
 
+        # if no parameters are stored, store default parameters
+        if 'Full' not in self.WaterCalibrationPar:
+            self.WaterCalibrationPar['Full'] = {}
+            self.WaterCalibrationPar['Full']['TimeMin'] = 0.02
+            self.WaterCalibrationPar['Full']['TimeMax'] = 0.05
+            self.WaterCalibrationPar['Full']['Stride']  = 0.005
+            self.WaterCalibrationPar['Full']['Interval']= 0.1
+            self.WaterCalibrationPar['Full']['Cycle']   = 200
+
+        if 'Spot' not in self.WaterCalibrationPar:
+            self.WaterCalibrationPar['Spot'] = {}
+            self.WaterCalibrationPar['Spot']['Interval']= 0.1
+            self.WaterCalibrationPar['Spot']['Cycle']   = 200           
+       
+        self.SpotCycle = float(self.WaterCalibrationPar['Spot']['Cycle'])
+        self.SpotInterval = float(self.WaterCalibrationPar['Spot']['Interval'])
+
+        # Add other calibration types to drop down list, but only if they have all parameters
+        other_types = set(self.WaterCalibrationPar.keys()) - set(['Full','Spot'])
+        required = set(['TimeMin','TimeMax','Stride','Interval','Cycle'])
+        if len(other_types) > 0:
+            for t in other_types:
+                if required.issubset(set(self.WaterCalibrationPar[t].keys())):
+                    self.CalibrationType.addItem(t)
+                else:
+                    logging.info('Calibration Type "{}" missing required fields'.format(t))
+    
     def _StartCalibratingLeft(self):
         '''start the calibration loop of left valve'''
+
         self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            self.StartCalibratingLeft.setChecked(False)
+            self.StartCalibratingLeft.setStyleSheet("background-color : none")
+            self.Warning.setText('Calibration was terminated!')
+            self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+            self.StartCalibratingRight.setEnabled(True)
             return
+
         if self.StartCalibratingLeft.isChecked():
             # change button color
             self.StartCalibratingLeft.setStyleSheet("background-color : green;")
             QApplication.processEvents()
             # disable the right valve calibration
             self.StartCalibratingRight.setEnabled(False)
-            self.label_15.setEnabled(False)
-            self.label_14.setEnabled(False)
-            self.label_17.setEnabled(False)
-            self.label_18.setEnabled(False)
-            self.label_22.setEnabled(False)
-            self.label_16.setEnabled(False)
-            self.label_25.setEnabled(False)
-            self.TimeRightMin.setEnabled(False)
-            self.TimeRightMax.setEnabled(False)
-            self.StrideRight.setEnabled(False)
-            self.CycleCaliRight.setEnabled(False)
-            self.IntervalRight_2.setEnabled(False)
-            self.WeightAfterRight.setEnabled(False)
-            self.WeightBeforeRight.setEnabled(False)
-            self.label_27.setEnabled(False)
-            self.TubeWeightRight.setEnabled(False)
-            # check the continue button
-            self.Continue.setChecked(True)
-            self.Continue.setStyleSheet("background-color : green;")
         else:
-            self.StartCalibratingLeft.setStyleSheet("background-color : none")
-            self.Warning.setText('Calibration was terminated!')
-            self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
-        N=0
-        for current_valve_opentime in np.arange(float(self.TimeLeftMin.text()),float(self.TimeLeftMax.text())+0.0001,float(self.StrideLeft.text())):
-            N=N+1
-            if N==1:
-                # disable TubeWeightRight
-                self.TubeWeightLeft.setEnabled(False)
-                self.label_26.setEnabled(False)
-                if self.TubeWeightLeft.text()!='':
-                    self.WeightBeforeLeft.setText(self.TubeWeightLeft.text())
-                self.TubeWeightLeft.setText('')
+            self.StartCalibratingLeft.setChecked(True)
+            self._Finished()
+            return
+
+        # Get Calibration parameters
+        self.params = self.WaterCalibrationPar[self.CalibrationType.currentText()]
+
+        # Populate options for calibrations
+        self.left_opentimes = np.arange(
+            float(self.params['TimeMin']),
+            float(self.params['TimeMax'])+0.0001,
+            float(self.params['Stride'])
+            )
+        self.left_opentimes = [np.round(x,3) for x in self.left_opentimes]
+        self.LeftOpenTime.clear()
+        for t in self.left_opentimes:
+            self.LeftOpenTime.addItem('{0:.3f}'.format(t))
+        self.WeightBeforeLeft.setText('')
+        self.WeightAfterLeft.setText('')
+        self.Warning.setText('')
+
+        # Keep track of calibration status
+        self.calibrating_left = True
+        self.left_measurements = np.empty(np.shape(self.left_opentimes))
+        self.left_measurements[:] = False
+
+        # Start the first calibration
+        self._CalibrateLeftOne()
+
+    def _CalibrateLeftOne(self,repeat=False):
+        '''
+            Calibrate a single value
+        '''
+
+        # Determine what valve time we are measuring
+        if not repeat: 
+            if np.all(self.left_measurements):
+                self.Warning.setText('All measurements have been completed. Either press Repeat, or Finished')
+                return
+            next_index = np.where(self.left_measurements != True)[0][0]
+            self.LeftOpenTime.setCurrentIndex(next_index)
+        else:
+            next_index = self.LeftOpenTime.currentIndex()
+        logging.info('Calibrating left: {}'.format(self.left_opentimes[next_index])) 
+ 
+        # Shuffle weights of before/after
+        self.WeightBeforeLeft.setText(self.WeightAfterLeft.text())
+        self.WeightAfterLeft.setText('')
+
+        #Prompt for before weight, using field value as default
+        if self.WeightBeforeLeft.text() != '':
+             before_weight = float(self.WeightBeforeLeft.text()) 
+        else:
+             before_weight = 0.0 
+        before_weight, ok = QInputDialog().getDouble(
+             self,
+             'Box {}, Left'.format(self.MainWindow.box_letter),
+              "Before weight (g): ", 
+              before_weight,
+              0,1000,4)
+        if not ok:
+            # User cancels
+            self.Warning.setText('Press Continue, Repeat, or Finished')
+            return
+        self.WeightBeforeLeft.setText(str(before_weight))
+
+        # Perform this measurement
+        current_valve_opentime = self.left_opentimes[next_index]
+        for i in range(int(self.params['Cycle'])):
+            QApplication.processEvents()
+            if (not self.EmergencyStop.isChecked()):
+                self._CalibrationStatus(
+                    float(current_valve_opentime), 
+                    self.WeightBeforeLeft.text(),
+                    i,self.params['Cycle'], float(self.params['Interval'])
+                    )
+
+                # set the valve open time
+                self.MainWindow.Channel.LeftValue(float(current_valve_opentime)*1000) 
+                # open the valve
+                self.MainWindow.Channel3.ManualWater_Left(int(1))
+                # delay
+                time.sleep(current_valve_opentime+float(self.params['Interval']))
             else:
-                # enable TubeWeightRight
-                self.TubeWeightLeft.setEnabled(True)
-                self.label_26.setEnabled(True)
-            while 1:
-                if not self.StartCalibratingLeft.isChecked():
-                    break
-                if self.Continue.isChecked():
-                    # start the open/close/delay cycle
-                    for i in range(int(self.CycleCaliLeft.text())):
-                        QApplication.processEvents()
-                        while 1:
-                            QApplication.processEvents()
-                            if (not self.EmergencyStop.isChecked()) or (not self.StartCalibratingLeft.isChecked()):
-                                break
-                        if self.StartCalibratingLeft.isChecked():
-                            # print the current calibration value
-                            self.Warning.setText('You are calibrating Left valve: '+ str(round(float(current_valve_opentime),4))+'   Current cycle:'+str(i+1)+'/'+self.CycleCaliLeft.text())
-                            self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
-                            # set the valve open time
-                            self.MainWindow.Channel.LeftValue(float(current_valve_opentime)*1000) 
-                            # open the valve
-                            self.MainWindow.Channel3.ManualWater_Left(int(1))
-                            # delay
-                            time.sleep(current_valve_opentime+float(self.IntervalLeft_2.text()))
-                        else:
-                            break
-                self.Continue.setChecked(False)
-                self.Continue.setStyleSheet("background-color : none")
-                if i==range(int(self.CycleCaliLeft.text()))[-1]:
-                    self.Warning.setText('Finish calibrating left valve: '+ str(round(float(current_valve_opentime),4))+'\nPlease enter the \"weight after(mg)\" and click the \"Continue\" button to start calibrating the next value.\nOr enter a negative value to repeat the current calibration.')
-                self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
-                self.TubeWeightLeft.setEnabled(True)
-                self.label_26.setEnabled(True)
-                # Waiting for the continue button to be clicked
-                continuetag=1
-                while 1:
-                    QApplication.processEvents()
-                    if not self.StartCalibratingLeft.isChecked():
-                        break
-                    if self.Continue.isChecked():
-                        # save the calibration data after the current calibration is completed
-                        if i==range(int(self.CycleCaliLeft.text()))[-1]:
-                            # save the data
-                            valve='Left'
-                            valve_open_time=str(round(float(current_valve_opentime),4))
-                            valve_open_interval=str(round(float(self.IntervalLeft_2.text()),4))
-                            cycle=str(int(self.CycleCaliLeft.text()))
-                            if self.WeightAfterLeft.text()=='':
-                                self.Warning.setText('Please enter the measured \"weight after(mg)\" and click the continue button again!\nOr enter a negative value to repeat the current calibration.')
-                                continuetag=0
-                                self.Continue.setChecked(False)
-                                self.Continue.setStyleSheet("background-color : none")
-                            else:
-                                try:
-                                    continuetag=1
-                                    total_water=float(self.WeightAfterLeft.text())
-                                    tube_weight=self.WeightBeforeLeft.text()
-                                    if tube_weight=='':
-                                        tube_weight=0
-                                    else:
-                                        tube_weight=float(tube_weight)
-                                    if total_water>=0:
-                                        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water,tube_weight=tube_weight)
-                                    # clear the weight before/tube/weight after
-                                    self.WeightAfterLeft.setText('')
-                                    if self.TubeWeightLeft.text()=='':
-                                        self.WeightBeforeLeft.setText(str(total_water))
-                                    else:
-                                        self.WeightBeforeLeft.setText(self.TubeWeightLeft.text())
-                                    self.TubeWeightLeft.setText('')
-                                except Exception as e:
-                                    logging.error(str(e))
-                                    continuetag=0
-                                    self.Warning.setText('Please enter the correct weight after(mg)/weight before(mg) and click the continue button again!\nOr enter a negative value to repeat the current calibration.')
-                        if continuetag==1:
-                            break
-                # Repeat current calibration when negative value is entered
-                QApplication.processEvents()
-                try:
-                    if total_water=='' or total_water<=0:
-                        pass
-                    else:
-                        break
-                except Exception as e:
-                    logging.error(str(e))
-                    break
-        try: 
-            # calibration complete indication
-            if self.StartCalibratingLeft.isChecked() and current_valve_opentime==np.arange(float(self.TimeLeftMin.text()),float(self.TimeLeftMax.text())+0.0001,float(self.StrideLeft.text()))[-1]:
-                self.Warning.setText('Calibration is complete!')
-                self._UpdateFigure()
-        except Exception as e:
-            logging.error(str(e))
-            self.Warning.setText('Calibration is not complete! Parameters error!')
-            self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
-        # set the default valve open time
-        self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
-        # enable the right valve calibration
-        self.StartCalibratingRight.setEnabled(True)
-        self.label_15.setEnabled(True)
-        self.label_14.setEnabled(True)
-        self.label_17.setEnabled(True)
-        self.label_18.setEnabled(True)
-        self.label_22.setEnabled(True)
-        self.label_13.setEnabled(True)
-        self.label_16.setEnabled(True)
-        self.label_25.setEnabled(True)
-        self.TimeRightMin.setEnabled(True)
-        self.TimeRightMax.setEnabled(True)
-        self.StrideRight.setEnabled(True)
-        self.CycleCaliRight.setEnabled(True)
-        self.IntervalRight_2.setEnabled(True)
-        self.WeightAfterRight.setEnabled(True)
-        self.WeightBeforeRight.setEnabled(True) 
-        self.label_27.setEnabled(True)
-        self.TubeWeightRight.setEnabled(True)
-        # change the color to be normal
-        self.StartCalibratingLeft.setStyleSheet("background-color : none")
-        self.StartCalibratingLeft.setChecked(False)
+                self.Warning.setText('Please repeat measurement')
+                self.WeightBeforeLeft.setText('')
+                self.WeightAfterLeft.setText('')
+                self.Repeat.setStyleSheet("color: white;background-color : mediumorchid;")
+                self.Continue.setStyleSheet("color: black;background-color : none;")
+                self.EmergencyStop.setChecked(False)
+                self.EmergencyStop.setStyleSheet("background-color : none;")
+                return
+
+        # Prompt for weight
+        final_tube_weight = 0.0
+        final_tube_weight, ok = QInputDialog().getDouble(
+            self,
+            'Box {}, Left'.format(self.MainWindow.box_letter),
+            "Weight after (g): ", 
+            final_tube_weight,
+            0, 1000, 4)
+        if not ok:
+            self.Warning.setText('Please repeat measurement')
+            self.WeightBeforeLeft.setText('')
+            self.WeightAfterLeft.setText('')
+            self.Repeat.setStyleSheet("color: white;background-color : mediumorchid;")
+            self.Continue.setStyleSheet("color: black;background-color : none;")
+            return
+        self.WeightAfterLeft.setText(str(final_tube_weight))
+
+        # Mark measurement as complete, save data, and update figure
+        self.left_measurements[next_index] = True
+        self._Save(
+            valve='Left',
+            valve_open_time=str(current_valve_opentime),
+            valve_open_interval=str(self.params['Interval']),
+            cycle=str(self.params['Cycle']),
+            total_water=float(self.WeightAfterLeft.text()),
+            tube_weight=float(self.WeightBeforeLeft.text())
+            )
+        self._UpdateFigure()
+
+        # Direct user for next steps
+        if np.all(self.left_measurements):
+            self.Warning.setText('Measurements recorded for all values. Please press Repeat, or Finished')   
+            self.Repeat.setStyleSheet("color: black;background-color : none;")
+            self.Finished.setStyleSheet("color: white;background-color : mediumorchid;")
+        else:
+            self.Warning.setText('Please press Continue, Repeat, or Finished')
+            self.Continue.setStyleSheet("color: white;background-color : mediumorchid;")
+            self.Repeat.setStyleSheet("color: black;background-color : none;")
+
     def _StartCalibratingRight(self):
         '''start the calibration loop of right valve'''
+
         self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            self.StartCalibratingRight.setChecked(False)
+            self.StartCalibratingRight.setStyleSheet("background-color : none")
+            self.Warning.setText('Calibration was terminated!')
+            self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+            self.StartCalibratingRight.setEnabled(True)
             return
+
         if self.StartCalibratingRight.isChecked():
             # change button color
             self.StartCalibratingRight.setStyleSheet("background-color : green;")
             QApplication.processEvents()
-            # disable the left valve calibration
-            self.StartCalibratingLeft.setEnabled(False)
-            self.label_9.setEnabled(False)
-            self.label_10.setEnabled(False)
-            self.label_11.setEnabled(False)
-            self.label_12.setEnabled(False)
-            self.label_23.setEnabled(False)
-            self.label_13.setEnabled(False)
-            self.label_24.setEnabled(False)
-            self.label_26.setEnabled(False)
-            self.TimeLeftMin.setEnabled(False)
-            self.TimeLeftMax.setEnabled(False)
-            self.StrideLeft.setEnabled(False)
-            self.CycleCaliLeft.setEnabled(False)
-            self.IntervalLeft_2.setEnabled(False)
-            self.WeightAfterLeft.setEnabled(False)
-            self.WeightBeforeLeft.setEnabled(False)
-            self.TubeWeightLeft.setEnabled(False)
-            # check the continue button
-            self.Continue.setChecked(True)
-            self.Continue.setStyleSheet("background-color : green;")
+            # disable the right valve calibration
+            self.StartCalibratingRight.setEnabled(False)
         else:
-            self.StartCalibratingRight.setStyleSheet("background-color : none")
-            self.Warning.setText('Calibration was terminated!')
-            self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
-        N=0
-        for current_valve_opentime in np.arange(float(self.TimeRightMin.text()),float(self.TimeRightMax.text())+0.0001,float(self.StrideRight.text())):
-            N=N+1
-            if N==1:
-                # disable TubeWeightRight
-                self.TubeWeightRight.setEnabled(False)
-                self.label_27.setEnabled(False)
-                if self.TubeWeightRight.text()!='':
-                    self.WeightBeforeRight.setText(self.TubeWeightRight.text())
-                self.TubeWeightRight.setText('')
-            else:
-                # enable TubeWeightRight
-                self.TubeWeightRight.setEnabled(True)
-                self.label_27.setEnabled(True)
-            while 1:
-                QApplication.processEvents()
-                if not self.StartCalibratingRight.isChecked():
-                    break
-                if self.Continue.isChecked():
-                    # start the open/close/delay cycle
-                    for i in range(int(self.CycleCaliRight.text())):
-                        QApplication.processEvents()
-                        while 1:
-                            QApplication.processEvents()
-                            if (not self.EmergencyStop.isChecked()) or (not self.StartCalibratingRight.isChecked()):
-                                break
-                        if self.StartCalibratingRight.isChecked():
-                            # print the current calibration value
-                            self.Warning.setText('You are calibrating Right valve: '+ str(round(float(current_valve_opentime),4))+'   Current cycle:'+str(i+1)+'/'+self.CycleCaliRight.text())
-                            self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
-                            # set the valve open time
-                            self.MainWindow.Channel.RightValue(float(current_valve_opentime)*1000) 
-                            # open the valve
-                            self.MainWindow.Channel3.ManualWater_Right(int(1))
-                            # delay
-                            time.sleep(current_valve_opentime+float(self.IntervalRight_2.text()))
-                        else:
-                            break
-                self.Continue.setChecked(False)
-                self.Continue.setStyleSheet("background-color : none")
-                if i==range(int(self.CycleCaliRight.text()))[-1]:
-                    self.Warning.setText('Finish calibrating Right valve: '+ str(round(float(current_valve_opentime),4))+'\nPlease enter the \"weight after(mg)\" and click the \"Continue\" button to start calibrating the next value.\nOr enter a negative value to repeat the current calibration.')
-                    self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
-                self.TubeWeightRight.setEnabled(True)
-                self.label_27.setEnabled(True)
-                # Waiting for the continue button to be clicked
-                continuetag=1
-                while 1:
-                    QApplication.processEvents()
-                    if not self.StartCalibratingRight.isChecked():
-                        break
-                    if self.Continue.isChecked():
-                        # save the calibration data after the current calibration is completed
-                        if i==range(int(self.CycleCaliRight.text()))[-1]:
-                            # save the data
-                            valve='Right'
-                            valve_open_time=str(round(float(current_valve_opentime),4))
-                            valve_open_interval=str(round(float(self.IntervalRight_2.text()),4))
-                            cycle=str(int(self.CycleCaliRight.text()))
-                            if self.WeightAfterRight.text()=='':
-                                self.Warning.setText('Please enter the measured \"weight after(mg)\" and click the continue button again!\nOr enter a negative value to repeat the current calibration.')
-                                continuetag=0
-                                self.Continue.setChecked(False)
-                                self.Continue.setStyleSheet("background-color : none")
-                            else:
-                                try:
-                                    continuetag=1
-                                    total_water=float(self.WeightAfterRight.text())
-                                    tube_weight=self.WeightBeforeRight.text()
-                                    if tube_weight=='':
-                                        tube_weight=0
-                                    else:
-                                        tube_weight=float(tube_weight)
-                                    if total_water>=0:
-                                        self._Save(valve=valve,valve_open_time=valve_open_time,valve_open_interval=valve_open_interval,cycle=cycle,total_water=total_water,tube_weight=tube_weight)
-                                    # clear the weight before/tube/weight after
-                                    self.WeightAfterRight.setText('')
-                                    if self.TubeWeightRight.text()=='':
-                                        self.WeightBeforeRight.setText(str(total_water))
-                                    else:
-                                        self.WeightBeforeRight.setText(self.TubeWeightRight.text())
-                                    self.TubeWeightRight.setText('')
-                                except Exception as e:
-                                    logging.error(str(e))
-                                    continuetag=0
-                                    self.Warning.setText('Please enter the correct weight after(mg)/tube weight(mg) and click the continue button again!\nOr enter a negative value to repeat the current calibration.')
-                        if continuetag==1:
-                            break
-                # Repeat current calibration when negative value is entered
-                QApplication.processEvents()
-                try:
-                    if total_water=='' or total_water<=0:
-                        pass
-                    else:
-                        break
-                except Exception as e:
-                    logging.error(str(e))
-                    break
-        try: 
-            # calibration complete indication
-            if self.StartCalibratingRight.isChecked() and current_valve_opentime==np.arange(float(self.TimeRightMin.text()),float(self.TimeRightMax.text())+0.0001,float(self.StrideRight.text()))[-1]:
-                self.Warning.setText('Calibration is complete!')
-                self._UpdateFigure()
-        except Exception as e:
-            logging.error(str(e))
-            self.Warning.setText('Calibration is not complete! Parameters error!')
-            self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+            self.StartCalibratingRight.setChecked(True)
+            self._Finished()
+            return
 
-        # set the default valve open time
-        self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
-        # enable the left valve calibration
-        self.StartCalibratingLeft.setEnabled(True)
-        self.label_9.setEnabled(True)
-        self.label_10.setEnabled(True)
-        self.label_11.setEnabled(True)
-        self.label_12.setEnabled(True)
-        self.label_23.setEnabled(True)
-        self.label_13.setEnabled(True)
-        self.label_24.setEnabled(True)
-        self.label_26.setEnabled(True)
-        self.TimeLeftMin.setEnabled(True)
-        self.TimeLeftMax.setEnabled(True)
-        self.StrideLeft.setEnabled(True)
-        self.CycleCaliLeft.setEnabled(True)
-        self.IntervalLeft_2.setEnabled(True)
-        self.WeightAfterLeft.setEnabled(True) 
-        self.WeightBeforeLeft.setEnabled(True)
-        self.TubeWeightLeft.setEnabled(True)
-        # change the color to be normal
-        self.StartCalibratingRight.setStyleSheet("background-color : none")
-        self.StartCalibratingRight.setChecked(False)
-    def _Save(self,valve,valve_open_time,valve_open_interval,cycle,total_water,tube_weight):
+        # Get Calibration parameters
+        self.params = self.WaterCalibrationPar[self.CalibrationType.currentText()]
+
+        # Populate options for calibrations
+        self.right_opentimes = np.arange(
+            float(self.params['TimeMin']),
+            float(self.params['TimeMax'])+0.0001,
+            float(self.params['Stride'])
+            )
+        self.right_opentimes = [np.round(x,3) for x in self.right_opentimes]
+        self.RightOpenTime.clear()
+        for t in self.right_opentimes:
+            self.RightOpenTime.addItem('{0:.3f}'.format(t))
+        self.WeightBeforeRight.setText('')
+        self.WeightAfterRight.setText('')
+        self.Warning.setText('')
+
+        # Keep track of calibration status
+        self.calibrating_right = True
+        self.right_measurements = np.empty(np.shape(self.right_opentimes))
+        self.right_measurements[:] = False
+
+        # Start the first calibration
+        self._CalibrateRightOne()
+
+    def _CalibrateRightOne(self,repeat=False):
+        '''
+            Calibrate a single value
+        '''
+
+        # Determine what valve time we are measuring
+        if not repeat: 
+            if np.all(self.right_measurements):
+                self.Warning.setText('All measurements have been completed. Either press Repeat, or Finished')
+                return
+            next_index = np.where(self.right_measurements != True)[0][0]
+            self.RightOpenTime.setCurrentIndex(next_index)
+        else:
+            next_index = self.RightOpenTime.currentIndex()
+        logging.info('Calibrating right: {}'.format(self.right_opentimes[next_index])) 
+ 
+        # Shuffle weights of before/after
+        self.WeightBeforeRight.setText(self.WeightAfterRight.text())
+        self.WeightAfterRight.setText('')
+
+        #Prompt for before weight, using field value as default
+        if self.WeightBeforeRight.text() != '':
+             before_weight = float(self.WeightBeforeRight.text()) 
+        else:
+             before_weight = 0.0 
+        before_weight, ok = QInputDialog().getDouble(
+             self,
+             'Box {}, Right'.format(self.MainWindow.box_letter),
+              "Before weight (g): ", 
+              before_weight,
+              0,1000,4)
+        if not ok:
+            # User cancels
+            self.Warning.setText('Press Continue, Repeat, or Finished')
+            return
+        self.WeightBeforeRight.setText(str(before_weight))
+
+        # Perform this measurement
+        current_valve_opentime = self.right_opentimes[next_index]
+        for i in range(int(self.params['Cycle'])):
+            QApplication.processEvents()
+            if (not self.EmergencyStop.isChecked()):
+                self._CalibrationStatus(
+                    float(current_valve_opentime), 
+                    self.WeightBeforeRight.text(),
+                    i,self.params['Cycle'], float(self.params['Interval'])
+                    )
+
+                # set the valve open time
+                self.MainWindow.Channel.RightValue(float(current_valve_opentime)*1000) 
+                # open the valve
+                self.MainWindow.Channel3.ManualWater_Right(int(1))
+                # delay
+                time.sleep(current_valve_opentime+float(self.params['Interval']))
+            else:
+                self.Warning.setText('Please repeat measurement')
+                self.WeightBeforeRight.setText('')
+                self.WeightAfterRight.setText('')
+                self.Repeat.setStyleSheet("color: white;background-color : mediumorchid;")
+                self.Continue.setStyleSheet("color: black;background-color : none;")
+                self.EmergencyStop.setChecked(False)
+                self.EmergencyStop.setStyleSheet("background-color : none;")
+                return
+
+        # Prompt for weight
+        final_tube_weight = 0.0
+        final_tube_weight, ok = QInputDialog().getDouble(
+            self,
+            'Box {}, Right'.format(self.MainWindow.box_letter),
+            "Weight after (g): ", 
+            final_tube_weight,
+            0, 1000, 4)
+        if not ok:
+            self.Warning.setText('Please repeat measurement')
+            self.WeightBeforeRight.setText('')
+            self.WeightAfterRight.setText('')
+            self.Repeat.setStyleSheet("color: white;background-color : mediumorchid;")
+            self.Continue.setStyleSheet("color: black;background-color : none;")
+            return
+        self.WeightAfterRight.setText(str(final_tube_weight))
+
+        # Mark measurement as complete, save data, and update figure
+        self.right_measurements[next_index] = True
+        self._Save(
+            valve='Right',
+            valve_open_time=str(current_valve_opentime),
+            valve_open_interval=str(self.params['Interval']),
+            cycle=str(self.params['Cycle']),
+            total_water=float(self.WeightAfterRight.text()),
+            tube_weight=float(self.WeightBeforeRight.text())
+            )
+        self._UpdateFigure()
+
+        # Direct user for next steps
+        if np.all(self.right_measurements):
+            self.Warning.setText('Measurements recorded for all values. Please press Repeat, or Finished')   
+            self.Repeat.setStyleSheet("color: black;background-color : none;")
+        else:
+            self.Warning.setText('Please press Continue, Repeat, or Finished')
+            self.Continue.setStyleSheet("color: white;background-color : mediumorchid;")
+            self.Repeat.setStyleSheet("color: black;background-color : none;") 
+        
+    def _CalibrationStatus(self,opentime, weight_before, i, cycle, interval):
+        self.Warning.setText(
+            'Measuring left valve: {}s'.format(opentime) + \
+            '\nEmpty tube weight: {}g'.format(weight_before) + \
+            '\nCurrent cycle: '+str(i+1)+'/{}'.format(int(cycle)) + \
+            '\nTime remaining: {}'.format(self._TimeRemaining(
+                i,cycle,opentime,interval))
+            )
+        self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+
+    def _Save(self,valve,valve_open_time,valve_open_interval,cycle,total_water,tube_weight,append=False):
         '''save the calibrated result and update the figure'''
         if total_water=='' or tube_weight=='':
             return
@@ -815,11 +832,11 @@ class WaterCalibrationDialog(QDialog):
         if valve_open_interval not in WaterCalibrationResults[date_str][valve][valve_open_time]:
             WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval] = {}
         if cycle not in WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval]:
-            WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle] = {}
-        if WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle]=={}:
-            WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle]=[total_water]
+            WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle] = []
+        if append:
+            WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle].append(np.round(total_water,1))
         else:
-            WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle].append(total_water)
+            WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle]=[np.round(total_water,1)]
         self.WaterCalibrationResults=WaterCalibrationResults.copy()
         # save to the json file
         if not os.path.exists(os.path.dirname(self.MainWindow.WaterCalibrationFiles)):
@@ -828,6 +845,7 @@ class WaterCalibrationDialog(QDialog):
             json.dump(WaterCalibrationResults, file,indent=4)
         # update the figure
         self._UpdateFigure()
+
     def _UpdateFigure(self):
         '''plot the calibration result'''
         if self.ToInitializeVisual==1: # only run once
@@ -890,56 +908,283 @@ class WaterCalibrationDialog(QDialog):
             # set the default valve open time
             self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
 
-    def _OpenLeft(self):    
+    def _TimeRemaining(self,i, cycles, opentime, interval):
+        total_seconds = (cycles-i)*(opentime+interval)
+        minutes = int(np.floor(total_seconds/60))
+        seconds = int(np.ceil(np.mod(total_seconds,60)))
+        return '{}:{:02}'.format(minutes, seconds)
+    
+    def _VolumeToTime(self,volume,valve):
+        # x = (y-b)/m 
+        if hasattr(self.MainWindow, 'latest_fitting'):
+            fit = self.MainWindow.latest_fitting[valve]
+            m = fit[0]
+            b = fit[1] 
+        else:
+            m = 1
+            b = 0
+        return (volume-b)/m
+
+    def _TimeToVolume(self,time):
+        # y= mx +b        
+        if hasattr(self.MainWindow, 'latest_fitting'):
+            print(self.MainWindow.latest_fitting)
+        else:
+            m = 1
+            b = 0
+        return time*m+b
+
+    def _SpotCheckLeft(self):    
         '''Calibration of left valve in a different thread'''
+
         self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            self.SpotCheckLeft.setChecked(False)        
+            self.SpotCheckLeft.setStyleSheet("background-color : none;")
+            self.SaveLeft.setStyleSheet("color: black;background-color : none;")
+            self.TotalWaterSingleLeft.setText('')
+            self.SpotCheckPreWeightLeft.setText('')
             return
-        if self.OpenLeft.isChecked():
-            # change button color
-            self.OpenLeft.setStyleSheet("background-color : green;")
-        else:
-            self.OpenLeft.setStyleSheet("background-color : none")
+
+        if self.SpotCheckLeft.isChecked():
+            logging.info('starting spot check left')
+            self.SpotCheckLeft.setStyleSheet("background-color : green;")
+    
+            # Get empty tube weight, using field value as default
+            if self.SpotCheckPreWeightLeft.text() != '':
+                empty_tube_weight = float(self.SpotCheckPreWeightLeft.text()) 
+            else:
+                empty_tube_weight = 0.0 
+            empty_tube_weight, ok = QInputDialog().getDouble(
+                self,
+                'Box {}, Left'.format(self.MainWindow.box_letter),
+                "Empty tube weight (g): ", 
+                empty_tube_weight,
+                0,1000,4)
+            if not ok:
+                # User cancels
+                logging.warning('user cancelled spot calibration')
+                self.SpotCheckLeft.setStyleSheet("background-color : none;")
+                self.SpotCheckLeft.setChecked(False)        
+                self.Warning.setText('Spot check left cancelled')
+                self.SpotCheckPreWeightLeft.setText('')
+                self.TotalWaterSingleLeft.setText('')
+                self.SaveLeft.setStyleSheet("color: black;background-color : none;")
+                return
+            self.SpotCheckPreWeightLeft.setText(str(empty_tube_weight))
+
+        # Determine what open time to use
+        self.SpotLeftFinished=0
+        self.SpotLeftOpenTime = self._VolumeToTime(float(self.SpotLeftVolume.text()),'Left')
+        self.SpotLeftOpenTime = np.round(self.SpotLeftOpenTime,4)
+        logging.info('Using a calibration spot check of {}s to deliver {}uL'.format(self.SpotLeftOpenTime,self.SpotLeftVolume.text()))
+
         # start the open/close/delay cycle
-        for i in range(int(self.CycleLeft.text())):
+        for i in range(int(self.SpotCycle)):
             QApplication.processEvents()
-            if self.OpenLeft.isChecked():
+            if self.SpotCheckLeft.isChecked() and (not self.EmergencyStop.isChecked()):
+                self.Warning.setText(
+                    'Measuring left valve: {}uL'.format(self.SpotLeftVolume.text()) + \
+                    '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
+                    '\nCurrent cycle: '+str(i+1)+'/{}'.format(int(self.SpotCycle)) + \
+                    '\nTime remaining: {}'.format(self._TimeRemaining(
+                        i,self.SpotCycle,self.SpotLeftOpenTime,self.SpotInterval))
+                    )
+                self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+
                 # set the valve open time
-                self.MainWindow.Channel.LeftValue(float(self.OpenLeftTime.text())*1000) 
+                self.MainWindow.Channel.LeftValue(float(self.SpotLeftOpenTime)*1000) 
                 # open the valve
                 self.MainWindow.Channel3.ManualWater_Left(int(1))
                 # delay
-                time.sleep(float(self.OpenLeftTime.text())+float(self.IntervalLeft.text()))
+                time.sleep(self.SpotLeftOpenTime+self.SpotInterval)
             else:
-                break
-        self.OpenLeft.setChecked(False)        
+                self.Warning.setText('Spot check left cancelled')
+                self.SpotCheckPreWeightLeft.setText('')
+                self.TotalWaterSingleLeft.setText('')
+                self.SaveLeft.setStyleSheet("color: black;background-color : none;")
+                self.EmergencyStop.setChecked(False)
+                self.EmergencyStop.setStyleSheet("background-color : none;")
+                self.SpotCheckLeft.setChecked(False)        
+                self.SpotCheckLeft.setStyleSheet("background-color : none")
+                return
+
+        # Get final value, using field as default
+        if self.TotalWaterSingleLeft.text() != '':
+            final_tube_weight = float(self.TotalWaterSingleLeft.text()) 
+        else:
+            final_tube_weight = 0.0
+        final_tube_weight, ok = QInputDialog().getDouble(
+            self,
+            'Box {}, Left'.format(self.MainWindow.box_letter),
+            "Final tube weight (g): ", 
+            final_tube_weight,
+            0, 1000, 4)
+        self.TotalWaterSingleLeft.setText(str(final_tube_weight))
+
+        #Determine result
+        result = (final_tube_weight - empty_tube_weight)/int(self.SpotCycle)*1000
+        error = result - float(self.SpotLeftVolume.text())
+        error = np.round(error,4)
+        self.Warning.setText(
+            'Measuring left valve: {}uL'.format(self.SpotLeftVolume.text()) + \
+            '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
+            '\nFinal tube weight: {}g'.format(final_tube_weight) + \
+            '\nAvg. error from target: {}uL'.format(error)
+            )        
+        TOLERANCE = float(self.SpotLeftVolume.text())/10
+        if np.abs(error) > TOLERANCE:
+            reply = QMessageBox.critical(self, 'Spot check left', 
+                'Result ( {}uL ) is outside expected tolerance. \nPlease confirm you entered information correctly, then press save.'.format(np.round(result,2)), 
+                QMessageBox.Ok)
+            logging.error('Water calibration spot check exceeds tolerance: {}'.format(error))  
+            self.SaveLeft.setStyleSheet("color: white;background-color : mediumorchid;")
+            self.Warning.setText(
+                'Measuring left valve: {}uL'.format(self.SpotLeftVolume.text()) + \
+                '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
+                '\nFinal tube weight: {}g'.format(final_tube_weight) + \
+                '\nAvg. error from target: {}uL'.format(error)
+                )
+        else:
+            self.Warning.setText(
+                'Measuring left valve: {}uL'.format(self.SpotLeftVolume.text()) + \
+                '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
+                '\nFinal tube weight: {}g'.format(final_tube_weight) + \
+                '\nAvg. error from target: {}uL'.format(error) + \
+                '\nCalibration saved'
+                )
+            self._SaveLeft()
+
+
         # set the default valve open time
         self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
-    def _OpenRight(self):
-        '''Calibration of right valve'''
+
+        self.SpotCheckLeft.setChecked(False)        
+        self.SpotCheckLeft.setStyleSheet("background-color : none")
+        logging.info('Done with spot check Left')
+
+    def _SpotCheckRight(self):
+        '''Calibration of right valve in a different thread'''
+
         self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            self.SpotCheckRight.setChecked(False)        
+            self.SpotCheckRight.setStyleSheet("background-color : none;")
+            self.SaveRight.setStyleSheet("color: black;background-color : none;")
+            self.TotalWaterSingleRight.setText('')
+            self.SpotCheckPreWeightRight.setText('')
             return
-        if self.OpenRight.isChecked():
-            # change button color
-            self.OpenRight.setStyleSheet("background-color : green;")
-        else:
-            self.OpenRight.setStyleSheet("background-color : none")
+
+        if self.SpotCheckRight.isChecked():
+            logging.info('starting spot check right')
+            self.SpotCheckRight.setStyleSheet("background-color : green;")
+    
+            # Get empty tube weight, using field value as default
+            if self.SpotCheckPreWeightRight.text() != '':
+                empty_tube_weight = float(self.SpotCheckPreWeightRight.text()) 
+            else:
+                empty_tube_weight = 0.0 
+            empty_tube_weight, ok = QInputDialog().getDouble(
+                self,
+                'Box {}, Right'.format(self.MainWindow.box_letter),
+                "Empty tube weight (g): ", 
+                empty_tube_weight,
+                0,1000,4)
+            if not ok:
+                # User cancels
+                logging.warning('user cancelled spot calibration')
+                self.SpotCheckRight.setStyleSheet("background-color : none;")
+                self.SpotCheckRight.setChecked(False)        
+                self.Warning.setText('Spot check right cancelled')
+                self.SpotCheckPreWeightRight.setText('')
+                self.TotalWaterSingleRight.setText('')
+                self.SaveRight.setStyleSheet("color: black;background-color : none;")
+                return
+            self.SpotCheckPreWeightRight.setText(str(empty_tube_weight))
+
+        # Determine what open time to use
+        self.SpotRightOpenTime = self._VolumeToTime(float(self.SpotRightVolume.text()),'Right')
+        self.SpotRightOpenTime = np.round(self.SpotRightOpenTime,4)
+        logging.info('Using a calibration spot check of {}s to deliver {}uL'.format(self.SpotRightOpenTime,self.SpotRightVolume.text()))
+
         # start the open/close/delay cycle
-        for i in range(int(self.CycleRight.text())):
+        for i in range(int(self.SpotCycle)):
             QApplication.processEvents()
-            if self.OpenRight.isChecked():
+            if self.SpotCheckRight.isChecked() and (not self.EmergencyStop.isChecked()):
+                self.Warning.setText(
+                    'Measuring right valve: {}uL'.format(self.SpotRightVolume.text()) + \
+                    '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
+                    '\nCurrent cycle: '+str(i+1)+'/{}'.format(int(self.SpotCycle)) + \
+                    '\nTime remaining: {}'.format(self._TimeRemaining(
+                        i,self.SpotCycle,self.SpotRightOpenTime,self.SpotInterval))
+                    )
+                self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+
                 # set the valve open time
-                self.MainWindow.Channel.RightValue(float(self.OpenRightTime.text())*1000) 
+                self.MainWindow.Channel.RightValue(float(self.SpotRightOpenTime)*1000) 
                 # open the valve
                 self.MainWindow.Channel3.ManualWater_Right(int(1))
                 # delay
-                time.sleep(float(self.OpenRightTime.text())+float(self.IntervalRight.text()))
+                time.sleep(self.SpotRightOpenTime+self.SpotInterval)
             else:
-                break
-        self.OpenRight.setChecked(False)  
+                self.Warning.setText('Spot check right cancelled')
+                self.SpotCheckPreWeightRight.setText('')
+                self.TotalWaterSingleRight.setText('')
+                self.SaveRight.setStyleSheet("color: black;background-color : none;")
+                self.EmergencyStop.setChecked(False)
+                self.EmergencyStop.setStyleSheet("background-color : none;")
+                self.SpotCheckRight.setChecked(False)        
+                self.SpotCheckRight.setStyleSheet("background-color : none")
+                return
+
+        # Get final value, using field as default
+        if self.TotalWaterSingleRight.text() != '':
+            final_tube_weight = float(self.TotalWaterSingleRight.text()) 
+        else:
+            final_tube_weight = 0.0
+        final_tube_weight, ok = QInputDialog().getDouble(
+            self,
+            'Box {}, Right'.format(self.MainWindow.box_letter),
+            "Final tube weight (g): ", 
+            final_tube_weight,
+            0, 1000, 4)
+        self.TotalWaterSingleRight.setText(str(final_tube_weight))
+
+        #Determine result
+        result = (final_tube_weight - empty_tube_weight)/int(self.SpotCycle)*1000
+        error = result - float(self.SpotRightVolume.text())
+        error = np.round(error,4)
+        
+        TOLERANCE = float(self.SpotRightVolume.text())/10
+        if np.abs(error) > TOLERANCE:
+            reply = QMessageBox.critical(self, 'Spot check right', 
+                'Result ( {}uL ) is outside expected tolerance. \nPlease confirm you entered information correctly, then press save.'.format(np.round(result,2)), 
+                QMessageBox.Ok)
+            logging.error('Water calibration spot check exceeds tolerance: {}'.format(error))  
+            self.SaveRight.setStyleSheet("color: white;background-color : mediumorchid;")
+            self.Warning.setText(
+                'Measuring right valve: {}uL'.format(self.SpotRightVolume.text()) + \
+                '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
+                '\nFinal tube weight: {}g'.format(final_tube_weight) + \
+                '\nAvg. error from target: {}uL'.format(error)
+                )
+        else:
+            self.Warning.setText(
+                'Measuring right valve: {}uL'.format(self.SpotRightVolume.text()) + \
+                '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
+                '\nFinal tube weight: {}g'.format(final_tube_weight) + \
+                '\nAvg. error from target: {}uL'.format(error) + \
+                '\nCalibration saved'
+                )
+            self._SaveRight()
+
         # set the default valve open time
         self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
+
+        self.SpotCheckRight.setChecked(False)        
+        self.SpotCheckRight.setStyleSheet("background-color : none")
+        logging.info('Done with spot check Right')
+        
 
 class CameraDialog(QDialog):
     def __init__(self, MainWindow, parent=None):
@@ -948,6 +1193,8 @@ class CameraDialog(QDialog):
         
         self.MainWindow=MainWindow
         self._connectSignalsSlots()
+        self.camera_start_time=''
+        self.camera_stop_time=''
     def _connectSignalsSlots(self):
         self.StartCamera.clicked.connect(self._StartCamera)
         self.ClearTemporaryVideo.clicked.connect(self._ClearTemporaryVideo)
@@ -1067,6 +1314,7 @@ class CameraDialog(QDialog):
             # start the video triggers
             self.MainWindow.Channel.CameraControl(int(1))
             time.sleep(5)
+            self.camera_start_time = str(datetime.now())
             self.MainWindow.WarningLabelCamera.setText('Camera is on!')
             self.MainWindow.WarningLabelCamera.setStyleSheet(self.MainWindow.default_warning_color)
             self.WarningLabelCameraOn.setText('Camera is on!')
@@ -1077,7 +1325,8 @@ class CameraDialog(QDialog):
         else:
             self.StartCamera.setStyleSheet("background-color : none")
             self.MainWindow.Channel.CameraControl(int(2))
-            time.sleep(2)
+            self.camera_stop_time = str(datetime.now())
+            time.sleep(5)
             self.MainWindow.WarningLabelCamera.setText('Camera is off!')
             self.MainWindow.WarningLabelCamera.setStyleSheet(self.MainWindow.default_warning_color)
             self.WarningLabelCameraOn.setText('Camera is off!')
@@ -1139,18 +1388,6 @@ def is_file_in_use(file_path):
             return False
         except OSError as e:
             return True
-
-#class ManipulatorDialog(QDialog):
-#    def __init__(self, MainWindow, parent=None):
-#        super().__init__(parent)
-#        uic.loadUi('Manipulator.ui', self)
-
-#class MotorStageDialog(QDialog):
-#    def __init__(self, MainWindow, parent=None):
-#        super().__init__(parent)
-#        uic.loadUi('MotorStage.ui', self)
-#        
-#        self.MainWindow=MainWindow
 
 class LaserCalibrationDialog(QDialog):
     def __init__(self, MainWindow, parent=None):
@@ -1688,6 +1925,383 @@ def initialize_dic(dic_name,key_list=[]):
     initialize_dic(dic_name[key],key_list=key_list_new)
     return dic_name
 
+
+class MetadataDialog(QDialog):
+    '''For adding metadata to the session'''
+    def __init__(self, MainWindow, parent=None):
+        super().__init__(parent)
+        uic.loadUi('MetaData.ui', self)
+        self.MainWindow = MainWindow
+        self._connectSignalsSlots()
+        self.meta_data = {}
+        self.meta_data['rig_metadata'] = {}
+        self.meta_data['session_metadata'] = {}
+        self.meta_data['rig_metadata_file'] = ''
+        self.GoCueDecibel.setText(str(self.MainWindow.Other_go_cue_decibel))
+        self.LickSpoutDistance.setText(str(self.MainWindow.Other_lick_spout_distance))
+        self._get_basics()
+        self._show_project_names()
+
+    def _connectSignalsSlots(self):
+        self.SelectRigMetadata.clicked.connect(lambda: self._SelectRigMetadata(rig_metadata_file=None))
+        self.EphysProbes.currentIndexChanged.connect(self._show_angles)
+        self.StickMicroscopes.currentIndexChanged.connect(self._show_angles)
+        self.ArcAngle.textChanged.connect(self._save_configuration)
+        self.ModuleAngle.textChanged.connect(self._save_configuration)
+        self.ProbeTarget.textChanged.connect(self._save_configuration)
+        self.RotationAngle.textChanged.connect(self._save_configuration)
+        self.ManipulatorX.textChanged.connect(self._save_configuration)
+        self.ManipulatorY.textChanged.connect(self._save_configuration)
+        self.ManipulatorZ.textChanged.connect(self._save_configuration)
+        self.SaveMeta.clicked.connect(self._save_metadata)
+        self.LoadMeta.clicked.connect(self._load_metadata)
+        self.RigMetadataFile.textChanged.connect(self._removing_warning)
+        self.ClearMetadata.clicked.connect(self._clear_metadata)
+        self.Stick_ArcAngle.textChanged.connect(self._save_configuration)
+        self.Stick_ModuleAngle.textChanged.connect(self._save_configuration)
+        self.Stick_RotationAngle.textChanged.connect(self._save_configuration)
+        self.ProjectName.currentIndexChanged.connect(self._show_project_info)
+        self.GoCueDecibel.textChanged.connect(self._save_go_cue_decibel)
+        self.LickSpoutDistance.textChanged.connect(self._save_lick_spout_distance)
+
+    def _set_reference(self, reference):
+        '''set the reference'''
+        self.reference = reference
+        self.LickSpoutReferenceX.setText(str(reference[0]))
+        self.LickSpoutReferenceY.setText(str(reference[1]))
+        self.LickSpoutReferenceZ.setText(str(reference[2]))
+
+    def _show_project_info(self):
+        '''show the project information based on current project name'''
+        current_project_index = self.ProjectName.currentIndex()
+        self.current_project_name=self.ProjectName.currentText()
+        self.funding_institution=self.project_info['Funding Institution'][current_project_index]
+        self.grant_number=self.project_info['Grant Number'][current_project_index]
+        self.investigators=self.project_info['Investigators'][current_project_index]
+        self.fundee=self.project_info['Fundee'][current_project_index]
+        self.FundingSource.setText(str(self.funding_institution))
+        self.Investigators.setText(str(self.investigators))
+        self.GrantNumber.setText(str(self.grant_number))
+        self.Fundee.setText(str(self.fundee))
+
+    def _save_lick_spout_distance(self):
+        '''save the lick spout distance'''
+        self.MainWindow.Other_lick_spout_distance=self.LickSpoutDistance.text()
+
+    def _save_go_cue_decibel(self):
+        '''save the go cue decibel'''
+        self.MainWindow.Other_go_cue_decibel=self.GoCueDecibel.text()
+
+    def _show_project_names(self):
+        '''show the project names from the project spreadsheet'''
+        # load the project spreadsheet
+        project_info_file = self.MainWindow.project_info_file
+        if not os.path.exists(project_info_file):
+            return
+        self.project_info = pd.read_excel(project_info_file)
+        project_names = self.project_info['Project Name'].tolist()
+        # show the project information
+        # adding project names to the project combobox
+        self._manage_signals(enable=False,keys=['ProjectName'],action=self._show_project_info)
+        self.ProjectName.addItems(project_names)
+        self._manage_signals(enable=True,keys=['ProjectName'],action=self._show_project_info)
+        self._show_project_info()
+
+    def _get_basics(self):
+        '''get the basic information'''
+        self.probe_types = ['StickMicroscopes','EphysProbes']
+        self.metadata_keys = ['microscopes','probes']
+        self.widgets = [self.Microscopes,self.Probes]
+    
+    def _clear_metadata(self):
+        '''clear the metadata'''
+        self.meta_data = {}
+        self.meta_data['rig_metadata'] = {}
+        self.meta_data['session_metadata'] = {}
+        self.meta_data['rig_metadata_file'] = ''
+        self.ExperimentDescription.clear()
+        self._update_metadata()
+
+    def _removing_warning(self):
+        '''remove the warning'''
+        if self.RigMetadataFile.text()!='':
+            self.MainWindow._manage_warning_labels(self.MainWindow.MetadataWarning,warning_text='')
+
+    def _load_metadata(self):
+        '''load the metadata from a json file'''
+        metadata_dialog_file, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select Metadata File",
+            self.MainWindow.metadata_dialog_folder,
+            "JSON Files (*.json)"
+        )
+        if not metadata_dialog_file:
+            return
+        if os.path.exists(metadata_dialog_file):
+            with open(metadata_dialog_file, 'r') as file:
+                self.meta_data = json.load(file)
+        self.meta_data['metadata_dialog_file'] = metadata_dialog_file
+        self._update_metadata(dont_clear=True)
+        
+    def _update_metadata(self,update_rig_metadata=True,update_session_metadata=True,dont_clear=False):
+        '''update the metadata'''
+        if (update_rig_metadata or update_session_metadata) and ('rig_metadata_file' in self.meta_data):
+            if os.path.basename(self.meta_data['rig_metadata_file'])!=self.RigMetadataFile.text() and self.RigMetadataFile.text() != '':
+                if dont_clear==False:
+                    # clear probe angles if the rig metadata file is changed
+                    self.meta_data['session_metadata']['probes'] = {}
+                    self.meta_data['session_metadata']['microscopes'] = {}
+            self.RigMetadataFile.setText(os.path.basename(self.meta_data['rig_metadata_file']))
+        if update_session_metadata:
+            widget_dict = self._get_widgets()
+            self._set_widgets_value(widget_dict, self.meta_data['session_metadata'])
+
+        self._show_ephys_probes()
+        self._show_stick_microscopes()
+        self._iterate_probes_microscopes()    
+    
+    def _iterate_probes_microscopes(self):
+        '''iterate the probes and microscopes to save the probe information'''
+        keys = ['EphysProbes', 'StickMicroscopes']
+        for key in keys:
+            current_combo = getattr(self, key)
+            current_index = current_combo.currentIndex()
+            for index in range(current_combo.count()):
+                current_combo.setCurrentIndex(index)
+            current_combo.setCurrentIndex(current_index)
+
+    def _set_widgets_value(self, widget_dict, metadata):
+        '''set the widgets value'''
+        for key, value in widget_dict.items():
+            if key in metadata:
+                if isinstance(value, QtWidgets.QLineEdit):
+                    value.setText(metadata[key])
+                elif isinstance(value, QtWidgets.QTextEdit):
+                    value.setPlainText(metadata[key])
+                elif isinstance(value, QtWidgets.QComboBox):
+                    index = value.findText(metadata[key])
+                    if index != -1:
+                        value.setCurrentIndex(index)
+            elif isinstance(value, QtWidgets.QComboBox):
+                value.setCurrentIndex(0)
+            elif isinstance(value, QtWidgets.QLineEdit):
+                value.setText('')   
+            elif isinstance(value, QtWidgets.QTextEdit):
+                value.setPlainText('')
+
+    def _clear_angles(self, keys):
+        '''Clear the angles and target area for the given widget
+        Parameters
+        ----------
+        keys : List of str
+            The key to clear
+        
+        '''
+        for key in keys:
+            getattr(self, key).setText('')
+
+    def _save_metadata_dialog_parameters(self):
+        '''save the metadata dialog parameters'''
+        widget_dict = self._get_widgets()
+        self.meta_data=self.MainWindow._Concat(widget_dict, self.meta_data, 'session_metadata')
+        self.meta_data['rig_metadata_file'] = self.RigMetadataFile.text()
+        
+    def _save_metadata(self):
+        '''save the metadata collected from this dialogue to an independent json file'''
+        # save metadata parameters
+        self._save_metadata_dialog_parameters()
+        # Save self.meta_data to JSON
+        metadata_dialog_folder=self.MainWindow.metadata_dialog_folder
+        if not os.path.exists(metadata_dialog_folder):
+            os.makedirs(metadata_dialog_folder)
+        json_file=os.path.join(metadata_dialog_folder, self.MainWindow.current_box+'_'+datetime.now().strftime("%Y-%m-%d_%H-%M-%S")+ '_metadata_dialog.json')
+
+        with open(json_file, 'w') as file:
+            json.dump(self.meta_data, file, indent=4)
+    
+    def _get_widgets(self):
+        '''get the widgets used for saving/loading metadata'''
+        exclude_widgets=self._get_children_keys(self.Probes)
+        exclude_widgets+=self._get_children_keys(self.Microscopes)
+        exclude_widgets+=['EphysProbes','RigMetadataFile','StickMicroscopes']
+        widget_dict = {w.objectName(): w for w in self.findChildren(
+            (QtWidgets.QLineEdit, QtWidgets.QTextEdit, QtWidgets.QComboBox))
+            if w.objectName() not in exclude_widgets}
+        return widget_dict
+    
+    def _save_configuration(self):
+        '''save the angles and target area of the selected probe type ('StickMicroscopes','EphysProbes')'''
+
+        probe_types = self.probe_types
+        metadata_keys = self.metadata_keys
+        widgets = self.widgets  
+
+        for i in range(len(probe_types)):
+            probe_type=probe_types[i]
+            metadata_key=metadata_keys[i]
+            widget=widgets[i]
+            current_probe = getattr(self, probe_type).currentText()
+            self.meta_data['session_metadata'] = initialize_dic(self.meta_data['session_metadata'], key_list=[metadata_key, current_probe])
+            keys = self._get_children_keys(widget)
+            for key in keys:
+                self.meta_data['session_metadata'][metadata_key][current_probe][key] = getattr(self, key).text()
+
+    def _show_angles(self):
+        '''
+        show the angles and target area of the selected probe type ('StickMicroscopes','EphysProbes')
+        '''
+        
+        probe_types = self.probe_types
+        metadata_keys = self.metadata_keys
+        widgets = self.widgets  
+
+        for i in range(len(probe_types)):
+            probe_type = probe_types[i]
+            metadata_key = metadata_keys[i]
+            widget = widgets[i]
+            action=self._save_configuration
+
+            self._manage_signals(enable=False, keys=self._get_children_keys(widget),action=action)
+            self._manage_signals(enable=False, keys=[probe_type], action=self._show_angles)
+            
+            current_probe = getattr(self, probe_type).currentText()
+            self.meta_data['session_metadata'] = initialize_dic(self.meta_data['session_metadata'], key_list=[metadata_key])
+            if current_probe == '' or current_probe not in self.meta_data['session_metadata'][metadata_key]:
+                self._clear_angles(self._get_children_keys(widget))
+                self._manage_signals(enable=True, keys=[probe_type], action=self._show_angles)
+                self._manage_signals(enable=True, keys=self._get_children_keys(widget), action=action)
+                continue
+
+            self.meta_data['session_metadata'] = initialize_dic(self.meta_data['session_metadata'], key_list=[metadata_key, current_probe])
+            keys = self._get_children_keys(widget)
+            for key in keys:
+                self.meta_data['session_metadata'][metadata_key][current_probe].setdefault(key, '')
+                getattr(self, key).setText(self.meta_data['session_metadata'][metadata_key][current_probe][key])
+
+            self._manage_signals(enable=True, keys=self._get_children_keys(widget), action=action)
+            self._manage_signals(enable=True, keys=[probe_type], action=self._show_angles)
+            
+
+    def _get_children_keys(self,parent_widget = None):
+        '''get the children QLineEidt objectName'''
+        if parent_widget is None:
+            parent_widget = self.Probes
+        probe_keys = []
+        for child_widget in parent_widget.children():
+            if isinstance(child_widget, QtWidgets.QLineEdit):
+                probe_keys.append(child_widget.objectName())
+            if isinstance(child_widget, QtWidgets.QGroupBox):
+                for child_widget2 in child_widget.children():
+                    if isinstance(child_widget2, QtWidgets.QLineEdit):
+                        probe_keys.append(child_widget2.objectName())   
+        return probe_keys
+    
+    def _show_stick_microscopes(self):
+        '''setting the stick microscopes from the rig metadata'''
+        if self.meta_data['rig_metadata'] == {}:
+            self.StickMicroscopes.clear()
+            self._show_angles()
+            self.meta_data['session_metadata']['microscopes'] = {}
+            return
+        items=[]
+        if 'stick_microscopes' in self.meta_data['rig_metadata']:
+            for i in range(len(self.meta_data['rig_metadata']['stick_microscopes'])):
+                items.append(self.meta_data['rig_metadata']['stick_microscopes'][i]['name'])
+        if items==[]:
+            self.StickMicroscopes.clear()
+            self._show_angles()
+            return
+        
+        self._manage_signals(enable=False,keys=['StickMicroscopes'],action=self._show_angles)
+        self._manage_signals(enable=False,keys=self._get_children_keys(self.Microscopes),action=self._save_configuration)
+        self.StickMicroscopes.clear()
+        self.StickMicroscopes.addItems(items)
+        self._manage_signals(enable=True,keys=['StickMicroscopes'],action=self._show_angles)
+        self._manage_signals(enable=True,keys=self._get_children_keys(self.Microscopes),action=self._save_configuration)
+        self._show_angles()
+
+    def _show_ephys_probes(self):
+        '''setting the ephys probes from the rig metadata'''
+        if self.meta_data['rig_metadata'] == {}:
+            self.EphysProbes.clear()
+            self._show_angles()
+            return
+        items=[]
+        if 'ephys_assemblies' in self.meta_data['rig_metadata']:
+            for assembly in self.meta_data['rig_metadata']['ephys_assemblies']:
+                for probe in assembly['probes']:
+                    items.append(probe['name'])
+        if items==[]:
+            self.EphysProbes.clear()
+            self._show_angles()
+            return
+        
+        self._manage_signals(enable=False,keys=['EphysProbes'],action=self._show_angles)
+        self._manage_signals(enable=False,keys=self._get_children_keys(self.Probes),action=self._save_configuration)
+        self.EphysProbes.clear()
+        self.EphysProbes.addItems(items)
+        self._manage_signals(enable=True,keys=['EphysProbes'],action=self._show_angles)
+        self._manage_signals(enable=True,keys=self._get_children_keys(self.Probes),action=self._save_configuration)
+        self._show_angles()
+    
+    def _manage_signals(self, enable=True,keys='',signals='',action=''):
+        '''manage signals 
+        Parameters
+        ----------
+        enable : bool
+            enable (connect) or disable (disconnect) the signals
+        action : function
+            the function to be connected or disconnected
+        keys : list
+            the keys of the widgets to be connected or disconnected
+        '''
+        if keys == '':
+            keys=self._get_children_keys(self.Probes)
+        if signals == '':
+            signals = []
+            for attr in keys:
+                if isinstance(getattr(self, attr),QtWidgets.QLineEdit):
+                    signals.append(getattr(self, attr).textChanged)
+                elif isinstance(getattr(self, attr),QtWidgets.QComboBox):
+                    signals.append(getattr(self, attr).currentIndexChanged)
+        if action == '':
+            action = self._save_configuration
+
+        for signal in signals:
+            if enable:
+                signal.connect(action)
+            else:
+                signal.disconnect(action)
+
+    def _SelectRigMetadata(self,rig_metadata_file=None):
+        '''Select the rig metadata file and load it
+        Parameters
+        ----------
+        rig_metadata_file : str
+            The rig metadata file path
+        
+        Returns
+        -------
+        None
+        '''
+        if rig_metadata_file is None:
+            rig_metadata_file, _ = QFileDialog.getOpenFileName(
+                self,
+                "Select Rig Metadata File",
+                self.MainWindow.rig_metadata_folder,
+                "JSON Files (*.json)"
+            )
+        if not rig_metadata_file:
+            return
+        self.meta_data['rig_metadata_file'] = rig_metadata_file
+        self.meta_data['session_metadata']['RigMetadataFile'] = rig_metadata_file
+        if os.path.exists(rig_metadata_file):
+            with open(rig_metadata_file, 'r') as file:
+                self.meta_data['rig_metadata'] = json.load(file)
+
+        # Update the text box
+        self._update_metadata(update_session_metadata=False)
+        
 class AutoTrainDialog(QDialog):
     '''For automatic training'''
 
@@ -2050,7 +2664,7 @@ class AutoTrainDialog(QDialog):
     def _show_curriculum_in_streamlit(self):
         if self.selected_curriculum is not None:
             webbrowser.open(
-                'https://foraging-behavior-browser.streamlit.app/'
+                'https://foraging-behavior-browser.allenneuraldynamics-test.org/'
                 '?tab_id=tab_auto_train_curriculum'
                 f'&auto_training_curriculum_name={self.selected_curriculum["curriculum"].curriculum_name}'
                 f'&auto_training_curriculum_version={self.selected_curriculum["curriculum"].curriculum_version}'
@@ -2059,10 +2673,10 @@ class AutoTrainDialog(QDialog):
                         
     def _show_auto_training_history_in_streamlit(self):
         webbrowser.open(
-            'https://foraging-behavior-browser.streamlit.app/?'
+            'https://foraging-behavior-browser.allenneuraldynamics-test.org/?'
             f'&filter_subject_id={self.selected_subject_id}'
             f'&tab_id=tab_auto_train_history'
-            f'&auto_training_history_x_axis=date'
+            f'&auto_training_history_x_axis=session'
             f'&auto_training_history_sort_by=subject_id'
             f'&auto_training_history_sort_order=descending'
         )
@@ -2086,6 +2700,7 @@ class AutoTrainDialog(QDialog):
 
                 
     def _override_stage_clicked(self, state):
+        logger.info(f"Override stage clicked: state={state}")
         if state:
             self.comboBox_override_stage.setEnabled(True)
         else:
@@ -2093,6 +2708,7 @@ class AutoTrainDialog(QDialog):
         self._update_stage_to_apply()
         
     def _override_curriculum_clicked(self, state):
+        logger.info(f"Override stage clicked: state={state}")
         if state:
             self.pushButton_apply_curriculum.setEnabled(True)
             self._add_border_curriculum_selection()
@@ -2106,6 +2722,7 @@ class AutoTrainDialog(QDialog):
     def _update_stage_to_apply(self):
         if self.checkBox_override_stage.isChecked():
             self.stage_in_use = self.comboBox_override_stage.currentText()
+            logger.info(f"Stage overridden to: {self.stage_in_use}")
         elif self.last_session is not None:
             self.stage_in_use = self.last_session['next_stage_suggested']
         else:
@@ -2116,6 +2733,9 @@ class AutoTrainDialog(QDialog):
             + '\n'.join(get_curriculum_string(self.curriculum_in_use).split('(')).strip(')') 
             + f"\n{self.stage_in_use}"
         )
+        
+        logger.info(f"Current stage to apply: {self.stage_in_use} @"
+                    f"{get_curriculum_string(self.curriculum_in_use)}")
                 
     def _apply_curriculum(self):
         # Check if a curriculum is selected
@@ -2241,6 +2861,8 @@ class AutoTrainDialog(QDialog):
                     
     def update_auto_train_lock(self, engaged):
         if engaged:
+            logger.info(f"AutoTrain engaged! {self.stage_in_use} @ {get_curriculum_string(self.curriculum_in_use)}")
+            
             # Update the flag
             self.auto_train_engaged = True
 
@@ -2289,6 +2911,8 @@ class AutoTrainDialog(QDialog):
             self.pushButton_preview_auto_train_paras.setEnabled(False)
                                     
         else:
+            logger.info("AutoTrain disengaged!")
+
             # Update the flag
             self.auto_train_engaged = False
             
