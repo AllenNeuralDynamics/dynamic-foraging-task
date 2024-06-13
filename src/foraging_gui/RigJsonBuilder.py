@@ -4,14 +4,15 @@ import logging
 import numpy as np
 from deepdiff import DeepDiff
 from datetime import date, datetime, timezone
+import serial.tools.list_ports as list_ports
 
 import aind_data_schema.core.rig as r
 import aind_data_schema.components.devices as d
+import aind_data_schema.components.coordinates as c
 from aind_data_schema_models.modalities import Modality
 from aind_data_schema_models.units import SizeUnit
 
 from foraging_gui.Visualization import GetWaterCalibration
-
 
 def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibration):    
 
@@ -167,7 +168,10 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     model="XC0922LENS",
                     manufacturer=d.Organization.OTHER,
                     max_aperture="f/1.4",
-                    notes='Focal Length 9-22mm 1/3" IR F1.4',
+                    focal_length=9,
+                    focal_length_unit=SizeUnit.MM,
+                    notes='Manufacturer is Xenocam',
+
                 ),
             ),
             d.CameraAssembly(
@@ -194,7 +198,9 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     model="XC0922LENS",
                     manufacturer=d.Organization.OTHER,
                     max_aperture="f/1.4",
-                    notes='Focal Length 9-22mm 1/3" IR F1.4',
+                    focal_length=9,
+                    focal_length_unit=SizeUnit.MM,
+                    notes='Manufacturer is Xenocam',
                 ),
             ),
         ]
@@ -214,7 +220,24 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     components['mouse_platform']=d.Tube(
         name="mouse_tube_foraging", 
         diameter=3.0,
-        diameter_unit=SizeUnit.CM
+        diameter_unit=SizeUnit.CM,
+        manufacturer=d.Organization.CUSTOM,
+        )
+    
+    components['enclosure'] = d.Enclosure(
+        name='Behavior enclosure',
+        size=c.Size3d(
+            width=54, # TODO, 54cm is my quick measurement of one box
+            length=54, # TODO
+            height=54, # TODO
+            unit=SizeUnit.CM
+            ),
+        manufacturer=d.Organization.AIND,  # TODO
+        internal_material='',
+        external_material='',
+        grounded=False, # TODO
+        laser_interlock=False,
+        air_filtration=False, # TODO 
         )
 
 
@@ -225,6 +248,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     name="NewScaleMotor for LickSpouts",
                     serial_number=settings['newscale_serial_num_box{}'.format(settings['box_number'])], 
                     manufacturer=d.Organization.NEW_SCALE_TECHNOLOGIES,
+                    model='XYZ Stage with M30LS-3.4-15 linear stages',
                     travel=15.0,
                     travel_unit=SizeUnit.MM,
                     firmware="https://github.com/AllenNeuralDynamics/python-newscale, branch: axes-on-target, commit #7c17497",
@@ -234,28 +258,49 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     name="AIND lick spout stage",
                     manufacturer=d.Organization.AIND,
                     travel=30, 
-                    travel_unit=SizeUnit.MM
+                    travel_unit=SizeUnit.MM,
+                    notes="https://allenneuraldynamics.github.io/Bonsai.AllenNeuralDynamics/articles/aind-manipulator.html"
                     )      
 
     if ('AINDLickDetector' in settings['box_settings']) and (settings['box_settings']['AINDLickDetector'] == "1"):
-        lick_spout_name = 'AIND_Lick_Detector'
+        lick_spout_manufacturer=d.Organization.AIND
     else:
-        lick_spout_name = 'Janelia_Lick_Detector'
+        lick_spout_manufacturer=d.Organization.JANELIA
     lick_spouts=[
         d.RewardSpout(
-            name="{} Left".format(lick_spout_name),
+            name="Left lick spout",
             side=d.SpoutSide.LEFT,
             spout_diameter=1.2,
-            solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Left"),
-            lick_sensor_type=d.LickSensorType("Capacitive")
+            solenoid_valve=d.Device(
+                device_type="Solenoid", 
+                name="Solenoid Left",
+                manufacturer=d.Organization.LEE,
+                model='LHDA1233415H'
+                ),
+            lick_sensor_type=d.LickSensorType("Capacitive"),
+            lick_sensor = d.Device(
+                device_type='Lick Sensor',
+                name="Lick Sensor Left",
+                manufacturer=lick_spout_manufacturer
+                )
         ),
         d.RewardSpout(
-            name="{} Right".format(lick_spout_name),
+            name='Right lick spout',
             side=d.SpoutSide.RIGHT,
             spout_diameter=1.2,
             spout_diameter_unit=SizeUnit.MM,
-            solenoid_valve=d.Device(device_type="Solenoid", name="Solenoid Right"),
-            lick_sensor_type=d.LickSensorType("Capacitive")
+            solenoid_valve=d.Device(
+                device_type="Solenoid", 
+                name="Solenoid Right",
+                manufacturer=d.Organization.LEE,
+                model='LHDA1233415H'
+                ),
+            lick_sensor_type=d.LickSensorType("Capacitive"),
+            lick_sensor = d.Device(
+                device_type='Lick Sensor',
+                name="Lick Sensor Right",
+                manufacturer=lick_spout_manufacturer
+                )
         ),
         ]   
 
@@ -265,8 +310,9 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             stage_type = stage,
         ),
         d.Speaker(
-            name="Stimulus speaker",
-            manufacturer=d.Organization.OTHER,
+            name="Stimulus Speaker",
+            manufacturer=d.Organization.TYMPHANY,
+            model='XT25SC90-04', 
         )
         ]
 
@@ -282,6 +328,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             computer_name=settings['computer_name'], 
             is_clock_generator=False,
             data_interface=d.DataInterface.ETH,
+            core_version='1.11', # TODO
             notes = '{} and {}, as well as reward delivery solenoids are connected via ethernet cables'.format(lick_spouts[0].name, lick_spouts[1].name)
         ),
         d.HarpDevice(
@@ -290,7 +337,8 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             manufacturer=d.Organization.CHAMPALIMAUD,
             computer_name=settings['computer_name'], 
             is_clock_generator=False,
-            data_interface=d.DataInterface.USB
+            data_interface=d.DataInterface.USB,
+            core_version='1.4', # TODO
         ),
         d.HarpDevice(
             name="Harp clock synchronization board",
@@ -298,7 +346,8 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             manufacturer=d.Organization.CHAMPALIMAUD,
             computer_name=settings['computer_name'], 
             is_clock_generator=True,
-            data_interface=d.DataInterface.USB
+            data_interface=d.DataInterface.USB,
+            core_version='', # TODO
         ),       
         d.HarpDevice(
             name="Harp sound amplifier",
@@ -306,7 +355,8 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             manufacturer=d.Organization.CHAMPALIMAUD,
             computer_name=settings['computer_name'], 
             is_clock_generator=False,
-            data_interface=d.DataInterface.USB
+            data_interface=d.DataInterface.USB,
+            core_version='', # TODO
         )
     ]
 
@@ -439,13 +489,13 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                 cut_off_wavelength=562,
             ),
             d.Filter(
-                name="dual-edge standard epi-fluorescence dichroic beamsplitter",
+                name="beamsplitter",
                 model="FF493/574-Di01-25x36",
                 manufacturer=d.Organization.SEMROCK,
                 notes="493/574 nm BrightLine dual-edge standard epi-fluorescence dichroic beamsplitter",
                 filter_type="Multiband",
                 width=36,
-                height=24,
+                height=25,
             ),
             d.Filter(
                 name="Excitation filter 410nm",
@@ -556,7 +606,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     ###########################################################################
     # Assemble rig schema
     rig = r.Rig(
-        rig_id="{}_{}".format(settings['rig_name'],datetime.now().strftime('%Y-%m-%d')), 
+        rig_id="{}_{}".format(settings['rig_name'],datetime.now().strftime('%Y%m%d')), 
         modification_date=date.today(),
         **components 
         )
@@ -573,7 +623,7 @@ def parse_water_calibration(water_calibration):
             left = d.Calibration(
                 calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
                 device_name = 'Lick spout Left',
-                description = 'Water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delievered in microliters.',
+                description = 'Water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delivered in microliters.',
                 input = {'valve open time (s):':left_times},
                 output = {'water volume (ul):':left_volumes}
                 )
@@ -600,7 +650,7 @@ def parse_water_calibration(water_calibration):
             right = d.Calibration(
                 calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
                 device_name = 'Lick spout Right',
-                description = 'Water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delievered in microliters.',
+                description = 'Water calibration for Lick spout Right. The input is the valve open time in seconds and the output is the volume of water delivered in microliters.',
                 input = {'valve open time (s):':right_times},
                 output = {'water volume (ul):':right_volumes}
                 )

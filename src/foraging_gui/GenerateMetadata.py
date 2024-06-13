@@ -129,8 +129,22 @@ class generate_metadata:
                 'NINDS': 'NINDS',
                 'Simons Foundation': 'SIMONS',
             },
-            'ephys_rig_behavior_daq_names':["harp behavior board","harp sound card","harp clock synchronization board","harp lickety split left","harp lickety split right"],
-            'behavior_rig_behavior_daq_names':["harp behavior board","harp sound card","harp clock synchronization board",'Janelia lick detector'],
+            'ephys_rig_behavior_daq_names':[
+                "Harp Behavior",
+                "Harp Sound",
+                "Harp clock synchronization board",
+                "Harp sound amplifier",
+                "Lick Sensor Left",
+                "Lick Sensor Right"
+                ],
+            'behavior_rig_behavior_daq_names':[
+                "Harp Behavior",
+                "Harp Sound",
+                "Harp clock synchronization board",
+                "Harp sound amplifier",
+                'Lick Sensor Left',
+                'Lick Sensor Right'
+                ],
             'fiber_photometry_daq_names':[''],
             'ephys_daq_names':['neuropixel basestation'],
             'optogenetics_daq_names':['optogenetics nidaq'],
@@ -618,7 +632,7 @@ class generate_metadata:
                 amplitude_modulation_frequency=7500,
             )],
             speaker_config=SpeakerConfig(
-                name='Speaker',
+                name='Stimulus Speaker',
                 volume=self.Obj['Other_go_cue_decibel'],
                 volume_unit=SoundIntensityUnit.DB,
             ),
@@ -626,6 +640,7 @@ class generate_metadata:
             trials_finished= self.trials_finished,
             trials_rewarded=self.trials_rewarded
         ))
+
     def _get_optogenetics_stimulus(self):
         '''
         Make the optogenetics stimulus metadata
