@@ -3637,7 +3637,7 @@ class Window(QMainWindow):
         # Track elapsed time in case Bonsai Stalls
         last_trial_start = time.time()
         stall_iteration = 1
-        stall_duration = 5*60 
+        stall_duration = 20#5*60 
 
         while self.Start.isChecked():
             QApplication.processEvents()
@@ -3714,7 +3714,7 @@ class Window(QMainWindow):
                 if self.NewTrialRewardOrder==1:
                     GeneratedTrials._GenerateATrial(self.Channel4)   
 
-            elif (time.time() - last_trial_start) >stall_duration*stall_iteration:
+            elif ((time.time() - last_trial_start) >stall_duration*stall_iteration) and ((time.time() - self.Channel.last_message_time) > stall_duration*stall_iteration):
                 # Elapsed time since last trial is more than tolerance
 
                 # Check if we are in the photometry baseline period.
@@ -3752,6 +3752,8 @@ class Window(QMainWindow):
                     # User continues, wait another stall_duration and prompt again
                     logging.error('trial stalled {} minutes, user continued trials'.format(elapsed_time))
                     stall_iteration +=1
+                else:
+                    print(self.Channel.last_message_time)
 
 
     def _StartTrialLoop1(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
