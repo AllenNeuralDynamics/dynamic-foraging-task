@@ -2751,7 +2751,7 @@ class Window(QMainWindow):
                                 widget.setText(value)
                             if key in {'BaseWeight','TotalWater','TargetWeight','WeightAfter','SuggestedWater','TargetRatio'}:
                                 self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
-                                self.WeightAfter.textChanged.connect(self._UpdateSuggestedWater)
+                                self.WeightAfter.textChanged.connect(self._PostWeightChange)
                                 self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
                         elif isinstance(widget, QtWidgets.QComboBox):
                             if Tag==0:
