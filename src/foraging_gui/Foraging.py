@@ -1019,7 +1019,7 @@ class Window(QMainWindow):
 
         # check that the SettingsBox has each of the values in mandatory_fields as a key, if not log an error for the missing key
 
-        csv_mandatory_fields = ['Behavior', 'Soundcard', 'BonsaiOsc1', 'BonsaiOsc2', 'BonsaiOsc3', 'BonsaiOsc4','AttenuationLeft']
+        csv_mandatory_fields = ['Behavior', 'Soundcard', 'BonsaiOsc1', 'BonsaiOsc2', 'BonsaiOsc3', 'BonsaiOsc4','AttenuationLeft','AttenuationRight']
         for field in csv_mandatory_fields:
             if field not in self.SettingsBox.keys():
                 logging.error('Missing key ({}) in settings_box file'.format(field))
