@@ -460,7 +460,7 @@ class Window(QMainWindow):
             elif os.path.exists(training_folder_new):
                 for file_name in os.listdir(training_folder_new):
                     if file_name.endswith('.json'): 
-                        session_full_path_list.append(os.path.join(training_folder, file_name))
+                        session_full_path_list.append(os.path.join(training_folder_new, file_name))
                         session_path_list.append(session_folder) 
 
         sorted_indices = sorted(enumerate(session_path_list), key=lambda x: x[1], reverse=True)
