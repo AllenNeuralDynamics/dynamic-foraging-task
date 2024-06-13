@@ -5,7 +5,7 @@ import numpy as np
 from deepdiff import DeepDiff
 from datetime import date, datetime, timezone
 import serial.tools.list_ports as list_ports
-from pyharp.device import Device
+from harp.device import Device
 
 import aind_data_schema.core.rig as r
 import aind_data_schema.components.devices as d
