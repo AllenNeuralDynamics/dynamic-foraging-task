@@ -10,7 +10,8 @@ class RigClient:
         self.client = client
         self.client.addMsgHandler("default", self.msg_handler)
         self.msgs = queue.Queue(maxsize=0)
-    
+        self.last_message_time = time.time()   
+ 
         # Keep track photometry message history
         self.photometry_messages = {}
         self.photometry_message_tolerance = 2
@@ -39,7 +40,9 @@ class RigClient:
         CurrentMessage=[msg.address,args[1][0],msg.values()[2],msg.values()[3]]
         self.msgs.put([msg,args])
         msg_str = str(CurrentMessage)
-        
+        self.last_message_time = time.time()       
+        print(self.last_message_time)
+ 
         # Selectively log photometry messages 
         if (('PhotometryRising' in msg_str) or ('PhotometryFalling' in msg_str)):
             # Only selectively log these two messages
