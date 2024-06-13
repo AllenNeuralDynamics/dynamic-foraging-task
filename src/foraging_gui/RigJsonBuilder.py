@@ -227,10 +227,10 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     components['enclosure'] = d.Enclosure(
         name='Behavior enclosure',
         size=c.Size3d(
-            width=0, # TODO
-            length=0, # TODO
-            height=0, # TODO
-            unit=SizeUnit.M
+            width=54, # TODO, 54cm is my quick measurement of one box
+            length=54, # TODO
+            height=54, # TODO
+            unit=SizeUnit.CM
             ),
         manufacturer=d.Organization.AIND,  # TODO
         internal_material='',
