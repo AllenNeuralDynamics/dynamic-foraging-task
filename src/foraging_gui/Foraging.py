@@ -3714,8 +3714,10 @@ class Window(QMainWindow):
                 if self.NewTrialRewardOrder==1:
                     GeneratedTrials._GenerateATrial(self.Channel4)   
 
-            elif (time.time() - last_trial_start) >stall_duration*stall_iteration:
+            elif ((time.time() - last_trial_start) >stall_duration*stall_iteration) and \
+                ((time.time() - self.Channel.last_message_time) > stall_duration*stall_iteration):
                 # Elapsed time since last trial is more than tolerance
+                # and elapsed time since last harp message is more than tolerance
 
                 # Check if we are in the photometry baseline period.
                 if (self.finish_Timer==0) & ((time.time() - last_trial_start) < (float(self.baselinetime.text())*60+10)):
