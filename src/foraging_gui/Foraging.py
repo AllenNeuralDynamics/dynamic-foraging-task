@@ -9,6 +9,7 @@ import logging
 import socket
 import harp
 import pandas as pd
+import threading
 from pathlib import Path
 from datetime import date, datetime
 
@@ -1236,9 +1237,15 @@ class Window(QMainWindow):
         SettingsBox = 'Settings_box{}.csv'.format(self.box_number)
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
         if self.start_bonsai_ide:
-            subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
+            process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True,
+                stdout = subprocess.PIPE, stderr = subprocess.STDOUT,text=True)
         else:
-            subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True)
+            process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True,
+                stdout = subprocess.PIPE, stderr = subprocess.STDOUT,text=True)
+
+        # Log stdout and stderr from bonsai in a separate thread
+        threading.Thread(target=log_subprocess_output, args=(process,'BONSAI',)).start()
+
 
     def _OpenVideoFolder(self):
         '''Open the video folder'''
@@ -2976,7 +2983,9 @@ class Window(QMainWindow):
             logging.info('Starting FIP workflow in directory: {}'.format(CWD))
             folder_path = ' -p session="{}"'.format(self.SessionFolder)
             camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartCamera.isChecked())
-            subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera+' --start',cwd=CWD,shell=True)
+            process = subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera+' --start',cwd=CWD,shell=True,
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            threading.Thread(target=log_subprocess_output, args=(process,'FIP',)).start()
             self.FIP_started=True 
         except Exception as e:
             logging.error(e)
@@ -4099,6 +4108,16 @@ class UncaughtHook(QtCore.QObject):
         tb = "<br><br>".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         self._exception_caught.emit(self.box+tb)
 
+def log_subprocess_output(process, prefix):
+    logging.info('{} logging starting'.format(prefix))
+    while process.poll() is None:       
+        output = process.stdout.readline()
+        if 'Exception' in output:
+            logging.error(prefix+': '+output.strip())
+        else:
+            logging.info(prefix+': '+output.strip())
+
+    logging.info('{} logging terminating'.format(prefix))
 
 if __name__ == "__main__":
 
