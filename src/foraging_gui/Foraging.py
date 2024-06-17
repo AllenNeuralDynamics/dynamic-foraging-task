@@ -960,7 +960,12 @@ class Window(QMainWindow):
     def _LoadSchedule(self):
         if os.path.exists(self.Settings['schedule_path']):
             schedule = pd.read_csv(self.Settings['schedule_path'])
-            
+            box_list = []
+            for tower, box in itertools.product([1,2,3,6,7,8,9],['A','B','C','D']):
+                box_list.append(str(tower)+box)
+
+            self.schedule = schedule.query('Box in @box_list').copy() 
+            print(self.schedule)
         else:
             logging.error('Could not find schedule at {}'.format(self.Settings['schedule_path']))
             return
