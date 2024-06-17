@@ -971,6 +971,13 @@ class Window(QMainWindow):
             logging.error('Could not find schedule at {}'.format(self.Settings['schedule_path']))
             return
 
+    def _GetIACUC(self, mouse_id):
+        if not hasattr(self, 'schedule'):
+            return None
+        if str(mouse_id) not in self.schedule['Mouse ID'].values:
+            return None
+        return int(schedule.query('`Mouse ID` == @mouse_id').iloc[0].Protocol)
+
     def _GetSettings(self):
         '''
             Load the settings that are specific to this computer
