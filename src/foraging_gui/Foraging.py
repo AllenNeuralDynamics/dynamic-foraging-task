@@ -959,7 +959,7 @@ class Window(QMainWindow):
     
     def _LoadSchedule(self):
         if os.path.exists(self.Settings['schedule_path']):
-            schedule = pd.read_csv(self.Settings['schedule_path']
+            schedule = pd.read_csv(self.Settings['schedule_path'])
             
         else:
             logging.error('Could not find schedule at {}'.format(self.Settings['schedule_path']))
