@@ -10,6 +10,7 @@ import socket
 import harp
 import pandas as pd
 import threading
+import itertools
 from pathlib import Path
 from datetime import date, datetime
 
