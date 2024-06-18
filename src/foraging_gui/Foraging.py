@@ -2677,7 +2677,7 @@ class Window(QMainWindow):
                         'Investigators':['Jeremiah Cohen'],
                         'Fundee':['nan'],
                     }
-                self.Metadata_dialog.project_info(project_info)
+                self.Metadata_dialog.project_info = project_info
                 self.ProjectName.addItems(['Behavior Platform'])
 
         self.keyPressEvent(allow_reset=True) 
