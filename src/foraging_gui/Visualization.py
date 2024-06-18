@@ -333,8 +333,17 @@ class PlotV(FigureCanvas):
 class PlotWaterCalibration(FigureCanvas):
     def __init__(self,water_win,dpi=100,width=5, height=4):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
-        gs = GridSpec(10, 30, wspace = 3, hspace = 0.1, bottom = 0.1, top = 0.95, left = 0.04, right = 0.98)
+        gs = GridSpec(10, 30, 
+            wspace = 3, 
+            hspace = 0.1, 
+            bottom = 0.1, 
+            top = 0.9, 
+            left = 0.08, 
+            right = 0.98
+            )
         self.ax1 = self.fig.add_subplot(gs[0:9, 1:30])
+        self.ax1.spines['right'].set_visible(False)
+        self.ax1.spines['top'].set_visible(False)
         FigureCanvas.__init__(self, self.fig)
         self.water_win=water_win
         self.WaterCalibrationResults=self.water_win.WaterCalibrationResults
@@ -366,32 +375,51 @@ class PlotWaterCalibration(FigureCanvas):
             showrecent=1
         if showrecent>len(sorted_dates):
             showrecent=len(sorted_dates)
-        all_dates=sorted_dates[-showrecent:]
+        
+        # Dont count spot checks against "show last" number
+        iterator = 0
+        counter = 0
+        all_dates = []
+        while counter < showrecent:
+            if iterator > len(sorted_dates):
+                break
+            iterator +=1
+            if ('Left' in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()) or ('Right' in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()):
+                counter += 1 
+        all_dates = sorted_dates[-iterator:]
+
         # use the selected date if showspecificcali is not NA
         if self.water_win.showspecificcali.currentText()!='NA':
             all_dates=[self.water_win.showspecificcali.currentText()]
+
         #all_dates represents dates to plot
         for current_date in sorted_dates:
             all_valves=self.WaterCalibrationResults[current_date].keys()
             for current_valve in all_valves:
-                sorted_X,sorted_Y=self._GetWaterCalibration(self.WaterCalibrationResults,current_date,current_valve)
-                if current_date in all_dates:
-                    if current_valve=='Left':
-                        line=self.ax1.plot(sorted_X, sorted_Y, 'o-',label=current_date+'_left valve')
-                    elif current_valve=='Right':
-                        line=self.ax1.plot(sorted_X, sorted_Y, 'o-',label=current_date+'_right valve')
-                    # fit the curve
-                    color=line[0].get_color()
-                    slope, intercept=self._PlotFitting(sorted_X,sorted_Y,color,Plot=1)
-                else:
-                    slope, intercept=self._PlotFitting(sorted_X,sorted_Y,'r',Plot=0)
-                # save fitting results
-                if current_date not in self.FittingResults:
-                    self.FittingResults[current_date]={}
-                if current_valve not in self.FittingResults[current_date]:
-                    self.FittingResults[current_date][current_valve]={}
-                self.FittingResults[current_date][current_valve]=[slope,intercept]
-
+                if current_valve in ['Left','Right']:
+                    sorted_X,sorted_Y=self._GetWaterCalibration(self.WaterCalibrationResults,current_date,current_valve)
+                    if current_date in all_dates:
+                        if current_valve=='Left':
+                            line=self.ax1.plot(sorted_X, sorted_Y, 'o-',label=current_date+'_left valve')
+                        elif current_valve=='Right':
+                            line=self.ax1.plot(sorted_X, sorted_Y, 'o-',label=current_date+'_right valve')
+                        # fit the curve
+                        color=line[0].get_color()
+                        slope, intercept=self._PlotFitting(sorted_X,sorted_Y,color,Plot=1)
+                    else:
+                        slope, intercept=self._PlotFitting(sorted_X,sorted_Y,'r',Plot=0)
+                    # save fitting results
+                    if current_date not in self.FittingResults:
+                        self.FittingResults[current_date]={}
+                    if current_valve not in self.FittingResults[current_date]:
+                        self.FittingResults[current_date][current_valve]={}
+                    self.FittingResults[current_date][current_valve]=[slope,intercept]
+                elif (current_valve in ['SpotLeft','SpotRight'])and(current_date in all_dates):
+                    X,Y=self._GetWaterSpotCheck(self.WaterCalibrationResults,current_date,current_valve)                   
+                    if current_valve=='SpotLeft':
+                        line=self.ax1.plot(X, Y, 'x',label=current_date+'_spot left')
+                    elif current_valve=='SpotRight':
+                        line=self.ax1.plot(X, Y, 'x',label=current_date+'_spot right')
         self.ax1.set_xlabel('valve open time(s)')
         self.ax1.set_ylabel('water(mg)')
         self.ax1.legend(loc='lower right', fontsize=8)
@@ -409,6 +437,21 @@ class PlotWaterCalibration(FigureCanvas):
     def _GetWaterCalibration(self,WaterCalibrationResult, current_date, current_valve):
         x,y = GetWaterCalibration(WaterCalibrationResult, current_date, current_valve)   
         return x, y
+    
+    def _GetWaterSpotCheck(self,WaterCalibrationResult, current_date, current_valve):
+        x,y = GetWaterSpotCheck(WaterCalibrationResult, current_date, current_valve)
+        return x,y
+
+def GetWaterSpotCheck(WaterCalibrationResult, date, valve):
+    x = []
+    y = []
+    for time in WaterCalibrationResult[date][valve].keys():
+        for interval in WaterCalibrationResult[date][valve][time].keys():
+            for cycles in WaterCalibrationResult[date][valve][time][interval].keys():
+                for measurement in WaterCalibrationResult[date][valve][time][interval][cycles]:
+                    x.append(float(time))
+                    y.append(float(measurement)/float(cycles))
+    return x, y
  
 def GetWaterCalibration(WaterCalibrationResults,current_date,current_valve):
     '''Get the water calibration results from a specific date and valve'''

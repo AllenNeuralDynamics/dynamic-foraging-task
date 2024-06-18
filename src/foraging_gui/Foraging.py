@@ -73,7 +73,6 @@ class Window(QMainWindow):
         self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration_{}.json'.format(box_number))
         self.WaterCalibrationFiles=os.path.join(self.SettingFolder,'WaterCalibration_{}.json'.format(box_number))
         self.WaterCalibrationParFiles=os.path.join(self.SettingFolder,'WaterCalibrationPar_{}.json'.format(box_number))
-        self.TrainingStageFiles=os.path.join(self.SettingFolder,'TrainingStagePar.json')
 
         # Load Laser and Water Calibration Files
         self._GetLaserCalibration()
@@ -138,7 +137,6 @@ class Window(QMainWindow):
         self._GetTrainingParameters() # get initial training parameters
         self.connectSignalsSlots()
         self._Task()
-        self._TrainingStage()
         self.keyPressEvent()
         self._WaterVolumnManage2()
         self._LickSta()
@@ -241,8 +239,6 @@ class Window(QMainWindow):
         self.WeightAfter.textChanged.connect(self._PostWeightChange)
         self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
         self.Randomness.currentIndexChanged.connect(self._Randomness)
-        self.TrainingStage.currentIndexChanged.connect(self._TrainingStage)
-        self.TrainingStage.activated.connect(self._TrainingStage)
         self.actionTemporary_Logging.triggered.connect(self._startTemporaryLogging)
         self.actionFormal_logging.triggered.connect(self._startFormalLogging)
         self.actionOpen_logging_folder.triggered.connect(self._OpenLoggingFolder)
@@ -940,6 +936,25 @@ class Window(QMainWindow):
         else:
             return (key, 0)
 
+    def _check_line_terminator(self, file_path):
+        # Open the file in binary mode to read raw bytes. Check that last line has a \n terminator. 
+        with open(file_path, 'rb') as file:
+            # Move the cursor to the end of the file
+            file.seek(0, 2)
+            # Start from the end and move backwards to find the start of the last line
+            file.seek(file.tell() - 1, 0)
+            # Read the last line
+            last_line = file.readline()
+            # Detect line terminator
+            if b'\r\n' in last_line: # Windows
+                return True
+            elif b'\n' in last_line: # Unix
+                return True
+            elif b'\r' in last_line: # Old Mac
+                return True
+            else:
+                return False
+
     def _GetSettings(self):
         '''
             Load the settings that are specific to this computer
@@ -989,13 +1004,26 @@ class Window(QMainWindow):
             raise Exception('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))           
         try:
             # Open the csv settings file
-            df = pd.read_csv(self.SettingsBoxFile,index_col=None)
+            df = pd.read_csv(self.SettingsBoxFile,index_col=None, header=None)
             self.SettingsBox = {row[0]: row[1] for _, row in df.iterrows()}
             logging.info('Loaded settings_box file')
         except Exception as e:
             logging.error('Could not load settings_box file at: {}, {}'.format(self.SettingsBoxFile,str(e)))
             e.args = ('Could not load settings box file at: {}'.format(self.SettingsBoxFile), *e.args)
             raise e
+
+        # check that there is a newline for final entry of csv files
+        if not self._check_line_terminator(self.SettingsBoxFile):
+            logging.error('Settings box file does not have a newline at the end')
+            raise Exception('Settings box file does not have a newline at the end')
+
+        # check that the SettingsBox has each of the values in mandatory_fields as a key, if not log an error for the missing key
+
+        csv_mandatory_fields = ['Behavior', 'Soundcard', 'BonsaiOsc1', 'BonsaiOsc2', 'BonsaiOsc3', 'BonsaiOsc4','AttenuationLeft','AttenuationRight']
+        for field in csv_mandatory_fields:
+            if field not in self.SettingsBox.keys():
+                logging.error('Missing key ({}) in settings_box file'.format(field))
+                raise Exception('Missing key ({}) in settings_box file'.format(field))
 
         # Try to load the settings file        
         self.Settings = {}
@@ -1472,27 +1500,6 @@ class Window(QMainWindow):
         '''Restart the formal logging'''
         self.Ot_log_folder=self._restartlogging()
 
-    def _TrainingStage(self):
-        '''Change the parameters automatically based on training stage and task'''
-        #self.WarningLabel_SaveTrainingStage.setText('')
-        #self.WarningLabel_SaveTrainingStage.setStyleSheet("color: none;")
-        # load the prestored training stage parameters
-        self._LoadTrainingPar()
-        # set the training parameters in the GUI
-        widget_dict = {w.objectName(): w for w in self.TrainingParameters.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-        Task=self.Task.currentText()
-        CurrentTrainingStage=self.TrainingStage.currentText()
-        try:
-            for key in widget_dict.keys():
-                if Task not in self.TrainingStagePar:
-                    continue
-                elif CurrentTrainingStage not in self.TrainingStagePar[Task]:
-                    continue
-                self._set_parameters(key,widget_dict,self.TrainingStagePar[Task][CurrentTrainingStage])
-        except Exception as e:
-            # Catch the exception and log error information
-            logging.error(str(e))
-
     def _set_parameters(self,key,widget_dict,parameters):
         '''Set the parameters in the GUI
             key: the parameter name you want to change
@@ -1562,14 +1569,6 @@ class Window(QMainWindow):
             if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
                 pass
                 #widget.clear()
-
-    def _LoadTrainingPar(self):
-        '''load the training stage parameters'''
-        logging.info('loading training stage parameters')
-        self.TrainingStagePar={}
-        if os.path.exists(self.TrainingStageFiles):
-            with open(self.TrainingStageFiles, 'r') as f:
-                self.TrainingStagePar = json.load(f)
 
     def _Randomness(self):
         '''enable/disable some fields in the Block/Delay Period/ITI'''
@@ -2751,7 +2750,7 @@ class Window(QMainWindow):
                                 widget.setText(value)
                             if key in {'BaseWeight','TotalWater','TargetWeight','WeightAfter','SuggestedWater','TargetRatio'}:
                                 self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
-                                self.WeightAfter.textChanged.connect(self._UpdateSuggestedWater)
+                                self.WeightAfter.textChanged.connect(self._PostWeightChange)
                                 self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
                         elif isinstance(widget, QtWidgets.QComboBox):
                             if Tag==0:
@@ -3715,8 +3714,10 @@ class Window(QMainWindow):
                 if self.NewTrialRewardOrder==1:
                     GeneratedTrials._GenerateATrial(self.Channel4)   
 
-            elif (time.time() - last_trial_start) >stall_duration*stall_iteration:
+            elif ((time.time() - last_trial_start) >stall_duration*stall_iteration) and \
+                ((time.time() - self.Channel.last_message_time) > stall_duration*stall_iteration):
                 # Elapsed time since last trial is more than tolerance
+                # and elapsed time since last harp message is more than tolerance
 
                 # Check if we are in the photometry baseline period.
                 if (self.finish_Timer==0) & ((time.time() - last_trial_start) < (float(self.baselinetime.text())*60+10)):
