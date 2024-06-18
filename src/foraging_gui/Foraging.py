@@ -2636,6 +2636,7 @@ class Window(QMainWindow):
         self.BaseWeight.setText('')
         self.WeightAfter.setText('')
         self.TargetRatio.setText('0.85')
+        self.keyPressEvent(allow_reset=True) 
 
         # Set IACUC protocol in metadata based on schedule
         protocol = self._GetInfoFromSchedule(mouse_id,'Protocol')
@@ -2669,6 +2670,15 @@ class Window(QMainWindow):
                 self.Metadata_dialog.ProjectName.setCurrentIndex(index)
                 self.Metadata_dialog._show_project_info()
                 logging.info('Setting Project name: {}'.format('Behavior Platform'))
+            else:
+                project_info = {
+                        'Funding Institution':['Allen Institution'],
+                        'Grant Number':['nan'],
+                        'Investigators':['Jeremiah Cohen'],
+                        'Fundee':['nan'],
+                    }
+                self.Metadata_dialog.project_info(project_info)
+                self.ProjectName.addItems(['Behavior Platform'])
 
         self.keyPressEvent(allow_reset=True) 
         return 
