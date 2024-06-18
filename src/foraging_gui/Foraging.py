@@ -966,7 +966,7 @@ class Window(QMainWindow):
                 box_list.append(str(tower)+box)
 
             self.schedule = schedule.query('Box in @box_list').copy() 
-            #print(self.schedule)
+            print(self.schedule) ## DEBUGGING
         else:
             logging.error('Could not find schedule at {}'.format(self.Settings['schedule_path']))
             return
@@ -977,7 +977,7 @@ class Window(QMainWindow):
             return None
         if mouse_id not in self.schedule['Mouse ID'].values:
             return None
-        return schedule.query('`Mouse ID` == @mouse_id').iloc[0][column]
+        return self.schedule.query('`Mouse ID` == @mouse_id').iloc[0][column]
 
     def _GetSettings(self):
         '''
@@ -2638,6 +2638,7 @@ class Window(QMainWindow):
         self.TargetRatio.setText('0.85')
         
         protocol = self._GetInfoFromSchedule(mouse_id,'Protocol')
+        print(protocol) ## DEBUGGING
         if protocol is not None:
             # Set metadata protocol 
             self.Metadata_dialog.meta_data['session_metadata']['IACUCProtocol']=str(int(protocol))
