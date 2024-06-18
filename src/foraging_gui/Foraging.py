@@ -966,7 +966,6 @@ class Window(QMainWindow):
                 box_list.append(str(tower)+box)
 
             self.schedule = schedule.query('Box in @box_list').copy() 
-            print(self.schedule) ## DEBUGGING
         else:
             logging.error('Could not find schedule at {}'.format(self.Settings['schedule_path']))
             return
@@ -2639,9 +2638,7 @@ class Window(QMainWindow):
 
         # Set IACUC protocol in metadata based on schedule
         protocol = self._GetInfoFromSchedule(mouse_id,'Protocol')
-        print(protocol) ## DEBUGGING
         if protocol is not None:
-
             self.Metadata_dialog.meta_data['session_metadata']['IACUCProtocol']=str(int(protocol))
             self.Metadata_dialog._update_metadata(
                 update_rig_metadata=False, 
@@ -2653,9 +2650,8 @@ class Window(QMainWindow):
         project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
         add_default = True
         if project_name is not None:
-            projects = [self.Metadata_dialog.ProjectName.itemText(i) for i in range(self.Metadata_dialog.ProjectName.count())]
-            print(projects)
-            print(project_name)
+            projects = [self.Metadata_dialog.ProjectName.itemText(i) 
+                for i in range(self.Metadata_dialog.ProjectName.count())]
             index = np.where(np.array(projects) == project_name)[0]
             if len(index) > 0:
                 index = index[0]
@@ -2664,13 +2660,14 @@ class Window(QMainWindow):
                 logging.info('Setting Project name: {}'.format(project_name))
                 add_default = False
         if add_default:
-            projects = [self.Metadata_dialog.ProjectName.itemText(i) for i in range(self.Metadata_dialog.ProjectName.count())]
+            projects = [self.Metadata_dialog.ProjectName.itemText(i) 
+                for i in range(self.Metadata_dialog.ProjectName.count())]
             index = np.where(np.array(projects) == 'Behavior Platform')[0]
             if len(index) > 0:
                 index = index[0]
                 self.Metadata_dialog.ProjectName.setCurrentIndex(index)
                 self.Metadata_dialog._show_project_info()
-                logging.info('Setting Project name: {}'.format(project_name))
+                logging.info('Setting Project name: {}'.format('Behavior Platform'))
 
         self.keyPressEvent(allow_reset=True) 
         return 
