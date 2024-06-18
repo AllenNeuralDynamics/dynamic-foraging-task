@@ -2636,14 +2636,27 @@ class Window(QMainWindow):
         self.BaseWeight.setText('')
         self.WeightAfter.setText('')
         self.TargetRatio.setText('0.85')
-        
+
+        # Set IACUC protocol in metadata based on schedule
         protocol = self._GetInfoFromSchedule(mouse_id,'Protocol')
         print(protocol) ## DEBUGGING
         if protocol is not None:
-            # Set metadata protocol 
+
             self.Metadata_dialog.meta_data['session_metadata']['IACUCProtocol']=str(int(protocol))
-            self.Metadata_dialog._update_metadata(update_rig_metadata=False, update_session_metadata=True)
-            #self.Metadata_dialog.IACUCProtocol.setText(str(protocol)) 
+            self.Metadata_dialog._update_metadata(
+                update_rig_metadata=False, 
+                update_session_metadata=True
+                )
+
+        # Set Project Name in metadata based on schedule
+        project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
+        if project_name is not None:
+            projects = [self.Metadata_dialog.ProjectName.itemText(i) for i in range(self.Metadata_dialog.ProjectName.count())]
+            print(projects)
+            #index = ?
+
+            #self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+            #self.Metadata_dialog._show_project_info()
 
         self.keyPressEvent(allow_reset=True) 
         return 
