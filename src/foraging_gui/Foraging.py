@@ -2647,16 +2647,30 @@ class Window(QMainWindow):
                 update_rig_metadata=False, 
                 update_session_metadata=True
                 )
+            logging.info('Setting IACUC Protocol: {}'.format(protocol))
 
         # Set Project Name in metadata based on schedule
         project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
+        add_default = True
         if project_name is not None:
             projects = [self.Metadata_dialog.ProjectName.itemText(i) for i in range(self.Metadata_dialog.ProjectName.count())]
             print(projects)
-            #index = ?
-
-            #self.Metadata_dialog.ProjectName.setCurrentIndex(index)
-            #self.Metadata_dialog._show_project_info()
+            print(project_name)
+            index = np.where(np.array(projects) == project_name)[0]
+            if len(index) > 0:
+                index = index[0]
+                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+                self.Metadata_dialog._show_project_info()
+                logging.info('Setting Project name: {}'.format(project_name))
+                add_default = False
+        if add_default:
+            projects = [self.Metadata_dialog.ProjectName.itemText(i) for i in range(self.Metadata_dialog.ProjectName.count())]
+            index = np.where(np.array(projects) == 'Behavior Platform')[0]
+            if len(index) > 0:
+                index = index[0]
+                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+                self.Metadata_dialog._show_project_info()
+                logging.info('Setting Project name: {}'.format(project_name))
 
         self.keyPressEvent(allow_reset=True) 
         return 
