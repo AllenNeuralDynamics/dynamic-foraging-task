@@ -2679,9 +2679,9 @@ class Window(QMainWindow):
                     }
                 self.Metadata_dialog.project_info = project_info
                 self.Metadata_dialog.ProjectName.addItems(['Behavior Platform'])
+                logging.info('Setting Project name: {}'.format('Behavior Platform'))
 
         self.keyPressEvent(allow_reset=True) 
-        return 
     
     def _Open_getListOfMice(self):
         '''
