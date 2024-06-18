@@ -17,5 +17,7 @@ git pull origin %branch% >>%logfile% 2>&1
 echo waiting thirty seconds for logging to finish >>%logfile%
 timeout 30 >NUL
 git status >>%logfile% 2>&1
+echo --------------------------- >%updatefile%
+echo %date% %time% >>%updatefile%
 call conda activate Foraging
 pip install -e . >>%updatefile% 2>&1
