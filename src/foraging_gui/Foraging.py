@@ -447,11 +447,17 @@ class Window(QMainWindow):
         session_full_path_list=[]
         session_path_list=[]
         for session_folder in os.listdir(animal_folder):
-            training_folder = os.path.join(animal_folder,session_folder, 'behavior')
-            if os.path.exists(training_folder):
-                for file_name in os.listdir(training_folder):
+            training_folder_old = os.path.join(animal_folder,session_folder, 'TrainingFolder')
+            training_folder_new = os.path.join(animal_folder,session_folder, 'behavior')
+            if os.path.exists(training_folder_old):
+                for file_name in os.listdir(training_folder_old):
                     if file_name.endswith('.json'): 
-                        session_full_path_list.append(os.path.join(training_folder, file_name))
+                        session_full_path_list.append(os.path.join(training_folder_old, file_name))
+                        session_path_list.append(session_folder) 
+            elif os.path.exists(training_folder_new):
+                for file_name in os.listdir(training_folder_new):
+                    if file_name.endswith('.json'): 
+                        session_full_path_list.append(os.path.join(training_folder_new, file_name))
                         session_path_list.append(session_folder) 
 
         sorted_indices = sorted(enumerate(session_path_list), key=lambda x: x[1], reverse=True)
