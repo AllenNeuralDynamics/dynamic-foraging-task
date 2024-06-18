@@ -971,13 +971,13 @@ class Window(QMainWindow):
             logging.error('Could not find schedule at {}'.format(self.Settings['schedule_path']))
             return
 
-    def _GetIACUC(self, mouse_id):
+    def _GetInfoFromSchedule(self, mouse_id, column):
         mouse_id = str(mouse_id)
         if not hasattr(self, 'schedule'):
             return None
         if mouse_id not in self.schedule['Mouse ID'].values:
             return None
-        return int(schedule.query('`Mouse ID` == @mouse_id').iloc[0].Protocol)
+        return schedule.query('`Mouse ID` == @mouse_id').iloc[0][column]
 
     def _GetSettings(self):
         '''
@@ -2637,10 +2637,10 @@ class Window(QMainWindow):
         self.WeightAfter.setText('')
         self.TargetRatio.setText('0.85')
         
-        protocol = self._GetIACUC(mouse_id)
+        protocol = self._GetInfoFromSchedule(mouse_id,'Protocol')
         if protocol is not None:
             # Set metadata protocol 
-            self.Metadata_dialog.meta_data['session_metadata']['IACUCProtocol']=str(protocol)
+            self.Metadata_dialog.meta_data['session_metadata']['IACUCProtocol']=str(int(protocol))
             self.Metadata_dialog._update_metadata(update_rig_metadata=False, update_session_metadata=True)
             #self.Metadata_dialog.IACUCProtocol.setText(str(protocol)) 
 
