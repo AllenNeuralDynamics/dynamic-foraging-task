@@ -966,6 +966,7 @@ class Window(QMainWindow):
                 box_list.append(str(tower)+box)
 
             self.schedule = schedule.query('Box in @box_list').copy() 
+            logging.info('Loaded behavior schedule')
         else:
             logging.error('Could not find schedule at {}'.format(self.Settings['schedule_path']))
             return
