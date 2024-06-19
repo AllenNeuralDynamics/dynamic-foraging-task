@@ -20,4 +20,4 @@ git status >>%logfile% 2>&1
 echo --------------------------- >%updatefile%
 echo %date% %time% >>%updatefile%
 call conda activate Foraging
-pip install -e . >>%updatefile% 2>&1
+pip install --upgrade -e . >>%updatefile% 2>&1
