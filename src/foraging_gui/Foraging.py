@@ -4038,6 +4038,7 @@ def log_git_hash():
 
     # Log gui version:
     logging.info('Current foraging_gui version: {}'.format(foraging_gui.__version__))
+    print('Current foraging_gui version: {}'.format(foraging_gui.__version__))
 
     # Check for untracked local changes
     repo_dirty_flag = dirty_files != ''
