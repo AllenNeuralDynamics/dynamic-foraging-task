@@ -10,6 +10,7 @@ import socket
 import harp
 import pandas as pd
 import threading
+import itertools
 from pathlib import Path
 from datetime import date, datetime
 
@@ -69,6 +70,7 @@ class Window(QMainWindow):
         self.SettingFile=os.path.join(self.SettingFolder,'ForagingSettings.json')
         self.SettingsBoxFile=os.path.join(self.SettingFolder,'Settings_box'+str(self.box_number)+'.csv')
         self._GetSettings()
+        self._LoadSchedule()
 
         # Load Settings that are specific to this box 
         self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration_{}.json'.format(box_number))
@@ -961,6 +963,23 @@ class Window(QMainWindow):
                 return True
             else:
                 return False
+    
+    def _LoadSchedule(self):
+        if os.path.exists(self.Settings['schedule_path']):
+            schedule = pd.read_csv(self.Settings['schedule_path'])
+            schedule = schedule.dropna(subset=['Mouse ID','Box']).copy()
+            logging.info('Loaded behavior schedule')
+        else:
+            logging.error('Could not find schedule at {}'.format(self.Settings['schedule_path']))
+            return
+
+    def _GetInfoFromSchedule(self, mouse_id, column):
+        mouse_id = str(mouse_id)
+        if not hasattr(self, 'schedule'):
+            return None
+        if mouse_id not in self.schedule['Mouse ID'].values:
+            return None
+        return self.schedule.query('`Mouse ID` == @mouse_id').iloc[0][column]
 
     def _GetSettings(self):
         '''
@@ -991,6 +1010,7 @@ class Window(QMainWindow):
             'metadata_dialog_folder':os.path.join(self.SettingFolder,"metadata_dialog")+'\\',
             'rig_metadata_folder':os.path.join(self.SettingFolder,"rig_metadata")+'\\',
             'project_info_file':os.path.join(self.SettingFolder,"Project Name and Funding Source v2.csv"),
+            'schedule_path':os.path.join('Z:\\','dynamic_foraging','DynamicForagingSchedule.csv'),
             'go_cue_decibel_box1':60,
             'go_cue_decibel_box2':60,
             'go_cue_decibel_box3':60,
@@ -2619,7 +2639,51 @@ class Window(QMainWindow):
         self.WeightAfter.setText('')
         self.TargetRatio.setText('0.85')
         self.keyPressEvent(allow_reset=True) 
-        return 
+
+        # Set IACUC protocol in metadata based on schedule
+        protocol = self._GetInfoFromSchedule(mouse_id,'Protocol')
+        if protocol is not None:
+            self.Metadata_dialog.meta_data['session_metadata']['IACUCProtocol']=str(int(protocol))
+            self.Metadata_dialog._update_metadata(
+                update_rig_metadata=False, 
+                update_session_metadata=True
+                )
+            logging.info('Setting IACUC Protocol: {}'.format(protocol))
+
+        # Set Project Name in metadata based on schedule
+        project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
+        add_default = True
+        if project_name is not None:
+            projects = [self.Metadata_dialog.ProjectName.itemText(i) 
+                for i in range(self.Metadata_dialog.ProjectName.count())]
+            index = np.where(np.array(projects) == project_name)[0]
+            if len(index) > 0:
+                index = index[0]
+                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+                self.Metadata_dialog._show_project_info()
+                logging.info('Setting Project name: {}'.format(project_name))
+                add_default = False
+        if add_default:
+            projects = [self.Metadata_dialog.ProjectName.itemText(i) 
+                for i in range(self.Metadata_dialog.ProjectName.count())]
+            index = np.where(np.array(projects) == 'Behavior Platform')[0]
+            if len(index) > 0:
+                index = index[0]
+                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+                self.Metadata_dialog._show_project_info()
+                logging.info('Setting Project name: {}'.format('Behavior Platform'))
+            else:
+                project_info = {
+                        'Funding Institution':['Allen Institution'],
+                        'Grant Number':['nan'],
+                        'Investigators':['Jeremiah Cohen'],
+                        'Fundee':['nan'],
+                    }
+                self.Metadata_dialog.project_info = project_info
+                self.Metadata_dialog.ProjectName.addItems(['Behavior Platform'])
+                logging.info('Setting Project name: {}'.format('Behavior Platform'))
+
+        self.keyPressEvent(allow_reset=True) 
     
     def _Open_getListOfMice(self):
         '''
