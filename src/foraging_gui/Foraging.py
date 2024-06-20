@@ -25,6 +25,7 @@ from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 
+import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
 from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
 from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,MetadataDialog
@@ -4034,6 +4035,9 @@ def log_git_hash():
     # Log branch and commit hash
     logging.info('Current git commit branch, hash: {}, {}'.format(git_branch,git_hash))
     print('Current git commit branch, hash: {}, {}'.format(git_branch,git_hash))
+
+    # Log gui version:
+    logging.info('Current foraging_gui version: {}'.format(foraging_gui.__version__))
 
     # Check for untracked local changes
     repo_dirty_flag = dirty_files != ''
