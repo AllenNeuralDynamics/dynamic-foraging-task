@@ -1,0 +1,14 @@
+name: version increment
+run-name: increment foraging gui version
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+   bump-version:
+     uses: AllenNeuralDynamics/aind-github-actions/.github/workflows/tag.yml@main
+     with:
+       default_branch: main # optional, default: main
+     secrets:
+       SERVICE_TOKEN: ${{ secrets.GITHUB_TOKEN }} # required
