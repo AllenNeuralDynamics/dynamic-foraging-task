@@ -2674,7 +2674,7 @@ class Window(QMainWindow):
                 logging.info('Setting Project name: {}'.format('Behavior Platform'))
             else:
                 project_info = {
-                        'Funding Institution':['Allen Institution'],
+                        'Funding Institution':['Allen Institute'],
                         'Grant Number':['nan'],
                         'Investigators':['Jeremiah Cohen'],
                         'Fundee':['nan'],
