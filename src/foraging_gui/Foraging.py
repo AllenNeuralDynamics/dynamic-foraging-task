@@ -2733,7 +2733,7 @@ class Window(QMainWindow):
                             self.WeightAfter.disconnect()
                             value=CurrentObj[key]
                             Tag=1
-                            
+
                         if type(value)==bool:
                             Tag=1
                         else:
@@ -2754,8 +2754,18 @@ class Window(QMainWindow):
                         elif isinstance(widget, QtWidgets.QComboBox):
                             if Tag==0:
                                 index = widget.findText(value[-1])
+                                final_value = value[-1]
                             elif Tag==1:
                                 index = widget.findText(value)
+                                final_value = value
+                            
+                            if key.startswith('Frequency_'):
+                                condition=key.split('_')[1]
+                                if CurrentObj['Protocol_'+condition] in ['Pulse']:
+                                    widget.setEditable(True)
+                                    widget.lineEdit().setText(final_value)
+                                    continue
+                                
                             if index != -1:
                                 # Alternating on/off for SessionStartWith if SessionAlternating is on
                                 if key=='SessionStartWith' and 'Opto_dialog' in Obj:
