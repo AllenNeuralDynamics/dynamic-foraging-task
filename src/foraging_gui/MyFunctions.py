@@ -1359,7 +1359,7 @@ class GenerateTrials():
             else:
                 self.SelctedCondition=0 # control is selected
         # Determine whether the interval between two near trials is larger than the MinOptoInterval
-        non_zero_indices=np.nonzero(np.array(self.B_SelectedCondition))
+        non_zero_indices=np.nonzero(np.array(self.B_SelectedCondition).astype(int))
         if len(non_zero_indices[0])>0:
             if len(self.B_SelectedCondition)-(non_zero_indices[0][-1]+1)<float(self.TP_MinOptoInterval):
                 self.SelctedCondition=0
