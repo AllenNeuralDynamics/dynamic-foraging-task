@@ -3851,7 +3851,6 @@ class Window(QMainWindow):
     def _PostWeightChange(self):
         self.unsaved_data=True
         self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
-        self.NewSession.setStyleSheet("background-color : none")
         self.WarningLabel.setText('')
         self._UpdateSuggestedWater()
 
