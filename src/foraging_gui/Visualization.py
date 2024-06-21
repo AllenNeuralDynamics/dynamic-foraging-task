@@ -208,7 +208,7 @@ class PlotV(FigureCanvas):
                 continue
             current_color=color_mapping['Condition'+str(condition)]
             self.ax1.plot(self.B_BTime[Optogenetics_On], np.zeros(len(self.B_BTime[Optogenetics_On]))+1.5, 
-                'o',markeredgecolor = current_color, markerfacecolor = current_color,label='Optogenetics',markersize=self.MarkerSize, alpha=1)
+                'o',markeredgecolor = current_color, markerfacecolor = current_color,label='Opto condition '+str(condition),markersize=self.MarkerSize, alpha=1)
             
         if np.size(LeftBait) !=0:
             self.ax1.plot(self.B_BTime[LeftBait], np.zeros(len(self.B_BTime[LeftBait]))-0.2, 
