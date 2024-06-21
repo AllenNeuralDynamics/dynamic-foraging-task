@@ -105,10 +105,10 @@ class PlotV(FigureCanvas):
 
         # Colors for different optogenetics conditions
         color_mapping = {
-            'Condition1': (1, 0, 0, 1),  # Red with full opacity
-            'Condition2': (0, 1, 0, 1),  # Green with full opacity
-            'Condition3': (0, 0, 1, 1),  # Blue with full opacity
-            'Condition4': (1, 1, 0, 1)   # Yellow with full opacity
+            'Condition1': (0, 191/255, 255/255, 1),  # Deep Sky Blue
+            'Condition2': (255/255, 127/255, 80/255, 1),  # Coral Red
+            'Condition3': (34/255, 139/255, 34/255, 1),  # Forest Green
+            'Condition4': (218/255, 165/255, 32/255, 1)  # Goldenrod
         }
 
         # Define trial types
