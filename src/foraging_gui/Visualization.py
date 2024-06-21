@@ -58,7 +58,7 @@ class PlotV(FigureCanvas):
         self.B_LaserOnTrial=np.array(GeneratedTrials.B_LaserOnTrial)
         self.B_AutoWaterTrial=GeneratedTrials.B_AutoWaterTrial
         self.MarchingType=GeneratedTrials.TP_MartchingType
-
+        self.B_SelectedCondition=np.array(GeneratedTrials.B_SelectedCondition)
         if self.B_CurrentTrialN>0:
             self.B_Time=self.B_RewardOutcomeTime-GeneratedTrials.B_TrialStartTime[0]
         else:
@@ -108,8 +108,7 @@ class PlotV(FigureCanvas):
         LeftChoice_UnRewarded=np.where(np.logical_and(self.B_AnimalResponseHistory==0,self.B_RewardedHistory[0]==False))
         RightChoice_Rewarded=np.where(np.logical_and(self.B_AnimalResponseHistory==1,self.B_RewardedHistory[1]==True))
         RightChoice_UnRewarded=np.where(np.logical_and(self.B_AnimalResponseHistory==1, self.B_RewardedHistory[1]==False))
-        Optogenetics_On=np.where(self.B_LaserOnTrial[:-1]==1)
-
+        
         # running average of choice
         if self.RunLength()!='':
             kernel_size = int(self.RunLength())
@@ -193,9 +192,22 @@ class PlotV(FigureCanvas):
             self.ax1.plot(self.B_BTime[RightAutoWater], np.zeros(len(self.B_BTime[RightAutoWater]))+0.6, 
                 'bo',markerfacecolor =(0, 1, 0, 1),markersize=self.MarkerSize,label='AutoWater')
 
-        if np.size(Optogenetics_On) !=0:
+        # Example categories and their associated colors
+        color_mapping = {
+            'Condition1': (1, 0, 0, 1),  # Red with full opacity
+            'Condition2': (0, 1, 0, 1),  # Green with full opacity
+            'Condition3': (0, 0, 1, 1),  # Blue with full opacity
+            'Condition4': (1, 1, 0, 1)   # Yellow with full opacity
+        }
+        condition_list=list(set(self.B_SelectedCondition))
+        for condition in condition_list:
+            Optogenetics_On=np.where(np.logical_and(self.B_LaserOnTrial[:-1]==1,self.B_SelectedCondition[:-1]==condition))
+            if len(Optogenetics_On[0])==0:
+                continue
+            current_color=color_mapping['Condition'+str(condition)]
             self.ax1.plot(self.B_BTime[Optogenetics_On], np.zeros(len(self.B_BTime[Optogenetics_On]))+1.5, 
-                'bo',markerfacecolor = (0, 0, 1, 1),label='Optogenetics',markersize=self.MarkerSize, alpha=1)
+                'o',markeredgecolor = current_color, markerfacecolor = current_color,label='Optogenetics',markersize=self.MarkerSize, alpha=1)
+            
         if np.size(LeftBait) !=0:
             self.ax1.plot(self.B_BTime[LeftBait], np.zeros(len(self.B_BTime[LeftBait]))-0.2, 
                 'kD',markersize=self.MarkerSize, alpha=0.2)
