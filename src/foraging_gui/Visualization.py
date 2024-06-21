@@ -103,6 +103,14 @@ class PlotV(FigureCanvas):
     def _PlotChoice(self):
         self.ax1.cla()
 
+        # Colors for different optogenetics conditions
+        color_mapping = {
+            'Condition1': (1, 0, 0, 1),  # Red with full opacity
+            'Condition2': (0, 1, 0, 1),  # Green with full opacity
+            'Condition3': (0, 0, 1, 1),  # Blue with full opacity
+            'Condition4': (1, 1, 0, 1)   # Yellow with full opacity
+        }
+
         # Define trial types
         LeftChoice_Rewarded=np.where(np.logical_and(self.B_AnimalResponseHistory==0,self.B_RewardedHistory[0]==True))
         LeftChoice_UnRewarded=np.where(np.logical_and(self.B_AnimalResponseHistory==0,self.B_RewardedHistory[0]==False))
@@ -174,7 +182,8 @@ class PlotV(FigureCanvas):
             if self.B_BaitHistory[1][-1]==True:
                 self.ax1.plot(NewTrialStart2,1.2, 'kD',markersize=self.MarkerSize, alpha=0.4)
             if self.B_LaserOnTrial[-1]==1:
-                self.ax1.plot(NewTrialStart2,1.5, 'bo',markersize=self.MarkerSize,markerfacecolor = (0, 0, 1, 1), alpha=1)
+                current_color=color_mapping['Condition'+str(self.B_SelectedCondition[-1])]
+                self.ax1.plot(NewTrialStart2,1.5, 'o',markersize=self.MarkerSize,markeredgecolor=current_color, markerfacecolor = current_color, alpha=1)
             if self.B_AutoWaterTrial[0][-1]==1:
                 self.ax1.plot(NewTrialStart2,0.4, 'bo',markerfacecolor = (0, 1, 0, 1),markersize=self.MarkerSize)
             if self.B_AutoWaterTrial[1][-1]==1:
@@ -192,13 +201,6 @@ class PlotV(FigureCanvas):
             self.ax1.plot(self.B_BTime[RightAutoWater], np.zeros(len(self.B_BTime[RightAutoWater]))+0.6, 
                 'bo',markerfacecolor =(0, 1, 0, 1),markersize=self.MarkerSize,label='AutoWater')
 
-        # Example categories and their associated colors
-        color_mapping = {
-            'Condition1': (1, 0, 0, 1),  # Red with full opacity
-            'Condition2': (0, 1, 0, 1),  # Green with full opacity
-            'Condition3': (0, 0, 1, 1),  # Blue with full opacity
-            'Condition4': (1, 1, 0, 1)   # Yellow with full opacity
-        }
         condition_list=list(set(self.B_SelectedCondition))
         for condition in condition_list:
             Optogenetics_On=np.where(np.logical_and(self.B_LaserOnTrial[:-1]==1,self.B_SelectedCondition[:-1]==condition))
