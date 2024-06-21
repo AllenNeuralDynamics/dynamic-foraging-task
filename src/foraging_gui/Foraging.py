@@ -2734,6 +2734,7 @@ class Window(QMainWindow):
                             value=CurrentObj[key]
                             Tag=1
 
+                        # tag=0, get the last value for ndarray; tag=1, get the current value for single value data
                         if type(value)==bool:
                             Tag=1
                         else:
@@ -2742,30 +2743,27 @@ class Window(QMainWindow):
                                 Tag=0
                         if type(value)==np.ndarray:
                             Tag=0
+
+                        if tag==0:
+                            final_value=value[-1]
+                        elif tag==1:
+                            final_value=value
+
                         if isinstance(widget, QtWidgets.QLineEdit):
-                            if Tag==0:
-                                widget.setText(value[-1])
-                            elif Tag==1:
-                                widget.setText(value)
+                            widget.setText(final_value)
                             if key in {'BaseWeight','TotalWater','TargetWeight','WeightAfter','SuggestedWater','TargetRatio'}:
                                 self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
                                 self.WeightAfter.textChanged.connect(self._PostWeightChange)
                                 self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
                         elif isinstance(widget, QtWidgets.QComboBox):
-                            if Tag==0:
-                                index = widget.findText(value[-1])
-                                final_value = value[-1]
-                            elif Tag==1:
-                                index = widget.findText(value)
-                                final_value = value
-                            
+                            index=widget.findText(final_value)
                             if key.startswith('Frequency_'):
                                 condition=key.split('_')[1]
                                 if CurrentObj['Protocol_'+condition] in ['Pulse']:
                                     widget.setEditable(True)
                                     widget.lineEdit().setText(final_value)
                                     continue
-                                
+
                             if index != -1:
                                 # Alternating on/off for SessionStartWith if SessionAlternating is on
                                 if key=='SessionStartWith' and 'Opto_dialog' in Obj:
@@ -2776,25 +2774,13 @@ class Window(QMainWindow):
                                 else:
                                     widget.setCurrentIndex(index)
                         elif isinstance(widget, QtWidgets.QDoubleSpinBox):
-                            if Tag==0:
-                                widget.setValue(float(value[-1]))
-                            elif Tag==1:
-                                widget.setValue(float(value))
+                            widget.setValue(float(final_value))
                         elif isinstance(widget, QtWidgets.QSpinBox):
-                            if Tag==0:
-                                widget.setValue(int(value[-1]))
-                            elif Tag==1:
-                                widget.setValue(int(value))
+                            widget.setValue(int(final_value))
                         elif isinstance(widget, QtWidgets.QTextEdit):
-                            if Tag==0:
-                                widget.setText(value[-1])
-                            elif Tag==1:
-                                widget.setText(value)
+                            widget.setText(final_value)
                         elif isinstance(widget, QtWidgets.QPushButton):
-                            if Tag==0:
-                                widget.setChecked(bool(value[-1]))
-                            elif Tag==1:
-                                widget.setChecked(value)
+                            widget.setCheckable(bool(final_value))
                             if key=='AutoReward':
                                 self._AutoReward()
                             if key=='NextBlock':
