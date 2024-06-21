@@ -1640,7 +1640,7 @@ class Window(QMainWindow):
             Parameters=self.GeneratedTrials
         else:
             Parameters=self
-        if event==None:
+        if event is None or not isinstance(event, QtGui.QKeyEvent):
             event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, Qt.Key_Return, Qt.KeyboardModifiers())
         if (event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter):
             # handle the return key press event here
