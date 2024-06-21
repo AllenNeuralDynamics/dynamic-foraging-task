@@ -2744,9 +2744,9 @@ class Window(QMainWindow):
                         if type(value)==np.ndarray:
                             Tag=0
 
-                        if tag==0:
+                        if Tag==0:
                             final_value=value[-1]
-                        elif tag==1:
+                        elif Tag==1:
                             final_value=value
 
                         if isinstance(widget, QtWidgets.QLineEdit):
