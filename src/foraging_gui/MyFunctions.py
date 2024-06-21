@@ -1361,7 +1361,7 @@ class GenerateTrials():
         # Determine whether the interval between two near trials is larger than the MinOptoInterval
         non_zero_indices=np.nonzero(np.array(self.B_SelectedCondition))
         if len(non_zero_indices[0])>0:
-            if len(self.B_SelectedCondition)-(non_zero_indices[0][-1]+1)<self.TP_MinOptoInterval:
+            if len(self.B_SelectedCondition)-(non_zero_indices[0][-1]+1)<float(self.TP_MinOptoInterval):
                 self.SelctedCondition=0
                 
     def _InitiateATrial(self,Channel1,Channel4):
