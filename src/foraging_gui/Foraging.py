@@ -2733,8 +2733,7 @@ class Window(QMainWindow):
                             self.WeightAfter.disconnect()
                             value=CurrentObj[key]
                             Tag=1
-                        if isinstance(widget, QtWidgets.QPushButton):
-                            pass
+                            
                         if type(value)==bool:
                             Tag=1
                         else:
