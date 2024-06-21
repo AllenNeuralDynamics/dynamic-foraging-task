@@ -3911,7 +3911,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Min no opto trials=</string>
+     <string>Min opto interval=</string>
     </property>
     <property name="textFormat">
      <enum>Qt::AutoText</enum>
@@ -3920,7 +3920,7 @@
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QLineEdit" name="MinNoOpto">
+   <widget class="QLineEdit" name="MinOptoInterval">
     <property name="geometry">
      <rect>
       <x>100</x>

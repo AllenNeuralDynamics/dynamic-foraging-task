@@ -1358,7 +1358,7 @@ class GenerateTrials():
                 break
             else:
                 self.SelctedCondition=0 # control is selected
-
+        # Determine whether the interval between two near trials is larger than the MinOptoInterval
     def _InitiateATrial(self,Channel1,Channel4):
     
         # Indicate that unsaved data exists
