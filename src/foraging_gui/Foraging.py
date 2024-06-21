@@ -2786,7 +2786,7 @@ class Window(QMainWindow):
                         elif isinstance(widget, QtWidgets.QTextEdit):
                             widget.setText(final_value)
                         elif isinstance(widget, QtWidgets.QPushButton):
-                            widget.setCheckable(bool(final_value))
+                            widget.setChecked(bool(final_value))
                             if key=='AutoReward':
                                 self._AutoReward()
                             if key=='NextBlock':
