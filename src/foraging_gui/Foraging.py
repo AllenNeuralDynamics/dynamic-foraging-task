@@ -1617,7 +1617,7 @@ class Window(QMainWindow):
     def keyPressEvent(self, event=None,allow_reset=False):
         '''
             Enter press to allow change of parameters
-            allow_reset (bool) allows the Baseweight parameter to be reset to the empty string
+            allow_reset (bool) allows the Baseweight etc. parameters to be reset to the empty string
         '''
         try:
             if self.actionTime_distribution.isChecked()==True:
@@ -1725,6 +1725,10 @@ class Window(QMainWindow):
                     self._ShowRewardPairs()
                 try:
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
+                        # Changes are not allowed until press is typed except for PositionX, PositionY and PositionZ
+                        if child.objectName() not in ('PositionX', 'PositionY', 'PositionZ'):
+                            self.UpdateParameters = 0
+                        
                         self.Continue=0
                         if child.objectName() in {'LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','ProbeTarget','RigMetadataFile','Experimenter', 'UncoupledReward', 'ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
                             child.setStyleSheet(self.default_text_color)
@@ -1744,16 +1748,12 @@ class Window(QMainWindow):
                         try:
                             # it's valid float
                             float(child.text())
-                            # Changes are not allowed until press is typed except for PositionX, PositionY and PositionZ
-                            if child.objectName() not in ('PositionX', 'PositionY', 'PositionZ'):
-                                self.UpdateParameters = 0
                         except Exception as e:
                             #logging.error(str(e))
                             # Invalid float. Do not change the parameter
                             if child.objectName() in ['BaseWeight', 'WeightAfter']:
                                 # Strip the last character which triggered the invalid float
                                 child.setText(child.text()[:-1]) 
-                                self.UpdateParameters=0
                                 continue
                             elif isinstance(child, QtWidgets.QDoubleSpinBox):
                                 child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
