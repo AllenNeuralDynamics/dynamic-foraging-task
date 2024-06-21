@@ -269,6 +269,10 @@ class Window(QMainWindow):
         self.SessionlistSpin.textChanged.connect(self._session_list_spin)
         self.StartEphysRecording.clicked.connect(self._StartEphysRecording)
         self.SetReference.clicked.connect(self._set_reference)
+        self.Opto_dialog.laser_1_calibration_voltage.textChanged.connect(self._toggle_save_color)
+        self.Opto_dialog.laser_2_calibration_voltage.textChanged.connect(self._toggle_save_color)
+        self.Opto_dialog.laser_1_calibration_power.textChanged.connect(self._toggle_save_color)
+        self.Opto_dialog.laser_2_calibration_power.textChanged.connect(self._toggle_save_color)
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
@@ -3838,6 +3842,11 @@ class Window(QMainWindow):
         self.Channel.RightValue(float(self.TP_RightValue)*1000)
         self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
         self._UpdateSuggestedWater()
+    
+    def _toggle_save_color(self):
+        '''toggle the color of the save button to mediumorchid'''
+        self.unsaved_data=True
+        self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
 
     def _PostWeightChange(self):
         self.unsaved_data=True
