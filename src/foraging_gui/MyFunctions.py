@@ -1077,10 +1077,6 @@ class GenerateTrials():
                 self.win.ShowBasic.setText(Other_BasicText)
                 self.win.Other_BasicText=Other_BasicText
      
-        # newscale positions
-        if hasattr(self.win, 'current_stage'):
-            self.win._GetPositions()
-                
     def _CheckStop(self):
         '''Stop if there are many ingoral trials or if the maximam trial is exceeded MaxTrial'''
         StopIgnore=int(self.TP_StopIgnores)-1
