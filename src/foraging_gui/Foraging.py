@@ -3341,7 +3341,6 @@ class Window(QMainWindow):
         '''start trial loop'''
         # empty post weight
         self.WeightAfter.setText('')
-
         # Check for Bonsai connection
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
@@ -3468,6 +3467,12 @@ class Window(QMainWindow):
             self.WarningLabel.setStyleSheet("color: none;")
             # disable metadata fields
             self._set_metadata_enabled(False)
+            # disable preview
+            self.Camera_dialog.StartPreview.setEnabled(False)
+            # stop the temporary logging
+            if self.Camera_dialog.StartPreview.isChecked():
+                self.Camera_dialog.StartPreview.setChecked(False)
+                self.Camera_dialog._StartCamera(start_type='preview')
         else:
             # Prompt user to confirm stopping trials
             reply = QMessageBox.question(self, 
@@ -3483,7 +3488,8 @@ class Window(QMainWindow):
                 logging.info('Start button pressed: user continued session')               
                 self.Start.setChecked(True)
                 return 
-           
+            # enable preview
+            self.Camera_dialog.StartPreview.setEnabled(True)
             # If the photometry timer is running, stop it 
             if self.finish_Timer==0:
                 self.ignore_timer=True
