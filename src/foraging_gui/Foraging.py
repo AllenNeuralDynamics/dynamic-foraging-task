@@ -2970,7 +2970,7 @@ class Window(QMainWindow):
             CWD=os.path.dirname(self.FIP_workflow_path)
             logging.info('Starting FIP workflow in directory: {}'.format(CWD))
             folder_path = ' -p session="{}"'.format(self.SessionFolder)
-            camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartCamera.isChecked())
+            camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartRecording.isChecked())
             subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera+' --start',cwd=CWD,shell=True)
             self.FIP_started=True 
         except Exception as e:
@@ -3175,8 +3175,8 @@ class Window(QMainWindow):
 
     def _stop_camera(self):
         '''Stop the camera if it is running'''
-        if self.Camera_dialog.StartCamera.isChecked():
-            self.Camera_dialog.StartCamera.setChecked(False)
+        if self.Camera_dialog.StartRecording.isChecked():
+            self.Camera_dialog.StartRecording.setChecked(False)
             self.Camera_dialog._StartCamera()
     def _stop_logging(self):
         '''Stop the logging'''
@@ -3504,7 +3504,7 @@ class Window(QMainWindow):
             # start a new logging
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
-                if (not (self.Camera_dialog.StartCamera.isChecked() and self.Camera_dialog.AutoControl.currentText()=='No')) and (not self.FIP_started):
+                if (not (self.Camera_dialog.StartRecording.isChecked() and self.Camera_dialog.AutoControl.currentText()=='No')) and (not self.FIP_started):
                     self.CreateNewFolder=1
                     self.Ot_log_folder=self._restartlogging()
             except Exception as e:
@@ -3527,7 +3527,7 @@ class Window(QMainWindow):
                     raise
             # start the camera during the begginning of each session
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
-                self.Camera_dialog.StartCamera.setChecked(True)
+                self.Camera_dialog.StartRecording.setChecked(True)
                 self.Camera_dialog._StartCamera()
             self.SessionStartTime=datetime.now()
             self.Other_SessionStartTime=str(self.SessionStartTime) # for saving
