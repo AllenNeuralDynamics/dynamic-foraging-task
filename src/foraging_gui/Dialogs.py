@@ -1264,9 +1264,13 @@ class CameraDialog(QDialog):
                 logging.info(f"Directory '{self.MainWindow.temporary_video_folder}' does not exist.")
         except Exception as e:
             logging.error(str(e))
-            
-    def _StartCamera(self):
-        '''Start/stop the camera'''
+    
+    def _StartCamera(self,type='recording'):
+        '''Start/stop the camera
+        parameters:
+            type: 'recording' or 'preview'
+
+        '''
         self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
@@ -1274,11 +1278,31 @@ class CameraDialog(QDialog):
             self.MainWindow._ConnectBonsai()
             if self.MainWindow.InitializeBonsaiSuccessfully==0:
                 return 
-        if self.StartCamera.isChecked():
-            self.StartCamera.setStyleSheet("background-color : green;")
-            # Start logging if the formal logging is not started
-            if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
-                self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
+            
+        if type=='recording':
+            widget_now=self.StartCamera
+            widget_other=self.StartPreview
+        else:
+            widget_now=self.StartPreview
+            widget_other=self.StartCamera
+
+        if widget_now.isChecked():
+            widget_now.setStyleSheet("background-color : green;")
+            widget_other.setChecked(False)
+            if type=='recording':
+                # stop the preview first
+                if self.StartPreview.isChecked():
+                    self._StartCamera(type='preview')   
+                # Start logging if the formal logging is not started
+                if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
+                    self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
+            if type=='preview':
+                # stop the recording first
+                if self.StartCamera.isChecked():
+                    self._StartCamera(type='recording')
+                if self.MainWindow.logging_type!=1 or self.MainWindow.logging_type==-1:
+                    # Start logging if the temporary logging is not started
+                    self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging(self.MainWindow.temporary_video_folder)
 
             '''
             # This part was dropped due to the new logging method
@@ -1313,7 +1337,7 @@ class CameraDialog(QDialog):
             self.WarningLabelLogging.setStyleSheet("color: None;")
             self.WarningLabelOpenSave.setText('')
         else:
-            self.StartCamera.setStyleSheet("background-color : none")
+            widget_now.setStyleSheet("background-color : none")
             self.MainWindow.Channel.CameraControl(int(2))
             self.camera_stop_time = str(datetime.now())
             time.sleep(5)
