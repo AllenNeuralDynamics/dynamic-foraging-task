@@ -1218,11 +1218,9 @@ class CameraDialog(QDialog):
     def _AutoControl(self):
         '''Trigger the camera during the start of a new behavior session'''
         if self.AutoControl.currentText()=='Yes':
-            self.label_8.setEnabled(False)
             self.RestartLogging.setEnabled(False)
             self.StartRecording.setChecked(False)
         else:
-            self.label_8.setEnabled(True)
             self.RestartLogging.setEnabled(True)
             
     def _ClearTemporaryVideo(self):
