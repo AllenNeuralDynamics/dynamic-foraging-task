@@ -1196,8 +1196,8 @@ class CameraDialog(QDialog):
         self.camera_start_time=''
         self.camera_stop_time=''
     def _connectSignalsSlots(self):
-        self.StartRecording.clicked.connect(self._StartCameraRecording)
-        self.StartPreview.clicked.connect(self._StartCameraPreview)
+        self.StartRecording.clicked.connect(lambda: self._StartCamera('recording'))
+        self.StartPreview.clicked.connect(lambda: self._StartCamera('preview'))
         self.ClearTemporaryVideo.clicked.connect(self._ClearTemporaryVideo)
         self.AutoControl.currentIndexChanged.connect(self._AutoControl)
         self.OpenSaveFolder.clicked.connect(self._OpenSaveFolder)
@@ -1234,13 +1234,6 @@ class CameraDialog(QDialog):
                 logging.info(f"Directory '{self.MainWindow.temporary_video_folder}' does not exist.")
         except Exception as e:
             logging.error(str(e))
-
-    
-    def _StartCameraRecording(self):
-        self._StartCamera(start_type='recording')
-
-    def _StartCameraPreview(self):
-        self._StartCamera(start_type='preview')
 
     def _StartCamera(self,start_type='recording'):
         '''Start/stop the camera
