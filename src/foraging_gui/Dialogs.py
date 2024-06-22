@@ -1304,25 +1304,6 @@ class CameraDialog(QDialog):
                     # Start logging if the temporary logging is not started
                     self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging(self.MainWindow.temporary_video_folder)
 
-            '''
-            # This part was dropped due to the new logging method
-            # save the video data
-            if self.CollectVideo.currentText()=='Yes':
-                Re=self._SaveVideoData()
-            if self.CollectVideo.currentText()=='No' or Re==False:
-                video_folder=self.MainWindow.video_folder
-                video_folder=os.path.join(video_folder,'Tmp')
-                if not os.path.exists(video_folder):
-                    os.makedirs(video_folder)
-                side_camera_file=os.path.join(video_folder,'side_camera.avi')
-                bottom_camera_file=os.path.join(video_folder,'bottom_camera.avi')
-                side_camera_csv=os.path.join(video_folder,'side_camera.csv')
-                bottom_camera_csv=os.path.join(video_folder,'bottom_camera.csv')
-                self.MainWindow.Channel.SideCameraFile(side_camera_file)
-                self.MainWindow.Channel.BottomCameraFile(bottom_camera_file)
-                self.MainWindow.Channel.SideCameraCSV(side_camera_csv)
-                self.MainWindow.Channel.BottomCameraCSV(bottom_camera_csv)
-            '''
             # set the camera frequency. It's better to set the frequency after the temporary logging. 
             self.MainWindow.Channel.CameraFrequency(int(self.FrameRate.text()))
             # start the video triggers
