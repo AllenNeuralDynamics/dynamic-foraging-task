@@ -1196,8 +1196,8 @@ class CameraDialog(QDialog):
         self.camera_start_time=''
         self.camera_stop_time=''
     def _connectSignalsSlots(self):
-        self.StartRecording.clicked.connect(self._StartCamera)
-        self.StartPreview.clicked.connect(self._StartCamera)
+        self.StartRecording.clicked.connect(self._StartCameraRecording)
+        self.StartPreview.clicked.connect(self._StartCameraPreview)
         self.ClearTemporaryVideo.clicked.connect(self._ClearTemporaryVideo)
         self.AutoControl.currentIndexChanged.connect(self._AutoControl)
         self.OpenSaveFolder.clicked.connect(self._OpenSaveFolder)
@@ -1240,6 +1240,12 @@ class CameraDialog(QDialog):
         except Exception as e:
             logging.error(str(e))
     
+    def _StartCameraRecording(self):
+        self._StartCamera(start_type='recording')
+
+    def _StartCameraPreview(self):
+        self._StartCamera(start_type='preview')
+
     def _StartCamera(self,start_type='recording'):
         '''Start/stop the camera
         parameters:
@@ -1267,14 +1273,14 @@ class CameraDialog(QDialog):
             if start_type=='recording':
                 # stop the preview first
                 if self.StartPreview.isChecked():
-                    self._StartCamera(type='preview')   
+                    self._StartCamera(start_type='preview')   
                 # Start logging if the formal logging is not started
                 if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
                     self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
             if start_type=='preview':
                 # stop the recording first
                 if self.StartRecording.isChecked():
-                    self._StartCamera(type='recording')
+                    self._StartCamera(start_type='recording')
                 if self.MainWindow.logging_type!=1 or self.MainWindow.logging_type==-1:
                     # Start logging if the temporary logging is not started
                     self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging(self.MainWindow.temporary_video_folder)
