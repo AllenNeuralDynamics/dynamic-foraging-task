@@ -1239,6 +1239,7 @@ class CameraDialog(QDialog):
                 logging.info(f"Directory '{self.MainWindow.temporary_video_folder}' does not exist.")
         except Exception as e:
             logging.error(str(e))
+
     
     def _StartCameraRecording(self):
         self._StartCamera(start_type='recording')
@@ -1313,6 +1314,8 @@ class CameraDialog(QDialog):
             self.WarningLabelOpenSave.setText('')
             # clear temporary video files
             if start_type=='preview':
+                # stop the logging
+                self.MainWindow._stop_logging()
                 self._ClearTemporaryVideo()
 
     def _SaveVideoData(self):

@@ -3178,6 +3178,7 @@ class Window(QMainWindow):
         if self.Camera_dialog.StartRecording.isChecked():
             self.Camera_dialog.StartRecording.setChecked(False)
             self.Camera_dialog._StartCamera()
+            
     def _stop_logging(self):
         '''Stop the logging'''
         try:
