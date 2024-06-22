@@ -38,7 +38,7 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QPushButton" name="StartCamera">
+  <widget class="QPushButton" name="StartRecording">
    <property name="geometry">
     <rect>
      <x>120</x>
