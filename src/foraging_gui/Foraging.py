@@ -870,6 +870,8 @@ class Window(QMainWindow):
             self._GetSaveFolder()
             self.CreateNewFolder=0
             log_folder=self.HarpFolder
+            self.unsaved_data=True
+            self.Save.setStyleSheet("color: white;background-color : mediumorchid")
         else:
             # temporary logging
             loggingtype=1
