@@ -3178,6 +3178,7 @@ class Window(QMainWindow):
         if self.Camera_dialog.StartCamera.isChecked():
             self.Camera_dialog.StartCamera.setChecked(False)
             self.Camera_dialog._StartCamera()
+            
     def _stop_logging(self):
         '''Stop the logging'''
         try:
