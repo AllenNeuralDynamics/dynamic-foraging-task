@@ -1264,7 +1264,7 @@ class CameraDialog(QDialog):
                 logging.info(f"Directory '{self.MainWindow.temporary_video_folder}' does not exist.")
         except Exception as e:
             logging.error(str(e))
-
+            
     def _StartCamera(self):
         '''Start/stop the camera'''
         self.MainWindow._ConnectBonsai()
@@ -1276,20 +1276,10 @@ class CameraDialog(QDialog):
                 return 
         if self.StartCamera.isChecked():
             self.StartCamera.setStyleSheet("background-color : green;")
-            if self.AutoControl.currentText()=='No':
-                # If the behavior start button is checked, set the CollectVideo to Yes.
-                if self.MainWindow.Start.isChecked():
-                    index=self.CollectVideo.findText('Yes')
-                    self.CollectVideo.setCurrentIndex(index)
-                # Do not restart logging when automatic control is "yes" as logging will start in behavior control
-                if self.CollectVideo.currentText()=='Yes':
-                    # Start logging if the formal logging is not started
-                    if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
-                        self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
-                else:
-                    if self.MainWindow.logging_type!=1 or self.MainWindow.logging_type==-1:
-                        # Start logging if the temporary logging is not started
-                        self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging(self.MainWindow.temporary_video_folder)
+            # Start logging if the formal logging is not started
+            if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
+                self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
+
             '''
             # This part was dropped due to the new logging method
             # save the video data
