@@ -1240,7 +1240,7 @@ class CameraDialog(QDialog):
         except Exception as e:
             logging.error(str(e))
     
-    def _StartCamera(self,sart_type='recording'):
+    def _StartCamera(self,start_type='recording'):
         '''Start/stop the camera
         parameters:
             type: 'recording' or 'preview'
@@ -1254,7 +1254,7 @@ class CameraDialog(QDialog):
             if self.MainWindow.InitializeBonsaiSuccessfully==0:
                 return 
             
-        if sart_type=='recording':
+        if start_type=='recording':
             widget_now=self.StartRecording
             widget_other=self.StartPreview
         else:
@@ -1264,14 +1264,14 @@ class CameraDialog(QDialog):
         if widget_now.isChecked():
             widget_now.setStyleSheet("background-color : green;")
             widget_other.setChecked(False)
-            if sart_type=='recording':
+            if start_type=='recording':
                 # stop the preview first
                 if self.StartPreview.isChecked():
                     self._StartCamera(type='preview')   
                 # Start logging if the formal logging is not started
                 if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
                     self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
-            if sart_type=='preview':
+            if start_type=='preview':
                 # stop the recording first
                 if self.StartRecording.isChecked():
                     self._StartCamera(type='recording')
@@ -1305,7 +1305,7 @@ class CameraDialog(QDialog):
             self.WarningLabelLogging.setStyleSheet("color: None;")
             self.WarningLabelOpenSave.setText('')
             # clear temporary video files
-            if sart_type=='preview':
+            if start_type=='preview':
                 self._ClearTemporaryVideo()
 
     def _SaveVideoData(self):
