@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>261</width>
-    <height>448</height>
+    <width>269</width>
+    <height>476</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>23</x>
-     <y>260</y>
+     <y>280</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -42,9 +42,9 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>50</y>
+     <y>60</y>
      <width>80</width>
-     <height>20</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -54,7 +54,7 @@
     </sizepolicy>
    </property>
    <property name="text">
-    <string>Start</string>
+    <string>Start recording</string>
    </property>
    <property name="checkable">
     <bool>true</bool>
@@ -64,7 +64,7 @@
    <property name="geometry">
     <rect>
      <x>23</x>
-     <y>120</y>
+     <y>140</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -89,7 +89,7 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>120</y>
+     <y>140</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -118,7 +118,7 @@
    <property name="geometry">
     <rect>
      <x>23</x>
-     <y>84</y>
+     <y>104</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -143,7 +143,7 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>84</y>
+     <y>104</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -175,7 +175,7 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>260</y>
+     <y>280</y>
      <width>81</width>
      <height>22</height>
     </rect>
@@ -203,7 +203,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>360</y>
+     <y>380</y>
      <width>171</width>
      <height>51</height>
     </rect>
@@ -231,7 +231,7 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>156</y>
+     <y>176</y>
      <width>81</width>
      <height>20</height>
     </rect>
@@ -253,7 +253,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>370</y>
+     <y>390</y>
      <width>171</width>
      <height>51</height>
     </rect>
@@ -281,7 +281,7 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>190</y>
+     <y>210</y>
      <width>81</width>
      <height>21</height>
     </rect>
@@ -303,7 +303,7 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>225</y>
+     <y>245</y>
      <width>81</width>
      <height>21</height>
     </rect>
@@ -325,7 +325,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>320</y>
+     <y>340</y>
      <width>171</width>
      <height>51</height>
     </rect>
@@ -353,7 +353,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>330</y>
+     <y>350</y>
      <width>171</width>
      <height>51</height>
     </rect>
@@ -375,6 +375,28 @@
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="Preview">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>20</y>
+     <width>80</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="text">
+    <string>Preview</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
    </property>
   </widget>
  </widget>
