@@ -315,7 +315,7 @@
     </sizepolicy>
    </property>
    <property name="text">
-    <string>Restart log</string>
+    <string>Restart logging</string>
    </property>
    <property name="checkable">
     <bool>false</bool>
