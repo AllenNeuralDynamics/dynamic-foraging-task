@@ -9,6 +9,8 @@ import logging
 import socket
 import harp
 import pandas as pd
+import threading
+import itertools
 from pathlib import Path
 from datetime import date, datetime
 
@@ -24,6 +26,7 @@ from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 
+import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
 from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
 from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,MetadataDialog
@@ -68,6 +71,7 @@ class Window(QMainWindow):
         self.SettingFile=os.path.join(self.SettingFolder,'ForagingSettings.json')
         self.SettingsBoxFile=os.path.join(self.SettingFolder,'Settings_box'+str(self.box_number)+'.csv')
         self._GetSettings()
+        self._LoadSchedule()
 
         # Load Settings that are specific to this box 
         self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration_{}.json'.format(box_number))
@@ -446,11 +450,17 @@ class Window(QMainWindow):
         session_full_path_list=[]
         session_path_list=[]
         for session_folder in os.listdir(animal_folder):
-            training_folder = os.path.join(animal_folder,session_folder, 'behavior')
-            if os.path.exists(training_folder):
-                for file_name in os.listdir(training_folder):
+            training_folder_old = os.path.join(animal_folder,session_folder, 'TrainingFolder')
+            training_folder_new = os.path.join(animal_folder,session_folder, 'behavior')
+            if os.path.exists(training_folder_old):
+                for file_name in os.listdir(training_folder_old):
                     if file_name.endswith('.json'): 
-                        session_full_path_list.append(os.path.join(training_folder, file_name))
+                        session_full_path_list.append(os.path.join(training_folder_old, file_name))
+                        session_path_list.append(session_folder) 
+            elif os.path.exists(training_folder_new):
+                for file_name in os.listdir(training_folder_new):
+                    if file_name.endswith('.json'): 
+                        session_full_path_list.append(os.path.join(training_folder_new, file_name))
                         session_path_list.append(session_folder) 
 
         sorted_indices = sorted(enumerate(session_path_list), key=lambda x: x[1], reverse=True)
@@ -955,6 +965,23 @@ class Window(QMainWindow):
                 return True
             else:
                 return False
+    
+    def _LoadSchedule(self):
+        if os.path.exists(self.Settings['schedule_path']):
+            schedule = pd.read_csv(self.Settings['schedule_path'])
+            schedule = schedule.dropna(subset=['Mouse ID','Box']).copy()
+            logging.info('Loaded behavior schedule')
+        else:
+            logging.error('Could not find schedule at {}'.format(self.Settings['schedule_path']))
+            return
+
+    def _GetInfoFromSchedule(self, mouse_id, column):
+        mouse_id = str(mouse_id)
+        if not hasattr(self, 'schedule'):
+            return None
+        if mouse_id not in self.schedule['Mouse ID'].values:
+            return None
+        return self.schedule.query('`Mouse ID` == @mouse_id').iloc[0][column]
 
     def _GetSettings(self):
         '''
@@ -985,6 +1012,7 @@ class Window(QMainWindow):
             'metadata_dialog_folder':os.path.join(self.SettingFolder,"metadata_dialog")+'\\',
             'rig_metadata_folder':os.path.join(self.SettingFolder,"rig_metadata")+'\\',
             'project_info_file':os.path.join(self.SettingFolder,"Project Name and Funding Source v2.csv"),
+            'schedule_path':os.path.join('Z:\\','dynamic_foraging','DynamicForagingSchedule.csv'),
             'go_cue_decibel_box1':60,
             'go_cue_decibel_box2':60,
             'go_cue_decibel_box3':60,
@@ -1237,9 +1265,15 @@ class Window(QMainWindow):
         SettingsBox = 'Settings_box{}.csv'.format(self.box_number)
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
         if self.start_bonsai_ide:
-            subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
+            process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True,
+                stdout = subprocess.PIPE, stderr = subprocess.STDOUT,text=True)
         else:
-            subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True)
+            process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True,
+                stdout = subprocess.PIPE, stderr = subprocess.STDOUT,text=True)
+
+        # Log stdout and stderr from bonsai in a separate thread
+        threading.Thread(target=log_subprocess_output, args=(process,'BONSAI',)).start()
+
 
     def _OpenVideoFolder(self):
         '''Open the video folder'''
@@ -2607,7 +2641,51 @@ class Window(QMainWindow):
         self.WeightAfter.setText('')
         self.TargetRatio.setText('0.85')
         self.keyPressEvent(allow_reset=True) 
-        return 
+
+        # Set IACUC protocol in metadata based on schedule
+        protocol = self._GetInfoFromSchedule(mouse_id,'Protocol')
+        if protocol is not None:
+            self.Metadata_dialog.meta_data['session_metadata']['IACUCProtocol']=str(int(protocol))
+            self.Metadata_dialog._update_metadata(
+                update_rig_metadata=False, 
+                update_session_metadata=True
+                )
+            logging.info('Setting IACUC Protocol: {}'.format(protocol))
+
+        # Set Project Name in metadata based on schedule
+        project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
+        add_default = True
+        if project_name is not None:
+            projects = [self.Metadata_dialog.ProjectName.itemText(i) 
+                for i in range(self.Metadata_dialog.ProjectName.count())]
+            index = np.where(np.array(projects) == project_name)[0]
+            if len(index) > 0:
+                index = index[0]
+                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+                self.Metadata_dialog._show_project_info()
+                logging.info('Setting Project name: {}'.format(project_name))
+                add_default = False
+        if add_default:
+            projects = [self.Metadata_dialog.ProjectName.itemText(i) 
+                for i in range(self.Metadata_dialog.ProjectName.count())]
+            index = np.where(np.array(projects) == 'Behavior Platform')[0]
+            if len(index) > 0:
+                index = index[0]
+                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+                self.Metadata_dialog._show_project_info()
+                logging.info('Setting Project name: {}'.format('Behavior Platform'))
+            else:
+                project_info = {
+                        'Funding Institution':['Allen Institute'],
+                        'Grant Number':['nan'],
+                        'Investigators':['Jeremiah Cohen'],
+                        'Fundee':['nan'],
+                    }
+                self.Metadata_dialog.project_info = project_info
+                self.Metadata_dialog.ProjectName.addItems(['Behavior Platform'])
+                logging.info('Setting Project name: {}'.format('Behavior Platform'))
+
+        self.keyPressEvent(allow_reset=True) 
     
     def _Open_getListOfMice(self):
         '''
@@ -2977,7 +3055,9 @@ class Window(QMainWindow):
             logging.info('Starting FIP workflow in directory: {}'.format(CWD))
             folder_path = ' -p session="{}"'.format(self.SessionFolder)
             camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartRecording.isChecked())
-            subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera+' --start',cwd=CWD,shell=True)
+            process = subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera+' --start',cwd=CWD,shell=True,
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            threading.Thread(target=log_subprocess_output, args=(process,'FIP',)).start()
             self.FIP_started=True 
         except Exception as e:
             logging.error(e)
@@ -4029,6 +4109,10 @@ def log_git_hash():
     logging.info('Current git commit branch, hash: {}, {}'.format(git_branch,git_hash))
     print('Current git commit branch, hash: {}, {}'.format(git_branch,git_hash))
 
+    # Log gui version:
+    logging.info('Current foraging_gui version: {}'.format(foraging_gui.__version__))
+    print('Current foraging_gui version: {}'.format(foraging_gui.__version__))
+
     # Check for untracked local changes
     repo_dirty_flag = dirty_files != ''
     if repo_dirty_flag:
@@ -4108,6 +4192,16 @@ class UncaughtHook(QtCore.QObject):
         tb = "<br><br>".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         self._exception_caught.emit(self.box+tb)
 
+def log_subprocess_output(process, prefix):
+    logging.info('{} logging starting'.format(prefix))
+    while process.poll() is None:       
+        output = process.stdout.readline()
+        if 'Exception' in output:
+            logging.error(prefix+': '+output.strip())
+        else:
+            logging.info(prefix+': '+output.strip())
+
+    logging.info('{} logging terminating'.format(prefix))
 
 if __name__ == "__main__":
 
