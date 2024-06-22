@@ -1196,7 +1196,7 @@ class CameraDialog(QDialog):
         self.camera_start_time=''
         self.camera_stop_time=''
     def _connectSignalsSlots(self):
-        self.StartCamera.clicked.connect(self._StartCamera)
+        self.StartRecording.clicked.connect(self._StartCamera)
         self.ClearTemporaryVideo.clicked.connect(self._ClearTemporaryVideo)
         self.AutoControl.currentIndexChanged.connect(self._AutoControl)
         self.RestartLogging.clicked.connect(self._RestartLogging)
@@ -1233,16 +1233,16 @@ class CameraDialog(QDialog):
     def _AutoControl(self):
         '''Trigger the camera during the start of a new behavior session'''
         if self.AutoControl.currentText()=='Yes':
-            #self.StartCamera.setEnabled(False)
+            #self.StartRecording.setEnabled(False)
             self.label_8.setEnabled(False)
             self.CollectVideo.setEnabled(False)
             self.RestartLogging.setEnabled(False)
-            self.StartCamera.setChecked(False)
+            self.StartRecording.setChecked(False)
             index = self.CollectVideo.findText('Yes')
             if index != -1:
                 self.CollectVideo.setCurrentIndex(index)
         else:
-            #self.StartCamera.setEnabled(True)
+            #self.StartRecording.setEnabled(True)
             self.label_8.setEnabled(True)
             self.CollectVideo.setEnabled(True)
             self.RestartLogging.setEnabled(True)
@@ -1280,11 +1280,11 @@ class CameraDialog(QDialog):
                 return 
             
         if type=='recording':
-            widget_now=self.StartCamera
+            widget_now=self.StartRecording
             widget_other=self.StartPreview
         else:
             widget_now=self.StartPreview
-            widget_other=self.StartCamera
+            widget_other=self.StartRecording
 
         if widget_now.isChecked():
             widget_now.setStyleSheet("background-color : green;")
@@ -1298,7 +1298,7 @@ class CameraDialog(QDialog):
                     self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
             if type=='preview':
                 # stop the recording first
-                if self.StartCamera.isChecked():
+                if self.StartRecording.isChecked():
                     self._StartCamera(type='recording')
                 if self.MainWindow.logging_type!=1 or self.MainWindow.logging_type==-1:
                     # Start logging if the temporary logging is not started
