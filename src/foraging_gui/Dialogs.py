@@ -1197,6 +1197,7 @@ class CameraDialog(QDialog):
         self.camera_stop_time=''
     def _connectSignalsSlots(self):
         self.StartRecording.clicked.connect(self._StartCamera)
+        self.StartPreview.clicked.connect(self._StartCamera)
         self.ClearTemporaryVideo.clicked.connect(self._ClearTemporaryVideo)
         self.AutoControl.currentIndexChanged.connect(self._AutoControl)
         self.RestartLogging.clicked.connect(self._RestartLogging)
