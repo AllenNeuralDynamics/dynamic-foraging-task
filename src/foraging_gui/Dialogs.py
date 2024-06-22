@@ -1200,7 +1200,6 @@ class CameraDialog(QDialog):
         self.StartPreview.clicked.connect(self._StartCamera)
         self.ClearTemporaryVideo.clicked.connect(self._ClearTemporaryVideo)
         self.AutoControl.currentIndexChanged.connect(self._AutoControl)
-        self.RestartLogging.clicked.connect(self._RestartLogging)
         self.OpenSaveFolder.clicked.connect(self._OpenSaveFolder)
 
     def _OpenSaveFolder(self):
@@ -1215,21 +1214,6 @@ class CameraDialog(QDialog):
         else:
             self.WarningLabelOpenSave.setText('No logging folder found!')
             self.WarningLabelOpenSave.setStyleSheet(self.MainWindow.default_warning_color)
-
-    def _RestartLogging(self):
-        '''Restart the logging (create a new logging folder)'''
-        self.MainWindow._ConnectBonsai()
-        if self.MainWindow.InitializeBonsaiSuccessfully==0:
-            return
-        if self.CollectVideo.currentText()=='Yes':
-            # formal logging
-            self.MainWindow.CreateNewFolder=1
-            self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
-        else:
-            # temporary logging
-            self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging(self.MainWindow.temporary_video_folder)
-        self.WarningLabelLogging.setText('Logging has restarted!')
-        self.WarningLabelLogging.setStyleSheet(self.MainWindow.default_warning_color)
 
     def _AutoControl(self):
         '''Trigger the camera during the start of a new behavior session'''
