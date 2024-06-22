@@ -1269,10 +1269,10 @@ class CameraDialog(QDialog):
 
         if widget_now.isChecked():
             widget_now.setStyleSheet("background-color : green;")
-            widget_other.setChecked(False)
             if start_type=='recording':
                 # stop the preview first
                 if self.StartPreview.isChecked():
+                    self.StartPreview.setChecked(False)
                     self._StartCamera(start_type='preview')   
                 # Start logging if the formal logging is not started
                 if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
@@ -1280,6 +1280,7 @@ class CameraDialog(QDialog):
             if start_type=='preview':
                 # stop the recording first
                 if self.StartRecording.isChecked():
+                    self.StartRecording.setChecked(False)
                     self._StartCamera(start_type='recording')
                 if self.MainWindow.logging_type!=1 or self.MainWindow.logging_type==-1:
                     # Start logging if the temporary logging is not started
