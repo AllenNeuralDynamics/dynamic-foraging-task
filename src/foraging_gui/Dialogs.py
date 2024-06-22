@@ -1330,7 +1330,10 @@ class CameraDialog(QDialog):
             self.WarningLabelLogging.setText('')
             self.WarningLabelLogging.setStyleSheet("color: None;")
             self.WarningLabelOpenSave.setText('')
-    
+            # clear temporary video files
+            if type=='preview':
+                self._ClearTemporaryVideo()
+                
     def _SaveVideoData(self):
         '''Save the video data'''
         self.MainWindow._GetSaveFileName()
