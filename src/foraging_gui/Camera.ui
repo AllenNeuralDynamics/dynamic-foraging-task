@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>23</x>
-     <y>280</y>
+     <y>220</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -64,7 +64,7 @@
    <property name="geometry">
     <rect>
      <x>23</x>
-     <y>140</y>
+     <y>110</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -89,7 +89,7 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>140</y>
+     <y>110</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -102,63 +102,6 @@
    </property>
    <property name="currentIndex">
     <number>1</number>
-   </property>
-   <item>
-    <property name="text">
-     <string>Yes</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>No</string>
-    </property>
-   </item>
-  </widget>
-  <widget class="QLabel" name="label_8">
-   <property name="geometry">
-    <rect>
-     <x>23</x>
-     <y>104</y>
-     <width>91</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="text">
-    <string>collect video=</string>
-   </property>
-   <property name="textFormat">
-    <enum>Qt::AutoText</enum>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="CollectVideo">
-   <property name="geometry">
-    <rect>
-     <x>120</x>
-     <y>104</y>
-     <width>80</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="currentIndex">
-    <number>1</number>
-   </property>
-   <property name="frame">
-    <bool>true</bool>
    </property>
    <item>
     <property name="text">
@@ -175,7 +118,7 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>280</y>
+     <y>220</y>
      <width>81</width>
      <height>22</height>
     </rect>
@@ -231,7 +174,7 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>176</y>
+     <y>146</y>
      <width>81</width>
      <height>20</height>
     </rect>
@@ -281,7 +224,7 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>210</y>
+     <y>180</y>
      <width>81</width>
      <height>21</height>
     </rect>
@@ -294,28 +237,6 @@
    </property>
    <property name="text">
     <string>Open save</string>
-   </property>
-   <property name="checkable">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="RestartLogging">
-   <property name="geometry">
-    <rect>
-     <x>120</x>
-     <y>245</y>
-     <width>81</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="text">
-    <string>Restart logging</string>
    </property>
    <property name="checkable">
     <bool>false</bool>
