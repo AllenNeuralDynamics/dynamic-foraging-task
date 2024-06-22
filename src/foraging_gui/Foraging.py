@@ -875,7 +875,11 @@ class Window(QMainWindow):
             loggingtype=1
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-            log_folder=os.path.join(log_folder,formatted_datetime,'raw.harp')
+            log_folder=os.path.join(log_folder,formatted_datetime,'behavior','raw.harp')
+            # create video folder
+            video_folder=os.path.join(log_folder,'..','..','behavior-videos')
+            if not os.path.exists(video_folder):
+                os.makedirs(video_folder)
         # stop the logging first
         self._stop_logging()
         self.Channel.StartLogging(log_folder)
