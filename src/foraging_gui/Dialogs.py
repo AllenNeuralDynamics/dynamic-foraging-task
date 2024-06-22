@@ -1234,22 +1234,12 @@ class CameraDialog(QDialog):
     def _AutoControl(self):
         '''Trigger the camera during the start of a new behavior session'''
         if self.AutoControl.currentText()=='Yes':
-            #self.StartRecording.setEnabled(False)
             self.label_8.setEnabled(False)
-            self.CollectVideo.setEnabled(False)
             self.RestartLogging.setEnabled(False)
             self.StartRecording.setChecked(False)
-            index = self.CollectVideo.findText('Yes')
-            if index != -1:
-                self.CollectVideo.setCurrentIndex(index)
         else:
-            #self.StartRecording.setEnabled(True)
             self.label_8.setEnabled(True)
-            self.CollectVideo.setEnabled(True)
             self.RestartLogging.setEnabled(True)
-            index = self.CollectVideo.findText('No')
-            if index != -1:
-                self.CollectVideo.setCurrentIndex(index)
             
     def _ClearTemporaryVideo(self):
         '''Clear temporary video files'''
@@ -1333,7 +1323,7 @@ class CameraDialog(QDialog):
             # clear temporary video files
             if type=='preview':
                 self._ClearTemporaryVideo()
-                
+
     def _SaveVideoData(self):
         '''Save the video data'''
         self.MainWindow._GetSaveFileName()
