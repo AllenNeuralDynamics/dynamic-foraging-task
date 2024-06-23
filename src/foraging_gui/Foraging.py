@@ -3825,24 +3825,32 @@ class Window(QMainWindow):
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
             return
-        self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
-        time.sleep(0.01) 
-        self.Channel3.ManualWater_Left(int(1))
-        self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
-        self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+float(self.TP_GiveWaterL_volume)/1000
-        self._UpdateSuggestedWater()
+        if self.AlignToGoCue.currentText()=='Yes':
+            # reserve the water after the go cue
+            self.give_left_reserved=1
+        else:
+            self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
+            time.sleep(0.01) 
+            self.Channel3.ManualWater_Left(int(1))
+            self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
+            self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+float(self.TP_GiveWaterL_volume)/1000
+            self._UpdateSuggestedWater()
     
     def _GiveRight(self):
         '''manually give right water'''
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
             return
-        self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
-        time.sleep(0.01) 
-        self.Channel3.ManualWater_Right(int(1))
-        self.Channel.RightValue(float(self.TP_RightValue)*1000)
-        self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
-        self._UpdateSuggestedWater()
+        if self.AlignToGoCue.currentText()=='Yes':
+            # reserve the water after the go cue
+            self.give_right_reserved=1
+        else:
+            self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
+            time.sleep(0.01) 
+            self.Channel3.ManualWater_Right(int(1))
+            self.Channel.RightValue(float(self.TP_RightValue)*1000)
+            self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
+            self._UpdateSuggestedWater()
 
     def _PostWeightChange(self):
         self.unsaved_data=True
