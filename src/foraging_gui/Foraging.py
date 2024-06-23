@@ -126,6 +126,10 @@ class Window(QMainWindow):
         self.finish_Timer=1     # for photometry baseline recordings
         self.PhotometryRun=0    # 1. Photometry has been run; 0. Photometry has not been carried out.
         self.ignore_timer=False # Used for canceling the photometry baseline timer
+        self.give_left_volume_reserved=0 # the reserved volume of left water
+        self.give_right_volume_reserved=0 # the reserved volume of right water
+        self.give_left_reserved=0 # no reserved water for left valve to give after the go cue
+        self.give_right_reserved=0 # no reserved water for right valve to give after the go cue
         self._Optogenetics()    # open the optogenetics panel 
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
@@ -3820,14 +3824,17 @@ class Window(QMainWindow):
             self.DelayBeta.setEnabled(True)
             self.DelayMin.setEnabled(True)
             self.DelayMax.setEnabled(True)
+            
     def _GiveLeft(self):
         '''manually give left water'''
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
             return
         if self.AlignToGoCue.currentText()=='Yes':
-            # reserve the water after the go cue
+            # Reserving the water after the go cue.Each click will add the water to the reserved water
             self.give_left_reserved=1
+            self.give_left_volume_reserved=self.give_left_volume_reserved+float(self.TP_GiveWaterL)*1000
+            self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+float(self.TP_GiveWaterL_volume)/1000
         else:
             self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
             time.sleep(0.01) 
@@ -3842,8 +3849,10 @@ class Window(QMainWindow):
         if self.InitializeBonsaiSuccessfully==0:
             return
         if self.AlignToGoCue.currentText()=='Yes':
-            # reserve the water after the go cue
+            # Reserving the water after the go cue.Each click will add the water to the reserved water
             self.give_right_reserved=1
+            self.give_right_volume_reserved=self.give_right_volume_reserved+float(self.TP_GiveWaterR)*1000
+            self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
         else:
             self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
             time.sleep(0.01) 
