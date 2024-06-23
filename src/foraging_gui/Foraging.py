@@ -238,7 +238,8 @@ class Window(QMainWindow):
         self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
         self.WeightAfter.textChanged.connect(self._PostWeightChange)
         self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
-        self.Randomness.currentIndexChanged.connect(self._Randomness)
+        self.RandomnessBlock.currentIndexChanged.connect(self._RandomnessBlock)
+        self.RandomnessOther.currentIndexChanged.connect(self._RandomnessOther)
         self.actionTemporary_Logging.triggered.connect(self._startTemporaryLogging)
         self.actionFormal_logging.triggered.connect(self._startFormalLogging)
         self.actionOpen_logging_folder.triggered.connect(self._OpenLoggingFolder)
@@ -1570,28 +1571,29 @@ class Window(QMainWindow):
                 pass
                 #widget.clear()
 
-    def _Randomness(self):
-        '''enable/disable some fields in the Block/Delay Period/ITI'''
-        if self.Randomness.currentText()=='Exponential':
+    def _RandomnessBlock(self):
+        '''enable/disable some fields in the Block'''
+        if self.RandomnessBlock.currentText()=='Exponential':
             self.label_14.setEnabled(True)
-            self.label_18.setEnabled(True)
-            self.label_39.setEnabled(True)
             self.BlockBeta.setEnabled(True)
-            self.DelayBeta.setEnabled(True)
-            self.ITIBeta.setEnabled(True)
-            # if self.Task.currentText()!='RewardN':
-            #     self.BlockBeta.setStyleSheet("color: black;border: 1px solid gray;background-color: white;")
+
         elif self.Randomness.currentText()=='Even':
             self.label_14.setEnabled(False)
+            self.BlockBeta.setEnabled(False)
+
+    def _RandomnessOther(self):
+        '''enable/disable some fields in the Delay Period/ITI'''
+        if self.RandomnessOther.currentText()=='Exponential':
+            self.label_18.setEnabled(True)
+            self.label_39.setEnabled(True)
+            self.DelayBeta.setEnabled(True)
+            self.ITIBeta.setEnabled(True)
+
+        elif self.Randomness.currentText()=='Even':
             self.label_18.setEnabled(False)
             self.label_39.setEnabled(False)
-            self.BlockBeta.setEnabled(False)
             self.DelayBeta.setEnabled(False)
             self.ITIBeta.setEnabled(False)
-            # if self.Task.currentText()!='RewardN':
-            #     border_color = "rgb(100, 100, 100,80)"
-            #     border_style = "1px solid " + border_color
-            #     self.BlockBeta.setStyleSheet(f"color: gray;border:{border_style};background-color: rgba(0, 0, 0, 0);")
 
     def _AdvancedBlockAuto(self):
         '''enable/disable some fields in the AdvancedBlockAuto'''
@@ -1835,7 +1837,8 @@ class Window(QMainWindow):
         '''hide and show some fields based on the task type'''
         self.label_43.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
         self.ITIIncrease.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-        self._Randomness()
+        self._RandomnessBlock()
+        self._RandomnessOther()
 
         if self.Task.currentText() in ['Coupled Baiting','Coupled Without Baiting']:
             self.label_6.setEnabled(True)
