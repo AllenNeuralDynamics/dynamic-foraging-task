@@ -3854,7 +3854,6 @@ class Window(QMainWindow):
             self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+self.give_left_volume_reserved/1000
             self.give_left_volume_reserved=0
             self.give_left_time_reserved=0
-            self._UpdateSuggestedWater()
         elif valve=='right':
             if self.give_right_volume_reserved==0:
                 return
@@ -3865,7 +3864,6 @@ class Window(QMainWindow):
             self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+self.give_right_volume_reserved/1000
             self.give_right_volume_reserved=0
             self.give_right_time_reserved=0
-            self._UpdateSuggestedWater()
 
     def _GiveRight(self):
         '''manually give right water'''
