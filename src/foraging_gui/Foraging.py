@@ -126,10 +126,8 @@ class Window(QMainWindow):
         self.finish_Timer=1     # for photometry baseline recordings
         self.PhotometryRun=0    # 1. Photometry has been run; 0. Photometry has not been carried out.
         self.ignore_timer=False # Used for canceling the photometry baseline timer
-        self.give_left_volume_reserved=0 # the reserved volume of left water
-        self.give_right_volume_reserved=0 # the reserved volume of right water
-        self.give_left_reserved=0 # no reserved water for left valve to give after the go cue
-        self.give_right_reserved=0 # no reserved water for right valve to give after the go cue
+        self.give_left_volume_reserved=0 # the reserved volume of left water (usually given after go cue)
+        self.give_right_volume_reserved=0 # the reserved volume of right water (usually given after go cue)
         self._Optogenetics()    # open the optogenetics panel 
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
@@ -3832,7 +3830,6 @@ class Window(QMainWindow):
             return
         if self.AlignToGoCue.currentText()=='Yes':
             # Reserving the water after the go cue.Each click will add the water to the reserved water
-            self.give_left_reserved=1
             self.give_left_volume_reserved=self.give_left_volume_reserved+float(self.TP_GiveWaterL)*1000
         else:
             self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
@@ -3841,10 +3838,12 @@ class Window(QMainWindow):
             self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
             self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+float(self.TP_GiveWaterL_volume)/1000
             self._UpdateSuggestedWater()
-            
+
     def _give_reserved_water(self,valve=None):
         '''give reserved water usually after the go cue'''
         if valve=='left':
+            if self.give_left_volume_reserved==0:
+                return
             self.Channel.LeftValue(self.give_left_volume_reserved)
             time.sleep(0.01) 
             self.Channel3.ManualWater_Left(int(1))
@@ -3853,6 +3852,8 @@ class Window(QMainWindow):
             self.give_left_volume_reserved=0
             self._UpdateSuggestedWater()
         elif valve=='right':
+            if self.give_right_volume_reserved==0:
+                return
             self.Channel.RightValue(self.give_right_volume_reserved)
             time.sleep(0.01) 
             self.Channel3.ManualWater_Right(int(1))
@@ -3868,7 +3869,6 @@ class Window(QMainWindow):
             return
         if self.AlignToGoCue.currentText()=='Yes':
             # Reserving the water after the go cue.Each click will add the water to the reserved water
-            self.give_right_reserved=1
             self.give_right_volume_reserved=self.give_right_volume_reserved+float(self.TP_GiveWaterR)*1000
             self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
         else:
