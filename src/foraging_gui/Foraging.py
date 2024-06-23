@@ -1577,7 +1577,7 @@ class Window(QMainWindow):
             self.label_14.setEnabled(True)
             self.BlockBeta.setEnabled(True)
 
-        elif self.Randomness.currentText()=='Even':
+        elif self.RandomnessBlock.currentText()=='Even':
             self.label_14.setEnabled(False)
             self.BlockBeta.setEnabled(False)
 
@@ -1589,7 +1589,7 @@ class Window(QMainWindow):
             self.DelayBeta.setEnabled(True)
             self.ITIBeta.setEnabled(True)
 
-        elif self.Randomness.currentText()=='Even':
+        elif self.RandomnessOther.currentText()=='Even':
             self.label_18.setEnabled(False)
             self.label_39.setEnabled(False)
             self.DelayBeta.setEnabled(False)
