@@ -126,8 +126,10 @@ class Window(QMainWindow):
         self.finish_Timer=1     # for photometry baseline recordings
         self.PhotometryRun=0    # 1. Photometry has been run; 0. Photometry has not been carried out.
         self.ignore_timer=False # Used for canceling the photometry baseline timer
-        self.give_left_volume_reserved=0 # the reserved volume of left water (usually given after go cue)
-        self.give_right_volume_reserved=0 # the reserved volume of right water (usually given after go cue)
+        self.give_left_volume_reserved=0 # the reserved volume of the left valve (usually given after go cue)
+        self.give_right_volume_reserved=0 # the reserved volume of the right valve (usually given after go cue)
+        self.give_left_time_reserved=0 # the reserved open time of the left valve (usually given after go cue)
+        self.give_right_time_reserved=0 # the reserved open time of the right valve (usually given after go cue)
         self._Optogenetics()    # open the optogenetics panel 
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
@@ -3830,7 +3832,8 @@ class Window(QMainWindow):
             return
         if self.AlignToGoCue.currentText()=='Yes':
             # Reserving the water after the go cue.Each click will add the water to the reserved water
-            self.give_left_volume_reserved=self.give_left_volume_reserved+float(self.TP_GiveWaterL)*1000
+            self.give_left_volume_reserved=self.give_left_volume_reserved+float(self.TP_GiveWaterL_volume)*1000
+            self.give_left_time_reserved=self.give_left_time_reserved+float(self.TP_GiveWaterL)*1000
         else:
             self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
             time.sleep(0.01) 
@@ -3869,7 +3872,8 @@ class Window(QMainWindow):
             return
         if self.AlignToGoCue.currentText()=='Yes':
             # Reserving the water after the go cue.Each click will add the water to the reserved water
-            self.give_right_volume_reserved=self.give_right_volume_reserved+float(self.TP_GiveWaterR)*1000
+            self.give_right_volume_reserved=self.give_right_volume_reserved+float(self.TP_GiveWaterR_volume)*1000
+            self.give_right_time_reserved=self.give_right_time_reserved+float(self.TP_GiveWaterR)*1000
         else:
             self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
             time.sleep(0.01) 
