@@ -910,7 +910,7 @@
             <string notr="true"/>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="tab_2">
             <attribute name="title">
@@ -2004,8 +2004,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>627</width>
-                  <height>325</height>
+                  <width>610</width>
+                  <height>339</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_9">
@@ -2032,10 +2032,16 @@
                     </property>
                     <item>
                      <widget class="QGroupBox" name="groupBox_4">
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>130</height>
+                       </size>
+                      </property>
                       <property name="maximumSize">
                        <size>
                         <width>260</width>
-                        <height>110</height>
+                        <height>900</height>
                        </size>
                       </property>
                       <property name="font">
@@ -2100,19 +2106,6 @@
                          </property>
                         </widget>
                        </item>
-                       <item row="2" column="1">
-                        <widget class="QLabel" name="label_16">
-                         <property name="maximumSize">
-                          <size>
-                           <width>20</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
-                         <property name="text">
-                          <string>sec</string>
-                         </property>
-                        </widget>
-                       </item>
                        <item row="2" column="2">
                         <widget class="QDoubleSpinBox" name="GiveWaterR">
                          <property name="sizePolicy">
@@ -2135,6 +2128,32 @@
                          </property>
                          <property name="value">
                           <double>0.030000000000000</double>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="3" column="1">
+                        <widget class="QLabel" name="label_31">
+                         <property name="maximumSize">
+                          <size>
+                           <width>20</width>
+                           <height>16777215</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string>uL</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="1">
+                        <widget class="QLabel" name="label_16">
+                         <property name="maximumSize">
+                          <size>
+                           <width>20</width>
+                           <height>16777215</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string>sec</string>
                          </property>
                         </widget>
                        </item>
@@ -2163,19 +2182,6 @@
                          </property>
                         </widget>
                        </item>
-                       <item row="3" column="1">
-                        <widget class="QLabel" name="label_31">
-                         <property name="maximumSize">
-                          <size>
-                           <width>20</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
-                         <property name="text">
-                          <string>uL</string>
-                         </property>
-                        </widget>
-                       </item>
                        <item row="3" column="2">
                         <widget class="QDoubleSpinBox" name="GiveWaterR_volume">
                          <property name="sizePolicy">
@@ -2198,19 +2204,6 @@
                          </property>
                          <property name="value">
                           <double>3.000000000000000</double>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="3" column="3">
-                        <widget class="QLabel" name="label_33">
-                         <property name="maximumSize">
-                          <size>
-                           <width>20</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
-                         <property name="text">
-                          <string>uL</string>
                          </property>
                         </widget>
                        </item>
@@ -2255,10 +2248,71 @@
                          </property>
                         </widget>
                        </item>
+                       <item row="3" column="3">
+                        <widget class="QLabel" name="label_33">
+                         <property name="maximumSize">
+                          <size>
+                           <width>20</width>
+                           <height>16777215</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string>uL</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="5" column="2">
+                        <widget class="QComboBox" name="AlignToGoCue">
+                         <property name="enabled">
+                          <bool>true</bool>
+                         </property>
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>100</width>
+                           <height>150</height>
+                          </size>
+                         </property>
+                         <item>
+                          <property name="text">
+                           <string>no</string>
+                          </property>
+                         </item>
+                         <item>
+                          <property name="text">
+                           <string>yes</string>
+                          </property>
+                         </item>
+                        </widget>
+                       </item>
+                       <item row="5" column="0">
+                        <widget class="QLabel" name="label_34">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="text">
+                          <string>align to go cue=</string>
+                         </property>
+                         <property name="textFormat">
+                          <enum>Qt::AutoText</enum>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                         </property>
+                        </widget>
+                       </item>
                       </layout>
                      </widget>
                     </item>
-                    <item alignment="Qt::AlignTop">
+                    <item>
                      <widget class="QGroupBox" name="groupBox_7">
                       <property name="maximumSize">
                        <size>
@@ -2562,8 +2616,8 @@ Bias:</string>
                         <rect>
                          <x>0</x>
                          <y>0</y>
-                         <width>340</width>
-                         <height>195</height>
+                         <width>330</width>
+                         <height>209</height>
                         </rect>
                        </property>
                        <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -2634,7 +2688,7 @@ Double dipping:
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>1072</width>
+                  <width>1068</width>
                   <height>457</height>
                  </rect>
                 </property>
@@ -4613,8 +4667,8 @@ Current pair:
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>722</width>
-                  <height>308</height>
+                  <width>627</width>
+                  <height>325</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_16">
@@ -5287,7 +5341,7 @@ Current pair:
    <property name="text">
     <string>New session</string>
    </property>
-  </action> 
+  </action>
   <action name="actionLaser_Calibration">
    <property name="checkable">
     <bool>true</bool>
