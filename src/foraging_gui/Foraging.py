@@ -3832,7 +3832,7 @@ class Window(QMainWindow):
             return
         if self.AlignToGoCue.currentText()=='yes':
             # Reserving the water after the go cue.Each click will add the water to the reserved water
-            self.give_left_volume_reserved=self.give_left_volume_reserved+float(self.TP_GiveWaterL_volume)*1000
+            self.give_left_volume_reserved=self.give_left_volume_reserved+float(self.TP_GiveWaterL_volume)
             self.give_left_time_reserved=self.give_left_time_reserved+float(self.TP_GiveWaterL)*1000
         else:
             self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
@@ -3847,7 +3847,7 @@ class Window(QMainWindow):
         if valve=='left':
             if self.give_left_volume_reserved==0:
                 return
-            self.Channel.LeftValue(self.give_left_time_reserved)
+            self.Channel.LeftValue(float(self.give_left_time_reserved))
             time.sleep(0.01) 
             self.Channel3.ManualWater_Left(int(1))
             self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
@@ -3858,7 +3858,7 @@ class Window(QMainWindow):
         elif valve=='right':
             if self.give_right_volume_reserved==0:
                 return
-            self.Channel.RightValue(self.give_right_time_reserved)
+            self.Channel.RightValue(float(self.give_right_time_reserved))
             time.sleep(0.01) 
             self.Channel3.ManualWater_Right(int(1))
             self.Channel.RightValue(float(self.TP_RightValue)*1000)
@@ -3874,7 +3874,7 @@ class Window(QMainWindow):
             return
         if self.AlignToGoCue.currentText()=='yes':
             # Reserving the water after the go cue.Each click will add the water to the reserved water
-            self.give_right_volume_reserved=self.give_right_volume_reserved+float(self.TP_GiveWaterR_volume)*1000
+            self.give_right_volume_reserved=self.give_right_volume_reserved+float(self.TP_GiveWaterR_volume)
             self.give_right_time_reserved=self.give_right_time_reserved+float(self.TP_GiveWaterR)*1000
         else:
             self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
