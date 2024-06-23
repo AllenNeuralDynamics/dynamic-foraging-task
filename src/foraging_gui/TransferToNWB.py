@@ -102,12 +102,12 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         return 'incomplete_json'
     
     if not hasattr(obj, 'Other_SessionStartTime'):
-        session_start_timeC=datetime.datetime.strptime('2023-04-26', "%Y-%m-%d") # specific for LA30_2023-04-27.json
+        session_start_timeT=datetime.datetime.strptime('2023-04-26', "%Y-%m-%d") # specific for LA30_2023-04-27.json
     else:
-        session_start_timeC=datetime.datetime.strptime(obj.Other_SessionStartTime, '%Y-%m-%d %H:%M:%S.%f')
+        session_start_timeT=datetime.datetime.strptime(obj.Other_SessionStartTime, '%Y-%m-%d %H:%M:%S.%f')
     
     # add local time zone explicitly
-    session_start_timeC = session_start_timeC.replace(tzinfo=tzlocal())
+    session_start_timeC = session_start_timeT.replace(tzinfo=tzlocal())
 
     ### session related information ###
     nwbfile = NWBFile(
@@ -221,16 +221,19 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_trial_column(name='block_min', description=f'The minimum length allowed for each block')
     nwbfile.add_trial_column(name='block_max', description=f'The maxmum length allowed for each block')
     nwbfile.add_trial_column(name='min_reward_each_block', description=f'The minimum reward allowed for each block')
+    nwbfile.add_trial_column(name='block_randomness_distribution', description=f'The randomness distribution of the block length')
     # delay duration
     nwbfile.add_trial_column(name='delay_beta', description=f'The beta of exponential distribution to generate the delay duration(s)')
     nwbfile.add_trial_column(name='delay_min', description=f'The minimum duration(s) allowed for each delay')
     nwbfile.add_trial_column(name='delay_max', description=f'The maxmum duration(s) allowed for each delay')
     nwbfile.add_trial_column(name='delay_duration', description=f'The expected time duration between delay start and go cue start')
+    nwbfile.add_trial_column(name='delay_randomness_distribution', description=f'The randomness distribution of the delay duration')
     # ITI duration
     nwbfile.add_trial_column(name='ITI_beta', description=f'The beta of exponential distribution to generate the ITI duration(s)')
     nwbfile.add_trial_column(name='ITI_min', description=f'The minimum duration(s) allowed for each ITI')
     nwbfile.add_trial_column(name='ITI_max', description=f'The maxmum duration(s) allowed for each ITI')
     nwbfile.add_trial_column(name='ITI_duration', description=f'The expected time duration between trial start and ITI start')
+    nwbfile.add_trial_column(name='ITI_randomness_distribution', description=f'The randomness distribution of the ITI duration')
     # response duration
     nwbfile.add_trial_column(name='response_duration', description=f'The maximum time that the animal must make a choce in order to get a reward')
     # reward consumption duration
@@ -338,7 +341,34 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                 goCue_start_time_t = getattr(obj, f'B_GoCueTimeHarp')[i]  # Use Harp time, old format
             else:
                 goCue_start_time_t = getattr(obj, f'B_GoCueTimeSoundCard')[i]  # Use Harp time, new format
-            
+        # get the randomness distribution
+        # Old sessions without the randomness option, and default randomness is exponential. 
+        if not (hasattr(obj, 'TP_RandomnessBlock') or hasattr(obj, 'TP_Randomness') or hasattr(obj, 'TP_RandomnessOther')):
+            randomness_distribution_block = 'Exponential'
+            randomness_distribution_delay = 'Exponential'
+            randomness_distribution_ITI = 'Exponential'
+        # The randomness distribution is defined in the task parameters both for coupled and uncoupled task
+        elif hasattr(obj, 'TP_RandomnessBlock') and hasattr(obj, 'TP_RandomnessOther'):
+            randomness_distribution_block = getattr(obj, 'TP_RandomnessBlock')[i]
+            randomness_distribution_delay = getattr(obj, 'TP_RandomnessOther')[i]
+            randomness_distribution_ITI = getattr(obj, 'TP_RandomnessOther')[i]
+        # After Feb 27, the randomness distribution is defined in the task parameters for coupled task, but it was set as even by default for uncoupled task.
+        elif session_start_timeT>=datetime.datetime.strptime('2024-02-27', '%Y-%m-%d'):
+            if obj.TP_Task[i] in ['Uncoupled Baiting','Uncoupled Without Baiting']:
+                randomness_distribution_block = 'Even'
+
+            else:
+                randomness_distribution_block = getattr(obj, 'TP_Randomness')[i]
+            randomness_distribution_delay = getattr(obj, 'TP_Randomness')[i]
+            randomness_distribution_ITI = getattr(obj, 'TP_Randomness')[i]
+        # Before Feb 27, the randomness distribution is defined in the task parameters both for coupled and uncouplded tasks.
+        else:
+            randomness_distribution_block = getattr(obj, 'TP_Randomness')[i]
+            randomness_distribution_delay = getattr(obj, 'TP_Randomness')[i]
+            randomness_distribution_ITI = getattr(obj, 'TP_Randomness')[i]
+    
+        _get_field(obj, 'obj.TP_Randomness', index=i, default='Exponential') 
+
         nwbfile.add_trial(start_time=getattr(obj, f'B_TrialStartTime{Harp}')[i], 
                         stop_time=getattr(obj, f'B_TrialEndTime{Harp}')[i],
                         animal_response=obj.B_AnimalResponseHistory[i],
@@ -360,14 +390,17 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                         block_min=float(obj.TP_BlockMin[i]),
                         block_max=float(obj.TP_BlockMax[i]),
                         min_reward_each_block=float(obj.TP_BlockMinReward[i]),
+                        block_randomness_distribution=randomness_distribution_block,
                         delay_beta=float(obj.TP_DelayBeta[i]),
                         delay_min=float(obj.TP_DelayMin[i]),
                         delay_max=float(obj.TP_DelayMax[i]),
                         delay_duration=obj.B_DelayHistory[i],
+                        delay_randomness_distribution=randomness_distribution_delay,
                         ITI_beta=float(obj.TP_ITIBeta[i]),
                         ITI_min=float(obj.TP_ITIMin[i]),
                         ITI_max=float(obj.TP_ITIMax[i]),
                         ITI_duration=obj.B_ITIHistory[i],
+                        ITI_randomness_distribution=randomness_distribution_ITI,
                         response_duration=float(obj.TP_ResponseTime[i]),
                         reward_consumption_duration=float(obj.TP_RewardConsumeTime[i]),
                         reward_delay=float(_get_field(obj, 'TP_RewardDelay', index=i, default=0)),
