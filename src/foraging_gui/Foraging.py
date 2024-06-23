@@ -3830,7 +3830,7 @@ class Window(QMainWindow):
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
             return
-        if self.AlignToGoCue.currentText()=='Yes':
+        if self.AlignToGoCue.currentText()=='yes':
             # Reserving the water after the go cue.Each click will add the water to the reserved water
             self.give_left_volume_reserved=self.give_left_volume_reserved+float(self.TP_GiveWaterL_volume)*1000
             self.give_left_time_reserved=self.give_left_time_reserved+float(self.TP_GiveWaterL)*1000
@@ -3872,7 +3872,7 @@ class Window(QMainWindow):
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
             return
-        if self.AlignToGoCue.currentText()=='Yes':
+        if self.AlignToGoCue.currentText()=='yes':
             # Reserving the water after the go cue.Each click will add the water to the reserved water
             self.give_right_volume_reserved=self.give_right_volume_reserved+float(self.TP_GiveWaterR_volume)*1000
             self.give_right_time_reserved=self.give_right_time_reserved+float(self.TP_GiveWaterR)*1000
