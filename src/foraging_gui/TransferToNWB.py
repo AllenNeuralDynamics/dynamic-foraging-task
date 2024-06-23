@@ -347,7 +347,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
             randomness_distribution_block = 'Exponential'
             randomness_distribution_delay = 'Exponential'
             randomness_distribution_ITI = 'Exponential'
-        # The randomness distribution is defined in the task parameters both for coupled and uncoupled task
+        # The randomness distribution is defined in the task parameters (TP_RandomnessBlock and TP_RandomnessOther) both for coupled and uncoupled task
         elif hasattr(obj, 'TP_RandomnessBlock') and hasattr(obj, 'TP_RandomnessOther'):
             randomness_distribution_block = getattr(obj, 'TP_RandomnessBlock')[i]
             randomness_distribution_delay = getattr(obj, 'TP_RandomnessOther')[i]
@@ -361,7 +361,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                 randomness_distribution_block = getattr(obj, 'TP_Randomness')[i]
             randomness_distribution_delay = getattr(obj, 'TP_Randomness')[i]
             randomness_distribution_ITI = getattr(obj, 'TP_Randomness')[i]
-        # Before Feb 27, the randomness distribution is defined in the task parameters both for coupled and uncouplded tasks.
+        # Before Feb 27, the randomness distribution is defined in the task parameters (TP_Randomness) both for coupled and uncouplded tasks.
         else:
             randomness_distribution_block = getattr(obj, 'TP_Randomness')[i]
             randomness_distribution_delay = getattr(obj, 'TP_Randomness')[i]
