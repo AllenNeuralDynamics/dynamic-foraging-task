@@ -544,25 +544,26 @@ class PlotTimeDistribution(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
     def _Update(self,win):
         # randomly draw a block length between Min and Max
-        SampleMethods=win.Randomness.currentText()
+        SampleMethodsBlock=win.RandomnessBlock.currentText()
+        SampleMethodsOther=win.RandomnessOther.currentText()
         # block length
         Min=float(win.BlockMin.text())
         Max=float(win.BlockMax.text())
         Beta=float(win.BlockBeta.text())
         DataType='int'
-        SampledBlockLen=self._Sample(Min=Min,Max=Max,SampleMethods=SampleMethods,Beta=Beta,DataType=DataType)
+        SampledBlockLen=self._Sample(Min=Min,Max=Max,SampleMethods=SampleMethodsBlock,Beta=Beta,DataType=DataType)
         # ITI 
         Min=float(win.ITIMin.text())
         Max=float(win.ITIMax.text())
         Beta=float(win.ITIBeta.text())
         DataType='float'
-        SampledITI=self._Sample(Min=Min,Max=Max,SampleMethods=SampleMethods,Beta=Beta,DataType=DataType)
+        SampledITI=self._Sample(Min=Min,Max=Max,SampleMethods=SampleMethodsOther,Beta=Beta,DataType=DataType)
         # Delay
         Min=float(win.DelayMin.text())
         Max=float(win.DelayMax.text())
         Beta=float(win.DelayBeta.text())
         DataType='float'
-        SampledDelay=self._Sample(Min=Min,Max=Max,SampleMethods=SampleMethods,Beta=Beta,DataType=DataType)
+        SampledDelay=self._Sample(Min=Min,Max=Max,SampleMethods=SampleMethodsOther,Beta=Beta,DataType=DataType)
         self.ax1.cla()
         self.ax2.cla()
         self.ax3.cla()
