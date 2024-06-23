@@ -1872,9 +1872,9 @@
     <widget class="QLabel" name="label_9">
      <property name="geometry">
       <rect>
-       <x>529</x>
+       <x>509</x>
        <y>23</y>
-       <width>81</width>
+       <width>101</width>
        <height>23</height>
       </rect>
      </property>
@@ -1885,7 +1885,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>randomness=</string>
+      <string>randomness block=</string>
      </property>
      <property name="textFormat">
       <enum>Qt::AutoText</enum>
@@ -1894,7 +1894,7 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
-    <widget class="QComboBox" name="Randomness">
+    <widget class="QComboBox" name="RandomnessBlock">
      <property name="geometry">
       <rect>
        <x>614</x>
@@ -2430,6 +2430,57 @@
      </property>
      <property name="text">
       <string>window size (trials)=</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="RandomnessOther">
+     <property name="geometry">
+      <rect>
+       <x>865</x>
+       <y>20</y>
+       <width>80</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <item>
+      <property name="text">
+       <string>Exponential</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Even</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QLabel" name="label_30">
+     <property name="geometry">
+      <rect>
+       <x>760</x>
+       <y>20</y>
+       <width>101</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>randomness other=</string>
      </property>
      <property name="textFormat">
       <enum>Qt::AutoText</enum>
@@ -4508,6 +4559,10 @@
      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
     </property>
    </widget>
+   <zorder>TrainingParameters</zorder>
+   <zorder>StartFIP</zorder>
+   <zorder>FIPMode</zorder>
+   <zorder>label_65</zorder>
    <zorder>PhotometryB</zorder>
    <zorder>infor</zorder>
    <zorder>line</zorder>
