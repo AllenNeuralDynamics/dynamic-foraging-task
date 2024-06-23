@@ -910,7 +910,7 @@
             <string notr="true"/>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="tab_2">
             <attribute name="title">
@@ -2632,9 +2632,9 @@ Double dipping:
                <widget class="QWidget" name="scrollAreaWidgetContents_2">
                 <property name="geometry">
                  <rect>
-                  <x>0</x>
+                  <x>-258</x>
                   <y>0</y>
-                  <width>1072</width>
+                  <width>1088</width>
                   <height>457</height>
                  </rect>
                 </property>
@@ -3741,25 +3741,6 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
-                      <item row="0" column="8">
-                       <widget class="QLabel" name="label_9">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>randomness=</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
                       <item row="10" column="1" rowspan="2">
                        <widget class="Line" name="line">
                         <property name="orientation">
@@ -4146,32 +4127,6 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
-                      <item row="0" column="9" colspan="2">
-                       <widget class="QComboBox" name="Randomness">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <item>
-                         <property name="text">
-                          <string>Exponential</string>
-                         </property>
-                        </item>
-                        <item>
-                         <property name="text">
-                          <string>Even</string>
-                         </property>
-                        </item>
-                       </widget>
-                      </item>
                       <item row="1" column="6">
                        <widget class="QDoubleSpinBox" name="RightValue">
                         <property name="sizePolicy">
@@ -4544,6 +4499,96 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
+                      <item row="0" column="6">
+                       <widget class="QComboBox" name="RandomnessBlock">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>80</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <item>
+                         <property name="text">
+                          <string>Exponential</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>Even</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
+                      <item row="0" column="5">
+                       <widget class="QLabel" name="label_9">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>randomness block=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="0" column="8">
+                       <widget class="QLabel" name="label_34">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>randomness other=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="0" column="9">
+                       <widget class="QComboBox" name="RandomnessOther">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>80</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <item>
+                         <property name="text">
+                          <string>Exponential</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>Even</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
                      </layout>
                     </item>
                    </layout>
@@ -4613,8 +4658,8 @@ Current pair:
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>722</width>
-                  <height>308</height>
+                  <width>627</width>
+                  <height>325</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_16">
@@ -5287,7 +5332,7 @@ Current pair:
    <property name="text">
     <string>New session</string>
    </property>
-  </action> 
+  </action>
   <action name="actionLaser_Calibration">
    <property name="checkable">
     <bool>true</bool>
