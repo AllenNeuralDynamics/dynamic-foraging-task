@@ -3824,7 +3824,7 @@ class Window(QMainWindow):
             self.DelayBeta.setEnabled(True)
             self.DelayMin.setEnabled(True)
             self.DelayMax.setEnabled(True)
-            
+
     def _GiveLeft(self):
         '''manually give left water'''
         self._ConnectBonsai()
@@ -3834,7 +3834,6 @@ class Window(QMainWindow):
             # Reserving the water after the go cue.Each click will add the water to the reserved water
             self.give_left_reserved=1
             self.give_left_volume_reserved=self.give_left_volume_reserved+float(self.TP_GiveWaterL)*1000
-            self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+float(self.TP_GiveWaterL_volume)/1000
         else:
             self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
             time.sleep(0.01) 
@@ -3842,7 +3841,26 @@ class Window(QMainWindow):
             self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
             self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+float(self.TP_GiveWaterL_volume)/1000
             self._UpdateSuggestedWater()
-    
+            
+    def _give_reserved_water(self,valve=None):
+        '''give reserved water usually after the go cue'''
+        if valve=='left':
+            self.Channel.LeftValue(self.give_left_volume_reserved)
+            time.sleep(0.01) 
+            self.Channel3.ManualWater_Left(int(1))
+            self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
+            self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+self.give_left_volume_reserved/1000
+            self.give_left_volume_reserved=0
+            self._UpdateSuggestedWater()
+        elif valve=='right':
+            self.Channel.RightValue(self.give_right_volume_reserved)
+            time.sleep(0.01) 
+            self.Channel3.ManualWater_Right(int(1))
+            self.Channel.RightValue(float(self.TP_RightValue)*1000)
+            self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+self.give_right_volume_reserved/1000
+            self.give_right_volume_reserved=0
+            self._UpdateSuggestedWater()
+
     def _GiveRight(self):
         '''manually give right water'''
         self._ConnectBonsai()
