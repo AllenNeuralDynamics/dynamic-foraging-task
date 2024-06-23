@@ -3344,6 +3344,7 @@ class Window(QMainWindow):
         # stop the current session
         self.Start.setStyleSheet("background-color : none")
         self.Start.setChecked(False)
+        self.Camera_dialog.StartPreview.setEnabled(True)
 
         # waiting for the finish of the last trial
         start_time = time.time()
