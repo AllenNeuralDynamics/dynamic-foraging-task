@@ -134,6 +134,8 @@ class GenerateTrials():
                     persev_add=True,  # Hard-coded to True for now
                     perseverative_limit=4, # Hard-coded to 4 for now
                     max_block_tally=3, # Hard-coded to 3 for now
+                    block_beta=float(self.TP_BlockBeta),
+                    random_distribution_block=self.TP_RandomnessBlock,
                 )
                 _, msg_uncoupled_block = self.uncoupled_blocks.next_trial()
             else:
