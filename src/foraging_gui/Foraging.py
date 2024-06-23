@@ -3870,7 +3870,6 @@ class Window(QMainWindow):
         if self.AlignToGoCue.currentText()=='Yes':
             # Reserving the water after the go cue.Each click will add the water to the reserved water
             self.give_right_volume_reserved=self.give_right_volume_reserved+float(self.TP_GiveWaterR)*1000
-            self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
         else:
             self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
             time.sleep(0.01) 
