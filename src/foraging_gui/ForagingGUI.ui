@@ -3462,7 +3462,7 @@ Double dipping:
                          </sizepolicy>
                         </property>
                         <property name="text">
-                         <string>Reward delay=</string>
+                         <string>reward delay=</string>
                         </property>
                         <property name="textFormat">
                          <enum>Qt::AutoText</enum>
@@ -3885,7 +3885,7 @@ Double dipping:
                          </sizepolicy>
                         </property>
                         <property name="text">
-                         <string>Reward consume time =</string>
+                         <string>reward consume time =</string>
                         </property>
                         <property name="textFormat">
                          <enum>Qt::AutoText</enum>
