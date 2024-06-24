@@ -198,8 +198,8 @@ class PlotV(FigureCanvas):
         if np.size(self.B_AutoLeftWaterStartTime) !=0:
             self.ax1.plot(self.B_AutoLeftWaterStartTime, np.zeros(len(self.B_AutoLeftWaterStartTime))+0.4, 
                 'bo',markerfacecolor = (0, 1, 0, 1),markersize=self.MarkerSize)
-        if np.size(self.B_AutoLeftWaterRightTime) !=0:
-            self.ax1.plot(self.B_AutoLeftWaterRightTime, np.zeros(len(self.B_AutoLeftWaterRightTime))+0.6, 
+        if np.size(self.B_AutoRightWaterStartTime) !=0:
+            self.ax1.plot(self.B_AutoRightWaterStartTime, np.zeros(len(self.B_AutoRightWaterStartTime))+0.6, 
                 'bo',markerfacecolor =(0, 1, 0, 1),markersize=self.MarkerSize,label='AutoWater')
         
         if np.size(self.B_ManualLeftWaterStartTime) !=0:
