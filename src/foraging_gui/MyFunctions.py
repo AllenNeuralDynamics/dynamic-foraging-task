@@ -1630,8 +1630,13 @@ class GenerateTrials():
                 if self.CurrentAutoRewardTrial[1]==1:
                     Channel3.AutoWater_Right(int(1))
                 # give reserved manual water
-                self.win._give_reserved_water(valve='left')
-                self.win._give_reserved_water(valve='right')
+                # The manual water of two sides are given sequentially. Randomlizing the order to avoid bias. 
+                if np.random.random(1)<0.5:
+                    self.win._give_reserved_water(valve='left')
+                    self.win._give_reserved_water(valve='right')
+                else:
+                    self.win._give_reserved_water(valve='right')
+                    self.win._give_reserved_water(valve='left')
                 GoCueTimeSoundCard=Rec[1][1][0]
                 in_delay=0
             elif Rec[0].address=='/DOPort2Output': #this port is used to trigger optogenetics aligned to Go cue
