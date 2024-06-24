@@ -207,7 +207,7 @@ class PlotV(FigureCanvas):
                 'bs',markerfacecolor = (0, 1, 0, 1),markersize=self.MarkerSize)
         if np.size(self.B_ManualRightWaterStartTime) !=0:
             self.ax1.plot(self.B_ManualRightWaterStartTime, np.zeros(len(self.B_ManualRightWaterStartTime))+0.7, 
-                'bs',markerfacecolor =(0, 1, 0, 1),markersize=self.MarkerSize,label='AutoWater')
+                'bs',markerfacecolor =(0, 1, 0, 1),markersize=self.MarkerSize,label='ManualWater')
             
         if np.size(Optogenetics_On) !=0:
             self.ax1.plot(self.B_BTime[Optogenetics_On], np.zeros(len(self.B_BTime[Optogenetics_On]))+1.5, 
