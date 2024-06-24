@@ -1630,6 +1630,14 @@ class GenerateTrials():
                 if self.CurrentAutoRewardTrial[1]==1:
                     Channel3.AutoWater_Right(int(1))
                 # give reserved manual water
+                if float(self.win.give_left_volume_reserved) > 0 or float(self.win.give_right_volume_reserved) > 0:
+                    # Set the text of a label or text widget to show the reserved volumes
+                    self.win.ManualWaterWarning.setText(
+                        f'Give reserved manual water (ul) left: {self.win.give_left_volume_reserved}; right: {self.win.give_right_volume_reserved}'
+                    )
+                    # Set the text color of the label or text widget to red
+                    self.win.ManualWaterWarning.setStyleSheet(self.win.default_warning_color)
+
                 # The manual water of two sides are given sequentially. Randomlizing the order to avoid bias. 
                 if np.random.random(1)<0.5:
                     self.win._give_reserved_water(valve='left')

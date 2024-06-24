@@ -3216,6 +3216,7 @@ class Window(QMainWindow):
         self._stop_logging()
 
         # Reset GUI visuals
+        self.ManualWaterWarning.setText('')
         self.Save.setStyleSheet("color:black;background-color:None;")
         self.NewSession.setStyleSheet("background-color : green;")
         self.NewSession.setChecked(False)
@@ -3498,6 +3499,8 @@ class Window(QMainWindow):
                     # Stop the worker, this has a 1 second delay before taking effect
                     # so we set the text to get ignored as well
                     self.workertimer._stop()
+
+            self.ManualWaterWarning.setText('')
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
