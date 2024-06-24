@@ -3266,16 +3266,12 @@ class Window(QMainWindow):
 
     def _stop_logging(self):
         '''Stop the logging'''
-        self._ConnectBonsai()
-        if self.InitializeBonsaiSuccessfully==0:
-            logging.info('Cannot stop logging when bonsai is disconnected')        
-        else:
-            try:
-                self.Channel.StopLogging('s')
-            except ConnectionAbortedError:
-                logging.error('Bonsai connection error')
-            except Exception as e:
-                logging.error(str(e))
+        try:
+            self.Channel.StopLogging('s')
+        except Exception as e:
+            print(type(e))
+            print(e.__dict__.keys())
+            logging.error(str(e))
 
     def _NewSession(self):
         logging.info('New Session pressed')
