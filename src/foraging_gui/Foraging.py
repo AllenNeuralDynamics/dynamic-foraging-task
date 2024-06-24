@@ -1520,54 +1520,54 @@ class Window(QMainWindow):
             widget = widget_dict[key]
             try: # load the paramter used by last trial
                 value=np.array([parameters[key]])
-                Tag=0
+                loading_parameters_type=0
             # sometimes we only have training parameters, no behavior parameters
             except Exception as e:
                 logging.error(str(e))
                 value=parameters[key]
-                Tag=1
+                loading_parameters_type=1
             if isinstance(widget, QtWidgets.QPushButton):
                 pass
             if type(value)==bool:
-                Tag=1
+                loading_parameters_type=1
             else:
                 if len(value)==0:
                     value=np.array([''], dtype='<U1')
-                    Tag=0
+                    loading_parameters_type=0
             if type(value)==np.ndarray:
-                Tag=0
+                loading_parameters_type=0
             if isinstance(widget, QtWidgets.QLineEdit):
-                if Tag==0:
+                if loading_parameters_type==0:
                     widget.setText(value[-1])
-                elif Tag==1:
+                elif loading_parameters_type==1:
                     widget.setText(value)
             elif isinstance(widget, QtWidgets.QComboBox):
-                if Tag==0:
+                if loading_parameters_type==0:
                     index = widget.findText(value[-1])
-                elif Tag==1:
+                elif loading_parameters_type==1:
                     index = widget.findText(value)
                 if index != -1:
                     widget.setCurrentIndex(index)
             elif isinstance(widget, QtWidgets.QDoubleSpinBox):
-                if Tag==0:
+                if loading_parameters_type==0:
                     widget.setValue(float(value[-1]))
-                elif Tag==1:
+                elif loading_parameters_type==1:
                     widget.setValue(float(value))
             elif isinstance(widget, QtWidgets.QSpinBox):
-                if Tag==0:
+                if loading_parameters_type==0:
                     widget.setValue(int(value[-1]))
-                elif Tag==1:
+                elif loading_parameters_type==1:
                     widget.setValue(int(value))
             elif isinstance(widget, QtWidgets.QTextEdit):
-                if Tag==0:
+                if loading_parameters_type==0:
                     widget.setText(value[-1])
-                elif Tag==1:
+                elif loading_parameters_type==1:
                     widget.setText(value)
             elif isinstance(widget, QtWidgets.QPushButton):
                 if key=='AutoReward':
-                    if Tag==0:
+                    if loading_parameters_type==0:
                         widget.setChecked(bool(value[-1]))
-                    elif Tag==1:
+                    elif loading_parameters_type==1:
                         widget.setChecked(value)
                     self._AutoReward()
         else:
@@ -2726,33 +2726,34 @@ class Window(QMainWindow):
                             continue
                         widget = widget_dict[key]
 
+                        # loading_parameters_type=0, get the last value of saved training parameters for each trial; loading_parameters_type=1, get the current value for single value data directly from the window. 
                         if 'TP_{}'.format(key) in CurrentObj:
                             value=np.array([CurrentObj['TP_'+key][-2]])
-                            Tag=0
+                            loading_parameters_type=0
                         else:
                             value=CurrentObj[key]
-                            Tag=1
+                            loading_parameters_type=1
 
                         if key in {'BaseWeight','TotalWater','TargetWeight','WeightAfter','SuggestedWater','TargetRatio'}:
                             self.BaseWeight.disconnect()
                             self.TargetRatio.disconnect()
                             self.WeightAfter.disconnect()
                             value=CurrentObj[key]
-                            Tag=1
+                            loading_parameters_type=1
 
                         # tag=0, get the last value for ndarray; tag=1, get the current value for single value data
                         if type(value)==bool:
-                            Tag=1
+                            loading_parameters_type=1
                         else:
                             if len(value)==0:
                                 value=np.array([''], dtype='<U1')
-                                Tag=0
+                                loading_parameters_type=0
                         if type(value)==np.ndarray:
-                            Tag=0
+                            loading_parameters_type=0
 
-                        if Tag==0:
+                        if loading_parameters_type==0:
                             final_value=value[-1]
-                        elif Tag==1:
+                        elif loading_parameters_type==1:
                             final_value=value
 
                         if isinstance(widget, QtWidgets.QLineEdit):
