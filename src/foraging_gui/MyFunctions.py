@@ -1620,9 +1620,9 @@ class GenerateTrials():
             elif Rec[0].address=='/GoCueTimeSoundCard':
                 # give auto water after Co cue
                 if self.CurrentAutoRewardTrial[0]==1:
-                    Channel3.ManualWater_Left(int(1))
+                    Channel3.AutoWater_Left(int(1))
                 if self.CurrentAutoRewardTrial[1]==1:
-                    Channel3.ManualWater_Right(int(1))
+                    Channel3.AutoWater_Right(int(1))
                 # give reserved manual water
                 self.win._give_reserved_water(valve='left')
                 self.win._give_reserved_water(valve='right')
