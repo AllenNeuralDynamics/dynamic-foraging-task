@@ -1083,10 +1083,6 @@ class GenerateTrials():
                 self.win.ShowBasic.setText(Other_BasicText)
                 self.win.Other_BasicText=Other_BasicText
      
-        # newscale positions
-        if hasattr(self.win, 'current_stage'):
-            self.win._GetPositions()
-                
     def _CheckStop(self):
         '''Stop if there are many ingoral trials or if the maximam trial is exceeded MaxTrial'''
         StopIgnore=int(self.TP_StopIgnores)-1
@@ -1364,7 +1360,12 @@ class GenerateTrials():
                 break
             else:
                 self.SelctedCondition=0 # control is selected
-
+        # Determine whether the interval between two near trials is larger than the MinOptoInterval
+        non_zero_indices=np.nonzero(np.array(self.B_SelectedCondition).astype(int))
+        if len(non_zero_indices[0])>0:
+            if len(self.B_SelectedCondition)-(non_zero_indices[0][-1]+1)<float(self.TP_MinOptoInterval):
+                self.SelctedCondition=0
+                
     def _InitiateATrial(self,Channel1,Channel4):
     
         # Indicate that unsaved data exists

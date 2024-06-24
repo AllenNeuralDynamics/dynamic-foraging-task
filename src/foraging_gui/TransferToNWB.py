@@ -262,6 +262,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_trial_column(name='fraction_of_session', description=f'Turn on/off opto in a fraction of the session (related to session_wide_control)')
     nwbfile.add_trial_column(name='session_start_with', description=f'The session start with opto on or off (related to session_wide_control)')
     nwbfile.add_trial_column(name='session_alternation', description=f'Turn on/off opto in every other session (related to session_wide_control)')
+    nwbfile.add_trial_column(name='minimum_opto_interval', description=f'Minimum interval between two optogenetics trials (number of trials)')
 
     # auto training parameters
     nwbfile.add_trial_column(name='auto_train_engaged', description=f'Whether the auto training is engaged')
@@ -396,6 +397,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                         fraction_of_session=float(_get_field(obj, 'TP_FractionOfSession', index=i, default=np.nan)),
                         session_start_with=_get_field(obj, 'TP_SessionStartWith', index=i, default='None'),
                         session_alternation=_get_field(obj, 'TP_SessionAlternating', index=i, default='None'),
+                        minimum_opto_interval=float(_get_field(obj, 'TP_MinOptoInterval', index=i, default=0)),
+
                         # add all auto training parameters (eventually should be in session.json)
                         auto_train_engaged=_get_field(obj, 'TP_auto_train_engaged', index=i,default='None'),
                         auto_train_curriculum_name=_get_field(obj, 'TP_auto_train_curriculum_name', index=i, default='None'),
