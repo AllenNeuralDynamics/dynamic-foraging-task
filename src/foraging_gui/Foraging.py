@@ -99,7 +99,7 @@ class Window(QMainWindow):
         self.ANewTrial = 1          # permission to start a new trial
         self.previous_backup_completed = 1   # permission to save backup data; 0, the previous saving has not finished, and it will not trigger the next saving; 1, it is allowed to save backup data
         self.UpdateParameters = 1   # permission to update parameters
-        self.loggingstarted = -1    # Have we started trial logging
+        self.logging_type = -1    # -1, logging is not started; 0, temporary logging; 1, formal logging
         self.unsaved_data = False   # Setting unsaved data to False 
         self.to_check_drop_frames = 1 # 1, to check drop frames during saving data; 0, not to check drop frames 
 
@@ -877,9 +877,8 @@ class Window(QMainWindow):
         if log_folder is None:
             # formal logging
             loggingtype=0
-            if self.CreateNewFolder==1:
-                self._GetSaveFolder()
-                self.CreateNewFolder=0
+            self._GetSaveFolder()
+            self.CreateNewFolder=0
             log_folder=self.HarpFolder
         else:
             # temporary logging
@@ -893,12 +892,8 @@ class Window(QMainWindow):
         Rec=self.Channel.receive()
         if Rec[0].address=='/loggerstarted':
             pass
-        if loggingtype==0:
-            # formal logging
-            self.loggingstarted=0
-        elif loggingtype==1:
-            # temporary logging
-            self.loggingstarted=1
+        
+        self.logging_type=loggingtype # 0 for formal logging, 1 for temporary logging
         return log_folder
     
     def _GetLaserCalibration(self):
@@ -3267,6 +3262,7 @@ class Window(QMainWindow):
         '''Stop the logging'''
         try:
             self.Channel.StopLogging('s')
+            self.logging_type=-1 # logging has stopped
         except Exception as e:
             logging.error(str(e))
 
