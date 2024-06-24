@@ -64,6 +64,12 @@ class GenerateTrials():
         self.B_PhotometryRisingTimeHarp=np.array([]).astype(float)
         self.B_PhotometryFallingTimeHarp=np.array([]).astype(float)
         self.B_OptogeneticsTimeHarp=np.array([]).astype(float)
+        self.B_ManualLeftWaterStartTime=np.array([]).astype(float)
+        self.B_ManualRightWaterStartTime=np.array([]).astype(float)
+        self.B_EarnedLeftWaterStartTime=np.array([]).astype(float)
+        self.B_EarnedRightWaterStartTime=np.array([]).astype(float)
+        self.B_AutoLeftWaterStartTime=np.array([]).astype(float)
+        self.B_AutoRightWaterStartTime=np.array([]).astype(float)
         self.B_RewardOutcomeTime=np.array([]).astype(float)
         self.B_LaserOnTrial=[] # trials with laser on
         self.B_SimulationSession=[]
@@ -1710,6 +1716,19 @@ class GenerateTrials():
                 self.B_PhotometryFallingTimeHarp=np.append(self.B_PhotometryFallingTimeHarp,Rec[1][1][0])
             elif Rec[0].address=='/OptogeneticsTimeHarp':
                 self.B_OptogeneticsTimeHarp=np.append(self.B_OptogeneticsTimeHarp,Rec[1][1][0])
+            elif Rec[0].address=='/ManualLeftWaterStartTime':
+                self.B_ManualLeftWaterStartTime=np.append(self.B_ManualLeftWaterStartTime,Rec[1][1][0])
+            elif Rec[0].address=='/ManualRightWaterStartTime':
+                self.B_ManualRightWaterStartTime=np.append(self.B_ManualRightWaterStartTime,Rec[1][1][0])
+            elif Rec[0].address=='/EarnedLeftWaterStartTime':
+                self.B_EarnedLeftWaterStartTime=np.append(self.B_EarnedLeftWaterStartTime,Rec[1][1][0])
+            elif Rec[0].address=='/EarnedRightWaterStartTime':
+                self.B_EarnedRightWaterStartTime=np.append(self.B_EarnedRightWaterStartTime,Rec[1][1][0])
+            elif Rec[0].address=='/AutoLeftWaterStartTime':
+                self.B_AutoLeftWaterStartTime=np.append(self.B_AutoLeftWaterStartTime,Rec[1][1][0])
+            elif Rec[0].address=='/AutoRightWaterStartTime':
+                self.B_AutoRightWaterStartTime=np.append(self.B_AutoRightWaterStartTime,Rec[1][1][0])
+            
 
     def _DeletePreviousLicks(self,Channel2):
         '''Delete licks from the previous session'''
