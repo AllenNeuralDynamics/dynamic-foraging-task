@@ -951,7 +951,7 @@ class WaterCalibrationDialog(QDialog):
                 reply = QMessageBox.critical(self, 'Spot check left', 
                     'Please perform full calibration before spot check', 
                     QMessageBox.Ok)
-                logging.error('Cannot perform spot check before full calibration')  
+                logging.warning('Cannot perform spot check before full calibration')  
                 self.SpotCheckLeft.setStyleSheet("background-color : none;")
                 self.SpotCheckLeft.setChecked(False)        
                 self.Warning.setText('')
@@ -1089,6 +1089,19 @@ class WaterCalibrationDialog(QDialog):
             return
 
         if self.SpotCheckRight.isChecked():
+            if 'Right' not in self.MainWindow.latest_fitting:
+                reply = QMessageBox.critical(self, 'Spot check right', 
+                    'Please perform full calibration before spot check', 
+                    QMessageBox.Ok)
+                logging.warning('Cannot perform spot check before full calibration')  
+                self.SpotCheckRight.setStyleSheet("background-color : none;")
+                self.SpotCheckRight.setChecked(False)        
+                self.Warning.setText('')
+                self.SpotCheckPreWeightRight.setText('')
+                self.TotalWaterSingleRight.setText('')
+                self.SaveRight.setStyleSheet("color: black;background-color : none;")               
+                return  
+
             logging.info('starting spot check right')
             self.SpotCheckRight.setStyleSheet("background-color : green;")
     
