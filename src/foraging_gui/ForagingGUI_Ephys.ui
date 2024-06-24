@@ -4565,6 +4565,24 @@
      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
     </property>
    </widget>
+   <widget class="QLabel" name="ManualWaterWarning">
+    <property name="geometry">
+     <rect>
+      <x>1240</x>
+      <y>870</y>
+      <width>261</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>7</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
    <zorder>TrainingParameters</zorder>
    <zorder>StartFIP</zorder>
    <zorder>FIPMode</zorder>
@@ -4604,6 +4622,7 @@
    <zorder>label_65</zorder>
    <zorder>OpenEphysRecordingType</zorder>
    <zorder>MetadataWarning</zorder>
+   <zorder>ManualWaterWarning</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
