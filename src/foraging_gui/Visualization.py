@@ -58,7 +58,15 @@ class PlotV(FigureCanvas):
         self.B_LaserOnTrial=np.array(GeneratedTrials.B_LaserOnTrial)
         self.B_AutoWaterTrial=GeneratedTrials.B_AutoWaterTrial
         self.MarchingType=GeneratedTrials.TP_MartchingType
-
+        self.B_LeftRewardDeliveryTimeHarp=GeneratedTrials.B_LeftRewardDeliveryTimeHarp
+        self.B_RightRewardDeliveryTimeHarp=GeneratedTrials.B_RightRewardDeliveryTimeHarp
+        self.B_ManualLeftWaterStartTime=GeneratedTrials.B_ManualLeftWaterStartTime
+        self.B_ManualRightWaterStartTime=GeneratedTrials.B_ManualRightWaterStartTime
+        self.B_EarnedLeftWaterStartTime=GeneratedTrials.B_EarnedLeftWaterStartTime
+        self.B_EarnedRightWaterStartTime=GeneratedTrials.B_EarnedRightWaterStartTime
+        self.B_AutoLeftWaterStartTime=GeneratedTrials.B_AutoLeftWaterStartTime
+        self.B_AutoRightWaterStartTime=GeneratedTrials.B_AutoRightWaterStartTime
+        
         if self.B_CurrentTrialN>0:
             self.B_Time=self.B_RewardOutcomeTime-GeneratedTrials.B_TrialStartTime[0]
         else:
