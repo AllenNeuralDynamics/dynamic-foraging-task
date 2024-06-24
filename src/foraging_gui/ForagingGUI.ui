@@ -2278,6 +2278,9 @@
                            <height>150</height>
                           </size>
                          </property>
+                         <property name="currentIndex">
+                          <number>1</number>
+                         </property>
                          <item>
                           <property name="text">
                            <string>no</string>
@@ -2686,7 +2689,7 @@ Double dipping:
                <widget class="QWidget" name="scrollAreaWidgetContents_2">
                 <property name="geometry">
                  <rect>
-                  <x>0</x>
+                  <x>-303</x>
                   <y>0</y>
                   <width>1068</width>
                   <height>457</height>
