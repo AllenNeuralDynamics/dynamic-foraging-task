@@ -9,6 +9,8 @@ import logging
 import socket
 import harp
 import pandas as pd
+import threading
+import itertools
 from pathlib import Path
 from datetime import date, datetime
 
@@ -24,6 +26,7 @@ from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 
+import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
 from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
 from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,MetadataDialog
@@ -68,6 +71,7 @@ class Window(QMainWindow):
         self.SettingFile=os.path.join(self.SettingFolder,'ForagingSettings.json')
         self.SettingsBoxFile=os.path.join(self.SettingFolder,'Settings_box'+str(self.box_number)+'.csv')
         self._GetSettings()
+        self._LoadSchedule()
 
         # Load Settings that are specific to this box 
         self.LaserCalibrationFiles=os.path.join(self.SettingFolder,'LaserCalibration_{}.json'.format(box_number))
@@ -95,7 +99,7 @@ class Window(QMainWindow):
         self.ANewTrial = 1          # permission to start a new trial
         self.previous_backup_completed = 1   # permission to save backup data; 0, the previous saving has not finished, and it will not trigger the next saving; 1, it is allowed to save backup data
         self.UpdateParameters = 1   # permission to update parameters
-        self.loggingstarted = -1    # Have we started trial logging
+        self.logging_type = -1    # -1, logging is not started; 0, temporary logging; 1, formal logging
         self.unsaved_data = False   # Setting unsaved data to False 
         self.to_check_drop_frames = 1 # 1, to check drop frames during saving data; 0, not to check drop frames 
 
@@ -452,11 +456,17 @@ class Window(QMainWindow):
         session_full_path_list=[]
         session_path_list=[]
         for session_folder in os.listdir(animal_folder):
-            training_folder = os.path.join(animal_folder,session_folder, 'behavior')
-            if os.path.exists(training_folder):
-                for file_name in os.listdir(training_folder):
+            training_folder_old = os.path.join(animal_folder,session_folder, 'TrainingFolder')
+            training_folder_new = os.path.join(animal_folder,session_folder, 'behavior')
+            if os.path.exists(training_folder_old):
+                for file_name in os.listdir(training_folder_old):
                     if file_name.endswith('.json'): 
-                        session_full_path_list.append(os.path.join(training_folder, file_name))
+                        session_full_path_list.append(os.path.join(training_folder_old, file_name))
+                        session_path_list.append(session_folder) 
+            elif os.path.exists(training_folder_new):
+                for file_name in os.listdir(training_folder_new):
+                    if file_name.endswith('.json'): 
+                        session_full_path_list.append(os.path.join(training_folder_new, file_name))
                         session_path_list.append(session_folder) 
 
         sorted_indices = sorted(enumerate(session_path_list), key=lambda x: x[1], reverse=True)
@@ -522,12 +532,20 @@ class Window(QMainWindow):
                     self.trigger_length=0
                     self.WarningLabelCamera.setText('')
                     self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
+                    self.to_check_drop_frames=0
                     return
-                else:
+                elif ('HighSpeedCamera' in self.SettingsBox) and (self.SettingsBox['HighSpeedCamera'] ==1):
                     self.trigger_length=0
                     logging.error('Saved video data, but no camera trigger file found')
                     self.WarningLabelCamera.setText('No camera trigger file found!')
                     self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
+                    return
+                else:
+                    logging.info('Saved video data, but not using high speed camera - skipping drop frame check')
+                    self.trigger_length=0
+                    self.WarningLabelCamera.setText('')
+                    self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
+                    self.to_check_drop_frames=0
                     return
                 csv_files = [file for file in os.listdir(video_folder) if file.endswith(".csv")]
                 avi_files = [file for file in os.listdir(video_folder) if file.endswith(".avi")]
@@ -873,28 +891,29 @@ class Window(QMainWindow):
         if log_folder is None:
             # formal logging
             loggingtype=0
-            if self.CreateNewFolder==1:
-                self._GetSaveFolder()
-                self.CreateNewFolder=0
+            self._GetSaveFolder()
+            self.CreateNewFolder=0
             log_folder=self.HarpFolder
+            self.unsaved_data=True
+            self.Save.setStyleSheet("color: white;background-color : mediumorchid")
         else:
             # temporary logging
             loggingtype=1
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-            log_folder=os.path.join(log_folder,formatted_datetime,'raw.harp')
+            log_folder=os.path.join(log_folder,formatted_datetime,'behavior','raw.harp')
+            # create video folder
+            video_folder=os.path.join(log_folder,'..','..','behavior-videos')
+            if not os.path.exists(video_folder):
+                os.makedirs(video_folder)
         # stop the logging first
         self._stop_logging()
         self.Channel.StartLogging(log_folder)
         Rec=self.Channel.receive()
         if Rec[0].address=='/loggerstarted':
             pass
-        if loggingtype==0:
-            # formal logging
-            self.loggingstarted=0
-        elif loggingtype==1:
-            # temporary logging
-            self.loggingstarted=1
+        
+        self.logging_type=loggingtype # 0 for formal logging, 1 for temporary logging
         return log_folder
     
     def _GetLaserCalibration(self):
@@ -960,6 +979,23 @@ class Window(QMainWindow):
                 return True
             else:
                 return False
+    
+    def _LoadSchedule(self):
+        if os.path.exists(self.Settings['schedule_path']):
+            schedule = pd.read_csv(self.Settings['schedule_path'])
+            schedule = schedule.dropna(subset=['Mouse ID','Box']).copy()
+            logging.info('Loaded behavior schedule')
+        else:
+            logging.error('Could not find schedule at {}'.format(self.Settings['schedule_path']))
+            return
+
+    def _GetInfoFromSchedule(self, mouse_id, column):
+        mouse_id = str(mouse_id)
+        if not hasattr(self, 'schedule'):
+            return None
+        if mouse_id not in self.schedule['Mouse ID'].values:
+            return None
+        return self.schedule.query('`Mouse ID` == @mouse_id').iloc[0][column]
 
     def _GetSettings(self):
         '''
@@ -990,6 +1026,7 @@ class Window(QMainWindow):
             'metadata_dialog_folder':os.path.join(self.SettingFolder,"metadata_dialog")+'\\',
             'rig_metadata_folder':os.path.join(self.SettingFolder,"rig_metadata")+'\\',
             'project_info_file':os.path.join(self.SettingFolder,"Project Name and Funding Source v2.csv"),
+            'schedule_path':os.path.join('Z:\\','dynamic_foraging','DynamicForagingSchedule.csv'),
             'go_cue_decibel_box1':60,
             'go_cue_decibel_box2':60,
             'go_cue_decibel_box3':60,
@@ -1242,9 +1279,15 @@ class Window(QMainWindow):
         SettingsBox = 'Settings_box{}.csv'.format(self.box_number)
         CWD=os.path.join(os.path.dirname(os.getcwd()),'workflows')
         if self.start_bonsai_ide:
-            subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True)
+            process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start',cwd=CWD,shell=True,
+                stdout = subprocess.PIPE, stderr = subprocess.STDOUT,text=True)
         else:
-            subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True)
+            process = subprocess.Popen(self.bonsai_path+' '+self.bonsaiworkflow_path+' -p '+'SettingsPath='+self.SettingFolder+'\\'+SettingsBox+ ' --start --no-editor',cwd=CWD,shell=True,
+                stdout = subprocess.PIPE, stderr = subprocess.STDOUT,text=True)
+
+        # Log stdout and stderr from bonsai in a separate thread
+        threading.Thread(target=log_subprocess_output, args=(process,'BONSAI',)).start()
+
 
     def _OpenVideoFolder(self):
         '''Open the video folder'''
@@ -2612,7 +2655,51 @@ class Window(QMainWindow):
         self.WeightAfter.setText('')
         self.TargetRatio.setText('0.85')
         self.keyPressEvent(allow_reset=True) 
-        return 
+
+        # Set IACUC protocol in metadata based on schedule
+        protocol = self._GetInfoFromSchedule(mouse_id,'Protocol')
+        if protocol is not None:
+            self.Metadata_dialog.meta_data['session_metadata']['IACUCProtocol']=str(int(protocol))
+            self.Metadata_dialog._update_metadata(
+                update_rig_metadata=False, 
+                update_session_metadata=True
+                )
+            logging.info('Setting IACUC Protocol: {}'.format(protocol))
+
+        # Set Project Name in metadata based on schedule
+        project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
+        add_default = True
+        if project_name is not None:
+            projects = [self.Metadata_dialog.ProjectName.itemText(i) 
+                for i in range(self.Metadata_dialog.ProjectName.count())]
+            index = np.where(np.array(projects) == project_name)[0]
+            if len(index) > 0:
+                index = index[0]
+                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+                self.Metadata_dialog._show_project_info()
+                logging.info('Setting Project name: {}'.format(project_name))
+                add_default = False
+        if add_default:
+            projects = [self.Metadata_dialog.ProjectName.itemText(i) 
+                for i in range(self.Metadata_dialog.ProjectName.count())]
+            index = np.where(np.array(projects) == 'Behavior Platform')[0]
+            if len(index) > 0:
+                index = index[0]
+                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+                self.Metadata_dialog._show_project_info()
+                logging.info('Setting Project name: {}'.format('Behavior Platform'))
+            else:
+                project_info = {
+                        'Funding Institution':['Allen Institute'],
+                        'Grant Number':['nan'],
+                        'Investigators':['Jeremiah Cohen'],
+                        'Fundee':['nan'],
+                    }
+                self.Metadata_dialog.project_info = project_info
+                self.Metadata_dialog.ProjectName.addItems(['Behavior Platform'])
+                logging.info('Setting Project name: {}'.format('Behavior Platform'))
+
+        self.keyPressEvent(allow_reset=True) 
     
     def _Open_getListOfMice(self):
         '''
@@ -2977,8 +3064,10 @@ class Window(QMainWindow):
             CWD=os.path.dirname(self.FIP_workflow_path)
             logging.info('Starting FIP workflow in directory: {}'.format(CWD))
             folder_path = ' -p session="{}"'.format(self.SessionFolder)
-            camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartCamera.isChecked())
-            subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera+' --start',cwd=CWD,shell=True)
+            camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartRecording.isChecked())
+            process = subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera+' --start',cwd=CWD,shell=True,
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            threading.Thread(target=log_subprocess_output, args=(process,'FIP',)).start()
             self.FIP_started=True 
         except Exception as e:
             logging.error(e)
@@ -3182,15 +3271,21 @@ class Window(QMainWindow):
 
     def _stop_camera(self):
         '''Stop the camera if it is running'''
-        if self.Camera_dialog.StartCamera.isChecked():
-            self.Camera_dialog.StartCamera.setChecked(False)
+        if self.Camera_dialog.StartRecording.isChecked():
+            self.Camera_dialog.StartRecording.setChecked(False)
             self.Camera_dialog._StartCamera()
+
+            
     def _stop_logging(self):
         '''Stop the logging'''
         try:
             self.Channel.StopLogging('s')
+            self.logging_type=-1 # logging has stopped
         except Exception as e:
-            logging.error(str(e))
+            logging.warning('Bonsai connection is closed')
+            self.WarningLabel.setText('Lost bonsai connection')
+            self.WarningLabel.setStyleSheet(self.default_warning_color)
+            self.InitializeBonsaiSuccessfully=0
 
     def _NewSession(self):
         logging.info('New Session pressed')
@@ -3224,6 +3319,11 @@ class Window(QMainWindow):
         self.TotalWaterWarning.setText('')
         self.WarningLabel_2.setText('')
         self._set_metadata_enabled(True)
+
+        self._ConnectBonsai()
+        if self.InitializeBonsaiSuccessfully == 0:
+            self.WarningLabel.setText('Lost bonsai connection')
+            self.WarningLabel.setStyleSheet(self.default_warning_color)
 
         # Reset state variables
         self._StopPhotometry() # Make sure photoexcitation is stopped 
@@ -3263,6 +3363,7 @@ class Window(QMainWindow):
         # stop the current session
         self.Start.setStyleSheet("background-color : none")
         self.Start.setChecked(False)
+        self.Camera_dialog.StartPreview.setEnabled(True)
 
         # waiting for the finish of the last trial
         start_time = time.time()
@@ -3342,11 +3443,13 @@ class Window(QMainWindow):
         '''start trial loop'''
         # empty post weight
         self.WeightAfter.setText('')
+
         # empty the laser calibration
         self.Opto_dialog.laser_1_calibration_voltage.setText('')
         self.Opto_dialog.laser_2_calibration_voltage.setText('')
         self.Opto_dialog.laser_1_calibration_power.setText('')
         self.Opto_dialog.laser_2_calibration_power.setText('')
+
         # Check for Bonsai connection
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
@@ -3473,6 +3576,12 @@ class Window(QMainWindow):
             self.WarningLabel.setStyleSheet("color: none;")
             # disable metadata fields
             self._set_metadata_enabled(False)
+            # disable preview
+            self.Camera_dialog.StartPreview.setEnabled(False)
+            # stop the temporary logging
+            if self.Camera_dialog.StartPreview.isChecked():
+                self.Camera_dialog.StartPreview.setChecked(False)
+                self.Camera_dialog._StartCamera(start_type='preview')
         else:
             # Prompt user to confirm stopping trials
             reply = QMessageBox.question(self, 
@@ -3488,7 +3597,8 @@ class Window(QMainWindow):
                 logging.info('Start button pressed: user continued session')               
                 self.Start.setChecked(True)
                 return 
-           
+            # enable preview
+            self.Camera_dialog.StartPreview.setEnabled(True)
             # If the photometry timer is running, stop it 
             if self.finish_Timer==0:
                 self.ignore_timer=True
@@ -3514,7 +3624,7 @@ class Window(QMainWindow):
             # start a new logging
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
-                if (not (self.Camera_dialog.StartCamera.isChecked() and self.Camera_dialog.CollectVideo.currentText()=='Yes' and self.Camera_dialog.AutoControl.currentText()=='No')) and (not self.FIP_started):
+                if (not (self.Camera_dialog.StartRecording.isChecked() and self.Camera_dialog.AutoControl.currentText()=='No')) and (not self.FIP_started):
                     self.CreateNewFolder=1
                     self.Ot_log_folder=self._restartlogging()
             except Exception as e:
@@ -3537,7 +3647,7 @@ class Window(QMainWindow):
                     raise
             # start the camera during the begginning of each session
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
-                self.Camera_dialog.StartCamera.setChecked(True)
+                self.Camera_dialog.StartRecording.setChecked(True)
                 self.Camera_dialog._StartCamera()
             self.SessionStartTime=datetime.now()
             self.Other_SessionStartTime=str(self.SessionStartTime) # for saving
@@ -3705,7 +3815,7 @@ class Window(QMainWindow):
                 if self.actionLicks_sta.isChecked():
                     self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
                 # save the data everytrial
-                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial:
+                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
                     self.previous_backup_completed=0
                     self.threadpool6.start(worker_save)
 
@@ -4030,6 +4140,10 @@ def log_git_hash():
     logging.info('Current git commit branch, hash: {}, {}'.format(git_branch,git_hash))
     print('Current git commit branch, hash: {}, {}'.format(git_branch,git_hash))
 
+    # Log gui version:
+    logging.info('Current foraging_gui version: {}'.format(foraging_gui.__version__))
+    print('Current foraging_gui version: {}'.format(foraging_gui.__version__))
+
     # Check for untracked local changes
     repo_dirty_flag = dirty_files != ''
     if repo_dirty_flag:
@@ -4109,6 +4223,16 @@ class UncaughtHook(QtCore.QObject):
         tb = "<br><br>".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         self._exception_caught.emit(self.box+tb)
 
+def log_subprocess_output(process, prefix):
+    logging.info('{} logging starting'.format(prefix))
+    while process.poll() is None:       
+        output = process.stdout.readline()
+        if 'Exception' in output:
+            logging.error(prefix+': '+output.strip())
+        else:
+            logging.info(prefix+': '+output.strip())
+
+    logging.info('{} logging terminating'.format(prefix))
 
 if __name__ == "__main__":
 
