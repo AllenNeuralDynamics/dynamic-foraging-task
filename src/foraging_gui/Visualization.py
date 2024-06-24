@@ -36,7 +36,7 @@ class PlotV(FigureCanvas):
             return
 
         if Channel is not None:
-            GeneratedTrials._GetLicks(Channel)
+            GeneratedTrials._get_irregular_timestamp(Channel)
 
         # Unpack data 
         self.B_AnimalResponseHistory=GeneratedTrials.B_AnimalResponseHistory
