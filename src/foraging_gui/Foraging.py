@@ -3307,6 +3307,11 @@ class Window(QMainWindow):
         self.WarningLabel_2.setText('')
         self._set_metadata_enabled(True)
 
+        self._ConnectBonsai()
+        if self.InitializeBonsaiSuccessfully == 0:
+            self.WarningLabel.setText('Lost bonsai connection')
+            self.WarningLabel.setStyleSheet(self.default_warning_color)
+
         # Reset state variables
         self._StopPhotometry() # Make sure photoexcitation is stopped 
         self.StartANewSession=1
