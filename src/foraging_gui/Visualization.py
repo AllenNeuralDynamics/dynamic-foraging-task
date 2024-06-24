@@ -170,8 +170,6 @@ class PlotV(FigureCanvas):
         if self.B_BaitHistory.shape[1]>self.B_AnimalResponseHistory.shape[0]:
             LeftBait=np.where(self.B_BaitHistory[0][:-1]==True)
             RightBait=np.where(self.B_BaitHistory[1][:-1]==True)
-            LeftAutoWater=np.where(self.B_AutoWaterTrial[0][:-1]==1)
-            RightAutoWater=np.where(self.B_AutoWaterTrial[1][:-1]==1)
             # plot the upcoming trial start time
             if self.B_CurrentTrialN>0:
                 NewTrialStart=np.array(self.B_BTime[-1])
@@ -196,14 +194,12 @@ class PlotV(FigureCanvas):
         else:
             LeftBait=np.where(self.B_BaitHistory[0]==True)
             RightBait=np.where(self.B_BaitHistory[1]==True)
-            LeftAutoWater=np.where(self.B_AutoWaterTrial[0]==1)
-            RightAutoWater=np.where(self.B_AutoWaterTrial[1]==1)
-        
-        if np.size(LeftAutoWater) !=0:
-            self.ax1.plot(self.B_BTime[LeftAutoWater], np.zeros(len(self.B_BTime[LeftAutoWater]))+0.4, 
+
+        if np.size(self.B_AutoLeftWaterStartTime) !=0:
+            self.ax1.plot(self.B_AutoLeftWaterStartTime, np.zeros(len(self.B_AutoLeftWaterStartTime))+0.4, 
                 'bo',markerfacecolor = (0, 1, 0, 1),markersize=self.MarkerSize)
-        if np.size(RightAutoWater) !=0:
-            self.ax1.plot(self.B_BTime[RightAutoWater], np.zeros(len(self.B_BTime[RightAutoWater]))+0.6, 
+        if np.size(self.B_AutoLeftWaterRightTime) !=0:
+            self.ax1.plot(self.B_AutoLeftWaterRightTime, np.zeros(len(self.B_AutoLeftWaterRightTime))+0.6, 
                 'bo',markerfacecolor =(0, 1, 0, 1),markersize=self.MarkerSize,label='AutoWater')
         
         if np.size(self.B_ManualLeftWaterStartTime) !=0:
