@@ -273,11 +273,17 @@ class Window(QMainWindow):
         self.SessionlistSpin.textChanged.connect(self._session_list_spin)
         self.StartEphysRecording.clicked.connect(self._StartEphysRecording)
         self.SetReference.clicked.connect(self._set_reference)
+        self.Opto_dialog.laser_1_calibration_voltage.textChanged.connect(self._toggle_save_color)
+        self.Opto_dialog.laser_2_calibration_voltage.textChanged.connect(self._toggle_save_color)
+        self.Opto_dialog.laser_1_calibration_power.textChanged.connect(self._toggle_save_color)
+        self.Opto_dialog.laser_2_calibration_power.textChanged.connect(self._toggle_save_color)
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):     
                 child.textChanged.connect(self._CheckTextChange)
+            for child in container.findChildren((QtWidgets.QComboBox)):     
+                child.currentIndexChanged.connect(self.keyPressEvent)
         # Opto_dialog can not detect natural enter press, so returnPressed is used here. 
         for container in [self.Opto_dialog,self.Metadata_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
@@ -1557,54 +1563,54 @@ class Window(QMainWindow):
             widget = widget_dict[key]
             try: # load the paramter used by last trial
                 value=np.array([parameters[key]])
-                Tag=0
+                loading_parameters_type=0
             # sometimes we only have training parameters, no behavior parameters
             except Exception as e:
                 logging.error(str(e))
                 value=parameters[key]
-                Tag=1
+                loading_parameters_type=1
             if isinstance(widget, QtWidgets.QPushButton):
                 pass
             if type(value)==bool:
-                Tag=1
+                loading_parameters_type=1
             else:
                 if len(value)==0:
                     value=np.array([''], dtype='<U1')
-                    Tag=0
+                    loading_parameters_type=0
             if type(value)==np.ndarray:
-                Tag=0
+                loading_parameters_type=0
             if isinstance(widget, QtWidgets.QLineEdit):
-                if Tag==0:
+                if loading_parameters_type==0:
                     widget.setText(value[-1])
-                elif Tag==1:
+                elif loading_parameters_type==1:
                     widget.setText(value)
             elif isinstance(widget, QtWidgets.QComboBox):
-                if Tag==0:
+                if loading_parameters_type==0:
                     index = widget.findText(value[-1])
-                elif Tag==1:
+                elif loading_parameters_type==1:
                     index = widget.findText(value)
                 if index != -1:
                     widget.setCurrentIndex(index)
             elif isinstance(widget, QtWidgets.QDoubleSpinBox):
-                if Tag==0:
+                if loading_parameters_type==0:
                     widget.setValue(float(value[-1]))
-                elif Tag==1:
+                elif loading_parameters_type==1:
                     widget.setValue(float(value))
             elif isinstance(widget, QtWidgets.QSpinBox):
-                if Tag==0:
+                if loading_parameters_type==0:
                     widget.setValue(int(value[-1]))
-                elif Tag==1:
+                elif loading_parameters_type==1:
                     widget.setValue(int(value))
             elif isinstance(widget, QtWidgets.QTextEdit):
-                if Tag==0:
+                if loading_parameters_type==0:
                     widget.setText(value[-1])
-                elif Tag==1:
+                elif loading_parameters_type==1:
                     widget.setText(value)
             elif isinstance(widget, QtWidgets.QPushButton):
                 if key=='AutoReward':
-                    if Tag==0:
+                    if loading_parameters_type==0:
                         widget.setChecked(bool(value[-1]))
-                    elif Tag==1:
+                    elif loading_parameters_type==1:
                         widget.setChecked(value)
                     self._AutoReward()
         else:
@@ -1656,7 +1662,7 @@ class Window(QMainWindow):
     def keyPressEvent(self, event=None,allow_reset=False):
         '''
             Enter press to allow change of parameters
-            allow_reset (bool) allows the Baseweight parameter to be reset to the empty string
+            allow_reset (bool) allows the Baseweight etc. parameters to be reset to the empty string
         '''
         try:
             if self.actionTime_distribution.isChecked()==True:
@@ -1677,7 +1683,7 @@ class Window(QMainWindow):
             Parameters=self.GeneratedTrials
         else:
             Parameters=self
-        if event==None:
+        if event is None or not isinstance(event, QtGui.QKeyEvent):
             event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, Qt.Key_Return, Qt.KeyboardModifiers())
         if (event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter):
             # handle the return key press event here
@@ -1764,6 +1770,10 @@ class Window(QMainWindow):
                     self._ShowRewardPairs()
                 try:
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
+                        # Changes are not allowed until press is typed except for PositionX, PositionY and PositionZ
+                        if child.objectName() not in ('PositionX', 'PositionY', 'PositionZ'):
+                            self.UpdateParameters = 0
+                        
                         self.Continue=0
                         if child.objectName() in {'LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','ProbeTarget','RigMetadataFile','Experimenter', 'UncoupledReward', 'ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
                             child.setStyleSheet(self.default_text_color)
@@ -1783,16 +1793,12 @@ class Window(QMainWindow):
                         try:
                             # it's valid float
                             float(child.text())
-                            # Changes are not allowed until press is typed except for PositionX, PositionY and PositionZ
-                            if child.objectName() not in ('PositionX', 'PositionY', 'PositionZ'):
-                                self.UpdateParameters = 0
                         except Exception as e:
                             #logging.error(str(e))
                             # Invalid float. Do not change the parameter
                             if child.objectName() in ['BaseWeight', 'WeightAfter']:
                                 # Strip the last character which triggered the invalid float
                                 child.setText(child.text()[:-1]) 
-                                self.UpdateParameters=0
                                 continue
                             elif isinstance(child, QtWidgets.QDoubleSpinBox):
                                 child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
@@ -2807,43 +2813,51 @@ class Window(QMainWindow):
                             continue
                         widget = widget_dict[key]
 
+                        # loading_parameters_type=0, get the last value of saved training parameters for each trial; loading_parameters_type=1, get the current value for single value data directly from the window. 
                         if 'TP_{}'.format(key) in CurrentObj:
                             value=np.array([CurrentObj['TP_'+key][-2]])
-                            Tag=0
+                            loading_parameters_type=0
                         else:
                             value=CurrentObj[key]
-                            Tag=1
+                            loading_parameters_type=1
 
                         if key in {'BaseWeight','TotalWater','TargetWeight','WeightAfter','SuggestedWater','TargetRatio'}:
                             self.BaseWeight.disconnect()
                             self.TargetRatio.disconnect()
                             self.WeightAfter.disconnect()
                             value=CurrentObj[key]
-                            Tag=1
-                        if isinstance(widget, QtWidgets.QPushButton):
-                            pass
+                            loading_parameters_type=1
+
+                        # tag=0, get the last value for ndarray; tag=1, get the current value for single value data
                         if type(value)==bool:
-                            Tag=1
+                            loading_parameters_type=1
                         else:
                             if len(value)==0:
                                 value=np.array([''], dtype='<U1')
-                                Tag=0
+                                loading_parameters_type=0
                         if type(value)==np.ndarray:
-                            Tag=0
+                            loading_parameters_type=0
+
+                        if loading_parameters_type==0:
+                            final_value=value[-1]
+                        elif loading_parameters_type==1:
+                            final_value=value
+
                         if isinstance(widget, QtWidgets.QLineEdit):
-                            if Tag==0:
-                                widget.setText(value[-1])
-                            elif Tag==1:
-                                widget.setText(value)
+                            widget.setText(final_value)
                             if key in {'BaseWeight','TotalWater','TargetWeight','WeightAfter','SuggestedWater','TargetRatio'}:
                                 self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
                                 self.WeightAfter.textChanged.connect(self._PostWeightChange)
                                 self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
                         elif isinstance(widget, QtWidgets.QComboBox):
-                            if Tag==0:
-                                index = widget.findText(value[-1])
-                            elif Tag==1:
-                                index = widget.findText(value)
+                            index=widget.findText(final_value)
+                            if key.startswith('Frequency_'):
+                                condition=key.split('_')[1]
+                                if CurrentObj['Protocol_'+condition] in ['Pulse']:
+                                    widget.setEditable(True)
+                                    widget.lineEdit().setText(final_value)
+                                    continue
+
                             if index != -1:
                                 # Alternating on/off for SessionStartWith if SessionAlternating is on
                                 if key=='SessionStartWith' and 'Opto_dialog' in Obj:
@@ -2854,25 +2868,13 @@ class Window(QMainWindow):
                                 else:
                                     widget.setCurrentIndex(index)
                         elif isinstance(widget, QtWidgets.QDoubleSpinBox):
-                            if Tag==0:
-                                widget.setValue(float(value[-1]))
-                            elif Tag==1:
-                                widget.setValue(float(value))
+                            widget.setValue(float(final_value))
                         elif isinstance(widget, QtWidgets.QSpinBox):
-                            if Tag==0:
-                                widget.setValue(int(value[-1]))
-                            elif Tag==1:
-                                widget.setValue(int(value))
+                            widget.setValue(int(final_value))
                         elif isinstance(widget, QtWidgets.QTextEdit):
-                            if Tag==0:
-                                widget.setText(value[-1])
-                            elif Tag==1:
-                                widget.setText(value)
+                            widget.setText(final_value)
                         elif isinstance(widget, QtWidgets.QPushButton):
-                            if Tag==0:
-                                widget.setChecked(bool(value[-1]))
-                            elif Tag==1:
-                                widget.setChecked(value)
+                            widget.setChecked(bool(final_value))
                             if key=='AutoReward':
                                 self._AutoReward()
                             if key=='NextBlock':
@@ -3441,6 +3443,13 @@ class Window(QMainWindow):
         '''start trial loop'''
         # empty post weight
         self.WeightAfter.setText('')
+
+        # empty the laser calibration
+        self.Opto_dialog.laser_1_calibration_voltage.setText('')
+        self.Opto_dialog.laser_2_calibration_voltage.setText('')
+        self.Opto_dialog.laser_1_calibration_power.setText('')
+        self.Opto_dialog.laser_2_calibration_power.setText('')
+
         # Check for Bonsai connection
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
@@ -3950,11 +3959,15 @@ class Window(QMainWindow):
         self.Channel.RightValue(float(self.TP_RightValue)*1000)
         self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
         self._UpdateSuggestedWater()
+    
+    def _toggle_save_color(self):
+        '''toggle the color of the save button to mediumorchid'''
+        self.unsaved_data=True
+        self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
 
     def _PostWeightChange(self):
         self.unsaved_data=True
         self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
-        self.NewSession.setStyleSheet("background-color : none")
         self.WarningLabel.setText('')
         self._UpdateSuggestedWater()
 

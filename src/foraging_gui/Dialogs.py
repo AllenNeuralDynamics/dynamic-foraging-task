@@ -1645,7 +1645,11 @@ class LaserCalibrationDialog(QDialog):
         self.PulseDur_1.setText(self.MainWindow.Opto_dialog.__getattribute__("PulseDur_" + condition).text())
         self.LaserColor_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("LaserColor_" + condition).currentIndex())
         self.Location_1.setCurrentIndex(self.Location_1.findText(self.CopyLaser.currentText()))
-        self.Protocol_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Protocol_" + condition).currentIndex())
+        if self.MainWindow.Opto_dialog.__getattribute__("Protocol_" + condition).currentText()=='Pulse':
+            ind=self.Protocol_1.findText('Constant')
+        else:
+            ind=self.MainWindow.Opto_dialog.__getattribute__("Protocol_" + condition).currentIndex()
+        self.Protocol_1.setCurrentIndex(ind)
         self.voltage.setText(str(eval(self.MainWindow.Opto_dialog.__getattribute__(f"Laser{copylaser}_power_{condition}").currentText())[0]))
         
 
