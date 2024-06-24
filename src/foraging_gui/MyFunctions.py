@@ -1688,8 +1688,8 @@ class GenerateTrials():
         channel3.ManualWater_Right(int(1))
         channel3.RightValue1(float(self.win.RightValue.text())*1000)
 
-    def _GetLicks(self,Channel2):
-        '''Get licks and reward delivery time'''
+    def _get_irregular_timestamp(self,Channel2):
+        '''Get timestamps occurred irregularly (e.g. licks and reward delivery time)'''
         while not Channel2.msgs.empty():
             Rec=Channel2.receive()
             if Rec[0].address=='/LeftLickTime':
@@ -1710,6 +1710,7 @@ class GenerateTrials():
                 self.B_PhotometryFallingTimeHarp=np.append(self.B_PhotometryFallingTimeHarp,Rec[1][1][0])
             elif Rec[0].address=='/OptogeneticsTimeHarp':
                 self.B_OptogeneticsTimeHarp=np.append(self.B_OptogeneticsTimeHarp,Rec[1][1][0])
+
     def _DeletePreviousLicks(self,Channel2):
         '''Delete licks from the previous session'''
         while not Channel2.msgs.empty():

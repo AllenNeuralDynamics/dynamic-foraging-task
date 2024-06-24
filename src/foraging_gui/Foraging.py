@@ -2251,7 +2251,7 @@ class Window(QMainWindow):
 
         # this should be improved in the future. Need to get the last LeftRewardDeliveryTime and RightRewardDeliveryTime
         if hasattr(self, 'GeneratedTrials') and self.InitializeBonsaiSuccessfully==1:
-            self.GeneratedTrials._GetLicks(self.Channel2)
+            self.GeneratedTrials._get_irregular_timestamp(self.Channel2)
         
         # Create new folders
         if self.CreateNewFolder==1:
@@ -3575,7 +3575,7 @@ class Window(QMainWindow):
             # create workers
             worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.Channel,self.Channel3,self.Channel4)
             worker1.signals.finished.connect(self._thread_complete)
-            workerLick = Worker(GeneratedTrials._GetLicks,self.Channel2)
+            workerLick = Worker(GeneratedTrials._get_irregular_timestamp,self.Channel2)
             workerLick.signals.finished.connect(self._thread_complete2)
             workerPlot = Worker(PlotM._Update,GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
             workerPlot.signals.finished.connect(self._thread_complete3)
