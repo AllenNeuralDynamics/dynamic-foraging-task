@@ -3834,7 +3834,7 @@ class Window(QMainWindow):
             # Reserving the water after the go cue.Each click will add the water to the reserved water
             self.give_left_volume_reserved=self.give_left_volume_reserved+float(self.TP_GiveWaterL_volume)
             if self.latest_fitting!={}:
-                self.give_left_time_reserved=((float(self.give_left_volume_reserved)-self.latest_fitting['left'][1])/self.latest_fitting['left'][0])*1000
+                self.give_left_time_reserved=((float(self.give_left_volume_reserved)-self.latest_fitting['Left'][1])/self.latest_fitting['Left'][0])*1000
             else:
                 self.give_left_time_reserved=self.give_left_time_reserved+float(self.TP_GiveWaterL)*1000
         else:
@@ -3877,7 +3877,7 @@ class Window(QMainWindow):
             # Reserving the water after the go cue.Each click will add the water to the reserved water
             self.give_right_volume_reserved=self.give_right_volume_reserved+float(self.TP_GiveWaterR_volume)
             if self.latest_fitting!={}:
-                self.give_right_time_reserved=((float(self.give_right_volume_reserved)-self.latest_fitting['right'][1])/self.latest_fitting['right'][0])*1000
+                self.give_right_time_reserved=((float(self.give_right_volume_reserved)-self.latest_fitting['Right'][1])/self.latest_fitting['Right'][0])*1000
             else:
                 self.give_right_time_reserved=self.give_right_time_reserved+float(self.TP_GiveWaterR)*1000
         else:
