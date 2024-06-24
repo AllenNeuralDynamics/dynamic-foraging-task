@@ -2793,8 +2793,6 @@ class Window(QMainWindow):
                                 self._AutoReward()
                             if key=='NextBlock':
                                 self._NextBlock()
-                    elif key=='RandomnessBlock':
-                        self._set_default_randomness(Obj['Task'])
                     else:
                         widget = widget_dict[key]
                         if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
@@ -2865,15 +2863,6 @@ class Window(QMainWindow):
             self.NewSession.setDisabled(False)
         self.StartExcitation.setChecked(False)
         self.keyPressEvent() # Accept all updates
-
-    def _set_default_randomness(self,task):
-        '''Set the default block randomness for different tasks'''
-        if task in ['Uncoupled Baiting','Uncoupled Without Baiting']:
-            index = self.RandomnessBlock.findText('Even')
-            self.RandomnessBlock.setCurrentIndex(index)
-        elif task in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
-            index = self.RandomnessBlock.findText('Exponential')
-            self.RandomnessBlock.setCurrentIndex(index)
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
