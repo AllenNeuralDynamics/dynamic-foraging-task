@@ -112,15 +112,6 @@ class PlotV(FigureCanvas):
         Fraction=self.B_RewardProHistory[1]/self.B_RewardProHistory.sum(axis=0)
         self.ax2.plot(self.B_Time,Fraction[0:Len],linestyle=':',color='y',label='p_R_frac',alpha=0.8)
         self.draw()
-
-    def _update_manual_water(self, ax, water_times, y_value, color, label):
-        # adding the manual water
-        if np.size(self.B_ManualLeftWaterStartTime) !=0:
-            self.ax1.plot(self.B_BTime[self.B_ManualLeftWaterStartTime], np.zeros(len(self.B_ManualLeftWaterStartTime))+0.4, 
-                'bs',markerfacecolor = (0, 1, 0, 1),markersize=self.MarkerSize)
-        if np.size(self.B_ManualRightWaterStartTime) !=0:
-            self.ax1.plot(self.B_ManualRightWaterStartTime, np.zeros(len(self.B_ManualRightWaterStartTime))+0.6, 
-                'bs',markerfacecolor =(0, 1, 0, 1),markersize=self.MarkerSize,label='AutoWater')
             
     def _PlotChoice(self):
         self.ax1.cla()
@@ -214,7 +205,14 @@ class PlotV(FigureCanvas):
         if np.size(RightAutoWater) !=0:
             self.ax1.plot(self.B_BTime[RightAutoWater], np.zeros(len(self.B_BTime[RightAutoWater]))+0.6, 
                 'bo',markerfacecolor =(0, 1, 0, 1),markersize=self.MarkerSize,label='AutoWater')
-
+        
+        if np.size(self.B_ManualLeftWaterStartTime) !=0:
+            self.ax1.plot(self.B_ManualLeftWaterStartTime, np.zeros(len(self.B_ManualLeftWaterStartTime))+0.3, 
+                'bs',markerfacecolor = (0, 1, 0, 1),markersize=self.MarkerSize)
+        if np.size(self.B_ManualRightWaterStartTime) !=0:
+            self.ax1.plot(self.B_ManualRightWaterStartTime, np.zeros(len(self.B_ManualRightWaterStartTime))+0.7, 
+                'bs',markerfacecolor =(0, 1, 0, 1),markersize=self.MarkerSize,label='AutoWater')
+            
         if np.size(Optogenetics_On) !=0:
             self.ax1.plot(self.B_BTime[Optogenetics_On], np.zeros(len(self.B_BTime[Optogenetics_On]))+1.5, 
                 'bo',markerfacecolor = (0, 0, 1, 1),label='Optogenetics',markersize=self.MarkerSize, alpha=1)
