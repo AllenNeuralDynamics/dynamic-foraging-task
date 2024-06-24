@@ -99,7 +99,7 @@ class Window(QMainWindow):
         self.ANewTrial = 1          # permission to start a new trial
         self.previous_backup_completed = 1   # permission to save backup data; 0, the previous saving has not finished, and it will not trigger the next saving; 1, it is allowed to save backup data
         self.UpdateParameters = 1   # permission to update parameters
-        self.loggingstarted = -1    # Have we started trial logging
+        self.logging_type = -1    # -1, logging is not started; 0, temporary logging; 1, formal logging
         self.unsaved_data = False   # Setting unsaved data to False 
         self.to_check_drop_frames = 1 # 1, to check drop frames during saving data; 0, not to check drop frames 
 
@@ -877,28 +877,29 @@ class Window(QMainWindow):
         if log_folder is None:
             # formal logging
             loggingtype=0
-            if self.CreateNewFolder==1:
-                self._GetSaveFolder()
-                self.CreateNewFolder=0
+            self._GetSaveFolder()
+            self.CreateNewFolder=0
             log_folder=self.HarpFolder
+            self.unsaved_data=True
+            self.Save.setStyleSheet("color: white;background-color : mediumorchid")
         else:
             # temporary logging
             loggingtype=1
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-            log_folder=os.path.join(log_folder,formatted_datetime,'raw.harp')
+            log_folder=os.path.join(log_folder,formatted_datetime,'behavior','raw.harp')
+            # create video folder
+            video_folder=os.path.join(log_folder,'..','..','behavior-videos')
+            if not os.path.exists(video_folder):
+                os.makedirs(video_folder)
         # stop the logging first
         self._stop_logging()
         self.Channel.StartLogging(log_folder)
         Rec=self.Channel.receive()
         if Rec[0].address=='/loggerstarted':
             pass
-        if loggingtype==0:
-            # formal logging
-            self.loggingstarted=0
-        elif loggingtype==1:
-            # temporary logging
-            self.loggingstarted=1
+        
+        self.logging_type=loggingtype # 0 for formal logging, 1 for temporary logging
         return log_folder
     
     def _GetLaserCalibration(self):
@@ -3053,7 +3054,7 @@ class Window(QMainWindow):
             CWD=os.path.dirname(self.FIP_workflow_path)
             logging.info('Starting FIP workflow in directory: {}'.format(CWD))
             folder_path = ' -p session="{}"'.format(self.SessionFolder)
-            camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartCamera.isChecked())
+            camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartRecording.isChecked())
             process = subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera+' --start',cwd=CWD,shell=True,
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
             threading.Thread(target=log_subprocess_output, args=(process,'FIP',)).start()
@@ -3260,14 +3261,16 @@ class Window(QMainWindow):
 
     def _stop_camera(self):
         '''Stop the camera if it is running'''
-        if self.Camera_dialog.StartCamera.isChecked():
-            self.Camera_dialog.StartCamera.setChecked(False)
+        if self.Camera_dialog.StartRecording.isChecked():
+            self.Camera_dialog.StartRecording.setChecked(False)
             self.Camera_dialog._StartCamera()
 
+            
     def _stop_logging(self):
         '''Stop the logging'''
         try:
             self.Channel.StopLogging('s')
+            self.logging_type=-1 # logging has stopped
         except Exception as e:
             logging.warning('Bonsai connection is closed')
             self.WarningLabel.setText('Lost bonsai connection')
@@ -3350,6 +3353,7 @@ class Window(QMainWindow):
         # stop the current session
         self.Start.setStyleSheet("background-color : none")
         self.Start.setChecked(False)
+        self.Camera_dialog.StartPreview.setEnabled(True)
 
         # waiting for the finish of the last trial
         start_time = time.time()
@@ -3429,7 +3433,6 @@ class Window(QMainWindow):
         '''start trial loop'''
         # empty post weight
         self.WeightAfter.setText('')
-
         # Check for Bonsai connection
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
@@ -3556,6 +3559,12 @@ class Window(QMainWindow):
             self.WarningLabel.setStyleSheet("color: none;")
             # disable metadata fields
             self._set_metadata_enabled(False)
+            # disable preview
+            self.Camera_dialog.StartPreview.setEnabled(False)
+            # stop the temporary logging
+            if self.Camera_dialog.StartPreview.isChecked():
+                self.Camera_dialog.StartPreview.setChecked(False)
+                self.Camera_dialog._StartCamera(start_type='preview')
         else:
             # Prompt user to confirm stopping trials
             reply = QMessageBox.question(self, 
@@ -3571,7 +3580,8 @@ class Window(QMainWindow):
                 logging.info('Start button pressed: user continued session')               
                 self.Start.setChecked(True)
                 return 
-           
+            # enable preview
+            self.Camera_dialog.StartPreview.setEnabled(True)
             # If the photometry timer is running, stop it 
             if self.finish_Timer==0:
                 self.ignore_timer=True
@@ -3597,7 +3607,7 @@ class Window(QMainWindow):
             # start a new logging
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
-                if (not (self.Camera_dialog.StartCamera.isChecked() and self.Camera_dialog.CollectVideo.currentText()=='Yes' and self.Camera_dialog.AutoControl.currentText()=='No')) and (not self.FIP_started):
+                if (not (self.Camera_dialog.StartRecording.isChecked() and self.Camera_dialog.AutoControl.currentText()=='No')) and (not self.FIP_started):
                     self.CreateNewFolder=1
                     self.Ot_log_folder=self._restartlogging()
             except Exception as e:
@@ -3620,7 +3630,7 @@ class Window(QMainWindow):
                     raise
             # start the camera during the begginning of each session
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
-                self.Camera_dialog.StartCamera.setChecked(True)
+                self.Camera_dialog.StartRecording.setChecked(True)
                 self.Camera_dialog._StartCamera()
             self.SessionStartTime=datetime.now()
             self.Other_SessionStartTime=str(self.SessionStartTime) # for saving
@@ -3788,7 +3798,7 @@ class Window(QMainWindow):
                 if self.actionLicks_sta.isChecked():
                     self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
                 # save the data everytrial
-                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial:
+                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
                     self.previous_backup_completed=0
                     self.threadpool6.start(worker_save)
 
