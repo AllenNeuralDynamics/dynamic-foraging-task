@@ -526,12 +526,20 @@ class Window(QMainWindow):
                     self.trigger_length=0
                     self.WarningLabelCamera.setText('')
                     self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
+                    self.to_check_drop_frames=0
                     return
-                else:
+                elif ('HighSpeedCamera' in self.SettingsBox) and (self.SettingsBox['HighSpeedCamera'] ==1):
                     self.trigger_length=0
                     logging.error('Saved video data, but no camera trigger file found')
                     self.WarningLabelCamera.setText('No camera trigger file found!')
                     self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
+                    return
+                else:
+                    logging.info('Saved video data, but not using high speed camera - skipping drop frame check')
+                    self.trigger_length=0
+                    self.WarningLabelCamera.setText('')
+                    self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
+                    self.to_check_drop_frames=0
                     return
                 csv_files = [file for file in os.listdir(video_folder) if file.endswith(".csv")]
                 avi_files = [file for file in os.listdir(video_folder) if file.endswith(".avi")]
