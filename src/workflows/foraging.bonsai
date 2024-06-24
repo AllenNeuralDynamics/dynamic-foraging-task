@@ -1697,6 +1697,9 @@
                       <Value>0</Value>
                     </Combinator>
                   </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>AutoWater_Left</Name>
+                  </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:Merge" />
                   </Expression>
@@ -1755,6 +1758,9 @@
                       <Value>0</Value>
                     </Combinator>
                   </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>AutoWater_Right</Name>
+                  </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:Merge" />
                   </Expression>
@@ -1777,24 +1783,26 @@
                   <Edge From="6" To="7" Label="Source2" />
                   <Edge From="7" To="8" Label="Source1" />
                   <Edge From="8" To="9" Label="Source1" />
-                  <Edge From="10" To="17" Label="Source1" />
+                  <Edge From="10" To="18" Label="Source1" />
                   <Edge From="11" To="15" Label="Source1" />
                   <Edge From="12" To="13" Label="Source1" />
                   <Edge From="13" To="14" Label="Source1" />
                   <Edge From="14" To="15" Label="Source2" />
                   <Edge From="15" To="16" Label="Source1" />
-                  <Edge From="16" To="17" Label="Source2" />
-                  <Edge From="17" To="18" Label="Source1" />
+                  <Edge From="16" To="18" Label="Source2" />
+                  <Edge From="17" To="18" Label="Source3" />
                   <Edge From="18" To="19" Label="Source1" />
-                  <Edge From="20" To="27" Label="Source1" />
-                  <Edge From="21" To="25" Label="Source1" />
-                  <Edge From="22" To="23" Label="Source1" />
+                  <Edge From="19" To="20" Label="Source1" />
+                  <Edge From="21" To="29" Label="Source1" />
+                  <Edge From="22" To="26" Label="Source1" />
                   <Edge From="23" To="24" Label="Source1" />
-                  <Edge From="24" To="25" Label="Source2" />
-                  <Edge From="25" To="26" Label="Source1" />
-                  <Edge From="26" To="27" Label="Source2" />
-                  <Edge From="27" To="28" Label="Source1" />
-                  <Edge From="28" To="29" Label="Source1" />
+                  <Edge From="24" To="25" Label="Source1" />
+                  <Edge From="25" To="26" Label="Source2" />
+                  <Edge From="26" To="27" Label="Source1" />
+                  <Edge From="27" To="29" Label="Source2" />
+                  <Edge From="28" To="29" Label="Source3" />
+                  <Edge From="29" To="30" Label="Source1" />
+                  <Edge From="30" To="31" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -3889,6 +3897,26 @@
                   <Expression xsi:type="rx:PublishSubject">
                     <Name>CameraFrequency</Name>
                   </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>FromBonsaiOSC3</Name>
+                  </Expression>
+                  <Expression xsi:type="osc:Parse">
+                    <osc:Address>/AutoWater_Left</osc:Address>
+                    <osc:TypeTag>i</osc:TypeTag>
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>AutoWater_Left</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>FromBonsaiOSC3</Name>
+                  </Expression>
+                  <Expression xsi:type="osc:Parse">
+                    <osc:Address>/AutoWater_Right</osc:Address>
+                    <osc:TypeTag>i</osc:TypeTag>
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>AutoWater_Right</Name>
+                  </Expression>
                 </Nodes>
                 <Edges>
                   <Edge From="0" To="1" Label="Source1" />
@@ -3991,6 +4019,10 @@
                   <Edge From="138" To="139" Label="Source1" />
                   <Edge From="140" To="141" Label="Source1" />
                   <Edge From="141" To="142" Label="Source1" />
+                  <Edge From="143" To="144" Label="Source1" />
+                  <Edge From="144" To="145" Label="Source1" />
+                  <Edge From="146" To="147" Label="Source1" />
+                  <Edge From="147" To="148" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -4260,6 +4292,90 @@
                       <Name>ToBonsaiOSC2</Name>
                     </Builder>
                   </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>ManualWater_Left</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>Timestamps</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:WithLatestFrom" />
+                  </Expression>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Item2</Selector>
+                  </Expression>
+                  <Expression xsi:type="scr:ExpressionTransform">
+                    <scr:Expression>new(it as Seconds)</scr:Expression>
+                  </Expression>
+                  <Expression xsi:type="osc:Format">
+                    <osc:Address>/ManualLeftWaterStartTime</osc:Address>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>ToBonsaiOSC2</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>ManualWater_Right</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>Timestamps</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:WithLatestFrom" />
+                  </Expression>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Item2</Selector>
+                  </Expression>
+                  <Expression xsi:type="scr:ExpressionTransform">
+                    <scr:Expression>new(it as Seconds)</scr:Expression>
+                  </Expression>
+                  <Expression xsi:type="osc:Format">
+                    <osc:Address>/ManualRightWaterStartTime</osc:Address>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>ToBonsaiOSC2</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>AutoWater_Left</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>Timestamps</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:WithLatestFrom" />
+                  </Expression>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Item2</Selector>
+                  </Expression>
+                  <Expression xsi:type="scr:ExpressionTransform">
+                    <scr:Expression>new(it as Seconds)</scr:Expression>
+                  </Expression>
+                  <Expression xsi:type="osc:Format">
+                    <osc:Address>/AutoLeftWaterStartTime</osc:Address>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>ToBonsaiOSC2</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>AutoWater_Right</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>Timestamps</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:WithLatestFrom" />
+                  </Expression>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Item2</Selector>
+                  </Expression>
+                  <Expression xsi:type="scr:ExpressionTransform">
+                    <scr:Expression>new(it as Seconds)</scr:Expression>
+                  </Expression>
+                  <Expression xsi:type="osc:Format">
+                    <osc:Address>/AutoRightWaterStartTime</osc:Address>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>ToBonsaiOSC2</Name>
+                  </Expression>
                 </Nodes>
                 <Edges>
                   <Edge From="0" To="1" Label="Source1" />
@@ -4326,6 +4442,30 @@
                   <Edge From="74" To="75" Label="Source1" />
                   <Edge From="75" To="76" Label="Source1" />
                   <Edge From="76" To="77" Label="Source1" />
+                  <Edge From="78" To="80" Label="Source1" />
+                  <Edge From="79" To="80" Label="Source2" />
+                  <Edge From="80" To="81" Label="Source1" />
+                  <Edge From="81" To="82" Label="Source1" />
+                  <Edge From="82" To="83" Label="Source1" />
+                  <Edge From="83" To="84" Label="Source1" />
+                  <Edge From="85" To="87" Label="Source1" />
+                  <Edge From="86" To="87" Label="Source2" />
+                  <Edge From="87" To="88" Label="Source1" />
+                  <Edge From="88" To="89" Label="Source1" />
+                  <Edge From="89" To="90" Label="Source1" />
+                  <Edge From="90" To="91" Label="Source1" />
+                  <Edge From="92" To="94" Label="Source1" />
+                  <Edge From="93" To="94" Label="Source2" />
+                  <Edge From="94" To="95" Label="Source1" />
+                  <Edge From="95" To="96" Label="Source1" />
+                  <Edge From="96" To="97" Label="Source1" />
+                  <Edge From="97" To="98" Label="Source1" />
+                  <Edge From="99" To="101" Label="Source1" />
+                  <Edge From="100" To="101" Label="Source2" />
+                  <Edge From="101" To="102" Label="Source1" />
+                  <Edge From="102" To="103" Label="Source1" />
+                  <Edge From="103" To="104" Label="Source1" />
+                  <Edge From="104" To="105" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
