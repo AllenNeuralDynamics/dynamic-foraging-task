@@ -135,7 +135,7 @@ class GenerateTrials():
                     perseverative_limit=4, # Hard-coded to 4 for now
                     max_block_tally=3, # Hard-coded to 3 for now
                     block_beta=float(self.TP_BlockBeta),
-                    random_distribution_block=self.TP_RandomnessBlock,
+                    random_distribution_block='Even', # Hard-coded to 'Even' for now. Show be changed to `self.TP_RandomnessBlock` after updating the curriculum. 
                 )
                 _, msg_uncoupled_block = self.uncoupled_blocks.next_trial()
             else:
