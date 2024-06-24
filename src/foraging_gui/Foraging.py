@@ -3269,9 +3269,10 @@ class Window(QMainWindow):
         try:
             self.Channel.StopLogging('s')
         except Exception as e:
-            print(type(e))
-            print(e.__dict__.keys())
-            logging.error(str(e))
+            logging.warning('Bonsai connection is closed')
+            self.WarningLabel.setText('Lost bonsai connection')
+            self.WarningLabel.setStyleSheet(self.default_warning_color)
+            self.InitializeBonsaiSuccessfully=0
 
     def _NewSession(self):
         logging.info('New Session pressed')
