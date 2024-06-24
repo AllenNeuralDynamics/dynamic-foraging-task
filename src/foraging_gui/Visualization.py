@@ -58,17 +58,22 @@ class PlotV(FigureCanvas):
         self.B_LaserOnTrial=np.array(GeneratedTrials.B_LaserOnTrial)
         self.B_AutoWaterTrial=GeneratedTrials.B_AutoWaterTrial
         self.MarchingType=GeneratedTrials.TP_MartchingType
-        self.B_LeftRewardDeliveryTimeHarp=GeneratedTrials.B_LeftRewardDeliveryTimeHarp
-        self.B_RightRewardDeliveryTimeHarp=GeneratedTrials.B_RightRewardDeliveryTimeHarp
-        self.B_ManualLeftWaterStartTime=GeneratedTrials.B_ManualLeftWaterStartTime
-        self.B_ManualRightWaterStartTime=GeneratedTrials.B_ManualRightWaterStartTime
-        self.B_EarnedLeftWaterStartTime=GeneratedTrials.B_EarnedLeftWaterStartTime
-        self.B_EarnedRightWaterStartTime=GeneratedTrials.B_EarnedRightWaterStartTime
-        self.B_AutoLeftWaterStartTime=GeneratedTrials.B_AutoLeftWaterStartTime
-        self.B_AutoRightWaterStartTime=GeneratedTrials.B_AutoRightWaterStartTime
-        
+        # They are not harp time
+        self.B_ManualLeftWaterStartTime=GeneratedTrials.B_ManualLeftWaterStartTime.copy()
+        self.B_ManualRightWaterStartTime=GeneratedTrials.B_ManualRightWaterStartTime.copy()
+        self.B_EarnedLeftWaterStartTime=GeneratedTrials.B_EarnedLeftWaterStartTime.copy()
+        self.B_EarnedRightWaterStartTime=GeneratedTrials.B_EarnedRightWaterStartTime.copy()
+        self.B_AutoLeftWaterStartTime=GeneratedTrials.B_AutoLeftWaterStartTime.copy()
+        self.B_AutoRightWaterStartTime=GeneratedTrials.B_AutoRightWaterStartTime.copy()
+
         if self.B_CurrentTrialN>0:
             self.B_Time=self.B_RewardOutcomeTime-GeneratedTrials.B_TrialStartTime[0]
+            self.B_ManualLeftWaterStartTime=self.B_ManualLeftWaterStartTime-GeneratedTrials.B_TrialStartTime[0]
+            self.B_ManualRightWaterStartTime=self.B_ManualRightWaterStartTime-GeneratedTrials.B_TrialStartTime[0]
+            self.B_EarnedLeftWaterStartTime=self.B_EarnedLeftWaterStartTime-GeneratedTrials.B_TrialStartTime[0]
+            self.B_EarnedRightWaterStartTime=self.B_EarnedRightWaterStartTime-GeneratedTrials.B_TrialStartTime[0]
+            self.B_AutoLeftWaterStartTime=self.B_AutoLeftWaterStartTime-GeneratedTrials.B_TrialStartTime[0]
+            self.B_AutoRightWaterStartTime=self.B_AutoRightWaterStartTime-GeneratedTrials.B_TrialStartTime[0]
         else:
             self.B_Time=self.B_RewardOutcomeTime
 
@@ -108,6 +113,15 @@ class PlotV(FigureCanvas):
         self.ax2.plot(self.B_Time,Fraction[0:Len],linestyle=':',color='y',label='p_R_frac',alpha=0.8)
         self.draw()
 
+    def _update_manual_water(self, ax, water_times, y_value, color, label):
+        # adding the manual water
+        if np.size(self.B_ManualLeftWaterStartTime) !=0:
+            self.ax1.plot(self.B_BTime[self.B_ManualLeftWaterStartTime], np.zeros(len(self.B_ManualLeftWaterStartTime))+0.4, 
+                'bs',markerfacecolor = (0, 1, 0, 1),markersize=self.MarkerSize)
+        if np.size(self.B_ManualRightWaterStartTime) !=0:
+            self.ax1.plot(self.B_ManualRightWaterStartTime, np.zeros(len(self.B_ManualRightWaterStartTime))+0.6, 
+                'bs',markerfacecolor =(0, 1, 0, 1),markersize=self.MarkerSize,label='AutoWater')
+            
     def _PlotChoice(self):
         self.ax1.cla()
 
