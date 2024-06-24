@@ -3841,6 +3841,7 @@ class Window(QMainWindow):
             self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
             time.sleep(0.01) 
             self.Channel3.ManualWater_Left(int(1))
+            time.sleep(0.01+float(self.TP_GiveWaterL)) 
             self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
             self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+float(self.TP_GiveWaterL_volume)/1000
             self._UpdateSuggestedWater()
@@ -3853,6 +3854,7 @@ class Window(QMainWindow):
             self.Channel.LeftValue(float(self.give_left_time_reserved))
             time.sleep(0.01) 
             self.Channel3.ManualWater_Left(int(1))
+            time.sleep(0.01+float(self.give_left_time_reserved)/1000)
             self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
             self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+self.give_left_volume_reserved/1000
             self.give_left_volume_reserved=0
@@ -3863,6 +3865,7 @@ class Window(QMainWindow):
             self.Channel.RightValue(float(self.give_right_time_reserved))
             time.sleep(0.01) 
             self.Channel3.ManualWater_Right(int(1))
+            time.sleep(0.01+float(self.give_right_time_reserved)/1000) 
             self.Channel.RightValue(float(self.TP_RightValue)*1000)
             self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+self.give_right_volume_reserved/1000
             self.give_right_volume_reserved=0
@@ -3884,6 +3887,7 @@ class Window(QMainWindow):
             self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
             time.sleep(0.01) 
             self.Channel3.ManualWater_Right(int(1))
+            time.sleep(0.01+float(self.TP_GiveWaterR)) 
             self.Channel.RightValue(float(self.TP_RightValue)*1000)
             self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
             self._UpdateSuggestedWater()
