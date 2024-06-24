@@ -3264,6 +3264,7 @@ class Window(QMainWindow):
         if self.Camera_dialog.StartRecording.isChecked():
             self.Camera_dialog.StartRecording.setChecked(False)
             self.Camera_dialog._StartCamera()
+
             
     def _stop_logging(self):
         '''Stop the logging'''
@@ -3271,7 +3272,10 @@ class Window(QMainWindow):
             self.Channel.StopLogging('s')
             self.logging_type=-1 # logging has stopped
         except Exception as e:
-            logging.error(str(e))
+            logging.warning('Bonsai connection is closed')
+            self.WarningLabel.setText('Lost bonsai connection')
+            self.WarningLabel.setStyleSheet(self.default_warning_color)
+            self.InitializeBonsaiSuccessfully=0
 
     def _NewSession(self):
         logging.info('New Session pressed')
@@ -3305,6 +3309,11 @@ class Window(QMainWindow):
         self.TotalWaterWarning.setText('')
         self.WarningLabel_2.setText('')
         self._set_metadata_enabled(True)
+
+        self._ConnectBonsai()
+        if self.InitializeBonsaiSuccessfully == 0:
+            self.WarningLabel.setText('Lost bonsai connection')
+            self.WarningLabel.setStyleSheet(self.default_warning_color)
 
         # Reset state variables
         self._StopPhotometry() # Make sure photoexcitation is stopped 
