@@ -3848,6 +3848,8 @@ class Window(QMainWindow):
             self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
             self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+float(self.TP_GiveWaterL_volume)/1000
             self._UpdateSuggestedWater()
+            self.ManualWaterWarning.setText('Give left manual water (ul): '+str(np.round(float(self.TP_GiveWaterL_volume),3)))
+            self.ManualWaterWarning.setStyleSheet(self.default_warning_color)
 
     def _give_reserved_water(self,valve=None):
         '''give reserved water usually after the go cue'''
@@ -3894,7 +3896,9 @@ class Window(QMainWindow):
             self.Channel.RightValue(float(self.TP_RightValue)*1000)
             self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
             self._UpdateSuggestedWater()
-
+            self.ManualWaterWarning.setText('Give right manual water (ul): '+str(np.round(float(self.TP_GiveWaterR_volume),3)))
+            self.ManualWaterWarning.setStyleSheet(self.default_warning_color)
+            
     def _PostWeightChange(self):
         self.unsaved_data=True
         self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
