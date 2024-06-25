@@ -39,7 +39,7 @@ def draw_dist_and_harzard(samples, title, ax_dist, ax_hazard, ax_dist_all, ax_ha
     # Overlay cumulative distribution
     ax_dist_all.plot(xx[:-1], 
                      hist.cumsum() / hist.sum(), 
-                     label='TruncExp (redraw)', color=color)
+                     label=title.split('\n')[0], color=color)
     
     # Overlay hazard function
     ax_hazard_all.plot(xx[:-1], hazard, color=color)  # Hazard func
@@ -121,6 +121,6 @@ if __name__ == '__main__':
     test_truncexp(lower=20, upper=60, beta=20)
     test_truncexp(lower=20, upper=80, beta=20)
     test_truncexp(lower=20, upper=100, beta=20)
-    test_truncexp(lower=20, upper=200, beta=20)
+    test_truncexp(lower=20, upper=200, beta=20, n=1000000)
 
     plt.show()
