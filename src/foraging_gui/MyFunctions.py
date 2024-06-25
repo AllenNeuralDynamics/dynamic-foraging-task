@@ -1626,10 +1626,18 @@ class GenerateTrials():
                 TrialEndTime=Rec[1][1][0]
             elif Rec[0].address=='/GoCueTimeSoundCard':
                 # give auto water after Co cue
-                if self.CurrentAutoRewardTrial[0]==1:
-                    Channel3.AutoWater_Left(int(1))
-                if self.CurrentAutoRewardTrial[1]==1:
-                    Channel3.AutoWater_Right(int(1))
+                # Randomlizing the order to avoid potential bias. 
+                if np.random.random(1)<0.5:
+                    if self.CurrentAutoRewardTrial[0]==1:
+                        Channel3.AutoWater_Left(int(1))
+                    if self.CurrentAutoRewardTrial[1]==1:
+                        Channel3.AutoWater_Right(int(1))
+                else:
+                    if self.CurrentAutoRewardTrial[1]==1:
+                        Channel3.AutoWater_Right(int(1))
+                    if self.CurrentAutoRewardTrial[0]==1:
+                        Channel3.AutoWater_Left(int(1))
+                        
                 # give reserved manual water
                 if float(self.win.give_left_volume_reserved) > 0 or float(self.win.give_right_volume_reserved) > 0:
                     # Set the text of a label or text widget to show the reserved volumes
