@@ -1281,6 +1281,7 @@ class CameraDialog(QDialog):
         if widget_now.isChecked():
             widget_now.setStyleSheet("background-color : green;")
             self.WarningLabelCameraOn.setText('Camera is turning on')
+            self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
             QApplication.processEvents()
             if start_type=='recording':
                 # stop the preview first
@@ -1315,6 +1316,7 @@ class CameraDialog(QDialog):
         else:
             widget_now.setStyleSheet("background-color : none")
             self.WarningLabelCameraOn.setText('Camera is turning off')
+            self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
             QApplication.processEvents()
             self.MainWindow.Channel.CameraControl(int(2))
             self.camera_stop_time = str(datetime.now())
