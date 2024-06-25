@@ -1271,10 +1271,6 @@ class CameraDialog(QDialog):
         self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
-        if self.MainWindow.InitializeBonsaiSuccessfully==0:
-            self.MainWindow._ConnectBonsai()
-            if self.MainWindow.InitializeBonsaiSuccessfully==0:
-                return 
         if start_type=='recording':
             widget_now=self.StartRecording
             widget_other=self.StartPreview
