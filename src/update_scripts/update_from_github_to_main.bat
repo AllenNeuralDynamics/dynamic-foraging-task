@@ -1,4 +1,5 @@
 set "logfile=C:\Users\%USERNAME%\Documents\foraging_gui_logs\github_log.txt"
+set "updatefile=C:\Users\%USERNAME%\Documents\foraging_gui_logs\update_log.txt"
 set "repo=C:\Users\%USERNAME%\Documents\GitHub\dynamic-foraging-task"
 set "branch=main"
 cd %repo%
@@ -19,3 +20,7 @@ git status >>%logfile% 2>&1
 echo removing old gui logs >>%logfile%
 forfiles /p "C:\Users\%USERNAME%\Documents\foraging_gui_logs" /s /m *.* /D -30 /C "cmd /c del @path"
 echo done >>%logfile%
+echo --------------------------- >%updatefile%
+echo %date% %time% >>%updatefile%
+call conda activate Foraging
+pip install --upgrade -e . >>%updatefile% 2>&1

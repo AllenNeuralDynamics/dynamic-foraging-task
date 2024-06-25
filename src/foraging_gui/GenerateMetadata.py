@@ -5,6 +5,7 @@ from datetime import datetime
 
 import numpy as np
 
+import foraging_gui
 from foraging_gui.Visualization import PlotWaterCalibration
 from aind_data_schema.components.stimulus import AuditoryStimulation
 from aind_data_schema.components.devices import SpoutSide,Calibration
@@ -862,7 +863,7 @@ class generate_metadata:
         self.behavior_software=[]
         self.behavior_software.append(Software(
             name='dynamic-foraging-task',
-            version=f'branch:{self.Obj["current_branch"]}   commit ID:{self.Obj["commit_ID"]}',
+            version=f'branch:{self.Obj["current_branch"]}   commit ID:{self.Obj["commit_ID"]}   version:{foraging_gui.__version__}',
             url=self.Obj["repo_url"],
         ))
         
