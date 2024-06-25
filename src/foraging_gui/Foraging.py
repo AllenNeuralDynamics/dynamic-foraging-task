@@ -565,7 +565,7 @@ class Window(QMainWindow):
                         self.frame_num[csv_file] = num_frames
             self.WarningLabelCamera.setText(self.drop_frames_warning_text)
             if self.drop_frames_tag:
-                self.WarningLabelCamera.setStyleSheet("color: red;")
+                self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
             else:
                 self.WarningLabelCamera.setStyleSheet("color: green;")  
             # only check drop frames once each session
