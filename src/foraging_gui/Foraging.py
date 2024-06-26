@@ -4139,15 +4139,15 @@ class Window(QMainWindow):
             'mount':None,
             'destination': '//allen/aind/scratch/dynamic_foraging_rig_transfer',
             's3_bucket':'private',
-            'processor_full_name': 'dynamic foraging task gui',
+            'processor_full_name': 'AIND Behavior Team',
             'modalities':{
-                'behavior':self.TrainingFolder,
-                'behavior-videos':self.VideoFolder,
-                'fib':self.PhotometryFolder
+                'behavior':self.TrainingFolder.replace('\\','/'),
+                'behavior-videos':self.VideoFolder.replace('\\','/'),
+                'fib':self.PhotometryFolder.replace('\\','/')
                 },
             'schemas':[
-                os.path.join(self.MetadataFolder,'session.json'),
-                os.path.join(self.MetadataFolder,'rig.json')
+                os.path.join(self.MetadataFolder,'session.json').replace('\\','/'),
+                os.path.join(self.MetadataFolder,'rig.json').replace('\\','/')
                 ],
             'schedule_time':None, # Should consider adding this for FIP
             'project_name':'?',
