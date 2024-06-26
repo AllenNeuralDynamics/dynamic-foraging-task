@@ -21,6 +21,8 @@ class UncoupledBlocks:
                  block_min=20, block_max=35,
                  persev_add=True, perseverative_limit=4,
                  max_block_tally=4,  # Max number of consecutive blocks in which one side has higher rwd prob than the other
+                 block_beta=None, # for exponential distribution
+                 random_distribution_block='Even',
                  ) -> None:
         
         self.__dict__.update(locals())
@@ -65,8 +67,13 @@ class UncoupledBlocks:
     def generate_next_block(self, side, check_higher_in_a_row=True, check_both_lowest=True):
         msg = ''
         other_side = list({'L', 'R'} - {side})[0]
-        random_block_len = np.random.randint(low=self.block_min, high=self.block_max + 1)
-        
+        if self.random_distribution_block == 'Even':
+            random_block_len = np.random.randint(low=self.block_min, high=self.block_max + 1)
+        elif self.random_distribution_block == 'Exponential' and self.block_beta is not None:
+            self.BlockLen = np.array(int(np.random.exponential(float(self.block_beta),1)+float(self.block_min)))
+            if self.BlockLen>float(self.block_max):
+                self.BlockLen=int(self.block_max)
+
         if self.block_ind[side] == 0:  # The first block
             self.block_ends[side].append(random_block_len)
             self.block_rwd_prob[side].append(np.random.choice(self.rwd_prob_array))

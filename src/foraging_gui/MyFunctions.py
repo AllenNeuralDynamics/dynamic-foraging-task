@@ -134,6 +134,8 @@ class GenerateTrials():
                     persev_add=True,  # Hard-coded to True for now
                     perseverative_limit=4, # Hard-coded to 4 for now
                     max_block_tally=3, # Hard-coded to 3 for now
+                    block_beta=float(self.TP_BlockBeta),
+                    random_distribution_block=self.TP_RandomnessBlock, 
                 )
                 _, msg_uncoupled_block = self.uncoupled_blocks.next_trial()
             else:
@@ -366,9 +368,9 @@ class GenerateTrials():
         # get the reward probabilities of the current block
         self.B_CurrentRewardProb=RewardProbPool[random.choice(range(np.shape(RewardProbPool)[0]))]
         # randomly draw a block length between Min and Max
-        if self.TP_Randomness=='Exponential':
+        if self.TP_RandomnessBlock=='Exponential':
             self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta),1)+float(self.TP_BlockMin)))
-        elif self.TP_Randomness=='Even':
+        elif self.TP_RandomnessBlock=='Even':
             self.BlockLen=  np.array(np.random.randint(float(self.TP_BlockMin), float(self.TP_BlockMax)+1))
         if self.BlockLen>float(self.TP_BlockMax):
             self.BlockLen=int(self.TP_BlockMax)
@@ -379,13 +381,13 @@ class GenerateTrials():
 
     def _generate_next_trial_other_paras(self):
         # get the ITI time and delay time
-        if self.TP_Randomness=='Exponential':
+        if self.TP_RandomnessOther=='Exponential':
             self.CurrentITI = float(np.random.exponential(float(self.TP_ITIBeta),1)+float(self.TP_ITIMin))
         elif self.TP_Randomness=='Even':
             self.CurrentITI = random.uniform(float(self.TP_ITIMin),float(self.TP_ITIMax))
         if self.CurrentITI>float(self.TP_ITIMax):
             self.CurrentITI=float(self.TP_ITIMax)
-        if self.TP_Randomness=='Exponential':
+        if self.TP_RandomnessOther=='Exponential':
             self.CurrentDelay = float(np.random.exponential(float(self.TP_DelayBeta),1)+float(self.TP_DelayMin))
         elif self.TP_Randomness=='Even':
             self.CurrentDelay=random.uniform(float(self.TP_DelayMin),float(self.TP_DelayMax))
