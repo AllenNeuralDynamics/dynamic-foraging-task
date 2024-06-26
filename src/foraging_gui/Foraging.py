@@ -2515,6 +2515,7 @@ class Window(QMainWindow):
         current_time = datetime.now()
         formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
         self.session_name = f'behavior_{self.ID.text()}_{formatted_datetime}'
+        self.acquisition_datetime = current_time.strftime("%Y-%m-%d %H:%M:%S%z")
         self.SessionFolder=os.path.join(self.default_saveFolder, 
             self.current_box,self.ID.text(), f'behavior_{self.ID.text()}_{formatted_datetime}')
 
@@ -4125,14 +4126,13 @@ class Window(QMainWindow):
         )
     
     def _generate_upload_manifest(self):
+
+        # Need to make sure this has run. 
         self._GetSaveFolder() ## DEBUGGING
 
-        flag_dir = os.path.join(os.path.expanduser("~"), "Documents",'ForagingSettings','manifest_dir')## DEBUGGING
-        session_id='0'
-        filename = os.path.join(flag_dir,'manifest_{}.yml'.format(session_id))
-
+        # Define contents of manifest file
         contents = {
-            'acquisition_datetime': '?',
+            'acquisition_datetime': self.acquisition_datetime,
             'name': self.session_name,
             'platform': 'behavior',
             'subject_id': self.ID.text(),
@@ -4155,7 +4155,12 @@ class Window(QMainWindow):
             'script': {}
             }
 
+
+        # Define filename of manifest
+        flag_dir = os.path.join(os.path.expanduser("~"), "Documents",'ForagingSettings','manifest_dir')## DEBUGGING
+        filename = os.path.join(flag_dir,'manifest_{}.yml'.format(contents['name']))
         
+        # Write the manifest file
         with open(filename,'w') as yaml_file:
             yaml.dump(contents, yaml_file, default_flow_style=False)
 
