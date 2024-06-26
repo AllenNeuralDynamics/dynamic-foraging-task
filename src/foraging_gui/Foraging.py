@@ -166,7 +166,7 @@ class Window(QMainWindow):
             '''
             self._ReconnectBonsai()   
         logging.info('Start up complete')
-        self._generate_upload_manifest(self) ## DEBUGGING, shouldnt run here
+        self._generate_upload_manifest() ## DEBUGGING, shouldnt run here
  
     def _load_rig_metadata(self):
         '''Load the latest rig metadata'''
