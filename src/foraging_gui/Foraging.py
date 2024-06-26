@@ -130,6 +130,10 @@ class Window(QMainWindow):
         self.finish_Timer=1     # for photometry baseline recordings
         self.PhotometryRun=0    # 1. Photometry has been run; 0. Photometry has not been carried out.
         self.ignore_timer=False # Used for canceling the photometry baseline timer
+        self.give_left_volume_reserved=0 # the reserved volume of the left valve (usually given after go cue)
+        self.give_right_volume_reserved=0 # the reserved volume of the right valve (usually given after go cue)
+        self.give_left_time_reserved=0 # the reserved open time of the left valve (usually given after go cue)
+        self.give_right_time_reserved=0 # the reserved open time of the right valve (usually given after go cue)
         self._Optogenetics()    # open the optogenetics panel 
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
@@ -2296,7 +2300,7 @@ class Window(QMainWindow):
 
         # this should be improved in the future. Need to get the last LeftRewardDeliveryTime and RightRewardDeliveryTime
         if hasattr(self, 'GeneratedTrials') and self.InitializeBonsaiSuccessfully==1:
-            self.GeneratedTrials._GetLicks(self.Channel2)
+            self.GeneratedTrials._get_irregular_timestamp(self.Channel2)
         
         # Create new folders
         if self.CreateNewFolder==1:
@@ -3309,6 +3313,7 @@ class Window(QMainWindow):
         self._stop_logging()
 
         # Reset GUI visuals
+        self.ManualWaterWarning.setText('')
         self.Save.setStyleSheet("color:black;background-color:None;")
         self.NewSession.setStyleSheet("background-color : green;")
         self.NewSession.setChecked(False)
@@ -3611,6 +3616,8 @@ class Window(QMainWindow):
                     # so we set the text to get ignored as well
                     self.workertimer._stop()
 
+            self.ManualWaterWarning.setText('')
+
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
             self._StopCurrentSession() 
@@ -3687,7 +3694,7 @@ class Window(QMainWindow):
             # create workers
             worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.Channel,self.Channel3,self.Channel4)
             worker1.signals.finished.connect(self._thread_complete)
-            workerLick = Worker(GeneratedTrials._GetLicks,self.Channel2)
+            workerLick = Worker(GeneratedTrials._get_irregular_timestamp,self.Channel2)
             workerLick.signals.finished.connect(self._thread_complete2)
             workerPlot = Worker(PlotM._Update,GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
             workerPlot.signals.finished.connect(self._thread_complete3)
@@ -3936,30 +3943,78 @@ class Window(QMainWindow):
             self.DelayBeta.setEnabled(True)
             self.DelayMin.setEnabled(True)
             self.DelayMax.setEnabled(True)
+
     def _GiveLeft(self):
         '''manually give left water'''
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
             return
-        self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
-        time.sleep(0.01) 
-        self.Channel3.ManualWater_Left(int(1))
-        self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
-        self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+float(self.TP_GiveWaterL_volume)/1000
-        self._UpdateSuggestedWater()
-    
+        if self.AlignToGoCue.currentText()=='yes':
+            # Reserving the water after the go cue.Each click will add the water to the reserved water
+            self.give_left_volume_reserved=self.give_left_volume_reserved+float(self.TP_GiveWaterL_volume)
+            if self.latest_fitting!={}:
+                self.give_left_time_reserved=((float(self.give_left_volume_reserved)-self.latest_fitting['Left'][1])/self.latest_fitting['Left'][0])*1000
+            else:
+                self.give_left_time_reserved=self.give_left_time_reserved+float(self.TP_GiveWaterL)*1000
+        else:
+            self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
+            time.sleep(0.01) 
+            self.Channel3.ManualWater_Left(int(1))
+            time.sleep(0.01+float(self.TP_GiveWaterL)) 
+            self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
+            self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+float(self.TP_GiveWaterL_volume)/1000
+            self._UpdateSuggestedWater()
+            self.ManualWaterWarning.setText('Give left manual water (ul): '+str(np.round(float(self.TP_GiveWaterL_volume),3)))
+            self.ManualWaterWarning.setStyleSheet(self.default_warning_color)
+
+    def _give_reserved_water(self,valve=None):
+        '''give reserved water usually after the go cue'''
+        if valve=='left':
+            if self.give_left_volume_reserved==0:
+                return
+            self.Channel.LeftValue(float(self.give_left_time_reserved))
+            time.sleep(0.01) 
+            self.Channel3.ManualWater_Left(int(1))
+            time.sleep(0.01+float(self.give_left_time_reserved)/1000)
+            self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
+            self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+self.give_left_volume_reserved/1000
+            self.give_left_volume_reserved=0
+            self.give_left_time_reserved=0
+        elif valve=='right':
+            if self.give_right_volume_reserved==0:
+                return
+            self.Channel.RightValue(float(self.give_right_time_reserved))
+            time.sleep(0.01) 
+            self.Channel3.ManualWater_Right(int(1))
+            time.sleep(0.01+float(self.give_right_time_reserved)/1000) 
+            self.Channel.RightValue(float(self.TP_RightValue)*1000)
+            self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+self.give_right_volume_reserved/1000
+            self.give_right_volume_reserved=0
+            self.give_right_time_reserved=0
+
     def _GiveRight(self):
         '''manually give right water'''
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
             return
-        self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
-        time.sleep(0.01) 
-        self.Channel3.ManualWater_Right(int(1))
-        self.Channel.RightValue(float(self.TP_RightValue)*1000)
-        self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
-        self._UpdateSuggestedWater()
-    
+        if self.AlignToGoCue.currentText()=='yes':
+            # Reserving the water after the go cue.Each click will add the water to the reserved water
+            self.give_right_volume_reserved=self.give_right_volume_reserved+float(self.TP_GiveWaterR_volume)
+            if self.latest_fitting!={}:
+                self.give_right_time_reserved=((float(self.give_right_volume_reserved)-self.latest_fitting['Right'][1])/self.latest_fitting['Right'][0])*1000
+            else:
+                self.give_right_time_reserved=self.give_right_time_reserved+float(self.TP_GiveWaterR)*1000
+        else:
+            self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
+            time.sleep(0.01) 
+            self.Channel3.ManualWater_Right(int(1))
+            time.sleep(0.01+float(self.TP_GiveWaterR)) 
+            self.Channel.RightValue(float(self.TP_RightValue)*1000)
+            self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
+            self._UpdateSuggestedWater()
+            self.ManualWaterWarning.setText('Give right manual water (ul): '+str(np.round(float(self.TP_GiveWaterR_volume),3)))
+            self.ManualWaterWarning.setStyleSheet(self.default_warning_color)
+            
     def _toggle_save_color(self):
         '''toggle the color of the save button to mediumorchid'''
         self.unsaved_data=True

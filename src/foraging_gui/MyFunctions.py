@@ -64,6 +64,12 @@ class GenerateTrials():
         self.B_PhotometryRisingTimeHarp=np.array([]).astype(float)
         self.B_PhotometryFallingTimeHarp=np.array([]).astype(float)
         self.B_OptogeneticsTimeHarp=np.array([]).astype(float)
+        self.B_ManualLeftWaterStartTime=np.array([]).astype(float)
+        self.B_ManualRightWaterStartTime=np.array([]).astype(float)
+        self.B_EarnedLeftWaterStartTime=np.array([]).astype(float)
+        self.B_EarnedRightWaterStartTime=np.array([]).astype(float)
+        self.B_AutoLeftWaterStartTime=np.array([]).astype(float)
+        self.B_AutoRightWaterStartTime=np.array([]).astype(float)
         self.B_RewardOutcomeTime=np.array([]).astype(float)
         self.B_LaserOnTrial=[] # trials with laser on
         self.B_SimulationSession=[]
@@ -1620,10 +1626,34 @@ class GenerateTrials():
                 TrialEndTime=Rec[1][1][0]
             elif Rec[0].address=='/GoCueTimeSoundCard':
                 # give auto water after Co cue
-                if self.CurrentAutoRewardTrial[0]==1:
-                    Channel3.ManualWater_Left(int(1))
-                if self.CurrentAutoRewardTrial[1]==1:
-                    Channel3.ManualWater_Right(int(1))
+                # Randomlizing the order to avoid potential bias. 
+                if np.random.random(1)<0.5:
+                    if self.CurrentAutoRewardTrial[0]==1:
+                        Channel3.AutoWater_Left(int(1))
+                    if self.CurrentAutoRewardTrial[1]==1:
+                        Channel3.AutoWater_Right(int(1))
+                else:
+                    if self.CurrentAutoRewardTrial[1]==1:
+                        Channel3.AutoWater_Right(int(1))
+                    if self.CurrentAutoRewardTrial[0]==1:
+                        Channel3.AutoWater_Left(int(1))
+                        
+                # give reserved manual water
+                if float(self.win.give_left_volume_reserved) > 0 or float(self.win.give_right_volume_reserved) > 0:
+                    # Set the text of a label or text widget to show the reserved volumes
+                    self.win.ManualWaterWarning.setText(
+                        f'Give reserved manual water (ul) left: {self.win.give_left_volume_reserved}; right: {self.win.give_right_volume_reserved}'
+                    )
+                    # Set the text color of the label or text widget to red
+                    self.win.ManualWaterWarning.setStyleSheet(self.win.default_warning_color)
+
+                # The manual water of two sides are given sequentially. Randomlizing the order to avoid bias. 
+                if np.random.random(1)<0.5:
+                    self.win._give_reserved_water(valve='left')
+                    self.win._give_reserved_water(valve='right')
+                else:
+                    self.win._give_reserved_water(valve='right')
+                    self.win._give_reserved_water(valve='left')
                 GoCueTimeSoundCard=Rec[1][1][0]
                 in_delay=0
             elif Rec[0].address=='/DOPort2Output': #this port is used to trigger optogenetics aligned to Go cue
@@ -1686,8 +1716,8 @@ class GenerateTrials():
         channel3.ManualWater_Right(int(1))
         channel3.RightValue1(float(self.win.RightValue.text())*1000)
 
-    def _GetLicks(self,Channel2):
-        '''Get licks and reward delivery time'''
+    def _get_irregular_timestamp(self,Channel2):
+        '''Get timestamps occurred irregularly (e.g. licks and reward delivery time)'''
         while not Channel2.msgs.empty():
             Rec=Channel2.receive()
             if Rec[0].address=='/LeftLickTime':
@@ -1708,6 +1738,20 @@ class GenerateTrials():
                 self.B_PhotometryFallingTimeHarp=np.append(self.B_PhotometryFallingTimeHarp,Rec[1][1][0])
             elif Rec[0].address=='/OptogeneticsTimeHarp':
                 self.B_OptogeneticsTimeHarp=np.append(self.B_OptogeneticsTimeHarp,Rec[1][1][0])
+            elif Rec[0].address=='/ManualLeftWaterStartTime':
+                self.B_ManualLeftWaterStartTime=np.append(self.B_ManualLeftWaterStartTime,Rec[1][1][0])
+            elif Rec[0].address=='/ManualRightWaterStartTime':
+                self.B_ManualRightWaterStartTime=np.append(self.B_ManualRightWaterStartTime,Rec[1][1][0])
+            elif Rec[0].address=='/EarnedLeftWaterStartTime':
+                self.B_EarnedLeftWaterStartTime=np.append(self.B_EarnedLeftWaterStartTime,Rec[1][1][0])
+            elif Rec[0].address=='/EarnedRightWaterStartTime':
+                self.B_EarnedRightWaterStartTime=np.append(self.B_EarnedRightWaterStartTime,Rec[1][1][0])
+            elif Rec[0].address=='/AutoLeftWaterStartTime':
+                self.B_AutoLeftWaterStartTime=np.append(self.B_AutoLeftWaterStartTime,Rec[1][1][0])
+            elif Rec[0].address=='/AutoRightWaterStartTime':
+                self.B_AutoRightWaterStartTime=np.append(self.B_AutoRightWaterStartTime,Rec[1][1][0])
+            
+
     def _DeletePreviousLicks(self,Channel2):
         '''Delete licks from the previous session'''
         while not Channel2.msgs.empty():
