@@ -4125,7 +4125,7 @@ class Window(QMainWindow):
     
     def _generate_upload_manifest(self):
         flag_dir = os.path.join(os.path.expanduser("~"), "Documents",'foraging_gui_logs')#
-        session_id='?'
+        session_id='0'
         filename = 'manifest_{}.yml'.format(session_id)
 
         contents = {
