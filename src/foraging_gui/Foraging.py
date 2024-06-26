@@ -4131,6 +4131,9 @@ class Window(QMainWindow):
 
         # Need to make sure this has run. 
         self._GetSaveFolder() ## DEBUGGING
+        
+        if not hasattr(self, 'project_name'):
+            self.project_name = 'Behavior Platform'
 
         # Define contents of manifest file
         contents = {
