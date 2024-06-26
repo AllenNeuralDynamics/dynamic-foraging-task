@@ -2704,8 +2704,10 @@ class Window(QMainWindow):
                         'Fundee':['nan'],
                     }
                 self.Metadata_dialog.project_info = project_info
-                self.Metadata_dialog.ProjectName.addItems(['Behavior Platform'])
-                logging.info('Setting Project name: {}'.format('Behavior Platform'))
+                project_name = 'Behavior Platform'
+                self.Metadata_dialog.ProjectName.addItems([project_name])
+                logging.info('Setting Project name: {}'.format(project_name))
+        self.project_name = project_name
 
         self.keyPressEvent(allow_reset=True) 
     
@@ -4135,7 +4137,7 @@ class Window(QMainWindow):
             'acquisition_datetime': self.acquisition_datetime,
             'name': self.session_name,
             'platform': 'behavior',
-            'subject_id': self.ID.text(),
+            'subject_id': int(self.ID.text()),
             'capsule_id': None,
             'mount':None,
             'destination': '//allen/aind/scratch/dynamic_foraging_rig_transfer',
@@ -4151,7 +4153,7 @@ class Window(QMainWindow):
                 os.path.join(self.MetadataFolder,'rig.json').replace('\\','/')
                 ],
             'schedule_time':None, # Should consider adding this for FIP
-            'project_name':'?', # Grab from Metadata
+            'project_name':self.project_name,
             'script': {}
             }
 
