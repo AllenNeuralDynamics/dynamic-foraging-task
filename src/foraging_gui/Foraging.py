@@ -4130,6 +4130,7 @@ class Window(QMainWindow):
             Do we want to trigger this at all for Ephys?
             acqusition datetime format correct?
             need to determine path to flag_dir
+            drop this in a try/except block, and alert the user if something goes wrong
         '''
         
         if not hasattr(self, 'project_name'):
