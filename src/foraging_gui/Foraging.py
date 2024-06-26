@@ -11,6 +11,7 @@ import harp
 import pandas as pd
 import threading
 import itertools
+import yaml
 from pathlib import Path
 from datetime import date, datetime
 
@@ -4120,6 +4121,37 @@ class Window(QMainWindow):
                          '&session_plot_mode=all+sessions+filtered+from+sidebar'
                          '&session_plot_selected_draw_types=1.+Choice+history'
         )
+    
+    def _generate_upload_manifest(self):
+        flag_dir = os.path.join(os.path.expanduser("~"), "Documents",'foraging_gui_logs')#
+        session_id='?'
+        filename = 'manifest_{}.yml'.format(session_id)
+
+        contents = {
+            'acquisition_datetime': '?',
+            'name': '?',
+            'platform':'behavior',
+            'subject_id':'?',
+            'capsule_id': "null",
+            'mount':'null',
+            'destination': '//allen/aind/scratch/dynamic_foraging_rig_transfer',
+            's3_bucket':'private',
+            'processor_full_name': 'dynamic foraging task gui',
+            'modalities':{
+                'behavior':'?',
+                'behavior-videos':'?',
+                'fib':'?'
+                }
+            'schemas':['?','?'],
+            'schedule_time':'null',
+            'project_name':'null',
+            'script': {}
+            }
+
+        
+        with open(filename,'w') as yaml_file:
+            yaml.dump(contents, yaml_file, default_flow_style=False)
+
 
 def start_gui_log_file(box_number):
     '''
