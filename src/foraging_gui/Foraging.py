@@ -2514,6 +2514,7 @@ class Window(QMainWindow):
         '''
         current_time = datetime.now()
         formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+        self.session_name = f'behavior_{self.ID.text()}_{formatted_datetime}'
         self.SessionFolder=os.path.join(self.default_saveFolder, 
             self.current_box,self.ID.text(), f'behavior_{self.ID.text()}_{formatted_datetime}')
 
@@ -4132,9 +4133,9 @@ class Window(QMainWindow):
 
         contents = {
             'acquisition_datetime': '?',
-            'name': '?',
-            'platform':'behavior',
-            'subject_id':'?',
+            'name': self.session_name,
+            'platform': 'behavior',
+            'subject_id': self.ID.text(),
             'capsule_id': None,
             'mount':None,
             'destination': '//allen/aind/scratch/dynamic_foraging_rig_transfer',
@@ -4150,7 +4151,7 @@ class Window(QMainWindow):
                 os.path.join(self.MetadataFolder,'rig.json').replace('\\','/')
                 ],
             'schedule_time':None, # Should consider adding this for FIP
-            'project_name':'?',
+            'project_name':'?', # Grab from Metadata
             'script': {}
             }
 
