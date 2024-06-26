@@ -166,7 +166,6 @@ class Window(QMainWindow):
             '''
             self._ReconnectBonsai()   
         logging.info('Start up complete')
-        self._generate_upload_manifest() ## DEBUGGING, shouldnt run here
  
     def _load_rig_metadata(self):
         '''Load the latest rig metadata'''
@@ -2492,11 +2491,8 @@ class Window(QMainWindow):
             self.SessionlistSpin.setEnabled(True)
             self.Sessionlist.setEnabled(True)
 
-            # Drop `finished` file with date/time
-            filepath = os.path.join(self.SessionFolder, 'finished') 
-            contents = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            with open(filepath, 'w') as finished_file:
-                finished_file.write(contents)
+            self._generate_upload_manifest() # Generate the upload manifest file
+
             if self.StartEphysRecording.isChecked():
                 QMessageBox.warning(self, '', 'Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!')
                 self.unsaved_data=True
@@ -4128,9 +4124,13 @@ class Window(QMainWindow):
         )
     
     def _generate_upload_manifest(self):
-
-        # Need to make sure this has run. 
-        self._GetSaveFolder() ## DEBUGGING
+        '''
+            DEBUGGING TODO
+            Figure out how to toggle upload time based on FIP sessions
+            Do we want to trigger this at all for Ephys?
+            acqusition datetime format correct?
+            need to determine path to flag_dir
+        '''
         
         if not hasattr(self, 'project_name'):
             self.project_name = 'Behavior Platform'
@@ -4155,7 +4155,7 @@ class Window(QMainWindow):
                 os.path.join(self.MetadataFolder,'session.json').replace('\\','/'),
                 os.path.join(self.MetadataFolder,'rig.json').replace('\\','/')
                 ],
-            'schedule_time':None, # Should consider adding this for FIP
+            'schedule_time':None,
             'project_name':self.project_name,
             'script': {}
             }
