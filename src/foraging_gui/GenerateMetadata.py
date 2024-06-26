@@ -278,8 +278,9 @@ class generate_metadata:
         '''
         if self.Obj['meta_data_dialog']['rig_metadata_file']=='' or self.Obj['MetadataFolder']=='':
             return
-        
-        rig_metadata_full_path=os.path.join(self.Obj['MetadataFolder'],self.Obj['meta_data_dialog']['rig_metadata_file'])
+
+        # save copy as rig.json
+        rig_metadata_full_path=os.path.join(self.Obj['MetadataFolder'],'rig.json') 
         with open(rig_metadata_full_path, 'w') as f:
             json.dump(self.Obj['meta_data_dialog']['rig_metadata'], f, indent=4)
 
