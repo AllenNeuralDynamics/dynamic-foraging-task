@@ -4141,7 +4141,7 @@ class Window(QMainWindow):
                 'behavior':'?',
                 'behavior-videos':'?',
                 'fib':'?'
-                }
+                },
             'schemas':['?','?'],
             'schedule_time':'null',
             'project_name':'null',
