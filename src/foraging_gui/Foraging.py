@@ -4124,6 +4124,8 @@ class Window(QMainWindow):
         )
     
     def _generate_upload_manifest(self):
+        self._GetSaveFolder() ## DEBUGGING
+
         flag_dir = os.path.join(os.path.expanduser("~"), "Documents",'ForagingSettings','manifest_dir')## DEBUGGING
         session_id='0'
         filename = os.path.join(flag_dir,'manifest_{}.yml'.format(session_id))
@@ -4133,19 +4135,22 @@ class Window(QMainWindow):
             'name': '?',
             'platform':'behavior',
             'subject_id':'?',
-            'capsule_id': "null",
-            'mount':'null',
+            'capsule_id': None,
+            'mount':None,
             'destination': '//allen/aind/scratch/dynamic_foraging_rig_transfer',
             's3_bucket':'private',
             'processor_full_name': 'dynamic foraging task gui',
             'modalities':{
-                'behavior':'?',
-                'behavior-videos':'?',
-                'fib':'?'
+                'behavior':self.TrainingFolder,
+                'behavior-videos':self.VideoFolder,
+                'fib':self.PhotometryFolder
                 },
-            'schemas':['?','?'],
-            'schedule_time':'null',
-            'project_name':'null',
+            'schemas':[
+                os.path.join(self.MetadataFolder,'session.json'),
+                os.path.join(self.MetadataFolder,'rig.json')
+                ],
+            'schedule_time':None, # Should consider adding this for FIP
+            'project_name':'?',
             'script': {}
             }
 
