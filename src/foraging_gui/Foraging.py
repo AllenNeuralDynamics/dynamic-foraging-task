@@ -4131,8 +4131,6 @@ class Window(QMainWindow):
         '''
             DEBUGGING TODO
             Figure out how to toggle upload time based on FIP sessions
-            Do we want to trigger this at all for Ephys?
-            acqusition datetime format correct?
             need to determine path to flag_dir
         '''
         try: 
@@ -4140,10 +4138,10 @@ class Window(QMainWindow):
                 self.project_name = 'Behavior Platform'
             
             if FIP:
-                schedule = 'midnight' ## DEBUGGING FORMAT
+                schedule = 'midnight' ## DEBUG, figure out format
                 capsule_id = 'FIP trigger capsule' ## DEBUG, figure out capsule
             else:
-                schedule = None  
+                schedule = None ## DEBUG, do we want to trigger later? 
                 capsule_id = None ## DEBUG, should probably trigger something? 
  
             # Define contents of manifest file
@@ -4170,9 +4168,9 @@ class Window(QMainWindow):
                 'project_name':self.project_name,
                 'script': {}
                 }
-    
-    
+     
             # Define filename of manifest
+            ## DEBUGGING
             flag_dir = os.path.join(os.path.expanduser("~"), "Documents",'ForagingSettings','manifest_dir')
             ## DEBUGGING
 
@@ -4181,10 +4179,12 @@ class Window(QMainWindow):
             # Write the manifest file
             with open(filename,'w') as yaml_file:
                 yaml.dump(contents, yaml_file, default_flow_style=False)
+
         except Exception as e:
             logging.error('Could not generate upload manifest: {}'.format(str(e)))
             QMessageBox.critical(self, 'Upload manifest', 
-                'Could not generate upload manifest. Please alert the mouse owner that this session will not be uploaded.')
+                'Could not generate upload manifest. '+\
+                'Please alert the mouse owner that this session will not be uploaded.')
             
 
 def start_gui_log_file(box_number):
