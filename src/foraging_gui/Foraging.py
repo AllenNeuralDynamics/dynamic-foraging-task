@@ -1043,6 +1043,7 @@ class Window(QMainWindow):
             'name_mapper_file':os.path.join(self.SettingFolder,"name_mapper.json"),
             'create_rig_metadata':True,
             'save_each_trial':True,
+            'AutomaticUpload':True
         }
         
         # Try to load Settings_box#.csv
@@ -2491,7 +2492,10 @@ class Window(QMainWindow):
             self.SessionlistSpin.setEnabled(True)
             self.Sessionlist.setEnabled(True)
 
-            self._generate_upload_manifest() # Generate the upload manifest file
+            if self.Settings['AutomaticUpload']:
+                self._generate_upload_manifest() # Generate the upload manifest file
+            else:
+                logging.info('Skipping Automatic Upload based on ForagingSettings.json')
 
             if self.StartEphysRecording.isChecked():
                 QMessageBox.warning(self, '', 'Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!')
@@ -4123,19 +4127,25 @@ class Window(QMainWindow):
                          '&session_plot_selected_draw_types=1.+Choice+history'
         )
     
-    def _generate_upload_manifest(self):
+    def _generate_upload_manifest(self,FIP=False):
         '''
             DEBUGGING TODO
             Figure out how to toggle upload time based on FIP sessions
             Do we want to trigger this at all for Ephys?
             acqusition datetime format correct?
             need to determine path to flag_dir
-            Made a toggle for FIP, which adds a trigger capsule
         '''
         try: 
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
-    
+            
+            if FIP:
+                schedule = 'midnight' ## DEBUGGING FORMAT
+                capsule_id = 'FIP trigger capsule' ## DEBUG, figure out capsule
+            else:
+                schedule = None  
+                capsule_id = None ## DEBUG, should probably trigger something? 
+ 
             # Define contents of manifest file
             contents = {
                 'acquisition_datetime': self.acquisition_datetime,
@@ -4156,7 +4166,7 @@ class Window(QMainWindow):
                     os.path.join(self.MetadataFolder,'session.json').replace('\\','/'),
                     os.path.join(self.MetadataFolder,'rig.json').replace('\\','/')
                     ],
-                'schedule_time':None,
+                'schedule_time':schedule,
                 'project_name':self.project_name,
                 'script': {}
                 }
