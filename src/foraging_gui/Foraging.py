@@ -2520,7 +2520,7 @@ class Window(QMainWindow):
         current_time = datetime.now()
         formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
         self.session_name = f'behavior_{self.ID.text()}_{formatted_datetime}'
-        self.acquisition_datetime = current_time.strftime("%Y-%m-%d %H:%M:%S%z")
+        self.acquisition_datetime = current_time.strftime("%Y-%m-%d %H:%M:%S")
         self.SessionFolder=os.path.join(self.default_saveFolder, 
             self.current_box,self.ID.text(), f'behavior_{self.ID.text()}_{formatted_datetime}')
 
@@ -4140,12 +4140,12 @@ class Window(QMainWindow):
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
             
-            if FIP:
-                schedule = None ## DEBUG, figure out format
+            if FIP: ## DEBUG, need to figure out how to set this flag.  
+                schedule = self.acquisition_datetime.split(' ')[0]+' 23:59:00'
                 capsule_id = 'c089614a-347e-4696-b17e-86980bb782c' 
                 mount = None ## DEBUG, figure out if we need this
             else:
-                schedule = None  
+                schedule = self.acquisition_datetime.split(' ')[0]+' 23:59:00'
                 capsule_id = 'c089614a-347e-4696-b17e-86980bb782c' 
                 mount = None
  
