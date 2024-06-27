@@ -4130,46 +4130,52 @@ class Window(QMainWindow):
             Do we want to trigger this at all for Ephys?
             acqusition datetime format correct?
             need to determine path to flag_dir
-            drop this in a try/except block, and alert the user if something goes wrong
+            Made a toggle for FIP, which adds a trigger capsule
         '''
-        
-        if not hasattr(self, 'project_name'):
-            self.project_name = 'Behavior Platform'
+        try: 
+            if not hasattr(self, 'project_name'):
+                self.project_name = 'Behavior Platform'
+    
+            # Define contents of manifest file
+            contents = {
+                'acquisition_datetime': self.acquisition_datetime,
+                'name': self.session_name,
+                'platform': 'behavior',
+                'subject_id': int(self.ID.text()),
+                'capsule_id': None,
+                'mount':None,
+                'destination': '//allen/aind/scratch/dynamic_foraging_rig_transfer',
+                's3_bucket':'private',
+                'processor_full_name': 'AIND Behavior Team',
+                'modalities':{
+                    'behavior':self.TrainingFolder.replace('\\','/'),
+                    'behavior-videos':self.VideoFolder.replace('\\','/'),
+                    'fib':self.PhotometryFolder.replace('\\','/')
+                    },
+                'schemas':[
+                    os.path.join(self.MetadataFolder,'session.json').replace('\\','/'),
+                    os.path.join(self.MetadataFolder,'rig.json').replace('\\','/')
+                    ],
+                'schedule_time':None,
+                'project_name':self.project_name,
+                'script': {}
+                }
+    
+    
+            # Define filename of manifest
+            flag_dir = os.path.join(os.path.expanduser("~"), "Documents",'ForagingSettings','manifest_dir')
+            ## DEBUGGING
 
-        # Define contents of manifest file
-        contents = {
-            'acquisition_datetime': self.acquisition_datetime,
-            'name': self.session_name,
-            'platform': 'behavior',
-            'subject_id': int(self.ID.text()),
-            'capsule_id': None,
-            'mount':None,
-            'destination': '//allen/aind/scratch/dynamic_foraging_rig_transfer',
-            's3_bucket':'private',
-            'processor_full_name': 'AIND Behavior Team',
-            'modalities':{
-                'behavior':self.TrainingFolder.replace('\\','/'),
-                'behavior-videos':self.VideoFolder.replace('\\','/'),
-                'fib':self.PhotometryFolder.replace('\\','/')
-                },
-            'schemas':[
-                os.path.join(self.MetadataFolder,'session.json').replace('\\','/'),
-                os.path.join(self.MetadataFolder,'rig.json').replace('\\','/')
-                ],
-            'schedule_time':None,
-            'project_name':self.project_name,
-            'script': {}
-            }
-
-
-        # Define filename of manifest
-        flag_dir = os.path.join(os.path.expanduser("~"), "Documents",'ForagingSettings','manifest_dir')## DEBUGGING
-        filename = os.path.join(flag_dir,'manifest_{}.yml'.format(contents['name']))
-        
-        # Write the manifest file
-        with open(filename,'w') as yaml_file:
-            yaml.dump(contents, yaml_file, default_flow_style=False)
-
+            filename = os.path.join(flag_dir,'manifest_{}.yml'.format(contents['name']))
+            
+            # Write the manifest file
+            with open(filename,'w') as yaml_file:
+                yaml.dump(contents, yaml_file, default_flow_style=False)
+        except Exception as e:
+            logging.error('Could not generate upload manifest: {}'.format(str(e)))
+            QMessageBox.critical(self, 'Upload manifest', 
+                'Could not generate upload manifest. Please alert the mouse owner that this session will not be uploaded.')
+            
 
 def start_gui_log_file(box_number):
     '''
