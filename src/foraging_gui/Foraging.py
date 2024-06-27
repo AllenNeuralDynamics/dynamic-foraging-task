@@ -1043,7 +1043,12 @@ class Window(QMainWindow):
             'name_mapper_file':os.path.join(self.SettingFolder,"name_mapper.json"),
             'create_rig_metadata':True,
             'save_each_trial':True,
-            'AutomaticUpload':True
+            'AutomaticUpload':True,
+            'manifest_flag_dir':os.path.join(
+                os.path.expanduser("~"), 
+                "Documents",
+                'aind_watchdog_service',
+                'manifest')
         }
         
         # Try to load Settings_box#.csv
@@ -4129,20 +4134,20 @@ class Window(QMainWindow):
     
     def _generate_upload_manifest(self,FIP=False):
         '''
-            DEBUGGING TODO
-            Figure out how to toggle upload time based on FIP sessions
-            need to determine path to flag_dir
+            Generates a manifest.yml file for triggering data copy to VAST and upload to aws
         '''
         try: 
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
             
             if FIP:
-                schedule = 'midnight' ## DEBUG, figure out format
-                capsule_id = 'FIP trigger capsule' ## DEBUG, figure out capsule
+                schedule = None ## DEBUG, figure out format
+                capsule_id = 'c089614a-347e-4696-b17e-86980bb782c' 
+                mount = None ## DEBUG, figure out if we need this
             else:
-                schedule = None ## DEBUG, do we want to trigger later? 
-                capsule_id = None ## DEBUG, should probably trigger something? 
+                schedule = None  
+                capsule_id = 'c089614a-347e-4696-b17e-86980bb782c' 
+                mount = None
  
             # Define contents of manifest file
             contents = {
@@ -4150,8 +4155,8 @@ class Window(QMainWindow):
                 'name': self.session_name,
                 'platform': 'behavior',
                 'subject_id': int(self.ID.text()),
-                'capsule_id': None,
-                'mount':None,
+                'capsule_id': capsule_id,
+                'mount':mount,
                 'destination': '//allen/aind/scratch/dynamic_foraging_rig_transfer',
                 's3_bucket':'private',
                 'processor_full_name': 'AIND Behavior Team',
@@ -4170,11 +4175,11 @@ class Window(QMainWindow):
                 }
      
             # Define filename of manifest
-            ## DEBUGGING
-            flag_dir = os.path.join(os.path.expanduser("~"), "Documents",'ForagingSettings','manifest_dir')
-            ## DEBUGGING
-
-            filename = os.path.join(flag_dir,'manifest_{}.yml'.format(contents['name']))
+            if not os.path.exists(self.Settings['manifest_flag_dir']):
+                os.makedirs(self.Settings['manifest_flag_dir'])
+            filename = os.path.join(
+                self.Settings['manifest_flag_dir'],
+                'manifest_{}.yml'.format(contents['name']))
             
             # Write the manifest file
             with open(filename,'w') as yaml_file:
