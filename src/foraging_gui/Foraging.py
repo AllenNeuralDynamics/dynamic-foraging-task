@@ -99,7 +99,7 @@ class Window(QMainWindow):
         self.ANewTrial = 1          # permission to start a new trial
         self.previous_backup_completed = 1   # permission to save backup data; 0, the previous saving has not finished, and it will not trigger the next saving; 1, it is allowed to save backup data
         self.UpdateParameters = 1   # permission to update parameters
-        self.loggingstarted = -1    # Have we started trial logging
+        self.logging_type = -1    # -1, logging is not started; 0, temporary logging; 1, formal logging
         self.unsaved_data = False   # Setting unsaved data to False 
         self.to_check_drop_frames = 1 # 1, to check drop frames during saving data; 0, not to check drop frames 
 
@@ -130,6 +130,10 @@ class Window(QMainWindow):
         self.finish_Timer=1     # for photometry baseline recordings
         self.PhotometryRun=0    # 1. Photometry has been run; 0. Photometry has not been carried out.
         self.ignore_timer=False # Used for canceling the photometry baseline timer
+        self.give_left_volume_reserved=0 # the reserved volume of the left valve (usually given after go cue)
+        self.give_right_volume_reserved=0 # the reserved volume of the right valve (usually given after go cue)
+        self.give_left_time_reserved=0 # the reserved open time of the left valve (usually given after go cue)
+        self.give_right_time_reserved=0 # the reserved open time of the right valve (usually given after go cue)
         self._Optogenetics()    # open the optogenetics panel 
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
@@ -273,11 +277,17 @@ class Window(QMainWindow):
         self.SessionlistSpin.textChanged.connect(self._session_list_spin)
         self.StartEphysRecording.clicked.connect(self._StartEphysRecording)
         self.SetReference.clicked.connect(self._set_reference)
+        self.Opto_dialog.laser_1_calibration_voltage.textChanged.connect(self._toggle_save_color)
+        self.Opto_dialog.laser_2_calibration_voltage.textChanged.connect(self._toggle_save_color)
+        self.Opto_dialog.laser_1_calibration_power.textChanged.connect(self._toggle_save_color)
+        self.Opto_dialog.laser_2_calibration_power.textChanged.connect(self._toggle_save_color)
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):     
                 child.textChanged.connect(self._CheckTextChange)
+            for child in container.findChildren((QtWidgets.QComboBox)):     
+                child.currentIndexChanged.connect(self.keyPressEvent)
         # Opto_dialog can not detect natural enter press, so returnPressed is used here. 
         for container in [self.Opto_dialog,self.Metadata_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
@@ -526,12 +536,20 @@ class Window(QMainWindow):
                     self.trigger_length=0
                     self.WarningLabelCamera.setText('')
                     self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
+                    self.to_check_drop_frames=0
                     return
-                else:
+                elif ('HighSpeedCamera' in self.SettingsBox) and (self.SettingsBox['HighSpeedCamera'] ==1):
                     self.trigger_length=0
                     logging.error('Saved video data, but no camera trigger file found')
                     self.WarningLabelCamera.setText('No camera trigger file found!')
                     self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
+                    return
+                else:
+                    logging.info('Saved video data, but not using high speed camera - skipping drop frame check')
+                    self.trigger_length=0
+                    self.WarningLabelCamera.setText('')
+                    self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
+                    self.to_check_drop_frames=0
                     return
                 csv_files = [file for file in os.listdir(video_folder) if file.endswith(".csv")]
                 avi_files = [file for file in os.listdir(video_folder) if file.endswith(".avi")]
@@ -551,7 +569,7 @@ class Window(QMainWindow):
                         self.frame_num[csv_file] = num_frames
             self.WarningLabelCamera.setText(self.drop_frames_warning_text)
             if self.drop_frames_tag:
-                self.WarningLabelCamera.setStyleSheet("color: red;")
+                self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
             else:
                 self.WarningLabelCamera.setStyleSheet("color: green;")  
             # only check drop frames once each session
@@ -877,28 +895,29 @@ class Window(QMainWindow):
         if log_folder is None:
             # formal logging
             loggingtype=0
-            if self.CreateNewFolder==1:
-                self._GetSaveFolder()
-                self.CreateNewFolder=0
+            self._GetSaveFolder()
+            self.CreateNewFolder=0
             log_folder=self.HarpFolder
+            self.unsaved_data=True
+            self.Save.setStyleSheet("color: white;background-color : mediumorchid")
         else:
             # temporary logging
             loggingtype=1
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-            log_folder=os.path.join(log_folder,formatted_datetime,'raw.harp')
+            log_folder=os.path.join(log_folder,formatted_datetime,'behavior','raw.harp')
+            # create video folder
+            video_folder=os.path.join(log_folder,'..','..','behavior-videos')
+            if not os.path.exists(video_folder):
+                os.makedirs(video_folder)
         # stop the logging first
         self._stop_logging()
         self.Channel.StartLogging(log_folder)
         Rec=self.Channel.receive()
         if Rec[0].address=='/loggerstarted':
             pass
-        if loggingtype==0:
-            # formal logging
-            self.loggingstarted=0
-        elif loggingtype==1:
-            # temporary logging
-            self.loggingstarted=1
+        
+        self.logging_type=loggingtype # 0 for formal logging, 1 for temporary logging
         return log_folder
     
     def _GetLaserCalibration(self):
@@ -1548,54 +1567,54 @@ class Window(QMainWindow):
             widget = widget_dict[key]
             try: # load the paramter used by last trial
                 value=np.array([parameters[key]])
-                Tag=0
+                loading_parameters_type=0
             # sometimes we only have training parameters, no behavior parameters
             except Exception as e:
                 logging.error(str(e))
                 value=parameters[key]
-                Tag=1
+                loading_parameters_type=1
             if isinstance(widget, QtWidgets.QPushButton):
                 pass
             if type(value)==bool:
-                Tag=1
+                loading_parameters_type=1
             else:
                 if len(value)==0:
                     value=np.array([''], dtype='<U1')
-                    Tag=0
+                    loading_parameters_type=0
             if type(value)==np.ndarray:
-                Tag=0
+                loading_parameters_type=0
             if isinstance(widget, QtWidgets.QLineEdit):
-                if Tag==0:
+                if loading_parameters_type==0:
                     widget.setText(value[-1])
-                elif Tag==1:
+                elif loading_parameters_type==1:
                     widget.setText(value)
             elif isinstance(widget, QtWidgets.QComboBox):
-                if Tag==0:
+                if loading_parameters_type==0:
                     index = widget.findText(value[-1])
-                elif Tag==1:
+                elif loading_parameters_type==1:
                     index = widget.findText(value)
                 if index != -1:
                     widget.setCurrentIndex(index)
             elif isinstance(widget, QtWidgets.QDoubleSpinBox):
-                if Tag==0:
+                if loading_parameters_type==0:
                     widget.setValue(float(value[-1]))
-                elif Tag==1:
+                elif loading_parameters_type==1:
                     widget.setValue(float(value))
             elif isinstance(widget, QtWidgets.QSpinBox):
-                if Tag==0:
+                if loading_parameters_type==0:
                     widget.setValue(int(value[-1]))
-                elif Tag==1:
+                elif loading_parameters_type==1:
                     widget.setValue(int(value))
             elif isinstance(widget, QtWidgets.QTextEdit):
-                if Tag==0:
+                if loading_parameters_type==0:
                     widget.setText(value[-1])
-                elif Tag==1:
+                elif loading_parameters_type==1:
                     widget.setText(value)
             elif isinstance(widget, QtWidgets.QPushButton):
                 if key=='AutoReward':
-                    if Tag==0:
+                    if loading_parameters_type==0:
                         widget.setChecked(bool(value[-1]))
-                    elif Tag==1:
+                    elif loading_parameters_type==1:
                         widget.setChecked(value)
                     self._AutoReward()
         else:
@@ -1647,7 +1666,7 @@ class Window(QMainWindow):
     def keyPressEvent(self, event=None,allow_reset=False):
         '''
             Enter press to allow change of parameters
-            allow_reset (bool) allows the Baseweight parameter to be reset to the empty string
+            allow_reset (bool) allows the Baseweight etc. parameters to be reset to the empty string
         '''
         try:
             if self.actionTime_distribution.isChecked()==True:
@@ -1668,7 +1687,7 @@ class Window(QMainWindow):
             Parameters=self.GeneratedTrials
         else:
             Parameters=self
-        if event==None:
+        if event is None or not isinstance(event, QtGui.QKeyEvent):
             event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, Qt.Key_Return, Qt.KeyboardModifiers())
         if (event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter):
             # handle the return key press event here
@@ -1755,6 +1774,10 @@ class Window(QMainWindow):
                     self._ShowRewardPairs()
                 try:
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
+                        # Changes are not allowed until press is typed except for PositionX, PositionY and PositionZ
+                        if child.objectName() not in ('PositionX', 'PositionY', 'PositionZ'):
+                            self.UpdateParameters = 0
+                        
                         self.Continue=0
                         if child.objectName() in {'LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','ProbeTarget','RigMetadataFile','Experimenter', 'UncoupledReward', 'ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
                             child.setStyleSheet(self.default_text_color)
@@ -1774,16 +1797,12 @@ class Window(QMainWindow):
                         try:
                             # it's valid float
                             float(child.text())
-                            # Changes are not allowed until press is typed except for PositionX, PositionY and PositionZ
-                            if child.objectName() not in ('PositionX', 'PositionY', 'PositionZ'):
-                                self.UpdateParameters = 0
                         except Exception as e:
                             #logging.error(str(e))
                             # Invalid float. Do not change the parameter
                             if child.objectName() in ['BaseWeight', 'WeightAfter']:
                                 # Strip the last character which triggered the invalid float
                                 child.setText(child.text()[:-1]) 
-                                self.UpdateParameters=0
                                 continue
                             elif isinstance(child, QtWidgets.QDoubleSpinBox):
                                 child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
@@ -2281,7 +2300,7 @@ class Window(QMainWindow):
 
         # this should be improved in the future. Need to get the last LeftRewardDeliveryTime and RightRewardDeliveryTime
         if hasattr(self, 'GeneratedTrials') and self.InitializeBonsaiSuccessfully==1:
-            self.GeneratedTrials._GetLicks(self.Channel2)
+            self.GeneratedTrials._get_irregular_timestamp(self.Channel2)
         
         # Create new folders
         if self.CreateNewFolder==1:
@@ -2798,43 +2817,51 @@ class Window(QMainWindow):
                             continue
                         widget = widget_dict[key]
 
+                        # loading_parameters_type=0, get the last value of saved training parameters for each trial; loading_parameters_type=1, get the current value for single value data directly from the window. 
                         if 'TP_{}'.format(key) in CurrentObj:
                             value=np.array([CurrentObj['TP_'+key][-2]])
-                            Tag=0
+                            loading_parameters_type=0
                         else:
                             value=CurrentObj[key]
-                            Tag=1
+                            loading_parameters_type=1
 
                         if key in {'BaseWeight','TotalWater','TargetWeight','WeightAfter','SuggestedWater','TargetRatio'}:
                             self.BaseWeight.disconnect()
                             self.TargetRatio.disconnect()
                             self.WeightAfter.disconnect()
                             value=CurrentObj[key]
-                            Tag=1
-                        if isinstance(widget, QtWidgets.QPushButton):
-                            pass
+                            loading_parameters_type=1
+
+                        # tag=0, get the last value for ndarray; tag=1, get the current value for single value data
                         if type(value)==bool:
-                            Tag=1
+                            loading_parameters_type=1
                         else:
                             if len(value)==0:
                                 value=np.array([''], dtype='<U1')
-                                Tag=0
+                                loading_parameters_type=0
                         if type(value)==np.ndarray:
-                            Tag=0
+                            loading_parameters_type=0
+
+                        if loading_parameters_type==0:
+                            final_value=value[-1]
+                        elif loading_parameters_type==1:
+                            final_value=value
+
                         if isinstance(widget, QtWidgets.QLineEdit):
-                            if Tag==0:
-                                widget.setText(value[-1])
-                            elif Tag==1:
-                                widget.setText(value)
+                            widget.setText(final_value)
                             if key in {'BaseWeight','TotalWater','TargetWeight','WeightAfter','SuggestedWater','TargetRatio'}:
                                 self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
                                 self.WeightAfter.textChanged.connect(self._PostWeightChange)
                                 self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
                         elif isinstance(widget, QtWidgets.QComboBox):
-                            if Tag==0:
-                                index = widget.findText(value[-1])
-                            elif Tag==1:
-                                index = widget.findText(value)
+                            index=widget.findText(final_value)
+                            if key.startswith('Frequency_'):
+                                condition=key.split('_')[1]
+                                if CurrentObj['Protocol_'+condition] in ['Pulse']:
+                                    widget.setEditable(True)
+                                    widget.lineEdit().setText(final_value)
+                                    continue
+
                             if index != -1:
                                 # Alternating on/off for SessionStartWith if SessionAlternating is on
                                 if key=='SessionStartWith' and 'Opto_dialog' in Obj:
@@ -2845,25 +2872,13 @@ class Window(QMainWindow):
                                 else:
                                     widget.setCurrentIndex(index)
                         elif isinstance(widget, QtWidgets.QDoubleSpinBox):
-                            if Tag==0:
-                                widget.setValue(float(value[-1]))
-                            elif Tag==1:
-                                widget.setValue(float(value))
+                            widget.setValue(float(final_value))
                         elif isinstance(widget, QtWidgets.QSpinBox):
-                            if Tag==0:
-                                widget.setValue(int(value[-1]))
-                            elif Tag==1:
-                                widget.setValue(int(value))
+                            widget.setValue(int(final_value))
                         elif isinstance(widget, QtWidgets.QTextEdit):
-                            if Tag==0:
-                                widget.setText(value[-1])
-                            elif Tag==1:
-                                widget.setText(value)
+                            widget.setText(final_value)
                         elif isinstance(widget, QtWidgets.QPushButton):
-                            if Tag==0:
-                                widget.setChecked(bool(value[-1]))
-                            elif Tag==1:
-                                widget.setChecked(value)
+                            widget.setChecked(bool(final_value))
                             if key=='AutoReward':
                                 self._AutoReward()
                             if key=='NextBlock':
@@ -3053,7 +3068,7 @@ class Window(QMainWindow):
             CWD=os.path.dirname(self.FIP_workflow_path)
             logging.info('Starting FIP workflow in directory: {}'.format(CWD))
             folder_path = ' -p session="{}"'.format(self.SessionFolder)
-            camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartCamera.isChecked())
+            camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartRecording.isChecked())
             process = subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera+' --start',cwd=CWD,shell=True,
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
             threading.Thread(target=log_subprocess_output, args=(process,'FIP',)).start()
@@ -3260,15 +3275,21 @@ class Window(QMainWindow):
 
     def _stop_camera(self):
         '''Stop the camera if it is running'''
-        if self.Camera_dialog.StartCamera.isChecked():
-            self.Camera_dialog.StartCamera.setChecked(False)
+        if self.Camera_dialog.StartRecording.isChecked():
+            self.Camera_dialog.StartRecording.setChecked(False)
             self.Camera_dialog._StartCamera()
+
+            
     def _stop_logging(self):
         '''Stop the logging'''
         try:
             self.Channel.StopLogging('s')
+            self.logging_type=-1 # logging has stopped
         except Exception as e:
-            logging.error(str(e))
+            logging.warning('Bonsai connection is closed')
+            self.WarningLabel.setText('Lost bonsai connection')
+            self.WarningLabel.setStyleSheet(self.default_warning_color)
+            self.InitializeBonsaiSuccessfully=0
 
     def _NewSession(self):
         logging.info('New Session pressed')
@@ -3292,6 +3313,7 @@ class Window(QMainWindow):
         self._stop_logging()
 
         # Reset GUI visuals
+        self.ManualWaterWarning.setText('')
         self.Save.setStyleSheet("color:black;background-color:None;")
         self.NewSession.setStyleSheet("background-color : green;")
         self.NewSession.setChecked(False)
@@ -3302,6 +3324,11 @@ class Window(QMainWindow):
         self.TotalWaterWarning.setText('')
         self.WarningLabel_2.setText('')
         self._set_metadata_enabled(True)
+
+        self._ConnectBonsai()
+        if self.InitializeBonsaiSuccessfully == 0:
+            self.WarningLabel.setText('Lost bonsai connection')
+            self.WarningLabel.setStyleSheet(self.default_warning_color)
 
         # Reset state variables
         self._StopPhotometry() # Make sure photoexcitation is stopped 
@@ -3341,6 +3368,7 @@ class Window(QMainWindow):
         # stop the current session
         self.Start.setStyleSheet("background-color : none")
         self.Start.setChecked(False)
+        self.Camera_dialog.StartPreview.setEnabled(True)
 
         # waiting for the finish of the last trial
         start_time = time.time()
@@ -3420,6 +3448,12 @@ class Window(QMainWindow):
         '''start trial loop'''
         # empty post weight
         self.WeightAfter.setText('')
+
+        # empty the laser calibration
+        self.Opto_dialog.laser_1_calibration_voltage.setText('')
+        self.Opto_dialog.laser_2_calibration_voltage.setText('')
+        self.Opto_dialog.laser_1_calibration_power.setText('')
+        self.Opto_dialog.laser_2_calibration_power.setText('')
 
         # Check for Bonsai connection
         self._ConnectBonsai()
@@ -3547,6 +3581,12 @@ class Window(QMainWindow):
             self.WarningLabel.setStyleSheet("color: none;")
             # disable metadata fields
             self._set_metadata_enabled(False)
+            # disable preview
+            self.Camera_dialog.StartPreview.setEnabled(False)
+            # stop the temporary logging
+            if self.Camera_dialog.StartPreview.isChecked():
+                self.Camera_dialog.StartPreview.setChecked(False)
+                self.Camera_dialog._StartCamera(start_type='preview')
         else:
             # Prompt user to confirm stopping trials
             reply = QMessageBox.question(self, 
@@ -3562,7 +3602,8 @@ class Window(QMainWindow):
                 logging.info('Start button pressed: user continued session')               
                 self.Start.setChecked(True)
                 return 
-           
+            # enable preview
+            self.Camera_dialog.StartPreview.setEnabled(True)
             # If the photometry timer is running, stop it 
             if self.finish_Timer==0:
                 self.ignore_timer=True
@@ -3574,6 +3615,8 @@ class Window(QMainWindow):
                     # Stop the worker, this has a 1 second delay before taking effect
                     # so we set the text to get ignored as well
                     self.workertimer._stop()
+
+            self.ManualWaterWarning.setText('')
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
@@ -3588,7 +3631,7 @@ class Window(QMainWindow):
             # start a new logging
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
-                if (not (self.Camera_dialog.StartCamera.isChecked() and self.Camera_dialog.CollectVideo.currentText()=='Yes' and self.Camera_dialog.AutoControl.currentText()=='No')) and (not self.FIP_started):
+                if (not (self.Camera_dialog.StartRecording.isChecked() and self.Camera_dialog.AutoControl.currentText()=='No')) and (not self.FIP_started):
                     self.CreateNewFolder=1
                     self.Ot_log_folder=self._restartlogging()
             except Exception as e:
@@ -3611,7 +3654,7 @@ class Window(QMainWindow):
                     raise
             # start the camera during the begginning of each session
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
-                self.Camera_dialog.StartCamera.setChecked(True)
+                self.Camera_dialog.StartRecording.setChecked(True)
                 self.Camera_dialog._StartCamera()
             self.SessionStartTime=datetime.now()
             self.Other_SessionStartTime=str(self.SessionStartTime) # for saving
@@ -3651,7 +3694,7 @@ class Window(QMainWindow):
             # create workers
             worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.Channel,self.Channel3,self.Channel4)
             worker1.signals.finished.connect(self._thread_complete)
-            workerLick = Worker(GeneratedTrials._GetLicks,self.Channel2)
+            workerLick = Worker(GeneratedTrials._get_irregular_timestamp,self.Channel2)
             workerLick.signals.finished.connect(self._thread_complete2)
             workerPlot = Worker(PlotM._Update,GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
             workerPlot.signals.finished.connect(self._thread_complete3)
@@ -3779,7 +3822,7 @@ class Window(QMainWindow):
                 if self.actionLicks_sta.isChecked():
                     self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
                 # save the data everytrial
-                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial:
+                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
                     self.previous_backup_completed=0
                     self.threadpool6.start(worker_save)
 
@@ -3900,34 +3943,86 @@ class Window(QMainWindow):
             self.DelayBeta.setEnabled(True)
             self.DelayMin.setEnabled(True)
             self.DelayMax.setEnabled(True)
+
     def _GiveLeft(self):
         '''manually give left water'''
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
             return
-        self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
-        time.sleep(0.01) 
-        self.Channel3.ManualWater_Left(int(1))
-        self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
-        self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+float(self.TP_GiveWaterL_volume)/1000
-        self._UpdateSuggestedWater()
-    
+        if self.AlignToGoCue.currentText()=='yes':
+            # Reserving the water after the go cue.Each click will add the water to the reserved water
+            self.give_left_volume_reserved=self.give_left_volume_reserved+float(self.TP_GiveWaterL_volume)
+            if self.latest_fitting!={}:
+                self.give_left_time_reserved=((float(self.give_left_volume_reserved)-self.latest_fitting['Left'][1])/self.latest_fitting['Left'][0])*1000
+            else:
+                self.give_left_time_reserved=self.give_left_time_reserved+float(self.TP_GiveWaterL)*1000
+        else:
+            self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
+            time.sleep(0.01) 
+            self.Channel3.ManualWater_Left(int(1))
+            time.sleep(0.01+float(self.TP_GiveWaterL)) 
+            self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
+            self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+float(self.TP_GiveWaterL_volume)/1000
+            self._UpdateSuggestedWater()
+            self.ManualWaterWarning.setText('Give left manual water (ul): '+str(np.round(float(self.TP_GiveWaterL_volume),3)))
+            self.ManualWaterWarning.setStyleSheet(self.default_warning_color)
+
+    def _give_reserved_water(self,valve=None):
+        '''give reserved water usually after the go cue'''
+        if valve=='left':
+            if self.give_left_volume_reserved==0:
+                return
+            self.Channel.LeftValue(float(self.give_left_time_reserved))
+            time.sleep(0.01) 
+            self.Channel3.ManualWater_Left(int(1))
+            time.sleep(0.01+float(self.give_left_time_reserved)/1000)
+            self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
+            self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+self.give_left_volume_reserved/1000
+            self.give_left_volume_reserved=0
+            self.give_left_time_reserved=0
+        elif valve=='right':
+            if self.give_right_volume_reserved==0:
+                return
+            self.Channel.RightValue(float(self.give_right_time_reserved))
+            time.sleep(0.01) 
+            self.Channel3.ManualWater_Right(int(1))
+            time.sleep(0.01+float(self.give_right_time_reserved)/1000) 
+            self.Channel.RightValue(float(self.TP_RightValue)*1000)
+            self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+self.give_right_volume_reserved/1000
+            self.give_right_volume_reserved=0
+            self.give_right_time_reserved=0
+
     def _GiveRight(self):
         '''manually give right water'''
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
             return
-        self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
-        time.sleep(0.01) 
-        self.Channel3.ManualWater_Right(int(1))
-        self.Channel.RightValue(float(self.TP_RightValue)*1000)
-        self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
-        self._UpdateSuggestedWater()
+        if self.AlignToGoCue.currentText()=='yes':
+            # Reserving the water after the go cue.Each click will add the water to the reserved water
+            self.give_right_volume_reserved=self.give_right_volume_reserved+float(self.TP_GiveWaterR_volume)
+            if self.latest_fitting!={}:
+                self.give_right_time_reserved=((float(self.give_right_volume_reserved)-self.latest_fitting['Right'][1])/self.latest_fitting['Right'][0])*1000
+            else:
+                self.give_right_time_reserved=self.give_right_time_reserved+float(self.TP_GiveWaterR)*1000
+        else:
+            self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
+            time.sleep(0.01) 
+            self.Channel3.ManualWater_Right(int(1))
+            time.sleep(0.01+float(self.TP_GiveWaterR)) 
+            self.Channel.RightValue(float(self.TP_RightValue)*1000)
+            self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
+            self._UpdateSuggestedWater()
+            self.ManualWaterWarning.setText('Give right manual water (ul): '+str(np.round(float(self.TP_GiveWaterR_volume),3)))
+            self.ManualWaterWarning.setStyleSheet(self.default_warning_color)
+            
+    def _toggle_save_color(self):
+        '''toggle the color of the save button to mediumorchid'''
+        self.unsaved_data=True
+        self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
 
     def _PostWeightChange(self):
         self.unsaved_data=True
         self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
-        self.NewSession.setStyleSheet("background-color : none")
         self.WarningLabel.setText('')
         self._UpdateSuggestedWater()
 

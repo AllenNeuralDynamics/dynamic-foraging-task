@@ -36,7 +36,7 @@ class PlotV(FigureCanvas):
             return
 
         if Channel is not None:
-            GeneratedTrials._GetLicks(Channel)
+            GeneratedTrials._get_irregular_timestamp(Channel)
 
         # Unpack data 
         self.B_AnimalResponseHistory=GeneratedTrials.B_AnimalResponseHistory
@@ -58,9 +58,22 @@ class PlotV(FigureCanvas):
         self.B_LaserOnTrial=np.array(GeneratedTrials.B_LaserOnTrial)
         self.B_AutoWaterTrial=GeneratedTrials.B_AutoWaterTrial
         self.MarchingType=GeneratedTrials.TP_MartchingType
-
+        # They are not harp time
+        self.B_ManualLeftWaterStartTime=GeneratedTrials.B_ManualLeftWaterStartTime.copy()
+        self.B_ManualRightWaterStartTime=GeneratedTrials.B_ManualRightWaterStartTime.copy()
+        self.B_EarnedLeftWaterStartTime=GeneratedTrials.B_EarnedLeftWaterStartTime.copy()
+        self.B_EarnedRightWaterStartTime=GeneratedTrials.B_EarnedRightWaterStartTime.copy()
+        self.B_AutoLeftWaterStartTime=GeneratedTrials.B_AutoLeftWaterStartTime.copy()
+        self.B_AutoRightWaterStartTime=GeneratedTrials.B_AutoRightWaterStartTime.copy()
+        self.B_SelectedCondition=np.array(GeneratedTrials.B_SelectedCondition)
         if self.B_CurrentTrialN>0:
             self.B_Time=self.B_RewardOutcomeTime-GeneratedTrials.B_TrialStartTime[0]
+            self.B_ManualLeftWaterStartTime=self.B_ManualLeftWaterStartTime-GeneratedTrials.B_TrialStartTime[0]
+            self.B_ManualRightWaterStartTime=self.B_ManualRightWaterStartTime-GeneratedTrials.B_TrialStartTime[0]
+            self.B_EarnedLeftWaterStartTime=self.B_EarnedLeftWaterStartTime-GeneratedTrials.B_TrialStartTime[0]
+            self.B_EarnedRightWaterStartTime=self.B_EarnedRightWaterStartTime-GeneratedTrials.B_TrialStartTime[0]
+            self.B_AutoLeftWaterStartTime=self.B_AutoLeftWaterStartTime-GeneratedTrials.B_TrialStartTime[0]
+            self.B_AutoRightWaterStartTime=self.B_AutoRightWaterStartTime-GeneratedTrials.B_TrialStartTime[0]
         else:
             self.B_Time=self.B_RewardOutcomeTime
 
@@ -99,17 +112,24 @@ class PlotV(FigureCanvas):
         Fraction=self.B_RewardProHistory[1]/self.B_RewardProHistory.sum(axis=0)
         self.ax2.plot(self.B_Time,Fraction[0:Len],linestyle=':',color='y',label='p_R_frac',alpha=0.8)
         self.draw()
-
+            
     def _PlotChoice(self):
         self.ax1.cla()
+
+        # Colors for different optogenetics conditions
+        color_mapping = {
+            'Condition1': (0, 191/255, 255/255, 1),  # Deep Sky Blue
+            'Condition2': (255/255, 127/255, 80/255, 1),  # Coral Red
+            'Condition3': (34/255, 139/255, 34/255, 1),  # Forest Green
+            'Condition4': (218/255, 165/255, 32/255, 1)  # Goldenrod
+        }
 
         # Define trial types
         LeftChoice_Rewarded=np.where(np.logical_and(self.B_AnimalResponseHistory==0,self.B_RewardedHistory[0]==True))
         LeftChoice_UnRewarded=np.where(np.logical_and(self.B_AnimalResponseHistory==0,self.B_RewardedHistory[0]==False))
         RightChoice_Rewarded=np.where(np.logical_and(self.B_AnimalResponseHistory==1,self.B_RewardedHistory[1]==True))
         RightChoice_UnRewarded=np.where(np.logical_and(self.B_AnimalResponseHistory==1, self.B_RewardedHistory[1]==False))
-        Optogenetics_On=np.where(self.B_LaserOnTrial[:-1]==1)
-
+        
         # running average of choice
         if self.RunLength()!='':
             kernel_size = int(self.RunLength())
@@ -157,8 +177,6 @@ class PlotV(FigureCanvas):
         if self.B_BaitHistory.shape[1]>self.B_AnimalResponseHistory.shape[0]:
             LeftBait=np.where(self.B_BaitHistory[0][:-1]==True)
             RightBait=np.where(self.B_BaitHistory[1][:-1]==True)
-            LeftAutoWater=np.where(self.B_AutoWaterTrial[0][:-1]==1)
-            RightAutoWater=np.where(self.B_AutoWaterTrial[1][:-1]==1)
             # plot the upcoming trial start time
             if self.B_CurrentTrialN>0:
                 NewTrialStart=np.array(self.B_BTime[-1])
@@ -175,7 +193,8 @@ class PlotV(FigureCanvas):
             if self.B_BaitHistory[1][-1]==True:
                 self.ax1.plot(NewTrialStart2,1.2, 'kD',markersize=self.MarkerSize, alpha=0.4)
             if self.B_LaserOnTrial[-1]==1:
-                self.ax1.plot(NewTrialStart2,1.5, 'bo',markersize=self.MarkerSize,markerfacecolor = (0, 0, 1, 1), alpha=1)
+                current_color=color_mapping['Condition'+str(self.B_SelectedCondition[-1])]
+                self.ax1.plot(NewTrialStart2,1.5, 'o',markersize=self.MarkerSize,markeredgecolor=current_color, markerfacecolor = current_color, alpha=1)
             if self.B_AutoWaterTrial[0][-1]==1:
                 self.ax1.plot(NewTrialStart2,0.4, 'bo',markerfacecolor = (0, 1, 0, 1),markersize=self.MarkerSize)
             if self.B_AutoWaterTrial[1][-1]==1:
@@ -183,19 +202,30 @@ class PlotV(FigureCanvas):
         else:
             LeftBait=np.where(self.B_BaitHistory[0]==True)
             RightBait=np.where(self.B_BaitHistory[1]==True)
-            LeftAutoWater=np.where(self.B_AutoWaterTrial[0]==1)
-            RightAutoWater=np.where(self.B_AutoWaterTrial[1]==1)
-        
-        if np.size(LeftAutoWater) !=0:
-            self.ax1.plot(self.B_BTime[LeftAutoWater], np.zeros(len(self.B_BTime[LeftAutoWater]))+0.4, 
+
+        if np.size(self.B_AutoLeftWaterStartTime) !=0:
+            self.ax1.plot(self.B_AutoLeftWaterStartTime, np.zeros(len(self.B_AutoLeftWaterStartTime))+0.4, 
                 'bo',markerfacecolor = (0, 1, 0, 1),markersize=self.MarkerSize)
-        if np.size(RightAutoWater) !=0:
-            self.ax1.plot(self.B_BTime[RightAutoWater], np.zeros(len(self.B_BTime[RightAutoWater]))+0.6, 
+        if np.size(self.B_AutoRightWaterStartTime) !=0:
+            self.ax1.plot(self.B_AutoRightWaterStartTime, np.zeros(len(self.B_AutoRightWaterStartTime))+0.6, 
                 'bo',markerfacecolor =(0, 1, 0, 1),markersize=self.MarkerSize,label='AutoWater')
 
-        if np.size(Optogenetics_On) !=0:
+        if np.size(self.B_ManualLeftWaterStartTime) !=0:
+            self.ax1.plot(self.B_ManualLeftWaterStartTime, np.zeros(len(self.B_ManualLeftWaterStartTime))+0.3, 
+                'bs',markerfacecolor = (0, 1, 0, 1),markersize=self.MarkerSize)
+        if np.size(self.B_ManualRightWaterStartTime) !=0:
+            self.ax1.plot(self.B_ManualRightWaterStartTime, np.zeros(len(self.B_ManualRightWaterStartTime))+0.7, 
+                'bs',markerfacecolor =(0, 1, 0, 1),markersize=self.MarkerSize,label='ManualWater')
+
+        condition_list=list(set(self.B_SelectedCondition))
+        for condition in condition_list:
+            Optogenetics_On=np.where(np.logical_and(self.B_LaserOnTrial[:-1]==1,self.B_SelectedCondition[:-1]==condition))
+            if len(Optogenetics_On[0])==0:
+                continue
+            current_color=color_mapping['Condition'+str(condition)]
             self.ax1.plot(self.B_BTime[Optogenetics_On], np.zeros(len(self.B_BTime[Optogenetics_On]))+1.5, 
-                'bo',markerfacecolor = (0, 0, 1, 1),label='Optogenetics',markersize=self.MarkerSize, alpha=1)
+                'o',markeredgecolor = current_color, markerfacecolor = current_color,label='Opto condition '+str(condition),markersize=self.MarkerSize, alpha=1)
+            
         if np.size(LeftBait) !=0:
             self.ax1.plot(self.B_BTime[LeftBait], np.zeros(len(self.B_BTime[LeftBait]))-0.2, 
                 'kD',markersize=self.MarkerSize, alpha=0.2)

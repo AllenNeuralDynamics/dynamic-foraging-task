@@ -2438,6 +2438,63 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
+    <widget class="QLabel" name="label_30">
+     <property name="geometry">
+      <rect>
+       <x>930</x>
+       <y>50</y>
+       <width>146</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>align to go cue=</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="AlignToGoCue">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>1080</x>
+       <y>50</y>
+       <width>80</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="currentIndex">
+      <number>1</number>
+     </property>
+     <item>
+      <property name="text">
+       <string>no</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>yes</string>
+      </property>
+     </item>
+    </widget>
    </widget>
    <widget class="QPushButton" name="Load">
     <property name="geometry">
@@ -4508,6 +4565,28 @@
      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
     </property>
    </widget>
+   <widget class="QLabel" name="ManualWaterWarning">
+    <property name="geometry">
+     <rect>
+      <x>1240</x>
+      <y>870</y>
+      <width>261</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>7</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <zorder>TrainingParameters</zorder>
+   <zorder>StartFIP</zorder>
+   <zorder>FIPMode</zorder>
+   <zorder>label_65</zorder>
    <zorder>PhotometryB</zorder>
    <zorder>infor</zorder>
    <zorder>line</zorder>
@@ -4543,6 +4622,7 @@
    <zorder>label_65</zorder>
    <zorder>OpenEphysRecordingType</zorder>
    <zorder>MetadataWarning</zorder>
+   <zorder>ManualWaterWarning</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

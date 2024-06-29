@@ -876,6 +876,7 @@ class WaterCalibrationDialog(QDialog):
             self.OpenLeftForever.setStyleSheet("background-color : green;")
             # set the valve open time
             self.MainWindow.Channel.LeftValue(float(1000)*1000) 
+            time.sleep(0.01) 
             # open the valve
             self.MainWindow.Channel3.ManualWater_Left(int(1))
         else:
@@ -883,8 +884,10 @@ class WaterCalibrationDialog(QDialog):
             self.OpenLeftForever.setStyleSheet("background-color : none")
             # close the valve 
             self.MainWindow.Channel.LeftValue(float(0.001)*1000)
+            time.sleep(0.01) 
             self.MainWindow.Channel3.ManualWater_Left(int(1))
             # set the default valve open time
+            time.sleep(0.01) 
             self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
 
     def _OpenRightForever(self):
@@ -897,6 +900,7 @@ class WaterCalibrationDialog(QDialog):
             self.OpenRightForever.setStyleSheet("background-color : green;")
             # set the valve open time
             self.MainWindow.Channel.RightValue(float(1000)*1000) 
+            time.sleep(0.01) 
             # open the valve
             self.MainWindow.Channel3.ManualWater_Right(int(1))
         else:
@@ -904,8 +908,10 @@ class WaterCalibrationDialog(QDialog):
             self.OpenRightForever.setStyleSheet("background-color : none")
             # close the valve 
             self.MainWindow.Channel.RightValue(float(0.001)*1000)
+            time.sleep(0.01) 
             self.MainWindow.Channel3.ManualWater_Right(int(1))
             # set the default valve open time
+            time.sleep(0.01) 
             self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
 
     def _TimeRemaining(self,i, cycles, opentime, interval):
@@ -947,6 +953,19 @@ class WaterCalibrationDialog(QDialog):
             return
 
         if self.SpotCheckLeft.isChecked():
+            if 'Left' not in self.MainWindow.latest_fitting:
+                reply = QMessageBox.critical(self, 'Spot check left', 
+                    'Please perform full calibration before spot check', 
+                    QMessageBox.Ok)
+                logging.warning('Cannot perform spot check before full calibration')  
+                self.SpotCheckLeft.setStyleSheet("background-color : none;")
+                self.SpotCheckLeft.setChecked(False)        
+                self.Warning.setText('')
+                self.SpotCheckPreWeightLeft.setText('')
+                self.TotalWaterSingleLeft.setText('')
+                self.SaveLeft.setStyleSheet("color: black;background-color : none;")               
+                return  
+ 
             logging.info('starting spot check left')
             self.SpotCheckLeft.setStyleSheet("background-color : green;")
     
@@ -1076,6 +1095,19 @@ class WaterCalibrationDialog(QDialog):
             return
 
         if self.SpotCheckRight.isChecked():
+            if 'Right' not in self.MainWindow.latest_fitting:
+                reply = QMessageBox.critical(self, 'Spot check right', 
+                    'Please perform full calibration before spot check', 
+                    QMessageBox.Ok)
+                logging.warning('Cannot perform spot check before full calibration')  
+                self.SpotCheckRight.setStyleSheet("background-color : none;")
+                self.SpotCheckRight.setChecked(False)        
+                self.Warning.setText('')
+                self.SpotCheckPreWeightRight.setText('')
+                self.TotalWaterSingleRight.setText('')
+                self.SaveRight.setStyleSheet("color: black;background-color : none;")               
+                return  
+
             logging.info('starting spot check right')
             self.SpotCheckRight.setStyleSheet("background-color : green;")
     
@@ -1195,11 +1227,12 @@ class CameraDialog(QDialog):
         self._connectSignalsSlots()
         self.camera_start_time=''
         self.camera_stop_time=''
+        
     def _connectSignalsSlots(self):
-        self.StartCamera.clicked.connect(self._StartCamera)
+        self.StartRecording.clicked.connect(lambda: self._StartCamera('recording'))
+        self.StartPreview.clicked.connect(lambda: self._StartCamera('preview'))
         self.ClearTemporaryVideo.clicked.connect(self._ClearTemporaryVideo)
         self.AutoControl.currentIndexChanged.connect(self._AutoControl)
-        self.RestartLogging.clicked.connect(self._RestartLogging)
         self.OpenSaveFolder.clicked.connect(self._OpenSaveFolder)
 
     def _OpenSaveFolder(self):
@@ -1215,40 +1248,10 @@ class CameraDialog(QDialog):
             self.WarningLabelOpenSave.setText('No logging folder found!')
             self.WarningLabelOpenSave.setStyleSheet(self.MainWindow.default_warning_color)
 
-    def _RestartLogging(self):
-        '''Restart the logging (create a new logging folder)'''
-        self.MainWindow._ConnectBonsai()
-        if self.MainWindow.InitializeBonsaiSuccessfully==0:
-            return
-        if self.CollectVideo.currentText()=='Yes':
-            # formal logging
-            self.MainWindow.CreateNewFolder=1
-            self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
-        else:
-            # temporary logging
-            self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging(self.MainWindow.temporary_video_folder)
-        self.WarningLabelLogging.setText('Logging has restarted!')
-        self.WarningLabelLogging.setStyleSheet(self.MainWindow.default_warning_color)
-
     def _AutoControl(self):
         '''Trigger the camera during the start of a new behavior session'''
         if self.AutoControl.currentText()=='Yes':
-            #self.StartCamera.setEnabled(False)
-            self.label_8.setEnabled(False)
-            self.CollectVideo.setEnabled(False)
-            self.RestartLogging.setEnabled(False)
-            self.StartCamera.setChecked(False)
-            index = self.CollectVideo.findText('Yes')
-            if index != -1:
-                self.CollectVideo.setCurrentIndex(index)
-        else:
-            #self.StartCamera.setEnabled(True)
-            self.label_8.setEnabled(True)
-            self.CollectVideo.setEnabled(True)
-            self.RestartLogging.setEnabled(True)
-            index = self.CollectVideo.findText('No')
-            if index != -1:
-                self.CollectVideo.setCurrentIndex(index)
+            self.StartRecording.setChecked(False)
             
     def _ClearTemporaryVideo(self):
         '''Clear temporary video files'''
@@ -1265,50 +1268,44 @@ class CameraDialog(QDialog):
         except Exception as e:
             logging.error(str(e))
 
-    def _StartCamera(self):
-        '''Start/stop the camera'''
+    def _StartCamera(self,start_type='recording'):
+        '''Start/stop the camera
+        parameters:
+            type: 'recording' or 'preview'
+
+        '''
         self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
-        if self.MainWindow.InitializeBonsaiSuccessfully==0:
-            self.MainWindow._ConnectBonsai()
-            if self.MainWindow.InitializeBonsaiSuccessfully==0:
-                return 
-        if self.StartCamera.isChecked():
-            self.StartCamera.setStyleSheet("background-color : green;")
-            if self.AutoControl.currentText()=='No':
-                # If the behavior start button is checked, set the CollectVideo to Yes.
-                if self.MainWindow.Start.isChecked():
-                    index=self.CollectVideo.findText('Yes')
-                    self.CollectVideo.setCurrentIndex(index)
-                # Do not restart logging when automatic control is "yes" as logging will start in behavior control
-                if self.CollectVideo.currentText()=='Yes':
-                    # Start logging if the formal logging is not started
-                    if self.MainWindow.loggingstarted!=0:
-                        self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
-                else:
-                    if self.MainWindow.loggingstarted!=1:
-                        # Start logging if the temporary logging is not started
-                        self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging(self.MainWindow.temporary_video_folder)
-            '''
-            # This part was dropped due to the new logging method
-            # save the video data
-            if self.CollectVideo.currentText()=='Yes':
-                Re=self._SaveVideoData()
-            if self.CollectVideo.currentText()=='No' or Re==False:
-                video_folder=self.MainWindow.video_folder
-                video_folder=os.path.join(video_folder,'Tmp')
-                if not os.path.exists(video_folder):
-                    os.makedirs(video_folder)
-                side_camera_file=os.path.join(video_folder,'side_camera.avi')
-                bottom_camera_file=os.path.join(video_folder,'bottom_camera.avi')
-                side_camera_csv=os.path.join(video_folder,'side_camera.csv')
-                bottom_camera_csv=os.path.join(video_folder,'bottom_camera.csv')
-                self.MainWindow.Channel.SideCameraFile(side_camera_file)
-                self.MainWindow.Channel.BottomCameraFile(bottom_camera_file)
-                self.MainWindow.Channel.SideCameraCSV(side_camera_csv)
-                self.MainWindow.Channel.BottomCameraCSV(bottom_camera_csv)
-            '''
+        if start_type=='recording':
+            widget_now=self.StartRecording
+            widget_other=self.StartPreview
+        else:
+            widget_now=self.StartPreview
+            widget_other=self.StartRecording
+
+        if widget_now.isChecked():
+            widget_now.setStyleSheet("background-color : green;")
+            self.WarningLabelCameraOn.setText('Camera is turning on')
+            self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
+            QApplication.processEvents()
+            if start_type=='recording':
+                # stop the preview first
+                if self.StartPreview.isChecked():
+                    self.StartPreview.setChecked(False)
+                    self._StartCamera(start_type='preview')   
+                # Start logging if the formal logging is not started
+                if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
+                    self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
+            if start_type=='preview':
+                # stop the recording first
+                if self.StartRecording.isChecked():
+                    self.StartRecording.setChecked(False)
+                    self._StartCamera(start_type='recording')
+                if self.MainWindow.logging_type!=1 or self.MainWindow.logging_type==-1:
+                    # Start logging if the temporary logging is not started
+                    self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging(self.MainWindow.temporary_video_folder)
+
             # set the camera frequency. It's better to set the frequency after the temporary logging. 
             self.MainWindow.Channel.CameraFrequency(int(self.FrameRate.text()))
             # start the video triggers
@@ -1323,7 +1320,10 @@ class CameraDialog(QDialog):
             self.WarningLabelLogging.setStyleSheet("color: None;")
             self.WarningLabelOpenSave.setText('')
         else:
-            self.StartCamera.setStyleSheet("background-color : none")
+            widget_now.setStyleSheet("background-color : none")
+            self.WarningLabelCameraOn.setText('Camera is turning off')
+            self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
+            QApplication.processEvents()
             self.MainWindow.Channel.CameraControl(int(2))
             self.camera_stop_time = str(datetime.now())
             time.sleep(5)
@@ -1334,7 +1334,12 @@ class CameraDialog(QDialog):
             self.WarningLabelLogging.setText('')
             self.WarningLabelLogging.setStyleSheet("color: None;")
             self.WarningLabelOpenSave.setText('')
-    
+            # clear temporary video files
+            if start_type=='preview':
+                # stop the logging
+                self.MainWindow._stop_logging()
+                self._ClearTemporaryVideo()
+
     def _SaveVideoData(self):
         '''Save the video data'''
         self.MainWindow._GetSaveFileName()
@@ -1648,7 +1653,11 @@ class LaserCalibrationDialog(QDialog):
         self.PulseDur_1.setText(self.MainWindow.Opto_dialog.__getattribute__("PulseDur_" + condition).text())
         self.LaserColor_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("LaserColor_" + condition).currentIndex())
         self.Location_1.setCurrentIndex(self.Location_1.findText(self.CopyLaser.currentText()))
-        self.Protocol_1.setCurrentIndex(self.MainWindow.Opto_dialog.__getattribute__("Protocol_" + condition).currentIndex())
+        if self.MainWindow.Opto_dialog.__getattribute__("Protocol_" + condition).currentText()=='Pulse':
+            ind=self.Protocol_1.findText('Constant')
+        else:
+            ind=self.MainWindow.Opto_dialog.__getattribute__("Protocol_" + condition).currentIndex()
+        self.Protocol_1.setCurrentIndex(ind)
         self.voltage.setText(str(eval(self.MainWindow.Opto_dialog.__getattribute__(f"Laser{copylaser}_power_{condition}").currentText())[0]))
         
 
