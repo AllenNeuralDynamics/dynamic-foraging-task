@@ -11,6 +11,7 @@ import harp
 import pandas as pd
 import threading
 import itertools
+import yaml
 from pathlib import Path
 from datetime import date, datetime
 
@@ -165,7 +166,7 @@ class Window(QMainWindow):
             '''
             self._ReconnectBonsai()   
         logging.info('Start up complete')
-    
+ 
     def _load_rig_metadata(self):
         '''Load the latest rig metadata'''
  
@@ -1042,6 +1043,12 @@ class Window(QMainWindow):
             'name_mapper_file':os.path.join(self.SettingFolder,"name_mapper.json"),
             'create_rig_metadata':True,
             'save_each_trial':True,
+            'AutomaticUpload':True,
+            'manifest_flag_dir':os.path.join(
+                os.path.expanduser("~"), 
+                "Documents",
+                'aind_watchdog_service',
+                'manifest')
         }
         
         # Try to load Settings_box#.csv
@@ -2490,11 +2497,11 @@ class Window(QMainWindow):
             self.SessionlistSpin.setEnabled(True)
             self.Sessionlist.setEnabled(True)
 
-            # Drop `finished` file with date/time
-            filepath = os.path.join(self.SessionFolder, 'finished') 
-            contents = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            with open(filepath, 'w') as finished_file:
-                finished_file.write(contents)
+            if self.Settings['AutomaticUpload']:
+                self._generate_upload_manifest() # Generate the upload manifest file
+            else:
+                logging.info('Skipping Automatic Upload based on ForagingSettings.json')
+
             if self.StartEphysRecording.isChecked():
                 QMessageBox.warning(self, '', 'Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!')
                 self.unsaved_data=True
@@ -2512,6 +2519,8 @@ class Window(QMainWindow):
         '''
         current_time = datetime.now()
         formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+        self.session_name = f'behavior_{self.ID.text()}_{formatted_datetime}'
+        self.acquisition_datetime = current_time.strftime("%Y-%m-%d %H:%M:%S")
         self.SessionFolder=os.path.join(self.default_saveFolder, 
             self.current_box,self.ID.text(), f'behavior_{self.ID.text()}_{formatted_datetime}')
 
@@ -2700,8 +2709,10 @@ class Window(QMainWindow):
                         'Fundee':['nan'],
                     }
                 self.Metadata_dialog.project_info = project_info
-                self.Metadata_dialog.ProjectName.addItems(['Behavior Platform'])
-                logging.info('Setting Project name: {}'.format('Behavior Platform'))
+                project_name = 'Behavior Platform'
+                self.Metadata_dialog.ProjectName.addItems([project_name])
+                logging.info('Setting Project name: {}'.format(project_name))
+        self.project_name = project_name
 
         self.keyPressEvent(allow_reset=True) 
     
@@ -4120,6 +4131,67 @@ class Window(QMainWindow):
                          '&session_plot_mode=all+sessions+filtered+from+sidebar'
                          '&session_plot_selected_draw_types=1.+Choice+history'
         )
+    
+    def _generate_upload_manifest(self,FIP=False):
+        '''
+            Generates a manifest.yml file for triggering data copy to VAST and upload to aws
+        '''
+        try: 
+            if not hasattr(self, 'project_name'):
+                self.project_name = 'Behavior Platform'
+            
+            if FIP: ## DEBUG, need to figure out how to set this flag.  
+                schedule = self.acquisition_datetime.split(' ')[0]+' 23:59:00'
+                capsule_id = 'c089614a-347e-4696-b17e-86980bb782c' 
+                mount = 'FIP' 
+            else:
+                schedule = self.acquisition_datetime.split(' ')[0]+' 23:59:00'
+                capsule_id = 'c089614a-347e-4696-b17e-86980bb782c' 
+                mount = 'FIP'
+ 
+            date_format = "%Y-%m-%d %H:%M:%S"
+            # Define contents of manifest file
+            contents = {
+                'acquisition_datetime': datetime.strptime(self.acquisition_datetime,date_format),
+                'name': self.session_name,
+                'platform': 'behavior',
+                'subject_id': int(self.ID.text()),
+                'capsule_id': capsule_id,
+                'mount':mount,
+                'destination': '//allen/aind/scratch/dynamic_foraging_rig_transfer',
+                's3_bucket':'private',
+                'processor_full_name': 'AIND Behavior Team',
+                'modalities':{
+                    'behavior':self.TrainingFolder.replace('\\','/'),
+                    'behavior-videos':self.VideoFolder.replace('\\','/'),
+                    'fib':self.PhotometryFolder.replace('\\','/')
+                    },
+                'schemas':[
+                    os.path.join(self.MetadataFolder,'session.json').replace('\\','/'),
+                    os.path.join(self.MetadataFolder,'rig.json').replace('\\','/')
+                    ],
+                'schedule_time':datetime.strptime(schedule,date_format),
+                'project_name':self.project_name,
+                'script': {}
+                }
+     
+            # Define filename of manifest
+            if not os.path.exists(self.Settings['manifest_flag_dir']):
+                os.makedirs(self.Settings['manifest_flag_dir'])
+            filename = os.path.join(
+                self.Settings['manifest_flag_dir'],
+                'manifest_{}.yml'.format(contents['name']))
+            
+            # Write the manifest file
+            with open(filename,'w') as yaml_file:
+                yaml.dump(contents, yaml_file, default_flow_style=False)
+
+        except Exception as e:
+            logging.error('Could not generate upload manifest: {}'.format(str(e)))
+            QMessageBox.critical(self, 'Upload manifest', 
+                'Could not generate upload manifest. '+\
+                'Please alert the mouse owner that this session will not be uploaded.')
+            
 
 def start_gui_log_file(box_number):
     '''
