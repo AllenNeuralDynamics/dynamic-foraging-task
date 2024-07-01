@@ -4143,11 +4143,11 @@ class Window(QMainWindow):
             if FIP: ## DEBUG, need to figure out how to set this flag.  
                 schedule = self.acquisition_datetime.split(' ')[0]+' 23:59:00'
                 capsule_id = 'c089614a-347e-4696-b17e-86980bb782c' 
-                mount = self.session_name 
+                mount = 'FIP' 
             else:
                 schedule = self.acquisition_datetime.split(' ')[0]+' 23:59:00'
                 capsule_id = 'c089614a-347e-4696-b17e-86980bb782c' 
-                mount = self.session_name
+                mount = 'FIP'
  
             # Define contents of manifest file
             contents = {
