@@ -4149,9 +4149,10 @@ class Window(QMainWindow):
                 capsule_id = 'c089614a-347e-4696-b17e-86980bb782c' 
                 mount = 'FIP'
  
+            date_format = "%Y-%m-%d %H:%M:%S"
             # Define contents of manifest file
             contents = {
-                'acquisition_datetime': self.acquisition_datetime,
+                'acquisition_datetime': datetime.strptime(self.acquisition_datetime,date_format),
                 'name': self.session_name,
                 'platform': 'behavior',
                 'subject_id': int(self.ID.text()),
@@ -4169,7 +4170,7 @@ class Window(QMainWindow):
                     os.path.join(self.MetadataFolder,'session.json').replace('\\','/'),
                     os.path.join(self.MetadataFolder,'rig.json').replace('\\','/')
                     ],
-                'schedule_time':schedule,
+                'schedule_time':datetime.strptime(schedule,date_format),
                 'project_name':self.project_name,
                 'script': {}
                 }
