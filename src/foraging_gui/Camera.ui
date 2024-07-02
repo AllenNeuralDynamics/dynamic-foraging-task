@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>261</width>
-    <height>448</height>
+    <width>269</width>
+    <height>476</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>23</x>
-     <y>260</y>
+     <y>220</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -38,13 +38,13 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QPushButton" name="StartCamera">
+  <widget class="QPushButton" name="StartRecording">
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>50</y>
+     <y>60</y>
      <width>80</width>
-     <height>20</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -54,7 +54,7 @@
     </sizepolicy>
    </property>
    <property name="text">
-    <string>Start</string>
+    <string>Start recording</string>
    </property>
    <property name="checkable">
     <bool>true</bool>
@@ -64,7 +64,7 @@
    <property name="geometry">
     <rect>
      <x>23</x>
-     <y>120</y>
+     <y>110</y>
      <width>91</width>
      <height>20</height>
     </rect>
@@ -89,7 +89,7 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>120</y>
+     <y>110</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -102,63 +102,6 @@
    </property>
    <property name="currentIndex">
     <number>1</number>
-   </property>
-   <item>
-    <property name="text">
-     <string>Yes</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>No</string>
-    </property>
-   </item>
-  </widget>
-  <widget class="QLabel" name="label_8">
-   <property name="geometry">
-    <rect>
-     <x>23</x>
-     <y>84</y>
-     <width>91</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="text">
-    <string>collect video=</string>
-   </property>
-   <property name="textFormat">
-    <enum>Qt::AutoText</enum>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="CollectVideo">
-   <property name="geometry">
-    <rect>
-     <x>120</x>
-     <y>84</y>
-     <width>80</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="currentIndex">
-    <number>1</number>
-   </property>
-   <property name="frame">
-    <bool>true</bool>
    </property>
    <item>
     <property name="text">
@@ -175,7 +118,7 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>260</y>
+     <y>220</y>
      <width>81</width>
      <height>22</height>
     </rect>
@@ -203,7 +146,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>360</y>
+     <y>380</y>
      <width>171</width>
      <height>51</height>
     </rect>
@@ -231,7 +174,7 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>156</y>
+     <y>146</y>
      <width>81</width>
      <height>20</height>
     </rect>
@@ -253,7 +196,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>370</y>
+     <y>390</y>
      <width>171</width>
      <height>51</height>
     </rect>
@@ -281,7 +224,7 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>190</y>
+     <y>180</y>
      <width>81</width>
      <height>21</height>
     </rect>
@@ -299,33 +242,11 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QPushButton" name="RestartLogging">
-   <property name="geometry">
-    <rect>
-     <x>120</x>
-     <y>225</y>
-     <width>81</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="text">
-    <string>Restart log</string>
-   </property>
-   <property name="checkable">
-    <bool>false</bool>
-   </property>
-  </widget>
   <widget class="QLabel" name="WarningLabelLogging">
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>320</y>
+     <y>340</y>
      <width>171</width>
      <height>51</height>
     </rect>
@@ -353,7 +274,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>330</y>
+     <y>350</y>
      <width>171</width>
      <height>51</height>
     </rect>
@@ -375,6 +296,28 @@
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="StartPreview">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>20</y>
+     <width>80</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="text">
+    <string>Preview</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
    </property>
   </widget>
  </widget>
