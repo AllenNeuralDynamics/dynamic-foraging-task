@@ -11,4 +11,4 @@ jobs:
      with:
        default_branch: main # optional, default: main
      secrets:
-       SERVICE_TOKEN: ${{ secrets.GITHUB_TOKEN }} # required
+       SERVICE_TOKEN: ${{ secrets.SERVICE_TOKEN }} # required
