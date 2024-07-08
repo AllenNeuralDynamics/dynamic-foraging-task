@@ -400,11 +400,14 @@ class generate_metadata:
             self.trials_total=0
             self.trials_finished=0
             self.trials_rewarded=0
+            self.total_reward=0
         else:
             self.trials_total=len(self.Obj['B_AnimalResponseHistory'])
             self.trials_finished=np.count_nonzero(self.Obj['B_AnimalResponseHistory']!=2)
             self.trials_rewarded=np.count_nonzero(np.logical_or(self.Obj['B_RewardedHistory'][0],self.Obj['B_RewardedHistory'][1]))
+            self.total_reward=float(self.Obj['BS_TotalReward'])
 
+    
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
         Initialize fields
@@ -455,7 +458,7 @@ class generate_metadata:
             "rig_id": self.Obj['meta_data_dialog']['rig_metadata']['rig_id'],
             "notes": self.Obj['ShowNotes'],
             "weight_unit": "gram",
-            "reward_consumed_total": float(self.Obj['BS_TotalReward']),
+            "reward_consumed_total": self.total_reward,
             "reward_consumed_unit": "microliter",
             "calibrations": self.calibration,
             "data_streams": self.data_streams,
