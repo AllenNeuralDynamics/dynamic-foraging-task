@@ -2527,10 +2527,10 @@
     <widget class="QLabel" name="label_31">
      <property name="geometry">
       <rect>
-       <x>232</x>
-       <y>13</y>
-       <width>141</width>
-       <height>23</height>
+       <x>310</x>
+       <y>0</y>
+       <width>81</width>
+       <height>61</height>
       </rect>
      </property>
      <property name="sizePolicy">
@@ -2540,7 +2540,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>add one trial </string>
+      <string>add one trial for no response </string>
      </property>
      <property name="textFormat">
       <enum>Qt::AutoText</enum>
@@ -2548,30 +2548,8 @@
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
-    </widget>
-    <widget class="QLabel" name="label_32">
-     <property name="geometry">
-      <rect>
-       <x>250</x>
-       <y>26</y>
-       <width>141</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>for noresponse=</string>
-     </property>
-     <property name="textFormat">
-      <enum>Qt::AutoText</enum>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     <property name="wordWrap">
+      <bool>true</bool>
      </property>
     </widget>
    </widget>
