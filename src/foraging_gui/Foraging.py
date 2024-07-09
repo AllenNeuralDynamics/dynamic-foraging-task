@@ -2303,7 +2303,7 @@ class Window(QMainWindow):
         if hasattr(self, 'GeneratedTrials') and self.InitializeBonsaiSuccessfully==1:
             self.GeneratedTrials._get_irregular_timestamp(self.Channel2)
         
-        # Create new folders
+        # Create new folders. 
         if self.CreateNewFolder==1:
             self._GetSaveFolder()
             self.CreateNewFolder=0
@@ -2326,9 +2326,10 @@ class Window(QMainWindow):
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
                 return
 
-
         # Do we have trials to save?
-        if hasattr(self, 'GeneratedTrials'):
+        if self.load_tag==1:
+            Obj=self.Obj
+        elif hasattr(self, 'GeneratedTrials'):
             if hasattr(self.GeneratedTrials, 'Obj'):
                 Obj=self.GeneratedTrials.Obj
             else:
@@ -2511,12 +2512,15 @@ class Window(QMainWindow):
             photometry data
             ephys data
         '''
-        current_time = datetime.now()
-        formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+        if self.load_tag==0:
+            current_time = datetime.now()
+            formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+        else:
+            formatted_datetime=self.fname.split('_')[-2]+'_'+self.fname.split('_')[-1].split('.')[0]
+        
+        # Determine folders
         self.SessionFolder=os.path.join(self.default_saveFolder, 
             self.current_box,self.ID.text(), f'behavior_{self.ID.text()}_{formatted_datetime}')
-
-        # Training folder
         self.TrainingFolder=os.path.join(self.SessionFolder,'behavior')
         self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
         self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
@@ -2533,6 +2537,7 @@ class Window(QMainWindow):
         
         # Metadata folder
         self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
+        
 
         # create folders
         if not os.path.exists(self.SessionFolder):
@@ -3450,7 +3455,7 @@ class Window(QMainWindow):
         '''start trial loop'''
         # set the load tag to zero
         self.load_tag=0
-        
+
         # empty post weight
         self.WeightAfter.setText('')
 
