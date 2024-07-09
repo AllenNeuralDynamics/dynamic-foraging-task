@@ -1604,10 +1604,10 @@ class GenerateTrials():
                     if self.TP_AddOneTrialForNoresponse=='Yes':
                         if self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']:
                             for i, side in enumerate(['L', 'R']):
-                                self.uncoupled_blocks.block_ends[side][-1] += 1
+                                self.uncoupled_blocks.block_ends[side][-1] = self.uncoupled_blocks.block_ends[side][-1]+1
                         elif self.TP_Task in ['Coupled Baiting','Coupled Without Baiting']:
                             for i, side in enumerate(['L', 'R']):
-                                self.BlockLenHistory[i][-1] += 1
+                                self.BlockLenHistory[i][-1] = self.BlockLenHistory[i][-1]+1
                 elif TrialOutcome=='RewardLeft':
                     self.B_AnimalCurrentResponse=0
                     self.B_Baited[0]=False
