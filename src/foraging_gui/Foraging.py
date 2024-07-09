@@ -134,6 +134,7 @@ class Window(QMainWindow):
         self.give_right_volume_reserved=0 # the reserved volume of the right valve (usually given after go cue)
         self.give_left_time_reserved=0 # the reserved open time of the left valve (usually given after go cue)
         self.give_right_time_reserved=0 # the reserved open time of the right valve (usually given after go cue)
+        self.load_tag=0 # 1, a session has been loaded; 0, no session has been loaded
         self._Optogenetics()    # open the optogenetics panel 
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
@@ -2298,7 +2299,7 @@ class Window(QMainWindow):
             self._StartExcitation()
             logging.info('Stopping excitation before saving')
 
-        # this should be improved in the future. Need to get the last LeftRewardDeliveryTime and RightRewardDeliveryTime
+        # get iregular timestamp
         if hasattr(self, 'GeneratedTrials') and self.InitializeBonsaiSuccessfully==1:
             self.GeneratedTrials._get_irregular_timestamp(self.Channel2)
         
@@ -2953,6 +2954,7 @@ class Window(QMainWindow):
             self.NewSession.setDisabled(False)
         self.StartExcitation.setChecked(False)
         self.keyPressEvent() # Accept all updates
+        self.load_tag=1
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
@@ -3446,6 +3448,9 @@ class Window(QMainWindow):
 
     def _Start(self):
         '''start trial loop'''
+        # set the load tag to zero
+        self.load_tag=0
+        
         # empty post weight
         self.WeightAfter.setText('')
 
