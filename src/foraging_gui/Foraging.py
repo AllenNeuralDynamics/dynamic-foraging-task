@@ -2307,6 +2307,7 @@ class Window(QMainWindow):
         if self.CreateNewFolder==1:
             self._GetSaveFolder()
             self.CreateNewFolder=0
+            
         if not os.path.exists(os.path.dirname(self.SaveFileJson)):
             os.makedirs(os.path.dirname(self.SaveFileJson))
             logging.info(f"Created new folder: {os.path.dirname(self.SaveFileJson)}")
@@ -2336,89 +2337,124 @@ class Window(QMainWindow):
                 Obj={}
         else:
             Obj={}
-        widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren(
-            (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
-            QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-        widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
-        self._Concat(widget_dict,Obj,'None')
-        dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','Metadata_dialog']
-        for dialog_name in dialogs:
-            if hasattr(self, dialog_name):
-                widget_dict = {w.objectName(): w for w in getattr(self, dialog_name).findChildren(
-                    (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
-                    QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox))}
-                self._Concat(widget_dict, Obj, dialog_name)
-        
-        Obj2=Obj.copy()
-        # save behavor events
-        if hasattr(self, 'GeneratedTrials'):
-            # Do something if self has the GeneratedTrials attribute
-            # Iterate over all attributes of the GeneratedTrials object
-            for attr_name in dir(self.GeneratedTrials):
-                if attr_name.startswith('B_') or attr_name.startswith('BS_'):
-                    if attr_name=='B_RewardFamilies' and self.SaveFile.endswith('.mat'):
-                        pass
-                    else:
-                        Value=getattr(self.GeneratedTrials, attr_name)
-                        try:
-                            if isinstance(Value, float) or isinstance(Value, int):                                
-                                if math.isnan(Value):
-                                    Obj[attr_name]='nan'    
+
+        if self.load_tag==0:
+            widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren(
+                (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+                QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+            widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
+            self._Concat(widget_dict,Obj,'None')
+            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','Metadata_dialog']
+            for dialog_name in dialogs:
+                if hasattr(self, dialog_name):
+                    widget_dict = {w.objectName(): w for w in getattr(self, dialog_name).findChildren(
+                        (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+                        QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox))}
+                    self._Concat(widget_dict, Obj, dialog_name)
+            Obj2=Obj.copy()
+            # save behavor events
+            if hasattr(self, 'GeneratedTrials'):
+                # Do something if self has the GeneratedTrials attribute
+                # Iterate over all attributes of the GeneratedTrials object
+                for attr_name in dir(self.GeneratedTrials):
+                    if attr_name.startswith('B_') or attr_name.startswith('BS_'):
+                        if attr_name=='B_RewardFamilies' and self.SaveFile.endswith('.mat'):
+                            pass
+                        else:
+                            Value=getattr(self.GeneratedTrials, attr_name)
+                            try:
+                                if isinstance(Value, float) or isinstance(Value, int):                                
+                                    if math.isnan(Value):
+                                        Obj[attr_name]='nan'    
+                                    else:
+                                        Obj[attr_name]=Value   
                                 else:
-                                    Obj[attr_name]=Value   
-                            else:
-                                Obj[attr_name]=Value        
-                        except Exception as e:
-                            logging.info(f'{attr_name} is not a real scalar, save it as it is.')
-                            Obj[attr_name]=Value
-        # save other events, e.g. session start time
-        for attr_name in dir(self):
-            if attr_name.startswith('Other_') or attr_name.startswith('info_'):
-                Obj[attr_name] = getattr(self, attr_name)
-        # save laser calibration results (only for the calibration session)
-        if hasattr(self, 'LaserCalibration_dialog'):
-            # Do something if self has the GeneratedTrials attribute
-            # Iterate over all attributes of the GeneratedTrials object
-            for attr_name in dir(self.LaserCalibration_dialog):
-                if attr_name.startswith('LCM_'):
-                    Obj[attr_name] = getattr(self.LaserCalibration_dialog, attr_name)
+                                    Obj[attr_name]=Value        
+                            except Exception as e:
+                                logging.info(f'{attr_name} is not a real scalar, save it as it is.')
+                                Obj[attr_name]=Value
+            # save other events, e.g. session start time
+            for attr_name in dir(self):
+                if attr_name.startswith('Other_') or attr_name.startswith('info_'):
+                    Obj[attr_name] = getattr(self, attr_name)
+            # save laser calibration results (only for the calibration session)
+            if hasattr(self, 'LaserCalibration_dialog'):
+                # Do something if self has the GeneratedTrials attribute
+                # Iterate over all attributes of the GeneratedTrials object
+                for attr_name in dir(self.LaserCalibration_dialog):
+                    if attr_name.startswith('LCM_'):
+                        Obj[attr_name] = getattr(self.LaserCalibration_dialog, attr_name)
 
-        # save laser calibration results from the json file
-        if hasattr(self, 'LaserCalibrationResults'):
-            self._GetLaserCalibration()
-            Obj['LaserCalibrationResults']=self.LaserCalibrationResults
+            # save laser calibration results from the json file
+            if hasattr(self, 'LaserCalibrationResults'):
+                self._GetLaserCalibration()
+                Obj['LaserCalibrationResults']=self.LaserCalibrationResults
 
-        # save water calibration results
-        if hasattr(self, 'WaterCalibrationResults'):
-            self._GetWaterCalibration()
-            Obj['WaterCalibrationResults']=self.WaterCalibrationResults
-        
-        # save other fields start with Ot_
-        for attr_name in dir(self):
-            if attr_name.startswith('Ot_'):
-                Obj[attr_name]=getattr(self, attr_name)
-        
-        if hasattr(self, 'fiber_photometry_start_time'):
-            Obj['fiber_photometry_start_time'] = self.fiber_photometry_start_time
-            if hasattr(self, 'fiber_photometry_end_time'):
-                end_time = self.fiber_photometry_end_time
-            else:
-                end_time = str(datetime.now())
-            Obj['fiber_photometry_end_time'] = end_time
+            # save water calibration results
+            if hasattr(self, 'WaterCalibrationResults'):
+                self._GetWaterCalibration()
+                Obj['WaterCalibrationResults']=self.WaterCalibrationResults
+            
+            # save other fields start with Ot_
+            for attr_name in dir(self):
+                if attr_name.startswith('Ot_'):
+                    Obj[attr_name]=getattr(self, attr_name)
+            
+            if hasattr(self, 'fiber_photometry_start_time'):
+                Obj['fiber_photometry_start_time'] = self.fiber_photometry_start_time
+                if hasattr(self, 'fiber_photometry_end_time'):
+                    end_time = self.fiber_photometry_end_time
+                else:
+                    end_time = str(datetime.now())
+                Obj['fiber_photometry_end_time'] = end_time
 
-        # Save the current box
-        Obj['box'] = self.current_box
+            # Save the current box
+            Obj['box'] = self.current_box
 
-        # save settings
-        Obj['settings'] = self.Settings
-        Obj['settings_box']=self.SettingsBox
+            # save settings
+            Obj['settings'] = self.Settings
+            Obj['settings_box']=self.SettingsBox
 
-        # save the commit hash
-        Obj['commit_ID']=self.commit_ID
-        Obj['repo_url']=self.repo_url
-        Obj['current_branch'] =self.current_branch
-        Obj['repo_dirty_flag'] =self.repo_dirty_flag
-        Obj['dirty_files'] =self.dirty_files
+            # save the commit hash
+            Obj['commit_ID']=self.commit_ID
+            Obj['repo_url']=self.repo_url
+            Obj['current_branch'] =self.current_branch
+            Obj['repo_dirty_flag'] =self.repo_dirty_flag
+            Obj['dirty_files'] =self.dirty_files
+            
+            # save the open ephys recording information
+            Obj['open_ephys'] = self.open_ephys
+            
+            if SaveContinue==0:
+                # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
+                self.unsaved_data=False 
+                self._NewSession()
+                self.unsaved_data=True
+                # do not create a new folder
+                self.CreateNewFolder=0
+
+            if BackupSave==0:
+                self._check_drop_frames(save_tag=1)
+                
+                # save drop frames information
+                Obj['drop_frames_tag']=self.drop_frames_tag
+                Obj['trigger_length']=self.trigger_length
+                Obj['drop_frames_warning_text']=self.drop_frames_warning_text
+                Obj['frame_num']=self.frame_num
+
+            # save manual water 
+            Obj['ManualWaterVolume']=self.ManualWaterVolume
+
+            # save camera start/stop time
+            Obj['Camera_dialog']['camera_start_time']=self.Camera_dialog.camera_start_time
+            Obj['Camera_dialog']['camera_stop_time']=self.Camera_dialog.camera_stop_time
+
+            # save the metadata collected in the metadata dialogue
+            self.Metadata_dialog._save_metadata_dialog_parameters()
+            Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
+
+            # save the saving type (normal saving, backup saving or force saving)
+            Obj['saving_type_label'] = saving_type_label
         
         # save folders
         Obj['TrainingFolder']=self.TrainingFolder
@@ -2426,40 +2462,6 @@ class Window(QMainWindow):
         Obj['VideoFolder']=self.VideoFolder
         Obj['PhotometryFolder']=self.PhotometryFolder
         Obj['MetadataFolder']=self.MetadataFolder
-        
-        # save the open ephys recording information
-        Obj['open_ephys'] = self.open_ephys
-        
-        if SaveContinue==0:
-            # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
-            self.unsaved_data=False 
-            self._NewSession()
-            self.unsaved_data=True
-            # do not create a new folder
-            self.CreateNewFolder=0
-
-        if BackupSave==0:
-            self._check_drop_frames(save_tag=1)
-            
-            # save drop frames information
-            Obj['drop_frames_tag']=self.drop_frames_tag
-            Obj['trigger_length']=self.trigger_length
-            Obj['drop_frames_warning_text']=self.drop_frames_warning_text
-            Obj['frame_num']=self.frame_num
-
-        # save manual water 
-        Obj['ManualWaterVolume']=self.ManualWaterVolume
-
-        # save camera start/stop time
-        Obj['Camera_dialog']['camera_start_time']=self.Camera_dialog.camera_start_time
-        Obj['Camera_dialog']['camera_stop_time']=self.Camera_dialog.camera_stop_time
-
-        # save the metadata collected in the metadata dialogue
-        self.Metadata_dialog._save_metadata_dialog_parameters()
-        Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
-
-        # save the saving type (normal saving, backup saving or force saving)
-        Obj['saving_type_label'] = saving_type_label
 
         # generate the metadata file
         try:
@@ -2472,7 +2474,7 @@ class Window(QMainWindow):
         if self.SaveFile.endswith('.mat'):
         # Save data to a .mat file
             savemat(self.SaveFile, Obj) 
-        elif self.SaveFile.endswith('par.json'):
+        elif self.SaveFile.endswith('par.json') and self.load_tag==0:
             with open(self.SaveFile, "w") as outfile:
                 json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
         elif self.SaveFile.endswith('.json'):
