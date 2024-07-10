@@ -425,6 +425,7 @@ class generate_metadata:
         if 'rig_metadata' not in self.Obj['meta_data_dialog']:
             self.Obj['meta_data_dialog']['rig_metadata'] = {}
             logging.info('Missing rig metadata for session metadata')
+            return 1
 
         # Missing field 'rig_metadata_file' and 'MetadataFolder' in the json file.
         # Possible reason: 1) Old version of the software. 2) the rig metadata is not provided.
