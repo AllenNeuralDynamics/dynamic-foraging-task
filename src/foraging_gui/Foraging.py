@@ -2580,7 +2580,10 @@ class Window(QMainWindow):
             self.HarpFolder=os.path.join(self.TrainingFolder, 'raw.harp')
             self.VideoFolder=os.path.join(self.SessionFolder, 'behavior-videos')
             self.PhotometryFolder=os.path.join(self.SessionFolder, 'fib')
-            
+        formatted_datetime = os.path.basename(self.fname).split('_')[-1].split('.')[0]
+        self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
+        self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
+        self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}_par.json')
     def _Concat(self,widget_dict,Obj,keyname):
         '''Help manage save different dialogs'''
         if keyname=='None':
