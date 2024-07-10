@@ -883,7 +883,7 @@ class generate_metadata:
         commit_ID, current_branch, repo_url, repo_dirty_flag, dirty_files, version = log_git_hash()
         self.behavior_software.append(Software(
             name='dynamic-foraging-task',
-            version=f'behavior branch:{self.Obj["current_branch"]}   commit ID:{self.Obj["commit_ID"]}    version:{self.Obj['version']}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{version}',
+            version=f'behavior branch:{self.Obj["current_branch"]}   commit ID:{self.Obj["commit_ID"]}    version:{self.Obj["version"]}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{version}',
             url=self.Obj["repo_url"],
         ))
         
