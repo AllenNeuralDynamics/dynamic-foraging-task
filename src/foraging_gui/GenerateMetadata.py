@@ -66,6 +66,9 @@ class generate_metadata:
     '''
     def __init__(self, json_file=None, Obj=None, dialog_metadata_file=None,dialog_metadata=None, output_folder=None):
         
+        if Obj is None:
+            self._set_metadata_logging()
+
         if json_file is None and Obj is None:
             logging.info("json file or Obj is not provided")
             return
@@ -75,7 +78,7 @@ class generate_metadata:
                 self.Obj = json.load(f)
         else:
             self.Obj = Obj
-
+        
         if dialog_metadata_file is not None:
             with open(dialog_metadata_file) as f:
                 self.Obj['meta_data_dialog'] = json.load(f)
@@ -86,8 +89,7 @@ class generate_metadata:
             self.output_folder = output_folder
         else:
             if 'MetadataFolder' not in self.Obj:
-                logging.info("MetadataFolder is not provided")
-                return
+                logging.info("MetadataFolder is not provided, use the default metadata folder")
             self._get_metadata_folder(json_file)
 
         return_tag=self._handle_edge_cases()
@@ -164,6 +166,42 @@ class generate_metadata:
         if hasattr(self,'name_mapper_external'):
             for key in self.name_mapper_external:
                 self.name_mapper[key] = self.name_mapper_external[key]
+
+    def _set_metadata_logging(self):
+        '''
+        Set the logging for the metadata generation. Don't use the behavior GUI logger. 
+        '''
+        # Check if the log folder exists, if it doesn't make it
+        logging_folder = os.path.join(os.path.expanduser("~"), "Documents",'foraging_metadata_logs')
+        if not os.path.exists(logging_folder):
+            os.makedirs(logging_folder)
+
+        # Determine name of this log file
+        # Get current time. Generate one log file per day.
+        current_time = datetime.now()
+        formatted_datetime = current_time.strftime("%Y-%m-%d")
+
+        # Build logfile name
+        filename = '{}_metadata_log.txt'.format(formatted_datetime)
+        logging_filename = os.path.join(logging_folder,filename)
+
+        # Format the log file:
+        log_format = '%(asctime)s:%(levelname)s:%(module)s:%(filename)s:%(funcName)s:line %(lineno)d:%(message)s'
+        log_datefmt = '%I:%M:%S %p'
+
+        # Start the log file
+        print('Starting a GUI log file at: ')
+        print(logging_filename)
+        logging.basicConfig(
+            format=log_format,
+            level=logging.INFO,
+            datefmt=log_datefmt,
+            handlers=[
+                logging.FileHandler(logging_filename),
+            ]
+        )
+        logging.info('Starting logfile!')
+        logging.captureWarnings(True)
 
     def _get_metadata_folder(self,json_file):
         '''
@@ -1135,5 +1173,5 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    generate_metadata(json_file=r'Y:\706893\behavior_706893_2024-06-27_16-21-41\behavior\706893_2024-06-27_16-21-41.json')
+    generate_metadata(json_file=r'Y:\689515\689515_2024-02-02_17-21-30\TrainingFolder\689515_2024-02-02_17-21-30.json')
     #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
