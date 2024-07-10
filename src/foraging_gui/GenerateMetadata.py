@@ -932,7 +932,14 @@ class generate_metadata:
                             elif Protocol=='Constant':
                                 voltage=[]
                                 power=[]
-                                for i in range(len(RecentLaserCalibration[color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
+                                if f"Laser_{laser_tag}" in RecentLaserCalibration[color][Protocol]:
+                                    current_calibration=RecentLaserCalibration[color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage']
+                                else:
+                                    if laser_tag==1:
+                                        current_calibration=RecentLaserCalibration[color][Protocol]["Left"]['LaserPowerVoltage']
+                                    elif laser_tag==2:
+                                        current_calibration=RecentLaserCalibration[color][Protocol]["Right"]['LaserPowerVoltage']
+                                for i in range(len(current_calibration)):
                                     laser_voltage_power=eval(str(RecentLaserCalibration[color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
                                     voltage.append(laser_voltage_power[0])
                                     power.append(laser_voltage_power[1])
