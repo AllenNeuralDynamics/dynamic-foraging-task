@@ -962,6 +962,8 @@ class generate_metadata:
         '''
         self.behavior_software=[]
         try:
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            os.chdir(script_dir)  # Change to the directory of the current script
             # Get information about task repository
             commit_ID = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
             current_branch = subprocess.check_output(['git','branch','--show-current']).decode('ascii').strip()
@@ -1194,5 +1196,5 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    generate_metadata(json_file=r'Z:\svc_aind_behavior_transfer\447-2-D\713855\behavior_713855_2024-05-31_14-36-04\behavior\713855_2024-05-31_14-36-04.json')
+    generate_metadata(json_file=r'Z:\svc_aind_behavior_transfer\447-2-D\713855\behavior_713855_2024-06-04_14-11-37\behavior\713855_2024-06-04_14-11-37.json')
     #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
