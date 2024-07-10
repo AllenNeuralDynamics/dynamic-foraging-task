@@ -83,7 +83,9 @@ class generate_metadata:
         if output_folder is not None:
             self.Obj['MetadataFolder'] = output_folder
 
-        self._handle_edge_cases()
+        return_tag=self._handle_edge_cases()
+        if return_tag==1:
+            return
         self._save_rig_metadata()
         self.Obj['session_metadata']= {}
         self._mapper()
@@ -288,6 +290,13 @@ class generate_metadata:
         '''
         handle edge cases (e.g. missing keys in the json file)
         '''
+        # Missing field 'meta_data_dialog' in the json file.
+        # Possible reason: 1) Old version of the software.
+        if 'meta_data_dialog' not in self.Obj:
+            self.Obj['meta_data_dialog'] = {}
+            logging.info('Missing metadata dialog for session metadata')
+            return 1
+        
         # Missing fields camera_start_time and camera_stop_time in the Camera_dialog. 
         # Possible reason: 1) the camera is not used in the session. 2 ) the camera is used but the start and end time are not recorded for old version of the software.
         self._initialize_fields(dic=self.Obj['Camera_dialog'],keys=['camera_start_time','camera_stop_time'],default_value='')
@@ -340,12 +349,6 @@ class generate_metadata:
         if 'settings_box' not in self.Obj:
             self.Obj['settings_box'] = {}
             logging.info('Missing settings_box.csv file for session metadata')
-
-        # Missing field 'meta_data_dialog' in the json file.
-        # Possible reason: 1) Old version of the software.
-        if 'meta_data_dialog' not in self.Obj:
-            self.Obj['meta_data_dialog'] = {}
-            logging.info('Missing metadata dialog for session metadata')
 
         # Missing field 'rig_metadata' in the json file.
         # Possible reason: 1) Old version of the software. 2) the rig metadata is not provided.
