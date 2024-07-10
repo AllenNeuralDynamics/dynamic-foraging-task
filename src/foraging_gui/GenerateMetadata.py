@@ -83,7 +83,12 @@ class generate_metadata:
             self.Obj['meta_data_dialog'] = dialog_metadata
         
         if output_folder is not None:
-            self.Obj['MetadataFolder'] = output_folder
+            self.output_folder = output_folder
+        else:
+            if 'MetadataFolder' not in self.Obj:
+                logging.info("MetadataFolder is not provided")
+                return
+            self._get_metadata_folder(json_file)
 
         return_tag=self._handle_edge_cases()
         if return_tag==1:
@@ -160,6 +165,16 @@ class generate_metadata:
             for key in self.name_mapper_external:
                 self.name_mapper[key] = self.name_mapper_external[key]
 
+    def _get_metadata_folder(self,json_file):
+        '''
+        Get the metadata folder
+        '''
+        session_folder = os.path.dirname(os.path.dirname(json_file))
+        metadata_folder=os.path.join(session_folder, 'metadata-dir')
+        self.output_folder=metadata_folder
+        if not os.path.exists(metadata_folder):
+            os.makedirs(metadata_folder)
+
     def _get_lick_spouts_distance(self):
         ''' 
         get the distance between the two lick spouts in um
@@ -208,7 +223,7 @@ class generate_metadata:
             platform= self.platform,
             subject_id=self.Obj['ID'],
         )
-        description.write_standard_file(output_directory=self.Obj['MetadataFolder'])
+        description.write_standard_file(output_directory=self.output_folder)
 
     def _get_funding_source(self):
         '''
@@ -280,11 +295,11 @@ class generate_metadata:
         '''
         Save the rig metadata to the MetadataFolder
         '''
-        if self.Obj['meta_data_dialog']['rig_metadata_file']=='' or self.Obj['MetadataFolder']=='':
+        if self.Obj['meta_data_dialog']['rig_metadata_file']=='' or self.output_folder=='':
             return
 
         # save copy as rig.json
-        rig_metadata_full_path=os.path.join(self.Obj['MetadataFolder'],'rig.json') 
+        rig_metadata_full_path=os.path.join(self.output_folder,'rig.json') 
         with open(rig_metadata_full_path, 'w') as f:
             json.dump(self.Obj['meta_data_dialog']['rig_metadata'], f, indent=4)
 
@@ -495,7 +510,7 @@ class generate_metadata:
             session_params["animal_weight_post"]=float(self.Obj['WeightAfter'])
 
         session = Session(**session_params)
-        session.write_standard_file(output_directory=self.Obj['MetadataFolder'])
+        session.write_standard_file(output_directory=self.output_folder)
 
     def _get_high_speed_camera_stream(self):
         '''
@@ -1120,5 +1135,5 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    generate_metadata(json_file=r'Y:\715083\behavior_715083_2024-04-26_17-12-15\behavior\715083_2024-04-26_17-12-15.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-13_12-38-51_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
+    generate_metadata(json_file=r'Y:\706893\behavior_706893_2024-06-27_16-21-41\behavior\706893_2024-06-27_16-21-41.json')
     #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
