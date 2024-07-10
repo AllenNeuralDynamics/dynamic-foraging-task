@@ -1070,7 +1070,7 @@ class generate_metadata:
             return
 
         device_oringin=self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceArea']
-        lick_spouts_distance=self.Obj['Other_lick_spout_distance']
+        lick_spouts_distance=float(self.Obj['Other_lick_spout_distance'])
         # using the last position of the stage
         start_position=[self.Obj['B_NewscalePositions'][-1][0], self.Obj['B_NewscalePositions'][-1][1], self.Obj['B_NewscalePositions'][-1][2]]
 
