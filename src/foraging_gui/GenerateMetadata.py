@@ -405,12 +405,12 @@ class generate_metadata:
             self.trials_rewarded=0
             self.total_reward=0
         else:
+            self.Obj['B_AnimalResponseHistory']=np.array(self.Obj['B_AnimalResponseHistory'])
             self.trials_total=len(self.Obj['B_AnimalResponseHistory'])
             self.trials_finished=np.count_nonzero(self.Obj['B_AnimalResponseHistory']!=2)
             self.trials_rewarded=np.count_nonzero(np.logical_or(self.Obj['B_RewardedHistory'][0],self.Obj['B_RewardedHistory'][1]))
             self.total_reward=float(self.Obj['BS_TotalReward'])
 
-    
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
         Initialize fields
