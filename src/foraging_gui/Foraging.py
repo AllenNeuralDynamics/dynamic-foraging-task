@@ -2469,17 +2469,19 @@ class Window(QMainWindow):
         except Exception as e:
             self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved succuessfully!')
             logging.error('Error generating session metadata: '+str(e))
-
-        # save Json or mat
-        if self.SaveFile.endswith('.mat'):
-        # Save data to a .mat file
-            savemat(self.SaveFile, Obj) 
-        elif self.SaveFile.endswith('par.json') and self.load_tag==0:
-            with open(self.SaveFile, "w") as outfile:
-                json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
-        elif self.SaveFile.endswith('.json'):
-            with open(self.SaveFile, "w") as outfile:
-                json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
+        
+        # don't save the data if the load tag is 1
+        if self.load_tag==0:
+            # save Json or mat
+            if self.SaveFile.endswith('.mat'):
+            # Save data to a .mat file
+                savemat(self.SaveFile, Obj) 
+            elif self.SaveFile.endswith('par.json') and self.load_tag==0:
+                with open(self.SaveFile, "w") as outfile:
+                    json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
+            elif self.SaveFile.endswith('.json'):
+                with open(self.SaveFile, "w") as outfile:
+                    json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
 
         # Toggle unsaved data to False
         if BackupSave==0:
