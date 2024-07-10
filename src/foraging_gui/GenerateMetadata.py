@@ -7,6 +7,7 @@ import numpy as np
 
 import foraging_gui
 from foraging_gui.Visualization import PlotWaterCalibration
+from foraging_gui.Foraging import log_git_hash
 from aind_data_schema.components.stimulus import AuditoryStimulation
 from aind_data_schema.components.devices import SpoutSide,Calibration
 from aind_data_schema_models.units import SizeUnit,FrequencyUnit,SoundIntensityUnit,PowerUnit
@@ -873,9 +874,10 @@ class generate_metadata:
         get the behavior software version information
         '''
         self.behavior_software=[]
+        commit_ID, current_branch, repo_url, repo_dirty_flag, dirty_files = log_git_hash()
         self.behavior_software.append(Software(
             name='dynamic-foraging-task',
-            version=f'branch:{self.Obj["current_branch"]}   commit ID:{self.Obj["commit_ID"]}   version:{foraging_gui.__version__}',
+            version=f'behavior branch:{self.Obj["current_branch"]}   commit ID:{self.Obj["commit_ID"]}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{foraging_gui.__version__}',
             url=self.Obj["repo_url"],
         ))
         
