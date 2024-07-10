@@ -2470,6 +2470,7 @@ class Window(QMainWindow):
         except Exception as e:
             self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved succuessfully!')
             logging.error('Error generating session metadata: '+str(e))
+            logging.error(traceback.format_exc())
         
         # don't save the data if the load tag is 1
         if self.load_tag==0:
