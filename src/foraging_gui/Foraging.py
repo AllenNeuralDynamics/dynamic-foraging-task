@@ -2454,11 +2454,13 @@ class Window(QMainWindow):
             Obj['saving_type_label'] = saving_type_label
         
         # save folders
+        Obj['SessionFolder']=self.SessionFolder
         Obj['TrainingFolder']=self.TrainingFolder
         Obj['HarpFolder']=self.HarpFolder
         Obj['VideoFolder']=self.VideoFolder
         Obj['PhotometryFolder']=self.PhotometryFolder
         Obj['MetadataFolder']=self.MetadataFolder
+        Obj['SaveFile']=self.SaveFile
 
         # generate the metadata file
         try:
