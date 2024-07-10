@@ -93,15 +93,12 @@ class generate_metadata:
         
         if output_folder is not None:
             self.output_folder = output_folder
-        elif 'MetadataFolder' not in self.Obj:
-            logging.info("MetadataFolder is not provided, use the default metadata folder")
-            if json_file is not None:
-                self._get_metadata_folder(json_file)
-            else:
-                logging.error("MetadataFolder is not determined!")
-                return
-        else:
+        elif json_file is not None:
+            self._get_metadata_folder(json_file)
+        elif 'MetadataFolder' in self.Obj:
             self.output_folder = self.Obj['MetadataFolder']
+        else:
+            logging.info("MetadataFolder is not determined")
 
         return_tag=self._handle_edge_cases()
         if return_tag==1:
