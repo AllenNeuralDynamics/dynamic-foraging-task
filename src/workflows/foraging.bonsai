@@ -1529,7 +1529,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Disabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM7</harp:PortName>
+                      <harp:PortName>COM11</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject">
@@ -1554,7 +1554,7 @@
                   <Expression xsi:type="p1:CreateMessage">
                     <harp:MessageType>Write</harp:MessageType>
                     <harp:Payload xsi:type="p1:CreateAttenuationLeftPayload">
-                      <p1:AttenuationLeft>0</p1:AttenuationLeft>
+                      <p1:AttenuationLeft>300</p1:AttenuationLeft>
                     </harp:Payload>
                   </Expression>
                   <Expression xsi:type="MulticastSubject">
@@ -1579,7 +1579,7 @@
                   <Expression xsi:type="p1:CreateMessage">
                     <harp:MessageType>Write</harp:MessageType>
                     <harp:Payload xsi:type="p1:CreateAttenuationRightPayload">
-                      <p1:AttenuationRight>0</p1:AttenuationRight>
+                      <p1:AttenuationRight>300</p1:AttenuationRight>
                     </harp:Payload>
                   </Expression>
                   <Expression xsi:type="MulticastSubject">
@@ -2834,7 +2834,7 @@
                 <harp:VisualIndicators>On</harp:VisualIndicators>
                 <harp:Heartbeat>Disabled</harp:Heartbeat>
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                <harp:PortName>COM3</harp:PortName>
+                <harp:PortName>COM6</harp:PortName>
               </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
@@ -2915,6 +2915,9 @@
                       <Value>0</Value>
                     </Operand>
                   </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>LeftLick</Name>
+                  </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:DistinctUntilChanged" />
                   </Expression>
@@ -2964,6 +2967,9 @@
                       <Value>0</Value>
                     </Operand>
                   </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>RightLick</Name>
+                  </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:DistinctUntilChanged" />
                   </Expression>
@@ -3005,13 +3011,13 @@
                 <Edges>
                   <Edge From="0" To="1" Label="Source1" />
                   <Edge From="1" To="2" Label="Source1" />
-                  <Edge From="2" To="28" Label="Source1" />
+                  <Edge From="2" To="30" Label="Source1" />
                   <Edge From="3" To="4" Label="Source1" />
                   <Edge From="4" To="5" Label="Source1" />
-                  <Edge From="5" To="28" Label="Source2" />
+                  <Edge From="5" To="30" Label="Source2" />
                   <Edge From="6" To="7" Label="Source1" />
                   <Edge From="7" To="8" Label="Source1" />
-                  <Edge From="7" To="13" Label="Source2" />
+                  <Edge From="7" To="14" Label="Source2" />
                   <Edge From="8" To="9" Label="Source1" />
                   <Edge From="9" To="10" Label="Source1" />
                   <Edge From="10" To="11" Label="Source1" />
@@ -3020,11 +3026,11 @@
                   <Edge From="13" To="14" Label="Source1" />
                   <Edge From="14" To="15" Label="Source1" />
                   <Edge From="15" To="16" Label="Source1" />
-                  <Edge From="16" To="28" Label="Source3" />
-                  <Edge From="17" To="18" Label="Source1" />
+                  <Edge From="16" To="17" Label="Source1" />
+                  <Edge From="17" To="30" Label="Source3" />
                   <Edge From="18" To="19" Label="Source1" />
-                  <Edge From="18" To="24" Label="Source2" />
                   <Edge From="19" To="20" Label="Source1" />
+                  <Edge From="19" To="26" Label="Source2" />
                   <Edge From="20" To="21" Label="Source1" />
                   <Edge From="21" To="22" Label="Source1" />
                   <Edge From="22" To="23" Label="Source1" />
@@ -3032,9 +3038,11 @@
                   <Edge From="24" To="25" Label="Source1" />
                   <Edge From="25" To="26" Label="Source1" />
                   <Edge From="26" To="27" Label="Source1" />
-                  <Edge From="27" To="28" Label="Source4" />
+                  <Edge From="27" To="28" Label="Source1" />
                   <Edge From="28" To="29" Label="Source1" />
-                  <Edge From="29" To="30" Label="Source1" />
+                  <Edge From="29" To="30" Label="Source4" />
+                  <Edge From="30" To="31" Label="Source1" />
+                  <Edge From="31" To="32" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -8004,6 +8012,9 @@
                         <Expression xsi:type="MemberSelector">
                           <Selector>Value.Image</Selector>
                         </Expression>
+                        <Expression xsi:type="rx:PublishSubject">
+                          <Name>CameraImage_Bottom</Name>
+                        </Expression>
                         <Expression xsi:type="SubscribeSubject">
                           <Name>RootPath</Name>
                         </Expression>
@@ -8062,15 +8073,16 @@
                         <Edge From="12" To="13" Label="Source1" />
                         <Edge From="13" To="14" Label="Source2" />
                         <Edge From="14" To="15" Label="Source1" />
-                        <Edge From="15" To="24" Label="Source1" />
-                        <Edge From="16" To="17" Label="Source1" />
+                        <Edge From="15" To="16" Label="Source1" />
+                        <Edge From="16" To="25" Label="Source1" />
                         <Edge From="17" To="18" Label="Source1" />
-                        <Edge From="18" To="24" Label="Source2" />
-                        <Edge From="19" To="20" Label="Source1" />
-                        <Edge From="20" To="24" Label="Source3" />
-                        <Edge From="21" To="22" Label="Source1" />
+                        <Edge From="18" To="19" Label="Source1" />
+                        <Edge From="19" To="25" Label="Source2" />
+                        <Edge From="20" To="21" Label="Source1" />
+                        <Edge From="21" To="25" Label="Source3" />
                         <Edge From="22" To="23" Label="Source1" />
-                        <Edge From="23" To="24" Label="Source4" />
+                        <Edge From="23" To="24" Label="Source1" />
+                        <Edge From="24" To="25" Label="Source4" />
                       </Edges>
                     </Workflow>
                   </Expression>
@@ -8171,6 +8183,9 @@
                         <Expression xsi:type="MemberSelector">
                           <Selector>Value.Image</Selector>
                         </Expression>
+                        <Expression xsi:type="rx:PublishSubject">
+                          <Name>CameraImage_Side</Name>
+                        </Expression>
                         <Expression xsi:type="SubscribeSubject">
                           <Name>RootPath</Name>
                         </Expression>
@@ -8229,15 +8244,16 @@
                         <Edge From="12" To="13" Label="Source1" />
                         <Edge From="13" To="14" Label="Source2" />
                         <Edge From="14" To="15" Label="Source1" />
-                        <Edge From="15" To="24" Label="Source1" />
-                        <Edge From="16" To="17" Label="Source1" />
+                        <Edge From="15" To="16" Label="Source1" />
+                        <Edge From="16" To="25" Label="Source1" />
                         <Edge From="17" To="18" Label="Source1" />
-                        <Edge From="18" To="24" Label="Source2" />
-                        <Edge From="19" To="20" Label="Source1" />
-                        <Edge From="20" To="24" Label="Source3" />
-                        <Edge From="21" To="22" Label="Source1" />
+                        <Edge From="18" To="19" Label="Source1" />
+                        <Edge From="19" To="25" Label="Source2" />
+                        <Edge From="20" To="21" Label="Source1" />
+                        <Edge From="21" To="25" Label="Source3" />
                         <Edge From="22" To="23" Label="Source1" />
-                        <Edge From="23" To="24" Label="Source4" />
+                        <Edge From="23" To="24" Label="Source1" />
+                        <Edge From="24" To="25" Label="Source4" />
                       </Edges>
                     </Workflow>
                   </Expression>
@@ -8506,6 +8522,22 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="rx:SubscribeWhen" />
             </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>CameraImage_Bottom</Name>
+            </Expression>
+            <Expression xsi:type="VisualizerMapping" />
+            <Expression xsi:type="SubscribeSubject">
+              <Name>CameraImage_Side</Name>
+            </Expression>
+            <Expression xsi:type="VisualizerMapping" />
+            <Expression xsi:type="viz:TableLayoutPanelBuilder">
+              <viz:Name>HighSpeedCamVis</viz:Name>
+              <viz:ColumnCount>1</viz:ColumnCount>
+              <viz:RowCount>2</viz:RowCount>
+              <viz:ColumnStyles />
+              <viz:RowStyles />
+              <viz:CellSpans />
+            </Expression>
             <Expression xsi:type="Disable">
               <Builder xsi:type="rx:Defer">
                 <Name>HarpDeviceDump</Name>
@@ -8586,6 +8618,10 @@
             <Edge From="46" To="47" Label="Source1" />
             <Edge From="47" To="48" Label="Source2" />
             <Edge From="49" To="50" Label="Source1" />
+            <Edge From="50" To="53" Label="Source1" />
+            <Edge From="51" To="52" Label="Source1" />
+            <Edge From="52" To="53" Label="Source2" />
+            <Edge From="54" To="55" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
@@ -8599,7 +8635,7 @@
         <Property Name="FileName" DisplayName="SettingsPath" />
       </Expression>
       <Expression xsi:type="io:CsvReader">
-        <io:FileName>C:\Users\xinxin.yin\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
+        <io:FileName>C:\Users\svc_aind_behavior\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
         <io:ScanPattern>%s,%s</io:ScanPattern>
         <io:SkipRows>0</io:SkipRows>
       </Expression>
@@ -8614,6 +8650,42 @@
       </Expression>
       <Expression xsi:type="rx:AsyncSubject">
         <Name>ComPorts</Name>
+      </Expression>
+      <Expression xsi:type="GroupWorkflow">
+        <Name>Visualization</Name>
+        <Workflow>
+          <Nodes>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>LeftLick</Name>
+            </Expression>
+            <Expression xsi:type="VisualizerMapping" />
+            <Expression xsi:type="SubscribeSubject">
+              <Name>RightLick</Name>
+            </Expression>
+            <Expression xsi:type="VisualizerMapping" />
+            <Expression xsi:type="viz:TableLayoutPanelBuilder">
+              <viz:Name>LickVis</viz:Name>
+              <viz:ColumnCount>1</viz:ColumnCount>
+              <viz:RowCount>2</viz:RowCount>
+              <viz:ColumnStyles />
+              <viz:RowStyles />
+              <viz:CellSpans>
+                <viz:CellSpan ColumnSpan="1" RowSpan="1" />
+                <viz:CellSpan ColumnSpan="4" RowSpan="1" />
+                <viz:CellSpan ColumnSpan="1" RowSpan="1" />
+                <viz:CellSpan ColumnSpan="4" RowSpan="1" />
+              </viz:CellSpans>
+            </Expression>
+            <Expression xsi:type="WorkflowOutput" />
+          </Nodes>
+          <Edges>
+            <Edge From="0" To="1" Label="Source1" />
+            <Edge From="1" To="4" Label="Source1" />
+            <Edge From="2" To="3" Label="Source1" />
+            <Edge From="3" To="4" Label="Source2" />
+            <Edge From="4" To="5" Label="Source1" />
+          </Edges>
+        </Workflow>
       </Expression>
     </Nodes>
     <Edges>
