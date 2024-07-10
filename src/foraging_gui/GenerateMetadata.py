@@ -1,13 +1,13 @@
 import json
 import os
 import logging
+import subprocess
 from datetime import datetime
 
 import numpy as np
 
 import foraging_gui
 from foraging_gui.Visualization import PlotWaterCalibration
-from foraging_gui.Foraging import log_git_hash
 from aind_data_schema.components.stimulus import AuditoryStimulation
 from aind_data_schema.components.devices import SpoutSide,Calibration
 from aind_data_schema_models.units import SizeUnit,FrequencyUnit,SoundIntensityUnit,PowerUnit
@@ -880,7 +880,16 @@ class generate_metadata:
         get the behavior software version information
         '''
         self.behavior_software=[]
-        commit_ID, current_branch, repo_url, repo_dirty_flag, dirty_files, version = log_git_hash()
+        try:
+            # Get information about task repository
+            commit_ID = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
+            current_branch = subprocess.check_output(['git','branch','--show-current']).decode('ascii').strip()
+            version=foraging_gui.__version__
+        except Exception as e:
+            logging.error('Could not get git branch and hash during generating session metadata: {}'.format(str(e)))
+            commit_ID=None
+            current_branch=None
+            version=None
         self.behavior_software.append(Software(
             name='dynamic-foraging-task',
             version=f'behavior branch:{self.Obj["current_branch"]}   commit ID:{self.Obj["commit_ID"]}    version:{self.Obj["version"]}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{version}',
