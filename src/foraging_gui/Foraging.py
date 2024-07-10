@@ -2456,12 +2456,12 @@ class Window(QMainWindow):
             # save the saving type (normal saving, backup saving or force saving)
             Obj['saving_type_label'] = saving_type_label
         
-        # save folders
-        Obj['TrainingFolder']=self.TrainingFolder
-        Obj['HarpFolder']=self.HarpFolder
-        Obj['VideoFolder']=self.VideoFolder
-        Obj['PhotometryFolder']=self.PhotometryFolder
-        Obj['MetadataFolder']=self.MetadataFolder
+            # save folders
+            Obj['TrainingFolder']=self.TrainingFolder
+            Obj['HarpFolder']=self.HarpFolder
+            Obj['VideoFolder']=self.VideoFolder
+            Obj['PhotometryFolder']=self.PhotometryFolder
+            Obj['MetadataFolder']=self.MetadataFolder
 
         # generate the metadata file
         try:
