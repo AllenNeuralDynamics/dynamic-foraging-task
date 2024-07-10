@@ -2577,13 +2577,9 @@ class Window(QMainWindow):
         self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
         self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
         self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}_par.json')
-        # Harp folder
         self.HarpFolder=os.path.join(self.TrainingFolder,'raw.harp')
-        # video data
         self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
-        # photometry folder
         self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
-        # Metadata folder
         self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
 
     def _Concat(self,widget_dict,Obj,keyname):
