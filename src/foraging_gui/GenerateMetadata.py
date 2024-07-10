@@ -76,8 +76,14 @@ class generate_metadata:
         if json_file is not None:
             with open(json_file) as f:
                 self.Obj = json.load(f)
+            session_folder = os.path.dirname(os.path.dirname(json_file))
         else:
             self.Obj = Obj
+            if 'TrainingFolder' in self.Obj:
+                session_folder =  os.path.dirname(self.Obj['TrainingFolder'])
+            else:
+                session_folder = "session folder is unknown"
+        logging.info("processing:"+session_folder)
         
         if dialog_metadata_file is not None:
             with open(dialog_metadata_file) as f:
