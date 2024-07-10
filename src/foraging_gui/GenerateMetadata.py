@@ -93,10 +93,15 @@ class generate_metadata:
         
         if output_folder is not None:
             self.output_folder = output_folder
+        elif 'MetadataFolder' not in self.Obj:
+            logging.info("MetadataFolder is not provided, use the default metadata folder")
+            if json_file is not None:
+                self._get_metadata_folder(json_file)
+            else:
+                logging.error("MetadataFolder is not determined!")
+                return
         else:
-            if 'MetadataFolder' not in self.Obj:
-                logging.info("MetadataFolder is not provided, use the default metadata folder")
-            self._get_metadata_folder(json_file)
+            self.output_folder = self.Obj['MetadataFolder']
 
         return_tag=self._handle_edge_cases()
         if return_tag==1:
@@ -109,7 +114,6 @@ class generate_metadata:
         if self.has_data_description:
             self._session_description()
         logging.info("Session metadata generated successfully:"+self.session_folder)
-        return 'success'
     
     def _mapper(self):
         '''
