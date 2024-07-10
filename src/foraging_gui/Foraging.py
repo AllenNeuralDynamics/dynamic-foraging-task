@@ -2517,27 +2517,7 @@ class Window(QMainWindow):
         if self.load_tag==0:
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-        
-            # Determine folders
-            self.SessionFolder=os.path.join(self.default_saveFolder, 
-                self.current_box,self.ID.text(), f'behavior_{self.ID.text()}_{formatted_datetime}')
-            self.TrainingFolder=os.path.join(self.SessionFolder,'behavior')
-            self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
-            self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
-            self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}_par.json')
-
-            # Harp folder
-            self.HarpFolder=os.path.join(self.TrainingFolder,'raw.harp')
-
-            # video data
-            self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
-
-            # photometry folder
-            self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
-            
-            # Metadata folder
-            self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
-        
+            self._get_folder_structure_new(formatted_datetime)
         elif self.load_tag==1:
             self._parse_folder_structure()
             
@@ -2563,27 +2543,45 @@ class Window(QMainWindow):
     
     def _parse_folder_structure(self):
         '''parse the folder structure from the loaded json file'''
-
+        formatted_datetime = os.path.basename(self.fname).split('_')[1]+'_'+os.path.basename(self.fname).split('_')[-1].split('.')[0]
         if os.path.basename(os.path.dirname(self.fname))=='TrainingFolder':
             # old data format
-            self.SessionFolder=os.path.dirname(os.path.dirname(self.fname))
-            self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
-            self.TrainingFolder=os.path.join(self.SessionFolder, 'TrainingFolder')
-            self.HarpFolder=os.path.join(self.SessionFolder, 'HarpFolder')
-            self.VideoFolder=os.path.join(self.SessionFolder, 'VideoFolder')
-            self.PhotometryFolder=os.path.join(self.SessionFolder, 'PhotometryFolder')
+            self._get_folder_structure_old(formatted_datetime)
         else:
             # new data format
-            self.SessionFolder=os.path.dirname(os.path.dirname(self.fname))
-            self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
-            self.TrainingFolder=os.path.join(self.SessionFolder, 'behavior')
-            self.HarpFolder=os.path.join(self.TrainingFolder, 'raw.harp')
-            self.VideoFolder=os.path.join(self.SessionFolder, 'behavior-videos')
-            self.PhotometryFolder=os.path.join(self.SessionFolder, 'fib')
-        formatted_datetime = os.path.basename(self.fname).split('_')[-1].split('.')[0]
+            self._get_folder_structure_new(formatted_datetime)
+
+    def _get_folder_structure_old(self,formatted_datetime):
+        '''get the folder structure for the old data format'''
+        self.SessionFolder=os.path.join(self.default_saveFolder, 
+            self.current_box,self.ID.text(), f'{self.ID.text()}_{formatted_datetime}')
+        self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
+        self.TrainingFolder=os.path.join(self.SessionFolder, 'TrainingFolder')
+        self.HarpFolder=os.path.join(self.SessionFolder, 'HarpFolder')
+        self.VideoFolder=os.path.join(self.SessionFolder, 'VideoFolder')
+        self.PhotometryFolder=os.path.join(self.SessionFolder, 'PhotometryFolder')
         self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
         self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
         self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}_par.json')
+
+    def _get_folder_structure_new(self,formatted_datetime):
+        '''get the folder structure for the new data format'''
+        # Determine folders
+        self.SessionFolder=os.path.join(self.default_saveFolder, 
+            self.current_box,self.ID.text(), f'behavior_{self.ID.text()}_{formatted_datetime}')
+        self.TrainingFolder=os.path.join(self.SessionFolder,'behavior')
+        self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
+        self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
+        self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}_par.json')
+        # Harp folder
+        self.HarpFolder=os.path.join(self.TrainingFolder,'raw.harp')
+        # video data
+        self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
+        # photometry folder
+        self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
+        # Metadata folder
+        self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
+
     def _Concat(self,widget_dict,Obj,keyname):
         '''Help manage save different dialogs'''
         if keyname=='None':
