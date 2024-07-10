@@ -706,7 +706,12 @@ class generate_metadata:
         index=np.where(np.array(self.Obj['B_SelectedCondition'])==1)[0]
         for i in index:
             current_condition=self.Obj['B_SelectedCondition'][i]
-            current_color=self.Obj[f'TP_LaserColor_{current_condition}'][i]
+            if f'TP_LaserColor_{current_condition}' not in self.Obj:
+                # old format
+                current_color=self.Obj[f'TP_Laser_{current_condition}'][i]
+            else:
+                # new format
+                current_color=self.Obj[f'TP_LaserColor_{current_condition}'][i]
             current_location=self.Obj[f'TP_Location_{current_condition}'][i]
             if current_location=='Both':
                 light_sources.append({'color':current_color,'laser_tag':1})
