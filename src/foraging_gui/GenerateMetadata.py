@@ -452,9 +452,11 @@ class generate_metadata:
         if 'commit_ID' not in self.Obj:
             self._initialize_fields(dic=self.Obj,keys=['commit_ID','repo_url','current_branch'],default_value='')
 
-        # Missing field 'Other_lick_spout_distance' in the json file.
+        # Missing field or empty 'Other_lick_spout_distance' in the json file.
         # Possible reason: 1) old version of the software.
         if 'Other_lick_spout_distance' not in self.Obj:
+            self.Obj['Other_lick_spout_distance']=5000
+        if self.Obj['Other_lick_spout_distance']=='':
             self.Obj['Other_lick_spout_distance']=5000
 
         # Missing ProjectName
@@ -490,7 +492,7 @@ class generate_metadata:
         # Typo 
         if 'PtotocolID' in self.Obj['meta_data_dialog']['session_metadata']:
             self.Obj['meta_data_dialog']['session_metadata']['ProtocolID']=self.Obj['meta_data_dialog']['session_metadata']['PtotocolID']
-            
+
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
         Initialize fields
@@ -1186,5 +1188,5 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    generate_metadata(json_file=r'Y:\706893\behavior_706893_2024-05-09_15-18-09\behavior\706893_2024-05-09_15-18-09.json')
+    generate_metadata(json_file=r'Y:706893\behavior_706893_2024-05-13_16-00-12\behavior\706893_2024-05-13_16-00-12.json')
     #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
