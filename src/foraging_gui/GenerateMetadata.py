@@ -923,8 +923,15 @@ class generate_metadata:
                                 for Frequency in RecentLaserCalibration[color][Protocol]:
                                     voltage=[]
                                     power=[]
-                                    for i in range(len(RecentLaserCalibration[color][Protocol][Frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
-                                        laser_voltage_power=eval(str(RecentLaserCalibration[color][Protocol][Frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
+                                    if f"Laser_{laser_tag}" in RecentLaserCalibration[color][Protocol][Frequency]:
+                                        current_calibration=RecentLaserCalibration[color][Protocol][Frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage']
+                                    else:
+                                        if laser_tag==1:
+                                            current_calibration=RecentLaserCalibration[color][Protocol][Frequency]["Left"]['LaserPowerVoltage']
+                                        elif laser_tag==2:
+                                            current_calibration=RecentLaserCalibration[color][Protocol][Frequency]["Right"]['LaserPowerVoltage']
+                                    for i in range(len(current_calibration)):
+                                        laser_voltage_power=eval(str(current_calibration[i]))
                                         voltage.append(laser_voltage_power[0])
                                         power.append(laser_voltage_power[1])
                                     voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
@@ -940,7 +947,7 @@ class generate_metadata:
                                     elif laser_tag==2:
                                         current_calibration=RecentLaserCalibration[color][Protocol]["Right"]['LaserPowerVoltage']
                                 for i in range(len(current_calibration)):
-                                    laser_voltage_power=eval(str(RecentLaserCalibration[color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
+                                    laser_voltage_power=eval(str(current_calibration[i]))
                                     voltage.append(laser_voltage_power[0])
                                     power.append(laser_voltage_power[1])
                                 voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
