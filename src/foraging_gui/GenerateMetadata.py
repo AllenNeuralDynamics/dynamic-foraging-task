@@ -109,7 +109,8 @@ class generate_metadata:
         if self.has_data_description:
             self._session_description()
         logging.info("Session metadata generated successfully:"+self.session_folder)
-
+        return 'success'
+    
     def _mapper(self):
         '''
         Name mapping
@@ -1180,5 +1181,5 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    generate_metadata(json_file=r'Y:\689515\689515_2024-02-02_17-21-30\TrainingFolder\689515_2024-02-02_17-21-30.json')
+    generate_metadata(json_file=r'Y:\706893\behavior_706893_2024-06-26_16-26-30\behavior\706893_2024-06-26_16-26-30.json')
     #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
