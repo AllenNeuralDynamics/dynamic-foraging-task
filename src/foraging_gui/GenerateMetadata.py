@@ -487,6 +487,10 @@ class generate_metadata:
             self.Obj['WeightAfter']=self.Obj['WeightAfter'].replace('..','.')
             self.Obj['WeightAfter']=re.sub(r'[^\.\d]', '', self.Obj['WeightAfter']) 
 
+        # Typo 
+        if 'PtotocolID' in self.Obj['meta_data_dialog']['session_metadata']:
+            self.Obj['meta_data_dialog']['session_metadata']['ProtocolID']=self.Obj['meta_data_dialog']['session_metadata']['PtotocolID']
+            
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
         Initialize fields
@@ -1182,5 +1186,5 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    generate_metadata(json_file=r'Y:\706893\behavior_706893_2024-06-26_16-26-30\behavior\706893_2024-06-26_16-26-30.json')
+    generate_metadata(json_file=r'Y:\706893\behavior_706893_2024-05-09_15-18-09\behavior\706893_2024-05-09_15-18-09.json')
     #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
