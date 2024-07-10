@@ -736,6 +736,8 @@ class generate_metadata:
         Make the optogenetics stimulus metadata
         '''
         self.optogenetics_stimulus=[]
+        if 'B_SelectedCondition' not in self.Obj:
+            return 
         a=np.array(self.Obj['B_SelectedCondition'])
         self.Obj['B_SelectedCondition']=a.astype(int)
         if sum( self.Obj['B_SelectedCondition'])==0:
@@ -1188,5 +1190,5 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    generate_metadata(json_file=r'Y:706893\behavior_706893_2024-05-13_16-00-12\behavior\706893_2024-05-13_16-00-12.json')
+    generate_metadata(json_file=r'Z:\svc_aind_behavior_transfer\447-2-D\713855\behavior_713855_2024-05-31_14-36-04\behavior\713855_2024-05-31_14-36-04.json')
     #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
