@@ -48,12 +48,12 @@ class generate_metadata:
     Parse the behavior json file and generate session and rig metadata
 
     Parameters:
-    json_file: str
-        path to the json file
     Obj: dict
-        dictionary containing the json file
+        dictionary containing the json file.
+    json_file: str
+        path to the json file. If provided, the json file will be loaded to the Obj.
     dialog_metadata: dict
-        dictionary containing the dialog metadata. If provided, it will override the meta_data_dialog key in the json file
+        dictionary containing the dialog metadata. If provided, it will override the meta_data_dialog key in the json file.
     output_folder: str
         path to the output folder where the metadata will be saved. If not provided, the metadata will be saved in the MetadataFolder extracted from the behavior json file/object. 
 
@@ -66,7 +66,7 @@ class generate_metadata:
     '''
     def __init__(self, json_file=None, Obj=None, dialog_metadata_file=None,dialog_metadata=None, output_folder=None):
         
-        if json_file is None and Obj is None and dialog_metadata is None:
+        if json_file is None and Obj is None:
             logging.info("json file or Obj is not provided")
             return
 
