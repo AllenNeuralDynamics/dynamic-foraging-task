@@ -291,6 +291,12 @@ class generate_metadata:
         '''
         handle edge cases (e.g. missing keys in the json file)
         '''
+
+        # Missing filed version in the json file.
+        # Possible reason: 1) Old version of the software. 
+        if 'version' not in self.Obj:
+            self.Obj['version']='Not recorded'
+        
         # Missing field 'meta_data_dialog' in the json file.
         # Possible reason: 1) Old version of the software.
         if 'meta_data_dialog' not in self.Obj:
@@ -874,10 +880,10 @@ class generate_metadata:
         get the behavior software version information
         '''
         self.behavior_software=[]
-        commit_ID, current_branch, repo_url, repo_dirty_flag, dirty_files = log_git_hash()
+        commit_ID, current_branch, repo_url, repo_dirty_flag, dirty_files, version = log_git_hash()
         self.behavior_software.append(Software(
             name='dynamic-foraging-task',
-            version=f'behavior branch:{self.Obj["current_branch"]}   commit ID:{self.Obj["commit_ID"]}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{foraging_gui.__version__}',
+            version=f'behavior branch:{self.Obj["current_branch"]}   commit ID:{self.Obj["commit_ID"]}    version:{self.Obj['version']}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{version}',
             url=self.Obj["repo_url"],
         ))
         

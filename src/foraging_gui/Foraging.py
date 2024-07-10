@@ -2421,6 +2421,7 @@ class Window(QMainWindow):
             Obj['current_branch'] =self.current_branch
             Obj['repo_dirty_flag'] =self.repo_dirty_flag
             Obj['dirty_files'] =self.dirty_files
+            Obj['version'] = self.version
             
             # save the open ephys recording information
             Obj['open_ephys'] = self.open_ephys
@@ -4222,9 +4223,10 @@ def log_git_hash():
         git_branch = subprocess.check_output(['git','branch','--show-current']).decode('ascii').strip()
         repo_url = subprocess.check_output(['git', 'remote', 'get-url', 'origin']).decode('ascii').strip()
         dirty_files = subprocess.check_output(['git','diff-index','--name-only', 'HEAD']).decode('ascii').strip()
+        version=foraging_gui.__version__
     except Exception as e:
         logging.error('Could not log git branch and hash: {}'.format(str(e)))
-        return None, None, None, None
+        return None, None, None, None, None, None
     
     # Log branch and commit hash
     logging.info('Current git commit branch, hash: {}, {}'.format(git_branch,git_hash))
@@ -4244,7 +4246,7 @@ def log_git_hash():
         logging.warning('local repository is clean')
         print('local repository is clean')
 
-    return git_hash, git_branch, repo_url, repo_dirty_flag, dirty_files
+    return git_hash, git_branch, repo_url, repo_dirty_flag, dirty_files, version
 
 
 def show_exception_box(log_msg):
@@ -4339,7 +4341,7 @@ if __name__ == "__main__":
    
     # Start logging
     start_gui_log_file(box_number)
-    commit_ID, current_branch, repo_url, repo_dirty_flag, dirty_files = log_git_hash()
+    commit_ID, current_branch, repo_url, repo_dirty_flag, dirty_files, version = log_git_hash()
 
     # Formating GUI graphics
     logging.info('Setting QApplication attributes')
@@ -4364,6 +4366,7 @@ if __name__ == "__main__":
     win.repo_url=repo_url
     win.repo_dirty_flag=repo_dirty_flag
     win.dirty_files=dirty_files
+    win.version=version
     win.show()
    
      # Run your application's event loop and stop after closing all windows
