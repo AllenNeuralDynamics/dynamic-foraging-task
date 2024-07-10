@@ -2517,30 +2517,30 @@ class Window(QMainWindow):
         if self.load_tag==0:
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-        else:
-            formatted_datetime=self.fname.split('_')[-2]+'_'+self.fname.split('_')[-1].split('.')[0]
         
-        # Determine folders
-        self.SessionFolder=os.path.join(self.default_saveFolder, 
-            self.current_box,self.ID.text(), f'behavior_{self.ID.text()}_{formatted_datetime}')
-        self.TrainingFolder=os.path.join(self.SessionFolder,'behavior')
-        self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
-        self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
-        self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}_par.json')
+            # Determine folders
+            self.SessionFolder=os.path.join(self.default_saveFolder, 
+                self.current_box,self.ID.text(), f'behavior_{self.ID.text()}_{formatted_datetime}')
+            self.TrainingFolder=os.path.join(self.SessionFolder,'behavior')
+            self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
+            self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
+            self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}_par.json')
 
-        # Harp folder
-        self.HarpFolder=os.path.join(self.TrainingFolder,'raw.harp')
+            # Harp folder
+            self.HarpFolder=os.path.join(self.TrainingFolder,'raw.harp')
 
-        # video data
-        self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
+            # video data
+            self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
 
-        # photometry folder
-        self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
+            # photometry folder
+            self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
+            
+            # Metadata folder
+            self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
         
-        # Metadata folder
-        self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
-        
-
+        elif self.load_tag==1:
+            self._parse_folder_structure()
+            
         # create folders
         if not os.path.exists(self.SessionFolder):
             os.makedirs(self.SessionFolder)
@@ -2560,7 +2560,27 @@ class Window(QMainWindow):
         if not os.path.exists(self.PhotometryFolder):
             os.makedirs(self.PhotometryFolder)
             logging.info(f"Created new folder: {self.PhotometryFolder}")
+    
+    def _parse_folder_structure(self):
+        '''parse the folder structure from the loaded json file'''
 
+        if os.path.basename(os.path.dirname(self.fname))=='TrainingFolder':
+            # old data format
+            self.SessionFolder=os.path.dirname(os.path.dirname(self.fname))
+            self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
+            self.TrainingFolder=os.path.join(self.SessionFolder, 'TrainingFolder')
+            self.HarpFolder=os.path.join(self.SessionFolder, 'HarpFolder')
+            self.VideoFolder=os.path.join(self.SessionFolder, 'VideoFolder')
+            self.PhotometryFolder=os.path.join(self.SessionFolder, 'PhotometryFolder')
+        else:
+            # new data format
+            self.SessionFolder=os.path.dirname(os.path.dirname(self.fname))
+            self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
+            self.TrainingFolder=os.path.join(self.SessionFolder, 'behavior')
+            self.HarpFolder=os.path.join(self.TrainingFolder, 'raw.harp')
+            self.VideoFolder=os.path.join(self.SessionFolder, 'behavior-videos')
+            self.PhotometryFolder=os.path.join(self.SessionFolder, 'fib')
+            
     def _Concat(self,widget_dict,Obj,keyname):
         '''Help manage save different dialogs'''
         if keyname=='None':
