@@ -2449,10 +2449,6 @@ class Window(QMainWindow):
             Obj['Camera_dialog']['camera_start_time']=self.Camera_dialog.camera_start_time
             Obj['Camera_dialog']['camera_stop_time']=self.Camera_dialog.camera_stop_time
 
-            # save the metadata collected in the metadata dialogue
-            self.Metadata_dialog._save_metadata_dialog_parameters()
-            Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
-
             # save the saving type (normal saving, backup saving or force saving)
             Obj['saving_type_label'] = saving_type_label
         
@@ -2465,6 +2461,10 @@ class Window(QMainWindow):
 
         # generate the metadata file
         try:
+            # save the metadata collected in the metadata dialogue
+            self.Metadata_dialog._save_metadata_dialog_parameters()
+            Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
+            # generate the metadata file
             generate_metadata(Obj=Obj)
         except Exception as e:
             self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved succuessfully!')
