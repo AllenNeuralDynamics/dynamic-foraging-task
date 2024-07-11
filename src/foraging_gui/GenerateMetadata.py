@@ -475,17 +475,18 @@ class generate_metadata:
 
         # Missing field 'B_AnimalResponseHistory' in the json file.
         # Possible reason: 1) the behavior data is not started in the session.
+        # total_reward_consumed_in_session is the reward animal consumed in the session, not including the supplementary water.
         if 'B_AnimalResponseHistory' not in self.Obj:
             self.trials_total=0
             self.trials_finished=0
             self.trials_rewarded=0
-            self.total_reward=0
+            self.total_reward_consumed_in_session=0
         else:
             self.Obj['B_AnimalResponseHistory']=np.array(self.Obj['B_AnimalResponseHistory'])
             self.trials_total=len(self.Obj['B_AnimalResponseHistory'])
             self.trials_finished=np.count_nonzero(self.Obj['B_AnimalResponseHistory']!=2)
             self.trials_rewarded=np.count_nonzero(np.logical_or(self.Obj['B_RewardedHistory'][0],self.Obj['B_RewardedHistory'][1]))
-            self.total_reward=float(self.Obj['BS_TotalReward'])
+            self.total_reward_consumed_in_session=float(self.Obj['BS_TotalReward'])
 
         # Wrong format of WeightAfter
         # Remove all the non-numeric characters except the dot in the WeightAfter
@@ -547,7 +548,7 @@ class generate_metadata:
             "rig_id": self.Obj['meta_data_dialog']['rig_metadata']['rig_id'],
             "notes": self.Obj['ShowNotes'],
             "weight_unit": "gram",
-            "reward_consumed_total": self.total_reward,
+            "reward_consumed_total": self.total_reward_consumed_in_session,
             "reward_consumed_unit": "microliter",
             "calibrations": self.calibration,
             "data_streams": self.data_streams,
@@ -715,7 +716,6 @@ class generate_metadata:
         
         self.audio_stimulus.append(StimulusEpoch(
             stimulus_name='auditory go cue',
-            notes=f"The duration of go cue is 100ms. The frequency is 7500Hz. Decibel is {self.Obj['Other_go_cue_decibel']}dB.",
             stimulus_modalities=[StimulusModality.AUDITORY],
             stimulus_start_time=self.session_start_time,
             stimulus_end_time=self.session_end_time,
@@ -730,9 +730,12 @@ class generate_metadata:
                 volume=self.Obj['Other_go_cue_decibel'],
                 volume_unit=SoundIntensityUnit.DB,
             ),
+            reward_consumed_during_epoch=self.total_reward_consumed_in_session,
+            reward_consumed_unit="microliter",
             trials_total= self.trials_total,
             trials_finished= self.trials_finished,
-            trials_rewarded=self.trials_rewarded
+            trials_rewarded=self.trials_rewarded,
+            notes=f"The duration of go cue is 100ms. The frequency is 7500Hz. Decibel is {self.Obj['Other_go_cue_decibel']}dB. The total reward consumed in the session is {self.total_reward_consumed_in_session} microliter. The total reward indcluding consumed in the session and supplementary water is {self.Obj['TotalWater']} millimeters.",
         ))
 
     def _get_optogenetics_stimulus(self):
@@ -817,8 +820,6 @@ class generate_metadata:
                 self.light_names_used_in_session.append([key for key, value in self.name_mapper['led_name_mapper'].items() if value == light_source][0])
 
         self.light_names_used_in_session = list(set(self.light_names_used_in_session))
-
-        
 
     def _get_ephys_stream(self):
         '''
