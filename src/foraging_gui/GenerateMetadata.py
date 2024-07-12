@@ -9,6 +9,7 @@ import numpy as np
 
 import foraging_gui
 from foraging_gui.Visualization import PlotWaterCalibration
+from foraging_gui.TransferToNWB import _get_field
 from aind_data_schema.components.stimulus import AuditoryStimulation
 from aind_data_schema.components.devices import SpoutSide,Calibration
 from aind_data_schema_models.units import SizeUnit,FrequencyUnit,SoundIntensityUnit,PowerUnit
@@ -730,6 +731,7 @@ class generate_metadata:
                 volume=self.Obj['Other_go_cue_decibel'],
                 volume_unit=SoundIntensityUnit.DB,
             ),
+            output_parameters=self._get_output_parameters(),
             reward_consumed_during_epoch=self.total_reward_consumed_in_session,
             reward_consumed_unit="microliter",
             trials_total= self.trials_total,
@@ -737,7 +739,60 @@ class generate_metadata:
             trials_rewarded=self.trials_rewarded,
             notes=f"The duration of go cue is 100ms. The frequency is 7500Hz. Decibel is {self.Obj['Other_go_cue_decibel']}dB. The total reward consumed in the session is {self.total_reward_consumed_in_session} microliter. The total reward indcluding consumed in the session and supplementary water is {self.Obj['TotalWater']} millimeters.",
         ))
+    
+    def _get_output_parameters(self):
+        '''Get the output parameters'''
 
+        # Handle water info (with better names)
+        BS_TotalReward = _get_field(self.Obj, 'BS_TotalReward')
+        # Turn uL to mL if the value is too large
+        water_in_session_foraging = BS_TotalReward / 1000 if BS_TotalReward > 5.0 else BS_TotalReward 
+        # Old name "ExtraWater" goes first because old json has a wrong Suggested Water
+        water_after_session = float(_get_field(self.Obj, 
+                                            field_list=['ExtraWater', 'SuggestedWater'], default=np.nan
+                                            ))
+        water_day_total = float(_get_field(self.Obj, 'TotalWater'))
+        water_in_session_total = water_day_total - water_after_session
+        water_in_session_manual = water_in_session_total - water_in_session_foraging
+
+        output_parameters = {
+            'meta': {
+                'box': _get_field(self.Obj, ['box', 'Tower']),
+                'session_end_time': _get_field(self.Obj, 'Other_CurrentTime'),
+                'session_run_time_in_min': _get_field(self.Obj, 'Other_RunningTime'),
+            },
+
+            'water': {
+                'water_in_session_foraging': water_in_session_foraging,
+                'water_in_session_manual': water_in_session_manual,
+                'water_in_session_total': water_in_session_total,
+                'water_after_session': water_after_session,
+                'water_day_total': water_day_total,
+            },
+
+            'weight': {
+                'base_weight': float(_get_field(self.Obj, 'BaseWeight')),
+                'target_weight': float(_get_field(self.Obj, 'TargetWeight')),
+                'target_weight_ratio': float(_get_field(self.Obj, 'TargetRatio')),
+                'weight_after': float(_get_field(self.Obj, 'WeightAfter')),
+            },
+
+            'performance': {
+                'foraging_efficiency': _get_field(self.Obj, 'B_for_eff_optimal'),
+                'foraging_efficiency_with_actual_random_seed': _get_field(self.Obj, 'B_for_eff_optimal_random_seed'),
+            },
+
+            'task_parameters': self._get_task_parameters(),
+        }
+
+        return output_parameters    
+    
+    def _get_task_parameters(self):
+        '''Get task parameters'''
+        # excluding parameters starting with B_, TP_,  BS_, meta_data_dialog, LaserCalibrationResults, WaterCalibrationResults
+        task_parameters = {key: value for key, value in self.Obj.items() if not key.startswith(('B_', 'TP_', 'BS_','meta_data_dialog','LaserCalibrationResults','WaterCalibrationResults'))}
+        return task_parameters
+    
     def _get_optogenetics_stimulus(self):
         '''
         Make the optogenetics stimulus metadata
@@ -1197,5 +1252,5 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    generate_metadata(json_file=r'Z:\svc_aind_behavior_transfer\447-2-D\713855\behavior_713855_2024-06-04_14-11-37\behavior\713855_2024-06-04_14-11-37.json')
+    generate_metadata(json_file=r'I:\BehaviorData\323_EPHYS3\713377\behavior_713377_2024-06-14_15-05-53\behavior\713377_2024-06-14_15-05-53.json')
     #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
