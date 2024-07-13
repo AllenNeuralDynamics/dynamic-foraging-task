@@ -4183,7 +4183,7 @@ class Window(QMainWindow):
                 capsule_id = 'c089614a-347e-4696-b17e-86980bb782c' 
                 mount = 'FIP'
  
-            date_format = "%Y-%m-%d %H:%M:%S"
+            date_format = "%Y-%m-%d_%H-%M-%S"
             # Define contents of manifest file
             contents = {
                 'acquisition_datetime': datetime.strptime(self.acquisition_datetime,date_format),
