@@ -236,6 +236,7 @@ class generate_metadata:
 
         if 'rig_id' not in self.Obj['meta_data_dialog']['rig_metadata']:
             self.box_type = 'Unknown'
+            logging.info('rig id is not found in the rig metadata!')
             return
         
         if 'EPHYS' in self.Obj['meta_data_dialog']['rig_metadata']['rig_id']:
@@ -248,9 +249,11 @@ class generate_metadata:
         Generate the session description to the MetadataFolder
         '''
         if self.Obj['meta_data_dialog']['rig_metadata']=={}:
+            logging.info('rig metadata is empty!')
             return
         self._get_session_time()
         if self.session_start_time == '' or self.session_end_time == '':
+            logging.info('session_start_time or session_end_time is empty!')
             return
         
         self.orcid = BaseName(name="Open Researcher and Contributor ID", abbreviation="ORCID")
