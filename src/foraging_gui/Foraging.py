@@ -2476,8 +2476,9 @@ class Window(QMainWindow):
             Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
             # generate the metadata file
             generate_metadata(Obj=Obj)
+            self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is saved!')
         except Exception as e:
-            self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved succuessfully!')
+            self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved!')
             logging.error('Error generating session metadata: '+str(e))
             logging.error(traceback.format_exc())
         
@@ -2504,7 +2505,7 @@ class Window(QMainWindow):
             if self.load_tag==0:
                 self.WarningLabel.setText('Saved: {}'.format(short_file))
             else:
-                self.WarningLabel.setText('Saving of loaded files is not allowed: {}'.format(short_file))
+                self.WarningLabel.setText('Saving of loaded files is not allowed!')
             self.WarningLabel.setStyleSheet(self.default_warning_color)
             
             self.SessionlistSpin.setEnabled(True)
