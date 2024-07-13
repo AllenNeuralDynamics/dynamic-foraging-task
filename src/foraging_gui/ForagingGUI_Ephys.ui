@@ -3396,6 +3396,34 @@
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
      </property>
     </widget>
+    <widget class="QLabel" name="MetadataWarning">
+     <property name="geometry">
+      <rect>
+       <x>-330</x>
+       <y>20</y>
+       <width>361</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">
@@ -4594,34 +4622,6 @@
      </property>
     </item>
    </widget>
-   <widget class="QLabel" name="MetadataWarning">
-    <property name="geometry">
-     <rect>
-      <x>1240</x>
-      <y>920</y>
-      <width>361</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::AutoText</enum>
-    </property>
-    <property name="scaledContents">
-     <bool>false</bool>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-    </property>
-   </widget>
    <widget class="QLabel" name="ManualWaterWarning">
     <property name="geometry">
      <rect>
@@ -4678,7 +4678,6 @@
    <zorder>StartEphysRecording</zorder>
    <zorder>label_65</zorder>
    <zorder>OpenEphysRecordingType</zorder>
-   <zorder>MetadataWarning</zorder>
    <zorder>ManualWaterWarning</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
