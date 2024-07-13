@@ -347,6 +347,7 @@ class generate_metadata:
         Save the rig metadata to the MetadataFolder
         '''
         if self.Obj['meta_data_dialog']['rig_metadata_file']=='' or self.output_folder=='':
+            logging.info('rig_metadata_file or the out_put folder is emtpy!')
             return
 
         # save copy as rig.json
@@ -526,6 +527,7 @@ class generate_metadata:
         '''
         # session_start_time and session_end_time are required fields
         if self.Obj['meta_data_dialog']['rig_metadata']=={}:
+            logging.info('rig metadata is empty!')
             return
         self._get_reward_delivery()
         self._get_water_calibration()
@@ -537,6 +539,7 @@ class generate_metadata:
         self._get_high_speed_camera_stream()
         self._get_session_time()
         if self.session_start_time == '' or self.session_end_time == '':
+            logging.info('session start time of session end time is empty!')
             return
 
         self._get_stimulus()
@@ -594,6 +597,7 @@ class generate_metadata:
         '''
         if 'settings_box' not in self.Obj:
             self.camera_names=[]
+            logging.info('Settings box is not provided and camera names can not be extracted!')
             return
         
         self.camera_names=[]
