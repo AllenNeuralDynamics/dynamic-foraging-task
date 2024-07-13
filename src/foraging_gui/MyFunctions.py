@@ -1341,9 +1341,9 @@ class GenerateTrials():
         Probabilities=[]
         empty=1
         condition_idx = [1, 2, 3, 4, 5, 6]
-        TP_LaserColor = [getattr(self, f'TP_LaserColor_{i}') for i in condition_idx]
+        TP_LaserColors = [ f'TP_LaserColor_{i}' for i in condition_idx]
         for attr_name in dir(self):
-            if attr_name in TP_LaserColor:
+            if attr_name in TP_LaserColors:
                 if getattr(self, attr_name) !='NA':
                     parts = attr_name.split('_')
                     ConditionsOn.append(parts[-1])
