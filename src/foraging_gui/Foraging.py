@@ -1108,6 +1108,7 @@ class Window(QMainWindow):
 
         # Save all settings
         self.default_saveFolder=self.Settings['default_saveFolder']
+        self.default_openFolder=self.Settings['default_openFolder']
         self.current_box=self.Settings['current_box']
         self.temporary_video_folder=self.Settings['temporary_video_folder']
         self.Teensy_COM = self.Settings['Teensy_COM_box'+str(self.box_number)]
