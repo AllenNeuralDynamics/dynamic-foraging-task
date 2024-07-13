@@ -2794,7 +2794,7 @@ class Window(QMainWindow):
             self.Obj = Obj
 
             widget_dict={}
-            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','centralwidget','TrainingParameters']
+            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','centralwidget','TrainingParameters','Opto_dialog']
             for dialog_name in dialogs:
                 if hasattr(self, dialog_name):
                     widget_types = (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit,
