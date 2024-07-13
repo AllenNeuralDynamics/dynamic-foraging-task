@@ -2803,7 +2803,7 @@ class Window(QMainWindow):
             # Adding widgets starting with 'Laser1_power' and 'Laser2_power' to widget_keys to allow the second update.
             widget_keys=list(widget_dict.keys())
             for key in widget_dict.keys():
-                if key.startswith('Laser1_power') or key.startswith('Laser2_power'):
+                if key.startswith('Laser1_power') or key.startswith('Laser2_power') or key.startswith('Location_') or key.startswith('Frequency_'):
                     widget_keys.append(key)
             try:
                 for key in widget_keys:
