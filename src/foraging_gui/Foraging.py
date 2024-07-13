@@ -2488,6 +2488,10 @@ class Window(QMainWindow):
             self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved!')
             logging.error('Error generating session metadata: '+str(e))
             logging.error(traceback.format_exc())
+            # set to False if error occurs
+            Obj['generate_session_metadata_success']=False
+            Obj['generate_rig_metadata_success']=False
+            Obj['generate_data_description_success']=False
         
         # don't save the data if the load tag is 1
         if self.load_tag==0:
