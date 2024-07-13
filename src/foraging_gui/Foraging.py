@@ -2805,7 +2805,7 @@ class Window(QMainWindow):
                 for key in widget_dict.keys():
                     try:
                         widget = widget_dict[key]
-                        if widget.parent().objectName()=='Optogenetics':
+                        if widget.parent().objectName() in ['Optogenetics','Optogenetics_trial_parameters']:
                             CurrentObj=Obj['Opto_dialog']
                         elif widget.parent().objectName()=='Camera':
                             CurrentObj=Obj['Camera_dialog']

@@ -600,7 +600,7 @@
     <string>Calibration</string>
    </property>
   </widget>
-  <widget class="QScrollArea" name="scrollArea">
+  <widget class="QScrollArea" name="QScrollOptogenetics">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -612,7 +612,7 @@
    <property name="widgetResizable">
     <bool>true</bool>
    </property>
-   <widget class="QWidget" name="scrollAreaWidgetContents">
+   <widget class="QWidget" name="Optogenetics_trial_parameters">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -5951,7 +5951,7 @@
   <zorder>laser_2_calibration_power</zorder>
   <zorder>line</zorder>
   <zorder>label8</zorder>
-  <zorder>scrollArea</zorder>
+  <zorder>QScrollOptogenetics</zorder>
  </widget>
  <resources/>
  <connections/>
