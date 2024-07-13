@@ -67,6 +67,10 @@ class generate_metadata:
     '''
     def __init__(self, json_file=None, Obj=None, dialog_metadata_file=None,dialog_metadata=None, output_folder=None):
         
+        self.session_metadata_success=False
+        self.rig_metadata_success=False
+        self.data_description_success=False
+
         if Obj is None:
             self._set_metadata_logging()
 
@@ -111,7 +115,9 @@ class generate_metadata:
         self._session()
         if self.has_data_description:
             self._session_description()
-        logging.info("Session metadata generated successfully:"+self.session_folder)
+        logging.info("Session metadata generated successfully: " + str(self.session_metadata_success))
+        logging.info("Rig metadata generated successfully: " + str(self.rig_metadata_success))
+        logging.info("Data description generated successfully: " + str(self.data_description_success))
     
     def _mapper(self):
         '''
@@ -275,6 +281,7 @@ class generate_metadata:
             subject_id=self.Obj['ID'],
         )
         description.write_standard_file(output_directory=self.output_folder)
+        self.data_description_success=True
 
     def _get_funding_source(self):
         '''
@@ -354,6 +361,7 @@ class generate_metadata:
         rig_metadata_full_path=os.path.join(self.output_folder,'rig.json') 
         with open(rig_metadata_full_path, 'w') as f:
             json.dump(self.Obj['meta_data_dialog']['rig_metadata'], f, indent=4)
+            self.rig_metadata_success=True
 
     def _handle_edge_cases(self):
         '''
@@ -576,6 +584,7 @@ class generate_metadata:
 
         session = Session(**session_params)
         session.write_standard_file(output_directory=self.output_folder)
+        self.session_metadata_success=True
 
     def _get_high_speed_camera_stream(self):
         '''
