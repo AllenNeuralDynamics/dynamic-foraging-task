@@ -2780,9 +2780,11 @@ class Window(QMainWindow):
             else:
                 # Open dialog box
                 fname, _ = QFileDialog.getOpenFileName(self, 'Open file', 
-                    self.default_saveFolder+'\\'+self.current_box, 
+                    self.default_openFolder+'\\'+self.current_box, 
                     "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
-                logging.info('User selected: {}'.format(fname))    
+                logging.info('User selected: {}'.format(fname))
+                if fname != '':
+                    self.default_openFolder=os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(fname))))  
 
             self.fname=fname
         else:
