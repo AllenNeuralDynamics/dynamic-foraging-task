@@ -1103,6 +1103,9 @@ class Window(QMainWindow):
                     logging.error('Missing setting ({}), is required'.format(key))               
                     raise Exception('Missing setting ({}), is required'.format(key)) 
 
+        if 'default_openFolder' not in self.Settings:
+            self.Settings['default_openFolder'] = self.Settings['default_saveFolder']
+
         # Save all settings
         self.default_saveFolder=self.Settings['default_saveFolder']
         self.current_box=self.Settings['current_box']
