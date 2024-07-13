@@ -981,6 +981,7 @@ class generate_metadata:
             for probe in assembly['probes']:
                 if probe['name'] == probe_name:
                    return probe['lasers']
+        logging.info('No lasers found!')
         return None
     
     def _find_assembly_names(self, probe_name):
@@ -990,6 +991,7 @@ class generate_metadata:
         for assembly in self.Obj['meta_data_dialog']['rig_metadata']['ephys_assemblies']:
             if probe_name in [probe['name'] for probe in assembly['probes']]:
                return assembly['name']
+        logging.info('No ephys assembly found!')
         return None
     
     def _get_probe_names(self):
@@ -1008,6 +1010,7 @@ class generate_metadata:
 
         if self.has_behavior_data==False:
             self.behavior_streams=[]
+            logging.info('No behavior data stream detected!')
             return
 
         if self.box_type == 'Ephys':
@@ -1053,6 +1056,7 @@ class generate_metadata:
         '''
         if self.Obj['LaserCalibrationResults']=={}:
             self.opto_calibration =[]
+            logging.info('No opto calibration results detected!')
             return
         self._parse_opto_calibration() 
         self.opto_calibration=[]
@@ -1142,6 +1146,7 @@ class generate_metadata:
     def _FindLatestCalibrationDate(self,Laser):
         '''find the latest calibration date for the selected laser'''
         if not ('LaserCalibrationResults' in self.Obj):
+            logging.info("LaserCalibrationResults is not included in self.Obj.")
             return 'NA'
         Dates=[]
         for Date in self.Obj['LaserCalibrationResults']:
@@ -1149,6 +1154,7 @@ class generate_metadata:
                 Dates.append(Date)
         sorted_dates = sorted(Dates)
         if sorted_dates==[]:
+            logging.info('No dates found in the LaserCalibrationResults.')
             return 'NA'
         else:
             return sorted_dates[-1]
@@ -1211,6 +1217,7 @@ class generate_metadata:
         '''
         if not self.has_reward_delivery:
             self.reward_delivery=[]
+            logging.info('No reward delivery metadata found!')
             return
 
         device_oringin=self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceArea']
