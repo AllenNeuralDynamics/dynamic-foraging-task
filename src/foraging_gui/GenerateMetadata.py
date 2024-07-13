@@ -898,7 +898,7 @@ class generate_metadata:
                 start_time = self.Obj['Other_SessionStartTime']
                 end_time = self.Obj['Other_CurrentTime']
             else:
-                start_time = current_recording['openephys_stat_recording_time']
+                start_time = current_recording['openephys_start_recording_time']
                 end_time = current_recording['openephys_stop_recording_time']
             self.ephys_streams.append(Stream(
                     stream_modalities=[Modality.ECEPHYS],
