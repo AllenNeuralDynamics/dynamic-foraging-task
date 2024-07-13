@@ -2501,7 +2501,10 @@ class Window(QMainWindow):
             self.Save.setStyleSheet("color: black;")
 
             short_file = self.SaveFile.split('\\')[-1]
-            self.WarningLabel.setText('Saved: {}'.format(short_file))
+            if self.load_tag==0:
+                self.WarningLabel.setText('Saved: {}'.format(short_file))
+            else:
+                self.WarningLabel.setText('Saving of loaded files is not allowed: {}'.format(short_file))
             self.WarningLabel.setStyleSheet(self.default_warning_color)
             
             self.SessionlistSpin.setEnabled(True)
