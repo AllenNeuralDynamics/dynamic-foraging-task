@@ -2475,8 +2475,12 @@ class Window(QMainWindow):
             self.Metadata_dialog._save_metadata_dialog_parameters()
             Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
             # generate the metadata file
-            generate_metadata(Obj=Obj)
-            self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is saved!')
+            generated_metadata=generate_metadata(Obj=Obj)
+            if BackupSave==0:
+                text="Session metadata generated successfully: " + str(generated_metadata.session_metadata_success)+"\n"+\
+                "Rig metadata generated successfully: " + str(generated_metadata.rig_metadata_success)+"\n"+\
+                "Data description generated successfully: " + str(generated_metadata.data_description_success)
+                self._manage_warning_labels(self.MetadataWarning,warning_text=text)
         except Exception as e:
             self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved!')
             logging.error('Error generating session metadata: '+str(e))

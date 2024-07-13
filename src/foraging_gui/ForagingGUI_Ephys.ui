@@ -12,7 +12,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1875</width>
+    <width>1951</width>
     <height>1015</height>
    </rect>
   </property>
@@ -3396,34 +3396,6 @@
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
      </property>
     </widget>
-    <widget class="QLabel" name="MetadataWarning">
-     <property name="geometry">
-      <rect>
-       <x>-330</x>
-       <y>20</y>
-       <width>361</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="textFormat">
-      <enum>Qt::AutoText</enum>
-     </property>
-     <property name="scaledContents">
-      <bool>false</bool>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-     </property>
-    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">
@@ -4640,6 +4612,19 @@
      <string/>
     </property>
    </widget>
+   <widget class="QLabel" name="MetadataWarning">
+    <property name="geometry">
+     <rect>
+      <x>1550</x>
+      <y>850</y>
+      <width>301</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
    <zorder>TrainingParameters</zorder>
    <zorder>StartFIP</zorder>
    <zorder>FIPMode</zorder>
@@ -4679,13 +4664,14 @@
    <zorder>label_65</zorder>
    <zorder>OpenEphysRecordingType</zorder>
    <zorder>ManualWaterWarning</zorder>
+   <zorder>MetadataWarning</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1875</width>
+     <width>1951</width>
      <height>21</height>
     </rect>
    </property>
