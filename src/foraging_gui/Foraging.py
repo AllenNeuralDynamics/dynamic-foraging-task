@@ -2794,15 +2794,19 @@ class Window(QMainWindow):
             self.Obj = Obj
 
             widget_dict={}
-            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','centralwidget','TrainingParameters','Opto_dialog']
+            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','centralwidget','TrainingParameters']
             for dialog_name in dialogs:
                 if hasattr(self, dialog_name):
                     widget_types = (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit,
                                     QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox)
                     widget_dict.update({w.objectName(): w for w in getattr(self, dialog_name).findChildren(widget_types)})
-
+            # Adding widgets starting with 'Laser1_power' and 'Laser2_power' to widget_keys to allow the second update.
+            widget_keys=list(widget_dict.keys())
+            for key in widget_dict.keys():
+                if key.startswith('Laser1_power') or key.startswith('Laser2_power'):
+                    widget_keys.append(key)
             try:
-                for key in widget_dict.keys():
+                for key in widget_keys:
                     try:
                         widget = widget_dict[key]
                         if widget.parent().objectName() in ['Optogenetics','Optogenetics_trial_parameters']:
