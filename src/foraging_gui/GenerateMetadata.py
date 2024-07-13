@@ -590,7 +590,8 @@ class generate_metadata:
                         stream_start_time=datetime.strptime(self.Obj['Camera_dialog']['camera_start_time'], '%Y-%m-%d %H:%M:%S.%f'),
                         stream_end_time=datetime.strptime(self.Obj['Camera_dialog']['camera_stop_time'], '%Y-%m-%d %H:%M:%S.%f'),
                 ))
-
+        else:
+            logging.info('No camera data stream detected!')
     def _get_camera_names(self):
         '''
         get cameras used in this session    
@@ -612,7 +613,7 @@ class generate_metadata:
         '''
         self.ophys_streams=[]
         if self.Obj['fiber_photometry_start_time']=='':
-            logging.info('Photometry start time is empty!')
+            logging.info('No photometry data stream detected!')
             return
         self._get_photometry_light_sources_config()
         self._get_photometry_detectors()
