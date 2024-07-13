@@ -612,6 +612,7 @@ class generate_metadata:
         '''
         self.ophys_streams=[]
         if self.Obj['fiber_photometry_start_time']=='':
+            logging.info('Photometry start time is empty!')
             return
         self._get_photometry_light_sources_config()
         self._get_photometry_detectors()
@@ -720,6 +721,7 @@ class generate_metadata:
         '''
         self.audio_stimulus=[]
         if self.behavior_streams==[]:
+            logging.info('No behavior data stream detected!')
             return
         
         self.audio_stimulus.append(StimulusEpoch(
@@ -806,6 +808,7 @@ class generate_metadata:
         '''
         self.optogenetics_stimulus=[]
         if 'B_SelectedCondition' not in self.Obj:
+            logging.info('B_SelectedCondition is not included in the self.Obj!')
             return 
         a=np.array(self.Obj['B_SelectedCondition'])
         self.Obj['B_SelectedCondition']=a.astype(int)
@@ -890,6 +893,7 @@ class generate_metadata:
 
         if self.Obj['open_ephys']==[]:
             self.ephys_streams=[]
+            logging.info('No ephys data stream detected!')
             return
         
         # find daq names for Neuropixels
@@ -898,6 +902,7 @@ class generate_metadata:
         self.ephys_streams=[]
         self._get_ephys_modules()
         if self.ephys_modules==[]:
+            logging.info('Ephys modules are empty!')
             return
         self._get_stick_microscope()
         for current_recording in self.Obj['open_ephys']:
