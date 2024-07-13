@@ -2481,6 +2481,9 @@ class Window(QMainWindow):
                 "Rig metadata generated successfully: " + str(generated_metadata.rig_metadata_success)+"\n"+\
                 "Data description generated successfully: " + str(generated_metadata.data_description_success)
                 self._manage_warning_labels(self.MetadataWarning,warning_text=text)
+            Obj['generate_session_metadata_success']=generated_metadata.session_metadata_success
+            Obj['generate_rig_metadata_success']=generated_metadata.rig_metadata_success
+            Obj['generate_data_description_success']=generated_metadata.data_description_success
         except Exception as e:
             self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved!')
             logging.error('Error generating session metadata: '+str(e))
