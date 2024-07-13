@@ -894,7 +894,7 @@ class generate_metadata:
             return
         self._get_stick_microscope()
         for current_recording in self.Obj['open_ephys']:
-            if 'openephys_stat_recording_time' not in current_recording:
+            if 'openephys_start_recording_time' not in current_recording.keys():
                 start_time = self.Obj['Other_SessionStartTime']
                 end_time = self.Obj['Other_CurrentTime']
             else:
