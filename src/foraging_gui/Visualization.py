@@ -122,6 +122,8 @@ class PlotV(FigureCanvas):
             'Condition2': (255/255, 127/255, 80/255, 1),  # Coral Red
             'Condition3': (34/255, 139/255, 34/255, 1),  # Forest Green
             'Condition4': (218/255, 165/255, 32/255, 1)  # Goldenrod
+            'Condition5': (255/255, 0/255, 0/255, 1)  # Red
+            'Condition6': (0/255, 0/255, 255/255, 1)  # Blue
         }
 
         # Define trial types
