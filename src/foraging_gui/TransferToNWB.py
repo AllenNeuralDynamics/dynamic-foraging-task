@@ -310,11 +310,12 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
             LaserPulseDurC = np.nan
 
         else:
-            if getattr(obj, f'TP_Laser_{Sc}')[i] == 'Blue':
+            laser_color=_get_field(obj, field_list=[f'TP_Laser_{Sc}',f'TP_LaserColor_{Sc}'],index=i)
+            if laser_color == 'Blue':
                 LaserWavelengthC = float(473)
-            elif getattr(obj, f'TP_Laser_{Sc}')[i] == 'Red':
+            elif laser_color == 'Red':
                 LaserWavelengthC = float(647)
-            elif getattr(obj, f'TP_Laser_{Sc}')[i] == 'Green':
+            elif laser_color == 'Green':
                 LaserWavelengthC = float(547)
             LaserLocationC = str(getattr(obj, f'TP_Location_{Sc}')[i])
             Laser1Power=float(eval(_get_field(obj, field_list=[f'TP_Laser1_power_{Sc}',f'TP_LaserPowerLeft_{Sc}'],index=i,default='[np.nan,np.nan]'))[1])
@@ -582,5 +583,4 @@ if __name__ == '__main__':
         'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936359/706893_2024-04-09_14-27-56_ephys.json',
     ]
 
-    #test_bonsai_json_to_nwb(test_json_urls)
-    bonsai_to_nwb(fname=r"Y:713377\behavior_713377_2024-05-16_13-13-52\behavior\713377_2024-05-16_13-13-52.json",save_folder=r"I:\tmp")
+    test_bonsai_json_to_nwb(test_json_urls)
