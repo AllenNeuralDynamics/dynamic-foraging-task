@@ -346,7 +346,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                         rewarded_historyL=obj.B_RewardedHistory[0][i],
                         rewarded_historyR=obj.B_RewardedHistory[1][i],
                         reward_outcome_time=obj.B_RewardOutcomeTime[i],
-                        delay_start_time=getattr(obj, f'B_DelayStartTime{Harp}')[i],
+                        delay_start_time=_get_field(obj, f'B_DelayStartTime{Harp}', index=i, default=np.nan), 
                         goCue_start_time=goCue_start_time_t,
                         bait_left=obj.B_BaitHistory[0][i],
                         bait_right=obj.B_BaitHistory[1][i],
@@ -582,4 +582,5 @@ if __name__ == '__main__':
         'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936359/706893_2024-04-09_14-27-56_ephys.json',
     ]
 
-    test_bonsai_json_to_nwb(test_json_urls)
+    #test_bonsai_json_to_nwb(test_json_urls)
+    bonsai_to_nwb(fname=r"Y:713377\behavior_713377_2024-05-16_13-13-52\behavior\713377_2024-05-16_13-13-52.json",save_folder=r"I:\tmp")
