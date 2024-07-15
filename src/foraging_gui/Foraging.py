@@ -1103,8 +1103,12 @@ class Window(QMainWindow):
                     logging.error('Missing setting ({}), is required'.format(key))               
                     raise Exception('Missing setting ({}), is required'.format(key)) 
 
+        if 'default_openFolder' not in self.Settings:
+            self.Settings['default_openFolder'] = self.Settings['default_saveFolder']
+
         # Save all settings
         self.default_saveFolder=self.Settings['default_saveFolder']
+        self.default_openFolder=self.Settings['default_openFolder']
         self.current_box=self.Settings['current_box']
         self.temporary_video_folder=self.Settings['temporary_video_folder']
         self.Teensy_COM = self.Settings['Teensy_COM_box'+str(self.box_number)]
@@ -2776,9 +2780,11 @@ class Window(QMainWindow):
             else:
                 # Open dialog box
                 fname, _ = QFileDialog.getOpenFileName(self, 'Open file', 
-                    self.default_saveFolder+'\\'+self.current_box, 
+                    self.default_openFolder+'\\'+self.current_box, 
                     "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
-                logging.info('User selected: {}'.format(fname))    
+                logging.info('User selected: {}'.format(fname))
+                if fname != '':
+                    self.default_openFolder=os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(fname))))  
 
             self.fname=fname
         else:
