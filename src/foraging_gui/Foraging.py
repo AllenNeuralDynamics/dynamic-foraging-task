@@ -3562,17 +3562,16 @@ class Window(QMainWindow):
                     self.Start.setChecked(False)
                     logging.info('User declines continuation of session')
                     return
-
+                
             # check experimenter name
-            if self.Experimenter.text() == "the ghost in the shell":
-                reply = QMessageBox.critical(self,
-                    'Box {}, Start'.format(self.box_letter),    
-                    'Experimenter field set to default, continue anyways?',
-                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-                if reply == QMessageBox.No:
-                    self.Start.setChecked(False)
-                    logging.info('User declines using default name')
-                    return                
+            reply = QMessageBox.critical(self,
+                'Box {}, Start'.format(self.box_letter),    
+                f'The experimenter is <span style="color:red;">{self.Experimenter.text()}</span>. Is this correct?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if reply == QMessageBox.No:
+                self.Start.setChecked(False)
+                logging.info('User declines using default name')
+                return                
             logging.info('Starting session, with experimenter: {}'.format(self.Experimenter.text()))
 
             # check repo status
