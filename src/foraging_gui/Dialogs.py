@@ -84,7 +84,7 @@ class OptogeneticsDialog(QDialog):
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
         uic.loadUi('Optogenetics.ui', self)
-        self.condition_idx = [1, 2, 3, 4] # corresponding to optogenetics condition 1, 2, 3, 4
+        self.condition_idx = [1, 2, 3, 4, 5, 6] # corresponding to optogenetics condition 1, 2, 3, 4, 5, 6
         self.laser_tags=[1,2] # corresponding to Laser_1 and Laser_2
         self._connectSignalsSlots()
         self.MainWindow=MainWindow
@@ -1409,7 +1409,7 @@ class LaserCalibrationDialog(QDialog):
         self.threadpool1=QThreadPool()
         self.threadpool2=QThreadPool()
         self.laser_tags=[1,2]
-        self.condition_idx=[1,2,3,4]
+        self.condition_idx=[1,2,3,4,5,6]
     def _connectSignalsSlots(self):
         self.Open.clicked.connect(self._Open)
         self.KeepOpen.clicked.connect(self._KeepOpen)
