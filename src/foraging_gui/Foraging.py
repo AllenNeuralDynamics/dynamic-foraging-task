@@ -135,6 +135,7 @@ class Window(QMainWindow):
         self.give_right_volume_reserved=0 # the reserved volume of the right valve (usually given after go cue)
         self.give_left_time_reserved=0 # the reserved open time of the left valve (usually given after go cue)
         self.give_right_time_reserved=0 # the reserved open time of the right valve (usually given after go cue)
+        self.load_tag=0 # 1, a session has been loaded; 0, no session has been loaded
         self._Optogenetics()    # open the optogenetics panel 
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
@@ -337,7 +338,7 @@ class Window(QMainWindow):
                 self.openephys_start_recording_time = str(datetime.now())
                 QMessageBox.warning(self, '', f'Open Ephys has started recording!\n Recording type: {self.OpenEphysRecordingType.currentText()}')
             except Exception as e:
-                logging.error(str(e))
+                logging.error(traceback.format_exc())
                 self.StartEphysRecording.setChecked(False)
                 QMessageBox.warning(self, 'Connection Error', 'Failed to connect to Open Ephys. Please check: \n1) the correct ip address is included in the settings json file. \n2) the Open Ephys software is open.')                            
         else:
@@ -368,7 +369,7 @@ class Window(QMainWindow):
                 EphysControl.stop_open_ephys_recording()
                 QMessageBox.warning(self, '', 'Open Ephys has stopped recording! Please save the data again!')
             except Exception as e:
-                logging.error(str(e))
+                logging.error(traceback.format_exc())
                 QMessageBox.warning(self, 'Connection Error', 'Failed to stop Open Ephys recording. Please check: \n1) the open ephys software is still running')
         self._toggle_color(self.StartEphysRecording)
 
@@ -642,7 +643,7 @@ class Window(QMainWindow):
                 self._set_parameters(key,widget_dict,parameters)
         except Exception as e:
             # Catch the exception and log error information
-            logging.error(str(e))
+            logging.error(traceback.format_exc())
 
     def _keyPressEvent(self):
         # press enter to confirm parameters change
@@ -703,7 +704,7 @@ class Window(QMainWindow):
                 relative_postition=(0,0,step)
             self._UpdatePosition(current_position,relative_postition)
         except Exception as e:
-            logging.error(str(e))
+            logging.error(traceback.format_exc())
 
     def _MoveXP(self):
         '''Move X positively'''
@@ -827,7 +828,7 @@ class Window(QMainWindow):
             instance.set_baudrate(250000)
             self.current_stage=Stage(serial=instance)
         except Exception as e:
-            logging.error(str(e))
+            logging.error(traceback.format_exc())
             self._no_stage()
         else:
             logging.info('Successfully connected to newscale stage: {}'.format(instance.sn))       
@@ -847,7 +848,7 @@ class Window(QMainWindow):
                 logging.info('Connected to Bonsai')
                 subprocess.Popen('title Box{}'.format(self.box_letter),shell=True)
             except Exception as e:
-                logging.error(str(e))
+                logging.error(traceback.format_exc())
                 self.WarningLabelInitializeBonsai.setText('Please open bonsai!')
                 self.WarningLabelInitializeBonsai.setStyleSheet(self.default_warning_color)
                 self.InitializeBonsaiSuccessfully=0
@@ -1309,21 +1310,21 @@ class Window(QMainWindow):
         try:
             subprocess.Popen(['explorer', self.VideoFolder])
         except Exception as e:
-            logging.error(str(e))
+            logging.error(traceback.format_exc())
                     
     def _OpenMetadataDialogFolder(self):
         '''Open the metadata dialog folder'''
         try:
             subprocess.Popen(['explorer', self.metadata_dialog_folder])
         except Exception as e:
-            logging.error(str(e))
+            logging.error(traceback.format_exc())
 
     def _OpenRigMetadataFolder(self):
         '''Open the rig metadata folder'''
         try:
             subprocess.Popen(['explorer', self.rig_metadata_folder])
         except Exception as e:
-            logging.error(str(e))
+            logging.error(traceback.format_exc())
 
     def _load_most_recent_rig_json(self,error_if_none=True):
         # See if rig metadata folder exists 
@@ -1408,7 +1409,7 @@ class Window(QMainWindow):
         try:
             subprocess.Popen(['explorer', self.SettingFolder])
         except Exception as e:
-            logging.error(str(e))
+            logging.error(traceback.format_exc())
 
     def _ForceSave(self):
         '''Save whether the current trial is complete or not'''
@@ -1519,7 +1520,7 @@ class Window(QMainWindow):
             elif direction==-1:
                 widget2.setValue((float(widget1.text())-self.latest_fitting[valve][1])/self.latest_fitting[valve][0])
         except Exception as e:
-            logging.error(str(e))
+            logging.error(traceback.format_exc())
 
     def _GetLatestFitting(self,FittingResults):
         '''Get the latest fitting results from water calibration'''
@@ -1542,19 +1543,19 @@ class Window(QMainWindow):
             folder_name=os.path.dirname(self.SaveFileJson)
             subprocess.Popen(['explorer', folder_name])
         except Exception as e:
-            logging.error(str(e))
+            logging.error(traceback.format_exc())
             try:
                 AnimalFolder=os.path.join(self.default_saveFolder, self.current_box, self.ID.text())
                 subprocess.Popen(['explorer', AnimalFolder])
             except Exception as e:
-                logging.error(str(e))
+                logging.error(traceback.format_exc())
 
     def _OpenLoggingFolder(self):
         '''Open the logging folder'''
         try:
             subprocess.Popen(['explorer', self.Ot_log_folder])
         except Exception as e:
-            logging.error(str(e))
+            logging.error(traceback.format_exc())
 
     def _startTemporaryLogging(self):
         '''Restart the temporary logging'''
@@ -1581,7 +1582,7 @@ class Window(QMainWindow):
                 loading_parameters_type=0
             # sometimes we only have training parameters, no behavior parameters
             except Exception as e:
-                logging.error(str(e))
+                logging.error(traceback.format_exc())
                 value=parameters[key]
                 loading_parameters_type=1
             if isinstance(widget, QtWidgets.QPushButton):
@@ -1683,7 +1684,7 @@ class Window(QMainWindow):
             if self.actionTime_distribution.isChecked()==True:
                 self.PlotTime._Update(self)
         except Exception as e:
-            logging.error(str(e))
+            logging.error(traceback.format_exc())
 
         # move newscale stage
         if hasattr(self,'current_stage'):
@@ -1692,7 +1693,7 @@ class Window(QMainWindow):
                     self.StageStop.click
                     self.current_stage.move_absolute_3d(float(self.PositionX.text()),float(self.PositionY.text()),float(self.PositionZ.text()))
                 except Exception as e:
-                    logging.error(str(e))
+                    logging.error(traceback.format_exc())
         # Get the parameters before change
         if hasattr(self, 'GeneratedTrials') and self.ToInitializeVisual==0: # use the current GUI paramters when no session starts running
             Parameters=self.GeneratedTrials
@@ -1809,7 +1810,7 @@ class Window(QMainWindow):
                             # it's valid float
                             float(child.text())
                         except Exception as e:
-                            #logging.error(str(e))
+                            #logging.error(traceback.format_exc())
                             # Invalid float. Do not change the parameter
                             if child.objectName() in ['BaseWeight', 'WeightAfter']:
                                 # Strip the last character which triggered the invalid float
@@ -1828,7 +1829,7 @@ class Window(QMainWindow):
                         child.setStyleSheet('color: black;')
                         child.setStyleSheet('background-color: white;')
                 except Exception as e:
-                    #logging.error(str(e))
+                    #logging.error(traceback.format_exc())
                     pass
 
     def _CheckFormat(self,child):
@@ -1840,7 +1841,7 @@ class Window(QMainWindow):
                     self.RewardPairsN.setText(str(len(self.RewardFamilies[int(self.RewardFamily.text())-1])))
                 return 1
             except Exception as e:
-                logging.error(str(e))
+                logging.error(traceback.format_exc())
                 return 0
         if child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum':
             try:
@@ -1850,7 +1851,7 @@ class Window(QMainWindow):
                 else:
                     return 1
             except Exception as e: 
-                logging.error(str(e))
+                logging.error(traceback.format_exc())
                 return 0
         if child.objectName()=='UncoupledReward':
             try:
@@ -1867,7 +1868,7 @@ class Window(QMainWindow):
                 self.RewardProb=np.array(num_list)
                 return 1
             except Exception as e: 
-                logging.error(str(e))
+                logging.error(traceback.format_exc())
                 return 0
         else:
             return 1
@@ -2062,7 +2063,7 @@ class Window(QMainWindow):
                         self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
         except Exception as e:
             # Catch the exception and log error information
-            logging.error(str(e))
+            logging.error(traceback.format_exc())
 
     def closeEvent(self, event):
         # stop the current session first
@@ -2189,7 +2190,7 @@ class Window(QMainWindow):
         try:
             self.PlotTime._Update(self)
         except Exception as e:
-            logging.error(str(e))
+            logging.error(traceback.format_exc())
 
     def _LickSta(self):
         '''Licks statistics'''
@@ -2221,7 +2222,7 @@ class Window(QMainWindow):
             if hasattr(self, 'GeneratedTrials'):
                 self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
         except Exception as e:
-            logging.error(str(e))
+            logging.error(traceback.format_exc())
 
     def _about(self):
         QMessageBox.about(
@@ -2309,14 +2310,15 @@ class Window(QMainWindow):
             self._StartExcitation()
             logging.info('Stopping excitation before saving')
 
-        # this should be improved in the future. Need to get the last LeftRewardDeliveryTime and RightRewardDeliveryTime
+        # get iregular timestamp
         if hasattr(self, 'GeneratedTrials') and self.InitializeBonsaiSuccessfully==1:
             self.GeneratedTrials._get_irregular_timestamp(self.Channel2)
         
-        # Create new folders
+        # Create new folders. 
         if self.CreateNewFolder==1:
             self._GetSaveFolder()
             self.CreateNewFolder=0
+            
         if not os.path.exists(os.path.dirname(self.SaveFileJson)):
             os.makedirs(os.path.dirname(self.SaveFileJson))
             logging.info(f"Created new folder: {os.path.dirname(self.SaveFileJson)}")
@@ -2336,157 +2338,177 @@ class Window(QMainWindow):
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
                 return
 
-
         # Do we have trials to save?
-        if hasattr(self, 'GeneratedTrials'):
+        if self.load_tag==1:
+            Obj=self.Obj
+        elif hasattr(self, 'GeneratedTrials'):
             if hasattr(self.GeneratedTrials, 'Obj'):
                 Obj=self.GeneratedTrials.Obj
             else:
                 Obj={}
         else:
             Obj={}
-        widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren(
-            (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
-            QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-        widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
-        self._Concat(widget_dict,Obj,'None')
-        dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','Metadata_dialog']
-        for dialog_name in dialogs:
-            if hasattr(self, dialog_name):
-                widget_dict = {w.objectName(): w for w in getattr(self, dialog_name).findChildren(
-                    (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
-                    QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox))}
-                self._Concat(widget_dict, Obj, dialog_name)
-        
-        Obj2=Obj.copy()
-        # save behavor events
-        if hasattr(self, 'GeneratedTrials'):
-            # Do something if self has the GeneratedTrials attribute
-            # Iterate over all attributes of the GeneratedTrials object
-            for attr_name in dir(self.GeneratedTrials):
-                if attr_name.startswith('B_') or attr_name.startswith('BS_'):
-                    if attr_name=='B_RewardFamilies' and self.SaveFile.endswith('.mat'):
-                        pass
-                    else:
-                        Value=getattr(self.GeneratedTrials, attr_name)
-                        try:
-                            if isinstance(Value, float) or isinstance(Value, int):                                
-                                if math.isnan(Value):
-                                    Obj[attr_name]='nan'    
+
+        if self.load_tag==0:
+            widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren(
+                (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+                QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
+            widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
+            self._Concat(widget_dict,Obj,'None')
+            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','Metadata_dialog']
+            for dialog_name in dialogs:
+                if hasattr(self, dialog_name):
+                    widget_dict = {w.objectName(): w for w in getattr(self, dialog_name).findChildren(
+                        (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit, 
+                        QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox))}
+                    self._Concat(widget_dict, Obj, dialog_name)
+            Obj2=Obj.copy()
+            # save behavor events
+            if hasattr(self, 'GeneratedTrials'):
+                # Do something if self has the GeneratedTrials attribute
+                # Iterate over all attributes of the GeneratedTrials object
+                for attr_name in dir(self.GeneratedTrials):
+                    if attr_name.startswith('B_') or attr_name.startswith('BS_'):
+                        if attr_name=='B_RewardFamilies' and self.SaveFile.endswith('.mat'):
+                            pass
+                        else:
+                            Value=getattr(self.GeneratedTrials, attr_name)
+                            try:
+                                if isinstance(Value, float) or isinstance(Value, int):                                
+                                    if math.isnan(Value):
+                                        Obj[attr_name]='nan'    
+                                    else:
+                                        Obj[attr_name]=Value   
                                 else:
-                                    Obj[attr_name]=Value   
-                            else:
-                                Obj[attr_name]=Value        
-                        except Exception as e:
-                            logging.info(f'{attr_name} is not a real scalar, save it as it is.')
-                            Obj[attr_name]=Value
-        # save other events, e.g. session start time
-        for attr_name in dir(self):
-            if attr_name.startswith('Other_') or attr_name.startswith('info_'):
-                Obj[attr_name] = getattr(self, attr_name)
-        # save laser calibration results (only for the calibration session)
-        if hasattr(self, 'LaserCalibration_dialog'):
-            # Do something if self has the GeneratedTrials attribute
-            # Iterate over all attributes of the GeneratedTrials object
-            for attr_name in dir(self.LaserCalibration_dialog):
-                if attr_name.startswith('LCM_'):
-                    Obj[attr_name] = getattr(self.LaserCalibration_dialog, attr_name)
+                                    Obj[attr_name]=Value        
+                            except Exception as e:
+                                logging.info(f'{attr_name} is not a real scalar, save it as it is.')
+                                Obj[attr_name]=Value
+            # save other events, e.g. session start time
+            for attr_name in dir(self):
+                if attr_name.startswith('Other_') or attr_name.startswith('info_'):
+                    Obj[attr_name] = getattr(self, attr_name)
+            # save laser calibration results (only for the calibration session)
+            if hasattr(self, 'LaserCalibration_dialog'):
+                # Do something if self has the GeneratedTrials attribute
+                # Iterate over all attributes of the GeneratedTrials object
+                for attr_name in dir(self.LaserCalibration_dialog):
+                    if attr_name.startswith('LCM_'):
+                        Obj[attr_name] = getattr(self.LaserCalibration_dialog, attr_name)
 
-        # save laser calibration results from the json file
-        if hasattr(self, 'LaserCalibrationResults'):
-            self._GetLaserCalibration()
-            Obj['LaserCalibrationResults']=self.LaserCalibrationResults
+            # save laser calibration results from the json file
+            if hasattr(self, 'LaserCalibrationResults'):
+                self._GetLaserCalibration()
+                Obj['LaserCalibrationResults']=self.LaserCalibrationResults
 
-        # save water calibration results
-        if hasattr(self, 'WaterCalibrationResults'):
-            self._GetWaterCalibration()
-            Obj['WaterCalibrationResults']=self.WaterCalibrationResults
-        
-        # save other fields start with Ot_
-        for attr_name in dir(self):
-            if attr_name.startswith('Ot_'):
-                Obj[attr_name]=getattr(self, attr_name)
-        
-        if hasattr(self, 'fiber_photometry_start_time'):
-            Obj['fiber_photometry_start_time'] = self.fiber_photometry_start_time
-            if hasattr(self, 'fiber_photometry_end_time'):
-                end_time = self.fiber_photometry_end_time
-            else:
-                end_time = str(datetime.now())
-            Obj['fiber_photometry_end_time'] = end_time
+            # save water calibration results
+            if hasattr(self, 'WaterCalibrationResults'):
+                self._GetWaterCalibration()
+                Obj['WaterCalibrationResults']=self.WaterCalibrationResults
+            
+            # save other fields start with Ot_
+            for attr_name in dir(self):
+                if attr_name.startswith('Ot_'):
+                    Obj[attr_name]=getattr(self, attr_name)
+            
+            if hasattr(self, 'fiber_photometry_start_time'):
+                Obj['fiber_photometry_start_time'] = self.fiber_photometry_start_time
+                if hasattr(self, 'fiber_photometry_end_time'):
+                    end_time = self.fiber_photometry_end_time
+                else:
+                    end_time = str(datetime.now())
+                Obj['fiber_photometry_end_time'] = end_time
 
-        # Save the current box
-        Obj['box'] = self.current_box
+            # Save the current box
+            Obj['box'] = self.current_box
 
-        # save settings
-        Obj['settings'] = self.Settings
-        Obj['settings_box']=self.SettingsBox
+            # save settings
+            Obj['settings'] = self.Settings
+            Obj['settings_box']=self.SettingsBox
 
-        # save the commit hash
-        Obj['commit_ID']=self.commit_ID
-        Obj['repo_url']=self.repo_url
-        Obj['current_branch'] =self.current_branch
-        Obj['repo_dirty_flag'] =self.repo_dirty_flag
-        Obj['dirty_files'] =self.dirty_files
+            # save the commit hash
+            Obj['commit_ID']=self.commit_ID
+            Obj['repo_url']=self.repo_url
+            Obj['current_branch'] =self.current_branch
+            Obj['repo_dirty_flag'] =self.repo_dirty_flag
+            Obj['dirty_files'] =self.dirty_files
+            Obj['version'] = self.version
+            
+            # save the open ephys recording information
+            Obj['open_ephys'] = self.open_ephys
+            
+            if SaveContinue==0:
+                # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
+                self.unsaved_data=False 
+                self._NewSession()
+                self.unsaved_data=True
+                # do not create a new folder
+                self.CreateNewFolder=0
+
+            if BackupSave==0:
+                self._check_drop_frames(save_tag=1)
+                
+                # save drop frames information
+                Obj['drop_frames_tag']=self.drop_frames_tag
+                Obj['trigger_length']=self.trigger_length
+                Obj['drop_frames_warning_text']=self.drop_frames_warning_text
+                Obj['frame_num']=self.frame_num
+
+            # save manual water 
+            Obj['ManualWaterVolume']=self.ManualWaterVolume
+
+            # save camera start/stop time
+            Obj['Camera_dialog']['camera_start_time']=self.Camera_dialog.camera_start_time
+            Obj['Camera_dialog']['camera_stop_time']=self.Camera_dialog.camera_stop_time
+
+            # save the saving type (normal saving, backup saving or force saving)
+            Obj['saving_type_label'] = saving_type_label
         
         # save folders
+        Obj['SessionFolder']=self.SessionFolder
         Obj['TrainingFolder']=self.TrainingFolder
         Obj['HarpFolder']=self.HarpFolder
         Obj['VideoFolder']=self.VideoFolder
         Obj['PhotometryFolder']=self.PhotometryFolder
         Obj['MetadataFolder']=self.MetadataFolder
-        
-        # save the open ephys recording information
-        Obj['open_ephys'] = self.open_ephys
-        
-        if SaveContinue==0:
-            # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
-            self.unsaved_data=False 
-            self._NewSession()
-            self.unsaved_data=True
-            # do not create a new folder
-            self.CreateNewFolder=0
-
-        if BackupSave==0:
-            self._check_drop_frames(save_tag=1)
-            
-            # save drop frames information
-            Obj['drop_frames_tag']=self.drop_frames_tag
-            Obj['trigger_length']=self.trigger_length
-            Obj['drop_frames_warning_text']=self.drop_frames_warning_text
-            Obj['frame_num']=self.frame_num
-
-        # save manual water 
-        Obj['ManualWaterVolume']=self.ManualWaterVolume
-
-        # save camera start/stop time
-        Obj['Camera_dialog']['camera_start_time']=self.Camera_dialog.camera_start_time
-        Obj['Camera_dialog']['camera_stop_time']=self.Camera_dialog.camera_stop_time
-
-        # save the metadata collected in the metadata dialogue
-        self.Metadata_dialog._save_metadata_dialog_parameters()
-        Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
-
-        # save the saving type (normal saving, backup saving or force saving)
-        Obj['saving_type_label'] = saving_type_label
+        Obj['SaveFile']=self.SaveFile
 
         # generate the metadata file
         try:
-            generate_metadata(Obj=Obj)
+            # save the metadata collected in the metadata dialogue
+            self.Metadata_dialog._save_metadata_dialog_parameters()
+            Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
+            # generate the metadata file
+            generated_metadata=generate_metadata(Obj=Obj)
+            if BackupSave==0:
+                text="Session metadata generated successfully: " + str(generated_metadata.session_metadata_success)+"\n"+\
+                "Rig metadata generated successfully: " + str(generated_metadata.rig_metadata_success)+"\n"+\
+                "Data description generated successfully: " + str(generated_metadata.data_description_success)
+                self._manage_warning_labels(self.MetadataWarning,warning_text=text)
+            Obj['generate_session_metadata_success']=generated_metadata.session_metadata_success
+            Obj['generate_rig_metadata_success']=generated_metadata.rig_metadata_success
+            Obj['generate_data_description_success']=generated_metadata.data_description_success
         except Exception as e:
-            self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved succuessfully!')
+            self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved!')
             logging.error('Error generating session metadata: '+str(e))
-
-        # save Json or mat
-        if self.SaveFile.endswith('.mat'):
-        # Save data to a .mat file
-            savemat(self.SaveFile, Obj) 
-        elif self.SaveFile.endswith('par.json'):
-            with open(self.SaveFile, "w") as outfile:
-                json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
-        elif self.SaveFile.endswith('.json'):
-            with open(self.SaveFile, "w") as outfile:
-                json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
+            logging.error(traceback.format_exc())
+            # set to False if error occurs
+            Obj['generate_session_metadata_success']=False
+            Obj['generate_rig_metadata_success']=False
+            Obj['generate_data_description_success']=False
+        
+        # don't save the data if the load tag is 1
+        if self.load_tag==0:
+            # save Json or mat
+            if self.SaveFile.endswith('.mat'):
+            # Save data to a .mat file
+                savemat(self.SaveFile, Obj) 
+            elif self.SaveFile.endswith('par.json') and self.load_tag==0:
+                with open(self.SaveFile, "w") as outfile:
+                    json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
+            elif self.SaveFile.endswith('.json'):
+                with open(self.SaveFile, "w") as outfile:
+                    json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
 
         # Toggle unsaved data to False
         if BackupSave==0:
@@ -2495,7 +2517,10 @@ class Window(QMainWindow):
             self.Save.setStyleSheet("color: black;")
 
             short_file = self.SaveFile.split('\\')[-1]
-            self.WarningLabel.setText('Saved: {}'.format(short_file))
+            if self.load_tag==0:
+                self.WarningLabel.setText('Saved: {}'.format(short_file))
+            else:
+                self.WarningLabel.setText('Saving of loaded files is not allowed!')
             self.WarningLabel.setStyleSheet(self.default_warning_color)
             
             self.SessionlistSpin.setEnabled(True)
@@ -2521,31 +2546,14 @@ class Window(QMainWindow):
             photometry data
             ephys data
         '''
-        current_time = datetime.now()
-        formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-        self.session_name = f'behavior_{self.ID.text()}_{formatted_datetime}'
-        self.acquisition_datetime = current_time.strftime("%Y-%m-%d %H:%M:%S")
-        self.SessionFolder=os.path.join(self.default_saveFolder, 
-            self.current_box,self.ID.text(), f'behavior_{self.ID.text()}_{formatted_datetime}')
-
-        # Training folder
-        self.TrainingFolder=os.path.join(self.SessionFolder,'behavior')
-        self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
-        self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
-        self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}_par.json')
-
-        # Harp folder
-        self.HarpFolder=os.path.join(self.TrainingFolder,'raw.harp')
-
-        # video data
-        self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
-
-        # photometry folder
-        self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
         
-        # Metadata folder
-        self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
-
+        if self.load_tag==0:
+            current_time = datetime.now()
+            formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+            self._get_folder_structure_new(formatted_datetime)
+        elif self.load_tag==1:
+            self._parse_folder_structure()
+            
         # create folders
         if not os.path.exists(self.SessionFolder):
             os.makedirs(self.SessionFolder)
@@ -2565,6 +2573,43 @@ class Window(QMainWindow):
         if not os.path.exists(self.PhotometryFolder):
             os.makedirs(self.PhotometryFolder)
             logging.info(f"Created new folder: {self.PhotometryFolder}")
+    
+    def _parse_folder_structure(self):
+        '''parse the folder structure from the loaded json file'''
+        formatted_datetime = os.path.basename(self.fname).split('_')[1]+'_'+os.path.basename(self.fname).split('_')[-1].split('.')[0]
+        if os.path.basename(os.path.dirname(self.fname))=='TrainingFolder':
+            # old data format
+            self._get_folder_structure_old(formatted_datetime)
+        else:
+            # new data format
+            self._get_folder_structure_new(formatted_datetime)
+
+    def _get_folder_structure_old(self,formatted_datetime):
+        '''get the folder structure for the old data format'''
+        self.SessionFolder=os.path.join(self.default_saveFolder, 
+            self.current_box,self.ID.text(), f'{self.ID.text()}_{formatted_datetime}')
+        self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
+        self.TrainingFolder=os.path.join(self.SessionFolder, 'TrainingFolder')
+        self.HarpFolder=os.path.join(self.SessionFolder, 'HarpFolder')
+        self.VideoFolder=os.path.join(self.SessionFolder, 'VideoFolder')
+        self.PhotometryFolder=os.path.join(self.SessionFolder, 'PhotometryFolder')
+        self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
+        self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
+        self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}_par.json')
+
+    def _get_folder_structure_new(self,formatted_datetime):
+        '''get the folder structure for the new data format'''
+        # Determine folders
+        self.SessionFolder=os.path.join(self.default_saveFolder, 
+            self.current_box,self.ID.text(), f'behavior_{self.ID.text()}_{formatted_datetime}')
+        self.TrainingFolder=os.path.join(self.SessionFolder,'behavior')
+        self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
+        self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
+        self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}_par.json')
+        self.HarpFolder=os.path.join(self.TrainingFolder,'raw.harp')
+        self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
+        self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
+        self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
 
     def _Concat(self,widget_dict,Obj,keyname):
         '''Help manage save different dialogs'''
@@ -2822,7 +2867,7 @@ class Window(QMainWindow):
                         else:
                             CurrentObj=Obj.copy()
                     except Exception as e:
-                        logging.error(str(e))
+                        logging.error(traceback.format_exc())
                         continue
                     if key in CurrentObj:
                         # skip LeftValue, RightValue, GiveWaterL, GiveWaterR if WaterCalibrationResults is not empty as they will be set by the corresponding volume. 
@@ -2906,13 +2951,13 @@ class Window(QMainWindow):
                             widget.clear()
             except Exception as e:
                 # Catch the exception and print error information
-                logging.error(str(e))
+                logging.error(traceback.format_exc())
             try:
                 # visualization when loading the data
                 self._LoadVisualization()
             except Exception as e:
                 # Catch the exception and print error information
-                logging.error(str(e))
+                logging.error(traceback.format_exc())
                 # delete GeneratedTrials
                 del self.GeneratedTrials
             # show basic information
@@ -2945,7 +2990,7 @@ class Window(QMainWindow):
                         self.current_stage.move_absolute_3d(float(last_positions[0]),float(last_positions[1]),float(last_positions[2]))
                         self._UpdatePosition((float(last_positions[0]),float(last_positions[1]),float(last_positions[2])),(0,0,0))
                     except Exception as e:
-                        logging.error(str(e))
+                        logging.error(traceback.format_exc())
             else:
                 pass
 
@@ -2970,6 +3015,7 @@ class Window(QMainWindow):
             self.NewSession.setDisabled(False)
         self.StartExcitation.setChecked(False)
         self.keyPressEvent() # Accept all updates
+        self.load_tag=1
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
@@ -2991,7 +3037,7 @@ class Window(QMainWindow):
                     # Set the attribute in the GeneratedTrials object
                     setattr(self.GeneratedTrials, attr_name, value)
                 except Exception as e:
-                    logging.error(str(e))
+                    logging.error(traceback.format_exc())
         if self.GeneratedTrials.B_AnimalResponseHistory.size==0:
             del self.GeneratedTrials
             return
@@ -3124,7 +3170,7 @@ class Window(QMainWindow):
                 self.TeensyWarning.setText('Started FIP excitation')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
-                logging.error(str(e))
+                logging.error(traceback.format_exc())
                 self.TeensyWarning.setText('Error: starting excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
                 reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
@@ -3147,7 +3193,7 @@ class Window(QMainWindow):
                 self.TeensyWarning.setText('Stopped FIP excitation')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
-                logging.error(str(e))
+                logging.error(traceback.format_exc())
                 self.TeensyWarning.setText('Error stopping excitation!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
                 reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when stopping excitation: {}'.format(e), QMessageBox.Ok)
@@ -3201,7 +3247,7 @@ class Window(QMainWindow):
                 self.TeensyWarning.setText('Start bleaching!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
-                logging.error(str(e))
+                logging.error(traceback.format_exc())
                 
                 # Alert user
                 self.TeensyWarning.setText('Error: start bleaching!')
@@ -3235,7 +3281,7 @@ class Window(QMainWindow):
                 self.TeensyWarning.setText('')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
-                logging.error(str(e))
+                logging.error(traceback.format_exc())
                 self.TeensyWarning.setText('Error: stop bleaching!')
                 self.TeensyWarning.setStyleSheet(self.default_warning_color)
     
@@ -3463,6 +3509,9 @@ class Window(QMainWindow):
 
     def _Start(self):
         '''start trial loop'''
+        # set the load tag to zero
+        self.load_tag=0
+
         # empty post weight
         self.WeightAfter.setText('')
 
@@ -3766,7 +3815,7 @@ class Window(QMainWindow):
             try:
                 self.PlotM._Update(GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
             except Exception as e:
-                logging.error(str(e))
+                logging.error(traceback.format_exc())
 
     def _StartTrialLoop(self,GeneratedTrials,worker1,worker_save):
         if self.Start.isChecked():
@@ -4107,7 +4156,7 @@ class Window(QMainWindow):
             TotalWater=ExtraWater+water_in_session
             self.TotalWater.setText(str(np.round(TotalWater,3)))
         except Exception as e:
-            logging.error(str(e))
+            logging.error(traceback.format_exc())
             
     def _AutoTrain(self):
         """set up auto training"""
@@ -4155,7 +4204,7 @@ class Window(QMainWindow):
                 capsule_id = 'c089614a-347e-4696-b17e-86980bb782c' 
                 mount = 'FIP'
  
-            date_format = "%Y-%m-%d %H:%M:%S"
+            date_format = "%Y-%m-%d_%H-%M-%S"
             # Define contents of manifest file
             contents = {
                 'acquisition_datetime': datetime.strptime(self.acquisition_datetime,date_format),
@@ -4265,9 +4314,10 @@ def log_git_hash():
         git_branch = subprocess.check_output(['git','branch','--show-current']).decode('ascii').strip()
         repo_url = subprocess.check_output(['git', 'remote', 'get-url', 'origin']).decode('ascii').strip()
         dirty_files = subprocess.check_output(['git','diff-index','--name-only', 'HEAD']).decode('ascii').strip()
+        version=foraging_gui.__version__
     except Exception as e:
         logging.error('Could not log git branch and hash: {}'.format(str(e)))
-        return None, None, None, None
+        return None, None, None, None, None, None
     
     # Log branch and commit hash
     logging.info('Current git commit branch, hash: {}, {}'.format(git_branch,git_hash))
@@ -4287,7 +4337,7 @@ def log_git_hash():
         logging.warning('local repository is clean')
         print('local repository is clean')
 
-    return git_hash, git_branch, repo_url, repo_dirty_flag, dirty_files
+    return git_hash, git_branch, repo_url, repo_dirty_flag, dirty_files, version
 
 
 def show_exception_box(log_msg):
@@ -4382,7 +4432,7 @@ if __name__ == "__main__":
    
     # Start logging
     start_gui_log_file(box_number)
-    commit_ID, current_branch, repo_url, repo_dirty_flag, dirty_files = log_git_hash()
+    commit_ID, current_branch, repo_url, repo_dirty_flag, dirty_files, version = log_git_hash()
 
     # Formating GUI graphics
     logging.info('Setting QApplication attributes')
@@ -4407,6 +4457,7 @@ if __name__ == "__main__":
     win.repo_url=repo_url
     win.repo_dirty_flag=repo_dirty_flag
     win.dirty_files=dirty_files
+    win.version=version
     win.show()
    
      # Run your application's event loop and stop after closing all windows
