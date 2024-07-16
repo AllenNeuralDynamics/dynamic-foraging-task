@@ -2054,7 +2054,7 @@ class MetadataDialog(QDialog):
         
     def _update_metadata(self,update_rig_metadata=True,update_session_metadata=True,dont_clear=False):
         '''update the metadata'''
-        if (update_rig_metadata or update_session_metadata) and ('rig_metadata_file' in self.meta_data):
+        if (update_rig_metadata) and ('rig_metadata_file' in self.meta_data):
             if os.path.basename(self.meta_data['rig_metadata_file'])!=self.RigMetadataFile.text() and self.RigMetadataFile.text() != '':
                 if dont_clear==False:
                     # clear probe angles if the rig metadata file is changed
