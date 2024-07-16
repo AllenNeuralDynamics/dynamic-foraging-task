@@ -3787,7 +3787,7 @@ class Window(QMainWindow):
                 print('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
                 logging.info('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
                 if (self.GeneratedTrials.TP_AutoReward  or int(self.GeneratedTrials.TP_BlockMinReward)>0
-                    or self.GeneratedTrials.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']):
+                    or self.GeneratedTrials.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']) or self.AddOneTrialForNoresponse.currentText()=='Yes':
                     # The next trial parameters must be dependent on the current trial's choice
                     # get animal response and then generate a new trial
                     self.NewTrialRewardOrder=0

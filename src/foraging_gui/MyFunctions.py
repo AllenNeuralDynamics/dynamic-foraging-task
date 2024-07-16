@@ -1499,6 +1499,7 @@ class GenerateTrials():
         if self.B_AnimalCurrentResponse==2:
             self.B_CurrentRewarded[0]=False
             self.B_CurrentRewarded[1]=False
+            self._add_one_trial()
         elif self.B_AnimalCurrentResponse==0 and self.CurrentBait[0]==True:
             self.B_Baited[0]=False
             self.B_CurrentRewarded[1]=False
@@ -1551,6 +1552,16 @@ class GenerateTrials():
         self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,RewardOutcomeTime)
         self.GetResponseFinish=1
 
+    def _add_one_trial(self):
+        # to decide if we should add one trial to the block length on both sides
+        if self.TP_AddOneTrialForNoresponse=='Yes':
+            if self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']:
+                for i, side in enumerate(['L', 'R']):
+                    self.uncoupled_blocks.block_ends[side][-1] = self.uncoupled_blocks.block_ends[side][-1]+1
+            elif self.TP_Task in ['Coupled Baiting','Coupled Without Baiting']:
+                for i, side in enumerate(['L', 'R']):
+                    self.BlockLenHistory[i][-1] = self.BlockLenHistory[i][-1]+1
+
     def _GetAnimalResponse(self,Channel1,Channel3,Channel4):
         '''Get the animal's response'''
         self._CheckSimulationSession()
@@ -1600,6 +1611,7 @@ class GenerateTrials():
                     self.B_AnimalCurrentResponse=2
                     self.B_CurrentRewarded[0]=False
                     self.B_CurrentRewarded[1]=False
+                    self._add_one_trial()
                 elif TrialOutcome=='RewardLeft':
                     self.B_AnimalCurrentResponse=0
                     self.B_Baited[0]=False
