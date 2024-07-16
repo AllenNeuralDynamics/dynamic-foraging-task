@@ -84,7 +84,7 @@ class OptogeneticsDialog(QDialog):
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
         uic.loadUi('Optogenetics.ui', self)
-        self.condition_idx = [1, 2, 3, 4] # corresponding to optogenetics condition 1, 2, 3, 4
+        self.condition_idx = [1, 2, 3, 4, 5, 6] # corresponding to optogenetics condition 1, 2, 3, 4, 5, 6
         self.laser_tags=[1,2] # corresponding to Laser_1 and Laser_2
         self._connectSignalsSlots()
         self.MainWindow=MainWindow
@@ -1051,11 +1051,12 @@ class WaterCalibrationDialog(QDialog):
             '\nFinal tube weight: {}g'.format(final_tube_weight) + \
             '\nAvg. error from target: {}uL'.format(error)
             )        
-        TOLERANCE = float(self.SpotLeftVolume.text())/10
+        TOLERANCE = float(self.SpotLeftVolume.text())*.15
         if np.abs(error) > TOLERANCE:
             reply = QMessageBox.critical(self, 'Spot check left', 
-                'Result ( {}uL ) is outside expected tolerance. \nPlease confirm you entered information correctly, then press save.'.format(np.round(result,2)), 
+                'Measurement is outside expected tolerance. <br><br>FIRST, please confirm you entered information correctly, then press save. <br><br><span style="color:purple;font-weight:bold">IMPORTANT</span>: If the measurement was correctly entered (not a typo), please repeat the spot check once. If the measurement remains outside the expected tolerance please immediately perform a full calibration.'.format(np.round(result,2)), 
                 QMessageBox.Ok)
+
             logging.error('Water calibration spot check exceeds tolerance: {}'.format(error))  
             self.SaveLeft.setStyleSheet("color: white;background-color : mediumorchid;")
             self.Warning.setText(
@@ -1408,7 +1409,7 @@ class LaserCalibrationDialog(QDialog):
         self.threadpool1=QThreadPool()
         self.threadpool2=QThreadPool()
         self.laser_tags=[1,2]
-        self.condition_idx=[1,2,3,4]
+        self.condition_idx=[1,2,3,4,5,6]
     def _connectSignalsSlots(self):
         self.Open.clicked.connect(self._Open)
         self.KeepOpen.clicked.connect(self._KeepOpen)
