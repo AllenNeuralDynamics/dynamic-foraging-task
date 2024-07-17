@@ -3000,7 +3000,8 @@ class Window(QMainWindow):
 
             # load metadata to the metadata dialog
             if 'meta_data_dialog' in Obj:
-                self.Metadata_dialog.meta_data = Obj['meta_data_dialog']
+                if 'session_metadata' in Obj['meta_data_dialog']:
+                    self.Metadata_dialog.meta_data['session_metadata'] = Obj['meta_data_dialog']['session_metadata']
                 self.Metadata_dialog._update_metadata()
 
             # show session list related to that animal
