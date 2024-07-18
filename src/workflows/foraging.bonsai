@@ -8532,8 +8532,8 @@
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
               <viz:Name>HighSpeedCamVis</viz:Name>
-              <viz:ColumnCount>1</viz:ColumnCount>
-              <viz:RowCount>2</viz:RowCount>
+              <viz:ColumnCount>2</viz:ColumnCount>
+              <viz:RowCount>1</viz:RowCount>
               <viz:ColumnStyles />
               <viz:RowStyles />
               <viz:CellSpans />
