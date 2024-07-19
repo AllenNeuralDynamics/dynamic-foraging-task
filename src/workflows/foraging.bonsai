@@ -8532,8 +8532,8 @@
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
               <viz:Name>HighSpeedCamVis</viz:Name>
-              <viz:ColumnCount>1</viz:ColumnCount>
-              <viz:RowCount>2</viz:RowCount>
+              <viz:ColumnCount>2</viz:ColumnCount>
+              <viz:RowCount>1</viz:RowCount>
               <viz:ColumnStyles />
               <viz:RowStyles />
               <viz:CellSpans />
@@ -8656,15 +8656,31 @@
         <Workflow>
           <Nodes>
             <Expression xsi:type="SubscribeSubject">
+              <Name>RightLick</Name>
+            </Expression>
+            <Expression xsi:type="VisualizerMapping" />
+            <Expression xsi:type="SubscribeSubject">
               <Name>LeftLick</Name>
             </Expression>
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="SubscribeSubject">
-              <Name>RightLick</Name>
+              <Name>ComPorts</Name>
             </Expression>
-            <Expression xsi:type="VisualizerMapping" />
+            <Expression xsi:type="Index">
+              <Operand xsi:type="StringProperty">
+                <Value>current_box</Value>
+              </Operand>
+            </Expression>
+            <Expression xsi:type="Format">
+              <Format>LickVis: {0}</Format>
+            </Expression>
+            <Expression xsi:type="PropertyMapping">
+              <PropertyMappings>
+                <Property Name="Name" />
+              </PropertyMappings>
+            </Expression>
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
-              <viz:Name>LickVis</viz:Name>
+              <viz:Name>LickVis: 428-9-A</viz:Name>
               <viz:ColumnCount>1</viz:ColumnCount>
               <viz:RowCount>2</viz:RowCount>
               <viz:ColumnStyles />
@@ -8676,14 +8692,16 @@
                 <viz:CellSpan ColumnSpan="4" RowSpan="1" />
               </viz:CellSpans>
             </Expression>
-            <Expression xsi:type="WorkflowOutput" />
           </Nodes>
           <Edges>
             <Edge From="0" To="1" Label="Source1" />
-            <Edge From="1" To="4" Label="Source1" />
+            <Edge From="1" To="8" Label="Source1" />
             <Edge From="2" To="3" Label="Source1" />
-            <Edge From="3" To="4" Label="Source2" />
+            <Edge From="3" To="8" Label="Source2" />
             <Edge From="4" To="5" Label="Source1" />
+            <Edge From="5" To="6" Label="Source1" />
+            <Edge From="6" To="7" Label="Source1" />
+            <Edge From="7" To="8" Label="Source3" />
           </Edges>
         </Workflow>
       </Expression>

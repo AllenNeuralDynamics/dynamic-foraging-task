@@ -1,12 +1,15 @@
 import json
 import os
+import re
 import logging
+import subprocess
 from datetime import datetime
 
 import numpy as np
 
 import foraging_gui
 from foraging_gui.Visualization import PlotWaterCalibration
+from foraging_gui.TransferToNWB import _get_field
 from aind_data_schema.components.stimulus import AuditoryStimulation
 from aind_data_schema.components.devices import SpoutSide,Calibration
 from aind_data_schema_models.units import SizeUnit,FrequencyUnit,SoundIntensityUnit,PowerUnit
@@ -46,12 +49,12 @@ class generate_metadata:
     Parse the behavior json file and generate session and rig metadata
 
     Parameters:
-    json_file: str
-        path to the json file
     Obj: dict
-        dictionary containing the json file
+        dictionary containing the json file.
+    json_file: str
+        path to the json file. If provided, the json file will be loaded to the Obj.
     dialog_metadata: dict
-        dictionary containing the dialog metadata. If provided, it will override the meta_data_dialog key in the json file
+        dictionary containing the dialog metadata. If provided, it will override the meta_data_dialog key in the json file.
     output_folder: str
         path to the output folder where the metadata will be saved. If not provided, the metadata will be saved in the MetadataFolder extracted from the behavior json file/object. 
 
@@ -64,15 +67,28 @@ class generate_metadata:
     '''
     def __init__(self, json_file=None, Obj=None, dialog_metadata_file=None,dialog_metadata=None, output_folder=None):
         
-        if json_file is None and Obj is None and dialog_metadata is None:
+        self.session_metadata_success=False
+        self.rig_metadata_success=False
+        self.data_description_success=False
+
+        if Obj is None:
+            self._set_metadata_logging()
+
+        if json_file is None and Obj is None:
             logging.info("json file or Obj is not provided")
             return
 
         if json_file is not None:
             with open(json_file) as f:
                 self.Obj = json.load(f)
+            self.session_folder = os.path.dirname(os.path.dirname(json_file))
         else:
             self.Obj = Obj
+            if 'TrainingFolder' in self.Obj:
+                self.session_folder =  os.path.dirname(self.Obj['TrainingFolder'])
+            else:
+                self.session_folder = "session folder is unknown"
+        logging.info("processing:"+self.session_folder)
 
         if dialog_metadata_file is not None:
             with open(dialog_metadata_file) as f:
@@ -81,9 +97,17 @@ class generate_metadata:
             self.Obj['meta_data_dialog'] = dialog_metadata
         
         if output_folder is not None:
-            self.Obj['MetadataFolder'] = output_folder
+            self.output_folder = output_folder
+        elif json_file is not None:
+            self._get_metadata_folder(json_file)
+        elif 'MetadataFolder' in self.Obj:
+            self.output_folder = self.Obj['MetadataFolder']
+        else:
+            logging.info("MetadataFolder is not determined")
 
-        self._handle_edge_cases()
+        return_tag=self._handle_edge_cases()
+        if return_tag==1:
+            return
         self._save_rig_metadata()
         self.Obj['session_metadata']= {}
         self._mapper()
@@ -91,7 +115,10 @@ class generate_metadata:
         self._session()
         if self.has_data_description:
             self._session_description()
-
+        logging.info("Session metadata generated successfully: " + str(self.session_metadata_success))
+        logging.info("Rig metadata generated successfully: " + str(self.rig_metadata_success))
+        logging.info("Data description generated successfully: " + str(self.data_description_success))
+    
     def _mapper(self):
         '''
         Name mapping
@@ -156,6 +183,52 @@ class generate_metadata:
             for key in self.name_mapper_external:
                 self.name_mapper[key] = self.name_mapper_external[key]
 
+    def _set_metadata_logging(self):
+        '''
+        Set the logging for the metadata generation. Don't use the behavior GUI logger. 
+        '''
+        # Check if the log folder exists, if it doesn't make it
+        logging_folder = os.path.join(os.path.expanduser("~"), "Documents",'foraging_metadata_logs')
+        if not os.path.exists(logging_folder):
+            os.makedirs(logging_folder)
+
+        # Determine name of this log file
+        # Get current time. Generate one log file per day.
+        current_time = datetime.now()
+        formatted_datetime = current_time.strftime("%Y-%m-%d")
+
+        # Build logfile name
+        filename = '{}_metadata_log.txt'.format(formatted_datetime)
+        logging_filename = os.path.join(logging_folder,filename)
+
+        # Format the log file:
+        log_format = '%(asctime)s:%(levelname)s:%(module)s:%(filename)s:%(funcName)s:line %(lineno)d:%(message)s'
+        log_datefmt = '%I:%M:%S %p'
+
+        # Start the log file
+        print('Starting a GUI log file at: ')
+        print(logging_filename)
+        logging.basicConfig(
+            format=log_format,
+            level=logging.INFO,
+            datefmt=log_datefmt,
+            handlers=[
+                logging.FileHandler(logging_filename),
+            ]
+        )
+        logging.info('Starting logfile!')
+        logging.captureWarnings(True)
+
+    def _get_metadata_folder(self,json_file):
+        '''
+        Get the metadata folder
+        '''
+        session_folder = os.path.dirname(os.path.dirname(json_file))
+        metadata_folder=os.path.join(session_folder, 'metadata-dir')
+        self.output_folder=metadata_folder
+        if not os.path.exists(metadata_folder):
+            os.makedirs(metadata_folder)
+
     def _get_lick_spouts_distance(self):
         ''' 
         get the distance between the two lick spouts in um
@@ -169,6 +242,7 @@ class generate_metadata:
 
         if 'rig_id' not in self.Obj['meta_data_dialog']['rig_metadata']:
             self.box_type = 'Unknown'
+            logging.info('rig id is not found in the rig metadata!')
             return
         
         if 'EPHYS' in self.Obj['meta_data_dialog']['rig_metadata']['rig_id']:
@@ -181,9 +255,11 @@ class generate_metadata:
         Generate the session description to the MetadataFolder
         '''
         if self.Obj['meta_data_dialog']['rig_metadata']=={}:
+            logging.info('rig metadata is empty!')
             return
         self._get_session_time()
         if self.session_start_time == '' or self.session_end_time == '':
+            logging.info('session_start_time or session_end_time is empty!')
             return
         
         self.orcid = BaseName(name="Open Researcher and Contributor ID", abbreviation="ORCID")
@@ -204,7 +280,8 @@ class generate_metadata:
             platform= self.platform,
             subject_id=self.Obj['ID'],
         )
-        description.write_standard_file(output_directory=self.Obj['MetadataFolder'])
+        description.write_standard_file(output_directory=self.output_folder)
+        self.data_description_success=True
 
     def _get_funding_source(self):
         '''
@@ -276,18 +353,33 @@ class generate_metadata:
         '''
         Save the rig metadata to the MetadataFolder
         '''
-        if self.Obj['meta_data_dialog']['rig_metadata_file']=='' or self.Obj['MetadataFolder']=='':
+        if self.Obj['meta_data_dialog']['rig_metadata_file']=='' or self.output_folder=='':
+            logging.info('rig_metadata_file or the out_put folder is emtpy!')
             return
 
         # save copy as rig.json
-        rig_metadata_full_path=os.path.join(self.Obj['MetadataFolder'],'rig.json') 
+        rig_metadata_full_path=os.path.join(self.output_folder,'rig.json') 
         with open(rig_metadata_full_path, 'w') as f:
             json.dump(self.Obj['meta_data_dialog']['rig_metadata'], f, indent=4)
+            self.rig_metadata_success=True
 
     def _handle_edge_cases(self):
         '''
         handle edge cases (e.g. missing keys in the json file)
         '''
+
+        # Missing filed version in the json file.
+        # Possible reason: 1) Old version of the software. 
+        if 'version' not in self.Obj:
+            self.Obj['version']='Not recorded'
+        
+        # Missing field 'meta_data_dialog' in the json file.
+        # Possible reason: 1) Old version of the software.
+        if 'meta_data_dialog' not in self.Obj:
+            self.Obj['meta_data_dialog'] = {}
+            logging.info('Missing metadata dialog for session metadata')
+            return 1
+        
         # Missing fields camera_start_time and camera_stop_time in the Camera_dialog. 
         # Possible reason: 1) the camera is not used in the session. 2 ) the camera is used but the start and end time are not recorded for old version of the software.
         self._initialize_fields(dic=self.Obj['Camera_dialog'],keys=['camera_start_time','camera_stop_time'],default_value='')
@@ -341,18 +433,16 @@ class generate_metadata:
             self.Obj['settings_box'] = {}
             logging.info('Missing settings_box.csv file for session metadata')
 
-        # Missing field 'meta_data_dialog' in the json file.
-        # Possible reason: 1) Old version of the software.
-        if 'meta_data_dialog' not in self.Obj:
-            self.Obj['meta_data_dialog'] = {}
-            logging.info('Missing metadata dialog for session metadata')
-
         # Missing field 'rig_metadata' in the json file.
         # Possible reason: 1) Old version of the software. 2) the rig metadata is not provided.
         if 'rig_metadata' not in self.Obj['meta_data_dialog']:
             self.Obj['meta_data_dialog']['rig_metadata'] = {}
             logging.info('Missing rig metadata for session metadata')
-
+            return 1
+        elif self.Obj['meta_data_dialog']['rig_metadata']=={}:
+            logging.info('Missing rig metadata for session metadata')
+            return 1
+        
         # Missing field 'rig_metadata_file' and 'MetadataFolder' in the json file.
         # Possible reason: 1) Old version of the software. 2) the rig metadata is not provided.
         self._initialize_fields(dic=self.Obj['meta_data_dialog'],keys=['rig_metadata_file'],default_value='')
@@ -379,9 +469,11 @@ class generate_metadata:
         if 'commit_ID' not in self.Obj:
             self._initialize_fields(dic=self.Obj,keys=['commit_ID','repo_url','current_branch'],default_value='')
 
-        # Missing field 'Other_lick_spout_distance' in the json file.
+        # Missing field or empty 'Other_lick_spout_distance' in the json file.
         # Possible reason: 1) old version of the software.
         if 'Other_lick_spout_distance' not in self.Obj:
+            self.Obj['Other_lick_spout_distance']=5000
+        if self.Obj['Other_lick_spout_distance']=='':
             self.Obj['Other_lick_spout_distance']=5000
 
         # Missing ProjectName
@@ -396,14 +488,28 @@ class generate_metadata:
 
         # Missing field 'B_AnimalResponseHistory' in the json file.
         # Possible reason: 1) the behavior data is not started in the session.
+        # total_reward_consumed_in_session is the reward animal consumed in the session, not including the supplementary water.
         if 'B_AnimalResponseHistory' not in self.Obj:
             self.trials_total=0
             self.trials_finished=0
             self.trials_rewarded=0
+            self.total_reward_consumed_in_session=0
         else:
+            self.Obj['B_AnimalResponseHistory']=np.array(self.Obj['B_AnimalResponseHistory'])
             self.trials_total=len(self.Obj['B_AnimalResponseHistory'])
             self.trials_finished=np.count_nonzero(self.Obj['B_AnimalResponseHistory']!=2)
             self.trials_rewarded=np.count_nonzero(np.logical_or(self.Obj['B_RewardedHistory'][0],self.Obj['B_RewardedHistory'][1]))
+            self.total_reward_consumed_in_session=float(self.Obj['BS_TotalReward'])
+
+        # Wrong format of WeightAfter
+        # Remove all the non-numeric characters except the dot in the WeightAfter
+        if self.Obj['WeightAfter']!='':
+            self.Obj['WeightAfter']=self.Obj['WeightAfter'].replace('..','.')
+            self.Obj['WeightAfter']=re.sub(r'[^\.\d]', '', self.Obj['WeightAfter']) 
+
+        # Typo 
+        if 'PtotocolID' in self.Obj['meta_data_dialog']['session_metadata']:
+            self.Obj['meta_data_dialog']['session_metadata']['ProtocolID']=self.Obj['meta_data_dialog']['session_metadata']['PtotocolID']
 
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
@@ -429,6 +535,7 @@ class generate_metadata:
         '''
         # session_start_time and session_end_time are required fields
         if self.Obj['meta_data_dialog']['rig_metadata']=={}:
+            logging.info('rig metadata is empty!')
             return
         self._get_reward_delivery()
         self._get_water_calibration()
@@ -440,6 +547,7 @@ class generate_metadata:
         self._get_high_speed_camera_stream()
         self._get_session_time()
         if self.session_start_time == '' or self.session_end_time == '':
+            logging.info('session start time or session end time is empty!')
             return
 
         self._get_stimulus()
@@ -455,7 +563,7 @@ class generate_metadata:
             "rig_id": self.Obj['meta_data_dialog']['rig_metadata']['rig_id'],
             "notes": self.Obj['ShowNotes'],
             "weight_unit": "gram",
-            "reward_consumed_total": float(self.Obj['BS_TotalReward']),
+            "reward_consumed_total": self.total_reward_consumed_in_session,
             "reward_consumed_unit": "microliter",
             "calibrations": self.calibration,
             "data_streams": self.data_streams,
@@ -475,7 +583,8 @@ class generate_metadata:
             session_params["animal_weight_post"]=float(self.Obj['WeightAfter'])
 
         session = Session(**session_params)
-        session.write_standard_file(output_directory=self.Obj['MetadataFolder'])
+        session.write_standard_file(output_directory=self.output_folder)
+        self.session_metadata_success=True
 
     def _get_high_speed_camera_stream(self):
         '''
@@ -490,13 +599,15 @@ class generate_metadata:
                         stream_start_time=datetime.strptime(self.Obj['Camera_dialog']['camera_start_time'], '%Y-%m-%d %H:%M:%S.%f'),
                         stream_end_time=datetime.strptime(self.Obj['Camera_dialog']['camera_stop_time'], '%Y-%m-%d %H:%M:%S.%f'),
                 ))
-
+        else:
+            logging.info('No camera data stream detected!')
     def _get_camera_names(self):
         '''
         get cameras used in this session    
         '''
         if 'settings_box' not in self.Obj:
             self.camera_names=[]
+            logging.info('Settings box is not provided and camera names can not be extracted!')
             return
         
         self.camera_names=[]
@@ -511,6 +622,7 @@ class generate_metadata:
         '''
         self.ophys_streams=[]
         if self.Obj['fiber_photometry_start_time']=='':
+            logging.info('No photometry data stream detected!')
             return
         self._get_photometry_light_sources_config()
         self._get_photometry_detectors()
@@ -619,11 +731,11 @@ class generate_metadata:
         '''
         self.audio_stimulus=[]
         if self.behavior_streams==[]:
+            logging.info('No behavior data stream detected!')
             return
         
         self.audio_stimulus.append(StimulusEpoch(
             stimulus_name='auditory go cue',
-            notes=f"The duration of go cue is 100ms. The frequency is 7500Hz. Decibel is {self.Obj['Other_go_cue_decibel']}dB.",
             stimulus_modalities=[StimulusModality.AUDITORY],
             stimulus_start_time=self.session_start_time,
             stimulus_end_time=self.session_end_time,
@@ -638,16 +750,76 @@ class generate_metadata:
                 volume=self.Obj['Other_go_cue_decibel'],
                 volume_unit=SoundIntensityUnit.DB,
             ),
+            output_parameters=self._get_output_parameters(),
+            reward_consumed_during_epoch=self.total_reward_consumed_in_session,
+            reward_consumed_unit="microliter",
             trials_total= self.trials_total,
             trials_finished= self.trials_finished,
-            trials_rewarded=self.trials_rewarded
+            trials_rewarded=self.trials_rewarded,
+            notes=f"The duration of go cue is 100ms. The frequency is 7500Hz. Decibel is {self.Obj['Other_go_cue_decibel']}dB. The total reward consumed in the session is {self.total_reward_consumed_in_session} microliter. The total reward indcluding consumed in the session and supplementary water is {self.Obj['TotalWater']} millimeters.",
         ))
+    
+    def _get_output_parameters(self):
+        '''Get the output parameters'''
 
+        # Handle water info (with better names)
+        BS_TotalReward = _get_field(self.Obj, 'BS_TotalReward')
+        # Turn uL to mL if the value is too large
+        water_in_session_foraging = BS_TotalReward / 1000 if BS_TotalReward > 5.0 else BS_TotalReward 
+        # Old name "ExtraWater" goes first because old json has a wrong Suggested Water
+        water_after_session = float(_get_field(self.Obj, 
+                                            field_list=['ExtraWater', 'SuggestedWater'], default=np.nan
+                                            ))
+        water_day_total = float(_get_field(self.Obj, 'TotalWater'))
+        water_in_session_total = water_day_total - water_after_session
+        water_in_session_manual = water_in_session_total - water_in_session_foraging
+
+        output_parameters = {
+            'meta': {
+                'box': _get_field(self.Obj, ['box', 'Tower']),
+                'session_end_time': _get_field(self.Obj, 'Other_CurrentTime'),
+                'session_run_time_in_min': _get_field(self.Obj, 'Other_RunningTime'),
+            },
+
+            'water': {
+                'water_in_session_foraging': water_in_session_foraging,
+                'water_in_session_manual': water_in_session_manual,
+                'water_in_session_total': water_in_session_total,
+                'water_after_session': water_after_session,
+                'water_day_total': water_day_total,
+            },
+
+            'weight': {
+                'base_weight': float(_get_field(self.Obj, 'BaseWeight')),
+                'target_weight': float(_get_field(self.Obj, 'TargetWeight')),
+                'target_weight_ratio': float(_get_field(self.Obj, 'TargetRatio')),
+                'weight_after': float(_get_field(self.Obj, 'WeightAfter')),
+            },
+
+            'performance': {
+                'foraging_efficiency': _get_field(self.Obj, 'B_for_eff_optimal'),
+                'foraging_efficiency_with_actual_random_seed': _get_field(self.Obj, 'B_for_eff_optimal_random_seed'),
+            },
+
+            'task_parameters': self._get_task_parameters(),
+        }
+
+        return output_parameters    
+    
+    def _get_task_parameters(self):
+        '''Get task parameters'''
+        # excluding parameters starting with B_, TP_,  BS_, meta_data_dialog, LaserCalibrationResults, WaterCalibrationResults
+        task_parameters = {key: value for key, value in self.Obj.items() if not key.startswith(('B_', 'TP_', 'BS_','meta_data_dialog','LaserCalibrationResults','WaterCalibrationResults'))}
+        return task_parameters
+    
     def _get_optogenetics_stimulus(self):
         '''
         Make the optogenetics stimulus metadata
         '''
         self.optogenetics_stimulus=[]
+        if 'B_SelectedCondition' not in self.Obj:
+            logging.info('B_SelectedCondition is not included in the self.Obj!')
+            return 
         a=np.array(self.Obj['B_SelectedCondition'])
         self.Obj['B_SelectedCondition']=a.astype(int)
         if sum( self.Obj['B_SelectedCondition'])==0:
@@ -700,7 +872,12 @@ class generate_metadata:
         index=np.where(np.array(self.Obj['B_SelectedCondition'])==1)[0]
         for i in index:
             current_condition=self.Obj['B_SelectedCondition'][i]
-            current_color=self.Obj[f'TP_LaserColor_{current_condition}'][i]
+            if f'TP_LaserColor_{current_condition}' not in self.Obj:
+                # old format
+                current_color=self.Obj[f'TP_Laser_{current_condition}'][i]
+            else:
+                # new format
+                current_color=self.Obj[f'TP_LaserColor_{current_condition}'][i]
             current_location=self.Obj[f'TP_Location_{current_condition}'][i]
             if current_location=='Both':
                 light_sources.append({'color':current_color,'laser_tag':1})
@@ -719,8 +896,6 @@ class generate_metadata:
 
         self.light_names_used_in_session = list(set(self.light_names_used_in_session))
 
-        
-
     def _get_ephys_stream(self):
         '''
         Make the ephys stream metadata
@@ -728,6 +903,7 @@ class generate_metadata:
 
         if self.Obj['open_ephys']==[]:
             self.ephys_streams=[]
+            logging.info('No ephys data stream detected!')
             return
         
         # find daq names for Neuropixels
@@ -736,14 +912,15 @@ class generate_metadata:
         self.ephys_streams=[]
         self._get_ephys_modules()
         if self.ephys_modules==[]:
+            logging.info('Ephys modules are empty!')
             return
         self._get_stick_microscope()
         for current_recording in self.Obj['open_ephys']:
-            if 'openephys_stat_recording_time' not in current_recording:
+            if 'openephys_start_recording_time' not in current_recording.keys():
                 start_time = self.Obj['Other_SessionStartTime']
                 end_time = self.Obj['Other_CurrentTime']
             else:
-                start_time = current_recording['openephys_stat_recording_time']
+                start_time = current_recording['openephys_start_recording_time']
                 end_time = current_recording['openephys_stop_recording_time']
             self.ephys_streams.append(Stream(
                     stream_modalities=[Modality.ECEPHYS],
@@ -814,6 +991,7 @@ class generate_metadata:
             for probe in assembly['probes']:
                 if probe['name'] == probe_name:
                    return probe['lasers']
+        logging.info('No lasers found!')
         return None
     
     def _find_assembly_names(self, probe_name):
@@ -823,6 +1001,7 @@ class generate_metadata:
         for assembly in self.Obj['meta_data_dialog']['rig_metadata']['ephys_assemblies']:
             if probe_name in [probe['name'] for probe in assembly['probes']]:
                return assembly['name']
+        logging.info('No ephys assembly found!')
         return None
     
     def _get_probe_names(self):
@@ -841,6 +1020,7 @@ class generate_metadata:
 
         if self.has_behavior_data==False:
             self.behavior_streams=[]
+            logging.info('No behavior data stream detected!')
             return
 
         if self.box_type == 'Ephys':
@@ -862,9 +1042,21 @@ class generate_metadata:
         get the behavior software version information
         '''
         self.behavior_software=[]
+        try:
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            os.chdir(script_dir)  # Change to the directory of the current script
+            # Get information about task repository
+            commit_ID = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
+            current_branch = subprocess.check_output(['git','branch','--show-current']).decode('ascii').strip()
+            version=foraging_gui.__version__
+        except Exception as e:
+            logging.error('Could not get git branch and hash during generating session metadata: {}'.format(str(e)))
+            commit_ID=None
+            current_branch=None
+            version=None
         self.behavior_software.append(Software(
             name='dynamic-foraging-task',
-            version=f'branch:{self.Obj["current_branch"]}   commit ID:{self.Obj["commit_ID"]}   version:{foraging_gui.__version__}',
+            version=f'behavior branch:{self.Obj["current_branch"]}   commit ID:{self.Obj["commit_ID"]}    version:{self.Obj["version"]}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{version}',
             url=self.Obj["repo_url"],
         ))
         
@@ -874,6 +1066,7 @@ class generate_metadata:
         '''
         if self.Obj['LaserCalibrationResults']=={}:
             self.opto_calibration =[]
+            logging.info('No opto calibration results detected!')
             return
         self._parse_opto_calibration() 
         self.opto_calibration=[]
@@ -912,8 +1105,15 @@ class generate_metadata:
                                 for Frequency in RecentLaserCalibration[color][Protocol]:
                                     voltage=[]
                                     power=[]
-                                    for i in range(len(RecentLaserCalibration[color][Protocol][Frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
-                                        laser_voltage_power=eval(str(RecentLaserCalibration[color][Protocol][Frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
+                                    if f"Laser_{laser_tag}" in RecentLaserCalibration[color][Protocol][Frequency]:
+                                        current_calibration=RecentLaserCalibration[color][Protocol][Frequency][f"Laser_{laser_tag}"]['LaserPowerVoltage']
+                                    else:
+                                        if laser_tag==1:
+                                            current_calibration=RecentLaserCalibration[color][Protocol][Frequency]["Left"]['LaserPowerVoltage']
+                                        elif laser_tag==2:
+                                            current_calibration=RecentLaserCalibration[color][Protocol][Frequency]["Right"]['LaserPowerVoltage']
+                                    for i in range(len(current_calibration)):
+                                        laser_voltage_power=eval(str(current_calibration[i]))
                                         voltage.append(laser_voltage_power[0])
                                         power.append(laser_voltage_power[1])
                                     voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
@@ -921,8 +1121,15 @@ class generate_metadata:
                             elif Protocol=='Constant':
                                 voltage=[]
                                 power=[]
-                                for i in range(len(RecentLaserCalibration[color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
-                                    laser_voltage_power=eval(str(RecentLaserCalibration[color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
+                                if f"Laser_{laser_tag}" in RecentLaserCalibration[color][Protocol]:
+                                    current_calibration=RecentLaserCalibration[color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage']
+                                else:
+                                    if laser_tag==1:
+                                        current_calibration=RecentLaserCalibration[color][Protocol]["Left"]['LaserPowerVoltage']
+                                    elif laser_tag==2:
+                                        current_calibration=RecentLaserCalibration[color][Protocol]["Right"]['LaserPowerVoltage']
+                                for i in range(len(current_calibration)):
+                                    laser_voltage_power=eval(str(current_calibration[i]))
                                     voltage.append(laser_voltage_power[0])
                                     power.append(laser_voltage_power[1])
                                 voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
@@ -949,6 +1156,7 @@ class generate_metadata:
     def _FindLatestCalibrationDate(self,Laser):
         '''find the latest calibration date for the selected laser'''
         if not ('LaserCalibrationResults' in self.Obj):
+            logging.info("LaserCalibrationResults is not included in self.Obj.")
             return 'NA'
         Dates=[]
         for Date in self.Obj['LaserCalibrationResults']:
@@ -956,6 +1164,7 @@ class generate_metadata:
                 Dates.append(Date)
         sorted_dates = sorted(Dates)
         if sorted_dates==[]:
+            logging.info('No dates found in the LaserCalibrationResults.')
             return 'NA'
         else:
             return sorted_dates[-1]
@@ -1018,10 +1227,11 @@ class generate_metadata:
         '''
         if not self.has_reward_delivery:
             self.reward_delivery=[]
+            logging.info('No reward delivery metadata found!')
             return
 
         device_oringin=self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceArea']
-        lick_spouts_distance=self.Obj['Other_lick_spout_distance']
+        lick_spouts_distance=float(self.Obj['Other_lick_spout_distance'])
         # using the last position of the stage
         start_position=[self.Obj['B_NewscalePositions'][-1][0], self.Obj['B_NewscalePositions'][-1][1], self.Obj['B_NewscalePositions'][-1][2]]
 
@@ -1071,5 +1281,5 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    generate_metadata(json_file=r'Y:\715083\behavior_715083_2024-04-26_17-12-15\behavior\715083_2024-04-26_17-12-15.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-13_12-38-51_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
+    generate_metadata(json_file=r'I:\BehaviorData\323_EPHYS3\713377\behavior_713377_2024-06-14_15-05-53\behavior\713377_2024-06-14_15-05-53.json')
     #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
