@@ -31,3 +31,4 @@ FipObjectiveSerialNumber,0
 codec,-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M -v 24
 AttenuationLeft,0
 AttenuationRight,0
+current_box,4xx-x-C
