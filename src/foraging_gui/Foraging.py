@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QWidget
 from PyQt5.QtWidgets import QFileDialog,QVBoxLayout
 from PyQt5 import QtWidgets,QtGui,QtCore, uic
 from PyQt5.QtCore import QThreadPool,Qt,QThread
@@ -38,6 +38,8 @@ from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScal
 from foraging_gui.stage import Stage
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
+
+from StageWidget.views.stage_widget import get_stage_object, StageUI
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -84,9 +86,12 @@ class Window(QMainWindow):
         self._GetWaterCalibration()
 
         # Load Rig Json
-        self._LoadRigJson()      
- 
-        # Load User interface 
+        self._LoadRigJson()
+
+        # Load Stage Widget
+        self.stage_widget = get_stage_object(StageUI.widget.value)
+
+        # Load User interface
         self._LoadUI()
 
         # set window title
@@ -185,17 +190,20 @@ class Window(QMainWindow):
             self.default_warning_color="color: purple;"
             self.default_text_color='color: purple;'
             self.default_text_background_color='background-color: purple;'
+            self._insert_stage_controller_widget_foraging_gui("widget_2")
         elif self.default_ui=='ForagingGUI_Ephys.ui':
             logging.info('Using ForagingGUI_Ephys.ui interface')
             self.Visualization.setTitle(str(date.today()))
             self.default_warning_color="color: red;"
             self.default_text_color='color: red;'
             self.default_text_background_color='background-color: red;'
+            self._insert_stage_controller_widget_foraging_ephys_gui()
         else:
             logging.info('Using ForagingGUI.ui interface')
             self.default_warning_color="color: red;"
             self.default_text_color='color: red;'
             self.default_text_background_color='background-color: red;'
+            self._insert_stage_controller_widget_foraging_gui("widget_2")
 
     def connectSignalsSlots(self):
         '''Define callbacks'''
@@ -294,7 +302,40 @@ class Window(QMainWindow):
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit)):   
                 child.returnPressed.connect(self.keyPressEvent)
-    
+
+    def _insert_stage_controller_widget_foraging_gui(self, widget_to_replace):
+        """
+        replace current motor controller in foraging_gui with stagewidget controller
+        note: foraging gui must be loaded (load_ui function) before running this function
+        """
+        widget = getattr(self, widget_to_replace, None)
+        if widget is not None:
+            layout = widget.layout()
+            # Hide all current items
+            for i in reversed(range(layout.count())):
+                layout.itemAt(i).widget().setVisible(False)
+            # Insert new stage_widget
+            layout.addWidget(self.stage_widget)
+
+    def _insert_stage_controller_widget_foraging_ephys_gui(self):
+        """
+        replace current motor controller in foraging_ephys_gui with stagewidget controller
+        """
+        if hasattr(self, "centralwidget"):
+            widget = self.centralwidget
+            # Find groupBox_3 (motor stage group box)
+            child = widget.findChild(QWidget, "groupBox_3")
+            if child is not None:
+                # Get x and y coordinates and hide current controller widget
+                x_pos = child.geometry().x()
+                y_pos = child.geometry().y()
+                child.setVisible(False)
+
+                # Insert new controller widget
+                self.stage_widget.setParent(widget)
+                self.stage_widget.move(x_pos, y_pos)
+                self.stage_widget.setVisible(True)
+
     def _set_reference(self):
         '''
         set the reference point for lick spout position in the metadata dialog
