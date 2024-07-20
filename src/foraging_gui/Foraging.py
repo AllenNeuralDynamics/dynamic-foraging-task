@@ -2935,6 +2935,10 @@ class Window(QMainWindow):
                                         if Obj['Opto_dialog']['SessionAlternating']=='on' and Obj['OptogeneticsB']=='on' and Obj['Opto_dialog']['SessionWideControl']=='on':
                                             index=1-index
                                             widget.setCurrentIndex(index)
+                                        else:
+                                            widget.setCurrentIndex(index)
+                                    else:
+                                        widget.setCurrentIndex(index)
                                 else:
                                     widget.setCurrentIndex(index)
                         elif isinstance(widget, QtWidgets.QDoubleSpinBox):
