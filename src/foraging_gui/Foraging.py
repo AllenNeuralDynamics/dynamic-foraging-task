@@ -2860,7 +2860,7 @@ class Window(QMainWindow):
                 for key in widget_keys:
                     try:
                         widget = widget_dict[key]
-                        if widget.parent().objectName() in ['Optogenetics','Optogenetics_trial_parameters']:
+                        if widget.parent().objectName() in ['Optogenetics','Optogenetics_trial_parameters','SessionParameters']:
                             CurrentObj=Obj['Opto_dialog']
                         elif widget.parent().objectName()=='Camera':
                             CurrentObj=Obj['Camera_dialog']
@@ -2874,6 +2874,8 @@ class Window(QMainWindow):
                         logging.error(traceback.format_exc())
                         continue
                     if key in CurrentObj:
+                        if key=='MinOptoInterval':
+                            pass
                         # skip LeftValue, RightValue, GiveWaterL, GiveWaterR if WaterCalibrationResults is not empty as they will be set by the corresponding volume. 
                         if (key in ['LeftValue','RightValue','GiveWaterL','GiveWaterR']) and self.WaterCalibrationResults!={}:
                             continue

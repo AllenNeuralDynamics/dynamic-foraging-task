@@ -360,7 +360,7 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QGroupBox" name="groupBox">
+  <widget class="QGroupBox" name="SessionParameters">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -5920,7 +5920,7 @@
   </widget>
   <zorder>groupBox_3</zorder>
   <zorder>groupBox_2</zorder>
-  <zorder>groupBox</zorder>
+  <zorder>SessionParameters</zorder>
   <zorder>label1</zorder>
   <zorder>SampleFrequency</zorder>
   <zorder>label1_20</zorder>
