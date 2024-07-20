@@ -2874,8 +2874,6 @@ class Window(QMainWindow):
                         logging.error(traceback.format_exc())
                         continue
                     if key in CurrentObj:
-                        if key=='MinOptoInterval':
-                            pass
                         # skip LeftValue, RightValue, GiveWaterL, GiveWaterR if WaterCalibrationResults is not empty as they will be set by the corresponding volume. 
                         if (key in ['LeftValue','RightValue','GiveWaterL','GiveWaterR']) and self.WaterCalibrationResults!={}:
                             continue
