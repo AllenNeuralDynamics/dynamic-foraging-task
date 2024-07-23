@@ -2254,10 +2254,13 @@ class Window(QMainWindow):
             SaveAs=0
             SaveContinue=1
             saving_type_label = 'backup saving'
+            data=self.backup_data
         elif ForceSave==1:
             saving_type_label = 'force saving'
+            data=self
         else:
             saving_type_label = 'normal saving'
+            data=self
 
         logging.info('Saving current session, ForceSave={}'.format(ForceSave))
         if ForceSave==0:
@@ -3894,6 +3897,7 @@ class Window(QMainWindow):
                 # save the data everytrial
                 if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
                     self.previous_backup_completed=0
+                    self.backup_data=self.copy()
                     self.threadpool6.start(worker_save)
 
                 if GeneratedTrials.CurrentSimulation==True:
