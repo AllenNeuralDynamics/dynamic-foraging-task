@@ -407,7 +407,8 @@ class PlotWaterCalibration(FigureCanvas):
             showrecent=1
         if showrecent>len(sorted_dates):
             showrecent=len(sorted_dates)
-        
+        print(sorted_dates)        
+
         # Dont count spot checks against "show last" number
         iterator = 0
         counter = 0
