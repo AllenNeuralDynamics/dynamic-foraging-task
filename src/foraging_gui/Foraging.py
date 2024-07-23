@@ -160,6 +160,7 @@ class Window(QMainWindow):
         self.open_ephys=[]
         # load the rig metadata
         self._load_rig_metadata()
+        self.create_auto_train_dialog()
         if not self.start_bonsai_ide:
             '''
                 When starting bonsai without the IDE the connection is always unstable.
@@ -240,7 +241,20 @@ class Window(QMainWindow):
         self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
-        self.AutoTrain.clicked.connect(self._AutoTrain)
+                                
+        # Connect to ID change in the mainwindow
+        self.ID.returnPressed.connect(
+            lambda: self.AutoTrain_dialog.update_auto_train_lock(engaged=False)
+        )
+        self.ID.returnPressed.connect(
+            lambda: self.AutoTrain_dialog.update_auto_train_fields(
+                subject_id=self.ID.text(),
+                auto_engage=True,
+                )
+            )
+        self.AutoTrain.clicked.connect(self._auto_train_clicked)
+        
+        
         self.pushButton_streamlit.clicked.connect(self._open_mouse_on_streamlit)
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._Task)
@@ -4164,22 +4178,15 @@ class Window(QMainWindow):
             self.TotalWater.setText(str(np.round(TotalWater,3)))
         except Exception as e:
             logging.error(traceback.format_exc())
-            
-    def _AutoTrain(self):
-        """set up auto training"""
+         
+         
+    def create_auto_train_dialog(self):
         # Note: by only create one AutoTrainDialog, all objects associated with 
         # AutoTrainDialog are now persistent!
-        if not hasattr(self, 'AutoTrain_dialog'):
-            self.AutoTrain_dialog = AutoTrainDialog(MainWindow=self, parent=None)
-                        
-            # Connect to ID change in the mainwindow
-            self.ID.returnPressed.connect(
-                lambda: self.AutoTrain_dialog.update_auto_train_lock(engaged=False)
-            )
-            self.ID.returnPressed.connect(
-                lambda: self.AutoTrain_dialog.update_auto_train_fields(subject_id=self.ID.text())
-            )
-
+        self.AutoTrain_dialog = AutoTrainDialog(MainWindow=self, parent=None)
+        
+    def _auto_train_clicked(self):
+        """set up auto training"""
         self.AutoTrain_dialog.show()
         
         # Check subject id each time the dialog is opened

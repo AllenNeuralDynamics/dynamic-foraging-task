@@ -2371,7 +2371,10 @@ class AutoTrainDialog(QDialog):
             self._preview_auto_train_paras
         )
         
-    def update_auto_train_fields(self, subject_id: str, curriculum_just_overridden: bool = False):
+    def update_auto_train_fields(self, 
+                                 subject_id: str, 
+                                 curriculum_just_overridden: bool = False,
+                                 auto_engage: bool = False):
         self.selected_subject_id = subject_id
         self.label_subject_id.setText(self.selected_subject_id)
         
@@ -2468,6 +2471,12 @@ class AutoTrainDialog(QDialog):
                 self.label_last_actual_stage.setText(str(self.last_session['current_stage_actual']))
                 self.label_next_stage_suggested.setText(str(self.last_session['next_stage_suggested']))
                 self.label_next_stage_suggested.setStyleSheet("color: black;")
+                
+                # auto engage
+                if auto_engage:
+                    self.auto_train_engaged = True
+                    self.pushButton_apply_auto_train_paras.click()
+                
             else:
                 self.label_last_actual_stage.setText('irrelevant (curriculum overridden)')
                 self.label_next_stage_suggested.setText('irrelevant')
