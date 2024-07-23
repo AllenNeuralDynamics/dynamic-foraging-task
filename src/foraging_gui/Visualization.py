@@ -416,7 +416,7 @@ class PlotWaterCalibration(FigureCanvas):
             if iterator >= len(sorted_dates):
                 break
             iterator +=1
-            if ('Left' in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()) or 
+            if ('Left' in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()) or \
                 ('Right' in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()):
                 counter += 1 
         all_dates = sorted_dates[-iterator:]
