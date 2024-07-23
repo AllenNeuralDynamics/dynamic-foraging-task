@@ -2471,12 +2471,7 @@ class AutoTrainDialog(QDialog):
                 self.label_last_actual_stage.setText(str(self.last_session['current_stage_actual']))
                 self.label_next_stage_suggested.setText(str(self.last_session['next_stage_suggested']))
                 self.label_next_stage_suggested.setStyleSheet("color: black;")
-                
-                # auto engage
-                if auto_engage:
-                    self.auto_train_engaged = True
-                    self.pushButton_apply_auto_train_paras.click()
-                
+                                
             else:
                 self.label_last_actual_stage.setText('irrelevant (curriculum overridden)')
                 self.label_next_stage_suggested.setText('irrelevant')
@@ -2513,6 +2508,15 @@ class AutoTrainDialog(QDialog):
         # Update df_auto_train_manager and df_curriculum_manager
         self._show_auto_training_manager()
         self._show_available_curriculums()
+        
+        # auto engage
+        if auto_engage:
+            try:
+                self.pushButton_apply_auto_train_paras.click()
+                logger.info(f"Auto engage successful for mouse {self.selected_subject_id}")
+            except Exception as e:
+                logger.warning(f"Auto engage failed: {str(e)}")
+
 
     def _add_border_curriculum_selection(self):
         self.tableView_df_curriculum.setStyleSheet(
