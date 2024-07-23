@@ -414,6 +414,7 @@ class PlotWaterCalibration(FigureCanvas):
         counter = 0
         all_dates = []
         while counter < showrecent:
+            print('counter: {}, iterator: {}'.format(counter,iterator))
             if iterator > len(sorted_dates):
                 break
             iterator +=1
