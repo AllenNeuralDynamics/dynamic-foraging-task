@@ -2254,10 +2254,13 @@ class Window(QMainWindow):
             SaveAs=0
             SaveContinue=1
             saving_type_label = 'backup saving'
+            behavior_data_field='GeneratedTrials_backup'
         elif ForceSave==1:
             saving_type_label = 'force saving'
+            behavior_data_field='GeneratedTrials'
         else:
             saving_type_label = 'normal saving'
+            behavior_data_field='GeneratedTrials'
 
 
         logging.info('Saving current session, ForceSave={}'.format(ForceSave))
@@ -2342,9 +2345,9 @@ class Window(QMainWindow):
         # Do we have trials to save?
         if self.load_tag==1:
             Obj=self.Obj
-        elif hasattr(self, 'GeneratedTrials'):
-            if hasattr(self.GeneratedTrials, 'Obj'):
-                Obj=self.GeneratedTrials.Obj
+        elif hasattr(self, behavior_data_field):
+            if hasattr(getattr(self,behavior_data_field), 'Obj'):
+                Obj=getattr(self,behavior_data_field).Obj
             else:
                 Obj={}
         else:
@@ -2365,15 +2368,15 @@ class Window(QMainWindow):
                     self._Concat(widget_dict, Obj, dialog_name)
             Obj2=Obj.copy()
             # save behavor events
-            if hasattr(self, 'GeneratedTrials'):
+            if hasattr(self, behavior_data_field):
                 # Do something if self has the GeneratedTrials attribute
                 # Iterate over all attributes of the GeneratedTrials object
-                for attr_name in dir(self.GeneratedTrials):
+                for attr_name in dir(getattr(self, behavior_data_field)):
                     if attr_name.startswith('B_') or attr_name.startswith('BS_'):
                         if attr_name=='B_RewardFamilies' and self.SaveFile.endswith('.mat'):
                             pass
                         else:
-                            Value=getattr(self.GeneratedTrials, attr_name)
+                            Value=getattr(getattr(self, behavior_data_field), attr_name)
                             try:
                                 if isinstance(Value, float) or isinstance(Value, int):                                
                                     if math.isnan(Value):
