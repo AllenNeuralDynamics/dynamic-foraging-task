@@ -3898,7 +3898,7 @@ class Window(QMainWindow):
                 # save the data everytrial
                 if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
                     self.previous_backup_completed=0
-                    self.GeneratedTrials_backup=copy.deepcopy(self.GeneratedTrials)
+                    self.GeneratedTrials_backup=copy.copy(self.GeneratedTrials)
                     self.threadpool6.start(worker_save)
 
                 if GeneratedTrials.CurrentSimulation==True:
