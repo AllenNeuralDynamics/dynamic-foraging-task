@@ -2254,13 +2254,11 @@ class Window(QMainWindow):
             SaveAs=0
             SaveContinue=1
             saving_type_label = 'backup saving'
-            data=self.backup_data
         elif ForceSave==1:
             saving_type_label = 'force saving'
-            data=self
         else:
             saving_type_label = 'normal saving'
-            data=self
+
 
         logging.info('Saving current session, ForceSave={}'.format(ForceSave))
         if ForceSave==0:
@@ -2314,7 +2312,7 @@ class Window(QMainWindow):
             logging.info('Stopping excitation before saving')
 
         # get iregular timestamp
-        if hasattr(self, 'GeneratedTrials') and self.InitializeBonsaiSuccessfully==1:
+        if hasattr(self, 'GeneratedTrials') and self.InitializeBonsaiSuccessfully==1 and BackupSave==0:
             self.GeneratedTrials._get_irregular_timestamp(self.Channel2)
         
         # Create new folders. 
@@ -2387,14 +2385,13 @@ class Window(QMainWindow):
                             except Exception as e:
                                 logging.info(f'{attr_name} is not a real scalar, save it as it is.')
                                 Obj[attr_name]=Value
+            
             # save other events, e.g. session start time
             for attr_name in dir(self):
                 if attr_name.startswith('Other_') or attr_name.startswith('info_'):
                     Obj[attr_name] = getattr(self, attr_name)
             # save laser calibration results (only for the calibration session)
             if hasattr(self, 'LaserCalibration_dialog'):
-                # Do something if self has the GeneratedTrials attribute
-                # Iterate over all attributes of the GeneratedTrials object
                 for attr_name in dir(self.LaserCalibration_dialog):
                     if attr_name.startswith('LCM_'):
                         Obj[attr_name] = getattr(self.LaserCalibration_dialog, attr_name)
