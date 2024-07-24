@@ -12,6 +12,7 @@ import pandas as pd
 import threading
 import itertools
 import yaml
+import copy
 from pathlib import Path
 from datetime import date, datetime
 
@@ -3897,7 +3898,7 @@ class Window(QMainWindow):
                 # save the data everytrial
                 if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
                     self.previous_backup_completed=0
-                    self.backup_data=self.copy()
+                    self.GeneratedTrials_backup=copy.deepcopy(self.GeneratedTrials)
                     self.threadpool6.start(worker_save)
 
                 if GeneratedTrials.CurrentSimulation==True:
