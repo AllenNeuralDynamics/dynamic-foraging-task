@@ -160,7 +160,6 @@ class Window(QMainWindow):
         self.open_ephys=[]
         # load the rig metadata
         self._load_rig_metadata()
-        self.create_auto_train_dialog()
         if not self.start_bonsai_ide:
             '''
                 When starting bonsai without the IDE the connection is always unstable.
@@ -4473,8 +4472,11 @@ if __name__ == "__main__":
     win.dirty_files=dirty_files
     win.version=version
     win.show()
-   
-     # Run your application's event loop and stop after closing all windows
+    
+    # Move creating AutoTrain here to catch any AWS errors
+    win.create_auto_train_dialog()
+
+    # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())
 
 

@@ -2327,10 +2327,10 @@ class AutoTrainDialog(QDialog):
         self.curriculum_in_use = None
 
         # Connect to Auto Training Manager and Curriculum Manager
-        aws_connected = self._connect_auto_training_manager()
+        self.aws_connected = self._connect_auto_training_manager()
         
         # Disable Auto Train button if not connected to AWS
-        if not aws_connected:
+        if not self.aws_connected:
             self.MainWindow.AutoTrain.setEnabled(False)
             return
         
@@ -2375,6 +2375,10 @@ class AutoTrainDialog(QDialog):
                                  subject_id: str, 
                                  curriculum_just_overridden: bool = False,
                                  auto_engage: bool = False):
+        # Do nothing if not connected to AWS
+        if not self.aws_connected:
+            return
+        
         self.selected_subject_id = subject_id
         self.label_subject_id.setText(self.selected_subject_id)
         
@@ -2554,10 +2558,11 @@ class AutoTrainDialog(QDialog):
             )
         except:
             logger.error("AWS connection failed!")
-            QMessageBox.critical(self,
+            QMessageBox.critical(self.MainWindow,
                                  'Box {}, Error'.format(self.MainWindow.box_letter),
                                  f'AWS connection failed!\n'
-                                 f'Please check your AWS credentials at ~\.aws\credentials!')
+                                 f'Please check your AWS credentials at ~\.aws\credentials and restart the GUI!\n\n'
+                                 f'The AutoTrain will be disabled until the connection is restored.')
             return False
         df_training_manager = self.auto_train_manager.df_manager
         
