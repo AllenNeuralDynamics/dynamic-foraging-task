@@ -248,7 +248,7 @@ class Window(QMainWindow):
         self.ID.returnPressed.connect(
             lambda: self.AutoTrain_dialog.update_auto_train_fields(
                 subject_id=self.ID.text(),
-                auto_engage=True,
+                auto_engage=self.auto_engage,
                 )
             )
         self.AutoTrain.clicked.connect(self._auto_train_clicked)
@@ -1062,7 +1062,8 @@ class Window(QMainWindow):
                 os.path.expanduser("~"), 
                 "Documents",
                 'aind_watchdog_service',
-                'manifest')
+                'manifest'),
+            'auto_engage':True,
         }
         
         # Try to load Settings_box#.csv
@@ -1148,6 +1149,7 @@ class Window(QMainWindow):
         self.lick_spout_distance_box4 = self.Settings['lick_spout_distance_box4']
         self.name_mapper_file = self.Settings['name_mapper_file']
         self.save_each_trial = self.Settings['save_each_trial']
+        self.auto_engage = self.Settings['auto_engage']
 
         if not is_absolute_path(self.project_info_file):
             self.project_info_file = os.path.join(self.SettingFolder,self.project_info_file)
