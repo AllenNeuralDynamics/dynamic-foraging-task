@@ -4237,9 +4237,9 @@ class Window(QMainWindow):
                 's3_bucket':'private',
                 'processor_full_name': 'AIND Behavior Team',
                 'modalities':{
-                    'behavior':self.TrainingFolder.replace('\\','/'),
-                    'behavior-videos':self.VideoFolder.replace('\\','/'),
-                    'fib':self.PhotometryFolder.replace('\\','/')
+                    'behavior':[self.TrainingFolder.replace('\\','/')],
+                    'behavior-videos':[self.VideoFolder.replace('\\','/')],
+                    'fib':[self.PhotometryFolder.replace('\\','/')]
                     },
                 'schemas':[
                     os.path.join(self.MetadataFolder,'session.json').replace('\\','/'),
