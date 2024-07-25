@@ -2571,6 +2571,7 @@ class Window(QMainWindow):
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
             self._get_folder_structure_new(formatted_datetime)
             self.acquisition_datetime = formatted_datetime 
+            self.session_name=f'behavior_{self.ID.text()}_{formated_datetime}'
         elif self.load_tag==1:
             self._parse_folder_structure()
             
