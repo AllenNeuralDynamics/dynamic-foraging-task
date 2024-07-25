@@ -4218,11 +4218,11 @@ class Window(QMainWindow):
                 self.project_name = 'Behavior Platform'
             
             if FIP: ## DEBUG, need to figure out how to set this flag.  
-                schedule = self.acquisition_datetime.split('_')[0]+' 23:59:00'
+                schedule = self.acquisition_datetime.split('_')[0]+'_23:59:00'
                 capsule_id = 'c089614a-347e-4696-b17e-86980bb782c' 
                 mount = 'FIP' 
             else:
-                schedule = self.acquisition_datetime.split('_')[0]+' 23:59:00'
+                schedule = self.acquisition_datetime.split('_')[0]+'_23:59:00'
                 capsule_id = 'c089614a-347e-4696-b17e-86980bb782c' 
                 mount = 'FIP'
  
