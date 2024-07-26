@@ -2687,7 +2687,7 @@
     <widget class="QLabel" name="label_69">
      <property name="geometry">
       <rect>
-       <x>585</x>
+       <x>610</x>
        <y>10</y>
        <width>121</width>
        <height>20</height>
@@ -2787,7 +2787,7 @@
     <widget class="QSpinBox" name="RunLength">
      <property name="geometry">
       <rect>
-       <x>710</x>
+       <x>735</x>
        <y>10</y>
        <width>61</width>
        <height>22</height>
@@ -2863,7 +2863,7 @@
     <widget class="QLabel" name="label_73">
      <property name="geometry">
       <rect>
-       <x>210</x>
+       <x>190</x>
        <y>10</y>
        <width>121</width>
        <height>20</height>
@@ -2888,7 +2888,7 @@
     <widget class="QSpinBox" name="SessionlistSpin">
      <property name="geometry">
       <rect>
-       <x>530</x>
+       <x>510</x>
        <y>10</y>
        <width>41</width>
        <height>22</height>
@@ -2913,11 +2913,36 @@
     <widget class="QComboBox" name="Sessionlist">
      <property name="geometry">
       <rect>
-       <x>340</x>
+       <x>320</x>
        <y>10</y>
        <width>191</width>
        <height>22</height>
       </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="HideLegend">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>10</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>hide legend</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
      </property>
     </widget>
    </widget>
