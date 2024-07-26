@@ -1089,7 +1089,7 @@ class Window(QMainWindow):
 
         # check that the SettingsBox has each of the values in mandatory_fields as a key, if not log an error for the missing key
 
-        csv_mandatory_fields = ['Behavior', 'Soundcard', 'BonsaiOsc1', 'BonsaiOsc2', 'BonsaiOsc3', 'BonsaiOsc4','AttenuationLeft','AttenuationRight']
+        csv_mandatory_fields = ['Behavior', 'Soundcard', 'BonsaiOsc1', 'BonsaiOsc2', 'BonsaiOsc3', 'BonsaiOsc4','AttenuationLeft','AttenuationRight','current_box']
         for field in csv_mandatory_fields:
             if field not in self.SettingsBox.keys():
                 logging.error('Missing key ({}) in settings_box file'.format(field))
@@ -2570,6 +2570,8 @@ class Window(QMainWindow):
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
             self._get_folder_structure_new(formatted_datetime)
+            self.acquisition_datetime = formatted_datetime 
+            self.session_name=f'behavior_{self.ID.text()}_{formatted_datetime}'
         elif self.load_tag==1:
             self._parse_folder_structure()
             
@@ -4216,11 +4218,11 @@ class Window(QMainWindow):
                 self.project_name = 'Behavior Platform'
             
             if FIP: ## DEBUG, need to figure out how to set this flag.  
-                schedule = self.acquisition_datetime.split(' ')[0]+' 23:59:00'
+                schedule = self.acquisition_datetime.split('_')[0]+'_23-59-00'
                 capsule_id = 'c089614a-347e-4696-b17e-86980bb782c' 
                 mount = 'FIP' 
             else:
-                schedule = self.acquisition_datetime.split(' ')[0]+' 23:59:00'
+                schedule = self.acquisition_datetime.split('_')[0]+'_23-59-00'
                 capsule_id = 'c089614a-347e-4696-b17e-86980bb782c' 
                 mount = 'FIP'
  
@@ -4237,9 +4239,9 @@ class Window(QMainWindow):
                 's3_bucket':'private',
                 'processor_full_name': 'AIND Behavior Team',
                 'modalities':{
-                    'behavior':self.TrainingFolder.replace('\\','/'),
-                    'behavior-videos':self.VideoFolder.replace('\\','/'),
-                    'fib':self.PhotometryFolder.replace('\\','/')
+                    'behavior':[self.TrainingFolder.replace('\\','/')],
+                    'behavior-videos':[self.VideoFolder.replace('\\','/')],
+                    'fib':[self.PhotometryFolder.replace('\\','/')]
                     },
                 'schemas':[
                     os.path.join(self.MetadataFolder,'session.json').replace('\\','/'),
