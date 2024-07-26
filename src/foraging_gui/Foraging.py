@@ -253,8 +253,6 @@ class Window(QMainWindow):
                 )
             )
         self.AutoTrain.clicked.connect(self._auto_train_clicked)
-        
-        
         self.pushButton_streamlit.clicked.connect(self._open_mouse_on_streamlit)
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._Task)
