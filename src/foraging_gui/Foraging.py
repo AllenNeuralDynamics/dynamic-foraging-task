@@ -1083,6 +1083,7 @@ class Window(QMainWindow):
                 'aind_watchdog_service',
                 'manifest'),
             'auto_engage':True,
+            'clear_figure_after_save':True,
         }
         
         # Try to load Settings_box#.csv
@@ -1169,7 +1170,7 @@ class Window(QMainWindow):
         self.name_mapper_file = self.Settings['name_mapper_file']
         self.save_each_trial = self.Settings['save_each_trial']
         self.auto_engage = self.Settings['auto_engage']
-
+        self.clear_figure_after_save = self.Settings['clear_figure_after_save']
         if not is_absolute_path(self.project_info_file):
             self.project_info_file = os.path.join(self.SettingFolder,self.project_info_file)
         # Also stream log info to the console if enabled
@@ -3455,7 +3456,7 @@ class Window(QMainWindow):
             del self.fiber_photometry_end_time 
 
         # Clear Plots
-        if hasattr(self, 'PlotM'): 
+        if hasattr(self, 'PlotM') and self.clear_figure_after_save: 
             self.PlotM._Update(GeneratedTrials=None,Channel=None)
 
         # Add note to log
