@@ -356,11 +356,15 @@ class PlotV(FigureCanvas):
         self.ax1.set_yticks([0,1])
         self.ax1.set_yticklabels(['L', 'R'])
         self.ax1.set_ylim(-0.6, 1.6)
-        self.ax1.legend(loc='lower left', fontsize=8)
         self.ax2.set_yticks([0,1])
         self.ax2.set_yticklabels(['L', 'R'])
         self.ax2.set_ylim(-0.15, 1.15)
-        self.ax2.legend(loc='lower left', fontsize=8)
+        if self.main_win.HideLegend.isChecked():
+            self.ax1.legend().set_visible(False)
+            self.ax2.legend().set_visible(False)
+        else:
+            self.ax1.legend(loc='lower left', fontsize=8)
+            self.ax2.legend(loc='lower left', fontsize=8)
 
 class PlotWaterCalibration(FigureCanvas):
     def __init__(self,water_win,dpi=100,width=5, height=4):
