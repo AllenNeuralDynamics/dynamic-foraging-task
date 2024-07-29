@@ -4232,6 +4232,9 @@ class Window(QMainWindow):
         '''
             Generates a manifest.yml file for triggering data copy to VAST and upload to aws
         '''
+        if self.ID.text() == '0':
+            logging.info('Skipping upload manifest, because this is the test mouse')
+            return
         try: 
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
@@ -4286,7 +4289,7 @@ class Window(QMainWindow):
             logging.error('Could not generate upload manifest: {}'.format(str(e)))
             QMessageBox.critical(self, 'Upload manifest', 
                 'Could not generate upload manifest. '+\
-                'Please alert the mouse owner that this session will not be uploaded.')
+                'Please alert the mouse owner, and report on github.')
             
 
 def start_gui_log_file(box_number):
