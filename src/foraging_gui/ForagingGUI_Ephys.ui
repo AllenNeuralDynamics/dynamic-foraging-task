@@ -2939,7 +2939,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>hide legend</string>
+      <string>Hide legend</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
