@@ -61,14 +61,14 @@ class Window(QMainWindow):
     #     self.default_ui = "ForagingGUI.ui"
     #     self._LoadUI()
     #     self._InitializeMotorStage()
-    # if not hasattr(self, 'current_stage'):
-    #     self.stage_widget = get_stage_object(StageUI.widget.value)
-    #     if self.default_ui == "ForagingGUI.ui" or None:
-    #         self._insert_stage_controller_widget_foraging_gui("widget_2")
+    #     if self.Settings['newscale_serial_num_box{}'.format(self.box_number)] == '':
+    #         self.stage_widget = get_stage_object(StageUI.widget.value)
+    #         if self.default_ui == "ForagingGUI.ui" or None:
+    #             self._insert_stage_controller_widget_foraging_gui("widget_2")
+    #         else:
+    #             self._insert_stage_controller_widget_foraging_ephys_gui()
     #     else:
-    #         self._insert_stage_controller_widget_foraging_ephys_gui()
-    # else:
-    #     print("Newscale stage connected
+    #         print("Newscale stage connected")
 
     def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
@@ -170,7 +170,7 @@ class Window(QMainWindow):
         self._InitializeMotorStage()
 
         # Initialize Allen Institute stage widget if Newscale stage was not found
-        if not hasattr(self, 'current_stage'):
+        if self.Settings['newscale_serial_num_box{}'.format(self.box_number)] == '':
             self.stage_widget = get_stage_object(StageUI.widget.value)
             if self.default_ui == "ForagingGUI.ui" or None:
                 self._insert_stage_controller_widget_foraging_gui("widget_2")
