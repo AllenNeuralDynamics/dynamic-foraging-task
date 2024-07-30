@@ -2327,10 +2327,10 @@ class AutoTrainDialog(QDialog):
         self.curriculum_in_use = None
 
         # Connect to Auto Training Manager and Curriculum Manager
-        aws_connected = self._connect_auto_training_manager()
+        self.aws_connected = self._connect_auto_training_manager()
         
         # Disable Auto Train button if not connected to AWS
-        if not aws_connected:
+        if not self.aws_connected:
             self.MainWindow.AutoTrain.setEnabled(False)
             return
         
@@ -2371,7 +2371,14 @@ class AutoTrainDialog(QDialog):
             self._preview_auto_train_paras
         )
         
-    def update_auto_train_fields(self, subject_id: str, curriculum_just_overridden: bool = False):
+    def update_auto_train_fields(self, 
+                                 subject_id: str, 
+                                 curriculum_just_overridden: bool = False,
+                                 auto_engage: bool = False):
+        # Do nothing if not connected to AWS
+        if not self.aws_connected:
+            return
+        
         self.selected_subject_id = subject_id
         self.label_subject_id.setText(self.selected_subject_id)
         
@@ -2468,6 +2475,7 @@ class AutoTrainDialog(QDialog):
                 self.label_last_actual_stage.setText(str(self.last_session['current_stage_actual']))
                 self.label_next_stage_suggested.setText(str(self.last_session['next_stage_suggested']))
                 self.label_next_stage_suggested.setStyleSheet("color: black;")
+                                
             else:
                 self.label_last_actual_stage.setText('irrelevant (curriculum overridden)')
                 self.label_next_stage_suggested.setText('irrelevant')
@@ -2504,6 +2512,15 @@ class AutoTrainDialog(QDialog):
         # Update df_auto_train_manager and df_curriculum_manager
         self._show_auto_training_manager()
         self._show_available_curriculums()
+        
+        # auto engage
+        if auto_engage:
+            try:
+                self.pushButton_apply_auto_train_paras.click()
+                logger.info(f"Auto engage successful for mouse {self.selected_subject_id}")
+            except Exception as e:
+                logger.warning(f"Auto engage failed: {str(e)}")
+
 
     def _add_border_curriculum_selection(self):
         self.tableView_df_curriculum.setStyleSheet(
@@ -2541,10 +2558,11 @@ class AutoTrainDialog(QDialog):
             )
         except:
             logger.error("AWS connection failed!")
-            QMessageBox.critical(self,
+            QMessageBox.critical(self.MainWindow,
                                  'Box {}, Error'.format(self.MainWindow.box_letter),
                                  f'AWS connection failed!\n'
-                                 f'Please check your AWS credentials at ~\.aws\credentials!')
+                                 f'Please check your AWS credentials at ~\.aws\credentials and restart the GUI!\n\n'
+                                 f'The AutoTrain will be disabled until the connection is restored.')
             return False
         df_training_manager = self.auto_train_manager.df_manager
         

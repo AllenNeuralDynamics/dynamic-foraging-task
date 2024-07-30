@@ -12,6 +12,7 @@ import pandas as pd
 import threading
 import itertools
 import yaml
+import copy
 from pathlib import Path
 from datetime import date, datetime
 
@@ -240,7 +241,20 @@ class Window(QMainWindow):
         self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
-        self.AutoTrain.clicked.connect(self._AutoTrain)
+                                
+        # Connect to ID change in the mainwindow
+        self.ID.returnPressed.connect(
+            lambda: self.AutoTrain_dialog.update_auto_train_lock(engaged=False)
+        )
+        self.ID.returnPressed.connect(
+            lambda: self.AutoTrain_dialog.update_auto_train_fields(
+                subject_id=self.ID.text(),
+                auto_engage=self.auto_engage,
+                )
+            )
+        self.AutoTrain.clicked.connect(self._auto_train_clicked)
+        
+        
         self.pushButton_streamlit.clicked.connect(self._open_mouse_on_streamlit)
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._Task)
@@ -1049,7 +1063,8 @@ class Window(QMainWindow):
                 os.path.expanduser("~"), 
                 "Documents",
                 'aind_watchdog_service',
-                'manifest')
+                'manifest'),
+            'auto_engage':True,
         }
         
         # Try to load Settings_box#.csv
@@ -1074,7 +1089,7 @@ class Window(QMainWindow):
 
         # check that the SettingsBox has each of the values in mandatory_fields as a key, if not log an error for the missing key
 
-        csv_mandatory_fields = ['Behavior', 'Soundcard', 'BonsaiOsc1', 'BonsaiOsc2', 'BonsaiOsc3', 'BonsaiOsc4','AttenuationLeft','AttenuationRight']
+        csv_mandatory_fields = ['Behavior', 'Soundcard', 'BonsaiOsc1', 'BonsaiOsc2', 'BonsaiOsc3', 'BonsaiOsc4','AttenuationLeft','AttenuationRight','current_box']
         for field in csv_mandatory_fields:
             if field not in self.SettingsBox.keys():
                 logging.error('Missing key ({}) in settings_box file'.format(field))
@@ -1135,6 +1150,7 @@ class Window(QMainWindow):
         self.lick_spout_distance_box4 = self.Settings['lick_spout_distance_box4']
         self.name_mapper_file = self.Settings['name_mapper_file']
         self.save_each_trial = self.Settings['save_each_trial']
+        self.auto_engage = self.Settings['auto_engage']
 
         if not is_absolute_path(self.project_info_file):
             self.project_info_file = os.path.join(self.SettingFolder,self.project_info_file)
@@ -2254,10 +2270,14 @@ class Window(QMainWindow):
             SaveAs=0
             SaveContinue=1
             saving_type_label = 'backup saving'
+            behavior_data_field='GeneratedTrials_backup'
         elif ForceSave==1:
             saving_type_label = 'force saving'
+            behavior_data_field='GeneratedTrials'
         else:
             saving_type_label = 'normal saving'
+            behavior_data_field='GeneratedTrials'
+
 
         logging.info('Saving current session, ForceSave={}'.format(ForceSave))
         if ForceSave==0:
@@ -2311,7 +2331,7 @@ class Window(QMainWindow):
             logging.info('Stopping excitation before saving')
 
         # get iregular timestamp
-        if hasattr(self, 'GeneratedTrials') and self.InitializeBonsaiSuccessfully==1:
+        if hasattr(self, 'GeneratedTrials') and self.InitializeBonsaiSuccessfully==1 and BackupSave==0:
             self.GeneratedTrials._get_irregular_timestamp(self.Channel2)
         
         # Create new folders. 
@@ -2341,9 +2361,9 @@ class Window(QMainWindow):
         # Do we have trials to save?
         if self.load_tag==1:
             Obj=self.Obj
-        elif hasattr(self, 'GeneratedTrials'):
-            if hasattr(self.GeneratedTrials, 'Obj'):
-                Obj=self.GeneratedTrials.Obj
+        elif hasattr(self, behavior_data_field):
+            if hasattr(getattr(self,behavior_data_field), 'Obj'):
+                Obj=getattr(self,behavior_data_field).Obj
             else:
                 Obj={}
         else:
@@ -2364,15 +2384,15 @@ class Window(QMainWindow):
                     self._Concat(widget_dict, Obj, dialog_name)
             Obj2=Obj.copy()
             # save behavor events
-            if hasattr(self, 'GeneratedTrials'):
+            if hasattr(self, behavior_data_field):
                 # Do something if self has the GeneratedTrials attribute
                 # Iterate over all attributes of the GeneratedTrials object
-                for attr_name in dir(self.GeneratedTrials):
+                for attr_name in dir(getattr(self, behavior_data_field)):
                     if attr_name.startswith('B_') or attr_name.startswith('BS_'):
                         if attr_name=='B_RewardFamilies' and self.SaveFile.endswith('.mat'):
                             pass
                         else:
-                            Value=getattr(self.GeneratedTrials, attr_name)
+                            Value=getattr(getattr(self, behavior_data_field), attr_name)
                             try:
                                 if isinstance(Value, float) or isinstance(Value, int):                                
                                     if math.isnan(Value):
@@ -2384,14 +2404,13 @@ class Window(QMainWindow):
                             except Exception as e:
                                 logging.info(f'{attr_name} is not a real scalar, save it as it is.')
                                 Obj[attr_name]=Value
+            
             # save other events, e.g. session start time
             for attr_name in dir(self):
                 if attr_name.startswith('Other_') or attr_name.startswith('info_'):
                     Obj[attr_name] = getattr(self, attr_name)
             # save laser calibration results (only for the calibration session)
             if hasattr(self, 'LaserCalibration_dialog'):
-                # Do something if self has the GeneratedTrials attribute
-                # Iterate over all attributes of the GeneratedTrials object
                 for attr_name in dir(self.LaserCalibration_dialog):
                     if attr_name.startswith('LCM_'):
                         Obj[attr_name] = getattr(self.LaserCalibration_dialog, attr_name)
@@ -2551,6 +2570,8 @@ class Window(QMainWindow):
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
             self._get_folder_structure_new(formatted_datetime)
+            self.acquisition_datetime = formatted_datetime 
+            self.session_name=f'behavior_{self.ID.text()}_{formatted_datetime}'
         elif self.load_tag==1:
             self._parse_folder_structure()
             
@@ -2860,7 +2881,7 @@ class Window(QMainWindow):
                 for key in widget_keys:
                     try:
                         widget = widget_dict[key]
-                        if widget.parent().objectName() in ['Optogenetics','Optogenetics_trial_parameters']:
+                        if widget.parent().objectName() in ['Optogenetics','Optogenetics_trial_parameters','SessionParameters']:
                             CurrentObj=Obj['Opto_dialog']
                         elif widget.parent().objectName()=='Camera':
                             CurrentObj=Obj['Camera_dialog']
@@ -2935,6 +2956,10 @@ class Window(QMainWindow):
                                         if Obj['Opto_dialog']['SessionAlternating']=='on' and Obj['OptogeneticsB']=='on' and Obj['Opto_dialog']['SessionWideControl']=='on':
                                             index=1-index
                                             widget.setCurrentIndex(index)
+                                        else:
+                                            widget.setCurrentIndex(index)
+                                    else:
+                                        widget.setCurrentIndex(index)
                                 else:
                                     widget.setCurrentIndex(index)
                         elif isinstance(widget, QtWidgets.QDoubleSpinBox):
@@ -3563,11 +3588,10 @@ class Window(QMainWindow):
                     self.Start.setChecked(False)
                     logging.info('User declines continuation of session')
                     return
-                
             # check experimenter name
             reply = QMessageBox.critical(self,
                 'Box {}, Start'.format(self.box_letter),    
-                f'The experimenter is <span style="color:red;">{self.Experimenter.text()}</span>. Is this correct?',
+                f'The experimenter is <span style="{self.default_text_color}">{self.Experimenter.text()}</span>. Is this correct?',
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if reply == QMessageBox.No:
                 self.Start.setChecked(False)
@@ -3894,6 +3918,7 @@ class Window(QMainWindow):
                 # save the data everytrial
                 if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
                     self.previous_backup_completed=0
+                    self.GeneratedTrials_backup=copy.copy(self.GeneratedTrials)
                     self.threadpool6.start(worker_save)
 
                 if GeneratedTrials.CurrentSimulation==True:
@@ -4161,22 +4186,15 @@ class Window(QMainWindow):
             self.TotalWater.setText(str(np.round(TotalWater,3)))
         except Exception as e:
             logging.error(traceback.format_exc())
-            
-    def _AutoTrain(self):
-        """set up auto training"""
+         
+         
+    def create_auto_train_dialog(self):
         # Note: by only create one AutoTrainDialog, all objects associated with 
         # AutoTrainDialog are now persistent!
-        if not hasattr(self, 'AutoTrain_dialog'):
-            self.AutoTrain_dialog = AutoTrainDialog(MainWindow=self, parent=None)
-                        
-            # Connect to ID change in the mainwindow
-            self.ID.returnPressed.connect(
-                lambda: self.AutoTrain_dialog.update_auto_train_lock(engaged=False)
-            )
-            self.ID.returnPressed.connect(
-                lambda: self.AutoTrain_dialog.update_auto_train_fields(subject_id=self.ID.text())
-            )
-
+        self.AutoTrain_dialog = AutoTrainDialog(MainWindow=self, parent=None)
+        
+    def _auto_train_clicked(self):
+        """set up auto training"""
         self.AutoTrain_dialog.show()
         
         # Check subject id each time the dialog is opened
@@ -4200,11 +4218,11 @@ class Window(QMainWindow):
                 self.project_name = 'Behavior Platform'
             
             if FIP: ## DEBUG, need to figure out how to set this flag.  
-                schedule = self.acquisition_datetime.split(' ')[0]+' 23:59:00'
+                schedule = self.acquisition_datetime.split('_')[0]+'_23-59-00'
                 capsule_id = 'c089614a-347e-4696-b17e-86980bb782c' 
                 mount = 'FIP' 
             else:
-                schedule = self.acquisition_datetime.split(' ')[0]+' 23:59:00'
+                schedule = self.acquisition_datetime.split('_')[0]+'_23-59-00'
                 capsule_id = 'c089614a-347e-4696-b17e-86980bb782c' 
                 mount = 'FIP'
  
@@ -4221,9 +4239,9 @@ class Window(QMainWindow):
                 's3_bucket':'private',
                 'processor_full_name': 'AIND Behavior Team',
                 'modalities':{
-                    'behavior':self.TrainingFolder.replace('\\','/'),
-                    'behavior-videos':self.VideoFolder.replace('\\','/'),
-                    'fib':self.PhotometryFolder.replace('\\','/')
+                    'behavior':[self.TrainingFolder.replace('\\','/')],
+                    'behavior-videos':[self.VideoFolder.replace('\\','/')],
+                    'fib':[self.PhotometryFolder.replace('\\','/')]
                     },
                 'schemas':[
                     os.path.join(self.MetadataFolder,'session.json').replace('\\','/'),
@@ -4463,8 +4481,11 @@ if __name__ == "__main__":
     win.dirty_files=dirty_files
     win.version=version
     win.show()
-   
-     # Run your application's event loop and stop after closing all windows
+    
+    # Move creating AutoTrain here to catch any AWS errors
+    win.create_auto_train_dialog()
+
+    # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())
 
 
