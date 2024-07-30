@@ -88,6 +88,8 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - Use `pip` to install this repository:
   - From the `C:\Users\svc_aind_behavior\Documents\GitHub\dynamic-foraging-task` directory run `pip install -e .`
   - This should install all the required python packages. 
+  - If you're using the allen institute stage motor (instead of the newscale motor) run the following additional command:
+    - `pip install stagewidget --index-url http://eng-tools:3141/aibs/packages --trusted-host eng-tools`
 - Copy `Settings_box<box num>.csv` to `Users\svc_aind_behavior\Documents\ForagingSettings`
   - Copy `<box num>` 1-4 depending on the computer
   - Configure the Behavior/Soundcard COM ports for each computer
