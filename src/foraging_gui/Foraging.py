@@ -3619,7 +3619,7 @@ class Window(QMainWindow):
             logging.info('Starting session, with experimenter: {}'.format(self.Experimenter.text()))
 
             # check repo status
-            if (self.current_branch not in ['main','production_testing']) & (self.ID.text() != '0'):
+            if (self.current_branch not in ['main','production_testing']) & (self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']):
                 # Prompt user over off-pipeline branch
                 reply = QMessageBox.critical(self,
                     'Box {}, Start'.format(self.box_letter),    
@@ -3635,7 +3635,7 @@ class Window(QMainWindow):
                     logging.error('Starting session on branch: {}'.format(self.current_branch))
 
             # Check for untracked local changes
-            if self.repo_dirty_flag & (self.ID.text() != '0'):
+            if self.repo_dirty_flag & (self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']):
                 # prompt user over untracked local changes
                 reply = QMessageBox.critical(self,
                     'Box {}, Start'.format(self.box_letter),    
@@ -4232,6 +4232,9 @@ class Window(QMainWindow):
         '''
             Generates a manifest.yml file for triggering data copy to VAST and upload to aws
         '''
+        if self.ID.text() in ['0','1','2','3','4','5','6','7','8','9','10']:
+            logging.info('Skipping upload manifest, because this is the test mouse')
+            return
         try: 
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
@@ -4286,7 +4289,7 @@ class Window(QMainWindow):
             logging.error('Could not generate upload manifest: {}'.format(str(e)))
             QMessageBox.critical(self, 'Upload manifest', 
                 'Could not generate upload manifest. '+\
-                'Please alert the mouse owner that this session will not be uploaded.')
+                'Please alert the mouse owner, and report on github.')
             
 
 def start_gui_log_file(box_number):
