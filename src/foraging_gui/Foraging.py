@@ -54,6 +54,22 @@ class NumpyEncoder(json.JSONEncoder):
 class Window(QMainWindow):
     Time = QtCore.pyqtSignal(int) # Photometry timer signal
 
+    # TESTING
+    # def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
+    #     logging.info('Creating Window')
+    #     super().__init__(parent)
+    #     self.default_ui = "ForagingGUI.ui"
+    #     self._LoadUI()
+    #     self._InitializeMotorStage()
+    # if not hasattr(self, 'current_stage'):
+    #     self.stage_widget = get_stage_object(StageUI.widget.value)
+    #     if self.default_ui == "ForagingGUI.ui" or None:
+    #         self._insert_stage_controller_widget_foraging_gui("widget_2")
+    #     else:
+    #         self._insert_stage_controller_widget_foraging_ephys_gui()
+    # else:
+    #     print("Newscale stage connected
+
     def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
         super().__init__(parent)
@@ -87,9 +103,6 @@ class Window(QMainWindow):
 
         # Load Rig Json
         self._LoadRigJson()
-
-        # Load Stage Widget
-        self.stage_widget = get_stage_object(StageUI.widget.value)
 
         # Load User interface
         self._LoadUI()
@@ -155,7 +168,17 @@ class Window(QMainWindow):
         self._WaterVolumnManage2()
         self._LickSta()
         self._InitializeMotorStage()
-        self._GetPositions()
+
+        # Initialize Allen Institute stage widget if Newscale stage was not found
+        if not hasattr(self, 'current_stage'):
+            self.stage_widget = get_stage_object(StageUI.widget.value)
+            if self.default_ui == "ForagingGUI.ui" or None:
+                self._insert_stage_controller_widget_foraging_gui("widget_2")
+            else:
+                self._insert_stage_controller_widget_foraging_ephys_gui()
+        else:
+            self._GetPositions()
+
         self._warmup()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
@@ -190,20 +213,17 @@ class Window(QMainWindow):
             self.default_warning_color="color: purple;"
             self.default_text_color='color: purple;'
             self.default_text_background_color='background-color: purple;'
-            self._insert_stage_controller_widget_foraging_gui("widget_2")
         elif self.default_ui=='ForagingGUI_Ephys.ui':
             logging.info('Using ForagingGUI_Ephys.ui interface')
             self.Visualization.setTitle(str(date.today()))
             self.default_warning_color="color: red;"
             self.default_text_color='color: red;'
             self.default_text_background_color='background-color: red;'
-            self._insert_stage_controller_widget_foraging_ephys_gui()
         else:
             logging.info('Using ForagingGUI.ui interface')
             self.default_warning_color="color: red;"
             self.default_text_color='color: red;'
             self.default_text_background_color='background-color: red;'
-            self._insert_stage_controller_widget_foraging_gui("widget_2")
 
     def connectSignalsSlots(self):
         '''Define callbacks'''
