@@ -121,7 +121,9 @@ class PlotV(FigureCanvas):
             'Condition1': (0, 191/255, 255/255, 1),  # Deep Sky Blue
             'Condition2': (255/255, 127/255, 80/255, 1),  # Coral Red
             'Condition3': (34/255, 139/255, 34/255, 1),  # Forest Green
-            'Condition4': (218/255, 165/255, 32/255, 1)  # Goldenrod
+            'Condition4': (218/255, 165/255, 32/255, 1),  # Goldenrod
+            'Condition5': (255/255, 0/255, 0/255, 1),  # Red
+            'Condition6': (0/255, 0/255, 255/255, 1)  # Blue
         }
 
         # Define trial types
@@ -354,11 +356,15 @@ class PlotV(FigureCanvas):
         self.ax1.set_yticks([0,1])
         self.ax1.set_yticklabels(['L', 'R'])
         self.ax1.set_ylim(-0.6, 1.6)
-        self.ax1.legend(loc='lower left', fontsize=8)
         self.ax2.set_yticks([0,1])
         self.ax2.set_yticklabels(['L', 'R'])
         self.ax2.set_ylim(-0.15, 1.15)
-        self.ax2.legend(loc='lower left', fontsize=8)
+        if self.main_win.HideLegend.isChecked():
+            self.ax1.legend().set_visible(False)
+            self.ax2.legend().set_visible(False)
+        else:
+            self.ax1.legend(loc='lower left', fontsize=8)
+            self.ax2.legend(loc='lower left', fontsize=8)
 
 class PlotWaterCalibration(FigureCanvas):
     def __init__(self,water_win,dpi=100,width=5, height=4):
@@ -405,16 +411,17 @@ class PlotWaterCalibration(FigureCanvas):
             showrecent=1
         if showrecent>len(sorted_dates):
             showrecent=len(sorted_dates)
-        
+
         # Dont count spot checks against "show last" number
         iterator = 0
         counter = 0
         all_dates = []
         while counter < showrecent:
-            if iterator > len(sorted_dates):
+            if iterator >= len(sorted_dates):
                 break
             iterator +=1
-            if ('Left' in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()) or ('Right' in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()):
+            if ('Left' in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()) or \
+                ('Right' in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()):
                 counter += 1 
         all_dates = sorted_dates[-iterator:]
 

@@ -84,7 +84,7 @@ class OptogeneticsDialog(QDialog):
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
         uic.loadUi('Optogenetics.ui', self)
-        self.condition_idx = [1, 2, 3, 4] # corresponding to optogenetics condition 1, 2, 3, 4
+        self.condition_idx = [1, 2, 3, 4, 5, 6] # corresponding to optogenetics condition 1, 2, 3, 4, 5, 6
         self.laser_tags=[1,2] # corresponding to Laser_1 and Laser_2
         self._connectSignalsSlots()
         self.MainWindow=MainWindow
@@ -1051,11 +1051,12 @@ class WaterCalibrationDialog(QDialog):
             '\nFinal tube weight: {}g'.format(final_tube_weight) + \
             '\nAvg. error from target: {}uL'.format(error)
             )        
-        TOLERANCE = float(self.SpotLeftVolume.text())/10
+        TOLERANCE = float(self.SpotLeftVolume.text())*.15
         if np.abs(error) > TOLERANCE:
             reply = QMessageBox.critical(self, 'Spot check left', 
-                'Result ( {}uL ) is outside expected tolerance. \nPlease confirm you entered information correctly, then press save.'.format(np.round(result,2)), 
+                'Measurement is outside expected tolerance. <br><br>FIRST, please confirm you entered information correctly, then press save. <br><br><span style="color:purple;font-weight:bold">IMPORTANT</span>: If the measurement was correctly entered (not a typo), please repeat the spot check once. If the measurement remains outside the expected tolerance please immediately perform a full calibration.'.format(np.round(result,2)), 
                 QMessageBox.Ok)
+
             logging.error('Water calibration spot check exceeds tolerance: {}'.format(error))  
             self.SaveLeft.setStyleSheet("color: white;background-color : mediumorchid;")
             self.Warning.setText(
@@ -1408,7 +1409,7 @@ class LaserCalibrationDialog(QDialog):
         self.threadpool1=QThreadPool()
         self.threadpool2=QThreadPool()
         self.laser_tags=[1,2]
-        self.condition_idx=[1,2,3,4]
+        self.condition_idx=[1,2,3,4,5,6]
     def _connectSignalsSlots(self):
         self.Open.clicked.connect(self._Open)
         self.KeepOpen.clicked.connect(self._KeepOpen)
@@ -2054,7 +2055,7 @@ class MetadataDialog(QDialog):
         
     def _update_metadata(self,update_rig_metadata=True,update_session_metadata=True,dont_clear=False):
         '''update the metadata'''
-        if (update_rig_metadata or update_session_metadata) and ('rig_metadata_file' in self.meta_data):
+        if (update_rig_metadata) and ('rig_metadata_file' in self.meta_data):
             if os.path.basename(self.meta_data['rig_metadata_file'])!=self.RigMetadataFile.text() and self.RigMetadataFile.text() != '':
                 if dont_clear==False:
                     # clear probe angles if the rig metadata file is changed
@@ -2326,10 +2327,10 @@ class AutoTrainDialog(QDialog):
         self.curriculum_in_use = None
 
         # Connect to Auto Training Manager and Curriculum Manager
-        aws_connected = self._connect_auto_training_manager()
+        self.aws_connected = self._connect_auto_training_manager()
         
         # Disable Auto Train button if not connected to AWS
-        if not aws_connected:
+        if not self.aws_connected:
             self.MainWindow.AutoTrain.setEnabled(False)
             return
         
@@ -2370,7 +2371,14 @@ class AutoTrainDialog(QDialog):
             self._preview_auto_train_paras
         )
         
-    def update_auto_train_fields(self, subject_id: str, curriculum_just_overridden: bool = False):
+    def update_auto_train_fields(self, 
+                                 subject_id: str, 
+                                 curriculum_just_overridden: bool = False,
+                                 auto_engage: bool = False):
+        # Do nothing if not connected to AWS
+        if not self.aws_connected:
+            return
+        
         self.selected_subject_id = subject_id
         self.label_subject_id.setText(self.selected_subject_id)
         
@@ -2467,6 +2475,7 @@ class AutoTrainDialog(QDialog):
                 self.label_last_actual_stage.setText(str(self.last_session['current_stage_actual']))
                 self.label_next_stage_suggested.setText(str(self.last_session['next_stage_suggested']))
                 self.label_next_stage_suggested.setStyleSheet("color: black;")
+                                
             else:
                 self.label_last_actual_stage.setText('irrelevant (curriculum overridden)')
                 self.label_next_stage_suggested.setText('irrelevant')
@@ -2503,6 +2512,15 @@ class AutoTrainDialog(QDialog):
         # Update df_auto_train_manager and df_curriculum_manager
         self._show_auto_training_manager()
         self._show_available_curriculums()
+        
+        # auto engage
+        if auto_engage:
+            try:
+                self.pushButton_apply_auto_train_paras.click()
+                logger.info(f"Auto engage successful for mouse {self.selected_subject_id}")
+            except Exception as e:
+                logger.warning(f"Auto engage failed: {str(e)}")
+
 
     def _add_border_curriculum_selection(self):
         self.tableView_df_curriculum.setStyleSheet(
@@ -2540,10 +2558,11 @@ class AutoTrainDialog(QDialog):
             )
         except:
             logger.error("AWS connection failed!")
-            QMessageBox.critical(self,
+            QMessageBox.critical(self.MainWindow,
                                  'Box {}, Error'.format(self.MainWindow.box_letter),
                                  f'AWS connection failed!\n'
-                                 f'Please check your AWS credentials at ~\.aws\credentials!')
+                                 f'Please check your AWS credentials at ~\.aws\credentials and restart the GUI!\n\n'
+                                 f'The AutoTrain will be disabled until the connection is restored.')
             return False
         df_training_manager = self.auto_train_manager.df_manager
         

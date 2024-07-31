@@ -12,7 +12,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1875</width>
+    <width>1951</width>
     <height>1015</height>
    </rect>
   </property>
@@ -2687,7 +2687,7 @@
     <widget class="QLabel" name="label_69">
      <property name="geometry">
       <rect>
-       <x>585</x>
+       <x>610</x>
        <y>10</y>
        <width>121</width>
        <height>20</height>
@@ -2787,7 +2787,7 @@
     <widget class="QSpinBox" name="RunLength">
      <property name="geometry">
       <rect>
-       <x>710</x>
+       <x>735</x>
        <y>10</y>
        <width>61</width>
        <height>22</height>
@@ -2863,7 +2863,7 @@
     <widget class="QLabel" name="label_73">
      <property name="geometry">
       <rect>
-       <x>210</x>
+       <x>190</x>
        <y>10</y>
        <width>121</width>
        <height>20</height>
@@ -2888,7 +2888,7 @@
     <widget class="QSpinBox" name="SessionlistSpin">
      <property name="geometry">
       <rect>
-       <x>530</x>
+       <x>510</x>
        <y>10</y>
        <width>41</width>
        <height>22</height>
@@ -2913,11 +2913,36 @@
     <widget class="QComboBox" name="Sessionlist">
      <property name="geometry">
       <rect>
-       <x>340</x>
+       <x>320</x>
        <y>10</y>
        <width>191</width>
        <height>22</height>
       </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="HideLegend">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>10</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Hide legend</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
      </property>
     </widget>
    </widget>
@@ -4594,34 +4619,6 @@
      </property>
     </item>
    </widget>
-   <widget class="QLabel" name="MetadataWarning">
-    <property name="geometry">
-     <rect>
-      <x>1240</x>
-      <y>920</y>
-      <width>361</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::AutoText</enum>
-    </property>
-    <property name="scaledContents">
-     <bool>false</bool>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-    </property>
-   </widget>
    <widget class="QLabel" name="ManualWaterWarning">
     <property name="geometry">
      <rect>
@@ -4635,6 +4632,19 @@
      <font>
       <pointsize>7</pointsize>
      </font>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="MetadataWarning">
+    <property name="geometry">
+     <rect>
+      <x>1550</x>
+      <y>850</y>
+      <width>301</width>
+      <height>91</height>
+     </rect>
     </property>
     <property name="text">
      <string/>
@@ -4678,15 +4688,15 @@
    <zorder>StartEphysRecording</zorder>
    <zorder>label_65</zorder>
    <zorder>OpenEphysRecordingType</zorder>
-   <zorder>MetadataWarning</zorder>
    <zorder>ManualWaterWarning</zorder>
+   <zorder>MetadataWarning</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1875</width>
+     <width>1951</width>
      <height>21</height>
     </rect>
    </property>
