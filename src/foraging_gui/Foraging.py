@@ -55,22 +55,6 @@ class NumpyEncoder(json.JSONEncoder):
 class Window(QMainWindow):
     Time = QtCore.pyqtSignal(int) # Photometry timer signal
 
-    # TESTING
-    # def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
-    #     logging.info('Creating Window')
-    #     super().__init__(parent)
-    #     self.default_ui = "ForagingGUI.ui"
-    #     self._LoadUI()
-    #     self._InitializeMotorStage()
-    #     if self.Settings['newscale_serial_num_box{}'.format(self.box_number)] == '':
-    #         self.stage_widget = get_stage_object(StageUI.widget.value)
-    #         if self.default_ui == "ForagingGUI.ui" or None:
-    #             self._insert_stage_controller_widget_foraging_gui("widget_2")
-    #         else:
-    #             self._insert_stage_controller_widget_foraging_ephys_gui()
-    #     else:
-    #         print("Newscale stage connected")
-
     def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
         super().__init__(parent)
