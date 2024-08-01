@@ -21,7 +21,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QWidget
 from PyQt5.QtWidgets import QFileDialog,QVBoxLayout
 from PyQt5 import QtWidgets,QtGui,QtCore, uic
 from PyQt5.QtCore import QThreadPool,Qt,QThread
@@ -39,6 +39,8 @@ from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScal
 from foraging_gui.stage import Stage
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
+
+from StageWidget.views.stage_widget import get_stage_object, StageUI
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -85,9 +87,9 @@ class Window(QMainWindow):
         self._GetWaterCalibration()
 
         # Load Rig Json
-        self._LoadRigJson()      
- 
-        # Load User interface 
+        self._LoadRigJson()
+
+        # Load User interface
         self._LoadUI()
 
         # set window title
@@ -152,7 +154,17 @@ class Window(QMainWindow):
         self._WaterVolumnManage2()
         self._LickSta()
         self._InitializeMotorStage()
-        self._GetPositions()
+
+        # Initialize Allen Institute stage widget if Newscale stage was not found
+        if self.Settings['newscale_serial_num_box{}'.format(self.box_number)] == '':
+            self.stage_widget = get_stage_object(StageUI.widget.value)
+            if self.default_ui == "ForagingGUI.ui" or None:
+                self._insert_stage_controller_widget_foraging_gui("widget_2")
+            else:
+                self._insert_stage_controller_widget_foraging_ephys_gui()
+        else:
+            self._GetPositions()
+
         self._warmup()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
@@ -241,7 +253,7 @@ class Window(QMainWindow):
         self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
-                                
+        self.HideLegend.clicked.connect(self._hide_legend)
         # Connect to ID change in the mainwindow
         self.ID.returnPressed.connect(
             lambda: self.AutoTrain_dialog.update_auto_train_lock(engaged=False)
@@ -253,8 +265,6 @@ class Window(QMainWindow):
                 )
             )
         self.AutoTrain.clicked.connect(self._auto_train_clicked)
-        
-        
         self.pushButton_streamlit.clicked.connect(self._open_mouse_on_streamlit)
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._Task)
@@ -309,7 +319,60 @@ class Window(QMainWindow):
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit)):   
                 child.returnPressed.connect(self.keyPressEvent)
+  
+    def _insert_stage_controller_widget_foraging_gui(self, widget_to_replace):
+        """
+        replace current motor controller in foraging_gui with stagewidget controller
+        note: foraging gui must be loaded (load_ui function) before running this function
+        """
+        widget = getattr(self, widget_to_replace, None)
+        if widget is not None:
+            layout = widget.layout()
+            # Hide all current items
+            for i in reversed(range(layout.count())):
+                layout.itemAt(i).widget().setVisible(False)
+            # Insert new stage_widget
+            layout.addWidget(self.stage_widget)
+
+    def _insert_stage_controller_widget_foraging_ephys_gui(self):
+        """
+        replace current motor controller in foraging_ephys_gui with stagewidget controller
+        """
+        if hasattr(self, "centralwidget"):
+            widget = self.centralwidget
+            # Find groupBox_3 (motor stage group box)
+            child = widget.findChild(QWidget, "groupBox_3")
+            if child is not None:
+                # Get x and y coordinates and hide current controller widget
+                x_pos = child.geometry().x()
+                y_pos = child.geometry().y()
+                child.setVisible(False)
+
+                # Insert new controller widget
+                self.stage_widget.setParent(widget)
+                self.stage_widget.move(x_pos, y_pos)
+                self.stage_widget.setVisible(True)
     
+    def _hide_legend(self):
+        '''Hide the legend of the plot'''
+        
+        if 'PlotM' not in self.__dict__:
+            self.HideLegend.setChecked(False)
+            return
+        
+        if 'ax1' not in self.PlotM.__dict__ or 'ax2' not in self.PlotM.__dict__:
+            self.HideLegend.setChecked(False)
+            return
+        
+        if self.HideLegend.isChecked():
+            self.PlotM.ax1.legend().set_visible(False)
+            self.PlotM.ax2.legend().set_visible(False)
+            self.PlotM.draw()
+        else:
+            self.PlotM.ax1.legend(loc='lower left', fontsize=8).set_visible(True)
+            self.PlotM.ax2.legend(loc='lower left', fontsize=8).set_visible(True)
+            self.PlotM.draw()
+
     def _set_reference(self):
         '''
         set the reference point for lick spout position in the metadata dialog
@@ -1065,6 +1128,7 @@ class Window(QMainWindow):
                 'aind_watchdog_service',
                 'manifest'),
             'auto_engage':True,
+            'clear_figure_after_save':True,
         }
         
         # Try to load Settings_box#.csv
@@ -1151,7 +1215,7 @@ class Window(QMainWindow):
         self.name_mapper_file = self.Settings['name_mapper_file']
         self.save_each_trial = self.Settings['save_each_trial']
         self.auto_engage = self.Settings['auto_engage']
-
+        self.clear_figure_after_save = self.Settings['clear_figure_after_save']
         if not is_absolute_path(self.project_info_file):
             self.project_info_file = os.path.join(self.SettingFolder,self.project_info_file)
         # Also stream log info to the console if enabled
@@ -3081,7 +3145,7 @@ class Window(QMainWindow):
             self.GeneratedTrials.B_GoCueTime=self.GeneratedTrials.B_GoCueTime[0]
             self.GeneratedTrials.B_RewardOutcomeTime=self.GeneratedTrials.B_RewardOutcomeTime[0]
             
-        PlotM=PlotV(win=self,GeneratedTrials=self.GeneratedTrials,width=5, height=4)
+        self.PlotM=PlotV(win=self,GeneratedTrials=self.GeneratedTrials,width=5, height=4)
         layout=self.Visualization.layout()
         if layout is not None:
             for i in reversed(range(layout.count())):
@@ -3090,12 +3154,12 @@ class Window(QMainWindow):
         layout=self.Visualization.layout()
         if layout is None:
             layout=QVBoxLayout(self.Visualization)
-        toolbar = NavigationToolbar(PlotM, self)
+        toolbar = NavigationToolbar(self.PlotM, self)
         toolbar.setMaximumHeight(20)
         toolbar.setMaximumWidth(300)
         layout.addWidget(toolbar)
-        layout.addWidget(PlotM)
-        PlotM._Update(GeneratedTrials=self.GeneratedTrials)
+        layout.addWidget(self.PlotM)
+        self.PlotM._Update(GeneratedTrials=self.GeneratedTrials)
         self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
 
     def _Clear(self):
@@ -3437,7 +3501,7 @@ class Window(QMainWindow):
             del self.fiber_photometry_end_time 
 
         # Clear Plots
-        if hasattr(self, 'PlotM'): 
+        if hasattr(self, 'PlotM') and self.clear_figure_after_save: 
             self.PlotM._Update(GeneratedTrials=None,Channel=None)
 
         # Add note to log
@@ -3600,7 +3664,7 @@ class Window(QMainWindow):
             logging.info('Starting session, with experimenter: {}'.format(self.Experimenter.text()))
 
             # check repo status
-            if (self.current_branch not in ['main','production_testing']) & (self.ID.text() != '0'):
+            if (self.current_branch not in ['main','production_testing']) & (self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']):
                 # Prompt user over off-pipeline branch
                 reply = QMessageBox.critical(self,
                     'Box {}, Start'.format(self.box_letter),    
@@ -3616,7 +3680,7 @@ class Window(QMainWindow):
                     logging.error('Starting session on branch: {}'.format(self.current_branch))
 
             # Check for untracked local changes
-            if self.repo_dirty_flag & (self.ID.text() != '0'):
+            if self.repo_dirty_flag & (self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']):
                 # prompt user over untracked local changes
                 reply = QMessageBox.critical(self,
                     'Box {}, Start'.format(self.box_letter),    
@@ -4212,6 +4276,9 @@ class Window(QMainWindow):
         '''
             Generates a manifest.yml file for triggering data copy to VAST and upload to aws
         '''
+        if self.ID.text() in ['0','1','2','3','4','5','6','7','8','9','10']:
+            logging.info('Skipping upload manifest, because this is the test mouse')
+            return
         try: 
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
@@ -4266,7 +4333,7 @@ class Window(QMainWindow):
             logging.error('Could not generate upload manifest: {}'.format(str(e)))
             QMessageBox.critical(self, 'Upload manifest', 
                 'Could not generate upload manifest. '+\
-                'Please alert the mouse owner that this session will not be uploaded.')
+                'Please alert the mouse owner, and report on github.')
             
 
 def start_gui_log_file(box_number):

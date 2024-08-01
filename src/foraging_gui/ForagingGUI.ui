@@ -79,7 +79,7 @@
            <x>0</x>
            <y>0</y>
            <width>894</width>
-           <height>236</height>
+           <height>235</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_17">
@@ -113,7 +113,7 @@
        </widget>
       </item>
       <item>
-       <layout class="QGridLayout" name="gridLayout_5" columnstretch="0,0,0,0,0,0,0,0,0,0,0">
+       <layout class="QGridLayout" name="gridLayout_5" columnstretch="0,0,0,0,0,0,0,0,0,0,0,0">
         <property name="sizeConstraint">
          <enum>QLayout::SetDefaultConstraint</enum>
         </property>
@@ -126,20 +126,7 @@
         <property name="rightMargin">
          <number>4</number>
         </property>
-        <item row="0" column="0">
-         <widget class="QPushButton" name="Load">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Load</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="3">
+        <item row="2" column="3">
          <spacer name="horizontalSpacer_5">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -152,7 +139,7 @@
           </property>
          </spacer>
         </item>
-        <item row="0" column="6">
+        <item row="2" column="7">
          <widget class="QSpinBox" name="SessionlistSpin">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -177,8 +164,8 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="10">
-         <widget class="QPushButton" name="Clear">
+        <item row="2" column="0">
+         <widget class="QPushButton" name="Load">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -186,11 +173,33 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Clear</string>
+           <string>Load</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="8" alignment="Qt::AlignRight">
+        <item row="2" column="4">
+         <widget class="QLabel" name="label_73">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>session=</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::AutoText</enum>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="9" alignment="Qt::AlignRight">
          <widget class="QPushButton" name="NewSession">
           <property name="enabled">
            <bool>true</bool>
@@ -215,7 +224,20 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="2">
+        <item row="2" column="11">
+         <widget class="QPushButton" name="Clear">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Clear</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
          <widget class="QPushButton" name="Start">
           <property name="enabled">
            <bool>true</bool>
@@ -240,8 +262,31 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="4">
-         <widget class="QLabel" name="label_73">
+        <item row="2" column="1">
+         <widget class="QPushButton" name="Save">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Save</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="5">
+         <widget class="QComboBox" name="Sessionlist">
+          <property name="minimumSize">
+           <size>
+            <width>200</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="8">
+         <widget class="QPushButton" name="HideLegend">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -252,36 +297,10 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>session=</string>
+           <string>Hide legend</string>
           </property>
-          <property name="textFormat">
-           <enum>Qt::AutoText</enum>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="5">
-         <widget class="QComboBox" name="Sessionlist">
-          <property name="minimumSize">
-           <size>
-            <width>200</width>
-            <height>0</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QPushButton" name="Save">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Save</string>
+          <property name="checkable">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -596,7 +615,7 @@
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>178</width>
+                      <width>169</width>
                       <height>247</height>
                      </rect>
                     </property>
@@ -922,7 +941,7 @@
             <string notr="true"/>
            </property>
            <property name="currentIndex">
-            <number>2</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="tab_2">
             <attribute name="title">
@@ -939,8 +958,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>627</width>
-                  <height>325</height>
+                  <width>624</width>
+                  <height>353</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout">
@@ -1000,6 +1019,9 @@
                       <property name="font">
                        <font>
                         <pointsize>8</pointsize>
+                        <weight>50</weight>
+                        <italic>false</italic>
+                        <bold>false</bold>
                        </font>
                       </property>
                       <property name="title">
@@ -1316,6 +1338,9 @@
                            <property name="font">
                             <font>
                              <pointsize>7</pointsize>
+                             <weight>50</weight>
+                             <italic>false</italic>
+                             <bold>false</bold>
                             </font>
                            </property>
                            <property name="text">
@@ -1340,6 +1365,9 @@
                            <property name="font">
                             <font>
                              <pointsize>7</pointsize>
+                             <weight>50</weight>
+                             <italic>false</italic>
+                             <bold>false</bold>
                             </font>
                            </property>
                            <property name="text">
@@ -1364,6 +1392,9 @@
                            <property name="font">
                             <font>
                              <pointsize>7</pointsize>
+                             <weight>50</weight>
+                             <italic>false</italic>
+                             <bold>false</bold>
                             </font>
                            </property>
                            <property name="text">
@@ -1388,6 +1419,9 @@
                            <property name="font">
                             <font>
                              <pointsize>7</pointsize>
+                             <weight>50</weight>
+                             <italic>false</italic>
+                             <bold>false</bold>
                             </font>
                            </property>
                            <property name="text">
@@ -1422,178 +1456,6 @@
                           </widget>
                          </item>
                         </layout>
-                       </item>
-                      </layout>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QGroupBox" name="groupBox_6">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                      <property name="font">
-                       <font>
-                        <pointsize>8</pointsize>
-                       </font>
-                      </property>
-                      <property name="title">
-                       <string>Plot settings</string>
-                      </property>
-                      <layout class="QGridLayout" name="gridLayout_10">
-                       <item row="1" column="0">
-                        <widget class="QLabel" name="label_71">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="text">
-                          <string>step (s)=</string>
-                         </property>
-                         <property name="textFormat">
-                          <enum>Qt::AutoText</enum>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="1" column="1">
-                        <widget class="QSpinBox" name="StepSize">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>60</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
-                         <property name="maximum">
-                          <number>100000</number>
-                         </property>
-                         <property name="value">
-                          <number>5</number>
-                         </property>
-                         <property name="displayIntegerBase">
-                          <number>10</number>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="0" column="3">
-                        <widget class="QSpinBox" name="WindowSize">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>80</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
-                         <property name="maximum">
-                          <number>100000</number>
-                         </property>
-                         <property name="value">
-                          <number>100</number>
-                         </property>
-                         <property name="displayIntegerBase">
-                          <number>10</number>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="0" column="0">
-                        <widget class="QLabel" name="label_69">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="text">
-                          <string>window (trials) =</string>
-                         </property>
-                         <property name="textFormat">
-                          <enum>Qt::AutoText</enum>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="0" column="2">
-                        <widget class="QLabel" name="label_70">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="text">
-                          <string>seconds =</string>
-                         </property>
-                         <property name="textFormat">
-                          <enum>Qt::AutoText</enum>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="0" column="1">
-                        <widget class="QSpinBox" name="RunLength">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>60</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
-                         <property name="maximum">
-                          <number>100000</number>
-                         </property>
-                         <property name="value">
-                          <number>10</number>
-                         </property>
-                         <property name="displayIntegerBase">
-                          <number>10</number>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="1" column="2" colspan="2">
-                        <widget class="QComboBox" name="MartchingType">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <item>
-                          <property name="text">
-                           <string>log ratio</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string>fraction R</string>
-                          </property>
-                         </item>
-                        </widget>
                        </item>
                       </layout>
                      </widget>
@@ -1645,6 +1507,9 @@
                       <property name="font">
                        <font>
                         <pointsize>8</pointsize>
+                        <weight>50</weight>
+                        <italic>false</italic>
+                        <bold>false</bold>
                        </font>
                       </property>
                       <property name="title">
@@ -1916,6 +1781,9 @@
                            <property name="font">
                             <font>
                              <pointsize>8</pointsize>
+                             <weight>50</weight>
+                             <italic>false</italic>
+                             <bold>false</bold>
                             </font>
                            </property>
                            <property name="text">
@@ -1944,6 +1812,181 @@
                         <number>0</number>
                        </property>
                        <item>
+                        <widget class="QGroupBox" name="groupBox_6">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="font">
+                          <font>
+                           <pointsize>8</pointsize>
+                           <weight>50</weight>
+                           <italic>false</italic>
+                           <bold>false</bold>
+                          </font>
+                         </property>
+                         <property name="title">
+                          <string>Plot settings</string>
+                         </property>
+                         <layout class="QGridLayout" name="gridLayout_10">
+                          <item row="1" column="0">
+                           <widget class="QLabel" name="label_71">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="text">
+                             <string>step (s)=</string>
+                            </property>
+                            <property name="textFormat">
+                             <enum>Qt::AutoText</enum>
+                            </property>
+                            <property name="alignment">
+                             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="1" column="1">
+                           <widget class="QSpinBox" name="StepSize">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>60</width>
+                              <height>16777215</height>
+                             </size>
+                            </property>
+                            <property name="maximum">
+                             <number>100000</number>
+                            </property>
+                            <property name="value">
+                             <number>5</number>
+                            </property>
+                            <property name="displayIntegerBase">
+                             <number>10</number>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="0" column="3">
+                           <widget class="QSpinBox" name="WindowSize">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>80</width>
+                              <height>16777215</height>
+                             </size>
+                            </property>
+                            <property name="maximum">
+                             <number>100000</number>
+                            </property>
+                            <property name="value">
+                             <number>100</number>
+                            </property>
+                            <property name="displayIntegerBase">
+                             <number>10</number>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="0" column="0">
+                           <widget class="QLabel" name="label_69">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="text">
+                             <string>window (trials) =</string>
+                            </property>
+                            <property name="textFormat">
+                             <enum>Qt::AutoText</enum>
+                            </property>
+                            <property name="alignment">
+                             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="0" column="2">
+                           <widget class="QLabel" name="label_70">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="text">
+                             <string>seconds =</string>
+                            </property>
+                            <property name="textFormat">
+                             <enum>Qt::AutoText</enum>
+                            </property>
+                            <property name="alignment">
+                             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="0" column="1">
+                           <widget class="QSpinBox" name="RunLength">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>60</width>
+                              <height>16777215</height>
+                             </size>
+                            </property>
+                            <property name="maximum">
+                             <number>100000</number>
+                            </property>
+                            <property name="value">
+                             <number>10</number>
+                            </property>
+                            <property name="displayIntegerBase">
+                             <number>10</number>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="1" column="2" colspan="2">
+                           <widget class="QComboBox" name="MartchingType">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <item>
+                             <property name="text">
+                              <string>log ratio</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string>fraction R</string>
+                             </property>
+                            </item>
+                           </widget>
+                          </item>
+                         </layout>
+                        </widget>
+                       </item>
+                       <item>
                         <widget class="QLabel" name="label_75">
                          <property name="sizePolicy">
                           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
@@ -1954,6 +1997,9 @@
                          <property name="font">
                           <font>
                            <pointsize>8</pointsize>
+                           <weight>50</weight>
+                           <italic>false</italic>
+                           <bold>false</bold>
                           </font>
                          </property>
                          <property name="text">
@@ -2016,8 +2062,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>610</width>
-                  <height>339</height>
+                  <width>601</width>
+                  <height>342</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_9">
@@ -2059,6 +2105,9 @@
                       <property name="font">
                        <font>
                         <pointsize>8</pointsize>
+                        <weight>50</weight>
+                        <italic>false</italic>
+                        <bold>false</bold>
                        </font>
                       </property>
                       <property name="title">
@@ -2338,6 +2387,9 @@
                       <property name="font">
                        <font>
                         <pointsize>8</pointsize>
+                        <weight>50</weight>
+                        <italic>false</italic>
+                        <bold>false</bold>
                        </font>
                       </property>
                       <property name="title">
@@ -2420,6 +2472,9 @@
                       <property name="font">
                        <font>
                         <pointsize>8</pointsize>
+                        <weight>50</weight>
+                        <italic>false</italic>
+                        <bold>false</bold>
                        </font>
                       </property>
                       <property name="title">
@@ -2477,6 +2532,9 @@ Current right block:
                            <property name="font">
                             <font>
                              <pointsize>8</pointsize>
+                             <weight>50</weight>
+                             <italic>false</italic>
+                             <bold>false</bold>
                             </font>
                            </property>
                            <property name="text">
@@ -2530,6 +2588,9 @@ Current pair:
                    <property name="font">
                     <font>
                      <pointsize>8</pointsize>
+                     <weight>50</weight>
+                     <italic>false</italic>
+                     <bold>false</bold>
                     </font>
                    </property>
                    <property name="title">
@@ -2553,6 +2614,7 @@ Current pair:
                          <font>
                           <pointsize>9</pointsize>
                           <weight>75</weight>
+                          <italic>false</italic>
                           <bold>true</bold>
                          </font>
                         </property>
@@ -2596,6 +2658,7 @@ Water in session:</string>
                          <font>
                           <pointsize>9</pointsize>
                           <weight>75</weight>
+                          <italic>false</italic>
                           <bold>true</bold>
                          </font>
                         </property>
@@ -2631,8 +2694,8 @@ Bias:</string>
                         <rect>
                          <x>0</x>
                          <y>0</y>
-                         <width>330</width>
-                         <height>209</height>
+                         <width>324</width>
+                         <height>207</height>
                         </rect>
                        </property>
                        <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -2701,10 +2764,10 @@ Double dipping:
                <widget class="QWidget" name="scrollAreaWidgetContents_2">
                 <property name="geometry">
                  <rect>
-                  <x>-297</x>
+                  <x>0</x>
                   <y>0</y>
-                  <width>1068</width>
-                  <height>463</height>
+                  <width>1094</width>
+                  <height>470</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -4683,6 +4746,9 @@ Double dipping:
                    <property name="font">
                     <font>
                      <pointsize>8</pointsize>
+                     <weight>50</weight>
+                     <italic>false</italic>
+                     <bold>false</bold>
                     </font>
                    </property>
                    <property name="text">
@@ -4728,7 +4794,7 @@ Current pair:
                   <x>0</x>
                   <y>0</y>
                   <width>627</width>
-                  <height>325</height>
+                  <height>324</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_16">
@@ -5085,7 +5151,7 @@ Current pair:
      <x>0</x>
      <y>0</y>
      <width>960</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <property name="sizePolicy">
