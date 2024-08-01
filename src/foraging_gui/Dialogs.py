@@ -993,7 +993,6 @@ class WaterCalibrationDialog(QDialog):
             self.SpotCheckPreWeightLeft.setText(str(empty_tube_weight))
 
         # Determine what open time to use
-        self.SpotLeftFinished=0
         self.SpotLeftOpenTime = self._VolumeToTime(float(self.SpotLeftVolume.text()),'Left')
         self.SpotLeftOpenTime = np.round(self.SpotLeftOpenTime,4)
         logging.info('Using a calibration spot check of {}s to deliver {}uL'.format(self.SpotLeftOpenTime,self.SpotLeftVolume.text()))
@@ -1074,7 +1073,6 @@ class WaterCalibrationDialog(QDialog):
                 '\nCalibration saved'
                 )
             self._SaveLeft()
-
 
         # set the default valve open time
         self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
@@ -1187,7 +1185,12 @@ class WaterCalibrationDialog(QDialog):
         result = (final_tube_weight - empty_tube_weight)/int(self.SpotCycle)*1000
         error = result - float(self.SpotRightVolume.text())
         error = np.round(error,4)
-        
+        self.Warning.setText(
+            'Measuring right valve: {}uL'.format(self.SpotRightVolume.text()) + \
+            '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
+            '\nFinal tube weight: {}g'.format(final_tube_weight) + \
+            '\nAvg. error from target: {}uL'.format(error)
+            )                
         TOLERANCE = float(self.SpotRightVolume.text())*.15
         if np.abs(error) > TOLERANCE:
             reply = QMessageBox.critical(self, 'Spot check left', 
