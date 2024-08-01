@@ -3172,7 +3172,7 @@ class Window(QMainWindow):
                 logging.warning('FIP workflow already started, user restarts')
 
         # Start logging
-        self.CreateNewFolder=1
+        self.load_tag=0
         self.Ot_log_folder=self._restartlogging()
 
         # Start the FIP workflow
@@ -3745,7 +3745,6 @@ class Window(QMainWindow):
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
                 if (not (self.Camera_dialog.StartRecording.isChecked() and self.Camera_dialog.AutoControl.currentText()=='No')) and (not self.FIP_started):
-                    self.CreateNewFolder=1
                     self.Ot_log_folder=self._restartlogging()
             except Exception as e:
                 if 'ConnectionAbortedError' in str(e):
