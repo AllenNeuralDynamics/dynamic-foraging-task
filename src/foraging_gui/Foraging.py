@@ -21,7 +21,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QWidget
 from PyQt5.QtWidgets import QFileDialog,QVBoxLayout
 from PyQt5 import QtWidgets,QtGui,QtCore, uic
 from PyQt5.QtCore import QThreadPool,Qt,QThread
@@ -39,6 +39,8 @@ from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScal
 from foraging_gui.stage import Stage
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
+
+from StageWidget.views.stage_widget import get_stage_object, StageUI
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -85,9 +87,9 @@ class Window(QMainWindow):
         self._GetWaterCalibration()
 
         # Load Rig Json
-        self._LoadRigJson()      
- 
-        # Load User interface 
+        self._LoadRigJson()
+
+        # Load User interface
         self._LoadUI()
 
         # set window title
@@ -152,7 +154,17 @@ class Window(QMainWindow):
         self._WaterVolumnManage2()
         self._LickSta()
         self._InitializeMotorStage()
-        self._GetPositions()
+
+        # Initialize Allen Institute stage widget if Newscale stage was not found
+        if self.Settings['newscale_serial_num_box{}'.format(self.box_number)] == '':
+            self.stage_widget = get_stage_object(StageUI.widget.value)
+            if self.default_ui == "ForagingGUI.ui" or None:
+                self._insert_stage_controller_widget_foraging_gui("widget_2")
+            else:
+                self._insert_stage_controller_widget_foraging_ephys_gui()
+        else:
+            self._GetPositions()
+
         self._warmup()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
@@ -307,6 +319,39 @@ class Window(QMainWindow):
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit)):   
                 child.returnPressed.connect(self.keyPressEvent)
+  
+    def _insert_stage_controller_widget_foraging_gui(self, widget_to_replace):
+        """
+        replace current motor controller in foraging_gui with stagewidget controller
+        note: foraging gui must be loaded (load_ui function) before running this function
+        """
+        widget = getattr(self, widget_to_replace, None)
+        if widget is not None:
+            layout = widget.layout()
+            # Hide all current items
+            for i in reversed(range(layout.count())):
+                layout.itemAt(i).widget().setVisible(False)
+            # Insert new stage_widget
+            layout.addWidget(self.stage_widget)
+
+    def _insert_stage_controller_widget_foraging_ephys_gui(self):
+        """
+        replace current motor controller in foraging_ephys_gui with stagewidget controller
+        """
+        if hasattr(self, "centralwidget"):
+            widget = self.centralwidget
+            # Find groupBox_3 (motor stage group box)
+            child = widget.findChild(QWidget, "groupBox_3")
+            if child is not None:
+                # Get x and y coordinates and hide current controller widget
+                x_pos = child.geometry().x()
+                y_pos = child.geometry().y()
+                child.setVisible(False)
+
+                # Insert new controller widget
+                self.stage_widget.setParent(widget)
+                self.stage_widget.move(x_pos, y_pos)
+                self.stage_widget.setVisible(True)
     
     def _hide_legend(self):
         '''Hide the legend of the plot'''
