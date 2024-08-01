@@ -3066,6 +3066,7 @@ class Window(QMainWindow):
         self.StartExcitation.setChecked(False)
         self.keyPressEvent() # Accept all updates
         self.load_tag=1
+        self.ID.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
