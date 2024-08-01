@@ -993,7 +993,6 @@ class WaterCalibrationDialog(QDialog):
             self.SpotCheckPreWeightLeft.setText(str(empty_tube_weight))
 
         # Determine what open time to use
-        self.SpotLeftFinished=0
         self.SpotLeftOpenTime = self._VolumeToTime(float(self.SpotLeftVolume.text()),'Left')
         self.SpotLeftOpenTime = np.round(self.SpotLeftOpenTime,4)
         logging.info('Using a calibration spot check of {}s to deliver {}uL'.format(self.SpotLeftOpenTime,self.SpotLeftVolume.text()))
@@ -1074,7 +1073,6 @@ class WaterCalibrationDialog(QDialog):
                 '\nCalibration saved'
                 )
             self._SaveLeft()
-
 
         # set the default valve open time
         self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
@@ -1187,12 +1185,18 @@ class WaterCalibrationDialog(QDialog):
         result = (final_tube_weight - empty_tube_weight)/int(self.SpotCycle)*1000
         error = result - float(self.SpotRightVolume.text())
         error = np.round(error,4)
-        
-        TOLERANCE = float(self.SpotRightVolume.text())/10
+        self.Warning.setText(
+            'Measuring right valve: {}uL'.format(self.SpotRightVolume.text()) + \
+            '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
+            '\nFinal tube weight: {}g'.format(final_tube_weight) + \
+            '\nAvg. error from target: {}uL'.format(error)
+            )                
+        TOLERANCE = float(self.SpotRightVolume.text())*.15
         if np.abs(error) > TOLERANCE:
-            reply = QMessageBox.critical(self, 'Spot check right', 
-                'Result ( {}uL ) is outside expected tolerance. \nPlease confirm you entered information correctly, then press save.'.format(np.round(result,2)), 
+            reply = QMessageBox.critical(self, 'Spot check left', 
+                'Measurement is outside expected tolerance. <br><br>FIRST, please confirm you entered information correctly, then press save. <br><br><span style="color:purple;font-weight:bold">IMPORTANT</span>: If the measurement was correctly entered (not a typo), please repeat the spot check once. If the measurement remains outside the expected tolerance please immediately perform a full calibration.'.format(np.round(result,2)), 
                 QMessageBox.Ok)
+
             logging.error('Water calibration spot check exceeds tolerance: {}'.format(error))  
             self.SaveRight.setStyleSheet("color: white;background-color : mediumorchid;")
             self.Warning.setText(
