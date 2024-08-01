@@ -2752,7 +2752,8 @@ class Window(QMainWindow):
 
         # Set ID, clear weight information
         logging.info('User starting a new mouse: {}'.format(mouse_id))
-        self.ID.setText(mouse_id)   
+        self.ID.setText(mouse_id) 
+        self.ID.returnPressed.emit()
         self.BaseWeight.setText('')
         self.WeightAfter.setText('')
         self.TargetRatio.setText('0.85')
