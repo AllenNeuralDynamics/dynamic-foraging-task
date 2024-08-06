@@ -72,7 +72,7 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - Install the USBXpress software, for the newscale motor stage
 - Install the Spinnaker SDK, if a FLIR camera is being used
 - Install the NI-DAQ max driver if a NiDAQ is present (for optogenetics)
-- Create a `conda` environment, with python version 3.8
+- Create a `conda` environment, with python version 3.11
   - install `conda` [instructions here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/windows.html)
   - Run `miniconda prompt`, and type `where conda`
   - Add conda to the path variable
@@ -83,7 +83,7 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
       - C:\Users\svc_aind_behavior\AppData\Local\miniconda3\Scripts
       - C:\Users\svc_aind_behavior\AppData\Local\miniconda3\Library\bin
       - C:\Users\svc_aind_behavior\AppData\Local\miniconda3\condabin
-  - Create an environment: `conda create -n Foraging python=3.8`
+  - Create an environment: `conda create -n Foraging python=3.11`
   - Activate the environment: `conda activate Foraging`
 - Use `pip` to install this repository:
   - From the `C:\Users\svc_aind_behavior\Documents\GitHub\dynamic-foraging-task` directory run `pip install -e .`
