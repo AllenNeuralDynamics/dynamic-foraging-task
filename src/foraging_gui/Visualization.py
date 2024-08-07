@@ -453,8 +453,6 @@ class PlotWaterCalibration(FigureCanvas):
                     self.FittingResults[current_date][current_valve]=[slope,intercept]
                 elif (current_valve in ['SpotLeft','SpotRight'])and(current_date in all_dates):
                     X,Y=self._GetWaterSpotCheck(self.WaterCalibrationResults,current_date,current_valve)      
-                    print(Y)
-                    print(type(Y))
                     for index, y in enumerate(Y):
                         x = X[index]
                         FAILED = (y < 2*(1-.15)) or (y > 2*(1.15))             
