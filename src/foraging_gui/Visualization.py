@@ -456,6 +456,7 @@ class PlotWaterCalibration(FigureCanvas):
                     print(Y)
                     print(type(Y))
                     for index, y in enumerate(Y):
+                        x = X[index]
                         FAILED = (y < 2*(1-.15)) or (y > 2*(1.15))             
                         if current_valve=='SpotLeft':
                             if FAILED:
