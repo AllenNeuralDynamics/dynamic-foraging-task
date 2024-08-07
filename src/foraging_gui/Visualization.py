@@ -455,17 +455,18 @@ class PlotWaterCalibration(FigureCanvas):
                     X,Y=self._GetWaterSpotCheck(self.WaterCalibrationResults,current_date,current_valve)      
                     print(Y)
                     print(type(Y))
-                    FAILED = (Y[0] < 2*(1-.15)) or (Y[0] > 2*(1.15))             
-                    if current_valve=='SpotLeft':
-                        if FAILED:
-                            line=self.ax1.plot(X, Y, 'x',label=current_date+'_spot left (FAIL)')
-                        else:
-                            line=self.ax1.plot(X, Y, 'o',label=current_date+'_spot left')
-                    elif current_valve=='SpotRight':
-                        if FAILED:
-                            line=self.ax1.plot(X, Y, 'x',label=current_date+'_spot right (FAIL)')
-                        else:
-                            line=self.ax1.plot(X, Y, 'o',label=current_date+'_spot right')
+                    for index, y in enumerate(Y):
+                        FAILED = (y < 2*(1-.15)) or (y > 2*(1.15))             
+                        if current_valve=='SpotLeft':
+                            if FAILED:
+                                line=self.ax1.plot(x, y, 'x',label=current_date+'_spot left (FAIL)')
+                            else:
+                                line=self.ax1.plot(x, y, 'o',label=current_date+'_spot left')
+                        elif current_valve=='SpotRight':
+                            if FAILED:
+                                line=self.ax1.plot(x, y, 'x',label=current_date+'_spot right (FAIL)')
+                            else:
+                                line=self.ax1.plot(x, y, 'o',label=current_date+'_spot right')
         self.ax1.set_xlabel('valve open time(s)')
         self.ax1.set_ylabel('water(mg)')
         self.ax1.legend(loc='lower right', fontsize=8)
