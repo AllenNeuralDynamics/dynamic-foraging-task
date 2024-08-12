@@ -2915,11 +2915,11 @@
                       <Value>0</Value>
                     </Operand>
                   </Expression>
-                  <Expression xsi:type="rx:PublishSubject">
-                    <Name>LeftLick</Name>
-                  </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:DistinctUntilChanged" />
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>LeftLick</Name>
                   </Expression>
                   <Expression xsi:type="rx:Condition">
                     <Workflow>
@@ -2967,11 +2967,11 @@
                       <Value>0</Value>
                     </Operand>
                   </Expression>
-                  <Expression xsi:type="rx:PublishSubject">
-                    <Name>RightLick</Name>
-                  </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:DistinctUntilChanged" />
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>RightLick</Name>
                   </Expression>
                   <Expression xsi:type="rx:Condition">
                     <Workflow>
@@ -7964,7 +7964,7 @@
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="spk:SpinnakerCapture">
                             <spk:Index xsi:nil="true" />
-                            <spk:SerialNumber>23045805</spk:SerialNumber>
+                            <spk:SerialNumber>23022715</spk:SerialNumber>
                             <spk:ColorProcessing>Default</spk:ColorProcessing>
                           </Combinator>
                         </Expression>
@@ -8002,7 +8002,7 @@
                           </PropertyMappings>
                         </Expression>
                         <Expression xsi:type="io:CsvWriter">
-                          <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/bottom_camera.csv</io:FileName>
+                          <io:FileName>C:\Users\svc_aind_behavior\Documents\temporaryvideo\2024-08-05_11-56-50\behavior\raw.harp/../../behavior-videos/bottom_camera.csv</io:FileName>
                           <io:Append>false</io:Append>
                           <io:Overwrite>true</io:Overwrite>
                           <io:Suffix>None</io:Suffix>
@@ -8050,7 +8050,7 @@
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="ffmpeg:VideoWriter">
-                            <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/bottom_camera.avi</ffmpeg:FileName>
+                            <ffmpeg:FileName>C:\Users\svc_aind_behavior\Documents\temporaryvideo\2024-08-05_11-56-50\behavior\raw.harp/../../behavior-videos/bottom_camera.avi</ffmpeg:FileName>
                             <ffmpeg:Suffix>None</ffmpeg:Suffix>
                             <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                             <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
@@ -8135,7 +8135,7 @@
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="spk:SpinnakerCapture">
                             <spk:Index xsi:nil="true" />
-                            <spk:SerialNumber>23022710</spk:SerialNumber>
+                            <spk:SerialNumber>22511925</spk:SerialNumber>
                             <spk:ColorProcessing>Default</spk:ColorProcessing>
                           </Combinator>
                         </Expression>
@@ -8173,7 +8173,7 @@
                           </PropertyMappings>
                         </Expression>
                         <Expression xsi:type="io:CsvWriter">
-                          <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_right.csv</io:FileName>
+                          <io:FileName>C:\Users\svc_aind_behavior\Documents\temporaryvideo\2024-08-05_11-56-50\behavior\raw.harp/../../behavior-videos/side_camera_right.csv</io:FileName>
                           <io:Append>false</io:Append>
                           <io:Overwrite>true</io:Overwrite>
                           <io:Suffix>None</io:Suffix>
@@ -8221,7 +8221,7 @@
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="ffmpeg:VideoWriter">
-                            <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_right.avi</ffmpeg:FileName>
+                            <ffmpeg:FileName>C:\Users\svc_aind_behavior\Documents\temporaryvideo\2024-08-05_11-56-50\behavior\raw.harp/../../behavior-videos/side_camera_right.avi</ffmpeg:FileName>
                             <ffmpeg:Suffix>None</ffmpeg:Suffix>
                             <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                             <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
@@ -8525,9 +8525,19 @@
             <Expression xsi:type="SubscribeSubject">
               <Name>CameraImage_Bottom</Name>
             </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="cv:Flip">
+                <cv:Mode>Horizontal</cv:Mode>
+              </Combinator>
+            </Expression>
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="SubscribeSubject">
               <Name>CameraImage_Side</Name>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="cv:Flip">
+                <cv:Mode>Horizontal</cv:Mode>
+              </Combinator>
             </Expression>
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
@@ -8618,10 +8628,12 @@
             <Edge From="46" To="47" Label="Source1" />
             <Edge From="47" To="48" Label="Source2" />
             <Edge From="49" To="50" Label="Source1" />
-            <Edge From="50" To="53" Label="Source1" />
-            <Edge From="51" To="52" Label="Source1" />
-            <Edge From="52" To="53" Label="Source2" />
-            <Edge From="54" To="55" Label="Source1" />
+            <Edge From="50" To="51" Label="Source1" />
+            <Edge From="51" To="55" Label="Source1" />
+            <Edge From="52" To="53" Label="Source1" />
+            <Edge From="53" To="54" Label="Source1" />
+            <Edge From="54" To="55" Label="Source2" />
+            <Edge From="56" To="57" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
@@ -8672,7 +8684,7 @@
               </Operand>
             </Expression>
             <Expression xsi:type="Format">
-              <Format>LickVis: {0}</Format>
+              <Format>LickVis: {0} -- Top:R / Bottom:L</Format>
             </Expression>
             <Expression xsi:type="PropertyMapping">
               <PropertyMappings>
@@ -8680,7 +8692,7 @@
               </PropertyMappings>
             </Expression>
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
-              <viz:Name>LickVis: 428-9-A</viz:Name>
+              <viz:Name>LickVis: 428-9-A -- Top:R / Bottom:L</viz:Name>
               <viz:ColumnCount>1</viz:ColumnCount>
               <viz:RowCount>2</viz:RowCount>
               <viz:ColumnStyles />
