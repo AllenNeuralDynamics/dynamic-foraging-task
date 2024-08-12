@@ -8941,7 +8941,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="StringProperty">
-                      <Value>0</Value>
+                      <Value>1</Value>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="NotEqual">
@@ -9022,7 +9022,7 @@
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
               <viz:Name>HighSpeedCamVis</viz:Name>
               <viz:ColumnCount>2</viz:ColumnCount>
-              <viz:RowCount>1</viz:RowCount>
+              <viz:RowCount>2</viz:RowCount>
               <viz:ColumnStyles />
               <viz:RowStyles />
               <viz:CellSpans />
