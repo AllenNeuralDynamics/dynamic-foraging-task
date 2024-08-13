@@ -1292,14 +1292,13 @@ class CameraDialog(QDialog):
             self.WarningLabelCameraOn.setText('Camera is turning on')
             self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
             QApplication.processEvents()
-            if start_type=='recording':
-                # untoggle the preview button
-                if self.StartPreview.isChecked():
-                    self.StartPreview.setChecked(False)
-                    self._start_preview() 
-                # Start logging if the formal logging is not started
-                if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
-                    self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
+            # untoggle the preview button
+            if self.StartPreview.isChecked():
+                self.StartPreview.setChecked(False)
+                self._start_preview() 
+            # Start logging if the formal logging is not started
+            if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
+                self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
 
             # set the camera start type
             self.MainWindow.Channel.CameraStartType(int(1))
