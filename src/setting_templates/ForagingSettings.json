@@ -14,5 +14,9 @@
     "newscale_serial_num_box3":"",
     "newscale_serial_num_box4":"",
     "default_ui":"ForagingGUI.ui",
-    "open_ephys_machine_ip_address":""
+    "open_ephys_machine_ip_address":"",
+    "go_cue_decibel_box1":73,
+    "go_cue_decibel_box2":73,
+    "go_cue_decibel_box3":73,
+    "go_cue_decibel_box4":73
 }
