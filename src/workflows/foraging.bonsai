@@ -3944,7 +3944,7 @@
                   </Expression>
                   <Expression xsi:type="osc:Parse">
                     <osc:Address>/camerafrequency</osc:Address>
-                    <osc:TypeTag>s</osc:TypeTag>
+                    <osc:TypeTag>i</osc:TypeTag>
                   </Expression>
                   <Expression xsi:type="rx:PublishSubject">
                     <Name>CameraStartType</Name>
@@ -8512,9 +8512,9 @@
                   <Expression xsi:type="SubscribeSubject">
                     <Name>CameraStartType</Name>
                   </Expression>
-                  <Expression xsi:type="NotEqual">
-                    <Operand xsi:type="StringProperty">
-                      <Value>1</Value>
+                  <Expression xsi:type="Equal">
+                    <Operand xsi:type="IntProperty">
+                      <Value>2</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="rx:Condition">
@@ -9139,9 +9139,9 @@
                   <Expression xsi:type="SubscribeSubject">
                     <Name>CameraStartType</Name>
                   </Expression>
-                  <Expression xsi:type="NotEqual">
-                    <Operand xsi:type="StringProperty">
-                      <Value>2</Value>
+                  <Expression xsi:type="Equal">
+                    <Operand xsi:type="IntProperty">
+                      <Value>1</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="rx:Condition">
