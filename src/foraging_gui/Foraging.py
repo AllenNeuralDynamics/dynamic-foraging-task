@@ -3176,7 +3176,6 @@ class Window(QMainWindow):
                 logging.warning('FIP workflow already started, user restarts')
 
         # Start logging
-        self.load_tag=0
         self.Ot_log_folder=self._restartlogging()
 
         # Start the FIP workflow
