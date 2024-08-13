@@ -356,11 +356,15 @@ class PlotV(FigureCanvas):
         self.ax1.set_yticks([0,1])
         self.ax1.set_yticklabels(['L', 'R'])
         self.ax1.set_ylim(-0.6, 1.6)
-        self.ax1.legend(loc='lower left', fontsize=8)
         self.ax2.set_yticks([0,1])
         self.ax2.set_yticklabels(['L', 'R'])
         self.ax2.set_ylim(-0.15, 1.15)
-        self.ax2.legend(loc='lower left', fontsize=8)
+        if self.main_win.HideLegend.isChecked():
+            self.ax1.legend().set_visible(False)
+            self.ax2.legend().set_visible(False)
+        else:
+            self.ax1.legend(loc='lower left', fontsize=8)
+            self.ax2.legend(loc='lower left', fontsize=8)
 
 class PlotWaterCalibration(FigureCanvas):
     def __init__(self,water_win,dpi=100,width=5, height=4):
@@ -448,11 +452,20 @@ class PlotWaterCalibration(FigureCanvas):
                         self.FittingResults[current_date][current_valve]={}
                     self.FittingResults[current_date][current_valve]=[slope,intercept]
                 elif (current_valve in ['SpotLeft','SpotRight'])and(current_date in all_dates):
-                    X,Y=self._GetWaterSpotCheck(self.WaterCalibrationResults,current_date,current_valve)                   
-                    if current_valve=='SpotLeft':
-                        line=self.ax1.plot(X, Y, 'x',label=current_date+'_spot left')
-                    elif current_valve=='SpotRight':
-                        line=self.ax1.plot(X, Y, 'x',label=current_date+'_spot right')
+                    X,Y=self._GetWaterSpotCheck(self.WaterCalibrationResults,current_date,current_valve)      
+                    for index, y in enumerate(Y):
+                        x = X[index]
+                        FAILED = (y < 2*(1-.15)) or (y > 2*(1.15))             
+                        if current_valve=='SpotLeft':
+                            if FAILED:
+                                line=self.ax1.plot(x, y, 'x',label=current_date+'_spot left (FAIL)')
+                            else:
+                                line=self.ax1.plot(x, y, 'o',label=current_date+'_spot left')
+                        elif current_valve=='SpotRight':
+                            if FAILED:
+                                line=self.ax1.plot(x, y, 'x',label=current_date+'_spot right (FAIL)')
+                            else:
+                                line=self.ax1.plot(x, y, 'o',label=current_date+'_spot right')
         self.ax1.set_xlabel('valve open time(s)')
         self.ax1.set_ylabel('water(mg)')
         self.ax1.legend(loc='lower right', fontsize=8)

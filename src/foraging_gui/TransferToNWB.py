@@ -310,11 +310,12 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
             LaserPulseDurC = np.nan
 
         else:
-            if getattr(obj, f'TP_Laser_{Sc}')[i] == 'Blue':
+            laser_color=_get_field(obj, field_list=[f'TP_Laser_{Sc}',f'TP_LaserColor_{Sc}'],index=i)
+            if laser_color == 'Blue':
                 LaserWavelengthC = float(473)
-            elif getattr(obj, f'TP_Laser_{Sc}')[i] == 'Red':
+            elif laser_color == 'Red':
                 LaserWavelengthC = float(647)
-            elif getattr(obj, f'TP_Laser_{Sc}')[i] == 'Green':
+            elif laser_color == 'Green':
                 LaserWavelengthC = float(547)
             LaserLocationC = str(getattr(obj, f'TP_Location_{Sc}')[i])
             Laser1Power=float(eval(_get_field(obj, field_list=[f'TP_Laser1_power_{Sc}',f'TP_LaserPowerLeft_{Sc}'],index=i,default='[np.nan,np.nan]'))[1])
@@ -346,7 +347,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                         rewarded_historyL=obj.B_RewardedHistory[0][i],
                         rewarded_historyR=obj.B_RewardedHistory[1][i],
                         reward_outcome_time=obj.B_RewardOutcomeTime[i],
-                        delay_start_time=getattr(obj, f'B_DelayStartTime{Harp}')[i],
+                        delay_start_time=_get_field(obj, f'B_DelayStartTime{Harp}', index=i, default=np.nan), 
                         goCue_start_time=goCue_start_time_t,
                         bait_left=obj.B_BaitHistory[0][i],
                         bait_right=obj.B_BaitHistory[1][i],
