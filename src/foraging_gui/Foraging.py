@@ -2898,8 +2898,8 @@ class Window(QMainWindow):
                         # skip LeftValue, RightValue, GiveWaterL, GiveWaterR if WaterCalibrationResults is not empty as they will be set by the corresponding volume. 
                         if (key in ['LeftValue','RightValue','GiveWaterL','GiveWaterR']) and self.WaterCalibrationResults!={}:
                             continue
-                        # skip some keys; skip warmup
-                        if key in ['Start','warmup','SessionlistSpin']:
+                        # skip some keys
+                        if key in ['Start','warmup','SessionlistSpin','StartPreview','StartRecording']:
                             self.WeightAfter.setText('')
                             continue
                         widget = widget_dict[key]
