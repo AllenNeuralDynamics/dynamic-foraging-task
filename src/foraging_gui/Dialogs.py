@@ -1232,6 +1232,7 @@ class CameraDialog(QDialog):
     def _connectSignalsSlots(self):
         self.StartRecording.clicked.connect(self._StartCamera)
         self.StartPreview.clicked.connect(self._start_preview)
+        self.StartPreview.toggled.connect(self._start_preview)
         self.AutoControl.currentIndexChanged.connect(self._AutoControl)
         self.OpenSaveFolder.clicked.connect(self._OpenSaveFolder)
 
@@ -1300,7 +1301,6 @@ class CameraDialog(QDialog):
             # untoggle the preview button
             if self.StartPreview.isChecked():
                 self.StartPreview.setChecked(False)
-                self._start_preview() 
             # Start logging if the formal logging is not started
             if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
                 self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
