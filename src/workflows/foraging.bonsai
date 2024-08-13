@@ -3939,6 +3939,16 @@
                   <Expression xsi:type="rx:PublishSubject">
                     <Name>AutoWater_Right</Name>
                   </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>FromBonsaiOSC</Name>
+                  </Expression>
+                  <Expression xsi:type="osc:Parse">
+                    <osc:Address>/camerafrequency</osc:Address>
+                    <osc:TypeTag>s</osc:TypeTag>
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>CameraStartType</Name>
+                  </Expression>
                 </Nodes>
                 <Edges>
                   <Edge From="0" To="1" Label="Source1" />
@@ -4045,6 +4055,8 @@
                   <Edge From="144" To="145" Label="Source1" />
                   <Edge From="146" To="147" Label="Source1" />
                   <Edge From="147" To="148" Label="Source1" />
+                  <Edge From="149" To="150" Label="Source1" />
+                  <Edge From="150" To="151" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -8497,14 +8509,12 @@
                       </Edges>
                     </Workflow>
                   </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="StringProperty">
-                      <Value>0</Value>
-                    </Combinator>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>CameraStartType</Name>
                   </Expression>
                   <Expression xsi:type="NotEqual">
                     <Operand xsi:type="StringProperty">
-                      <Value>0</Value>
+                      <Value>1</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="rx:Condition">
@@ -8939,14 +8949,12 @@
                       </Edges>
                     </Workflow>
                   </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="StringProperty">
-                      <Value>1</Value>
-                    </Combinator>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>CameraStartType</Name>
                   </Expression>
                   <Expression xsi:type="NotEqual">
                     <Operand xsi:type="StringProperty">
-                      <Value>0</Value>
+                      <Value>2</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="rx:Condition">
