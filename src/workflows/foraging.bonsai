@@ -8574,9 +8574,19 @@
             <Expression xsi:type="SubscribeSubject">
               <Name>CameraImage_Bottom</Name>
             </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="cv:Flip">
+                <cv:Mode>Horizontal</cv:Mode>
+              </Combinator>
+            </Expression>
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="SubscribeSubject">
               <Name>CameraImage_Right</Name>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="cv:Flip">
+                <cv:Mode>Horizontal</cv:Mode>
+              </Combinator>
             </Expression>
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
@@ -8667,10 +8677,12 @@
             <Edge From="46" To="47" Label="Source1" />
             <Edge From="47" To="48" Label="Source2" />
             <Edge From="49" To="50" Label="Source1" />
-            <Edge From="50" To="53" Label="Source1" />
-            <Edge From="51" To="52" Label="Source1" />
-            <Edge From="52" To="53" Label="Source2" />
-            <Edge From="54" To="55" Label="Source1" />
+            <Edge From="50" To="51" Label="Source1" />
+            <Edge From="51" To="55" Label="Source1" />
+            <Edge From="52" To="53" Label="Source1" />
+            <Edge From="53" To="54" Label="Source1" />
+            <Edge From="54" To="55" Label="Source2" />
+            <Edge From="56" To="57" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
@@ -8721,7 +8733,7 @@
               </Operand>
             </Expression>
             <Expression xsi:type="Format">
-              <Format>LickVis: {0}</Format>
+              <Format>LickVis: {0} -- Top:R / Bottom:L</Format>
             </Expression>
             <Expression xsi:type="PropertyMapping">
               <PropertyMappings>
@@ -8729,7 +8741,7 @@
               </PropertyMappings>
             </Expression>
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
-              <viz:Name>LickVis: 4xx-x-A</viz:Name>
+              <viz:Name>LickVis: 428-9-A -- Top:R / Bottom:L</viz:Name>
               <viz:ColumnCount>1</viz:ColumnCount>
               <viz:RowCount>2</viz:RowCount>
               <viz:ColumnStyles />
@@ -9201,9 +9213,19 @@
             <Expression xsi:type="SubscribeSubject">
               <Name>CameraImage_Bottom_Preview</Name>
             </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="cv:Flip">
+                <cv:Mode>Horizontal</cv:Mode>
+              </Combinator>
+            </Expression>
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="SubscribeSubject">
               <Name>CameraImage_Right_Preview</Name>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="cv:Flip">
+                <cv:Mode>Horizontal</cv:Mode>
+              </Combinator>
             </Expression>
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
@@ -9235,12 +9257,14 @@
             <Edge From="3" To="4" Label="Source1" />
             <Edge From="4" To="5" Label="Source2" />
             <Edge From="6" To="7" Label="Source1" />
-            <Edge From="7" To="10" Label="Source1" />
-            <Edge From="8" To="9" Label="Source1" />
-            <Edge From="9" To="10" Label="Source2" />
-            <Edge From="11" To="12" Label="Source1" />
-            <Edge From="12" To="13" Label="Source1" />
+            <Edge From="7" To="8" Label="Source1" />
+            <Edge From="8" To="12" Label="Source1" />
+            <Edge From="9" To="10" Label="Source1" />
+            <Edge From="10" To="11" Label="Source1" />
+            <Edge From="11" To="12" Label="Source2" />
             <Edge From="13" To="14" Label="Source1" />
+            <Edge From="14" To="15" Label="Source1" />
+            <Edge From="15" To="16" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
