@@ -1285,11 +1285,8 @@ class CameraDialog(QDialog):
             self.StartRecording.setChecked(False)
             
     def _StartCamera(self):
-        '''Start/stop the camera
-        parameters:
-            type: 'recording' or 'preview'
-
-        '''
+        '''Start/stop the camera recording based on if the StartRecording button is toggled on/off'''
+        
         self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
