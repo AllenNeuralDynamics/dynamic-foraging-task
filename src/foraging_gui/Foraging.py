@@ -911,6 +911,7 @@ class Window(QMainWindow):
         if log_folder is None:
             # formal logging
             loggingtype=0
+            self.load_tag=0
             self._GetSaveFolder()
             self.CreateNewFolder=0
             log_folder=self.HarpFolder
