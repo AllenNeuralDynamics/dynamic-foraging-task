@@ -1251,6 +1251,9 @@ class CameraDialog(QDialog):
 
     def _start_preview(self):
         '''Start the camera preview'''
+        self.MainWindow._ConnectBonsai()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
         if self.StartPreview.isChecked():
             # subscribe to the camera preview
             self.MainWindow.Channel.CameraStartType(int(2))
@@ -1265,7 +1268,7 @@ class CameraDialog(QDialog):
         else:
             # stop the camera preview
             self.MainWindow.Channel.CameraControl(int(2))
-            
+
             self.StartPreview.setStyleSheet("background-color : none;")
             self.WarningLabelCameraOn.setText('Camera is off')
             self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
