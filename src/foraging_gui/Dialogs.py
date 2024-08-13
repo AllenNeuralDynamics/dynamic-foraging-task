@@ -1232,7 +1232,6 @@ class CameraDialog(QDialog):
     def _connectSignalsSlots(self):
         self.StartRecording.clicked.connect(self._StartCamera)
         self.StartPreview.clicked.connect(self._start_preview)
-        self.ClearTemporaryVideo.clicked.connect(self._ClearTemporaryVideo)
         self.AutoControl.currentIndexChanged.connect(self._AutoControl)
         self.OpenSaveFolder.clicked.connect(self._OpenSaveFolder)
 
@@ -1279,21 +1278,6 @@ class CameraDialog(QDialog):
         if self.AutoControl.currentText()=='Yes':
             self.StartRecording.setChecked(False)
             
-    def _ClearTemporaryVideo(self):
-        '''Clear temporary video files'''
-        self.MainWindow._ConnectBonsai()
-        if self.MainWindow.InitializeBonsaiSuccessfully==0:
-            return
-        try:
-            # Remove a directory and its contents (recursively)
-            if os.path.exists(self.MainWindow.temporary_video_folder):
-                shutil.rmtree(self.MainWindow.temporary_video_folder)
-                logging.info(f"Directory '{self.MainWindow.temporary_video_folder}' and its contents removed successfully.")
-            else:
-                logging.info(f"Directory '{self.MainWindow.temporary_video_folder}' does not exist.")
-        except Exception as e:
-            logging.error(str(e))
-
     def _StartCamera(self):
         '''Start/stop the camera
         parameters:
