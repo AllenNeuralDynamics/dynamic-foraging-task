@@ -1254,6 +1254,8 @@ class CameraDialog(QDialog):
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
         if self.StartPreview.isChecked():
+            # disable the start recording button
+            self.StartRecording.setEnabled(False)
             # subscribe to the camera preview
             self.MainWindow.Channel.CameraStartType(int(2))
             # set the camera frequency
@@ -1269,6 +1271,7 @@ class CameraDialog(QDialog):
             self.MainWindow.Channel.CameraControl(int(2))
             # stop the camera preview workflow
             self.MainWindow.Channel.StopCameraPreview(int(1))
+
             self.StartPreview.setStyleSheet("background-color : none;")
             self.WarningLabelCameraOn.setText('Camera is off')
             self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
