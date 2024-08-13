@@ -8571,6 +8571,193 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="rx:SubscribeWhen" />
             </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>CameraImage_Bottom</Name>
+            </Expression>
+            <Expression xsi:type="VisualizerMapping" />
+            <Expression xsi:type="SubscribeSubject">
+              <Name>CameraImage_Right</Name>
+            </Expression>
+            <Expression xsi:type="VisualizerMapping" />
+            <Expression xsi:type="viz:TableLayoutPanelBuilder">
+              <viz:Name>CameraRecording</viz:Name>
+              <viz:ColumnCount>2</viz:ColumnCount>
+              <viz:RowCount>1</viz:RowCount>
+              <viz:ColumnStyles />
+              <viz:RowStyles />
+              <viz:CellSpans />
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="rx:Defer">
+                <Name>HarpDeviceDump</Name>
+                <Workflow>
+                  <Nodes>
+                    <Expression xsi:type="harp:CreateMessage">
+                      <harp:MessageType>Write</harp:MessageType>
+                      <harp:Payload xsi:type="harp:CreateOperationControlPayload">
+                        <harp:OperationMode>Active</harp:OperationMode>
+                        <harp:DumpRegisters>true</harp:DumpRegisters>
+                        <harp:MuteReplies>false</harp:MuteReplies>
+                        <harp:VisualIndicators>On</harp:VisualIndicators>
+                        <harp:OperationLed>On</harp:OperationLed>
+                        <harp:Heartbeat>Enabled</harp:Heartbeat>
+                      </harp:Payload>
+                    </Expression>
+                    <Expression xsi:type="MulticastSubject">
+                      <Name>BehaviorCommands</Name>
+                    </Expression>
+                    <Expression xsi:type="MulticastSubject">
+                      <Name>SoundCardCommands</Name>
+                    </Expression>
+                    <Expression xsi:type="MulticastSubject">
+                      <Name>LickometerLeftCommands</Name>
+                    </Expression>
+                    <Expression xsi:type="MulticastSubject">
+                      <Name>LickometerRightCommands</Name>
+                    </Expression>
+                  </Nodes>
+                  <Edges>
+                    <Edge From="0" To="1" Label="Source1" />
+                    <Edge From="1" To="2" Label="Source1" />
+                    <Edge From="2" To="3" Label="Source1" />
+                    <Edge From="3" To="4" Label="Source1" />
+                  </Edges>
+                </Workflow>
+              </Builder>
+            </Expression>
+            <Expression xsi:type="Disable">
+              <Builder xsi:type="Combinator">
+                <Combinator xsi:type="rx:DelaySubscription">
+                  <rx:DueTime>PT2S</rx:DueTime>
+                </Combinator>
+              </Builder>
+            </Expression>
+          </Nodes>
+          <Edges>
+            <Edge From="0" To="1" Label="Source1" />
+            <Edge From="1" To="2" Label="Source1" />
+            <Edge From="3" To="4" Label="Source1" />
+            <Edge From="4" To="5" Label="Source1" />
+            <Edge From="6" To="7" Label="Source1" />
+            <Edge From="7" To="8" Label="Source1" />
+            <Edge From="8" To="9" Label="Source1" />
+            <Edge From="10" To="11" Label="Source1" />
+            <Edge From="11" To="12" Label="Source1" />
+            <Edge From="13" To="14" Label="Source1" />
+            <Edge From="14" To="15" Label="Source1" />
+            <Edge From="16" To="17" Label="Source1" />
+            <Edge From="17" To="18" Label="Source1" />
+            <Edge From="19" To="20" Label="Source1" />
+            <Edge From="20" To="21" Label="Source1" />
+            <Edge From="22" To="23" Label="Source1" />
+            <Edge From="23" To="24" Label="Source1" />
+            <Edge From="25" To="26" Label="Source1" />
+            <Edge From="26" To="27" Label="Source1" />
+            <Edge From="28" To="29" Label="Source1" />
+            <Edge From="29" To="30" Label="Source1" />
+            <Edge From="31" To="32" Label="Source1" />
+            <Edge From="32" To="33" Label="Source1" />
+            <Edge From="34" To="35" Label="Source1" />
+            <Edge From="36" To="37" Label="Source1" />
+            <Edge From="39" To="40" Label="Source1" />
+            <Edge From="41" To="42" Label="Source1" />
+            <Edge From="43" To="48" Label="Source1" />
+            <Edge From="44" To="45" Label="Source1" />
+            <Edge From="45" To="46" Label="Source1" />
+            <Edge From="46" To="47" Label="Source1" />
+            <Edge From="47" To="48" Label="Source2" />
+            <Edge From="49" To="50" Label="Source1" />
+            <Edge From="50" To="53" Label="Source1" />
+            <Edge From="51" To="52" Label="Source1" />
+            <Edge From="52" To="53" Label="Source2" />
+            <Edge From="54" To="55" Label="Source1" />
+          </Edges>
+        </Workflow>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Concat" />
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Repeat" />
+      </Expression>
+      <Expression xsi:type="ExternalizedMapping">
+        <Property Name="FileName" DisplayName="SettingsPath" />
+      </Expression>
+      <Expression xsi:type="io:CsvReader">
+        <io:FileName>C:\Users\xinxin.yin\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
+        <io:ScanPattern>%s,%s</io:ScanPattern>
+        <io:SkipRows>0</io:SkipRows>
+      </Expression>
+      <Expression xsi:type="rx:ToDictionary">
+        <rx:KeySelector>Item1</rx:KeySelector>
+        <rx:ElementSelector>Item2</rx:ElementSelector>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Take">
+          <rx:Count>1</rx:Count>
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="rx:AsyncSubject">
+        <Name>ComPorts</Name>
+      </Expression>
+      <Expression xsi:type="GroupWorkflow">
+        <Name>LickVisualization</Name>
+        <Workflow>
+          <Nodes>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>RightLick</Name>
+            </Expression>
+            <Expression xsi:type="VisualizerMapping" />
+            <Expression xsi:type="SubscribeSubject">
+              <Name>LeftLick</Name>
+            </Expression>
+            <Expression xsi:type="VisualizerMapping" />
+            <Expression xsi:type="SubscribeSubject">
+              <Name>ComPorts</Name>
+            </Expression>
+            <Expression xsi:type="Index">
+              <Operand xsi:type="StringProperty">
+                <Value>current_box</Value>
+              </Operand>
+            </Expression>
+            <Expression xsi:type="Format">
+              <Format>LickVis: {0}</Format>
+            </Expression>
+            <Expression xsi:type="PropertyMapping">
+              <PropertyMappings>
+                <Property Name="Name" />
+              </PropertyMappings>
+            </Expression>
+            <Expression xsi:type="viz:TableLayoutPanelBuilder">
+              <viz:Name>LickVis: 4xx-x-A</viz:Name>
+              <viz:ColumnCount>1</viz:ColumnCount>
+              <viz:RowCount>2</viz:RowCount>
+              <viz:ColumnStyles />
+              <viz:RowStyles />
+              <viz:CellSpans>
+                <viz:CellSpan ColumnSpan="1" RowSpan="1" />
+                <viz:CellSpan ColumnSpan="4" RowSpan="1" />
+                <viz:CellSpan ColumnSpan="1" RowSpan="1" />
+                <viz:CellSpan ColumnSpan="4" RowSpan="1" />
+              </viz:CellSpans>
+            </Expression>
+          </Nodes>
+          <Edges>
+            <Edge From="0" To="1" Label="Source1" />
+            <Edge From="1" To="8" Label="Source1" />
+            <Edge From="2" To="3" Label="Source1" />
+            <Edge From="3" To="8" Label="Source2" />
+            <Edge From="4" To="5" Label="Source1" />
+            <Edge From="5" To="6" Label="Source1" />
+            <Edge From="6" To="7" Label="Source1" />
+            <Edge From="7" To="8" Label="Source3" />
+          </Edges>
+        </Workflow>
+      </Expression>
+      <Expression xsi:type="GroupWorkflow">
+        <Name>CameraPreview</Name>
+        <Workflow>
+          <Nodes>
             <Expression xsi:type="GroupWorkflow">
               <Name>CameraPreview</Name>
               <Workflow>
@@ -9012,14 +9199,6 @@
               <Combinator xsi:type="rx:SubscribeWhen" />
             </Expression>
             <Expression xsi:type="SubscribeSubject">
-              <Name>CameraImage_Bottom</Name>
-            </Expression>
-            <Expression xsi:type="VisualizerMapping" />
-            <Expression xsi:type="SubscribeSubject">
-              <Name>CameraImage_Right</Name>
-            </Expression>
-            <Expression xsi:type="VisualizerMapping" />
-            <Expression xsi:type="SubscribeSubject">
               <Name>CameraImage_Bottom_Preview</Name>
             </Expression>
             <Expression xsi:type="VisualizerMapping" />
@@ -9028,186 +9207,24 @@
             </Expression>
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
-              <viz:Name>HighSpeedCamVis</viz:Name>
+              <viz:Name>CameraPreview</viz:Name>
               <viz:ColumnCount>2</viz:ColumnCount>
-              <viz:RowCount>2</viz:RowCount>
+              <viz:RowCount>1</viz:RowCount>
               <viz:ColumnStyles />
               <viz:RowStyles />
               <viz:CellSpans />
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="rx:Defer">
-                <Name>HarpDeviceDump</Name>
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="harp:CreateMessage">
-                      <harp:MessageType>Write</harp:MessageType>
-                      <harp:Payload xsi:type="harp:CreateOperationControlPayload">
-                        <harp:OperationMode>Active</harp:OperationMode>
-                        <harp:DumpRegisters>true</harp:DumpRegisters>
-                        <harp:MuteReplies>false</harp:MuteReplies>
-                        <harp:VisualIndicators>On</harp:VisualIndicators>
-                        <harp:OperationLed>On</harp:OperationLed>
-                        <harp:Heartbeat>Enabled</harp:Heartbeat>
-                      </harp:Payload>
-                    </Expression>
-                    <Expression xsi:type="MulticastSubject">
-                      <Name>BehaviorCommands</Name>
-                    </Expression>
-                    <Expression xsi:type="MulticastSubject">
-                      <Name>SoundCardCommands</Name>
-                    </Expression>
-                    <Expression xsi:type="MulticastSubject">
-                      <Name>LickometerLeftCommands</Name>
-                    </Expression>
-                    <Expression xsi:type="MulticastSubject">
-                      <Name>LickometerRightCommands</Name>
-                    </Expression>
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                    <Edge From="1" To="2" Label="Source1" />
-                    <Edge From="2" To="3" Label="Source1" />
-                    <Edge From="3" To="4" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Builder>
-            </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="rx:DelaySubscription">
-                  <rx:DueTime>PT2S</rx:DueTime>
-                </Combinator>
-              </Builder>
-            </Expression>
           </Nodes>
           <Edges>
-            <Edge From="0" To="1" Label="Source1" />
+            <Edge From="0" To="5" Label="Source1" />
             <Edge From="1" To="2" Label="Source1" />
-            <Edge From="3" To="4" Label="Source1" />
-            <Edge From="4" To="5" Label="Source1" />
-            <Edge From="6" To="7" Label="Source1" />
-            <Edge From="7" To="8" Label="Source1" />
-            <Edge From="8" To="9" Label="Source1" />
-            <Edge From="10" To="11" Label="Source1" />
-            <Edge From="11" To="12" Label="Source1" />
-            <Edge From="13" To="14" Label="Source1" />
-            <Edge From="14" To="15" Label="Source1" />
-            <Edge From="16" To="17" Label="Source1" />
-            <Edge From="17" To="18" Label="Source1" />
-            <Edge From="19" To="20" Label="Source1" />
-            <Edge From="20" To="21" Label="Source1" />
-            <Edge From="22" To="23" Label="Source1" />
-            <Edge From="23" To="24" Label="Source1" />
-            <Edge From="25" To="26" Label="Source1" />
-            <Edge From="26" To="27" Label="Source1" />
-            <Edge From="28" To="29" Label="Source1" />
-            <Edge From="29" To="30" Label="Source1" />
-            <Edge From="31" To="32" Label="Source1" />
-            <Edge From="32" To="33" Label="Source1" />
-            <Edge From="34" To="35" Label="Source1" />
-            <Edge From="36" To="37" Label="Source1" />
-            <Edge From="39" To="40" Label="Source1" />
-            <Edge From="41" To="42" Label="Source1" />
-            <Edge From="43" To="48" Label="Source1" />
-            <Edge From="44" To="45" Label="Source1" />
-            <Edge From="45" To="46" Label="Source1" />
-            <Edge From="46" To="47" Label="Source1" />
-            <Edge From="47" To="48" Label="Source2" />
-            <Edge From="49" To="54" Label="Source1" />
-            <Edge From="50" To="51" Label="Source1" />
-            <Edge From="51" To="52" Label="Source1" />
-            <Edge From="52" To="53" Label="Source1" />
-            <Edge From="53" To="54" Label="Source2" />
-            <Edge From="55" To="56" Label="Source1" />
-            <Edge From="56" To="63" Label="Source1" />
-            <Edge From="57" To="58" Label="Source1" />
-            <Edge From="58" To="63" Label="Source2" />
-            <Edge From="59" To="60" Label="Source1" />
-            <Edge From="60" To="63" Label="Source3" />
-            <Edge From="61" To="62" Label="Source1" />
-            <Edge From="62" To="63" Label="Source4" />
-            <Edge From="64" To="65" Label="Source1" />
-          </Edges>
-        </Workflow>
-      </Expression>
-      <Expression xsi:type="Combinator">
-        <Combinator xsi:type="rx:Concat" />
-      </Expression>
-      <Expression xsi:type="Combinator">
-        <Combinator xsi:type="rx:Repeat" />
-      </Expression>
-      <Expression xsi:type="ExternalizedMapping">
-        <Property Name="FileName" DisplayName="SettingsPath" />
-      </Expression>
-      <Expression xsi:type="io:CsvReader">
-        <io:FileName>C:\Users\xinxin.yin\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
-        <io:ScanPattern>%s,%s</io:ScanPattern>
-        <io:SkipRows>0</io:SkipRows>
-      </Expression>
-      <Expression xsi:type="rx:ToDictionary">
-        <rx:KeySelector>Item1</rx:KeySelector>
-        <rx:ElementSelector>Item2</rx:ElementSelector>
-      </Expression>
-      <Expression xsi:type="Combinator">
-        <Combinator xsi:type="rx:Take">
-          <rx:Count>1</rx:Count>
-        </Combinator>
-      </Expression>
-      <Expression xsi:type="rx:AsyncSubject">
-        <Name>ComPorts</Name>
-      </Expression>
-      <Expression xsi:type="GroupWorkflow">
-        <Name>Visualization</Name>
-        <Workflow>
-          <Nodes>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>RightLick</Name>
-            </Expression>
-            <Expression xsi:type="VisualizerMapping" />
-            <Expression xsi:type="SubscribeSubject">
-              <Name>LeftLick</Name>
-            </Expression>
-            <Expression xsi:type="VisualizerMapping" />
-            <Expression xsi:type="SubscribeSubject">
-              <Name>ComPorts</Name>
-            </Expression>
-            <Expression xsi:type="Index">
-              <Operand xsi:type="StringProperty">
-                <Value>current_box</Value>
-              </Operand>
-            </Expression>
-            <Expression xsi:type="Format">
-              <Format>LickVis: {0}</Format>
-            </Expression>
-            <Expression xsi:type="PropertyMapping">
-              <PropertyMappings>
-                <Property Name="Name" />
-              </PropertyMappings>
-            </Expression>
-            <Expression xsi:type="viz:TableLayoutPanelBuilder">
-              <viz:Name>LickVis: 4xx-x-A</viz:Name>
-              <viz:ColumnCount>1</viz:ColumnCount>
-              <viz:RowCount>2</viz:RowCount>
-              <viz:ColumnStyles />
-              <viz:RowStyles />
-              <viz:CellSpans>
-                <viz:CellSpan ColumnSpan="1" RowSpan="1" />
-                <viz:CellSpan ColumnSpan="4" RowSpan="1" />
-                <viz:CellSpan ColumnSpan="1" RowSpan="1" />
-                <viz:CellSpan ColumnSpan="4" RowSpan="1" />
-              </viz:CellSpans>
-            </Expression>
-          </Nodes>
-          <Edges>
-            <Edge From="0" To="1" Label="Source1" />
-            <Edge From="1" To="8" Label="Source1" />
             <Edge From="2" To="3" Label="Source1" />
-            <Edge From="3" To="8" Label="Source2" />
-            <Edge From="4" To="5" Label="Source1" />
-            <Edge From="5" To="6" Label="Source1" />
+            <Edge From="3" To="4" Label="Source1" />
+            <Edge From="4" To="5" Label="Source2" />
             <Edge From="6" To="7" Label="Source1" />
-            <Edge From="7" To="8" Label="Source3" />
+            <Edge From="7" To="10" Label="Source1" />
+            <Edge From="8" To="9" Label="Source1" />
+            <Edge From="9" To="10" Label="Source2" />
           </Edges>
         </Workflow>
       </Expression>
