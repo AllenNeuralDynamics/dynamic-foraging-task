@@ -1265,13 +1265,13 @@ class CameraDialog(QDialog):
             self.WarningLabelCameraOn.setText('Camera is on')
             self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
         else:
-            # stop the camera preview
+            # stop camera triggers
             self.MainWindow.Channel.CameraControl(int(2))
-
+            # stop the camera preview workflow
+            self.MainWindow.Channel.StopCameraPreview(int(1))
             self.StartPreview.setStyleSheet("background-color : none;")
             self.WarningLabelCameraOn.setText('Camera is off')
             self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
-
 
     def _AutoControl(self):
         '''Trigger the camera during the start of a new behavior session'''

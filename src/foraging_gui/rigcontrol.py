@@ -225,3 +225,7 @@ class RigClient:
         # 1, start recording; 2, start preview
         self.send("/camerastarttype", value) 
 
+    def StopCameraPreview(self,value):
+        # stop the camera preview workflow
+        self.send("/stopcamerapreview", value)
+
