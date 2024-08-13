@@ -1230,7 +1230,7 @@ class CameraDialog(QDialog):
         self.camera_stop_time=''
         
     def _connectSignalsSlots(self):
-        self.StartRecording.clicked.connect(lambda: self._StartCamera('recording'))
+        self.StartRecording.clicked.connect(self._StartCamera)
         self.StartPreview.clicked.connect(self._start_preview)
         self.ClearTemporaryVideo.clicked.connect(self._ClearTemporaryVideo)
         self.AutoControl.currentIndexChanged.connect(self._AutoControl)
@@ -1294,7 +1294,7 @@ class CameraDialog(QDialog):
         except Exception as e:
             logging.error(str(e))
 
-    def _StartCamera(self,start_type='recording'):
+    def _StartCamera(self):
         '''Start/stop the camera
         parameters:
             type: 'recording' or 'preview'
@@ -1303,36 +1303,23 @@ class CameraDialog(QDialog):
         self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
-        if start_type=='recording':
-            widget_now=self.StartRecording
-            widget_other=self.StartPreview
-        else:
-            widget_now=self.StartPreview
-            widget_other=self.StartRecording
-
-        if widget_now.isChecked():
-            widget_now.setStyleSheet("background-color : green;")
+        if self.StartRecording.isChecked():
+            self.StartRecording.setStyleSheet("background-color : green;")
             self.WarningLabelCameraOn.setText('Camera is turning on')
             self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
             QApplication.processEvents()
             if start_type=='recording':
-                # stop the preview first
+                # untoggle the preview button
                 if self.StartPreview.isChecked():
                     self.StartPreview.setChecked(False)
-                    self._StartCamera(start_type='preview')   
+                    self._start_preview() 
                 # Start logging if the formal logging is not started
                 if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
                     self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
-            if start_type=='preview':
-                # stop the recording first
-                if self.StartRecording.isChecked():
-                    self.StartRecording.setChecked(False)
-                    self._StartCamera(start_type='recording')
-                if self.MainWindow.logging_type!=1 or self.MainWindow.logging_type==-1:
-                    # Start logging if the temporary logging is not started
-                    self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging(self.MainWindow.temporary_video_folder)
 
-            # set the camera frequency. It's better to set the frequency after the temporary logging. 
+            # set the camera start type
+            self.MainWindow.Channel.CameraStartType(int(1))
+            # set the camera frequency.
             self.MainWindow.Channel.CameraFrequency(int(self.FrameRate.text()))
             # start the video triggers
             self.MainWindow.Channel.CameraControl(int(1))
@@ -1346,7 +1333,7 @@ class CameraDialog(QDialog):
             self.WarningLabelLogging.setStyleSheet("color: None;")
             self.WarningLabelOpenSave.setText('')
         else:
-            widget_now.setStyleSheet("background-color : none")
+            self.StartRecording.setStyleSheet("background-color : none")
             self.WarningLabelCameraOn.setText('Camera is turning off')
             self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
             QApplication.processEvents()
@@ -1360,11 +1347,6 @@ class CameraDialog(QDialog):
             self.WarningLabelLogging.setText('')
             self.WarningLabelLogging.setStyleSheet("color: None;")
             self.WarningLabelOpenSave.setText('')
-            # clear temporary video files
-            if start_type=='preview':
-                # stop the logging
-                self.MainWindow._stop_logging()
-                self._ClearTemporaryVideo()
 
     def _SaveVideoData(self):
         '''Save the video data'''
