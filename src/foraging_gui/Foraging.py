@@ -3691,8 +3691,6 @@ class Window(QMainWindow):
                 logging.info('Start button pressed: user continued session')               
                 self.Start.setChecked(True)
                 return 
-            # enable preview
-            self.Camera_dialog.StartPreview.setEnabled(True)
             # If the photometry timer is running, stop it 
             if self.finish_Timer==0:
                 self.ignore_timer=True
