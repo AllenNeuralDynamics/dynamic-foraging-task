@@ -1301,6 +1301,8 @@ class CameraDialog(QDialog):
             # Start logging if the formal logging is not started
             if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
                 self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
+            # set to check drop frame as true
+            self.MainWindow.to_check_drop_frames=1
             # disable the start preview button
             self.StartPreview.setEnabled(False)
             # disable the Load button 
