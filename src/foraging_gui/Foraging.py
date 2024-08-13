@@ -3385,7 +3385,6 @@ class Window(QMainWindow):
             self.WarningLabel.setStyleSheet(self.default_warning_color)
             self.InitializeBonsaiSuccessfully=0
         
-
     def _NewSession(self):
         logging.info('New Session pressed')
 
@@ -3677,12 +3676,6 @@ class Window(QMainWindow):
             self.WarningLabel.setStyleSheet("color: none;")
             # disable metadata fields
             self._set_metadata_enabled(False)
-            # disable preview
-            self.Camera_dialog.StartPreview.setEnabled(False)
-            # stop the temporary logging
-            if self.Camera_dialog.StartPreview.isChecked():
-                self.Camera_dialog.StartPreview.setChecked(False)
-                self.Camera_dialog._StartCamera(start_type='preview')
         else:
             # Prompt user to confirm stopping trials
             reply = QMessageBox.question(self, 
