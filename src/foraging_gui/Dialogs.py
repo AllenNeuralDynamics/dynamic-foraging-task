@@ -1252,14 +1252,25 @@ class CameraDialog(QDialog):
     def _start_preview(self):
         '''Start the camera preview'''
         if self.StartPreview.isChecked():
+            # subscribe to the camera preview
+            self.MainWindow.Channel.CameraStartType(int(2))
+            # set the camera frequency
+            self.MainWindow.Channel.CameraFrequency(int(self.FrameRate.text()))
+            # start the video triggers
+            self.MainWindow.Channel.CameraControl(int(1))
+
             self.StartPreview.setStyleSheet("background-color : green;")
             self.WarningLabelCameraOn.setText('Camera is on')
             self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
         else:
+            # stop the camera preview
+            self.MainWindow.Channel.CameraControl(int(2))
+            
             self.StartPreview.setStyleSheet("background-color : none;")
             self.WarningLabelCameraOn.setText('Camera is off')
             self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
-  
+
+
     def _AutoControl(self):
         '''Trigger the camera during the start of a new behavior session'''
         if self.AutoControl.currentText()=='Yes':
