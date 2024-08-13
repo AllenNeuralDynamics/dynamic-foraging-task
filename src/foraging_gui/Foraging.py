@@ -2812,11 +2812,6 @@ class Window(QMainWindow):
             # stop current session first
             self._StopCurrentSession() 
 
-            # Start new session
-            new_session = self._NewSession()
-            if not new_session:
-                return
-
             if open_last:
                 mice = self._Open_getListOfMice()
                 W = MouseSelectorDialog(self, mice)
@@ -2835,6 +2830,7 @@ class Window(QMainWindow):
                     # figureout out new Mouse
                     logging.info('User entered the ID for a mouse with no data: {}'.format(mouse_id))
                     self._OpenNewMouse(mouse_id)
+                    self._NewSession()
                     return
     
                 # attempt to load last session from mouse
@@ -2857,6 +2853,11 @@ class Window(QMainWindow):
             fname=input_file
             self.fname=fname
         if fname:
+            # Start new session
+            new_session = self._NewSession()
+            if not new_session:
+                return
+            
             if fname.endswith('.mat'):
                 Obj = loadmat(fname)
             elif fname.endswith('.json'):
