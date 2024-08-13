@@ -3375,6 +3375,7 @@ class Window(QMainWindow):
             
     def _stop_logging(self):
         '''Stop the logging'''
+        self.Camera_dialog.StartPreview.setChecked(True)
         try:
             self.Channel.StopLogging('s')
             self.logging_type=-1 # logging has stopped
@@ -3383,6 +3384,7 @@ class Window(QMainWindow):
             self.WarningLabel.setText('Lost bonsai connection')
             self.WarningLabel.setStyleSheet(self.default_warning_color)
             self.InitializeBonsaiSuccessfully=0
+        
 
     def _NewSession(self):
         logging.info('New Session pressed')
