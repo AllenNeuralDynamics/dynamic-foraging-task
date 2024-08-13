@@ -1267,6 +1267,8 @@ class CameraDialog(QDialog):
             self.WarningLabelCameraOn.setText('Camera is on')
             self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
         else:
+            # enable the start recording button
+            self.StartRecording.setEnabled(True)
             # stop camera triggers
             self.MainWindow.Channel.CameraControl(int(2))
             # stop the camera preview workflow
@@ -1299,6 +1301,8 @@ class CameraDialog(QDialog):
             if self.StartPreview.isChecked():
                 self.StartPreview.setChecked(False)
                 self._start_preview() 
+            # disable the start preview button
+            self.StartPreview.setEnabled(False)
             # Start logging if the formal logging is not started
             if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
                 self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
