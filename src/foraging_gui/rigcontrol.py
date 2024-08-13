@@ -221,3 +221,7 @@ class RigClient:
         # Trigger waveform after Rewardoutcome for optogenetics
         self.send("/PassRewardOutcome", value) 
 
+    def CameraStartType(self,value):
+        # 1, start recording; 2, start preview
+        self.send("/camerastarttype", value) 
+
