@@ -3376,6 +3376,8 @@ class Window(QMainWindow):
     def _stop_logging(self):
         '''Stop the logging'''
         self.Camera_dialog.StartPreview.setEnabled(True)
+        self.ID.setEnabled(True)
+        self.Load.setEnabled(True)
         try:
             self.Channel.StopLogging('s')
             self.logging_type=-1 # logging has stopped
@@ -3761,7 +3763,6 @@ class Window(QMainWindow):
         else:
             GeneratedTrials=self.GeneratedTrials
 
-
         if self.ToInitializeVisual==1: # only run once
             self.PlotM=PlotM
             layout=self.Visualization.layout()
@@ -3807,7 +3808,6 @@ class Window(QMainWindow):
             workerStartTrialLoop1=self.workerStartTrialLoop1
             worker_save=self.worker_save
 
-  
         # collecting the base signal for photometry. Only run once
         if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and self.PhotometryRun==0:
             logging.info('Starting photometry baseline timer')

@@ -1303,6 +1303,10 @@ class CameraDialog(QDialog):
                 self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
             # disable the start preview button
             self.StartPreview.setEnabled(False)
+            # disable the Load button 
+            self.MainWindow.Load.setEnabled(False)
+            # disable the Animal ID
+            self.MainWindow.ID.setEnabled(False)
             # set the camera start type
             self.MainWindow.Channel.CameraStartType(int(1))
             # set the camera frequency.
