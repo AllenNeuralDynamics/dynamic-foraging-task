@@ -1231,7 +1231,7 @@ class CameraDialog(QDialog):
         
     def _connectSignalsSlots(self):
         self.StartRecording.clicked.connect(lambda: self._StartCamera('recording'))
-        self.StartPreview.clicked.connect(lambda: self._StartCamera('preview'))
+        self.StartPreview.clicked.connect(self._start_preview)
         self.ClearTemporaryVideo.clicked.connect(self._ClearTemporaryVideo)
         self.AutoControl.currentIndexChanged.connect(self._AutoControl)
         self.OpenSaveFolder.clicked.connect(self._OpenSaveFolder)
@@ -1249,6 +1249,17 @@ class CameraDialog(QDialog):
             self.WarningLabelOpenSave.setText('No logging folder found!')
             self.WarningLabelOpenSave.setStyleSheet(self.MainWindow.default_warning_color)
 
+    def _start_preview(self):
+        '''Start the camera preview'''
+        if self.StartPreview.isChecked():
+            self.StartPreview.setStyleSheet("background-color : green;")
+            self.WarningLabelCameraOn.setText('Camera is on')
+            self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
+        else:
+            self.StartPreview.setStyleSheet("background-color : none;")
+            self.WarningLabelCameraOn.setText('Camera is off')
+            self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
+  
     def _AutoControl(self):
         '''Trigger the camera during the start of a new behavior session'''
         if self.AutoControl.currentText()=='Yes':
