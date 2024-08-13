@@ -8741,7 +8741,7 @@
               </PropertyMappings>
             </Expression>
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
-              <viz:Name>LickVis: 428-9-A -- Top:R / Bottom:L</viz:Name>
+              <viz:Name>LickVis: 4xx-x-A -- Top:R / Bottom:L</viz:Name>
               <viz:ColumnCount>1</viz:ColumnCount>
               <viz:RowCount>2</viz:RowCount>
               <viz:ColumnStyles />
