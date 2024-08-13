@@ -241,7 +241,7 @@ class Window(QMainWindow):
         self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
-                                
+        self.HideLegend.clicked.connect(self._hide_legend)
         # Connect to ID change in the mainwindow
         self.ID.returnPressed.connect(
             lambda: self.AutoTrain_dialog.update_auto_train_lock(engaged=False)
@@ -253,8 +253,6 @@ class Window(QMainWindow):
                 )
             )
         self.AutoTrain.clicked.connect(self._auto_train_clicked)
-        
-        
         self.pushButton_streamlit.clicked.connect(self._open_mouse_on_streamlit)
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._Task)
@@ -310,6 +308,26 @@ class Window(QMainWindow):
             for child in container.findChildren((QtWidgets.QLineEdit)):   
                 child.returnPressed.connect(self.keyPressEvent)
     
+    def _hide_legend(self):
+        '''Hide the legend of the plot'''
+        
+        if 'PlotM' not in self.__dict__:
+            self.HideLegend.setChecked(False)
+            return
+        
+        if 'ax1' not in self.PlotM.__dict__ or 'ax2' not in self.PlotM.__dict__:
+            self.HideLegend.setChecked(False)
+            return
+        
+        if self.HideLegend.isChecked():
+            self.PlotM.ax1.legend().set_visible(False)
+            self.PlotM.ax2.legend().set_visible(False)
+            self.PlotM.draw()
+        else:
+            self.PlotM.ax1.legend(loc='lower left', fontsize=8).set_visible(True)
+            self.PlotM.ax2.legend(loc='lower left', fontsize=8).set_visible(True)
+            self.PlotM.draw()
+
     def _set_reference(self):
         '''
         set the reference point for lick spout position in the metadata dialog
@@ -1066,6 +1084,7 @@ class Window(QMainWindow):
                 'aind_watchdog_service',
                 'manifest'),
             'auto_engage':True,
+            'clear_figure_after_save':True,
         }
         
         # Try to load Settings_box#.csv
@@ -1152,7 +1171,7 @@ class Window(QMainWindow):
         self.name_mapper_file = self.Settings['name_mapper_file']
         self.save_each_trial = self.Settings['save_each_trial']
         self.auto_engage = self.Settings['auto_engage']
-
+        self.clear_figure_after_save = self.Settings['clear_figure_after_save']
         if not is_absolute_path(self.project_info_file):
             self.project_info_file = os.path.join(self.SettingFolder,self.project_info_file)
         # Also stream log info to the console if enabled
@@ -2734,7 +2753,8 @@ class Window(QMainWindow):
 
         # Set ID, clear weight information
         logging.info('User starting a new mouse: {}'.format(mouse_id))
-        self.ID.setText(mouse_id)   
+        self.ID.setText(mouse_id) 
+        self.ID.returnPressed.emit()
         self.BaseWeight.setText('')
         self.WeightAfter.setText('')
         self.TargetRatio.setText('0.85')
@@ -3048,6 +3068,7 @@ class Window(QMainWindow):
         self.StartExcitation.setChecked(False)
         self.keyPressEvent() # Accept all updates
         self.load_tag=1
+        self.ID.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
@@ -3083,7 +3104,7 @@ class Window(QMainWindow):
             self.GeneratedTrials.B_GoCueTime=self.GeneratedTrials.B_GoCueTime[0]
             self.GeneratedTrials.B_RewardOutcomeTime=self.GeneratedTrials.B_RewardOutcomeTime[0]
             
-        PlotM=PlotV(win=self,GeneratedTrials=self.GeneratedTrials,width=5, height=4)
+        self.PlotM=PlotV(win=self,GeneratedTrials=self.GeneratedTrials,width=5, height=4)
         layout=self.Visualization.layout()
         if layout is not None:
             for i in reversed(range(layout.count())):
@@ -3092,12 +3113,12 @@ class Window(QMainWindow):
         layout=self.Visualization.layout()
         if layout is None:
             layout=QVBoxLayout(self.Visualization)
-        toolbar = NavigationToolbar(PlotM, self)
+        toolbar = NavigationToolbar(self.PlotM, self)
         toolbar.setMaximumHeight(20)
         toolbar.setMaximumWidth(300)
         layout.addWidget(toolbar)
-        layout.addWidget(PlotM)
-        PlotM._Update(GeneratedTrials=self.GeneratedTrials)
+        layout.addWidget(self.PlotM)
+        self.PlotM._Update(GeneratedTrials=self.GeneratedTrials)
         self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
 
     def _Clear(self):
@@ -3155,7 +3176,7 @@ class Window(QMainWindow):
                 logging.warning('FIP workflow already started, user restarts')
 
         # Start logging
-        self.CreateNewFolder=1
+        self.load_tag=0
         self.Ot_log_folder=self._restartlogging()
 
         # Start the FIP workflow
@@ -3441,7 +3462,7 @@ class Window(QMainWindow):
             del self.fiber_photometry_end_time 
 
         # Clear Plots
-        if hasattr(self, 'PlotM'): 
+        if hasattr(self, 'PlotM') and self.clear_figure_after_save: 
             self.PlotM._Update(GeneratedTrials=None,Channel=None)
 
         # Add note to log
@@ -3603,7 +3624,7 @@ class Window(QMainWindow):
             logging.info('Starting session, with experimenter: {}'.format(self.Experimenter.text()))
 
             # check repo status
-            if (self.current_branch not in ['main','production_testing']) & (self.ID.text() != '0'):
+            if (self.current_branch not in ['main','production_testing']) & (self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']):
                 # Prompt user over off-pipeline branch
                 reply = QMessageBox.critical(self,
                     'Box {}, Start'.format(self.box_letter),    
@@ -3619,7 +3640,7 @@ class Window(QMainWindow):
                     logging.error('Starting session on branch: {}'.format(self.current_branch))
 
             # Check for untracked local changes
-            if self.repo_dirty_flag & (self.ID.text() != '0'):
+            if self.repo_dirty_flag & (self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']):
                 # prompt user over untracked local changes
                 reply = QMessageBox.critical(self,
                     'Box {}, Start'.format(self.box_letter),    
@@ -3721,7 +3742,6 @@ class Window(QMainWindow):
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
                 if (not (self.Camera_dialog.StartRecording.isChecked() and self.Camera_dialog.AutoControl.currentText()=='No')) and (not self.FIP_started):
-                    self.CreateNewFolder=1
                     self.Ot_log_folder=self._restartlogging()
             except Exception as e:
                 if 'ConnectionAbortedError' in str(e):
@@ -4206,17 +4226,20 @@ class Window(QMainWindow):
         '''
             Generates a manifest.yml file for triggering data copy to VAST and upload to aws
         '''
+        if self.ID.text() in ['0','1','2','3','4','5','6','7','8','9','10']:
+            logging.info('Skipping upload manifest, because this is the test mouse')
+            return
         try: 
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
             
             if FIP: ## DEBUG, need to figure out how to set this flag.  
                 schedule = self.acquisition_datetime.split('_')[0]+'_23-59-00'
-                capsule_id = 'c089614a-347e-4696-b17e-86980bb782c' 
+                capsule_id = 'c089614a-347e-4696-b17e-86980bb782c1' 
                 mount = 'FIP' 
             else:
                 schedule = self.acquisition_datetime.split('_')[0]+'_23-59-00'
-                capsule_id = 'c089614a-347e-4696-b17e-86980bb782c' 
+                capsule_id = 'c089614a-347e-4696-b17e-86980bb782c1' 
                 mount = 'FIP'
  
             date_format = "%Y-%m-%d_%H-%M-%S"
@@ -4260,7 +4283,7 @@ class Window(QMainWindow):
             logging.error('Could not generate upload manifest: {}'.format(str(e)))
             QMessageBox.critical(self, 'Upload manifest', 
                 'Could not generate upload manifest. '+\
-                'Please alert the mouse owner that this session will not be uploaded.')
+                'Please alert the mouse owner, and report on github.')
             
 
 def start_gui_log_file(box_number):

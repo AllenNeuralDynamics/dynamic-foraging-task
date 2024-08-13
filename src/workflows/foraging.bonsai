@@ -2915,11 +2915,11 @@
                       <Value>0</Value>
                     </Operand>
                   </Expression>
-                  <Expression xsi:type="rx:PublishSubject">
-                    <Name>LeftLick</Name>
-                  </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:DistinctUntilChanged" />
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>LeftLick</Name>
                   </Expression>
                   <Expression xsi:type="rx:Condition">
                     <Workflow>
@@ -2967,11 +2967,11 @@
                       <Value>0</Value>
                     </Operand>
                   </Expression>
-                  <Expression xsi:type="rx:PublishSubject">
-                    <Name>RightLick</Name>
-                  </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:DistinctUntilChanged" />
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>RightLick</Name>
                   </Expression>
                   <Expression xsi:type="rx:Condition">
                     <Workflow>
@@ -9218,9 +9218,19 @@
                 <cv:Mode>Horizontal</cv:Mode>
               </Combinator>
             </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="cv:Flip">
+                <cv:Mode>Horizontal</cv:Mode>
+              </Combinator>
+            </Expression>
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="SubscribeSubject">
               <Name>CameraImage_Right_Preview</Name>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="cv:Flip">
+                <cv:Mode>Horizontal</cv:Mode>
+              </Combinator>
             </Expression>
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="cv:Flip">
