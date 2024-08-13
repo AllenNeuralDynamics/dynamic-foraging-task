@@ -3943,7 +3943,7 @@
                     <Name>FromBonsaiOSC</Name>
                   </Expression>
                   <Expression xsi:type="osc:Parse">
-                    <osc:Address>/camerafrequency</osc:Address>
+                    <osc:Address>/camerastarttype</osc:Address>
                     <osc:TypeTag>i</osc:TypeTag>
                   </Expression>
                   <Expression xsi:type="rx:PublishSubject">
@@ -8514,7 +8514,7 @@
                   </Expression>
                   <Expression xsi:type="Equal">
                     <Operand xsi:type="IntProperty">
-                      <Value>2</Value>
+                      <Value>1</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="rx:Condition">
@@ -9141,7 +9141,7 @@
                   </Expression>
                   <Expression xsi:type="Equal">
                     <Operand xsi:type="IntProperty">
-                      <Value>1</Value>
+                      <Value>2</Value>
                     </Operand>
                   </Expression>
                   <Expression xsi:type="rx:Condition">
