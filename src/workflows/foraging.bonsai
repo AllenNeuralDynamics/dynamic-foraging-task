@@ -1529,7 +1529,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Disabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM6</harp:PortName>
+                      <harp:PortName>COM10</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject">
@@ -9244,6 +9244,9 @@
           </Edges>
         </Workflow>
       </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Repeat" />
+      </Expression>
     </Nodes>
     <Edges>
       <Edge From="7" To="8" Label="Source1" />
@@ -9255,6 +9258,7 @@
       <Edge From="14" To="15" Label="Source1" />
       <Edge From="15" To="16" Label="Source1" />
       <Edge From="16" To="17" Label="Source1" />
+      <Edge From="19" To="20" Label="Source1" />
     </Edges>
   </Workflow>
 </WorkflowBuilder>
