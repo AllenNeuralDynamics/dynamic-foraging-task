@@ -1286,7 +1286,7 @@ class CameraDialog(QDialog):
             
     def _StartCamera(self):
         '''Start/stop the camera recording based on if the StartRecording button is toggled on/off'''
-        
+
         self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
@@ -1334,51 +1334,6 @@ class CameraDialog(QDialog):
             self.WarningLabelLogging.setStyleSheet("color: None;")
             self.WarningLabelOpenSave.setText('')
 
-    def _SaveVideoData(self):
-        '''Save the video data'''
-        self.MainWindow._GetSaveFileName()
-        video_folder=self.MainWindow.video_folder
-        video_folder=os.path.join(video_folder,self.MainWindow.current_box,self.MainWindow.AnimalName.text())
-        if not os.path.exists(video_folder):
-            os.makedirs(video_folder)
-        base_name=os.path.splitext(os.path.basename(self.MainWindow.SaveFileJson))[0]
-        
-        side_camera_file=os.path.join(video_folder,base_name+'_side_camera.avi')
-        bottom_camera_file=os.path.join(video_folder,base_name+'_bottom_camera.avi')
-        side_camera_csv=os.path.join(video_folder,base_name+'_side_camera.csv')
-        bottom_camera_csv=os.path.join(video_folder,base_name+'_bottom_camera.csv')
-        if is_file_in_use(side_camera_file) or is_file_in_use(bottom_camera_file) or is_file_in_use(side_camera_csv) or is_file_in_use(bottom_camera_csv):              
-            self.WarningLabelFileIsInUse.setText('File is in use. Please restart the bonsai!')
-            self.WarningLabelFileIsInUse.setStyleSheet(self.MainWindow.default_warning_color)
-            return False
-        else:
-            self.WarningLabelFileIsInUse.setText('')
-        N=0
-        while 1:
-            if os.path.isfile(side_camera_file) or os.path.isfile(bottom_camera_file) or os.path.isfile(side_camera_csv) or os.path.isfile(bottom_camera_csv):
-                N=N+1
-                side_camera_file=os.path.join(video_folder,base_name+'_'+str(N)+'_side_camera.avi')
-                bottom_camera_file=os.path.join(video_folder,base_name+'_'+str(N)+'_bottom_camera.avi')
-                side_camera_csv=os.path.join(video_folder,base_name+'_'+str(N)+'_side_camera.csv')
-                bottom_camera_csv=os.path.join(video_folder,base_name+'_'+str(N)+'_bottom_camera.csv')
-            else:
-                break
-        if is_file_in_use(side_camera_file) or is_file_in_use(bottom_camera_file) or is_file_in_use(side_camera_csv) or is_file_in_use(bottom_camera_csv):
-            self.WarningLabelFileIsInUse.setText('File is in use. Please restart the bonsai!')
-            self.WarningLabelFileIsInUse.setStyleSheet(self.MainWindow.default_warning_color)
-            return False
-        else:
-            self.WarningLabelFileIsInUse.setText('')
-        self.MainWindow.Channel.SideCameraFile(side_camera_file)
-        self.MainWindow.Channel.BottomCameraFile(bottom_camera_file)
-        self.MainWindow.Channel.SideCameraCSV(side_camera_csv)
-        self.MainWindow.Channel.BottomCameraCSV(bottom_camera_csv)
-        self.MainWindow.TP_side_camera_file=side_camera_file
-        self.MainWindow.TP_bottom_camera_file=bottom_camera_file
-        self.MainWindow.TP_side_camera_csv=side_camera_csv
-        self.MainWindow.TP_bottom_camera_csv=bottom_camera_csv
-        return True
-    
 def is_file_in_use(file_path):
     '''check if the file is open'''
     if os.path.exists(file_path):

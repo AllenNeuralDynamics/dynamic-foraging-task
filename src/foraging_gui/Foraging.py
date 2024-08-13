@@ -3372,7 +3372,6 @@ class Window(QMainWindow):
             self.Camera_dialog.StartRecording.setChecked(False)
             self.Camera_dialog._StartCamera()
 
-            
     def _stop_logging(self):
         '''Stop the logging'''
         self.Camera_dialog.StartPreview.setEnabled(True)
