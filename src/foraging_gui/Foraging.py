@@ -3392,7 +3392,6 @@ class Window(QMainWindow):
         '''Stop the camera if it is running'''
         if self.Camera_dialog.StartRecording.isChecked():
             self.Camera_dialog.StartRecording.setChecked(False)
-            self.Camera_dialog._StartCamera()
 
     def _stop_logging(self):
         '''Stop the logging'''
@@ -3767,8 +3766,8 @@ class Window(QMainWindow):
                     raise
             # start the camera during the begginning of each session
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
+                # camera will start recording
                 self.Camera_dialog.StartRecording.setChecked(True)
-                self.Camera_dialog._StartCamera()
             self.SessionStartTime=datetime.now()
             self.Other_SessionStartTime=str(self.SessionStartTime) # for saving
             GeneratedTrials=GenerateTrials(self)

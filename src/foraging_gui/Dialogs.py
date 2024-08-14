@@ -1235,6 +1235,7 @@ class CameraDialog(QDialog):
         
     def _connectSignalsSlots(self):
         self.StartRecording.clicked.connect(self._StartCamera)
+        self.StartRecording.toggled.connect(self._StartCamera)
         self.StartPreview.clicked.connect(self._start_preview)
         self.StartPreview.toggled.connect(self._start_preview)
         self.AutoControl.currentIndexChanged.connect(self._AutoControl)
