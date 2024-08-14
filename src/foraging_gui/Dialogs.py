@@ -1302,6 +1302,8 @@ class CameraDialog(QDialog):
             # untoggle the preview button
             if self.StartPreview.isChecked():
                 self.StartPreview.setChecked(False)
+                # sleep for 1 second to make sure the trigger is off
+                time.sleep(1)
             # Start logging if the formal logging is not started
             if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
                 self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
