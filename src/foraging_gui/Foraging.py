@@ -3965,6 +3965,9 @@ class Window(QMainWindow):
                 if self.NewTrialRewardOrder==1:
                     GeneratedTrials._GenerateATrial(self.Channel4)   
 
+                # show disk space
+                self._show_disk_space()
+                
             elif ((time.time() - last_trial_start) >stall_duration*stall_iteration) and \
                 ((time.time() - self.Channel.last_message_time) > stall_duration*stall_iteration):
                 # Elapsed time since last trial is more than tolerance
