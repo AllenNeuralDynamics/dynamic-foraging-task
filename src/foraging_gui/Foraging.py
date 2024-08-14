@@ -3740,6 +3740,8 @@ class Window(QMainWindow):
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
                 if (not (self.Camera_dialog.StartRecording.isChecked() and self.Camera_dialog.AutoControl.currentText()=='No')) and (not self.FIP_started):
+                    # Turn off the camera recording
+                    self.Camera_dialog.StartRecording.setChecked(False)
                     # Turn off the preview if it is on and the autocontrol is on, which can make sure the trigger is off before starting the logging. 
                     if self.Camera_dialog.AutoControl.currentText()=='Yes' and self.Camera_dialog.StartPreview.isChecked():
                         self.Camera_dialog.StartPreview.setChecked(False)
