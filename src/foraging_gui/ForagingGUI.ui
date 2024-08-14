@@ -611,6 +611,9 @@
                    <property name="textVisible">
                     <bool>true</bool>
                    </property>
+                   <property name="format">
+                    <string>%p% used</string>
+                   </property>
                   </widget>
                  </item>
                  <item row="0" column="0">

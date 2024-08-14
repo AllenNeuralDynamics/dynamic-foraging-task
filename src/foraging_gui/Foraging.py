@@ -182,7 +182,7 @@ class Window(QMainWindow):
     def _show_disk_space(self):
         '''Show the disk space of the current computer'''
         total, used, free = shutil.disk_usage(self.default_saveFolder)
-        self.diskspace.setText(f"Disk space: {free/total*100:.2f}% free")
+        self.diskspace.setText(f"Disk space: {free/1024**3:.2f}GB free {total/1024**3:.2f}GB total")
         self.DiskSpaceProgreeBar.setValue(int(used/total*100))
 
     def _LoadUI(self):
