@@ -185,7 +185,7 @@ class Window(QMainWindow):
         self.diskspace.setText(f"Used space: {used/1024**3:.2f}GB    Free space: {free/1024**3:.2f}GB")
         self.DiskSpaceProgreeBar.setValue(int(used/total*100))
         if free/1024**3 < 100 or used/total > 0.9:
-            self.DiskSpaceProgreeBar.setStyleSheet("QProgressBar::chunk {background-color: red;}")
+            self.DiskSpaceProgreeBar.setStyleSheet("QProgressBar::chunk {background-"+self.default_warning_color+"}")
         else:
             self.DiskSpaceProgreeBar.setStyleSheet("QProgressBar::chunk {background-color: green;}")
 
@@ -3967,7 +3967,7 @@ class Window(QMainWindow):
 
                 # show disk space
                 self._show_disk_space()
-                
+
             elif ((time.time() - last_trial_start) >stall_duration*stall_iteration) and \
                 ((time.time() - self.Channel.last_message_time) > stall_duration*stall_iteration):
                 # Elapsed time since last trial is more than tolerance
