@@ -182,8 +182,12 @@ class Window(QMainWindow):
     def _show_disk_space(self):
         '''Show the disk space of the current computer'''
         total, used, free = shutil.disk_usage(self.default_saveFolder)
-        self.diskspace.setText(f"Disk space: {free/1024**3:.2f}GB free {total/1024**3:.2f}GB total")
+        self.diskspace.setText(f"Used space: {used/1024**3:.2f}GB    Free space: {free/1024**3:.2f}GB")
         self.DiskSpaceProgreeBar.setValue(int(used/total*100))
+        if free/1024**3 < 100 or used/total > 0.9:
+            self.DiskSpaceProgreeBar.setStyleSheet("QProgressBar::chunk {background-color: red;}")
+        else:
+            self.DiskSpaceProgreeBar.setStyleSheet("QProgressBar::chunk {background-color: green;}")
 
     def _LoadUI(self):
         '''
