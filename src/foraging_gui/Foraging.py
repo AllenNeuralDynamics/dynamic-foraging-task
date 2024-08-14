@@ -3743,7 +3743,7 @@ class Window(QMainWindow):
                 if (not (self.Camera_dialog.StartRecording.isChecked() and self.Camera_dialog.AutoControl.currentText()=='No')) and (not self.FIP_started):
                     # Turn off the preview if it is on and the autocontrol is on, which can make sure the trigger is off before starting the logging. 
                     if self.Camera_dialog.AutoControl.currentText()=='Yes' and self.Camera_dialog.StartPreview.isChecked():
-                        self.StartPreview.setChecked(False)
+                        self.Camera_dialog.StartPreview.setChecked(False)
                         # sleep for 1 second to make sure the trigger is off
                         time.sleep(1)
                     self.Ot_log_folder=self._restartlogging()
