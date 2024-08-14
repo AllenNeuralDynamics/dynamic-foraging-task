@@ -1513,7 +1513,7 @@ class LaserCalibrationDialog(QDialog):
         getattr(self, 'PulseDur_'+str(Numb)).setEnabled(Label)
         for i in Inactlabel:
             getattr(self, 'label'+str(Numb)+'_'+str(i)).setEnabled(Label)
-        if getattr(self, 'LaserColor_'+str(Numb)+'.currentText')() != 'NA':
+        if getattr(self, 'LaserColor_'+str(Numb)).currentText() != 'NA':
             getattr(self, '_activated_' + str(Numb))()
     
     def _GetLaserWaveForm(self):
