@@ -13,7 +13,7 @@ import threading
 import itertools
 import yaml
 import copy
-import psutil
+import shutil
 from pathlib import Path
 from datetime import date, datetime
 
@@ -162,6 +162,8 @@ class Window(QMainWindow):
         self.open_ephys=[]
         # load the rig metadata
         self._load_rig_metadata()
+        # show disk space
+        self._show_disk_space()
         if not self.start_bonsai_ide:
             '''
                 When starting bonsai without the IDE the connection is always unstable.
@@ -176,6 +178,12 @@ class Window(QMainWindow):
         rig_json, rig_json_file= self._load_most_recent_rig_json()
         self.latest_rig_metadata_file = rig_json_file 
         self.Metadata_dialog._SelectRigMetadata(self.latest_rig_metadata_file)
+
+    def _show_disk_space(self):
+        '''Show the disk space of the current computer'''
+        total, used, free = shutil.disk_usage(self.default_saveFolder)
+        self.diskspace.setText(f"Disk space: {free/total*100:.2f}% free")
+        self.DiskSpaceProgreeBar.setValue(int(used/total*100))
 
     def _LoadUI(self):
         '''
