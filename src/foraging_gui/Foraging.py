@@ -186,6 +186,7 @@ class Window(QMainWindow):
         self.DiskSpaceProgreeBar.setValue(int(used/total*100))
         if free/1024**3 < 100 or used/total > 0.9:
             self.DiskSpaceProgreeBar.setStyleSheet("QProgressBar::chunk {background-"+self.default_warning_color+"}")
+            logging.warning(f"Low disk space  Used space: {used/1024**3:.2f}GB    Free space: {free/1024**3:.2f}GB")
         else:
             self.DiskSpaceProgreeBar.setStyleSheet("QProgressBar::chunk {background-color: green;}")
 
