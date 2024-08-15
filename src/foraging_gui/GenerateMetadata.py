@@ -1116,6 +1116,8 @@ class generate_metadata:
                                         laser_voltage_power=eval(str(current_calibration[i]))
                                         voltage.append(laser_voltage_power[0])
                                         power.append(laser_voltage_power[1])
+                                    if voltage==[] or power==[]:
+                                        continue
                                     voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
                                     self.parsed_optocalibration.append({'laser name':laser,'latest_calibration_date':latest_calibration_date,'Color':color, 'Protocol':Protocol, 'Frequency':Frequency, 'Laser tag':laser_tag, 'Voltage':voltage, 'Power':power})
                             elif Protocol=='Constant':
@@ -1281,5 +1283,5 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    generate_metadata(json_file=r'I:\BehaviorData\323_EPHYS3\713377\behavior_713377_2024-06-14_15-05-53\behavior\713377_2024-06-14_15-05-53.json')
+    generate_metadata(json_file=r'Y:\711256\behavior_711256_2024-08-15_11-17-57\behavior\711256_2024-08-15_11-17-57.json')
     #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
