@@ -1239,9 +1239,8 @@ class CameraDialog(QDialog):
         self.camera_stop_time=''
         
     def _connectSignalsSlots(self):
-        self.StartRecording.clicked.connect(lambda: self._StartCamera('recording'))
-        self.StartPreview.clicked.connect(lambda: self._StartCamera('preview'))
-        self.ClearTemporaryVideo.clicked.connect(self._ClearTemporaryVideo)
+        self.StartRecording.toggled.connect(self._StartCamera)
+        self.StartPreview.toggled.connect(self._start_preview)
         self.AutoControl.currentIndexChanged.connect(self._AutoControl)
         self.OpenSaveFolder.clicked.connect(self._OpenSaveFolder)
 
@@ -1258,65 +1257,71 @@ class CameraDialog(QDialog):
             self.WarningLabelOpenSave.setText('No logging folder found!')
             self.WarningLabelOpenSave.setStyleSheet(self.MainWindow.default_warning_color)
 
+    def _start_preview(self):
+        '''Start the camera preview'''
+        self.MainWindow._ConnectBonsai()
+        if self.MainWindow.InitializeBonsaiSuccessfully==0:
+            return
+        if self.StartPreview.isChecked():
+            # disable the start recording button
+            self.StartRecording.setEnabled(False)
+            # subscribe to the camera preview
+            self.MainWindow.Channel.CameraStartType(int(2))
+            # set the camera frequency
+            self.MainWindow.Channel.CameraFrequency(int(self.FrameRate.text()))
+            # start the video triggers
+            self.MainWindow.Channel.CameraControl(int(1))
+
+            self.StartPreview.setStyleSheet("background-color : green;")
+            self.WarningLabelCameraOn.setText('Camera is on')
+            self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
+        else:
+            # enable the start recording button
+            self.StartRecording.setEnabled(True)
+            # stop camera triggers
+            self.MainWindow.Channel.CameraControl(int(2))
+            # stop the camera preview workflow
+            self.MainWindow.Channel.StopCameraPreview(int(1))
+
+            self.StartPreview.setStyleSheet("background-color : none;")
+            self.WarningLabelCameraOn.setText('Camera is off')
+            self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
+
     def _AutoControl(self):
         '''Trigger the camera during the start of a new behavior session'''
         if self.AutoControl.currentText()=='Yes':
             self.StartRecording.setChecked(False)
             
-    def _ClearTemporaryVideo(self):
-        '''Clear temporary video files'''
+    def _StartCamera(self):
+        '''Start/stop the camera recording based on if the StartRecording button is toggled on/off'''
+
         self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
-        try:
-            # Remove a directory and its contents (recursively)
-            if os.path.exists(self.MainWindow.temporary_video_folder):
-                shutil.rmtree(self.MainWindow.temporary_video_folder)
-                logging.info(f"Directory '{self.MainWindow.temporary_video_folder}' and its contents removed successfully.")
-            else:
-                logging.info(f"Directory '{self.MainWindow.temporary_video_folder}' does not exist.")
-        except Exception as e:
-            logging.error(str(e))
-
-    def _StartCamera(self,start_type='recording'):
-        '''Start/stop the camera
-        parameters:
-            type: 'recording' or 'preview'
-
-        '''
-        self.MainWindow._ConnectBonsai()
-        if self.MainWindow.InitializeBonsaiSuccessfully==0:
-            return
-        if start_type=='recording':
-            widget_now=self.StartRecording
-            widget_other=self.StartPreview
-        else:
-            widget_now=self.StartPreview
-            widget_other=self.StartRecording
-
-        if widget_now.isChecked():
-            widget_now.setStyleSheet("background-color : green;")
+        if self.StartRecording.isChecked():
+            self.StartRecording.setStyleSheet("background-color : green;")
             self.WarningLabelCameraOn.setText('Camera is turning on')
             self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
             QApplication.processEvents()
-            if start_type=='recording':
-                # stop the preview first
-                if self.StartPreview.isChecked():
-                    self.StartPreview.setChecked(False)
-                    self._StartCamera(start_type='preview')   
-                # Start logging if the formal logging is not started
-                if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
-                    self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
-            if start_type=='preview':
-                # stop the recording first
-                if self.StartRecording.isChecked():
-                    self.StartRecording.setChecked(False)
-                    self._StartCamera(start_type='recording')
-                if self.MainWindow.logging_type!=1 or self.MainWindow.logging_type==-1:
-                    # Start logging if the temporary logging is not started
-                    self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging(self.MainWindow.temporary_video_folder)
-
-            # set the camera frequency. It's better to set the frequency after the temporary logging. 
+            # untoggle the preview button
+            if self.StartPreview.isChecked():
+                self.StartPreview.setChecked(False)
+                # sleep for 1 second to make sure the trigger is off
+                time.sleep(1)
+            # Start logging if the formal logging is not started
+            if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
+                self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
+            # set to check drop frame as true
+            self.MainWindow.to_check_drop_frames=1
+            # disable the start preview button
+            self.StartPreview.setEnabled(False)
+            # disable the Load button 
+            self.MainWindow.Load.setEnabled(False)
+            # disable the Animal ID
+            self.MainWindow.ID.setEnabled(False)
+            # set the camera start type
+            self.MainWindow.Channel.CameraStartType(int(1))
+            # set the camera frequency.
             self.MainWindow.Channel.CameraFrequency(int(self.FrameRate.text()))
             # start the video triggers
             self.MainWindow.Channel.CameraControl(int(1))
@@ -1330,7 +1335,7 @@ class CameraDialog(QDialog):
             self.WarningLabelLogging.setStyleSheet("color: None;")
             self.WarningLabelOpenSave.setText('')
         else:
-            widget_now.setStyleSheet("background-color : none")
+            self.StartRecording.setStyleSheet("background-color : none")
             self.WarningLabelCameraOn.setText('Camera is turning off')
             self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
             QApplication.processEvents()
@@ -1344,57 +1349,7 @@ class CameraDialog(QDialog):
             self.WarningLabelLogging.setText('')
             self.WarningLabelLogging.setStyleSheet("color: None;")
             self.WarningLabelOpenSave.setText('')
-            # clear temporary video files
-            if start_type=='preview':
-                # stop the logging
-                self.MainWindow._stop_logging()
-                self._ClearTemporaryVideo()
 
-    def _SaveVideoData(self):
-        '''Save the video data'''
-        self.MainWindow._GetSaveFileName()
-        video_folder=self.MainWindow.video_folder
-        video_folder=os.path.join(video_folder,self.MainWindow.current_box,self.MainWindow.AnimalName.text())
-        if not os.path.exists(video_folder):
-            os.makedirs(video_folder)
-        base_name=os.path.splitext(os.path.basename(self.MainWindow.SaveFileJson))[0]
-        
-        side_camera_file=os.path.join(video_folder,base_name+'_side_camera.avi')
-        bottom_camera_file=os.path.join(video_folder,base_name+'_bottom_camera.avi')
-        side_camera_csv=os.path.join(video_folder,base_name+'_side_camera.csv')
-        bottom_camera_csv=os.path.join(video_folder,base_name+'_bottom_camera.csv')
-        if is_file_in_use(side_camera_file) or is_file_in_use(bottom_camera_file) or is_file_in_use(side_camera_csv) or is_file_in_use(bottom_camera_csv):              
-            self.WarningLabelFileIsInUse.setText('File is in use. Please restart the bonsai!')
-            self.WarningLabelFileIsInUse.setStyleSheet(self.MainWindow.default_warning_color)
-            return False
-        else:
-            self.WarningLabelFileIsInUse.setText('')
-        N=0
-        while 1:
-            if os.path.isfile(side_camera_file) or os.path.isfile(bottom_camera_file) or os.path.isfile(side_camera_csv) or os.path.isfile(bottom_camera_csv):
-                N=N+1
-                side_camera_file=os.path.join(video_folder,base_name+'_'+str(N)+'_side_camera.avi')
-                bottom_camera_file=os.path.join(video_folder,base_name+'_'+str(N)+'_bottom_camera.avi')
-                side_camera_csv=os.path.join(video_folder,base_name+'_'+str(N)+'_side_camera.csv')
-                bottom_camera_csv=os.path.join(video_folder,base_name+'_'+str(N)+'_bottom_camera.csv')
-            else:
-                break
-        if is_file_in_use(side_camera_file) or is_file_in_use(bottom_camera_file) or is_file_in_use(side_camera_csv) or is_file_in_use(bottom_camera_csv):
-            self.WarningLabelFileIsInUse.setText('File is in use. Please restart the bonsai!')
-            self.WarningLabelFileIsInUse.setStyleSheet(self.MainWindow.default_warning_color)
-            return False
-        else:
-            self.WarningLabelFileIsInUse.setText('')
-        self.MainWindow.Channel.SideCameraFile(side_camera_file)
-        self.MainWindow.Channel.BottomCameraFile(bottom_camera_file)
-        self.MainWindow.Channel.SideCameraCSV(side_camera_csv)
-        self.MainWindow.Channel.BottomCameraCSV(bottom_camera_csv)
-        self.MainWindow.TP_side_camera_file=side_camera_file
-        self.MainWindow.TP_bottom_camera_file=bottom_camera_file
-        self.MainWindow.TP_side_camera_csv=side_camera_csv
-        self.MainWindow.TP_bottom_camera_csv=bottom_camera_csv
-        return True
-    
 def is_file_in_use(file_path):
     '''check if the file is open'''
     if os.path.exists(file_path):
