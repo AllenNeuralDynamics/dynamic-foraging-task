@@ -1112,12 +1112,12 @@ class generate_metadata:
                                             current_calibration=RecentLaserCalibration[color][Protocol][Frequency]["Left"]['LaserPowerVoltage']
                                         elif laser_tag==2:
                                             current_calibration=RecentLaserCalibration[color][Protocol][Frequency]["Right"]['LaserPowerVoltage']
+                                    if current_calibration==[]:
+                                        continue
                                     for i in range(len(current_calibration)):
                                         laser_voltage_power=eval(str(current_calibration[i]))
                                         voltage.append(laser_voltage_power[0])
                                         power.append(laser_voltage_power[1])
-                                    if voltage==[] or power==[]:
-                                        continue
                                     voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
                                     self.parsed_optocalibration.append({'laser name':laser,'latest_calibration_date':latest_calibration_date,'Color':color, 'Protocol':Protocol, 'Frequency':Frequency, 'Laser tag':laser_tag, 'Voltage':voltage, 'Power':power})
                             elif Protocol=='Constant':
@@ -1130,6 +1130,8 @@ class generate_metadata:
                                         current_calibration=RecentLaserCalibration[color][Protocol]["Left"]['LaserPowerVoltage']
                                     elif laser_tag==2:
                                         current_calibration=RecentLaserCalibration[color][Protocol]["Right"]['LaserPowerVoltage']
+                                if current_calibration==[]:
+                                    continue
                                 for i in range(len(current_calibration)):
                                     laser_voltage_power=eval(str(current_calibration[i]))
                                     voltage.append(laser_voltage_power[0])
