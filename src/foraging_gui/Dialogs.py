@@ -1506,7 +1506,7 @@ class LaserCalibrationDialog(QDialog):
     def _LaserColor(self,Numb):
         ''' enable/disable items based on laser (blue/green/orange/red/NA)'''
         Inactlabel=[2,3,5,12,13,14,15]
-        if getattr(self, 'LaserColor_'+str(Numb)+'.currentText()')=='NA':
+        if getattr(self, 'LaserColor_'+str(Numb)).currentText()=='NA':
             Label=False
         else:
             Label=True
@@ -1518,7 +1518,7 @@ class LaserCalibrationDialog(QDialog):
         getattr(self, 'PulseDur_'+str(Numb)).setEnabled(Label)
         for i in Inactlabel:
             getattr(self, 'label'+str(Numb)+'_'+str(i)).setEnabled(Label)
-        if getattr(self, 'LaserColor_'+str(Numb)+'.currentText')() != 'NA':
+        if getattr(self, 'LaserColor_'+str(Numb)).currentText() != 'NA':
             getattr(self, '_activated_' + str(Numb))()
     
     def _GetLaserWaveForm(self):
