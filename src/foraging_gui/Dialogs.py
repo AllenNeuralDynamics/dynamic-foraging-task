@@ -325,6 +325,11 @@ class WaterCalibrationDialog(QDialog):
         self.setWindowTitle('Water Calibration: {}'.format(self.MainWindow.current_box))
         self.Warning.setText('')
         self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+        # find all buttons and set them to not be the default button
+        for container in [self]:
+            for child in container.findChildren((QtWidgets.QPushButton)):     
+                child.setDefault(False)
+                child.setAutoDefault(False)
 
     def _connectSignalsSlots(self):
         self.SpotCheckLeft.clicked.connect(self._SpotCheckLeft)
