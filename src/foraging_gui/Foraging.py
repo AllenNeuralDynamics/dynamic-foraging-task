@@ -13,6 +13,7 @@ import threading
 import itertools
 import yaml
 import copy
+import shutil
 from pathlib import Path
 from datetime import date, datetime
 
@@ -161,6 +162,8 @@ class Window(QMainWindow):
         self.open_ephys=[]
         # load the rig metadata
         self._load_rig_metadata()
+        # show disk space
+        self._show_disk_space()
         if not self.start_bonsai_ide:
             '''
                 When starting bonsai without the IDE the connection is always unstable.
@@ -175,6 +178,17 @@ class Window(QMainWindow):
         rig_json, rig_json_file= self._load_most_recent_rig_json()
         self.latest_rig_metadata_file = rig_json_file 
         self.Metadata_dialog._SelectRigMetadata(self.latest_rig_metadata_file)
+
+    def _show_disk_space(self):
+        '''Show the disk space of the current computer'''
+        total, used, free = shutil.disk_usage(self.default_saveFolder)
+        self.diskspace.setText(f"Used space: {used/1024**3:.2f}GB    Free space: {free/1024**3:.2f}GB")
+        self.DiskSpaceProgreeBar.setValue(int(used/total*100))
+        if free/1024**3 < 100 or used/total > 0.9:
+            self.DiskSpaceProgreeBar.setStyleSheet("QProgressBar::chunk {background-"+self.default_warning_color+"}")
+            logging.warning(f"Low disk space  Used space: {used/1024**3:.2f}GB    Free space: {free/1024**3:.2f}GB")
+        else:
+            self.DiskSpaceProgreeBar.setStyleSheet("QProgressBar::chunk {background-color: green;}")
 
     def _LoadUI(self):
         '''
@@ -3951,6 +3965,9 @@ class Window(QMainWindow):
                 #generate a new trial
                 if self.NewTrialRewardOrder==1:
                     GeneratedTrials._GenerateATrial(self.Channel4)   
+
+                # show disk space
+                self._show_disk_space()
 
             elif ((time.time() - last_trial_start) >stall_duration*stall_iteration) and \
                 ((time.time() - self.Channel.last_message_time) > stall_duration*stall_iteration):
