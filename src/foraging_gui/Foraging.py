@@ -13,6 +13,7 @@ import threading
 import itertools
 import yaml
 import copy
+import shutil
 from pathlib import Path
 from datetime import date, datetime
 
@@ -161,6 +162,8 @@ class Window(QMainWindow):
         self.open_ephys=[]
         # load the rig metadata
         self._load_rig_metadata()
+        # show disk space
+        self._show_disk_space()
         if not self.start_bonsai_ide:
             '''
                 When starting bonsai without the IDE the connection is always unstable.
@@ -175,6 +178,17 @@ class Window(QMainWindow):
         rig_json, rig_json_file= self._load_most_recent_rig_json()
         self.latest_rig_metadata_file = rig_json_file 
         self.Metadata_dialog._SelectRigMetadata(self.latest_rig_metadata_file)
+
+    def _show_disk_space(self):
+        '''Show the disk space of the current computer'''
+        total, used, free = shutil.disk_usage(self.default_saveFolder)
+        self.diskspace.setText(f"Used space: {used/1024**3:.2f}GB    Free space: {free/1024**3:.2f}GB")
+        self.DiskSpaceProgreeBar.setValue(int(used/total*100))
+        if free/1024**3 < 100 or used/total > 0.9:
+            self.DiskSpaceProgreeBar.setStyleSheet("QProgressBar::chunk {background-"+self.default_warning_color+"}")
+            logging.warning(f"Low disk space  Used space: {used/1024**3:.2f}GB    Free space: {free/1024**3:.2f}GB")
+        else:
+            self.DiskSpaceProgreeBar.setStyleSheet("QProgressBar::chunk {background-color: green;}")
 
     def _LoadUI(self):
         '''
@@ -929,6 +943,7 @@ class Window(QMainWindow):
         if log_folder is None:
             # formal logging
             loggingtype=0
+            self.load_tag=0
             self._GetSaveFolder()
             self.CreateNewFolder=0
             log_folder=self.HarpFolder
@@ -2832,11 +2847,6 @@ class Window(QMainWindow):
             # stop current session first
             self._StopCurrentSession() 
 
-            # Start new session
-            new_session = self._NewSession()
-            if not new_session:
-                return
-
             if open_last:
                 mice = self._Open_getListOfMice()
                 W = MouseSelectorDialog(self, mice)
@@ -2855,6 +2865,7 @@ class Window(QMainWindow):
                     # figureout out new Mouse
                     logging.info('User entered the ID for a mouse with no data: {}'.format(mouse_id))
                     self._OpenNewMouse(mouse_id)
+                    self._NewSession()
                     return
     
                 # attempt to load last session from mouse
@@ -2877,6 +2888,11 @@ class Window(QMainWindow):
             fname=input_file
             self.fname=fname
         if fname:
+            # Start new session
+            new_session = self._NewSession()
+            if not new_session:
+                return
+            
             if fname.endswith('.mat'):
                 Obj = loadmat(fname)
             elif fname.endswith('.json'):
@@ -2918,8 +2934,8 @@ class Window(QMainWindow):
                         # skip LeftValue, RightValue, GiveWaterL, GiveWaterR if WaterCalibrationResults is not empty as they will be set by the corresponding volume. 
                         if (key in ['LeftValue','RightValue','GiveWaterL','GiveWaterR']) and self.WaterCalibrationResults!={}:
                             continue
-                        # skip some keys; skip warmup
-                        if key in ['Start','warmup','SessionlistSpin']:
+                        # skip some keys
+                        if key in ['Start','warmup','SessionlistSpin','StartPreview','StartRecording']:
                             self.WeightAfter.setText('')
                             continue
                         widget = widget_dict[key]
@@ -3174,7 +3190,6 @@ class Window(QMainWindow):
                 logging.warning('FIP workflow already started, user restarts')
 
         # Start logging
-        self.load_tag=0
         self.Ot_log_folder=self._restartlogging()
 
         # Start the FIP workflow
@@ -3391,11 +3406,12 @@ class Window(QMainWindow):
         '''Stop the camera if it is running'''
         if self.Camera_dialog.StartRecording.isChecked():
             self.Camera_dialog.StartRecording.setChecked(False)
-            self.Camera_dialog._StartCamera()
 
-            
     def _stop_logging(self):
         '''Stop the logging'''
+        self.Camera_dialog.StartPreview.setEnabled(True)
+        self.ID.setEnabled(True)
+        self.Load.setEnabled(True)
         try:
             self.Channel.StopLogging('s')
             self.logging_type=-1 # logging has stopped
@@ -3404,7 +3420,7 @@ class Window(QMainWindow):
             self.WarningLabel.setText('Lost bonsai connection')
             self.WarningLabel.setStyleSheet(self.default_warning_color)
             self.InitializeBonsaiSuccessfully=0
-
+        
     def _NewSession(self):
         logging.info('New Session pressed')
 
@@ -3482,7 +3498,6 @@ class Window(QMainWindow):
         # stop the current session
         self.Start.setStyleSheet("background-color : none")
         self.Start.setChecked(False)
-        self.Camera_dialog.StartPreview.setEnabled(True)
 
         # waiting for the finish of the last trial
         start_time = time.time()
@@ -3696,12 +3711,6 @@ class Window(QMainWindow):
             self.WarningLabel.setStyleSheet("color: none;")
             # disable metadata fields
             self._set_metadata_enabled(False)
-            # disable preview
-            self.Camera_dialog.StartPreview.setEnabled(False)
-            # stop the temporary logging
-            if self.Camera_dialog.StartPreview.isChecked():
-                self.Camera_dialog.StartPreview.setChecked(False)
-                self.Camera_dialog._StartCamera(start_type='preview')
         else:
             # Prompt user to confirm stopping trials
             reply = QMessageBox.question(self, 
@@ -3717,8 +3726,6 @@ class Window(QMainWindow):
                 logging.info('Start button pressed: user continued session')               
                 self.Start.setChecked(True)
                 return 
-            # enable preview
-            self.Camera_dialog.StartPreview.setEnabled(True)
             # If the photometry timer is running, stop it 
             if self.finish_Timer==0:
                 self.ignore_timer=True
@@ -3747,6 +3754,13 @@ class Window(QMainWindow):
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
                 if (not (self.Camera_dialog.StartRecording.isChecked() and self.Camera_dialog.AutoControl.currentText()=='No')) and (not self.FIP_started):
+                    # Turn off the camera recording
+                    self.Camera_dialog.StartRecording.setChecked(False)
+                    # Turn off the preview if it is on and the autocontrol is on, which can make sure the trigger is off before starting the logging. 
+                    if self.Camera_dialog.AutoControl.currentText()=='Yes' and self.Camera_dialog.StartPreview.isChecked():
+                        self.Camera_dialog.StartPreview.setChecked(False)
+                        # sleep for 1 second to make sure the trigger is off
+                        time.sleep(1)
                     self.Ot_log_folder=self._restartlogging()
             except Exception as e:
                 if 'ConnectionAbortedError' in str(e):
@@ -3768,8 +3782,8 @@ class Window(QMainWindow):
                     raise
             # start the camera during the begginning of each session
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
+                # camera will start recording
                 self.Camera_dialog.StartRecording.setChecked(True)
-                self.Camera_dialog._StartCamera()
             self.SessionStartTime=datetime.now()
             self.Other_SessionStartTime=str(self.SessionStartTime) # for saving
             GeneratedTrials=GenerateTrials(self)
@@ -3788,7 +3802,6 @@ class Window(QMainWindow):
             GeneratedTrials._DeletePreviousLicks(self.Channel2)
         else:
             GeneratedTrials=self.GeneratedTrials
-
 
         if self.ToInitializeVisual==1: # only run once
             self.PlotM=PlotM
@@ -3835,7 +3848,6 @@ class Window(QMainWindow):
             workerStartTrialLoop1=self.workerStartTrialLoop1
             worker_save=self.worker_save
 
-  
         # collecting the base signal for photometry. Only run once
         if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and self.PhotometryRun==0:
             logging.info('Starting photometry baseline timer')
@@ -3951,6 +3963,9 @@ class Window(QMainWindow):
                 #generate a new trial
                 if self.NewTrialRewardOrder==1:
                     GeneratedTrials._GenerateATrial(self.Channel4)   
+
+                # show disk space
+                self._show_disk_space()
 
             elif ((time.time() - last_trial_start) >stall_duration*stall_iteration) and \
                 ((time.time() - self.Channel.last_message_time) > stall_duration*stall_iteration):
