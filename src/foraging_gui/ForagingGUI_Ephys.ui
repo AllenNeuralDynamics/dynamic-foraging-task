@@ -4650,6 +4650,55 @@
      <string/>
     </property>
    </widget>
+   <widget class="QProgressBar" name="DiskSpaceProgreeBar">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>1540</x>
+      <y>290</y>
+      <width>321</width>
+      <height>15</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>16777215</width>
+      <height>15</height>
+     </size>
+    </property>
+    <property name="font">
+     <font>
+      <stylestrategy>PreferDefault</stylestrategy>
+     </font>
+    </property>
+    <property name="whatsThis">
+     <string/>
+    </property>
+    <property name="value">
+     <number>24</number>
+    </property>
+    <property name="textVisible">
+     <bool>true</bool>
+    </property>
+    <property name="format">
+     <string>%p% used</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="diskspace">
+    <property name="geometry">
+     <rect>
+      <x>1540</x>
+      <y>270</y>
+      <width>321</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Disk space:  (free/total(GB))  </string>
+    </property>
+   </widget>
    <zorder>TrainingParameters</zorder>
    <zorder>StartFIP</zorder>
    <zorder>FIPMode</zorder>
@@ -4690,6 +4739,8 @@
    <zorder>OpenEphysRecordingType</zorder>
    <zorder>ManualWaterWarning</zorder>
    <zorder>MetadataWarning</zorder>
+   <zorder>DiskSpaceProgreeBar</zorder>
+   <zorder>diskspace</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
