@@ -2579,11 +2579,6 @@ class Window(QMainWindow):
             self.SessionlistSpin.setEnabled(True)
             self.Sessionlist.setEnabled(True)
 
-            if self.Settings['AutomaticUpload']:
-                self._generate_upload_manifest() # Generate the upload manifest file
-            else:
-                logging.info('Skipping Automatic Upload based on ForagingSettings.json')
-
             if self.StartEphysRecording.isChecked():
                 QMessageBox.warning(self, '', 'Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!')
                 self.unsaved_data=True
@@ -3575,6 +3570,12 @@ class Window(QMainWindow):
 
     def _Start(self):
         '''start trial loop'''
+
+        if self.Settings['AutomaticUpload']:
+            self._generate_upload_manifest()  # Generate the upload manifest file
+        else:
+            logging.info('Skipping Automatic Upload based on ForagingSettings.json')
+
         # set the load tag to zero
         self.load_tag=0
 
