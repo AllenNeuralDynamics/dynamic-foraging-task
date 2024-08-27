@@ -1,0 +1,116 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyInterpreterInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="75">
+            <item index="0" class="java.lang.String" itemvalue="traitlets" />
+            <item index="1" class="java.lang.String" itemvalue="html5lib" />
+            <item index="2" class="java.lang.String" itemvalue="apeye-core" />
+            <item index="3" class="java.lang.String" itemvalue="tabulate" />
+            <item index="4" class="java.lang.String" itemvalue="mypy" />
+            <item index="5" class="java.lang.String" itemvalue="pre-commit" />
+            <item index="6" class="java.lang.String" itemvalue="dict2css" />
+            <item index="7" class="java.lang.String" itemvalue="py" />
+            <item index="8" class="java.lang.String" itemvalue="executing" />
+            <item index="9" class="java.lang.String" itemvalue="frozenlist" />
+            <item index="10" class="java.lang.String" itemvalue="filelock" />
+            <item index="11" class="java.lang.String" itemvalue="pyzmq" />
+            <item index="12" class="java.lang.String" itemvalue="soupsieve" />
+            <item index="13" class="java.lang.String" itemvalue="beautifulsoup4" />
+            <item index="14" class="java.lang.String" itemvalue="domdf-python-tools" />
+            <item index="15" class="java.lang.String" itemvalue="nodeenv" />
+            <item index="16" class="java.lang.String" itemvalue="iniconfig" />
+            <item index="17" class="java.lang.String" itemvalue="apeye" />
+            <item index="18" class="java.lang.String" itemvalue="sphinx-tabs" />
+            <item index="19" class="java.lang.String" itemvalue="ipykernel" />
+            <item index="20" class="java.lang.String" itemvalue="fonttools" />
+            <item index="21" class="java.lang.String" itemvalue="natsort" />
+            <item index="22" class="java.lang.String" itemvalue="imageio" />
+            <item index="23" class="java.lang.String" itemvalue="virtualenv" />
+            <item index="24" class="java.lang.String" itemvalue="distlib" />
+            <item index="25" class="java.lang.String" itemvalue="CacheControl" />
+            <item index="26" class="java.lang.String" itemvalue="dask" />
+            <item index="27" class="java.lang.String" itemvalue="cfgv" />
+            <item index="28" class="java.lang.String" itemvalue="enum-tools" />
+            <item index="29" class="java.lang.String" itemvalue="msgpack" />
+            <item index="30" class="java.lang.String" itemvalue="idna" />
+            <item index="31" class="java.lang.String" itemvalue="pathspec" />
+            <item index="32" class="java.lang.String" itemvalue="sphinx-jinja2-compat" />
+            <item index="33" class="java.lang.String" itemvalue="async-timeout" />
+            <item index="34" class="java.lang.String" itemvalue="maturin" />
+            <item index="35" class="java.lang.String" itemvalue="pluggy" />
+            <item index="36" class="java.lang.String" itemvalue="mypy-extensions" />
+            <item index="37" class="java.lang.String" itemvalue="PyOpenGL-accelerate" />
+            <item index="38" class="java.lang.String" itemvalue="sphinx-prompt" />
+            <item index="39" class="java.lang.String" itemvalue="importlib-metadata" />
+            <item index="40" class="java.lang.String" itemvalue="sphinx_autodoc_typehints" />
+            <item index="41" class="java.lang.String" itemvalue="tomlkit" />
+            <item index="42" class="java.lang.String" itemvalue="stack-data" />
+            <item index="43" class="java.lang.String" itemvalue="PyWavelets" />
+            <item index="44" class="java.lang.String" itemvalue="ruamel.yaml.clib" />
+            <item index="45" class="java.lang.String" itemvalue="zipp" />
+            <item index="46" class="java.lang.String" itemvalue="s3fs" />
+            <item index="47" class="java.lang.String" itemvalue="aiobotocore" />
+            <item index="48" class="java.lang.String" itemvalue="ome-zarr" />
+            <item index="49" class="java.lang.String" itemvalue="aioitertools" />
+            <item index="50" class="java.lang.String" itemvalue="sphinx-toolbox" />
+            <item index="51" class="java.lang.String" itemvalue="botocore" />
+            <item index="52" class="java.lang.String" itemvalue="identify" />
+            <item index="53" class="java.lang.String" itemvalue="opencv-python" />
+            <item index="54" class="java.lang.String" itemvalue="pytest" />
+            <item index="55" class="java.lang.String" itemvalue="black" />
+            <item index="56" class="java.lang.String" itemvalue="ruamel.yaml" />
+            <item index="57" class="java.lang.String" itemvalue="cssutils" />
+            <item index="58" class="java.lang.String" itemvalue="jmespath" />
+            <item index="59" class="java.lang.String" itemvalue="pandas" />
+            <item index="60" class="java.lang.String" itemvalue="lockfile" />
+            <item index="61" class="java.lang.String" itemvalue="sphinx-basic-ng" />
+            <item index="62" class="java.lang.String" itemvalue="autodocsumm" />
+            <item index="63" class="java.lang.String" itemvalue="Sphinx" />
+            <item index="64" class="java.lang.String" itemvalue="napari-ome-zarr" />
+            <item index="65" class="java.lang.String" itemvalue="psygnal" />
+            <item index="66" class="java.lang.String" itemvalue="aiohttp" />
+            <item index="67" class="java.lang.String" itemvalue="multidict" />
+            <item index="68" class="java.lang.String" itemvalue="yarl" />
+            <item index="69" class="java.lang.String" itemvalue="furo" />
+            <item index="70" class="java.lang.String" itemvalue="aiosignal" />
+            <item index="71" class="java.lang.String" itemvalue="webencodings" />
+            <item index="72" class="java.lang.String" itemvalue="aind-foraging-behavior-bonsai-automatic-training" />
+            <item index="73" class="java.lang.String" itemvalue="python-newscale" />
+            <item index="74" class="java.lang.String" itemvalue="psutil" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8Inspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="E302" />
+          <option value="E202" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8NamingInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="N801" />
+          <option value="N802" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyTypeCheckerInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="PyQt5.QtCore.Qt.BackgroundRole" />
+          <option value="PyQt5.QtWidgets.clicked.connect" />
+          <option value="mesospim.general_imaging_tab.GeneralImagingTab.data_line" />
+          <option value="dispim.dispim.Dispim.acquire" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

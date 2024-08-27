@@ -2774,53 +2774,6 @@ class Window(QMainWindow):
         self.TargetRatio.setText('0.85')
         self.keyPressEvent(allow_reset=True) 
 
-        # Set IACUC protocol in metadata based on schedule
-        protocol = self._GetInfoFromSchedule(mouse_id,'Protocol')
-        if protocol is not None:
-            self.Metadata_dialog.meta_data['session_metadata']['IACUCProtocol']=str(int(protocol))
-            self.Metadata_dialog._update_metadata(
-                update_rig_metadata=False, 
-                update_session_metadata=True
-                )
-            logging.info('Setting IACUC Protocol: {}'.format(protocol))
-
-        # Set Project Name in metadata based on schedule
-        project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
-        add_default = True
-        if project_name is not None:
-            projects = [self.Metadata_dialog.ProjectName.itemText(i) 
-                for i in range(self.Metadata_dialog.ProjectName.count())]
-            index = np.where(np.array(projects) == project_name)[0]
-            if len(index) > 0:
-                index = index[0]
-                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
-                self.Metadata_dialog._show_project_info()
-                logging.info('Setting Project name: {}'.format(project_name))
-                add_default = False
-        if add_default:
-            projects = [self.Metadata_dialog.ProjectName.itemText(i) 
-                for i in range(self.Metadata_dialog.ProjectName.count())]
-            index = np.where(np.array(projects) == 'Behavior Platform')[0]
-            if len(index) > 0:
-                index = index[0]
-                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
-                self.Metadata_dialog._show_project_info()
-                logging.info('Setting Project name: {}'.format('Behavior Platform'))
-            else:
-                project_info = {
-                        'Funding Institution':['Allen Institute'],
-                        'Grant Number':['nan'],
-                        'Investigators':['Jeremiah Cohen'],
-                        'Fundee':['nan'],
-                    }
-                self.Metadata_dialog.project_info = project_info
-                project_name = 'Behavior Platform'
-                self.Metadata_dialog.ProjectName.addItems([project_name])
-                logging.info('Setting Project name: {}'.format(project_name))
-        self.project_name = project_name
-
-        self.keyPressEvent(allow_reset=True) 
-    
     def _Open_getListOfMice(self):
         '''
             Returns a list of mice with data saved on this computer
@@ -3575,6 +3528,56 @@ class Window(QMainWindow):
 
     def _Start(self):
         '''start trial loop'''
+
+        mouse_id = self.ID.text()
+
+        # Set IACUC protocol in metadata based on schedule
+        protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
+        if protocol is not None:
+            self.Metadata_dialog.meta_data['session_metadata']['IACUCProtocol'] = str(int(protocol))
+            self.Metadata_dialog._update_metadata(
+                update_rig_metadata=False,
+                update_session_metadata=True
+            )
+            logging.info('Setting IACUC Protocol: {}'.format(protocol))
+
+        # Set Project Name in metadata based on schedule
+        project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
+        add_default = True
+        if project_name is not None:
+            projects = [self.Metadata_dialog.ProjectName.itemText(i)
+                        for i in range(self.Metadata_dialog.ProjectName.count())]
+            index = np.where(np.array(projects) == project_name)[0]
+            if len(index) > 0:
+                index = index[0]
+                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+                self.Metadata_dialog._show_project_info()
+                logging.info('Setting Project name: {}'.format(project_name))
+                add_default = False
+        if add_default:
+            projects = [self.Metadata_dialog.ProjectName.itemText(i)
+                        for i in range(self.Metadata_dialog.ProjectName.count())]
+            index = np.where(np.array(projects) == 'Behavior Platform')[0]
+            if len(index) > 0:
+                index = index[0]
+                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+                self.Metadata_dialog._show_project_info()
+                logging.info('Setting Project name: {}'.format('Behavior Platform'))
+            else:
+                project_info = {
+                    'Funding Institution': ['Allen Institute'],
+                    'Grant Number': ['nan'],
+                    'Investigators': ['Jeremiah Cohen'],
+                    'Fundee': ['nan'],
+                }
+                self.Metadata_dialog.project_info = project_info
+                project_name = 'Behavior Platform'
+                self.Metadata_dialog.ProjectName.addItems([project_name])
+                logging.info('Setting Project name: {}'.format(project_name))
+        self.project_name = project_name
+
+        self.keyPressEvent(allow_reset=True)
+
         # set the load tag to zero
         self.load_tag=0
 
