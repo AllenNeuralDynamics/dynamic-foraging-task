@@ -3571,11 +3571,6 @@ class Window(QMainWindow):
     def _Start(self):
         '''start trial loop'''
 
-        if self.Settings['AutomaticUpload']:
-            self._generate_upload_manifest()  # Generate the upload manifest file
-        else:
-            logging.info('Skipping Automatic Upload based on ForagingSettings.json')
-
         # set the load tag to zero
         self.load_tag=0
 
@@ -3712,6 +3707,12 @@ class Window(QMainWindow):
             self.WarningLabel.setStyleSheet("color: none;")
             # disable metadata fields
             self._set_metadata_enabled(False)
+
+            if self.Settings['AutomaticUpload']:
+                self._generate_upload_manifest()  # Generate the upload manifest file
+            else:
+                logging.info('Skipping Automatic Upload based on ForagingSettings.json')
+
         else:
             # Prompt user to confirm stopping trials
             reply = QMessageBox.question(self, 
