@@ -1451,15 +1451,19 @@
               <Name>Audio</Name>
               <Workflow>
                 <Nodes>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="al:AudioReader">
-                      <al:FileName>bell.wav</al:FileName>
-                      <al:BufferLength>0</al:BufferLength>
-                      <al:SampleRate>0</al:SampleRate>
-                    </Combinator>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="Combinator">
+                      <Combinator xsi:type="al:AudioReader">
+                        <al:FileName>bell.wav</al:FileName>
+                        <al:BufferLength>0</al:BufferLength>
+                        <al:SampleRate>0</al:SampleRate>
+                      </Combinator>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="rx:BehaviorSubject">
-                    <Name>AudioWaveform</Name>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="rx:BehaviorSubject">
+                      <Name>AudioWaveform</Name>
+                    </Builder>
                   </Expression>
                   <Expression xsi:type="Disable">
                     <Builder xsi:type="SubscribeSubject">
