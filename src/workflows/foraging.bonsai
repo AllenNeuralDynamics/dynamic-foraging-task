@@ -1461,49 +1461,53 @@
                   <Expression xsi:type="rx:BehaviorSubject">
                     <Name>AudioWaveform</Name>
                   </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>GoCue</Name>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="SubscribeSubject">
+                      <Name>GoCue</Name>
+                    </Builder>
                   </Expression>
-                  <Expression xsi:type="rx:SelectMany">
-                    <Name>Play sound</Name>
-                    <Workflow>
-                      <Nodes>
-                        <Expression xsi:type="SubscribeSubject">
-                          <Name>AudioWaveform</Name>
-                        </Expression>
-                        <Expression xsi:type="Combinator">
-                          <Combinator xsi:type="al:AudioPlayback">
-                            <al:SampleRate>44100</al:SampleRate>
-                            <al:State>Playing</al:State>
-                          </Combinator>
-                        </Expression>
-                        <Expression xsi:type="Combinator">
-                          <Combinator xsi:type="rx:Last" />
-                        </Expression>
-                        <Expression xsi:type="Combinator">
-                          <Combinator xsi:type="rx:Take">
-                            <rx:Count>1</rx:Count>
-                          </Combinator>
-                        </Expression>
-                        <Expression xsi:type="WorkflowOutput" />
-                        <Expression xsi:type="beh:CreateMessage">
-                          <harp:MessageType>Write</harp:MessageType>
-                          <harp:Payload xsi:type="beh:CreateOutputSetPayload">
-                            <beh:OutputSet>DOPort0</beh:OutputSet>
-                          </harp:Payload>
-                        </Expression>
-                        <Expression xsi:type="MulticastSubject">
-                          <Name>BehaviorCommands</Name>
-                        </Expression>
-                      </Nodes>
-                      <Edges>
-                        <Edge From="0" To="1" Label="Source1" />
-                        <Edge From="1" To="2" Label="Source1" />
-                        <Edge From="2" To="3" Label="Source1" />
-                        <Edge From="3" To="4" Label="Source1" />
-                        <Edge From="5" To="6" Label="Source1" />
-                      </Edges>
-                    </Workflow>
+                  <Expression xsi:type="Disable">
+                    <Builder xsi:type="rx:SelectMany">
+                      <Name>Play sound</Name>
+                      <Workflow>
+                        <Nodes>
+                          <Expression xsi:type="SubscribeSubject">
+                            <Name>AudioWaveform</Name>
+                          </Expression>
+                          <Expression xsi:type="Combinator">
+                            <Combinator xsi:type="al:AudioPlayback">
+                              <al:SampleRate>44100</al:SampleRate>
+                              <al:State>Playing</al:State>
+                            </Combinator>
+                          </Expression>
+                          <Expression xsi:type="Combinator">
+                            <Combinator xsi:type="rx:Last" />
+                          </Expression>
+                          <Expression xsi:type="Combinator">
+                            <Combinator xsi:type="rx:Take">
+                              <rx:Count>1</rx:Count>
+                            </Combinator>
+                          </Expression>
+                          <Expression xsi:type="WorkflowOutput" />
+                          <Expression xsi:type="beh:CreateMessage">
+                            <harp:MessageType>Write</harp:MessageType>
+                            <harp:Payload xsi:type="beh:CreateOutputSetPayload">
+                              <beh:OutputSet>DOPort0</beh:OutputSet>
+                            </harp:Payload>
+                          </Expression>
+                          <Expression xsi:type="MulticastSubject">
+                            <Name>BehaviorCommands</Name>
+                          </Expression>
+                        </Nodes>
+                        <Edges>
+                          <Edge From="0" To="1" Label="Source1" />
+                          <Edge From="1" To="2" Label="Source1" />
+                          <Edge From="2" To="3" Label="Source1" />
+                          <Edge From="3" To="4" Label="Source1" />
+                          <Edge From="5" To="6" Label="Source1" />
+                        </Edges>
+                      </Workflow>
+                    </Builder>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject" TypeArguments="harp:HarpMessage">
                     <rx:Name>SoundCardCommands</rx:Name>
