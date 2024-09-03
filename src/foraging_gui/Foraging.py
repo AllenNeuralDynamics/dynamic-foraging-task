@@ -3712,7 +3712,6 @@ class Window(QMainWindow):
                 self._generate_upload_manifest()  # Generate the upload manifest file
             else:
                 logging.info('Skipping Automatic Upload based on ForagingSettings.json')
-
         else:
             # Prompt user to confirm stopping trials
             reply = QMessageBox.question(self, 
