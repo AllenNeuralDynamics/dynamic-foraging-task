@@ -1043,7 +1043,7 @@ class Window(QMainWindow):
             return
 
     def _GetInfoFromSchedule(self, mouse_id, column):
-        #mouse_id = str(mouse_id)
+        mouse_id = str(mouse_id)
         if not hasattr(self, 'schedule'):
             return None
         if mouse_id not in self.schedule['Mouse ID'].values:
@@ -3570,9 +3570,10 @@ class Window(QMainWindow):
             self.keyPressEvent()
 
             # check if FIP setting match schedule
-            mouse_id = int(self.ID.text())
+            mouse_id = self.ID.text()
             FIP_Mode = self._GetInfoFromSchedule(mouse_id, 'FIP Mode')
-            if (FIP_Mode is None and hasattr(self, 'schedule')) and self.PhotometryB.currentText()=='on':
+            FIP_is_nan = (isinstance(FIP_Mode, float) and math.isnan(FIP_Mode))
+            if (FIP_is_nan and hasattr(self, 'schedule')) and self.PhotometryB.currentText()=='on':
                 reply = QMessageBox.critical(self,
                                              'Box {}, Start'.format(self.box_letter),
                                              'Photometry is set to "on", but the FIP Mode is not in schedule. Continue anyways?',
@@ -3584,7 +3585,7 @@ class Window(QMainWindow):
                 else:
                     # Allow the session to continue, but log error
                     logging.error('Starting session with conflicting FIP information')
-            elif FIP_Mode is not None and self.PhotometryB.currentText()=='off':
+            elif not FIP_is_nan and self.PhotometryB.currentText()=='off':
                 reply = QMessageBox.critical(self,
                                              'Box {}, Start'.format(self.box_letter),
                                              f'Photometry is set to "off" but schedule indicate '
@@ -3598,7 +3599,7 @@ class Window(QMainWindow):
                     # Allow the session to continue, but log error
                     logging.error('Starting session with conflicting FIP information')
 
-            elif FIP_Mode is not None and FIP_Mode != self.FIPMode.currentText() and self.PhotometryB.currentText()=='on':
+            elif not FIP_is_nan and FIP_Mode != self.FIPMode.currentText() and self.PhotometryB.currentText()=='on':
                 reply = QMessageBox.critical(self,
                                              'Box {}, Start'.format(self.box_letter),
                                              f'FIP Mode is set to {self.FIPMode.currentText()} but schedule indicate '
