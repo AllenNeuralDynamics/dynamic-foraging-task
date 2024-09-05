@@ -1036,7 +1036,7 @@ class Window(QMainWindow):
     def _LoadSchedule(self):
         if os.path.exists(self.Settings['schedule_path']):
             schedule = pd.read_csv(self.Settings['schedule_path'])
-            schedule = schedule.dropna(subset=['Mouse ID','Box']).copy()
+            self.schedule = schedule.dropna(subset=['Mouse ID','Box']).copy()
             logging.info('Loaded behavior schedule')
         else:
             logging.error('Could not find schedule at {}'.format(self.Settings['schedule_path']))
@@ -2774,53 +2774,6 @@ class Window(QMainWindow):
         self.TargetRatio.setText('0.85')
         self.keyPressEvent(allow_reset=True) 
 
-        # Set IACUC protocol in metadata based on schedule
-        protocol = self._GetInfoFromSchedule(mouse_id,'Protocol')
-        if protocol is not None:
-            self.Metadata_dialog.meta_data['session_metadata']['IACUCProtocol']=str(int(protocol))
-            self.Metadata_dialog._update_metadata(
-                update_rig_metadata=False, 
-                update_session_metadata=True
-                )
-            logging.info('Setting IACUC Protocol: {}'.format(protocol))
-
-        # Set Project Name in metadata based on schedule
-        project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
-        add_default = True
-        if project_name is not None:
-            projects = [self.Metadata_dialog.ProjectName.itemText(i) 
-                for i in range(self.Metadata_dialog.ProjectName.count())]
-            index = np.where(np.array(projects) == project_name)[0]
-            if len(index) > 0:
-                index = index[0]
-                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
-                self.Metadata_dialog._show_project_info()
-                logging.info('Setting Project name: {}'.format(project_name))
-                add_default = False
-        if add_default:
-            projects = [self.Metadata_dialog.ProjectName.itemText(i) 
-                for i in range(self.Metadata_dialog.ProjectName.count())]
-            index = np.where(np.array(projects) == 'Behavior Platform')[0]
-            if len(index) > 0:
-                index = index[0]
-                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
-                self.Metadata_dialog._show_project_info()
-                logging.info('Setting Project name: {}'.format('Behavior Platform'))
-            else:
-                project_info = {
-                        'Funding Institution':['Allen Institute'],
-                        'Grant Number':['nan'],
-                        'Investigators':['Jeremiah Cohen'],
-                        'Fundee':['nan'],
-                    }
-                self.Metadata_dialog.project_info = project_info
-                project_name = 'Behavior Platform'
-                self.Metadata_dialog.ProjectName.addItems([project_name])
-                logging.info('Setting Project name: {}'.format(project_name))
-        self.project_name = project_name
-
-        self.keyPressEvent(allow_reset=True) 
-    
     def _Open_getListOfMice(self):
         '''
             Returns a list of mice with data saved on this computer
@@ -3575,6 +3528,7 @@ class Window(QMainWindow):
 
     def _Start(self):
         '''start trial loop'''
+
         # set the load tag to zero
         self.load_tag=0
 
@@ -3614,6 +3568,50 @@ class Window(QMainWindow):
         if self.Start.isChecked():
             logging.info('Start button pressed: starting trial loop')
             self.keyPressEvent()
+
+            # check if FIP setting match schedule
+            mouse_id = self.ID.text()
+            FIP_Mode = self._GetInfoFromSchedule(mouse_id, 'FIP Mode')
+            FIP_is_nan = (isinstance(FIP_Mode, float) and math.isnan(FIP_Mode))
+            if (FIP_is_nan and hasattr(self, 'schedule')) and self.PhotometryB.currentText()=='on':
+                reply = QMessageBox.critical(self,
+                                             'Box {}, Start'.format(self.box_letter),
+                                             'Photometry is set to "on", but the FIP Mode is not in schedule. Continue anyways?',
+                                             QMessageBox.Yes | QMessageBox.No,)
+                if reply == QMessageBox.No:
+                    self.Start.setChecked(False)
+                    logging.info('User declines starting session due to conflicting FIP information')
+                    return
+                else:
+                    # Allow the session to continue, but log error
+                    logging.error('Starting session with conflicting FIP information')
+            elif not FIP_is_nan and self.PhotometryB.currentText()=='off':
+                reply = QMessageBox.critical(self,
+                                             'Box {}, Start'.format(self.box_letter),
+                                             f'Photometry is set to "off" but schedule indicate '
+                                             f'FIP Mode is {FIP_Mode}. Continue anyways?',
+                                             QMessageBox.Yes | QMessageBox.No,)
+                if reply == QMessageBox.No:
+                    self.Start.setChecked(False)
+                    logging.info('User declines starting session due to conflicting FIP information')
+                    return
+                else:
+                    # Allow the session to continue, but log error
+                    logging.error('Starting session with conflicting FIP information')
+
+            elif not FIP_is_nan and FIP_Mode != self.FIPMode.currentText() and self.PhotometryB.currentText()=='on':
+                reply = QMessageBox.critical(self,
+                                             'Box {}, Start'.format(self.box_letter),
+                                             f'FIP Mode is set to {self.FIPMode.currentText()} but schedule indicate '
+                                             f'FIP Mode is {FIP_Mode}. Continue anyways?',
+                                             QMessageBox.Yes | QMessageBox.No,)
+                if reply == QMessageBox.No:
+                    self.Start.setChecked(False)
+                    logging.info('User declines starting session due to conflicting FIP information')
+                    return
+                else:
+                    # Allow the session to continue, but log error
+                    logging.error('Starting session with conflicting FIP information')
 
             if self.StartANewSession == 0 :
                 reply = QMessageBox.question(self, 
@@ -3711,6 +3709,54 @@ class Window(QMainWindow):
             self.WarningLabel.setStyleSheet("color: none;")
             # disable metadata fields
             self._set_metadata_enabled(False)
+
+            # Set IACUC protocol in metadata based on schedule
+            protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
+            if protocol is not None:
+                self.Metadata_dialog.meta_data['session_metadata']['IACUCProtocol'] = str(int(protocol))
+                self.Metadata_dialog._update_metadata(
+                    update_rig_metadata=False,
+                    update_session_metadata=True
+                )
+                logging.info('Setting IACUC Protocol: {}'.format(protocol))
+
+            # Set Project Name in metadata based on schedule
+            project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
+            add_default = True
+            if project_name is not None:
+                projects = [self.Metadata_dialog.ProjectName.itemText(i)
+                            for i in range(self.Metadata_dialog.ProjectName.count())]
+                index = np.where(np.array(projects) == project_name)[0]
+                if len(index) > 0:
+                    index = index[0]
+                    self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+                    self.Metadata_dialog._show_project_info()
+                    logging.info('Setting Project name: {}'.format(project_name))
+                    add_default = False
+            if add_default:
+                projects = [self.Metadata_dialog.ProjectName.itemText(i)
+                            for i in range(self.Metadata_dialog.ProjectName.count())]
+                index = np.where(np.array(projects) == 'Behavior Platform')[0]
+                if len(index) > 0:
+                    index = index[0]
+                    self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+                    self.Metadata_dialog._show_project_info()
+                    logging.info('Setting Project name: {}'.format('Behavior Platform'))
+                else:
+                    project_info = {
+                        'Funding Institution': ['Allen Institute'],
+                        'Grant Number': ['nan'],
+                        'Investigators': ['Jeremiah Cohen'],
+                        'Fundee': ['nan'],
+                    }
+                    self.Metadata_dialog.project_info = project_info
+                    project_name = 'Behavior Platform'
+                    self.Metadata_dialog.ProjectName.addItems([project_name])
+                    logging.info('Setting Project name: {}'.format(project_name))
+            self.project_name = project_name
+
+            self.keyPressEvent(allow_reset=True)
+
         else:
             # Prompt user to confirm stopping trials
             reply = QMessageBox.question(self, 
