@@ -2579,11 +2579,6 @@ class Window(QMainWindow):
             self.SessionlistSpin.setEnabled(True)
             self.Sessionlist.setEnabled(True)
 
-            if self.Settings['AutomaticUpload']:
-                self._generate_upload_manifest() # Generate the upload manifest file
-            else:
-                logging.info('Skipping Automatic Upload based on ForagingSettings.json')
-
             if self.StartEphysRecording.isChecked():
                 QMessageBox.warning(self, '', 'Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!')
                 self.unsaved_data=True
@@ -3709,6 +3704,11 @@ class Window(QMainWindow):
             self.WarningLabel.setStyleSheet("color: none;")
             # disable metadata fields
             self._set_metadata_enabled(False)
+
+            if self.Settings['AutomaticUpload']:
+                self._generate_upload_manifest()  # Generate the upload manifest file
+            else:
+                logging.info('Skipping Automatic Upload based on ForagingSettings.json')
 
             # Set IACUC protocol in metadata based on schedule
             protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
