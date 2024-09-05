@@ -2120,10 +2120,18 @@ class Window(QMainWindow):
         self._StopCurrentSession() 
 
         if self.unsaved_data:
-            reply = QMessageBox.critical(self, 
-                'Box {}, Foraging Close'.format(self.box_letter), 
+            reply = QMessageBox.critical(self,
+                'Box {}, Foraging Close'.format(self.box_letter),
                 'Exit without saving?',
-                QMessageBox.Yes | QMessageBox.No , QMessageBox.No)  
+                QMessageBox.Yes | QMessageBox.No , QMessageBox.No)
+            if reply == QMessageBox.No:
+                event.ignore()
+                return
+        elif self.WeightAfter.text() == '' and self.StartANewSession == 1 and not self.unsaved_data:  # post weight not entered and session ran
+            reply = QMessageBox.critical(self,
+                                         'Box {}, Foraging Close'.format(self.box_letter),
+                                         'Post weight appears to not be entered. Exit without entering and saving?',
+                                         QMessageBox.Yes, QMessageBox.No)
             if reply == QMessageBox.No:
                 event.ignore()
                 return
@@ -3085,14 +3093,19 @@ class Window(QMainWindow):
 
     def _Clear(self):
         # Stop current session first
-        self._StopCurrentSession()    
-    
+        self._StopCurrentSession()
+
         # Verify user wants to clear parameters
         if self.unsaved_data:
-            reply = QMessageBox.critical(self, 
-                'Box {}, Clear parameters:'.format(self.box_letter), 
+            reply = QMessageBox.critical(self,
+                'Box {}, Clear parameters:'.format(self.box_letter),
                 'Unsaved data exists! Do you want to clear training parameters?',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)        
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        elif self.WeightAfter.text() == '' and self.StartANewSession == 1 and not self.unsaved_data:  # post weight not entered and session ran
+            reply = QMessageBox.critical(self,
+                                         'Box {}, Foraging Close'.format(self.box_letter),
+                                         'Post weight appears to not be entered. Clear without entering and saving?',
+                                         QMessageBox.Yes, QMessageBox.No)
         else:
             reply = QMessageBox.question(self, 
                 'Box {}, Clear parameters:'.format(self.box_letter), 
@@ -3113,24 +3126,24 @@ class Window(QMainWindow):
             self.TeensyWarning.setText('No Teensy COM for this box')
             self.TeensyWarning.setStyleSheet(self.default_warning_color)
             msg = 'No Teensy COM configured for this box, cannot start FIP workflow'
-            reply = QMessageBox.information(self, 
+            reply = QMessageBox.information(self,
                 'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
             return
-        
+
         if self.FIP_workflow_path == "":
             logging.warning('No FIP workflow path defined in ForagingSettings.json')
             self.TeensyWarning.setText('FIP workflow path not defined')
             self.TeensyWarning.setStyleSheet(self.default_warning_color)
             msg = 'FIP workflow path not defined, cannot start FIP workflow'
-            reply = QMessageBox.information(self, 
+            reply = QMessageBox.information(self,
                 'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
             return
- 
+
         if self.FIP_started:
-            reply = QMessageBox.question(self, 
-                'Box {}, Start FIP workflow:'.format(self.box_letter), 
+            reply = QMessageBox.question(self,
+                'Box {}, Start FIP workflow:'.format(self.box_letter),
                 'FIP workflow has already been started. Start again?',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No )       
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No )
             if reply == QMessageBox.No:
                 logging.warning('FIP workflow already started, user declines to restart')
                 return
@@ -3149,7 +3162,7 @@ class Window(QMainWindow):
             process = subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera+' --start',cwd=CWD,shell=True,
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
             threading.Thread(target=log_subprocess_output, args=(process,'FIP',)).start()
-            self.FIP_started=True 
+            self.FIP_started=True
         except Exception as e:
             logging.error(e)
             reply = QMessageBox.information(self, 
@@ -3373,9 +3386,9 @@ class Window(QMainWindow):
         logging.info('New Session pressed')
 
         # If we have unsaved data, prompt to save
-        if (self.ToInitializeVisual==0) and (self.unsaved_data): 
-            reply = QMessageBox.critical(self, 
-                'Box {}, New Session:'.format(self.box_letter), 
+        if (self.ToInitializeVisual==0) and (self.unsaved_data):
+            reply = QMessageBox.critical(self,
+                'Box {}, New Session:'.format(self.box_letter),
                 'Start new session without saving?',
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if reply == QMessageBox.No:
@@ -3383,7 +3396,17 @@ class Window(QMainWindow):
                 self.NewSession.setChecked(False)
                 logging.info('New Session declined')
                 return False
-        
+        elif self.WeightAfter.text() == '' and self.StartANewSession == 1 and not self.unsaved_data:  # post weight not entered and session ran
+            reply = QMessageBox.critical(self,
+                                         'Box {}, Foraging Close'.format(self.box_letter),
+                                         'Post weight appears to not be entered. Start new session without entering and saving?',
+                                         QMessageBox.Yes, QMessageBox.No)
+            if reply == QMessageBox.No:
+                self.NewSession.setStyleSheet("background-color : none")
+                self.NewSession.setChecked(False)
+                logging.info('New Session declined')
+                return False
+
         # stop the camera 
         self._stop_camera()
 
@@ -4309,7 +4332,7 @@ class Window(QMainWindow):
                 schedule = self.acquisition_datetime.split('_')[0]+'_20-30-00'
                 capsule_id = 'c089614a-347e-4696-b17e-86980bb782c1' 
                 mount = 'FIP'
- 
+
             date_format = "%Y-%m-%d_%H-%M-%S"
             # Define contents of manifest file
             contents = {
