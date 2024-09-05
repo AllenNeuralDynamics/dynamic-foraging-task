@@ -2119,7 +2119,6 @@ class Window(QMainWindow):
         # stop the current session first
         self._StopCurrentSession() 
 
-        reply = None
         if self.unsaved_data:
             reply = QMessageBox.critical(self,
                 'Box {}, Foraging Close'.format(self.box_letter),
@@ -2128,7 +2127,7 @@ class Window(QMainWindow):
             if reply == QMessageBox.No:
                 event.ignore()
                 return
-        elif self.WeightAfter.text() == '' and self.StartANewSession == 1 and reply != QMessageBox.Yes and not self.unsaved_data:  # post weight not entered and session ran
+        elif self.WeightAfter.text() == '' and self.StartANewSession == 1 and not self.unsaved_data:  # post weight not entered and session ran
             reply = QMessageBox.critical(self,
                                          'Box {}, Foraging Close'.format(self.box_letter),
                                          'Post weight appears to not be entered. Exit without entering and saving?',
@@ -3148,14 +3147,13 @@ class Window(QMainWindow):
         # Stop current session first
         self._StopCurrentSession()
 
-        reply = None
         # Verify user wants to clear parameters
         if self.unsaved_data:
             reply = QMessageBox.critical(self,
                 'Box {}, Clear parameters:'.format(self.box_letter),
                 'Unsaved data exists! Do you want to clear training parameters?',
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        elif self.WeightAfter.text() == '' and self.StartANewSession == 1 and reply != QMessageBox.Yes and not self.unsaved_data:  # post weight not entered and session ran
+        elif self.WeightAfter.text() == '' and self.StartANewSession == 1 and not self.unsaved_data:  # post weight not entered and session ran
             reply = QMessageBox.critical(self,
                                          'Box {}, Foraging Close'.format(self.box_letter),
                                          'Post weight appears to not be entered. Clear without entering and saving?',
@@ -3440,7 +3438,6 @@ class Window(QMainWindow):
         logging.info('New Session pressed')
 
         # If we have unsaved data, prompt to save
-        reply = None
         if (self.ToInitializeVisual==0) and (self.unsaved_data):
             reply = QMessageBox.critical(self,
                 'Box {}, New Session:'.format(self.box_letter),
@@ -3451,7 +3448,7 @@ class Window(QMainWindow):
                 self.NewSession.setChecked(False)
                 logging.info('New Session declined')
                 return False
-        elif self.WeightAfter.text() == '' and self.StartANewSession == 1 and reply != QMessageBox.Yes and not self.unsaved_data:  # post weight not entered and session ran
+        elif self.WeightAfter.text() == '' and self.StartANewSession == 1 and not self.unsaved_data:  # post weight not entered and session ran
             reply = QMessageBox.critical(self,
                                          'Box {}, Foraging Close'.format(self.box_letter),
                                          'Post weight appears to not be entered. Start new session without entering and saving?',
