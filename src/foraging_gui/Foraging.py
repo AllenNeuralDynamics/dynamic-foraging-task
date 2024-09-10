@@ -2607,7 +2607,6 @@ class Window(QMainWindow):
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
             self._get_folder_structure_new(formatted_datetime)
-            self.acquisition_datetime = formatted_datetime 
             self.session_name=f'behavior_{self.ID.text()}_{formatted_datetime}'
         elif self.load_tag==1:
             self._parse_folder_structure()
@@ -3728,11 +3727,6 @@ class Window(QMainWindow):
             # disable metadata fields
             self._set_metadata_enabled(False)
 
-            if self.Settings['AutomaticUpload']:
-                self._generate_upload_manifest()  # Generate the upload manifest file
-            else:
-                logging.info('Skipping Automatic Upload based on ForagingSettings.json')
-
             # Set IACUC protocol in metadata based on schedule
             protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
             if protocol is not None:
@@ -3871,6 +3865,11 @@ class Window(QMainWindow):
             GeneratedTrials._DeletePreviousLicks(self.Channel2)
         else:
             GeneratedTrials=self.GeneratedTrials
+
+            if self.Settings['AutomaticUpload']:
+                self._generate_upload_manifest()  # Generate the upload manifest file
+            else:
+                logging.info('Skipping Automatic Upload based on ForagingSettings.json')
 
         if self.ToInitializeVisual==1: # only run once
             self.PlotM=PlotM
