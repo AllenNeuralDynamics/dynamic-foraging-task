@@ -2127,7 +2127,7 @@ class Window(QMainWindow):
             if reply == QMessageBox.No:
                 event.ignore()
                 return
-        elif self.WeightAfter.text() == '' and self.StartANewSession == 1 and not self.unsaved_data:  # post weight not entered and session ran
+        elif self.WeightAfter.text() == '' and self.StartANewSession == 0 and not self.unsaved_data:  # post weight not entered and session ran
             reply = QMessageBox.critical(self,
                                          'Box {}, Foraging Close'.format(self.box_letter),
                                          'Post weight appears to not be entered. Exit without entering and saving?',
@@ -3101,7 +3101,7 @@ class Window(QMainWindow):
                 'Box {}, Clear parameters:'.format(self.box_letter),
                 'Unsaved data exists! Do you want to clear training parameters?',
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        elif self.WeightAfter.text() == '' and self.StartANewSession == 1 and not self.unsaved_data:  # post weight not entered and session ran
+        elif self.WeightAfter.text() == '' and self.StartANewSession == 0 and not self.unsaved_data:  # post weight not entered and session ran
             reply = QMessageBox.critical(self,
                                          'Box {}, Foraging Close'.format(self.box_letter),
                                          'Post weight appears to not be entered. Clear without entering and saving?',
@@ -3396,7 +3396,7 @@ class Window(QMainWindow):
                 self.NewSession.setChecked(False)
                 logging.info('New Session declined')
                 return False
-        elif self.WeightAfter.text() == '' and self.StartANewSession == 1 and not self.unsaved_data:  # post weight not entered and session ran
+        elif self.WeightAfter.text() == '' and self.StartANewSession == 0 and not self.unsaved_data:  # post weight not entered and session ran
             reply = QMessageBox.critical(self,
                                          'Box {}, Foraging Close'.format(self.box_letter),
                                          'Post weight appears to not be entered. Start new session without entering and saving?',
