@@ -3589,47 +3589,48 @@ class Window(QMainWindow):
 
             # check if FIP setting match schedule
             mouse_id = self.ID.text()
-            FIP_Mode = self._GetInfoFromSchedule(mouse_id, 'FIP Mode')
-            FIP_is_nan = (isinstance(FIP_Mode, float) and math.isnan(FIP_Mode))
-            if (FIP_is_nan and hasattr(self, 'schedule')) and self.PhotometryB.currentText()=='on':
-                reply = QMessageBox.critical(self,
-                                             'Box {}, Start'.format(self.box_letter),
-                                             'Photometry is set to "on", but the FIP Mode is not in schedule. Continue anyways?',
-                                             QMessageBox.Yes | QMessageBox.No,)
-                if reply == QMessageBox.No:
-                    self.Start.setChecked(False)
-                    logging.info('User declines starting session due to conflicting FIP information')
-                    return
-                else:
-                    # Allow the session to continue, but log error
-                    logging.error('Starting session with conflicting FIP information')
-            elif not FIP_is_nan and self.PhotometryB.currentText()=='off':
-                reply = QMessageBox.critical(self,
-                                             'Box {}, Start'.format(self.box_letter),
-                                             f'Photometry is set to "off" but schedule indicate '
-                                             f'FIP Mode is {FIP_Mode}. Continue anyways?',
-                                             QMessageBox.Yes | QMessageBox.No,)
-                if reply == QMessageBox.No:
-                    self.Start.setChecked(False)
-                    logging.info('User declines starting session due to conflicting FIP information')
-                    return
-                else:
-                    # Allow the session to continue, but log error
-                    logging.error('Starting session with conflicting FIP information')
+            if mouse_id in self.schedule['Mouse ID'].values and mouse_id not in ['0','1','2','3','4','5','6','7','8','9','10'] and hasattr(self, 'schedule'): # skip if test mouse or mouse isn't in schedule or
+                FIP_Mode = self._GetInfoFromSchedule(mouse_id, 'FIP Mode')
+                FIP_is_nan = (isinstance(FIP_Mode, float) and math.isnan(FIP_Mode)) or FIP_Mode is None
+                if FIP_is_nan and self.PhotometryB.currentText()=='on':
+                    reply = QMessageBox.critical(self,
+                                                 'Box {}, Start'.format(self.box_letter),
+                                                 'Photometry is set to "on", but the FIP Mode is not in schedule. Continue anyways?',
+                                                 QMessageBox.Yes | QMessageBox.No,)
+                    if reply == QMessageBox.No:
+                        self.Start.setChecked(False)
+                        logging.info('User declines starting session due to conflicting FIP information')
+                        return
+                    else:
+                        # Allow the session to continue, but log error
+                        logging.error('Starting session with conflicting FIP information')
+                elif not FIP_is_nan and self.PhotometryB.currentText()=='off':
+                    reply = QMessageBox.critical(self,
+                                                 'Box {}, Start'.format(self.box_letter),
+                                                 f'Photometry is set to "off" but schedule indicate '
+                                                 f'FIP Mode is {FIP_Mode}. Continue anyways?',
+                                                 QMessageBox.Yes | QMessageBox.No,)
+                    if reply == QMessageBox.No:
+                        self.Start.setChecked(False)
+                        logging.info('User declines starting session due to conflicting FIP information')
+                        return
+                    else:
+                        # Allow the session to continue, but log error
+                        logging.error('Starting session with conflicting FIP information')
 
-            elif not FIP_is_nan and FIP_Mode != self.FIPMode.currentText() and self.PhotometryB.currentText()=='on':
-                reply = QMessageBox.critical(self,
-                                             'Box {}, Start'.format(self.box_letter),
-                                             f'FIP Mode is set to {self.FIPMode.currentText()} but schedule indicate '
-                                             f'FIP Mode is {FIP_Mode}. Continue anyways?',
-                                             QMessageBox.Yes | QMessageBox.No,)
-                if reply == QMessageBox.No:
-                    self.Start.setChecked(False)
-                    logging.info('User declines starting session due to conflicting FIP information')
-                    return
-                else:
-                    # Allow the session to continue, but log error
-                    logging.error('Starting session with conflicting FIP information')
+                elif not FIP_is_nan and FIP_Mode != self.FIPMode.currentText() and self.PhotometryB.currentText()=='on':
+                    reply = QMessageBox.critical(self,
+                                                 'Box {}, Start'.format(self.box_letter),
+                                                 f'FIP Mode is set to {self.FIPMode.currentText()} but schedule indicate '
+                                                 f'FIP Mode is {FIP_Mode}. Continue anyways?',
+                                                 QMessageBox.Yes | QMessageBox.No,)
+                    if reply == QMessageBox.No:
+                        self.Start.setChecked(False)
+                        logging.info('User declines starting session due to conflicting FIP information')
+                        return
+                    else:
+                        # Allow the session to continue, but log error
+                        logging.error('Starting session with conflicting FIP information')
 
             if self.StartANewSession == 0 :
                 reply = QMessageBox.question(self, 
