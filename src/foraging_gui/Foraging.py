@@ -3589,7 +3589,7 @@ class Window(QMainWindow):
 
             # check if FIP setting match schedule
             mouse_id = self.ID.text()
-            if mouse_id in self.schedule['Mouse ID'].values and mouse_id not in ['0','1','2','3','4','5','6','7','8','9','10'] and hasattr(self, 'schedule'): # skip if test mouse or mouse isn't in schedule or
+            if hasattr(self, 'schedule') and mouse_id in self.schedule['Mouse ID'].values and mouse_id not in ['0','1','2','3','4','5','6','7','8','9','10'] : # skip if test mouse or mouse isn't in schedule or
                 FIP_Mode = self._GetInfoFromSchedule(mouse_id, 'FIP Mode')
                 FIP_is_nan = (isinstance(FIP_Mode, float) and math.isnan(FIP_Mode)) or FIP_Mode is None
                 if FIP_is_nan and self.PhotometryB.currentText()=='on':
