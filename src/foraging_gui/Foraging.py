@@ -3397,6 +3397,7 @@ class Window(QMainWindow):
                 logging.info('New Session declined')
                 return False
         elif self.WeightAfter.text() == '' and self.StartANewSession == 0 and not self.unsaved_data:  # post weight not entered and session ran
+            print('new session pressed')
             reply = QMessageBox.critical(self,
                                          'Box {}, Foraging Close'.format(self.box_letter),
                                          'Post weight appears to not be entered. Start new session without entering and saving?',
