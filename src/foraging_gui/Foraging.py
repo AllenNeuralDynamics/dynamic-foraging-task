@@ -2304,7 +2304,8 @@ class Window(QMainWindow):
             SaveAs=0
             SaveContinue=1
             saving_type_label = 'backup saving'
-            behavior_data_field='GeneratedTrials_backup'
+            #behavior_data_field='GeneratedTrials_backup'
+            behavior_data_field='GeneratedTrials'
         elif ForceSave==1:
             saving_type_label = 'force saving'
             behavior_data_field='GeneratedTrials'
@@ -3948,11 +3949,14 @@ class Window(QMainWindow):
                 if self.actionLicks_sta.isChecked():
                     self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
                 # save the data everytrial
+
+                ### Save data in a separate thread ###
+                '''
                 if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
                     self.previous_backup_completed=0
                     self.GeneratedTrials_backup=copy.copy(self.GeneratedTrials)
                     self.threadpool6.start(worker_save)
-
+                '''
                 if GeneratedTrials.CurrentSimulation==True:
                     GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3,self.Channel4)
                     self.ANewTrial=1
@@ -3963,6 +3967,17 @@ class Window(QMainWindow):
                 #generate a new trial
                 if self.NewTrialRewardOrder==1:
                     GeneratedTrials._GenerateATrial(self.Channel4)   
+
+                ### Save data in the main thread ###
+                start_time = time.time()
+                self.previous_backup_completed=1
+                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
+                    self._Save(BackupSave=1)
+                # Record the end time
+                end_time = time.time()
+                # Calculate the time elapsed and log if it is too long
+                if end_time - start_time>1:
+                    logging.info(f"Time taken to backup the data is too long: {elapsed_time:.6f} seconds")
 
                 # show disk space
                 self._show_disk_space()
