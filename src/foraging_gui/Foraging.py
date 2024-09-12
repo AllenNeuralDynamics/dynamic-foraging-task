@@ -2135,10 +2135,8 @@ class Window(QMainWindow):
                                          'Post weight appears to not be entered. Do you want to close gui?',
                                          QMessageBox.Yes, QMessageBox.No)
             if reply == QMessageBox.No:
-                self.NewSession.setStyleSheet("background-color : none")
-                self.NewSession.setChecked(False)
-                logging.info('New Session declined')
-                return False
+                event.ignore()
+                return
         else:
             reply = QMessageBox.question(self,
                 'Box {}, Foraging Close'.format(self.box_letter), 
@@ -3461,8 +3459,8 @@ class Window(QMainWindow):
 
         # Add note to log
         logging.info('New Session complete')
-
-        if self.NewSession.isChecked(): # clicking save button
+        # clicking save button will trigger function so only reset session_run if NewSession clicked
+        if self.NewSession.isChecked():
             self.session_run = False
 
         return True
@@ -3564,6 +3562,15 @@ class Window(QMainWindow):
 
         # set the load tag to zero
         self.load_tag=0
+
+        # post weight not entered and session ran
+        if self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
+            reply = QMessageBox.critical(self,
+                                         'Box {}, Foraging Close'.format(self.box_letter),
+                                         'Post weight appears to not be entered. Do you want to start a new session?',
+                                         QMessageBox.Yes, QMessageBox.No)
+            if reply == QMessageBox.No:
+                return
 
         # empty post weight
         self.WeightAfter.setText('')
@@ -3793,7 +3800,7 @@ class Window(QMainWindow):
                     logging.info('Setting Project name: {}'.format(project_name))
             self.project_name = project_name
 
-            self.session_run = True # session has been started
+            self.session_run = True   # session has been started
 
             self.keyPressEvent(allow_reset=True)
 
