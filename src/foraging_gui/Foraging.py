@@ -16,7 +16,8 @@ import copy
 import shutil
 from pathlib import Path
 from datetime import date, datetime
-
+# from aind_slims_api import SlimsClient
+# from aind_slims_api import models
 import serial 
 import numpy as np
 import pandas as pd
@@ -108,6 +109,9 @@ class Window(QMainWindow):
 
         # Connect to Bonsai
         self._InitializeBonsai()
+
+        # connect to Slims
+        self._ConnectSlims()
 
         # Set up threads 
         self.threadpool=QThreadPool() # get animal response
@@ -1210,6 +1214,35 @@ class Window(QMainWindow):
         self.Other_go_cue_decibel=self.Settings['go_cue_decibel_box'+str(self.box_number)]
         self.Other_lick_spout_distance=self.Settings['lick_spout_distance_box'+str(self.box_number)]
         self.rig_name = '{}'.format(self.current_box)
+
+    def _ConnectSlims(self):
+        '''
+            Connect to Slims
+        '''
+
+        self.client = SlimsClient(username='dynamic_foraging', password='slims')
+
+    def _AddWaterLogResult(self, metadata: generate_metadata):
+        '''
+            Add WaterLogResult to slims based on current state of gui
+
+            :param metadata: metadata object containing water log information
+
+        '''
+
+        mouse = self.client.fetch_model(models.SlimsMouseContent, barcode=self.ID.text())
+        waterlog_result = self.client.add_model(
+            models.SlimsWaterlogResult(
+                mouse_pk=mouse.pk,
+                date=datetime(2021, 1, 1),
+                weight_g=20.0,
+                water_earned_ml=5.0,
+                water_supplement_delivered_ml=5.0,
+                water_supplement_recommended_ml=5.0,
+                total_water_ml=10.0,
+                comments="comments",
+
+                ))
 
 
     def _InitializeBonsai(self):
@@ -2534,7 +2567,7 @@ class Window(QMainWindow):
         Obj['MetadataFolder']=self.MetadataFolder
         Obj['SaveFile']=self.SaveFile
 
-        # generate the metadata file
+        # generate the metadata file and update slims
         try:
             # save the metadata collected in the metadata dialogue
             self.Metadata_dialog._save_metadata_dialog_parameters()
@@ -2549,6 +2582,9 @@ class Window(QMainWindow):
             Obj['generate_session_metadata_success']=generated_metadata.session_metadata_success
             Obj['generate_rig_metadata_success']=generated_metadata.rig_metadata_success
             Obj['generate_data_description_success']=generated_metadata.data_description_success
+            print(generated_metadata)
+            self._AddWaterLogResult(generated_metadata)
+
         except Exception as e:
             self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved!')
             logging.error('Error generating session metadata: '+str(e))
