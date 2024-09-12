@@ -138,6 +138,10 @@ class Window(QMainWindow):
         self.give_left_time_reserved=0 # the reserved open time of the left valve (usually given after go cue)
         self.give_right_time_reserved=0 # the reserved open time of the right valve (usually given after go cue)
         self.load_tag=0 # 1, a session has been loaded; 0, no session has been loaded
+        self.Other_manual_water_left_volume=[] # the volume of manual water given by the left valve each time
+        self.Other_manual_water_left_time=[] # the valve open time of manual water given by the left valve each time
+        self.Other_manual_water_right_volume=[] # the volume of manual water given by the right valve each time
+        self.Other_manual_water_right_time=[] # the valve open time of manual water given by the right valve each time
         self._Optogenetics()    # open the optogenetics panel 
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
@@ -4087,6 +4091,9 @@ class Window(QMainWindow):
             else:
                 self.give_left_time_reserved=self.give_left_time_reserved+float(self.TP_GiveWaterL)*1000
         else:
+            self.Other_manual_water_left_volume.append(float(self.TP_GiveWaterL_volume))
+            self.Other_manual_water_left_time.append(float(self.TP_GiveWaterL)*1000)
+
             self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
             time.sleep(0.01) 
             self.Channel3.ManualWater_Left(int(1))
@@ -4108,6 +4115,8 @@ class Window(QMainWindow):
             time.sleep(0.01+float(self.give_left_time_reserved)/1000)
             self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
             self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+self.give_left_volume_reserved/1000
+            self.Other_manual_water_left_volume.append(self.give_left_volume_reserved)
+            self.Other_manual_water_left_time.append(self.give_left_time_reserved)
             self.give_left_volume_reserved=0
             self.give_left_time_reserved=0
         elif valve=='right':
@@ -4119,6 +4128,8 @@ class Window(QMainWindow):
             time.sleep(0.01+float(self.give_right_time_reserved)/1000) 
             self.Channel.RightValue(float(self.TP_RightValue)*1000)
             self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+self.give_right_volume_reserved/1000
+            self.Other_manual_water_right_volume.append(self.give_right_volume_reserved)
+            self.Other_manual_water_right_time.append(self.give_right_time_reserved)
             self.give_right_volume_reserved=0
             self.give_right_time_reserved=0
 
@@ -4135,6 +4146,9 @@ class Window(QMainWindow):
             else:
                 self.give_right_time_reserved=self.give_right_time_reserved+float(self.TP_GiveWaterR)*1000
         else:
+            self.Other_manual_water_right_volume.append(float(self.TP_GiveWaterR_volume))
+            self.Other_manual_water_right_time.append(float(self.TP_GiveWaterR)*1000)
+        
             self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
             time.sleep(0.01) 
             self.Channel3.ManualWater_Right(int(1))
