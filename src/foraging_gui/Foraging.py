@@ -1220,7 +1220,7 @@ class Window(QMainWindow):
             Connect to Slims
         '''
 
-        self.client = SlimsClient(username='dynamic_foraging', password='slims')
+        self.slims_client = None#SlimsClient(username='dynamic_foraging', password='slims')
 
     def _AddWaterLogResult(self, metadata: generate_metadata):
         '''
@@ -1229,20 +1229,20 @@ class Window(QMainWindow):
             :param metadata: metadata object containing water log information
 
         '''
-
-        mouse = self.client.fetch_model(models.SlimsMouseContent, barcode=self.ID.text())
-        waterlog_result = self.client.add_model(
-            models.SlimsWaterlogResult(
-                mouse_pk=mouse.pk,
-                date=datetime(2021, 1, 1),
-                weight_g=20.0,
-                water_earned_ml=5.0,
-                water_supplement_delivered_ml=5.0,
-                water_supplement_recommended_ml=5.0,
-                total_water_ml=10.0,
-                comments="comments",
-
-                ))
+        print(metadata.Obj)
+        # mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=self.ID.text())
+        # waterlog_result = self.slims_client.add_model(
+        #     models.SlimsWaterlogResult(
+        #         mouse_pk=mouse.pk,
+        #         date=datetime(2021, 1, 1),
+        #         weight_g=20.0,
+        #         water_earned_ml=5.0,
+        #         water_supplement_delivered_ml=5.0,
+        #         water_supplement_recommended_ml=5.0,
+        #         total_water_ml=10.0,
+        #         comments="comments",
+        #         workstation=metadata.Obj['rig_id']
+        #         ))
 
 
     def _InitializeBonsai(self):
@@ -2582,7 +2582,6 @@ class Window(QMainWindow):
             Obj['generate_session_metadata_success']=generated_metadata.session_metadata_success
             Obj['generate_rig_metadata_success']=generated_metadata.rig_metadata_success
             Obj['generate_data_description_success']=generated_metadata.data_description_success
-            print(generated_metadata)
             self._AddWaterLogResult(generated_metadata)
 
         except Exception as e:
