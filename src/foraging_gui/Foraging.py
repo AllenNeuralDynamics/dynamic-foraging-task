@@ -3105,7 +3105,7 @@ class Window(QMainWindow):
         if self.unsaved_data:
             reply = QMessageBox.critical(self,
                 'Box {}, Clear parameters:'.format(self.box_letter),
-                'Unsaved data exists!  n `  training parameters?',
+                'Unsaved data exists! Do you want to clear training parameters?',
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         # post weight not entered and session ran and new session button was clicked
         elif self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
