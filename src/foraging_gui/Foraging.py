@@ -3578,9 +3578,6 @@ class Window(QMainWindow):
             if reply == QMessageBox.No:
                 return
 
-        # empty post weight
-        self.WeightAfter.setText('')
-
         # empty the laser calibration
         self.Opto_dialog.laser_1_calibration_voltage.setText('')
         self.Opto_dialog.laser_2_calibration_voltage.setText('')
@@ -3747,6 +3744,9 @@ class Window(QMainWindow):
                     logging.info('User selected not to start excitation')
                     self.Start.setChecked(False)
                     return
+
+            # empty post weight after pass through checks in case user cancels run
+            self.WeightAfter.setText('')
 
             # change button color and mark the state change
             self.Start.setStyleSheet("background-color : green;")
