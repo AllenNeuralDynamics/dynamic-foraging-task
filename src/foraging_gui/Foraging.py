@@ -3391,8 +3391,8 @@ class Window(QMainWindow):
             self.InitializeBonsaiSuccessfully=0
         
     def _NewSession(self):
-        logging.info('New Session pressed')
 
+        logging.info('New Session pressed')
         # If we have unsaved data, prompt to save
         if (self.ToInitializeVisual==0) and (self.unsaved_data):
             reply = QMessageBox.critical(self,
@@ -3405,7 +3405,7 @@ class Window(QMainWindow):
                 logging.info('New Session declined')
                 return False
         # post weight not entered and session ran and new session button was clicked
-        elif self.WeightAfter.text() == '' and self.ToInitializeVisual==0 and not self.unsaved_data and self.NewSession.isChecked():
+        elif self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data and self.NewSession.isChecked():
             reply = QMessageBox.critical(self,
                                          'Box {}, Foraging Close'.format(self.box_letter),
                                          'Post weight appears to not be entered. Start new session without entering and saving?',
@@ -3421,6 +3421,11 @@ class Window(QMainWindow):
 
         # Reset logging
         self._stop_logging()
+
+        # reset if session has been run
+        if self.NewSession.isChecked():
+            logging.info('Resetting session run flag')
+            self.session_run = False
 
         # Reset GUI visuals
         self.ManualWaterWarning.setText('')
@@ -3459,9 +3464,6 @@ class Window(QMainWindow):
 
         # Add note to log
         logging.info('New Session complete')
-        # clicking save button will trigger function so only reset session_run if NewSession clicked
-        if self.NewSession.isChecked():
-            self.session_run = False
 
         return True
 
