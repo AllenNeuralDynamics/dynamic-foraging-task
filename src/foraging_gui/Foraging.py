@@ -2837,7 +2837,7 @@ class Window(QMainWindow):
                             self.NewSession.setStyleSheet("background-color : none")
                             self.NewSession.setChecked(False)
                             logging.info('New Session declined')
-                            return False
+                            return
                     self.session_run = False # reset flag since new session button won't be checked
                     self._NewSession()
                     return
@@ -2863,6 +2863,18 @@ class Window(QMainWindow):
             self.fname=fname
         if fname:
             # Start new session
+            # check outside new session since new session button won't be checked
+            if self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
+                reply = QMessageBox.critical(self,
+                                             'Box {}, Foraging Close'.format(self.box_letter),
+                                             'Post weight appears to not be entered. Start new session without entering and saving?',
+                                             QMessageBox.Yes, QMessageBox.No)
+                if reply == QMessageBox.No:
+                    self.NewSession.setStyleSheet("background-color : none")
+                    self.NewSession.setChecked(False)
+                    logging.info('New Session declined')
+                    return
+            self.session_run = False  # reset flag since new session button won't be checked
             new_session = self._NewSession()
             if not new_session:
                 return
