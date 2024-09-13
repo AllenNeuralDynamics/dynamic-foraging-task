@@ -138,6 +138,10 @@ class Window(QMainWindow):
         self.give_left_time_reserved=0 # the reserved open time of the left valve (usually given after go cue)
         self.give_right_time_reserved=0 # the reserved open time of the right valve (usually given after go cue)
         self.load_tag=0 # 1, a session has been loaded; 0, no session has been loaded
+        self.Other_manual_water_left_volume=[] # the volume of manual water given by the left valve each time
+        self.Other_manual_water_left_time=[] # the valve open time of manual water given by the left valve each time
+        self.Other_manual_water_right_volume=[] # the volume of manual water given by the right valve each time
+        self.Other_manual_water_right_time=[] # the valve open time of manual water given by the right valve each time
         self._Optogenetics()    # open the optogenetics panel 
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
@@ -2607,7 +2611,7 @@ class Window(QMainWindow):
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
             self._get_folder_structure_new(formatted_datetime)
-            self.acquisition_datetime = formatted_datetime 
+            self.acquisition_datetime = formatted_datetime
             self.session_name=f'behavior_{self.ID.text()}_{formatted_datetime}'
         elif self.load_tag==1:
             self._parse_folder_structure()
@@ -3589,47 +3593,48 @@ class Window(QMainWindow):
 
             # check if FIP setting match schedule
             mouse_id = self.ID.text()
-            FIP_Mode = self._GetInfoFromSchedule(mouse_id, 'FIP Mode')
-            FIP_is_nan = (isinstance(FIP_Mode, float) and math.isnan(FIP_Mode))
-            if (FIP_is_nan and hasattr(self, 'schedule')) and self.PhotometryB.currentText()=='on':
-                reply = QMessageBox.critical(self,
-                                             'Box {}, Start'.format(self.box_letter),
-                                             'Photometry is set to "on", but the FIP Mode is not in schedule. Continue anyways?',
-                                             QMessageBox.Yes | QMessageBox.No,)
-                if reply == QMessageBox.No:
-                    self.Start.setChecked(False)
-                    logging.info('User declines starting session due to conflicting FIP information')
-                    return
-                else:
-                    # Allow the session to continue, but log error
-                    logging.error('Starting session with conflicting FIP information')
-            elif not FIP_is_nan and self.PhotometryB.currentText()=='off':
-                reply = QMessageBox.critical(self,
-                                             'Box {}, Start'.format(self.box_letter),
-                                             f'Photometry is set to "off" but schedule indicate '
-                                             f'FIP Mode is {FIP_Mode}. Continue anyways?',
-                                             QMessageBox.Yes | QMessageBox.No,)
-                if reply == QMessageBox.No:
-                    self.Start.setChecked(False)
-                    logging.info('User declines starting session due to conflicting FIP information')
-                    return
-                else:
-                    # Allow the session to continue, but log error
-                    logging.error('Starting session with conflicting FIP information')
+            if hasattr(self, 'schedule') and mouse_id in self.schedule['Mouse ID'].values and mouse_id not in ['0','1','2','3','4','5','6','7','8','9','10'] : # skip if test mouse or mouse isn't in schedule or
+                FIP_Mode = self._GetInfoFromSchedule(mouse_id, 'FIP Mode')
+                FIP_is_nan = (isinstance(FIP_Mode, float) and math.isnan(FIP_Mode)) or FIP_Mode is None
+                if FIP_is_nan and self.PhotometryB.currentText()=='on':
+                    reply = QMessageBox.critical(self,
+                                                 'Box {}, Start'.format(self.box_letter),
+                                                 'Photometry is set to "on", but the FIP Mode is not in schedule. Continue anyways?',
+                                                 QMessageBox.Yes | QMessageBox.No,)
+                    if reply == QMessageBox.No:
+                        self.Start.setChecked(False)
+                        logging.info('User declines starting session due to conflicting FIP information')
+                        return
+                    else:
+                        # Allow the session to continue, but log error
+                        logging.error('Starting session with conflicting FIP information')
+                elif not FIP_is_nan and self.PhotometryB.currentText()=='off':
+                    reply = QMessageBox.critical(self,
+                                                 'Box {}, Start'.format(self.box_letter),
+                                                 f'Photometry is set to "off" but schedule indicate '
+                                                 f'FIP Mode is {FIP_Mode}. Continue anyways?',
+                                                 QMessageBox.Yes | QMessageBox.No,)
+                    if reply == QMessageBox.No:
+                        self.Start.setChecked(False)
+                        logging.info('User declines starting session due to conflicting FIP information')
+                        return
+                    else:
+                        # Allow the session to continue, but log error
+                        logging.error('Starting session with conflicting FIP information')
 
-            elif not FIP_is_nan and FIP_Mode != self.FIPMode.currentText() and self.PhotometryB.currentText()=='on':
-                reply = QMessageBox.critical(self,
-                                             'Box {}, Start'.format(self.box_letter),
-                                             f'FIP Mode is set to {self.FIPMode.currentText()} but schedule indicate '
-                                             f'FIP Mode is {FIP_Mode}. Continue anyways?',
-                                             QMessageBox.Yes | QMessageBox.No,)
-                if reply == QMessageBox.No:
-                    self.Start.setChecked(False)
-                    logging.info('User declines starting session due to conflicting FIP information')
-                    return
-                else:
-                    # Allow the session to continue, but log error
-                    logging.error('Starting session with conflicting FIP information')
+                elif not FIP_is_nan and FIP_Mode != self.FIPMode.currentText() and self.PhotometryB.currentText()=='on':
+                    reply = QMessageBox.critical(self,
+                                                 'Box {}, Start'.format(self.box_letter),
+                                                 f'FIP Mode is set to {self.FIPMode.currentText()} but schedule indicate '
+                                                 f'FIP Mode is {FIP_Mode}. Continue anyways?',
+                                                 QMessageBox.Yes | QMessageBox.No,)
+                    if reply == QMessageBox.No:
+                        self.Start.setChecked(False)
+                        logging.info('User declines starting session due to conflicting FIP information')
+                        return
+                    else:
+                        # Allow the session to continue, but log error
+                        logging.error('Starting session with conflicting FIP information')
 
             if self.StartANewSession == 0 :
                 reply = QMessageBox.question(self, 
@@ -3727,11 +3732,6 @@ class Window(QMainWindow):
             self.WarningLabel.setStyleSheet("color: none;")
             # disable metadata fields
             self._set_metadata_enabled(False)
-
-            if self.Settings['AutomaticUpload']:
-                self._generate_upload_manifest()  # Generate the upload manifest file
-            else:
-                logging.info('Skipping Automatic Upload based on ForagingSettings.json')
 
             # Set IACUC protocol in metadata based on schedule
             protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
@@ -3869,6 +3869,10 @@ class Window(QMainWindow):
             GeneratedTrials._GenerateATrial(self.Channel4)
             # delete licks from the previous session
             GeneratedTrials._DeletePreviousLicks(self.Channel2)
+            if self.Settings['AutomaticUpload']:
+                self._generate_upload_manifest()  # Generate the upload manifest file
+            else:
+                logging.info('Skipping Automatic Upload based on ForagingSettings.json')
         else:
             GeneratedTrials=self.GeneratedTrials
 
@@ -4156,6 +4160,9 @@ class Window(QMainWindow):
             else:
                 self.give_left_time_reserved=self.give_left_time_reserved+float(self.TP_GiveWaterL)*1000
         else:
+            self.Other_manual_water_left_volume.append(float(self.TP_GiveWaterL_volume))
+            self.Other_manual_water_left_time.append(float(self.TP_GiveWaterL)*1000)
+
             self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
             time.sleep(0.01) 
             self.Channel3.ManualWater_Left(int(1))
@@ -4177,6 +4184,8 @@ class Window(QMainWindow):
             time.sleep(0.01+float(self.give_left_time_reserved)/1000)
             self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
             self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+self.give_left_volume_reserved/1000
+            self.Other_manual_water_left_volume.append(self.give_left_volume_reserved)
+            self.Other_manual_water_left_time.append(self.give_left_time_reserved)
             self.give_left_volume_reserved=0
             self.give_left_time_reserved=0
         elif valve=='right':
@@ -4188,6 +4197,8 @@ class Window(QMainWindow):
             time.sleep(0.01+float(self.give_right_time_reserved)/1000) 
             self.Channel.RightValue(float(self.TP_RightValue)*1000)
             self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+self.give_right_volume_reserved/1000
+            self.Other_manual_water_right_volume.append(self.give_right_volume_reserved)
+            self.Other_manual_water_right_time.append(self.give_right_time_reserved)
             self.give_right_volume_reserved=0
             self.give_right_time_reserved=0
 
@@ -4204,6 +4215,9 @@ class Window(QMainWindow):
             else:
                 self.give_right_time_reserved=self.give_right_time_reserved+float(self.TP_GiveWaterR)*1000
         else:
+            self.Other_manual_water_right_volume.append(float(self.TP_GiveWaterR_volume))
+            self.Other_manual_water_right_time.append(float(self.TP_GiveWaterR)*1000)
+        
             self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
             time.sleep(0.01) 
             self.Channel3.ManualWater_Right(int(1))
