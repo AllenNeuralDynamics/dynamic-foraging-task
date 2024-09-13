@@ -2828,6 +2828,8 @@ class Window(QMainWindow):
                     logging.info('User entered the ID for a mouse with no data: {}'.format(mouse_id))
                     self._OpenNewMouse(mouse_id)
                     # check outside new session since new session button won't be checked
+                    print(self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data)
+                    print(self.session_run)
                     if self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
                         reply = QMessageBox.critical(self,
                                                      'Box {}, Foraging Close'.format(self.box_letter),
