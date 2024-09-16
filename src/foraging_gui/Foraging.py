@@ -1790,7 +1790,7 @@ class Window(QMainWindow):
                         if allow_reset:
                             continue
                         if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
-                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))                       
+                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
                     if (child.objectName() in ['LatestCalibrationDate','SessionlistSpin']):
                         continue
@@ -2772,14 +2772,12 @@ class Window(QMainWindow):
             QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if reply == QMessageBox.No:
             logging.info('User declines to start new mouse: {}'.format(mouse_id))
-            return
+            return reply
 
         # Set ID, clear weight information
         logging.info('User starting a new mouse: {}'.format(mouse_id))
         self.ID.setText(mouse_id) 
         self.ID.returnPressed.emit()
-        self.BaseWeight.setText('')
-        self.WeightAfter.setText('')
         self.TargetRatio.setText('0.85')
         self.keyPressEvent(allow_reset=True) 
 
@@ -2826,22 +2824,10 @@ class Window(QMainWindow):
                 if mouse_id not in mice:
                     # figureout out new Mouse
                     logging.info('User entered the ID for a mouse with no data: {}'.format(mouse_id))
-                    self._OpenNewMouse(mouse_id)
-                    # check outside new session since new session button won't be checked
-                    print(self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data)
-                    print(self.session_run)
-                    if self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
-                        reply = QMessageBox.critical(self,
-                                                     'Box {}, Foraging Close'.format(self.box_letter),
-                                                     'Post weight appears to not be entered. Start new session without entering and saving?',
-                                                     QMessageBox.Yes, QMessageBox.No)
-                        if reply == QMessageBox.No:
-                            self.NewSession.setStyleSheet("background-color : none")
-                            self.NewSession.setChecked(False)
-                            logging.info('New Session declined')
-                            return
-                    self.session_run = False # reset flag since new session button won't be checked
-                    self._NewSession()
+                    reply = self._OpenNewMouse(mouse_id)
+                    if reply != QMessageBox.No:     # user pressed yes
+                        self.NewSession.setChecked(True)
+                        self._NewSession()
                     return
     
                 # attempt to load last session from mouse
@@ -2865,18 +2851,7 @@ class Window(QMainWindow):
             self.fname=fname
         if fname:
             # Start new session
-            # check outside new session since new session button won't be checked
-            if self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
-                reply = QMessageBox.critical(self,
-                                             'Box {}, Foraging Close'.format(self.box_letter),
-                                             'Post weight appears to not be entered. Start new session without entering and saving?',
-                                             QMessageBox.Yes, QMessageBox.No)
-                if reply == QMessageBox.No:
-                    self.NewSession.setStyleSheet("background-color : none")
-                    self.NewSession.setChecked(False)
-                    logging.info('New Session declined')
-                    return
-            self.session_run = False  # reset flag since new session button won't be checked
+            self.NewSession.setChecked(True)
             new_session = self._NewSession()
             if not new_session:
                 return
@@ -3456,6 +3431,8 @@ class Window(QMainWindow):
         if self.NewSession.isChecked():
             logging.info('Resetting session run flag')
             self.session_run = False
+            self.BaseWeight.setText('')
+            self.WeightAfter.setText('')
 
         # Reset GUI visuals
         self.ManualWaterWarning.setText('')
