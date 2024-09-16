@@ -105,6 +105,7 @@ class Window(QMainWindow):
         self.logging_type = -1    # -1, logging is not started; 0, temporary logging; 1, formal logging
         self.unsaved_data = False   # Setting unsaved data to False 
         self.to_check_drop_frames = 1 # 1, to check drop frames during saving data; 0, not to check drop frames 
+        self.session_run = False    # flag to indicate if session has been run or not
 
         # Connect to Bonsai
         self._InitializeBonsai()
@@ -1789,7 +1790,7 @@ class Window(QMainWindow):
                         if allow_reset:
                             continue
                         if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
-                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))                       
+                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
                     if (child.objectName() in ['LatestCalibrationDate','SessionlistSpin']):
                         continue
@@ -2131,10 +2132,11 @@ class Window(QMainWindow):
             if reply == QMessageBox.No:
                 event.ignore()
                 return
-        elif self.WeightAfter.text() == '' and self.StartANewSession == 1 and not self.unsaved_data:  # post weight not entered and session ran
+        # post weight not entered and session ran
+        elif self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
             reply = QMessageBox.critical(self,
                                          'Box {}, Foraging Close'.format(self.box_letter),
-                                         'Post weight appears to not be entered. Exit without entering and saving?',
+                                         'Post weight appears to not be entered. Do you want to close gui?',
                                          QMessageBox.Yes, QMessageBox.No)
             if reply == QMessageBox.No:
                 event.ignore()
@@ -2770,14 +2772,12 @@ class Window(QMainWindow):
             QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if reply == QMessageBox.No:
             logging.info('User declines to start new mouse: {}'.format(mouse_id))
-            return
+            return reply
 
         # Set ID, clear weight information
         logging.info('User starting a new mouse: {}'.format(mouse_id))
         self.ID.setText(mouse_id) 
         self.ID.returnPressed.emit()
-        self.BaseWeight.setText('')
-        self.WeightAfter.setText('')
         self.TargetRatio.setText('0.85')
         self.keyPressEvent(allow_reset=True) 
 
@@ -2824,8 +2824,10 @@ class Window(QMainWindow):
                 if mouse_id not in mice:
                     # figureout out new Mouse
                     logging.info('User entered the ID for a mouse with no data: {}'.format(mouse_id))
-                    self._OpenNewMouse(mouse_id)
-                    self._NewSession()
+                    reply = self._OpenNewMouse(mouse_id)
+                    if reply != QMessageBox.No:     # user pressed yes
+                        self.NewSession.setChecked(True)
+                        self._NewSession()
                     return
     
                 # attempt to load last session from mouse
@@ -2849,6 +2851,7 @@ class Window(QMainWindow):
             self.fname=fname
         if fname:
             # Start new session
+            self.NewSession.setChecked(True)
             new_session = self._NewSession()
             if not new_session:
                 return
@@ -3105,11 +3108,17 @@ class Window(QMainWindow):
                 'Box {}, Clear parameters:'.format(self.box_letter),
                 'Unsaved data exists! Do you want to clear training parameters?',
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        elif self.WeightAfter.text() == '' and self.StartANewSession == 1 and not self.unsaved_data:  # post weight not entered and session ran
+        # post weight not entered and session ran and new session button was clicked
+        elif self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
             reply = QMessageBox.critical(self,
                                          'Box {}, Foraging Close'.format(self.box_letter),
-                                         'Post weight appears to not be entered. Clear without entering and saving?',
+                                         'Post weight appears to not be entered. Do you want to clear training parameters?',
                                          QMessageBox.Yes, QMessageBox.No)
+            if reply == QMessageBox.No:
+                self.NewSession.setStyleSheet("background-color : none")
+                self.NewSession.setChecked(False)
+                logging.info('New Session declined')
+                return False
         else:
             reply = QMessageBox.question(self, 
                 'Box {}, Clear parameters:'.format(self.box_letter), 
@@ -3387,8 +3396,8 @@ class Window(QMainWindow):
             self.InitializeBonsaiSuccessfully=0
         
     def _NewSession(self):
-        logging.info('New Session pressed')
 
+        logging.info('New Session pressed')
         # If we have unsaved data, prompt to save
         if (self.ToInitializeVisual==0) and (self.unsaved_data):
             reply = QMessageBox.critical(self,
@@ -3400,7 +3409,8 @@ class Window(QMainWindow):
                 self.NewSession.setChecked(False)
                 logging.info('New Session declined')
                 return False
-        elif self.WeightAfter.text() == '' and self.StartANewSession == 1 and not self.unsaved_data:  # post weight not entered and session ran
+        # post weight not entered and session ran and new session button was clicked
+        elif self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data and self.NewSession.isChecked():
             reply = QMessageBox.critical(self,
                                          'Box {}, Foraging Close'.format(self.box_letter),
                                          'Post weight appears to not be entered. Start new session without entering and saving?',
@@ -3416,6 +3426,13 @@ class Window(QMainWindow):
 
         # Reset logging
         self._stop_logging()
+
+        # reset if session has been run
+        if self.NewSession.isChecked():
+            logging.info('Resetting session run flag')
+            self.session_run = False
+            self.BaseWeight.setText('')
+            self.WeightAfter.setText('')
 
         # Reset GUI visuals
         self.ManualWaterWarning.setText('')
@@ -3454,6 +3471,7 @@ class Window(QMainWindow):
 
         # Add note to log
         logging.info('New Session complete')
+
         return True
 
     def _AskSave(self):
@@ -3554,8 +3572,14 @@ class Window(QMainWindow):
         # set the load tag to zero
         self.load_tag=0
 
-        # empty post weight
-        self.WeightAfter.setText('')
+        # post weight not entered and session ran
+        if self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
+            reply = QMessageBox.critical(self,
+                                         'Box {}, Foraging Close'.format(self.box_letter),
+                                         'Post weight appears to not be entered. Do you want to start a new session?',
+                                         QMessageBox.Yes, QMessageBox.No)
+            if reply == QMessageBox.No:
+                return
 
         # empty the laser calibration
         self.Opto_dialog.laser_1_calibration_voltage.setText('')
@@ -3724,6 +3748,9 @@ class Window(QMainWindow):
                     self.Start.setChecked(False)
                     return
 
+            # empty post weight after pass through checks in case user cancels run
+            self.WeightAfter.setText('')
+
             # change button color and mark the state change
             self.Start.setStyleSheet("background-color : green;")
             self.NewSession.setStyleSheet("background-color : none")
@@ -3777,6 +3804,8 @@ class Window(QMainWindow):
                     self.Metadata_dialog.ProjectName.addItems([project_name])
                     logging.info('Setting Project name: {}'.format(project_name))
             self.project_name = project_name
+
+            self.session_run = True   # session has been started
 
             self.keyPressEvent(allow_reset=True)
 
