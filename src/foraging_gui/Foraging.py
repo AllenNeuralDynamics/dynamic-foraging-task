@@ -16,8 +16,8 @@ import copy
 import shutil
 from pathlib import Path
 from datetime import date, datetime
-# from aind_slims_api import SlimsClient
-# from aind_slims_api import models
+from aind_slims_api import SlimsClient
+from aind_slims_api import models
 import serial 
 import numpy as np
 import pandas as pd
@@ -41,6 +41,7 @@ from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScal
 from foraging_gui.stage import Stage
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
+from aind_data_schema.core.session import Session
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -1220,29 +1221,29 @@ class Window(QMainWindow):
             Connect to Slims
         '''
 
-        self.slims_client = None#SlimsClient(username='dynamic_foraging', password='slims')
+        self.slims_client = SlimsClient(username='dynamic_foraging', password='slims')
 
-    def _AddWaterLogResult(self, metadata: generate_metadata):
+    def _AddWaterLogResult(self, session: Session):
         '''
             Add WaterLogResult to slims based on current state of gui
 
-            :param metadata: metadata object containing water log information
+            :param session: Session object to pull water information from
 
         '''
-        print(metadata.Obj)
-        # mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=self.ID.text())
-        # waterlog_result = self.slims_client.add_model(
-        #     models.SlimsWaterlogResult(
-        #         mouse_pk=mouse.pk,
-        #         date=datetime(2021, 1, 1),
-        #         weight_g=20.0,
-        #         water_earned_ml=5.0,
-        #         water_supplement_delivered_ml=5.0,
-        #         water_supplement_recommended_ml=5.0,
-        #         total_water_ml=10.0,
-        #         comments="comments",
-        #         workstation=metadata.Obj['rig_id']
-        #         ))
+        print('session metadata', session)
+        #mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=self.ID.text())
+        waterlog_result = self.slims_client.add_model(
+            models.SlimsWaterlogResult(
+                mouse_pk=1,#mouse.pk,
+                date=session.session_start_time,
+                weight_g=session.animal_weight_prior,
+                water_earned_ml=session.reward_delivery,
+                water_supplement_delivered_ml=None, #session.water['water_in_session_manual'],
+                water_supplement_recommended_ml=None,
+                total_water_ml=session.reward_consumed_total,
+                comments=session.notes,
+                workstation=session.rig_id
+                ))
 
 
     def _InitializeBonsai(self):
@@ -2582,7 +2583,7 @@ class Window(QMainWindow):
             Obj['generate_session_metadata_success']=generated_metadata.session_metadata_success
             Obj['generate_rig_metadata_success']=generated_metadata.rig_metadata_success
             Obj['generate_data_description_success']=generated_metadata.data_description_success
-            self._AddWaterLogResult(generated_metadata)
+            self._AddWaterLogResult(generated_metadata._session())
 
         except Exception as e:
             self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved!')

@@ -585,6 +585,8 @@ class generate_metadata:
         session = Session(**session_params)
         session.write_standard_file(output_directory=self.output_folder)
         self.session_metadata_success=True
+        return session
+
 
     def _get_high_speed_camera_stream(self):
         '''
