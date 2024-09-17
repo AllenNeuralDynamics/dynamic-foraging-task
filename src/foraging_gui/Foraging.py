@@ -105,6 +105,7 @@ class Window(QMainWindow):
         self.logging_type = -1    # -1, logging is not started; 0, temporary logging; 1, formal logging
         self.unsaved_data = False   # Setting unsaved data to False 
         self.to_check_drop_frames = 1 # 1, to check drop frames during saving data; 0, not to check drop frames 
+        self.session_run = False    # flag to indicate if session has been run or not
 
         # Connect to Bonsai
         self._InitializeBonsai()
@@ -138,6 +139,10 @@ class Window(QMainWindow):
         self.give_left_time_reserved=0 # the reserved open time of the left valve (usually given after go cue)
         self.give_right_time_reserved=0 # the reserved open time of the right valve (usually given after go cue)
         self.load_tag=0 # 1, a session has been loaded; 0, no session has been loaded
+        self.Other_manual_water_left_volume=[] # the volume of manual water given by the left valve each time
+        self.Other_manual_water_left_time=[] # the valve open time of manual water given by the left valve each time
+        self.Other_manual_water_right_volume=[] # the volume of manual water given by the right valve each time
+        self.Other_manual_water_right_time=[] # the valve open time of manual water given by the right valve each time
         self._Optogenetics()    # open the optogenetics panel 
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
@@ -1036,7 +1041,7 @@ class Window(QMainWindow):
     def _LoadSchedule(self):
         if os.path.exists(self.Settings['schedule_path']):
             schedule = pd.read_csv(self.Settings['schedule_path'])
-            schedule = schedule.dropna(subset=['Mouse ID','Box']).copy()
+            self.schedule = schedule.dropna(subset=['Mouse ID','Box']).copy()
             logging.info('Loaded behavior schedule')
         else:
             logging.error('Could not find schedule at {}'.format(self.Settings['schedule_path']))
@@ -1785,7 +1790,7 @@ class Window(QMainWindow):
                         if allow_reset:
                             continue
                         if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
-                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))                       
+                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
                     if (child.objectName() in ['LatestCalibrationDate','SessionlistSpin']):
                         continue
@@ -2120,10 +2125,19 @@ class Window(QMainWindow):
         self._StopCurrentSession() 
 
         if self.unsaved_data:
-            reply = QMessageBox.critical(self, 
-                'Box {}, Foraging Close'.format(self.box_letter), 
+            reply = QMessageBox.critical(self,
+                'Box {}, Foraging Close'.format(self.box_letter),
                 'Exit without saving?',
-                QMessageBox.Yes | QMessageBox.No , QMessageBox.No)  
+                QMessageBox.Yes | QMessageBox.No , QMessageBox.No)
+            if reply == QMessageBox.No:
+                event.ignore()
+                return
+        # post weight not entered and session ran
+        elif self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
+            reply = QMessageBox.critical(self,
+                                         'Box {}, Foraging Close'.format(self.box_letter),
+                                         'Post weight appears to not be entered. Do you want to close gui?',
+                                         QMessageBox.Yes, QMessageBox.No)
             if reply == QMessageBox.No:
                 event.ignore()
                 return
@@ -2579,11 +2593,6 @@ class Window(QMainWindow):
             self.SessionlistSpin.setEnabled(True)
             self.Sessionlist.setEnabled(True)
 
-            if self.Settings['AutomaticUpload']:
-                self._generate_upload_manifest() # Generate the upload manifest file
-            else:
-                logging.info('Skipping Automatic Upload based on ForagingSettings.json')
-
             if self.StartEphysRecording.isChecked():
                 QMessageBox.warning(self, '', 'Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!')
                 self.unsaved_data=True
@@ -2604,7 +2613,7 @@ class Window(QMainWindow):
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
             self._get_folder_structure_new(formatted_datetime)
-            self.acquisition_datetime = formatted_datetime 
+            self.acquisition_datetime = formatted_datetime
             self.session_name=f'behavior_{self.ID.text()}_{formatted_datetime}'
         elif self.load_tag==1:
             self._parse_folder_structure()
@@ -2763,64 +2772,15 @@ class Window(QMainWindow):
             QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if reply == QMessageBox.No:
             logging.info('User declines to start new mouse: {}'.format(mouse_id))
-            return
+            return reply
 
         # Set ID, clear weight information
         logging.info('User starting a new mouse: {}'.format(mouse_id))
         self.ID.setText(mouse_id) 
         self.ID.returnPressed.emit()
-        self.BaseWeight.setText('')
-        self.WeightAfter.setText('')
         self.TargetRatio.setText('0.85')
         self.keyPressEvent(allow_reset=True) 
 
-        # Set IACUC protocol in metadata based on schedule
-        protocol = self._GetInfoFromSchedule(mouse_id,'Protocol')
-        if protocol is not None:
-            self.Metadata_dialog.meta_data['session_metadata']['IACUCProtocol']=str(int(protocol))
-            self.Metadata_dialog._update_metadata(
-                update_rig_metadata=False, 
-                update_session_metadata=True
-                )
-            logging.info('Setting IACUC Protocol: {}'.format(protocol))
-
-        # Set Project Name in metadata based on schedule
-        project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
-        add_default = True
-        if project_name is not None:
-            projects = [self.Metadata_dialog.ProjectName.itemText(i) 
-                for i in range(self.Metadata_dialog.ProjectName.count())]
-            index = np.where(np.array(projects) == project_name)[0]
-            if len(index) > 0:
-                index = index[0]
-                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
-                self.Metadata_dialog._show_project_info()
-                logging.info('Setting Project name: {}'.format(project_name))
-                add_default = False
-        if add_default:
-            projects = [self.Metadata_dialog.ProjectName.itemText(i) 
-                for i in range(self.Metadata_dialog.ProjectName.count())]
-            index = np.where(np.array(projects) == 'Behavior Platform')[0]
-            if len(index) > 0:
-                index = index[0]
-                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
-                self.Metadata_dialog._show_project_info()
-                logging.info('Setting Project name: {}'.format('Behavior Platform'))
-            else:
-                project_info = {
-                        'Funding Institution':['Allen Institute'],
-                        'Grant Number':['nan'],
-                        'Investigators':['Jeremiah Cohen'],
-                        'Fundee':['nan'],
-                    }
-                self.Metadata_dialog.project_info = project_info
-                project_name = 'Behavior Platform'
-                self.Metadata_dialog.ProjectName.addItems([project_name])
-                logging.info('Setting Project name: {}'.format(project_name))
-        self.project_name = project_name
-
-        self.keyPressEvent(allow_reset=True) 
-    
     def _Open_getListOfMice(self):
         '''
             Returns a list of mice with data saved on this computer
@@ -2864,8 +2824,10 @@ class Window(QMainWindow):
                 if mouse_id not in mice:
                     # figureout out new Mouse
                     logging.info('User entered the ID for a mouse with no data: {}'.format(mouse_id))
-                    self._OpenNewMouse(mouse_id)
-                    self._NewSession()
+                    reply = self._OpenNewMouse(mouse_id)
+                    if reply != QMessageBox.No:     # user pressed yes
+                        self.NewSession.setChecked(True)
+                        self._NewSession()
                     return
     
                 # attempt to load last session from mouse
@@ -2889,6 +2851,7 @@ class Window(QMainWindow):
             self.fname=fname
         if fname:
             # Start new session
+            self.NewSession.setChecked(True)
             new_session = self._NewSession()
             if not new_session:
                 return
@@ -3137,14 +3100,25 @@ class Window(QMainWindow):
 
     def _Clear(self):
         # Stop current session first
-        self._StopCurrentSession()    
-    
+        self._StopCurrentSession()
+
         # Verify user wants to clear parameters
         if self.unsaved_data:
-            reply = QMessageBox.critical(self, 
-                'Box {}, Clear parameters:'.format(self.box_letter), 
+            reply = QMessageBox.critical(self,
+                'Box {}, Clear parameters:'.format(self.box_letter),
                 'Unsaved data exists! Do you want to clear training parameters?',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)        
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        # post weight not entered and session ran and new session button was clicked
+        elif self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
+            reply = QMessageBox.critical(self,
+                                         'Box {}, Foraging Close'.format(self.box_letter),
+                                         'Post weight appears to not be entered. Do you want to clear training parameters?',
+                                         QMessageBox.Yes, QMessageBox.No)
+            if reply == QMessageBox.No:
+                self.NewSession.setStyleSheet("background-color : none")
+                self.NewSession.setChecked(False)
+                logging.info('New Session declined')
+                return False
         else:
             reply = QMessageBox.question(self, 
                 'Box {}, Clear parameters:'.format(self.box_letter), 
@@ -3165,24 +3139,24 @@ class Window(QMainWindow):
             self.TeensyWarning.setText('No Teensy COM for this box')
             self.TeensyWarning.setStyleSheet(self.default_warning_color)
             msg = 'No Teensy COM configured for this box, cannot start FIP workflow'
-            reply = QMessageBox.information(self, 
+            reply = QMessageBox.information(self,
                 'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
             return
-        
+
         if self.FIP_workflow_path == "":
             logging.warning('No FIP workflow path defined in ForagingSettings.json')
             self.TeensyWarning.setText('FIP workflow path not defined')
             self.TeensyWarning.setStyleSheet(self.default_warning_color)
             msg = 'FIP workflow path not defined, cannot start FIP workflow'
-            reply = QMessageBox.information(self, 
+            reply = QMessageBox.information(self,
                 'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
             return
- 
+
         if self.FIP_started:
-            reply = QMessageBox.question(self, 
-                'Box {}, Start FIP workflow:'.format(self.box_letter), 
+            reply = QMessageBox.question(self,
+                'Box {}, Start FIP workflow:'.format(self.box_letter),
                 'FIP workflow has already been started. Start again?',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No )       
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No )
             if reply == QMessageBox.No:
                 logging.warning('FIP workflow already started, user declines to restart')
                 return
@@ -3201,7 +3175,7 @@ class Window(QMainWindow):
             process = subprocess.Popen(self.bonsai_path+' '+self.FIP_workflow_path+folder_path+camera+' --start',cwd=CWD,shell=True,
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
             threading.Thread(target=log_subprocess_output, args=(process,'FIP',)).start()
-            self.FIP_started=True 
+            self.FIP_started=True
         except Exception as e:
             logging.error(e)
             reply = QMessageBox.information(self, 
@@ -3422,12 +3396,12 @@ class Window(QMainWindow):
             self.InitializeBonsaiSuccessfully=0
         
     def _NewSession(self):
-        logging.info('New Session pressed')
 
+        logging.info('New Session pressed')
         # If we have unsaved data, prompt to save
-        if (self.ToInitializeVisual==0) and (self.unsaved_data): 
-            reply = QMessageBox.critical(self, 
-                'Box {}, New Session:'.format(self.box_letter), 
+        if (self.ToInitializeVisual==0) and (self.unsaved_data):
+            reply = QMessageBox.critical(self,
+                'Box {}, New Session:'.format(self.box_letter),
                 'Start new session without saving?',
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if reply == QMessageBox.No:
@@ -3435,12 +3409,30 @@ class Window(QMainWindow):
                 self.NewSession.setChecked(False)
                 logging.info('New Session declined')
                 return False
-        
+        # post weight not entered and session ran and new session button was clicked
+        elif self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data and self.NewSession.isChecked():
+            reply = QMessageBox.critical(self,
+                                         'Box {}, Foraging Close'.format(self.box_letter),
+                                         'Post weight appears to not be entered. Start new session without entering and saving?',
+                                         QMessageBox.Yes, QMessageBox.No)
+            if reply == QMessageBox.No:
+                self.NewSession.setStyleSheet("background-color : none")
+                self.NewSession.setChecked(False)
+                logging.info('New Session declined')
+                return False
+
         # stop the camera 
         self._stop_camera()
 
         # Reset logging
         self._stop_logging()
+
+        # reset if session has been run
+        if self.NewSession.isChecked():
+            logging.info('Resetting session run flag')
+            self.session_run = False
+            self.BaseWeight.setText('')
+            self.WeightAfter.setText('')
 
         # Reset GUI visuals
         self.ManualWaterWarning.setText('')
@@ -3479,6 +3471,7 @@ class Window(QMainWindow):
 
         # Add note to log
         logging.info('New Session complete')
+
         return True
 
     def _AskSave(self):
@@ -3575,11 +3568,18 @@ class Window(QMainWindow):
 
     def _Start(self):
         '''start trial loop'''
+
         # set the load tag to zero
         self.load_tag=0
 
-        # empty post weight
-        self.WeightAfter.setText('')
+        # post weight not entered and session ran
+        if self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
+            reply = QMessageBox.critical(self,
+                                         'Box {}, Foraging Close'.format(self.box_letter),
+                                         'Post weight appears to not be entered. Do you want to start a new session?',
+                                         QMessageBox.Yes, QMessageBox.No)
+            if reply == QMessageBox.No:
+                return
 
         # empty the laser calibration
         self.Opto_dialog.laser_1_calibration_voltage.setText('')
@@ -3614,6 +3614,51 @@ class Window(QMainWindow):
         if self.Start.isChecked():
             logging.info('Start button pressed: starting trial loop')
             self.keyPressEvent()
+
+            # check if FIP setting match schedule
+            mouse_id = self.ID.text()
+            if hasattr(self, 'schedule') and mouse_id in self.schedule['Mouse ID'].values and mouse_id not in ['0','1','2','3','4','5','6','7','8','9','10'] : # skip if test mouse or mouse isn't in schedule or
+                FIP_Mode = self._GetInfoFromSchedule(mouse_id, 'FIP Mode')
+                FIP_is_nan = (isinstance(FIP_Mode, float) and math.isnan(FIP_Mode)) or FIP_Mode is None
+                if FIP_is_nan and self.PhotometryB.currentText()=='on':
+                    reply = QMessageBox.critical(self,
+                                                 'Box {}, Start'.format(self.box_letter),
+                                                 'Photometry is set to "on", but the FIP Mode is not in schedule. Continue anyways?',
+                                                 QMessageBox.Yes | QMessageBox.No,)
+                    if reply == QMessageBox.No:
+                        self.Start.setChecked(False)
+                        logging.info('User declines starting session due to conflicting FIP information')
+                        return
+                    else:
+                        # Allow the session to continue, but log error
+                        logging.error('Starting session with conflicting FIP information')
+                elif not FIP_is_nan and self.PhotometryB.currentText()=='off':
+                    reply = QMessageBox.critical(self,
+                                                 'Box {}, Start'.format(self.box_letter),
+                                                 f'Photometry is set to "off" but schedule indicate '
+                                                 f'FIP Mode is {FIP_Mode}. Continue anyways?',
+                                                 QMessageBox.Yes | QMessageBox.No,)
+                    if reply == QMessageBox.No:
+                        self.Start.setChecked(False)
+                        logging.info('User declines starting session due to conflicting FIP information')
+                        return
+                    else:
+                        # Allow the session to continue, but log error
+                        logging.error('Starting session with conflicting FIP information')
+
+                elif not FIP_is_nan and FIP_Mode != self.FIPMode.currentText() and self.PhotometryB.currentText()=='on':
+                    reply = QMessageBox.critical(self,
+                                                 'Box {}, Start'.format(self.box_letter),
+                                                 f'FIP Mode is set to {self.FIPMode.currentText()} but schedule indicate '
+                                                 f'FIP Mode is {FIP_Mode}. Continue anyways?',
+                                                 QMessageBox.Yes | QMessageBox.No,)
+                    if reply == QMessageBox.No:
+                        self.Start.setChecked(False)
+                        logging.info('User declines starting session due to conflicting FIP information')
+                        return
+                    else:
+                        # Allow the session to continue, but log error
+                        logging.error('Starting session with conflicting FIP information')
 
             if self.StartANewSession == 0 :
                 reply = QMessageBox.question(self, 
@@ -3703,6 +3748,9 @@ class Window(QMainWindow):
                     self.Start.setChecked(False)
                     return
 
+            # empty post weight after pass through checks in case user cancels run
+            self.WeightAfter.setText('')
+
             # change button color and mark the state change
             self.Start.setStyleSheet("background-color : green;")
             self.NewSession.setStyleSheet("background-color : none")
@@ -3711,6 +3759,56 @@ class Window(QMainWindow):
             self.WarningLabel.setStyleSheet("color: none;")
             # disable metadata fields
             self._set_metadata_enabled(False)
+
+            # Set IACUC protocol in metadata based on schedule
+            protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
+            if protocol is not None:
+                self.Metadata_dialog.meta_data['session_metadata']['IACUCProtocol'] = str(int(protocol))
+                self.Metadata_dialog._update_metadata(
+                    update_rig_metadata=False,
+                    update_session_metadata=True
+                )
+                logging.info('Setting IACUC Protocol: {}'.format(protocol))
+
+            # Set Project Name in metadata based on schedule
+            project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
+            add_default = True
+            if project_name is not None:
+                projects = [self.Metadata_dialog.ProjectName.itemText(i)
+                            for i in range(self.Metadata_dialog.ProjectName.count())]
+                index = np.where(np.array(projects) == project_name)[0]
+                if len(index) > 0:
+                    index = index[0]
+                    self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+                    self.Metadata_dialog._show_project_info()
+                    logging.info('Setting Project name: {}'.format(project_name))
+                    add_default = False
+            if add_default:
+                projects = [self.Metadata_dialog.ProjectName.itemText(i)
+                            for i in range(self.Metadata_dialog.ProjectName.count())]
+                index = np.where(np.array(projects) == 'Behavior Platform')[0]
+                if len(index) > 0:
+                    index = index[0]
+                    self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+                    self.Metadata_dialog._show_project_info()
+                    logging.info('Setting Project name: {}'.format('Behavior Platform'))
+                else:
+                    project_info = {
+                        'Funding Institution': ['Allen Institute'],
+                        'Grant Number': ['nan'],
+                        'Investigators': ['Jeremiah Cohen'],
+                        'Fundee': ['nan'],
+                    }
+                    self.Metadata_dialog.project_info = project_info
+                    project_name = 'Behavior Platform'
+                    self.Metadata_dialog.ProjectName.addItems([project_name])
+                    logging.info('Setting Project name: {}'.format(project_name))
+            self.project_name = project_name
+
+            self.session_run = True   # session has been started
+
+            self.keyPressEvent(allow_reset=True)
+
         else:
             # Prompt user to confirm stopping trials
             reply = QMessageBox.question(self, 
@@ -3800,6 +3898,10 @@ class Window(QMainWindow):
             GeneratedTrials._GenerateATrial(self.Channel4)
             # delete licks from the previous session
             GeneratedTrials._DeletePreviousLicks(self.Channel2)
+            if self.Settings['AutomaticUpload']:
+                self._generate_upload_manifest()  # Generate the upload manifest file
+            else:
+                logging.info('Skipping Automatic Upload based on ForagingSettings.json')
         else:
             GeneratedTrials=self.GeneratedTrials
 
@@ -3948,10 +4050,6 @@ class Window(QMainWindow):
                 if self.actionLicks_sta.isChecked():
                     self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
                 # save the data everytrial
-                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
-                    self.previous_backup_completed=0
-                    self.GeneratedTrials_backup=copy.copy(self.GeneratedTrials)
-                    self.threadpool6.start(worker_save)
 
                 if GeneratedTrials.CurrentSimulation==True:
                     GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3,self.Channel4)
@@ -3963,6 +4061,23 @@ class Window(QMainWindow):
                 #generate a new trial
                 if self.NewTrialRewardOrder==1:
                     GeneratedTrials._GenerateATrial(self.Channel4)   
+                '''
+                ### Save data in the main thread. Keep it temporarily for testing ### 
+                start_time = time.time()
+                self.previous_backup_completed=1
+                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
+                    self._Save(BackupSave=1)
+                # Record the end time
+                end_time = time.time()
+                # Calculate the time elapsed and log if it is too long
+                if end_time - start_time>1:
+                    logging.info(f"Time taken to backup the data is too long: {elapsed_time:.6f} seconds")
+                '''
+                # Save data in a separate thread
+                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
+                    self.previous_backup_completed=0
+                    self.GeneratedTrials_backup=copy.copy(self.GeneratedTrials)
+                    self.threadpool6.start(worker_save)
 
                 # show disk space
                 self._show_disk_space()
@@ -4087,6 +4202,9 @@ class Window(QMainWindow):
             else:
                 self.give_left_time_reserved=self.give_left_time_reserved+float(self.TP_GiveWaterL)*1000
         else:
+            self.Other_manual_water_left_volume.append(float(self.TP_GiveWaterL_volume))
+            self.Other_manual_water_left_time.append(float(self.TP_GiveWaterL)*1000)
+
             self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
             time.sleep(0.01) 
             self.Channel3.ManualWater_Left(int(1))
@@ -4108,6 +4226,8 @@ class Window(QMainWindow):
             time.sleep(0.01+float(self.give_left_time_reserved)/1000)
             self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
             self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+self.give_left_volume_reserved/1000
+            self.Other_manual_water_left_volume.append(self.give_left_volume_reserved)
+            self.Other_manual_water_left_time.append(self.give_left_time_reserved)
             self.give_left_volume_reserved=0
             self.give_left_time_reserved=0
         elif valve=='right':
@@ -4119,6 +4239,8 @@ class Window(QMainWindow):
             time.sleep(0.01+float(self.give_right_time_reserved)/1000) 
             self.Channel.RightValue(float(self.TP_RightValue)*1000)
             self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+self.give_right_volume_reserved/1000
+            self.Other_manual_water_right_volume.append(self.give_right_volume_reserved)
+            self.Other_manual_water_right_time.append(self.give_right_time_reserved)
             self.give_right_volume_reserved=0
             self.give_right_time_reserved=0
 
@@ -4135,6 +4257,9 @@ class Window(QMainWindow):
             else:
                 self.give_right_time_reserved=self.give_right_time_reserved+float(self.TP_GiveWaterR)*1000
         else:
+            self.Other_manual_water_right_volume.append(float(self.TP_GiveWaterR_volume))
+            self.Other_manual_water_right_time.append(float(self.TP_GiveWaterR)*1000)
+        
             self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
             time.sleep(0.01) 
             self.Channel3.ManualWater_Right(int(1))
@@ -4263,7 +4388,7 @@ class Window(QMainWindow):
                 schedule = self.acquisition_datetime.split('_')[0]+'_20-30-00'
                 capsule_id = 'c089614a-347e-4696-b17e-86980bb782c1' 
                 mount = 'FIP'
- 
+
             date_format = "%Y-%m-%d_%H-%M-%S"
             # Define contents of manifest file
             contents = {
