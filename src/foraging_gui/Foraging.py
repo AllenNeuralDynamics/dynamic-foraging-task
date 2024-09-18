@@ -29,6 +29,7 @@ from PyQt5 import QtWidgets,QtGui,QtCore, uic
 from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
+from pprint import pprint
 
 import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
@@ -1230,20 +1231,23 @@ class Window(QMainWindow):
             :param session: Session object to pull water information from
 
         '''
-        print('session metadata', session)
+
         #mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=self.ID.text())
-        waterlog_result = self.slims_client.add_model(
+        mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode="00000000")
+        water_json = session.stimulus_epochs[0].output_parameters.water.items()
+        water = {k: v if not (isinstance(v, float) and math.isnan(v)) else None for k, v in water_json}
+        self.slims_client.add_model(
             models.SlimsWaterlogResult(
-                mouse_pk=1,#mouse.pk,
+                mouse_pk=mouse.pk,
                 date=session.session_start_time,
                 weight_g=session.animal_weight_prior,
-                water_earned_ml=session.reward_delivery,
-                water_supplement_delivered_ml=None, #session.water['water_in_session_manual'],
+                water_earned_ml=water['water_in_session_foraging'],
+                water_supplement_delivered_ml=water['water_after_session'],
                 water_supplement_recommended_ml=None,
-                total_water_ml=session.reward_consumed_total,
+                total_water_ml=water['water_in_session_total'],
                 comments=session.notes,
-                workstation=session.rig_id
-                ))
+                workstation=session.rig_id,
+                test_pk=self.slims_client.fetch_pk("Test", test_name="test_waterlog")))
 
 
     def _InitializeBonsai(self):
