@@ -1231,7 +1231,10 @@ class Window(QMainWindow):
             :param session: Session object to pull water information from
 
         '''
-        print()
+
+        # TODO: try/except if mouse is found? Or should an error be raised if mouse isn't found?
+        #  Just skip if mouse is simulated?
+
         # mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=self.ID.text())
         mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode="00000000")
 
@@ -1242,24 +1245,20 @@ class Window(QMainWindow):
         # extract software information
         software = session.data_streams[0].software[0]
 
-        # check if mouse already has waterlog for today and if, so update model
-        # TODO: Check within a tighter range like an hour?
-        #  or is it realistic that this session will be the first waterlog event that day?
-        #  Or should I just use the session_start_time? Does that change per save function?
-        #  or should I just keep track of waterlog model for each mouse?
+        # check if mouse already has waterlog for at session time and if, so update model
         latest_waterlog_result = self.slims_client.fetch_models(models.SlimsWaterlogResult,
                                                                       mouse_pk = mouse.pk,
                                                                       sort = ["date"])[-1]
-        if latest_waterlog_result.date == session.session.session_start_time:
-            latest_waterlog_result.weight_g=session.animal_weight_prior
-            latest_waterlog_result.water_earned_ml=water['water_in_session_foraging']
-            latest_waterlog_result.water_supplement_delivered_ml=water['water_after_session']
-            latest_waterlog_result.water_supplement_recommended_ml=None
-            latest_waterlog_result.total_water_ml=water['water_in_session_total']
-            latest_waterlog_result.comments=session.notes
-            latest_waterlog_result.workstation=session.rig_id
-            latest_waterlog_result.sw_source=software.url
-            latest_waterlog_result.sw_version=software.version
+        if latest_waterlog_result.date == session.session_start_time:
+            latest_waterlog_result.weight_g = session.animal_weight_prior
+            latest_waterlog_result.water_earned_ml = water['water_in_session_foraging']
+            latest_waterlog_result.water_supplement_delivered_ml = water['water_after_session']
+            latest_waterlog_result.water_supplement_recommended_ml = None
+            latest_waterlog_result.total_water_ml = water['water_in_session_total']
+            latest_waterlog_result.comments = session.notes
+            latest_waterlog_result.workstation = session.rig_id
+            latest_waterlog_result.sw_source = software.url
+            latest_waterlog_result.sw_version = software.version
             self.slims_client.update_model(model=latest_waterlog_result)
         else:
             self.slims_client.add_model(
