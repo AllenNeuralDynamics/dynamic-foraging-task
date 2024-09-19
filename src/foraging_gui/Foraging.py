@@ -1275,9 +1275,6 @@ class Window(QMainWindow):
                     sw_version=software.version,
                     test_pk=self.slims_client.fetch_pk("Test", test_name="test_waterlog")))
 
-
-
-
     def _InitializeBonsai(self):
         '''
             Connect to Bonsai using OSC messages to establish a connection. 
