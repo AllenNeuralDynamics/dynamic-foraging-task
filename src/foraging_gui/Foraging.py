@@ -15,7 +15,7 @@ import yaml
 import copy
 import shutil
 from pathlib import Path
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from aind_slims_api import SlimsClient
 from aind_slims_api import models
 import serial 
@@ -1246,10 +1246,9 @@ class Window(QMainWindow):
         software = session.data_streams[0].software[0]
 
         # check if mouse already has waterlog for at session time and if, so update model
-        latest_waterlog_result = self.slims_client.fetch_models(models.SlimsWaterlogResult,
-                                                                      mouse_pk = mouse.pk,
-                                                                      sort = ["date"])[-1]
-        if latest_waterlog_result.date == session.session_start_time:
+        latest_waterlog_result = self.slims_client.fetch_models(models.SlimsWaterlogResult, mouse_pk= mouse.pk,)[0]
+        if latest_waterlog_result.date.strftime("%Y-%m-%d %H:%M:%S") == \
+                session.session_start_time.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"):
             latest_waterlog_result.weight_g = session.animal_weight_prior
             latest_waterlog_result.water_earned_ml = water['water_in_session_foraging']
             latest_waterlog_result.water_supplement_delivered_ml = water['water_after_session']
