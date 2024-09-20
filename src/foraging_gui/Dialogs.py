@@ -2876,9 +2876,14 @@ class AutoTrainDialog(QDialog):
 
             # lock the widgets that have been set by auto training 
             for widget in self.widgets_locked_by_auto_train:
+                # Exclude some fields so that RAs can change them without going off-curriculum
+                # See https://github.com/AllenNeuralDynamics/aind-behavior-blog/issues/620
+                if widget.objectName() in ["StopIgnores", "MaxTrial", "MaxTime"]:
+                    continue
                 widget.setEnabled(False)
                 # set the border color to green
                 widget.setStyleSheet("border: 2px solid  rgb(0, 214, 103);")
+                
             self.MainWindow.TrainingParameters.setStyleSheet(
                 '''QGroupBox {
                         border: 5px solid  rgb(0, 214, 103)
