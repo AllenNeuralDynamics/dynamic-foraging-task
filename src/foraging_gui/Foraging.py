@@ -2377,6 +2377,9 @@ class Window(QMainWindow):
             SaveContinue (int): 0, force to start a new session, 1 if the current session should be saved without restarting the logging
             BackupSave (int): 1, save the current session without stopping the current session and without prompting the user for a save file, 0, save the current session and prompt the user for a save file
         '''
+
+        save_clicked = self.Save.isChecked()    # save if function was called by save button press
+
         if BackupSave==1:
             ForceSave=1
             SaveAs=0
@@ -2619,7 +2622,8 @@ class Window(QMainWindow):
             Obj['generate_session_metadata_success']=generated_metadata.session_metadata_success
             Obj['generate_rig_metadata_success']=generated_metadata.rig_metadata_success
             Obj['generate_data_description_success']=generated_metadata.data_description_success
-            self._AddWaterLogResult(generated_metadata._session())
+            if save_clicked and self.WeightAfter.text() != '':
+                self._AddWaterLogResult(generated_metadata._session())
 
         except Exception as e:
             self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved!')
