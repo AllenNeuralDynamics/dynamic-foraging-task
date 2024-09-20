@@ -1232,10 +1232,15 @@ class Window(QMainWindow):
 
         '''
 
-        # TODO: try/except if mouse is found? Or should an error be raised if mouse isn't found?
-        #  Just skip if mouse is simulated?
-
-        # mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=self.ID.text())
+        # try: # try and find mouse
+        #     mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=session.subject_id)
+        # except Exception as e:
+        #     if e == 'No record found.': # if no mouse found, create it
+        #         #mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode="00000000")
+        #         mouse = self.slims_client.add_model(models.SlimsMouseContent(barcode=session.subject_id,
+        #                                                                      baseline_weight_g=session.session.animal_weight_prior))
+        #     else:
+        #         raise e
         mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode="00000000")
 
         # extract water information
@@ -1245,35 +1250,32 @@ class Window(QMainWindow):
         # extract software information
         software = session.data_streams[0].software[0]
 
+        # create model
+        model = models.SlimsWaterlogResult(
+            mouse_pk=mouse.pk,
+            date=session.session_start_time,
+            weight_g=session.animal_weight_prior,
+            water_earned_ml=water['water_in_session_foraging'],
+            water_supplement_delivered_ml=water['water_after_session'],
+            water_supplement_recommended_ml=None,
+            total_water_ml=water['water_in_session_total'],
+            comments=session.notes,
+            workstation=session.rig_id,
+            sw_source=software.url,
+            sw_version=software.version,
+            test_pk=self.slims_client.fetch_pk("Test", test_name="test_waterlog"))
+
         # check if mouse already has waterlog for at session time and if, so update model
         latest_waterlog_result = self.slims_client.fetch_models(models.SlimsWaterlogResult, mouse_pk= mouse.pk,)[0]
         if latest_waterlog_result.date.strftime("%Y-%m-%d %H:%M:%S") == \
                 session.session_start_time.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"):
-            latest_waterlog_result.weight_g = session.animal_weight_prior
-            latest_waterlog_result.water_earned_ml = water['water_in_session_foraging']
-            latest_waterlog_result.water_supplement_delivered_ml = water['water_after_session']
-            latest_waterlog_result.water_supplement_recommended_ml = None
-            latest_waterlog_result.total_water_ml = water['water_in_session_total']
-            latest_waterlog_result.comments = session.notes
-            latest_waterlog_result.workstation = session.rig_id
-            latest_waterlog_result.sw_source = software.url
-            latest_waterlog_result.sw_version = software.version
-            self.slims_client.update_model(model=latest_waterlog_result)
+            print('in if')
+            model.pk = latest_waterlog_result.pk
+            self.slims_client.update_model(model=model)
         else:
-            self.slims_client.add_model(
-                models.SlimsWaterlogResult(
-                    mouse_pk=mouse.pk,
-                    date=session.session_start_time,
-                    weight_g=session.animal_weight_prior,
-                    water_earned_ml=water['water_in_session_foraging'],
-                    water_supplement_delivered_ml=water['water_after_session'],
-                    water_supplement_recommended_ml=None,
-                    total_water_ml=water['water_in_session_total'],
-                    comments=session.notes,
-                    workstation=session.rig_id,
-                    sw_source=software.url,
-                    sw_version=software.version,
-                    test_pk=self.slims_client.fetch_pk("Test", test_name="test_waterlog")))
+            print('in else')
+            self.slims_client.add_model(model)
+
 
     def _InitializeBonsai(self):
         '''
