@@ -1228,7 +1228,8 @@ class Window(QMainWindow):
             Connect to Slims
         '''
 
-        self.slims_client = SlimsClient(username='dynamic_foraging', password='slims')
+        self.slims_client = SlimsClient(username=os.environ['SLIMS_USERNAME'],
+                                        password=os.environ['SLIMS_PASSWORD'])
 
     def _AddWaterLogResult(self, session: Session):
         '''
@@ -1237,7 +1238,6 @@ class Window(QMainWindow):
             :param session: Session object to pull water information from
 
         '''
-        print('adding results')
         # TODO: bug in aind-slims-api repo. Need to add source and content_type args
         # try: # try and find mouse
         #     mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=session.subject_id)
