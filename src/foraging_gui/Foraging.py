@@ -29,7 +29,7 @@ from PyQt5 import QtWidgets,QtGui,QtCore, uic
 from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
-from pprint import pprint
+import inspect
 
 import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
@@ -247,6 +247,7 @@ class Window(QMainWindow):
         self.actionConnectBonsai.triggered.connect(self._ConnectBonsai)
         self.actionReconnect_bonsai.triggered.connect(self._ReconnectBonsai)
         self.Load.clicked.connect(self._OpenLast)
+        self.Save.setCheckable(True)
         self.Save.clicked.connect(self._Save)
         self.Clear.clicked.connect(self._Clear)
         self.Start.clicked.connect(self._Start)
@@ -1236,7 +1237,7 @@ class Window(QMainWindow):
             :param session: Session object to pull water information from
 
         '''
-
+        print('adding results')
         # TODO: bug in aind-slims-api repo. Need to add source and content_type args
         # try: # try and find mouse
         #     mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=session.subject_id)
@@ -1275,9 +1276,11 @@ class Window(QMainWindow):
         latest_waterlog_result = self.slims_client.fetch_models(models.SlimsWaterlogResult, mouse_pk= mouse.pk,)[0]
         if latest_waterlog_result.date.strftime("%Y-%m-%d %H:%M:%S") == \
                 session.session_start_time.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"):
+            print('in if')
             model.pk = latest_waterlog_result.pk
             self.slims_client.update_model(model=model)
         else:
+            print('in else')
             self.slims_client.add_model(model)
 
 
@@ -2622,8 +2625,11 @@ class Window(QMainWindow):
             Obj['generate_session_metadata_success']=generated_metadata.session_metadata_success
             Obj['generate_rig_metadata_success']=generated_metadata.rig_metadata_success
             Obj['generate_data_description_success']=generated_metadata.data_description_success
-            if save_clicked and self.WeightAfter.text() != '':
-                self._AddWaterLogResult(generated_metadata._session())
+
+            if save_clicked:    # create water log result if weight after filled and uncheck save
+                if self.WeightAfter.text() != '':
+                    self._AddWaterLogResult(generated_metadata._session())
+                self.Save.setChecked(False)
 
         except Exception as e:
             self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved!')
