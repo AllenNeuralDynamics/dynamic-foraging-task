@@ -1232,6 +1232,7 @@ class Window(QMainWindow):
 
         '''
 
+        # TODO: bug in aind-slims-api repo. Need to add source and content_type args
         # try: # try and find mouse
         #     mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=session.subject_id)
         # except Exception as e:
@@ -1269,11 +1270,9 @@ class Window(QMainWindow):
         latest_waterlog_result = self.slims_client.fetch_models(models.SlimsWaterlogResult, mouse_pk= mouse.pk,)[0]
         if latest_waterlog_result.date.strftime("%Y-%m-%d %H:%M:%S") == \
                 session.session_start_time.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"):
-            print('in if')
             model.pk = latest_waterlog_result.pk
             self.slims_client.update_model(model=model)
         else:
-            print('in else')
             self.slims_client.add_model(model)
 
 
