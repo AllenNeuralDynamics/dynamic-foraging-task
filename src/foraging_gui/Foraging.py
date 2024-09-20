@@ -3784,6 +3784,8 @@ class Window(QMainWindow):
                     logging.info('Setting Project name: {}'.format(project_name))
                     add_default = False
             if add_default:
+                project_name = 'Behavior Platform'
+                logging.info('Setting Project name: {}'.format('Behavior Platform'))
                 projects = [self.Metadata_dialog.ProjectName.itemText(i)
                             for i in range(self.Metadata_dialog.ProjectName.count())]
                 index = np.where(np.array(projects) == 'Behavior Platform')[0]
@@ -3791,7 +3793,6 @@ class Window(QMainWindow):
                     index = index[0]
                     self.Metadata_dialog.ProjectName.setCurrentIndex(index)
                     self.Metadata_dialog._show_project_info()
-                    logging.info('Setting Project name: {}'.format('Behavior Platform'))
                 else:
                     project_info = {
                         'Funding Institution': ['Allen Institute'],
@@ -3800,9 +3801,7 @@ class Window(QMainWindow):
                         'Fundee': ['nan'],
                     }
                     self.Metadata_dialog.project_info = project_info
-                    project_name = 'Behavior Platform'
                     self.Metadata_dialog.ProjectName.addItems([project_name])
-                    logging.info('Setting Project name: {}'.format(project_name))
             self.project_name = project_name
 
             self.session_run = True   # session has been started
