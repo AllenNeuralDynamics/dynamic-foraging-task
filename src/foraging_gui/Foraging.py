@@ -1231,7 +1231,7 @@ class Window(QMainWindow):
             self.slims_client = SlimsClient(username=os.environ['SLIMS_USERNAME'],
                                             password=os.environ['SLIMS_PASSWORD'])
         except KeyError:
-            logging.info('SLIMS_USERNAME and SLIMS_PASSWORD do not exist as '
+            logging.warning('SLIMS_USERNAME and SLIMS_PASSWORD do not exist as '
                          'environment variables on machine. Water will not be logged in Slims')
             self.slims_client = None
 
