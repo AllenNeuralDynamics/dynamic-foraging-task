@@ -3404,6 +3404,7 @@ class Window(QMainWindow):
     def _thread_complete(self):
         '''complete of a trial'''
         if self.NewTrialRewardOrder==0:
+            self._SaveLastTrial()
             self.GeneratedTrials._GenerateATrial(self.Channel4)
         self.ANewTrial=1
     
@@ -3894,6 +3895,7 @@ class Window(QMainWindow):
                 #generate a new trial
                 if self.test==1:
                     self.ToGenerateATrial=1
+                    self._SaveLastTrial()
                     GeneratedTrials._GenerateATrial(self.Channel4)
                 else:
                     self.ToGenerateATrial=0

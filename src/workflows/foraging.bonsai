@@ -12,8 +12,9 @@
                  xmlns:p1="clr-namespace:Harp.SoundCard;assembly=Harp.SoundCard"
                  xmlns:wie="clr-namespace:Bonsai.Windows.Input;assembly=Bonsai.Windows.Input"
                  xmlns:p2="clr-namespace:AllenNeuralDynamics.LicketySplitLickDetector;assembly=AllenNeuralDynamics.LicketySplitLickDetector"
+                 xmlns:p3="clr-namespace:AllenNeuralDynamics.SniffDetector;assembly=AllenNeuralDynamics.SniffDetector"
                  xmlns:dsp="clr-namespace:Bonsai.Dsp;assembly=Bonsai.Dsp"
-                 xmlns:p3="clr-namespace:Bonsai.DAQmx;assembly=Extensions"
+                 xmlns:p4="clr-namespace:Bonsai.DAQmx;assembly=Extensions"
                  xmlns:vid="clr-namespace:Bonsai.Video;assembly=Bonsai.Video"
                  xmlns:cv="clr-namespace:Bonsai.Vision;assembly=Bonsai.Vision"
                  xmlns:io="clr-namespace:Bonsai.IO;assembly=Bonsai.System"
@@ -351,7 +352,7 @@
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="gl:Delay">
-                            <gl:DueTime>PT1.68S</gl:DueTime>
+                            <gl:DueTime>PT3.161S</gl:DueTime>
                           </Combinator>
                         </Expression>
                         <Expression xsi:type="WorkflowOutput" />
@@ -373,7 +374,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT1.5S</gl:DueTime>
+                      <gl:DueTime>PT2S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -433,7 +434,7 @@
                         </Expression>
                         <Expression xsi:type="Equal">
                           <Operand xsi:type="IntProperty">
-                            <Value>1</Value>
+                            <Value>0</Value>
                           </Operand>
                         </Expression>
                         <Expression xsi:type="rx:Condition">
@@ -519,7 +520,7 @@
                         </Expression>
                         <Expression xsi:type="Equal">
                           <Operand xsi:type="IntProperty">
-                            <Value>1</Value>
+                            <Value>0</Value>
                           </Operand>
                         </Expression>
                         <Expression xsi:type="rx:Condition">
@@ -1523,11 +1524,61 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Disabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM8</harp:PortName>
+                      <harp:PortName>COM7</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject">
                     <Name>SoundCardEvents</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>ComPorts</Name>
+                  </Expression>
+                  <Expression xsi:type="Index">
+                    <Operand xsi:type="StringProperty">
+                      <Value>SoundCardAttenuation</Value>
+                    </Operand>
+                  </Expression>
+                  <Expression xsi:type="scr:ExpressionTransform">
+                    <scr:Expression>Convert.ToInt32(it)</scr:Expression>
+                  </Expression>
+                  <Expression xsi:type="PropertyMapping">
+                    <PropertyMappings>
+                      <Property Name="AttenuationLeft" />
+                    </PropertyMappings>
+                  </Expression>
+                  <Expression xsi:type="p1:CreateMessage">
+                    <harp:MessageType>Write</harp:MessageType>
+                    <harp:Payload xsi:type="p1:CreateAttenuationLeftPayload">
+                      <p1:AttenuationLeft>100</p1:AttenuationLeft>
+                    </harp:Payload>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>SoundCardCommands</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>ComPorts</Name>
+                  </Expression>
+                  <Expression xsi:type="Index">
+                    <Operand xsi:type="StringProperty">
+                      <Value>SoundCardAttenuation</Value>
+                    </Operand>
+                  </Expression>
+                  <Expression xsi:type="scr:ExpressionTransform">
+                    <scr:Expression>Convert.ToInt32(it)</scr:Expression>
+                  </Expression>
+                  <Expression xsi:type="PropertyMapping">
+                    <PropertyMappings>
+                      <Property Name="AttenuationRight" />
+                    </PropertyMappings>
+                  </Expression>
+                  <Expression xsi:type="p1:CreateMessage">
+                    <harp:MessageType>Write</harp:MessageType>
+                    <harp:Payload xsi:type="p1:CreateAttenuationRightPayload">
+                      <p1:AttenuationRight>100</p1:AttenuationRight>
+                    </harp:Payload>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>SoundCardCommands</Name>
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
                     <Name>GoCue</Name>
@@ -1552,6 +1603,16 @@
                   <Edge From="8" To="9" Label="Source1" />
                   <Edge From="10" To="11" Label="Source1" />
                   <Edge From="11" To="12" Label="Source1" />
+                  <Edge From="12" To="13" Label="Source1" />
+                  <Edge From="13" To="14" Label="Source2" />
+                  <Edge From="14" To="15" Label="Source1" />
+                  <Edge From="16" To="17" Label="Source1" />
+                  <Edge From="17" To="18" Label="Source1" />
+                  <Edge From="18" To="19" Label="Source1" />
+                  <Edge From="19" To="20" Label="Source2" />
+                  <Edge From="20" To="21" Label="Source1" />
+                  <Edge From="22" To="23" Label="Source1" />
+                  <Edge From="23" To="24" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -3224,79 +3285,106 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="rx:SubscribeWhen" />
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="SubscribeSubject">
-                <Name>ComPorts</Name>
-              </Builder>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>ComPorts</Name>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Index">
-                <Operand xsi:type="StringProperty">
-                  <Value>SniffDetector</Value>
-                </Operand>
-              </Builder>
+            <Expression xsi:type="Index">
+              <Operand xsi:type="StringProperty">
+                <Value>SniffDetector</Value>
+              </Operand>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="NotEqual">
-                <Operand xsi:type="StringProperty">
-                  <Value>0</Value>
-                </Operand>
-              </Builder>
+            <Expression xsi:type="NotEqual">
+              <Operand xsi:type="StringProperty">
+                <Value>0</Value>
+              </Operand>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="rx:Condition">
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="WorkflowInput">
-                      <Name>Source1</Name>
-                    </Expression>
-                    <Expression xsi:type="WorkflowOutput" />
-                  </Nodes>
-                  <Edges>
-                    <Edge From="0" To="1" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Builder>
+            <Expression xsi:type="rx:Condition">
+              <Workflow>
+                <Nodes>
+                  <Expression xsi:type="WorkflowInput">
+                    <Name>Source1</Name>
+                  </Expression>
+                  <Expression xsi:type="WorkflowOutput" />
+                </Nodes>
+                <Edges>
+                  <Edge From="0" To="1" Label="Source1" />
+                </Edges>
+              </Workflow>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="GroupWorkflow">
-                <Name>SniffDetector</Name>
-                <Workflow>
-                  <Nodes>
-                    <Expression xsi:type="Disable">
-                      <Builder xsi:type="SubscribeSubject">
-                        <Name>Events</Name>
-                      </Builder>
-                    </Expression>
-                    <Expression xsi:type="Disable">
-                      <Builder xsi:type="rx:BehaviorSubject" TypeArguments="harp:HarpMessage">
-                        <rx:Name>Commands</rx:Name>
-                      </Builder>
-                    </Expression>
-                    <Expression xsi:type="Disable">
-                      <Builder xsi:type="Combinator">
-                        <Combinator xsi:type="harp:Device">
-                          <harp:OperationMode>Active</harp:OperationMode>
-                          <harp:OperationLed>On</harp:OperationLed>
-                          <harp:DumpRegisters>true</harp:DumpRegisters>
-                          <harp:VisualIndicators>On</harp:VisualIndicators>
-                          <harp:Heartbeat>Disabled</harp:Heartbeat>
-                          <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                          <harp:PortName>COM5</harp:PortName>
-                        </Combinator>
-                      </Builder>
-                    </Expression>
-                  </Nodes>
-                  <Edges>
-                    <Edge From="1" To="2" Label="Source1" />
-                  </Edges>
-                </Workflow>
-              </Builder>
+            <Expression xsi:type="GroupWorkflow">
+              <Name>SniffDetector</Name>
+              <Workflow>
+                <Nodes>
+                  <Expression xsi:type="rx:BehaviorSubject" TypeArguments="harp:HarpMessage">
+                    <rx:Name>SniffCommands</rx:Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>ComPorts</Name>
+                  </Expression>
+                  <Expression xsi:type="Index">
+                    <Operand xsi:type="StringProperty">
+                      <Value>SniffDetector</Value>
+                    </Operand>
+                  </Expression>
+                  <Expression xsi:type="PropertyMapping">
+                    <PropertyMappings>
+                      <Property Name="PortName" />
+                    </PropertyMappings>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="p3:Device">
+                      <harp:OperationMode>Active</harp:OperationMode>
+                      <harp:OperationLed>On</harp:OperationLed>
+                      <harp:DumpRegisters>true</harp:DumpRegisters>
+                      <harp:VisualIndicators>On</harp:VisualIndicators>
+                      <harp:Heartbeat>Enabled</harp:Heartbeat>
+                      <harp:IgnoreErrors>true</harp:IgnoreErrors>
+                      <harp:PortName>COM5</harp:PortName>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>SniffDetectorEvents</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>SniffDetectorEvents</Name>
+                  </Expression>
+                  <Expression xsi:type="p3:Parse">
+                    <harp:Register xsi:type="p3:TimestampedRawVoltage" />
+                  </Expression>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Value</Selector>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:Timer">
+                      <rx:DueTime>PT1S</rx:DueTime>
+                      <rx:Period>PT0S</rx:Period>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="p3:CreateMessage">
+                    <harp:MessageType>Write</harp:MessageType>
+                    <harp:Payload xsi:type="p3:CreateRawVoltageDispatchRatePayload">
+                      <p3:RawVoltageDispatchRate>400</p3:RawVoltageDispatchRate>
+                    </harp:Payload>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>SniffCommands</Name>
+                  </Expression>
+                </Nodes>
+                <Edges>
+                  <Edge From="0" To="4" Label="Source1" />
+                  <Edge From="1" To="2" Label="Source1" />
+                  <Edge From="2" To="3" Label="Source1" />
+                  <Edge From="3" To="4" Label="Source2" />
+                  <Edge From="4" To="5" Label="Source1" />
+                  <Edge From="6" To="7" Label="Source1" />
+                  <Edge From="7" To="8" Label="Source1" />
+                  <Edge From="9" To="10" Label="Source1" />
+                  <Edge From="10" To="11" Label="Source1" />
+                </Edges>
+              </Workflow>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="Combinator">
-                <Combinator xsi:type="rx:SubscribeWhen" />
-              </Builder>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="rx:SubscribeWhen" />
             </Expression>
           </Nodes>
           <Edges>
@@ -4414,29 +4502,29 @@
                       <Property Name="TriggerSource" />
                     </Expression>
                     <Expression xsi:type="Combinator">
-                      <Combinator xsi:type="p3:TriggeredAnalogOutput">
-                        <p3:SignalSource />
-                        <p3:TriggerSource>/Dev1/PFI0</p3:TriggerSource>
-                        <p3:SampleRate>5000</p3:SampleRate>
-                        <p3:ActiveEdge>Rising</p3:ActiveEdge>
-                        <p3:SampleMode>FiniteSamples</p3:SampleMode>
-                        <p3:BufferSize>50002</p3:BufferSize>
-                        <p3:Channels>
-                          <p3:AnalogOutputChannelConfiguration>
-                            <p3:ChannelName />
-                            <p3:MinimumValue>-10</p3:MinimumValue>
-                            <p3:MaximumValue>10</p3:MaximumValue>
-                            <p3:PhysicalChannel>Dev1/ao0</p3:PhysicalChannel>
-                            <p3:VoltageUnits>Volts</p3:VoltageUnits>
-                          </p3:AnalogOutputChannelConfiguration>
-                          <p3:AnalogOutputChannelConfiguration>
-                            <p3:ChannelName />
-                            <p3:MinimumValue>-10</p3:MinimumValue>
-                            <p3:MaximumValue>10</p3:MaximumValue>
-                            <p3:PhysicalChannel>Dev1/ao1</p3:PhysicalChannel>
-                            <p3:VoltageUnits>Volts</p3:VoltageUnits>
-                          </p3:AnalogOutputChannelConfiguration>
-                        </p3:Channels>
+                      <Combinator xsi:type="p4:TriggeredAnalogOutput">
+                        <p4:SignalSource />
+                        <p4:TriggerSource>/Dev1/PFI0</p4:TriggerSource>
+                        <p4:SampleRate>5000</p4:SampleRate>
+                        <p4:ActiveEdge>Rising</p4:ActiveEdge>
+                        <p4:SampleMode>FiniteSamples</p4:SampleMode>
+                        <p4:BufferSize>50002</p4:BufferSize>
+                        <p4:Channels>
+                          <p4:AnalogOutputChannelConfiguration>
+                            <p4:ChannelName />
+                            <p4:MinimumValue>-10</p4:MinimumValue>
+                            <p4:MaximumValue>10</p4:MaximumValue>
+                            <p4:PhysicalChannel>Dev1/ao0</p4:PhysicalChannel>
+                            <p4:VoltageUnits>Volts</p4:VoltageUnits>
+                          </p4:AnalogOutputChannelConfiguration>
+                          <p4:AnalogOutputChannelConfiguration>
+                            <p4:ChannelName />
+                            <p4:MinimumValue>-10</p4:MinimumValue>
+                            <p4:MaximumValue>10</p4:MaximumValue>
+                            <p4:PhysicalChannel>Dev1/ao1</p4:PhysicalChannel>
+                            <p4:VoltageUnits>Volts</p4:VoltageUnits>
+                          </p4:AnalogOutputChannelConfiguration>
+                        </p4:Channels>
                       </Combinator>
                     </Expression>
                     <Expression xsi:type="Combinator">
@@ -7505,15 +7593,11 @@
             <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogHarpDemux.bonsai">
               <LogName>LickometerEventsRight</LogName>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="SubscribeSubject">
-                <Name>SniffDetectorEvents</Name>
-              </Builder>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>SniffDetectorEvents</Name>
             </Expression>
-            <Expression xsi:type="Disable">
-              <Builder xsi:type="IncludeWorkflow" Path="Extensions\LogHarpDemux.bonsai">
-                <LogName>LickometerEventsRight</LogName>
-              </Builder>
+            <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogHarpDemux.bonsai">
+              <LogName>SniffDetectorEvents</LogName>
             </Expression>
             <Expression xsi:type="GroupWorkflow">
               <Name>HighSpeedCamera</Name>
@@ -7628,7 +7712,7 @@
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="spk:SpinnakerCapture">
                             <spk:Index xsi:nil="true" />
-                            <spk:SerialNumber>23022717</spk:SerialNumber>
+                            <spk:SerialNumber>23022719</spk:SerialNumber>
                             <spk:ColorProcessing>Default</spk:ColorProcessing>
                           </Combinator>
                         </Expression>
@@ -7666,7 +7750,7 @@
                           </PropertyMappings>
                         </Expression>
                         <Expression xsi:type="io:CsvWriter">
-                          <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_left.csv</io:FileName>
+                          <io:FileName>D:\behavior_data\717377\behavior_717377_2024-06-18_16-19-59\behavior\raw.harp/../../behavior-videos/side_camera_left.csv</io:FileName>
                           <io:Append>false</io:Append>
                           <io:Overwrite>true</io:Overwrite>
                           <io:Suffix>None</io:Suffix>
@@ -7711,7 +7795,7 @@
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="ffmpeg:VideoWriter">
-                            <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_left.avi</ffmpeg:FileName>
+                            <ffmpeg:FileName>D:\behavior_data\717377\behavior_717377_2024-06-18_16-19-59\behavior\raw.harp/../../behavior-videos/side_camera_left.avi</ffmpeg:FileName>
                             <ffmpeg:Suffix>None</ffmpeg:Suffix>
                             <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                             <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
@@ -7795,7 +7879,7 @@
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="spk:SpinnakerCapture">
                             <spk:Index xsi:nil="true" />
-                            <spk:SerialNumber>23045805</spk:SerialNumber>
+                            <spk:SerialNumber>23022721</spk:SerialNumber>
                             <spk:ColorProcessing>Default</spk:ColorProcessing>
                           </Combinator>
                         </Expression>
@@ -7833,7 +7917,7 @@
                           </PropertyMappings>
                         </Expression>
                         <Expression xsi:type="io:CsvWriter">
-                          <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/bottom_camera.csv</io:FileName>
+                          <io:FileName>D:\behavior_data\717377\behavior_717377_2024-06-18_16-19-59\behavior\raw.harp/../../behavior-videos/bottom_camera.csv</io:FileName>
                           <io:Append>false</io:Append>
                           <io:Overwrite>true</io:Overwrite>
                           <io:Suffix>None</io:Suffix>
@@ -7878,7 +7962,7 @@
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="ffmpeg:VideoWriter">
-                            <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/bottom_camera.avi</ffmpeg:FileName>
+                            <ffmpeg:FileName>D:\behavior_data\717377\behavior_717377_2024-06-18_16-19-59\behavior\raw.harp/../../behavior-videos/bottom_camera.avi</ffmpeg:FileName>
                             <ffmpeg:Suffix>None</ffmpeg:Suffix>
                             <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                             <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
@@ -7962,7 +8046,7 @@
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="spk:SpinnakerCapture">
                             <spk:Index xsi:nil="true" />
-                            <spk:SerialNumber>23022710</spk:SerialNumber>
+                            <spk:SerialNumber>24067702</spk:SerialNumber>
                             <spk:ColorProcessing>Default</spk:ColorProcessing>
                           </Combinator>
                         </Expression>
@@ -8000,7 +8084,7 @@
                           </PropertyMappings>
                         </Expression>
                         <Expression xsi:type="io:CsvWriter">
-                          <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_right.csv</io:FileName>
+                          <io:FileName>D:\behavior_data\0\behavior_0_2024-06-06_15-16-41\behavior\raw.harp/../../behavior-videos/side_camera_right.csv</io:FileName>
                           <io:Append>false</io:Append>
                           <io:Overwrite>true</io:Overwrite>
                           <io:Suffix>None</io:Suffix>
@@ -8045,7 +8129,7 @@
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="ffmpeg:VideoWriter">
-                            <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_right.avi</ffmpeg:FileName>
+                            <ffmpeg:FileName>D:\behavior_data\0\behavior_0_2024-06-06_15-16-41\behavior\raw.harp/../../behavior-videos/side_camera_right.avi</ffmpeg:FileName>
                             <ffmpeg:Suffix>None</ffmpeg:Suffix>
                             <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                             <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
@@ -8276,6 +8360,173 @@
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:SubscribeWhen" />
                   </Expression>
+                  <Expression xsi:type="GroupWorkflow">
+                    <Name>EyeCamera</Name>
+                    <Workflow>
+                      <Nodes>
+                        <Expression xsi:type="SubscribeSubject">
+                          <Name>ComPorts</Name>
+                        </Expression>
+                        <Expression xsi:type="Index">
+                          <Operand xsi:type="StringProperty">
+                            <Value>EyeCamera</Value>
+                          </Operand>
+                        </Expression>
+                        <Expression xsi:type="PropertyMapping">
+                          <PropertyMappings>
+                            <Property Name="SerialNumber" />
+                          </PropertyMappings>
+                        </Expression>
+                        <Expression xsi:type="Combinator">
+                          <Combinator xsi:type="spk:SpinnakerCapture">
+                            <spk:Index xsi:nil="true" />
+                            <spk:SerialNumber>23022730</spk:SerialNumber>
+                            <spk:ColorProcessing>Default</spk:ColorProcessing>
+                          </Combinator>
+                        </Expression>
+                        <Expression xsi:type="SubscribeSubject">
+                          <Name>BehaviorEvents</Name>
+                        </Expression>
+                        <Expression xsi:type="beh:Parse">
+                          <harp:Register xsi:type="beh:TimestampedCamera1Frame" />
+                        </Expression>
+                        <Expression xsi:type="MemberSelector">
+                          <Selector>Seconds</Selector>
+                        </Expression>
+                        <Expression xsi:type="Combinator">
+                          <Combinator xsi:type="rx:Zip" />
+                        </Expression>
+                        <Expression xsi:type="rx:PublishSubject">
+                          <Name>EyeCameraFrames</Name>
+                        </Expression>
+                        <Expression xsi:type="SubscribeSubject">
+                          <Name>EyeCameraFrames</Name>
+                        </Expression>
+                        <Expression xsi:type="Combinator">
+                          <Combinator xsi:type="harp:CreateTimestamped" />
+                        </Expression>
+                        <Expression xsi:type="SubscribeSubject">
+                          <Name>RootPath</Name>
+                        </Expression>
+                        <Expression xsi:type="Format">
+                          <Format>{0}/../../behavior-videos/eye_camera.csv</Format>
+                          <Selector />
+                        </Expression>
+                        <Expression xsi:type="PropertyMapping">
+                          <PropertyMappings>
+                            <Property Name="FileName" />
+                          </PropertyMappings>
+                        </Expression>
+                        <Expression xsi:type="io:CsvWriter">
+                          <io:FileName>D:\behavior_data\717377\behavior_717377_2024-06-18_16-19-59\behavior\raw.harp/../../behavior-videos/eye_camera.csv</io:FileName>
+                          <io:Append>false</io:Append>
+                          <io:Overwrite>true</io:Overwrite>
+                          <io:Suffix>None</io:Suffix>
+                          <io:IncludeHeader>false</io:IncludeHeader>
+                          <io:Selector>Seconds,Value.ChunkData.FrameID,Value.ChunkData.Timestamp,Value.ChunkData.Gain,Value.ChunkData.ExposureTime</io:Selector>
+                        </Expression>
+                        <Expression xsi:type="MemberSelector">
+                          <Selector>Value.Image</Selector>
+                        </Expression>
+                        <Expression xsi:type="SubscribeSubject">
+                          <Name>RootPath</Name>
+                        </Expression>
+                        <Expression xsi:type="Format">
+                          <Format>{0}/../../behavior-videos/eye_camera.avi</Format>
+                          <Selector />
+                        </Expression>
+                        <Expression xsi:type="PropertyMapping">
+                          <PropertyMappings>
+                            <Property Name="FileName" />
+                          </PropertyMappings>
+                        </Expression>
+                        <Expression xsi:type="SubscribeSubject">
+                          <Name>CameraFrequency</Name>
+                        </Expression>
+                        <Expression xsi:type="PropertyMapping">
+                          <PropertyMappings>
+                            <Property Name="FrameRate" />
+                          </PropertyMappings>
+                        </Expression>
+                        <Expression xsi:type="SubscribeSubject">
+                          <Name>ComPorts</Name>
+                        </Expression>
+                        <Expression xsi:type="Index">
+                          <Operand xsi:type="StringProperty">
+                            <Value>codec</Value>
+                          </Operand>
+                        </Expression>
+                        <Expression xsi:type="PropertyMapping">
+                          <PropertyMappings>
+                            <Property Name="OutputArguments" />
+                          </PropertyMappings>
+                        </Expression>
+                        <Expression xsi:type="Combinator">
+                          <Combinator xsi:type="ffmpeg:VideoWriter">
+                            <ffmpeg:FileName>D:\behavior_data\717377\behavior_717377_2024-06-18_16-19-59\behavior\raw.harp/../../behavior-videos/eye_camera.avi</ffmpeg:FileName>
+                            <ffmpeg:Suffix>None</ffmpeg:Suffix>
+                            <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
+                            <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
+                            <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M</ffmpeg:OutputArguments>
+                          </Combinator>
+                        </Expression>
+                      </Nodes>
+                      <Edges>
+                        <Edge From="0" To="1" Label="Source1" />
+                        <Edge From="1" To="2" Label="Source1" />
+                        <Edge From="2" To="3" Label="Source1" />
+                        <Edge From="3" To="7" Label="Source1" />
+                        <Edge From="4" To="5" Label="Source1" />
+                        <Edge From="5" To="6" Label="Source1" />
+                        <Edge From="6" To="7" Label="Source2" />
+                        <Edge From="7" To="8" Label="Source1" />
+                        <Edge From="9" To="10" Label="Source1" />
+                        <Edge From="10" To="14" Label="Source1" />
+                        <Edge From="11" To="12" Label="Source1" />
+                        <Edge From="12" To="13" Label="Source1" />
+                        <Edge From="13" To="14" Label="Source2" />
+                        <Edge From="14" To="15" Label="Source1" />
+                        <Edge From="15" To="24" Label="Source1" />
+                        <Edge From="16" To="17" Label="Source1" />
+                        <Edge From="17" To="18" Label="Source1" />
+                        <Edge From="18" To="24" Label="Source2" />
+                        <Edge From="19" To="20" Label="Source1" />
+                        <Edge From="20" To="24" Label="Source3" />
+                        <Edge From="21" To="22" Label="Source1" />
+                        <Edge From="22" To="23" Label="Source1" />
+                        <Edge From="23" To="24" Label="Source4" />
+                      </Edges>
+                    </Workflow>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>ComPorts</Name>
+                  </Expression>
+                  <Expression xsi:type="Index">
+                    <Operand xsi:type="StringProperty">
+                      <Value>HasEyeCamera</Value>
+                    </Operand>
+                  </Expression>
+                  <Expression xsi:type="NotEqual">
+                    <Operand xsi:type="StringProperty">
+                      <Value>0</Value>
+                    </Operand>
+                  </Expression>
+                  <Expression xsi:type="rx:Condition">
+                    <Workflow>
+                      <Nodes>
+                        <Expression xsi:type="WorkflowInput">
+                          <Name>Source1</Name>
+                        </Expression>
+                        <Expression xsi:type="WorkflowOutput" />
+                      </Nodes>
+                      <Edges>
+                        <Edge From="0" To="1" Label="Source1" />
+                      </Edges>
+                    </Workflow>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:SubscribeWhen" />
+                  </Expression>
                 </Nodes>
                 <Edges>
                   <Edge From="0" To="1" Label="Source1" />
@@ -8313,6 +8564,11 @@
                   <Edge From="38" To="39" Label="Source1" />
                   <Edge From="39" To="40" Label="Source1" />
                   <Edge From="40" To="41" Label="Source2" />
+                  <Edge From="42" To="47" Label="Source1" />
+                  <Edge From="43" To="44" Label="Source1" />
+                  <Edge From="44" To="45" Label="Source1" />
+                  <Edge From="45" To="46" Label="Source1" />
+                  <Edge From="46" To="47" Label="Source2" />
                 </Edges>
               </Workflow>
             </Expression>

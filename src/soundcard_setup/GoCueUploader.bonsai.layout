@@ -53,7 +53,7 @@
     <VisualizerSettings>
       <MatVisualizer>
         <XMin>0</XMin>
-        <XMax>9600</XMax>
+        <XMax>960000</XMax>
         <YMin>-3000000000</YMin>
         <YMax>3000000000</YMax>
         <AutoScaleX>true</AutoScaleX>

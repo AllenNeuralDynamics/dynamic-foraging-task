@@ -20,7 +20,7 @@
       </Expression>
       <Expression xsi:type="Combinator">
         <Combinator xsi:type="dsp:FunctionGenerator">
-          <dsp:BufferLength>9600</dsp:BufferLength>
+          <dsp:BufferLength>960000</dsp:BufferLength>
           <dsp:Frequency>7500</dsp:Frequency>
           <dsp:Waveform>Sine</dsp:Waveform>
           <dsp:SampleRate>96000</dsp:SampleRate>
@@ -33,7 +33,7 @@
       <Expression xsi:type="Combinator">
         <Combinator xsi:type="p1:UpdateSoundWaveform">
           <p1:DeviceIndex>0</p1:DeviceIndex>
-          <p1:SoundIndex>4</p1:SoundIndex>
+          <p1:SoundIndex>3</p1:SoundIndex>
           <p1:SoundName>GoCue</p1:SoundName>
           <p1:SampleRate>SampleRate96000Hz</p1:SampleRate>
         </Combinator>
