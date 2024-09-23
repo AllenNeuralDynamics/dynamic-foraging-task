@@ -3631,7 +3631,7 @@ class Window(QMainWindow):
                         return
                     else:
                         # Allow the session to continue, but log error
-                        logging.error('Starting session with conflicting FIP information')
+                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP on, but not in schedule'.format(mouse_id))
                 elif not FIP_is_nan and self.PhotometryB.currentText()=='off':
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
@@ -3644,7 +3644,7 @@ class Window(QMainWindow):
                         return
                     else:
                         # Allow the session to continue, but log error
-                        logging.error('Starting session with conflicting FIP information')
+                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP off, but schedule lists FIP {}'.format(mouse_id, FIP_Mode))
 
                 elif not FIP_is_nan and FIP_Mode != self.FIPMode.currentText() and self.PhotometryB.currentText()=='on':
                     reply = QMessageBox.critical(self,
@@ -3658,7 +3658,7 @@ class Window(QMainWindow):
                         return
                     else:
                         # Allow the session to continue, but log error
-                        logging.error('Starting session with conflicting FIP information')
+                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP mode {}, schedule lists {}'.format(mouse_id, self.FIPMode.currentText(), FIP_Mode))
 
             if self.StartANewSession == 0 :
                 reply = QMessageBox.question(self, 
