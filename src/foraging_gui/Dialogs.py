@@ -334,7 +334,6 @@ class WaterCalibrationDialog(QDialog):
 
         # setup flags to keep lines open
         self.left_valve_open_timer = QTimer(timeout=lambda: self.open_valve('left'), interval=10000)
-        print(self.left_valve_open_timer.interval())
         self.right_valve_open_timer = QTimer(timeout=lambda: self.open_valve('right'), interval=10000)
 
 
@@ -927,7 +926,7 @@ class WaterCalibrationDialog(QDialog):
     def open_valve(self, valve: Literal['left', 'right']):
         """function to call the right or left water line open
         :param valve: string specifying right or left valve"""
-        print('opening', valve)
+
         if valve == 'right':    # open right
             self.MainWindow.Channel.RightValue(float(1000) * 1000)  # set the valve open time
             time.sleep(0.01)
