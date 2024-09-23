@@ -1231,9 +1231,18 @@ class Window(QMainWindow):
             self.slims_client = SlimsClient(username=os.environ['SLIMS_USERNAME'],
                                             password=os.environ['SLIMS_PASSWORD'])
         except KeyError:
-            logging.warning('SLIMS_USERNAME and SLIMS_PASSWORD do not exist as '
-                         'environment variables on machine. Water will not be logged in Slims')
-            self.slims_client = None
+            raise KeyError('SLIMS_USERNAME and SLIMS_PASSWORD do not exist as '
+                         'environment variables on machine. Please add')
+
+        try:
+            self.slims_client.fetch_model(models.SlimsMouseContent)
+        except Exception as e:
+            raise Exception(f'Exception trying to read from Slims: {e}.\n'
+                            f' Please check credentials:\n'
+                            f'Username: {os.environ["SLIMS_USERNAME"]}\n'
+                            f'Password: {os.environ["SLIMS_PASSWORD"]}')
+
+
 
     def _AddWaterLogResult(self, session: Session):
         '''
@@ -2629,8 +2638,7 @@ class Window(QMainWindow):
             Obj['generate_data_description_success']=generated_metadata.data_description_success
 
             if save_clicked:    # create water log result if weight after filled and uncheck save
-                if self.WeightAfter.text() != '' and self.slims_client is not None and \
-                        self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']:
+                if self.WeightAfter.text() != '' and self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']:
                     self._AddWaterLogResult(generated_metadata._session())
                 self.Save.setChecked(False)
 
