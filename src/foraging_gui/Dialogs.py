@@ -928,7 +928,7 @@ class WaterCalibrationDialog(QDialog):
     def reopen_valve(self, valve: Literal['left', 'right']):
         """function to reopen the right or left water line open. Valve must be open prior to calling this function.
         Calling ManualWater_ will toggle state of valve so need to call twice on already open valve.
-        :param valve: string specifying right or left valve"""
+        param valve: string specifying right or left valve"""
 
         # get correct function based on input valve name
         getattr(self.MainWindow.Channel3, f'ManualWater_{valve.capitalize()}')(int(1))  # close valve
