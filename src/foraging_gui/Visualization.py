@@ -354,11 +354,15 @@ class PlotV(FigureCanvas):
 
     def _UpdateAxis(self):
         self.ax1.set_yticks([0,1])
-        self.ax1.set_yticklabels(['R', 'L'])
+        self.ax1.set_yticklabels(['L', 'R'])
         self.ax1.set_ylim(-0.6, 1.6)
+        self.ax1.yaxis.set_inverted(True)
+
         self.ax2.set_yticks([0,1])
-        self.ax2.set_yticklabels(['R', 'L'])
+        self.ax2.set_yticklabels(['L', 'R'])
         self.ax2.set_ylim(-0.15, 1.15)
+        self.ax2.yaxis.set_inverted(True)
+        
         if self.main_win.HideLegend.isChecked():
             self.ax1.legend().set_visible(False)
             self.ax2.legend().set_visible(False)
