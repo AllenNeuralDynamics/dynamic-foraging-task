@@ -930,7 +930,6 @@ class WaterCalibrationDialog(QDialog):
         Calling ManualWater_ will toggle state of valve so need to call twice on already open valve.
         :param valve: string specifying right or left valve"""
 
-
         # get correct function based on input valve name
         getattr(self.MainWindow.Channel3, f'ManualWater_{valve.capitalize()}')(int(1))  # close valve
         getattr(self.MainWindow.Channel3, f'ManualWater_{valve.capitalize()}')(int(1))  # open valve
