@@ -333,8 +333,8 @@ class WaterCalibrationDialog(QDialog):
                 child.setAutoDefault(False)
 
         # setup flags to keep lines open
-        self.left_valve_open_timer = QTimer(timeout=lambda: self.open_valve('left'), interval=10000)
-        self.right_valve_open_timer = QTimer(timeout=lambda: self.open_valve('right'), interval=10000)
+        self.left_valve_open_timer = QTimer(timeout=lambda: self.reopen_valve('left'), interval=10000)
+        self.right_valve_open_timer = QTimer(timeout=lambda: self.reopen_valve('right'), interval=10000)
 
 
     def _connectSignalsSlots(self):
@@ -885,7 +885,8 @@ class WaterCalibrationDialog(QDialog):
         if self.OpenLeftForever.isChecked():
             # change button color
             self.OpenLeftForever.setStyleSheet("background-color : green;")
-            self.open_valve('left') # initially open valve
+            self.MainWindow.Channel.LeftValue(float(1000) * 1000)  # set the valve open time
+            self.MainWindow.Channel3.ManualWater_Left(int(1))  # set valve initially open
             self.left_valve_open_timer.start()
         else:
             # change button color
@@ -907,7 +908,8 @@ class WaterCalibrationDialog(QDialog):
         if self.OpenRightForever.isChecked():
             # change button color
             self.OpenRightForever.setStyleSheet("background-color : green;")
-            self.open_valve('right')    # initially open valve
+            self.MainWindow.Channel.RightValue(float(1000) * 1000)  # set the valve open time
+            self.MainWindow.Channel3.ManualWater_Right(int(1))  # set valve initially open
             self.right_valve_open_timer.start()
 
         else:
@@ -923,19 +925,15 @@ class WaterCalibrationDialog(QDialog):
             time.sleep(0.01) 
             self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
 
-    def open_valve(self, valve: Literal['left', 'right']):
-        """function to call the right or left water line open
+    def reopen_valve(self, valve: Literal['left', 'right']):
+        """function to reopen the right or left water line open. Valve must be open prior to calling this function.
+        Calling ManualWater_ will toggle state of valve so need to call twice on already open valve.
         :param valve: string specifying right or left valve"""
 
-        if valve == 'right':    # open right
-            self.MainWindow.Channel.RightValue(float(1000) * 1000)  # set the valve open time
-            time.sleep(0.01)
-            self.MainWindow.Channel3.ManualWater_Right(int(1))  # open the valve
-        else:   # open left
-            self.MainWindow.Channel.LeftValue(float(1000) * 1000)   # set the valve open time
-            time.sleep(0.01)
-            self.MainWindow.Channel3.ManualWater_Left(int(1))   # open the valve
 
+        # get correct function based on input valve name
+        getattr(self.MainWindow.Channel3, f'ManualWater_{valve.capitalize()}')(int(1))  # close valve
+        getattr(self.MainWindow.Channel3, f'ManualWater_{valve.capitalize()}')(int(1))  # open valve
 
     def _TimeRemaining(self,i, cycles, opentime, interval):
         total_seconds = (cycles-i)*(opentime+interval)
