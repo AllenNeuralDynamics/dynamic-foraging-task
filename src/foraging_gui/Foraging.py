@@ -609,6 +609,7 @@ class Window(QMainWindow):
 
                 for avi_file in avi_files:
                     csv_file = avi_file.replace('.avi', '.csv')
+                    camera_name = avi_file.replace('.avi','')
                     if csv_file not in csv_files:
                         self.drop_frames_warning_text+=f'No csv file found for {avi_file}\n'
                     else:
@@ -619,7 +620,7 @@ class Window(QMainWindow):
                             self.drop_frames_tag=1
                         else:
                             self.drop_frames_warning_text+=f"Correct: {avi_file} has {num_frames} frames and {self.trigger_length} triggers\n"
-                        self.frame_num[csv_file] = num_frames
+                        self.frame_num[camera_name] = num_frames
             self.WarningLabelCamera.setText(self.drop_frames_warning_text)
             if self.drop_frames_tag:
                 self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
