@@ -581,7 +581,8 @@ class generate_metadata:
 
         if self.Obj['WeightAfter']!='':
             session_params["animal_weight_post"]=float(self.Obj['WeightAfter'])
-
+        if self.Obj['BaseWeight']!='':
+            session_params["animal_weight_prior"]=float(self.Obj['BaseWeight'])
         session = Session(**session_params)
         session.write_standard_file(output_directory=self.output_folder)
         self.session_metadata_success=True

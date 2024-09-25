@@ -29,7 +29,7 @@ from PyQt5 import QtWidgets,QtGui,QtCore, uic
 from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
-import inspect
+from pprint import pprint
 
 import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
@@ -1251,17 +1251,37 @@ class Window(QMainWindow):
             :param session: Session object to pull water information from
 
         '''
-        # TODO: bug in aind-slims-api repo. Need to add source and content_type args
-        # try: # try and find mouse
-        #     mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=session.subject_id)
-        # except Exception as e:
-        #     if e == 'No record found.': # if no mouse found, create it
-        #         #mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode="00000000")
-        #         mouse = self.slims_client.add_model(models.SlimsMouseContent(barcode=session.subject_id,
-        #                                                                      baseline_weight_g=session.session.animal_weight_prior))
-        #     else:
-        #         raise e
-        mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode="00000000")
+
+        try:    # try and find mouse
+            mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=session.subject_id)
+        except Exception as e:
+            if str(e) == 'No record found.':    # if no mouse found or validation errors on mouse
+
+                # check schedule to make sure enough information is known about mouse to create model in slims
+                if (current_state := self._GetInfoFromSchedule(session.subject_id, 'Current State')) is not None \
+                        and (point_of_contact := self._GetInfoFromSchedule(session.subject_id, 'PI')) is not None:
+                    mouse = models.SlimsMouseContent(barcode=session.subject_id,
+                                                     baseline_weight_g=session.animal_weight_prior,
+                                                     point_of_contact=point_of_contact,
+                                                     water_restricted=True if current_state == 'hab only' else False,
+                                                     )
+
+                    try:    # try to add mouse model. This might fail if mouse exists but with validation errors
+                        self.slims_client.add_model(mouse)
+                    except Exception as e:
+                        if '"cntn_barCode":"This field should be unique"' in str(e):    # error if mouse already exists
+                            logging.error(f'Mouse {session.subject_id} exists in Slims but contains validations errors.'
+                                          f'Waterlog needs to be added manually to Slims')
+                            return
+                        else:
+                            raise e
+
+                else:   # Not enough info in schedule to create mouse
+                    logging.error(f'Mouse {session.subject_id} does not exist in Slims, and schedule does not contain '
+                                  f'enough information to add mouse. Waterlog needs to be added manually to Slims')
+                    return
+            else:
+                raise e
 
         # extract water information
         water_json = session.stimulus_epochs[0].output_parameters.water.items()
@@ -1286,14 +1306,13 @@ class Window(QMainWindow):
             test_pk=self.slims_client.fetch_pk("Test", test_name="test_waterlog"))
 
         # check if mouse already has waterlog for at session time and if, so update model
-        latest_waterlog_result = self.slims_client.fetch_models(models.SlimsWaterlogResult, mouse_pk= mouse.pk,)[0]
-        if latest_waterlog_result.date.strftime("%Y-%m-%d %H:%M:%S") == \
+        waterlogs = self.slims_client.fetch_models(models.SlimsWaterlogResult, mouse_pk=mouse.pk)
+        if waterlogs != [] and waterlogs[0].date.strftime("%Y-%m-%d %H:%M:%S") == \
                 session.session_start_time.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"):
-            model.pk = latest_waterlog_result.pk
+            model.pk = waterlogs[0].pk
             self.slims_client.update_model(model=model)
         else:
             self.slims_client.add_model(model)
-
 
     def _InitializeBonsai(self):
         '''
@@ -2425,11 +2444,13 @@ class Window(QMainWindow):
                 logging.info('saving declined by user')
                 self.WarningLabel.setText('')
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
+                self.Save.setChecked(False)  # uncheck button
                 return
             elif response==QMessageBox.Cancel:
                 logging.info('saving canceled by user')
                 self.WarningLabel.setText('')
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
+                self.Save.setChecked(False)  # uncheck button
                 return
         # check if the laser power and target are entered
         if BackupSave==0 and self.OptogeneticsB.currentText()=='on' and (self.Opto_dialog.laser_1_target.text()=='' or self.Opto_dialog.laser_1_calibration_power.text()=='' or self.Opto_dialog.laser_2_target.text()=='' or self.Opto_dialog.laser_2_calibration_power.text()=='' or self.Opto_dialog.laser_1_calibration_voltage.text()=='' or self.Opto_dialog.laser_2_calibration_voltage.text()==''):
@@ -2446,11 +2467,13 @@ class Window(QMainWindow):
                 logging.info('saving declined by user')
                 self.WarningLabel.setText('')
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
+                self.Save.setChecked(False)  # uncheck button
                 return
             elif response==QMessageBox.Cancel:
                 logging.info('saving canceled by user')
                 self.WarningLabel.setText('')
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
+                self.Save.setChecked(False)  # uncheck button
                 return
 
         # Stop Excitation if its running
@@ -2485,6 +2508,7 @@ class Window(QMainWindow):
                 logging.info('empty file name')
                 self.WarningLabel.setText('')
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
+                self.Save.setChecked(False)  # uncheck button
                 return
 
         # Do we have trials to save?
@@ -2640,7 +2664,7 @@ class Window(QMainWindow):
             if save_clicked:    # create water log result if weight after filled and uncheck save
                 if self.WeightAfter.text() != '' and self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']:
                     self._AddWaterLogResult(generated_metadata._session())
-                self.Save.setChecked(False)
+
 
         except Exception as e:
             self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved!')
@@ -2684,6 +2708,8 @@ class Window(QMainWindow):
                 QMessageBox.warning(self, '', 'Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!')
                 self.unsaved_data=True
                 self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
+
+            self.Save.setChecked(False)     # uncheck button
 
     def _GetSaveFolder(self):
         '''
