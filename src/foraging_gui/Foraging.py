@@ -1091,7 +1091,7 @@ class Window(QMainWindow):
             'metadata_dialog_folder':os.path.join(self.SettingFolder,"metadata_dialog")+'\\',
             'rig_metadata_folder':os.path.join(self.SettingFolder,"rig_metadata")+'\\',
             'project_info_file':os.path.join(self.SettingFolder,"Project Name and Funding Source v2.csv"),
-            'schedule_path':os.path.join('Z:\\','dynamic_foraging','DynamicForagingSchedule.csv'),
+            'schedule_path':os.path.join(r'C:\Users\micah.woodard\Downloads','Behavior Schedule.csv'),
             'go_cue_decibel_box1':60,
             'go_cue_decibel_box2':60,
             'go_cue_decibel_box3':60,
@@ -1235,12 +1235,13 @@ class Window(QMainWindow):
                          'environment variables on machine. Please add')
 
         try:
-            self.slims_client.fetch_model(models.SlimsMouseContent)
+            self.slims_client.fetch_model(models.SlimsMouseContent, barcode='00000000')
         except Exception as e:
-            raise Exception(f'Exception trying to read from Slims: {e}.\n'
-                            f' Please check credentials:\n'
-                            f'Username: {os.environ["SLIMS_USERNAME"]}\n'
-                            f'Password: {os.environ["SLIMS_PASSWORD"]}')
+            if str(e) != 'No record found.':    # bypass if mouse doesn't exist
+                raise Exception(f'Exception trying to read from Slims: {e}.\n'
+                                f' Please check credentials:\n'
+                                f'Username: {os.environ["SLIMS_USERNAME"]}\n'
+                                f'Password: {os.environ["SLIMS_PASSWORD"]}')
 
 
 
@@ -1256,18 +1257,16 @@ class Window(QMainWindow):
             mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=session.subject_id)
         except Exception as e:
             if str(e) == 'No record found.':    # if no mouse found or validation errors on mouse
-
                 # check schedule to make sure enough information is known about mouse to create model in slims
                 if (current_state := self._GetInfoFromSchedule(session.subject_id, 'Current State')) is not None \
                         and (point_of_contact := self._GetInfoFromSchedule(session.subject_id, 'PI')) is not None:
-                    mouse = models.SlimsMouseContent(barcode=session.subject_id,
+                    model = models.SlimsMouseContent(barcode=session.subject_id,
                                                      baseline_weight_g=session.animal_weight_prior,
                                                      point_of_contact=point_of_contact,
                                                      water_restricted=True if current_state == 'hab only' else False,
                                                      )
-
                     try:    # try to add mouse model. This might fail if mouse exists but with validation errors
-                        self.slims_client.add_model(mouse)
+                        mouse = self.slims_client.add_model(model)
                     except Exception as e:
                         if '"cntn_barCode":"This field should be unique"' in str(e):    # error if mouse already exists
                             logging.error(f'Mouse {session.subject_id} exists in Slims but contains validations errors.'
@@ -1277,7 +1276,7 @@ class Window(QMainWindow):
                             raise e
 
                 else:   # Not enough info in schedule to create mouse
-                    logging.error(f'Mouse {session.subject_id} does not exist in Slims, and schedule does not contain '
+                    logging.error(f'Mouse {session.subject_id} exists in Slims, and schedule does not contain '
                                   f'enough information to add mouse. Waterlog needs to be added manually to Slims')
                     return
             else:
@@ -2662,7 +2661,7 @@ class Window(QMainWindow):
             Obj['generate_data_description_success']=generated_metadata.data_description_success
 
             if save_clicked:    # create water log result if weight after filled and uncheck save
-                if self.WeightAfter.text() != '' and self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']:
+                if self.BaseWeight.text() != '' and self.WeightAfter.text() != '' and self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']:
                     self._AddWaterLogResult(generated_metadata._session())
 
 
