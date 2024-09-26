@@ -8,7 +8,6 @@ import math
 import logging
 import socket
 import harp
-import pandas as pd
 import threading
 import itertools
 import yaml
@@ -29,7 +28,6 @@ from PyQt5 import QtWidgets,QtGui,QtCore, uic
 from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
-from pprint import pprint
 
 import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
@@ -1237,12 +1235,13 @@ class Window(QMainWindow):
         try:
             self.slims_client.fetch_model(models.SlimsMouseContent, barcode='00000000')
         except Exception as e:
-            if str(e) != 'No record found.':    # bypass if mouse doesn't exist
+            if 'Status 401 – Unauthorized' in str(e):    # catch error if username and password are incorrect
                 raise Exception(f'Exception trying to read from Slims: {e}.\n'
                                 f' Please check credentials:\n'
                                 f'Username: {os.environ["SLIMS_USERNAME"]}\n'
                                 f'Password: {os.environ["SLIMS_PASSWORD"]}')
-
+            elif str(e) != 'No record found.':    # bypass if mouse doesn't exist
+                raise Exception(f'Exception trying to read from Slims: {e}.\n')
 
 
     def _AddWaterLogResult(self, session: Session):
@@ -1254,12 +1253,20 @@ class Window(QMainWindow):
         '''
 
         try:    # try and find mouse
+            logging.info(f'Attempting to fetch mouse {session.subject_id} from Slims')
             mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=session.subject_id)
         except Exception as e:
             if str(e) == 'No record found.':    # if no mouse found or validation errors on mouse
+                logging.error(f'"No record found" error while trying to fetch mouse {session.subject_id}. '
+                              f'Attempting to add mouse model to Slims.')
                 # check schedule to make sure enough information is known about mouse to create model in slims
                 if not pd.isnull((curr_st := self._GetInfoFromSchedule(session.subject_id, 'Current State'))) \
                         and not pd.isnull((point_of_contact := self._GetInfoFromSchedule(session.subject_id, 'PI'))):
+                    logging.info(f'Creating mouse model for mouse {session.subject_id} with the below information: \n'
+                                 f'barcode: {session.subject_id} \n'
+                                 f'baseline_weight_g: {session.animal_weight_prior} \n'
+                                 f'point_of_contact: {point_of_contact} \n'
+                                 f'water_restricted: {True if curr_st.lower() == "hab only" else False}')
                     model = models.SlimsMouseContent(barcode=session.subject_id,
                                                      baseline_weight_g=session.animal_weight_prior,
                                                      point_of_contact=point_of_contact,
@@ -1267,39 +1274,46 @@ class Window(QMainWindow):
                                                      )
                     try:    # try to add mouse model. This might fail if mouse exists but with validation errors
                         mouse = self.slims_client.add_model(model)
+                        logging.info(f'Mouse {session.subject_id} successfully added to slims with pk {mouse.pk}')
                     except Exception as e:
                         if '"cntn_barCode":"This field should be unique"' in str(e):    # error if mouse already exists
                             logging.error(f'Mouse {session.subject_id} exists in Slims but contains validations errors.'
-                                          f'Waterlog needs to be added manually to Slims')
+                                          f'Waterlog needs to be added manually to Slims.')
                             QMessageBox.critical(self,
                                                  'Adding Waterlog',
-                                                 f'Mouse {session.subject_id} exists in Slims but contains validations errors.'
-                                                 f'Waterlog needs to be added manually to Slims',
+                                                 f'Mouse {session.subject_id} exists in Slims but contains validations '
+                                                 f'errors. Waterlog needs to be added manually to Slims.',
                                                  QMessageBox.Ok)
                             return
                         else:
+                            logging.error(f'While adding mouse {session.subject_id} model, unexpected error occurred.')
                             raise e
 
                 else:   # Not enough info in schedule to create mouse
                     logging.error(f'Mouse {session.subject_id} does not exist in Slims, and schedule does not contain '
-                                  f'enough information to add mouse. Waterlog needs to be added manually to Slims')
+                                  f'enough information to add mouse. Waterlog needs to be added manually to Slims.')
                     QMessageBox.critical(self,
                                          'Adding Waterlog',
-                                         f'Mouse {session.subject_id} does not exist in Slims, and schedule does not contain '
-                                         f'enough information to add mouse. Waterlog needs to be added manually to Slims',
+                                         f'Mouse {session.subject_id} does not exist in Slims, and schedule does not '
+                                         f'contain enough information to add mouse. '
+                                         f'Waterlog needs to be added manually to Slims.',
                                          QMessageBox.Ok)
                     return
             else:
+                logging.error(f'While fetching mouse {session.subject_id} model, unexpected error occurred.')
                 raise e
 
         # extract water information
+        logging.info('Extracting water information from first stimulus epoch')
         water_json = session.stimulus_epochs[0].output_parameters.water.items()
         water = {k: v if not (isinstance(v, float) and math.isnan(v)) else None for k, v in water_json}
 
         # extract software information
+        logging.info('Extracting software information from first data stream')
         software = session.data_streams[0].software[0]
 
         # create model
+        logging.info('Creating SlimsWaterlogResult based on session information.')
         model = models.SlimsWaterlogResult(
             mouse_pk=mouse.pk,
             date=session.session_start_time,
@@ -1315,12 +1329,15 @@ class Window(QMainWindow):
             test_pk=self.slims_client.fetch_pk("Test", test_name="test_waterlog"))
 
         # check if mouse already has waterlog for at session time and if, so update model
-        waterlogs = self.slims_client.fetch_models(models.SlimsWaterlogResult, mouse_pk=mouse.pk)
-        if waterlogs != [] and waterlogs[0].date.strftime("%Y-%m-%d %H:%M:%S") == \
+        logging.info(f'Fetching previous waterlog for mouse {session.subject_id}')
+        waterlog = self.slims_client.fetch_models(models.SlimsWaterlogResult, mouse_pk=mouse.pk, start=0, end=1)
+        if waterlog != [] and waterlog[0].date.strftime("%Y-%m-%d %H:%M:%S") == \
                 session.session_start_time.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"):
-            model.pk = waterlogs[0].pk
+            logging.info(f'Waterlog information already exists for this session. Updating waterlog in Slims.')
+            model.pk = waterlog[0].pk
             self.slims_client.update_model(model=model)
         else:
+            logging.info(f'Adding waterlog to Slims.')
             self.slims_client.add_model(model)
 
     def _InitializeBonsai(self):
