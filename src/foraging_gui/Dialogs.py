@@ -931,7 +931,6 @@ class WaterCalibrationDialog(QDialog):
 
             open_timer.start()
 
-
         else:   # close open valve
             # change button color
             button.setStyleSheet("background-color : none")
