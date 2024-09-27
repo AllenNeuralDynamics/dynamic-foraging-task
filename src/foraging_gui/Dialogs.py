@@ -7,6 +7,7 @@ import subprocess
 from datetime import datetime
 import logging
 import webbrowser
+from typing import Literal
 
 import numpy as np
 import pandas as pd
@@ -14,7 +15,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox 
 from PyQt5.QtWidgets import QLabel, QDialogButtonBox,QFileDialog,QInputDialog, QLineEdit
 from PyQt5 import QtWidgets, uic, QtGui
-from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject, QEvent
+from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject, QTimer
 from PyQt5.QtSvg import QSvgWidget
 
 from foraging_gui.MyFunctions import Worker
@@ -330,6 +331,11 @@ class WaterCalibrationDialog(QDialog):
             for child in container.findChildren((QtWidgets.QPushButton)):     
                 child.setDefault(False)
                 child.setAutoDefault(False)
+
+        # setup flags to keep lines open
+        self.left_valve_open_timer = QTimer(timeout=lambda: self.reopen_valve('Left'), interval=10000)
+        self.right_valve_open_timer = QTimer(timeout=lambda: self.reopen_valve('Right'), interval=10000)
+
 
     def _connectSignalsSlots(self):
         self.SpotCheckLeft.clicked.connect(self._SpotCheckLeft)
@@ -879,15 +885,14 @@ class WaterCalibrationDialog(QDialog):
         if self.OpenLeftForever.isChecked():
             # change button color
             self.OpenLeftForever.setStyleSheet("background-color : green;")
-            # set the valve open time
-            self.MainWindow.Channel.LeftValue(float(1000)*1000) 
-            time.sleep(0.01) 
-            # open the valve
-            self.MainWindow.Channel3.ManualWater_Left(int(1))
+            self.MainWindow.Channel.LeftValue(float(1000) * 1000)  # set the valve open time
+            self.MainWindow.Channel3.ManualWater_Left(int(1))  # set valve initially open
+            self.left_valve_open_timer.start()
         else:
             # change button color
             self.OpenLeftForever.setStyleSheet("background-color : none")
-            # close the valve 
+            self.left_valve_open_timer.stop()
+            # close the valve
             self.MainWindow.Channel.LeftValue(float(0.001)*1000)
             time.sleep(0.01) 
             self.MainWindow.Channel3.ManualWater_Left(int(1))
@@ -903,21 +908,31 @@ class WaterCalibrationDialog(QDialog):
         if self.OpenRightForever.isChecked():
             # change button color
             self.OpenRightForever.setStyleSheet("background-color : green;")
-            # set the valve open time
-            self.MainWindow.Channel.RightValue(float(1000)*1000) 
-            time.sleep(0.01) 
-            # open the valve
-            self.MainWindow.Channel3.ManualWater_Right(int(1))
+            self.MainWindow.Channel.RightValue(float(1000) * 1000)  # set the valve open time
+            self.MainWindow.Channel3.ManualWater_Right(int(1))  # set valve initially open
+            self.right_valve_open_timer.start()
+
         else:
             # change button color
             self.OpenRightForever.setStyleSheet("background-color : none")
-            # close the valve 
+            self.right_valve_open_timer.stop()
+
+            # close the valve
             self.MainWindow.Channel.RightValue(float(0.001)*1000)
             time.sleep(0.01) 
             self.MainWindow.Channel3.ManualWater_Right(int(1))
             # set the default valve open time
             time.sleep(0.01) 
             self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
+
+    def reopen_valve(self, valve: Literal['Left', 'Right']):
+        """Function to reopen the right or left water line open. Valve must be open prior to calling this function.
+        Calling ManualWater_ will toggle state of valve so need to call twice on already open valve.
+        param valve: string specifying right or left valve"""
+
+        # get correct function based on input valve name
+        getattr(self.MainWindow.Channel3, f'ManualWater_{valve}')(int(1))  # close valve
+        getattr(self.MainWindow.Channel3, f'ManualWater_{valve}')(int(1))  # open valve
 
     def _TimeRemaining(self,i, cycles, opentime, interval):
         total_seconds = (cycles-i)*(opentime+interval)
