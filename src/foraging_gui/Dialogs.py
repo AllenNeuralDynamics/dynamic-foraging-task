@@ -348,11 +348,6 @@ class WaterCalibrationDialog(QDialog):
                      self.OpenRight5ml.setText(f'Open right 5ml: {round(self.right_close_timer.remainingTime()/1000)}s'),
                      interval=1000)
 
-        # Disable 5ml buttons if no water calibration curve
-        if not hasattr(self.MainWindow, 'latest_fitting'):
-            self.OpenLeft5ml.setEnabled(False)
-            self.OpenRight5ml.setEnabled(False)
-
     def _connectSignalsSlots(self):
         self.SpotCheckLeft.clicked.connect(self._SpotCheckLeft)
         self.SpotCheckRight.clicked.connect(self._SpotCheckRight)
@@ -911,7 +906,7 @@ class WaterCalibrationDialog(QDialog):
         :param button: button that was pressed
         :param valve: which valve to open. Restricted to Right or Left
         """
-       
+
         self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
@@ -928,7 +923,7 @@ class WaterCalibrationDialog(QDialog):
             toggle_valve_state(int(1))  # set valve initially open
 
             if button.text() == f'Open {valve.lower()} 5ml':    # set up additional logic to only open for 5ml
-                five_ml_time_ms = round(self._VolumeToTime(5, valve) * 1000)  # calculate time for valve to stay open
+                five_ml_time_ms = round(self._VolumeToTime(5000, valve) * 1000)  # calculate time for valve to stay open
                 close_timer.setInterval(five_ml_time_ms)  # set interval of valve close time to be five_ml_time_ms
                 close_timer.setSingleShot(True)  # only trigger once when 5ml has been expelled
                 text_timer.start()  # start timer to update text
@@ -976,7 +971,6 @@ class WaterCalibrationDialog(QDialog):
         """
         # x = (y-b)/m
         if hasattr(self.MainWindow, 'latest_fitting') and self.MainWindow.latest_fitting != {}:
-            print(self.MainWindow.latest_fitting)
             fit = self.MainWindow.latest_fitting[valve]
             m = fit[0]
             b = fit[1] 
