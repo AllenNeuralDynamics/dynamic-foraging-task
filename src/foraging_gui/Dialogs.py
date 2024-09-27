@@ -349,9 +349,9 @@ class WaterCalibrationDialog(QDialog):
                      interval=1000)
 
         # Disable 5ml buttons if no water calibration curve
-        # if not hasattr(self.MainWindow, 'latest_fitting'):
-        #     self.OpenLeft5ml.setEnabled(False)
-        #     self.OpenRight5ml.setEnabled(False)
+        if not hasattr(self.MainWindow, 'latest_fitting'):
+            self.OpenLeft5ml.setEnabled(False)
+            self.OpenRight5ml.setEnabled(False)
 
     def _connectSignalsSlots(self):
         self.SpotCheckLeft.clicked.connect(self._SpotCheckLeft)
@@ -911,7 +911,7 @@ class WaterCalibrationDialog(QDialog):
         :param button: button that was pressed
         :param valve: which valve to open. Restricted to Right or Left
         """
-        print('in toggle valve', button, valve)
+       
         self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
