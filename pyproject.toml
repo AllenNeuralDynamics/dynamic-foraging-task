@@ -26,6 +26,7 @@ dependencies = [
     "pyOSC3@git+https://github.com/glopesdev/pyosc3.git@master",
     "newscale@git+https://github.com/AllenNeuralDynamics/python-newscale@axes-on-target",
     "aind-auto-train@git+https://github.com/AllenNeuralDynamics/aind-foraging-behavior-bonsai-automatic-training.git@main",
+    "aind-slims-api@git+https://github.com/AllenNeuralDynamics/aind-slims-api@main",
     "pynwb",
     "requests",
     "harp-python",
@@ -33,6 +34,7 @@ dependencies = [
     "deepdiff",
     "aind-data-schema==0.36.0",
     "aind-data-schema-models==0.1.10",
+    "pydantic==2.8.2",
     "pyyaml"
 ]
 
