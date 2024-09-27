@@ -333,31 +333,33 @@ class WaterCalibrationDialog(QDialog):
                 child.setAutoDefault(False)
 
         # setup QTimers to keep lines open
-        self.left_valve_open_timer = QTimer(timeout=lambda: self.reopen_valve('Left'), interval=10000)
-        self.right_valve_open_timer = QTimer(timeout=lambda: self.reopen_valve('Right'), interval=10000)
+        self.left_open_timer = QTimer(timeout=lambda: self.reopen_valve('Left'), interval=10000)
+        self.right_open_timer = QTimer(timeout=lambda: self.reopen_valve('Right'), interval=10000)
 
         # setup QTimers to keep close lines after 5ml
-        self.left_valve_close_timer = QTimer(timeout=lambda: self.close_valve('Left'))  # will set interval
-        self.right_valve_close_timer = QTimer(timeout=lambda: self.close_valve('Right'))
+        self.left_close_timer = QTimer(timeout=lambda: self.close_valve('Left'))  # will set interval
+        self.right_close_timer = QTimer(timeout=lambda: self.close_valve('Right'))
 
         # setup Qtimers for updating text countdown
-        self.left_valve_text_timer = QTimer(timeout=lambda:
-            self.OpenLeft5ml.setText(f'Open right 5ml: {self.left_valve_close_timer.remainingTime()}s'), interval=1000)
-        self.right_valve_text_timer = QTimer(timeout=lambda:
-            self.OpenRight5ml.setText(f'Open left 5ml: {self.right_valve_close_timer.remainingTime()}s'), interval=1000)
+        self.left_text_timer = QTimer(timeout=lambda:
+                      self.OpenLeft5ml.setText(f'Open left 5ml: {round(self.left_close_timer.remainingTime()/1000)}s'),
+                      interval=1000)
+        self.right_text_timer = QTimer(timeout=lambda:
+                     self.OpenRight5ml.setText(f'Open right 5ml: {round(self.right_close_timer.remainingTime()/1000)}s'),
+                     interval=1000)
 
         # Disable 5ml buttons if no water calibration curve
         if not hasattr(self.MainWindow, 'latest_fitting'):
             self.OpenLeft5ml.setEnabled(False)
             self.OpenRight5ml.setEnabled(False)
-            
+
     def _connectSignalsSlots(self):
         self.SpotCheckLeft.clicked.connect(self._SpotCheckLeft)
         self.SpotCheckRight.clicked.connect(self._SpotCheckRight)
-        self.OpenLeftForever.clicked.connect(lambda: self._OpenValve(self.OpenLeftForever, 'Left'))
-        self.OpenRightForever.clicked.connect(lambda: self._OpenValve(self.OpenRightForever, 'Right'))
-        self.OpenLeft5ml.clicked.connect(lambda: self._OpenValve(self.OpenLeft5ml, 'Left'))
-        self.OpenRight5ml.clicked.connect(lambda: self._OpenValve(self.OpenRight5ml, 'Right'))
+        self.OpenLeftForever.clicked.connect(lambda: self._ToggleValve(self.OpenLeftForever, 'Left'))
+        self.OpenRightForever.clicked.connect(lambda: self._ToggleValve(self.OpenRightForever, 'Right'))
+        self.OpenLeft5ml.clicked.connect(lambda: self._ToggleValve(self.OpenLeft5ml, 'Left'))
+        self.OpenRight5ml.clicked.connect(lambda: self._ToggleValve(self.OpenRight5ml, 'Right'))
         self.SaveLeft.clicked.connect(self._SaveLeft)
         self.SaveRight.clicked.connect(self._SaveRight)
         self.StartCalibratingLeft.clicked.connect(self._StartCalibratingLeft)
@@ -893,9 +895,9 @@ class WaterCalibrationDialog(QDialog):
             self.ToInitializeVisual=0
         self.PlotM._Update()
 
-    def _OpenValve(self, button, valve: Literal['Left', 'Right']):
+    def _ToggleValve(self, button, valve: Literal['Left', 'Right']):
         """
-        Open specified valve and set up logic based on button pressed
+        Toggle open/close state of specified valve and set up logic based on button pressed
         :param button: button that was pressed
         :param valve: which valve to open. Restricted to Right or Left
         """
@@ -906,9 +908,9 @@ class WaterCalibrationDialog(QDialog):
 
         set_valve_time = getattr(self.MainWindow.Channel, f'{valve}Value')
         toggle_valve_state = getattr(self.MainWindow.Channel3, f'ManualWater_{valve}')
-        open_valve_timer = getattr(self, f'{valve.lower()}_valve_open_timer')
-        close_timer = getattr(self, f'{valve.lower()}_valve_close_timer')
-        text_timer = getattr(self, f'{valve.lower()}_valve_text_timer')
+        open_valve_timer = getattr(self, f'{valve.lower()}_open_timer')
+        close_timer = getattr(self, f'{valve.lower()}_close_timer')
+        text_timer = getattr(self, f'{valve.lower()}_text_timer')
 
         if button.isChecked():  # open valve
             button.setStyleSheet("background-color : green;")
@@ -916,7 +918,7 @@ class WaterCalibrationDialog(QDialog):
             toggle_valve_state(int(1))  # set valve initially open
 
             if button.text() == f'Open {valve.lower()} 5ml':    # set up additional logic to only open for 5ml
-                five_ml_time_ms = self._VolumeToTime(5, valve) * 1000  # calculate time for valve to stay open
+                five_ml_time_ms = round(self._VolumeToTime(5, valve) * 1000)  # calculate time for valve to stay open
                 close_timer.setInterval(five_ml_time_ms)  # set interval of valve closer time to be five_ml_time_ms
                 close_timer.setSingleShot(True)  # only trigger once when 5ml has been expelled
                 text_timer.start()  # start timer to update text
@@ -929,7 +931,6 @@ class WaterCalibrationDialog(QDialog):
             # change button color
             button.setStyleSheet("background-color : none")
             open_valve_timer.stop()
-
             if f'Open {valve.lower()} 5ml' in button.text():
                 close_timer.stop()
                 text_timer.stop()
@@ -955,15 +956,18 @@ class WaterCalibrationDialog(QDialog):
         """Function to close open valve and stop QTimer that is reopening valve.
         param valve: string specifying right or left valve"""
 
-        timer = getattr(self, f'{valve.lower()}_valve_open_timer')
-        # stop valve Qtimer that is calling valve to reopen
-        timer.stop()
-        while timer.isActive():     # wait until timer has fully stopped
+        open_timer = getattr(self, f'{valve.lower()}_open_timer')
+        text_timer = getattr(self, f'{valve.lower()}_text_timer')
+
+        open_timer.stop()   # stop valve Qtimer that is calling valve to reopen
+        text_timer.stop()   # stop Qtimer that is updating text
+        while open_timer.isActive() or text_timer.isActive():     # wait until timers have fully stopped
             time.sleep(.01)
         getattr(self.MainWindow.Channel3, f'ManualWater_{valve}')(int(1))  # close valve
 
         # restyle button
         button = getattr(self, f'Open{valve}5ml')
+        button.setChecked(False)
         button.setStyleSheet("background-color : none")
         button.setText(f'Open {valve.lower()} 5ml')
 
@@ -973,9 +977,15 @@ class WaterCalibrationDialog(QDialog):
         seconds = int(np.ceil(np.mod(total_seconds,60)))
         return '{}:{:02}'.format(minutes, seconds)
     
-    def _VolumeToTime(self,volume,valve):
-        # x = (y-b)/m 
-        if hasattr(self.MainWindow, 'latest_fitting'):
+    def _VolumeToTime(self, volume, valve: Literal['Left', 'Right'] ):
+        """
+        Function to return the amount of time(s) it takes for water line to flush specified volume of water (mg)
+        :param volume: volume to flush in mg
+        :param valve: string specifying right or left valve
+        """
+        # x = (y-b)/m
+        if hasattr(self.MainWindow, 'latest_fitting') and self.MainWindow.latest_fitting != {}:
+            print(self.MainWindow.latest_fitting)
             fit = self.MainWindow.latest_fitting[valve]
             m = fit[0]
             b = fit[1] 
