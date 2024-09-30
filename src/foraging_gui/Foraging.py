@@ -15,8 +15,8 @@ import copy
 import shutil
 from pathlib import Path
 from datetime import date, datetime, timezone
-from aind_slims_api import SlimsClient
-from aind_slims_api import models
+# from aind_slims_api import SlimsClient    # comment out untill schema has been updated
+# from aind_slims_api import models
 import serial 
 import numpy as np
 import pandas as pd
@@ -112,7 +112,7 @@ class Window(QMainWindow):
         self._InitializeBonsai()
 
         # connect to Slims
-        self._ConnectSlims()
+        #self._ConnectSlims()
 
         # Set up threads 
         self.threadpool=QThreadPool() # get animal response
@@ -2690,7 +2690,8 @@ class Window(QMainWindow):
 
             if save_clicked:    # create water log result if weight after filled and uncheck save
                 if self.BaseWeight.text() != '' and self.WeightAfter.text() != '' and self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']:
-                    self._AddWaterLogResult(generated_metadata._session())
+                    pass
+                    #self._AddWaterLogResult(generated_metadata._session())
 
 
         except Exception as e:
