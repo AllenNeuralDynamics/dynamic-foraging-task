@@ -265,7 +265,6 @@ class Window(QMainWindow):
         self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
-        self.HideLegend.clicked.connect(self._hide_legend)
         # Connect to ID change in the mainwindow
         self.ID.returnPressed.connect(
             lambda: self.AutoTrain_dialog.update_auto_train_lock(engaged=False)
@@ -331,26 +330,6 @@ class Window(QMainWindow):
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit)):   
                 child.returnPressed.connect(self.keyPressEvent)
-    
-    def _hide_legend(self):
-        '''Hide the legend of the plot'''
-        
-        if 'PlotM' not in self.__dict__:
-            self.HideLegend.setChecked(False)
-            return
-        
-        if 'ax1' not in self.PlotM.__dict__ or 'ax2' not in self.PlotM.__dict__:
-            self.HideLegend.setChecked(False)
-            return
-        
-        if self.HideLegend.isChecked():
-            self.PlotM.ax1.legend().set_visible(False)
-            self.PlotM.ax2.legend().set_visible(False)
-            self.PlotM.draw()
-        else:
-            self.PlotM.ax1.legend(loc='lower left', fontsize=8).set_visible(True)
-            self.PlotM.ax2.legend(loc='lower left', fontsize=8).set_visible(True)
-            self.PlotM.draw()
 
     def _set_reference(self):
         '''

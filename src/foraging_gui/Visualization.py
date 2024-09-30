@@ -13,7 +13,6 @@ class PlotV(FigureCanvas):
 
         self.ax1 = self.fig.add_subplot(gs[0:4, 0:20])
         self.ax2 = self.fig.add_subplot(gs[4:10, 0:20], sharex=self.ax1)
-        self.ax3 = self.fig.add_subplot(gs[1:9, 22:])
 
         FigureCanvas.__init__(self, self.fig)
         self.RunLength=win.RunLength.text
@@ -31,7 +30,6 @@ class PlotV(FigureCanvas):
             # If we have no trials, clear the plots
             self.ax1.cla()
             self.ax2.cla()
-            self.ax3.cla() 
             self.draw()        
             return
 
@@ -260,9 +258,6 @@ class PlotV(FigureCanvas):
         self.draw()
 
     def _PlotMatching(self):
-        ax=self.ax3
-        self.ax3.cla()
-        self.ax3.set_box_aspect(1)
 
         if self.WindowSize()!='':
             WindowSize=int(self.WindowSize())
@@ -306,43 +301,7 @@ class PlotV(FigureCanvas):
                 choice_log_ratio[idx]=np.log(RightChoiceN / LeftChoiceN)
                 reward_log_ratio[idx]=np.log(RightRewardN / LeftRewardN)
             WinStartN=WinStartN+StepSize
-        if self.MarchingType=='log ratio':
-            x=reward_log_ratio
-            y=choice_log_ratio
-            self.ax3.set(xlabel='Log Reward_R/L',ylabel='Log Choice_R/L')
-            self.ax3.plot(x, y, 'ko')
-            max_range = max(np.abs(self.ax3.get_xlim()).max(), np.abs(self.ax3.get_ylim()).max())
-            self.ax3.plot([-max_range, max_range], [-max_range, max_range], 'k--', lw=1)
-        else:
-            x=reward_R_frac
-            y=choice_R_frac
-            self.ax3.set(xlabel='frac Reward_R',ylabel='frac Choice_R')
-            self.ax3.plot(x, y, 'ko')
-            self.ax3.plot([0, 1], [0, 1], 'k--', lw=1)
 
-        # linear fitting
-        try: 
-            SeInd=~np.logical_or(np.logical_or(np.isinf(x),np.isinf(y)), np.logical_or(np.isnan(x),np.isnan(y)))
-            x=x[SeInd]
-            y=y[SeInd]
-
-            # check we have enough data to do regression
-            if len(np.unique(x)) > 1:
-                slope, intercept, r_value, p_value, _ = stats.linregress(x, y)
-                fit_x = x
-                fit_y = x * slope + intercept
-            
-                # Save intercept to show bias in performance info
-                self.main_win.B_Bias_R=intercept
-            
-                self.ax3.plot(fit_x, fit_y, 'r', label=f'r = {r_value:.3f}\np = {p_value:.2e}')
-                self.ax3.set_title(f'slope = {slope:.2f}, bias_R = {intercept:.2f}', fontsize=9)
-                self.ax3.legend(loc='upper left', fontsize=8)
-                self.ax3.axis('equal')
-                self.ax3.set_xlim([fit_x.min()-2, fit_x.max()+2])
-                self.ax3.set_ylim([fit_y.min()-2, fit_y.max()+2])
-        except Exception as e:
-            logging.error(str(e))
         self.draw()
 
     def _PlotLicks(self):
@@ -362,13 +321,9 @@ class PlotV(FigureCanvas):
         self.ax2.set_yticklabels(['L', 'R'])
         self.ax2.set_ylim(-0.15, 1.15)
         self.ax2.yaxis.set_inverted(True)
-        
-        if self.main_win.HideLegend.isChecked():
-            self.ax1.legend().set_visible(False)
-            self.ax2.legend().set_visible(False)
-        else:
-            self.ax1.legend(loc='lower left', fontsize=8)
-            self.ax2.legend(loc='lower left', fontsize=8)
+
+        self.ax1.legend(bbox_to_anchor=(1, 1), loc='upper left', fontsize=8)
+        self.ax2.legend(bbox_to_anchor=(1, 0), loc='lower left', fontsize=8)
 
 class PlotWaterCalibration(FigureCanvas):
     def __init__(self,water_win,dpi=100,width=5, height=4):
