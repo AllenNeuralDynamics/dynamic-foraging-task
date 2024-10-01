@@ -1,9 +1,10 @@
-from pyqtgraph import PlotWidget, ScatterPlotItem
+from pyqtgraph import PlotWidget, GraphItem, mkPen
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMainWindow
 from aind_dynamic_foraging_models.logistic_regression import fit_logistic_regression
 import numpy as np
-from typing import Union, List, Literal
+from typing import Union, List
+import logging
 
 class BiasIndicator(QMainWindow):
     """Widget to calculate, display, and alert user of lick bias"""
@@ -15,6 +16,8 @@ class BiasIndicator(QMainWindow):
         :param bias_limit: decimal to alert user if bias is above between 0 and 1
         """
 
+        self.log = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+
         super().__init__(*args, **kwargs)
 
         self.bias_threshold = bias_threshold
@@ -22,13 +25,15 @@ class BiasIndicator(QMainWindow):
         # initialize biases as empy list
         self._biases = []
         self._bias_items = []
+        self._graph_items = []
 
         # create plot to show bias data
         self.bias_plot = PlotWidget()
-        self.bias_plot.getViewBox().state['targetRange'] = [[-1, 30], [-1, 1]]  # Setting autopan range
+        self.bias_plot.getViewBox().state['targetRange'] = [[-1, 30], [-5, 5]]  # Setting autopan range
         self.bias_plot.getViewBox().state['autoPan'] = [True, False]  # auto pan along x axis
         self.bias_plot.getViewBox().state['autoRange'] = [True, False]
         self.bias_plot.setLabels(left=('Bias', ''), bottom=('Time', 's'), title='Bias')
+        self.bias_plot.getAxis('left').setTicks([[(-2.5, 'Left'), (2.5, 'Right')]])
         self.setCentralWidget(self.bias_plot)
 
     @property
@@ -71,22 +76,37 @@ class BiasIndicator(QMainWindow):
 
         # calculate logistic regression and extract bia
         if len(choice_history) > n_trial_back + 2:
-            lr = fit_logistic_regression(choice_history=choice_history,
-                                         reward_history=reward_history,
-                                         n_trial_back=n_trial_back,
-                                         selected_trial_idx=selected_trial_idx)
-            bias = lr['df_beta'].loc['bias']['cross_validation'].values[0]
-            self._biases.append(bias)
+            try:
+                lr = fit_logistic_regression(choice_history=choice_history,
+                                             reward_history=reward_history,
+                                             n_trial_back=n_trial_back,
+                                             selected_trial_idx=selected_trial_idx)
+                bias = lr['df_beta'].loc['bias']['cross_validation'].values[0]
+                self._biases.append(bias)
 
-            # add to plot
-            if len(self._biases) >= 2:
-                bias_item = self.bias_plot.plot([len(self._biases)-1, len(self._biases)], self._biases[-2:])
-                self._bias_items.append(bias_item)
+                # add to plot
+                if len(self._biases) >= 2:
+                    bias_item = self.bias_plot.plot([len(self._biases)-1, len(self._biases)], self._biases[-2:])
+                    self._bias_items.append(bias_item)
+                    graph_item = GraphItem(pos=[[len(self._biases), bias]])
+                    self.bias_plot.addItem(graph_item)
+                    self._graph_items.append(graph_item)
 
-            # to help graph from getting bloated and slow, prune data display in graph
-            if len(self._bias_items) >= 32:
-                self.bias_plot.removeItem(self._bias_items[0])
-                del self._bias_items[0]
+                # to help graph from getting bloated and slow, prune data display in graph
+                if len(self._bias_items) >= 32:
+                    self.bias_plot.removeItem(self._bias_items[0])
+                    del self._bias_items[0]
+                    self.bias_plot.removeItem(self._graph_items[0])
+                    del self._graph_items[0]
 
-            if abs(bias) > self.bias_threshold:
-                self.biasOver.emit(bias)
+                if abs(bias) > self.bias_threshold:
+                    self.biasOver.emit('right' if bias > 0 else 'left')
+
+            except ValueError as v:
+                print(v)
+                acceptable_errors = ['Cannot have number of splits n_splits=10 greater than the number of samples:',
+                                     'n_splits=10 cannot be greater than the number of members in each class.']
+                if any(x in str(v) for x in acceptable_errors):
+                    self.log.info("Can't calculate bias because ", str(v).lower())
+                else:
+                    raise v
