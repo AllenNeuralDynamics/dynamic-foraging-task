@@ -8,15 +8,15 @@ import math
 import logging
 import socket
 import harp
-import pandas as pd
 import threading
 import itertools
 import yaml
 import copy
 import shutil
 from pathlib import Path
-from datetime import date, datetime
-
+from datetime import date, datetime, timezone
+# from aind_slims_api import SlimsClient    # comment out untill schema has been updated
+# from aind_slims_api import models
 import serial 
 import numpy as np
 import pandas as pd
@@ -40,6 +40,7 @@ from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScal
 from foraging_gui.stage import Stage
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
+from aind_data_schema.core.session import Session
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -109,6 +110,9 @@ class Window(QMainWindow):
 
         # Connect to Bonsai
         self._InitializeBonsai()
+
+        # connect to Slims
+        #self._ConnectSlims()
 
         # Set up threads 
         self.threadpool=QThreadPool() # get animal response
@@ -241,6 +245,7 @@ class Window(QMainWindow):
         self.actionConnectBonsai.triggered.connect(self._ConnectBonsai)
         self.actionReconnect_bonsai.triggered.connect(self._ReconnectBonsai)
         self.Load.clicked.connect(self._OpenLast)
+        self.Save.setCheckable(True)
         self.Save.clicked.connect(self._Save)
         self.Clear.clicked.connect(self._Clear)
         self.Start.clicked.connect(self._Start)
@@ -609,6 +614,7 @@ class Window(QMainWindow):
 
                 for avi_file in avi_files:
                     csv_file = avi_file.replace('.avi', '.csv')
+                    camera_name = avi_file.replace('.avi','')
                     if csv_file not in csv_files:
                         self.drop_frames_warning_text+=f'No csv file found for {avi_file}\n'
                     else:
@@ -619,7 +625,7 @@ class Window(QMainWindow):
                             self.drop_frames_tag=1
                         else:
                             self.drop_frames_warning_text+=f"Correct: {avi_file} has {num_frames} frames and {self.trigger_length} triggers\n"
-                        self.frame_num[csv_file] = num_frames
+                        self.frame_num[camera_name] = num_frames
             self.WarningLabelCamera.setText(self.drop_frames_warning_text)
             if self.drop_frames_tag:
                 self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
@@ -1216,6 +1222,124 @@ class Window(QMainWindow):
         self.Other_lick_spout_distance=self.Settings['lick_spout_distance_box'+str(self.box_number)]
         self.rig_name = '{}'.format(self.current_box)
 
+    def _ConnectSlims(self):
+        '''
+            Connect to Slims
+        '''
+        try:
+            self.slims_client = SlimsClient(username=os.environ['SLIMS_USERNAME'],
+                                            password=os.environ['SLIMS_PASSWORD'])
+        except KeyError:
+            raise KeyError('SLIMS_USERNAME and SLIMS_PASSWORD do not exist as '
+                         'environment variables on machine. Please add')
+
+        try:
+            self.slims_client.fetch_model(models.SlimsMouseContent, barcode='00000000')
+        except Exception as e:
+            if 'Status 401 – Unauthorized' in str(e):    # catch error if username and password are incorrect
+                raise Exception(f'Exception trying to read from Slims: {e}.\n'
+                                f' Please check credentials:\n'
+                                f'Username: {os.environ["SLIMS_USERNAME"]}\n'
+                                f'Password: {os.environ["SLIMS_PASSWORD"]}')
+            elif str(e) != 'No record found.':    # bypass if mouse doesn't exist
+                raise Exception(f'Exception trying to read from Slims: {e}.\n')
+
+
+    def _AddWaterLogResult(self, session: Session):
+        '''
+            Add WaterLogResult to slims based on current state of gui
+
+            :param session: Session object to pull water information from
+
+        '''
+
+        try:    # try and find mouse
+            logging.info(f'Attempting to fetch mouse {session.subject_id} from Slims')
+            mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=session.subject_id)
+        except Exception as e:
+            if str(e) == 'No record found.':    # if no mouse found or validation errors on mouse
+                logging.error(f'"No record found" error while trying to fetch mouse {session.subject_id}. '
+                              f'Attempting to add mouse model to Slims.')
+                # check schedule to make sure enough information is known about mouse to create model in slims
+                if not pd.isnull((curr_st := self._GetInfoFromSchedule(session.subject_id, 'Current State'))) \
+                        and not pd.isnull((point_of_contact := self._GetInfoFromSchedule(session.subject_id, 'PI'))):
+                    logging.info(f'Creating mouse model for mouse {session.subject_id} with the below information: \n'
+                                 f'barcode: {session.subject_id} \n'
+                                 f'baseline_weight_g: {session.animal_weight_prior} \n'
+                                 f'point_of_contact: {point_of_contact} \n'
+                                 f'water_restricted: {True if curr_st.lower() == "hab only" else False}')
+                    model = models.SlimsMouseContent(barcode=session.subject_id,
+                                                     baseline_weight_g=session.animal_weight_prior,
+                                                     point_of_contact=point_of_contact,
+                                                     water_restricted=True if curr_st.lower() == 'hab only' else False,
+                                                     )
+                    try:    # try to add mouse model. This might fail if mouse exists but with validation errors
+                        mouse = self.slims_client.add_model(model)
+                        logging.info(f'Mouse {session.subject_id} successfully added to slims with pk {mouse.pk}')
+                    except Exception as e:
+                        if '"cntn_barCode":"This field should be unique"' in str(e):    # error if mouse already exists
+                            logging.error(f'Mouse {session.subject_id} exists in Slims but contains validations errors.'
+                                          f'Waterlog needs to be added manually to Slims.')
+                            QMessageBox.critical(self,
+                                                 'Adding Waterlog',
+                                                 f'Mouse {session.subject_id} exists in Slims but contains validations '
+                                                 f'errors. Waterlog needs to be added manually to Slims.',
+                                                 QMessageBox.Ok)
+                            return
+                        else:
+                            logging.error(f'While adding mouse {session.subject_id} model, unexpected error occurred.')
+                            raise e
+
+                else:   # Not enough info in schedule to create mouse
+                    logging.error(f'Mouse {session.subject_id} does not exist in Slims, and schedule does not contain '
+                                  f'enough information to add mouse. Waterlog needs to be added manually to Slims.')
+                    QMessageBox.critical(self,
+                                         'Adding Waterlog',
+                                         f'Mouse {session.subject_id} does not exist in Slims, and schedule does not '
+                                         f'contain enough information to add mouse. '
+                                         f'Waterlog needs to be added manually to Slims.',
+                                         QMessageBox.Ok)
+                    return
+            else:
+                logging.error(f'While fetching mouse {session.subject_id} model, unexpected error occurred.')
+                raise e
+
+        # extract water information
+        logging.info('Extracting water information from first stimulus epoch')
+        water_json = session.stimulus_epochs[0].output_parameters.water.items()
+        water = {k: v if not (isinstance(v, float) and math.isnan(v)) else None for k, v in water_json}
+
+        # extract software information
+        logging.info('Extracting software information from first data stream')
+        software = session.data_streams[0].software[0]
+
+        # create model
+        logging.info('Creating SlimsWaterlogResult based on session information.')
+        model = models.SlimsWaterlogResult(
+            mouse_pk=mouse.pk,
+            date=session.session_start_time,
+            weight_g=session.animal_weight_prior,
+            water_earned_ml=water['water_in_session_foraging'],
+            water_supplement_delivered_ml=water['water_after_session'],
+            water_supplement_recommended_ml=None,
+            total_water_ml=water['water_in_session_total'],
+            comments=session.notes,
+            workstation=session.rig_id,
+            sw_source=software.url,
+            sw_version=software.version,
+            test_pk=self.slims_client.fetch_pk("Test", test_name="test_waterlog"))
+
+        # check if mouse already has waterlog for at session time and if, so update model
+        logging.info(f'Fetching previous waterlog for mouse {session.subject_id}')
+        waterlog = self.slims_client.fetch_models(models.SlimsWaterlogResult, mouse_pk=mouse.pk, start=0, end=1)
+        if waterlog != [] and waterlog[0].date.strftime("%Y-%m-%d %H:%M:%S") == \
+                session.session_start_time.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"):
+            logging.info(f'Waterlog information already exists for this session. Updating waterlog in Slims.')
+            model.pk = waterlog[0].pk
+            self.slims_client.update_model(model=model)
+        else:
+            logging.info(f'Adding waterlog to Slims.')
+            self.slims_client.add_model(model)
 
     def _InitializeBonsai(self):
         '''
@@ -1784,7 +1908,7 @@ class Window(QMainWindow):
                         if Correct ==0: # incorrect format; don't change
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
-                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight']) and
+                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight','','GoCueDecibel','ConditionP_5','ConditionP_6','Duration_5','Duration_6','OffsetEnd_5','OffsetEnd_6','OffsetStart_5','OffsetStart_6','Probability_5','Probability_6','PulseDur_5','PulseDur_6','RD_5','RD_6']) and
                         (child.text() == '')):
                         # These attributes can have the empty string, but we can't set the value as the empty string, unless we allow resets
                         if allow_reset:
@@ -2313,6 +2437,9 @@ class Window(QMainWindow):
             SaveContinue (int): 0, force to start a new session, 1 if the current session should be saved without restarting the logging
             BackupSave (int): 1, save the current session without stopping the current session and without prompting the user for a save file, 0, save the current session and prompt the user for a save file
         '''
+
+        save_clicked = self.Save.isChecked()    # save if function was called by save button press
+
         if BackupSave==1:
             ForceSave=1
             SaveAs=0
@@ -2344,11 +2471,13 @@ class Window(QMainWindow):
                 logging.info('saving declined by user')
                 self.WarningLabel.setText('')
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
+                self.Save.setChecked(False)  # uncheck button
                 return
             elif response==QMessageBox.Cancel:
                 logging.info('saving canceled by user')
                 self.WarningLabel.setText('')
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
+                self.Save.setChecked(False)  # uncheck button
                 return
         # check if the laser power and target are entered
         if BackupSave==0 and self.OptogeneticsB.currentText()=='on' and (self.Opto_dialog.laser_1_target.text()=='' or self.Opto_dialog.laser_1_calibration_power.text()=='' or self.Opto_dialog.laser_2_target.text()=='' or self.Opto_dialog.laser_2_calibration_power.text()=='' or self.Opto_dialog.laser_1_calibration_voltage.text()=='' or self.Opto_dialog.laser_2_calibration_voltage.text()==''):
@@ -2365,11 +2494,13 @@ class Window(QMainWindow):
                 logging.info('saving declined by user')
                 self.WarningLabel.setText('')
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
+                self.Save.setChecked(False)  # uncheck button
                 return
             elif response==QMessageBox.Cancel:
                 logging.info('saving canceled by user')
                 self.WarningLabel.setText('')
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
+                self.Save.setChecked(False)  # uncheck button
                 return
 
         # Stop Excitation if its running
@@ -2404,6 +2535,7 @@ class Window(QMainWindow):
                 logging.info('empty file name')
                 self.WarningLabel.setText('')
                 self.WarningLabel.setStyleSheet(self.default_warning_color)
+                self.Save.setChecked(False)  # uncheck button
                 return
 
         # Do we have trials to save?
@@ -2540,7 +2672,7 @@ class Window(QMainWindow):
         Obj['MetadataFolder']=self.MetadataFolder
         Obj['SaveFile']=self.SaveFile
 
-        # generate the metadata file
+        # generate the metadata file and update slims
         try:
             # save the metadata collected in the metadata dialogue
             self.Metadata_dialog._save_metadata_dialog_parameters()
@@ -2555,6 +2687,13 @@ class Window(QMainWindow):
             Obj['generate_session_metadata_success']=generated_metadata.session_metadata_success
             Obj['generate_rig_metadata_success']=generated_metadata.rig_metadata_success
             Obj['generate_data_description_success']=generated_metadata.data_description_success
+
+            if save_clicked:    # create water log result if weight after filled and uncheck save
+                if self.BaseWeight.text() != '' and self.WeightAfter.text() != '' and self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']:
+                    pass
+                    #self._AddWaterLogResult(generated_metadata._session())
+
+
         except Exception as e:
             self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved!')
             logging.error('Error generating session metadata: '+str(e))
@@ -2597,6 +2736,8 @@ class Window(QMainWindow):
                 QMessageBox.warning(self, '', 'Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!')
                 self.unsaved_data=True
                 self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
+
+            self.Save.setChecked(False)     # uncheck button
 
     def _GetSaveFolder(self):
         '''
@@ -3631,7 +3772,7 @@ class Window(QMainWindow):
                         return
                     else:
                         # Allow the session to continue, but log error
-                        logging.error('Starting session with conflicting FIP information')
+                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP on, but not in schedule'.format(mouse_id))
                 elif not FIP_is_nan and self.PhotometryB.currentText()=='off':
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
@@ -3644,7 +3785,7 @@ class Window(QMainWindow):
                         return
                     else:
                         # Allow the session to continue, but log error
-                        logging.error('Starting session with conflicting FIP information')
+                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP off, but schedule lists FIP {}'.format(mouse_id, FIP_Mode))
 
                 elif not FIP_is_nan and FIP_Mode != self.FIPMode.currentText() and self.PhotometryB.currentText()=='on':
                     reply = QMessageBox.critical(self,
@@ -3658,7 +3799,7 @@ class Window(QMainWindow):
                         return
                     else:
                         # Allow the session to continue, but log error
-                        logging.error('Starting session with conflicting FIP information')
+                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP mode {}, schedule lists {}'.format(mouse_id, self.FIPMode.currentText(), FIP_Mode))
 
             if self.StartANewSession == 0 :
                 reply = QMessageBox.question(self, 
@@ -3784,6 +3925,8 @@ class Window(QMainWindow):
                     logging.info('Setting Project name: {}'.format(project_name))
                     add_default = False
             if add_default:
+                project_name = 'Behavior Platform'
+                logging.info('Setting Project name: {}'.format('Behavior Platform'))
                 projects = [self.Metadata_dialog.ProjectName.itemText(i)
                             for i in range(self.Metadata_dialog.ProjectName.count())]
                 index = np.where(np.array(projects) == 'Behavior Platform')[0]
@@ -3791,7 +3934,6 @@ class Window(QMainWindow):
                     index = index[0]
                     self.Metadata_dialog.ProjectName.setCurrentIndex(index)
                     self.Metadata_dialog._show_project_info()
-                    logging.info('Setting Project name: {}'.format('Behavior Platform'))
                 else:
                     project_info = {
                         'Funding Institution': ['Allen Institute'],
@@ -3800,9 +3942,7 @@ class Window(QMainWindow):
                         'Fundee': ['nan'],
                     }
                     self.Metadata_dialog.project_info = project_info
-                    project_name = 'Behavior Platform'
                     self.Metadata_dialog.ProjectName.addItems([project_name])
-                    logging.info('Setting Project name: {}'.format(project_name))
             self.project_name = project_name
 
             self.session_run = True   # session has been started
