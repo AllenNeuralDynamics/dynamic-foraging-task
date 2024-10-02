@@ -9,12 +9,13 @@ import logging
 import socket
 import harp
 import threading
-import itertools
+from random import randint
 import yaml
 import copy
 import shutil
 from pathlib import Path
 from datetime import date, datetime, timezone
+import csv
 # from aind_slims_api import SlimsClient    # comment out untill schema has been updated
 # from aind_slims_api import models
 import serial 
@@ -23,7 +24,7 @@ import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
-from PyQt5.QtWidgets import QFileDialog,QVBoxLayout
+from PyQt5.QtWidgets import QFileDialog,QVBoxLayout, QGridLayout
 from PyQt5 import QtWidgets,QtGui,QtCore, uic
 from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
@@ -38,6 +39,7 @@ from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY, EphysRecording
 from foraging_gui.stage import Stage
+from foraging_gui.bias_indicator import BiasIndicator
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
 from aind_data_schema.core.session import Session
@@ -123,6 +125,9 @@ class Window(QMainWindow):
         self.threadpool6=QThreadPool() # for saving data
         self.threadpool_workertimer=QThreadPool() # for timing
 
+        # create bias indicator
+        self.bias_indicator = BiasIndicator()  # TODO: Where to store bias_threshold parameter? self.Settings?
+
         # Set up more parameters
         self.FIP_started=False
         self.OpenOptogenetics=0
@@ -169,8 +174,10 @@ class Window(QMainWindow):
         self._StopPhotometry() # Make sure photoexcitation is stopped 
         # Initialize open ephys saving dictionary
         self.open_ephys=[]
+
         # load the rig metadata
         self._load_rig_metadata()
+
         # show disk space
         self._show_disk_space()
         if not self.start_bonsai_ide:
@@ -318,6 +325,7 @@ class Window(QMainWindow):
         self.Opto_dialog.laser_2_calibration_voltage.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_1_calibration_power.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_2_calibration_power.textChanged.connect(self._toggle_save_color)
+
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
@@ -3209,12 +3217,13 @@ class Window(QMainWindow):
             layout.invalidate()
         layout=self.Visualization.layout()
         if layout is None:
-            layout=QVBoxLayout(self.Visualization)
+            layout=QGridLayout(self.Visualization)
         toolbar = NavigationToolbar(self.PlotM, self)
         toolbar.setMaximumHeight(20)
         toolbar.setMaximumWidth(300)
         layout.addWidget(toolbar)
         layout.addWidget(self.PlotM)
+        layout.addWidget(self.bias_indicator, 0, 1, 2, 1)
         self.PlotM._Update(GeneratedTrials=self.GeneratedTrials)
         self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
 
@@ -4032,12 +4041,13 @@ class Window(QMainWindow):
                     layout.itemAt(i).widget().setParent(None)
                 layout.invalidate()
             if layout is None:
-                layout=QVBoxLayout(self.Visualization)
+                layout=QGridLayout(self.Visualization)
             toolbar = NavigationToolbar(PlotM, self)
             toolbar.setMaximumHeight(20)
             toolbar.setMaximumWidth(300)
-            layout.addWidget(toolbar)
-            layout.addWidget(PlotM)
+            layout.addWidget(toolbar, 0, 0)
+            layout.addWidget(PlotM, 1, 0)
+            layout.addWidget(self.bias_indicator, 0, 1, 2, 1)
             self.ToInitializeVisual=0
             # create workers
             worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.Channel,self.Channel3,self.Channel4)
@@ -4060,6 +4070,7 @@ class Window(QMainWindow):
             self.workerStartTrialLoop1=workerStartTrialLoop1
             self.worker_save=worker_save
         else:
+            self.bias_indicator.clear()
             PlotM=self.PlotM
             worker1=self.worker1
             workerLick=self.workerLick
@@ -4168,8 +4179,15 @@ class Window(QMainWindow):
                 # update licks statistics
                 if self.actionLicks_sta.isChecked():
                     self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
-                # save the data everytrial
 
+                # correctly format data for bias indicator
+                choice_history = [np.nan if x == 2 else x for x in self.GeneratedTrials.B_AnimalResponseHistory]
+                any_reward = [any(x) for x in np.column_stack(self.GeneratedTrials.B_RewardedHistory)]
+                # add data to bias_indicator
+                self.bias_indicator.calculate_bias(choice_history=choice_history,
+                                                   reward_history=np.array(any_reward).astype(int))
+
+                # save the data everytrial
                 if GeneratedTrials.CurrentSimulation==True:
                     GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3,self.Channel4)
                     self.ANewTrial=1
@@ -4241,7 +4259,6 @@ class Window(QMainWindow):
                     # User continues, wait another stall_duration and prompt again
                     logging.error('trial stalled {} minutes, user continued trials'.format(elapsed_time))
                     stall_iteration +=1
-
 
     def _StartTrialLoop1(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         logging.info('starting trial loop 1')
