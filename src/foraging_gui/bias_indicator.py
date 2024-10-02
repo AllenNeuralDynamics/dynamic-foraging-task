@@ -31,20 +31,21 @@ class BiasIndicator(QMainWindow):
 
         # create plot to show bias data
         self.bias_plot = PlotWidget()
-        self.bias_plot.setRange(xRange=[0, 15], yRange=[2*-bias_threshold, 2*bias_threshold])
+        self.bias_plot.setRange(xRange=[1, 15], yRange=[2*-bias_threshold, 2*bias_threshold])
         self.bias_plot.setLabels(left=('Bias', ''), title='Bias')
         self.bias_plot.getAxis('left').setTicks([[(-bias_threshold, 'Left Bias'), (bias_threshold, 'Right Bias')]])
-        self.bias_plot.addLine(y=bias_threshold, pen='r')  # add lines at threshold to make clearer when bias goes over
-        self.bias_plot.addLine(y=-bias_threshold, pen='b')
+        self.bias_plot.addLine(y=bias_threshold, pen='b')  # add lines at threshold to make clearer when bias goes over
+        self.bias_plot.addLine(y=-bias_threshold, pen='r')
         self.setCentralWidget(self.bias_plot)
 
         # create gradient pen
         cm = colormap.get('CET-D1')  # prepare a diverging color map
+        cm.reverse()    # reverse to red == left and blue == right
         cm.setMappingMode('diverging')  # set mapping mode
-        self.bias_pen = cm.getPen(span=(-bias_threshold, bias_threshold),  width=5)  # blue at -threshold to red at +threshold
+        self.bias_pen = cm.getPen(span=(-bias_threshold, bias_threshold),  width=5)  # red at -threshold to blue at +threshold
 
         # create leading point
-        self._current_bias_point = GraphItem(pos=[[0, 0]],  pen=QPen(QColor('green')), brush=QColor('green'))
+        self._current_bias_point = GraphItem(pos=[[0, 0]],  pen=QPen(QColor('green')), brush=QColor('green'), size=9)
         self.bias_plot.addItem(self._current_bias_point)
 
     @property
@@ -119,12 +120,14 @@ class BiasIndicator(QMainWindow):
                     self.biasOver.emit(bias)
                     self._current_bias_point.setData(pos=[[len(self._biases), bias]],
                                                      pen=QColor('purple'),
-                                                     brush=QColor('purple'))
+                                                     brush=QColor('purple'),
+                                                     size=9)
 
                 else:
                     self._current_bias_point.setData(pos=[[len(self._biases), bias]],
                                                      pen=QColor('green'),
-                                                     brush=QColor('green'))
+                                                     brush=QColor('green'),
+                                                     size=9)
 
             except ValueError as v:
                 acceptable_errors = ['Cannot have number of splits n_splits=10 greater than the number of samples:',
@@ -138,9 +141,9 @@ class BiasIndicator(QMainWindow):
 
         # re configure plot
         self.bias_plot.clear()
-        self.bias_plot.addLine(y=self.bias_threshold, pen='r')  # add lines at threshold to make clearer when bias goes over
-        self.bias_plot.addLine(y=-self.bias_threshold, pen='b')
-        self.bias_plot.setRange(xRange=[0, 15], yRange=[2 * -self.bias_threshold, 2 * self.bias_threshold])
+        self.bias_plot.addLine(y=self.bias_threshold, pen='b')  # add lines at threshold to make clearer when bias goes over
+        self.bias_plot.addLine(y=-self.bias_threshold, pen='r')
+        self.bias_plot.setRange(xRange=[1, 15], yRange=[2 * -self.bias_threshold, 2 * self.bias_threshold])
 
         self._biases = []
         self._biases_scatter_items = []
