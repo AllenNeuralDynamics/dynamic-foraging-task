@@ -315,12 +315,12 @@ class PlotV(FigureCanvas):
         self.ax1.set_yticks([0,1])
         self.ax1.set_yticklabels(['L', 'R'])
         self.ax1.set_ylim(-0.6, 1.6)
-        self.ax1.yaxis.set_inverted(True)
+        #self.ax1.yaxis.set_inverted(True)
 
         self.ax2.set_yticks([0,1])
         self.ax2.set_yticklabels(['L', 'R'])
         self.ax2.set_ylim(-0.15, 1.15)
-        self.ax2.yaxis.set_inverted(True)
+        #self.ax2.yaxis.set_inverted(True)
 
         self.ax1.legend(bbox_to_anchor=(1, 1), loc='upper left', fontsize=8)
         self.ax2.legend(bbox_to_anchor=(1, 0), loc='lower left', fontsize=8)
