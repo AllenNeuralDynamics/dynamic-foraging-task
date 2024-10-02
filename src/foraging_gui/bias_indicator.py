@@ -31,9 +31,11 @@ class BiasIndicator(QMainWindow):
 
         # create plot to show bias data
         self.bias_plot = PlotWidget()
+        self.bias_plot.setMouseEnabled(False)
+        self.bias_plot.setMouseTracking(False)
         self.bias_plot.setRange(xRange=[1, 15], yRange=[2*-bias_threshold, 2*bias_threshold])
-        self.bias_plot.setLabels(left=('Bias', ''), title='Bias')
-        self.bias_plot.getAxis('left').setTicks([[(-bias_threshold, 'Left Bias'), (bias_threshold, 'Right Bias')]])
+        self.bias_plot.setLabels(title='Bias')
+        self.bias_plot.getAxis('left').setTicks([[(-bias_threshold, 'L Bias'), (bias_threshold, 'R Bias')]])
         self.bias_plot.addLine(y=bias_threshold, pen='b')  # add lines at threshold to make clearer when bias goes over
         self.bias_plot.addLine(y=-bias_threshold, pen='r')
         self.setCentralWidget(self.bias_plot)
@@ -113,8 +115,7 @@ class BiasIndicator(QMainWindow):
                         self.bias_plot.removeItem(self._biases_scatter_items[0])
                         del self._biases_scatter_items[0]
                         # scroll graph with data
-                        self.bias_plot.setRange(xRange=[bias_count-n_trial_back, bias_count],
-                                                yRange=[2 * -self.bias_threshold, 2 * self.bias_threshold])
+                        self.bias_plot.setRange(xRange=[bias_count-n_trial_back, bias_count])
                 # emit signal and flash current bias point if over
                 if abs(bias) > self.bias_threshold:
                     self.biasOver.emit(bias)
@@ -131,7 +132,8 @@ class BiasIndicator(QMainWindow):
 
             except ValueError as v:
                 acceptable_errors = ['Cannot have number of splits n_splits=10 greater than the number of samples:',
-                                     'n_splits=10 cannot be greater than the number of members in each class.']
+                                     'n_splits=10 cannot be greater than the number of members in each class.',
+                                     'This solver needs samples of at least 2 classes in the data']
                 if any(x in str(v) for x in acceptable_errors):
                     self.log.info("Can't calculate bias because ", str(v))
                 else:

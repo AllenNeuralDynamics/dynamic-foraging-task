@@ -23,7 +23,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
 from PyQt5.QtWidgets import QFileDialog,QVBoxLayout, QGridLayout
 from PyQt5 import QtWidgets,QtGui,QtCore, uic
 from PyQt5.QtCore import QThreadPool,Qt,QThread
@@ -127,6 +127,7 @@ class Window(QMainWindow):
 
         # create bias indicator
         self.bias_indicator = BiasIndicator()  # TODO: Where to store bias_threshold parameter? self.Settings?
+        self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Ignored)
 
         # Set up more parameters
         self.FIP_started=False
@@ -2679,6 +2680,7 @@ class Window(QMainWindow):
                 if self.BaseWeight.text() != '' and self.WeightAfter.text() != '' and self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']:
                     pass
                     #self._AddWaterLogResult(generated_metadata._session())
+                self.bias_indicator.clear()  # prepare for new session
 
 
         except Exception as e:
@@ -3210,6 +3212,7 @@ class Window(QMainWindow):
             self.GeneratedTrials.B_RewardOutcomeTime=self.GeneratedTrials.B_RewardOutcomeTime[0]
             
         self.PlotM=PlotV(win=self,GeneratedTrials=self.GeneratedTrials,width=5, height=4)
+        self.PlotM.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
         layout=self.Visualization.layout()
         if layout is not None:
             for i in reversed(range(layout.count())):
@@ -3221,9 +3224,10 @@ class Window(QMainWindow):
         toolbar = NavigationToolbar(self.PlotM, self)
         toolbar.setMaximumHeight(20)
         toolbar.setMaximumWidth(300)
-        layout.addWidget(toolbar)
-        layout.addWidget(self.PlotM)
-        layout.addWidget(self.bias_indicator, 0, 1, 2, 1)
+        layout.addWidget(toolbar, 0, 0, 1, 2)
+        layout.addWidget(self.PlotM, 1, 0)
+        layout.addWidget(self.bias_indicator, 1, 1)
+        self.bias_indicator.clear()
         self.PlotM._Update(GeneratedTrials=self.GeneratedTrials)
         self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
 
@@ -3595,7 +3599,8 @@ class Window(QMainWindow):
             del self.fiber_photometry_end_time 
 
         # Clear Plots
-        if hasattr(self, 'PlotM') and self.clear_figure_after_save: 
+        if hasattr(self, 'PlotM') and self.clear_figure_after_save:
+            self.bias_indicator.clear()
             self.PlotM._Update(GeneratedTrials=None,Channel=None)
 
         # Add note to log
@@ -4035,6 +4040,7 @@ class Window(QMainWindow):
 
         if self.ToInitializeVisual==1: # only run once
             self.PlotM=PlotM
+            self.PlotM.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
             layout=self.Visualization.layout()
             if layout is not None:
                 for i in reversed(range(layout.count())):
@@ -4045,10 +4051,12 @@ class Window(QMainWindow):
             toolbar = NavigationToolbar(PlotM, self)
             toolbar.setMaximumHeight(20)
             toolbar.setMaximumWidth(300)
-            layout.addWidget(toolbar, 0, 0)
+            layout.addWidget(toolbar, 0, 0, 1, 2)
             layout.addWidget(PlotM, 1, 0)
-            layout.addWidget(self.bias_indicator, 0, 1, 2, 1)
+            layout.addWidget(self.bias_indicator, 1, 1)
             self.ToInitializeVisual=0
+            # clear bias indicator graph
+            self.bias_indicator.clear()
             # create workers
             worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.Channel,self.Channel3,self.Channel4)
             worker1.signals.finished.connect(self._thread_complete)
@@ -4070,7 +4078,6 @@ class Window(QMainWindow):
             self.workerStartTrialLoop1=workerStartTrialLoop1
             self.worker_save=worker_save
         else:
-            self.bias_indicator.clear()
             PlotM=self.PlotM
             worker1=self.worker1
             workerLick=self.workerLick
