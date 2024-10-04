@@ -126,8 +126,8 @@ class Window(QMainWindow):
         self.threadpool_workertimer=QThreadPool() # for timing
 
         # create bias indicator
-        self.bias_indicator = BiasIndicator(x_range=500)  # TODO: Where to store bias_threshold parameter? self.Settings?
         self.bias_n_size = 500
+        self.bias_indicator = BiasIndicator(x_range=self.bias_n_size)  # TODO: Where to store bias_threshold parameter? self.Settings?
         self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
 
         # Set up more parameters
@@ -4196,6 +4196,9 @@ class Window(QMainWindow):
 
                     # use self.bias_n_size of trials to compute bias over or take n the first 0 to N trials
                     l = len(choice_history)
+                    # FIXME: .6  of choice history is a little arbitrary. If the n_trial_back is close to equaling the
+                    #  trial count, the logistic regression can't be calculated because of an error saying
+                    #  'Cannot have number of splits n_splits=10 greater than the number of samples: 2'
                     n_trial_back = self.bias_n_size if l > self.bias_n_size else \
                         round(len(np.array(choice_history)[~np.isnan(choice_history)])*.6)
 
