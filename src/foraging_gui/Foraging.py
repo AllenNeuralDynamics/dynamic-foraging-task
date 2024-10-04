@@ -128,7 +128,7 @@ class Window(QMainWindow):
         # create bias indicator
         self.bias_indicator = BiasIndicator(x_range=50)  # TODO: Where to store bias_threshold parameter? self.Settings?
         self.bias_n_size = 500
-        self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Ignored)
+        self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
 
         # Set up more parameters
         self.FIP_started=False
@@ -4205,9 +4205,6 @@ class Window(QMainWindow):
                                                            'reward_history': np.array(any_reward).astype(int),
                                                            'n_trial_back': n_trial_back})
                     bias_thread.start()
-                    # self.bias_indicator.calculate_bias(choice_history=choice_history,
-                                                       # reward_history=np.array(any_reward).astype(int),
-                                                       # n_trial_back=n_trial_back)
 
                 # save the data everytrial
                 if GeneratedTrials.CurrentSimulation==True:

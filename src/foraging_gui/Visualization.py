@@ -11,8 +11,8 @@ class PlotV(FigureCanvas):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         gs = GridSpec(10, 30, wspace=3, hspace=0.1, bottom=0.1, top=0.95, left=0.04, right=0.98)
 
-        self.ax1 = self.fig.add_subplot(gs[0:4, 0:20])
-        self.ax2 = self.fig.add_subplot(gs[4:10, 0:20], sharex=self.ax1)
+        self.ax1 = self.fig.add_subplot(gs[0:4, 0:25])
+        self.ax2 = self.fig.add_subplot(gs[4:10, 0:25], sharex=self.ax1)
 
         FigureCanvas.__init__(self, self.fig)
         self.RunLength=win.RunLength.text
@@ -322,8 +322,8 @@ class PlotV(FigureCanvas):
         self.ax2.set_ylim(-0.15, 1.15)
         #self.ax2.yaxis.set_inverted(True)
 
-        self.ax1.legend(bbox_to_anchor=(1, 1), loc='upper left', fontsize=8)
-        self.ax2.legend(bbox_to_anchor=(1, 0), loc='lower left', fontsize=8)
+        self.ax1.legend(bbox_to_anchor=(1, 1), loc='upper left', fontsize=6)
+        self.ax2.legend(bbox_to_anchor=(1, 0), loc='lower left', fontsize=6)
 
 class PlotWaterCalibration(FigureCanvas):
     def __init__(self,water_win,dpi=100,width=5, height=4):

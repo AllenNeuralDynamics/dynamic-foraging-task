@@ -1,4 +1,4 @@
-from pyqtgraph import PlotWidget, GraphItem, setConfigOption, colormap
+from pyqtgraph import PlotWidget, GraphItem, setConfigOption, colormap, PlotDataItem
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QColor, QPen
 from PyQt5.QtWidgets import QMainWindow
@@ -10,21 +10,23 @@ from math import floor
 
 setConfigOption('background', 'w')
 setConfigOption('foreground', 'k')
+
+
 class BiasIndicator(QMainWindow):
     """Widget to calculate, display, and alert user of lick bias"""
 
     biasOver = pyqtSignal(float)
+    biasError = pyqtSignal(str)
+    biasValue = pyqtSignal(float)
 
-    def __init__(self, bias_threshold: float = .7, x_range: int = 15,  *args, **kwargs):
+    def __init__(self, bias_threshold: float = .7, x_range: int = 15, *args, **kwargs):
         """
         :param bias_limit: decimal to alert user if bias is above between 0 and 1
         :param x_range: total number of values displayed on the x axis as graph is scrolling
         """
 
-        self.log = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-
         super().__init__(*args, **kwargs)
-
+        self.log = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         self.bias_threshold = bias_threshold
 
         # initialize biases as empy list and x_range
@@ -36,23 +38,24 @@ class BiasIndicator(QMainWindow):
         self.bias_plot = PlotWidget()
         self.bias_plot.setMouseEnabled(False)
         self.bias_plot.setMouseTracking(False)
-        self.bias_plot.setRange(xRange=[1, self.x_range], yRange=[2*-bias_threshold, 2*bias_threshold])
+        self.bias_plot.setRange(xRange=[1, self.x_range], yRange=[2 * -bias_threshold, 2 * bias_threshold])
         self.bias_plot.setLabels(left='Bias')
         self.bias_plot.getAxis('left').setTicks([[(-bias_threshold, 'L'),
                                                   (bias_threshold, 'R')]])
-        #self.bias_plot.getPlotItem().hideAxis('bottom')
+        # self.bias_plot.getPlotItem().hideAxis('bottom')
         self.bias_plot.addLine(y=bias_threshold, pen='b')  # add lines at threshold to make clearer when bias goes over
         self.bias_plot.addLine(y=-bias_threshold, pen='r')
         self.setCentralWidget(self.bias_plot)
 
         # create gradient pen
         cm = colormap.get('CET-D1')  # prepare a diverging color map
-        cm.reverse()    # reverse to red == left and blue == right
+        cm.reverse()  # reverse to red == left and blue == right
         cm.setMappingMode('diverging')  # set mapping mode
-        self.bias_pen = cm.getPen(span=(2*-bias_threshold, 2*bias_threshold),  width=5)  # red at -threshold to blue at +threshold
+        self.bias_pen = cm.getPen(span=(2 * -bias_threshold, 2 * bias_threshold),
+                                  width=5)  # red at -threshold to blue at +threshold
 
         # create leading point
-        self._current_bias_point = GraphItem(pos=[[0, 0]],  pen=QPen(QColor('green')), brush=QColor('green'), size=9)
+        self._current_bias_point = GraphItem(pos=[[0, 0]], pen=QPen(QColor('green')), brush=QColor('green'), size=9)
         self.bias_plot.addItem(self._current_bias_point)
 
     @property
@@ -83,8 +86,8 @@ class BiasIndicator(QMainWindow):
         total number of values displayed on the x axis as graph is scrolling
         :param value: int value to set x range to
         """
-        bias_count = len(self._bias) if len(self._bias) - self.x_range > 0 else 1
-        self.bias_plot.setRange(xRange=[bias_count - self.x_range, bias_count])
+        last_x = self._biases_scatter_items[-1].xData[1] if self._biases_scatter_items != [] else 0
+        self.bias_plot.setRange(xRange=[last_x - self.x_range, last_x])
         self._x_range = value
 
     def calculate_bias(self,
@@ -121,11 +124,13 @@ class BiasIndicator(QMainWindow):
                                              selected_trial_idx=selected_trial_idx)
                 bias = lr['df_beta'].loc['bias']['cross_validation'].values[0]
                 self._biases.append(bias)
+                self.biasValue.emit(bias)
 
+                trial_count = len(choice_history)
                 # add to plot
                 if len(self._biases) >= 2:
-                    bias_count = len(self._biases)
-                    scatter_item = self.bias_plot.plot([bias_count-1, bias_count], self._biases[-2:],
+                    last = self._biases_scatter_items[-1].xData[1] if self._biases_scatter_items != [] else trial_count
+                    scatter_item = self.bias_plot.plot([last, trial_count], self._biases[-2:],
                                                        pen=self.bias_pen)
                     self._biases_scatter_items.append(scatter_item)
 
@@ -133,22 +138,26 @@ class BiasIndicator(QMainWindow):
                     self.bias_plot.removeItem(self._current_bias_point)
                     self.bias_plot.addItem(self._current_bias_point)
 
-                    # to help graph from getting bloated and slow, prune data display in graph
-                    if len(self._biases_scatter_items) >= self.x_range + 2:
-                        self.bias_plot.removeItem(self._biases_scatter_items[0])
-                        del self._biases_scatter_items[0]
-                        # scroll graph with data
-                        self.bias_plot.setRange(xRange=[bias_count - self.x_range, bias_count])
+                    # auto scroll graph
+                    if trial_count >= self.bias_plot.getAxis('bottom').range[1]:
+                        print([trial_count - self.x_range if self.x_range < trial_count else 2,
+                                                        trial_count+1])
+                        self.bias_plot.setRange(xRange=[trial_count - self.x_range if self.x_range < trial_count else 2,
+                                                        trial_count+1])
+                        # self.bias_plot.removeItem(self._biases_scatter_items[0])
+                        # del self._biases_scatter_items[0]
+                        # # scroll graph with data
+
                 # emit signal and flash current bias point if over
                 if abs(bias) > self.bias_threshold:
                     self.biasOver.emit(bias)
-                    self._current_bias_point.setData(pos=[[len(self._biases), bias]],
+                    self._current_bias_point.setData(pos=[[trial_count, bias]],
                                                      pen=QColor('purple'),
                                                      brush=QColor('purple'),
                                                      size=9)
 
                 else:
-                    self._current_bias_point.setData(pos=[[len(self._biases), bias]],
+                    self._current_bias_point.setData(pos=[[trial_count, bias]],
                                                      pen=QColor('green'),
                                                      brush=QColor('green'),
                                                      size=9)
@@ -158,19 +167,20 @@ class BiasIndicator(QMainWindow):
                                      'n_splits=10 cannot be greater than the number of members in each class.',
                                      'This solver needs samples of at least 2 classes in the data']
                 if any(x in str(v) for x in acceptable_errors):
-                    #self.log.info("Can't calculate bias because ", str(v))
-                    print("Can't calculate bias because ", str(v))
+                    self.log.info(f"Can't calculate bias because {str(v).lower()}")
+                    self.biasError.emit(str(v))
                 else:
                     raise v
+
     def clear(self):
         """Clear table of all items and clear biases list"""
 
         # re configure plot
         self.bias_plot.clear()
-        self.bias_plot.addLine(y=self.bias_threshold, pen='b')  # add lines at threshold to make clearer when bias goes over
+        self.bias_plot.addLine(y=self.bias_threshold,
+                               pen='b')  # add lines at threshold to make clearer when bias goes over
         self.bias_plot.addLine(y=-self.bias_threshold, pen='r')
         self.bias_plot.setRange(xRange=[1, self.x_range], yRange=[2 * -self.bias_threshold, 2 * self.bias_threshold])
 
         self._biases = []
         self._biases_scatter_items = []
-
