@@ -126,7 +126,7 @@ class Window(QMainWindow):
         self.threadpool_workertimer=QThreadPool() # for timing
 
         # create bias indicator
-        self.bias_indicator = BiasIndicator(x_range=50)  # TODO: Where to store bias_threshold parameter? self.Settings?
+        self.bias_indicator = BiasIndicator(x_range=500)  # TODO: Where to store bias_threshold parameter? self.Settings?
         self.bias_n_size = 500
         self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
 
