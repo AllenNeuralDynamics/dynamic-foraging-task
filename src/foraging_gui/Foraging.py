@@ -126,7 +126,8 @@ class Window(QMainWindow):
         self.threadpool_workertimer=QThreadPool() # for timing
 
         # create bias indicator
-        self.bias_indicator = BiasIndicator()  # TODO: Where to store bias_threshold parameter? self.Settings?
+        self.bias_indicator = BiasIndicator(x_range=50)  # TODO: Where to store bias_threshold parameter? self.Settings?
+        self.bias_n_size = 500
         self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Ignored)
 
         # Set up more parameters
@@ -4187,12 +4188,26 @@ class Window(QMainWindow):
                 if self.actionLicks_sta.isChecked():
                     self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
 
-                # correctly format data for bias indicator
-                choice_history = [np.nan if x == 2 else x for x in self.GeneratedTrials.B_AnimalResponseHistory]
-                any_reward = [any(x) for x in np.column_stack(self.GeneratedTrials.B_RewardedHistory)]
-                # add data to bias_indicator
-                self.bias_indicator.calculate_bias(choice_history=choice_history,
-                                                   reward_history=np.array(any_reward).astype(int))
+                # calculate bias every 10 trials
+                if (GeneratedTrials.B_CurrentTrialN+1) % 10 == 0 and GeneratedTrials.B_CurrentTrialN+1 > 20:
+                    # correctly format data for bias indicator
+                    choice_history = [1 if x == 2 else int(x) for x in self.GeneratedTrials.B_AnimalResponseHistory]
+                    any_reward = [any(x) for x in np.column_stack(self.GeneratedTrials.B_RewardedHistory)]
+
+                    # use self.bias_n_size of trials to compute bias over or take n the first 0 to N trials
+                    l = len(choice_history)
+                    n_trial_back = self.bias_n_size if l > self.bias_n_size else \
+                        round(len(np.array(choice_history)[~np.isnan(choice_history)])*.6)
+
+                    # add data to bias_indicator
+                    bias_thread = threading.Thread(target=self.bias_indicator.calculate_bias,
+                                                   kwargs={'choice_history': choice_history,
+                                                           'reward_history': np.array(any_reward).astype(int),
+                                                           'n_trial_back': n_trial_back})
+                    bias_thread.start()
+                    # self.bias_indicator.calculate_bias(choice_history=choice_history,
+                                                       # reward_history=np.array(any_reward).astype(int),
+                                                       # n_trial_back=n_trial_back)
 
                 # save the data everytrial
                 if GeneratedTrials.CurrentSimulation==True:
