@@ -38,8 +38,9 @@ class BiasIndicator(QMainWindow):
         self.bias_plot.setMouseTracking(False)
         self.bias_plot.setRange(xRange=[1, self.x_range], yRange=[2*-bias_threshold, 2*bias_threshold])
         self.bias_plot.setLabels(left='Bias')
-        self.bias_plot.getAxis('left').setTicks([[(-bias_threshold, 'L Bias'), (bias_threshold, 'R Bias')]])
-        self.bias_plot.getPlotItem().hideAxis('bottom')
+        self.bias_plot.getAxis('left').setTicks([[(-bias_threshold, 'L'),
+                                                  (bias_threshold, 'R')]])
+        #self.bias_plot.getPlotItem().hideAxis('bottom')
         self.bias_plot.addLine(y=bias_threshold, pen='b')  # add lines at threshold to make clearer when bias goes over
         self.bias_plot.addLine(y=-bias_threshold, pen='r')
         self.setCentralWidget(self.bias_plot)
