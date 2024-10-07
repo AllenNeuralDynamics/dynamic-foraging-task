@@ -5,6 +5,7 @@ import numpy as np
 from deepdiff import DeepDiff
 from datetime import date, datetime, timezone
 import serial.tools.list_ports as list_ports
+import re
 
 import aind_data_schema.core.rig as r
 import aind_data_schema.components.devices as d
@@ -18,7 +19,9 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
 
     # Build the new rig schema
     rig = build_rig_json_core(settings, water_calibration, laser_calibration)
-
+    if rig is None:
+        logging.error('Could not generate Rig json')
+        return
     # Serialize, and then deserialize to compare with existing rig schema 
     new_rig_json = json.loads(rig.model_dump_json())
 
@@ -599,9 +602,20 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     # Generate Rig Schema
     ###########################################################################
     # Assemble rig schema
-    print(settings)
+    rig_id = "{}_{}".format(settings['rig_name'],datetime.now().strftime('%Y%m%d'))
+    if re.match(r.RIG_ID_PATTERN, rig_id) is None: # rig_id does not match regex pattern reqs
+        try:  # assuming rigs are named in room-box-letter fashion
+            room, box, letter = '446-8-B'.split('-')#settings['rig_name'].split('-')
+            rig_name = room + box + '_' + letter
+            rig_id = "{}_{}".format(rig_name, datetime.now().strftime('%Y%m%d'))
+            if re.match(r.RIG_ID_PATTERN, rig_id) is None: # rig_id still does not match regex pattern reqs
+                raise ValueError
+        except ValueError:
+            logging.error(f'Cannot generate rig because rig_id cannot be configured to match {r.RIG_ID_PATTERN}')
+            return
+
     rig = r.Rig(
-        rig_id="{}_{}".format(settings['rig_name'].replace('-', ''),datetime.now().strftime('%Y%m%d')),
+        rig_id=rig_id,
         modification_date=date.today(),
         **components 
         )
