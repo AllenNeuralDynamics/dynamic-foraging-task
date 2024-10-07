@@ -16,7 +16,7 @@ requests
 harp-python
 openpyxl
 deepdiff
-aind-data-schema==0.36.0
+aind-data-schema==1.1.0
 aind-data-schema-models==0.1.10
 pyyaml
 pyqtgraph

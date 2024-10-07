@@ -105,7 +105,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                         sensor_format_unit=SizeUnit.IN,
                         sensor_width=720,
                         sensor_height=540,
-                        max_frame_rate=522,
                         model="Blackfly S BFS-U3-04S2M",
                         serial_number=settings['box_settings']['SideCameraRight'],
                     )
@@ -136,7 +135,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                         sensor_format_unit=SizeUnit.IN,
                         sensor_width=720,
                         sensor_height=540,
-                        max_frame_rate=522,
                         model="Blackfly S BFS-U3-04S2M",
                         serial_number=settings['box_settings']['BottomCamera'],
                     )
@@ -155,7 +153,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     notes="The light intensity sensor was removed; IR illumination is constantly on",
                     data_interface="USB",
                     computer_name=settings['computer_name'],
-                    max_frame_rate=120,
                     sensor_width=640,
                     sensor_height=480,
                     chroma="Color",
@@ -185,7 +182,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     notes="The light intensity sensor was removed; IR illumination is constantly on",
                     data_interface="USB",
                     computer_name=settings['computer_name'],
-                    max_frame_rate=120,
                     sensor_width=640,
                     sensor_height=480,
                     chroma="Color",
@@ -274,7 +270,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             solenoid_valve=d.Device(
                 device_type="Solenoid", 
                 name="Solenoid Left",
-                manufacturer=d.Organization.LEE,
                 model='LHDA1233415H'
                 ),
             lick_sensor_type=d.LickSensorType("Capacitive"),
@@ -292,7 +287,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             solenoid_valve=d.Device(
                 device_type="Solenoid", 
                 name="Solenoid Right",
-                manufacturer=d.Organization.LEE,
                 model='LHDA1233415H'
                 ),
             lick_sensor_type=d.LickSensorType("Capacitive"),
