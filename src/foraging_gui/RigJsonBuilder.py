@@ -605,7 +605,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     rig_id = "{}_{}".format(settings['rig_name'],datetime.now().strftime('%Y%m%d'))
     if re.match(r.RIG_ID_PATTERN, rig_id) is None: # rig_id does not match regex pattern reqs
         try:  # assuming rigs are named in room-box-letter fashion
-            room, box, letter = '446-8-B'.split('-')#settings['rig_name'].split('-')
+            room, box, letter = settings['rig_name'].split('-')
             rig_name = room + '_' + box + letter
             rig_id = "{}_{}".format(rig_name, datetime.now().strftime('%Y%m%d'))
             if re.match(r.RIG_ID_PATTERN, rig_id) is None: # rig_id still does not match regex pattern reqs
