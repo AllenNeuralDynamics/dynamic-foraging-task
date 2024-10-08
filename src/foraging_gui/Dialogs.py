@@ -12,7 +12,7 @@ from typing import Literal
 import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox 
+from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox
 from PyQt5.QtWidgets import QLabel, QDialogButtonBox,QFileDialog,QInputDialog, QLineEdit
 from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject, QTimer
@@ -332,16 +332,39 @@ class WaterCalibrationDialog(QDialog):
                 child.setDefault(False)
                 child.setAutoDefault(False)
 
-        # setup flags to keep lines open
-        self.left_valve_open_timer = QTimer(timeout=lambda: self.reopen_valve('Left'), interval=10000)
-        self.right_valve_open_timer = QTimer(timeout=lambda: self.reopen_valve('Right'), interval=10000)
+        # setup QTimers to keep lines open
+        self.left_open_timer = QTimer(timeout=lambda: self.reopen_valve('Left'), interval=10000)
+        self.right_open_timer = QTimer(timeout=lambda: self.reopen_valve('Right'), interval=10000)
 
+        # setup QTimers to keep close lines after 5ml
+        self.left_close_timer = QTimer(timeout=lambda:  self.OpenLeft5ml.setChecked(False))  # trigger _ToggleValve call
+        self.right_close_timer = QTimer(timeout=lambda: self.OpenRight5ml.setChecked(False))
+
+        # setup Qtimers for updating text countdown
+        self.left_text_timer = QTimer(timeout=lambda:
+                      self.OpenLeft5ml.setText(f'Open left 5ml: {round(self.left_close_timer.remainingTime()/1000)}s'),
+                      interval=1000)
+        self.right_text_timer = QTimer(timeout=lambda:
+                     self.OpenRight5ml.setText(f'Open right 5ml: {round(self.right_close_timer.remainingTime()/1000)}s'),
+                     interval=1000)
 
     def _connectSignalsSlots(self):
         self.SpotCheckLeft.clicked.connect(self._SpotCheckLeft)
         self.SpotCheckRight.clicked.connect(self._SpotCheckRight)
-        self.OpenLeftForever.clicked.connect(self._OpenLeftForever)
-        self.OpenRightForever.clicked.connect(self._OpenRightForever)
+
+        # Set up OpenLeftForever button
+        self.OpenLeftForever.clicked.connect(lambda: self._ToggleValve(self.OpenLeftForever, 'Left'))
+        self.OpenLeftForever.clicked.connect(lambda: self.OpenLeft5ml.setDisabled(self.OpenLeftForever.isChecked()))
+        # Set up OpenRightForever button
+        self.OpenRightForever.clicked.connect(lambda: self._ToggleValve(self.OpenRightForever, 'Right'))
+        self.OpenRightForever.clicked.connect(lambda: self.OpenRight5ml.setDisabled(self.OpenRightForever.isChecked()))
+        # Set up OpenLeft5ml button
+        self.OpenLeft5ml.toggled.connect(lambda val: self._ToggleValve(self.OpenLeft5ml, 'Left'))
+        self.OpenLeft5ml.toggled.connect(lambda val: self.OpenLeftForever.setDisabled(val))
+        # Set up OpenRight5ml button
+        self.OpenRight5ml.toggled.connect(lambda val: self._ToggleValve(self.OpenRight5ml, 'Right'))
+        self.OpenRight5ml.toggled.connect(lambda val: self.OpenRightForever.setDisabled(val))
+
         self.SaveLeft.clicked.connect(self._SaveLeft)
         self.SaveRight.clicked.connect(self._SaveRight)
         self.StartCalibratingLeft.clicked.connect(self._StartCalibratingLeft)
@@ -877,53 +900,52 @@ class WaterCalibrationDialog(QDialog):
             self.ToInitializeVisual=0
         self.PlotM._Update()
 
-    def _OpenLeftForever(self):
-        '''Open the left valve forever'''
+    def _ToggleValve(self, button, valve: Literal['Left', 'Right']):
+        """
+        Toggle open/close state of specified valve and set up logic based on button pressed
+        :param button: button that was pressed
+        :param valve: which valve to open. Restricted to Right or Left
+        """
+
         self.MainWindow._ConnectBonsai()
         if self.MainWindow.InitializeBonsaiSuccessfully==0:
             return
-        if self.OpenLeftForever.isChecked():
-            # change button color
-            self.OpenLeftForever.setStyleSheet("background-color : green;")
-            self.MainWindow.Channel.LeftValue(float(1000) * 1000)  # set the valve open time
-            self.MainWindow.Channel3.ManualWater_Left(int(1))  # set valve initially open
-            self.left_valve_open_timer.start()
-        else:
-            # change button color
-            self.OpenLeftForever.setStyleSheet("background-color : none")
-            self.left_valve_open_timer.stop()
-            # close the valve
-            self.MainWindow.Channel.LeftValue(float(0.001)*1000)
-            time.sleep(0.01) 
-            self.MainWindow.Channel3.ManualWater_Left(int(1))
-            # set the default valve open time
-            time.sleep(0.01) 
-            self.MainWindow.Channel.LeftValue(float(self.MainWindow.LeftValue.text())*1000)
 
-    def _OpenRightForever(self):
-        '''Open the right valve forever'''
-        self.MainWindow._ConnectBonsai()
-        if self.MainWindow.InitializeBonsaiSuccessfully==0:
-            return
-        if self.OpenRightForever.isChecked():
-            # change button color
-            self.OpenRightForever.setStyleSheet("background-color : green;")
-            self.MainWindow.Channel.RightValue(float(1000) * 1000)  # set the valve open time
-            self.MainWindow.Channel3.ManualWater_Right(int(1))  # set valve initially open
-            self.right_valve_open_timer.start()
+        set_valve_time = getattr(self.MainWindow.Channel, f'{valve}Value')
+        toggle_valve_state = getattr(self.MainWindow.Channel3, f'ManualWater_{valve}')
+        open_timer = getattr(self, f'{valve.lower()}_open_timer')
+        close_timer = getattr(self, f'{valve.lower()}_close_timer')
+        text_timer = getattr(self, f'{valve.lower()}_text_timer')
 
-        else:
+        if button.isChecked():  # open valve
+            button.setStyleSheet("background-color : green;")
+            set_valve_time(float(1000) * 1000)  # set the valve open time to max value
+            toggle_valve_state(int(1))  # set valve initially open
+
+            if button.text() == f'Open {valve.lower()} 5ml':    # set up additional logic to only open for 5ml
+                five_ml_time_ms = round(self._VolumeToTime(5000, valve) * 1000)  # calculate time for valve to stay open
+                close_timer.setInterval(five_ml_time_ms)  # set interval of valve close time to be five_ml_time_ms
+                close_timer.setSingleShot(True)  # only trigger once when 5ml has been expelled
+                text_timer.start()  # start timer to update text
+                close_timer.start()
+
+            open_timer.start()
+
+        else:   # close open valve
             # change button color
-            self.OpenRightForever.setStyleSheet("background-color : none")
-            self.right_valve_open_timer.stop()
+            button.setStyleSheet("background-color : none")
+            open_timer.stop()
+            if f'Open {valve.lower()} 5ml' in button.text():
+                close_timer.stop()
+                text_timer.stop()
+                button.setText(f'Open {valve.lower()} 5ml')
 
             # close the valve
-            self.MainWindow.Channel.RightValue(float(0.001)*1000)
+            toggle_valve_state(int(1))
+
+            # reset the default valve open time
             time.sleep(0.01) 
-            self.MainWindow.Channel3.ManualWater_Right(int(1))
-            # set the default valve open time
-            time.sleep(0.01) 
-            self.MainWindow.Channel.RightValue(float(self.MainWindow.RightValue.text())*1000)
+            set_valve_time(float(getattr(self.MainWindow, f'{valve}Value').text())*1000)
 
     def reopen_valve(self, valve: Literal['Left', 'Right']):
         """Function to reopen the right or left water line open. Valve must be open prior to calling this function.
@@ -940,9 +962,14 @@ class WaterCalibrationDialog(QDialog):
         seconds = int(np.ceil(np.mod(total_seconds,60)))
         return '{}:{:02}'.format(minutes, seconds)
     
-    def _VolumeToTime(self,volume,valve):
-        # x = (y-b)/m 
-        if hasattr(self.MainWindow, 'latest_fitting'):
+    def _VolumeToTime(self, volume, valve: Literal['Left', 'Right'] ):
+        """
+        Function to return the amount of time(s) it takes for water line to flush specified volume of water (mg)
+        :param volume: volume to flush in mg
+        :param valve: string specifying right or left valve
+        """
+        # x = (y-b)/m
+        if hasattr(self.MainWindow, 'latest_fitting') and self.MainWindow.latest_fitting != {}:
             fit = self.MainWindow.latest_fitting[valve]
             m = fit[0]
             b = fit[1] 
