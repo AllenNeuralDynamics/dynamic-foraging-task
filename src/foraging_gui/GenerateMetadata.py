@@ -26,8 +26,7 @@ from aind_data_schema.components.coordinates import RelativePosition, Translatio
 from aind_data_schema.core.session import (
     Coordinates3d,
     DomeModule,
-    EphysModule,
-    EphysProbeConfig,
+    ManipulatorModule,
     Session,
     Stream,
     RewardDeliveryConfig,
@@ -960,11 +959,10 @@ class generate_metadata:
         self.stmulus_device_names=[]
         for ind_probe, probe in enumerate(self.probe_names):
             if probe in self.Obj['meta_data_dialog']['session_metadata']['probes']:
-                self.ephys_modules.append(EphysModule(
+                self.ephys_modules.append(ManipulatorModule(
                     rotation_angle=self.Obj['meta_data_dialog']['session_metadata']['probes'][probe]['RotationAngle'],
                     arc_angle=self.Obj['meta_data_dialog']['session_metadata']['probes'][probe]['ArcAngle'],
                     module_angle=self.Obj['meta_data_dialog']['session_metadata']['probes'][probe]['ModuleAngle'],
-                    ephys_probes=[EphysProbeConfig(name=probe)],
                     assembly_name=self._find_assembly_names(probe),
                     primary_targeted_structure=self.Obj['meta_data_dialog']['session_metadata']['probes'][probe]['ProbeTarget'],
                     manipulator_coordinates=Coordinates3d(
