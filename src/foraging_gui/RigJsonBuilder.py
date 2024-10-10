@@ -12,7 +12,7 @@ import aind_data_schema.components.devices as d
 import aind_data_schema.components.coordinates as c
 from aind_data_schema_models.modalities import Modality
 from aind_data_schema_models.units import SizeUnit
-
+from aind_data_schema_models.organizations import Organization
 from foraging_gui.Visualization import GetWaterCalibration
 
 def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibration):    
@@ -273,7 +273,8 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             solenoid_valve=d.Device(
                 device_type="Solenoid", 
                 name="Solenoid Left",
-                model='LHDA1233415H'
+                model='LHDA1233415H',
+                manufacturer=Organization.from_name('The Lee Company')
                 ),
             lick_sensor_type=d.LickSensorType("Capacitive"),
             lick_sensor = d.Device(
@@ -290,7 +291,8 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             solenoid_valve=d.Device(
                 device_type="Solenoid", 
                 name="Solenoid Right",
-                model='LHDA1233415H'
+                model='LHDA1233415H',
+                manufacturer=Organization.from_name('The Lee Company')
                 ),
             lick_sensor_type=d.LickSensorType("Capacitive"),
             lick_sensor = d.Device(
