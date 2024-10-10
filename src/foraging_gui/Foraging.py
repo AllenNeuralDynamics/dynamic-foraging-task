@@ -4200,11 +4200,12 @@ class Window(QMainWindow):
                     #  trial count, the logistic regression can't be calculated because of an error saying
                     #  'Cannot have number of splits n_splits=10 greater than the number of samples: 2'
                     n_trial_back = self.bias_n_size if l > self.bias_n_size else \
-                        round(len(np.array(choice_history)[~np.isnan(choice_history)])*.6)
+                        round(len(np.array(choice_history)[~np.isnan(choice_history)]))
 
                     # add data to bias_indicator
                     bias_thread = threading.Thread(target=self.bias_indicator.calculate_bias,
-                                                   kwargs={'choice_history': choice_history,
+                                                   kwargs={'time_point': self.GeneratedTrials.B_TrialStartTime[-1],
+                                                           'choice_history': choice_history,
                                                            'reward_history': np.array(any_reward).astype(int),
                                                            'n_trial_back': n_trial_back})
                     bias_thread.start()
