@@ -1,4 +1,4 @@
-from pyqtgraph import PlotWidget, GraphItem, setConfigOption, colormap, PlotDataItem
+from pyqtgraph import PlotWidget, GraphItem, setConfigOption, colormap, PlotDataItem, TextItem
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QColor, QPen
 from PyQt5.QtWidgets import QMainWindow
@@ -6,11 +6,9 @@ from aind_dynamic_foraging_models.logistic_regression import fit_logistic_regres
 import numpy as np
 from typing import Union, List
 import logging
-from math import floor
 
 setConfigOption('background', 'w')
 setConfigOption('foreground', 'k')
-
 
 class BiasIndicator(QMainWindow):
     """Widget to calculate, display, and alert user of lick bias"""
@@ -61,6 +59,12 @@ class BiasIndicator(QMainWindow):
         self._current_bias_point = GraphItem(pos=[[0, 0]], pen=QPen(QColor('green')), brush=QColor('green'), size=9)
         self.bias_plot.addItem(self._current_bias_point)
 
+        # create bias label
+        self.bias_label = TextItem(color='black', anchor=(0, -.5))
+        self.biasValue.connect(lambda bias, trial: self.bias_label.setText(str(round(bias, 3))))
+        self.biasValue.connect(lambda bias, trial: self.bias_label.setPos(self._current_bias_point.pos[0][0], bias))
+        self.bias_plot.addItem(self.bias_label)
+
     @property
     def bias_threshold(self) -> float:
         """Decimal threshold at which alert user if bias is above"""
@@ -99,6 +103,7 @@ class BiasIndicator(QMainWindow):
                        reward_history: Union[List, np.ndarray],
                        n_trial_back: int = 15,
                        selected_trial_idx: Union[List, np.ndarray] = None,
+                       cv: int = 10,
                        ):
 
         """Fit logistic regression model to choice and reward history.
@@ -116,6 +121,8 @@ class BiasIndicator(QMainWindow):
            selected_trial_idx : Union[List, np.ndarray], optional
                If None, use all trials;
                else, only look at selected trials for fitting, but using the full history.
+           cv : int, optional
+                Number of folds in cross validation, by default 10
            """
 
         # calculate logistic regression and extract bias
@@ -127,7 +134,7 @@ class BiasIndicator(QMainWindow):
                                              reward_history=reward_history,
                                              n_trial_back=n_trial_back,
                                              selected_trial_idx=selected_trial_idx,
-                                             cv=2)
+                                             cv=cv)
                 bias = lr['df_beta'].loc['bias']['cross_validation'].values[0]
                 self.log.info(f"Bias: {bias} Trial Count: {trial_count}")
                 self._biases.append(bias)
@@ -163,8 +170,8 @@ class BiasIndicator(QMainWindow):
                                                      size=9)
 
             except ValueError as v:
-                acceptable_errors = ['Cannot have number of splits n_splits=10 greater than the number of samples:',
-                                     'n_splits=10 cannot be greater than the number of members in each class.',
+                acceptable_errors = [f'Cannot have number of splits n_splits={cv} greater than the number of samples:',
+                                     f'n_splits={cv} cannot be greater than the number of members in each class.',
                                      'This solver needs samples of at least 2 classes in the data']
                 if any(x in str(v) for x in acceptable_errors):
                     self.log.info(f"Can't calculate bias at trial count {trial_count} because {str(v).lower()}")
@@ -190,3 +197,6 @@ class BiasIndicator(QMainWindow):
         # reset leading point
         self._current_bias_point = GraphItem(pos=[[0, 0]], pen=QPen(QColor('green')), brush=QColor('green'), size=9)
         self.bias_plot.addItem(self._current_bias_point)
+        # reset bias label
+        self.bias_label.setText('')
+        self.bias_plot.addItem(self.bias_label)

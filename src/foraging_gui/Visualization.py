@@ -7,12 +7,12 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 class PlotV(FigureCanvas):
-    def __init__(self,win,GeneratedTrials=None,parent=None,dpi=100,width=8, height=4):
+    def __init__(self,win,GeneratedTrials=None,parent=None,dpi=100,width=5, height=4):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         gs = GridSpec(10, 30, wspace=3, hspace=0.1, bottom=0.1, top=0.95, left=0.04, right=0.98)
 
-        self.ax1 = self.fig.add_subplot(gs[0:6, 0:40])
-        self.ax2 = self.fig.add_subplot(gs[6:10, 0:40], sharex=self.ax1)
+        self.ax1 = self.fig.add_subplot(gs[0:6, 0:26])
+        self.ax2 = self.fig.add_subplot(gs[6:10, 0:26], sharex=self.ax1)
 
         FigureCanvas.__init__(self, self.fig)
         self.RunLength=win.RunLength.text
@@ -23,6 +23,8 @@ class PlotV(FigureCanvas):
         self.StepSizeSetValue=win.StepSize.setValue
         self.MarkerSize=3
         self.main_win = win
+
+        self.setMinimumWidth(650)
 
     def _Update(self,GeneratedTrials=None,Channel=None):
 
