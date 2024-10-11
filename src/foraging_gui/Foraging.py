@@ -1216,6 +1216,7 @@ class Window(QMainWindow):
             Connect to Slims
         '''
         try:
+            print(os.environ)
             self.slims_client = SlimsClient(username=os.environ['SLIMS_USERNAME'],
                                             password=os.environ['SLIMS_PASSWORD'])
         except KeyError:
