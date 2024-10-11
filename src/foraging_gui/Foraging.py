@@ -129,7 +129,8 @@ class Window(QMainWindow):
         self.bias_n_size = 500
         self.bias_indicator = BiasIndicator(x_range=self.bias_n_size)  # TODO: Where to store bias_threshold parameter? self.Settings?
         self.bias_indicator.biasValue.connect(lambda bias, trial_num: setattr(self, 'B_Bias_R', bias))  # update dashboard value
-        self.bias_indicator.biasValue.connect(lambda bias, trial_num: self.GeneratedTrials.B_Bias.append(bias))    # update generated_trials value
+        self.bias_indicator.biasValue.connect(lambda bias, trial_num: self.GeneratedTrials.B_Bias.__setitem__(trial_num,
+                                                                                                              bias))    # update generated_trials value
         self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
 
         # Set up more parameters
@@ -4190,6 +4191,9 @@ class Window(QMainWindow):
                 if self.actionLicks_sta.isChecked():
                     self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
 
+                # extend GeneratedTrials.B_Bias list and set newest bias value to last bias value. If new bias is
+                # calculated, value will be updated
+                GeneratedTrials.B_Bias.append(GeneratedTrials.B_Bias[-1])
                 # calculate bias every 10 trials
                 if (GeneratedTrials.B_CurrentTrialN+1) % 10 == 0 and GeneratedTrials.B_CurrentTrialN+1 > 20:
                     # correctly format data for bias indicator
