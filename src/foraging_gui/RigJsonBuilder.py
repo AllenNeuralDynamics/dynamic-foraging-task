@@ -5,20 +5,23 @@ import numpy as np
 from deepdiff import DeepDiff
 from datetime import date, datetime, timezone
 import serial.tools.list_ports as list_ports
+import re
 
 import aind_data_schema.core.rig as r
 import aind_data_schema.components.devices as d
 import aind_data_schema.components.coordinates as c
 from aind_data_schema_models.modalities import Modality
 from aind_data_schema_models.units import SizeUnit
-
+from aind_data_schema_models.organizations import Organization
 from foraging_gui.Visualization import GetWaterCalibration
 
 def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibration):    
 
     # Build the new rig schema
     rig = build_rig_json_core(settings, water_calibration, laser_calibration)
-
+    if rig is None:
+        logging.error('Could not generate Rig json')
+        return
     # Serialize, and then deserialize to compare with existing rig schema 
     new_rig_json = json.loads(rig.model_dump_json())
 
@@ -105,7 +108,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                         sensor_format_unit=SizeUnit.IN,
                         sensor_width=720,
                         sensor_height=540,
-                        max_frame_rate=522,
                         model="Blackfly S BFS-U3-04S2M",
                         serial_number=settings['box_settings']['SideCameraRight'],
                     )
@@ -136,7 +138,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                         sensor_format_unit=SizeUnit.IN,
                         sensor_width=720,
                         sensor_height=540,
-                        max_frame_rate=522,
                         model="Blackfly S BFS-U3-04S2M",
                         serial_number=settings['box_settings']['BottomCamera'],
                     )
@@ -155,7 +156,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     notes="The light intensity sensor was removed; IR illumination is constantly on",
                     data_interface="USB",
                     computer_name=settings['computer_name'],
-                    max_frame_rate=120,
                     sensor_width=640,
                     sensor_height=480,
                     chroma="Color",
@@ -185,7 +185,6 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     notes="The light intensity sensor was removed; IR illumination is constantly on",
                     data_interface="USB",
                     computer_name=settings['computer_name'],
-                    max_frame_rate=120,
                     sensor_width=640,
                     sensor_height=480,
                     chroma="Color",
@@ -274,8 +273,8 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             solenoid_valve=d.Device(
                 device_type="Solenoid", 
                 name="Solenoid Left",
-                manufacturer=d.Organization.LEE,
-                model='LHDA1233415H'
+                model='LHDA1233415H',
+                manufacturer=Organization.from_name('The Lee Company')
                 ),
             lick_sensor_type=d.LickSensorType("Capacitive"),
             lick_sensor = d.Device(
@@ -292,8 +291,8 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             solenoid_valve=d.Device(
                 device_type="Solenoid", 
                 name="Solenoid Right",
-                manufacturer=d.Organization.LEE,
-                model='LHDA1233415H'
+                model='LHDA1233415H',
+                manufacturer=Organization.from_name('The Lee Company')
                 ),
             lick_sensor_type=d.LickSensorType("Capacitive"),
             lick_sensor = d.Device(
@@ -605,8 +604,20 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
     # Generate Rig Schema
     ###########################################################################
     # Assemble rig schema
+    rig_id = "{}_{}".format(settings['rig_name'],datetime.now().strftime('%Y%m%d'))
+    if re.match(r.RIG_ID_PATTERN, rig_id) is None: # rig_id does not match regex pattern reqs
+        try:  # assuming rigs are named in room-box-letter fashion
+            room, box, letter = settings['rig_name'].split('-')
+            rig_name = room + '_' + box + letter
+            rig_id = "{}_{}".format(rig_name, datetime.now().strftime('%Y%m%d'))
+            if re.match(r.RIG_ID_PATTERN, rig_id) is None: # rig_id still does not match regex pattern reqs
+                raise ValueError
+        except ValueError:
+            logging.error(f'Cannot generate rig because rig_id cannot be configured to match {r.RIG_ID_PATTERN}')
+            return
+
     rig = r.Rig(
-        rig_id="{}_{}".format(settings['rig_name'],datetime.now().strftime('%Y%m%d')), 
+        rig_id=rig_id,
         modification_date=date.today(),
         **components 
         )
