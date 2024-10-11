@@ -60,7 +60,7 @@ class BiasIndicator(QMainWindow):
         self.bias_plot.addItem(self._current_bias_point)
 
         # create bias label
-        self.bias_label = TextItem(color='black', anchor=(0, -.5))
+        self.bias_label = TextItem(color='black', anchor=(1, 0))
         self.biasValue.connect(lambda bias, trial: self.bias_label.setText(str(round(bias, 3))))
         self.biasValue.connect(lambda bias, trial: self.bias_label.setPos(self._current_bias_point.pos[0][0], bias))
         self.bias_plot.addItem(self.bias_label)
