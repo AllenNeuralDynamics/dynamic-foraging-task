@@ -11,8 +11,8 @@ class PlotV(FigureCanvas):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         gs = GridSpec(10, 30, wspace=3, hspace=0.1, bottom=0.1, top=0.95, left=0.04, right=0.98)
 
-        self.ax1 = self.fig.add_subplot(gs[0:4, 0:25])
-        self.ax2 = self.fig.add_subplot(gs[4:10, 0:25], sharex=self.ax1)
+        self.ax1 = self.fig.add_subplot(gs[0:6, 0:26])
+        self.ax2 = self.fig.add_subplot(gs[6:10, 0:26], sharex=self.ax1)
 
         FigureCanvas.__init__(self, self.fig)
         self.RunLength=win.RunLength.text
@@ -23,6 +23,8 @@ class PlotV(FigureCanvas):
         self.StepSizeSetValue=win.StepSize.setValue
         self.MarkerSize=3
         self.main_win = win
+
+        self.setMinimumWidth(650)
 
     def _Update(self,GeneratedTrials=None,Channel=None):
 
@@ -315,11 +317,11 @@ class PlotV(FigureCanvas):
         self.ax1.set_yticks([0,1])
         self.ax1.set_yticklabels(['L', 'R'])
         self.ax1.set_ylim(-0.6, 1.6)
-        #self.ax1.yaxis.set_inverted(True)
+        self.ax1.yaxis.set_inverted(True)
 
         self.ax2.set_yticks([0,1])
-        self.ax2.set_yticklabels(['L', 'R'])
-        self.ax2.set_ylim(-0.15, 1.15)
+        #self.ax2.set_yticklabels(['L', 'R'])
+        self.ax2.set_ylim(-0.05, 1.05)
         #self.ax2.yaxis.set_inverted(True)
 
         self.ax1.legend(bbox_to_anchor=(1, 1), loc='upper left', fontsize=6)
