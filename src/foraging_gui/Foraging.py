@@ -128,6 +128,7 @@ class Window(QMainWindow):
         # create bias indicator
         self.bias_n_size = 500
         self.bias_indicator = BiasIndicator(x_range=self.bias_n_size)  # TODO: Where to store bias_threshold parameter? self.Settings?
+        self.bias_indicator.biasValue.connect(self.bias_calculated)  # update dashboard value
         self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
 
         # Set up more parameters
@@ -3972,6 +3973,11 @@ class Window(QMainWindow):
 
             self.ManualWaterWarning.setText('')
 
+            # fill out GenerateTrials B_Bias
+            last_bias = self.GeneratedTrials.B_Bias[-1]
+            b_bias_len = len(self.GeneratedTrials.B_Bias)
+            self.GeneratedTrials.B_Bias += [last_bias]*((self.GeneratedTrials.B_CurrentTrialN+1)-b_bias_len)
+
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
             self._StopCurrentSession() 
@@ -4201,12 +4207,13 @@ class Window(QMainWindow):
                     #  'Cannot have number of splits n_splits=10 greater than the number of samples: 2'
                     n_trial_back = self.bias_n_size if l > self.bias_n_size else \
                         round(len(np.array(choice_history)[~np.isnan(choice_history)])*.6)
-
                     # add data to bias_indicator
                     bias_thread = threading.Thread(target=self.bias_indicator.calculate_bias,
-                                                   kwargs={'choice_history': choice_history,
+                                                   kwargs={'time_point': self.GeneratedTrials.B_TrialStartTime[-1],
+                                                           'choice_history': choice_history,
                                                            'reward_history': np.array(any_reward).astype(int),
-                                                           'n_trial_back': n_trial_back})
+                                                           'n_trial_back': n_trial_back,
+                                                           'cv': 2})
                     bias_thread.start()
 
                 # save the data everytrial
@@ -4281,6 +4288,18 @@ class Window(QMainWindow):
                     # User continues, wait another stall_duration and prompt again
                     logging.error('trial stalled {} minutes, user continued trials'.format(elapsed_time))
                     stall_iteration +=1
+
+    def bias_calculated(self, bias: float, trial_number: int) -> None:
+        """
+        Function to update GeneratedTrials.B_Bias and Bias attribute when new bias value is calculated
+        :param bias: bias value
+        :param trial_number: trial number at which bias value was calculated
+        """
+
+        self.B_Bias_R = bias
+        last_bias_filler = [self.GeneratedTrials.B_Bias[-1]]*(trial_number-len(self.GeneratedTrials.B_Bias))
+        self.GeneratedTrials.B_Bias += last_bias_filler
+        self.GeneratedTrials.B_Bias[trial_number-1] = bias
 
     def _StartTrialLoop1(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         logging.info('starting trial loop 1')

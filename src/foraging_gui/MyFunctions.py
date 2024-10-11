@@ -25,6 +25,7 @@ PID_NEWSCALE = 0xea61
 class GenerateTrials():
     def __init__(self,win):
         self.win=win
+        self.B_Bias = [0]  # lick bias
         self.B_RewardFamilies=self.win.RewardFamilies
         self.B_CurrentTrialN=-1 # trial number starts from 0; Update when trial starts
         self.B_LickPortN=2
