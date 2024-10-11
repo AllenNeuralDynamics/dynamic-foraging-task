@@ -1219,9 +1219,9 @@ class Window(QMainWindow):
             print(os.environ)
             self.slims_client = SlimsClient(username=os.environ['SLIMS_USERNAME'],
                                             password=os.environ['SLIMS_PASSWORD'])
-        except KeyError:
+        except KeyError as e:
             raise KeyError('SLIMS_USERNAME and SLIMS_PASSWORD do not exist as '
-                         'environment variables on machine. Please add')
+                         f'environment variables on machine. Please add. {e}')
 
         try:
             self.slims_client.fetch_model(models.SlimsMouseContent, barcode='00000000')
