@@ -1231,7 +1231,7 @@ class Window(QMainWindow):
                                 f' Please check credentials:\n'
                                 f'Username: {os.environ["SLIMS_USERNAME"]}\n'
                                 f'Password: {os.environ["SLIMS_PASSWORD"]}')
-            elif str(e) != 'No record found.':    # bypass if mouse doesn't exist
+            elif 'No record found' not in str(e):    # bypass if mouse doesn't exist
                 raise Exception(f'Exception trying to read from Slims: {e}.\n')
         logging.info('Successfully connected to Slims')
 
