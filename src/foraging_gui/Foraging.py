@@ -129,7 +129,7 @@ class Window(QMainWindow):
         self.bias_n_size = 500
         self.bias_indicator = BiasIndicator(x_range=self.bias_n_size)  # TODO: Where to store bias_threshold parameter? self.Settings?
         self.bias_indicator.biasValue.connect(lambda bias, trial_num: setattr(self, 'B_Bias_R', bias))  # update dashboard value
-        self.bias_indicator.biasValue.connect(lambda bias, trial_num: setattr(self.GeneratedTrials, 'B_Bias', bias))    # update generated_trials value
+        self.bias_indicator.biasValue.connect(lambda bias, trial_num: self.GeneratedTrials.B_Bias.append(bias))    # update generated_trials value
         self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
 
         # Set up more parameters
