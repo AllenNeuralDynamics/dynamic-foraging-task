@@ -4038,10 +4038,6 @@ class Window(QMainWindow):
             GeneratedTrials._GenerateATrial(self.Channel4)
             # delete licks from the previous session
             GeneratedTrials._DeletePreviousLicks(self.Channel2)
-            if self.Settings['AutomaticUpload']:
-                self._generate_upload_manifest()  # Generate the upload manifest file
-            else:
-                logging.info('Skipping Automatic Upload based on ForagingSettings.json')
         else:
             GeneratedTrials=self.GeneratedTrials
 
@@ -4141,7 +4137,14 @@ class Window(QMainWindow):
                 # Reset stall timer
                 last_trial_start = time.time()
                 stall_iteration = 1
-                
+
+                # create manifest after first trial is completed
+                if GeneratedTrials.B_CurrentTrialN == 1:
+                    if self.Settings['AutomaticUpload']:
+                        self._generate_upload_manifest()  # Generate the upload manifest file
+                    else:
+                        logging.info('Skipping Automatic Upload based on ForagingSettings.json')
+
                 # can start a new trial when we receive the trial end signal from Bonsai
                 self.ANewTrial=0 
                 GeneratedTrials.B_CurrentTrialN+=1
