@@ -3703,6 +3703,27 @@ class Window(QMainWindow):
         self.ID.setEnabled(enable)
         self.Experimenter.setEnabled(enable)
 
+    def _set_default_project(self):
+        '''Set default project information'''
+        project_name = 'Behavior Platform'
+        logging.info('Setting Project name: {}'.format('Behavior Platform'))
+        projects = [self.Metadata_dialog.ProjectName.itemText(i)
+                    for i in range(self.Metadata_dialog.ProjectName.count())]
+        index = np.where(np.array(projects) == 'Behavior Platform')[0]
+        if len(index) > 0:
+            index = index[0]
+            self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+            self.Metadata_dialog._show_project_info()
+        else:
+            project_info = {
+                'Funding Institution': ['Allen Institute'],
+                'Grant Number': ['nan'],
+                'Investigators': ['Jeremiah Cohen'],
+                'Fundee': ['nan'],
+            }
+            self.Metadata_dialog.project_info = project_info
+            self.Metadata_dialog.ProjectName.addItems([project_name])
+
     def _Start(self):
         '''start trial loop'''
 
@@ -3919,27 +3940,11 @@ class Window(QMainWindow):
                     self.Metadata_dialog._show_project_info()
                     logging.info('Setting Project name: {}'.format(project_name))
                     self.add_default_project_name = False
+                    
             if self.add_default_project_name:
-                project_name = 'Behavior Platform'
-                logging.info('Setting Project name: {}'.format('Behavior Platform'))
-                projects = [self.Metadata_dialog.ProjectName.itemText(i)
-                            for i in range(self.Metadata_dialog.ProjectName.count())]
-                index = np.where(np.array(projects) == 'Behavior Platform')[0]
-                if len(index) > 0:
-                    index = index[0]
-                    self.Metadata_dialog.ProjectName.setCurrentIndex(index)
-                    self.Metadata_dialog._show_project_info()
-                else:
-                    project_info = {
-                        'Funding Institution': ['Allen Institute'],
-                        'Grant Number': ['nan'],
-                        'Investigators': ['Jeremiah Cohen'],
-                        'Fundee': ['nan'],
-                    }
-                    self.Metadata_dialog.project_info = project_info
-                    self.Metadata_dialog.ProjectName.addItems([project_name])
-            self.project_name = project_name
+                self._set_default_project()
 
+            self.project_name = project_name
             self.session_run = True   # session has been started
 
             self.keyPressEvent(allow_reset=True)
