@@ -3929,6 +3929,7 @@ class Window(QMainWindow):
                 logging.info('Setting IACUC Protocol: {}'.format(protocol))
 
             # Set Project Name in metadata based on schedule
+            add_default=True
             project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
             if project_name is not None:
                 projects = [self.Metadata_dialog.ProjectName.itemText(i)
@@ -3939,9 +3940,9 @@ class Window(QMainWindow):
                     self.Metadata_dialog.ProjectName.setCurrentIndex(index)
                     self.Metadata_dialog._show_project_info()
                     logging.info('Setting Project name: {}'.format(project_name))
-                    self.add_default_project_name = False
-                    
-            if self.add_default_project_name:
+                    add_default = False
+
+            if self.add_default_project_name and add_default:
                 self._set_default_project()
 
             self.project_name = project_name
