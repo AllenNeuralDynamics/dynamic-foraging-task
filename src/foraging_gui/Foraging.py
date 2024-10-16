@@ -1099,6 +1099,7 @@ class Window(QMainWindow):
                 'manifest'),
             'auto_engage':True,
             'clear_figure_after_save':True,
+            'add_default_project_name':True
         }
         
         # Try to load Settings_box#.csv
@@ -1186,6 +1187,7 @@ class Window(QMainWindow):
         self.save_each_trial = self.Settings['save_each_trial']
         self.auto_engage = self.Settings['auto_engage']
         self.clear_figure_after_save = self.Settings['clear_figure_after_save']
+        self.add_default_project_name = self.Settings['add_default_project_name']
         if not is_absolute_path(self.project_info_file):
             self.project_info_file = os.path.join(self.SettingFolder,self.project_info_file)
         # Also stream log info to the console if enabled
@@ -3907,7 +3909,6 @@ class Window(QMainWindow):
 
             # Set Project Name in metadata based on schedule
             project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
-            add_default = True
             if project_name is not None:
                 projects = [self.Metadata_dialog.ProjectName.itemText(i)
                             for i in range(self.Metadata_dialog.ProjectName.count())]
@@ -3917,8 +3918,8 @@ class Window(QMainWindow):
                     self.Metadata_dialog.ProjectName.setCurrentIndex(index)
                     self.Metadata_dialog._show_project_info()
                     logging.info('Setting Project name: {}'.format(project_name))
-                    add_default = False
-            if add_default:
+                    self.add_default_project_name = False
+            if self.add_default_project_name:
                 project_name = 'Behavior Platform'
                 logging.info('Setting Project name: {}'.format('Behavior Platform'))
                 projects = [self.Metadata_dialog.ProjectName.itemText(i)
