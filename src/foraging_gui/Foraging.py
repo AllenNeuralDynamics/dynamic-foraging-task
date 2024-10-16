@@ -4656,6 +4656,7 @@ def start_gui_log_file(box_number):
     log_formatter = logging.Formatter(fmt=log_format, datefmt=log_datefmt)
     file_handler = logging.FileHandler(logging_filename)
     file_handler.setFormatter(log_formatter)
+    file_handler.setLevel(logging.INFO)
     logger.root.addHandler(file_handler)
 
     logging.info('Starting logfile!')
