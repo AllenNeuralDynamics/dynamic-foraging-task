@@ -44,6 +44,9 @@ from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
 from aind_data_schema.core.session import Session
 
+logger = logging.getLogger(__name__)
+logger.root.handlers.clear()    # clear handlers so aind_slims_api doesn't bulldoze log file
+
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.ndarray):
@@ -1191,11 +1194,11 @@ class Window(QMainWindow):
             self.project_info_file = os.path.join(self.SettingFolder,self.project_info_file)
         # Also stream log info to the console if enabled
         if  self.Settings['show_log_info_in_console']:
-            logger = logging.getLogger()
             handler = logging.StreamHandler()
             # Using the same format and level as the root logger
             handler.setFormatter(logging.root.handlers[0].formatter)
-            handler.setLevel(logging.root.level)            
+            handler.setLevel(logging.root.level)
+            logger.root.handlers.clear()    # clear here or can't see in console
             logger.addHandler(handler)
             
         # Determine box
