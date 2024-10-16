@@ -45,7 +45,7 @@ from foraging_gui.RigJsonBuilder import build_rig_json
 from aind_data_schema.core.session import Session
 
 logger = logging.getLogger(__name__)
-logger.root.handlers.clear()    # clear handlers so aind_slims_api doesn't bulldoze log file
+logger.root.handlers.clear() # clear handlers so console output can be configured
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -1193,14 +1193,14 @@ class Window(QMainWindow):
         if not is_absolute_path(self.project_info_file):
             self.project_info_file = os.path.join(self.SettingFolder,self.project_info_file)
         # Also stream log info to the console if enabled
-        if  self.Settings['show_log_info_in_console']:
+        if self.Settings['show_log_info_in_console']:
+
             handler = logging.StreamHandler()
             # Using the same format and level as the root logger
-            handler.setFormatter(logging.root.handlers[0].formatter)
-            handler.setLevel(logging.root.level)
-            logger.root.handlers.clear()    # clear here or can't see in console
-            logger.addHandler(handler)
-            
+            handler.setFormatter(logger.root.handlers[0].formatter)
+            handler.setLevel(logger.root.level)
+            logger.root.addHandler(handler)
+
         # Determine box
         if self.current_box in ['447-1','447-2','447-3']:
             mapper={
@@ -4652,14 +4652,12 @@ def start_gui_log_file(box_number):
     # Start the log file
     print('Starting a GUI log file at: ')
     print(logging_filename)
-    logging.basicConfig(
-        format=log_format,
-        level=logging.INFO,
-        datefmt=log_datefmt,
-        handlers=[
-            logging.FileHandler(logging_filename),
-        ]
-    )
+
+    log_formatter = logging.Formatter(fmt=log_format, datefmt=log_datefmt)
+    file_handler = logging.FileHandler(logging_filename)
+    file_handler.setFormatter(log_formatter)
+    logger.root.addHandler(file_handler)
+
     logging.info('Starting logfile!')
     logging.captureWarnings(True)
 
