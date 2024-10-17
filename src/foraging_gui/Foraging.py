@@ -128,11 +128,16 @@ class Window(QMainWindow):
         self.threadpool6=QThreadPool() # for saving data
         self.threadpool_workertimer=QThreadPool() # for timing
 
-        # create bias indicator
+        # create bias indicator and initialize parameters
         self.bias_n_size = 500
+        self.bias_step_size_mm = 10    # TODO: What value to set this at initially? Where to store?
+        self.wait_trial_count = 50      # TODO: What value to set this at initially? Where to store?
+        self.stage_moved_trial = 0      # initialize variable to 0
         self.bias_indicator = BiasIndicator(x_range=self.bias_n_size)  # TODO: Where to store bias_threshold parameter? self.Settings?
         self.bias_indicator.biasValue.connect(self.bias_calculated)  # update dashboard value
+        self.bias_indicator.biasOver.connect(self.bias_over)
         self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.correct_for_bias = True
 
         # Set up more parameters
         self.FIP_started=False
@@ -4306,6 +4311,23 @@ class Window(QMainWindow):
         last_bias_filler = [self.GeneratedTrials.B_Bias[-1]]*(trial_number-len(self.GeneratedTrials.B_Bias))
         self.GeneratedTrials.B_Bias += last_bias_filler
         self.GeneratedTrials.B_Bias[trial_number-1] = bias
+
+    def bias_over(self, bias: float, trial_number: int) -> None:
+        """
+        Handle stage movement for a bias value whose magnitude exceeds the threshold
+        :param bias: bias value
+        :param trial_number: trial number at which bias value was calculated
+        """
+
+        if trial_number-self.stage_moved_trial > self.wait_trial_count:   # check that minimum trials happened  # TODO: Should this be timed based or trial based? As of now, trial based
+            direction = -1 if bias < 0 else 1  # TODO: Check if this is true
+            if self.Settings['newscale_serial_num_box{}'.format(self.box_number)] != '':    # newscale stage
+                self._Move('y', self.bias_step_size_mm*direction)
+            else:   # aind-scale
+                self.stage_widget.stage_model.move_relative([1,2], self.bias_step_size_mm, direction)
+
+            # reset stage_moved variable
+            self.stage_moved_trial = trial_number
 
     def _StartTrialLoop1(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         logging.info('starting trial loop 1')
