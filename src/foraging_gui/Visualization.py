@@ -15,12 +15,9 @@ class PlotV(FigureCanvas):
         self.ax2 = self.fig.add_subplot(gs[6:10, 0:26], sharex=self.ax1)
 
         FigureCanvas.__init__(self, self.fig)
-        self.RunLength=win.RunLength.text
-        self.RunLengthSetValue=win.RunLength.setValue
-        self.WindowSize=win.WindowSize.text
-        self.WindowSizeSetValue=win.WindowSize.setValue
-        self.StepSize=win.StepSize.text
-        self.StepSizeSetValue=win.StepSize.setValue
+        self.RunLength=10
+        self.WindowSize=100
+        self.StepSize=5
         self.MarkerSize=3
         self.main_win = win
 
@@ -37,7 +34,7 @@ class PlotV(FigureCanvas):
 
         if Channel is not None:
             GeneratedTrials._get_irregular_timestamp(Channel)
-
+        print(GeneratedTrials.__dict__)
         # Unpack data 
         self.B_AnimalResponseHistory=GeneratedTrials.B_AnimalResponseHistory
         self.B_LickPortN=GeneratedTrials.B_LickPortN
@@ -131,7 +128,7 @@ class PlotV(FigureCanvas):
         LeftChoice_UnRewarded=np.where(np.logical_and(self.B_AnimalResponseHistory==0,self.B_RewardedHistory[0]==False))
         RightChoice_Rewarded=np.where(np.logical_and(self.B_AnimalResponseHistory==1,self.B_RewardedHistory[1]==True))
         RightChoice_UnRewarded=np.where(np.logical_and(self.B_AnimalResponseHistory==1, self.B_RewardedHistory[1]==False))
-        
+
         # running average of choice
         if self.RunLength()!='':
             kernel_size = int(self.RunLength())
@@ -269,7 +266,7 @@ class PlotV(FigureCanvas):
         else:
             WindowSize=100
             self.WindowSizeSetValue(100)
-        if self.StepSize()!='': 
+        if self.StepSize()!='':
             StepSize=int(self.StepSize())
             if StepSize==0 or StepSize==1:
                 StepSize=10
