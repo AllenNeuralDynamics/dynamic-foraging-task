@@ -3723,7 +3723,8 @@ class Window(QMainWindow):
             }
             self.Metadata_dialog.project_info = project_info
             self.Metadata_dialog.ProjectName.addItems([project_name])
-
+        return project_name
+    
     def _Start(self):
         '''start trial loop'''
 
@@ -3943,7 +3944,7 @@ class Window(QMainWindow):
                     add_default = False
 
             if self.add_default_project_name and add_default:
-                self._set_default_project()
+                project_name=self._set_default_project()
 
             self.project_name = project_name
             self.session_run = True   # session has been started
