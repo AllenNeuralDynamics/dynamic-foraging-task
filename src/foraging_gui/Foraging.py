@@ -1103,6 +1103,7 @@ class Window(QMainWindow):
                 'manifest'),
             'auto_engage':True,
             'clear_figure_after_save':True,
+            'add_default_project_name':True
         }
         
         # Try to load Settings_box#.csv
@@ -1190,6 +1191,7 @@ class Window(QMainWindow):
         self.save_each_trial = self.Settings['save_each_trial']
         self.auto_engage = self.Settings['auto_engage']
         self.clear_figure_after_save = self.Settings['clear_figure_after_save']
+        self.add_default_project_name = self.Settings['add_default_project_name']
         if not is_absolute_path(self.project_info_file):
             self.project_info_file = os.path.join(self.SettingFolder,self.project_info_file)
         # Also stream log info to the console if enabled
@@ -3705,6 +3707,28 @@ class Window(QMainWindow):
         self.ID.setEnabled(enable)
         self.Experimenter.setEnabled(enable)
 
+    def _set_default_project(self):
+        '''Set default project information'''
+        project_name = 'Behavior Platform'
+        logging.info('Setting Project name: {}'.format('Behavior Platform'))
+        projects = [self.Metadata_dialog.ProjectName.itemText(i)
+                    for i in range(self.Metadata_dialog.ProjectName.count())]
+        index = np.where(np.array(projects) == 'Behavior Platform')[0]
+        if len(index) > 0:
+            index = index[0]
+            self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+            self.Metadata_dialog._show_project_info()
+        else:
+            project_info = {
+                'Funding Institution': ['Allen Institute'],
+                'Grant Number': ['nan'],
+                'Investigators': ['Jeremiah Cohen'],
+                'Fundee': ['nan'],
+            }
+            self.Metadata_dialog.project_info = project_info
+            self.Metadata_dialog.ProjectName.addItems([project_name])
+        return project_name
+    
     def _Start(self):
         '''start trial loop'''
 
@@ -3910,8 +3934,8 @@ class Window(QMainWindow):
                 logging.info('Setting IACUC Protocol: {}'.format(protocol))
 
             # Set Project Name in metadata based on schedule
+            add_default=True
             project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
-            add_default = True
             if project_name is not None:
                 projects = [self.Metadata_dialog.ProjectName.itemText(i)
                             for i in range(self.Metadata_dialog.ProjectName.count())]
@@ -3922,27 +3946,11 @@ class Window(QMainWindow):
                     self.Metadata_dialog._show_project_info()
                     logging.info('Setting Project name: {}'.format(project_name))
                     add_default = False
-            if add_default:
-                project_name = 'Behavior Platform'
-                logging.info('Setting Project name: {}'.format('Behavior Platform'))
-                projects = [self.Metadata_dialog.ProjectName.itemText(i)
-                            for i in range(self.Metadata_dialog.ProjectName.count())]
-                index = np.where(np.array(projects) == 'Behavior Platform')[0]
-                if len(index) > 0:
-                    index = index[0]
-                    self.Metadata_dialog.ProjectName.setCurrentIndex(index)
-                    self.Metadata_dialog._show_project_info()
-                else:
-                    project_info = {
-                        'Funding Institution': ['Allen Institute'],
-                        'Grant Number': ['nan'],
-                        'Investigators': ['Jeremiah Cohen'],
-                        'Fundee': ['nan'],
-                    }
-                    self.Metadata_dialog.project_info = project_info
-                    self.Metadata_dialog.ProjectName.addItems([project_name])
-            self.project_name = project_name
 
+            if self.add_default_project_name and add_default:
+                project_name=self._set_default_project()
+
+            self.project_name = project_name
             self.session_run = True   # session has been started
 
             self.keyPressEvent(allow_reset=True)
