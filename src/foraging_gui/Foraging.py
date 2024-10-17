@@ -4323,7 +4323,7 @@ class Window(QMainWindow):
             direction = -1 if bias < 0 else 1  # TODO: Check if this is true
             if self.Settings['newscale_serial_num_box{}'.format(self.box_number)] != '':    # newscale stage
                 self._Move('y', self.bias_step_size_mm*direction)
-            else:   # aind-scale
+            elif hasattr(self, 'stage_widget'):   # aind-scale. Not implemented so skip
                 self.stage_widget.stage_model.move_relative([1,2], self.bias_step_size_mm, direction)
 
             # reset stage_moved variable
