@@ -130,7 +130,7 @@ class Window(QMainWindow):
 
         # create bias indicator and initialize parameters
         self.bias_n_size = 500
-        self.bias_step_size_mm = 10    # TODO: What value to set this at initially? Where to store?
+        self.bias_step_size_mm = .2    # TODO: What value to set this at initially? Where to store?
         self.wait_trial_count = 50      # TODO: What value to set this at initially? Where to store?
         self.stage_moved_trial = 0      # initialize variable to 0
         self.bias_indicator = BiasIndicator(x_range=self.bias_n_size)  # TODO: Where to store bias_threshold parameter? self.Settings?
@@ -4322,7 +4322,7 @@ class Window(QMainWindow):
         if trial_number-self.stage_moved_trial > self.wait_trial_count:   # check that minimum trials happened  # TODO: Should this be timed based or trial based? As of now, trial based
             direction = -1 if bias < 0 else 1  # TODO: Check if this is true
             if self.Settings['newscale_serial_num_box{}'.format(self.box_number)] != '':    # newscale stage
-                self._Move('y', self.bias_step_size_mm*direction)
+                self._Move('y', self.bias_step_size_mm*direction*1000)  # TODO: Check if _Move is expecting mm or um
             elif hasattr(self, 'stage_widget'):   # aind-scale. Not implemented so skip
                 self.stage_widget.stage_model.move_relative([1,2], self.bias_step_size_mm, direction)
 
