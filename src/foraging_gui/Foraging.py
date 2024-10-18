@@ -2273,10 +2273,6 @@ class Window(QMainWindow):
                 event.ignore()
                 return
 
-        # if session log handler is not none, stop logging for previous session
-        # if self.session_log_handler is not None:
-        #     self.end_session_log()
-
         event.accept()
         self.Start.setChecked(False)
         if self.InitializeBonsaiSuccessfully==1:
@@ -3191,10 +3187,6 @@ class Window(QMainWindow):
         self.load_tag=1
         self.ID.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
 
-        # if session log handler is not none, stop logging for previous session
-        # if self.session_log_handler is not None:
-        #     self.end_session_log()
-
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
         self.ToInitializeVisual=1
@@ -3280,10 +3272,6 @@ class Window(QMainWindow):
         else:
             logging.info('Clearing declined')
             return
-
-        # if session log handler is not none, stop logging for previous session
-        # if self.session_log_handler is not None:
-        #     self.end_session_log()
 
     def _StartFIP(self):
         self.StartFIP.setChecked(False)
