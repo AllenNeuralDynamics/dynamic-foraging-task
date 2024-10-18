@@ -1031,13 +1031,13 @@
                       <property name="minimumSize">
                        <size>
                         <width>0</width>
-                        <height>200</height>
+                        <height>300</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
                         <width>16777215</width>
-                        <height>180</height>
+                        <height>16777215</height>
                        </size>
                       </property>
                       <property name="font">
@@ -1470,175 +1470,7 @@
                      </widget>
                     </item>
                     <item>
-                     <widget class="QGroupBox" name="groupBox_6">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                      <property name="font">
-                       <font>
-                        <pointsize>8</pointsize>
-                       </font>
-                      </property>
-                      <property name="title">
-                       <string>Plot settings</string>
-                      </property>
-                      <layout class="QGridLayout" name="gridLayout_10">
-                       <item row="1" column="0">
-                        <widget class="QLabel" name="label_71">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="text">
-                          <string>step (s)=</string>
-                         </property>
-                         <property name="textFormat">
-                          <enum>Qt::AutoText</enum>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="1" column="1">
-                        <widget class="QSpinBox" name="StepSize">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>60</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
-                         <property name="maximum">
-                          <number>100000</number>
-                         </property>
-                         <property name="value">
-                          <number>5</number>
-                         </property>
-                         <property name="displayIntegerBase">
-                          <number>10</number>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="0" column="3">
-                        <widget class="QSpinBox" name="WindowSize">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>80</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
-                         <property name="maximum">
-                          <number>100000</number>
-                         </property>
-                         <property name="value">
-                          <number>100</number>
-                         </property>
-                         <property name="displayIntegerBase">
-                          <number>10</number>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="0" column="0">
-                        <widget class="QLabel" name="label_69">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="text">
-                          <string>window (trials) =</string>
-                         </property>
-                         <property name="textFormat">
-                          <enum>Qt::AutoText</enum>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="0" column="2">
-                        <widget class="QLabel" name="label_70">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="text">
-                          <string>seconds =</string>
-                         </property>
-                         <property name="textFormat">
-                          <enum>Qt::AutoText</enum>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="0" column="1">
-                        <widget class="QSpinBox" name="RunLength">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>60</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
-                         <property name="maximum">
-                          <number>100000</number>
-                         </property>
-                         <property name="value">
-                          <number>10</number>
-                         </property>
-                         <property name="displayIntegerBase">
-                          <number>10</number>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="1" column="2" colspan="2">
-                        <widget class="QComboBox" name="MartchingType">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <item>
-                          <property name="text">
-                           <string>log ratio</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string>fraction R</string>
-                          </property>
-                         </item>
-                        </widget>
-                       </item>
-                      </layout>
+                     <widget class="QWidget" name="groupBox_6">
                      </widget>
                     </item>
                    </layout>
