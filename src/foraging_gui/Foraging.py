@@ -16,8 +16,8 @@ import shutil
 from pathlib import Path
 from datetime import date, datetime, timezone
 import csv
-# from aind_slims_api import SlimsClient    # comment out untill schema has been updated
-# from aind_slims_api import models
+from aind_slims_api import SlimsClient
+from aind_slims_api import models
 import serial 
 import numpy as np
 import pandas as pd
@@ -114,7 +114,7 @@ class Window(QMainWindow):
         self._InitializeBonsai()
 
         # connect to Slims
-        #self._ConnectSlims()
+        self._ConnectSlims()
 
         # Set up threads 
         self.threadpool=QThreadPool() # get animal response
@@ -128,6 +128,7 @@ class Window(QMainWindow):
         # create bias indicator
         self.bias_n_size = 500
         self.bias_indicator = BiasIndicator(x_range=self.bias_n_size)  # TODO: Where to store bias_threshold parameter? self.Settings?
+        self.bias_indicator.biasValue.connect(self.bias_calculated)  # update dashboard value
         self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
 
         # Set up more parameters
@@ -1079,7 +1080,7 @@ class Window(QMainWindow):
             'metadata_dialog_folder':os.path.join(self.SettingFolder,"metadata_dialog")+'\\',
             'rig_metadata_folder':os.path.join(self.SettingFolder,"rig_metadata")+'\\',
             'project_info_file':os.path.join(self.SettingFolder,"Project Name and Funding Source v2.csv"),
-            'schedule_path':os.path.join('Z:\\','dynamic_foraging','DynamicForagingSchedule.csv'),
+            'schedule_path': os.path.join('Z:\\','dynamic_foraging','DynamicForagingSchedule.csv'),
             'go_cue_decibel_box1':60,
             'go_cue_decibel_box2':60,
             'go_cue_decibel_box3':60,
@@ -1216,11 +1217,12 @@ class Window(QMainWindow):
             Connect to Slims
         '''
         try:
+            logging.info('Attempting to connect to Slims')
             self.slims_client = SlimsClient(username=os.environ['SLIMS_USERNAME'],
                                             password=os.environ['SLIMS_PASSWORD'])
-        except KeyError:
+        except KeyError as e:
             raise KeyError('SLIMS_USERNAME and SLIMS_PASSWORD do not exist as '
-                         'environment variables on machine. Please add')
+                           f'environment variables on machine. Please add. {e}')
 
         try:
             self.slims_client.fetch_model(models.SlimsMouseContent, barcode='00000000')
@@ -1230,9 +1232,9 @@ class Window(QMainWindow):
                                 f' Please check credentials:\n'
                                 f'Username: {os.environ["SLIMS_USERNAME"]}\n'
                                 f'Password: {os.environ["SLIMS_PASSWORD"]}')
-            elif str(e) != 'No record found.':    # bypass if mouse doesn't exist
+            elif 'No record found' not in str(e):    # bypass if mouse doesn't exist
                 raise Exception(f'Exception trying to read from Slims: {e}.\n')
-
+        logging.info('Successfully connected to Slims')
 
     def _AddWaterLogResult(self, session: Session):
         '''
@@ -1246,7 +1248,7 @@ class Window(QMainWindow):
             logging.info(f'Attempting to fetch mouse {session.subject_id} from Slims')
             mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=session.subject_id)
         except Exception as e:
-            if str(e) == 'No record found.':    # if no mouse found or validation errors on mouse
+            if 'No record found' in str(e):    # if no mouse found or validation errors on mouse
                 logging.error(f'"No record found" error while trying to fetch mouse {session.subject_id}. '
                               f'Attempting to add mouse model to Slims.')
                 # check schedule to make sure enough information is known about mouse to create model in slims
@@ -2679,8 +2681,7 @@ class Window(QMainWindow):
 
             if save_clicked:    # create water log result if weight after filled and uncheck save
                 if self.BaseWeight.text() != '' and self.WeightAfter.text() != '' and self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']:
-                    pass
-                    #self._AddWaterLogResult(generated_metadata._session())
+                    self._AddWaterLogResult(generated_metadata._session())
                 self.bias_indicator.clear()  # prepare for new session
 
 
@@ -3972,6 +3973,11 @@ class Window(QMainWindow):
 
             self.ManualWaterWarning.setText('')
 
+            # fill out GenerateTrials B_Bias
+            last_bias = self.GeneratedTrials.B_Bias[-1]
+            b_bias_len = len(self.GeneratedTrials.B_Bias)
+            self.GeneratedTrials.B_Bias += [last_bias]*((self.GeneratedTrials.B_CurrentTrialN+1)-b_bias_len)
+
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
             self._StopCurrentSession() 
@@ -4201,12 +4207,13 @@ class Window(QMainWindow):
                     #  'Cannot have number of splits n_splits=10 greater than the number of samples: 2'
                     n_trial_back = self.bias_n_size if l > self.bias_n_size else \
                         round(len(np.array(choice_history)[~np.isnan(choice_history)])*.6)
-
                     # add data to bias_indicator
                     bias_thread = threading.Thread(target=self.bias_indicator.calculate_bias,
-                                                   kwargs={'choice_history': choice_history,
+                                                   kwargs={'time_point': self.GeneratedTrials.B_TrialStartTime[-1],
+                                                           'choice_history': choice_history,
                                                            'reward_history': np.array(any_reward).astype(int),
-                                                           'n_trial_back': n_trial_back})
+                                                           'n_trial_back': n_trial_back,
+                                                           'cv': 2})
                     bias_thread.start()
 
                 # save the data everytrial
@@ -4281,6 +4288,18 @@ class Window(QMainWindow):
                     # User continues, wait another stall_duration and prompt again
                     logging.error('trial stalled {} minutes, user continued trials'.format(elapsed_time))
                     stall_iteration +=1
+
+    def bias_calculated(self, bias: float, trial_number: int) -> None:
+        """
+        Function to update GeneratedTrials.B_Bias and Bias attribute when new bias value is calculated
+        :param bias: bias value
+        :param trial_number: trial number at which bias value was calculated
+        """
+
+        self.B_Bias_R = bias
+        last_bias_filler = [self.GeneratedTrials.B_Bias[-1]]*(trial_number-len(self.GeneratedTrials.B_Bias))
+        self.GeneratedTrials.B_Bias += last_bias_filler
+        self.GeneratedTrials.B_Bias[trial_number-1] = bias
 
     def _StartTrialLoop1(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         logging.info('starting trial loop 1')
