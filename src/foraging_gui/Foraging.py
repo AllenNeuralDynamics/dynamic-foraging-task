@@ -4605,7 +4605,7 @@ class Window(QMainWindow):
                          '&session_plot_selected_draw_types=1.+Choice+history'
         )
 
-    def _generate_upload_manifest(self,FIP=False):
+    def _generate_upload_manifest(self,FIP=False):  # FIXME: How does this ever get set to True?
         '''
             Generates a manifest.yml file for triggering data copy to VAST and upload to aws
         '''
@@ -4616,6 +4616,7 @@ class Window(QMainWindow):
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
 
+            # FIXME: How is this if statement working if it does the exact same thing for each condition?
             if FIP: ## DEBUG, need to figure out how to set this flag.
                 schedule = self.acquisition_datetime.split('_')[0]+'_20-30-00'
                 capsule_id = 'c089614a-347e-4696-b17e-86980bb782c1'
@@ -4624,6 +4625,18 @@ class Window(QMainWindow):
                 schedule = self.acquisition_datetime.split('_')[0]+'_20-30-00'
                 capsule_id = 'c089614a-347e-4696-b17e-86980bb782c1'
                 mount = 'FIP'
+
+            # only include fib and behavior videos if fib is being run
+            if self.PhotometryB.currentText()=='on':
+                modalities = {
+                    'behavior':[self.TrainingFolder.replace('\\','/')],
+                    'behavior-videos':[self.VideoFolder.replace('\\','/')],
+                    'fib':[self.PhotometryFolder.replace('\\','/')]
+                    }
+            else:
+                modalities = {
+                    'behavior': [self.TrainingFolder.replace('\\', '/')]
+                }
 
             date_format = "%Y-%m-%d_%H-%M-%S"
             # Define contents of manifest file
@@ -4637,11 +4650,7 @@ class Window(QMainWindow):
                 'destination': '//allen/aind/scratch/dynamic_foraging_rig_transfer',
                 's3_bucket':'private',
                 'processor_full_name': 'AIND Behavior Team',
-                'modalities':{
-                    'behavior':[self.TrainingFolder.replace('\\','/')],
-                    'behavior-videos':[self.VideoFolder.replace('\\','/')],
-                    'fib':[self.PhotometryFolder.replace('\\','/')]
-                    },
+                'modalities':modalities,
                 'schemas':[
                     os.path.join(self.MetadataFolder,'session.json').replace('\\','/'),
                     os.path.join(self.MetadataFolder,'rig.json').replace('\\','/')
