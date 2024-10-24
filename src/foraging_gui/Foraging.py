@@ -3995,6 +3995,17 @@ class Window(QMainWindow):
             b_bias_len = len(self.GeneratedTrials.B_Bias)
             self.GeneratedTrials.B_Bias += [last_bias]*((self.GeneratedTrials.B_CurrentTrialN+1)-b_bias_len)
 
+            # stop FIB if Teensy_COM is attribute and if found in com port list
+            if hasattr(self, 'Teensy_COM') and \
+                    self.Teensy_COM in [port.name for port in serial.tools.list_ports.comports()]:
+                ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
+                # Trigger Teensy with the above specified exp mode
+                ser.write(b's')
+                ser.close()
+                self.TeensyWarning.setText('Stopped FIP excitation')
+                self.TeensyWarning.setStyleSheet(self.default_warning_color)
+                self.fiber_photometry_end_time = str(datetime.now())
+
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
             self._StopCurrentSession()
