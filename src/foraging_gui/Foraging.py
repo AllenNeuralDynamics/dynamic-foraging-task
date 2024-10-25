@@ -93,6 +93,9 @@ class Window(QMainWindow):
         # Load Rig Json
         self._LoadRigJson()
 
+        # Stage Widget
+        self.stage_widget = None
+
         # Load User interface
         self._LoadUI()
 
@@ -237,7 +240,8 @@ class Window(QMainWindow):
             for i in reversed(range(layout.count())):
                 layout.itemAt(i).widget().setVisible(False)
             # Insert new stage_widget
-            layout.addWidget(get_stage_widget())
+            self.stage_widget = get_stage_widget()
+            layout.addWidget(self.stage_widget)
 
     def _LoadUI(self):
         '''
