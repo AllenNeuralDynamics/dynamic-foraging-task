@@ -11,18 +11,17 @@ class PlotV(FigureCanvas):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         gs = GridSpec(10, 30, wspace=3, hspace=0.1, bottom=0.1, top=0.95, left=0.04, right=0.98)
 
-        self.ax1 = self.fig.add_subplot(gs[0:4, 0:25])
-        self.ax2 = self.fig.add_subplot(gs[4:10, 0:25], sharex=self.ax1)
+        self.ax1 = self.fig.add_subplot(gs[0:6, 0:26])
+        self.ax2 = self.fig.add_subplot(gs[6:10, 0:26], sharex=self.ax1)
 
         FigureCanvas.__init__(self, self.fig)
-        self.RunLength=win.RunLength.text
-        self.RunLengthSetValue=win.RunLength.setValue
-        self.WindowSize=win.WindowSize.text
-        self.WindowSizeSetValue=win.WindowSize.setValue
-        self.StepSize=win.StepSize.text
-        self.StepSizeSetValue=win.StepSize.setValue
+        self.RunLength=10
+        self.WindowSize=100
+        self.StepSize=5
         self.MarkerSize=3
         self.main_win = win
+
+        self.setMinimumWidth(650)
 
     def _Update(self,GeneratedTrials=None,Channel=None):
 
@@ -55,7 +54,7 @@ class PlotV(FigureCanvas):
         self.B_RewardOutcomeTime=GeneratedTrials.B_RewardOutcomeTime
         self.B_LaserOnTrial=np.array(GeneratedTrials.B_LaserOnTrial)
         self.B_AutoWaterTrial=GeneratedTrials.B_AutoWaterTrial
-        self.MarchingType=GeneratedTrials.TP_MartchingType
+        self.MarchingType=GeneratedTrials.TP_MartchingType = ['log ratio']
         # They are not harp time
         self.B_ManualLeftWaterStartTime=GeneratedTrials.B_ManualLeftWaterStartTime.copy()
         self.B_ManualRightWaterStartTime=GeneratedTrials.B_ManualRightWaterStartTime.copy()
@@ -129,17 +128,9 @@ class PlotV(FigureCanvas):
         LeftChoice_UnRewarded=np.where(np.logical_and(self.B_AnimalResponseHistory==0,self.B_RewardedHistory[0]==False))
         RightChoice_Rewarded=np.where(np.logical_and(self.B_AnimalResponseHistory==1,self.B_RewardedHistory[1]==True))
         RightChoice_UnRewarded=np.where(np.logical_and(self.B_AnimalResponseHistory==1, self.B_RewardedHistory[1]==False))
-        
+
         # running average of choice
-        if self.RunLength()!='':
-            kernel_size = int(self.RunLength())
-            if kernel_size==1:
-                kernel_size=2
-                self.RunLengthSetValue(2)
-        else:
-            kernel_size=2
-            self.RunLengthSetValue(2)
-        self.kernel_size=kernel_size
+        self.kernel_size=2
         ResponseHistoryT=self.B_AnimalResponseHistory.copy()
         ResponseHistoryT[ResponseHistoryT==2]=np.nan
         ResponseHistoryF=ResponseHistoryT.copy()
@@ -160,15 +151,15 @@ class PlotV(FigureCanvas):
 
         # running average of response fraction
         for i in range(len(self.B_AnimalResponseHistory)):
-            if i>=kernel_size-1:
-                if all(np.isnan(ResponseHistoryT[i+1-kernel_size:i+1])):
-                    ResponseHistoryF[i+1-kernel_size]=np.nan
-                    RewardedHistoryF[i+1-kernel_size]=np.nan
-                    SuccessHistoryF[i+1-kernel_size]=np.nan
+            if i>=self.kernel_size-1:
+                if all(np.isnan(ResponseHistoryT[i+1-self.kernel_size:i+1])):
+                    ResponseHistoryF[i+1-self.kernel_size]=np.nan
+                    RewardedHistoryF[i+1-self.kernel_size]=np.nan
+                    SuccessHistoryF[i+1-self.kernel_size]=np.nan
                 else:
-                    ResponseHistoryF[i+1-kernel_size]=np.nanmean(ResponseHistoryT[i+1-kernel_size:i+1])
-                    RewardedHistoryF[i+1-kernel_size]=np.nanmean(RewardedHistoryT[i+1-kernel_size:i+1])
-                    SuccessHistoryF[i+1-kernel_size]=np.nanmean(SuccessHistoryT[i+1-kernel_size:i+1])
+                    ResponseHistoryF[i+1-self.kernel_size]=np.nanmean(ResponseHistoryT[i+1-self.kernel_size:i+1])
+                    RewardedHistoryF[i+1-self.kernel_size]=np.nanmean(RewardedHistoryT[i+1-self.kernel_size:i+1])
+                    SuccessHistoryF[i+1-self.kernel_size]=np.nanmean(SuccessHistoryT[i+1-self.kernel_size:i+1])
         self.ResponseHistoryF=ResponseHistoryF
         LeftChoice=np.where(self.B_AnimalResponseHistory==0)
         RightChoice=np.where(self.B_AnimalResponseHistory==1)
@@ -247,38 +238,21 @@ class PlotV(FigureCanvas):
         if np.size(NoResponse) !=0:
             self.ax1.plot(self.B_Time[NoResponse], np.zeros(len(self.B_Time[NoResponse]))+.5, 
                 'Xk',label='NoResponse',markersize=self.MarkerSize,alpha=0.2)
-        if self.B_CurrentTrialN>kernel_size:
-            self.ax2.plot(self.B_Time[kernel_size-1:],ResponseHistoryF[:-kernel_size+1],
+        if self.B_CurrentTrialN>self.kernel_size:
+            self.ax2.plot(self.B_Time[self.kernel_size-1:],ResponseHistoryF[:-self.kernel_size+1],
                 'k',label='Choice_frac',linewidth=2,alpha=0.8)
-            self.ax2.plot(self.B_Time[kernel_size-1:],RewardedHistoryF[:-kernel_size+1],
+            self.ax2.plot(self.B_Time[self.kernel_size-1:],RewardedHistoryF[:-self.kernel_size+1],
                 'g',label='reward_frac',linewidth=1,alpha=0.8)
-            self.ax2.plot(self.B_Time[kernel_size-1:],SuccessHistoryF[:-kernel_size+1],
+            self.ax2.plot(self.B_Time[self.kernel_size-1:],SuccessHistoryF[:-self.kernel_size+1],
                 'c',label='finish_frac', alpha=0.2)
         self._UpdateAxis()
         self.draw()
 
     def _PlotMatching(self):
 
-        if self.WindowSize()!='':
-            WindowSize=int(self.WindowSize())
-            if WindowSize==0 or WindowSize==1:
-                WindowSize=100
-                self.WindowSizeSetValue(100)
-        else:
-            WindowSize=100
-            self.WindowSizeSetValue(100)
-        if self.StepSize()!='': 
-            StepSize=int(self.StepSize())
-            if StepSize==0 or StepSize==1:
-                StepSize=10
-                self.StepSizeSetValue(10)
-        else:
-            StepSize=10
-            self.StepSizeSetValue(10)
-
         if self.B_CurrentTrialN<1:
             return
-        NumberOfDots = int((np.ptp(self.B_Time)-WindowSize)/StepSize)
+        NumberOfDots = int((np.ptp(self.B_Time)-self.WindowSize)/self.StepSize)
         if NumberOfDots<1:
             return
         choice_R_frac = np.empty(NumberOfDots)
@@ -288,7 +262,7 @@ class PlotV(FigureCanvas):
         reward_log_ratio = choice_R_frac.copy()
         WinStartN=np.min(self.B_Time)
         for idx in range(NumberOfDots):
-            CuI=np.logical_and(self.B_Time>=WinStartN,self.B_Time<WinStartN+WindowSize)
+            CuI=np.logical_and(self.B_Time>=WinStartN,self.B_Time<WinStartN+self.WindowSize)
             LeftChoiceN=sum(self.B_AnimalResponseHistory[CuI]==0)
             RightChoiceN=sum(self.B_AnimalResponseHistory[CuI]==1)
             LeftRewardN=sum(self.B_RewardedHistory[0,CuI]==1)
@@ -300,7 +274,7 @@ class PlotV(FigureCanvas):
             if (RightChoiceN!=0) and (LeftChoiceN!=0) and (RightRewardN!=0) and (LeftRewardN!=0):
                 choice_log_ratio[idx]=np.log(RightChoiceN / LeftChoiceN)
                 reward_log_ratio[idx]=np.log(RightRewardN / LeftRewardN)
-            WinStartN=WinStartN+StepSize
+            WinStartN=WinStartN+self.StepSize
 
         self.draw()
 
@@ -315,11 +289,11 @@ class PlotV(FigureCanvas):
         self.ax1.set_yticks([0,1])
         self.ax1.set_yticklabels(['L', 'R'])
         self.ax1.set_ylim(-0.6, 1.6)
-        #self.ax1.yaxis.set_inverted(True)
+        self.ax1.yaxis.set_inverted(True)
 
         self.ax2.set_yticks([0,1])
-        self.ax2.set_yticklabels(['L', 'R'])
-        self.ax2.set_ylim(-0.15, 1.15)
+        #self.ax2.set_yticklabels(['L', 'R'])
+        self.ax2.set_ylim(-0.05, 1.05)
         #self.ax2.yaxis.set_inverted(True)
 
         self.ax1.legend(bbox_to_anchor=(1, 1), loc='upper left', fontsize=6)

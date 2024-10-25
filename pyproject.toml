@@ -33,10 +33,11 @@ dependencies = [
     "harp-python",
     "openpyxl",
     "deepdiff",
-    "aind-data-schema==0.36.0",
-    "aind-data-schema-models==0.1.10",
+    "aind-data-schema==1.1.0",
+    "aind-data-schema-models==0.5.6",
+    "pydantic==2.9.2",
     "stagewidget",
-    #"pydantic==2.8.2",
+
     "pyyaml",
     "pyqtgraph"
 

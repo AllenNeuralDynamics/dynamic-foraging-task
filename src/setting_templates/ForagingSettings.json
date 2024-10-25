@@ -18,5 +18,6 @@
     "go_cue_decibel_box1":73,
     "go_cue_decibel_box2":73,
     "go_cue_decibel_box3":73,
-    "go_cue_decibel_box4":73
+    "go_cue_decibel_box4":73,
+    "add_default_project_name":true
 }
