@@ -25,6 +25,9 @@ PID_NEWSCALE = 0xea61
 class GenerateTrials():
     def __init__(self,win):
         self.win=win
+        self.B_LeftLickIntervalPercent = None      # percentage of left lick intervals under 100ms
+        self.B_RightLickIntervalPercent = None     # percentage of right lick intervals under 100ms
+        self.B_CrossSideIntervalPercent = None     # percentage of cross side lick intervals under 100ms
         self.B_Bias = [0]  # lick bias
         self.B_RewardFamilies=self.win.RewardFamilies
         self.B_CurrentTrialN=-1 # trial number starts from 0; Update when trial starts
@@ -104,7 +107,10 @@ class GenerateTrials():
         self.Obj={}
         # get all of the training parameters of the current trial
         self._GetTrainingParameters(self.win)
-        
+
+        # create timer to calculate lick intervals every 10 minutes
+        self.lick_interval_time = QtCore.QTimer(timeout=self.calculate_inter_lick_intervals, interval=600000)
+
     def _GenerateATrial(self,Channel4):
         self.finish_select_par=0
         if self.win.UpdateParameters==1:
@@ -890,7 +896,55 @@ class GenerateTrials():
             self.Start_CoCue_LeftRightRatio=np.nan
         else:
             self.Start_CoCue_LeftRightRatio=np.array(sum(self.Start_GoCue_LeftLicks))/np.array(sum(self.Start_GoCue_RightLicks))
-        
+
+    def calculate_inter_lick_intervals(self):
+        """
+        Calculate and categorize lick intervals
+        """
+
+        right = self.B_RightLickTime
+        left = self.B_LeftLickTime
+
+        if right is not None and left is not None:
+            # calculate left  interval and fraction
+            same_side_l = np.diff(left)
+            same_side_l_frac = len(same_side_l[~(same_side_l > 100)]) / len(same_side_l)
+            logging.info(f'Percentage of left lick intervals under 100 ms is {same_side_l_frac * 100}%.')
+            self.B_LeftLickIntervalPercent = same_side_l_frac * 100
+
+            # calculate left  interval and fraction
+            same_side_r = np.diff(right)
+            same_side_r_frac = len(same_side_r[~(same_side_r > 100)]) / len(same_side_r)
+            logging.info(f'Percentage of right lick intervals under 100 ms is {same_side_r_frac * 100}%.')
+            self.B_RightLickIntervalPercent = same_side_r_frac * 100
+
+            if same_side_l_frac + same_side_r_frac >= .1:
+                self.win.same_side_lick_interval.setText(f'Percentage of same side lick intervals under 100 ms is '
+                                                         f'over 10%: {(same_side_r_frac+same_side_l_frac) * 100}%.')
+            else:
+                self.win.same_side_lick_interval.setText('')
+
+            # calculate cross side interval and frac
+            dummy_array = np.ones(right.shape)  # use array to tell lick side after merging
+            stacked_right = np.column_stack((dummy_array, right))
+            stacked_left = np.column_stack((np.negative(dummy_array), left))
+            merged_sorted = sorted(np.concatenate((stacked_right, stacked_left)),
+                                   key=lambda x: x[1])  # sort by second element
+            cross_sides = []
+            for i in range(1, len(right)):
+                if merged_sorted[i - 1][0] == -merged_sorted[i][0]:  # cross side lick
+                    cross_sides.append(merged_sorted[i][1] - merged_sorted[i - 1][1])
+            cross_sides = np.array(cross_sides)
+            cross_side_frac = len(cross_sides[~(cross_sides > 100)]) / len(cross_sides)
+            logging.info(f'Percentage of cross side lick intervals under 100 ms is {cross_side_frac * 100}%.')
+            self.B_CrossSideIntervalPercent = cross_side_frac * 100
+
+            if cross_side_frac >= .1:
+                self.win.cross_side_lick_interval.setText(f'Percentage of cross side lick intervals under 100 ms is '
+                                                         f'over 10%: {(same_side_r_frac+same_side_l_frac) * 100}%.')
+            else:
+                self.win.cross_side_lick_interval.setText('')
+
     def _GetDoubleDipping(self,LicksIndex):
         '''get the number of double dipping. e.g. 0 1 0 will result in 2 double dipping''' 
         DoubleDipping=np.sum(np.diff(LicksIndex)!=0)

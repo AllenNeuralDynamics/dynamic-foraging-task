@@ -2404,6 +2404,12 @@ class Window(QMainWindow):
             toolbar.setMaximumWidth(300)
             layout.addWidget(toolbar)
             layout.addWidget(PlotLick)
+            # add text labels to indicate lick interval percentages
+            self.same_side_lick_interval = QtWidgets.QLabel()
+            self.cross_side_lick_interval = QtWidgets.QLabel()
+            layout.addWidget(self.same_side_lick_interval)
+            layout.addWidget(self.cross_side_lick_interval)
+
             self.LickSta_ToInitializeVisual=0
         try:
             if hasattr(self, 'GeneratedTrials'):
@@ -4055,6 +4061,8 @@ class Window(QMainWindow):
             GeneratedTrials._GenerateATrial(self.Channel4)
             # delete licks from the previous session
             GeneratedTrials._DeletePreviousLicks(self.Channel2)
+            GeneratedTrials.lick_interval_time.start()  # start lick interval calculation
+
 
             if self.Start.isChecked():
                 # if session log handler is not none, stop logging for previous session
