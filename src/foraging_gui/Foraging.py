@@ -4001,6 +4001,9 @@ class Window(QMainWindow):
             b_bias_len = len(self.GeneratedTrials.B_Bias)
             self.GeneratedTrials.B_Bias += [last_bias]*((self.GeneratedTrials.B_CurrentTrialN+1)-b_bias_len)
 
+            # stop lick interval calculation
+            self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
+
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
             self._StopCurrentSession()
