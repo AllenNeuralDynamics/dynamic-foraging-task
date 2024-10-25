@@ -43,6 +43,7 @@ from foraging_gui.bias_indicator import BiasIndicator
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
 from aind_data_schema.core.session import Session
+from pprint import pprint
 
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear() # clear handlers so console output can be configured
@@ -2680,13 +2681,11 @@ class Window(QMainWindow):
             generated_metadata=generate_metadata(Obj=Obj)
             if BackupSave==0:
                 text="Session metadata generated successfully: " + str(generated_metadata.session_metadata_success)+"\n"+\
-                "Rig metadata generated successfully: " + str(generated_metadata.rig_metadata_success)+"\n"+\
-                "Data description generated successfully: " + str(generated_metadata.data_description_success)
+                "Rig metadata generated successfully: " + str(generated_metadata.rig_metadata_success)+"\n"
                 self._manage_warning_labels(self.MetadataWarning,warning_text=text)
             Obj['generate_session_metadata_success']=generated_metadata.session_metadata_success
             Obj['generate_rig_metadata_success']=generated_metadata.rig_metadata_success
-            Obj['generate_data_description_success']=generated_metadata.data_description_success
-
+            pprint(generated_metadata._session().dict()['data_streams'][0]['stream_modalities'])
             if save_clicked:    # create water log result if weight after filled and uncheck save
                 if self.BaseWeight.text() != '' and self.WeightAfter.text() != '' and self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']:
                     self._AddWaterLogResult(generated_metadata._session())
@@ -2700,7 +2699,6 @@ class Window(QMainWindow):
             # set to False if error occurs
             Obj['generate_session_metadata_success']=False
             Obj['generate_rig_metadata_success']=False
-            Obj['generate_data_description_success']=False
 
         # don't save the data if the load tag is 1
         if self.load_tag==0:
@@ -4621,6 +4619,11 @@ class Window(QMainWindow):
             mount = 'FIP'
             
             date_format = "%Y-%m-%d_%H-%M-%S"
+
+            # populate modalities run
+            modalities = {'behavior':[self.TrainingFolder.replace('\\','/')]}
+
+
             # Define contents of manifest file
             contents = {
                 'acquisition_datetime': datetime.strptime(self.acquisition_datetime,date_format),
@@ -4640,7 +4643,6 @@ class Window(QMainWindow):
                 'schemas':[
                     os.path.join(self.MetadataFolder,'session.json').replace('\\','/'),
                     os.path.join(self.MetadataFolder,'rig.json').replace('\\','/'),
-                    os.path.join(self.MetadataFolder, 'data_description.json').replace('\\', '/')
                     ],
                 'schedule_time':datetime.strptime(schedule,date_format),
                 'project_name':self.project_name,
