@@ -1126,8 +1126,9 @@ class GenerateTrials():
         # If we should stop trials, uncheck the start button
         if stop:           
             self.win.Start.setStyleSheet("background-color : none")
-            self.win.Start.setChecked(False)        
+            self.win.Start.setChecked(False)
             reply = QtWidgets.QMessageBox.question(self.win, 'Box {}'.format(self.win.box_letter), msg, QtWidgets.QMessageBox.Ok)
+            self.win._Start()  # trigger stopping logic after window
     
     def _CheckAutoWater(self):
         '''Check if it should be an auto water trial'''

@@ -3996,8 +3996,9 @@ class Window(QMainWindow):
             self.GeneratedTrials.B_Bias += [last_bias]*((self.GeneratedTrials.B_CurrentTrialN+1)-b_bias_len)
 
             # stop FIB if running
-            if self.Teensy_COM != '' and  self.StartExcitation.isChecked():
-               self._StartExcitation()
+            if self.StartExcitation.isChecked():
+                self.StartExcitation.setChecked(False)
+                self._StartExcitation()
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
