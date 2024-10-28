@@ -85,6 +85,10 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
       - C:\Users\svc_aind_behavior\AppData\Local\miniconda3\condabin
   - Create an environment: `conda create -n Foraging python=3.11`
   - Activate the environment: `conda activate Foraging`
+- Add the following environments (needed for Stage Widget integration)
+  - PIP_EXTRA_INDEX_URL=http://eng-tools/aibs/packages
+  - PIP_TRUSTED_HOSTS=eng-tools
+  - STAGE_UI_VERSION=widget (this is for using the widget view of the stage controller)
 - Use `pip` to install this repository:
   - From the `C:\Users\svc_aind_behavior\Documents\GitHub\dynamic-foraging-task` directory run `pip install -e .`
   - This should install all the required python packages. 

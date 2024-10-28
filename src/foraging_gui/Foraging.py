@@ -30,6 +30,8 @@ from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 
+from StageWidget.main import get_stage_widget
+
 import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
 from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
@@ -94,7 +96,10 @@ class Window(QMainWindow):
         # Load Rig Json
         self._LoadRigJson()
 
-        # Load User interface 
+        # Stage Widget
+        self.stage_widget = None
+
+        # Load User interface
         self._LoadUI()
 
         # set window title
@@ -173,7 +178,7 @@ class Window(QMainWindow):
         self._WaterVolumnManage2()
         self._LickSta()
         self._InitializeMotorStage()
-        self._GetPositions()
+        self._load_stage()
         self._warmup()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
@@ -214,6 +219,36 @@ class Window(QMainWindow):
             logging.warning(f"Low disk space  Used space: {used/1024**3:.2f}GB    Free space: {free/1024**3:.2f}GB")
         else:
             self.DiskSpaceProgreeBar.setStyleSheet("QProgressBar::chunk {background-color: green;}")
+
+    def _load_stage(self) -> None:
+        """
+        Check whether newscale stage is defined in the config. If not, initialize and inject stage widget.
+        """
+        if self.Settings['newscale_serial_num_box{}'.format(self.box_number)] == '':
+            widget_to_replace = "motor_stage_widget" if self.default_ui == "ForagingGUI_Ephys.ui" else "widget_2"
+            self._insert_stage_widget(widget_to_replace)
+        else:
+            self._GetPositions()
+
+    def _insert_stage_widget(self, widget_to_replace: str) -> None:
+        """
+        Given a widget name, replace all contents of that widget with the stage widget
+        Note: The UI file must be loaded or else it can't find the widget to replace
+              Also the widget to replace must contain a layout so it can hide all child widgets properly.
+        """
+        logging.info("Inserting Stage Widget")
+
+        # Get QWidget object
+        widget = getattr(self, widget_to_replace, None)
+
+        if widget is not None:
+            layout = widget.layout()
+            # Hide all current items within widget being replaced
+            for i in reversed(range(layout.count())):
+                layout.itemAt(i).widget().setVisible(False)
+            # Insert new stage_widget
+            self.stage_widget = get_stage_widget()
+            layout.addWidget(self.stage_widget)
 
     def _LoadUI(self):
         '''
