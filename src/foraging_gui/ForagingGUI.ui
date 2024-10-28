@@ -911,6 +911,7 @@
                    </property>
                    <property name="font">
                     <font>
+                     <pointsize>8</pointsize>
                      <stylestrategy>PreferDefault</stylestrategy>
                     </font>
                    </property>
@@ -965,7 +966,7 @@
             <string notr="true"/>
            </property>
            <property name="currentIndex">
-            <number>2</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="tab_2">
             <attribute name="title">
@@ -1043,6 +1044,9 @@
                       <property name="font">
                        <font>
                         <pointsize>8</pointsize>
+                        <weight>50</weight>
+                        <italic>false</italic>
+                        <bold>false</bold>
                        </font>
                       </property>
                       <property name="title">
@@ -1359,6 +1363,9 @@
                            <property name="font">
                             <font>
                              <pointsize>7</pointsize>
+                             <weight>50</weight>
+                             <italic>false</italic>
+                             <bold>false</bold>
                             </font>
                            </property>
                            <property name="text">
@@ -1383,6 +1390,9 @@
                            <property name="font">
                             <font>
                              <pointsize>7</pointsize>
+                             <weight>50</weight>
+                             <italic>false</italic>
+                             <bold>false</bold>
                             </font>
                            </property>
                            <property name="text">
@@ -1407,6 +1417,9 @@
                            <property name="font">
                             <font>
                              <pointsize>7</pointsize>
+                             <weight>50</weight>
+                             <italic>false</italic>
+                             <bold>false</bold>
                             </font>
                            </property>
                            <property name="text">
@@ -1431,6 +1444,9 @@
                            <property name="font">
                             <font>
                              <pointsize>7</pointsize>
+                             <weight>50</weight>
+                             <italic>false</italic>
+                             <bold>false</bold>
                             </font>
                            </property>
                            <property name="text">
@@ -1520,6 +1536,9 @@
                       <property name="font">
                        <font>
                         <pointsize>8</pointsize>
+                        <weight>50</weight>
+                        <italic>false</italic>
+                        <bold>false</bold>
                        </font>
                       </property>
                       <property name="title">
@@ -1791,6 +1810,9 @@
                            <property name="font">
                             <font>
                              <pointsize>8</pointsize>
+                             <weight>50</weight>
+                             <italic>false</italic>
+                             <bold>false</bold>
                             </font>
                            </property>
                            <property name="text">
@@ -1799,6 +1821,181 @@
                           </widget>
                          </item>
                         </layout>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QGroupBox" name="groupBox_6">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="font">
+                       <font>
+                        <pointsize>8</pointsize>
+                        <weight>50</weight>
+                        <italic>false</italic>
+                        <bold>false</bold>
+                       </font>
+                      </property>
+                      <property name="title">
+                       <string>Plot settings</string>
+                      </property>
+                      <layout class="QGridLayout" name="gridLayout_10">
+                       <item row="1" column="0">
+                        <widget class="QLabel" name="label_71">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="text">
+                          <string>step (s)=</string>
+                         </property>
+                         <property name="textFormat">
+                          <enum>Qt::AutoText</enum>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="1">
+                        <widget class="QSpinBox" name="StepSize">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>60</width>
+                           <height>16777215</height>
+                          </size>
+                         </property>
+                         <property name="maximum">
+                          <number>100000</number>
+                         </property>
+                         <property name="value">
+                          <number>5</number>
+                         </property>
+                         <property name="displayIntegerBase">
+                          <number>10</number>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="3">
+                        <widget class="QSpinBox" name="WindowSize">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>80</width>
+                           <height>16777215</height>
+                          </size>
+                         </property>
+                         <property name="maximum">
+                          <number>100000</number>
+                         </property>
+                         <property name="value">
+                          <number>100</number>
+                         </property>
+                         <property name="displayIntegerBase">
+                          <number>10</number>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="0">
+                        <widget class="QLabel" name="label_69">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="text">
+                          <string>window (trials) =</string>
+                         </property>
+                         <property name="textFormat">
+                          <enum>Qt::AutoText</enum>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="2">
+                        <widget class="QLabel" name="label_70">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="text">
+                          <string>seconds =</string>
+                         </property>
+                         <property name="textFormat">
+                          <enum>Qt::AutoText</enum>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="1">
+                        <widget class="QSpinBox" name="RunLength">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>60</width>
+                           <height>16777215</height>
+                          </size>
+                         </property>
+                         <property name="maximum">
+                          <number>100000</number>
+                         </property>
+                         <property name="value">
+                          <number>10</number>
+                         </property>
+                         <property name="displayIntegerBase">
+                          <number>10</number>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="2" colspan="2">
+                        <widget class="QComboBox" name="MartchingType">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <item>
+                          <property name="text">
+                           <string>log ratio</string>
+                          </property>
+                         </item>
+                         <item>
+                          <property name="text">
+                           <string>fraction R</string>
+                          </property>
+                         </item>
+                        </widget>
                        </item>
                       </layout>
                      </widget>
@@ -1829,6 +2026,9 @@
                          <property name="font">
                           <font>
                            <pointsize>8</pointsize>
+                           <weight>50</weight>
+                           <italic>false</italic>
+                           <bold>false</bold>
                           </font>
                          </property>
                          <property name="text">
@@ -1934,6 +2134,9 @@
                       <property name="font">
                        <font>
                         <pointsize>8</pointsize>
+                        <weight>50</weight>
+                        <italic>false</italic>
+                        <bold>false</bold>
                        </font>
                       </property>
                       <property name="title">
@@ -2213,6 +2416,9 @@
                       <property name="font">
                        <font>
                         <pointsize>8</pointsize>
+                        <weight>50</weight>
+                        <italic>false</italic>
+                        <bold>false</bold>
                        </font>
                       </property>
                       <property name="title">
@@ -2295,6 +2501,9 @@
                       <property name="font">
                        <font>
                         <pointsize>8</pointsize>
+                        <weight>50</weight>
+                        <italic>false</italic>
+                        <bold>false</bold>
                        </font>
                       </property>
                       <property name="title">
@@ -2352,6 +2561,9 @@ Current right block:
                            <property name="font">
                             <font>
                              <pointsize>8</pointsize>
+                             <weight>50</weight>
+                             <italic>false</italic>
+                             <bold>false</bold>
                             </font>
                            </property>
                            <property name="text">
@@ -2405,6 +2617,9 @@ Current pair:
                    <property name="font">
                     <font>
                      <pointsize>8</pointsize>
+                     <weight>50</weight>
+                     <italic>false</italic>
+                     <bold>false</bold>
                     </font>
                    </property>
                    <property name="title">
@@ -2428,6 +2643,7 @@ Current pair:
                          <font>
                           <pointsize>9</pointsize>
                           <weight>75</weight>
+                          <italic>false</italic>
                           <bold>true</bold>
                          </font>
                         </property>
@@ -2471,6 +2687,7 @@ Water in session:</string>
                          <font>
                           <pointsize>9</pointsize>
                           <weight>75</weight>
+                          <italic>false</italic>
                           <bold>true</bold>
                          </font>
                         </property>
@@ -2578,7 +2795,7 @@ Double dipping:
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>1068</width>
+                  <width>1072</width>
                   <height>463</height>
                  </rect>
                 </property>
@@ -4558,6 +4775,9 @@ Double dipping:
                    <property name="font">
                     <font>
                      <pointsize>8</pointsize>
+                     <weight>50</weight>
+                     <italic>false</italic>
+                     <bold>false</bold>
                     </font>
                    </property>
                    <property name="text">
