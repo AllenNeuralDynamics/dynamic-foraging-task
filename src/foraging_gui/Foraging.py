@@ -3844,6 +3844,8 @@ class Window(QMainWindow):
                     self.Start.setChecked(False)
                     logging.info('User declines continuation of session')
                     return
+                self.GeneratedTrials.lick_interval_time.start()  # restart lick interval calculation
+
             # check experimenter name
             reply = QMessageBox.critical(self,
                 'Box {}, Start'.format(self.box_letter),
@@ -4065,7 +4067,6 @@ class Window(QMainWindow):
             # delete licks from the previous session
             GeneratedTrials._DeletePreviousLicks(self.Channel2)
             GeneratedTrials.lick_interval_time.start()  # start lick interval calculation
-
 
             if self.Start.isChecked():
                 # if session log handler is not none, stop logging for previous session

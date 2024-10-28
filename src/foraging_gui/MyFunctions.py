@@ -109,7 +109,8 @@ class GenerateTrials():
         self._GetTrainingParameters(self.win)
 
         # create timer to calculate lick intervals every 10 minutes
-        self.lick_interval_time = QtCore.QTimer(timeout=self.calculate_inter_lick_intervals, interval=600000)
+        #self.lick_interval_time = QtCore.QTimer(timeout=self.calculate_inter_lick_intervals, interval=600000)
+        self.lick_interval_time = QtCore.QTimer(timeout=self.calculate_inter_lick_intervals, interval=100)
 
     def _GenerateATrial(self,Channel4):
         self.finish_select_par=0
@@ -905,6 +906,7 @@ class GenerateTrials():
         right = self.B_RightLickTime
         left = self.B_LeftLickTime
         threshold = .1
+        print(right, left, 'right and left lick time')
         if right is not None and left is not None and len(right) > 0 and len(left) > 0:
             # calculate left  interval and fraction
             same_side_l = np.diff(left)
