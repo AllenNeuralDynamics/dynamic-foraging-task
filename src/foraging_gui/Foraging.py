@@ -1312,8 +1312,8 @@ class Window(QMainWindow):
                         logging.info(f'Mouse {session.subject_id} successfully added to slims with pk {mouse.pk}')
                     except Exception as e:
                         if '"cntn_barCode":"This field should be unique"' in str(e):    # error if mouse already exists
-                            logging.error(f'Mouse {session.subject_id} exists in Slims but contains validations errors.'
-                                          f'Waterlog needs to be added manually to Slims.')
+                            logging.warning(f'Mouse {session.subject_id} exists in Slims but contains validations '
+                                            f'errors. Waterlog needs to be added manually to Slims.')
                             QMessageBox.critical(self,
                                                  'Adding Waterlog',
                                                  f'Mouse {session.subject_id} exists in Slims but contains validations '
@@ -1325,8 +1325,8 @@ class Window(QMainWindow):
                             raise e
 
                 else:   # Not enough info in schedule to create mouse
-                    logging.error(f'Mouse {session.subject_id} does not exist in Slims, and schedule does not contain '
-                                  f'enough information to add mouse. Waterlog needs to be added manually to Slims.')
+                    logging.warning(f'Mouse {session.subject_id} does not exist in Slims, and schedule does not contain'
+                                    f' enough information to add mouse. Waterlog needs to be added manually to Slims.')
                     QMessageBox.critical(self,
                                          'Adding Waterlog',
                                          f'Mouse {session.subject_id} does not exist in Slims, and schedule does not '
