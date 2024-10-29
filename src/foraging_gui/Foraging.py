@@ -1292,8 +1292,8 @@ class Window(QMainWindow):
             mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=session.subject_id)
         except Exception as e:
             if 'No record found' in str(e):    # if no mouse found or validation errors on mouse
-                logging.error(f'"No record found" error while trying to fetch mouse {session.subject_id}. '
-                              f'Attempting to add mouse model to Slims.')
+                logging.warning(f'"No record found" error while trying to fetch mouse {session.subject_id}. '
+                                f'Attempting to add mouse model to Slims.')
                 # check schedule to make sure enough information is known about mouse to create model in slims
                 if not pd.isnull((curr_st := self._GetInfoFromSchedule(session.subject_id, 'Current State'))) \
                         and not pd.isnull((point_of_contact := self._GetInfoFromSchedule(session.subject_id, 'PI'))):
@@ -1312,8 +1312,8 @@ class Window(QMainWindow):
                         logging.info(f'Mouse {session.subject_id} successfully added to slims with pk {mouse.pk}')
                     except Exception as e:
                         if '"cntn_barCode":"This field should be unique"' in str(e):    # error if mouse already exists
-                            logging.error(f'Mouse {session.subject_id} exists in Slims but contains validations errors.'
-                                          f'Waterlog needs to be added manually to Slims.')
+                            logging.warning(f'Mouse {session.subject_id} exists in Slims but contains validations '
+                                            f'errors. Waterlog needs to be added manually to Slims.')
                             QMessageBox.critical(self,
                                                  'Adding Waterlog',
                                                  f'Mouse {session.subject_id} exists in Slims but contains validations '
@@ -1325,8 +1325,8 @@ class Window(QMainWindow):
                             raise e
 
                 else:   # Not enough info in schedule to create mouse
-                    logging.error(f'Mouse {session.subject_id} does not exist in Slims, and schedule does not contain '
-                                  f'enough information to add mouse. Waterlog needs to be added manually to Slims.')
+                    logging.warning(f'Mouse {session.subject_id} does not exist in Slims, and schedule does not contain'
+                                    f' enough information to add mouse. Waterlog needs to be added manually to Slims.')
                     QMessageBox.critical(self,
                                          'Adding Waterlog',
                                          f'Mouse {session.subject_id} does not exist in Slims, and schedule does not '
