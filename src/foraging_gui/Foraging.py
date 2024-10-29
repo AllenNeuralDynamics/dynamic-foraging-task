@@ -1292,8 +1292,8 @@ class Window(QMainWindow):
             mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=session.subject_id)
         except Exception as e:
             if 'No record found' in str(e):    # if no mouse found or validation errors on mouse
-                logging.error(f'"No record found" error while trying to fetch mouse {session.subject_id}. '
-                              f'Attempting to add mouse model to Slims.')
+                logging.warning(f'"No record found" error while trying to fetch mouse {session.subject_id}. '
+                                f'Attempting to add mouse model to Slims.')
                 # check schedule to make sure enough information is known about mouse to create model in slims
                 if not pd.isnull((curr_st := self._GetInfoFromSchedule(session.subject_id, 'Current State'))) \
                         and not pd.isnull((point_of_contact := self._GetInfoFromSchedule(session.subject_id, 'PI'))):
