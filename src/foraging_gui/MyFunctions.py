@@ -915,13 +915,13 @@ class GenerateTrials():
             logging.info(f'Percentage of left lick intervals under 100 ms is {same_side_l_frac * 100}%.')
             self.B_LeftLickIntervalPercent = same_side_l_frac * 100
 
-        elif len(left) > 0:
+        if len(left) > 0:
             # calculate right interval and fraction
             same_side_r_frac = np.mean(same_side_r <= threshold)
             logging.info(f'Percentage of right lick intervals under 100 ms is {same_side_r_frac * 100}%.')
             self.B_RightLickIntervalPercent = same_side_r_frac * 100
 
-        elif len(right) > 0 and len(left) > 0:
+        if len(right) > 0 and len(left) > 0:
             # calculate same side lick interval and fraction for both right and left
             same_side_combined = np.concat([same_side_l, same_side_r])
             same_side_frac = np.mean(same_side_combined <= threshold)
