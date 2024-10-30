@@ -923,7 +923,7 @@ class GenerateTrials():
 
         if len(right) > 0 and len(left) > 0:
             # calculate same side lick interval and fraction for both right and left
-            same_side_combined = np.concat([same_side_l, same_side_r])
+            same_side_combined = np.concatenate([same_side_l, same_side_r])
             same_side_frac = np.mean(same_side_combined <= threshold)
 
             if same_side_frac >= threshold:
@@ -939,12 +939,12 @@ class GenerateTrials():
             stacked_left = np.column_stack((np.negative(dummy_array), left))
             # concatenate stacked_right and stacked_left then sort based on time element
             # e.g. [[-1, 10], [1, 15], [-1, 20], [1, 25]...]. Ones added to assign lick side to times
-            merged_sorted = sorted(np.concatenate((stacked_right, stacked_left)),
-                                   key=lambda x: x[1])
+            merged_sorted = np.array(sorted(np.concatenate((stacked_right, stacked_left)),
+                               key=lambda x: x[1]))
 
             diffs = np.diff(merged_sorted[:, 0])    # take difference of 1 (right) or -1 (left)
             # take difference of next index with previous at indices where directions are opposite
-            cross_sides = [merged_sorted[i + 1, 1] - merged_sorted[i, 1] for i in np.where(diffs != 0)]
+            cross_sides = np.array([merged_sorted[i + 1, 1] - merged_sorted[i, 1] for i in np.where(diffs != 0)])[0]
             cross_side_frac = np.mean(cross_sides <= threshold)
             logging.info(f'Percentage of cross side lick intervals under 100 ms is {cross_side_frac * 100}%.')
             self.B_CrossSideIntervalPercent = cross_side_frac * 100
