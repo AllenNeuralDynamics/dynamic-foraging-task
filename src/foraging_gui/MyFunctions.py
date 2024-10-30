@@ -110,7 +110,7 @@ class GenerateTrials():
 
         # create timer to calculate lick intervals every 10 minutes
         self.lick_interval_time = QtCore.QTimer(timeout=self.calculate_inter_lick_intervals, interval=600000)
-
+     
     def _GenerateATrial(self,Channel4):
         self.finish_select_par=0
         if self.win.UpdateParameters==1:
@@ -911,20 +911,20 @@ class GenerateTrials():
         if len(right) > 0:
             # calculate left interval and fraction
             same_side_l_frac = round(np.mean(same_side_l <= threshold), 4)
-            logging.info(f'Percentage of left lick intervals under 100 ms is {same_side_l_frac * 100}%.')
+            logging.info(f'Percentage of left lick intervals under 100 ms is {same_side_l_frac * 100:.2f}%.')
             self.B_LeftLickIntervalPercent = same_side_l_frac * 100
 
         if len(left) > 0:
             # calculate right interval and fraction
             same_side_r_frac = round(np.mean(same_side_r <= threshold), 4)
-            logging.info(f'Percentage of right lick intervals under 100 ms is {same_side_r_frac * 100}%.')
+            logging.info(f'Percentage of right lick intervals under 100 ms is {same_side_r_frac * 100:.2f}%.')
             self.B_RightLickIntervalPercent = same_side_r_frac * 100
 
         if len(right) > 0 and len(left) > 0:
             # calculate same side lick interval and fraction for both right and left
             same_side_combined = np.concatenate([same_side_l, same_side_r])
             same_side_frac = round(np.mean(same_side_combined <= threshold), 4)
-            logging.info(f'Percentage of right and left lick intervals under 100 ms is {same_side_frac * 100}%.')
+            logging.info(f'Percentage of right and left lick intervals under 100 ms is {same_side_frac * 100:.2f}%.')
             if same_side_frac >= threshold:
                 self.win.same_side_lick_interval.setText(f'Percentage of same side lick intervals under 100 ms is '
                                                          f'over 10%: {same_side_frac * 100:.2f}%.')
@@ -950,7 +950,7 @@ class GenerateTrials():
 
             if cross_side_frac >= threshold:
                 self.win.cross_side_lick_interval.setText(f'Percentage of cross side lick intervals under 100 ms is '
-                                                          f'over 10%: {cross_side_frac * 100}%.')
+                                                          f'over 10%: {cross_side_frac * 100:.2f}%.')
             else:
                 self.win.cross_side_lick_interval.setText('')
 
