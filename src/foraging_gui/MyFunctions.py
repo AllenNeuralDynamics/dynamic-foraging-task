@@ -907,43 +907,51 @@ class GenerateTrials():
         left = self.B_LeftLickTime
         threshold = .1
 
-        if right is not None and left is not None and len(right) > 0 and len(left) > 0:
+        same_side_l = np.diff(left)
+        same_side_r = np.diff(right)
+        if len(right) > 0:
             # calculate left interval and fraction
-            same_side_l = np.diff(left)
-            same_side_l_frac = len(same_side_l[~(same_side_l > threshold)]) / len(same_side_l)
+            same_side_l_frac = np.mean(same_side_l <= threshold)
             logging.info(f'Percentage of left lick intervals under 100 ms is {same_side_l_frac * 100}%.')
             self.B_LeftLickIntervalPercent = same_side_l_frac * 100
 
+        elif len(left) > 0:
             # calculate right interval and fraction
-            same_side_r = np.diff(right)
-            same_side_r_frac = len(same_side_r[~(same_side_r > threshold)]) / len(same_side_r)
+            same_side_r_frac = np.mean(same_side_r <= threshold)
             logging.info(f'Percentage of right lick intervals under 100 ms is {same_side_r_frac * 100}%.')
             self.B_RightLickIntervalPercent = same_side_r_frac * 100
 
-            if same_side_l_frac + same_side_r_frac >= .1:
+        elif len(right) > 0 and len(left) > 0:
+            # calculate same side lick interval and fraction for both right and left
+            same_side_combined = np.concat([same_side_l, same_side_r])
+            same_side_frac = np.mean(same_side_combined <= threshold)
+
+            if same_side_frac >= threshold:
                 self.win.same_side_lick_interval.setText(f'Percentage of same side lick intervals under 100 ms is '
-                                                         f'over 10%: {(same_side_r_frac+same_side_l_frac) * 100}%.')
+                                                         f'over 10%: {same_side_frac * 100}%.')
             else:
                 self.win.same_side_lick_interval.setText('')
 
             # calculate cross side interval and frac
-            dummy_array = np.ones(right.shape)  # use array to tell lick side after merging
+            dummy_array = np.ones(right.shape)  # array used to assign lick direction
+            # 2d arrays pairing each time with a 1 (right) or -1 (left)
             stacked_right = np.column_stack((dummy_array, right))
             stacked_left = np.column_stack((np.negative(dummy_array), left))
+            # concatenate stacked_right and stacked_left then sort based on time element
+            # e.g. [[-1, 10], [1, 15], [-1, 20], [1, 25]...]. Ones added to assign lick side to times
             merged_sorted = sorted(np.concatenate((stacked_right, stacked_left)),
-                                   key=lambda x: x[1])  # sort by second element
-            cross_sides = []
-            for i in range(1, len(right)):
-                if merged_sorted[i - 1][0] == -merged_sorted[i][0]:  # cross side lick
-                    cross_sides.append(merged_sorted[i][1] - merged_sorted[i - 1][1])
-            cross_sides = np.array(cross_sides)
-            cross_side_frac = len(cross_sides[~(cross_sides > threshold)]) / len(cross_sides)
+                                   key=lambda x: x[1])
+
+            diffs = np.diff(merged_sorted[:, 0])    # take difference of 1 (right) or -1 (left)
+            # take difference of next index with previous at indices where directions are opposite
+            cross_sides = [merged_sorted[i + 1, 1] - merged_sorted[i, 1] for i in np.where(diffs != 0)]
+            cross_side_frac = np.mean(cross_sides <= threshold)
             logging.info(f'Percentage of cross side lick intervals under 100 ms is {cross_side_frac * 100}%.')
             self.B_CrossSideIntervalPercent = cross_side_frac * 100
 
-            if cross_side_frac >= .1:
+            if cross_side_frac >= threshold:
                 self.win.cross_side_lick_interval.setText(f'Percentage of cross side lick intervals under 100 ms is '
-                                                          f'over 10%: {(same_side_r_frac+same_side_l_frac) * 100}%.')
+                                                          f'over 10%: {cross_side_frac * 100}%.')
             else:
                 self.win.cross_side_lick_interval.setText('')
 
