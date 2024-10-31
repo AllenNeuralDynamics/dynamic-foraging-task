@@ -4666,13 +4666,14 @@ class Window(QMainWindow):
             capsule_id = 'c089614a-347e-4696-b17e-86980bb782c1'
             mount = 'FIP'
 
-
-            stream_modalities = session.data_streams[0].stream_modalities
-            modalities = {'behavior': [self.TrainingFolder.replace('\\', '/')]}
-            if Modality.FIB in stream_modalities:
-                modalities['fib']=[self.PhotometryFolder.replace('\\','/')]
-            if Modality.BEHAVIOR_VIDEOS in stream_modalities:
-                modalities['behavior-videos'] = [self.VideoFolder.replace('\\','/')]
+            modalities = {}
+            for stream in session.data_streams:
+                if Modality.BEHAVIOR in stream.stream_modalities:
+                    modalities['behavior'] = [self.TrainingFolder.replace('\\', '/')]
+                elif Modality.FIB in stream.stream_modalities:
+                    modalities['fib'] = [self.PhotometryFolder.replace('\\', '/')]
+                elif Modality.BEHAVIOR_VIDEOS in stream.stream_modalities:
+                    modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
 
             date_format = "%Y-%m-%d_%H-%M-%S"
             # Define contents of manifest file
