@@ -45,6 +45,7 @@ from foraging_gui.bias_indicator import BiasIndicator
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
 from aind_data_schema.core.session import Session
+from aind_data_schema_models.modalities import Modality
 
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear() # clear handlers so console output can be configured
@@ -61,6 +62,7 @@ class NumpyEncoder(json.JSONEncoder):
 
 class Window(QMainWindow):
     Time = QtCore.pyqtSignal(int) # Photometry timer signal
+    sessionGenerated = QtCore.pyqtSignal(Session)  # signal to indicate Session has been generated
 
     def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
@@ -191,6 +193,9 @@ class Window(QMainWindow):
 
         # Initializes session log handler as None
         self.session_log_handler = None
+
+        # generate an upload manifest when a session has been produced
+        self.upload_manifest_slot = self.sessionGenerated.connect(self._generate_upload_manifest)
 
         # show disk space
         self._show_disk_space()
@@ -2713,18 +2718,19 @@ class Window(QMainWindow):
             Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
             # generate the metadata file
             generated_metadata=generate_metadata(Obj=Obj)
+            session = generated_metadata._session()
+            self.sessionGenerated.emit(session)   # emit sessionGenerated
+
             if BackupSave==0:
                 text="Session metadata generated successfully: " + str(generated_metadata.session_metadata_success)+"\n"+\
-                "Rig metadata generated successfully: " + str(generated_metadata.rig_metadata_success)+"\n"+\
-                "Data description generated successfully: " + str(generated_metadata.data_description_success)
+                "Rig metadata generated successfully: " + str(generated_metadata.rig_metadata_success)
                 self._manage_warning_labels(self.MetadataWarning,warning_text=text)
             Obj['generate_session_metadata_success']=generated_metadata.session_metadata_success
             Obj['generate_rig_metadata_success']=generated_metadata.rig_metadata_success
-            Obj['generate_data_description_success']=generated_metadata.data_description_success
 
             if save_clicked:    # create water log result if weight after filled and uncheck save
                 if self.BaseWeight.text() != '' and self.WeightAfter.text() != '' and self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']:
-                    self._AddWaterLogResult(generated_metadata._session())
+                    self._AddWaterLogResult(session)
                 self.bias_indicator.clear()  # prepare for new session
 
 
@@ -2735,7 +2741,6 @@ class Window(QMainWindow):
             # set to False if error occurs
             Obj['generate_session_metadata_success']=False
             Obj['generate_rig_metadata_success']=False
-            Obj['generate_data_description_success']=False
 
         # don't save the data if the load tag is 1
         if self.load_tag==0:
@@ -3873,6 +3878,7 @@ class Window(QMainWindow):
                     self.Start.setChecked(False)
                     logging.info('User declines continuation of session')
                     return
+
             # check experimenter name
             reply = QMessageBox.critical(self,
                 'Box {}, Start'.format(self.box_letter),
@@ -3963,6 +3969,11 @@ class Window(QMainWindow):
             self.WarningLabel.setStyleSheet("color: none;")
             # disable metadata fields
             self._set_metadata_enabled(False)
+
+            # generate an upload manifest when a session has been produced if slot is not already connected
+            if self.upload_manifest_slot is None:
+                logging.debug('Connecting sessionGenerated to _generate_upload_manifest')
+                self.upload_manifest_slot = self.sessionGenerated.connect(self._generate_upload_manifest)
 
             # Set IACUC protocol in metadata based on schedule
             protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
@@ -4228,13 +4239,6 @@ class Window(QMainWindow):
                 # Reset stall timer
                 last_trial_start = time.time()
                 stall_iteration = 1
-
-                # create manifest after first trial is completed
-                if GeneratedTrials.B_CurrentTrialN == 1:
-                    if self.Settings['AutomaticUpload']:
-                        self._generate_upload_manifest()  # Generate the upload manifest file
-                    else:
-                        logging.info('Skipping Automatic Upload based on ForagingSettings.json')
 
                 # can start a new trial when we receive the trial end signal from Bonsai
                 self.ANewTrial=0
@@ -4640,13 +4644,20 @@ class Window(QMainWindow):
                          '&session_plot_selected_draw_types=1.+Choice+history'
         )
 
-    def _generate_upload_manifest(self):
+    def _generate_upload_manifest(self, session: Session):
         '''
             Generates a manifest.yml file for triggering data copy to VAST and upload to aws
+            :param session: session to use to create upload manifest
         '''
+
         if self.ID.text() in ['0','1','2','3','4','5','6','7','8','9','10']:
             logging.info('Skipping upload manifest, because this is the test mouse')
             return
+
+        if not self.Settings['AutomaticUpload']:
+            logging.info('Skipping Automatic Upload based on ForagingSettings.json')
+            return
+
         try:
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
@@ -4654,7 +4665,15 @@ class Window(QMainWindow):
             schedule = self.acquisition_datetime.split('_')[0]+'_20-30-00'
             capsule_id = 'c089614a-347e-4696-b17e-86980bb782c1'
             mount = 'FIP'
-            
+
+
+            stream_modalities = session.data_streams[0].stream_modalities
+            modalities = {'behavior': [self.TrainingFolder.replace('\\', '/')]}
+            if Modality.FIB in stream_modalities:
+                modalities['fib']=[self.PhotometryFolder.replace('\\','/')]
+            if Modality.BEHAVIOR_VIDEOS in stream_modalities:
+                modalities['behavior-videos'] = [self.VideoFolder.replace('\\','/')]
+
             date_format = "%Y-%m-%d_%H-%M-%S"
             # Define contents of manifest file
             contents = {
@@ -4667,15 +4686,10 @@ class Window(QMainWindow):
                 'destination': '//allen/aind/scratch/dynamic_foraging_rig_transfer',
                 's3_bucket':'private',
                 'processor_full_name': 'AIND Behavior Team',
-                'modalities':{
-                    'behavior':[self.TrainingFolder.replace('\\','/')],
-                    'behavior-videos':[self.VideoFolder.replace('\\','/')],
-                    'fib':[self.PhotometryFolder.replace('\\','/')]
-                    },
+                'modalities':modalities,
                 'schemas':[
                     os.path.join(self.MetadataFolder,'session.json').replace('\\','/'),
                     os.path.join(self.MetadataFolder,'rig.json').replace('\\','/'),
-                    os.path.join(self.MetadataFolder, 'data_description.json').replace('\\', '/')
                     ],
                 'schedule_time':datetime.strptime(schedule,date_format),
                 'project_name':self.project_name,
@@ -4699,6 +4713,9 @@ class Window(QMainWindow):
                 'Could not generate upload manifest. '+\
                 'Please alert the mouse owner, and report on github.')
 
+        # disconnect slot to only create manifest once
+        logging.debug('Disconnecting sessionGenerated from _generate_upload_manifest')
+        self.upload_manifest_slot = self.sessionGenerated.disconnect(self.upload_manifest_slot)
 
 def start_gui_log_file(box_number):
     '''
