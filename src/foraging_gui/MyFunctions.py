@@ -104,7 +104,9 @@ class GenerateTrials():
         self.Obj={}
         # get all of the training parameters of the current trial
         self._GetTrainingParameters(self.win)
-        
+
+        self.TP_RunLength = 10
+
     def _GenerateATrial(self,Channel4):
         self.finish_select_par=0
         if self.win.UpdateParameters==1:
@@ -566,6 +568,7 @@ class GenerateTrials():
     
     def _GetChoiceFrac(self):
         '''Get the fraction of right choices with running average'''
+
         kernel_size=int(self.TP_RunLength)
         ResponseHistoryT=self.B_AnimalResponseHistory.copy()
         ResponseHistoryT[ResponseHistoryT==2]=np.nan
