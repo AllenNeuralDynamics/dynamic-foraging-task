@@ -15,7 +15,6 @@ class PlotV(FigureCanvas):
         self.ax2 = self.fig.add_subplot(gs[6:10, 0:26], sharex=self.ax1)
 
         FigureCanvas.__init__(self, self.fig)
-        self.RunLength=10
         self.WindowSize=100
         self.StepSize=5
         self.MarkerSize=3
