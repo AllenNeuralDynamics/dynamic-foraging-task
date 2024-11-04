@@ -140,6 +140,7 @@ class Window(QMainWindow):
         self.bias_indicator = BiasIndicator(x_range=self.bias_n_size)  # TODO: Where to store bias_threshold parameter? self.Settings?
         self.bias_indicator.biasValue.connect(self.bias_calculated)  # update dashboard value
         self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.bias_thread = threading.Thread()   # dummy thread
 
         # Set up more parameters
         self.FIP_started=False
@@ -4267,13 +4268,17 @@ class Window(QMainWindow):
                     n_trial_back = self.bias_n_size if l > self.bias_n_size else \
                         round(len(np.array(choice_history)[~np.isnan(choice_history)])*.6)
                     # add data to bias_indicator
-                    bias_thread = threading.Thread(target=self.bias_indicator.calculate_bias,
-                                                   kwargs={'time_point': self.GeneratedTrials.B_TrialStartTime[-1],
-                                                           'choice_history': choice_history,
-                                                           'reward_history': np.array(any_reward).astype(int),
-                                                           'n_trial_back': n_trial_back,
-                                                           'cv': 2})
-                    bias_thread.start()
+                    if not self.bias_thread.is_alive():
+                        logger.debug('Starting bias thread.')
+                        self.bias_thread = threading.Thread(target=self.bias_indicator.calculate_bias,
+                                                       kwargs={'time_point': self.GeneratedTrials.B_TrialStartTime[-1],
+                                                               'choice_history': choice_history,
+                                                               'reward_history': np.array(any_reward).astype(int),
+                                                               'n_trial_back': n_trial_back,
+                                                               'cv': 2})
+                        self.bias_thread.start()
+                    else:
+                        logger.debug('Skipping bias calculation as previous is still in progress. ')
 
                 # save the data everytrial
                 if GeneratedTrials.CurrentSimulation==True:
