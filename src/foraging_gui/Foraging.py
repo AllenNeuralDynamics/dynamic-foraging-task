@@ -67,7 +67,10 @@ class Window(QMainWindow):
 
     def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
+
+        # create warning widget
         self.warning_log_tag = 'warning_widget'  # TODO: How to set this or does it matter?
+        self.warning_widget = WarningWidget(log_tag=self.warning_log_tag)
 
         super().__init__(parent)
 
@@ -106,6 +109,10 @@ class Window(QMainWindow):
 
         # Load User interface
         self._LoadUI()
+
+        # add warning_widget to layout and set color
+        self.scrollArea_6.setWidget(self.warning_widget)
+        self.warning_widget.setTextColor(self.default_warning_color)
 
         # set window title
         self.setWindowTitle(self.rig_name)
@@ -199,10 +206,6 @@ class Window(QMainWindow):
 
         # generate an upload manifest when a session has been produced
         self.upload_manifest_slot = self.sessionGenerated.connect(self._generate_upload_manifest)
-
-        # create and add warning_widget
-        self.warning_widget = WarningWidget(log_tag=self.warning_log_tag)
-        self.scrollArea_6.setWidget(self.warning_widget)
 
         # show disk space
         self._show_disk_space()
