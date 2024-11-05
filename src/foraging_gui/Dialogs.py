@@ -268,8 +268,6 @@ class OptogeneticsDialog(QDialog):
                                 ItemsLaserPower=sorted(ItemsLaserPower)
                                 getattr(self, f"Laser{laser_tag}_power_{str(Numb)}").clear()
                                 getattr(self, f"Laser{laser_tag}_power_{str(Numb)}").addItems(ItemsLaserPower)
-                        self.MainWindow.WarningLabel.setText('')
-                        self.MainWindow.WarningLabel.setStyleSheet("color: gray;")
                     else:
                         no_calibration=True
                 else:
@@ -280,8 +278,7 @@ class OptogeneticsDialog(QDialog):
             if no_calibration:
                 for laser_tag in self.laser_tags:
                     getattr(self, f"Laser{laser_tag}_power_{str(Numb)}").clear()
-                    self.MainWindow.WarningLabel.setText('No calibration for this protocol identified!')
-                    self.MainWindow.WarningLabel.setStyleSheet(self.MainWindow.default_warning_color)
+                    logging.warning('No calibration for this protocol identified!')
 
         getattr(self, 'Location_' + str(Numb)).setEnabled(Label)
         getattr(self, 'Laser1_power_' + str(Numb)).setEnabled(Label)
@@ -1370,8 +1367,7 @@ class CameraDialog(QDialog):
             self.MainWindow.Channel.CameraControl(int(1))
             time.sleep(5)
             self.camera_start_time = str(datetime.now())
-            self.MainWindow.WarningLabelCamera.setText('Camera is on!')
-            self.MainWindow.WarningLabelCamera.setStyleSheet(self.MainWindow.default_warning_color)
+            logging.warning('Camera is on!')
             self.WarningLabelCameraOn.setText('Camera is on!')
             self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
             self.WarningLabelLogging.setText('')
@@ -1385,8 +1381,7 @@ class CameraDialog(QDialog):
             self.MainWindow.Channel.CameraControl(int(2))
             self.camera_stop_time = str(datetime.now())
             time.sleep(5)
-            self.MainWindow.WarningLabelCamera.setText('Camera is off!')
-            self.MainWindow.WarningLabelCamera.setStyleSheet(self.MainWindow.default_warning_color)
+            logging.warning('Camera is off!')
             self.WarningLabelCameraOn.setText('Camera is off!')
             self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
             self.WarningLabelLogging.setText('')
@@ -1557,8 +1552,7 @@ class LaserCalibrationDialog(QDialog):
             # add ramping down
             if self.CLP_RampingDown>0:
                 if self.CLP_RampingDown>self.CLP_CurrentDuration:
-                    self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
-                    self.win.WarningLabel.setStyleSheet(self.MainWindow.default_warning_color)
+                    logging.warning('Ramping down is longer than the laser duration!')
                 else:
                     Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
                     RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
@@ -1567,15 +1561,13 @@ class LaserCalibrationDialog(QDialog):
             self.my_wave=np.append(self.my_wave,[0,0])
         elif self.CLP_Protocol=='Pulse':
             if self.CLP_PulseDur=='NA':
-                self.win.WarningLabel.setText('Pulse duration is NA!')
-                self.win.WarningLabel.setStyleSheet(self.MainWindow.default_warning_color)
+                logging.warning('Pulse duration is NA!')
             else:
                 self.CLP_PulseDur=float(self.CLP_PulseDur)
                 PointsEachPulse=int(self.CLP_SampleFrequency*self.CLP_PulseDur)
                 PulseIntervalPoints=int(1/self.CLP_Frequency*self.CLP_SampleFrequency-PointsEachPulse)
                 if PulseIntervalPoints<0:
-                    self.win.WarningLabel.setText('Pulse frequency and pulse duration are not compatible!')
-                    self.win.WarningLabel.setStyleSheet(self.MainWindow.default_warning_color)
+                    logging.warning('Pulse frequency and pulse duration are not compatible!')
                 TotalPoints=int(self.CLP_SampleFrequency*self.CLP_CurrentDuration)
                 PulseNumber=np.floor(self.CLP_CurrentDuration*self.CLP_Frequency) 
                 EachPulse=Amplitude*np.ones(PointsEachPulse)
@@ -1587,8 +1579,7 @@ class LaserCalibrationDialog(QDialog):
                     for i in range(int(PulseNumber-1)):
                         self.my_wave=np.concatenate((self.my_wave, WaveFormEachCycle), axis=0)
                 else:
-                    self.win.WarningLabel.setText('Pulse number is less than 1!')
-                    self.win.WarningLabel.setStyleSheet(self.MainWindow.default_warning_color)
+                    logging.warning('Pulse number is less than 1!')
                     return
                 self.my_wave=np.concatenate((self.my_wave, EachPulse), axis=0)
                 self.my_wave=np.concatenate((self.my_wave, np.zeros(TotalPoints-np.shape(self.my_wave)[0])), axis=0)
@@ -1599,8 +1590,7 @@ class LaserCalibrationDialog(QDialog):
             if self.CLP_RampingDown>0:
             # add ramping down
                 if self.CLP_RampingDown>self.CLP_CurrentDuration:
-                    self.win.WarningLabel.setText('Ramping down is longer than the laser duration!')
-                    self.win.WarningLabel.setStyleSheet(self.MainWindow.default_warning_color)
+                    logging.warning('Ramping down is longer than the laser duration!')
                 else:
                     Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
                     RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
@@ -1608,8 +1598,7 @@ class LaserCalibrationDialog(QDialog):
                     self.my_wave=self.my_wave*RampingDown
             self.my_wave=np.append(self.my_wave,[0,0])
         else:
-            self.win.WarningLabel.setText('Unidentified optogenetics protocol!')
-            self.win.WarningLabel.setStyleSheet(self.MainWindow.default_warning_color)
+            logging.warning('Unidentified optogenetics protocol!')
 
     def _GetLaserAmplitude(self):
         '''the voltage amplitude dependens on Protocol, Laser Power, Laser color, and the stimulation locations<>'''
@@ -1620,9 +1609,8 @@ class LaserCalibrationDialog(QDialog):
         elif self.CLP_Location=='Both':
             self.CurrentLaserAmplitude=[self.CLP_InputVoltage,self.CLP_InputVoltage]
         else:
-            self.win.WarningLabel.setText('No stimulation location defined!')
-            self.win.WarningLabel.setStyleSheet(self.MainWindow.default_warning_color)
-   
+            logging.warning('No stimulation location defined!')
+
     # get training parameters
     def _GetTrainingParameters(self,win):
         '''Get training parameters'''
@@ -2042,7 +2030,8 @@ class MetadataDialog(QDialog):
     def _removing_warning(self):
         '''remove the warning'''
         if self.RigMetadataFile.text()!='':
-            self.MainWindow._manage_warning_labels(self.MainWindow.MetadataWarning,warning_text='')
+            pass
+            #self.MainWindow._manage_warning_labels(self.MainWindow.MetadataWarning,warning_text='')
 
     def _load_metadata(self):
         '''load the metadata from a json file'''

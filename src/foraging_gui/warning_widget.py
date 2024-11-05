@@ -1,5 +1,5 @@
 import logging
-from multiprocessing import Queue
+from queue import Queue
 from logging.handlers import QueueHandler
 from random import randint
 from PyQt5.QtCore import QTimer
@@ -13,7 +13,7 @@ class WarningWidget(QWidget):
 
         super().__init__(*args, **kwargs)
 
-        #self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
         # create vertical layout
         self.setLayout(QVBoxLayout())
@@ -22,7 +22,7 @@ class WarningWidget(QWidget):
         self.queue = Queue()
         queue_handler = QueueHandler(self.queue)
         queue_handler.setLevel(logging.WARNING)
-        logger.root.addHandler(queue_handler)
+        self.logger.root.addHandler(queue_handler)
 
         # create QTimer to periodically check queue
         self.check_timer = QTimer(timeout=self.check_warning_queue, interval=1000)
@@ -30,19 +30,17 @@ class WarningWidget(QWidget):
 
     def check_warning_queue(self):
         """
-        Check queue and update layout with latest warnings
+        Check queue and update layout with the latest warnings
         """
-        #print('while not que empty', self.queue.qsize(), self.queue.full())
-        if not self.queue.empty():
-            print(self.queue.get(block=False, timeout=1))
-            # label = QLabel(str(self.queue.get().getMessage()))
-            # self.layout().insertWidget(0, label)
 
+        while not self.queue.empty():
+            label = QLabel(str(self.queue.get().getMessage()))
+            self.layout().insertWidget(0, label)
 
             # prune layout if too many warnings
-            # if self.layout().count() == 30:
-            #     widget = self.layout().itemAt(29).widget()
-            #     self.layout().removeWidget(widget)
+            if self.layout().count() == 30:
+                widget = self.layout().itemAt(29).widget()
+                self.layout().removeWidget(widget)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
@@ -52,14 +50,13 @@ if __name__ == '__main__':
     stream_handler.setLevel(logger.root.level)
     logger.root.addHandler(stream_handler)
 
-    warn_widget = WarningWidget(logger)
+    warn_widget = WarningWidget()
+    warn_widget.show()
 
     warnings = ['this is a warning', 'this is also a warning', 'this is a warning too', 'Warn warn warn',
                 'are you warned yet?']
 
-    warning_timer = QTimer(timeout=lambda: logger.warning(warnings[randint(0, 5)]), interval=1000)
-
+    warning_timer = QTimer(timeout=lambda: logger.warning(warnings[randint(0, 4)]), interval=1000)
     warning_timer.start()
-    warn_widget.show()
 
     sys.exit(app.exec_())
