@@ -51,7 +51,7 @@ class WarningWidget(QWidget):
             log = self.queue.get().getMessage()
             if log[12:].strip():   # skip empty messages
                 label = QLabel(log)
-                label.setStyleSheet(f'"color: {self.text_color};"')
+                label.setStyleSheet(f'color: {self.text_color};')
                 self.layout().insertWidget(0, label)
 
                 # prune layout if too many warnings

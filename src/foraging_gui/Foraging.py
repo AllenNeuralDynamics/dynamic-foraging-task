@@ -273,14 +273,14 @@ class Window(QMainWindow):
         if self.default_ui=='ForagingGUI.ui':
             logging.info('Using ForagingGUI.ui interface')
             self.label_date.setText(str(date.today()))
-            self.default_warning_color="color: purple;"
-            self.default_text_color='purple'
+            self.default_warning_color="purple"
+            self.default_text_color="color: purple;"
             self.default_text_background_color='background-color: purple;'
         elif self.default_ui=='ForagingGUI_Ephys.ui':
             logging.info('Using ForagingGUI_Ephys.ui interface')
             self.Visualization.setTitle(str(date.today()))
-            self.default_warning_color="color: red;"
-            self.default_text_color='red'
+            self.default_warning_color="red"
+            self.default_text_color="color: red;"
             self.default_text_background_color='background-color: red;'
         else:
             logging.info('Using ForagingGUI.ui interface')
