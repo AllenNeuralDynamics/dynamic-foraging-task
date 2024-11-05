@@ -1292,48 +1292,9 @@ class Window(QMainWindow):
             mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=session.subject_id)
         except Exception as e:
             if 'No record found' in str(e):    # if no mouse found or validation errors on mouse
-                logging.error(f'"No record found" error while trying to fetch mouse {session.subject_id}. '
-                              f'Attempting to add mouse model to Slims.')
-                # check schedule to make sure enough information is known about mouse to create model in slims
-                if not pd.isnull((curr_st := self._GetInfoFromSchedule(session.subject_id, 'Current State'))) \
-                        and not pd.isnull((point_of_contact := self._GetInfoFromSchedule(session.subject_id, 'PI'))):
-                    logging.info(f'Creating mouse model for mouse {session.subject_id} with the below information: \n'
-                                 f'barcode: {session.subject_id} \n'
-                                 f'baseline_weight_g: {session.animal_weight_prior} \n'
-                                 f'point_of_contact: {point_of_contact} \n'
-                                 f'water_restricted: {True if curr_st.lower() == "hab only" else False}')
-                    model = models.SlimsMouseContent(barcode=session.subject_id,
-                                                     baseline_weight_g=session.animal_weight_prior,
-                                                     point_of_contact=point_of_contact,
-                                                     water_restricted=True if curr_st.lower() == 'hab only' else False,
-                                                     )
-                    try:    # try to add mouse model. This might fail if mouse exists but with validation errors
-                        mouse = self.slims_client.add_model(model)
-                        logging.info(f'Mouse {session.subject_id} successfully added to slims with pk {mouse.pk}')
-                    except Exception as e:
-                        if '"cntn_barCode":"This field should be unique"' in str(e):    # error if mouse already exists
-                            logging.error(f'Mouse {session.subject_id} exists in Slims but contains validations errors.'
-                                          f'Waterlog needs to be added manually to Slims.')
-                            QMessageBox.critical(self,
-                                                 'Adding Waterlog',
-                                                 f'Mouse {session.subject_id} exists in Slims but contains validations '
-                                                 f'errors. Waterlog needs to be added manually to Slims.',
-                                                 QMessageBox.Ok)
-                            return
-                        else:
-                            logging.error(f'While adding mouse {session.subject_id} model, unexpected error occurred.')
-                            raise e
-
-                else:   # Not enough info in schedule to create mouse
-                    logging.error(f'Mouse {session.subject_id} does not exist in Slims, and schedule does not contain '
-                                  f'enough information to add mouse. Waterlog needs to be added manually to Slims.')
-                    QMessageBox.critical(self,
-                                         'Adding Waterlog',
-                                         f'Mouse {session.subject_id} does not exist in Slims, and schedule does not '
-                                         f'contain enough information to add mouse. '
-                                         f'Waterlog needs to be added manually to Slims.',
-                                         QMessageBox.Ok)
-                    return
+                logging.warning(f'"No record found" error while trying to fetch mouse {session.subject_id}. '
+                                f'Will not log water.')
+                return
             else:
                 logging.error(f'While fetching mouse {session.subject_id} model, unexpected error occurred.')
                 raise e
