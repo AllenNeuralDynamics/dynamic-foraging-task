@@ -48,15 +48,16 @@ class WarningWidget(QWidget):
         """
 
         while not self.queue.empty():
-            log = self.queue.get()
-            label = QLabel(str(log.getMessage()))
-            label.setStyleSheet(f'"color: {self.text_color};"')
-            self.layout().insertWidget(0, label)
+            log = self.queue.get().getMessage()
+            if log[12:].strip():   # skip empty messages
+                label = QLabel(log)
+                label.setStyleSheet(f'"color: {self.text_color};"')
+                self.layout().insertWidget(0, label)
 
-            # prune layout if too many warnings
-            if self.layout().count() == 30:
-                widget = self.layout().itemAt(29).widget()
-                self.layout().removeWidget(widget)
+                # prune layout if too many warnings
+                if self.layout().count() == 30:
+                    widget = self.layout().itemAt(29).widget()
+                    self.layout().removeWidget(widget)
 
     def setTextColor(self, color: str) -> None:
         """
@@ -97,9 +98,9 @@ if __name__ == '__main__':
     warn_widget.show()
 
     warnings = ['this is a warning', 'this is also a warning', 'this is a warning too', 'Warn warn warn',
-                'are you warned yet?']
+                'are you warned yet?', '']
 
-    warning_timer = QTimer(timeout=lambda: logger.warning(warnings[randint(0, 4)],
+    warning_timer = QTimer(timeout=lambda: logger.warning(warnings[randint(0, 5)],
                                                           extra={'tags': 'warning_widget'}), interval=1000)
     warning_timer.start()
 

@@ -70,7 +70,6 @@ class Window(QMainWindow):
 
         # create warning widget
         self.warning_log_tag = 'warning_widget'  # TODO: How to set this or does it matter?
-        self.warning_widget = WarningWidget(log_tag=self.warning_log_tag)
 
         super().__init__(parent)
 
@@ -111,8 +110,9 @@ class Window(QMainWindow):
         self._LoadUI()
 
         # add warning_widget to layout and set color
+        self.warning_widget = WarningWidget(log_tag=self.warning_log_tag,
+                                            text_color=self.default_warning_color)
         self.scrollArea_6.setWidget(self.warning_widget)
-        self.warning_widget.setTextColor(self.default_warning_color)
 
         # set window title
         self.setWindowTitle(self.rig_name)
@@ -274,13 +274,13 @@ class Window(QMainWindow):
             logging.info('Using ForagingGUI.ui interface')
             self.label_date.setText(str(date.today()))
             self.default_warning_color="color: purple;"
-            self.default_text_color='color: purple;'
+            self.default_text_color='purple'
             self.default_text_background_color='background-color: purple;'
         elif self.default_ui=='ForagingGUI_Ephys.ui':
             logging.info('Using ForagingGUI_Ephys.ui interface')
             self.Visualization.setTitle(str(date.today()))
             self.default_warning_color="color: red;"
-            self.default_text_color='color: red;'
+            self.default_text_color='red'
             self.default_text_background_color='background-color: red;'
         else:
             logging.info('Using ForagingGUI.ui interface')
