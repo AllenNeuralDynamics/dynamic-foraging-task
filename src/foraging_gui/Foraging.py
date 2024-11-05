@@ -67,6 +67,8 @@ class Window(QMainWindow):
 
     def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
+        self.warning_log_tag = 'warning_widget'  # TODO: How to set this or does it matter?
+
         super().__init__(parent)
 
         # Process inputs        
@@ -199,7 +201,6 @@ class Window(QMainWindow):
         self.upload_manifest_slot = self.sessionGenerated.connect(self._generate_upload_manifest)
 
         # create and add warning_widget
-        self.warning_log_tag = 'warning_widget'     # TODO: How to set this or does it matter?
         self.warning_widget = WarningWidget(log_tag=self.warning_log_tag)
         self.scrollArea_6.setWidget(self.warning_widget)
 
@@ -2670,7 +2671,7 @@ class Window(QMainWindow):
 
 
         except Exception as e:
-            self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved!')
+            logging.warning('Meta data is not saved!', extra= {'tags': {self.warning_log_tag}})
             logging.error('Error generating session metadata: '+str(e))
             logging.error(traceback.format_exc())
             # set to False if error occurs
