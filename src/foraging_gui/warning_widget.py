@@ -34,7 +34,8 @@ class WarningWidget(QWidget):
         """
 
         while not self.queue.empty():
-            label = QLabel(str(self.queue.get().getMessage()))
+            log = self.queue.get()
+            label = QLabel(str(log.getMessage()))
             self.layout().insertWidget(0, label)
 
             # prune layout if too many warnings

@@ -2656,7 +2656,7 @@ class Window(QMainWindow):
             if BackupSave==0:
                 text="Session metadata generated successfully: " + str(generated_metadata.session_metadata_success)+"\n"+\
                 "Rig metadata generated successfully: " + str(generated_metadata.rig_metadata_success)
-                self._manage_warning_labels(self.MetadataWarning,warning_text=text)
+                logging.warning(text)
             Obj['generate_session_metadata_success']=generated_metadata.session_metadata_success
             Obj['generate_rig_metadata_success']=generated_metadata.rig_metadata_success
 
