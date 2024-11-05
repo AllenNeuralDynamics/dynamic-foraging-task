@@ -278,7 +278,8 @@ class OptogeneticsDialog(QDialog):
             if no_calibration:
                 for laser_tag in self.laser_tags:
                     getattr(self, f"Laser{laser_tag}_power_{str(Numb)}").clear()
-                    logging.warning('No calibration for this protocol identified!')
+                    logging.warning('No calibration for this protocol identified!',
+                                    extra={'tags': [self.MainWindow.warning_log_tag]})
 
         getattr(self, 'Location_' + str(Numb)).setEnabled(Label)
         getattr(self, 'Laser1_power_' + str(Numb)).setEnabled(Label)
@@ -1367,7 +1368,7 @@ class CameraDialog(QDialog):
             self.MainWindow.Channel.CameraControl(int(1))
             time.sleep(5)
             self.camera_start_time = str(datetime.now())
-            logging.warning('Camera is on!')
+            logging.info('Camera is on!', extra={'tags': [self.MainWindow.warning_log_tag]})
             self.WarningLabelCameraOn.setText('Camera is on!')
             self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
             self.WarningLabelLogging.setText('')
@@ -1381,7 +1382,7 @@ class CameraDialog(QDialog):
             self.MainWindow.Channel.CameraControl(int(2))
             self.camera_stop_time = str(datetime.now())
             time.sleep(5)
-            logging.warning('Camera is off!')
+            logging.info('Camera is off!', extra={'tags': [self.MainWindow.warning_log_tag]})
             self.WarningLabelCameraOn.setText('Camera is off!')
             self.WarningLabelCameraOn.setStyleSheet(self.MainWindow.default_warning_color)
             self.WarningLabelLogging.setText('')
@@ -1552,7 +1553,8 @@ class LaserCalibrationDialog(QDialog):
             # add ramping down
             if self.CLP_RampingDown>0:
                 if self.CLP_RampingDown>self.CLP_CurrentDuration:
-                    logging.warning('Ramping down is longer than the laser duration!')
+                    logging.warning('Ramping down is longer than the laser duration!',
+                                    extra={'tags': [self.MainWindow.warning_log_tag]})
                 else:
                     Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
                     RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
@@ -1561,13 +1563,14 @@ class LaserCalibrationDialog(QDialog):
             self.my_wave=np.append(self.my_wave,[0,0])
         elif self.CLP_Protocol=='Pulse':
             if self.CLP_PulseDur=='NA':
-                logging.warning('Pulse duration is NA!')
+                logging.warning('Pulse duration is NA!', extra={'tags': [self.MainWindow.warning_log_tag]})
             else:
                 self.CLP_PulseDur=float(self.CLP_PulseDur)
                 PointsEachPulse=int(self.CLP_SampleFrequency*self.CLP_PulseDur)
                 PulseIntervalPoints=int(1/self.CLP_Frequency*self.CLP_SampleFrequency-PointsEachPulse)
                 if PulseIntervalPoints<0:
-                    logging.warning('Pulse frequency and pulse duration are not compatible!')
+                    logging.warning('Pulse frequency and pulse duration are not compatible!',
+                                    extra={'tags': [self.MainWindow.warning_log_tag]})
                 TotalPoints=int(self.CLP_SampleFrequency*self.CLP_CurrentDuration)
                 PulseNumber=np.floor(self.CLP_CurrentDuration*self.CLP_Frequency) 
                 EachPulse=Amplitude*np.ones(PointsEachPulse)
@@ -1579,7 +1582,7 @@ class LaserCalibrationDialog(QDialog):
                     for i in range(int(PulseNumber-1)):
                         self.my_wave=np.concatenate((self.my_wave, WaveFormEachCycle), axis=0)
                 else:
-                    logging.warning('Pulse number is less than 1!')
+                    logging.warning('Pulse number is less than 1!', extra={'tags': [self.MainWindow.warning_log_tag]})
                     return
                 self.my_wave=np.concatenate((self.my_wave, EachPulse), axis=0)
                 self.my_wave=np.concatenate((self.my_wave, np.zeros(TotalPoints-np.shape(self.my_wave)[0])), axis=0)
@@ -1590,7 +1593,8 @@ class LaserCalibrationDialog(QDialog):
             if self.CLP_RampingDown>0:
             # add ramping down
                 if self.CLP_RampingDown>self.CLP_CurrentDuration:
-                    logging.warning('Ramping down is longer than the laser duration!')
+                    logging.warning('Ramping down is longer than the laser duration!',
+                                    extra={'tags': [self.MainWindow.warning_log_tag]})
                 else:
                     Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
                     RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
@@ -1598,7 +1602,7 @@ class LaserCalibrationDialog(QDialog):
                     self.my_wave=self.my_wave*RampingDown
             self.my_wave=np.append(self.my_wave,[0,0])
         else:
-            logging.warning('Unidentified optogenetics protocol!')
+            logging.warning('Unidentified optogenetics protocol!', extra={'tags': [self.MainWindow.warning_log_tag]})
 
     def _GetLaserAmplitude(self):
         '''the voltage amplitude dependens on Protocol, Laser Power, Laser color, and the stimulation locations<>'''
@@ -1609,7 +1613,7 @@ class LaserCalibrationDialog(QDialog):
         elif self.CLP_Location=='Both':
             self.CurrentLaserAmplitude=[self.CLP_InputVoltage,self.CLP_InputVoltage]
         else:
-            logging.warning('No stimulation location defined!')
+            logging.warning('No stimulation location defined!', extra={'tags': [self.MainWindow.warning_log_tag]})
 
     # get training parameters
     def _GetTrainingParameters(self,win):
@@ -1960,7 +1964,6 @@ class MetadataDialog(QDialog):
         self.ManipulatorZ.textChanged.connect(self._save_configuration)
         self.SaveMeta.clicked.connect(self._save_metadata)
         self.LoadMeta.clicked.connect(self._load_metadata)
-        self.RigMetadataFile.textChanged.connect(self._removing_warning)
         self.ClearMetadata.clicked.connect(self._clear_metadata)
         self.Stick_ArcAngle.textChanged.connect(self._save_configuration)
         self.Stick_ModuleAngle.textChanged.connect(self._save_configuration)
@@ -2026,12 +2029,6 @@ class MetadataDialog(QDialog):
         self.meta_data['rig_metadata_file'] = ''
         self.ExperimentDescription.clear()
         self._update_metadata()
-
-    def _removing_warning(self):
-        '''remove the warning'''
-        if self.RigMetadataFile.text()!='':
-            pass
-            #self.MainWindow._manage_warning_labels(self.MainWindow.MetadataWarning,warning_text='')
 
     def _load_metadata(self):
         '''load the metadata from a json file'''

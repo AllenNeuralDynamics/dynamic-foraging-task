@@ -163,7 +163,7 @@ class GenerateTrials():
                 ))
                 
             # Show msg
-            logging.warning(msg_uncoupled_block)
+            logging.warning(msg_uncoupled_block, extra={'tags': [self.win.warning_log_tag]})
             
         # Append the (updated) current reward probability to the history 
         self.B_RewardProHistory=np.append(
@@ -283,7 +283,7 @@ class GenerateTrials():
             self.win.keyPressEvent()
             self.win.NextBlock.setChecked(True)
             self.win._NextBlock()
-            logging.warning('Warm up is turned off')
+            logging.info('Warm up is turned off', extra={'tags': [self.win.warning_log_tag]})
 
     def _get_warmup_state(self):
         '''calculate the metrics related to the warm up and decide if we should turn on the warm up'''
@@ -308,7 +308,9 @@ class GenerateTrials():
             # turn on the warm up
             warmup=1
         # show current metrics of the warm up
-        logging.error('Finish trial: '+str(round(finish_trial,2))+ '; Finish ratio: '+str(round(finish_ratio,2))+'; Choice ratio bias: '+str(round(abs(choice_ratio-0.5),2)))
+        logging.info('Finish trial: '+str(round(finish_trial,2))+ '; Finish ratio: '+str(round(finish_ratio,2))+
+                      '; Choice ratio bias: '+str(round(abs(choice_ratio-0.5),2)),
+                      extra={'tags': [self.win.warning_log_tag]})
         return warmup
         
     def _CheckBaitPermitted(self):
@@ -324,7 +326,8 @@ class GenerateTrials():
         else:
             self.BaitPermitted=True
         if self.BaitPermitted==False:
-            logging.warning('The active side has no reward due to consecutive \nselections('+str(MaxCLen)+')<'+self.TP_InitiallyInactiveN)
+            logging.warning('The active side has no reward due to consecutive \nselections('+str(MaxCLen)+')<'+
+                            self.TP_InitiallyInactiveN, extra={'tags': [self.win.warning_log_tag]})
 
     def _GetMaximumConSelection(self):
         '''get the maximum consecutive selection of the active side of the current block'''
@@ -1116,7 +1119,7 @@ class GenerateTrials():
             stop=False
 
         # Update the warning label text/color
-        logging.warning(warning_label_text)
+        logging.warning(warning_label_text, extra={'tags': [self.win.warning_log_tag]})
 
         # If we should stop trials, uncheck the start button
         if stop:           
@@ -1131,9 +1134,11 @@ class GenerateTrials():
             IgnoredN=int(self.TP_Ignored)
             if UnrewardedN<=0:
                 self.CurrentAutoReward=1
-                logging.warning('Auto water because unrewarded trials exceed: '+self.TP_Unrewarded)
+                logging.warning('Auto water because unrewarded trials exceed: '+self.TP_Unrewarded,
+                                extra={'tags': [self.win.warning_log_tag]})
             elif  IgnoredN <=0:
-                logging.warning('Auto water because ignored trials exceed: '+self.TP_Ignored)
+                logging.warning('Auto water because ignored trials exceed: '+self.TP_Ignored,
+                                extra={'tags': [self.win.warning_log_tag]})
                 self.CurrentAutoReward=1
             else:
                 if np.shape(self.B_AnimalResponseHistory)[0]>=IgnoredN or np.shape(self.B_RewardedHistory[0])[0]>=UnrewardedN:
@@ -1144,10 +1149,12 @@ class GenerateTrials():
                         B_RewardedHistory[i]=np.logical_or(self.B_RewardedHistory[i],self.B_AutoWaterTrial[i][Ind])
                     if np.all(self.B_AnimalResponseHistory[-IgnoredN:]==2) and np.shape(self.B_AnimalResponseHistory)[0]>=IgnoredN:
                         self.CurrentAutoReward=1
-                        logging.warning('Auto water because ignored trials exceed: '+self.TP_Ignored)
+                        logging.warning('Auto water because ignored trials exceed: '+self.TP_Ignored,
+                                        extra={'tags': [self.win.warning_log_tag]})
                     elif (np.all(B_RewardedHistory[0][-UnrewardedN:]==False) and np.all(B_RewardedHistory[1][-UnrewardedN:]==False) and np.shape(B_RewardedHistory[0])[0]>=UnrewardedN):
                         self.CurrentAutoReward=1
-                        logging.warning('Auto water because unrewarded trials exceed: '+self.TP_Unrewarded)
+                        logging.warning('Auto water because unrewarded trials exceed: '+self.TP_Unrewarded,
+                                        extra={'tags': [self.win.warning_log_tag]})
                     else:
                         self.CurrentAutoReward=0
                 else:
@@ -1182,7 +1189,7 @@ class GenerateTrials():
             # the duration is determined by CurrentITI, CurrentDelay, self.CLP_OffsetStart, self.CLP_OffsetEnd
             # only positive CLP_OffsetStart is allowed
             if self.CLP_OffsetStart<0:
-                logging.warning('Please set offset start to be positive!')
+                logging.warning('Please set offset start to be positive!', extra={'tags': [self.win.warning_log_tag]})
             # there is no delay for optogenetics trials 
             self.CLP_CurrentDuration=self.CurrentITI-self.CLP_OffsetStart+self.CLP_OffsetEnd
         elif self.CLP_LaserStart=='Go cue' and self.CLP_LaserEnd=='Trial start':
@@ -1216,12 +1223,12 @@ class GenerateTrials():
 
         elif self.CLP_Protocol=='Pulse':
             if self.CLP_PulseDur=='NA':
-                logging.warning('Pulse duration is NA!')
+                logging.warning('Pulse duration is NA!', extra={'tags': [self.win.warning_log_tag]})
                 self.CLP_PulseDur=0
                 self.my_wave=np.empty(0)
                 self.opto_error_tag=1
             elif self.CLP_Frequency=='':
-                logging.warning('Pulse frequency is NA!')
+                logging.warning('Pulse frequency is NA!', extra={'tags': [self.win.warning_log_tag]})
                 self.CLP_Frequency=0
                 self.my_wave=np.empty(0)
                 self.opto_error_tag=1
@@ -1230,7 +1237,8 @@ class GenerateTrials():
                 PointsEachPulse=int(self.CLP_SampleFrequency*self.CLP_PulseDur)
                 PulseIntervalPoints=int(1/self.CLP_Frequency*self.CLP_SampleFrequency-PointsEachPulse)
                 if PulseIntervalPoints<0:
-                    logging.warning('Pulse frequency and pulse duration are not compatible!')
+                    logging.warning('Pulse frequency and pulse duration are not compatible!',
+                                    extra={'tags': [self.win.warning_log_tag]})
                 TotalPoints=int(self.CLP_SampleFrequency*self.CLP_CurrentDuration)
                 PulseNumber=np.floor(self.CLP_CurrentDuration*self.CLP_Frequency) 
                 EachPulse=Amplitude*np.ones(PointsEachPulse)
@@ -1242,7 +1250,7 @@ class GenerateTrials():
                     for i in range(int(PulseNumber-1)):
                         self.my_wave=np.concatenate((self.my_wave, WaveFormEachCycle), axis=0)
                 else:
-                    logging.warning('Pulse number is less than 1!')
+                    logging.warning('Pulse number is less than 1!', extra={'tags': [self.win.warning_log_tag]})
                     return
                 self.my_wave=np.concatenate((self.my_wave, EachPulse), axis=0)
                 self.my_wave=np.concatenate((self.my_wave, np.zeros(TotalPoints-np.shape(self.my_wave)[0])), axis=0)
@@ -1258,7 +1266,7 @@ class GenerateTrials():
             self._add_offset()
             self.my_wave=np.append(self.my_wave,[0,0])
         else:
-            logging.warning('Unidentified optogenetics protocol!')
+            logging.warning('Unidentified optogenetics protocol!', extra={'tags': [self.win.warning_log_tag]})
 
         '''
         # test
@@ -1270,7 +1278,8 @@ class GenerateTrials():
         '''Add ramping down to the waveform'''
         if self.CLP_RampingDown>0:
             if self.CLP_RampingDown>self.CLP_CurrentDuration:
-                logging.warning('Ramping down is longer than the laser duration!')
+                logging.warning('Ramping down is longer than the laser duration!',
+                                extra={'tags': [self.win.warning_log_tag]})
             else:
                 Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
                 RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
@@ -1289,25 +1298,26 @@ class GenerateTrials():
         self.CurrentLaserAmplitude=[0,0]
         if self.CLP_Location=='Laser_1':
             if self.CLP_Laser1Power=='':
-                logging.warning('No amplitude for Laser_1 defined!')
+                logging.warning('No amplitude for Laser_1 defined!', extra={'tags': [self.win.warning_log_tag]})
             else:
                 Laser1PowerAmp=eval(self.CLP_Laser1Power)
                 self.CurrentLaserAmplitude=[Laser1PowerAmp[0],0]
         elif self.CLP_Location=='Laser_2':
             if self.CLP_Laser2Power=='':
-                logging.warning('No amplitude for Laser_2 defined!')
+                logging.warning('No amplitude for Laser_2 defined!', extra={'tags': [self.win.warning_log_tag]})
             else:
                 Laser2PowerAmp=eval(self.CLP_Laser2Power)
                 self.CurrentLaserAmplitude=[0,Laser2PowerAmp[0]]
         elif self.CLP_Location=='Both':
             if  self.CLP_Laser1Power=='' or self.CLP_Location=='':
-                logging.warning('No amplitude for Laser_1 or Laser_2 laser defined!')
+                logging.warning('No amplitude for Laser_1 or Laser_2 laser defined!',
+                                extra={'tags': [self.win.warning_log_tag]})
             else:
                 Laser1PowerAmp=eval(self.CLP_Laser1Power)
                 Laser2PowerAmp=eval(self.CLP_Laser2Power)
                 self.CurrentLaserAmplitude=[Laser1PowerAmp[0],Laser2PowerAmp[0]]
         else:
-            logging.warning('No stimulation location defined!')
+            logging.warning('No stimulation location defined!', extra={'tags': [self.win.warning_log_tag]})
         self.B_LaserAmplitude.append(self.CurrentLaserAmplitude)
 
     def _SelectOptogeneticsCondition(self):
@@ -1410,7 +1420,8 @@ class GenerateTrials():
                     Channel1.PassGoCue(int(0))
                     Channel1.PassRewardOutcome(int(1))
                 else:
-                    logging.warning('Unindentified optogenetics start event!')
+                    logging.warning('Unindentified optogenetics start event!',
+                                    extra={'tags': [self.win.warning_log_tag]})
                 # send the waveform size
                 Channel1.Location1_Size(int(self.Location1_Size))
                 Channel1.Location2_Size(int(self.Location2_Size))
@@ -1632,8 +1643,10 @@ class GenerateTrials():
                 # give reserved manual water
                 if float(self.win.give_left_volume_reserved) > 0 or float(self.win.give_right_volume_reserved) > 0:
                     # Set the text of a label or text widget to show the reserved volumes
-                    logging.warning(
-                        f'Give reserved manual water (ul) left: {self.win.give_left_volume_reserved}; right: {self.win.give_right_volume_reserved}'
+                    logging.info(
+                        f'Give reserved manual water (ul) left: {self.win.give_left_volume_reserved}; '
+                        f'right: {self.win.give_right_volume_reserved}',
+                        extra={'tags': [self.win.warning_log_tag]}
                     )
 
                 # The manual water of two sides are given sequentially. Randomlizing the order to avoid bias. 
