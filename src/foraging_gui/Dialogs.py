@@ -513,10 +513,10 @@ class WaterCalibrationDialog(QDialog):
         if 'Full' not in self.WaterCalibrationPar:
             self.WaterCalibrationPar['Full'] = {}
             self.WaterCalibrationPar['Full']['TimeMin'] = 0.02
-            self.WaterCalibrationPar['Full']['TimeMax'] = 0.05
-            self.WaterCalibrationPar['Full']['Stride']  = 0.005
+            self.WaterCalibrationPar['Full']['TimeMax'] = 0.03
+            self.WaterCalibrationPar['Full']['Stride']  = 0.01
             self.WaterCalibrationPar['Full']['Interval']= 0.1
-            self.WaterCalibrationPar['Full']['Cycle']   = 200
+            self.WaterCalibrationPar['Full']['Cycle']   = 1000
 
         if 'Spot' not in self.WaterCalibrationPar:
             self.WaterCalibrationPar['Spot'] = {}
@@ -672,8 +672,8 @@ class WaterCalibrationDialog(QDialog):
             valve_open_time=str(current_valve_opentime),
             valve_open_interval=str(self.params['Interval']),
             cycle=str(self.params['Cycle']),
-            total_water=float(self.WeightAfterLeft.text()),
-            tube_weight=float(self.WeightBeforeLeft.text())
+            total_water=float(final_tube_weight),
+            tube_weight=float(before_weight)
             )
         self._UpdateFigure()
 
@@ -807,6 +807,7 @@ class WaterCalibrationDialog(QDialog):
             "Weight after (g): ", 
             final_tube_weight,
             0, 1000, 4)
+        print(final_tube_weight, ok)
         if not ok:
             self.Warning.setText('Please repeat measurement')
             self.WeightBeforeRight.setText('')
@@ -823,8 +824,8 @@ class WaterCalibrationDialog(QDialog):
             valve_open_time=str(current_valve_opentime),
             valve_open_interval=str(self.params['Interval']),
             cycle=str(self.params['Cycle']),
-            total_water=float(self.WeightAfterRight.text()),
-            tube_weight=float(self.WeightBeforeRight.text())
+            total_water=float(final_tube_weight),
+            tube_weight=float(before_weight)
             )
         self._UpdateFigure()
 

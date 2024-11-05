@@ -30,6 +30,8 @@ from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 
+from StageWidget.main import get_stage_widget
+
 import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
 from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
@@ -43,6 +45,7 @@ from foraging_gui.bias_indicator import BiasIndicator
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
 from aind_data_schema.core.session import Session
+from aind_data_schema_models.modalities import Modality
 
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear() # clear handlers so console output can be configured
@@ -59,6 +62,7 @@ class NumpyEncoder(json.JSONEncoder):
 
 class Window(QMainWindow):
     Time = QtCore.pyqtSignal(int) # Photometry timer signal
+    sessionGenerated = QtCore.pyqtSignal(Session)  # signal to indicate Session has been generated
 
     def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
@@ -94,7 +98,10 @@ class Window(QMainWindow):
         # Load Rig Json
         self._LoadRigJson()
 
-        # Load User interface 
+        # Stage Widget
+        self.stage_widget = None
+
+        # Load User interface
         self._LoadUI()
 
         # set window title
@@ -173,7 +180,7 @@ class Window(QMainWindow):
         self._WaterVolumnManage2()
         self._LickSta()
         self._InitializeMotorStage()
-        self._GetPositions()
+        self._load_stage()
         self._warmup()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
@@ -186,6 +193,9 @@ class Window(QMainWindow):
 
         # Initializes session log handler as None
         self.session_log_handler = None
+
+        # generate an upload manifest when a session has been produced
+        self.upload_manifest_slot = self.sessionGenerated.connect(self._generate_upload_manifest)
 
         # show disk space
         self._show_disk_space()
@@ -214,6 +224,36 @@ class Window(QMainWindow):
             logging.warning(f"Low disk space  Used space: {used/1024**3:.2f}GB    Free space: {free/1024**3:.2f}GB")
         else:
             self.DiskSpaceProgreeBar.setStyleSheet("QProgressBar::chunk {background-color: green;}")
+
+    def _load_stage(self) -> None:
+        """
+        Check whether newscale stage is defined in the config. If not, initialize and inject stage widget.
+        """
+        if self.Settings['newscale_serial_num_box{}'.format(self.box_number)] == '':
+            widget_to_replace = "motor_stage_widget" if self.default_ui == "ForagingGUI_Ephys.ui" else "widget_2"
+            self._insert_stage_widget(widget_to_replace)
+        else:
+            self._GetPositions()
+
+    def _insert_stage_widget(self, widget_to_replace: str) -> None:
+        """
+        Given a widget name, replace all contents of that widget with the stage widget
+        Note: The UI file must be loaded or else it can't find the widget to replace
+              Also the widget to replace must contain a layout so it can hide all child widgets properly.
+        """
+        logging.info("Inserting Stage Widget")
+
+        # Get QWidget object
+        widget = getattr(self, widget_to_replace, None)
+
+        if widget is not None:
+            layout = widget.layout()
+            # Hide all current items within widget being replaced
+            for i in reversed(range(layout.count())):
+                layout.itemAt(i).widget().setVisible(False)
+            # Insert new stage_widget
+            self.stage_widget = get_stage_widget()
+            layout.addWidget(self.stage_widget)
 
     def _LoadUI(self):
         '''
@@ -1257,48 +1297,9 @@ class Window(QMainWindow):
             mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=session.subject_id)
         except Exception as e:
             if 'No record found' in str(e):    # if no mouse found or validation errors on mouse
-                logging.error(f'"No record found" error while trying to fetch mouse {session.subject_id}. '
-                              f'Attempting to add mouse model to Slims.')
-                # check schedule to make sure enough information is known about mouse to create model in slims
-                if not pd.isnull((curr_st := self._GetInfoFromSchedule(session.subject_id, 'Current State'))) \
-                        and not pd.isnull((point_of_contact := self._GetInfoFromSchedule(session.subject_id, 'PI'))):
-                    logging.info(f'Creating mouse model for mouse {session.subject_id} with the below information: \n'
-                                 f'barcode: {session.subject_id} \n'
-                                 f'baseline_weight_g: {session.animal_weight_prior} \n'
-                                 f'point_of_contact: {point_of_contact} \n'
-                                 f'water_restricted: {True if curr_st.lower() == "hab only" else False}')
-                    model = models.SlimsMouseContent(barcode=session.subject_id,
-                                                     baseline_weight_g=session.animal_weight_prior,
-                                                     point_of_contact=point_of_contact,
-                                                     water_restricted=True if curr_st.lower() == 'hab only' else False,
-                                                     )
-                    try:    # try to add mouse model. This might fail if mouse exists but with validation errors
-                        mouse = self.slims_client.add_model(model)
-                        logging.info(f'Mouse {session.subject_id} successfully added to slims with pk {mouse.pk}')
-                    except Exception as e:
-                        if '"cntn_barCode":"This field should be unique"' in str(e):    # error if mouse already exists
-                            logging.error(f'Mouse {session.subject_id} exists in Slims but contains validations errors.'
-                                          f'Waterlog needs to be added manually to Slims.')
-                            QMessageBox.critical(self,
-                                                 'Adding Waterlog',
-                                                 f'Mouse {session.subject_id} exists in Slims but contains validations '
-                                                 f'errors. Waterlog needs to be added manually to Slims.',
-                                                 QMessageBox.Ok)
-                            return
-                        else:
-                            logging.error(f'While adding mouse {session.subject_id} model, unexpected error occurred.')
-                            raise e
-
-                else:   # Not enough info in schedule to create mouse
-                    logging.error(f'Mouse {session.subject_id} does not exist in Slims, and schedule does not contain '
-                                  f'enough information to add mouse. Waterlog needs to be added manually to Slims.')
-                    QMessageBox.critical(self,
-                                         'Adding Waterlog',
-                                         f'Mouse {session.subject_id} does not exist in Slims, and schedule does not '
-                                         f'contain enough information to add mouse. '
-                                         f'Waterlog needs to be added manually to Slims.',
-                                         QMessageBox.Ok)
-                    return
+                logging.warning(f'"No record found" error while trying to fetch mouse {session.subject_id}. '
+                                f'Will not log water.')
+                return
             else:
                 logging.error(f'While fetching mouse {session.subject_id} model, unexpected error occurred.')
                 raise e
@@ -2684,18 +2685,19 @@ class Window(QMainWindow):
             Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
             # generate the metadata file
             generated_metadata=generate_metadata(Obj=Obj)
+            session = generated_metadata._session()
+            self.sessionGenerated.emit(session)   # emit sessionGenerated
+
             if BackupSave==0:
                 text="Session metadata generated successfully: " + str(generated_metadata.session_metadata_success)+"\n"+\
-                "Rig metadata generated successfully: " + str(generated_metadata.rig_metadata_success)+"\n"+\
-                "Data description generated successfully: " + str(generated_metadata.data_description_success)
+                "Rig metadata generated successfully: " + str(generated_metadata.rig_metadata_success)
                 self._manage_warning_labels(self.MetadataWarning,warning_text=text)
             Obj['generate_session_metadata_success']=generated_metadata.session_metadata_success
             Obj['generate_rig_metadata_success']=generated_metadata.rig_metadata_success
-            Obj['generate_data_description_success']=generated_metadata.data_description_success
 
             if save_clicked:    # create water log result if weight after filled and uncheck save
                 if self.BaseWeight.text() != '' and self.WeightAfter.text() != '' and self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']:
-                    self._AddWaterLogResult(generated_metadata._session())
+                    self._AddWaterLogResult(session)
                 self.bias_indicator.clear()  # prepare for new session
 
 
@@ -2706,7 +2708,6 @@ class Window(QMainWindow):
             # set to False if error occurs
             Obj['generate_session_metadata_success']=False
             Obj['generate_rig_metadata_success']=False
-            Obj['generate_data_description_success']=False
 
         # don't save the data if the load tag is 1
         if self.load_tag==0:
@@ -3937,6 +3938,11 @@ class Window(QMainWindow):
             # disable metadata fields
             self._set_metadata_enabled(False)
 
+            # generate an upload manifest when a session has been produced if slot is not already connected
+            if self.upload_manifest_slot is None:
+                logging.debug('Connecting sessionGenerated to _generate_upload_manifest')
+                self.upload_manifest_slot = self.sessionGenerated.connect(self._generate_upload_manifest)
+
             # Set IACUC protocol in metadata based on schedule
             protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
             if protocol is not None:
@@ -4205,13 +4211,6 @@ class Window(QMainWindow):
                 # Reset stall timer
                 last_trial_start = time.time()
                 stall_iteration = 1
-
-                # create manifest after first trial is completed
-                if GeneratedTrials.B_CurrentTrialN == 1:
-                    if self.Settings['AutomaticUpload']:
-                        self._generate_upload_manifest()  # Generate the upload manifest file
-                    else:
-                        logging.info('Skipping Automatic Upload based on ForagingSettings.json')
 
                 # can start a new trial when we receive the trial end signal from Bonsai
                 self.ANewTrial=0
@@ -4617,13 +4616,20 @@ class Window(QMainWindow):
                          '&session_plot_selected_draw_types=1.+Choice+history'
         )
 
-    def _generate_upload_manifest(self):
+    def _generate_upload_manifest(self, session: Session):
         '''
             Generates a manifest.yml file for triggering data copy to VAST and upload to aws
+            :param session: session to use to create upload manifest
         '''
+
         if self.ID.text() in ['0','1','2','3','4','5','6','7','8','9','10']:
             logging.info('Skipping upload manifest, because this is the test mouse')
             return
+
+        if not self.Settings['AutomaticUpload']:
+            logging.info('Skipping Automatic Upload based on ForagingSettings.json')
+            return
+
         try:
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
@@ -4631,7 +4637,16 @@ class Window(QMainWindow):
             schedule = self.acquisition_datetime.split('_')[0]+'_20-30-00'
             capsule_id = 'c089614a-347e-4696-b17e-86980bb782c1'
             mount = 'FIP'
-            
+
+            modalities = {}
+            for stream in session.data_streams:
+                if Modality.BEHAVIOR in stream.stream_modalities:
+                    modalities['behavior'] = [self.TrainingFolder.replace('\\', '/')]
+                elif Modality.FIB in stream.stream_modalities:
+                    modalities['fib'] = [self.PhotometryFolder.replace('\\', '/')]
+                elif Modality.BEHAVIOR_VIDEOS in stream.stream_modalities:
+                    modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
+
             date_format = "%Y-%m-%d_%H-%M-%S"
             # Define contents of manifest file
             contents = {
@@ -4644,15 +4659,10 @@ class Window(QMainWindow):
                 'destination': '//allen/aind/scratch/dynamic_foraging_rig_transfer',
                 's3_bucket':'private',
                 'processor_full_name': 'AIND Behavior Team',
-                'modalities':{
-                    'behavior':[self.TrainingFolder.replace('\\','/')],
-                    'behavior-videos':[self.VideoFolder.replace('\\','/')],
-                    'fib':[self.PhotometryFolder.replace('\\','/')]
-                    },
+                'modalities':modalities,
                 'schemas':[
                     os.path.join(self.MetadataFolder,'session.json').replace('\\','/'),
                     os.path.join(self.MetadataFolder,'rig.json').replace('\\','/'),
-                    os.path.join(self.MetadataFolder, 'data_description.json').replace('\\', '/')
                     ],
                 'schedule_time':datetime.strptime(schedule,date_format),
                 'project_name':self.project_name,
@@ -4676,6 +4686,9 @@ class Window(QMainWindow):
                 'Could not generate upload manifest. '+\
                 'Please alert the mouse owner, and report on github.')
 
+        # disconnect slot to only create manifest once
+        logging.debug('Disconnecting sessionGenerated from _generate_upload_manifest')
+        self.upload_manifest_slot = self.sessionGenerated.disconnect(self.upload_manifest_slot)
 
 def start_gui_log_file(box_number):
     '''

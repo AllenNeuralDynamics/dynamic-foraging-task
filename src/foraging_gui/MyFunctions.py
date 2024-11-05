@@ -13,7 +13,7 @@ from itertools import accumulate
 from serial.tools.list_ports import comports as list_comports
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
-from random import randint
+
 from foraging_gui.reward_schedules.uncoupled_block import UncoupledBlocks
 
 if PLATFORM == 'win32':
@@ -110,7 +110,7 @@ class GenerateTrials():
 
         # create timer to calculate lick intervals every 10 minutes
         self.lick_interval_time = QtCore.QTimer(timeout=self.calculate_inter_lick_intervals, interval=600000)
-     
+
     def _GenerateATrial(self,Channel4):
         self.finish_select_par=0
         if self.win.UpdateParameters==1:
@@ -479,7 +479,7 @@ class GenerateTrials():
         if self.TP_AdvancedBlockAuto=='off':
             self.AdvancedBlockSwitchPermitted=1
             return
-        kernel_size=int(self.TP_RunLength)
+        kernel_size=2
         if self.B_CurrentTrialN>kernel_size:
             # get the current block length
             self._GetCurrentBlockLen()
@@ -572,7 +572,8 @@ class GenerateTrials():
     
     def _GetChoiceFrac(self):
         '''Get the fraction of right choices with running average'''
-        kernel_size=int(self.TP_RunLength)
+
+        kernel_size=2
         ResponseHistoryT=self.B_AnimalResponseHistory.copy()
         ResponseHistoryT[ResponseHistoryT==2]=np.nan
         ResponseHistoryF=ResponseHistoryT.copy()

@@ -911,6 +911,7 @@
                    </property>
                    <property name="font">
                     <font>
+                     <pointsize>8</pointsize>
                      <stylestrategy>PreferDefault</stylestrategy>
                     </font>
                    </property>
@@ -965,7 +966,7 @@
             <string notr="true"/>
            </property>
            <property name="currentIndex">
-            <number>2</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="tab_2">
             <attribute name="title">
@@ -1043,6 +1044,9 @@
                       <property name="font">
                        <font>
                         <pointsize>8</pointsize>
+                        <weight>50</weight>
+                        <italic>false</italic>
+                        <bold>false</bold>
                        </font>
                       </property>
                       <property name="title">
@@ -1359,6 +1363,9 @@
                            <property name="font">
                             <font>
                              <pointsize>7</pointsize>
+                             <weight>50</weight>
+                             <italic>false</italic>
+                             <bold>false</bold>
                             </font>
                            </property>
                            <property name="text">
@@ -1383,6 +1390,9 @@
                            <property name="font">
                             <font>
                              <pointsize>7</pointsize>
+                             <weight>50</weight>
+                             <italic>false</italic>
+                             <bold>false</bold>
                             </font>
                            </property>
                            <property name="text">
@@ -1407,6 +1417,9 @@
                            <property name="font">
                             <font>
                              <pointsize>7</pointsize>
+                             <weight>50</weight>
+                             <italic>false</italic>
+                             <bold>false</bold>
                             </font>
                            </property>
                            <property name="text">
@@ -1431,6 +1444,9 @@
                            <property name="font">
                             <font>
                              <pointsize>7</pointsize>
+                             <weight>50</weight>
+                             <italic>false</italic>
+                             <bold>false</bold>
                             </font>
                            </property>
                            <property name="text">
@@ -1520,6 +1536,9 @@
                       <property name="font">
                        <font>
                         <pointsize>8</pointsize>
+                        <weight>50</weight>
+                        <italic>false</italic>
+                        <bold>false</bold>
                        </font>
                       </property>
                       <property name="title">
@@ -1791,6 +1810,9 @@
                            <property name="font">
                             <font>
                              <pointsize>8</pointsize>
+                             <weight>50</weight>
+                             <italic>false</italic>
+                             <bold>false</bold>
                             </font>
                            </property>
                            <property name="text">
@@ -1801,6 +1823,10 @@
                         </layout>
                        </item>
                       </layout>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QWidget" name="groupBox_6">
                      </widget>
                     </item>
                     <item>
@@ -1829,6 +1855,9 @@
                          <property name="font">
                           <font>
                            <pointsize>8</pointsize>
+                           <weight>50</weight>
+                           <italic>false</italic>
+                           <bold>false</bold>
                           </font>
                          </property>
                          <property name="text">
@@ -1934,6 +1963,9 @@
                       <property name="font">
                        <font>
                         <pointsize>8</pointsize>
+                        <weight>50</weight>
+                        <italic>false</italic>
+                        <bold>false</bold>
                        </font>
                       </property>
                       <property name="title">
@@ -2213,6 +2245,9 @@
                       <property name="font">
                        <font>
                         <pointsize>8</pointsize>
+                        <weight>50</weight>
+                        <italic>false</italic>
+                        <bold>false</bold>
                        </font>
                       </property>
                       <property name="title">
@@ -2295,6 +2330,9 @@
                       <property name="font">
                        <font>
                         <pointsize>8</pointsize>
+                        <weight>50</weight>
+                        <italic>false</italic>
+                        <bold>false</bold>
                        </font>
                       </property>
                       <property name="title">
@@ -2352,6 +2390,9 @@ Current right block:
                            <property name="font">
                             <font>
                              <pointsize>8</pointsize>
+                             <weight>50</weight>
+                             <italic>false</italic>
+                             <bold>false</bold>
                             </font>
                            </property>
                            <property name="text">
@@ -2405,6 +2446,9 @@ Current pair:
                    <property name="font">
                     <font>
                      <pointsize>8</pointsize>
+                     <weight>50</weight>
+                     <italic>false</italic>
+                     <bold>false</bold>
                     </font>
                    </property>
                    <property name="title">
@@ -2428,6 +2472,7 @@ Current pair:
                          <font>
                           <pointsize>9</pointsize>
                           <weight>75</weight>
+                          <italic>false</italic>
                           <bold>true</bold>
                          </font>
                         </property>
@@ -2471,6 +2516,7 @@ Water in session:</string>
                          <font>
                           <pointsize>9</pointsize>
                           <weight>75</weight>
+                          <italic>false</italic>
                           <bold>true</bold>
                          </font>
                         </property>
@@ -2578,7 +2624,7 @@ Double dipping:
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>1068</width>
+                  <width>1072</width>
                   <height>463</height>
                  </rect>
                 </property>
@@ -4558,6 +4604,9 @@ Double dipping:
                    <property name="font">
                     <font>
                      <pointsize>8</pointsize>
+                     <weight>50</weight>
+                     <italic>false</italic>
+                     <bold>false</bold>
                     </font>
                    </property>
                    <property name="text">
