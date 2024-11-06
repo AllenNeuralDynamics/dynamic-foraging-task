@@ -3,7 +3,7 @@ from queue import Queue
 from logging.handlers import QueueHandler
 from random import randint
 from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QScrollArea
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QSizePolicy
 import sys
 
 
@@ -51,6 +51,7 @@ class WarningWidget(QWidget):
             log = self.queue.get().getMessage()
             if log[12:].strip():   # skip empty messages
                 label = QLabel(log)
+                label.setWordWrap(True)
                 label.setStyleSheet(f'color: {self.text_color};')
                 self.layout().insertWidget(0, label)
 
