@@ -109,7 +109,7 @@ class GenerateTrials():
         self._GetTrainingParameters(self.win)
 
         # create timer to calculate lick intervals every 10 minutes
-        self.lick_interval_time = QtCore.QTimer(timeout=self.calculate_inter_lick_intervals, interval=60000)
+        self.lick_interval_time = QtCore.QTimer(timeout=self.calculate_inter_lick_intervals, interval=600000)
 
     def _GenerateATrial(self,Channel4):
         self.finish_select_par=0
@@ -935,7 +935,7 @@ class GenerateTrials():
             # calculate cross side interval and frac
             right_dummy = np.ones(right.shape)  # array used to assign lick direction
             left_dummy = np.negative(np.ones(left.shape))
-            
+
             # 2d arrays pairing each time with a 1 (right) or -1 (left)
             stacked_right = np.column_stack((right_dummy, right))
             stacked_left = np.column_stack((left_dummy, left))
