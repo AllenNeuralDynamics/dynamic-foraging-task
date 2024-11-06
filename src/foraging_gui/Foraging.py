@@ -3255,7 +3255,8 @@ class Window(QMainWindow):
         self.StartFIP.setChecked(False)
 
         if self.Teensy_COM == '':
-            logging.warning('No Teensy COM configured for this box, cannot start FIP workflow')
+            logging.warning('No Teensy COM configured for this box, cannot start FIP workflow',
+                            extra={'tags': [self.warning_log_tag]})
             msg = 'No Teensy COM configured for this box, cannot start FIP workflow'
             reply = QMessageBox.information(self,
                 'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
@@ -3302,7 +3303,8 @@ class Window(QMainWindow):
     def _StartExcitation(self):
 
         if self.Teensy_COM == '':
-            logging.warning('No Teensy COM configured for this box, cannot start excitation')
+            logging.warning('No Teensy COM configured for this box, cannot start excitation',
+                            extra={'tags': [self.warning_log_tag]})
             msg = 'No Teensy COM configured for this box, cannot start excitation'
             reply = QMessageBox.information(self,
                 'Box {}, StartExcitation'.format(self.box_letter), msg, QMessageBox.Ok )
@@ -3354,7 +3356,8 @@ class Window(QMainWindow):
     def _StartBleaching(self):
 
         if self.Teensy_COM == '':
-            logging.warning('No Teensy COM configured for this box, cannot start bleaching')
+            logging.warning('No Teensy COM configured for this box, cannot start bleaching',
+                            extra={'tags': [self.warning_log_tag]})
             msg = 'No Teensy COM configured for this box, cannot start bleaching'
             reply = QMessageBox.information(self,
                 'Box {}, StartBleaching'.format(self.box_letter), msg, QMessageBox.Ok )
@@ -4151,7 +4154,7 @@ class Window(QMainWindow):
                 except Exception as e:
                     if 'ConnectionAbortedError' in str(e):
                         logging.info('lost bonsai connection: InitiateATrial')
-                        logging.warning('Lost bonsai connection')
+                        logging.warning('Lost bonsai connection', extra={'tags': [self.warning_log_tag]})
                         self.Start.setChecked(False)
                         self.Start.setStyleSheet("background-color : none")
                         self.InitializeBonsaiSuccessfully=0
