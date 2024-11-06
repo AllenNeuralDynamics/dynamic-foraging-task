@@ -25,6 +25,9 @@ PID_NEWSCALE = 0xea61
 class GenerateTrials():
     def __init__(self,win):
         self.win=win
+        self.B_LeftLickIntervalPercent = None      # percentage of left lick intervals under 100ms
+        self.B_RightLickIntervalPercent = None     # percentage of right lick intervals under 100ms
+        self.B_CrossSideIntervalPercent = None     # percentage of cross side lick intervals under 100ms
         self.B_Bias = [0]  # lick bias
         self.B_RewardFamilies=self.win.RewardFamilies
         self.B_CurrentTrialN=-1 # trial number starts from 0; Update when trial starts
@@ -104,6 +107,9 @@ class GenerateTrials():
         self.Obj={}
         # get all of the training parameters of the current trial
         self._GetTrainingParameters(self.win)
+
+        # create timer to calculate lick intervals every 10 minutes
+        self.lick_interval_time = QtCore.QTimer(timeout=self.calculate_inter_lick_intervals, interval=600000)
 
     def _GenerateATrial(self,Channel4):
         self.finish_select_par=0
@@ -891,7 +897,70 @@ class GenerateTrials():
             self.Start_CoCue_LeftRightRatio=np.nan
         else:
             self.Start_CoCue_LeftRightRatio=np.array(sum(self.Start_GoCue_LeftLicks))/np.array(sum(self.Start_GoCue_RightLicks))
-        
+
+    def calculate_inter_lick_intervals(self):
+        """
+        Calculate and categorize lick intervals
+        """
+
+        right = self.B_RightLickTime
+        left = self.B_LeftLickTime
+        threshold = .1
+
+        same_side_l = np.diff(left)
+        same_side_r = np.diff(right)
+        if len(right) > 0:
+            # calculate left interval and fraction
+            same_side_l_frac = round(np.mean(same_side_l <= threshold), 4)
+            logging.info(f'Percentage of left lick intervals under 100 ms is {same_side_l_frac * 100:.2f}%.')
+            self.B_LeftLickIntervalPercent = same_side_l_frac * 100
+
+        if len(left) > 0:
+            # calculate right interval and fraction
+            same_side_r_frac = round(np.mean(same_side_r <= threshold), 4)
+            logging.info(f'Percentage of right lick intervals under 100 ms is {same_side_r_frac * 100:.2f}%.')
+            self.B_RightLickIntervalPercent = same_side_r_frac * 100
+
+        if len(right) > 0 and len(left) > 0:
+            # calculate same side lick interval and fraction for both right and left
+            same_side_combined = np.concatenate([same_side_l, same_side_r])
+            same_side_frac = round(np.mean(same_side_combined <= threshold), 4)
+            logging.info(f'Percentage of right and left lick intervals under 100 ms is {same_side_frac * 100:.2f}%.')
+            if same_side_frac >= threshold:
+                self.win.same_side_lick_interval.setText(f'Percentage of same side lick intervals under 100 ms is '
+                                                         f'over 10%: {same_side_frac * 100:.2f}%.')
+                logging.error(f'Percentage of same side lick intervals under 100 ms in Box {self.win.box_letter} '
+                              f'mouse {self.win.ID.text()} exceeded 10%')
+            else:
+                self.win.same_side_lick_interval.setText('')
+
+            # calculate cross side interval and frac
+            right_dummy = np.ones(right.shape)  # array used to assign lick direction
+            left_dummy = np.negative(np.ones(left.shape))
+
+            # 2d arrays pairing each time with a 1 (right) or -1 (left)
+            stacked_right = np.column_stack((right_dummy, right))
+            stacked_left = np.column_stack((left_dummy, left))
+            # concatenate stacked_right and stacked_left then sort based on time element
+            # e.g. [[-1, 10], [1, 15], [-1, 20], [1, 25]...]. Ones added to assign lick side to times
+            merged_sorted = np.array(sorted(np.concatenate((stacked_right, stacked_left)),
+                               key=lambda x: x[1]))
+
+            diffs = np.diff(merged_sorted[:, 0])    # take difference of 1 (right) or -1 (left)
+            # take difference of next index with previous at indices where directions are opposite
+            cross_sides = np.array([merged_sorted[i + 1, 1] - merged_sorted[i, 1] for i in np.where(diffs != 0)])[0]
+            cross_side_frac = round(np.mean(cross_sides <= threshold), 4)
+            logging.info(f'Percentage of cross side lick intervals under 100 ms is {cross_side_frac * 100:.2f}%.')
+            self.B_CrossSideIntervalPercent = cross_side_frac * 100
+
+            if cross_side_frac >= threshold:
+                self.win.cross_side_lick_interval.setText(f'Percentage of cross side lick intervals under 100 ms is '
+                                                          f'over 10%: {cross_side_frac * 100:.2f}%.')
+                logging.error(f'Percentage of cross side lick intervals under 100 ms in Box {self.win.box_letter} '
+                              f'mouse {self.win.ID.text()} exceeded 10%')
+            else:
+                self.win.cross_side_lick_interval.setText('')
+
     def _GetDoubleDipping(self,LicksIndex):
         '''get the number of double dipping. e.g. 0 1 0 will result in 2 double dipping''' 
         DoubleDipping=np.sum(np.diff(LicksIndex)!=0)

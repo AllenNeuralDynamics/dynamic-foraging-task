@@ -2405,6 +2405,12 @@ class Window(QMainWindow):
             toolbar.setMaximumWidth(300)
             layout.addWidget(toolbar)
             layout.addWidget(PlotLick)
+            # add text labels to indicate lick interval percentages
+            self.same_side_lick_interval = QtWidgets.QLabel()
+            self.cross_side_lick_interval = QtWidgets.QLabel()
+            layout.addWidget(self.same_side_lick_interval)
+            layout.addWidget(self.cross_side_lick_interval)
+
             self.LickSta_ToInitializeVisual=0
         try:
             if hasattr(self, 'GeneratedTrials'):
@@ -3839,6 +3845,7 @@ class Window(QMainWindow):
                     self.Start.setChecked(False)
                     logging.info('User declines continuation of session')
                     return
+                self.GeneratedTrials.lick_interval_time.start()  # restart lick interval calculation
 
             # check experimenter name
             reply = QMessageBox.critical(self,
@@ -4002,6 +4009,9 @@ class Window(QMainWindow):
             b_bias_len = len(self.GeneratedTrials.B_Bias)
             self.GeneratedTrials.B_Bias += [last_bias]*((self.GeneratedTrials.B_CurrentTrialN+1)-b_bias_len)
 
+            # stop lick interval calculation
+            self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
+
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
             self._StopCurrentSession()
@@ -4062,6 +4072,7 @@ class Window(QMainWindow):
             GeneratedTrials._GenerateATrial(self.Channel4)
             # delete licks from the previous session
             GeneratedTrials._DeletePreviousLicks(self.Channel2)
+            GeneratedTrials.lick_interval_time.start()  # start lick interval calculation
 
             if self.Start.isChecked():
                 # if session log handler is not none, stop logging for previous session
