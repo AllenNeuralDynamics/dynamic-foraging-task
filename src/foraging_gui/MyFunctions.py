@@ -933,10 +933,12 @@ class GenerateTrials():
                 self.win.same_side_lick_interval.setText('')
 
             # calculate cross side interval and frac
-            dummy_array = np.ones(right.shape)  # array used to assign lick direction
+            right_dummy = np.ones(right.shape)  # array used to assign lick direction
+            left_dummy = np.negative(np.ones(left.shape))
+            
             # 2d arrays pairing each time with a 1 (right) or -1 (left)
-            stacked_right = np.column_stack((dummy_array, right))
-            stacked_left = np.column_stack((np.negative(dummy_array), left))
+            stacked_right = np.column_stack((right_dummy, right))
+            stacked_left = np.column_stack((left_dummy, left))
             # concatenate stacked_right and stacked_left then sort based on time element
             # e.g. [[-1, 10], [1, 15], [-1, 20], [1, 25]...]. Ones added to assign lick side to times
             merged_sorted = np.array(sorted(np.concatenate((stacked_right, stacked_left)),
