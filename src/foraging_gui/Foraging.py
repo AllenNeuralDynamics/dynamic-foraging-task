@@ -24,13 +24,13 @@ import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
-from PyQt5.QtWidgets import QFileDialog,QVBoxLayout, QGridLayout
+from PyQt5.QtWidgets import QFileDialog,QVBoxLayout, QGridLayout, QLabel
 from PyQt5 import QtWidgets,QtGui,QtCore, uic
-from PyQt5.QtCore import QThreadPool,Qt,QThread, QTimer
+from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 
-from StageWidget.main import get_stage_widget
+#from StageWidget.main import get_stage_widget
 
 import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
@@ -1197,8 +1197,7 @@ class Window(QMainWindow):
         for key in defaults:
             if key not in self.Settings:
                 self.Settings[key] = defaults[key]
-                logging.warning('Missing setting ({}), using default: {}'.format(key,self.Settings[key]),
-                                extra={'tags': [self.warning_log_tag]})
+                logging.warning('Missing setting ({}), using default: {}'.format(key,self.Settings[key]))
                 if key in ['default_saveFolder','current_box']:
                     logging.error('Missing setting ({}), is required'.format(key))
                     raise Exception('Missing setting ({}), is required'.format(key))
@@ -3651,8 +3650,7 @@ class Window(QMainWindow):
         if len(str(seconds)) == 1:
             seconds = '0{}'.format(seconds)
         if not self.ignore_timer:
-            logging.info('Running photometry baseline: {}:{}'.format(minutes,seconds),
-                            extra={'tags': [self.warning_log_tag]})
+            self.photometry_timer_label.setText('Running photometry baseline: {}:{}'.format(minutes,seconds))
 
     def _set_metadata_enabled(self, enable: bool):
         '''Enable or disable metadata fields'''
@@ -4060,6 +4058,10 @@ class Window(QMainWindow):
             self.finish_Timer=0
             self.PhotometryRun=1
             self.ignore_timer=False
+
+            # create label to display time remaining on photometry label and add to warning widget
+            self.photometry_timer_label = QLabel()
+            self.warning_widget.layout().insertWidget(0, self.photometry_timer_label)
 
             # If we already created a workertimer and thread we can reuse them
             if not hasattr(self, 'workertimer'):
