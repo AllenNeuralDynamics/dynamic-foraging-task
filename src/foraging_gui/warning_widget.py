@@ -11,13 +11,17 @@ class WarningWidget(QWidget):
     """Widget that uses a logging QueueHandler to display log errors and warning"""
 
     def __init__(self, log_tag: str = 'warning_widget',
-                 log_level: str = 'INFO',
-                 text_color: str = 'black',
+                 log_level: str = logging.INFO,
+                 warning_color: str = 'purple',
+                 info_color: str = 'green',
+                 error_color: str = 'orange',
                  *args, **kwargs):
         """
         :param log_tag: log_tag to pass into filter
         :param log_level: level for QueueHandler
-        :param text_color: color of warning messages
+        :param warning_color: color of warning messages
+        :param info_color: color of info messages
+        :param error_color: color of error messages
         """
 
         super().__init__(*args, **kwargs)
@@ -25,7 +29,9 @@ class WarningWidget(QWidget):
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
         # set color for labels
-        self.text_color = text_color
+        self._warning_color = warning_color
+        self._info_color = info_color
+        self._error_color = error_color
 
         # create vertical layout
         self.setLayout(QVBoxLayout())
@@ -48,11 +54,18 @@ class WarningWidget(QWidget):
         """
 
         while not self.queue.empty():
-            log = self.queue.get().getMessage()
-            if log[12:].strip():   # skip empty messages
-                label = QLabel(log)
+            log = self.queue.get()
+
+            if log.getMessage()[12:].strip():   # skip empty messages
+                label = QLabel(log.getMessage())
                 label.setWordWrap(True)
-                label.setStyleSheet(f'color: {self.text_color};')
+                print(log.levelno, logging.WARNING)
+                if log.levelno == logging.WARNING:
+                    label.setStyleSheet(f'color: {self._warning_color};')
+                elif log.levelno == logging.ERROR:
+                    label.setStyleSheet(f'color: {self._error_color};')
+                elif log.levelno == logging.INFO:
+                    label.setStyleSheet(f'color: {self._info_color};')
                 self.layout().insertWidget(0, label)
 
                 # prune layout if too many warnings
@@ -60,13 +73,49 @@ class WarningWidget(QWidget):
                     widget = self.layout().itemAt(29).widget()
                     self.layout().removeWidget(widget)
 
-    def setTextColor(self, color: str) -> None:
+    def setWarningColor(self, color: str) -> None:
         """
-        Set color of text
+        Set color of warning labels
         :param color: color to set text to
         """
 
-        self.text_color = color
+        self._warning_color = color
+    def warningColor(self) -> str:
+        """
+        return color of warning labels
+        """
+
+        return self._warning_color
+
+    def setInfoColor(self, color: str) -> None:
+        """
+        Set color of info labels
+        :param color: color to set text to
+        """
+
+        self._info_color = color
+
+    def infoColor(self) -> str:
+        """
+        return color of info labels
+        """
+
+        return self._info_color
+
+    def setErrorColor(self, color: str) -> None:
+        """
+        Set color of error labels
+        :param color: color to set text to
+        """
+
+        self._error_color = color
+
+    def errorColor(self) -> str:
+        """
+        return color of error labels
+        """
+
+        return self._error_color
 
 class WarningFilter(logging.Filter):
     """ Log filter which logs messages with tags that contain keyword"""
@@ -89,7 +138,7 @@ if __name__ == '__main__':
 
     logger = logging.getLogger()
     stream_handler = logging.StreamHandler()
-    stream_handler.setLevel(logger.root.level)
+    stream_handler.setLevel('INFO')
     log_format = '%(asctime)s:%(levelname)s:%(module)s:%(filename)s:%(funcName)s:line %(lineno)d:%(message)s'
     log_datefmt = '%I:%M:%S %p'
     stream_handler.setFormatter(logging.Formatter(fmt=log_format, datefmt=log_datefmt))
@@ -100,9 +149,19 @@ if __name__ == '__main__':
 
     warnings = ['this is a warning', 'this is also a warning', 'this is a warning too', 'Warn warn warn',
                 'are you warned yet?', '']
+    infos = ['info dump', 'inspo info', 'too much information']
+    errors = ['error 7', 'error 8', 'error 9']
 
     warning_timer = QTimer(timeout=lambda: logger.warning(warnings[randint(0, 5)],
                                                           extra={'tags': 'warning_widget'}), interval=1000)
+
+    info_timer = QTimer(timeout=lambda: logger.info(infos[randint(0, 2)],
+                                                          extra={'tags': 'warning_widget'}), interval=1000)
+    error_timer = QTimer(timeout=lambda: logger.error(errors[randint(0, 2)],
+                                                    extra={'tags': 'warning_widget'}), interval=1000)
+
     warning_timer.start()
+    info_timer.start()
+    error_timer.start()
 
     sys.exit(app.exec_())

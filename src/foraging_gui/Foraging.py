@@ -111,7 +111,7 @@ class Window(QMainWindow):
 
         # add warning_widget to layout and set color
         self.warning_widget = WarningWidget(log_tag=self.warning_log_tag,
-                                            text_color=self.default_warning_color)
+                                            warning_color=self.default_warning_color)
         self.scrollArea_6.setWidget(self.warning_widget)
 
         # set window title
