@@ -667,7 +667,10 @@ class Window(QMainWindow):
                         else:
                             self.drop_frames_warning_text+=f"Correct: {avi_file} has {num_frames} frames and {self.trigger_length} triggers\n"
                         self.frame_num[camera_name] = num_frames
-            logging.warning(self.drop_frames_warning_text, extra={'tags': [self.warning_log_tag]})
+            if self.drop_frames_tag:
+                logging.warning(self.drop_frames_warning_text, extra={'tags': [self.warning_log_tag]})
+            else:
+                logging.info(self.drop_frames_warning_text, extra={'tags': [self.warning_log_tag]})
             # only check drop frames once each session
             self.to_check_drop_frames=0
 
