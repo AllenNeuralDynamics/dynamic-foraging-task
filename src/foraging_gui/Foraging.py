@@ -4061,6 +4061,7 @@ class Window(QMainWindow):
 
             # create label to display time remaining on photometry label and add to warning widget
             self.photometry_timer_label = QLabel()
+            self.photometry_timer_label.setStyleSheet(f'color: {self.default_warning_color};')
             self.warning_widget.layout().insertWidget(0, self.photometry_timer_label)
 
             # If we already created a workertimer and thread we can reuse them
