@@ -3,7 +3,7 @@ from queue import Queue
 from logging.handlers import QueueHandler
 from random import randint
 from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QSizePolicy
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel
 import sys
 
 
@@ -135,6 +135,8 @@ class WarningFilter(logging.Filter):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
+    logging.basicConfig(level=logging.INFO)
+
     logger = logging.getLogger()
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel('INFO')
@@ -144,7 +146,6 @@ if __name__ == '__main__':
     logger.root.addHandler(stream_handler)
 
     warn_widget = WarningWidget()
-    warn_widget.show()
 
     warnings = ['this is a warning', 'this is also a warning', 'this is a warning too', 'Warn warn warn',
                 'are you warned yet?', '']
