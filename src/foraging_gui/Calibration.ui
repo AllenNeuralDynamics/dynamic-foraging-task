@@ -646,7 +646,7 @@
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
         </widget>
-        <widget class="QLineEdit" name="WeightAfterLeft">
+        <widget class="QLabel" name="WeightAfterLeft">
             <property name="geometry">
                 <rect>
                     <x>510</x>
@@ -659,7 +659,7 @@
                 <string/>
             </property>
         </widget>
-        <widget class="QLineEdit" name="WeightAfterRight">
+        <widget class="QLabel" name="WeightAfterRight">
             <property name="geometry">
                 <rect>
                     <x>510</x>
@@ -790,7 +790,7 @@
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
         </widget>
-        <widget class="QLineEdit" name="WeightBeforeLeft">
+        <widget class="QLabel" name="WeightBeforeLeft">
             <property name="geometry">
                 <rect>
                     <x>360</x>
@@ -803,7 +803,7 @@
                 <string/>
             </property>
         </widget>
-        <widget class="QLineEdit" name="WeightBeforeRight">
+        <widget class="QLabel" name="WeightBeforeRight">
             <property name="geometry">
                 <rect>
                     <x>360</x>
