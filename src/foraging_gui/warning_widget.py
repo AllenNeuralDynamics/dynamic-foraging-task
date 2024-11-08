@@ -59,7 +59,6 @@ class WarningWidget(QWidget):
             if log.getMessage()[12:].strip():   # skip empty messages
                 label = QLabel(log.getMessage())
                 label.setWordWrap(True)
-                print(log.levelno, logging.WARNING)
                 if log.levelno == logging.WARNING:
                     label.setStyleSheet(f'color: {self._warning_color};')
                 elif log.levelno == logging.ERROR:
