@@ -146,6 +146,7 @@ if __name__ == '__main__':
     logger.root.addHandler(stream_handler)
 
     warn_widget = WarningWidget()
+    warn_widget.show()
 
     warnings = ['this is a warning', 'this is also a warning', 'this is a warning too', 'Warn warn warn',
                 'are you warned yet?', '']
