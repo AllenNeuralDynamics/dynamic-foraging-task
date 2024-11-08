@@ -805,7 +805,6 @@ class WaterCalibrationDialog(QDialog):
             "Weight after (g): ", 
             final_tube_weight,
             0, 1000, 4)
-        print(final_tube_weight, ok)
         if not ok:
             self.Warning.setText('Please repeat measurement')
             self.WeightBeforeRight.setText('')
@@ -1278,7 +1277,13 @@ class CameraDialog(QDialog):
         self._connectSignalsSlots()
         self.camera_start_time=''
         self.camera_stop_time=''
-        
+
+        self.info_label = QLabel(parent=self)
+        self.info_label.setStyleSheet(f'color: {self.MainWindow.default_warning_color};')
+        self.info_label.move(50, 350)
+        self.info_label.setFixedSize(171, 51)
+        self.info_label.setAlignment(Qt.AlignCenter)
+
     def _connectSignalsSlots(self):
         self.StartRecording.toggled.connect(self._StartCamera)
         self.StartPreview.toggled.connect(self._start_preview)
@@ -1287,14 +1292,20 @@ class CameraDialog(QDialog):
 
     def _OpenSaveFolder(self):
         '''Open the log/save folder of the camera'''
+
+        text = self.info_label.text()
         if hasattr(self.MainWindow,'Ot_log_folder'):
             try:
                 subprocess.Popen(['explorer', os.path.join(os.path.dirname(os.path.dirname(self.MainWindow.Ot_log_folder)),'behavior-videos')])
             except Exception as e:
                 logging.error(str(e))
                 logging.warning('No logging folder found!', extra={'tags': self.MainWindow.warning_log_tag})
+                if 'No logging folder found!' not in text:
+                    self.info_label.setText(text + '\n No logging folder found!')
         else:
             logging.warning('No logging folder found!', extra={'tags': self.MainWindow.warning_log_tag})
+            if 'No logging folder found!' not in text:
+                self.info_label.setText(text + '\n No logging folder found!')
 
     def _start_preview(self):
         '''Start the camera preview'''
@@ -1313,6 +1324,8 @@ class CameraDialog(QDialog):
 
             self.StartPreview.setStyleSheet("background-color : green;")
             logging.info('Camera is on', extra={'tags': self.MainWindow.warning_log_tag})
+            self.info_label.setText('Camera is on')
+
         else:
             # enable the start recording button
             self.StartRecording.setEnabled(True)
@@ -1323,6 +1336,7 @@ class CameraDialog(QDialog):
 
             self.StartPreview.setStyleSheet("background-color : none;")
             logging.info('Camera is off', extra={'tags': self.MainWindow.warning_log_tag})
+            self.info_label.setText('Camera is off')
 
     def _AutoControl(self):
         '''Trigger the camera during the start of a new behavior session'''
@@ -1338,6 +1352,7 @@ class CameraDialog(QDialog):
         if self.StartRecording.isChecked():
             self.StartRecording.setStyleSheet("background-color : green;")
             logging.info('Camera is turning on', extra={'tags': self.MainWindow.warning_log_tag})
+            self.info_label.setText('Camera is turning on')
             QApplication.processEvents()
             # untoggle the preview button
             if self.StartPreview.isChecked():
@@ -1364,14 +1379,17 @@ class CameraDialog(QDialog):
             time.sleep(5)
             self.camera_start_time = str(datetime.now())
             logging.info('Camera is on!', extra={'tags': [self.MainWindow.warning_log_tag]})
+            self.info_label.setText('Camera is on!')
         else:
             self.StartRecording.setStyleSheet("background-color : none")
             logging.info('Camera is turning off', extra={'tags': self.MainWindow.warning_log_tag})
+            self.info_label.setText('Camera is turning off')
             QApplication.processEvents()
             self.MainWindow.Channel.CameraControl(int(2))
             self.camera_stop_time = str(datetime.now())
             time.sleep(5)
             logging.info('Camera is off!', extra={'tags': [self.MainWindow.warning_log_tag]})
+            self.info_label.setText('Camera is off!')
 
 def is_file_in_use(file_path):
     '''check if the file is open'''

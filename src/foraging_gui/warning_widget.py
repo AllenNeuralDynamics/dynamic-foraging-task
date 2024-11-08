@@ -3,9 +3,9 @@ from queue import Queue
 from logging.handlers import QueueHandler
 from random import randint
 from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QSizePolicy
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QScrollArea
 import sys
-
+from time import sleep
 
 class WarningWidget(QWidget):
     """Widget that uses a logging QueueHandler to display log errors and warning"""
@@ -59,7 +59,6 @@ class WarningWidget(QWidget):
             if log.getMessage()[12:].strip():   # skip empty messages
                 label = QLabel(log.getMessage())
                 label.setWordWrap(True)
-                print(log.levelno, logging.WARNING)
                 if log.levelno == logging.WARNING:
                     label.setStyleSheet(f'color: {self._warning_color};')
                 elif log.levelno == logging.ERROR:
@@ -136,6 +135,8 @@ class WarningFilter(logging.Filter):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
+    logging.basicConfig(level=logging.INFO)
+
     logger = logging.getLogger()
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel('INFO')
@@ -144,8 +145,12 @@ if __name__ == '__main__':
     stream_handler.setFormatter(logging.Formatter(fmt=log_format, datefmt=log_datefmt))
     logger.root.addHandler(stream_handler)
 
-    warn_widget = WarningWidget()
-    warn_widget.show()
+    scroll = QScrollArea()
+    warn_widget = WarningWidget(parent=scroll)
+    scroll.setWidget(warn_widget)
+    scroll.setWidgetResizable(True)
+    scroll.show()
+
 
     warnings = ['this is a warning', 'this is also a warning', 'this is a warning too', 'Warn warn warn',
                 'are you warned yet?', '']
@@ -156,12 +161,15 @@ if __name__ == '__main__':
                                                           extra={'tags': 'warning_widget'}), interval=1000)
 
     info_timer = QTimer(timeout=lambda: logger.info(infos[randint(0, 2)],
-                                                          extra={'tags': 'warning_widget'}), interval=1000)
+                                                          extra={'tags': 'warning_widget'}), interval=1500)
     error_timer = QTimer(timeout=lambda: logger.error(errors[randint(0, 2)],
-                                                    extra={'tags': 'warning_widget'}), interval=1000)
+                                                    extra={'tags': 'warning_widget'}), interval=1750)
 
     warning_timer.start()
+    sleep(.5)
     info_timer.start()
+    sleep(1)
     error_timer.start()
+    sleep(1)
 
     sys.exit(app.exec_())
