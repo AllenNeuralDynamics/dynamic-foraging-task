@@ -1714,16 +1714,16 @@ class Window(QMainWindow):
 
     def _OpenBehaviorFolder(self):
         '''Open the the current behavior folder'''
-        try:
-            folder_name=os.path.dirname(self.SaveFileJson)
+
+        if hasattr(self, 'SaveFileJson'):
+            folder_name = os.path.dirname(self.SaveFileJson)
             subprocess.Popen(['explorer', folder_name])
-        except Exception as e:
-            logging.error(traceback.format_exc())
-            try:
-                AnimalFolder=os.path.join(self.default_saveFolder, self.current_box, self.ID.text())
-                subprocess.Popen(['explorer', AnimalFolder])
-            except Exception as e:
-                logging.error(traceback.format_exc())
+        elif hasattr(self, 'default_saveFolder'):
+            AnimalFolder = os.path.join(self.default_saveFolder, self.current_box, self.ID.text())
+            logging.warning(f'Save folder unspecified so saving to {AnimalFolder}')
+            subprocess.Popen(['explorer', AnimalFolder])
+        else:
+            logging.error('Save folder unspecified')
 
     def _OpenLoggingFolder(self):
         '''Open the logging folder'''
