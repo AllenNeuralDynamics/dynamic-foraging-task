@@ -1921,7 +1921,7 @@ class Window(QMainWindow):
                         float(child.text())
                     except Exception as e:
                         # Invalid float. Do not change the parameter, reset back to previous value
-                        logging.error('Cannot convert input to float: {}, \'{}\''.format(child.objectName(),child.text()))
+                        logging.warning('Cannot convert input to float: {}, \'{}\''.format(child.objectName(),child.text()))
                         if isinstance(child, QtWidgets.QDoubleSpinBox):
                             child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
                         elif isinstance(child, QtWidgets.QSpinBox):
