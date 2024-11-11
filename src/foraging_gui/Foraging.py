@@ -1720,10 +1720,10 @@ class Window(QMainWindow):
             subprocess.Popen(['explorer', folder_name])
         elif hasattr(self, 'default_saveFolder'):
             AnimalFolder = os.path.join(self.default_saveFolder, self.current_box, self.ID.text())
-            logging.warning(f'Save folder unspecified so saving to {AnimalFolder}')
+            logging.warning(f'Save folder unspecified, so opening {AnimalFolder}')
             subprocess.Popen(['explorer', AnimalFolder])
         else:
-            logging.error('Save folder unspecified')
+            logging.warning('Save folder unspecified', extra={'tags': self.warning_log_tag})
 
     def _OpenLoggingFolder(self):
         '''Open the logging folder'''
