@@ -24,7 +24,7 @@ import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
-from PyQt5.QtWidgets import QFileDialog,QVBoxLayout, QGridLayout
+from PyQt5.QtWidgets import QFileDialog,QVBoxLayout, QGridLayout, QLabel
 from PyQt5 import QtWidgets,QtGui,QtCore, uic
 from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
@@ -42,9 +42,11 @@ from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY, EphysRecording
 from foraging_gui.stage import Stage
 from foraging_gui.bias_indicator import BiasIndicator
+from foraging_gui.warning_widget import WarningWidget
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
 from aind_data_schema.core.session import Session
+from aind_data_schema_models.modalities import Modality
 
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear() # clear handlers so console output can be configured
@@ -61,9 +63,14 @@ class NumpyEncoder(json.JSONEncoder):
 
 class Window(QMainWindow):
     Time = QtCore.pyqtSignal(int) # Photometry timer signal
+    sessionGenerated = QtCore.pyqtSignal(Session)  # signal to indicate Session has been generated
 
     def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
+
+        # create warning widget
+        self.warning_log_tag = 'warning_widget'  # TODO: How to set this or does it matter?
+
         super().__init__(parent)
 
         # Process inputs        
@@ -102,6 +109,11 @@ class Window(QMainWindow):
         # Load User interface
         self._LoadUI()
 
+        # add warning_widget to layout and set color
+        self.warning_widget = WarningWidget(log_tag=self.warning_log_tag,
+                                            warning_color=self.default_warning_color)
+        self.scrollArea_6.setWidget(self.warning_widget)
+
         # set window title
         self.setWindowTitle(self.rig_name)
         logging.info('Setting Window title: {}'.format(self.rig_name))
@@ -138,6 +150,7 @@ class Window(QMainWindow):
         self.bias_indicator = BiasIndicator(x_range=self.bias_n_size)  # TODO: Where to store bias_threshold parameter? self.Settings?
         self.bias_indicator.biasValue.connect(self.bias_calculated)  # update dashboard value
         self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.bias_thread = threading.Thread()   # dummy thread
 
         # Set up more parameters
         self.FIP_started=False
@@ -191,6 +204,9 @@ class Window(QMainWindow):
 
         # Initializes session log handler as None
         self.session_log_handler = None
+
+        # generate an upload manifest when a session has been produced
+        self.upload_manifest_slot = self.sessionGenerated.connect(self._generate_upload_manifest)
 
         # show disk space
         self._show_disk_space()
@@ -258,14 +274,14 @@ class Window(QMainWindow):
         if self.default_ui=='ForagingGUI.ui':
             logging.info('Using ForagingGUI.ui interface')
             self.label_date.setText(str(date.today()))
-            self.default_warning_color="color: purple;"
-            self.default_text_color='color: purple;'
+            self.default_warning_color="purple"
+            self.default_text_color="color: purple;"
             self.default_text_background_color='background-color: purple;'
         elif self.default_ui=='ForagingGUI_Ephys.ui':
             logging.info('Using ForagingGUI_Ephys.ui interface')
             self.Visualization.setTitle(str(date.today()))
-            self.default_warning_color="color: red;"
-            self.default_text_color='color: red;'
+            self.default_warning_color="red"
+            self.default_text_color="color: red;"
             self.default_text_background_color='background-color: red;'
         else:
             logging.info('Using ForagingGUI.ui interface')
@@ -623,21 +639,16 @@ class Window(QMainWindow):
                 elif len(os.listdir(video_folder)) == 0:
                     # no video data saved.
                     self.trigger_length=0
-                    self.WarningLabelCamera.setText('')
-                    self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
                     self.to_check_drop_frames=0
                     return
                 elif ('HighSpeedCamera' in self.SettingsBox) and (self.SettingsBox['HighSpeedCamera'] ==1):
                     self.trigger_length=0
                     logging.error('Saved video data, but no camera trigger file found')
-                    self.WarningLabelCamera.setText('No camera trigger file found!')
-                    self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
+                    logging.info('No camera trigger file found!', extra={'tags': [self.warning_log_tag]})
                     return
                 else:
                     logging.info('Saved video data, but not using high speed camera - skipping drop frame check')
                     self.trigger_length=0
-                    self.WarningLabelCamera.setText('')
-                    self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
                     self.to_check_drop_frames=0
                     return
                 csv_files = [file for file in os.listdir(video_folder) if file.endswith(".csv")]
@@ -657,11 +668,10 @@ class Window(QMainWindow):
                         else:
                             self.drop_frames_warning_text+=f"Correct: {avi_file} has {num_frames} frames and {self.trigger_length} triggers\n"
                         self.frame_num[camera_name] = num_frames
-            self.WarningLabelCamera.setText(self.drop_frames_warning_text)
             if self.drop_frames_tag:
-                self.WarningLabelCamera.setStyleSheet(self.default_warning_color)
+                logging.warning(self.drop_frames_warning_text, extra={'tags': [self.warning_log_tag]})
             else:
-                self.WarningLabelCamera.setStyleSheet("color: green;")
+                logging.info(self.drop_frames_warning_text, extra={'tags': [self.warning_log_tag]})
             # only check drop frames once each session
             self.to_check_drop_frames=0
 
@@ -864,7 +874,8 @@ class Window(QMainWindow):
 
         # If we can't find any stages, return 
         if len(self.instances) == 0:
-            logging.warning('Could not find any instances of NewScale Stage')
+            logging.info('Could not find any instances of NewScale Stage',
+                         extra={'tags': [self.warning_log_tag]})
             self._no_stage()
             return
 
@@ -937,8 +948,7 @@ class Window(QMainWindow):
                 subprocess.Popen('title Box{}'.format(self.box_letter),shell=True)
             except Exception as e:
                 logging.error(traceback.format_exc())
-                self.WarningLabelInitializeBonsai.setText('Please open bonsai!')
-                self.WarningLabelInitializeBonsai.setStyleSheet(self.default_warning_color)
+                logging.warning('Please open bonsai!', extra={'tags': [self.warning_log_tag]})
                 self.InitializeBonsaiSuccessfully=0
 
     def _ReconnectBonsai(self):
@@ -1360,8 +1370,6 @@ class Window(QMainWindow):
             logging.info('Connected to already running Bonsai')
             logging.info('Bonsai started successfully')
             self.InitializeBonsaiSuccessfully=1
-            self.WarningLabel.setText('')
-            self.WarningLabel.setStyleSheet(self.default_warning_color)
             return
 
         # Start Bonsai
@@ -1384,17 +1392,13 @@ class Window(QMainWindow):
                 # We could connect
                 logging.info('Connected to Bonsai after {} seconds'.format(wait))
                 logging.info('Bonsai started successfully')
-                if self.WarningLabel.text() == 'Lost bonsai connection':
-                    self.WarningLabel.setText('')
-                    self.WarningLabel.setStyleSheet(self.default_warning_color)
                 self.InitializeBonsaiSuccessfully=1
                 subprocess.Popen('title Box{}'.format(self.box_letter),shell=True)
                 return
 
         # Could not connect and we timed out
         logging.info('Could not connect to bonsai with max wait time {} seconds'.format(max_wait))
-        self.WarningLabel_2.setText('Started without bonsai connected!')
-        self.WarningLabel_2.setStyleSheet(self.default_warning_color)
+        logging.warning('Started without bonsai connected!', extra={'tags': [self.warning_log_tag]})
 
     def _ConnectOSC(self):
         '''
@@ -1458,9 +1462,6 @@ class Window(QMainWindow):
             self.Channel3.receive()
         while not self.Channel4.msgs.empty():
             self.Channel4.receive()
-        self.WarningLabel_2.setText('')
-        self.WarningLabel_2.setStyleSheet("color: gray;")
-        self.WarningLabelInitializeBonsai.setText('')
         self.InitializeBonsaiSuccessfully=1
 
     def _OpenBonsaiWorkflow(self,runworkflow=1):
@@ -1517,9 +1518,9 @@ class Window(QMainWindow):
             rig_json_path = ''
             if error_if_none:
                 logging.error('Did not find any existing rig.json files')
-                self._manage_warning_labels(self.MetadataWarning,warning_text='No rig metadata found!')
+                logging.warning('No rig metadata found!', extra={'tags': self.warning_log_tag})
             else:
-                logging.info('Did not find any existing rig.json files')
+                logging.info('Did not find any existing rig.json files')    #FIXME: is this really the right message
         else:
             rig_json_path = os.path.join(self.Settings['rig_metadata_folder'],files[-1])
             logging.info('Found existing rig.json: {}'.format(files[-1]))
@@ -2400,6 +2401,12 @@ class Window(QMainWindow):
             toolbar.setMaximumWidth(300)
             layout.addWidget(toolbar)
             layout.addWidget(PlotLick)
+            # add text labels to indicate lick interval percentages
+            self.same_side_lick_interval = QtWidgets.QLabel()
+            self.cross_side_lick_interval = QtWidgets.QLabel()
+            layout.addWidget(self.same_side_lick_interval)
+            layout.addWidget(self.cross_side_lick_interval)
+
             self.LickSta_ToInitializeVisual=0
         try:
             if hasattr(self, 'GeneratedTrials'):
@@ -2458,20 +2465,14 @@ class Window(QMainWindow):
                 "Do you want to save without weight or extra water information provided?",
                  QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
             if response==QMessageBox.Yes:
-                self.WarningLabel.setText('Saving without weight or extra water!')
-                self.WarningLabel.setStyleSheet(self.default_warning_color)
-                logging.info('saving without weight or extra water')
+                logging.warning('Saving without weight or extra water!', extra={'tags': [self.warning_log_tag]})
                 pass
             elif response==QMessageBox.No:
                 logging.info('saving declined by user')
-                self.WarningLabel.setText('')
-                self.WarningLabel.setStyleSheet(self.default_warning_color)
                 self.Save.setChecked(False)  # uncheck button
                 return
             elif response==QMessageBox.Cancel:
                 logging.info('saving canceled by user')
-                self.WarningLabel.setText('')
-                self.WarningLabel.setStyleSheet(self.default_warning_color)
                 self.Save.setChecked(False)  # uncheck button
                 return
         # check if the laser power and target are entered
@@ -2481,20 +2482,14 @@ class Window(QMainWindow):
                 "Do you want to save without complete laser target or laser power calibration information provided?",
                  QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
             if response==QMessageBox.Yes:
-                self.WarningLabel.setText('Saving without laser target or laser power!')
-                self.WarningLabel.setStyleSheet(self.default_warning_color)
-                logging.info('saving without laser target or laser power')
+                logging.warning('Saving without laser target or laser power!', extra={'tags': [self.warning_log_tag]})
                 pass
             elif response==QMessageBox.No:
                 logging.info('saving declined by user')
-                self.WarningLabel.setText('')
-                self.WarningLabel.setStyleSheet(self.default_warning_color)
                 self.Save.setChecked(False)  # uncheck button
                 return
             elif response==QMessageBox.Cancel:
                 logging.info('saving canceled by user')
-                self.WarningLabel.setText('')
-                self.WarningLabel.setStyleSheet(self.default_warning_color)
                 self.Save.setChecked(False)  # uncheck button
                 return
 
@@ -2528,8 +2523,6 @@ class Window(QMainWindow):
                 self.SaveFile=Names[0]
             if self.SaveFile == '':
                 logging.info('empty file name')
-                self.WarningLabel.setText('')
-                self.WarningLabel.setStyleSheet(self.default_warning_color)
                 self.Save.setChecked(False)  # uncheck button
                 return
 
@@ -2674,29 +2667,29 @@ class Window(QMainWindow):
             Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
             # generate the metadata file
             generated_metadata=generate_metadata(Obj=Obj)
+            session = generated_metadata._session()
+            self.sessionGenerated.emit(session)   # emit sessionGenerated
+
             if BackupSave==0:
                 text="Session metadata generated successfully: " + str(generated_metadata.session_metadata_success)+"\n"+\
-                "Rig metadata generated successfully: " + str(generated_metadata.rig_metadata_success)+"\n"+\
-                "Data description generated successfully: " + str(generated_metadata.data_description_success)
-                self._manage_warning_labels(self.MetadataWarning,warning_text=text)
+                "Rig metadata generated successfully: " + str(generated_metadata.rig_metadata_success)
+                logging.warning(text, extra={'tags': [self.warning_log_tag]})
             Obj['generate_session_metadata_success']=generated_metadata.session_metadata_success
             Obj['generate_rig_metadata_success']=generated_metadata.rig_metadata_success
-            Obj['generate_data_description_success']=generated_metadata.data_description_success
 
             if save_clicked:    # create water log result if weight after filled and uncheck save
                 if self.BaseWeight.text() != '' and self.WeightAfter.text() != '' and self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']:
-                    self._AddWaterLogResult(generated_metadata._session())
+                    self._AddWaterLogResult(session)
                 self.bias_indicator.clear()  # prepare for new session
 
 
         except Exception as e:
-            self._manage_warning_labels(self.MetadataWarning,warning_text='Meta data is not saved!')
+            logging.warning('Meta data is not saved!', extra= {'tags': {self.warning_log_tag}})
             logging.error('Error generating session metadata: '+str(e))
             logging.error(traceback.format_exc())
             # set to False if error occurs
             Obj['generate_session_metadata_success']=False
             Obj['generate_rig_metadata_success']=False
-            Obj['generate_data_description_success']=False
 
         # don't save the data if the load tag is 1
         if self.load_tag==0:
@@ -2719,10 +2712,9 @@ class Window(QMainWindow):
 
             short_file = self.SaveFile.split('\\')[-1]
             if self.load_tag==0:
-                self.WarningLabel.setText('Saved: {}'.format(short_file))
+                logging.warning('Saved: {}'.format(short_file), extra={'tags': [self.warning_log_tag]})
             else:
-                self.WarningLabel.setText('Saving of loaded files is not allowed!')
-            self.WarningLabel.setStyleSheet(self.default_warning_color)
+                logging.warning('Saving of loaded files is not allowed!', extra={'tags': [self.warning_log_tag]})
 
             self.SessionlistSpin.setEnabled(True)
             self.Sessionlist.setEnabled(True)
@@ -3273,9 +3265,8 @@ class Window(QMainWindow):
         self.StartFIP.setChecked(False)
 
         if self.Teensy_COM == '':
-            logging.warning('No Teensy COM configured for this box, cannot start FIP workflow')
-            self.TeensyWarning.setText('No Teensy COM for this box')
-            self.TeensyWarning.setStyleSheet(self.default_warning_color)
+            logging.warning('No Teensy COM configured for this box, cannot start FIP workflow',
+                            extra={'tags': [self.warning_log_tag]})
             msg = 'No Teensy COM configured for this box, cannot start FIP workflow'
             reply = QMessageBox.information(self,
                 'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
@@ -3283,8 +3274,6 @@ class Window(QMainWindow):
 
         if self.FIP_workflow_path == "":
             logging.warning('No FIP workflow path defined in ForagingSettings.json')
-            self.TeensyWarning.setText('FIP workflow path not defined')
-            self.TeensyWarning.setStyleSheet(self.default_warning_color)
             msg = 'FIP workflow path not defined, cannot start FIP workflow'
             reply = QMessageBox.information(self,
                 'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
@@ -3324,9 +3313,8 @@ class Window(QMainWindow):
     def _StartExcitation(self):
 
         if self.Teensy_COM == '':
-            logging.warning('No Teensy COM configured for this box, cannot start excitation')
-            self.TeensyWarning.setText('No Teensy COM for this box')
-            self.TeensyWarning.setStyleSheet(self.default_warning_color)
+            logging.warning('No Teensy COM configured for this box, cannot start excitation',
+                            extra={'tags': [self.warning_log_tag]})
             msg = 'No Teensy COM configured for this box, cannot start excitation'
             reply = QMessageBox.information(self,
                 'Box {}, StartExcitation'.format(self.box_letter), msg, QMessageBox.Ok )
@@ -3345,19 +3333,15 @@ class Window(QMainWindow):
                 elif self.FIPMode.currentText() == "Axon":
                     ser.write(b'e')
                 ser.close()
-                self.TeensyWarning.setText('Started FIP excitation')
-                self.TeensyWarning.setStyleSheet(self.default_warning_color)
+                logging.info('Started FIP excitation', extra={'tags': [self.warning_log_tag]})
             except Exception as e:
                 logging.error(traceback.format_exc())
-                self.TeensyWarning.setText('Error: starting excitation!')
-                self.TeensyWarning.setStyleSheet(self.default_warning_color)
+                logging.warning('Error: starting excitation!', extra={'tags': [self.warning_log_tag]})
                 reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when starting excitation: {}'.format(e), QMessageBox.Ok)
                 self.StartExcitation.setChecked(False)
                 self.StartExcitation.setStyleSheet("background-color : none")
                 return 0
             else:
-                self.TeensyWarning.setText('')
-                self.TeensyWarning.setStyleSheet(self.default_warning_color)
                 self.fiber_photometry_start_time = str(datetime.now())
 
         else:
@@ -3368,17 +3352,13 @@ class Window(QMainWindow):
                 # Trigger Teensy with the above specified exp mode
                 ser.write(b's')
                 ser.close()
-                self.TeensyWarning.setText('Stopped FIP excitation')
-                self.TeensyWarning.setStyleSheet(self.default_warning_color)
+                logging.info('Stopped FIP excitation', extra={'tags': [self.warning_log_tag]})
             except Exception as e:
                 logging.error(traceback.format_exc())
-                self.TeensyWarning.setText('Error stopping excitation!')
-                self.TeensyWarning.setStyleSheet(self.default_warning_color)
+                logging.warning('Error stopping excitation!', extra={'tags': [self.warning_log_tag]})
                 reply = QMessageBox.critical(self, 'Box {}, Start excitation:'.format(self.box_letter), 'error when stopping excitation: {}'.format(e), QMessageBox.Ok)
                 return 0
             else:
-                self.TeensyWarning.setText('')
-                self.TeensyWarning.setStyleSheet(self.default_warning_color)
                 self.fiber_photometry_end_time = str(datetime.now())
 
         return 1
@@ -3386,9 +3366,8 @@ class Window(QMainWindow):
     def _StartBleaching(self):
 
         if self.Teensy_COM == '':
-            logging.warning('No Teensy COM configured for this box, cannot start bleaching')
-            self.TeensyWarning.setText('No Teensy COM for this box')
-            self.TeensyWarning.setStyleSheet(self.default_warning_color)
+            logging.warning('No Teensy COM configured for this box, cannot start bleaching',
+                            extra={'tags': [self.warning_log_tag]})
             msg = 'No Teensy COM configured for this box, cannot start bleaching'
             reply = QMessageBox.information(self,
                 'Box {}, StartBleaching'.format(self.box_letter), msg, QMessageBox.Ok )
@@ -3422,14 +3401,12 @@ class Window(QMainWindow):
                 # Trigger Teensy with the above specified exp mode
                 ser.write(b'd')
                 ser.close()
-                self.TeensyWarning.setText('Start bleaching!')
-                self.TeensyWarning.setStyleSheet(self.default_warning_color)
+                logging.info('Start bleaching!', extra={'tags': [self.warning_log_tag]})
             except Exception as e:
                 logging.error(traceback.format_exc())
 
                 # Alert user
-                self.TeensyWarning.setText('Error: start bleaching!')
-                self.TeensyWarning.setStyleSheet(self.default_warning_color)
+                logging.warning('Error: start bleaching!', extra={'tags': [self.warning_log_tag]})
                 reply = QMessageBox.critical(self, 'Box {}, Start bleaching:'.format(self.box_letter),
                     'Cannot start photobleaching: {}'.format(str(e)), QMessageBox.Ok)
 
@@ -3456,12 +3433,9 @@ class Window(QMainWindow):
                 # Trigger Teensy with the above specified exp mode
                 ser.write(b's')
                 ser.close()
-                self.TeensyWarning.setText('')
-                self.TeensyWarning.setStyleSheet(self.default_warning_color)
             except Exception as e:
                 logging.error(traceback.format_exc())
-                self.TeensyWarning.setText('Error: stop bleaching!')
-                self.TeensyWarning.setStyleSheet(self.default_warning_color)
+                logging.warning('Error: stop bleaching!')
 
     def _StopPhotometry(self,closing=False):
         '''
@@ -3482,8 +3456,6 @@ class Window(QMainWindow):
             logging.info('Photometry excitation stopped')
         finally:
             # Reset all GUI buttons
-            self.TeensyWarning.setText('')
-            self.TeensyWarning.setStyleSheet(self.default_warning_color)
             self.StartBleaching.setStyleSheet("background-color : none")
             self.StartExcitation.setStyleSheet("background-color : none")
             self.StartBleaching.setChecked(False)
@@ -3529,8 +3501,7 @@ class Window(QMainWindow):
             self.logging_type=-1 # logging has stopped
         except Exception as e:
             logging.warning('Bonsai connection is closed')
-            self.WarningLabel.setText('Lost bonsai connection')
-            self.WarningLabel.setStyleSheet(self.default_warning_color)
+            logging.warning('Lost bonsai connection', extra={'tags': [self.warning_log_tag]})
             self.InitializeBonsaiSuccessfully=0
 
     def _NewSession(self):
@@ -3573,22 +3544,18 @@ class Window(QMainWindow):
             self.WeightAfter.setText('')
 
         # Reset GUI visuals
-        self.ManualWaterWarning.setText('')
         self.Save.setStyleSheet("color:black;background-color:None;")
         self.NewSession.setStyleSheet("background-color : green;")
         self.NewSession.setChecked(False)
         self.Start.setStyleSheet("background-color : none")
         self.Start.setChecked(False)
         self.Start.setDisabled(False)
-        self.WarningLabel.setText('')
         self.TotalWaterWarning.setText('')
-        self.WarningLabel_2.setText('')
         self._set_metadata_enabled(True)
 
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully == 0:
-            self.WarningLabel.setText('Lost bonsai connection')
-            self.WarningLabel.setStyleSheet(self.default_warning_color)
+            logging.warning('Lost bonsai connection', extra={'tags': [self.warning_log_tag]})
 
         # Reset state variables
         self._StopPhotometry() # Make sure photoexcitation is stopped
@@ -3640,13 +3607,10 @@ class Window(QMainWindow):
         stall_iteration = 1
         stall_duration = 5*60
         if self.ANewTrial==0:
-            self.WarningLabel.setText('Waiting for the finish of the last trial!')
-            self.WarningLabel.setStyleSheet(self.default_warning_color)
+            logging.warning('Waiting for the finish of the last trial!', extra={'tags': [self.warning_log_tag]})
             while 1:
                 QApplication.processEvents()
                 if self.ANewTrial==1:
-                    self.WarningLabel.setText('')
-                    self.WarningLabel.setStyleSheet(self.default_warning_color)
                     break
                 elif (time.time() - start_time) > stall_duration*stall_iteration:
                     elapsed_time = int(np.floor(stall_duration*stall_iteration/60))
@@ -3655,8 +3619,6 @@ class Window(QMainWindow):
                     if reply == QMessageBox.Yes:
                         logging.error('trial stalled {} minutes, user force stopped trials'.format(elapsed_time))
                         self.ANewTrial=1
-                        self.WarningLabel.setText('')
-                        self.WarningLabel.setStyleSheet(self.default_warning_color)
                         break
                     else:
                         stall_iteration+=1
@@ -3689,8 +3651,6 @@ class Window(QMainWindow):
         if not self.ignore_timer:
             self.finish_Timer=1
             logging.info('Finished photometry baseline timer')
-            self.WarningLabelStop.setText('')
-            self.WarningLabelStop.setStyleSheet(self.default_warning_color)
 
     def _update_photometery_timer(self,time):
         '''
@@ -3701,8 +3661,7 @@ class Window(QMainWindow):
         if len(str(seconds)) == 1:
             seconds = '0{}'.format(seconds)
         if not self.ignore_timer:
-            self.WarningLabelStop.setText('Running photometry baseline: {}:{}'.format(minutes,seconds))
-            self.WarningLabelStop.setStyleSheet(self.default_warning_color)
+            self.photometry_timer_label.setText('Running photometry baseline: {}:{}'.format(minutes,seconds))
 
     def _set_metadata_enabled(self, enable: bool):
         '''Enable or disable metadata fields'''
@@ -3772,9 +3731,7 @@ class Window(QMainWindow):
         self.Sessionlist.setEnabled(False)
 
         # Clear warnings
-        self.WarningLabelInitializeBonsai.setText('')
         self.NewSession.setDisabled(False)
-        self.WarningLabelCamera.setText('')
         # Toggle button colors
         if self.Start.isChecked():
             logging.info('Start button pressed: starting trial loop')
@@ -3834,6 +3791,8 @@ class Window(QMainWindow):
                     self.Start.setChecked(False)
                     logging.info('User declines continuation of session')
                     return
+                self.GeneratedTrials.lick_interval_time.start()  # restart lick interval calculation
+
             # check experimenter name
             reply = QMessageBox.critical(self,
                 'Box {}, Start'.format(self.box_letter),
@@ -3920,10 +3879,13 @@ class Window(QMainWindow):
             self.Start.setStyleSheet("background-color : green;")
             self.NewSession.setStyleSheet("background-color : none")
             self.NewSession.setChecked(False)
-            self.WarningLabel.setText('')
-            self.WarningLabel.setStyleSheet("color: none;")
             # disable metadata fields
             self._set_metadata_enabled(False)
+
+            # generate an upload manifest when a session has been produced if slot is not already connected
+            if self.upload_manifest_slot is None:
+                logging.debug('Connecting sessionGenerated to _generate_upload_manifest')
+                self.upload_manifest_slot = self.sessionGenerated.connect(self._generate_upload_manifest)
 
             # Set IACUC protocol in metadata based on schedule
             protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
@@ -3977,19 +3939,18 @@ class Window(QMainWindow):
                 self.ignore_timer=True
                 self.PhotometryRun=0
                 logging.info('canceling photometry baseline timer')
-                self.WarningLabelStop.setText('')
-                self.WarningLabelStop.setStyleSheet(self.default_warning_color)
                 if hasattr(self, 'workertimer'):
                     # Stop the worker, this has a 1 second delay before taking effect
                     # so we set the text to get ignored as well
                     self.workertimer._stop()
 
-            self.ManualWaterWarning.setText('')
-
             # fill out GenerateTrials B_Bias
             last_bias = self.GeneratedTrials.B_Bias[-1]
             b_bias_len = len(self.GeneratedTrials.B_Bias)
             self.GeneratedTrials.B_Bias += [last_bias]*((self.GeneratedTrials.B_CurrentTrialN+1)-b_bias_len)
+
+            # stop lick interval calculation
+            self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
@@ -3997,9 +3958,6 @@ class Window(QMainWindow):
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
             # generate a new session id
-            self.WarningLabel.setText('')
-            self.WarningLabel.setStyleSheet("color: gray;")
-            self.WarmupWarning.setText('')
             self.ManualWaterVolume=[0,0]
             # start a new logging
             try:
@@ -4016,8 +3974,7 @@ class Window(QMainWindow):
             except Exception as e:
                 if 'ConnectionAbortedError' in str(e):
                     logging.info('lost bonsai connection: restartlogging()')
-                    self.WarningLabel.setText('Lost bonsai connection')
-                    self.WarningLabel.setStyleSheet(self.default_warning_color)
+                    logging.warning('Lost bonsai connection', extra={'tags': [self.warning_log_tag]})
                     self.Start.setChecked(False)
                     self.Start.setStyleSheet("background-color : none")
                     self.InitializeBonsaiSuccessfully=0
@@ -4051,6 +4008,7 @@ class Window(QMainWindow):
             GeneratedTrials._GenerateATrial(self.Channel4)
             # delete licks from the previous session
             GeneratedTrials._DeletePreviousLicks(self.Channel2)
+            GeneratedTrials.lick_interval_time.start()  # start lick interval calculation
 
             if self.Start.isChecked():
                 # if session log handler is not none, stop logging for previous session
@@ -4117,6 +4075,11 @@ class Window(QMainWindow):
             self.PhotometryRun=1
             self.ignore_timer=False
 
+            # create label to display time remaining on photometry label and add to warning widget
+            self.photometry_timer_label = QLabel()
+            self.photometry_timer_label.setStyleSheet(f'color: {self.default_warning_color};')
+            self.warning_widget.layout().insertWidget(0, self.photometry_timer_label)
+
             # If we already created a workertimer and thread we can reuse them
             if not hasattr(self, 'workertimer'):
                 self.workertimer = TimerWorker()
@@ -4128,8 +4091,7 @@ class Window(QMainWindow):
                 self.workertimer_thread.start()
 
             self.Time.emit(int(np.floor(float(self.baselinetime.text())*60)))
-            self.WarningLabelStop.setText('Running photometry baseline')
-            self.WarningLabelStop.setStyleSheet(self.default_warning_color)
+            logging.info('Running photometry baseline', extra={'tags': [self.warning_log_tag]})
 
         self._StartTrialLoop(GeneratedTrials,worker1,worker_save)
 
@@ -4190,13 +4152,6 @@ class Window(QMainWindow):
                 last_trial_start = time.time()
                 stall_iteration = 1
 
-                # create manifest after first trial is completed
-                if GeneratedTrials.B_CurrentTrialN == 1:
-                    if self.Settings['AutomaticUpload']:
-                        self._generate_upload_manifest()  # Generate the upload manifest file
-                    else:
-                        logging.info('Skipping Automatic Upload based on ForagingSettings.json')
-
                 # can start a new trial when we receive the trial end signal from Bonsai
                 self.ANewTrial=0
                 GeneratedTrials.B_CurrentTrialN+=1
@@ -4218,8 +4173,7 @@ class Window(QMainWindow):
                 except Exception as e:
                     if 'ConnectionAbortedError' in str(e):
                         logging.info('lost bonsai connection: InitiateATrial')
-                        self.WarningLabel.setText('Lost bonsai connection')
-                        self.WarningLabel.setStyleSheet(self.default_warning_color)
+                        logging.warning('Lost bonsai connection', extra={'tags': [self.warning_log_tag]})
                         self.Start.setChecked(False)
                         self.Start.setStyleSheet("background-color : none")
                         self.InitializeBonsaiSuccessfully=0
@@ -4263,13 +4217,17 @@ class Window(QMainWindow):
                     n_trial_back = self.bias_n_size if l > self.bias_n_size else \
                         round(len(np.array(choice_history)[~np.isnan(choice_history)])*.6)
                     # add data to bias_indicator
-                    bias_thread = threading.Thread(target=self.bias_indicator.calculate_bias,
-                                                   kwargs={'time_point': self.GeneratedTrials.B_TrialStartTime[-1],
-                                                           'choice_history': choice_history,
-                                                           'reward_history': np.array(any_reward).astype(int),
-                                                           'n_trial_back': n_trial_back,
-                                                           'cv': 2})
-                    bias_thread.start()
+                    if not self.bias_thread.is_alive():
+                        logger.debug('Starting bias thread.')
+                        self.bias_thread = threading.Thread(target=self.bias_indicator.calculate_bias,
+                                                       kwargs={'time_point': self.GeneratedTrials.B_TrialStartTime[-1],
+                                                               'choice_history': choice_history,
+                                                               'reward_history': np.array(any_reward).astype(int),
+                                                               'n_trial_back': n_trial_back,
+                                                               'cv': 2})
+                        self.bias_thread.start()
+                    else:
+                        logger.debug('Skipping bias calculation as previous is still in progress. ')
 
                 # save the data everytrial
                 if GeneratedTrials.CurrentSimulation==True:
@@ -4336,8 +4294,8 @@ class Window(QMainWindow):
                     self.Start.setStyleSheet("background-color : none")
 
                     # Give warning to user
-                    self.WarningLabel.setText('Trials stalled, recheck bonsai connection.')
-                    self.WarningLabel.setStyleSheet(self.default_warning_color)
+                    logging.warning('Trials stalled, recheck bonsai connection.',
+                                    extra={'tags': [self.warning_log_tag]})
                     break
                 else:
                     # User continues, wait another stall_duration and prompt again
@@ -4444,8 +4402,9 @@ class Window(QMainWindow):
             self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
             self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+float(self.TP_GiveWaterL_volume)/1000
             self._UpdateSuggestedWater()
-            self.ManualWaterWarning.setText('Give left manual water (ul): '+str(np.round(float(self.TP_GiveWaterL_volume),3)))
-            self.ManualWaterWarning.setStyleSheet(self.default_warning_color)
+            logger.info('Give left manual water (ul): '+str(np.round(float(self.TP_GiveWaterL_volume),3)),
+                           extra={'tags': [self.warning_log_tag]})
+
 
     def _give_reserved_water(self,valve=None):
         '''give reserved water usually after the go cue'''
@@ -4499,8 +4458,8 @@ class Window(QMainWindow):
             self.Channel.RightValue(float(self.TP_RightValue)*1000)
             self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
             self._UpdateSuggestedWater()
-            self.ManualWaterWarning.setText('Give right manual water (ul): '+str(np.round(float(self.TP_GiveWaterR_volume),3)))
-            self.ManualWaterWarning.setStyleSheet(self.default_warning_color)
+            logger.info('Give right manual water (ul): '+str(np.round(float(self.TP_GiveWaterR_volume),3)),
+                        extra={'tags': [self.warning_log_tag]})
 
     def _toggle_save_color(self):
         '''toggle the color of the save button to mediumorchid'''
@@ -4510,7 +4469,6 @@ class Window(QMainWindow):
     def _PostWeightChange(self):
         self.unsaved_data=True
         self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
-        self.WarningLabel.setText('')
         self._UpdateSuggestedWater()
 
     def _UpdateSuggestedWater(self,ManualWater=0):
@@ -4601,13 +4559,20 @@ class Window(QMainWindow):
                          '&session_plot_selected_draw_types=1.+Choice+history'
         )
 
-    def _generate_upload_manifest(self):
+    def _generate_upload_manifest(self, session: Session):
         '''
             Generates a manifest.yml file for triggering data copy to VAST and upload to aws
+            :param session: session to use to create upload manifest
         '''
+
         if self.ID.text() in ['0','1','2','3','4','5','6','7','8','9','10']:
             logging.info('Skipping upload manifest, because this is the test mouse')
             return
+
+        if not self.Settings['AutomaticUpload']:
+            logging.info('Skipping Automatic Upload based on ForagingSettings.json')
+            return
+
         try:
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
@@ -4615,7 +4580,16 @@ class Window(QMainWindow):
             schedule = self.acquisition_datetime.split('_')[0]+'_20-30-00'
             capsule_id = 'c089614a-347e-4696-b17e-86980bb782c1'
             mount = 'FIP'
-            
+
+            modalities = {}
+            for stream in session.data_streams:
+                if Modality.BEHAVIOR in stream.stream_modalities:
+                    modalities['behavior'] = [self.TrainingFolder.replace('\\', '/')]
+                elif Modality.FIB in stream.stream_modalities:
+                    modalities['fib'] = [self.PhotometryFolder.replace('\\', '/')]
+                elif Modality.BEHAVIOR_VIDEOS in stream.stream_modalities:
+                    modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
+
             date_format = "%Y-%m-%d_%H-%M-%S"
             # Define contents of manifest file
             contents = {
@@ -4628,15 +4602,10 @@ class Window(QMainWindow):
                 'destination': '//allen/aind/scratch/dynamic_foraging_rig_transfer',
                 's3_bucket':'private',
                 'processor_full_name': 'AIND Behavior Team',
-                'modalities':{
-                    'behavior':[self.TrainingFolder.replace('\\','/')],
-                    'behavior-videos':[self.VideoFolder.replace('\\','/')],
-                    'fib':[self.PhotometryFolder.replace('\\','/')]
-                    },
+                'modalities':modalities,
                 'schemas':[
                     os.path.join(self.MetadataFolder,'session.json').replace('\\','/'),
                     os.path.join(self.MetadataFolder,'rig.json').replace('\\','/'),
-                    os.path.join(self.MetadataFolder, 'data_description.json').replace('\\', '/')
                     ],
                 'schedule_time':datetime.strptime(schedule,date_format),
                 'project_name':self.project_name,
@@ -4660,6 +4629,9 @@ class Window(QMainWindow):
                 'Could not generate upload manifest. '+\
                 'Please alert the mouse owner, and report on github.')
 
+        # disconnect slot to only create manifest once
+        logging.debug('Disconnecting sessionGenerated from _generate_upload_manifest')
+        self.upload_manifest_slot = self.sessionGenerated.disconnect(self.upload_manifest_slot)
 
 def start_gui_log_file(box_number):
     '''
