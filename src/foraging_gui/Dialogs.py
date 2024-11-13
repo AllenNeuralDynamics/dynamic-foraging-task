@@ -23,7 +23,6 @@ from foraging_gui.Visualization import PlotWaterCalibration
 from aind_auto_train.curriculum_manager import CurriculumManager
 from aind_auto_train.auto_train_manager import DynamicForagingAutoTrainManager
 from aind_auto_train.schema.task import TrainingStage
-from pprint import pprint
 from aind_auto_train.schema.curriculum import DynamicForagingCurriculum
 codebase_curriculum_schema_version = DynamicForagingCurriculum.model_fields['curriculum_schema_version'].default
 
@@ -1075,6 +1074,7 @@ class WaterCalibrationDialog(QDialog):
 
         # Determine result
         result = (final_tube_weight - empty_tube_weight) / int(self.SpotCycle) * 1000
+
         error = result - float(volume)
         error = np.round(error, 4)
         self.Warning.setText(
