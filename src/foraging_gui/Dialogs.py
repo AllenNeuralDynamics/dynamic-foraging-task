@@ -23,7 +23,7 @@ from foraging_gui.Visualization import PlotWaterCalibration
 from aind_auto_train.curriculum_manager import CurriculumManager
 from aind_auto_train.auto_train_manager import DynamicForagingAutoTrainManager
 from aind_auto_train.schema.task import TrainingStage
-
+from pprint import pprint
 from aind_auto_train.schema.curriculum import DynamicForagingCurriculum
 codebase_curriculum_schema_version = DynamicForagingCurriculum.model_fields['curriculum_schema_version'].default
 
@@ -456,13 +456,12 @@ class WaterCalibrationDialog(QDialog):
         save.setStyleSheet("background-color : green;")
         QApplication.processEvents()
 
-        valve = f'Spot{valve}'
         valve_open_time = str(self.SpotLeftOpenTime)
         water_txt = getattr(self, f'TotalWaterSingle{valve}').text()
         before_txt = getattr(self, f'SpotCheckPreWeight{valve}').text()
 
         self._Save(
-            valve=valve,
+            valve= f'Spot{valve}',
             valve_open_time=str(valve_open_time),
             valve_open_interval=str(self.SpotInterval),
             cycle=str(self.SpotCycle),
@@ -845,11 +844,13 @@ class WaterCalibrationDialog(QDialog):
         else:
             WaterCalibrationResults[date_str][valve][valve_open_time][valve_open_interval][cycle]=[np.round(total_water,1)]
         self.WaterCalibrationResults=WaterCalibrationResults.copy()
+
         # save to the json file
         if not os.path.exists(os.path.dirname(self.MainWindow.WaterCalibrationFiles)):
             os.makedirs(os.path.dirname(self.MainWindow.WaterCalibrationFiles))
         with open(self.MainWindow.WaterCalibrationFiles, "w") as file:
             json.dump(WaterCalibrationResults, file,indent=4)
+
         # update the figure
         self._UpdateFigure()
 
@@ -1083,29 +1084,32 @@ class WaterCalibrationDialog(QDialog):
             '\nAvg. error from target: {}uL'.format(error)
         )
 
-        # save spot check before checking to accurately check spot check fail
-        # self._SaveValve(valve)
-
         TOLERANCE = float(volume) * .15
         if np.abs(error) > TOLERANCE:
             reply = QMessageBox.critical(self, f'Spot check {valve}',
-                                         'Measurement is outside expected tolerance. <br><br>FIRST, please confirm you '
-                                         'entered information correctly, then press save. '
+                                         'Measurement is outside expected tolerance.<br><br>'
+                                         'If this is a typo, please press cancel.'
                                          '<br><br><span style="color:purple;font-weight:bold">IMPORTANT</span>: '
-                                         'If the measurement was correctly entered (not a typo), please repeat the spot'
-                                         ' check once. If the measurement remains outside the expected tolerance please'
-                                         ' immediately perform a full calibration.'.format( np.round(result, 2)),
-                                         QMessageBox.Ok)
-
-            logging.error('Water calibration spot check exceeds tolerance: {}'.format(error))
-            save.setStyleSheet("color: white;background-color : mediumorchid;")
-            self.Warning.setText(
-                f'Measuring {valve.lower()} valve: {volume}uL' + \
-                '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
-                '\nFinal tube weight: {}g'.format(final_tube_weight) + \
-                '\nAvg. error from target: {}uL'.format(error)
-            )
-            failures = self.check_spot_failures(valve)
+                                         'If the measurement was correctly entered, please press okay and repeat'
+                                         'spot check once.'.format(np.round(result, 2)),
+                                         QMessageBox.Ok | QMessageBox.Cancel)
+            if reply == QMessageBox.Cancel:
+                logging.warning('Spot check discarded due to type', extra={'tags': self.MainWindow.warning_log_tag})
+            else:
+                logging.error('Water calibration spot check exceeds tolerance: {}'.format(error))
+                save.setStyleSheet("color: white;background-color : mediumorchid;")
+                self.Warning.setText(
+                    f'Measuring {valve.lower()} valve: {volume}uL' + \
+                    '\nEmpty tube weight: {}g'.format(empty_tube_weight) + \
+                    '\nFinal tube weight: {}g'.format(final_tube_weight) + \
+                    '\nAvg. error from target: {}uL'.format(error)
+                )
+                self._SaveValve(valve)
+                if self.check_spot_failures(valve) >= 2:
+                    msg = 'Two or more spot checks have failed in the last 30 days. Please create a SIPE ticket to ' \
+                          'check rig.'
+                    logging.error(msg, extra={'tags': self.MainWindow.warning_log_tag})
+                    QMessageBox.critical(self, f'Spot check {valve}', msg, QMessageBox.Ok)
         else:
             self.Warning.setText(
                 f'Measuring {valve.lower()} valve: {volume}uL' + \
@@ -1114,6 +1118,7 @@ class WaterCalibrationDialog(QDialog):
                 '\nAvg. error from target: {}uL'.format(error) + \
                 '\nCalibration saved'
             )
+            self._SaveValve(valve)
 
         # set the default valve open time
         value = getattr(self.MainWindow, f'{valve}Value').text()
@@ -1131,10 +1136,10 @@ class WaterCalibrationDialog(QDialog):
         :return integer signifying the number of spot checks that have failed within the last 30 days
         """
 
-        today = datetime.now().day
+        today = datetime.now()
         # filter spot counts within the last 30 days
-        spot_counts = {k: v for k, v in self.MainWindow.WaterCalibrationResults.items() if f'Spot{valve}' in v.keys()
-                       and today-datetime.strptime(k).days < 30}
+        spot_counts = {k: v for k, v in self.WaterCalibrationResults.items() if f'Spot{valve}' in v.keys()
+                       and (today-datetime.strptime(k, "%Y-%m-%d")).days < 30}
 
         # based on information in spot check dictionary, calculate volume
         over_tolerance = 0
