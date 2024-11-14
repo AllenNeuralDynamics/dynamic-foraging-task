@@ -28,7 +28,7 @@ dependencies = [
     "aind-auto-train@git+https://github.com/AllenNeuralDynamics/aind-foraging-behavior-bonsai-automatic-training.git@main",
     "aind-slims-api@git+https://github.com/AllenNeuralDynamics/aind-slims-api@main",
     "aind-dynamic-foraging-models@git+https://github.com/AllenNeuralDynamics/aind-dynamic-foraging-models@main",
-    "Aind.Behavior.Services@git+https://github.com/AllenNeuralDynamics/Aind.Behavior.Services@main"
+    "aind-behavior-services==0.8.0rc1",
     "pynwb",
     "requests",
     "harp-python",
