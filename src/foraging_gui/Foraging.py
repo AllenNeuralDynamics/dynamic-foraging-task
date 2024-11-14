@@ -49,6 +49,8 @@ from aind_data_schema.core.session import Session
 from aind_data_schema_models.modalities import Modality
 from aind_behavior_services.session import AindBehaviorSessionModel
 
+from pprint import pprint
+
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear() # clear handlers so console output can be configured
 
@@ -402,7 +404,9 @@ class Window(QMainWindow):
         self.Task.currentTextChanged.connect(lambda task: setattr(self.behavior_session_model, 'experiment', task))
         self.Experimenter.textChanged.connect(lambda text: setattr(self.behavior_session_model, 'experimenter', [text]))
         self.ID.textChanged.connect(lambda subject: setattr(self.behavior_session_model, 'subject', subject))
-        self.ShowNotes.textChanged.connect(lambda notes: setattr(self.behavior_session_model, 'notes', notes))
+        self.ShowNotes.textChanged.connect(lambda: setattr(self.behavior_session_model, 'notes',
+                                                           self.ShowNotes.toPlainText()))
+
 
         # Set manual water volume to earned reward and trigger update if changed
         for side in ['Left', 'Right']:
