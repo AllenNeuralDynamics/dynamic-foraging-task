@@ -112,15 +112,14 @@ class Window(QMainWindow):
 
         # create AINDBehaviorSession model to be used and referenced for session info
         self.behavior_session_model = AindBehaviorSessionModel(
-            experiment=lambda: self.Task.currentText(),
-            experimenter=[lambda: self.Experimenter.text()],
+            experiment=self.Task.currentText(),
+            experimenter=[self.Experimenter.text()],
             date=datetime.now(),   # update when folders are created
             root_path='',         # update when created
-            session_name=lambda: f'{self.behavior_session_model.subject}_'
-                                 f'{ self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}',
-            subject=lambda: self.ID.text(),
+            session_name= '',   # update when date and subject are filled in 
+            subject=self.ID.text(),
             experiment_version=foraging_gui.__version__,
-            notes=lambda:self.ShowNotes.toPlainText(),
+            notes=self.ShowNotes.toPlainText(),
             commit_hash= subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip(),
             allow_dirty_repo=subprocess.check_output(['git','diff-index','--name-only', 'HEAD']).decode('ascii').strip() != '',
             skip_hardware_validation=True
@@ -2788,8 +2787,9 @@ class Window(QMainWindow):
 
     def _get_folder_structure_old(self):
         '''get the folder structure for the old data format'''
-
-        session_name = self.behavior_session_model.session_name     # includes subject and date of session
+        # includes subject and date of session
+        session_name = self.behavior_session_model.session_name = f'behavior_{self.behavior_session_model.subject}_' \
+                                                     f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
         self.SessionFolder=os.path.join(self.default_saveFolder,
             self.current_box,self.behavior_session_model.subject, session_name)
         self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
@@ -2799,19 +2799,21 @@ class Window(QMainWindow):
         self.PhotometryFolder=os.path.join(self.SessionFolder, 'PhotometryFolder')
         self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{session_name}.mat')
         self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}.json')
-        self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}_par.json')
+        self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}.json')
 
     def _get_folder_structure_new(self):
         '''get the folder structure for the new data format'''
         # Determine folders
-        session_name = self.behavior_session_model.session_name # includes subject and date of session 
+        # session_name includes subject and date of session
+        session_name = self.behavior_session_model.session_name=f'behavior_{self.behavior_session_model.subject}_' \
+                                                     f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
         self.SessionFolder=os.path.join(self.default_saveFolder,
             self.current_box,self.behavior_session_model.subject, f'behavior_{session_name}')
         self.behavior_session_model.root_path=os.path.join(self.SessionFolder,'behavior')
         self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{session_name}.mat')
         self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}.json')
         self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}_par.json')
-        self.behavior_session_modelJson = os.path.join(self.behavior_session_model.root_path,f'behavior_session_model_{session_name}_par.json')
+        self.behavior_session_modelJson = os.path.join(self.behavior_session_model.root_path,f'behavior_session_model_{session_name}.json')
         self.HarpFolder=os.path.join(self.behavior_session_model.root_path,'raw.harp')
         self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
         self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
@@ -4615,7 +4617,7 @@ class Window(QMainWindow):
             # Define contents of manifest file
             contents = {
                 'acquisition_datetime': self.behavior_session_model.date,
-                'name': self.session_name,
+                'name': self.behavior_session_model.session_name,
                 'platform': 'behavior',
                 'subject_id': int(self.behavior_session_model.subject),
                 'capsule_id': capsule_id,
