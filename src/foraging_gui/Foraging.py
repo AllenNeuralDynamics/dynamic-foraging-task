@@ -49,8 +49,6 @@ from aind_data_schema.core.session import Session
 from aind_data_schema_models.modalities import Modality
 from aind_behavior_services.session import AindBehaviorSessionModel
 
-from pprint import pprint
-
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear() # clear handlers so console output can be configured
 
