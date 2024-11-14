@@ -121,10 +121,11 @@ class Window(QMainWindow):
             experiment_version=foraging_gui.__version__,
             notes=self.ShowNotes.toPlainText(),
             commit_hash= subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip(),
-            allow_dirty_repo=subprocess.check_output(['git','diff-index','--name-only', 'HEAD']).decode('ascii').strip() != '',
+            allow_dirty_repo=
+            subprocess.check_output(['git','diff-index','--name-only', 'HEAD']).decode('ascii').strip() != '',
             skip_hardware_validation=True
         )
-
+        print(self.behavior_session_model)
         # add warning_widget to layout and set color
         self.warning_widget = WarningWidget(log_tag=self.warning_log_tag,
                                             warning_color=self.default_warning_color)
@@ -2623,7 +2624,7 @@ class Window(QMainWindow):
             Obj['commit_ID']=self.behavior_session_model.commit_hash
             Obj['repo_url']=self.repo_url
             Obj['current_branch'] =self.current_branch
-            Obj['repo_dirty_flag'] =self.repo_dirty_flag
+            Obj['repo_dirty_flag'] =self.behavior_session_model.allow_dirty_repo
             Obj['dirty_files'] =self.dirty_files
             Obj['version'] = self.behavior_session_model.experiment_version
 
@@ -3845,7 +3846,7 @@ class Window(QMainWindow):
                     logging.error('Starting session on branch: {}'.format(self.current_branch))
 
             # Check for untracked local changes
-            if self.repo_dirty_flag & (self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']):
+            if self.behavior_session_model.allow_dirty_repo & (self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']):
                 # prompt user over untracked local changes
                 reply = QMessageBox.critical(self,
                     'Box {}, Start'.format(self.box_letter),
@@ -3859,7 +3860,7 @@ class Window(QMainWindow):
                 else:
                     # Allow the session to continue, but log error
                     logging.error('Starting session with untracked local changes: {}'.format(self.dirty_files))
-            elif self.repo_dirty_flag is None:
+            elif self.behavior_session_model.allow_dirty_repo is None:
                 logging.error('Could not check for untracked local changes')
 
             if self.PhotometryB.currentText()=='on' and (not self.FIP_started):
@@ -4868,7 +4869,7 @@ if __name__ == "__main__":
     #win.behavior_session_model.commit_hash=commit_ID
     win.current_branch=current_branch
     win.repo_url=repo_url
-    win.repo_dirty_flag=repo_dirty_flag
+    #win.repo_dirty_flag=repo_dirty_flag
     win.dirty_files=dirty_files
     #win.behavior_session_model.experiment_version=version
     win.show()
