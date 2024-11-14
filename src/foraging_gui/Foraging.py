@@ -116,7 +116,7 @@ class Window(QMainWindow):
             experimenter=[self.Experimenter.text()],
             date=datetime.now(),   # update when folders are created
             root_path='',         # update when created
-            session_name= '',   # update when date and subject are filled in 
+            session_name= '',   # update when date and subject are filled in
             subject=self.ID.text(),
             experiment_version=foraging_gui.__version__,
             notes=self.ShowNotes.toPlainText(),
@@ -124,8 +124,6 @@ class Window(QMainWindow):
             allow_dirty_repo=subprocess.check_output(['git','diff-index','--name-only', 'HEAD']).decode('ascii').strip() != '',
             skip_hardware_validation=True
         )
-
-
 
         # add warning_widget to layout and set color
         self.warning_widget = WarningWidget(log_tag=self.warning_log_tag,
@@ -399,6 +397,12 @@ class Window(QMainWindow):
         self.Opto_dialog.laser_2_calibration_voltage.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_1_calibration_power.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_2_calibration_power.textChanged.connect(self._toggle_save_color)
+
+        # update parameters in behavior session model if widgets change
+        self.Task.currentTextChanged.connect(lambda task: setattr(self.behavior_session_model, 'experiment', task))
+        self.Experimenter.textChanged.connect(lambda text: setattr(self.behavior_session_model, 'experimenter', [text]))
+        self.ID.textChanged.connect(lambda subject: setattr(self.behavior_session_model, 'subject', subject))
+        self.ShowNotes.textChanged.connect(lambda notes: setattr(self.behavior_session_model, 'notes', notes))
 
         # Set manual water volume to earned reward and trigger update if changed
         for side in ['Left', 'Right']:
