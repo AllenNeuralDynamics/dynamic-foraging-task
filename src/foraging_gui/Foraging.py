@@ -30,7 +30,7 @@ from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 
-from StageWidget.main import get_stage_widget
+#from StageWidget.main import get_stage_widget
 
 import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
@@ -47,6 +47,7 @@ from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
 from aind_data_schema.core.session import Session
 from aind_data_schema_models.modalities import Modality
+from aind_behavior_services.session import AindBehaviorSessionModel
 
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear() # clear handlers so console output can be configured
@@ -198,6 +199,8 @@ class Window(QMainWindow):
         self._StopPhotometry() # Make sure photoexcitation is stopped
         # Initialize open ephys saving dictionary
         self.open_ephys=[]
+        # Initialize start_date variable
+        self.start_date = None
 
         # load the rig metadata
         self._load_rig_metadata()
@@ -1004,7 +1007,7 @@ class Window(QMainWindow):
             # formal logging
             loggingtype=0
             self.load_tag=0
-            self._GetSaveFolder()
+            self.start_date = self._GetSaveFolder()
             self.CreateNewFolder=0
             log_folder=self.HarpFolder
             self.unsaved_data=True
@@ -2485,11 +2488,6 @@ class Window(QMainWindow):
         if hasattr(self, 'GeneratedTrials') and self.InitializeBonsaiSuccessfully==1 and BackupSave==0:
             self.GeneratedTrials._get_irregular_timestamp(self.Channel2)
 
-        # Create new folders. 
-        if self.CreateNewFolder==1:
-            self._GetSaveFolder()
-            self.CreateNewFolder=0
-
         if not os.path.exists(os.path.dirname(self.SaveFileJson)):
             os.makedirs(os.path.dirname(self.SaveFileJson))
             logging.info(f"Created new folder: {os.path.dirname(self.SaveFileJson)}")
@@ -2708,7 +2706,7 @@ class Window(QMainWindow):
 
             self.Save.setChecked(False)     # uncheck button
 
-    def _GetSaveFolder(self):
+    def _GetSaveFolder(self) -> datetime:
         '''
         Create folders with structure requested by Sci.Comp.
         Each session forms an independent folder, with subfolders:
@@ -2717,6 +2715,8 @@ class Window(QMainWindow):
             video data
             photometry data
             ephys data
+
+        :return datetime object of the date used to name folders
         '''
 
         if self.load_tag==0:
@@ -2725,8 +2725,8 @@ class Window(QMainWindow):
             self._get_folder_structure_new(formatted_datetime)
             self.acquisition_datetime = formatted_datetime
             self.session_name=f'behavior_{self.ID.text()}_{formatted_datetime}'
-        elif self.load_tag==1:
-            self._parse_folder_structure()
+        else:
+            formatted_datetime = self._parse_folder_structure()
 
         # create folders
         if not os.path.exists(self.SessionFolder):
@@ -2748,8 +2748,14 @@ class Window(QMainWindow):
             os.makedirs(self.PhotometryFolder)
             logging.info(f"Created new folder: {self.PhotometryFolder}")
 
-    def _parse_folder_structure(self):
-        '''parse the folder structure from the loaded json file'''
+        return datetime.strptime(formatted_datetime, "%Y-%m-%d_%H-%M-%S")
+
+    def _parse_folder_structure(self) -> str:
+
+        """
+        parse the folder structure from the loaded json file
+        :return string of the date used to name folders
+        """
         formatted_datetime = os.path.basename(self.fname).split('_')[1]+'_'+os.path.basename(self.fname).split('_')[-1].split('.')[0]
         if os.path.basename(os.path.dirname(self.fname))=='TrainingFolder':
             # old data format
@@ -2757,7 +2763,7 @@ class Window(QMainWindow):
         else:
             # new data format
             self._get_folder_structure_new(formatted_datetime)
-
+        return formatted_datetime
     def _get_folder_structure_old(self,formatted_datetime):
         '''get the folder structure for the old data format'''
         self.SessionFolder=os.path.join(self.default_saveFolder,
@@ -2780,6 +2786,7 @@ class Window(QMainWindow):
         self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
         self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
         self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}_par.json')
+        self.behavior_session_modelJson = os.path.join(self.TrainingFolder,f'behavior_session_model_{self.ID.text()}_{formatted_datetime}_par.json')
         self.HarpFolder=os.path.join(self.TrainingFolder,'raw.harp')
         self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
         self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
@@ -2956,6 +2963,7 @@ class Window(QMainWindow):
                     self.default_openFolder=os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(fname))))
 
             self.fname=fname
+
         else:
             fname=input_file
             self.fname=fname
@@ -3857,6 +3865,26 @@ class Window(QMainWindow):
             # empty post weight after pass through checks in case user cancels run
             self.WeightAfter.setText('')
 
+            # Create new folders.
+            if self.CreateNewFolder == 1:
+                self.start_date = self._GetSaveFolder()
+                self.CreateNewFolder = 0
+
+            # create AINDBehaviorSession model
+            self.behavior_session_model = AindBehaviorSessionModel(
+                experiment=self.Task.currentText(),
+                experimenter=[self.Experimenter.text()],
+                date=self.start_date,
+                root_path=self.TrainingFolder,
+                session_name=self.SaveFileJson,
+                subject=self.ID.text(),
+                experiment_version=foraging_gui.__version__,
+                notes=self.ShowNotes.toPlainText(),
+                commit_hash=subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip(),
+                allow_dirty_repo=self.repo_dirty_flag,
+                skip_hardware_validation=True
+            )
+
             # change button color and mark the state change
             self.Start.setStyleSheet("background-color : green;")
             self.NewSession.setStyleSheet("background-color : none")
@@ -3933,6 +3961,11 @@ class Window(QMainWindow):
 
             # stop lick interval calculation
             self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
+
+            # save behavior session model
+            with open(self.behavior_session_modelJson, "w") as outfile:
+                outfile.write(self.behavior_session_model.model_dump_json())
+
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
