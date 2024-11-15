@@ -14,7 +14,7 @@ class WarningWidget(QWidget):
                  log_level: str = logging.INFO,
                  warning_color: str = 'purple',
                  info_color: str = 'green',
-                 error_color: str = 'orange',
+                 error_color: str = 'chocolate',
                  *args, **kwargs):
         """
         :param log_tag: log_tag to pass into filter
