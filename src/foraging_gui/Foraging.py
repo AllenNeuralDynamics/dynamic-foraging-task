@@ -199,8 +199,6 @@ class Window(QMainWindow):
         # Initialize open ephys saving dictionary
         self.open_ephys=[]
 
-        logging.error('No camera trigger file found!', extra={'tags': [self.warning_log_tag]})
-
         # load the rig metadata
         self._load_rig_metadata()
 
