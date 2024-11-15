@@ -1507,6 +1507,9 @@
      <property name="value">
       <double>0.030000000000000</double>
      </property>
+     <property name="disabled">
+     <bool>true</bool>
+    </property>
     </widget>
     <widget class="QDoubleSpinBox" name="GiveWaterR">
      <property name="geometry">
@@ -1532,6 +1535,9 @@
      <property name="value">
       <double>0.030000000000000</double>
      </property>
+     <property name="disabled">
+     <bool>true</bool>
+    </property>
     </widget>
     <widget class="QLabel" name="label_56">
      <property name="geometry">
@@ -2010,6 +2016,9 @@
      <property name="value">
       <double>3.000000000000000</double>
      </property>
+     <property name="disabled">
+     <bool>true</bool>
+    </property>
     </widget>
     <widget class="QDoubleSpinBox" name="GiveWaterR_volume">
      <property name="geometry">
@@ -2035,6 +2044,9 @@
      <property name="value">
       <double>3.000000000000000</double>
      </property>
+     <property name="disabled">
+     <bool>true</bool>
+    </property>
     </widget>
     <widget class="QDoubleSpinBox" name="RightValue_volume">
      <property name="geometry">

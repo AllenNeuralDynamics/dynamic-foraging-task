@@ -297,7 +297,7 @@
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
         </widget>
-        <widget class="QDoubleSpinBox" name="SpotLeftVolume">
+        <widget class="QLabel" name="SpotLeftVolume">
             <property name="geometry">
                 <rect>
                     <x>180</x>
@@ -306,17 +306,11 @@
                     <height>25</height>
                 </rect>
             </property>
-            <property name="decimals">
-                <number>1</number>
-            </property>
-            <property name="singleStep">
-                <double>0.1</double>
-            </property>
-            <property name="value">
-                <double>2.0</double>
+            <property name="text">
+                <string>2.0</string>
             </property>
         </widget>
-        <widget class="QDoubleSpinBox" name="SpotRightVolume">
+        <widget class="QLabel" name="SpotRightVolume">
             <property name="geometry">
                 <rect>
                     <x>180</x>
@@ -325,14 +319,8 @@
                     <height>25</height>
                 </rect>
             </property>
-            <property name="decimals">
-                <number>1</number>
-            </property>
-            <property name="singleStep">
-                <double>0.1</double>
-            </property>
-            <property name="value">
-                <double>2.0</double>
+            <property name="text">
+                <string>2.0</string>
             </property>
         </widget>
         <widget class="QLabel" name="SpotCheckPreWeightLeftLabel">
@@ -373,7 +361,7 @@
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
         </widget>
-        <widget class="QLineEdit" name="SpotCheckPreWeightLeft">
+        <widget class="QLabel" name="SpotCheckPreWeightLeft">
             <property name="geometry">
                 <rect>
                     <x>355</x>
@@ -386,7 +374,7 @@
                 <string/>
             </property>
         </widget>
-        <widget class="QLineEdit" name="SpotCheckPreWeightRight">
+        <widget class="QLabel" name="SpotCheckPreWeightRight">
             <property name="geometry">
                 <rect>
                     <x>355</x>
@@ -437,7 +425,7 @@
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
         </widget>
-        <widget class="QLineEdit" name="TotalWaterSingleLeft">
+        <widget class="QLabel" name="TotalWaterSingleLeft">
             <property name="geometry">
                 <rect>
                     <x>515</x>
@@ -450,7 +438,7 @@
                 <string/>
             </property>
         </widget>
-        <widget class="QLineEdit" name="TotalWaterSingleRight">
+        <widget class="QLabel" name="TotalWaterSingleRight">
             <property name="geometry">
                 <rect>
                     <x>515</x>
