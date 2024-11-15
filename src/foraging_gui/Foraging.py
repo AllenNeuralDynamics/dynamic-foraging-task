@@ -29,6 +29,7 @@ from PyQt5 import QtWidgets,QtGui,QtCore, uic
 from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
+from pydantic import ValidationError
 
 from StageWidget.main import get_stage_widget
 
@@ -3977,6 +3978,11 @@ class Window(QMainWindow):
             # stop lick interval calculation
             self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
 
+            # validate behavior session model and document validation errors if any
+            try:
+                AindBehaviorSessionModel(**self.behavior_session_model.model_dump())
+            except ValidationError as e:
+                logging.error(str(e), extra={'tags': [self.warning_log_tag]})
             # save behavior session model
             with open(self.behavior_session_modelJson, "w") as outfile:
                 outfile.write(self.behavior_session_model.model_dump_json())
