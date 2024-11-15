@@ -125,7 +125,7 @@ class Window(QMainWindow):
             subprocess.check_output(['git','diff-index','--name-only', 'HEAD']).decode('ascii').strip() != '',
             skip_hardware_validation=True
         )
-        print(self.behavior_session_model)
+
         # add warning_widget to layout and set color
         self.warning_widget = WarningWidget(log_tag=self.warning_log_tag,
                                             warning_color=self.default_warning_color)
@@ -4866,12 +4866,9 @@ if __name__ == "__main__":
     # Start GUI window
     win = Window(box_number=box_number,start_bonsai_ide=start_bonsai_ide)
     # Get the commit hash of the current version of this Python file
-    #win.behavior_session_model.commit_hash=commit_ID
     win.current_branch=current_branch
     win.repo_url=repo_url
-    #win.repo_dirty_flag=repo_dirty_flag
     win.dirty_files=dirty_files
-    #win.behavior_session_model.experiment_version=version
     win.show()
 
     # Move creating AutoTrain here to catch any AWS errors
