@@ -1847,7 +1847,7 @@ class MetadataDialog(QDialog):
             label = QLabel(f'{axis.upper()} (um):')
             setattr(self, f'LickSpoutReference{axis.upper()}', QLineEdit())
             grid_layout.addWidget(label, i, 0)
-            grid_layout.addWidget(getattr(self, f'LickSpoutReference{axis.upper()}'). i, 1)
+            grid_layout.addWidget(getattr(self, f'LickSpoutReference{axis.upper()}'), i, 1)
     def _connectSignalsSlots(self):
         self.SelectRigMetadata.clicked.connect(lambda: self._SelectRigMetadata(rig_metadata_file=None))
         self.EphysProbes.currentIndexChanged.connect(self._show_angles)

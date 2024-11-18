@@ -181,6 +181,7 @@ class Window(QMainWindow):
         self._WaterCalibration()# to open the water calibration panel
         self._Camera()
         self._InitializeMotorStage()
+        self._load_stage()
         self._Metadata()
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self.WaterPerRewardedTrial=0.005
@@ -191,7 +192,6 @@ class Window(QMainWindow):
         self.keyPressEvent()
         self._WaterVolumnManage2()
         self._LickSta()
-        self._load_stage()
         self._warmup()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
@@ -3127,13 +3127,17 @@ class Window(QMainWindow):
                     last_positions=Obj['B_StagePositions'][-1]
                 except:
                     pass
-                if hasattr(self,'current_stage'):
+                if hasattr(self,'current_stage'):   # newscale stage
                     try:
-                        self.StageStop.click
-                        self.current_stage.move_absolute_3d(float(last_positions[0]),float(last_positions[1]),float(last_positions[2]))
-                        self._UpdatePosition((float(last_positions[0]),float(last_positions[1]),float(last_positions[2])),(0,0,0))
+                        self.current_stage.move_absolute_3d(float(last_positions['x']),float(last_positions['y']),float(last_positions['z']))
+                        self._UpdatePosition((float(last_positions['x']),float(last_positions['y']),float(last_positions['z'])),(0,0,0))
                     except Exception as e:
                         logging.error(traceback.format_exc())
+                elif self.stage_widget is not None:  # aind stage
+                    self.stage_widget.lineEdit_x.setText(last_positions['x'])
+                    self.stage_widget.lineEdit_y1.setText(last_positions['y1'])
+                    self.stage_widget.lineEdit_y2.setText(last_positions['y2'])
+                    self.stage_widget.lineEdit_z.setText(last_positions['z'])
             else:
                 pass
 
