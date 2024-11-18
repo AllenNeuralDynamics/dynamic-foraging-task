@@ -354,12 +354,12 @@ class generate_metadata:
         else:
             self.has_behavior_data = True
         
-        # Missing fields B_NewscalePositions, LickSpoutReferenceArea, LickSpoutReferenceX, LickSpoutReferenceY, LickSpoutReferenceZ in the json file.
+        # Missing fields B_StagePositions, LickSpoutReferenceArea, LickSpoutReferenceX, LickSpoutReferenceY, LickSpoutReferenceZ in the json file.
         # Possible reason: 1) the NewScale stage is not connected to the behavior GUI. 2) the session is not started.
-        if ('B_NewscalePositions' not in self.Obj) or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceArea']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceX']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceY']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceZ']==''):
+        if ('B_StagePositions' not in self.Obj) or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceArea']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceX']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceY']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceZ']==''):
             self.has_reward_delivery = False
             logging.info('Cannot log reward delivery in session metadata - missing fields')
-        elif self.Obj['B_NewscalePositions']==[]:
+        elif self.Obj['B_StagePositions']==[]:
             self.has_reward_delivery = False
             logging.info('Cannot log reward delivery in session metadata - missing newscale positions')
         else:
@@ -1195,12 +1195,31 @@ class generate_metadata:
         device_oringin=self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceArea']
         lick_spouts_distance=float(self.Obj['Other_lick_spout_distance'])
         # using the last position of the stage
-        start_position=[self.Obj['B_NewscalePositions'][-1][0], self.Obj['B_NewscalePositions'][-1][1], self.Obj['B_NewscalePositions'][-1][2]]
+        start_position=[self.Obj['B_StagePositions'][-1]['x'],
+                        self.Obj['B_StagePositions'][-1].get('y', None),    # newscale stage
+                        self.Obj['B_StagePositions'][-1].get('y1', None),   # aind-stage
+                        self.Obj['B_StagePositions'][-1].get('y2', None),   # aind-stage
+                        self.Obj['B_StagePositions'][-1]['z']]
+        start_position = [pos for pos in start_position if pos is not None]     # filter out None values
 
+        # FIXME: Why are we assuming this and does it pertain to aind-stage?
         # assuming refering to the left lick spout
-        reference_spout_position=[float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceX']),float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceY']),float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceZ'])]
-        left_lick_spout_reference_position=np.array(reference_spout_position)-np.array(start_position)
-        right_lick_spout_reference_position=left_lick_spout_reference_position+np.array([-lick_spouts_distance,0,0])
+        reference_spout_position=[float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceX']),
+                                  float(self.Obj['meta_data_dialog']['session_metadata'].get('LickSpoutReferenceY',
+                                                                                             None)),
+                                  float(self.Obj['meta_data_dialog']['session_metadata'].get('LickSpoutReferenceY1',
+                                                                                             None)),
+                                  float(self.Obj['meta_data_dialog']['session_metadata'].get('LickSpoutReferenceY2',
+                                                                                             None)),
+                                  float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceZ'])]
+        reference_spout_position = [pos for pos in reference_spout_position if pos is not None]  # filter out None value
+
+        if len(reference_spout_position) == 3:  # newscale stage
+            left_lick_spout_reference_position=np.array(reference_spout_position)-np.array(start_position)
+            right_lick_spout_reference_position=left_lick_spout_reference_position+np.array([-lick_spouts_distance,0,0])
+        else:   # aind stage
+            left_lick_spout_reference_position = [reference_spout_position[i]-start_position[i] for i in [0, 1, 3]]
+            right_lick_spout_reference_position = [reference_spout_position[i] - start_position[i] for i in [0, 2, 3]]
 
         self.reward_delivery=RewardDeliveryConfig(
             reward_solution= RewardSolution.WATER,

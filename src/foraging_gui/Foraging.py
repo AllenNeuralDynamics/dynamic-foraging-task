@@ -769,15 +769,20 @@ class Window(QMainWindow):
         '''get the current position of the stage'''
         self._CheckStageConnection()
 
-        if hasattr(self, 'current_stage') and self.current_stage.connected:
+        if hasattr(self, 'current_stage') and self.current_stage.connected: # newscale stage
             logging.info('Grabbing current stage position')
             current_stage=self.current_stage
             current_position=current_stage.get_position()
             self._UpdatePosition(current_position,(0,0,0))
-            return current_position
-        else:
+            return {axis: float(pos) for axis, pos in zip(['x', 'y', 'z'], current_position) }
+        elif self.stage_widget is not None:     # aind stage
+            return {'x': float(self.stage_widget.lineEdit_x.text()),
+                    'y1': float(self.stage_widget.lineEdit_y1.text()),
+                    'y2': float(self.stage_widget.lineEdit_y2.text()),
+                    'z': float(self.stage_widget.lineEdit_z.text())}
+        else:   # no stage
+            logging.info('GetPositions called, but no current stage')
             return None
-            logging.info('GetPositions pressed, but no current stage')
 
     def _StageStop(self):
         '''Halt the stage'''
@@ -3117,9 +3122,9 @@ class Window(QMainWindow):
                     self.ShowBasic.setText(Obj['Other_BasicText'])
 
             #Set newscale position to last position
-            if 'B_NewscalePositions' in Obj:
+            if 'B_StagePositions' in Obj:
                 try:
-                    last_positions=Obj['B_NewscalePositions'][-1]
+                    last_positions=Obj['B_StagePositions'][-1]
                 except:
                     pass
                 if hasattr(self,'current_stage'):

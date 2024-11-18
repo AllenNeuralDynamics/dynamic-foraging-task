@@ -409,9 +409,11 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                         auto_train_stage_overridden=_get_field(obj, 'TP_auto_train_stage_overridden', index=i, default=np.nan),
 
                         # lickspout position
-                        lickspout_position_x=_get_field(obj, 'B_NewscalePositions', index=i, default=[np.nan] * 3)[0],
-                        lickspout_position_y=_get_field(obj, 'B_NewscalePositions', index=i, default=[np.nan] * 3)[1],
-                        lickspout_position_z=_get_field(obj, 'B_NewscalePositions', index=i, default=[np.nan] * 3)[2],
+                        lickspout_position_x=getattr(obj, 'B_StagePositions')[i]['x'] if len(getattr(obj, 'B_StagePositions', [])) > i else np.nan, 
+                        lickspout_position_y=getattr(obj, 'B_StagePositions')[i].get('y', np.nan) if len(getattr(obj, 'B_StagePositions', [])) > i else np.nan,
+                        lickspout_position_y1=getattr(obj, 'B_StagePositions')[i].get('y1', np.nan) if len(getattr(obj, 'B_StagePositions', [])) > i else np.nan,
+                        lickspout_position_y2=getattr(obj, 'B_StagePositions')[i].get('y12', np.nan) if len(getattr(obj, 'B_StagePositions', [])) > i else np.nan,
+                        lickspout_position_z=getattr(obj, 'B_StagePositions')[i].get('z', np.nan) if len(getattr(obj, 'B_StagePositions', [])) > i else np.nan,
                         
                         # reward size
                         reward_size_left=float(_get_field(obj, 'TP_LeftValue_volume', index=i)),
