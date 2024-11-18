@@ -928,7 +928,7 @@ class GenerateTrials():
                 self.win.same_side_lick_interval.setText(f'Percentage of same side lick intervals under 100 ms is '
                                                          f'over 10%: {same_side_frac * 100:.2f}%.')
                 logging.error(f'Percentage of same side lick intervals under 100 ms in Box {self.win.box_letter} '
-                              f'mouse {self.win.ID.text()} exceeded 10%')
+                              f'mouse {self.win.behavior_session_model.subject} exceeded 10%')
             else:
                 self.win.same_side_lick_interval.setText('')
 
@@ -955,7 +955,7 @@ class GenerateTrials():
                 self.win.cross_side_lick_interval.setText(f'Percentage of cross side lick intervals under 100 ms is '
                                                           f'over 10%: {cross_side_frac * 100:.2f}%.')
                 logging.error(f'Percentage of cross side lick intervals under 100 ms in Box {self.win.box_letter} '
-                              f'mouse {self.win.ID.text()} exceeded 10%')
+                              f'mouse {self.win.behavior_session_model.subject} exceeded 10%')
             else:
                 self.win.cross_side_lick_interval.setText('')
 
