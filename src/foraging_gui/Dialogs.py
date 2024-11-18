@@ -1842,13 +1842,12 @@ class MetadataDialog(QDialog):
 
         # create reference position boxes based on stage coordinate keys
         positions = self.MainWindow._GetPositions() if self.MainWindow._GetPositions() is not None else {}
-        grid_layout = QGridLayout()
+        grid_layout = QGridLayout(self.groupBox)
         for i, axis in enumerate(positions.keys()):
             label = QLabel(f'{axis.upper()} (um):')
             setattr(self, f'LickSpoutReference{axis.upper()}', QLineEdit())
-            grid_layout.addWidget(i, 0, label)
-            grid_layout.addWidget(i, 1, getattr(self, f'LickSpoutReference{axis.upper()}'))
-        self.groupBox.addLayout(grid_layout)
+            grid_layout.addWidget(label, i, 0)
+            grid_layout.addWidget(getattr(self, f'LickSpoutReference{axis.upper()}'). i, 1)
     def _connectSignalsSlots(self):
         self.SelectRigMetadata.clicked.connect(lambda: self._SelectRigMetadata(rig_metadata_file=None))
         self.EphysProbes.currentIndexChanged.connect(self._show_angles)
