@@ -129,7 +129,7 @@ class PlotV(FigureCanvas):
         RightChoice_UnRewarded=np.where(np.logical_and(self.B_AnimalResponseHistory==1, self.B_RewardedHistory[1]==False))
 
         # running average of choice
-        self.kernel_size=2
+        self.kernel_size=10
         ResponseHistoryT=self.B_AnimalResponseHistory.copy()
         ResponseHistoryT[ResponseHistoryT==2]=np.nan
         ResponseHistoryF=ResponseHistoryT.copy()

@@ -13,13 +13,12 @@ from foraging_gui.TransferToNWB import _get_field
 from aind_data_schema.components.stimulus import AuditoryStimulation
 from aind_data_schema.components.devices import SpoutSide,Calibration
 from aind_data_schema_models.units import SizeUnit,FrequencyUnit,SoundIntensityUnit,PowerUnit
-from aind_data_schema_models.modalities import Modality
 
-from aind_data_schema.core.data_description import DataLevel, Funding, RawDataDescription
+from aind_data_schema.core.data_description import Funding
 from aind_data_schema_models.organizations import Organization
 from aind_data_schema_models.modalities import Modality
 from aind_data_schema_models.platforms import Platform
-from aind_data_schema_models.pid_names import PIDName, BaseName
+from aind_data_schema_models.pid_names import PIDName
 from aind_data_schema.components.coordinates import RelativePosition, Translation3dTransform, Rotation3dTransform,Axis,AxisName
 
 
@@ -68,7 +67,6 @@ class generate_metadata:
         
         self.session_metadata_success=False
         self.rig_metadata_success=False
-        self.data_description_success=False
 
         if Obj is None:
             self._set_metadata_logging()
@@ -112,12 +110,10 @@ class generate_metadata:
         self._mapper()
         self._get_box_type()
         self._session()
-        if self.has_data_description:
-            self._session_description()
+
         logging.info("Session metadata generated successfully: " + str(self.session_metadata_success))
         logging.info("Rig metadata generated successfully: " + str(self.rig_metadata_success))
-        logging.info("Data description generated successfully: " + str(self.data_description_success))
-    
+
     def _mapper(self):
         '''
         Name mapping
@@ -248,39 +244,6 @@ class generate_metadata:
             self.box_type = 'Ephys'
         else:
             self.box_type = 'Behavior'
-    
-    def _session_description(self):
-        '''
-        Generate the session description to the MetadataFolder
-        '''
-        if self.Obj['meta_data_dialog']['rig_metadata']=={}:
-            logging.info('rig metadata is empty!')
-            return
-        self._get_session_time()
-        if self.session_start_time == '' or self.session_end_time == '':
-            logging.info('session_start_time or session_end_time is empty!')
-            return
-        
-        self.orcid = BaseName(name="Open Researcher and Contributor ID", abbreviation="ORCID")
-        self._get_modality()
-        self._get_investigators()
-        self._get_funding_source()
-        self._get_platform()
-
-        description= RawDataDescription(
-            data_level=DataLevel.RAW,
-            funding_source=self.funding_source,
-            investigators=self.investigators,
-            modality=self.modality,
-            project_name=self.Obj['meta_data_dialog']['session_metadata']['ProjectName'],
-            data_summary=self.Obj['meta_data_dialog']['session_metadata']['DataSummary'],
-            institution=Organization.AIND,
-            creation_time=self.session_start_time,
-            platform= self.platform,
-            subject_id=self.Obj['ID'],
-        )
-        description.write_standard_file(output_directory=self.output_folder)
-        self.data_description_success=True
 
     def _get_funding_source(self):
         '''
@@ -478,12 +441,6 @@ class generate_metadata:
         # Missing ProjectName
         # Possible reason: 1) old version of the software. 2) the "Project Name and Funding Source v2.csv" is not provided. 
         self._initialize_fields(dic=self.Obj['meta_data_dialog']['session_metadata'],keys=['ProjectName'],default_value='')
-
-        if self.Obj['meta_data_dialog']['session_metadata']['ProjectName']=='':
-            self.has_data_description = False
-            logging.info('No data description for session metadata')
-        else:
-            self.has_data_description = True
 
         # Missing field 'B_AnimalResponseHistory' in the json file.
         # Possible reason: 1) the behavior data is not started in the session.
