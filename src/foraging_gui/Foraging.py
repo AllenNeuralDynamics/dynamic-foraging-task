@@ -264,6 +264,7 @@ class Window(QMainWindow):
                 layout.itemAt(i).widget().setVisible(False)
             # Insert new stage_widget
             self.stage_widget = get_stage_widget()
+            print(dir(self.stage_widget))
             layout.addWidget(self.stage_widget)
 
     def _LoadUI(self):
