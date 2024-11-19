@@ -1195,12 +1195,14 @@ class GenerateTrials():
             self.win.Start.setStyleSheet("background-color : none")
             self.win.Start.setChecked(False)
             reply = QtWidgets.QMessageBox.question(self.win, 'Box {}'.format(self.win.box_letter), msg, QtWidgets.QMessageBox.Ok)
-            self.win._Start()  # trigger stopping logic after window
+            self.win._Stop()  # trigger stopping logic after window
             # stop FIB if running
             if self.win.StartExcitation.isChecked():
                 self.win.StartExcitation.setChecked(False)
-                self.win._StartExcitation()
-    
+                # delay stopping fib for 5 seconds
+                fip_stop_timer = QtCore.QTimer(timeout=self.win._StartExcitation,interval=5000)
+                fip_stop_timer.setSingleShot(True)
+                fip_stop_timer.start()
     def _CheckAutoWater(self):
         '''Check if it should be an auto water trial'''
         if self.TP_AutoReward:

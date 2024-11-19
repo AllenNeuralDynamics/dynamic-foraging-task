@@ -3970,27 +3970,8 @@ class Window(QMainWindow):
                     # so we set the text to get ignored as well
                     self.workertimer._stop()
 
-            # fill out GenerateTrials B_Bias
-            last_bias = self.GeneratedTrials.B_Bias[-1]
-            b_bias_len = len(self.GeneratedTrials.B_Bias)
-            self.GeneratedTrials.B_Bias += [last_bias]*((self.GeneratedTrials.B_CurrentTrialN+1)-b_bias_len)
+            self._Stop()
 
-            # stop lick interval calculation
-            self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
-
-            # validate behavior session model and document validation errors if any
-            try:
-                AindBehaviorSessionModel(**self.behavior_session_model.model_dump())
-            except ValidationError as e:
-                logging.error(str(e), extra={'tags': [self.warning_log_tag]})
-            # save behavior session model
-            with open(self.behavior_session_modelJson, "w") as outfile:
-                outfile.write(self.behavior_session_model.model_dump_json())
-
-
-        if (self.StartANewSession == 1) and (self.ANewTrial == 0):
-            # If we are starting a new session, we should wait for the last trial to finish
-            self._StopCurrentSession()
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
             # generate a new session id
@@ -4136,6 +4117,42 @@ class Window(QMainWindow):
                 self.PlotM._Update(GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
             except Exception as e:
                 logging.error(traceback.format_exc())
+
+    def _Stop(self):
+        """
+        Logic to stop a session
+        """
+
+        # If the photometry timer is running, stop it
+        if self.finish_Timer == 0:
+            self.ignore_timer = True
+            self.PhotometryRun = 0
+            logging.info('canceling photometry baseline timer')
+            if hasattr(self, 'workertimer'):
+                # Stop the worker, this has a 1 second delay before taking effect
+                # so we set the text to get ignored as well
+                self.workertimer._stop()
+
+        # fill out GenerateTrials B_Bias
+        last_bias = self.GeneratedTrials.B_Bias[-1]
+        b_bias_len = len(self.GeneratedTrials.B_Bias)
+        self.GeneratedTrials.B_Bias += [last_bias] * ((self.GeneratedTrials.B_CurrentTrialN + 1) - b_bias_len)
+
+        # stop lick interval calculation
+        self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
+
+        # validate behavior session model and document validation errors if any
+        try:
+            AindBehaviorSessionModel(**self.behavior_session_model.model_dump())
+        except ValidationError as e:
+            logging.error(str(e), extra={'tags': [self.warning_log_tag]})
+        # save behavior session model
+        with open(self.behavior_session_modelJson, "w") as outfile:
+            outfile.write(self.behavior_session_model.model_dump_json())
+
+        if (self.StartANewSession == 1) and (self.ANewTrial == 0):
+            # If we are starting a new session, we should wait for the last trial to finish
+            self._StopCurrentSession()
 
     def log_session(self) -> None:
         """
