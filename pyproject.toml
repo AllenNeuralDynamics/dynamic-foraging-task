@@ -31,7 +31,7 @@ dependencies = [
     "aind-behavior-services<0.9",
     "pynwb",
     "requests",
-    "harp-python",
+    "harp-python>=0.3.0",
     "openpyxl",
     "deepdiff",
     "aind-data-schema==1.1.0",
