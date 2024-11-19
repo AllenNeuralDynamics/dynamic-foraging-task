@@ -361,12 +361,8 @@ class Window(QMainWindow):
         self.actionOpen_video_folder.triggered.connect(self._OpenVideoFolder)
         self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
         self.RightValue.textChanged.connect(self._WaterVolumnManage1)
-        self.GiveWaterL.textChanged.connect(self._WaterVolumnManage1)
-        self.GiveWaterR.textChanged.connect(self._WaterVolumnManage1)
         self.LeftValue_volume.textChanged.connect(self._WaterVolumnManage2)
         self.RightValue_volume.textChanged.connect(self._WaterVolumnManage2)
-        self.GiveWaterL_volume.textChanged.connect(self._WaterVolumnManage2)
-        self.GiveWaterR_volume.textChanged.connect(self._WaterVolumnManage2)
         self.MoveXP.clicked.connect(self._MoveXP)
         self.MoveYP.clicked.connect(self._MoveYP)
         self.MoveZP.clicked.connect(self._MoveZP)
@@ -385,6 +381,18 @@ class Window(QMainWindow):
         self.Opto_dialog.laser_2_calibration_voltage.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_1_calibration_power.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_2_calibration_power.textChanged.connect(self._toggle_save_color)
+
+        # Set manual water volume to earned reward and trigger update if changed
+        for side in ['Left', 'Right']:
+            reward_volume_widget = getattr(self, f'{side}Value_volume')
+            manual_volume_widget = getattr(self, f'GiveWater{side[0]}_volume')
+            manual_volume_widget.setValue(reward_volume_widget.value())
+            reward_volume_widget.valueChanged.connect(manual_volume_widget.setValue)
+
+            reward_time_widget = getattr(self, f'{side}Value')
+            manual_time_widget = getattr(self, f'GiveWater{side[0]}')
+            manual_time_widget.setValue(reward_time_widget.value())
+            reward_time_widget.valueChanged.connect(manual_time_widget.setValue)
 
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
@@ -1598,12 +1606,8 @@ class Window(QMainWindow):
         '''Change the water volume based on the valve open time'''
         self.LeftValue.textChanged.disconnect(self._WaterVolumnManage1)
         self.RightValue.textChanged.disconnect(self._WaterVolumnManage1)
-        self.GiveWaterL.textChanged.disconnect(self._WaterVolumnManage1)
-        self.GiveWaterR.textChanged.disconnect(self._WaterVolumnManage1)
         self.LeftValue_volume.textChanged.disconnect(self._WaterVolumnManage2)
         self.RightValue_volume.textChanged.disconnect(self._WaterVolumnManage2)
-        self.GiveWaterL_volume.textChanged.disconnect(self._WaterVolumnManage2)
-        self.GiveWaterR_volume.textChanged.disconnect(self._WaterVolumnManage2)
         # use the latest calibration result
         if hasattr(self, 'WaterCalibration_dialog'):
             if hasattr(self.WaterCalibration_dialog, 'PlotM'):
@@ -1614,40 +1618,26 @@ class Window(QMainWindow):
             self._GetLatestFitting(FittingResults)
             self._ValvetimeVolumnTransformation(widget2=self.LeftValue_volume,widget1=self.LeftValue,direction=1,valve='Left')
             self._ValvetimeVolumnTransformation(widget2=self.RightValue_volume,widget1=self.RightValue,direction=1,valve='Right')
-            self._ValvetimeVolumnTransformation(widget2=self.GiveWaterL_volume,widget1=self.GiveWaterL,direction=1,valve='Left')
-            self._ValvetimeVolumnTransformation(widget2=self.GiveWaterR_volume,widget1=self.GiveWaterR,direction=1,valve='Right')
             self.LeftValue_volume.setEnabled(True)
             self.RightValue_volume.setEnabled(True)
-            self.GiveWaterL_volume.setEnabled(True)
-            self.GiveWaterR_volume.setEnabled(True)
             self.label_28.setEnabled(True)
             self.label_29.setEnabled(True)
         else:
             self.LeftValue_volume.setEnabled(False)
             self.RightValue_volume.setEnabled(False)
-            self.GiveWaterL_volume.setEnabled(False)
-            self.GiveWaterR_volume.setEnabled(False)
             self.label_28.setEnabled(False)
             self.label_29.setEnabled(False)
         self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
         self.RightValue.textChanged.connect(self._WaterVolumnManage1)
-        self.GiveWaterL.textChanged.connect(self._WaterVolumnManage1)
-        self.GiveWaterR.textChanged.connect(self._WaterVolumnManage1)
         self.LeftValue_volume.textChanged.connect(self._WaterVolumnManage2)
         self.RightValue_volume.textChanged.connect(self._WaterVolumnManage2)
-        self.GiveWaterL_volume.textChanged.connect(self._WaterVolumnManage2)
-        self.GiveWaterR_volume.textChanged.connect(self._WaterVolumnManage2)
 
     def _WaterVolumnManage2(self):
         '''Change the valve open time based on the water volume'''
         self.LeftValue.textChanged.disconnect(self._WaterVolumnManage1)
         self.RightValue.textChanged.disconnect(self._WaterVolumnManage1)
-        self.GiveWaterL.textChanged.disconnect(self._WaterVolumnManage1)
-        self.GiveWaterR.textChanged.disconnect(self._WaterVolumnManage1)
         self.LeftValue_volume.textChanged.disconnect(self._WaterVolumnManage2)
         self.RightValue_volume.textChanged.disconnect(self._WaterVolumnManage2)
-        self.GiveWaterL_volume.textChanged.disconnect(self._WaterVolumnManage2)
-        self.GiveWaterR_volume.textChanged.disconnect(self._WaterVolumnManage2)
         # use the latest calibration result
         if hasattr(self, 'WaterCalibration_dialog'):
             if hasattr(self.WaterCalibration_dialog, 'PlotM'):
@@ -1658,23 +1648,15 @@ class Window(QMainWindow):
             self._GetLatestFitting(FittingResults)
             self._ValvetimeVolumnTransformation(widget1=self.LeftValue_volume,widget2=self.LeftValue,direction=-1,valve='Left')
             self._ValvetimeVolumnTransformation(widget1=self.RightValue_volume,widget2=self.RightValue,direction=-1,valve='Right')
-            self._ValvetimeVolumnTransformation(widget1=self.GiveWaterL_volume,widget2=self.GiveWaterL,direction=-1,valve='Left')
-            self._ValvetimeVolumnTransformation(widget1=self.GiveWaterR_volume,widget2=self.GiveWaterR,direction=-1,valve='Right')
         else:
             self.LeftValue_volume.setEnabled(False)
             self.RightValue_volume.setEnabled(False)
-            self.GiveWaterL_volume.setEnabled(False)
-            self.GiveWaterR_volume.setEnabled(False)
             self.label_28.setEnabled(False)
             self.label_29.setEnabled(False)
         self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
         self.RightValue.textChanged.connect(self._WaterVolumnManage1)
-        self.GiveWaterL.textChanged.connect(self._WaterVolumnManage1)
-        self.GiveWaterR.textChanged.connect(self._WaterVolumnManage1)
         self.LeftValue_volume.textChanged.connect(self._WaterVolumnManage2)
         self.RightValue_volume.textChanged.connect(self._WaterVolumnManage2)
-        self.GiveWaterL_volume.textChanged.connect(self._WaterVolumnManage2)
-        self.GiveWaterR_volume.textChanged.connect(self._WaterVolumnManage2)
 
     def _ValvetimeVolumnTransformation(self,widget1,widget2,direction,valve):
         '''Transformation between valve open time the the water volume'''
@@ -1714,16 +1696,16 @@ class Window(QMainWindow):
 
     def _OpenBehaviorFolder(self):
         '''Open the the current behavior folder'''
-        try:
-            folder_name=os.path.dirname(self.SaveFileJson)
+
+        if hasattr(self, 'SaveFileJson'):
+            folder_name = os.path.dirname(self.SaveFileJson)
             subprocess.Popen(['explorer', folder_name])
-        except Exception as e:
-            logging.error(traceback.format_exc())
-            try:
-                AnimalFolder=os.path.join(self.default_saveFolder, self.current_box, self.ID.text())
-                subprocess.Popen(['explorer', AnimalFolder])
-            except Exception as e:
-                logging.error(traceback.format_exc())
+        elif hasattr(self, 'default_saveFolder'):
+            AnimalFolder = os.path.join(self.default_saveFolder, self.current_box, self.ID.text())
+            logging.warning(f'Save folder unspecified, so opening {AnimalFolder}')
+            subprocess.Popen(['explorer', AnimalFolder])
+        else:
+            logging.warning('Save folder unspecified', extra={'tags': self.warning_log_tag})
 
     def _OpenLoggingFolder(self):
         '''Open the logging folder'''
@@ -1921,7 +1903,7 @@ class Window(QMainWindow):
                         float(child.text())
                     except Exception as e:
                         # Invalid float. Do not change the parameter, reset back to previous value
-                        logging.error('Cannot convert input to float: {}, \'{}\''.format(child.objectName(),child.text()))
+                        logging.warning('Cannot convert input to float: {}, \'{}\''.format(child.objectName(),child.text()))
                         if isinstance(child, QtWidgets.QDoubleSpinBox):
                             child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
                         elif isinstance(child, QtWidgets.QSpinBox):
