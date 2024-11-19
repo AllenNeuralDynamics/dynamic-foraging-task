@@ -21,6 +21,7 @@
                  xmlns:spk="clr-namespace:Bonsai.Spinnaker;assembly=Bonsai.Spinnaker"
                  xmlns:ffmpeg="clr-namespace:Bonsai.FFmpeg;assembly=Bonsai.FFmpeg"
                  xmlns:p4="clr-namespace:;assembly=Extensions"
+                 xmlns:gui="clr-namespace:Bonsai.Gui;assembly=Bonsai.Gui"
                  xmlns="https://bonsai-rx.org/2018/workflow">
   <Workflow>
     <Nodes>
@@ -8718,14 +8719,6 @@
         <Workflow>
           <Nodes>
             <Expression xsi:type="SubscribeSubject">
-              <Name>LeftLick</Name>
-            </Expression>
-            <Expression xsi:type="VisualizerMapping" />
-            <Expression xsi:type="SubscribeSubject">
-              <Name>RightLick</Name>
-            </Expression>
-            <Expression xsi:type="VisualizerMapping" />
-            <Expression xsi:type="SubscribeSubject">
               <Name>ComPorts</Name>
             </Expression>
             <Expression xsi:type="Index">
@@ -8733,37 +8726,49 @@
                 <Value>current_box</Value>
               </Operand>
             </Expression>
-            <Expression xsi:type="Format">
-              <Format>LickVis: {0} -- Top:L / Bottom:R</Format>
-            </Expression>
             <Expression xsi:type="PropertyMapping">
               <PropertyMappings>
-                <Property Name="Name" />
+                <Property Name="Text" />
               </PropertyMappings>
             </Expression>
+            <Expression xsi:type="gui:LabelBuilder">
+              <gui:Enabled>true</gui:Enabled>
+              <gui:Visible>true</gui:Visible>
+              <gui:Font>Microsoft Sans Serif, 15.75pt, style=Bold</gui:Font>
+              <gui:Text />
+            </Expression>
+            <Expression xsi:type="VisualizerMapping" />
+            <Expression xsi:type="SubscribeSubject">
+              <Name>LeftLick</Name>
+            </Expression>
+            <Expression xsi:type="VisualizerMapping" />
+            <Expression xsi:type="SubscribeSubject">
+              <Name>RightLick</Name>
+            </Expression>
+            <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
-              <viz:Name>LickVis: 428-9-A -- Top:L / Bottom:R</viz:Name>
+              <viz:Name>LickVis:Top:L / Bottom:R</viz:Name>
               <viz:ColumnCount>1</viz:ColumnCount>
-              <viz:RowCount>2</viz:RowCount>
+              <viz:RowCount>11</viz:RowCount>
               <viz:ColumnStyles />
               <viz:RowStyles />
               <viz:CellSpans>
                 <viz:CellSpan ColumnSpan="1" RowSpan="1" />
-                <viz:CellSpan ColumnSpan="4" RowSpan="1" />
-                <viz:CellSpan ColumnSpan="1" RowSpan="1" />
-                <viz:CellSpan ColumnSpan="4" RowSpan="1" />
+                <viz:CellSpan ColumnSpan="1" RowSpan="5" />
+                <viz:CellSpan ColumnSpan="1" RowSpan="5" />
               </viz:CellSpans>
             </Expression>
           </Nodes>
           <Edges>
             <Edge From="0" To="1" Label="Source1" />
-            <Edge From="1" To="8" Label="Source1" />
+            <Edge From="1" To="2" Label="Source1" />
             <Edge From="2" To="3" Label="Source1" />
-            <Edge From="3" To="8" Label="Source2" />
-            <Edge From="4" To="5" Label="Source1" />
+            <Edge From="3" To="4" Label="Source1" />
+            <Edge From="4" To="9" Label="Source1" />
             <Edge From="5" To="6" Label="Source1" />
-            <Edge From="6" To="7" Label="Source1" />
-            <Edge From="7" To="8" Label="Source3" />
+            <Edge From="6" To="9" Label="Source2" />
+            <Edge From="7" To="8" Label="Source1" />
+            <Edge From="8" To="9" Label="Source3" />
           </Edges>
         </Workflow>
       </Expression>
