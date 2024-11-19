@@ -3134,10 +3134,10 @@ class Window(QMainWindow):
                     except Exception as e:
                         logging.error(traceback.format_exc())
                 elif self.stage_widget is not None:  # aind stage
-                    self.stage_widget.movement_page_view.lineEdit_x.setText(last_positions['x'])
-                    self.stage_widget.movement_page_view.lineEdit_y1.setText(last_positions['y1'])
-                    self.stage_widget.movement_page_view.lineEdit_y2.setText(last_positions['y2'])
-                    self.stage_widget.movement_page_view.lineEdit_z.setText(last_positions['z'])
+                    self.stage_widget.movement_page_view.lineEdit_x.setText(str(last_positions['x']))
+                    self.stage_widget.movement_page_view.lineEdit_y1.setText(str(last_positions['y1']))
+                    self.stage_widget.movement_page_view.lineEdit_y2.setText(str(last_positions['y2']))
+                    self.stage_widget.movement_page_view.lineEdit_z.setText(str(last_positions['z']))
             else:
                 pass
 
