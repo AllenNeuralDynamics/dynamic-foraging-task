@@ -264,7 +264,6 @@ class Window(QMainWindow):
                 layout.itemAt(i).widget().setVisible(False)
             # Insert new stage_widget
             self.stage_widget = get_stage_widget()
-            print(dir(self.stage_widget))
             layout.addWidget(self.stage_widget)
 
     def _LoadUI(self):
@@ -777,10 +776,10 @@ class Window(QMainWindow):
             self._UpdatePosition(current_position,(0,0,0))
             return {axis: float(pos) for axis, pos in zip(['x', 'y', 'z'], current_position) }
         elif self.stage_widget is not None:     # aind stage
-            return {'x': float(self.stage_widget.lineEdit_x.text()),
-                    'y1': float(self.stage_widget.lineEdit_y1.text()),
-                    'y2': float(self.stage_widget.lineEdit_y2.text()),
-                    'z': float(self.stage_widget.lineEdit_z.text())}
+            return {'x': float(self.stage_widget.movement_page_view.lineEdit_x.text()),
+                    'y1': float(self.stage_widget.movement_page_view.lineEdit_y1.text()),
+                    'y2': float(self.stage_widget.movement_page_view.lineEdit_y2.text()),
+                    'z': float(self.stage_widget.movement_page_view.lineEdit_z.text())}
         else:   # no stage
             logging.info('GetPositions called, but no current stage')
             return None
@@ -3135,10 +3134,10 @@ class Window(QMainWindow):
                     except Exception as e:
                         logging.error(traceback.format_exc())
                 elif self.stage_widget is not None:  # aind stage
-                    self.stage_widget.lineEdit_x.setText(last_positions['x'])
-                    self.stage_widget.lineEdit_y1.setText(last_positions['y1'])
-                    self.stage_widget.lineEdit_y2.setText(last_positions['y2'])
-                    self.stage_widget.lineEdit_z.setText(last_positions['z'])
+                    self.stage_widget.movement_page_view.lineEdit_x.setText(last_positions['x'])
+                    self.stage_widget.movement_page_view.lineEdit_y1.setText(last_positions['y1'])
+                    self.stage_widget.movement_page_view.lineEdit_y2.setText(last_positions['y2'])
+                    self.stage_widget.movement_page_view.lineEdit_z.setText(last_positions['z'])
             else:
                 pass
 
