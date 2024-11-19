@@ -1889,7 +1889,7 @@ class GenerateTrials():
                     # If the attribute does not exist in self.Obj, create a new list and append to it
                     self.Obj[attr_name] = [getattr(self, attr_name)]
         # get the newscale positions
-        if hasattr(self.win, 'current_stage'):
+        if hasattr(self.win, 'current_stage') or self.win.stage_widget is not None:
             self.B_StagePositions.append(self.win._GetPositions())
 
 
