@@ -689,6 +689,7 @@ class generate_metadata:
             return
         
         self.audio_stimulus.append(StimulusEpoch(
+            stimulus_device_names=self._get_speaker_names(),
             stimulus_name='auditory go cue',
             stimulus_modalities=[StimulusModality.AUDITORY],
             stimulus_start_time=self.session_start_time,
@@ -712,6 +713,16 @@ class generate_metadata:
             trials_rewarded=self.trials_rewarded,
             notes=f"The duration of go cue is 100ms. The frequency is 7500Hz. Decibel is {self.Obj['Other_go_cue_decibel']}dB. The total reward consumed in the session is {self.total_reward_consumed_in_session} microliter. The total reward indcluding consumed in the session and supplementary water is {self.Obj['TotalWater']} millimeters.",
         ))
+    def _get_speaker_names(self):
+        '''
+        get the speaker names
+        '''
+        speaker_names=[]
+        self.Obj['meta_data_dialog']['rig_metadata']
+        for current_device in self.Obj['meta_data_dialog']['rig_metadata']['stimulus_devices']:
+            if current_device['device_type']=='Speaker':
+                speaker_names.append(current_device['name'])
+        return speaker_names
     
     def _get_output_parameters(self):
         '''Get the output parameters'''
@@ -816,6 +827,7 @@ class generate_metadata:
             return  
         self._get_light_source_config()
         self.optogenetics_stimulus.append(StimulusEpoch(    
+                stimulus_device_names=self._get_optogenetics_stimulus_device_names(),
                 stimulus_name='Optogenetics',
                 stimulus_modalities=[StimulusModality.OPTOGENETICS],
                 notes='Please see NWB files for more details (stimulus epoch and stimulus protocol etc.).',
