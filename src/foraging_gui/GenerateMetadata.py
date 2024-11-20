@@ -544,7 +544,6 @@ class generate_metadata:
         self.session_metadata_success=True
         return session
 
-
     def _get_high_speed_camera_stream(self):
         '''
         Make the high speed camera stream metadata
@@ -768,7 +767,24 @@ class generate_metadata:
     def _get_task_parameters(self):
         '''Get task parameters'''
         # excluding parameters starting with B_, TP_,  BS_, meta_data_dialog, LaserCalibrationResults, WaterCalibrationResults
-        task_parameters = {key: value for key, value in self.Obj.items() if not key.startswith(('B_', 'TP_', 'BS_','meta_data_dialog','LaserCalibrationResults','WaterCalibrationResults'))}
+        #task_parameters = {key: value for key, value in self.Obj.items() if not key.startswith(('B_', 'TP_', 'BS_','meta_data_dialog','LaserCalibrationResults','WaterCalibrationResults'))}
+        # only keep key task parameters
+        keys =[
+            'Task',
+            'BlockBeta',
+            'BlockMin',
+            'BlockMax',
+            'ITIBeta',
+            'ITIMin',
+            'ITIMax',
+            'DelayBeta',
+            'DelayMin',
+            'DelayMax',
+            'LeftValue_volume',
+            'RightValue_volume',
+        ]
+        task_parameters = {key: value for key, value in self.Obj.items() if key in keys}
+
         return task_parameters
     
     def _get_optogenetics_stimulus(self):
@@ -1243,5 +1259,5 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    generate_metadata(json_file=r'Y:\711256\behavior_711256_2024-08-15_11-17-57\behavior\711256_2024-08-15_11-17-57.json')
+    generate_metadata(json_file=r'Y:\711256\behavior_711256_2024-08-15_11-17-57\behavior\711256_2024-08-15_11-17-57.json',output_folder=r'H:\test')
     #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
