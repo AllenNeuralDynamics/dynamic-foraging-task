@@ -157,16 +157,12 @@ class generate_metadata:
                 "Harp Sound",
                 "Harp clock synchronization board",
                 "Harp sound amplifier",
-                "Lick Sensor Left",
-                "Lick Sensor Right"
                 ],
             'behavior_rig_behavior_daq_names':[
                 "Harp Behavior",
                 "Harp Sound",
                 "Harp clock synchronization board",
                 "Harp sound amplifier",
-                'Lick Sensor Left',
-                'Lick Sensor Right'
                 ],
             'fiber_photometry_daq_names':[''],
             'ephys_daq_names':['neuropixel basestation'],
