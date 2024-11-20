@@ -1195,24 +1195,34 @@ class generate_metadata:
         device_oringin=self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceArea']
         lick_spouts_distance=float(self.Obj['Other_lick_spout_distance'])
         # using the last position of the stage
-        start_position=[self.Obj['B_StagePositions'][-1]['x'],
-                        self.Obj['B_StagePositions'][-1].get('y', None),    # newscale stage
-                        self.Obj['B_StagePositions'][-1].get('y1', None),   # aind-stage
-                        self.Obj['B_StagePositions'][-1].get('y2', None),   # aind-stage
-                        self.Obj['B_StagePositions'][-1]['z']]
-        start_position = [pos for pos in start_position if pos is not None]     # filter out None values
+        if 'B_StagePositions' in self.Obj.keys():
+            start_position=[self.Obj['B_StagePositions'][-1]['x'],
+                            self.Obj['B_StagePositions'][-1].get('y', None),    # newscale stage
+                            self.Obj['B_StagePositions'][-1].get('y1', None),   # aind-stage
+                            self.Obj['B_StagePositions'][-1].get('y2', None),   # aind-stage
+                            self.Obj['B_StagePositions'][-1]['z']]
+            start_position = [pos for pos in start_position if pos is not None]     # filter out None values
 
-        # FIXME: Why are we assuming this and does it pertain to aind-stage?
-        # assuming refering to the left lick spout
-        reference_spout_position=[float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceX']),
-                                  float(self.Obj['meta_data_dialog']['session_metadata'].get('LickSpoutReferenceY',
-                                                                                             None)),
-                                  float(self.Obj['meta_data_dialog']['session_metadata'].get('LickSpoutReferenceY1',
-                                                                                             None)),
-                                  float(self.Obj['meta_data_dialog']['session_metadata'].get('LickSpoutReferenceY2',
-                                                                                             None)),
-                                  float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceZ'])]
-        reference_spout_position = [pos for pos in reference_spout_position if pos is not None]  # filter out None value
+            reference_spout_position=[float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceX']),
+                                      float(self.Obj['meta_data_dialog']['session_metadata'].get('LickSpoutReferenceY',
+                                                                                                 None)),
+                                      float(self.Obj['meta_data_dialog']['session_metadata'].get('LickSpoutReferenceY1',
+                                                                                                 None)),
+                                      float(self.Obj['meta_data_dialog']['session_metadata'].get('LickSpoutReferenceY2',
+                                                                                                 None)),
+                                      float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceZ'])]
+            reference_spout_position = [pos for pos in reference_spout_position if pos is not None]  # filter out None value
+
+        elif 'B_NewscalePositions' in self.Obj.keys():  # older version of code
+            start_position = [self.Obj['B_NewscalePositions'][-1][0], self.Obj['B_NewscalePositions'][-1][1],
+                              self.Obj['B_NewscalePositions'][-1][2]]
+            # assuming refering to the left lick spout
+            reference_spout_position = [float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceX']),
+                                        float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceY']),
+                                        float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceZ'])]
+        else:
+            logging.error('Object does not have stage positions to create metadata.')
+            return
 
         if len(reference_spout_position) == 3:  # newscale stage
             left_lick_spout_reference_position=np.array(reference_spout_position)-np.array(start_position)
