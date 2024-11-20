@@ -783,10 +783,28 @@ class generate_metadata:
             'LeftValue_volume',
             'RightValue_volume',
         ]
+        reward_probability=self._get_reward_probability()
         task_parameters = {key: value for key, value in self.Obj.items() if key in keys}
 
         return task_parameters
     
+    def _get_reward_probability(self):
+        '''
+        Get the reward probability
+        '''
+        if self.Obj['Task'] in ['Uncoupled Baiting','Uncoupled Without Baiting']:
+            # Get reward prob pool from the input string (e.g., ["0.1", "0.5", "0.9"])
+            return self.Obj['UncoupledReward']
+        elif self.Obj['Task'] in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
+            RewardPairs=self.Obj['B_RewardFamilies'][int(self.Obj['RewardFamily'])-1][:int(self.Obj['RewardPairsN'])]
+            RewardProb=np.array(RewardPairs)/np.expand_dims(np.sum(RewardPairs,axis=1),axis=1)*float(self.Obj['BaseRewardSum'])
+            return str(RewardProb.tolist())
+        else:
+            logging.info('Task is not recognized!')
+            return ''
+           
+        
+
     def _get_optogenetics_stimulus(self):
         '''
         Make the optogenetics stimulus metadata
