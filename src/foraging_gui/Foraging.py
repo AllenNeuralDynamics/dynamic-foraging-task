@@ -4614,6 +4614,7 @@ class Window(QMainWindow):
                 self.project_name = 'Behavior Platform'
 
             # Upload time is 8:30 tonight, plus a random offset over a 30 minute period
+            # Random offset reduces strain on downstream servers getting many requests at once
             date_format = "%Y-%m-%d_%H-%M-%S"
             schedule = self.behavior_session_model.date.strftime(date_format).split('_')[0]+'_20-30-00'
             schedule_time = datetime.strptime(schedule,date_format) + timedelta(seconds=np.random.randint(30*60))
