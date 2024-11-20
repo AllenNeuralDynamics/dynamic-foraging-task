@@ -14,7 +14,7 @@ import yaml
 import copy
 import shutil
 from pathlib import Path
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timezone, timedelta
 import csv
 from aind_slims_api import SlimsClient
 from aind_slims_api import models
@@ -4613,7 +4613,11 @@ class Window(QMainWindow):
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
 
-            schedule = self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S").split('_')[0]+'_20-30-00'
+            # Upload time is 8:30 tonight, plus a random offset over a 30 minute period
+            # Random offset reduces strain on downstream servers getting many requests at once
+            date_format = "%Y-%m-%d_%H-%M-%S"
+            schedule = self.behavior_session_model.date.strftime(date_format).split('_')[0]+'_20-30-00'
+            schedule_time = datetime.strptime(schedule,date_format) + timedelta(seconds=np.random.randint(30*60))
             capsule_id = 'c089614a-347e-4696-b17e-86980bb782c1'
             mount = 'FIP'
 
@@ -4626,7 +4630,6 @@ class Window(QMainWindow):
                 elif Modality.BEHAVIOR_VIDEOS in stream.stream_modalities:
                     modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
 
-            date_format = "%Y-%m-%d_%H-%M-%S"
             # Define contents of manifest file
             contents = {
                 'acquisition_datetime': self.behavior_session_model.date,
@@ -4643,7 +4646,7 @@ class Window(QMainWindow):
                     os.path.join(self.MetadataFolder,'session.json').replace('\\','/'),
                     os.path.join(self.MetadataFolder,'rig.json').replace('\\','/'),
                     ],
-                'schedule_time':datetime.strptime(schedule,date_format),
+                'schedule_time':schedule_time,
                 'project_name':self.project_name,
                 'script': {}
                 }
