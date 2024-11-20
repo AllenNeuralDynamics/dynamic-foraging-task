@@ -1,4 +1,4 @@
-from pyqtgraph import PlotWidget, GraphItem, setConfigOption, colormap, PlotDataItem, TextItem
+from pyqtgraph import PlotWidget, GraphItem, setConfigOption, colormap, PlotDataItem, TextItem, ErrorBarItem
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QColor, QPen
 from PyQt5.QtWidgets import QMainWindow
@@ -98,7 +98,7 @@ class BiasIndicator(QMainWindow):
         self._x_range = value
 
     def calculate_bias(self,
-                       time_point: float,
+                       trial_num: int,
                        choice_history: Union[List, np.ndarray],
                        reward_history: Union[List, np.ndarray],
                        n_trial_back: int = 15,
@@ -112,6 +112,8 @@ class BiasIndicator(QMainWindow):
 
            Parameters
            ----------
+           trial_num : int
+               Trial number of currently at
            choice_history : Union[List, np.ndarray]
                Choice history (0 = left choice, 1 = right choice).
            reward_history : Union[List, np.ndarray]
@@ -140,31 +142,39 @@ class BiasIndicator(QMainWindow):
                 self._biases.append(bias)
                 self.biasValue.emit(bias, trial_count)
 
+                # add confidence intervals
+                upper = lr['df_beta'].loc['bias']['bootstrap_CI_upper'].values[0]
+                lower = lr['df_beta'].loc['bias']['bootstrap_CI_lower'].values[0]
+
+                self.bias_plot.addItem(ErrorBarItem(x=np.array([trial_num]), y=np.array([bias]),
+                                                    top=(abs(bias)+upper)-bias if not np.isnan(upper) else 0,
+                                                    bottom=(abs(bias)+lower)+bias if not np.isnan(upper) else 0,
+                                                    beam=1))
                 # add to plot
                 if len(self._biases) >= 2:
                     # append data with latest
-                    x = np.append(self._biases_scatter_item.xData, time_point)
+                    x = np.append(self._biases_scatter_item.xData, trial_num)
                     y = np.append(self._biases_scatter_item.yData, bias)
 
                     self._biases_scatter_item.setData(x=x, y=y)
 
                     # auto scroll graph
-                    if time_point >= self.bias_plot.getAxis('bottom').range[1]:
-                        self.bias_plot.setRange(xRange=[time_point - self.x_range if self.x_range < time_point else 2,
-                                                        time_point+1])
+                    if trial_num >= self.bias_plot.getAxis('bottom').range[1]:
+                        self.bias_plot.setRange(xRange=[trial_num - self.x_range if self.x_range < trial_num else 2,
+                                                        trial_num+1])
 
                 # emit signal and flash current bias point if over
                 if abs(bias) > self.bias_threshold:
                     self.log.info(f"Bias value calculated over a threshold of {self.bias_threshold}. Bias: {bias} "
                                   f"Trial Count: {trial_count}")
                     self.biasOver.emit(bias, trial_count)
-                    self._current_bias_point.setData(pos=[[time_point, bias]],
+                    self._current_bias_point.setData(pos=[[trial_num, bias]],
                                                      pen=QColor('purple'),
                                                      brush=QColor('purple'),
                                                      size=9)
 
                 else:
-                    self._current_bias_point.setData(pos=[[time_point, bias]],
+                    self._current_bias_point.setData(pos=[[trial_num, bias]],
                                                      pen=QColor('green'),
                                                      brush=QColor('green'),
                                                      size=9)

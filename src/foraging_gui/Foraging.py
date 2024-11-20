@@ -164,7 +164,7 @@ class Window(QMainWindow):
         self.threadpool_workertimer=QThreadPool() # for timing
 
         # create bias indicator
-        self.bias_n_size = 500
+        self.bias_n_size = 200
         self.bias_indicator = BiasIndicator(x_range=self.bias_n_size)  # TODO: Where to store bias_threshold parameter? self.Settings?
         self.bias_indicator.biasValue.connect(self.bias_calculated)  # update dashboard value
         self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
@@ -4242,25 +4242,23 @@ class Window(QMainWindow):
                 # calculate bias every 10 trials
                 if (GeneratedTrials.B_CurrentTrialN+1) % 10 == 0 and GeneratedTrials.B_CurrentTrialN+1 > 20:
                     # correctly format data for bias indicator
-                    choice_history = [1 if x == 2 else int(x) for x in self.GeneratedTrials.B_AnimalResponseHistory]
-                    any_reward = [any(x) for x in np.column_stack(self.GeneratedTrials.B_RewardedHistory)]
 
-                    # use self.bias_n_size of trials to compute bias over or take n the first 0 to N trials
-                    l = len(choice_history)
-                    # FIXME: .6  of choice history is a little arbitrary. If the n_trial_back is close to equaling the
-                    #  trial count, the logistic regression can't be calculated because of an error saying
-                    #  'Cannot have number of splits n_splits=10 greater than the number of samples: 2'
-                    n_trial_back = self.bias_n_size if l > self.bias_n_size else \
-                        round(len(np.array(choice_history)[~np.isnan(choice_history)])*.6)
+                    formatted_history = [np.nan if x == 2 else int(x) for x in self.GeneratedTrials.B_AnimalResponseHistory]
+                    formatted_reward = [any(x) for x in np.column_stack(self.GeneratedTrials.B_RewardedHistory)]
+
+                    # only take last 200 trials if enough trials have happened
+                    choice_history = formatted_history[-200:] if len(formatted_history) > 200 else formatted_history
+                    any_reward = formatted_reward[-200:] if len(formatted_reward) > 200 else formatted_reward
+
                     # add data to bias_indicator
                     if not self.bias_thread.is_alive():
                         logger.debug('Starting bias thread.')
                         self.bias_thread = threading.Thread(target=self.bias_indicator.calculate_bias,
-                                                       kwargs={'time_point': self.GeneratedTrials.B_TrialStartTime[-1],
+                                                       kwargs={'trial_num': len(formatted_history),
                                                                'choice_history': choice_history,
                                                                'reward_history': np.array(any_reward).astype(int),
-                                                               'n_trial_back': n_trial_back,
-                                                               'cv': 2})
+                                                               'n_trial_back': 5,
+                                                               'cv': 5})
                         self.bias_thread.start()
                     else:
                         logger.debug('Skipping bias calculation as previous is still in progress. ')
