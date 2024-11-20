@@ -1842,12 +1842,20 @@ class MetadataDialog(QDialog):
 
         # create reference position boxes based on stage coordinate keys
         positions = self.MainWindow._GetPositions() if self.MainWindow._GetPositions() is not None else {}
-        grid_layout = QGridLayout(self.groupBox)
+        grid_layout = QGridLayout()
+        # add in reference area widget
+        grid_layout.addWidget(self.label_95, 0, 0)
+        grid_layout.addWidget(self.LickSpoutReferenceArea, 0, 1)
         for i, axis in enumerate(positions.keys()):
             label = QLabel(f'{axis.upper()} (um):')
             setattr(self, f'LickSpoutReference{axis.upper()}', QLineEdit())
-            grid_layout.addWidget(label, i, 0)
-            grid_layout.addWidget(getattr(self, f'LickSpoutReference{axis.upper()}'), i, 1)
+            grid_layout.addWidget(label, i+1, 0)
+            grid_layout.addWidget(getattr(self, f'LickSpoutReference{axis.upper()}'), i+1, 1)
+        # add in lick spout distance
+        grid_layout.addWidget(self.label_96, len(positions.keys())+1, 0)
+        grid_layout.addWidget(self.LickSpoutDistance, len(positions.keys())+1, 1)
+        self.groupBox.setLayout(grid_layout)
+
     def _connectSignalsSlots(self):
         self.SelectRigMetadata.clicked.connect(lambda: self._SelectRigMetadata(rig_metadata_file=None))
         self.EphysProbes.currentIndexChanged.connect(self._show_angles)
