@@ -3121,25 +3121,35 @@ class Window(QMainWindow):
                 if 'Other_BasicText' in Obj:
                     self.ShowBasic.setText(Obj['Other_BasicText'])
 
-            #Set newscale position to last position
-            if 'B_StagePositions' in Obj:
-                try:
-                    last_positions=Obj['B_StagePositions'][-1]
-                except:
+            #Set stage position to last position
+            try:
+                last_positions = Obj['B_StagePositions'][-1]
+                if 'B_StagePositions' in Obj:
+                    if hasattr(self,'current_stage'):   # newscale stage
+                        self.current_stage.move_absolute_3d(float(last_positions['x']),
+                                                            float(last_positions['y']),
+                                                            float(last_positions['z']))
+                        self._UpdatePosition((float(last_positions['x']),
+                                              float(last_positions['y']),
+                                              float(last_positions['z'])),(0,0,0))
+                    elif self.stage_widget is not None:  # aind stage
+                        self.stage_widget.movement_page_view.lineEdit_x.setText(str(last_positions['x']))
+                        self.stage_widget.movement_page_view.lineEdit_y1.setText(str(last_positions['y1']))
+                        self.stage_widget.movement_page_view.lineEdit_y2.setText(str(last_positions['y2']))
+                        self.stage_widget.movement_page_view.lineEdit_z.setText(str(last_positions['z']))
+                elif 'B_NewscalePositions' in Obj:  # cross compatibility for mice run on older version of code.
+                    self.current_stage.move_absolute_3d(float(last_positions[0]),
+                                                        float(last_positions[1]),
+                                                        float(last_positions[2]))
+                    self._UpdatePosition((float(last_positions[0]),
+                                          float(last_positions[1]),
+                                          float(last_positions[2])),
+                                         (0, 0, 0))
+                else:
                     pass
-                if hasattr(self,'current_stage'):   # newscale stage
-                    try:
-                        self.current_stage.move_absolute_3d(float(last_positions['x']),float(last_positions['y']),float(last_positions['z']))
-                        self._UpdatePosition((float(last_positions['x']),float(last_positions['y']),float(last_positions['z'])),(0,0,0))
-                    except Exception as e:
-                        logging.error(traceback.format_exc())
-                elif self.stage_widget is not None:  # aind stage
-                    self.stage_widget.movement_page_view.lineEdit_x.setText(str(last_positions['x']))
-                    self.stage_widget.movement_page_view.lineEdit_y1.setText(str(last_positions['y1']))
-                    self.stage_widget.movement_page_view.lineEdit_y2.setText(str(last_positions['y2']))
-                    self.stage_widget.movement_page_view.lineEdit_z.setText(str(last_positions['z']))
-            else:
-                pass
+
+            except Exception as e:
+                logging.error(traceback.format_exc())
 
             # load metadata to the metadata dialog
             if 'meta_data_dialog' in Obj:
