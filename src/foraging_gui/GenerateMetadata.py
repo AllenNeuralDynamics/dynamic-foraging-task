@@ -142,9 +142,9 @@ class generate_metadata:
             'sides':['Left','Right'], # lick spouts
             'camera_list':['SideCameraLeft','SideCameraRight','BottomCamera','BodyCamera'], # camera names in the settings_box.csv
             'camera_name_mapper':{
-                'SideCameraLeft': "Face side left",
-                'SideCameraRight': "Face side right",
-                'BottomCamera': "Bottom",
+                'SideCameraLeft': "Face Side Left",
+                'SideCameraRight': "Face Side Right",
+                'BottomCamera': "Face Bottom",
                 'BodyCamera': "Body"
             }, # camera names in the settings_box.csv and the corresponding names in the rig metadata
             'institute':{
