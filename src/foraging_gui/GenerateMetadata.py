@@ -785,6 +785,7 @@ class generate_metadata:
         ]
         reward_probability=self._get_reward_probability()
         task_parameters = {key: value for key, value in self.Obj.items() if key in keys}
+        task_parameters['reward_probability'] = reward_probability
 
         return task_parameters
     
