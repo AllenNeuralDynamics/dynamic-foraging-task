@@ -3134,13 +3134,13 @@ class Window(QMainWindow):
                                               float(last_positions['z'])),(0,0,0))
                     elif self.stage_widget is not None:  # aind stage
                         self.stage_widget.movement_page_view.lineEdit_x.setText(str(last_positions['x']))
-                        self.stage_widget.movement_page_view.lineEdit_x.editingFinished.emit()
+                        self.stage_widget.movement_page_view.lineEdit_x.returnPressed.emit()
                         self.stage_widget.movement_page_view.lineEdit_y1.setText(str(last_positions['y1']))
-                        self.stage_widget.movement_page_view.lineEdit_y1.editingFinished.emit()
+                        self.stage_widget.movement_page_view.lineEdit_y1.returnPressed.emit()
                         self.stage_widget.movement_page_view.lineEdit_y2.setText(str(last_positions['y2']))
-                        self.stage_widget.movement_page_view.lineEdit_y2.editingFinished.emit()
+                        self.stage_widget.movement_page_view.lineEdit_y2.returnPressed.emit()
                         self.stage_widget.movement_page_view.lineEdit_z.setText(str(last_positions['z']))
-                        self.stage_widget.movement_page_view.lineEdit_z.editingFinished.emit()
+                        self.stage_widget.movement_page_view.lineEdit_z.returnPressed.emit()
                 elif 'B_NewscalePositions' in Obj:  # cross compatibility for mice run on older version of code.
                     self.current_stage.move_absolute_3d(float(last_positions[0]),
                                                         float(last_positions[1]),
