@@ -1,4 +1,4 @@
-from pyqtgraph import PlotWidget, GraphItem, setConfigOption, colormap, PlotDataItem, TextItem, ErrorBarItem
+from pyqtgraph import PlotWidget, GraphItem, setConfigOption, colormap, PlotDataItem, TextItem, FillBetweenItem
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QColor, QPen
 from PyQt5.QtWidgets import QMainWindow
@@ -40,7 +40,7 @@ class BiasIndicator(QMainWindow):
         self.bias_plot.setLabels(left='Bias', bottom='Trial #')    # make label bigger
         self.bias_plot.getAxis('left').setTicks([[(-bias_threshold, 'L'),
                                                   (bias_threshold, 'R')]])
-        self.bias_plot.addLine(y=0, pen='lightgray')  # add line at 0 to help user see if slight bias
+        self.bias_plot.addLine(y=0, pen='black')  # add line at 0 to help user see if slight bias
         self.bias_plot.addLine(y=bias_threshold, pen='b')  # add lines at threshold to make clearer when bias goes over
         self.bias_plot.addLine(y=-bias_threshold, pen='r')
         self.setCentralWidget(self.bias_plot)
@@ -52,6 +52,17 @@ class BiasIndicator(QMainWindow):
         self.bias_pen = cm.getPen(span=(1.5 * -bias_threshold,
                                         1.5 * bias_threshold),
                                   width=5)  # red at -threshold to blue at +threshold
+
+        # create upper and lower CI curves
+        self._upper_scatter_item = PlotDataItem([0], [0], pen='lightgray')
+        self._lower_scatter_item = PlotDataItem([0], [0], pen='lightgray')
+        self.bias_plot.addItem(self._upper_scatter_item)
+        self.bias_plot.addItem(self._lower_scatter_item)
+        self.bias_plot.addItem(FillBetweenItem(curve1=self._upper_scatter_item,
+                                               curve2=self._lower_scatter_item,
+                                               pen='lightgray',
+                                               brush='lightgray'))
+
 
         # create scatter curve item
         self._biases_scatter_item = PlotDataItem([0], [0], pen=self.bias_pen)
@@ -150,26 +161,32 @@ class BiasIndicator(QMainWindow):
                 # add confidence intervals
                 upper = lr['df_beta'].loc['bias']['bootstrap_CI_upper'].values[0]
                 lower = lr['df_beta'].loc['bias']['bootstrap_CI_lower'].values[0]
-
+            elif len(unique) == 0:
+                # no choices, report bias confidence as (-inf, +inf)
+                bias = 0
+                upper = 1
+                lower = -1
             elif unique[0] == 0:
                 # only left choices, report bias confidence as (-inf, 0)
                 bias = -1
                 upper = 0
-                lower = -self.bias_threshold
+                lower = -1
 
             elif unique[0] == 1:
                 # only right choices, report bias confidence as (0, +inf)
                 bias = 1
-                upper = self.bias_threshold
+                upper = 1
                 lower = 0
 
             else:   # skip bias calculation if no conditions are met
                 return
 
-            self.bias_plot.addItem(ErrorBarItem(x=np.array([trial_num]), y=np.array([bias]),
-                                                top=(abs(bias)+upper)-bias if not np.isnan(upper) else 0,
-                                                bottom=(abs(bias)-lower)-bias if not np.isnan(upper) else 0,
-                                                beam=2))
+            # update
+            self._upper_scatter_item.setData(x=np.append(self._upper_scatter_item.xData, trial_num),
+                                             y=np.append(self._upper_scatter_item.yData, bias+upper))
+            self._lower_scatter_item.setData(x=np.append(self._lower_scatter_item.xData, trial_num),
+                                             y=np.append(self._lower_scatter_item.yData, bias+lower))
+
             # add to plot
             if len(self._biases) >= 2:
                 # append data with latest
@@ -204,7 +221,7 @@ class BiasIndicator(QMainWindow):
 
         # re configure plot
         self.bias_plot.clear()
-        self.bias_plot.addLine(y=0, pen='lightgray')  # add line at 0 to help user see if slight bias
+        self.bias_plot.addLine(y=0, pen='black')  # add line at 0 to help user see if slight bias
         self.bias_plot.addLine(y=self.bias_threshold,
                                pen='b')  # add lines at threshold to make clearer when bias goes over
         self.bias_plot.addLine(y=-self.bias_threshold, pen='r')
@@ -212,6 +229,13 @@ class BiasIndicator(QMainWindow):
 
         # reset bias list
         self._biases = []
+        # reset upper and lower ci
+        self.bias_plot.addItem(self._upper_scatter_item)
+        self.bias_plot.addItem(self._lower_scatter_item)
+        self.bias_plot.addItem(FillBetweenItem(curve1=self._upper_scatter_item,
+                                               curve2=self._lower_scatter_item,
+                                               pen='lightgray',
+                                               brush='lightgray'))
         # reset scatter curve item
         self._biases_scatter_item = PlotDataItem([0], [0], pen=self.bias_pen)
         self.bias_plot.addItem(self._biases_scatter_item)
