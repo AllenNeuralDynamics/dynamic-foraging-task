@@ -103,7 +103,7 @@ class BiasIndicator(QMainWindow):
                        trial_num: int,
                        choice_history: Union[List, np.ndarray],
                        reward_history: Union[List, np.ndarray],
-                       n_trial_back: int = 15,
+                       n_trial_back: int = 5,
                        selected_trial_idx: Union[List, np.ndarray] = None,
                        cv: int = 10,
                        ):
