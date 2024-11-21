@@ -4618,7 +4618,9 @@ class Window(QMainWindow):
             date_format = "%Y-%m-%d_%H-%M-%S"
             schedule = self.behavior_session_model.date.strftime(date_format).split('_')[0]+'_20-30-00'
             schedule_time = datetime.strptime(schedule,date_format) + timedelta(seconds=np.random.randint(30*60))
-            capsule_id = 'c089614a-347e-4696-b17e-86980bb782c1'
+            # This ID is outdated as of 11/21/2024. We will remove this comment once we confirm everything works
+            #capsule_id = 'c089614a-347e-4696-b17e-86980bb782c1'
+            capsule_id = '0ae9703f-9012-4d0b-ad8d-b6a00858b80d'
             mount = 'FIP'
 
             modalities = {}
