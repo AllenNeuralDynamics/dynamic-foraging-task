@@ -29,6 +29,7 @@ from PyQt5 import QtWidgets,QtGui,QtCore, uic
 from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
+import inspect
 
 from StageWidget.main import get_stage_widget
 
@@ -3134,13 +3135,10 @@ class Window(QMainWindow):
                                               float(last_positions['z'])),(0,0,0))
                     elif self.stage_widget is not None:  # aind stage
                         self.stage_widget.movement_page_view.lineEdit_x.setText(str(last_positions['x']))
-                        self.stage_widget.movement_page_view.lineEdit_x.returnPressed.emit()
                         self.stage_widget.movement_page_view.lineEdit_y1.setText(str(last_positions['y1']))
-                        self.stage_widget.movement_page_view.lineEdit_y1.returnPressed.emit()
                         self.stage_widget.movement_page_view.lineEdit_y2.setText(str(last_positions['y2']))
-                        self.stage_widget.movement_page_view.lineEdit_y2.returnPressed.emit()
                         self.stage_widget.movement_page_view.lineEdit_z.setText(str(last_positions['z']))
-                        self.stage_widget.movement_page_view.lineEdit_z.returnPressed.emit()
+                        threading.Thread(target=self.move_aind_stage).start()
                 elif 'B_NewscalePositions' in Obj:  # cross compatibility for mice run on older version of code.
                     self.current_stage.move_absolute_3d(float(last_positions[0]),
                                                         float(last_positions[1]),
@@ -3179,6 +3177,21 @@ class Window(QMainWindow):
         self.keyPressEvent() # Accept all updates
         self.load_tag=1
         self.ID.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
+
+    def move_aind_stage(self):
+        """
+        Move all axis of stage in stage widget
+        """
+        # save current positions since stage widget will reset once returnPressed in emitted
+        axes = ['x', 'y1', 'y2', 'z']
+        textboxes = {axis: getattr(self.stage_widget.movement_page_view, f'lineEdit_{axis}') for axis in axes}
+        positions = {axis: textboxes[axis].text() for axis in axes}
+        for textbox, position in zip(textboxes, positions):
+            textbox.setText(position)
+            textbox.returnPressed.emit()
+            time.sleep(1)    # allow worker to initialize
+            while self.stage_widget.model.move_worker.isRunning():
+                time.sleep(.1)
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
