@@ -152,7 +152,8 @@ class BiasIndicator(QMainWindow):
                                              reward_history=reward_history,
                                              n_trial_back=n_trial_back,
                                              selected_trial_idx=selected_trial_idx,
-                                             cv=cv)
+                                             cv=cv,
+                                             fit_exponential=False)
                 bias = lr['df_beta'].loc['bias']['cross_validation'].values[0]
                 self.log.info(f"Bias: {bias} Trial Count: {trial_count}")
                 self._biases.append(bias)
