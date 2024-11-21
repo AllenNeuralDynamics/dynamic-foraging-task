@@ -3187,14 +3187,12 @@ class Window(QMainWindow):
         textboxes = [getattr(self.stage_widget.movement_page_view, f'lineEdit_{axis}') for axis in axes]
         positions = [textbox.text() for textbox in textboxes]
         for textbox, position in zip(textboxes, positions):
-            print(f'setting textbox {textbox} to position {position}')
             textbox.setText(position)
             textbox.returnPressed.emit()
             time.sleep(1)    # allow worker to initialize
             while self.stage_widget.stage_model.move_thread.isRunning():
                 time.sleep(.1)
-            print(f'textbox current text {textbox.text()}')
-
+        
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
         self.ToInitializeVisual=1
