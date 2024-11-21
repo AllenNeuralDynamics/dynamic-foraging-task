@@ -3185,7 +3185,7 @@ class Window(QMainWindow):
         # save current positions since stage widget will reset once returnPressed in emitted
         axes = ['x', 'y1', 'y2', 'z']
         textboxes = [getattr(self.stage_widget.movement_page_view, f'lineEdit_{axis}') for axis in axes]
-        positions = [textboxes[axis].text() for axis in axes]
+        positions = [textbox.text() for textbox in textboxes]
         for textbox, position in zip(textboxes, positions):
             textbox.setText(position)
             textbox.returnPressed.emit()
