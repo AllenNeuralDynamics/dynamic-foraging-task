@@ -40,7 +40,7 @@ class BiasIndicator(QMainWindow):
         self.bias_plot.setLabels(left='Bias', bottom='Trial #')    # make label bigger
         self.bias_plot.getAxis('left').setTicks([[(-bias_threshold, 'L'),
                                                   (bias_threshold, 'R')]])
-        self.bias_plot.addLine(y=0, pen='lightgrey')  # add line at 0 to help user see if slight bias
+        self.bias_plot.addLine(y=0, pen='lightgray')  # add line at 0 to help user see if slight bias
         self.bias_plot.addLine(y=bias_threshold, pen='b')  # add lines at threshold to make clearer when bias goes over
         self.bias_plot.addLine(y=-bias_threshold, pen='r')
         self.setCentralWidget(self.bias_plot)
@@ -62,7 +62,7 @@ class BiasIndicator(QMainWindow):
         self.bias_plot.addItem(self._current_bias_point)
 
         # create bias label
-        self.bias_label = TextItem(color='black', anchor=(-.05, 0))
+        self.bias_label = TextItem(color='black', anchor=(-.02, 0))
         self.biasValue.connect(lambda bias, trial: self.bias_label.setText(str(round(bias, 3))))
         self.biasValue.connect(lambda bias, trial: self.bias_label.setPos(self._current_bias_point.pos[0][0], bias))
         self.bias_plot.addItem(self.bias_label)
@@ -196,7 +196,7 @@ class BiasIndicator(QMainWindow):
 
         # re configure plot
         self.bias_plot.clear()
-        self.bias_plot.addLine(y=0, pen='grey')  # add line at 0 to help user see if slight bias
+        self.bias_plot.addLine(y=0, pen='lightgray')  # add line at 0 to help user see if slight bias
         self.bias_plot.addLine(y=self.bias_threshold,
                                pen='b')  # add lines at threshold to make clearer when bias goes over
         self.bias_plot.addLine(y=-self.bias_threshold, pen='r')
