@@ -133,7 +133,10 @@ class BiasIndicator(QMainWindow):
         choice_history = np.array(choice_history)
         if len(choice_history[~np.isnan(choice_history)]) >= n_trial_back + 2:
             trial_count = len(choice_history)
-            try:
+
+            # Determine if we have valid data to fit model
+            unique = np.unique(choice_history[~np.isnan(choice_history)])
+            if len(unique) == 2:
                 lr = fit_logistic_regression(choice_history=choice_history,
                                              reward_history=reward_history,
                                              n_trial_back=n_trial_back,
@@ -148,48 +151,53 @@ class BiasIndicator(QMainWindow):
                 upper = lr['df_beta'].loc['bias']['bootstrap_CI_upper'].values[0]
                 lower = lr['df_beta'].loc['bias']['bootstrap_CI_lower'].values[0]
 
-                self.bias_plot.addItem(ErrorBarItem(x=np.array([trial_num]), y=np.array([bias]),
-                                                    top=(abs(bias)+upper)-bias if not np.isnan(upper) else 0,
-                                                    bottom=(abs(bias)-lower)-bias if not np.isnan(upper) else 0,
-                                                    beam=2))
-                # add to plot
-                if len(self._biases) >= 2:
-                    # append data with latest
-                    x = np.append(self._biases_scatter_item.xData, trial_num)
-                    y = np.append(self._biases_scatter_item.yData, bias)
+            elif unique[0] == 0:
+                # only left choices, report bias confidence as (-inf, 0)
+                bias = -1
+                upper = 0
+                lower = -self.bias_threshold
 
-                    self._biases_scatter_item.setData(x=x, y=y)
+            elif unique[0] == 1:
+                # only right choices, report bias confidence as (0, +inf)
+                bias = 1
+                upper = self.bias_threshold
+                lower = 0
 
-                    # auto scroll graph
-                    if trial_num >= self.bias_plot.getAxis('bottom').range[1]-50:
-                        self.bias_plot.setRange(xRange=[trial_num - self.x_range if self.x_range < trial_num else 2,
-                                                        trial_num+50])
+            else:   # skip bias calculation if no conditions are met
+                return
 
-                # emit signal and flash current bias point if over
-                if abs(bias) > self.bias_threshold:
-                    self.log.info(f"Bias value calculated over a threshold of {self.bias_threshold}. Bias: {bias} "
-                                  f"Trial Count: {trial_count}")
-                    self.biasOver.emit(bias, trial_count)
-                    self._current_bias_point.setData(pos=[[trial_num, bias]],
-                                                     pen=QColor('purple'),
-                                                     brush=QColor('purple'),
-                                                     size=9)
+            self.bias_plot.addItem(ErrorBarItem(x=np.array([trial_num]), y=np.array([bias]),
+                                                top=(abs(bias)+upper)-bias if not np.isnan(upper) else 0,
+                                                bottom=(abs(bias)-lower)-bias if not np.isnan(upper) else 0,
+                                                beam=2))
+            # add to plot
+            if len(self._biases) >= 2:
+                # append data with latest
+                x = np.append(self._biases_scatter_item.xData, trial_num)
+                y = np.append(self._biases_scatter_item.yData, bias)
 
-                else:
-                    self._current_bias_point.setData(pos=[[trial_num, bias]],
-                                                     pen=QColor('green'),
-                                                     brush=QColor('green'),
-                                                     size=9)
+                self._biases_scatter_item.setData(x=x, y=y)
 
-            except ValueError as v:
-                acceptable_errors = [f'Cannot have number of splits n_splits={cv} greater than the number of samples:',
-                                     f'n_splits={cv} cannot be greater than the number of members in each class.',
-                                     'This solver needs samples of at least 2 classes in the data']
-                if any(x in str(v) for x in acceptable_errors):
-                    self.log.info(f"Can't calculate bias at trial count {trial_count} because {str(v).lower()}")
-                    self.biasError.emit(str(v), trial_count)
-                else:
-                    raise v
+                # auto scroll graph
+                if trial_num >= self.bias_plot.getAxis('bottom').range[1]-50:
+                    self.bias_plot.setRange(xRange=[trial_num - self.x_range if self.x_range < trial_num else 2,
+                                                    trial_num+50])
+
+            # emit signal and flash current bias point if over
+            if abs(bias) > self.bias_threshold:
+                self.log.info(f"Bias value calculated over a threshold of {self.bias_threshold}. Bias: {bias} "
+                              f"Trial Count: {trial_count}")
+                self.biasOver.emit(bias, trial_count)
+                self._current_bias_point.setData(pos=[[trial_num, bias]],
+                                                 pen=QColor('purple'),
+                                                 brush=QColor('purple'),
+                                                 size=9)
+
+            else:
+                self._current_bias_point.setData(pos=[[trial_num, bias]],
+                                                 pen=QColor('green'),
+                                                 brush=QColor('green'),
+                                                 size=9)
 
     def clear(self):
         """Clear table of all items and clear biases list"""
