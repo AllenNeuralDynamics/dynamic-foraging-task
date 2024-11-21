@@ -3190,7 +3190,7 @@ class Window(QMainWindow):
             textbox.setText(position)
             textbox.returnPressed.emit()
             time.sleep(1)    # allow worker to initialize
-            while self.stage_widget.stage_model.move_worker.isRunning():
+            while self.stage_widget.stage_model.move_thread.isRunning():
                 time.sleep(.1)
 
     def _LoadVisualization(self):
