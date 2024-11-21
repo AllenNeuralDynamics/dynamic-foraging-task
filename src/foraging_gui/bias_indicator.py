@@ -36,10 +36,11 @@ class BiasIndicator(QMainWindow):
         self.bias_plot.getViewBox().invertY(True)
         self.bias_plot.setMouseEnabled(False)
         self.bias_plot.setMouseTracking(False)
-        self.bias_plot.setRange(xRange=[1, self.x_range], yRange=[2 * -bias_threshold, 2 * bias_threshold])
-        self.bias_plot.setLabels(left='Bias', bottom='Trial Start Time (s)')    # make label bigger
+        self.bias_plot.setRange(xRange=[1, self.x_range], yRange=[-self.bias_threshold - .3, .3 + self.bias_threshold])
+        self.bias_plot.setLabels(left='Bias', bottom='Trial #')    # make label bigger
         self.bias_plot.getAxis('left').setTicks([[(-bias_threshold, 'L'),
                                                   (bias_threshold, 'R')]])
+        self.bias_plot.addLine(y=0, pen='lightgrey')  # add line at 0 to help user see if slight bias
         self.bias_plot.addLine(y=bias_threshold, pen='b')  # add lines at threshold to make clearer when bias goes over
         self.bias_plot.addLine(y=-bias_threshold, pen='r')
         self.setCentralWidget(self.bias_plot)
@@ -48,7 +49,8 @@ class BiasIndicator(QMainWindow):
         cm = colormap.get('CET-D1')  # prepare a diverging color map
         cm.reverse()  # reverse to red == left and blue == right
         cm.setMappingMode('diverging')  # set mapping mode
-        self.bias_pen = cm.getPen(span=(1.5 * -bias_threshold, 1.5 * bias_threshold),
+        self.bias_pen = cm.getPen(span=(1.5 * -bias_threshold,
+                                        1.5 * bias_threshold),
                                   width=5)  # red at -threshold to blue at +threshold
 
         # create scatter curve item
@@ -60,7 +62,7 @@ class BiasIndicator(QMainWindow):
         self.bias_plot.addItem(self._current_bias_point)
 
         # create bias label
-        self.bias_label = TextItem(color='black', anchor=(1, 0))
+        self.bias_label = TextItem(color='black', anchor=(-.05, 0))
         self.biasValue.connect(lambda bias, trial: self.bias_label.setText(str(round(bias, 3))))
         self.biasValue.connect(lambda bias, trial: self.bias_label.setPos(self._current_bias_point.pos[0][0], bias))
         self.bias_plot.addItem(self.bias_label)
@@ -148,8 +150,8 @@ class BiasIndicator(QMainWindow):
 
                 self.bias_plot.addItem(ErrorBarItem(x=np.array([trial_num]), y=np.array([bias]),
                                                     top=(abs(bias)+upper)-bias if not np.isnan(upper) else 0,
-                                                    bottom=(abs(bias)+lower)+bias if not np.isnan(upper) else 0,
-                                                    beam=1))
+                                                    bottom=(abs(bias)-lower)-bias if not np.isnan(upper) else 0,
+                                                    beam=2))
                 # add to plot
                 if len(self._biases) >= 2:
                     # append data with latest
@@ -159,9 +161,9 @@ class BiasIndicator(QMainWindow):
                     self._biases_scatter_item.setData(x=x, y=y)
 
                     # auto scroll graph
-                    if trial_num >= self.bias_plot.getAxis('bottom').range[1]:
+                    if trial_num >= self.bias_plot.getAxis('bottom').range[1]-50:
                         self.bias_plot.setRange(xRange=[trial_num - self.x_range if self.x_range < trial_num else 2,
-                                                        trial_num+1])
+                                                        trial_num+50])
 
                 # emit signal and flash current bias point if over
                 if abs(bias) > self.bias_threshold:
@@ -194,10 +196,11 @@ class BiasIndicator(QMainWindow):
 
         # re configure plot
         self.bias_plot.clear()
+        self.bias_plot.addLine(y=0, pen='grey')  # add line at 0 to help user see if slight bias
         self.bias_plot.addLine(y=self.bias_threshold,
                                pen='b')  # add lines at threshold to make clearer when bias goes over
         self.bias_plot.addLine(y=-self.bias_threshold, pen='r')
-        self.bias_plot.setRange(xRange=[1, self.x_range], yRange=[2 * -self.bias_threshold, 2 * self.bias_threshold])
+        self.bias_plot.setRange(xRange=[1, self.x_range], yRange=[-self.bias_threshold - .3, .3 + self.bias_threshold])
 
         # reset bias list
         self._biases = []

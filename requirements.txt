@@ -10,7 +10,7 @@ pyserial
 git+https://github.com/AllenNeuralDynamics/python-newscale@axes-on-target
 git+https://github.com/AllenNeuralDynamics/aind-foraging-behavior-bonsai-automatic-training.git@main
 git+https://github.com/AllenNeuralDynamics/aind-slims-api@main
-git+https://github.com/AllenNeuralDynamics/aind-dynamic-foraging-models@main
+git+https://github.com/AllenNeuralDynamics/aind-dynamic-foraging-models@v0.11.2
 aind-behavior-services<0.9
 pynwb
 requests

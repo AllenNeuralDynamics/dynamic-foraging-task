@@ -4258,7 +4258,7 @@ class Window(QMainWindow):
                                                                'choice_history': choice_history,
                                                                'reward_history': np.array(any_reward).astype(int),
                                                                'n_trial_back': 5,
-                                                               'cv': 5})
+                                                               'cv': 1})
                         self.bias_thread.start()
                     else:
                         logger.debug('Skipping bias calculation as previous is still in progress. ')
