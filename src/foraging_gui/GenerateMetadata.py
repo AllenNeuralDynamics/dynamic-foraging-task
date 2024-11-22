@@ -268,22 +268,32 @@ class generate_metadata:
         '''
         Get the session start and session end time
         '''
-        # priority behavior_streams>high_speed_camera_streams>ephys_streams>ophys_streams
-        if self.behavior_streams!=[]:
-            self.session_start_time = self.behavior_streams[0].stream_start_time
-            self.session_end_time = self.behavior_streams[0].stream_end_time
-        elif self.high_speed_camera_streams!=[]:
-            self.session_start_time = self.high_speed_camera_streams[0].stream_start_time
-            self.session_end_time = self.high_speed_camera_streams[0].stream_end_time
-        elif self.ephys_streams!=[]:
-            self.session_start_time = self.ephys_streams[0].stream_start_time
-            self.session_end_time = self.ephys_streams[0].stream_end_time
-        elif self.ophys_streams!=[]:
-            self.session_start_time = self.ophys_streams[0].stream_start_time
-            self.session_end_time = self.ophys_streams[0].stream_end_time
+        # Initialize empty lists to store start and end times
+        start_times = []
+        end_times = []
+
+        # List of all stream lists
+        all_streams = [
+            self.behavior_streams,
+            self.high_speed_camera_streams,
+            self.ephys_streams,
+            self.ophys_streams
+        ]
+
+        # Iterate over each stream list and collect times
+        for stream_list in all_streams:
+            for stream in stream_list:
+                start_times.append(stream.stream_start_time)
+                end_times.append(stream.stream_end_time)
+
+        # Determine the session start and end times
+        if start_times and end_times:
+            self.session_start_time = min(start_times)
+            self.session_end_time = max(end_times)
         else:
             self.session_start_time = ''
             self.session_end_time = ''
+
 
     def _get_modality(self):
         '''
