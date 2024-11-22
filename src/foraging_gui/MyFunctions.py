@@ -1199,8 +1199,12 @@ class GenerateTrials():
             # stop FIB if running
             if self.win.StartExcitation.isChecked():
                 self.win.StartExcitation.setChecked(False)
-                self.win._StartExcitation()
-    
+                # delay stopping fib for 5 seconds
+                logging.info('Starting timer to stop excitation')
+                fip_stop_timer = QtCore.QTimer(timeout=self.win._StartExcitation, interval=5000)
+                fip_stop_timer.setSingleShot(True)
+                fip_stop_timer.start()
+
     def _CheckAutoWater(self):
         '''Check if it should be an auto water trial'''
         if self.TP_AutoReward:
