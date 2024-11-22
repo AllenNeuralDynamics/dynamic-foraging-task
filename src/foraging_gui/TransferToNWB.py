@@ -418,21 +418,21 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         'reward_size_right' : float(_get_field(obj, 'TP_RightValue_volume', index=i))
         }
 
-        # populate lick spouts with correct format desppending if using newscale or aind stage
-        stage_positions = getattr(obj, 'B_StagePositions', [])
+        # populate lick spouts with correct format depending if using newscale or aind stage
+        stage_positions = getattr(obj, 'B_StagePositions', [])  # If obj doesn't have attr, skip if since i !< len([])
         if i < len(stage_positions):    # index is valid for stage position lengths
-            trial_kwargs['lickspout_position_x'] = stage_positions[i]['x']
-            trial_kwargs['lickspout_position_z'] = stage_positions[i]['z']
-            if stage_positions[i].keys() == ['x', 'y', 'z']:    # newscale stage
-                trial_kwargs['lickspout_position_y'] = stage_positions[i]['y']
-            else:       # aind stage
-                trial_kwargs['lickspout_position_y1'] = stage_positions[i]['y2']
+            trial_kwargs['lickspout_position_x'] = stage_positions[i].get('x', np.nan)  # nan default if keys are wrong
+            trial_kwargs['lickspout_position_z'] = stage_positions[i].get('z', np.nan)  # nan default if keys are wrong
+            if list(stage_positions[i].keys()) == ['x', 'y1', 'y2', 'z']:    # aind stage
+                trial_kwargs['lickspout_position_y1'] = stage_positions[i]['y1']
                 trial_kwargs['lickspout_position_y2'] = stage_positions[i]['y2']
-        else:   # if i not valid index, populate values with nan
+            else:       # newscale stage
+                trial_kwargs['lickspout_position_y'] = stage_positions[i].get('y', np.nan) # nan default if keys are wrong
+        else:   # if i not valid index, populate values with nan for x, y, z
             trial_kwargs['lickspout_position_x'] = np.nan
             trial_kwargs['lickspout_position_y'] = np.nan
             trial_kwargs['lickspout_position_z'] = np.nan
-        
+
         nwbfile.add_trial(**trial_kwargs)
 
 
