@@ -750,7 +750,7 @@ class generate_metadata:
             return
 
         self.behavior_stimulus.append(StimulusEpoch(
-            software=self.behavior_software_origin,
+            software=self.behavior_software,
             stimulus_device_names=self._get_speaker_names(),
             stimulus_name='The behavior auditory go cue',
             stimulus_modalities=[StimulusModality.AUDITORY],
@@ -889,7 +889,7 @@ class generate_metadata:
             return  
         self._get_light_source_config()
         self.optogenetics_stimulus.append(StimulusEpoch(
-                software=self.behavior_software_origin,    
+                software=self.behavior_software,    
                 stimulus_device_names=self.light_names_used_in_session,
                 stimulus_name='Optogenetics',
                 stimulus_modalities=[StimulusModality.OPTOGENETICS],
@@ -1106,7 +1106,6 @@ class generate_metadata:
         get the behavior software version information
         '''
         self.behavior_software=[]
-        self.behavior_software_origin=[]
         try:
             script_dir = os.path.dirname(os.path.abspath(__file__))
             os.chdir(script_dir)  # Change to the directory of the current script
@@ -1124,12 +1123,7 @@ class generate_metadata:
             version=f'behavior branch:{self.Obj["current_branch"]}   commit ID:{self.Obj["commit_ID"]}    version:{self.Obj["version"]}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{version}',
             url=self.Obj["repo_url"],
         ))
-        self.behavior_software_origin.append(Software(
-            name='dynamic-foraging-task',
-            version=f'behavior branch:{self.Obj["current_branch"]}   commit ID:{self.Obj["commit_ID"]}    version:{self.Obj["version"]}',
-            url=self.Obj["repo_url"],
-        ))
-    
+
     def _get_opto_calibration(self):
         '''
         Make the optogenetic (Laser or LED) calibration metadata
