@@ -576,7 +576,7 @@ class generate_metadata:
             self.data_streams[0].light_sources = self.data_streams[0].light_sources + self.ophys_streams[0].light_sources
             self.data_streams[0].detectors = self.data_streams[0].detectors + self.ophys_streams[0].detectors
             self.data_streams[0].fiber_connections = self.data_streams[0].fiber_connections + self.ophys_streams[0].fiber_connections
-            self.data_streams[0].notes = self.data_streams[0].notes + self.ophys_streams[0].notes
+            self.data_streams[0].notes = str(self.data_streams[0].notes) +';'+ str(self.ophys_streams[0].notes)
 
         if self.data_streams == []:
             self.data_streams = self.ephys_streams
