@@ -11,9 +11,10 @@ git+https://github.com/AllenNeuralDynamics/python-newscale@axes-on-target
 git+https://github.com/AllenNeuralDynamics/aind-foraging-behavior-bonsai-automatic-training.git@main
 git+https://github.com/AllenNeuralDynamics/aind-slims-api@main
 git+https://github.com/AllenNeuralDynamics/aind-dynamic-foraging-models@main
+aind-behavior-services<0.9
 pynwb
 requests
-harp-python
+harp-python>=0.3.0
 openpyxl
 deepdiff
 aind-data-schema==1.1.0
