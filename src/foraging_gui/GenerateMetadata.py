@@ -152,17 +152,19 @@ class generate_metadata:
                 'NINDS': 'NINDS',
                 'Simons Foundation': 'SIMONS',
             },
-            'ephys_rig_behavior_daq_names':[
+            'rig_daq_names_janelia_detector':[
                 "Harp Behavior",
                 "Harp Sound",
                 "Harp clock synchronization board",
                 "Harp sound amplifier",
                 ],
-            'behavior_rig_behavior_daq_names':[
+            'rig_daq_names_new_detector':[
                 "Harp Behavior",
                 "Harp Sound",
                 "Harp clock synchronization board",
                 "Harp sound amplifier",
+                "Lick spout Left",
+                "Lick spout Right",
                 ],
             'fiber_photometry_daq_names':[''],
             'ephys_daq_names':['neuropixel basestation'],
@@ -462,6 +464,12 @@ class generate_metadata:
         # Typo 
         if 'PtotocolID' in self.Obj['meta_data_dialog']['session_metadata']:
             self.Obj['meta_data_dialog']['session_metadata']['ProtocolID']=self.Obj['meta_data_dialog']['session_metadata']['PtotocolID']
+
+        # Get the lick detector 
+        if 'AINDLickDetector' not in self.Obj['settings_box']:
+            self.Obj['settings_box']['AINDLickDetector']=0
+        else:
+            self.Obj['settings_box']['AINDLickDetector']=int(self.Obj['settings_box']['AINDLickDetector'])
 
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
@@ -1023,10 +1031,10 @@ class generate_metadata:
             logging.info('No behavior data stream detected!')
             return
 
-        if self.box_type == 'Ephys':
-            daq_names=self.name_mapper['ephys_rig_behavior_daq_names']
+        if self.Obj['settings_box']['AINDLickDetector'] == 1:
+            daq_names=self.name_mapper['rig_daq_names_new_detector']
         else:
-            daq_names=self.name_mapper['behavior_rig_behavior_daq_names']
+            daq_names=self.name_mapper['rig_daq_names_janelia_detector']
 
         self.behavior_streams=[]
         self._get_behavior_software()
