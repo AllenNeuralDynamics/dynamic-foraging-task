@@ -333,7 +333,7 @@ class Window(QMainWindow):
         self.Save.setCheckable(True)
         self.Save.clicked.connect(self._Save)
         self.Clear.clicked.connect(self._Clear)
-        self.Start.clicked.connect(self._Start)
+        self.Start.clicked.connect(self._Check)
         self.GiveLeft.clicked.connect(self._GiveLeft)
         self.GiveRight.clicked.connect(self._GiveRight)
         self.NewSession.clicked.connect(self._NewSession)
@@ -3715,20 +3715,195 @@ class Window(QMainWindow):
             self.Metadata_dialog.ProjectName.addItems([project_name])
         return project_name
 
+    def _Checks(self):
+        """
+        Check with user before starting or stopping a scan
+        """
+
+        if self.Start.isChecked():  # run pre start checks
+
+            # post weight not entered and session ran
+            if self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
+                reply = QMessageBox.critical(self,
+                                             'Box {}, Foraging Close'.format(self.box_letter),
+                                             'Post weight appears to not be entered. Do you want to start a new session?',
+                                             QMessageBox.Yes, QMessageBox.No)
+                if reply == QMessageBox.No:
+                    return
+            # check if FIP setting match schedule
+            mouse_id = self.ID.text()
+            if hasattr(self, 'schedule') and mouse_id in self.schedule['Mouse ID'].values and mouse_id not in [
+                '0', '1',
+                '2', '3',
+                '4', '5',
+                '6', '7',
+                '8', '9',
+                '10']:  # skip if test mouse or mouse isn't in schedule or
+                FIP_Mode = self._GetInfoFromSchedule(mouse_id, 'FIP Mode')
+                FIP_is_nan = (isinstance(FIP_Mode, float) and math.isnan(FIP_Mode)) or FIP_Mode is None
+                if FIP_is_nan and self.PhotometryB.currentText() == 'on':
+                    reply = QMessageBox.critical(self,
+                                                 'Box {}, Start'.format(self.box_letter),
+                                                 'Photometry is set to "on", but the FIP Mode is not in schedule. Continue anyways?',
+                                                 QMessageBox.Yes | QMessageBox.No, )
+                    if reply == QMessageBox.No:
+                        self.Start.setChecked(False)
+                        logging.info('User declines starting session due to conflicting FIP information')
+                        return
+                    else:
+                        # Allow the session to continue, but log error
+                        logging.error(
+                            'Starting session with conflicting FIP information: mouse {}, FIP on, but not in schedule'.format(
+                                mouse_id))
+                elif not FIP_is_nan and self.PhotometryB.currentText() == 'off':
+                    reply = QMessageBox.critical(self,
+                                                 'Box {}, Start'.format(self.box_letter),
+                                                 f'Photometry is set to "off" but schedule indicate '
+                                                 f'FIP Mode is {FIP_Mode}. Continue anyways?',
+                                                 QMessageBox.Yes | QMessageBox.No, )
+                    if reply == QMessageBox.No:
+                        self.Start.setChecked(False)
+                        logging.info('User declines starting session due to conflicting FIP information')
+                        return
+                    else:
+                        # Allow the session to continue, but log error
+                        logging.error(
+                            'Starting session with conflicting FIP information: mouse {}, FIP off, but schedule lists FIP {}'.format(
+                                mouse_id, FIP_Mode))
+
+                elif not FIP_is_nan and FIP_Mode != self.FIPMode.currentText() and self.PhotometryB.currentText() == 'on':
+                    reply = QMessageBox.critical(self,
+                                                 'Box {}, Start'.format(self.box_letter),
+                                                 f'FIP Mode is set to {self.FIPMode.currentText()} but schedule indicate '
+                                                 f'FIP Mode is {FIP_Mode}. Continue anyways?',
+                                                 QMessageBox.Yes | QMessageBox.No, )
+                    if reply == QMessageBox.No:
+                        self.Start.setChecked(False)
+                        logging.info('User declines starting session due to conflicting FIP information')
+                        return
+                    else:
+                        # Allow the session to continue, but log error
+                        logging.error(
+                            'Starting session with conflicting FIP information: mouse {}, FIP mode {}, schedule lists {}'.format(
+                                mouse_id, self.FIPMode.currentText(), FIP_Mode))
+
+            if self.StartANewSession == 0:
+                reply = QMessageBox.question(self,
+                                             'Box {}, Start'.format(self.box_letter),
+                                             'Continue current session?',
+                                             QMessageBox.Yes | QMessageBox.No)
+                if reply == QMessageBox.No:
+                    self.Start.setChecked(False)
+                    logging.info('User declines continuation of session')
+                    return
+                self.GeneratedTrials.lick_interval_time.start()  # restart lick interval calculation
+
+            # check experimenter name
+            reply = QMessageBox.critical(self,
+                                         'Box {}, Start'.format(self.box_letter),
+                                         f'The experimenter is <span style="{self.default_text_color}">{self.Experimenter.text()}</span>. Is this correct?',
+                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if reply == QMessageBox.No:
+                self.Start.setChecked(False)
+                logging.info('User declines using default name')
+                return
+            logging.info('Starting session, with experimenter: {}'.format(self.Experimenter.text()))
+
+            # check repo status
+            if (self.current_branch not in ['main', 'production_testing']) & (
+                    self.ID.text() not in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']):
+                # Prompt user over off-pipeline branch
+                reply = QMessageBox.critical(self,
+                                             'Box {}, Start'.format(self.box_letter),
+                                             'Running on branch <span style="color:purple;font-weight:bold">{}</span>, continue anyways?'.format(
+                                                 self.current_branch),
+                                             QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                if reply == QMessageBox.No:
+                    # Stop session
+                    self.Start.setChecked(False)
+                    logging.info('User declines starting session on branch: {}'.format(self.current_branch))
+                    return
+                else:
+                    # Allow the session to continue, but log error
+                    logging.error('Starting session on branch: {}'.format(self.current_branch))
+
+            # Check for untracked local changes
+            if self.repo_dirty_flag & (
+                    self.ID.text() not in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']):
+                # prompt user over untracked local changes
+                reply = QMessageBox.critical(self,
+                                             'Box {}, Start'.format(self.box_letter),
+                                             'Local repository has untracked changes, continue anyways?',
+                                             QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                if reply == QMessageBox.No:
+                    # Stop session
+                    self.Start.setChecked(False)
+                    logging.info('User declines starting session with untracked changes')
+                    return
+                else:
+                    # Allow the session to continue, but log error
+                    logging.error('Starting session with untracked local changes: {}'.format(self.dirty_files))
+            elif self.repo_dirty_flag is None:
+                logging.error('Could not check for untracked local changes')
+
+            if self.PhotometryB.currentText() == 'on' and (not self.FIP_started):
+                reply = QMessageBox.critical(self,
+                                             'Box {}, Start'.format(self.box_letter),
+                                             'Photometry is set to "on", but the FIP workflow has not been started',
+                                             QMessageBox.Ok)
+                self.Start.setChecked(False)
+                logging.info('Cannot start session without starting FIP workflow')
+                return
+
+            # Check if photometry excitation is running or not
+            if self.PhotometryB.currentText() == 'on' and (not self.StartExcitation.isChecked()):
+                logging.warning('photometry is set to "on", but excitation is not running')
+
+                reply = QMessageBox.question(self,
+                                             'Box {}, Start'.format(self.box_letter),
+                                             'Photometry is set to "on", but excitation is not running. Start excitation now?',
+                                             QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+                if reply == QMessageBox.Yes:
+                    self.StartExcitation.setChecked(True)
+                    logging.info('User selected to start excitation')
+                    started = self._StartExcitation()
+                    if started == 0:
+                        reply = QMessageBox.critical(self,
+                                                     'Box {}, Start'.format(self.box_letter),
+                                                     'Could not start excitation, therefore cannot start the session',
+                                                     QMessageBox.Ok)
+                        logging.info('could not start session, due to failure to start excitation')
+                        self.Start.setChecked(False)
+                        return
+                else:
+                    logging.info('User selected not to start excitation')
+                    self.Start.setChecked(False)
+                    return
+        else:   # do pre stop checks
+            # Prompt user to confirm stopping trials
+            reply = QMessageBox.question(self,
+                                         'Box {}, Start'.format(self.box_letter),
+                                         'Stop current session?',
+                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+            if reply == QMessageBox.Yes:
+                # End trials
+                logging.info('Start button pressed: ending trial loop')
+                self.Start.setStyleSheet("background-color : none")
+            else:
+                # Continue trials
+                logging.info('Start button pressed: user continued session')
+                self.Start.setChecked(True)
+                return
+
+        # start or stop session if passed all checks
+        self._Start()
+
+
     def _Start(self):
         '''start trial loop'''
 
         # set the load tag to zero
-        self.load_tag=0
-
-        # post weight not entered and session ran
-        if self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
-            reply = QMessageBox.critical(self,
-                                         'Box {}, Foraging Close'.format(self.box_letter),
-                                         'Post weight appears to not be entered. Do you want to start a new session?',
-                                         QMessageBox.Yes, QMessageBox.No)
-            if reply == QMessageBox.No:
-                return
+        self.load_tag = 0
 
         # empty the laser calibration
         self.Opto_dialog.laser_1_calibration_voltage.setText('')
@@ -3738,14 +3913,14 @@ class Window(QMainWindow):
 
         # Check for Bonsai connection
         self._ConnectBonsai()
-        if self.InitializeBonsaiSuccessfully==0:
+        if self.InitializeBonsaiSuccessfully == 0:
             logging.info('Start button pressed, but bonsai not connected')
             self.Start.setChecked(False)
             self.Start.setStyleSheet('background-color:none;')
             return
 
         # set the flag to check drop frames
-        self.to_check_drop_frames=1
+        self.to_check_drop_frames = 1
 
         # clear the session list
         self._connect_Sessionlist(connect=False)
@@ -3762,141 +3937,7 @@ class Window(QMainWindow):
             logging.info('Start button pressed: starting trial loop')
             self.keyPressEvent()
 
-            # check if FIP setting match schedule
-            mouse_id = self.behavior_session_model.subject
-            if hasattr(self, 'schedule') and mouse_id in self.schedule['Mouse ID'].values and mouse_id not in ['0','1','2','3','4','5','6','7','8','9','10'] : # skip if test mouse or mouse isn't in schedule or
-                FIP_Mode = self._GetInfoFromSchedule(mouse_id, 'FIP Mode')
-                FIP_is_nan = (isinstance(FIP_Mode, float) and math.isnan(FIP_Mode)) or FIP_Mode is None
-                if FIP_is_nan and self.PhotometryB.currentText()=='on':
-                    reply = QMessageBox.critical(self,
-                                                 'Box {}, Start'.format(self.box_letter),
-                                                 'Photometry is set to "on", but the FIP Mode is not in schedule. Continue anyways?',
-                                                 QMessageBox.Yes | QMessageBox.No,)
-                    if reply == QMessageBox.No:
-                        self.Start.setChecked(False)
-                        logging.info('User declines starting session due to conflicting FIP information')
-                        return
-                    else:
-                        # Allow the session to continue, but log error
-                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP on, but not in schedule'.format(mouse_id))
-                elif not FIP_is_nan and self.PhotometryB.currentText()=='off':
-                    reply = QMessageBox.critical(self,
-                                                 'Box {}, Start'.format(self.box_letter),
-                                                 f'Photometry is set to "off" but schedule indicate '
-                                                 f'FIP Mode is {FIP_Mode}. Continue anyways?',
-                                                 QMessageBox.Yes | QMessageBox.No,)
-                    if reply == QMessageBox.No:
-                        self.Start.setChecked(False)
-                        logging.info('User declines starting session due to conflicting FIP information')
-                        return
-                    else:
-                        # Allow the session to continue, but log error
-                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP off, but schedule lists FIP {}'.format(mouse_id, FIP_Mode))
-
-                elif not FIP_is_nan and FIP_Mode != self.FIPMode.currentText() and self.PhotometryB.currentText()=='on':
-                    reply = QMessageBox.critical(self,
-                                                 'Box {}, Start'.format(self.box_letter),
-                                                 f'FIP Mode is set to {self.FIPMode.currentText()} but schedule indicate '
-                                                 f'FIP Mode is {FIP_Mode}. Continue anyways?',
-                                                 QMessageBox.Yes | QMessageBox.No,)
-                    if reply == QMessageBox.No:
-                        self.Start.setChecked(False)
-                        logging.info('User declines starting session due to conflicting FIP information')
-                        return
-                    else:
-                        # Allow the session to continue, but log error
-                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP mode {}, schedule lists {}'.format(mouse_id, self.FIPMode.currentText(), FIP_Mode))
-
-            if self.StartANewSession == 0 :
-                reply = QMessageBox.question(self,
-                    'Box {}, Start'.format(self.box_letter),
-                    'Continue current session?',
-                    QMessageBox.Yes | QMessageBox.No)
-                if reply == QMessageBox.No:
-                    self.Start.setChecked(False)
-                    logging.info('User declines continuation of session')
-                    return
-                self.GeneratedTrials.lick_interval_time.start()  # restart lick interval calculation
-
-            # check experimenter name
-            reply = QMessageBox.critical(self,
-                'Box {}, Start'.format(self.box_letter),
-                f'The experimenter is <span style="{self.default_text_color}">'
-                f'{self.behavior_session_model.experimenter[0]}</span>. Is this correct?',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-            if reply == QMessageBox.No:
-                self.Start.setChecked(False)
-                logging.info('User declines using default name')
-                return
-            logging.info('Starting session, with experimenter: {}'.format(self.behavior_session_model.experimenter[0]))
-
-            # check repo status
-            if (self.current_branch not in ['main','production_testing']) & (self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']):
-                # Prompt user over off-pipeline branch
-                reply = QMessageBox.critical(self,
-                    'Box {}, Start'.format(self.box_letter),
-                    'Running on branch <span style="color:purple;font-weight:bold">{}</span>, continue anyways?'.format(self.current_branch),
-                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-                if reply == QMessageBox.No:
-                    # Stop session
-                    self.Start.setChecked(False)
-                    logging.info('User declines starting session on branch: {}'.format(self.current_branch))
-                    return
-                else:
-                    # Allow the session to continue, but log error
-                    logging.error('Starting session on branch: {}'.format(self.current_branch))
-
-            # Check for untracked local changes
-            if self.behavior_session_model.allow_dirty_repo & (self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']):
-                # prompt user over untracked local changes
-                reply = QMessageBox.critical(self,
-                    'Box {}, Start'.format(self.box_letter),
-                    'Local repository has untracked changes, continue anyways?',
-                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-                if reply == QMessageBox.No:
-                    # Stop session
-                    self.Start.setChecked(False)
-                    logging.info('User declines starting session with untracked changes')
-                    return
-                else:
-                    # Allow the session to continue, but log error
-                    logging.error('Starting session with untracked local changes: {}'.format(self.dirty_files))
-            elif self.behavior_session_model.allow_dirty_repo is None:
-                logging.error('Could not check for untracked local changes')
-
-            if self.PhotometryB.currentText()=='on' and (not self.FIP_started):
-                reply = QMessageBox.critical(self,
-                    'Box {}, Start'.format(self.box_letter),
-                    'Photometry is set to "on", but the FIP workflow has not been started',
-                    QMessageBox.Ok)
-                self.Start.setChecked(False)
-                logging.info('Cannot start session without starting FIP workflow')
-                return
-
-            # Check if photometry excitation is running or not
-            if self.PhotometryB.currentText()=='on' and (not self.StartExcitation.isChecked()):
-                logging.warning('photometry is set to "on", but excitation is not running')
-
-                reply = QMessageBox.question(self,
-                    'Box {}, Start'.format(self.box_letter),
-                    'Photometry is set to "on", but excitation is not running. Start excitation now?',
-                    QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
-                if reply == QMessageBox.Yes:
-                    self.StartExcitation.setChecked(True)
-                    logging.info('User selected to start excitation')
-                    started = self._StartExcitation()
-                    if started == 0:
-                        reply = QMessageBox.critical(self,
-                            'Box {}, Start'.format(self.box_letter),
-                            'Could not start excitation, therefore cannot start the session',
-                            QMessageBox.Ok)
-                        logging.info('could not start session, due to failure to start excitation')
-                        self.Start.setChecked(False)
-                        return
-                else:
-                    logging.info('User selected not to start excitation')
-                    self.Start.setChecked(False)
-                    return
+            mouse_id = self.ID.text()
 
             # empty post weight after pass through checks in case user cancels run
             self.WeightAfter.setText('')
@@ -3924,7 +3965,7 @@ class Window(QMainWindow):
                 logging.info('Setting IACUC Protocol: {}'.format(protocol))
 
             # Set Project Name in metadata based on schedule
-            add_default=True
+            add_default = True
             project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
             if project_name is not None:
                 projects = [self.Metadata_dialog.ProjectName.itemText(i)
@@ -3938,64 +3979,63 @@ class Window(QMainWindow):
                     add_default = False
 
             if self.add_default_project_name and add_default:
-                project_name=self._set_default_project()
+                project_name = self._set_default_project()
 
             self.project_name = project_name
-            self.session_run = True   # session has been started
+            self.session_run = True  # session has been started
 
             self.keyPressEvent(allow_reset=True)
 
         else:
-            # Prompt user to confirm stopping trials
-            reply = QMessageBox.question(self,
-                'Box {}, Start'.format(self.box_letter),
-                'Stop current session?',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
-            if reply == QMessageBox.Yes:
-                # End trials
-                logging.info('Start button pressed: ending trial loop')
-                self.Start.setStyleSheet("background-color : none")
-            else:
-                # Continue trials
-                logging.info('Start button pressed: user continued session')
-                self.Start.setChecked(True)
-                return
             # If the photometry timer is running, stop it
-            if self.finish_Timer==0:
-                self.ignore_timer=True
-                self.PhotometryRun=0
+            if self.finish_Timer == 0:
+                self.ignore_timer = True
+                self.PhotometryRun = 0
                 logging.info('canceling photometry baseline timer')
                 if hasattr(self, 'workertimer'):
                     # Stop the worker, this has a 1 second delay before taking effect
                     # so we set the text to get ignored as well
                     self.workertimer._stop()
 
-            self._Stop()
+            # fill out GenerateTrials B_Bias
+            last_bias = self.GeneratedTrials.B_Bias[-1]
+            b_bias_len = len(self.GeneratedTrials.B_Bias)
+            self.GeneratedTrials.B_Bias += [last_bias] * ((self.GeneratedTrials.B_CurrentTrialN + 1) - b_bias_len)
 
+            # stop lick interval calculation
+            self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
+
+        if (self.StartANewSession == 1) and (self.ANewTrial == 0):
+            # If we are starting a new session, we should wait for the last trial to finish
+            self._StopCurrentSession()
         # to see if we should start a new session
-        if self.StartANewSession==1 and self.ANewTrial==1:
+        if self.StartANewSession == 1 and self.ANewTrial == 1:
             # generate a new session id
-            self.ManualWaterVolume=[0,0]
+            self.ManualWaterVolume = [0, 0]
             # start a new logging
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
-                if (not (self.Camera_dialog.StartRecording.isChecked() and self.Camera_dialog.AutoControl.currentText()=='No')) and (not self.FIP_started):
+                if (not (
+                        self.Camera_dialog.StartRecording.isChecked() and self.Camera_dialog.AutoControl.currentText() == 'No')) and (
+                not self.FIP_started):
                     # Turn off the camera recording
                     self.Camera_dialog.StartRecording.setChecked(False)
                     # Turn off the preview if it is on and the autocontrol is on, which can make sure the trigger is off before starting the logging. 
-                    if self.Camera_dialog.AutoControl.currentText()=='Yes' and self.Camera_dialog.StartPreview.isChecked():
+                    if self.Camera_dialog.AutoControl.currentText() == 'Yes' and self.Camera_dialog.StartPreview.isChecked():
                         self.Camera_dialog.StartPreview.setChecked(False)
                         # sleep for 1 second to make sure the trigger is off
                         time.sleep(1)
-                    self.Ot_log_folder=self._restartlogging()
+                    self.Ot_log_folder = self._restartlogging()
             except Exception as e:
                 if 'ConnectionAbortedError' in str(e):
                     logging.info('lost bonsai connection: restartlogging()')
                     logging.warning('Lost bonsai connection', extra={'tags': [self.warning_log_tag]})
                     self.Start.setChecked(False)
                     self.Start.setStyleSheet("background-color : none")
-                    self.InitializeBonsaiSuccessfully=0
-                    reply = QMessageBox.question(self, 'Box {}, Start'.format(self.box_letter), 'Cannot connect to Bonsai. Attempt reconnection?',QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+                    self.InitializeBonsaiSuccessfully = 0
+                    reply = QMessageBox.question(self, 'Box {}, Start'.format(self.box_letter),
+                                                 'Cannot connect to Bonsai. Attempt reconnection?',
+                                                 QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
                     if reply == QMessageBox.Yes:
                         self._ReconnectBonsai()
                         logging.info('User selected reconnect bonsai')
@@ -4003,25 +4043,25 @@ class Window(QMainWindow):
                         logging.info('User selected not to reconnect bonsai')
                     return
                 else:
-                    print('type: {}, text:{}'.format(type(e),e))
+                    print('type: {}, text:{}'.format(type(e), e))
                     raise
             # start the camera during the begginning of each session
-            if self.Camera_dialog.AutoControl.currentText()=='Yes':
+            if self.Camera_dialog.AutoControl.currentText() == 'Yes':
                 # camera will start recording
                 self.Camera_dialog.StartRecording.setChecked(True)
-            self.SessionStartTime=datetime.now()
-            self.Other_SessionStartTime=str(self.SessionStartTime) # for saving
-            GeneratedTrials=GenerateTrials(self)
-            self.GeneratedTrials=GeneratedTrials
-            self.StartANewSession=0
-            PlotM=PlotV(win=self,GeneratedTrials=GeneratedTrials,width=5, height=4)
-            #PlotM.finish=1
-            self.PlotM=PlotM
-            #generate the first trial outside the loop, only for new session
-            self.ToReceiveLicks=1
-            self.ToUpdateFigure=1
-            self.ToGenerateATrial=1
-            self.ToInitializeVisual=1
+            self.SessionStartTime = datetime.now()
+            self.Other_SessionStartTime = str(self.SessionStartTime)  # for saving
+            GeneratedTrials = GenerateTrials(self)
+            self.GeneratedTrials = GeneratedTrials
+            self.StartANewSession = 0
+            PlotM = PlotV(win=self, GeneratedTrials=GeneratedTrials, width=5, height=4)
+            # PlotM.finish=1
+            self.PlotM = PlotM
+            # generate the first trial outside the loop, only for new session
+            self.ToReceiveLicks = 1
+            self.ToUpdateFigure = 1
+            self.ToGenerateATrial = 1
+            self.ToInitializeVisual = 1
             GeneratedTrials._GenerateATrial(self.Channel4)
             # delete licks from the previous session
             GeneratedTrials._DeletePreviousLicks(self.Channel2)
@@ -4034,63 +4074,64 @@ class Window(QMainWindow):
                 self.log_session()  # start log for new session
 
         else:
-            GeneratedTrials=self.GeneratedTrials
+            GeneratedTrials = self.GeneratedTrials
 
-        if self.ToInitializeVisual==1: # only run once
-            self.PlotM=PlotM
+        if self.ToInitializeVisual == 1:  # only run once
+            self.PlotM = PlotM
             self.PlotM.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
-            layout=self.Visualization.layout()
+            layout = self.Visualization.layout()
             if layout is not None:
                 for i in reversed(range(layout.count())):
                     layout.itemAt(i).widget().setParent(None)
                 layout.invalidate()
             if layout is None:
-                layout=QGridLayout(self.Visualization)
+                layout = QGridLayout(self.Visualization)
             toolbar = NavigationToolbar(PlotM, self)
             toolbar.setMaximumHeight(20)
             toolbar.setMaximumWidth(300)
             layout.addWidget(toolbar, 0, 0, 1, 2)
             layout.addWidget(PlotM, 1, 0)
             layout.addWidget(self.bias_indicator, 1, 1)
-            self.ToInitializeVisual=0
+            self.ToInitializeVisual = 0
             # clear bias indicator graph
             self.bias_indicator.clear()
             # create workers
-            worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.Channel,self.Channel3,self.Channel4)
+            worker1 = Worker(GeneratedTrials._GetAnimalResponse, self.Channel, self.Channel3, self.Channel4)
             worker1.signals.finished.connect(self._thread_complete)
-            workerLick = Worker(GeneratedTrials._get_irregular_timestamp,self.Channel2)
+            workerLick = Worker(GeneratedTrials._get_irregular_timestamp, self.Channel2)
             workerLick.signals.finished.connect(self._thread_complete2)
-            workerPlot = Worker(PlotM._Update,GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
+            workerPlot = Worker(PlotM._Update, GeneratedTrials=GeneratedTrials, Channel=self.Channel2)
             workerPlot.signals.finished.connect(self._thread_complete3)
-            workerGenerateAtrial = Worker(GeneratedTrials._GenerateATrial,self.Channel4)
+            workerGenerateAtrial = Worker(GeneratedTrials._GenerateATrial, self.Channel4)
             workerGenerateAtrial.signals.finished.connect(self._thread_complete4)
-            workerStartTrialLoop = Worker(self._StartTrialLoop,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
-            workerStartTrialLoop1 = Worker(self._StartTrialLoop1,GeneratedTrials)
-            worker_save = Worker(self._Save,BackupSave=1)
+            workerStartTrialLoop = Worker(self._StartTrialLoop, GeneratedTrials, worker1, workerPlot,
+                                          workerGenerateAtrial)
+            workerStartTrialLoop1 = Worker(self._StartTrialLoop1, GeneratedTrials)
+            worker_save = Worker(self._Save, BackupSave=1)
             worker_save.signals.finished.connect(self._thread_complete6)
-            self.worker1=worker1
-            self.workerLick=workerLick
-            self.workerPlot=workerPlot
-            self.workerGenerateAtrial=workerGenerateAtrial
-            self.workerStartTrialLoop=workerStartTrialLoop
-            self.workerStartTrialLoop1=workerStartTrialLoop1
-            self.worker_save=worker_save
+            self.worker1 = worker1
+            self.workerLick = workerLick
+            self.workerPlot = workerPlot
+            self.workerGenerateAtrial = workerGenerateAtrial
+            self.workerStartTrialLoop = workerStartTrialLoop
+            self.workerStartTrialLoop1 = workerStartTrialLoop1
+            self.worker_save = worker_save
         else:
-            PlotM=self.PlotM
-            worker1=self.worker1
-            workerLick=self.workerLick
-            workerPlot=self.workerPlot
-            workerGenerateAtrial=self.workerGenerateAtrial
-            workerStartTrialLoop=self.workerStartTrialLoop
-            workerStartTrialLoop1=self.workerStartTrialLoop1
-            worker_save=self.worker_save
+            PlotM = self.PlotM
+            worker1 = self.worker1
+            workerLick = self.workerLick
+            workerPlot = self.workerPlot
+            workerGenerateAtrial = self.workerGenerateAtrial
+            workerStartTrialLoop = self.workerStartTrialLoop
+            workerStartTrialLoop1 = self.workerStartTrialLoop1
+            worker_save = self.worker_save
 
         # collecting the base signal for photometry. Only run once
-        if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and self.PhotometryRun==0:
+        if self.Start.isChecked() and self.PhotometryB.currentText() == 'on' and self.PhotometryRun == 0:
             logging.info('Starting photometry baseline timer')
-            self.finish_Timer=0
-            self.PhotometryRun=1
-            self.ignore_timer=False
+            self.finish_Timer = 0
+            self.PhotometryRun = 1
+            self.ignore_timer = False
 
             # create label to display time remaining on photometry label and add to warning widget
             self.photometry_timer_label = QLabel()
@@ -4107,52 +4148,16 @@ class Window(QMainWindow):
                 self.workertimer.moveToThread(self.workertimer_thread)
                 self.workertimer_thread.start()
 
-            self.Time.emit(int(np.floor(float(self.baselinetime.text())*60)))
+            self.Time.emit(int(np.floor(float(self.baselinetime.text()) * 60)))
             logging.info('Running photometry baseline', extra={'tags': [self.warning_log_tag]})
 
-        self._StartTrialLoop(GeneratedTrials,worker1,worker_save)
+        self._StartTrialLoop(GeneratedTrials, worker1, worker_save)
 
-        if self.actionDrawing_after_stopping.isChecked()==True:
+        if self.actionDrawing_after_stopping.isChecked() == True:
             try:
-                self.PlotM._Update(GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
+                self.PlotM._Update(GeneratedTrials=GeneratedTrials, Channel=self.Channel2)
             except Exception as e:
                 logging.error(traceback.format_exc())
-
-    def _Stop(self):
-        """
-        Logic to stop a session
-        """
-
-        # If the photometry timer is running, stop it
-        if self.finish_Timer == 0:
-            self.ignore_timer = True
-            self.PhotometryRun = 0
-            logging.info('canceling photometry baseline timer')
-            if hasattr(self, 'workertimer'):
-                # Stop the worker, this has a 1 second delay before taking effect
-                # so we set the text to get ignored as well
-                self.workertimer._stop()
-
-        # fill out GenerateTrials B_Bias
-        last_bias = self.GeneratedTrials.B_Bias[-1]
-        b_bias_len = len(self.GeneratedTrials.B_Bias)
-        self.GeneratedTrials.B_Bias += [last_bias] * ((self.GeneratedTrials.B_CurrentTrialN + 1) - b_bias_len)
-
-        # stop lick interval calculation
-        self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
-
-        # validate behavior session model and document validation errors if any
-        try:
-            AindBehaviorSessionModel(**self.behavior_session_model.model_dump())
-        except ValidationError as e:
-            logging.error(str(e), extra={'tags': [self.warning_log_tag]})
-        # save behavior session model
-        with open(self.behavior_session_modelJson, "w") as outfile:
-            outfile.write(self.behavior_session_model.model_dump_json())
-
-        if (self.StartANewSession == 1) and (self.ANewTrial == 0):
-            # If we are starting a new session, we should wait for the last trial to finish
-            self._StopCurrentSession()
 
     def log_session(self) -> None:
         """
