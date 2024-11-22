@@ -152,13 +152,13 @@ class generate_metadata:
                 'NINDS': 'NINDS',
                 'Simons Foundation': 'SIMONS',
             },
-            'rig_daq_names_janelia_detector':[
+            'rig_daq_names_janelia_lick_detector':[
                 "harp behavior board",
                 "harp sound card",
                 "harp clock synchronization board",
                 "harp sound amplifier",
                 ],
-            'rig_daq_names_new_detector':[
+            'rig_daq_names_aind_lick_detector':[
                 "harp behavior board",
                 "harp sound card",
                 "harp clock synchronization board",
@@ -1086,9 +1086,9 @@ class generate_metadata:
             return
 
         if self.Obj['settings_box']['AINDLickDetector'] == 1:
-            daq_names=self.name_mapper['rig_daq_names_new_detector']
+            daq_names=self.name_mapper['rig_daq_names_aind_lick_detector']
         else:
-            daq_names=self.name_mapper['rig_daq_names_janelia_detector']
+            daq_names=self.name_mapper['rig_daq_names_janelia_lick_detector']
 
         self.behavior_streams=[]
         self._get_behavior_software()
