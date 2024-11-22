@@ -577,6 +577,7 @@ class generate_metadata:
             self.data_streams[0].detectors = self.data_streams[0].detectors + self.ophys_streams[0].detectors
             self.data_streams[0].fiber_connections = self.data_streams[0].fiber_connections + self.ophys_streams[0].fiber_connections
             self.data_streams[0].notes = str(self.data_streams[0].notes) +';'+ str(self.ophys_streams[0].notes)
+            self.data_streams[0].software = self.ophys_streams[0].software
 
         if self.data_streams == []:
             self.data_streams = self.ephys_streams
@@ -613,6 +614,7 @@ class generate_metadata:
                         camera_names=self.camera_names,
                         stream_start_time=datetime.strptime(self.Obj['Camera_dialog']['camera_start_time'], '%Y-%m-%d %H:%M:%S.%f'),
                         stream_end_time=datetime.strptime(self.Obj['Camera_dialog']['camera_stop_time'], '%Y-%m-%d %H:%M:%S.%f'),
+                        software=self.behavior_software,
                 ))
         else:
             logging.info('No camera data stream detected!')
@@ -650,6 +652,7 @@ class generate_metadata:
                 light_sources=self.fib_light_sources_config,
                 detectors=self.fib_detectors,
                 fiber_connections=self.fiber_connections,
+                software=self.behavior_software,
                 notes=f'Fib modality: fib mode: {self.Obj["fiber_mode"]}',
         ))
 
@@ -1349,4 +1352,5 @@ class generate_metadata:
 if __name__ == '__main__':
     
     generate_metadata(json_file=r'Y:\753126\behavior_753126_2024-10-07_10-14-07\behavior\753126_2024-10-07_10-14-07.json',output_folder=r'H:\test')
+    #generate_metadata(json_file=r'Y:\753126\behavior_753126_2024-10-15_12-20-35\behavior\753126_2024-10-15_12-20-35.json',output_folder=r'H:\test')
     #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
