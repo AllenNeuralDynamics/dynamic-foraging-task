@@ -3731,7 +3731,7 @@ class Window(QMainWindow):
                 if reply == QMessageBox.No:
                     return
             # check if FIP setting match schedule
-            mouse_id = self.ID.text()
+            mouse_id = self.behavior_session_model.subject
             if hasattr(self, 'schedule') and mouse_id in self.schedule['Mouse ID'].values and mouse_id not in [
                 '0', '1',
                 '2', '3',
@@ -3796,7 +3796,6 @@ class Window(QMainWindow):
                     self.Start.setChecked(False)
                     logging.info('User declines continuation of session')
                     return
-                self.GeneratedTrials.lick_interval_time.start()  # restart lick interval calculation
 
             # check experimenter name
             reply = QMessageBox.critical(self,
@@ -3811,7 +3810,7 @@ class Window(QMainWindow):
 
             # check repo status
             if (self.current_branch not in ['main', 'production_testing']) & (
-                    self.ID.text() not in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']):
+                    self.behavior_session_model.subject not in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']):
                 # Prompt user over off-pipeline branch
                 reply = QMessageBox.critical(self,
                                              'Box {}, Start'.format(self.box_letter),
@@ -3828,8 +3827,8 @@ class Window(QMainWindow):
                     logging.error('Starting session on branch: {}'.format(self.current_branch))
 
             # Check for untracked local changes
-            if self.repo_dirty_flag & (
-                    self.ID.text() not in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']):
+            if self.behavior_session_model.allow_dirty_repo & (
+                    self.behavior_session_model.subject not in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']):
                 # prompt user over untracked local changes
                 reply = QMessageBox.critical(self,
                                              'Box {}, Start'.format(self.box_letter),
@@ -3843,7 +3842,7 @@ class Window(QMainWindow):
                 else:
                     # Allow the session to continue, but log error
                     logging.error('Starting session with untracked local changes: {}'.format(self.dirty_files))
-            elif self.repo_dirty_flag is None:
+            elif self.behavior_session_model.allow_dirty_repo is None:
                 logging.error('Could not check for untracked local changes')
 
             if self.PhotometryB.currentText() == 'on' and (not self.FIP_started):
@@ -3937,7 +3936,10 @@ class Window(QMainWindow):
             logging.info('Start button pressed: starting trial loop')
             self.keyPressEvent()
 
-            mouse_id = self.ID.text()
+            if self.StartANewSession == 0:
+                self.GeneratedTrials.lick_interval_time.start()  # restart lick interval calculation
+
+            mouse_id = self.behavior_session_model.subject
 
             # empty post weight after pass through checks in case user cancels run
             self.WeightAfter.setText('')
