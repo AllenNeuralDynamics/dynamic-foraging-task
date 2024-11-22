@@ -695,18 +695,18 @@ class generate_metadata:
         self.stimulus=[]
         self._get_behavior_stimulus()
         self._get_optogenetics_stimulus()
-        self.stimulus=self.audio_stimulus+self.optogenetics_stimulus
+        self.stimulus=self.behavior_stimulus+self.optogenetics_stimulus
 
     def _get_behavior_stimulus(self):
         '''
         Make the audio stimulus metadata
         '''
-        self.audio_stimulus=[]
-        if self.behavior_streams==[]:
+        self.behavior_stimulus=[]
+        if self.has_behavior_data==False:
             logging.info('No behavior data stream detected!')
             return
 
-        self.audio_stimulus.append(StimulusEpoch(
+        self.behavior_stimulus.append(StimulusEpoch(
             software=self.behavior_software_origin,
             stimulus_device_names=self._get_speaker_names(),
             stimulus_name='The behavior auditory go cue',
