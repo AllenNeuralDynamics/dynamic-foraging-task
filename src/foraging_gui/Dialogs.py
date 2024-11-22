@@ -12,7 +12,7 @@ from typing import Literal
 import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox
+from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox, QGridLayout
 from PyQt5.QtWidgets import QLabel, QDialogButtonBox,QFileDialog,QInputDialog, QLineEdit
 from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject, QTimer
@@ -1840,6 +1840,22 @@ class MetadataDialog(QDialog):
         self._get_basics()
         self._show_project_names()
 
+        # create reference position boxes based on stage coordinate keys
+        positions = self.MainWindow._GetPositions() if self.MainWindow._GetPositions() is not None else {}
+        grid_layout = QGridLayout()
+        # add in reference area widget
+        grid_layout.addWidget(self.label_95, 0, 0)
+        grid_layout.addWidget(self.LickSpoutReferenceArea, 0, 1)
+        for i, axis in enumerate(positions.keys()):
+            label = QLabel(f'{axis.upper()} (um):')
+            setattr(self, f'LickSpoutReference{axis.upper()}', QLineEdit())
+            grid_layout.addWidget(label, i+1, 0)
+            grid_layout.addWidget(getattr(self, f'LickSpoutReference{axis.upper()}'), i+1, 1)
+        # add in lick spout distance
+        grid_layout.addWidget(self.label_96, len(positions.keys())+1, 0)
+        grid_layout.addWidget(self.LickSpoutDistance, len(positions.keys())+1, 1)
+        self.groupBox.setLayout(grid_layout)
+
     def _connectSignalsSlots(self):
         self.SelectRigMetadata.clicked.connect(lambda: self._SelectRigMetadata(rig_metadata_file=None))
         self.EphysProbes.currentIndexChanged.connect(self._show_angles)
@@ -1861,12 +1877,15 @@ class MetadataDialog(QDialog):
         self.GoCueDecibel.textChanged.connect(self._save_go_cue_decibel)
         self.LickSpoutDistance.textChanged.connect(self._save_lick_spout_distance)
 
-    def _set_reference(self, reference):
-        '''set the reference'''
+    def _set_reference(self, reference: dict):
+        '''
+        set the reference
+        :param referencee: dictionary with keys that correspond to reference QLinEdits attributes
+        '''
         self.reference = reference
-        self.LickSpoutReferenceX.setText(str(reference[0]))
-        self.LickSpoutReferenceY.setText(str(reference[1]))
-        self.LickSpoutReferenceZ.setText(str(reference[2]))
+        for axis, pos in reference.items():
+            line_edit = getattr(self, f'LickSpoutReference{axis.upper()}')
+            line_edit.setText(str(pos))
 
     def _show_project_info(self):
         '''show the project information based on current project name'''

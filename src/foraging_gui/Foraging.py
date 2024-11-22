@@ -198,6 +198,8 @@ class Window(QMainWindow):
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
         self._Camera()
+        self._InitializeMotorStage()
+        self._load_stage()
         self._Metadata()
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self.WaterPerRewardedTrial=0.005
@@ -208,8 +210,6 @@ class Window(QMainWindow):
         self.keyPressEvent()
         self._WaterVolumnManage2()
         self._LickSta()
-        self._InitializeMotorStage()
-        self._load_stage()
         self._warmup()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
@@ -795,15 +795,20 @@ class Window(QMainWindow):
         '''get the current position of the stage'''
         self._CheckStageConnection()
 
-        if hasattr(self, 'current_stage') and self.current_stage.connected:
+        if hasattr(self, 'current_stage') and self.current_stage.connected: # newscale stage
             logging.info('Grabbing current stage position')
             current_stage=self.current_stage
             current_position=current_stage.get_position()
             self._UpdatePosition(current_position,(0,0,0))
-            return current_position
-        else:
+            return {axis: float(pos) for axis, pos in zip(['x', 'y', 'z'], current_position) }
+        elif self.stage_widget is not None:     # aind stage
+            return {'x': float(self.stage_widget.movement_page_view.lineEdit_x.text()),
+                    'y1': float(self.stage_widget.movement_page_view.lineEdit_y1.text()),
+                    'y2': float(self.stage_widget.movement_page_view.lineEdit_y2.text()),
+                    'z': float(self.stage_widget.movement_page_view.lineEdit_z.text())}
+        else:   # no stage
+            logging.info('GetPositions called, but no current stage')
             return None
-            logging.info('GetPositions pressed, but no current stage')
 
     def _StageStop(self):
         '''Halt the stage'''
@@ -3159,21 +3164,36 @@ class Window(QMainWindow):
                 if 'Other_BasicText' in Obj:
                     self.ShowBasic.setText(Obj['Other_BasicText'])
 
-            #Set newscale position to last position
-            if 'B_NewscalePositions' in Obj:
-                try:
-                    last_positions=Obj['B_NewscalePositions'][-1]
-                except:
+            #Set stage position to last position
+            try:
+                last_positions = Obj['B_StagePositions'][-1]
+                if 'B_StagePositions' in Obj:
+                    if hasattr(self,'current_stage'):   # newscale stage
+                        self.current_stage.move_absolute_3d(float(last_positions['x']),
+                                                            float(last_positions['y']),
+                                                            float(last_positions['z']))
+                        self._UpdatePosition((float(last_positions['x']),
+                                              float(last_positions['y']),
+                                              float(last_positions['z'])),(0,0,0))
+                    elif self.stage_widget is not None:  # aind stage
+                        self.stage_widget.movement_page_view.lineEdit_x.setText(str(last_positions['x']))
+                        self.stage_widget.movement_page_view.lineEdit_y1.setText(str(last_positions['y1']))
+                        self.stage_widget.movement_page_view.lineEdit_y2.setText(str(last_positions['y2']))
+                        self.stage_widget.movement_page_view.lineEdit_z.setText(str(last_positions['z']))
+                        threading.Thread(target=self.move_aind_stage).start()
+                elif 'B_NewscalePositions' in Obj:  # cross compatibility for mice run on older version of code.
+                    self.current_stage.move_absolute_3d(float(last_positions[0]),
+                                                        float(last_positions[1]),
+                                                        float(last_positions[2]))
+                    self._UpdatePosition((float(last_positions[0]),
+                                          float(last_positions[1]),
+                                          float(last_positions[2])),
+                                         (0, 0, 0))
+                else:
                     pass
-                if hasattr(self,'current_stage'):
-                    try:
-                        self.StageStop.click
-                        self.current_stage.move_absolute_3d(float(last_positions[0]),float(last_positions[1]),float(last_positions[2]))
-                        self._UpdatePosition((float(last_positions[0]),float(last_positions[1]),float(last_positions[2])),(0,0,0))
-                    except Exception as e:
-                        logging.error(traceback.format_exc())
-            else:
-                pass
+
+            except Exception as e:
+                logging.error(traceback.format_exc())
 
             # load metadata to the metadata dialog
             if 'meta_data_dialog' in Obj:
@@ -3199,6 +3219,21 @@ class Window(QMainWindow):
         self.keyPressEvent() # Accept all updates
         self.load_tag=1
         self.ID.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
+
+    def move_aind_stage(self):
+        """
+        Move all axis of stage in stage widget
+        """
+        # save current positions since stage widget will reset once returnPressed in emitted
+        axes = ['x', 'y1', 'y2', 'z']
+        textboxes = [getattr(self.stage_widget.movement_page_view, f'lineEdit_{axis}') for axis in axes]
+        positions = [textbox.text() for textbox in textboxes]
+        for textbox, position in zip(textboxes, positions):
+            textbox.setText(position)
+            textbox.returnPressed.emit()
+            time.sleep(1)    # allow worker to initialize
+            while self.stage_widget.stage_model.move_thread.isRunning():
+                time.sleep(.1)
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''

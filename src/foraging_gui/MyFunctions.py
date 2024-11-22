@@ -81,7 +81,7 @@ class GenerateTrials():
         self.B_LaserDuration=[]
         self.B_SelectedCondition=[]
         self.B_AutoWaterTrial=np.array([[],[]]).astype(bool) # to indicate if it is a trial with outo water.
-        self.B_NewscalePositions=[]
+        self.B_StagePositions=[]
         self.B_session_control_state=[]
         self.B_opto_error=[]
         self.NextWaveForm=1 # waveform stored for later use
@@ -1889,8 +1889,8 @@ class GenerateTrials():
                     # If the attribute does not exist in self.Obj, create a new list and append to it
                     self.Obj[attr_name] = [getattr(self, attr_name)]
         # get the newscale positions
-        if hasattr(self.win, 'current_stage'):
-            self.B_NewscalePositions.append(self.win.current_stage.get_position())
+        if hasattr(self.win, 'current_stage') or self.win.stage_widget is not None:
+            self.B_StagePositions.append(self.win._GetPositions())
 
 
 class NewScaleSerialY():
