@@ -581,7 +581,7 @@ class generate_metadata:
         if self.data_streams == []:
             self.data_streams = self.ephys_streams
         elif self.ephys_streams != []:
-            # add the ephys streams to the high speed camera streams
+            # add the first ephys streams (associated with the behavior) to the high speed camera streams
             self.data_streams[0].stream_modalities = self.data_streams[0].stream_modalities+self.ephys_streams[0].stream_modalities
             self.data_streams[0].stream_start_time=min(self.data_streams[0].stream_start_time,self.ephys_streams[0].stream_start_time)
             self.data_streams[0].stream_end_time=max(self.data_streams[0].stream_end_time,self.ephys_streams[0].stream_end_time)
@@ -590,8 +590,15 @@ class generate_metadata:
             self.data_streams[0].stick_microscopes = self.data_streams[0].stick_microscopes + self.ephys_streams[0].stick_microscopes
             self.data_streams[0].notes = str(self.data_streams[0].notes) +';'+ str(self.ephys_streams[0].notes)
 
-
-        
+        # combine other ephys streams
+        self.data_streams2 = []
+        if len(self.ephys_streams)>2:
+            self.data_streams2 = self.ephys_streams[1]
+            for ephys_stream in self.ephys_streams[2:]:
+                self.data_streams2.stream_start_time=min(self.data_streams2.stream_start_time,ephys_stream.stream_start_time)
+                self.data_streams2.stream_end_time=max(self.data_streams2.stream_end_time,ephys_stream.stream_end_time)
+                self.data_streams2.notes = str(self.data_streams2.notes) +';'+ str(ephys_stream.notes)
+        self.data_streams.append(self.data_streams2)
 
     def _get_high_speed_camera_stream(self):
         '''
@@ -642,7 +649,7 @@ class generate_metadata:
                 light_sources=self.fib_light_sources_config,
                 detectors=self.fib_detectors,
                 fiber_connections=self.fiber_connections,
-                notes=f'fib mode: {self.Obj["fiber_mode"]}',
+                notes=f'Fib modality: fib mode: {self.Obj["fiber_mode"]}',
         ))
 
     def _get_fiber_connections(self):
@@ -985,7 +992,7 @@ class generate_metadata:
                     daq_names=daq_names,
                     ephys_modules=self.ephys_modules,
                     stick_microscopes=self.stick_microscopes,
-                    notes=f"recording type: {current_recording['recording_type']}; file name:{current_recording['prepend_text']}{current_recording['base_text']};  experiment number:{current_recording['record_nodes'][0]['experiment_number']};  recording number:{current_recording['record_nodes'][0]['recording_number']}",
+                    notes=f"Ephys modality: recording type: {current_recording['recording_type']}; file name:{current_recording['prepend_text']}{current_recording['base_text']};  experiment number:{current_recording['record_nodes'][0]['experiment_number']};  recording number:{current_recording['record_nodes'][0]['recording_number']}",
             ))
 
 
