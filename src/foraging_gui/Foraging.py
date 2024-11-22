@@ -333,7 +333,7 @@ class Window(QMainWindow):
         self.Save.setCheckable(True)
         self.Save.clicked.connect(self._Save)
         self.Clear.clicked.connect(self._Clear)
-        self.Start.clicked.connect(self._Check)
+        self.Start.clicked.connect(self._CheckStartStop)
         self.GiveLeft.clicked.connect(self._GiveLeft)
         self.GiveRight.clicked.connect(self._GiveRight)
         self.NewSession.clicked.connect(self._NewSession)
@@ -3715,7 +3715,7 @@ class Window(QMainWindow):
             self.Metadata_dialog.ProjectName.addItems([project_name])
         return project_name
 
-    def _Checks(self):
+    def _CheckStartStop(self):
         """
         Check with user before starting or stopping a scan
         """
