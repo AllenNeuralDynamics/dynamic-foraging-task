@@ -806,7 +806,6 @@ class generate_metadata:
         output_parameters = {
             'meta': {
                 'box': _get_field(self.Obj, ['box', 'Tower']),
-                'session_end_time': _get_field(self.Obj, 'Other_CurrentTime'),
                 'session_run_time_in_min': _get_field(self.Obj, 'Other_RunningTime'),
             },
 
