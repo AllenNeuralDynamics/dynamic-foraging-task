@@ -598,7 +598,8 @@ class generate_metadata:
                 self.data_streams2.stream_start_time=min(self.data_streams2.stream_start_time,ephys_stream.stream_start_time)
                 self.data_streams2.stream_end_time=max(self.data_streams2.stream_end_time,ephys_stream.stream_end_time)
                 self.data_streams2.notes = str(self.data_streams2.notes) +';'+ str(ephys_stream.notes)
-        self.data_streams.append(self.data_streams2)
+        if self.data_streams2 != []:
+            self.data_streams.append(self.data_streams2)
 
     def _get_high_speed_camera_stream(self):
         '''
@@ -1354,5 +1355,5 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    generate_metadata(json_file=r'Y:\753126\behavior_753126_2024-10-15_12-20-35\behavior\753126_2024-10-15_12-20-35.json',output_folder=r'H:\test')
+    generate_metadata(json_file=r'Y:\753126\behavior_753126_2024-10-07_10-14-07\behavior\753126_2024-10-07_10-14-07.json',output_folder=r'H:\test')
     #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
