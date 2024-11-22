@@ -1195,7 +1195,6 @@ class GenerateTrials():
             self.win.Start.setStyleSheet("background-color : none")
             self.win.Start.setChecked(False)
             reply = QtWidgets.QMessageBox.question(self.win, 'Box {}'.format(self.win.box_letter), msg, QtWidgets.QMessageBox.Ok)
-            self.win._Start()  # trigger stopping logic after window
             # stop FIB if running
             if self.win.StartExcitation.isChecked():
                 self.win.StartExcitation.setChecked(False)
