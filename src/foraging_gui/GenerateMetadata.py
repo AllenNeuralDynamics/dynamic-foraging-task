@@ -711,8 +711,8 @@ class generate_metadata:
             stimulus_device_names=self._get_speaker_names(),
             stimulus_name='The behavior auditory go cue',
             stimulus_modalities=[StimulusModality.AUDITORY],
-            stimulus_start_time=self.session_start_time,
-            stimulus_end_time=self.session_end_time,
+            stimulus_start_time=self.behavior_streams[0].stream_start_time,
+            stimulus_end_time=self.behavior_streams[0].stream_end_time,
             stimulus_parameters=[AuditoryStimulation(
                 sitmulus_name='auditory go cue',
                 sample_frequency=96000,
