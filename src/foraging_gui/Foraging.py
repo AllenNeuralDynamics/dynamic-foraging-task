@@ -3989,6 +3989,7 @@ class Window(QMainWindow):
             self.keyPressEvent(allow_reset=True)
 
         else:
+            logging.info('Stopping trials')
             # If the photometry timer is running, stop it
             if self.finish_Timer == 0:
                 self.ignore_timer = True
@@ -4007,10 +4008,19 @@ class Window(QMainWindow):
             # stop lick interval calculation
             self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
 
+            # validate behavior session model and document validation errors if any
+            try:
+                AindBehaviorSessionModel(**self.behavior_session_model.model_dump())
+            except ValidationError as e:
+                logging.error(str(e), extra={'tags': [self.warning_log_tag]})
+            # save behavior session model
+            with open(self.behavior_session_modelJson, "w") as outfile:
+                outfile.write(self.behavior_session_model.model_dump_json())
+
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
             self._StopCurrentSession()
-        # to see if we should start a new session
+            # to see if we should start a new session
         if self.StartANewSession == 1 and self.ANewTrial == 1:
             # generate a new session id
             self.ManualWaterVolume = [0, 0]
@@ -4022,7 +4032,7 @@ class Window(QMainWindow):
                 not self.FIP_started):
                     # Turn off the camera recording
                     self.Camera_dialog.StartRecording.setChecked(False)
-                    # Turn off the preview if it is on and the autocontrol is on, which can make sure the trigger is off before starting the logging. 
+                    # Turn off the preview if it is on and the autocontrol is on, which can make sure the trigger is off before starting the logging.
                     if self.Camera_dialog.AutoControl.currentText() == 'Yes' and self.Camera_dialog.StartPreview.isChecked():
                         self.Camera_dialog.StartPreview.setChecked(False)
                         # sleep for 1 second to make sure the trigger is off
@@ -4128,7 +4138,7 @@ class Window(QMainWindow):
             workerStartTrialLoop1 = self.workerStartTrialLoop1
             worker_save = self.worker_save
 
-        # collecting the base signal for photometry. Only run once
+            # collecting the base signal for photometry. Only run once
         if self.Start.isChecked() and self.PhotometryB.currentText() == 'on' and self.PhotometryRun == 0:
             logging.info('Starting photometry baseline timer')
             self.finish_Timer = 0

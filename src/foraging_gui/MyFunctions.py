@@ -1195,11 +1195,13 @@ class GenerateTrials():
             self.win.Start.setStyleSheet("background-color : none")
             self.win.Start.setChecked(False)
             reply = QtWidgets.QMessageBox.question(self.win, 'Box {}'.format(self.win.box_letter), msg, QtWidgets.QMessageBox.Ok)
+            logging.info('Calling stop logic for session')
             self.win._Start()  # trigger stopping logic after window
             # stop FIB if running
             if self.win.StartExcitation.isChecked():
                 self.win.StartExcitation.setChecked(False)
                 # delay stopping fib for 5 seconds
+                logging.info('Starting timer to stop excitation')
                 fip_stop_timer = QtCore.QTimer(timeout=self.win._StartExcitation,interval=5000)
                 fip_stop_timer.setSingleShot(True)
                 fip_stop_timer.start()
