@@ -521,7 +521,8 @@ class generate_metadata:
             return
 
         self._get_stimulus()
-        self.data_streams = self.ephys_streams+self.ophys_streams+self.high_speed_camera_streams
+        self._combine_data_streams()
+        #self.data_streams = self.ephys_streams+self.ophys_streams+self.high_speed_camera_streams
 
         session_params = {
             "experimenter_full_name": [self.Obj['Experimenter']],
@@ -557,6 +558,40 @@ class generate_metadata:
         session.write_standard_file(output_directory=self.output_folder)
         self.session_metadata_success=True
         return session
+    
+    def _combine_data_streams(self):
+        '''
+        Combine the data streams
+        '''
+        
+        self.data_streams = self.high_speed_camera_streams
+        if self.data_streams == []:
+            self.data_streams = self.ophys_streams  
+        elif self.ophys_streams != []:
+            # add the ophys streams to the high speed camera streams
+            self.data_streams.stream_modalities = self.data_streams[0].stream_modalities + self.ophys_streams[0].stream_modalities
+            self.data_streams[0].stream_start_time=min(self.data_streams[0].stream_start_time,self.ophys_streams[0].stream_start_time)
+            self.data_streams[0].stream_end_time=max(self.data_streams[0].stream_end_time,self.ophys_streams[0].stream_end_time)
+            self.data_streams[0].daq_names = self.data_streams[0].daq_names + self.ophys_streams[0].daq_names
+            self.data_streams[0].light_sources = self.data_streams[0].light_sources + self.ophys_streams[0].light_sources
+            self.data_streams[0].detectors = self.data_streams[0].detectors + self.ophys_streams[0].detectors
+            self.data_streams[0].fiber_connections = self.data_streams[0].fiber_connections + self.ophys_streams[0].fiber_connections
+            self.data_streams[0].notes = self.data_streams[0].notes + self.ophys_streams[0].notes
+
+        if self.data_streams == []:
+            self.data_streams = self.ephys_streams
+        elif self.ephys_streams != []:
+            # add the ephys streams to the high speed camera streams
+            self.data_streams[0].stream_modalities = self.data_streams[0].stream_modalities+self.ephys_streams[0].stream_modalities
+            self.data_streams[0].stream_start_time=min(self.data_streams[0].stream_start_time,self.ephys_streams[0].stream_start_time)
+            self.data_streams[0].stream_end_time=max(self.data_streams[0].stream_end_time,self.ephys_streams[0].stream_end_time)
+            self.data_streams[0].daq_names = self.data_streams[0].daq_names + self.ephys_streams[0].daq_names
+            self.data_streams[0].ephys_modules = self.data_streams[0].ephys_modules + self.ephys_streams[0].ephys_modules
+            self.data_streams[0].stick_microscopes = self.data_streams[0].stick_microscopes + self.ephys_streams[0].stick_microscopes
+            self.data_streams[0].notes = str(self.data_streams[0].notes) +';'+ str(self.ephys_streams[0].notes)
+
+
+        
 
     def _get_high_speed_camera_stream(self):
         '''
@@ -1312,5 +1347,5 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    generate_metadata(json_file=r'Y:\711256\behavior_711256_2024-08-15_11-17-57\behavior\711256_2024-08-15_11-17-57.json',output_folder=r'H:\test')
+    generate_metadata(json_file=r'Y:\753126\behavior_753126_2024-10-15_12-20-35\behavior\753126_2024-10-15_12-20-35.json',output_folder=r'H:\test')
     #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
