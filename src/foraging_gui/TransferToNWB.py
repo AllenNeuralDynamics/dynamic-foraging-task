@@ -274,9 +274,18 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     
     # add lickspout position
     nwbfile.add_trial_column(name='lickspout_position_x', description=f'x position (um) of the lickspout position (left-right)')
-    nwbfile.add_trial_column(name='lickspout_position_y', description=f'y position (um) of the lickspout position (forward-backward)')
     nwbfile.add_trial_column(name='lickspout_position_z', description=f'z position (um) of the lickspout position (up-down)')
 
+    # determine lickspout keys based on stage position keys
+    stage_positions = getattr(obj, 'B_StagePositions', [{}])
+    if list(stage_positions[0].keys()) == ['x', 'y1', 'y2', 'z']:   # aind stage
+        nwbfile.add_trial_column(name='lickspout_position_y1',
+                                 description=f'y position (um) of the left lickspout position (forward-backward)')
+        nwbfile.add_trial_column(name='lickspout_position_y2',
+                                 description=f'y position (um) of the right lickspout position (forward-backward)')
+    else:
+        nwbfile.add_trial_column(name='lickspout_position_y',
+                                 description=f'y position (um) of the lickspout position (forward-backward)')
     # add reward size
     nwbfile.add_trial_column(name='reward_size_left', description=f'Left reward size (uL)')
     nwbfile.add_trial_column(name='reward_size_right', description=f'Right reward size (uL)')
