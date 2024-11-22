@@ -693,11 +693,11 @@ class generate_metadata:
         make the stimulus metadata (e.g. audio and optogenetics)
         '''
         self.stimulus=[]
-        self._get_audio_stimulus()
+        self._get_behavior_stimulus()
         self._get_optogenetics_stimulus()
         self.stimulus=self.audio_stimulus+self.optogenetics_stimulus
 
-    def _get_audio_stimulus(self):
+    def _get_behavior_stimulus(self):
         '''
         Make the audio stimulus metadata
         '''
@@ -705,11 +705,11 @@ class generate_metadata:
         if self.behavior_streams==[]:
             logging.info('No behavior data stream detected!')
             return
-        
+
         self.audio_stimulus.append(StimulusEpoch(
             software=self.behavior_software_origin,
             stimulus_device_names=self._get_speaker_names(),
-            stimulus_name='auditory go cue',
+            stimulus_name='The behavior auditory go cue',
             stimulus_modalities=[StimulusModality.AUDITORY],
             stimulus_start_time=self.session_start_time,
             stimulus_end_time=self.session_end_time,
@@ -732,6 +732,8 @@ class generate_metadata:
             trials_rewarded=self.trials_rewarded,
             notes=f"The duration of go cue is 100ms. The frequency is 7500Hz. Decibel is {self.Obj['Other_go_cue_decibel']}dB. The total reward consumed in the session is {self.total_reward_consumed_in_session} microliter. The total reward indcluding consumed in the session and supplementary water is {self.Obj['TotalWater']} millimeters.",
         ))
+
+
     def _get_speaker_names(self):
         '''
         get the speaker names
