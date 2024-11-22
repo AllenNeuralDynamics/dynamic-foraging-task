@@ -184,9 +184,9 @@ class BiasIndicator(QMainWindow):
 
             # update
             self._upper_scatter_item.setData(x=np.append(self._upper_scatter_item.xData, trial_num),
-                                             y=np.append(self._upper_scatter_item.yData, bias+upper))
+                                             y=np.append(self._upper_scatter_item.yData, upper))
             self._lower_scatter_item.setData(x=np.append(self._lower_scatter_item.xData, trial_num),
-                                             y=np.append(self._lower_scatter_item.yData, bias+lower))
+                                             y=np.append(self._lower_scatter_item.yData, lower))
 
             # add to plot
             if len(self._biases) >= 2:
