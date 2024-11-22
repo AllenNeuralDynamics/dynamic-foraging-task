@@ -521,7 +521,7 @@ class generate_metadata:
             return
 
         self._get_stimulus()
-        self.data_streams = self.behavior_streams+self.ephys_streams+self.ophys_streams+self.high_speed_camera_streams
+        self.data_streams = self.ephys_streams+self.ophys_streams+self.high_speed_camera_streams
 
         session_params = {
             "experimenter_full_name": [self.Obj['Experimenter']],
@@ -1040,7 +1040,7 @@ class generate_metadata:
 
         if self.has_behavior_data==False:
             self.behavior_streams=[]
-            logging.info('No behavior data stream detected!')
+            logging.info('No behavior data detected!')
             return
 
         if self.Obj['settings_box']['AINDLickDetector'] == 1:
@@ -1057,6 +1057,7 @@ class generate_metadata:
                 daq_names=daq_names,
                 software=self.behavior_software,
         ))
+
     def _get_behavior_software(self):
         '''
         get the behavior software version information
