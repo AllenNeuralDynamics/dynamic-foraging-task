@@ -31,7 +31,7 @@ from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 from pydantic import ValidationError
 
-from StageWidget.main import get_stage_widget
+#from StageWidget.main import get_stage_widget
 
 import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
@@ -1170,7 +1170,7 @@ class Window(QMainWindow):
             'metadata_dialog_folder':os.path.join(self.SettingFolder,"metadata_dialog")+'\\',
             'rig_metadata_folder':os.path.join(self.SettingFolder,"rig_metadata")+'\\',
             'project_info_file':os.path.join(self.SettingFolder,"Project Name and Funding Source v2.csv"),
-            'schedule_path': os.path.join('Z:\\','dynamic_foraging','DynamicForagingSchedule.csv'),
+            'schedule_path': os.path.join('C:\\',r"\Users\micah.woodard\Downloads\Behavior Schedule (1).csv"),
             'go_cue_decibel_box1':60,
             'go_cue_decibel_box2':60,
             'go_cue_decibel_box3':60,
@@ -3772,12 +3772,12 @@ class Window(QMainWindow):
         self.Opto_dialog.laser_2_calibration_power.setText('')
 
         # Check for Bonsai connection
-        self._ConnectBonsai()
-        if self.InitializeBonsaiSuccessfully==0:
-            logging.info('Start button pressed, but bonsai not connected')
-            self.Start.setChecked(False)
-            self.Start.setStyleSheet('background-color:none;')
-            return
+        # self._ConnectBonsai()
+        # if self.InitializeBonsaiSuccessfully==0:
+        #     logging.info('Start button pressed, but bonsai not connected')
+        #     self.Start.setChecked(False)
+        #     self.Start.setStyleSheet('background-color:none;')
+        #     return
 
         # set the flag to check drop frames
         self.to_check_drop_frames=1
@@ -3802,6 +3802,9 @@ class Window(QMainWindow):
             if hasattr(self, 'schedule') and mouse_id in self.schedule['Mouse ID'].values and mouse_id not in ['0','1','2','3','4','5','6','7','8','9','10'] : # skip if test mouse or mouse isn't in schedule or
                 FIP_Mode = self._GetInfoFromSchedule(mouse_id, 'FIP Mode')
                 FIP_is_nan = (isinstance(FIP_Mode, float) and math.isnan(FIP_Mode)) or FIP_Mode is None
+                FIP_Stage = self._GetInfoFromSchedule(mouse_id, 'First FP Stage')
+                current_stage = self.AutoTrain_dialog.stage_in_use
+                stages = ['STAGE_1', 'STAGE_2', 'STAGE_3', 'FINAL', 'GRADUATED', 'unknown training stage']
                 if FIP_is_nan and self.PhotometryB.currentText()=='on':
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
@@ -3814,7 +3817,7 @@ class Window(QMainWindow):
                     else:
                         # Allow the session to continue, but log error
                         logging.error('Starting session with conflicting FIP information: mouse {}, FIP on, but not in schedule'.format(mouse_id))
-                elif not FIP_is_nan and self.PhotometryB.currentText()=='off':
+                elif not FIP_is_nan and self.PhotometryB.currentText()=='off' and stages.index(current_stage) >= stages.index(FIP_Stage):
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
                                                  f'Photometry is set to "off" but schedule indicate '
