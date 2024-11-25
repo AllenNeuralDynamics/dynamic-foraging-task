@@ -31,7 +31,7 @@ from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 from pydantic import ValidationError
 
-#from StageWidget.main import get_stage_widget
+from StageWidget.main import get_stage_widget
 
 import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
@@ -1170,7 +1170,7 @@ class Window(QMainWindow):
             'metadata_dialog_folder':os.path.join(self.SettingFolder,"metadata_dialog")+'\\',
             'rig_metadata_folder':os.path.join(self.SettingFolder,"rig_metadata")+'\\',
             'project_info_file':os.path.join(self.SettingFolder,"Project Name and Funding Source v2.csv"),
-            'schedule_path': os.path.join('C:\\',r"\Users\micah.woodard\Downloads\Behavior Schedule (1).csv"),
+            'schedule_path': os.path.join('Z:\\','dynamic_foraging','DynamicForagingSchedule.csv'),
             'go_cue_decibel_box1':60,
             'go_cue_decibel_box2':60,
             'go_cue_decibel_box3':60,
@@ -3772,12 +3772,12 @@ class Window(QMainWindow):
         self.Opto_dialog.laser_2_calibration_power.setText('')
 
         # Check for Bonsai connection
-        # self._ConnectBonsai()
-        # if self.InitializeBonsaiSuccessfully==0:
-        #     logging.info('Start button pressed, but bonsai not connected')
-        #     self.Start.setChecked(False)
-        #     self.Start.setStyleSheet('background-color:none;')
-        #     return
+        self._ConnectBonsai()
+        if self.InitializeBonsaiSuccessfully==0:
+            logging.info('Start button pressed, but bonsai not connected')
+            self.Start.setChecked(False)
+            self.Start.setStyleSheet('background-color:none;')
+            return
 
         # set the flag to check drop frames
         self.to_check_drop_frames=1
