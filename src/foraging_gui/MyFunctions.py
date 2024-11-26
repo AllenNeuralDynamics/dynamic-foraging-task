@@ -1154,7 +1154,7 @@ class GenerateTrials():
      
     def _CheckStop(self):
         '''Stop if there are many ingoral trials or if the maximam trial is exceeded MaxTrial'''
-        StopIgnore=int(self.TP_StopIgnores)-1
+        StopIgnore=round(self.TP_auto_stop_ignore_ratio_threshold*self.TP_auto_stop_ignore_win)
         MaxTrial=int(self.TP_MaxTrial)-2 # trial number starts from 0
         MaxTime=float(self.TP_MaxTime)*60 # convert minutes to seconds
         if hasattr(self, 'BS_CurrentRunningTime'): 
@@ -1166,26 +1166,25 @@ class GenerateTrials():
         stop = False
         msg =''
         warning_label_text = ''
-        warning_label_color = 'color: gray;'        
 
         # Check for reasons to stop early 
-        if (np.shape(self.B_AnimalResponseHistory)[0]>=StopIgnore) and (np.all(self.B_AnimalResponseHistory[-StopIgnore:]==2)):
+        non_auto_reward = self.B_AnimalResponseHistory[np.where(~self.TP_AutoReward)]   # isolate non-auto-reward trials
+        win_sz = self.TP_auto_stop_ignore_win
+        if non_auto_reward.shape[0] > win_sz and non_auto_reward[-win_sz:][np.where(2)].shape[0] >= StopIgnore:
             stop=True
-            msg = 'Stopping the session because the mouse has ignored at least {} consecutive trials'.format(self.TP_StopIgnores)
-            warning_label_text = 'Stop because ignore trials exceed or equal: '+self.TP_StopIgnores
-            warning_label_color = self.win.default_warning_color
+            msg = f'Stopping the session because the mouse has ignored at least ' \
+                  f'{self.TP_auto_stop_ignore_ratio_threshold*100}% of {self.TP_auto_stop_ignore_win} ' \
+                  f'consecutive trials'
+            warning_label_text = 'Stop because ignore trials exceed or equal: '+\
+                                 f'{self.TP_auto_stop_ignore_ratio_threshold*100}% of {self.TP_auto_stop_ignore_win}'
         elif self.B_CurrentTrialN>MaxTrial: 
             stop=True
             msg = 'Stopping the session because the mouse has reached the maximum trial count: {}'.format(self.TP_MaxTrial)
             warning_label_text = 'Stop because maximum trials exceed or equal: '+self.TP_MaxTrial
-            warning_label_color = self.win.default_warning_color
         elif self.BS_CurrentRunningTime>MaxTime:
             stop=True
             msg = 'Stopping the session because the session running time has reached {} minutes'.format(self.TP_MaxTime)
             warning_label_text = 'Stop because running time exceeds or equals: '+self.TP_MaxTime+'m'
-            warning_label_color = self.win.default_warning_color
-        else:
-            stop=False
 
         # Update the warning label text/color
         logging.warning(warning_label_text, extra={'tags': [self.win.warning_log_tag]})
