@@ -31,7 +31,7 @@ from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 from pydantic import ValidationError
 
-#from StageWidget.main import get_stage_widget
+from StageWidget.main import get_stage_widget
 
 import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol

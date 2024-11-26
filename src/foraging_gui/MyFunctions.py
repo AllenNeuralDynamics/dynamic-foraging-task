@@ -1170,7 +1170,8 @@ class GenerateTrials():
         # Check for reasons to stop early 
         non_auto_reward = self.B_AnimalResponseHistory[np.where(~self.TP_AutoReward)]   # isolate non-auto-reward trials
         win_sz = self.TP_auto_stop_ignore_win
-        if non_auto_reward.shape[0] > win_sz and non_auto_reward[-win_sz:][np.where(2)].shape[0] >= StopIgnore:
+        if self.BS_CurrentRunningTime >= 30 and \
+                non_auto_reward.shape[0] > win_sz and non_auto_reward[-win_sz:][np.where(2)].shape[0] >= StopIgnore:
             stop=True
             msg = f'Stopping the session because the mouse has ignored at least ' \
                   f'{self.TP_auto_stop_ignore_ratio_threshold*100}% of {self.TP_auto_stop_ignore_win} ' \
