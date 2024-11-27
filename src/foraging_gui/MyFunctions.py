@@ -1167,8 +1167,9 @@ class GenerateTrials():
         msg =''
         warning_label_text = ''
 
-        # Check for reasons to stop early 
-        non_auto_reward = self.B_AnimalResponseHistory[np.where(~self.TP_AutoReward)]   # isolate non-auto-reward trials
+        # Check for reasons to stop early
+        auto_rewards = np.array([any(x) for x in np.column_stack(self.B_AutoWaterTrial.astype(bool))])
+        non_auto_reward = self.B_AnimalResponseHistory[np.where(~auto_rewards)]   # isolate non-auto-reward trials
         win_sz = self.TP_auto_stop_ignore_win
         if self.BS_CurrentRunningTime >= 30 and \
                 non_auto_reward.shape[0] > win_sz and non_auto_reward[-win_sz:][np.where(2)].shape[0] >= StopIgnore:
