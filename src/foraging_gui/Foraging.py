@@ -131,83 +131,88 @@ class Window(QMainWindow):
         self.session_run = False    # flag to indicate if session has been run or not
 
         # Connect to Bonsai
+        print("Initializing Bonsai")
         self._InitializeBonsai()
 
-        # connect to Slims
-        self._ConnectSlims()
-
-        # Set up threads 
-        self.threadpool=QThreadPool() # get animal response
-        self.threadpool2=QThreadPool() # get animal lick
-        self.threadpool3=QThreadPool() # visualization
-        self.threadpool4=QThreadPool() # for generating a new trial
-        self.threadpool5=QThreadPool() # for starting the trial loop
-        self.threadpool6=QThreadPool() # for saving data
-        self.threadpool_workertimer=QThreadPool() # for timing
-
-        # create bias indicator
-        self.bias_n_size = 500
-        self.bias_indicator = BiasIndicator(x_range=self.bias_n_size)  # TODO: Where to store bias_threshold parameter? self.Settings?
-        self.bias_indicator.biasValue.connect(self.bias_calculated)  # update dashboard value
-        self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-        self.bias_thread = threading.Thread()   # dummy thread
-
-        # Set up more parameters
-        self.FIP_started=False
-        self.OpenOptogenetics=0
-        self.OpenWaterCalibration=0
-        self.OpenLaserCalibration=0
-        self.OpenCamera=0
-        self.OpenMetadata=0
-        self.NewTrialRewardOrder=0
-        self.LickSta=0
-        self.LickSta_ToInitializeVisual=1
-        self.TimeDistribution=0
-        self.TimeDistribution_ToInitializeVisual=1
-        self.finish_Timer=1     # for photometry baseline recordings
-        self.PhotometryRun=0    # 1. Photometry has been run; 0. Photometry has not been carried out.
-        self.ignore_timer=False # Used for canceling the photometry baseline timer
-        self.give_left_volume_reserved=0 # the reserved volume of the left valve (usually given after go cue)
-        self.give_right_volume_reserved=0 # the reserved volume of the right valve (usually given after go cue)
-        self.give_left_time_reserved=0 # the reserved open time of the left valve (usually given after go cue)
-        self.give_right_time_reserved=0 # the reserved open time of the right valve (usually given after go cue)
-        self.load_tag=0 # 1, a session has been loaded; 0, no session has been loaded
-        self.Other_manual_water_left_volume=[] # the volume of manual water given by the left valve each time
-        self.Other_manual_water_left_time=[] # the valve open time of manual water given by the left valve each time
-        self.Other_manual_water_right_volume=[] # the volume of manual water given by the right valve each time
-        self.Other_manual_water_right_time=[] # the valve open time of manual water given by the right valve each time
-        self._Optogenetics()    # open the optogenetics panel
-        self._LaserCalibration()# to open the laser calibration panel
-        self._WaterCalibration()# to open the water calibration panel
-        self._Camera()
-        self._Metadata()
-        self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
-        self.WaterPerRewardedTrial=0.005
-        self._ShowRewardPairs() # show reward pairs
-        self._GetTrainingParameters() # get initial training parameters
-        self.connectSignalsSlots()
-        self._Task()
-        self.keyPressEvent()
-        self._WaterVolumnManage2()
-        self._LickSta()
-        self._InitializeMotorStage()
+        print("Initializing Stage")
         self._load_stage()
-        self._warmup()
-        self.CreateNewFolder=1 # to create new folder structure (a new session)
-        self.ManualWaterVolume=[0,0]
-        self._StopPhotometry() # Make sure photoexcitation is stopped
-        # Initialize open ephys saving dictionary
-        self.open_ephys=[]
 
-        # load the rig metadata
-        self._load_rig_metadata()
+        print("TESTING FINISH")
 
-        # Initializes session log handler as None
-        self.session_log_handler = None
-
-        # generate an upload manifest when a session has been produced
-        self.upload_manifest_slot = self.sessionGenerated.connect(self._generate_upload_manifest)
-
+        # connect to Slims
+        # self._ConnectSlims()
+        #
+        # # Set up threads
+        # self.threadpool=QThreadPool() # get animal response
+        # self.threadpool2=QThreadPool() # get animal lick
+        # self.threadpool3=QThreadPool() # visualization
+        # self.threadpool4=QThreadPool() # for generating a new trial
+        # self.threadpool5=QThreadPool() # for starting the trial loop
+        # self.threadpool6=QThreadPool() # for saving data
+        # self.threadpool_workertimer=QThreadPool() # for timing
+        #
+        # # create bias indicator
+        # self.bias_n_size = 500
+        # self.bias_indicator = BiasIndicator(x_range=self.bias_n_size)  # TODO: Where to store bias_threshold parameter? self.Settings?
+        # self.bias_indicator.biasValue.connect(self.bias_calculated)  # update dashboard value
+        # self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        # self.bias_thread = threading.Thread()   # dummy thread
+        #
+        # # Set up more parameters
+        # self.FIP_started=False
+        # self.OpenOptogenetics=0
+        # self.OpenWaterCalibration=0
+        # self.OpenLaserCalibration=0
+        # self.OpenCamera=0
+        # self.OpenMetadata=0
+        # self.NewTrialRewardOrder=0
+        # self.LickSta=0
+        # self.LickSta_ToInitializeVisual=1
+        # self.TimeDistribution=0
+        # self.TimeDistribution_ToInitializeVisual=1
+        # self.finish_Timer=1     # for photometry baseline recordings
+        # self.PhotometryRun=0    # 1. Photometry has been run; 0. Photometry has not been carried out.
+        # self.ignore_timer=False # Used for canceling the photometry baseline timer
+        # self.give_left_volume_reserved=0 # the reserved volume of the left valve (usually given after go cue)
+        # self.give_right_volume_reserved=0 # the reserved volume of the right valve (usually given after go cue)
+        # self.give_left_time_reserved=0 # the reserved open time of the left valve (usually given after go cue)
+        # self.give_right_time_reserved=0 # the reserved open time of the right valve (usually given after go cue)
+        # self.load_tag=0 # 1, a session has been loaded; 0, no session has been loaded
+        # self.Other_manual_water_left_volume=[] # the volume of manual water given by the left valve each time
+        # self.Other_manual_water_left_time=[] # the valve open time of manual water given by the left valve each time
+        # self.Other_manual_water_right_volume=[] # the volume of manual water given by the right valve each time
+        # self.Other_manual_water_right_time=[] # the valve open time of manual water given by the right valve each time
+        # self._Optogenetics()    # open the optogenetics panel
+        # self._LaserCalibration()# to open the laser calibration panel
+        # self._WaterCalibration()# to open the water calibration panel
+        # self._Camera()
+        # self._Metadata()
+        # self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
+        # self.WaterPerRewardedTrial=0.005
+        # self._ShowRewardPairs() # show reward pairs
+        # self._GetTrainingParameters() # get initial training parameters
+        # self.connectSignalsSlots()
+        # self._Task()
+        # self.keyPressEvent()
+        # self._WaterVolumnManage2()
+        # self._LickSta()
+        # self._InitializeMotorStage()
+        # self._warmup()
+        # self.CreateNewFolder=1 # to create new folder structure (a new session)
+        # self.ManualWaterVolume=[0,0]
+        # self._StopPhotometry() # Make sure photoexcitation is stopped
+        # # Initialize open ephys saving dictionary
+        # self.open_ephys=[]
+        #
+        # # load the rig metadata
+        # self._load_rig_metadata()
+        #
+        # # Initializes session log handler as None
+        # self.session_log_handler = None
+        #
+        # # generate an upload manifest when a session has been produced
+        # self.upload_manifest_slot = self.sessionGenerated.connect(self._generate_upload_manifest)
+        #
         # show disk space
         self._show_disk_space()
         if not self.start_bonsai_ide:
