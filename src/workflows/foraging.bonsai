@@ -120,7 +120,7 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="osc:CreateTcpServer">
                 <osc:Name>BonsaiOSC</osc:Name>
-                <osc:Port>4022</osc:Port>
+                <osc:Port>4032</osc:Port>
                 <osc:NoDelay>false</osc:NoDelay>
                 <osc:AllowNatTraversal>true</osc:AllowNatTraversal>
               </Combinator>
@@ -144,7 +144,7 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="osc:CreateTcpServer">
                 <osc:Name>BonsaiOSC2</osc:Name>
-                <osc:Port>4023</osc:Port>
+                <osc:Port>4033</osc:Port>
                 <osc:NoDelay>false</osc:NoDelay>
                 <osc:AllowNatTraversal>true</osc:AllowNatTraversal>
               </Combinator>
@@ -168,7 +168,7 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="osc:CreateTcpServer">
                 <osc:Name>BonsaiOSC3</osc:Name>
-                <osc:Port>4024</osc:Port>
+                <osc:Port>4034</osc:Port>
                 <osc:NoDelay>false</osc:NoDelay>
                 <osc:AllowNatTraversal>true</osc:AllowNatTraversal>
               </Combinator>
@@ -192,7 +192,7 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="osc:CreateTcpServer">
                 <osc:Name>BonsaiOSC4</osc:Name>
-                <osc:Port>4025</osc:Port>
+                <osc:Port>4035</osc:Port>
                 <osc:NoDelay>false</osc:NoDelay>
                 <osc:AllowNatTraversal>true</osc:AllowNatTraversal>
               </Combinator>
@@ -1539,7 +1539,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Disabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM7</harp:PortName>
+                      <harp:PortName>COM6</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject">
@@ -2844,7 +2844,7 @@
                 <harp:VisualIndicators>On</harp:VisualIndicators>
                 <harp:Heartbeat>Disabled</harp:Heartbeat>
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                <harp:PortName>COM4</harp:PortName>
+                <harp:PortName>COM7</harp:PortName>
               </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
@@ -8698,7 +8698,7 @@
         <Property Name="FileName" DisplayName="SettingsPath" />
       </Expression>
       <Expression xsi:type="io:CsvReader">
-        <io:FileName>C:\Users\svc_aind_behavior\Documents\ForagingSettings\Settings_box3.csv</io:FileName>
+        <io:FileName>C:\Users\svc_aind_behavior\Documents\ForagingSettings\Settings_box4.csv</io:FileName>
         <io:ScanPattern>%s,%s</io:ScanPattern>
         <io:SkipRows>0</io:SkipRows>
       </Expression>
@@ -8735,7 +8735,7 @@
               <gui:Enabled>true</gui:Enabled>
               <gui:Visible>true</gui:Visible>
               <gui:Font>Microsoft Sans Serif, 15.75pt, style=Bold</gui:Font>
-              <gui:Text>447-3-C</gui:Text>
+              <gui:Text> 447-1-D</gui:Text>
             </Expression>
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="SubscribeSubject">
