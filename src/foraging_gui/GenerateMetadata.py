@@ -522,6 +522,7 @@ class generate_metadata:
 
         self._get_stimulus()
         self._combine_data_streams()
+        self._get_modality()
         #self.data_streams = self.ephys_streams+self.ophys_streams+self.high_speed_camera_streams
 
         session_params = {
@@ -561,7 +562,7 @@ class generate_metadata:
     
     def _combine_data_streams(self):
         '''
-        Combine the data streams
+        Combine the data streams (exclude behavior from the data stream)
         '''
         
         self.data_streams = self.high_speed_camera_streams
