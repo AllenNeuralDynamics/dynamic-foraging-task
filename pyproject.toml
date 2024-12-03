@@ -37,7 +37,8 @@ dependencies = [
     "aind-data-schema-models==0.5.6",
     "pydantic==2.9.2",
     "stagewidget==1.0.4.dev0",
-
+    "python-logging-loki~=0.3.1",
+    "pykeepass~=4.0.7",
     "pyyaml",
     "pyqtgraph"
 
@@ -48,5 +49,3 @@ where = ["src"]
 
 [tool.setuptools.dynamic]
 version = {attr = "foraging_gui.__version__"}
-
-
