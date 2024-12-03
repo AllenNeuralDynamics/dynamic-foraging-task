@@ -4053,6 +4053,10 @@ class Window(QMainWindow):
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
                 # camera will start recording
                 self.Camera_dialog.StartRecording.setChecked(True)
+            # clear camera start and end time
+            if not self.Camera_dialog.StartRecording.isChecked():
+                self.Camera_dialog.camera_start_time=''
+                self.Camera_dialog.camera_stop_time=''
             self.SessionStartTime=datetime.now()
             self.Other_SessionStartTime=str(self.SessionStartTime) # for saving
             GeneratedTrials=GenerateTrials(self)
