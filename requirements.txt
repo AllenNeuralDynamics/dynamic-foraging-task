@@ -23,3 +23,5 @@ pydantic==2.9.2
 pyyaml
 pyqtgraph
 stagewidget==1.0.4.dev0
+python-logging-loki~=0.3.1
+pykeepass~=4.0.7

@@ -1,3 +1,4 @@
+import platform
 import sys
 import os
 import traceback
@@ -6,6 +7,9 @@ import time
 import subprocess
 import math
 import logging
+from hashlib import md5
+
+import logging_loki
 import socket
 import harp
 import threading
@@ -21,6 +25,7 @@ from aind_slims_api import models
 import serial
 import numpy as np
 import pandas as pd
+from pykeepass import PyKeePass
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
@@ -52,6 +57,7 @@ from aind_behavior_services.session import AindBehaviorSessionModel
 
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear() # clear handlers so console output can be configured
+logging.raiseExceptions = os.getenv('FORAGING_DEV_MODE', False)
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -4707,6 +4713,33 @@ class Window(QMainWindow):
         logging.debug('Disconnecting sessionGenerated from _generate_upload_manifest')
         self.upload_manifest_slot = self.sessionGenerated.disconnect(self.upload_manifest_slot)
 
+def setup_loki_logging(box_number):
+    db_file=os.getenv('SIPE_DB_FILE', r'//allen/aibs/mpe/keepass/sipe_sw_passwords.kdbx')
+    key_file=os.getenv('SIPE_KEY_FILE', r'c:\ProgramData\AIBS_MPE\.secrets\sipe_sw_passwords.keyx')
+    kp = PyKeePass(db_file, keyfile=key_file)
+    entry = kp.find_entries(title="Loki Credentials", first=True)
+    session =  md5((''.join([str(datetime.now()), platform.node(), str(os.getpid())])).encode("utf-8")).hexdigest()[:7]
+
+    handler = logging_loki.LokiHandler(
+        url="http://eng-tools/loki/api/v1/push",
+        tags={
+            'hostname': socket.gethostname(),
+            'process_name': __name__,
+            'user_name': os.getlogin(),
+            'log_session': session,
+            'box_name': chr(box_number + 64)  # they use A=1, B=2, ...
+        },
+        auth=(entry.username, entry.password),
+        version="1",
+    )
+
+    handler.setFormatter(
+        logging.Formatter(fmt='%(asctime)s\n%(name)s\n%(levelname)s\n%(funcName)s (%(filename)s:%(lineno)d)\n%(message)s',
+                          datefmt='%Y-%m-%d %H:%M:%S')
+    )
+    handler.setLevel(logging.INFO)
+    logger.root.addHandler(handler)
+
 def start_gui_log_file(box_number):
     '''
         Starts a log file for the gui.
@@ -4890,6 +4923,11 @@ if __name__ == "__main__":
 
     # Start logging
     start_gui_log_file(box_number)
+    try:
+        setup_loki_logging(box_number)
+    except Exception as e:  # noqa
+        logging.warning(f"Failed to setup LOKI Handler: {e}")
+
     commit_ID, current_branch, repo_url, repo_dirty_flag, dirty_files, version = log_git_hash()
 
     # Formating GUI graphics
@@ -4920,5 +4958,3 @@ if __name__ == "__main__":
 
     # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())
-
-
