@@ -81,7 +81,7 @@ class GenerateTrials():
         self.B_LaserDuration=[]
         self.B_SelectedCondition=[]
         self.B_AutoWaterTrial=np.array([[],[]]).astype(bool) # to indicate if it is a trial with outo water.
-        self.B_NewscalePositions=[]
+        self.B_StagePositions=[]
         self.B_session_control_state=[]
         self.B_opto_error=[]
         self.NextWaveForm=1 # waveform stored for later use
@@ -927,8 +927,8 @@ class GenerateTrials():
             if same_side_frac >= threshold:
                 self.win.same_side_lick_interval.setText(f'Percentage of same side lick intervals under 100 ms is '
                                                          f'over 10%: {same_side_frac * 100:.2f}%.')
-                logging.error(f'Percentage of same side lick intervals under 100 ms in Box {self.win.box_letter} '
-                              f'mouse {self.win.ID.text()} exceeded 10%')
+                logging.error(f'Percentage of same side lick intervals under 100 ms in Box {self.win.box_number}'
+                              f'{self.win.box_letter} mouse {self.win.behavior_session_model.subject} exceeded 10%')
             else:
                 self.win.same_side_lick_interval.setText('')
 
@@ -954,8 +954,8 @@ class GenerateTrials():
             if cross_side_frac >= threshold:
                 self.win.cross_side_lick_interval.setText(f'Percentage of cross side lick intervals under 100 ms is '
                                                           f'over 10%: {cross_side_frac * 100:.2f}%.')
-                logging.error(f'Percentage of cross side lick intervals under 100 ms in Box {self.win.box_letter} '
-                              f'mouse {self.win.ID.text()} exceeded 10%')
+                logging.error(f'Percentage of cross side lick intervals under 100 ms in Box {self.win.box_number}'
+                              f'{self.win.box_letter} mouse {self.win.behavior_session_model.subject} exceeded 10%')
             else:
                 self.win.cross_side_lick_interval.setText('')
 
@@ -1195,12 +1195,15 @@ class GenerateTrials():
             self.win.Start.setStyleSheet("background-color : none")
             self.win.Start.setChecked(False)
             reply = QtWidgets.QMessageBox.question(self.win, 'Box {}'.format(self.win.box_letter), msg, QtWidgets.QMessageBox.Ok)
-            self.win._Start()  # trigger stopping logic after window
             # stop FIB if running
             if self.win.StartExcitation.isChecked():
                 self.win.StartExcitation.setChecked(False)
-                self.win._StartExcitation()
-    
+                # delay stopping fib for 5 seconds
+                logging.info('Starting timer to stop excitation')
+                self.fip_stop_timer = QtCore.QTimer(timeout=self.win._StartExcitation, interval=5000)
+                self.fip_stop_timer.setSingleShot(True)
+                self.fip_stop_timer.start()
+
     def _CheckAutoWater(self):
         '''Check if it should be an auto water trial'''
         if self.TP_AutoReward:
@@ -1889,8 +1892,8 @@ class GenerateTrials():
                     # If the attribute does not exist in self.Obj, create a new list and append to it
                     self.Obj[attr_name] = [getattr(self, attr_name)]
         # get the newscale positions
-        if hasattr(self.win, 'current_stage'):
-            self.B_NewscalePositions.append(self.win.current_stage.get_position())
+        if hasattr(self.win, 'current_stage') or self.win.stage_widget is not None:
+            self.B_StagePositions.append(self.win._GetPositions())
 
 
 class NewScaleSerialY():
