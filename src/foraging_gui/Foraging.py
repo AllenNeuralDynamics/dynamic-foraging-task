@@ -3620,10 +3620,6 @@ class Window(QMainWindow):
 
         self.unsaved_data=False
         self.ManualWaterVolume=[0,0]
-        if hasattr(self, 'fiber_photometry_start_time'):
-            del self.fiber_photometry_start_time
-        if hasattr(self, 'fiber_photometry_end_time'):
-            del self.fiber_photometry_end_time
 
         # Clear Plots
         if hasattr(self, 'PlotM') and self.clear_figure_after_save:
@@ -4057,6 +4053,13 @@ class Window(QMainWindow):
             if not self.Camera_dialog.StartRecording.isChecked():
                 self.Camera_dialog.camera_start_time=''
                 self.Camera_dialog.camera_stop_time=''
+            # clear fiber start and end time
+            if hasattr(self, 'fiber_photometry_end_time'):
+                del self.fiber_photometry_end_time
+            if not self.StartExcitation.isChecked():
+                if hasattr(self, 'fiber_photometry_start_time'):
+                    del self.fiber_photometry_start_time
+
             self.SessionStartTime=datetime.now()
             self.Other_SessionStartTime=str(self.SessionStartTime) # for saving
             GeneratedTrials=GenerateTrials(self)
