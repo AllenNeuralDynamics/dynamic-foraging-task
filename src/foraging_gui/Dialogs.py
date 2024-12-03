@@ -52,7 +52,7 @@ class MouseSelectorDialog(QDialog):
         combo.setFont(font)
         self.combo = combo
         
-        msg = QLabel('Enter the Mouse ID: \n (use 0-9, single digit as test IDs)')
+        msg = QLabel('Enter the Mouse ID: \nuse 0-9, single digit as test ID')
         font = msg.font()
         font.setPointSize(12)
         msg.setFont(font)
