@@ -1170,7 +1170,7 @@
       <string>1</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_51">
+    <widget class="QLabel" name="auto_stop_ignore_win_label">
      <property name="geometry">
       <rect>
        <x>542</x>
@@ -1186,7 +1186,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>stop ignores&gt;</string>
+      <string>auto stop ignore window:</string>
      </property>
      <property name="textFormat">
       <enum>Qt::AutoText</enum>
@@ -1195,7 +1195,7 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
-    <widget class="QLineEdit" name="StopIgnores">
+    <widget class="QLineEdit" name="auto_stop_ignore_win">
      <property name="geometry">
       <rect>
        <x>614</x>
@@ -1211,7 +1211,51 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>20</string>
+      <string>30</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="auto_stop_ignore_ratio_threshold_label">
+     <property name="geometry">
+      <rect>
+       <x>1080</x>
+       <y>232</y>
+       <width>67</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>auto stop ignore ratio threshold:</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="auto_stop_ignore_ratio_threshold">
+     <property name="geometry">
+      <rect>
+       <x>1150</x>
+       <y>232</y>
+       <width>80</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>.8</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_52">
