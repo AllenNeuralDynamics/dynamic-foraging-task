@@ -617,7 +617,7 @@ class generate_metadata:
                         stream_modalities=[Modality.BEHAVIOR_VIDEOS],
                         camera_names=self.camera_names,
                         stream_start_time=datetime.strptime(self.Obj['Camera_dialog']['camera_start_time'], '%Y-%m-%d %H:%M:%S.%f'),
-                        stream_end_time=,
+                        stream_end_time=camera_stop_time,
                         software=self.behavior_software,
                 ))
         else:
