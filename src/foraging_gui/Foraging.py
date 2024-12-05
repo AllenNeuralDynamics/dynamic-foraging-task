@@ -4663,10 +4663,9 @@ class Window(QMainWindow):
             mount = 'FIP'
 
             modalities = {}
+            modalities['behavior'] = [self.behavior_session_model.root_path.replace('\\', '/')]
             for stream in session.data_streams:
-                if Modality.BEHAVIOR in stream.stream_modalities:
-                    modalities['behavior'] = [self.behavior_session_model.root_path.replace('\\', '/')]
-                elif Modality.FIB in stream.stream_modalities:
+                if Modality.FIB in stream.stream_modalities:
                     modalities['fib'] = [self.PhotometryFolder.replace('\\', '/')]
                 elif Modality.BEHAVIOR_VIDEOS in stream.stream_modalities:
                     modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
