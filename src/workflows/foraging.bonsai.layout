@@ -953,12 +953,12 @@
       <DialogSettings>
         <Visible>true</Visible>
         <Location>
-          <X>0</X>
-          <Y>0</Y>
+          <X>10</X>
+          <Y>311</Y>
         </Location>
         <Size>
-          <Width>0</Width>
-          <Height>0</Height>
+          <Width>636</Width>
+          <Height>279</Height>
         </Size>
         <WindowState>Normal</WindowState>
         <VisualizerTypeName>Bonsai.Design.Visualizers.TableLayoutPanelVisualizer</VisualizerTypeName>
@@ -1128,8 +1128,8 @@
         <Y>3</Y>
       </Location>
       <Size>
-        <Width>1029</Width>
-        <Height>604</Height>
+        <Width>632</Width>
+        <Height>654</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -1245,12 +1245,12 @@
       <DialogSettings>
         <Visible>true</Visible>
         <Location>
-          <X>0</X>
-          <Y>0</Y>
+          <X>14</X>
+          <Y>599</Y>
         </Location>
         <Size>
-          <Width>0</Width>
-          <Height>0</Height>
+          <Width>430</Width>
+          <Height>313</Height>
         </Size>
         <WindowState>Normal</WindowState>
         <VisualizerTypeName>Bonsai.Design.Visualizers.TableLayoutPanelVisualizer</VisualizerTypeName>
@@ -1304,8 +1304,8 @@
         <Y>3</Y>
       </Location>
       <Size>
-        <Width>1029</Width>
-        <Height>604</Height>
+        <Width>632</Width>
+        <Height>654</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -1457,12 +1457,12 @@
       <DialogSettings>
         <Visible>true</Visible>
         <Location>
-          <X>0</X>
-          <Y>0</Y>
+          <X>10</X>
+          <Y>38</Y>
         </Location>
         <Size>
-          <Width>0</Width>
-          <Height>0</Height>
+          <Width>637</Width>
+          <Height>267</Height>
         </Size>
         <WindowState>Normal</WindowState>
         <VisualizerTypeName>Bonsai.Design.Visualizers.TableLayoutPanelVisualizer</VisualizerTypeName>
