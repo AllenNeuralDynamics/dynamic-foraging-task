@@ -2827,7 +2827,7 @@ class Window(QMainWindow):
         session_name = self.behavior_session_model.session_name=f'behavior_{self.behavior_session_model.subject}_' \
                                                      f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
         self.SessionFolder=os.path.join(self.default_saveFolder,
-            self.current_box,self.behavior_session_model.subject, f'behavior_{session_name}')
+            self.current_box,self.behavior_session_model.subject, session_name)
         self.behavior_session_model.root_path=os.path.join(self.SessionFolder,'behavior')
         self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{session_name}.mat')
         self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}.json')
@@ -4663,11 +4663,11 @@ class Window(QMainWindow):
             mount = 'FIP'
 
             modalities = {}
+            modalities['behavior'] = [self.behavior_session_model.root_path.replace('\\', '/')]
             for stream in session.data_streams:
-                if Modality.BEHAVIOR in stream.stream_modalities:
-                    modalities['behavior'] = [self.behavior_session_model.root_path.replace('\\', '/')]
-                elif Modality.FIB in stream.stream_modalities:
+                if Modality.FIB in stream.stream_modalities:
                     modalities['fib'] = [self.PhotometryFolder.replace('\\', '/')]
+                    modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
                 elif Modality.BEHAVIOR_VIDEOS in stream.stream_modalities:
                     modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
 
