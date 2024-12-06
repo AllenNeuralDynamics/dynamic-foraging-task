@@ -274,9 +274,18 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     
     # add lickspout position
     nwbfile.add_trial_column(name='lickspout_position_x', description=f'x position (um) of the lickspout position (left-right)')
-    nwbfile.add_trial_column(name='lickspout_position_y', description=f'y position (um) of the lickspout position (forward-backward)')
     nwbfile.add_trial_column(name='lickspout_position_z', description=f'z position (um) of the lickspout position (up-down)')
 
+    # determine lickspout keys based on stage position keys
+    stage_positions = getattr(obj, 'B_StagePositions', [{}])
+    if list(stage_positions[0].keys()) == ['x', 'y1', 'y2', 'z']:   # aind stage
+        nwbfile.add_trial_column(name='lickspout_position_y1',
+                                 description=f'y position (um) of the left lickspout position (forward-backward)')
+        nwbfile.add_trial_column(name='lickspout_position_y2',
+                                 description=f'y position (um) of the right lickspout position (forward-backward)')
+    else:
+        nwbfile.add_trial_column(name='lickspout_position_y',
+                                 description=f'y position (um) of the lickspout position (forward-backward)')
     # add reward size
     nwbfile.add_trial_column(name='reward_size_left', description=f'Left reward size (uL)')
     nwbfile.add_trial_column(name='reward_size_right', description=f'Right reward size (uL)')
@@ -340,83 +349,100 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                 goCue_start_time_t = getattr(obj, f'B_GoCueTimeHarp')[i]  # Use Harp time, old format
             else:
                 goCue_start_time_t = getattr(obj, f'B_GoCueTimeSoundCard')[i]  # Use Harp time, new format
-            
-        nwbfile.add_trial(start_time=getattr(obj, f'B_TrialStartTime{Harp}')[i], 
-                        stop_time=getattr(obj, f'B_TrialEndTime{Harp}')[i],
-                        animal_response=obj.B_AnimalResponseHistory[i],
-                        rewarded_historyL=obj.B_RewardedHistory[0][i],
-                        rewarded_historyR=obj.B_RewardedHistory[1][i],
-                        reward_outcome_time=obj.B_RewardOutcomeTime[i],
-                        delay_start_time=_get_field(obj, f'B_DelayStartTime{Harp}', index=i, default=np.nan), 
-                        goCue_start_time=goCue_start_time_t,
-                        bait_left=obj.B_BaitHistory[0][i],
-                        bait_right=obj.B_BaitHistory[1][i],
-                        base_reward_probability_sum=float(obj.TP_BaseRewardSum[i]),
-                        reward_probabilityL=float(obj.B_RewardProHistory[0][i]),
-                        reward_probabilityR=float(obj.B_RewardProHistory[1][i]),
-                        reward_random_number_left=_get_field(obj, 'B_CurrentRewardProbRandomNumber', index=i, default=[np.nan] * 2)[0],
-                        reward_random_number_right=_get_field(obj, 'B_CurrentRewardProbRandomNumber', index=i, default=[np.nan] * 2)[1],
-                        left_valve_open_time=float(obj.TP_LeftValue[i]),
-                        right_valve_open_time=float(obj.TP_RightValue[i]),
-                        block_beta=float(obj.TP_BlockBeta[i]),
-                        block_min=float(obj.TP_BlockMin[i]),
-                        block_max=float(obj.TP_BlockMax[i]),
-                        min_reward_each_block=float(obj.TP_BlockMinReward[i]),
-                        delay_beta=float(obj.TP_DelayBeta[i]),
-                        delay_min=float(obj.TP_DelayMin[i]),
-                        delay_max=float(obj.TP_DelayMax[i]),
-                        delay_duration=obj.B_DelayHistory[i],
-                        ITI_beta=float(obj.TP_ITIBeta[i]),
-                        ITI_min=float(obj.TP_ITIMin[i]),
-                        ITI_max=float(obj.TP_ITIMax[i]),
-                        ITI_duration=obj.B_ITIHistory[i],
-                        response_duration=float(obj.TP_ResponseTime[i]),
-                        reward_consumption_duration=float(obj.TP_RewardConsumeTime[i]),
-                        reward_delay=float(_get_field(obj, 'TP_RewardDelay', index=i, default=0)),
-                        auto_waterL=obj.B_AutoWaterTrial[0][i] if type(obj.B_AutoWaterTrial[0]) is list else obj.B_AutoWaterTrial[i],   # Back-compatible with old autowater format
-                        auto_waterR=obj.B_AutoWaterTrial[1][i] if type(obj.B_AutoWaterTrial[0]) is list else obj.B_AutoWaterTrial[i],
-                        # optogenetics
-                        laser_on_trial=obj.B_LaserOnTrial[i],
-                        laser_wavelength=LaserWavelengthC,
-                        laser_location=LaserLocationC,
-                        laser_1_power=Laser1Power,
-                        laser_2_power=Laser2Power,
-                        laser_on_probability=LaserOnProbablityC,
-                        laser_duration=LaserDurationC,
-                        laser_condition=LaserConditionC,
-                        laser_condition_probability=LaserConditionProC,
-                        laser_start=LaserStartC,
-                        laser_start_offset=LaserStartOffsetC,
-                        laser_end=LaserEndC,
-                        laser_end_offset=LaserEndOffsetC,
-                        laser_protocol=LaserProtocolC,
-                        laser_frequency=LaserFrequencyC,
-                        laser_rampingdown=LaserRampingDownC,
-                        laser_pulse_duration=LaserPulseDurC,
-                        
-                        session_wide_control=_get_field(obj, 'TP_SessionWideControl', index=i, default='None'),
-                        fraction_of_session=float(_get_field(obj, 'TP_FractionOfSession', index=i, default=np.nan)),
-                        session_start_with=_get_field(obj, 'TP_SessionStartWith', index=i, default='None'),
-                        session_alternation=_get_field(obj, 'TP_SessionAlternating', index=i, default='None'),
-                        minimum_opto_interval=float(_get_field(obj, 'TP_MinOptoInterval', index=i, default=0)),
 
-                        # add all auto training parameters (eventually should be in session.json)
-                        auto_train_engaged=_get_field(obj, 'TP_auto_train_engaged', index=i,default='None'),
-                        auto_train_curriculum_name=_get_field(obj, 'TP_auto_train_curriculum_name', index=i, default='None'),
-                        auto_train_curriculum_version=_get_field(obj, 'TP_auto_train_curriculum_version', index=i, default='None'),
-                        auto_train_curriculum_schema_version=_get_field(obj, 'TP_auto_train_curriculum_schema_version', index=i, default='None'),
-                        auto_train_stage=_get_field(obj, 'TP_auto_train_stage', index=i, default='None'),
-                        auto_train_stage_overridden=_get_field(obj, 'TP_auto_train_stage_overridden', index=i, default=np.nan),
+        trial_kwargs = {
+        'start_time' : getattr(obj, f'B_TrialStartTime{Harp}')[i],
+        'stop_time' : getattr(obj, f'B_TrialEndTime{Harp}')[i],
+        'animal_response' : obj.B_AnimalResponseHistory[i],
+        'rewarded_historyL' : obj.B_RewardedHistory[0][i],
+        'rewarded_historyR' : obj.B_RewardedHistory[1][i],
+        'reward_outcome_time' : obj.B_RewardOutcomeTime[i],
+        'delay_start_time' : _get_field(obj, f'B_DelayStartTime{Harp}', index=i, default=np.nan),
+        'goCue_start_time' : goCue_start_time_t,
+        'bait_left' : obj.B_BaitHistory[0][i],
+        'bait_right' : obj.B_BaitHistory[1][i],
+        'base_reward_probability_sum' : float(obj.TP_BaseRewardSum[i]),
+        'reward_probabilityL' : float(obj.B_RewardProHistory[0][i]),
+        'reward_probabilityR' : float(obj.B_RewardProHistory[1][i]),
+        'reward_random_number_left' : _get_field(obj, 'B_CurrentRewardProbRandomNumber', index=i, default=[np.nan] * 2)[
+                                        0],
+        'reward_random_number_right' : _get_field(obj, 'B_CurrentRewardProbRandomNumber', index=i, default=[np.nan] * 2)[
+                                         1],
+        'left_valve_open_time' : float(obj.TP_LeftValue[i]),
+        'right_valve_open_time' : float(obj.TP_RightValue[i]),
+        'block_beta' : float(obj.TP_BlockBeta[i]),
+        'block_min' : float(obj.TP_BlockMin[i]),
+        'block_max' : float(obj.TP_BlockMax[i]),
+        'min_reward_each_block' : float(obj.TP_BlockMinReward[i]),
+        'delay_beta' : float(obj.TP_DelayBeta[i]),
+        'delay_min' : float(obj.TP_DelayMin[i]),
+        'delay_max' : float(obj.TP_DelayMax[i]),
+        'delay_duration' : obj.B_DelayHistory[i],
+        'ITI_beta' : float(obj.TP_ITIBeta[i]),
+        'ITI_min' : float(obj.TP_ITIMin[i]),
+        'ITI_max' : float(obj.TP_ITIMax[i]),
+        'ITI_duration' : obj.B_ITIHistory[i],
+        'response_duration' : float(obj.TP_ResponseTime[i]),
+        'reward_consumption_duration' : float(obj.TP_RewardConsumeTime[i]),
+        'reward_delay' : float(_get_field(obj, 'TP_RewardDelay', index=i, default=0)),
+        'auto_waterL' : obj.B_AutoWaterTrial[0][i] if type(obj.B_AutoWaterTrial[0]) is list else obj.B_AutoWaterTrial[
+            i],  # Back-compatible with old autowater format
+        'auto_waterR' : obj.B_AutoWaterTrial[1][i] if type(obj.B_AutoWaterTrial[0]) is list else obj.B_AutoWaterTrial[i],
+        # optogenetics
+        'laser_on_trial' : obj.B_LaserOnTrial[i],
+        'laser_wavelength' : LaserWavelengthC,
+        'laser_location' : LaserLocationC,
+        'laser_1_power' : Laser1Power,
+        'laser_2_power' : Laser2Power,
+        'laser_on_probability' : LaserOnProbablityC,
+        'laser_duration' : LaserDurationC,
+        'laser_condition' : LaserConditionC,
+        'laser_condition_probability' : LaserConditionProC,
+        'laser_start' : LaserStartC,
+        'laser_start_offset' : LaserStartOffsetC,
+        'laser_end' : LaserEndC,
+        'laser_end_offset' : LaserEndOffsetC,
+        'laser_protocol' : LaserProtocolC,
+        'laser_frequency' : LaserFrequencyC,
+        'laser_rampingdown' : LaserRampingDownC,
+        'laser_pulse_duration' : LaserPulseDurC,
 
-                        # lickspout position
-                        lickspout_position_x=_get_field(obj, 'B_NewscalePositions', index=i, default=[np.nan] * 3)[0],
-                        lickspout_position_y=_get_field(obj, 'B_NewscalePositions', index=i, default=[np.nan] * 3)[1],
-                        lickspout_position_z=_get_field(obj, 'B_NewscalePositions', index=i, default=[np.nan] * 3)[2],
-                        
-                        # reward size
-                        reward_size_left=float(_get_field(obj, 'TP_LeftValue_volume', index=i)),
-                        reward_size_right=float(_get_field(obj, 'TP_RightValue_volume', index=i)),
-                        )
+        'session_wide_control' : _get_field(obj, 'TP_SessionWideControl', index=i, default='None'),
+        'fraction_of_session' : float(_get_field(obj, 'TP_FractionOfSession', index=i, default=np.nan)),
+        'session_start_with' : _get_field(obj, 'TP_SessionStartWith', index=i, default='None'),
+        'session_alternation' : _get_field(obj, 'TP_SessionAlternating', index=i, default='None'),
+        'minimum_opto_interval' : float(_get_field(obj, 'TP_MinOptoInterval', index=i, default=0)),
+
+        # add all auto training parameters (eventually should be in session.json)
+        'auto_train_engaged' : _get_field(obj, 'TP_auto_train_engaged', index=i, default='None'),
+        'auto_train_curriculum_name' : _get_field(obj, 'TP_auto_train_curriculum_name', index=i, default='None'),
+        'auto_train_curriculum_version' : _get_field(obj, 'TP_auto_train_curriculum_version', index=i, default='None'),
+        'auto_train_curriculum_schema_version' : _get_field(obj, 'TP_auto_train_curriculum_schema_version', index=i,
+                                                          default='None'),
+        'auto_train_stage' : _get_field(obj, 'TP_auto_train_stage', index=i, default='None'),
+        'auto_train_stage_overridden' : _get_field(obj, 'TP_auto_train_stage_overridden', index=i, default=np.nan),
+
+        # reward size
+        'reward_size_left' : float(_get_field(obj, 'TP_LeftValue_volume', index=i)),
+        'reward_size_right' : float(_get_field(obj, 'TP_RightValue_volume', index=i))
+        }
+
+        # populate lick spouts with correct format depending if using newscale or aind stage
+        stage_positions = getattr(obj, 'B_StagePositions', [])  # If obj doesn't have attr, skip if since i !< len([])
+        if i < len(stage_positions):    # index is valid for stage position lengths
+            trial_kwargs['lickspout_position_x'] = stage_positions[i].get('x', np.nan)  # nan default if keys are wrong
+            trial_kwargs['lickspout_position_z'] = stage_positions[i].get('z', np.nan)  # nan default if keys are wrong
+            if list(stage_positions[i].keys()) == ['x', 'y1', 'y2', 'z']:    # aind stage
+                trial_kwargs['lickspout_position_y1'] = stage_positions[i]['y1']
+                trial_kwargs['lickspout_position_y2'] = stage_positions[i]['y2']
+            else:       # newscale stage
+                trial_kwargs['lickspout_position_y'] = stage_positions[i].get('y', np.nan) # nan default if keys are wrong
+        else:   # if i not valid index, populate values with nan for x, y, z
+            trial_kwargs['lickspout_position_x'] = np.nan
+            trial_kwargs['lickspout_position_y'] = np.nan
+            trial_kwargs['lickspout_position_z'] = np.nan
+
+        nwbfile.add_trial(**trial_kwargs)
 
 
     #######  Other time series  #######
