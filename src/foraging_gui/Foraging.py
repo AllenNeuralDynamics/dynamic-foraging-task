@@ -71,7 +71,6 @@ class NumpyEncoder(json.JSONEncoder):
 
 class Window(QMainWindow):
     Time = QtCore.pyqtSignal(int) # Photometry timer signal
-    sessionGenerated = QtCore.pyqtSignal(Session)  # signal to indicate Session has been generated
 
     def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
@@ -228,9 +227,6 @@ class Window(QMainWindow):
 
         # Initializes session log handler as None
         self.session_log_handler = None
-
-        # generate an upload manifest when a session has been produced
-        self.upload_manifest_slot = self.sessionGenerated.connect(self._generate_upload_manifest)
 
         # show disk space
         self._show_disk_space()
@@ -2686,8 +2682,7 @@ class Window(QMainWindow):
             Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
             # generate the metadata file
             generated_metadata=generate_metadata(Obj=Obj)
-            session = generated_metadata._session()
-            self.sessionGenerated.emit(session)   # emit sessionGenerated
+            self._generate_upload_manifest(generated_metadata)
 
             if BackupSave==0:
                 text="Session metadata generated successfully: " + str(generated_metadata.session_metadata_success)+"\n"+\
@@ -3631,10 +3626,6 @@ class Window(QMainWindow):
 
         self.unsaved_data=False
         self.ManualWaterVolume=[0,0]
-        if hasattr(self, 'fiber_photometry_start_time'):
-            del self.fiber_photometry_start_time
-        if hasattr(self, 'fiber_photometry_end_time'):
-            del self.fiber_photometry_end_time
 
         # Clear Plots
         if hasattr(self, 'PlotM') and self.clear_figure_after_save:
@@ -3949,11 +3940,6 @@ class Window(QMainWindow):
             # disable metadata fields
             self._set_metadata_enabled(False)
 
-            # generate an upload manifest when a session has been produced if slot is not already connected
-            if self.upload_manifest_slot is None:
-                logging.debug('Connecting sessionGenerated to _generate_upload_manifest')
-                self.upload_manifest_slot = self.sessionGenerated.connect(self._generate_upload_manifest)
-
             # Set IACUC protocol in metadata based on schedule
             protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
             if protocol is not None:
@@ -4069,6 +4055,17 @@ class Window(QMainWindow):
             if self.Camera_dialog.AutoControl.currentText()=='Yes':
                 # camera will start recording
                 self.Camera_dialog.StartRecording.setChecked(True)
+            # clear camera start and end time
+            if not self.Camera_dialog.StartRecording.isChecked():
+                self.Camera_dialog.camera_start_time=''
+                self.Camera_dialog.camera_stop_time=''
+            # clear fiber start and end time
+            if hasattr(self, 'fiber_photometry_end_time'):
+                del self.fiber_photometry_end_time
+            if not self.StartExcitation.isChecked():
+                if hasattr(self, 'fiber_photometry_start_time'):
+                    del self.fiber_photometry_start_time
+
             self.SessionStartTime=datetime.now()
             self.Other_SessionStartTime=str(self.SessionStartTime) # for saving
             GeneratedTrials=GenerateTrials(self)
@@ -4634,7 +4631,7 @@ class Window(QMainWindow):
                          '&session_plot_selected_draw_types=1.+Choice+history'
         )
 
-    def _generate_upload_manifest(self, session: Session):
+    def _generate_upload_manifest(self, generated_medadata):
         '''
             Generates a manifest.yml file for triggering data copy to VAST and upload to aws
             :param session: session to use to create upload manifest
@@ -4663,13 +4660,12 @@ class Window(QMainWindow):
             mount = 'FIP'
 
             modalities = {}
-            for stream in session.data_streams:
-                if Modality.BEHAVIOR in stream.stream_modalities:
-                    modalities['behavior'] = [self.behavior_session_model.root_path.replace('\\', '/')]
-                elif Modality.FIB in stream.stream_modalities:
-                    modalities['fib'] = [self.PhotometryFolder.replace('\\', '/')]
-                elif Modality.BEHAVIOR_VIDEOS in stream.stream_modalities:
-                    modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
+            if Modality.BEHAVIOR in generated_medadata.modality:
+                modalities['behavior'] = [self.behavior_session_model.root_path.replace('\\', '/')]
+            if Modality.FIB in generated_medadata.modality:
+                modalities['fib'] = [self.PhotometryFolder.replace('\\', '/')]
+            if Modality.BEHAVIOR_VIDEOS in generated_medadata.modality:
+                modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
 
             # Define contents of manifest file
             contents = {
@@ -4709,9 +4705,6 @@ class Window(QMainWindow):
                 'Could not generate upload manifest. '+\
                 'Please alert the mouse owner, and report on github.')
 
-        # disconnect slot to only create manifest once
-        logging.debug('Disconnecting sessionGenerated from _generate_upload_manifest')
-        self.upload_manifest_slot = self.sessionGenerated.disconnect(self.upload_manifest_slot)
 
 def setup_loki_logging(box_number):
     db_file=os.getenv('SIPE_DB_FILE', r'//allen/aibs/mpe/keepass/sipe_sw_passwords.kdbx')
