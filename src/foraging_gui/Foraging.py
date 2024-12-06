@@ -4667,6 +4667,7 @@ class Window(QMainWindow):
             for stream in session.data_streams:
                 if Modality.FIB in stream.stream_modalities:
                     modalities['fib'] = [self.PhotometryFolder.replace('\\', '/')]
+                    modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
                 elif Modality.BEHAVIOR_VIDEOS in stream.stream_modalities:
                     modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
 
