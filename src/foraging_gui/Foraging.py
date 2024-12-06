@@ -3186,7 +3186,7 @@ class Window(QMainWindow):
                         self.stage_widget.movement_page_view.lineEdit_y1.setText(str(last_positions['y1']))
                         self.stage_widget.movement_page_view.lineEdit_y2.setText(str(last_positions['y2']))
                         self.stage_widget.movement_page_view.lineEdit_z.setText(str(last_positions['z']))
-                        threading.Thread(target=self.move_aind_stage).start()
+                        self.move_aind_stage()
                 elif 'B_NewscalePositions' in Obj:  # cross compatibility for mice run on older version of code.
                     self.current_stage.move_absolute_3d(float(last_positions[0]),
                                                         float(last_positions[1]),
@@ -3230,16 +3230,8 @@ class Window(QMainWindow):
         """
         Move all axis of stage in stage widget
         """
-        # save current positions since stage widget will reset once returnPressed in emitted
-        axes = ['x', 'y1', 'y2', 'z']
-        textboxes = [getattr(self.stage_widget.movement_page_view, f'lineEdit_{axis}') for axis in axes]
-        positions = [textbox.text() for textbox in textboxes]
-        for textbox, position in zip(textboxes, positions):
-            textbox.setText(position)
-            textbox.returnPressed.emit()
-            time.sleep(1)    # allow worker to initialize
-            while self.stage_widget.stage_model.move_thread.isRunning():
-                time.sleep(.1)
+        positions = self.stage_widget.movement_page_view.get_positions_from_line_edit()
+        self.stage_widget.movement_page_view.signal_position_change.emit(positions)
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
