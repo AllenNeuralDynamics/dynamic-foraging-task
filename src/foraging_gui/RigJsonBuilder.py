@@ -321,7 +321,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
 
     components['daqs']=[
         d.HarpDevice(
-            name="Harp Behavior",
+            name="harp behavior board",
             harp_device_type=d.HarpDeviceType.BEHAVIOR,
             manufacturer=d.Organization.CHAMPALIMAUD,
             computer_name=settings['computer_name'], 
@@ -331,7 +331,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             notes = '{} and {}, as well as reward delivery solenoids are connected via ethernet cables'.format(lick_spouts[0].name, lick_spouts[1].name)
         ),
         d.HarpDevice(
-            name="Harp Sound",
+            name="harp sound card",
             harp_device_type=d.HarpDeviceType.SOUND_CARD,
             manufacturer=d.Organization.CHAMPALIMAUD,
             computer_name=settings['computer_name'], 
@@ -340,7 +340,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             core_version='1.4', # TODO
         ),
         d.HarpDevice(
-            name="Harp clock synchronization board",
+            name="harp clock synchronization board",
             harp_device_type=d.HarpDeviceType.CLOCK_SYNCHRONIZER,
             manufacturer=d.Organization.CHAMPALIMAUD,
             computer_name=settings['computer_name'], 
@@ -349,7 +349,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             core_version='', # TODO
         ),       
         d.HarpDevice(
-            name="Harp sound amplifier",
+            name="harp sound amplifier",
             harp_device_type=d.HarpDeviceType.INPUT_EXPANDER,
             manufacturer=d.Organization.CHAMPALIMAUD,
             computer_name=settings['computer_name'], 
