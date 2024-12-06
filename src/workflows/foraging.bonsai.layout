@@ -93,7 +93,7 @@
       </Location>
       <Size>
         <Width>240</Width>
-        <Height>263</Height>
+        <Height>190</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -117,7 +117,7 @@
           </Location>
           <Size>
             <Width>240</Width>
-            <Height>263</Height>
+            <Height>190</Height>
           </Size>
           <WindowState>Normal</WindowState>
         </EditorDialogSettings>
@@ -2497,7 +2497,7 @@
       </Location>
       <Size>
         <Width>240</Width>
-        <Height>263</Height>
+        <Height>190</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -2641,7 +2641,7 @@
           </Location>
           <Size>
             <Width>240</Width>
-            <Height>263</Height>
+            <Height>190</Height>
           </Size>
           <WindowState>Normal</WindowState>
         </EditorDialogSettings>
@@ -3123,7 +3123,7 @@
           </Location>
           <Size>
             <Width>240</Width>
-            <Height>263</Height>
+            <Height>190</Height>
           </Size>
           <WindowState>Normal</WindowState>
         </EditorDialogSettings>
@@ -3655,7 +3655,7 @@
       </Location>
       <Size>
         <Width>240</Width>
-        <Height>263</Height>
+        <Height>190</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -3679,7 +3679,7 @@
           </Location>
           <Size>
             <Width>240</Width>
-            <Height>263</Height>
+            <Height>190</Height>
           </Size>
           <WindowState>Normal</WindowState>
         </EditorDialogSettings>
@@ -5529,7 +5529,7 @@
           </Location>
           <Size>
             <Width>240</Width>
-            <Height>263</Height>
+            <Height>190</Height>
           </Size>
           <WindowState>Normal</WindowState>
         </EditorDialogSettings>
@@ -7040,12 +7040,12 @@
     <EditorDialogSettings>
       <Visible>false</Visible>
       <Location>
-        <X>724</X>
-        <Y>239</Y>
+        <X>566</X>
+        <Y>763</Y>
       </Location>
       <Size>
-        <Width>541</Width>
-        <Height>650</Height>
+        <Width>266</Width>
+        <Height>164</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -7153,23 +7153,11 @@
       </Location>
       <Size>
         <Width>240</Width>
-        <Height>263</Height>
+        <Height>190</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
     <EditorVisualizerLayout>
-      <DialogSettings>
-        <Visible>false</Visible>
-        <Location>
-          <X>0</X>
-          <Y>0</Y>
-        </Location>
-        <Size>
-          <Width>0</Width>
-          <Height>0</Height>
-        </Size>
-        <WindowState>Normal</WindowState>
-      </DialogSettings>
       <DialogSettings>
         <Visible>false</Visible>
         <Location>
@@ -7269,11 +7257,46 @@
       <DialogSettings>
         <Visible>true</Visible>
         <Location>
-          <X>108</X>
-          <Y>570</Y>
+          <X>91</X>
+          <Y>554</Y>
         </Location>
         <Size>
           <Width>336</Width>
+          <Height>279</Height>
+        </Size>
+        <WindowState>Normal</WindowState>
+        <VisualizerTypeName>Bonsai.Design.Visualizers.TableLayoutPanelVisualizer</VisualizerTypeName>
+        <VisualizerSettings>
+          <TableLayoutPanelVisualizer>
+            <MashupSettings>
+              <Source>0</Source>
+              <VisualizerTypeName>Bonsai.Design.Visualizers.BooleanTimeSeriesVisualizer</VisualizerTypeName>
+              <VisualizerSettings>
+                <BooleanTimeSeriesVisualizer>
+                  <Capacity>60</Capacity>
+                </BooleanTimeSeriesVisualizer>
+              </VisualizerSettings>
+            </MashupSettings>
+            <MashupSettings>
+              <Source>2</Source>
+              <VisualizerTypeName>Bonsai.Design.Visualizers.BooleanTimeSeriesVisualizer</VisualizerTypeName>
+              <VisualizerSettings>
+                <BooleanTimeSeriesVisualizer>
+                  <Capacity>60</Capacity>
+                </BooleanTimeSeriesVisualizer>
+              </VisualizerSettings>
+            </MashupSettings>
+          </TableLayoutPanelVisualizer>
+        </VisualizerSettings>
+      </DialogSettings>
+      <DialogSettings>
+        <Visible>true</Visible>
+        <Location>
+          <X>87</X>
+          <Y>561</Y>
+        </Location>
+        <Size>
+          <Width>332</Width>
           <Height>279</Height>
         </Size>
         <WindowState>Normal</WindowState>
@@ -7292,7 +7315,7 @@
               <VisualizerTypeName>Bonsai.Design.Visualizers.BooleanTimeSeriesVisualizer</VisualizerTypeName>
               <VisualizerSettings>
                 <BooleanTimeSeriesVisualizer>
-                  <Capacity>120</Capacity>
+                  <Capacity>640</Capacity>
                 </BooleanTimeSeriesVisualizer>
               </VisualizerSettings>
             </MashupSettings>
@@ -7301,7 +7324,7 @@
               <VisualizerTypeName>Bonsai.Design.Visualizers.BooleanTimeSeriesVisualizer</VisualizerTypeName>
               <VisualizerSettings>
                 <BooleanTimeSeriesVisualizer>
-                  <Capacity>120</Capacity>
+                  <Capacity>640</Capacity>
                 </BooleanTimeSeriesVisualizer>
               </VisualizerSettings>
             </MashupSettings>
@@ -7329,7 +7352,7 @@
       </Location>
       <Size>
         <Width>240</Width>
-        <Height>263</Height>
+        <Height>190</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -7353,7 +7376,7 @@
           </Location>
           <Size>
             <Width>240</Width>
-            <Height>263</Height>
+            <Height>190</Height>
           </Size>
           <WindowState>Normal</WindowState>
         </EditorDialogSettings>
@@ -7531,8 +7554,8 @@
       <DialogSettings>
         <Visible>true</Visible>
         <Location>
-          <X>89</X>
-          <Y>102</Y>
+          <X>88</X>
+          <Y>105</Y>
         </Location>
         <Size>
           <Width>415</Width>

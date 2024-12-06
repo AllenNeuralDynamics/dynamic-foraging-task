@@ -16,3 +16,5 @@ Notebooks
 notebooks
 .idea
 .spyproject
+.venv/
+build/
