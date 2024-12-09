@@ -3172,8 +3172,8 @@ class Window(QMainWindow):
 
             #Set stage position to last position
             try:
-                last_positions = Obj['B_StagePositions'][-1]
-                if 'B_StagePositions' in Obj:
+                if 'B_StagePositions' in Obj.keys() and len(Obj['B_StagePositions']) != 0:
+                    last_positions = Obj['B_StagePositions'][-1]
                     if hasattr(self,'current_stage'):   # newscale stage
                         self.current_stage.move_absolute_3d(float(last_positions['x']),
                                                             float(last_positions['y']),
@@ -3187,7 +3187,8 @@ class Window(QMainWindow):
                         self.stage_widget.movement_page_view.lineEdit_y2.setText(str(last_positions['y2']))
                         self.stage_widget.movement_page_view.lineEdit_z.setText(str(last_positions['z']))
                         threading.Thread(target=self.move_aind_stage).start()
-                elif 'B_NewscalePositions' in Obj:  # cross compatibility for mice run on older version of code.
+                elif 'B_NewscalePositions' in Obj.keys() and len(Obj['B_NewscalePositions']) != 0:  # cross compatibility for mice run on older version of code.
+                    last_positions = Obj['B_NewscalePositions'][-1]
                     self.current_stage.move_absolute_3d(float(last_positions[0]),
                                                         float(last_positions[1]),
                                                         float(last_positions[2]))
