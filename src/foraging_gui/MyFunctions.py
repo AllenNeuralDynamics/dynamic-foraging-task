@@ -1154,10 +1154,10 @@ class GenerateTrials():
      
     def _CheckStop(self):
         '''Stop if there are many ingoral trials or if the maximam trial is exceeded MaxTrial'''
-        StopIgnore=round(self.TP_auto_stop_ignore_ratio_threshold*self.TP_auto_stop_ignore_win)
+        StopIgnore=round(float(self.TP_auto_stop_ignore_ratio_threshold)*int(self.TP_auto_stop_ignore_win))
         MaxTrial=int(self.TP_MaxTrial)-2 # trial number starts from 0
         MaxTime=float(self.TP_MaxTime)*60 # convert minutes to seconds
-        if hasattr(self, 'BS_CurrentRunningTime'): 
+        if hasattr(self, 'BS_CurrentRunningTime'):
             pass
         else:
             self.BS_CurrentRunningTime=0
@@ -1169,16 +1169,17 @@ class GenerateTrials():
 
         # Check for reasons to stop early
         auto_rewards = np.array([any(x) for x in np.column_stack(self.B_AutoWaterTrial.astype(bool))])
-        non_auto_reward = self.B_AnimalResponseHistory[np.where(~auto_rewards)]   # isolate non-auto-reward trials
-        win_sz = self.TP_auto_stop_ignore_win
-        if self.BS_CurrentRunningTime >= 30 and \
-                non_auto_reward.shape[0] > win_sz and non_auto_reward[-win_sz:][np.where(2)].shape[0] >= StopIgnore:
+        non_auto_reward = self.B_AnimalResponseHistory[np.where(~auto_rewards.astype(bool))]   # isolate non-auto-reward
+        win_sz = int(self.TP_auto_stop_ignore_win)
+
+        if self.BS_CurrentRunningTime >= 30 and len(np.where(non_auto_reward[-win_sz:] == 2)[0]) >= StopIgnore:
             stop=True
+            threshold = float(self.TP_auto_stop_ignore_ratio_threshold)*100
             msg = f'Stopping the session because the mouse has ignored at least ' \
-                  f'{self.TP_auto_stop_ignore_ratio_threshold*100}% of {self.TP_auto_stop_ignore_win} ' \
+                  f'{threshold}% of {self.TP_auto_stop_ignore_win} ' \
                   f'consecutive trials'
             warning_label_text = 'Stop because ignore trials exceed or equal: '+\
-                                 f'{self.TP_auto_stop_ignore_ratio_threshold*100}% of {self.TP_auto_stop_ignore_win}'
+                                 f'{threshold}% of {self.TP_auto_stop_ignore_win}'
         elif self.B_CurrentTrialN>MaxTrial: 
             stop=True
             msg = 'Stopping the session because the mouse has reached the maximum trial count: {}'.format(self.TP_MaxTrial)
