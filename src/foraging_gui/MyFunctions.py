@@ -1171,8 +1171,8 @@ class GenerateTrials():
         auto_rewards = np.array([any(x) for x in np.column_stack(self.B_AutoWaterTrial.astype(bool))])
         non_auto_reward = self.B_AnimalResponseHistory[np.where(~auto_rewards.astype(bool))]   # isolate non-auto-reward
         win_sz = int(self.TP_auto_stop_ignore_win)
-
-        if self.BS_CurrentRunningTime >= 30 and len(np.where(non_auto_reward[-win_sz:] == 2)[0]) >= StopIgnore:
+        min_time = int(self.TP_min_time)
+        if self.BS_CurrentRunningTime/60 >= 30 and len(np.where(non_auto_reward[-win_sz:] == 2)[0]) >= StopIgnore:
             stop=True
             threshold = float(self.TP_auto_stop_ignore_ratio_threshold)*100
             msg = f'Stopping the session because the mouse has ignored at least ' \
