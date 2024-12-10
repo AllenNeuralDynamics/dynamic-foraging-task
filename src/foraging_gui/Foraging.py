@@ -2827,7 +2827,7 @@ class Window(QMainWindow):
         session_name = self.behavior_session_model.session_name=f'behavior_{self.behavior_session_model.subject}_' \
                                                      f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
         self.SessionFolder=os.path.join(self.default_saveFolder,
-            self.current_box,self.behavior_session_model.subject, f'behavior_{session_name}')
+            self.current_box,self.behavior_session_model.subject, session_name)
         self.behavior_session_model.root_path=os.path.join(self.SessionFolder,'behavior')
         self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{session_name}.mat')
         self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}.json')
@@ -3172,8 +3172,8 @@ class Window(QMainWindow):
 
             #Set stage position to last position
             try:
-                last_positions = Obj['B_StagePositions'][-1]
-                if 'B_StagePositions' in Obj:
+                if 'B_StagePositions' in Obj.keys() and len(Obj['B_StagePositions']) != 0:
+                    last_positions = Obj['B_StagePositions'][-1]
                     if hasattr(self,'current_stage'):   # newscale stage
                         self.current_stage.move_absolute_3d(float(last_positions['x']),
                                                             float(last_positions['y']),
@@ -3187,7 +3187,8 @@ class Window(QMainWindow):
                         self.stage_widget.movement_page_view.lineEdit_y2.setText(str(last_positions['y2']))
                         self.stage_widget.movement_page_view.lineEdit_z.setText(str(last_positions['z']))
                         threading.Thread(target=self.move_aind_stage).start()
-                elif 'B_NewscalePositions' in Obj:  # cross compatibility for mice run on older version of code.
+                elif 'B_NewscalePositions' in Obj.keys() and len(Obj['B_NewscalePositions']) != 0:  # cross compatibility for mice run on older version of code.
+                    last_positions = Obj['B_NewscalePositions'][-1]
                     self.current_stage.move_absolute_3d(float(last_positions[0]),
                                                         float(last_positions[1]),
                                                         float(last_positions[2]))
@@ -4663,11 +4664,11 @@ class Window(QMainWindow):
             mount = 'FIP'
 
             modalities = {}
+            modalities['behavior'] = [self.behavior_session_model.root_path.replace('\\', '/')]
             for stream in session.data_streams:
-                if Modality.BEHAVIOR in stream.stream_modalities:
-                    modalities['behavior'] = [self.behavior_session_model.root_path.replace('\\', '/')]
-                elif Modality.FIB in stream.stream_modalities:
+                if Modality.FIB in stream.stream_modalities:
                     modalities['fib'] = [self.PhotometryFolder.replace('\\', '/')]
+                    modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
                 elif Modality.BEHAVIOR_VIDEOS in stream.stream_modalities:
                     modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
 

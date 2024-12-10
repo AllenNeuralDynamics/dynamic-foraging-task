@@ -608,12 +608,16 @@ class generate_metadata:
         '''
         self.high_speed_camera_streams=[]
         self._get_camera_names()
-        if self.Obj['Camera_dialog']['camera_start_time'] != '' and self.Obj['Camera_dialog']['camera_stop_time'] != '' and self.camera_names != []:
+        if self.Obj['Camera_dialog']['camera_start_time'] != '' and self.camera_names != []:
+            if self.Obj['Camera_dialog']['camera_stop_time'] == '':
+                camera_stop_time = datetime.now()
+            else:
+                camera_stop_time = datetime.strptime(self.Obj['Camera_dialog']['camera_stop_time'], '%Y-%m-%d %H:%M:%S.%f')
             self.high_speed_camera_streams.append(Stream(
                         stream_modalities=[Modality.BEHAVIOR_VIDEOS],
                         camera_names=self.camera_names,
                         stream_start_time=datetime.strptime(self.Obj['Camera_dialog']['camera_start_time'], '%Y-%m-%d %H:%M:%S.%f'),
-                        stream_end_time=datetime.strptime(self.Obj['Camera_dialog']['camera_stop_time'], '%Y-%m-%d %H:%M:%S.%f'),
+                        stream_end_time=camera_stop_time,
                         software=self.behavior_software,
                 ))
         else:
@@ -818,13 +822,6 @@ class generate_metadata:
                 'water_in_session_total': water_in_session_total,
                 'water_after_session': water_after_session,
                 'water_day_total': water_day_total,
-            },
-
-            'weight': {
-                'base_weight': float(_get_field(self.Obj, 'BaseWeight')),
-                'target_weight': float(_get_field(self.Obj, 'TargetWeight')),
-                'target_weight_ratio': float(_get_field(self.Obj, 'TargetRatio')),
-                'weight_after': float(_get_field(self.Obj, 'WeightAfter')),
             },
 
             'performance': {
