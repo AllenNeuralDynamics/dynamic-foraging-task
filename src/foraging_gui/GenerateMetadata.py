@@ -824,13 +824,6 @@ class generate_metadata:
                 'water_day_total': water_day_total,
             },
 
-            'weight': {
-                'base_weight': float(_get_field(self.Obj, 'BaseWeight')),
-                'target_weight': float(_get_field(self.Obj, 'TargetWeight')),
-                'target_weight_ratio': float(_get_field(self.Obj, 'TargetRatio')),
-                'weight_after': float(_get_field(self.Obj, 'WeightAfter')),
-            },
-
             'performance': {
                 'foraging_efficiency': _get_field(self.Obj, 'B_for_eff_optimal'),
                 'foraging_efficiency_with_actual_random_seed': _get_field(self.Obj, 'B_for_eff_optimal_random_seed'),

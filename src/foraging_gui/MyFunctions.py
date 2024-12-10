@@ -723,7 +723,7 @@ class GenerateTrials():
     def foraging_eff_no_baiting(self,reward_rate, p_Ls, p_Rs, random_number_L=None, random_number_R=None):  # Calculate foraging efficiency (only for 2lp)
         '''Calculating the foraging efficiency of no baiting tasks (Code is from Han)'''    
         # --- Optimal-aver (use optimal expectation as 100% efficiency) ---
-        for_eff_optimal = reward_rate / np.nanmean(np.max([p_Ls, p_Rs], axis=0))
+        for_eff_optimal = float(reward_rate / np.nanmean(np.max([p_Ls, p_Rs], axis=0)))
         
         if random_number_L is None:
             return for_eff_optimal, np.nan
@@ -732,7 +732,7 @@ class GenerateTrials():
         reward_refills = np.vstack([p_Ls >= random_number_L, p_Rs >= random_number_R])
         optimal_choices = np.argmax([p_Ls, p_Rs], axis=0)  # Greedy choice, assuming the agent knows the groundtruth
         optimal_rewards = reward_refills[0][optimal_choices==0].sum() + reward_refills[1][optimal_choices==1].sum()
-        for_eff_optimal_random_seed = reward_rate / (optimal_rewards / len(optimal_choices))
+        for_eff_optimal_random_seed = float(reward_rate / (optimal_rewards / len(optimal_choices)))
         
         return for_eff_optimal, for_eff_optimal_random_seed
 
@@ -749,7 +749,7 @@ class GenerateTrials():
                 m_star = np.floor(np.log(1-p_max)/np.log(1-p_min))
                 p_stars[i] = p_max + (1-(1-p_min)**(m_star + 1)-p_max**2)/(m_star+1)
 
-        for_eff_optimal = reward_rate / np.nanmean(p_stars)
+        for_eff_optimal = float(reward_rate / np.nanmean(p_stars))
         
         if random_number_L is None:
             return for_eff_optimal, np.nan
@@ -783,7 +783,7 @@ class GenerateTrials():
                 reward_remain[this_choice[t]] = 0
             
             if reward_optimal_random_seed:                
-                for_eff_optimal_random_seed = reward_rate / (reward_optimal_random_seed / len(p_Ls))
+                for_eff_optimal_random_seed = float(reward_rate / (reward_optimal_random_seed / len(p_Ls)))
             else:
                 for_eff_optimal_random_seed = np.nan
         
