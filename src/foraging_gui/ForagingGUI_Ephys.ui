@@ -1170,50 +1170,6 @@
       <string>1</string>
      </property>
     </widget>
-    <widget class="QLabel" name="auto_stop_ignore_ratio_threshold_label">
-     <property name="geometry">
-      <rect>
-       <x>1080</x>
-       <y>232</y>
-       <width>67</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>auto stop ignore ratio threshold:</string>
-     </property>
-     <property name="textFormat">
-      <enum>Qt::AutoText</enum>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="auto_stop_ignore_ratio_threshold">
-     <property name="geometry">
-      <rect>
-       <x>1150</x>
-       <y>232</y>
-       <width>80</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>.8</string>
-     </property>
-    </widget>
     <widget class="QLabel" name="label_52">
      <property name="geometry">
       <rect>
@@ -2135,7 +2091,7 @@
     <widget class="QLabel" name="label_57">
      <property name="geometry">
       <rect>
-       <x>320</x>
+       <x>339</x>
        <y>315</y>
        <width>67</width>
        <height>16</height>
@@ -2160,7 +2116,7 @@
     <widget class="QLineEdit" name="MaxTrial">
      <property name="geometry">
       <rect>
-       <x>400</x>
+       <x>402</x>
        <y>312</y>
        <width>80</width>
        <height>20</height>
@@ -2179,7 +2135,7 @@
     <widget class="QLineEdit" name="MaxTime">
      <property name="geometry">
       <rect>
-       <x>581</x>
+       <x>613</x>
        <y>312</y>
        <width>80</width>
        <height>20</height>
@@ -2198,7 +2154,7 @@
     <widget class="QLabel" name="label_58">
      <property name="geometry">
       <rect>
-       <x>490</x>
+       <x>512</x>
        <y>315</y>
        <width>91</width>
        <height>20</height>
@@ -2223,7 +2179,7 @@
      <widget class="QLineEdit" name="min_time">
      <property name="geometry">
       <rect>
-       <x>772</x>
+       <x>863</x>
        <y>312</y>
        <width>80</width>
        <height>20</height>
@@ -2242,7 +2198,7 @@
     <widget class="QLabel" name="min_time_label">
      <property name="geometry">
       <rect>
-       <x>681</x>
+       <x>762</x>
        <y>315</y>
        <width>91</width>
        <height>20</height>
@@ -2267,7 +2223,7 @@
     <widget class="QLabel" name="auto_stop_ignore_win_label">
      <property name="geometry">
       <rect>
-       <x>150</x>
+       <x>105</x>
        <y>315</y>
        <width>75</width>
        <height>16</height>
@@ -2292,7 +2248,7 @@
     <widget class="QLineEdit" name="auto_stop_ignore_win">
      <property name="geometry">
       <rect>
-       <x>230</x>
+       <x>190</x>
        <y>312</y>
        <width>80</width>
        <height>20</height>
@@ -2324,7 +2280,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>auto stop ignore ratio threshold:</string>
+      <string>ignore ratio threshold:</string>
      </property>
      <property name="textFormat">
       <enum>Qt::AutoText</enum>
@@ -2336,7 +2292,7 @@
     <widget class="QLineEdit" name="auto_stop_ignore_ratio_threshold">
      <property name="geometry">
       <rect>
-       <x>1072</x>
+       <x>1081</x>
        <y>312</y>
        <width>80</width>
        <height>20</height>
