@@ -7040,8 +7040,8 @@
     <EditorDialogSettings>
       <Visible>false</Visible>
       <Location>
-        <X>566</X>
-        <Y>763</Y>
+        <X>924</X>
+        <Y>728</Y>
       </Location>
       <Size>
         <Width>266</Width>
@@ -7292,7 +7292,7 @@
       <DialogSettings>
         <Visible>true</Visible>
         <Location>
-          <X>87</X>
+          <X>92</X>
           <Y>561</Y>
         </Location>
         <Size>
@@ -7315,7 +7315,7 @@
               <VisualizerTypeName>Bonsai.Design.Visualizers.BooleanTimeSeriesVisualizer</VisualizerTypeName>
               <VisualizerSettings>
                 <BooleanTimeSeriesVisualizer>
-                  <Capacity>640</Capacity>
+                  <Capacity>60</Capacity>
                 </BooleanTimeSeriesVisualizer>
               </VisualizerSettings>
             </MashupSettings>
@@ -7324,7 +7324,7 @@
               <VisualizerTypeName>Bonsai.Design.Visualizers.BooleanTimeSeriesVisualizer</VisualizerTypeName>
               <VisualizerSettings>
                 <BooleanTimeSeriesVisualizer>
-                  <Capacity>640</Capacity>
+                  <Capacity>60</Capacity>
                 </BooleanTimeSeriesVisualizer>
               </VisualizerSettings>
             </MashupSettings>
