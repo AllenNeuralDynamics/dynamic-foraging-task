@@ -1361,7 +1361,7 @@ class Window(QMainWindow):
 
         # extract software information
         logging.info('Extracting software information from first data stream')
-        software = session.data_streams[0].software[0]
+        software = session.stimulus_epochs[0].software[0]
 
         # create model
         logging.info('Creating SlimsWaterlogResult based on session information.')
