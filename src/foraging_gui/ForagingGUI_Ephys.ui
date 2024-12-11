@@ -2091,7 +2091,7 @@
     <widget class="QLabel" name="label_57">
      <property name="geometry">
       <rect>
-       <x>339</x>
+       <x>1004</x>
        <y>315</y>
        <width>67</width>
        <height>16</height>
@@ -2116,7 +2116,7 @@
     <widget class="QLineEdit" name="MaxTrial">
      <property name="geometry">
       <rect>
-       <x>402</x>
+       <x>1081</x>
        <y>312</y>
        <width>80</width>
        <height>20</height>
@@ -2267,7 +2267,7 @@
     <widget class="QLabel" name="auto_stop_ignore_ratio_threshold_label">
      <property name="geometry">
       <rect>
-       <x>882</x>
+       <x>212</x>
        <y>315</y>
        <width>180</width>
        <height>16</height>
@@ -2292,7 +2292,7 @@
     <widget class="QLineEdit" name="auto_stop_ignore_ratio_threshold">
      <property name="geometry">
       <rect>
-       <x>1081</x>
+       <x>402</x>
        <y>312</y>
        <width>80</width>
        <height>20</height>

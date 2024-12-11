@@ -3567,7 +3567,7 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
-                      <item row="12" column="5">
+                      <item row="12" column="13">
                        <widget class="QLabel" name="label_57">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -3982,7 +3982,7 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
-                      <item row="12" column="6">
+                      <item row="12" column="14">
                        <widget class="QLineEdit" name="MaxTrial">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -4234,7 +4234,7 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
-                      <item row="12" column="13">
+                      <item row="12" column="5">
                        <widget class="QLabel" name="auto_stop_ignore_ratio_threshold_label">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -4253,7 +4253,7 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
-                      <item row="12" column="14">
+                      <item row="12" column="6">
                        <widget class="QLineEdit" name="auto_stop_ignore_ratio_threshold">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
