@@ -3804,7 +3804,7 @@ class Window(QMainWindow):
                 FIP_is_nan = (isinstance(FIP_Mode, float) and math.isnan(FIP_Mode)) or FIP_Mode is None
                 first_fip_stage = self._GetInfoFromSchedule(mouse_id, 'First FP Stage')
                 current_stage = self._GetInfoFromSchedule(mouse_id, 'Current Stage')
-                stages = ['1', '1.1', '1.2', '2', '3', 'FINAL', 'GRADUATED', np.nan()]
+                stages = ['1', '1.1', '1.2', '2', '3', 'FINAL', 'GRADUATED', np.nan]
                 if FIP_is_nan and self.PhotometryB.currentText()=='on':
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
