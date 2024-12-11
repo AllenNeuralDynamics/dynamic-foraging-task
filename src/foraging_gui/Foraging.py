@@ -3806,9 +3806,7 @@ class Window(QMainWindow):
                 # FINAL and auto-train has STAGE_FINAL
                 first_fip_stage = str(self._GetInfoFromSchedule(mouse_id, 'First FP Stage')).split('STAGE_')[-1]
                 current_stage = self.AutoTrain_dialog.stage_in_use.split('STAGE_')[-1]
-                stages = ['1', '2', '3', 'FINAL', 'GRADUATED', 'unknown training stage', 'nan']
-                print(current_stage, first_fip_stage, stages.index(current_stage), stages.index(first_fip_stage))
-                print(not FIP_is_nan, self.PhotometryB.currentText()=='off', stages.index(current_stage) >= stages.index(first_fip_stage))
+                stages = ['nan', '1', '2', '3', 'FINAL', 'GRADUATED', 'unknown training stage']
                 if FIP_is_nan and self.PhotometryB.currentText()=='on':
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
