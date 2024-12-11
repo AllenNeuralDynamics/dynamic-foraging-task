@@ -3802,9 +3802,11 @@ class Window(QMainWindow):
             if hasattr(self, 'schedule') and mouse_id in self.schedule['Mouse ID'].values and mouse_id not in ['0','1','2','3','4','5','6','7','8','9','10'] : # skip if test mouse or mouse isn't in schedule or
                 FIP_Mode = self._GetInfoFromSchedule(mouse_id, 'FIP Mode')
                 FIP_is_nan = (isinstance(FIP_Mode, float) and math.isnan(FIP_Mode)) or FIP_Mode is None
-                first_fip_stage = self._GetInfoFromSchedule(mouse_id, 'First FP Stage')
-                current_stage = self.AutoTrain_dialog.stage_in_use
-                stages = ['STAGE_1', 'STAGE_2', 'STAGE_3', 'FINAL', 'GRADUATED', 'unknown training stage']
+                # remove STAGE_ string for consistency between schedule and auto-train. Schedule denotes final stage as
+                # FINAL and auto-train has STAGE_FINAL
+                first_fip_stage = self._GetInfoFromSchedule(mouse_id, 'First FP Stage').split('STAGE_')[-1]
+                current_stage = self.AutoTrain_dialog.stage_in_use.split('STAGE_')[-1]
+                stages = ['1', '2', '3', 'FINAL', 'GRADUATED', 'unknown training stage']
                 if FIP_is_nan and self.PhotometryB.currentText()=='on':
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
