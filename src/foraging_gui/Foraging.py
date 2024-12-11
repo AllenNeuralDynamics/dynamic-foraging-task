@@ -1368,7 +1368,7 @@ class Window(QMainWindow):
         model = models.SlimsWaterlogResult(
             mouse_pk=mouse.pk,
             date=session.session_start_time,
-            weight_g=session.animal_weight_prior,
+            weight_g=session.animal_weight_post,
             water_earned_ml=water['water_in_session_foraging'],
             water_supplement_delivered_ml=water['water_after_session'],
             water_supplement_recommended_ml=None,
