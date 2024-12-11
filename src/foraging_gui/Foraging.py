@@ -3804,9 +3804,9 @@ class Window(QMainWindow):
                 FIP_is_nan = (isinstance(FIP_Mode, float) and math.isnan(FIP_Mode)) or FIP_Mode is None
                 # remove STAGE_ string for consistency between schedule and auto-train. Schedule denotes final stage as
                 # FINAL and auto-train has STAGE_FINAL
-                first_fip_stage = self._GetInfoFromSchedule(mouse_id, 'First FP Stage').split('STAGE_')[-1]
+                first_fip_stage = str(self._GetInfoFromSchedule(mouse_id, 'First FP Stage')).split('STAGE_')[-1]
                 current_stage = self.AutoTrain_dialog.stage_in_use.split('STAGE_')[-1]
-                stages = ['1', '2', '3', 'FINAL', 'GRADUATED', 'unknown training stage']
+                stages = ['1', '2', '3', 'FINAL', 'GRADUATED', 'unknown training stage', 'nan']
                 if FIP_is_nan and self.PhotometryB.currentText()=='on':
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
