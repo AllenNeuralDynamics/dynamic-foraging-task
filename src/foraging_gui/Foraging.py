@@ -1,3 +1,4 @@
+import platform
 import sys
 import os
 import traceback
@@ -6,6 +7,9 @@ import time
 import subprocess
 import math
 import logging
+from hashlib import md5
+
+import logging_loki
 import socket
 import harp
 import threading
@@ -14,13 +18,14 @@ import yaml
 import copy
 import shutil
 from pathlib import Path
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timezone, timedelta
 import csv
 from aind_slims_api import SlimsClient
 from aind_slims_api import models
 import serial
 import numpy as np
 import pandas as pd
+from pykeepass import PyKeePass
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
@@ -29,6 +34,7 @@ from PyQt5 import QtWidgets,QtGui,QtCore, uic
 from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
+from pydantic import ValidationError
 
 from StageWidget.main import get_stage_widget
 
@@ -47,9 +53,11 @@ from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
 from aind_data_schema.core.session import Session
 from aind_data_schema_models.modalities import Modality
+from aind_behavior_services.session import AindBehaviorSessionModel
 
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear() # clear handlers so console output can be configured
+logging.raiseExceptions = os.getenv('FORAGING_DEV_MODE', False)
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -109,6 +117,22 @@ class Window(QMainWindow):
         # Load User interface
         self._LoadUI()
 
+        # create AINDBehaviorSession model to be used and referenced for session info
+        self.behavior_session_model = AindBehaviorSessionModel(
+            experiment=self.Task.currentText(),
+            experimenter=[self.Experimenter.text()],
+            date=datetime.now(),   # update when folders are created
+            root_path='',         # update when created
+            session_name= '',   # update when date and subject are filled in
+            subject=self.ID.text(),
+            experiment_version=foraging_gui.__version__,
+            notes=self.ShowNotes.toPlainText(),
+            commit_hash= subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip(),
+            allow_dirty_repo=
+            subprocess.check_output(['git','diff-index','--name-only', 'HEAD']).decode('ascii').strip() != '',
+            skip_hardware_validation=True
+        )
+
         # add warning_widget to layout and set color
         self.warning_widget = WarningWidget(log_tag=self.warning_log_tag,
                                             warning_color=self.default_warning_color)
@@ -146,7 +170,7 @@ class Window(QMainWindow):
         self.threadpool_workertimer=QThreadPool() # for timing
 
         # create bias indicator
-        self.bias_n_size = 500
+        self.bias_n_size = 200
         self.bias_indicator = BiasIndicator(x_range=self.bias_n_size)  # TODO: Where to store bias_threshold parameter? self.Settings?
         self.bias_indicator.biasValue.connect(self.bias_calculated)  # update dashboard value
         self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
@@ -180,6 +204,8 @@ class Window(QMainWindow):
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
         self._Camera()
+        self._InitializeMotorStage()
+        self._load_stage()
         self._Metadata()
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self.WaterPerRewardedTrial=0.005
@@ -190,8 +216,6 @@ class Window(QMainWindow):
         self.keyPressEvent()
         self._WaterVolumnManage2()
         self._LickSta()
-        self._InitializeMotorStage()
-        self._load_stage()
         self._warmup()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
@@ -338,7 +362,7 @@ class Window(QMainWindow):
         )
         self.ID.returnPressed.connect(
             lambda: self.AutoTrain_dialog.update_auto_train_fields(
-                subject_id=self.ID.text(),
+                subject_id=self.behavior_session_model.subject,
                 auto_engage=self.auto_engage,
                 )
             )
@@ -381,6 +405,14 @@ class Window(QMainWindow):
         self.Opto_dialog.laser_2_calibration_voltage.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_1_calibration_power.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_2_calibration_power.textChanged.connect(self._toggle_save_color)
+
+        # update parameters in behavior session model if widgets change
+        self.Task.currentTextChanged.connect(lambda task: setattr(self.behavior_session_model, 'experiment', task))
+        self.Experimenter.textChanged.connect(lambda text: setattr(self.behavior_session_model, 'experimenter', [text]))
+        self.ID.textChanged.connect(lambda subject: setattr(self.behavior_session_model, 'subject', subject))
+        self.ShowNotes.textChanged.connect(lambda: setattr(self.behavior_session_model, 'notes',
+                                                           self.ShowNotes.toPlainText()))
+
 
         # Set manual water volume to earned reward and trigger update if changed
         for side in ['Left', 'Right']:
@@ -437,7 +469,7 @@ class Window(QMainWindow):
                 self._toggle_color(self.StartEphysRecording)
                 return
 
-        EphysControl=EphysRecording(open_ephys_machine_ip_address=self.open_ephys_machine_ip_address,mouse_id=self.ID.text())
+        EphysControl=EphysRecording(open_ephys_machine_ip_address=self.open_ephys_machine_ip_address,mouse_id=self.behavior_session_model.subject)
         if self.StartEphysRecording.isChecked():
             try:
                 if EphysControl.get_status()['mode']=='RECORD':
@@ -769,15 +801,20 @@ class Window(QMainWindow):
         '''get the current position of the stage'''
         self._CheckStageConnection()
 
-        if hasattr(self, 'current_stage') and self.current_stage.connected:
+        if hasattr(self, 'current_stage') and self.current_stage.connected: # newscale stage
             logging.info('Grabbing current stage position')
             current_stage=self.current_stage
             current_position=current_stage.get_position()
             self._UpdatePosition(current_position,(0,0,0))
-            return current_position
-        else:
+            return {axis: float(pos) for axis, pos in zip(['x', 'y', 'z'], current_position) }
+        elif self.stage_widget is not None:     # aind stage
+            return {'x': float(self.stage_widget.movement_page_view.lineEdit_x.text()),
+                    'y1': float(self.stage_widget.movement_page_view.lineEdit_y1.text()),
+                    'y2': float(self.stage_widget.movement_page_view.lineEdit_y2.text()),
+                    'z': float(self.stage_widget.movement_page_view.lineEdit_z.text())}
+        else:   # no stage
+            logging.info('GetPositions called, but no current stage')
             return None
-            logging.info('GetPositions pressed, but no current stage')
 
     def _StageStop(self):
         '''Halt the stage'''
@@ -1701,7 +1738,7 @@ class Window(QMainWindow):
             folder_name = os.path.dirname(self.SaveFileJson)
             subprocess.Popen(['explorer', folder_name])
         elif hasattr(self, 'default_saveFolder'):
-            AnimalFolder = os.path.join(self.default_saveFolder, self.current_box, self.ID.text())
+            AnimalFolder = os.path.join(self.default_saveFolder, self.current_box, self.behavior_session_model.subject)
             logging.warning(f'Save folder unspecified, so opening {AnimalFolder}')
             subprocess.Popen(['explorer', AnimalFolder])
         else:
@@ -2059,7 +2096,7 @@ class Window(QMainWindow):
         self.ITIIncrease.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
         self._Randomness()
 
-        if self.Task.currentText() in ['Coupled Baiting','Coupled Without Baiting']:
+        if self.behavior_session_model.experiment in ['Coupled Baiting','Coupled Without Baiting']:
             self.label_6.setEnabled(True)
             self.label_7.setEnabled(True)
             self.label_8.setEnabled(True)
@@ -2103,7 +2140,7 @@ class Window(QMainWindow):
             self.AdvancedBlockAuto.setEnabled(True)
             self._AdvancedBlockAuto() # Update states of SwitchThr and PointsInARow
 
-        elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
+        elif self.behavior_session_model.experiment in ['Uncoupled Baiting','Uncoupled Without Baiting']:
             self.label_6.setEnabled(False)
             self.label_7.setEnabled(False)
             self.label_8.setEnabled(False)
@@ -2145,7 +2182,7 @@ class Window(QMainWindow):
             self.PointsInARow.setEnabled(False)
             self.BlockMinReward.setEnabled(False)
             self.IncludeAutoReward.setEnabled(False)
-        elif self.Task.currentText() in ['RewardN']:
+        elif self.behavior_session_model.experiment in ['RewardN']:
             self.label_6.setEnabled(True)
             self.label_7.setEnabled(True)
             self.label_8.setEnabled(True)
@@ -2189,10 +2226,10 @@ class Window(QMainWindow):
     def _ShowRewardPairs(self):
         '''Show reward pairs'''
         try:
-            if self.Task.currentText() in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
+            if self.behavior_session_model.experiment in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
                 self.RewardPairs=self.RewardFamilies[int(self.RewardFamily.text())-1][:int(self.RewardPairsN.text())]
                 self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.BaseRewardSum.text())
-            elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
+            elif self.behavior_session_model.experiment in ['Uncoupled Baiting','Uncoupled Without Baiting']:
                 input_string=self.UncoupledReward.text()
                 # remove any square brackets and spaces from the string
                 input_string = input_string.replace('[','').replace(']','').replace(',', ' ')
@@ -2202,7 +2239,7 @@ class Window(QMainWindow):
                 num_list = [float(num) for num in num_list]
                 # create a numpy array from the list of numbers
                 self.RewardProb=np.array(num_list)
-            if self.Task.currentText() in ['Coupled Baiting','Coupled Without Baiting','RewardN','Uncoupled Baiting','Uncoupled Without Baiting']:
+            if self.behavior_session_model.experiment in ['Coupled Baiting','Coupled Without Baiting','RewardN','Uncoupled Baiting','Uncoupled Without Baiting']:
                 if hasattr(self, 'GeneratedTrials'):
                     self.ShowRewardPairs.setText('Reward pairs:\n'
                                                  + str(np.round(self.RewardProb,2)).replace('\n', ',')
@@ -2485,10 +2522,10 @@ class Window(QMainWindow):
         if hasattr(self, 'GeneratedTrials') and self.InitializeBonsaiSuccessfully==1 and BackupSave==0:
             self.GeneratedTrials._get_irregular_timestamp(self.Channel2)
 
-        # Create new folders. 
-        if self.CreateNewFolder==1:
+        # Create new folders.
+        if self.CreateNewFolder == 1:
             self._GetSaveFolder()
-            self.CreateNewFolder=0
+            self.CreateNewFolder = 0
 
         if not os.path.exists(os.path.dirname(self.SaveFileJson)):
             os.makedirs(os.path.dirname(self.SaveFileJson))
@@ -2596,12 +2633,12 @@ class Window(QMainWindow):
             Obj['settings_box']=self.SettingsBox
 
             # save the commit hash
-            Obj['commit_ID']=self.commit_ID
+            Obj['commit_ID']=self.behavior_session_model.commit_hash
             Obj['repo_url']=self.repo_url
             Obj['current_branch'] =self.current_branch
-            Obj['repo_dirty_flag'] =self.repo_dirty_flag
+            Obj['repo_dirty_flag'] =self.behavior_session_model.allow_dirty_repo
             Obj['dirty_files'] =self.dirty_files
-            Obj['version'] = self.version
+            Obj['version'] = self.behavior_session_model.experiment_version
 
             # save the open ephys recording information
             Obj['open_ephys'] = self.open_ephys
@@ -2635,7 +2672,7 @@ class Window(QMainWindow):
 
         # save folders
         Obj['SessionFolder']=self.SessionFolder
-        Obj['TrainingFolder']=self.TrainingFolder
+        Obj['TrainingFolder']=self.behavior_session_model.root_path
         Obj['HarpFolder']=self.HarpFolder
         Obj['VideoFolder']=self.VideoFolder
         Obj['PhotometryFolder']=self.PhotometryFolder
@@ -2660,7 +2697,7 @@ class Window(QMainWindow):
             Obj['generate_rig_metadata_success']=generated_metadata.rig_metadata_success
 
             if save_clicked:    # create water log result if weight after filled and uncheck save
-                if self.BaseWeight.text() != '' and self.WeightAfter.text() != '' and self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']:
+                if self.BaseWeight.text() != '' and self.WeightAfter.text() != '' and self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']:
                     self._AddWaterLogResult(session)
                 self.bias_indicator.clear()  # prepare for new session
 
@@ -2717,16 +2754,19 @@ class Window(QMainWindow):
             video data
             photometry data
             ephys data
+
         '''
 
         if self.load_tag==0:
-            current_time = datetime.now()
-            formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-            self._get_folder_structure_new(formatted_datetime)
-            self.acquisition_datetime = formatted_datetime
-            self.session_name=f'behavior_{self.ID.text()}_{formatted_datetime}'
-        elif self.load_tag==1:
+            self.behavior_session_model.date = datetime.now()   # update session model with correct date
+            self._get_folder_structure_new()
+            self.behavior_session_model.session_name=f'behavior_{self.behavior_session_model.subject}_' \
+                                                     f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
+        else:
             self._parse_folder_structure()
+
+        # update session model with correct date
+
 
         # create folders
         if not os.path.exists(self.SessionFolder):
@@ -2735,9 +2775,9 @@ class Window(QMainWindow):
         if not os.path.exists(self.MetadataFolder):
             os.makedirs(self.MetadataFolder)
             logging.info(f"Created new folder: {self.MetadataFolder}")
-        if not os.path.exists(self.TrainingFolder):
-            os.makedirs(self.TrainingFolder)
-            logging.info(f"Created new folder: {self.TrainingFolder}")
+        if not os.path.exists(self.behavior_session_model.root_path):
+            os.makedirs(self.behavior_session_model.root_path)
+            logging.info(f"Created new folder: {self.behavior_session_model.root_path}")
         if not os.path.exists(self.HarpFolder):
             os.makedirs(self.HarpFolder)
             logging.info(f"Created new folder: {self.HarpFolder}")
@@ -2748,39 +2788,52 @@ class Window(QMainWindow):
             os.makedirs(self.PhotometryFolder)
             logging.info(f"Created new folder: {self.PhotometryFolder}")
 
-    def _parse_folder_structure(self):
-        '''parse the folder structure from the loaded json file'''
+
+    def _parse_folder_structure(self) -> str:
+
+        """
+        parse the folder structure from the loaded json file
+        :return string of the date used to name folders
+        """
         formatted_datetime = os.path.basename(self.fname).split('_')[1]+'_'+os.path.basename(self.fname).split('_')[-1].split('.')[0]
+        self.behavior_session_model.date = datetime.strptime(formatted_datetime, "%Y-%m-%d_%H-%M-%S")
         if os.path.basename(os.path.dirname(self.fname))=='TrainingFolder':
             # old data format
-            self._get_folder_structure_old(formatted_datetime)
+            self._get_folder_structure_old()
         else:
             # new data format
-            self._get_folder_structure_new(formatted_datetime)
+            self._get_folder_structure_new()
 
-    def _get_folder_structure_old(self,formatted_datetime):
+    def _get_folder_structure_old(self):
         '''get the folder structure for the old data format'''
+        # includes subject and date of session
+        session_name = self.behavior_session_model.session_name = f'behavior_{self.behavior_session_model.subject}_' \
+                                                     f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
         self.SessionFolder=os.path.join(self.default_saveFolder,
-            self.current_box,self.ID.text(), f'{self.ID.text()}_{formatted_datetime}')
+            self.current_box,self.behavior_session_model.subject, session_name)
         self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
-        self.TrainingFolder=os.path.join(self.SessionFolder, 'TrainingFolder')
+        self.behavior_session_model.root_path = os.path.join(self.SessionFolder, 'TrainingFolder')
         self.HarpFolder=os.path.join(self.SessionFolder, 'HarpFolder')
         self.VideoFolder=os.path.join(self.SessionFolder, 'VideoFolder')
         self.PhotometryFolder=os.path.join(self.SessionFolder, 'PhotometryFolder')
-        self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
-        self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
-        self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}_par.json')
+        self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{session_name}.mat')
+        self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}.json')
+        self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}.json')
 
-    def _get_folder_structure_new(self,formatted_datetime):
+    def _get_folder_structure_new(self):
         '''get the folder structure for the new data format'''
         # Determine folders
+        # session_name includes subject and date of session
+        session_name = self.behavior_session_model.session_name=f'behavior_{self.behavior_session_model.subject}_' \
+                                                     f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
         self.SessionFolder=os.path.join(self.default_saveFolder,
-            self.current_box,self.ID.text(), f'behavior_{self.ID.text()}_{formatted_datetime}')
-        self.TrainingFolder=os.path.join(self.SessionFolder,'behavior')
-        self.SaveFileMat=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.mat')
-        self.SaveFileJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}.json')
-        self.SaveFileParJson=os.path.join(self.TrainingFolder,f'{self.ID.text()}_{formatted_datetime}_par.json')
-        self.HarpFolder=os.path.join(self.TrainingFolder,'raw.harp')
+            self.current_box,self.behavior_session_model.subject, session_name)
+        self.behavior_session_model.root_path=os.path.join(self.SessionFolder,'behavior')
+        self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{session_name}.mat')
+        self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}.json')
+        self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}_par.json')
+        self.behavior_session_modelJson = os.path.join(self.behavior_session_model.root_path,f'behavior_session_model_{session_name}.json')
+        self.HarpFolder=os.path.join(self.behavior_session_model.root_path,'raw.harp')
         self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
         self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
         self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
@@ -2956,6 +3009,7 @@ class Window(QMainWindow):
                     self.default_openFolder=os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(fname))))
 
             self.fname=fname
+
         else:
             fname=input_file
             self.fname=fname
@@ -3116,21 +3170,37 @@ class Window(QMainWindow):
                 if 'Other_BasicText' in Obj:
                     self.ShowBasic.setText(Obj['Other_BasicText'])
 
-            #Set newscale position to last position
-            if 'B_NewscalePositions' in Obj:
-                try:
-                    last_positions=Obj['B_NewscalePositions'][-1]
-                except:
+            #Set stage position to last position
+            try:
+                if 'B_StagePositions' in Obj.keys() and len(Obj['B_StagePositions']) != 0:
+                    last_positions = Obj['B_StagePositions'][-1]
+                    if hasattr(self,'current_stage'):   # newscale stage
+                        self.current_stage.move_absolute_3d(float(last_positions['x']),
+                                                            float(last_positions['y']),
+                                                            float(last_positions['z']))
+                        self._UpdatePosition((float(last_positions['x']),
+                                              float(last_positions['y']),
+                                              float(last_positions['z'])),(0,0,0))
+                    elif self.stage_widget is not None:  # aind stage
+                        self.stage_widget.movement_page_view.lineEdit_x.setText(str(last_positions['x']))
+                        self.stage_widget.movement_page_view.lineEdit_y1.setText(str(last_positions['y1']))
+                        self.stage_widget.movement_page_view.lineEdit_y2.setText(str(last_positions['y2']))
+                        self.stage_widget.movement_page_view.lineEdit_z.setText(str(last_positions['z']))
+                        threading.Thread(target=self.move_aind_stage).start()
+                elif 'B_NewscalePositions' in Obj.keys() and len(Obj['B_NewscalePositions']) != 0:  # cross compatibility for mice run on older version of code.
+                    last_positions = Obj['B_NewscalePositions'][-1]
+                    self.current_stage.move_absolute_3d(float(last_positions[0]),
+                                                        float(last_positions[1]),
+                                                        float(last_positions[2]))
+                    self._UpdatePosition((float(last_positions[0]),
+                                          float(last_positions[1]),
+                                          float(last_positions[2])),
+                                         (0, 0, 0))
+                else:
                     pass
-                if hasattr(self,'current_stage'):
-                    try:
-                        self.StageStop.click
-                        self.current_stage.move_absolute_3d(float(last_positions[0]),float(last_positions[1]),float(last_positions[2]))
-                        self._UpdatePosition((float(last_positions[0]),float(last_positions[1]),float(last_positions[2])),(0,0,0))
-                    except Exception as e:
-                        logging.error(traceback.format_exc())
-            else:
-                pass
+
+            except Exception as e:
+                logging.error(traceback.format_exc())
 
             # load metadata to the metadata dialog
             if 'meta_data_dialog' in Obj:
@@ -3156,6 +3226,21 @@ class Window(QMainWindow):
         self.keyPressEvent() # Accept all updates
         self.load_tag=1
         self.ID.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
+
+    def move_aind_stage(self):
+        """
+        Move all axis of stage in stage widget
+        """
+        # save current positions since stage widget will reset once returnPressed in emitted
+        axes = ['x', 'y1', 'y2', 'z']
+        textboxes = [getattr(self.stage_widget.movement_page_view, f'lineEdit_{axis}') for axis in axes]
+        positions = [textbox.text() for textbox in textboxes]
+        for textbox, position in zip(textboxes, positions):
+            textbox.setText(position)
+            textbox.returnPressed.emit()
+            time.sleep(1)    # allow worker to initialize
+            while self.stage_widget.stage_model.move_thread.isRunning():
+                time.sleep(.1)
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
@@ -3720,7 +3805,7 @@ class Window(QMainWindow):
             self.keyPressEvent()
 
             # check if FIP setting match schedule
-            mouse_id = self.ID.text()
+            mouse_id = self.behavior_session_model.subject
             if hasattr(self, 'schedule') and mouse_id in self.schedule['Mouse ID'].values and mouse_id not in ['0','1','2','3','4','5','6','7','8','9','10'] : # skip if test mouse or mouse isn't in schedule or
                 FIP_Mode = self._GetInfoFromSchedule(mouse_id, 'FIP Mode')
                 FIP_is_nan = (isinstance(FIP_Mode, float) and math.isnan(FIP_Mode)) or FIP_Mode is None
@@ -3778,16 +3863,17 @@ class Window(QMainWindow):
             # check experimenter name
             reply = QMessageBox.critical(self,
                 'Box {}, Start'.format(self.box_letter),
-                f'The experimenter is <span style="{self.default_text_color}">{self.Experimenter.text()}</span>. Is this correct?',
+                f'The experimenter is <span style="{self.default_text_color}">'
+                f'{self.behavior_session_model.experimenter[0]}</span>. Is this correct?',
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if reply == QMessageBox.No:
                 self.Start.setChecked(False)
                 logging.info('User declines using default name')
                 return
-            logging.info('Starting session, with experimenter: {}'.format(self.Experimenter.text()))
+            logging.info('Starting session, with experimenter: {}'.format(self.behavior_session_model.experimenter[0]))
 
             # check repo status
-            if (self.current_branch not in ['main','production_testing']) & (self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']):
+            if (self.current_branch not in ['main','production_testing']) & (self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']):
                 # Prompt user over off-pipeline branch
                 reply = QMessageBox.critical(self,
                     'Box {}, Start'.format(self.box_letter),
@@ -3803,7 +3889,7 @@ class Window(QMainWindow):
                     logging.error('Starting session on branch: {}'.format(self.current_branch))
 
             # Check for untracked local changes
-            if self.repo_dirty_flag & (self.ID.text() not in ['0','1','2','3','4','5','6','7','8','9','10']):
+            if self.behavior_session_model.allow_dirty_repo & (self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']):
                 # prompt user over untracked local changes
                 reply = QMessageBox.critical(self,
                     'Box {}, Start'.format(self.box_letter),
@@ -3817,7 +3903,7 @@ class Window(QMainWindow):
                 else:
                     # Allow the session to continue, but log error
                     logging.error('Starting session with untracked local changes: {}'.format(self.dirty_files))
-            elif self.repo_dirty_flag is None:
+            elif self.behavior_session_model.allow_dirty_repo is None:
                 logging.error('Could not check for untracked local changes')
 
             if self.PhotometryB.currentText()=='on' and (not self.FIP_started):
@@ -3933,6 +4019,16 @@ class Window(QMainWindow):
 
             # stop lick interval calculation
             self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
+
+            # validate behavior session model and document validation errors if any
+            try:
+                AindBehaviorSessionModel(**self.behavior_session_model.model_dump())
+            except ValidationError as e:
+                logging.error(str(e), extra={'tags': [self.warning_log_tag]})
+            # save behavior session model
+            with open(self.behavior_session_modelJson, "w") as outfile:
+                outfile.write(self.behavior_session_model.model_dump_json())
+
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
@@ -4088,7 +4184,7 @@ class Window(QMainWindow):
         Setup a log handler to write logs during session to TrainingFolder
         """
 
-        logging_filename = os.path.join(self.TrainingFolder, 'python_gui_log.txt')
+        logging_filename = os.path.join(self.behavior_session_model.root_path, 'python_gui_log.txt')
 
         # Format the log file:
         log_format = '%(asctime)s:%(levelname)s:%(module)s:%(filename)s:%(funcName)s:line %(lineno)d:%(message)s'
@@ -4100,7 +4196,7 @@ class Window(QMainWindow):
         self.session_log_handler.setLevel(logging.INFO)
         logger.root.addHandler(self.session_log_handler)
 
-        logging.info(f'Starting log file at {self.TrainingFolder}')
+        logging.info(f'Starting log file at {self.behavior_session_model.root_path}')
 
     def end_session_log(self) -> None:
         """
@@ -4188,25 +4284,23 @@ class Window(QMainWindow):
                 # calculate bias every 10 trials
                 if (GeneratedTrials.B_CurrentTrialN+1) % 10 == 0 and GeneratedTrials.B_CurrentTrialN+1 > 20:
                     # correctly format data for bias indicator
-                    choice_history = [1 if x == 2 else int(x) for x in self.GeneratedTrials.B_AnimalResponseHistory]
-                    any_reward = [any(x) for x in np.column_stack(self.GeneratedTrials.B_RewardedHistory)]
 
-                    # use self.bias_n_size of trials to compute bias over or take n the first 0 to N trials
-                    l = len(choice_history)
-                    # FIXME: .6  of choice history is a little arbitrary. If the n_trial_back is close to equaling the
-                    #  trial count, the logistic regression can't be calculated because of an error saying
-                    #  'Cannot have number of splits n_splits=10 greater than the number of samples: 2'
-                    n_trial_back = self.bias_n_size if l > self.bias_n_size else \
-                        round(len(np.array(choice_history)[~np.isnan(choice_history)])*.6)
+                    formatted_history = [np.nan if x == 2 else int(x) for x in self.GeneratedTrials.B_AnimalResponseHistory]
+                    formatted_reward = [any(x) for x in np.column_stack(self.GeneratedTrials.B_RewardedHistory)]
+
+                    # only take last 200 trials if enough trials have happened
+                    choice_history = formatted_history[-200:] if len(formatted_history) > 200 else formatted_history
+                    any_reward = formatted_reward[-200:] if len(formatted_reward) > 200 else formatted_reward
+
                     # add data to bias_indicator
                     if not self.bias_thread.is_alive():
                         logger.debug('Starting bias thread.')
                         self.bias_thread = threading.Thread(target=self.bias_indicator.calculate_bias,
-                                                       kwargs={'time_point': self.GeneratedTrials.B_TrialStartTime[-1],
+                                                       kwargs={'trial_num': len(formatted_history),
                                                                'choice_history': choice_history,
                                                                'reward_history': np.array(any_reward).astype(int),
-                                                               'n_trial_back': n_trial_back,
-                                                               'cv': 2})
+                                                               'n_trial_back': 5,
+                                                               'cv': 1})
                         self.bias_thread.start()
                     else:
                         logger.debug('Skipping bias calculation as previous is still in progress. ')
@@ -4530,12 +4624,12 @@ class Window(QMainWindow):
         self.AutoTrain_dialog.show()
 
         # Check subject id each time the dialog is opened
-        self.AutoTrain_dialog.update_auto_train_fields(subject_id=self.ID.text())
+        self.AutoTrain_dialog.update_auto_train_fields(subject_id=self.behavior_session_model.subject)
 
     def _open_mouse_on_streamlit(self):
         '''open the training history of the current mouse on the streamlit app'''
         # See this PR: https://github.com/AllenNeuralDynamics/foraging-behavior-browser/pull/25
-        webbrowser.open(f'https://foraging-behavior-browser.allenneuraldynamics-test.org/?filter_subject_id={self.ID.text()}'
+        webbrowser.open(f'https://foraging-behavior-browser.allenneuraldynamics-test.org/?filter_subject_id={self.behavior_session_model.subject}'
                          '&tab_id=tab_session_inspector'
                          '&session_plot_mode=all+sessions+filtered+from+sidebar'
                          '&session_plot_selected_draw_types=1.+Choice+history'
@@ -4547,7 +4641,7 @@ class Window(QMainWindow):
             :param session: session to use to create upload manifest
         '''
 
-        if self.ID.text() in ['0','1','2','3','4','5','6','7','8','9','10']:
+        if self.behavior_session_model.subject in ['0','1','2','3','4','5','6','7','8','9','10']:
             logging.info('Skipping upload manifest, because this is the test mouse')
             return
 
@@ -4559,26 +4653,31 @@ class Window(QMainWindow):
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
 
-            schedule = self.acquisition_datetime.split('_')[0]+'_20-30-00'
-            capsule_id = 'c089614a-347e-4696-b17e-86980bb782c1'
+            # Upload time is 8:30 tonight, plus a random offset over a 30 minute period
+            # Random offset reduces strain on downstream servers getting many requests at once
+            date_format = "%Y-%m-%d_%H-%M-%S"
+            schedule = self.behavior_session_model.date.strftime(date_format).split('_')[0]+'_20-30-00'
+            schedule_time = datetime.strptime(schedule,date_format) + timedelta(seconds=np.random.randint(30*60))
+            # This ID is outdated as of 11/21/2024. We will remove this comment once we confirm everything works
+            #capsule_id = 'c089614a-347e-4696-b17e-86980bb782c1'
+            capsule_id = '0ae9703f-9012-4d0b-ad8d-b6a00858b80d'
             mount = 'FIP'
 
             modalities = {}
+            modalities['behavior'] = [self.behavior_session_model.root_path.replace('\\', '/')]
             for stream in session.data_streams:
-                if Modality.BEHAVIOR in stream.stream_modalities:
-                    modalities['behavior'] = [self.TrainingFolder.replace('\\', '/')]
-                elif Modality.FIB in stream.stream_modalities:
+                if Modality.FIB in stream.stream_modalities:
                     modalities['fib'] = [self.PhotometryFolder.replace('\\', '/')]
+                    modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
                 elif Modality.BEHAVIOR_VIDEOS in stream.stream_modalities:
                     modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
 
-            date_format = "%Y-%m-%d_%H-%M-%S"
             # Define contents of manifest file
             contents = {
-                'acquisition_datetime': datetime.strptime(self.acquisition_datetime,date_format),
-                'name': self.session_name,
+                'acquisition_datetime': self.behavior_session_model.date,
+                'name': self.behavior_session_model.session_name,
                 'platform': 'behavior',
-                'subject_id': int(self.ID.text()),
+                'subject_id': int(self.behavior_session_model.subject),
                 'capsule_id': capsule_id,
                 'mount':mount,
                 'destination': '//allen/aind/scratch/dynamic_foraging_rig_transfer',
@@ -4589,7 +4688,7 @@ class Window(QMainWindow):
                     os.path.join(self.MetadataFolder,'session.json').replace('\\','/'),
                     os.path.join(self.MetadataFolder,'rig.json').replace('\\','/'),
                     ],
-                'schedule_time':datetime.strptime(schedule,date_format),
+                'schedule_time':schedule_time,
                 'project_name':self.project_name,
                 'script': {}
                 }
@@ -4614,6 +4713,33 @@ class Window(QMainWindow):
         # disconnect slot to only create manifest once
         logging.debug('Disconnecting sessionGenerated from _generate_upload_manifest')
         self.upload_manifest_slot = self.sessionGenerated.disconnect(self.upload_manifest_slot)
+
+def setup_loki_logging(box_number):
+    db_file=os.getenv('SIPE_DB_FILE', r'//allen/aibs/mpe/keepass/sipe_sw_passwords.kdbx')
+    key_file=os.getenv('SIPE_KEY_FILE', r'c:\ProgramData\AIBS_MPE\.secrets\sipe_sw_passwords.keyx')
+    kp = PyKeePass(db_file, keyfile=key_file)
+    entry = kp.find_entries(title="Loki Credentials", first=True)
+    session =  md5((''.join([str(datetime.now()), platform.node(), str(os.getpid())])).encode("utf-8")).hexdigest()[:7]
+
+    handler = logging_loki.LokiHandler(
+        url="http://eng-tools/loki/api/v1/push",
+        tags={
+            'hostname': socket.gethostname(),
+            'process_name': __name__,
+            'user_name': os.getlogin(),
+            'log_session': session,
+            'box_name': chr(box_number + 64)  # they use A=1, B=2, ...
+        },
+        auth=(entry.username, entry.password),
+        version="1",
+    )
+
+    handler.setFormatter(
+        logging.Formatter(fmt='%(asctime)s\n%(name)s\n%(levelname)s\n%(funcName)s (%(filename)s:%(lineno)d)\n%(message)s',
+                          datefmt='%Y-%m-%d %H:%M:%S')
+    )
+    handler.setLevel(logging.INFO)
+    logger.root.addHandler(handler)
 
 def start_gui_log_file(box_number):
     '''
@@ -4798,6 +4924,11 @@ if __name__ == "__main__":
 
     # Start logging
     start_gui_log_file(box_number)
+    try:
+        setup_loki_logging(box_number)
+    except Exception as e:  # noqa
+        logging.warning(f"Failed to setup LOKI Handler: {e}")
+
     commit_ID, current_branch, repo_url, repo_dirty_flag, dirty_files, version = log_git_hash()
 
     # Formating GUI graphics
@@ -4818,12 +4949,9 @@ if __name__ == "__main__":
     # Start GUI window
     win = Window(box_number=box_number,start_bonsai_ide=start_bonsai_ide)
     # Get the commit hash of the current version of this Python file
-    win.commit_ID=commit_ID
     win.current_branch=current_branch
     win.repo_url=repo_url
-    win.repo_dirty_flag=repo_dirty_flag
     win.dirty_files=dirty_files
-    win.version=version
     win.show()
 
     # Move creating AutoTrain here to catch any AWS errors
@@ -4831,5 +4959,3 @@ if __name__ == "__main__":
 
     # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())
-
-

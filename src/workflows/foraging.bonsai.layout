@@ -92,8 +92,8 @@
         <Y>3</Y>
       </Location>
       <Size>
-        <Width>1506</Width>
-        <Height>903</Height>
+        <Width>330</Width>
+        <Height>190</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -116,8 +116,8 @@
             <Y>3</Y>
           </Location>
           <Size>
-            <Width>1506</Width>
-            <Height>903</Height>
+            <Width>330</Width>
+            <Height>190</Height>
           </Size>
           <WindowState>Normal</WindowState>
         </EditorDialogSettings>
@@ -2496,8 +2496,8 @@
         <Y>3</Y>
       </Location>
       <Size>
-        <Width>836</Width>
-        <Height>698</Height>
+        <Width>330</Width>
+        <Height>190</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -2640,8 +2640,8 @@
             <Y>3</Y>
           </Location>
           <Size>
-            <Width>836</Width>
-            <Height>698</Height>
+            <Width>330</Width>
+            <Height>190</Height>
           </Size>
           <WindowState>Normal</WindowState>
         </EditorDialogSettings>
@@ -3122,8 +3122,8 @@
             <Y>3</Y>
           </Location>
           <Size>
-            <Width>836</Width>
-            <Height>698</Height>
+            <Width>330</Width>
+            <Height>190</Height>
           </Size>
           <WindowState>Normal</WindowState>
         </EditorDialogSettings>
@@ -3654,8 +3654,8 @@
         <Y>3</Y>
       </Location>
       <Size>
-        <Width>836</Width>
-        <Height>698</Height>
+        <Width>330</Width>
+        <Height>190</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -3678,8 +3678,8 @@
             <Y>3</Y>
           </Location>
           <Size>
-            <Width>836</Width>
-            <Height>698</Height>
+            <Width>330</Width>
+            <Height>190</Height>
           </Size>
           <WindowState>Normal</WindowState>
         </EditorDialogSettings>
@@ -5528,8 +5528,8 @@
             <Y>3</Y>
           </Location>
           <Size>
-            <Width>836</Width>
-            <Height>698</Height>
+            <Width>330</Width>
+            <Height>190</Height>
           </Size>
           <WindowState>Normal</WindowState>
         </EditorDialogSettings>
@@ -7040,12 +7040,12 @@
     <EditorDialogSettings>
       <Visible>true</Visible>
       <Location>
-        <X>721</X>
-        <Y>742</Y>
+        <X>909</X>
+        <Y>647</Y>
       </Location>
       <Size>
-        <Width>316</Width>
-        <Height>239</Height>
+        <Width>266</Width>
+        <Height>164</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -7693,8 +7693,8 @@
           <Y>329</Y>
         </Location>
         <Size>
-          <Width>417</Width>
-          <Height>220</Height>
+          <Width>413</Width>
+          <Height>233</Height>
         </Size>
         <WindowState>Normal</WindowState>
         <VisualizerTypeName>Bonsai.Design.Visualizers.TableLayoutPanelVisualizer</VisualizerTypeName>
@@ -7705,7 +7705,7 @@
               <VisualizerTypeName>IplImageRotateVisualizer</VisualizerTypeName>
               <VisualizerSettings>
                 <IplImageRotateVisualizer>
-                  <InvertHorizontal>true</InvertHorizontal>
+                  <InvertHorizontal>false</InvertHorizontal>
                   <InvertVertical>false</InvertVertical>
                   <RotateAngle>0</RotateAngle>
                 </IplImageRotateVisualizer>
@@ -7853,8 +7853,8 @@
         <Y>3</Y>
       </Location>
       <Size>
-        <Width>836</Width>
-        <Height>698</Height>
+        <Width>330</Width>
+        <Height>190</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -7990,6 +7990,48 @@
           </TableLayoutPanelVisualizer>
         </VisualizerSettings>
       </DialogSettings>
+      <DialogSettings>
+        <Visible>true</Visible>
+        <Location>
+          <X>92</X>
+          <Y>561</Y>
+        </Location>
+        <Size>
+          <Width>332</Width>
+          <Height>279</Height>
+        </Size>
+        <WindowState>Normal</WindowState>
+        <VisualizerTypeName>Bonsai.Design.Visualizers.TableLayoutPanelVisualizer</VisualizerTypeName>
+        <VisualizerSettings>
+          <TableLayoutPanelVisualizer>
+            <MashupSettings>
+              <Source>3</Source>
+              <VisualizerTypeName>Bonsai.Gui.LabelVisualizer</VisualizerTypeName>
+              <VisualizerSettings>
+                <LabelVisualizer />
+              </VisualizerSettings>
+            </MashupSettings>
+            <MashupSettings>
+              <Source>5</Source>
+              <VisualizerTypeName>Bonsai.Design.Visualizers.BooleanTimeSeriesVisualizer</VisualizerTypeName>
+              <VisualizerSettings>
+                <BooleanTimeSeriesVisualizer>
+                  <Capacity>60</Capacity>
+                </BooleanTimeSeriesVisualizer>
+              </VisualizerSettings>
+            </MashupSettings>
+            <MashupSettings>
+              <Source>7</Source>
+              <VisualizerTypeName>Bonsai.Design.Visualizers.BooleanTimeSeriesVisualizer</VisualizerTypeName>
+              <VisualizerSettings>
+                <BooleanTimeSeriesVisualizer>
+                  <Capacity>60</Capacity>
+                </BooleanTimeSeriesVisualizer>
+              </VisualizerSettings>
+            </MashupSettings>
+          </TableLayoutPanelVisualizer>
+        </VisualizerSettings>
+      </DialogSettings>
     </EditorVisualizerLayout>
   </DialogSettings>
   <DialogSettings xsi:type="WorkflowEditorSettings">
@@ -8010,8 +8052,8 @@
         <Y>3</Y>
       </Location>
       <Size>
-        <Width>836</Width>
-        <Height>698</Height>
+        <Width>330</Width>
+        <Height>190</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -8034,8 +8076,8 @@
             <Y>3</Y>
           </Location>
           <Size>
-            <Width>836</Width>
-            <Height>698</Height>
+            <Width>330</Width>
+            <Height>190</Height>
           </Size>
           <WindowState>Normal</WindowState>
         </EditorDialogSettings>
@@ -8213,8 +8255,8 @@
       <DialogSettings>
         <Visible>true</Visible>
         <Location>
-          <X>89</X>
-          <Y>102</Y>
+          <X>88</X>
+          <Y>105</Y>
         </Location>
         <Size>
           <Width>415</Width>

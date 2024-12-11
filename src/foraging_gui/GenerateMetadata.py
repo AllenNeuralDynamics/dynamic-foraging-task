@@ -142,9 +142,9 @@ class generate_metadata:
             'sides':['Left','Right'], # lick spouts
             'camera_list':['SideCameraLeft','SideCameraRight','BottomCamera','BodyCamera'], # camera names in the settings_box.csv
             'camera_name_mapper':{
-                'SideCameraLeft': "Face side left",
-                'SideCameraRight': "Face side right",
-                'BottomCamera': "Bottom",
+                'SideCameraLeft': "Face Side Left",
+                'SideCameraRight': "Face Side Right",
+                'BottomCamera': "Face Bottom",
                 'BodyCamera': "Body"
             }, # camera names in the settings_box.csv and the corresponding names in the rig metadata
             'institute':{
@@ -152,21 +152,19 @@ class generate_metadata:
                 'NINDS': 'NINDS',
                 'Simons Foundation': 'SIMONS',
             },
-            'ephys_rig_behavior_daq_names':[
-                "Harp Behavior",
-                "Harp Sound",
-                "Harp clock synchronization board",
-                "Harp sound amplifier",
-                "Lick Sensor Left",
-                "Lick Sensor Right"
+            'rig_daq_names_janelia_lick_detector':[
+                "harp behavior board",
+                "harp sound card",
+                "harp clock synchronization board",
+                "harp sound amplifier",
                 ],
-            'behavior_rig_behavior_daq_names':[
-                "Harp Behavior",
-                "Harp Sound",
-                "Harp clock synchronization board",
-                "Harp sound amplifier",
-                'Lick Sensor Left',
-                'Lick Sensor Right'
+            'rig_daq_names_aind_lick_detector':[
+                "harp behavior board",
+                "harp sound card",
+                "harp clock synchronization board",
+                "harp sound amplifier",
+                "harp lickety split left",
+                "harp lickety split right",
                 ],
             'fiber_photometry_daq_names':[''],
             'ephys_daq_names':['neuropixel basestation'],
@@ -270,22 +268,32 @@ class generate_metadata:
         '''
         Get the session start and session end time
         '''
-        # priority behavior_streams>high_speed_camera_streams>ephys_streams>ophys_streams
-        if self.behavior_streams!=[]:
-            self.session_start_time = self.behavior_streams[0].stream_start_time
-            self.session_end_time = self.behavior_streams[0].stream_end_time
-        elif self.high_speed_camera_streams!=[]:
-            self.session_start_time = self.high_speed_camera_streams[0].stream_start_time
-            self.session_end_time = self.high_speed_camera_streams[0].stream_end_time
-        elif self.ephys_streams!=[]:
-            self.session_start_time = self.ephys_streams[0].stream_start_time
-            self.session_end_time = self.ephys_streams[0].stream_end_time
-        elif self.ophys_streams!=[]:
-            self.session_start_time = self.ophys_streams[0].stream_start_time
-            self.session_end_time = self.ophys_streams[0].stream_end_time
+        # Initialize empty lists to store start and end times
+        start_times = []
+        end_times = []
+
+        # List of all stream lists
+        all_streams = [
+            self.behavior_streams,
+            self.high_speed_camera_streams,
+            self.ephys_streams,
+            self.ophys_streams
+        ]
+
+        # Iterate over each stream list and collect times
+        for stream_list in all_streams:
+            for stream in stream_list:
+                start_times.append(stream.stream_start_time)
+                end_times.append(stream.stream_end_time)
+
+        # Determine the session start and end times
+        if start_times and end_times:
+            self.session_start_time = min(start_times)
+            self.session_end_time = max(end_times)
         else:
             self.session_start_time = ''
             self.session_end_time = ''
+
 
     def _get_modality(self):
         '''
@@ -354,12 +362,12 @@ class generate_metadata:
         else:
             self.has_behavior_data = True
         
-        # Missing fields B_NewscalePositions, LickSpoutReferenceArea, LickSpoutReferenceX, LickSpoutReferenceY, LickSpoutReferenceZ in the json file.
+        # Missing fields B_StagePositions, LickSpoutReferenceArea, LickSpoutReferenceX, LickSpoutReferenceY, LickSpoutReferenceZ in the json file.
         # Possible reason: 1) the NewScale stage is not connected to the behavior GUI. 2) the session is not started.
-        if ('B_NewscalePositions' not in self.Obj) or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceArea']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceX']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceY']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceZ']==''):
+        if ('B_StagePositions' not in self.Obj) or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceArea']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceX']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceY']=='') or (self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceZ']==''):
             self.has_reward_delivery = False
             logging.info('Cannot log reward delivery in session metadata - missing fields')
-        elif self.Obj['B_NewscalePositions']==[]:
+        elif self.Obj['B_StagePositions']==[]:
             self.has_reward_delivery = False
             logging.info('Cannot log reward delivery in session metadata - missing newscale positions')
         else:
@@ -467,6 +475,12 @@ class generate_metadata:
         if 'PtotocolID' in self.Obj['meta_data_dialog']['session_metadata']:
             self.Obj['meta_data_dialog']['session_metadata']['ProtocolID']=self.Obj['meta_data_dialog']['session_metadata']['PtotocolID']
 
+        # Get the lick detector 
+        if 'AINDLickDetector' not in self.Obj['settings_box']:
+            self.Obj['settings_box']['AINDLickDetector']=0
+        else:
+            self.Obj['settings_box']['AINDLickDetector']=int(self.Obj['settings_box']['AINDLickDetector'])
+
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
         Initialize fields
@@ -507,7 +521,8 @@ class generate_metadata:
             return
 
         self._get_stimulus()
-        self.data_streams = self.behavior_streams+self.ephys_streams+self.ophys_streams+self.high_speed_camera_streams
+        self._combine_data_streams()
+        #self.data_streams = self.ephys_streams+self.ophys_streams+self.high_speed_camera_streams
 
         session_params = {
             "experimenter_full_name": [self.Obj['Experimenter']],
@@ -543,7 +558,49 @@ class generate_metadata:
         session.write_standard_file(output_directory=self.output_folder)
         self.session_metadata_success=True
         return session
+    
+    def _combine_data_streams(self):
+        '''
+        Combine the data streams
+        '''
+        
+        self.data_streams = self.high_speed_camera_streams
+        if self.data_streams == []:
+            self.data_streams = self.ophys_streams  
+        elif self.ophys_streams != []:
+            # add the ophys streams to the high speed camera streams
+            self.data_streams.stream_modalities = self.data_streams[0].stream_modalities + self.ophys_streams[0].stream_modalities
+            self.data_streams[0].stream_start_time=min(self.data_streams[0].stream_start_time,self.ophys_streams[0].stream_start_time)
+            self.data_streams[0].stream_end_time=max(self.data_streams[0].stream_end_time,self.ophys_streams[0].stream_end_time)
+            self.data_streams[0].daq_names = self.data_streams[0].daq_names + self.ophys_streams[0].daq_names
+            self.data_streams[0].light_sources = self.data_streams[0].light_sources + self.ophys_streams[0].light_sources
+            self.data_streams[0].detectors = self.data_streams[0].detectors + self.ophys_streams[0].detectors
+            self.data_streams[0].fiber_connections = self.data_streams[0].fiber_connections + self.ophys_streams[0].fiber_connections
+            self.data_streams[0].notes = str(self.data_streams[0].notes) +';'+ str(self.ophys_streams[0].notes)
+            self.data_streams[0].software = self.ophys_streams[0].software
 
+        if self.data_streams == []:
+            self.data_streams = self.ephys_streams
+        elif self.ephys_streams != []:
+            # add the first ephys streams (associated with the behavior) to the high speed camera streams
+            self.data_streams[0].stream_modalities = self.data_streams[0].stream_modalities+self.ephys_streams[0].stream_modalities
+            self.data_streams[0].stream_start_time=min(self.data_streams[0].stream_start_time,self.ephys_streams[0].stream_start_time)
+            self.data_streams[0].stream_end_time=max(self.data_streams[0].stream_end_time,self.ephys_streams[0].stream_end_time)
+            self.data_streams[0].daq_names = self.data_streams[0].daq_names + self.ephys_streams[0].daq_names
+            self.data_streams[0].ephys_modules = self.data_streams[0].ephys_modules + self.ephys_streams[0].ephys_modules
+            self.data_streams[0].stick_microscopes = self.data_streams[0].stick_microscopes + self.ephys_streams[0].stick_microscopes
+            self.data_streams[0].notes = str(self.data_streams[0].notes) +';'+ str(self.ephys_streams[0].notes)
+
+        # combine other ephys streams
+        self.data_streams2 = []
+        if len(self.ephys_streams)>2:
+            self.data_streams2 = self.ephys_streams[1]
+            for ephys_stream in self.ephys_streams[2:]:
+                self.data_streams2.stream_start_time=min(self.data_streams2.stream_start_time,ephys_stream.stream_start_time)
+                self.data_streams2.stream_end_time=max(self.data_streams2.stream_end_time,ephys_stream.stream_end_time)
+                self.data_streams2.notes = str(self.data_streams2.notes) +';'+ str(ephys_stream.notes)
+        if self.data_streams2 != []:
+            self.data_streams.append(self.data_streams2)
 
     def _get_high_speed_camera_stream(self):
         '''
@@ -551,12 +608,17 @@ class generate_metadata:
         '''
         self.high_speed_camera_streams=[]
         self._get_camera_names()
-        if self.Obj['Camera_dialog']['camera_start_time'] != '' and self.Obj['Camera_dialog']['camera_stop_time'] != '' and self.camera_names != []:
+        if self.Obj['Camera_dialog']['camera_start_time'] != '' and self.camera_names != []:
+            if self.Obj['Camera_dialog']['camera_stop_time'] == '':
+                camera_stop_time = datetime.now()
+            else:
+                camera_stop_time = datetime.strptime(self.Obj['Camera_dialog']['camera_stop_time'], '%Y-%m-%d %H:%M:%S.%f')
             self.high_speed_camera_streams.append(Stream(
                         stream_modalities=[Modality.BEHAVIOR_VIDEOS],
                         camera_names=self.camera_names,
                         stream_start_time=datetime.strptime(self.Obj['Camera_dialog']['camera_start_time'], '%Y-%m-%d %H:%M:%S.%f'),
-                        stream_end_time=datetime.strptime(self.Obj['Camera_dialog']['camera_stop_time'], '%Y-%m-%d %H:%M:%S.%f'),
+                        stream_end_time=camera_stop_time,
+                        software=self.behavior_software,
                 ))
         else:
             logging.info('No camera data stream detected!')
@@ -594,7 +656,8 @@ class generate_metadata:
                 light_sources=self.fib_light_sources_config,
                 detectors=self.fib_detectors,
                 fiber_connections=self.fiber_connections,
-                notes=f'fib mode: {self.Obj["fiber_mode"]}',
+                software=self.behavior_software,
+                notes=f'Fib modality: fib mode: {self.Obj["fiber_mode"]}',
         ))
 
     def _get_fiber_connections(self):
@@ -680,24 +743,26 @@ class generate_metadata:
         make the stimulus metadata (e.g. audio and optogenetics)
         '''
         self.stimulus=[]
-        self._get_audio_stimulus()
+        self._get_behavior_stimulus()
         self._get_optogenetics_stimulus()
-        self.stimulus=self.audio_stimulus+self.optogenetics_stimulus
+        self.stimulus=self.behavior_stimulus+self.optogenetics_stimulus
 
-    def _get_audio_stimulus(self):
+    def _get_behavior_stimulus(self):
         '''
         Make the audio stimulus metadata
         '''
-        self.audio_stimulus=[]
-        if self.behavior_streams==[]:
+        self.behavior_stimulus=[]
+        if self.has_behavior_data==False:
             logging.info('No behavior data stream detected!')
             return
-        
-        self.audio_stimulus.append(StimulusEpoch(
-            stimulus_name='auditory go cue',
+
+        self.behavior_stimulus.append(StimulusEpoch(
+            software=self.behavior_software,
+            stimulus_device_names=self._get_speaker_names(),
+            stimulus_name='The behavior auditory go cue',
             stimulus_modalities=[StimulusModality.AUDITORY],
-            stimulus_start_time=self.session_start_time,
-            stimulus_end_time=self.session_end_time,
+            stimulus_start_time=self.behavior_streams[0].stream_start_time,
+            stimulus_end_time=self.behavior_streams[0].stream_end_time,
             stimulus_parameters=[AuditoryStimulation(
                 sitmulus_name='auditory go cue',
                 sample_frequency=96000,
@@ -717,6 +782,18 @@ class generate_metadata:
             trials_rewarded=self.trials_rewarded,
             notes=f"The duration of go cue is 100ms. The frequency is 7500Hz. Decibel is {self.Obj['Other_go_cue_decibel']}dB. The total reward consumed in the session is {self.total_reward_consumed_in_session} microliter. The total reward indcluding consumed in the session and supplementary water is {self.Obj['TotalWater']} millimeters.",
         ))
+
+
+    def _get_speaker_names(self):
+        '''
+        get the speaker names
+        '''
+        speaker_names=[]
+        self.Obj['meta_data_dialog']['rig_metadata']
+        for current_device in self.Obj['meta_data_dialog']['rig_metadata']['stimulus_devices']:
+            if current_device['device_type']=='Speaker':
+                speaker_names.append(current_device['name'])
+        return speaker_names
     
     def _get_output_parameters(self):
         '''Get the output parameters'''
@@ -736,7 +813,6 @@ class generate_metadata:
         output_parameters = {
             'meta': {
                 'box': _get_field(self.Obj, ['box', 'Tower']),
-                'session_end_time': _get_field(self.Obj, 'Other_CurrentTime'),
                 'session_run_time_in_min': _get_field(self.Obj, 'Other_RunningTime'),
             },
 
@@ -746,13 +822,6 @@ class generate_metadata:
                 'water_in_session_total': water_in_session_total,
                 'water_after_session': water_after_session,
                 'water_day_total': water_day_total,
-            },
-
-            'weight': {
-                'base_weight': float(_get_field(self.Obj, 'BaseWeight')),
-                'target_weight': float(_get_field(self.Obj, 'TargetWeight')),
-                'target_weight_ratio': float(_get_field(self.Obj, 'TargetRatio')),
-                'weight_after': float(_get_field(self.Obj, 'WeightAfter')),
             },
 
             'performance': {
@@ -768,9 +837,43 @@ class generate_metadata:
     def _get_task_parameters(self):
         '''Get task parameters'''
         # excluding parameters starting with B_, TP_,  BS_, meta_data_dialog, LaserCalibrationResults, WaterCalibrationResults
-        task_parameters = {key: value for key, value in self.Obj.items() if not key.startswith(('B_', 'TP_', 'BS_','meta_data_dialog','LaserCalibrationResults','WaterCalibrationResults'))}
+        #task_parameters = {key: value for key, value in self.Obj.items() if not key.startswith(('B_', 'TP_', 'BS_','meta_data_dialog','LaserCalibrationResults','WaterCalibrationResults'))}
+        # only keep key task parameters
+        keys =[
+            'Task',
+            'BlockBeta',
+            'BlockMin',
+            'BlockMax',
+            'ITIBeta',
+            'ITIMin',
+            'ITIMax',
+            'DelayBeta',
+            'DelayMin',
+            'DelayMax',
+            'LeftValue_volume',
+            'RightValue_volume',
+        ]
+        reward_probability=self._get_reward_probability()
+        task_parameters = {key: value for key, value in self.Obj.items() if key in keys}
+        task_parameters['reward_probability'] = reward_probability
+
         return task_parameters
     
+    def _get_reward_probability(self):
+        '''
+        Get the reward probability
+        '''
+        if self.Obj['Task'] in ['Uncoupled Baiting','Uncoupled Without Baiting']:
+            # Get reward prob pool from the input string (e.g., ["0.1", "0.5", "0.9"])
+            return self.Obj['UncoupledReward']
+        elif self.Obj['Task'] in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
+            RewardPairs=self.Obj['B_RewardFamilies'][int(self.Obj['RewardFamily'])-1][:int(self.Obj['RewardPairsN'])]
+            RewardProb=np.array(RewardPairs)/np.expand_dims(np.sum(RewardPairs,axis=1),axis=1)*float(self.Obj['BaseRewardSum'])
+            return str(RewardProb.tolist())
+        else:
+            logging.info('Task is not recognized!')
+            return ''
+           
     def _get_optogenetics_stimulus(self):
         '''
         Make the optogenetics stimulus metadata
@@ -784,7 +887,9 @@ class generate_metadata:
         if sum( self.Obj['B_SelectedCondition'])==0:
             return  
         self._get_light_source_config()
-        self.optogenetics_stimulus.append(StimulusEpoch(    
+        self.optogenetics_stimulus.append(StimulusEpoch(
+                software=self.behavior_software,    
+                stimulus_device_names=self.light_names_used_in_session,
                 stimulus_name='Optogenetics',
                 stimulus_modalities=[StimulusModality.OPTOGENETICS],
                 notes='Please see NWB files for more details (stimulus epoch and stimulus protocol etc.).',
@@ -792,8 +897,7 @@ class generate_metadata:
                 stimulus_end_time=self.session_end_time,
                 light_source_config=self.light_source_config,
         ))
-
-
+    
     def _get_light_source_config(self):
         '''
         get the optogenetics stimulus light source config
@@ -888,7 +992,7 @@ class generate_metadata:
                     daq_names=daq_names,
                     ephys_modules=self.ephys_modules,
                     stick_microscopes=self.stick_microscopes,
-                    notes=f"recording type: {current_recording['recording_type']}; file name:{current_recording['prepend_text']}{current_recording['base_text']};  experiment number:{current_recording['record_nodes'][0]['experiment_number']};  recording number:{current_recording['record_nodes'][0]['recording_number']}",
+                    notes=f"Ephys modality: recording type: {current_recording['recording_type']}; file name:{current_recording['prepend_text']}{current_recording['base_text']};  experiment number:{current_recording['record_nodes'][0]['experiment_number']};  recording number:{current_recording['record_nodes'][0]['recording_number']}",
             ))
 
 
@@ -978,13 +1082,13 @@ class generate_metadata:
 
         if self.has_behavior_data==False:
             self.behavior_streams=[]
-            logging.info('No behavior data stream detected!')
+            logging.info('No behavior data detected!')
             return
 
-        if self.box_type == 'Ephys':
-            daq_names=self.name_mapper['ephys_rig_behavior_daq_names']
+        if self.Obj['settings_box']['AINDLickDetector'] == 1:
+            daq_names=self.name_mapper['rig_daq_names_aind_lick_detector']
         else:
-            daq_names=self.name_mapper['behavior_rig_behavior_daq_names']
+            daq_names=self.name_mapper['rig_daq_names_janelia_lick_detector']
 
         self.behavior_streams=[]
         self._get_behavior_software()
@@ -995,6 +1099,7 @@ class generate_metadata:
                 daq_names=daq_names,
                 software=self.behavior_software,
         ))
+
     def _get_behavior_software(self):
         '''
         get the behavior software version information
@@ -1017,7 +1122,7 @@ class generate_metadata:
             version=f'behavior branch:{self.Obj["current_branch"]}   commit ID:{self.Obj["commit_ID"]}    version:{self.Obj["version"]}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{version}',
             url=self.Obj["repo_url"],
         ))
-        
+
     def _get_opto_calibration(self):
         '''
         Make the optogenetic (Laser or LED) calibration metadata
@@ -1195,12 +1300,41 @@ class generate_metadata:
         device_oringin=self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceArea']
         lick_spouts_distance=float(self.Obj['Other_lick_spout_distance'])
         # using the last position of the stage
-        start_position=[self.Obj['B_NewscalePositions'][-1][0], self.Obj['B_NewscalePositions'][-1][1], self.Obj['B_NewscalePositions'][-1][2]]
+        if 'B_StagePositions' in self.Obj.keys():
+            start_position=[self.Obj['B_StagePositions'][-1]['x'],
+                            self.Obj['B_StagePositions'][-1].get('y', None),    # newscale stage
+                            self.Obj['B_StagePositions'][-1].get('y1', None),   # aind-stage
+                            self.Obj['B_StagePositions'][-1].get('y2', None),   # aind-stage
+                            self.Obj['B_StagePositions'][-1]['z']]
+            start_position = [pos for pos in start_position if pos is not None]     # filter out None values
 
-        # assuming refering to the left lick spout
-        reference_spout_position=[float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceX']),float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceY']),float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceZ'])]
-        left_lick_spout_reference_position=np.array(reference_spout_position)-np.array(start_position)
-        right_lick_spout_reference_position=left_lick_spout_reference_position+np.array([-lick_spouts_distance,0,0])
+            reference_spout_position=[float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceX']),
+                                      float(self.Obj['meta_data_dialog']['session_metadata'].get('LickSpoutReferenceY',
+                                                                                                 None)),
+                                      float(self.Obj['meta_data_dialog']['session_metadata'].get('LickSpoutReferenceY1',
+                                                                                                 None)),
+                                      float(self.Obj['meta_data_dialog']['session_metadata'].get('LickSpoutReferenceY2',
+                                                                                                 None)),
+                                      float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceZ'])]
+            reference_spout_position = [pos for pos in reference_spout_position if pos is not None]  # filter out None value
+
+        elif 'B_NewscalePositions' in self.Obj.keys():  # older version of code
+            start_position = [self.Obj['B_NewscalePositions'][-1][0], self.Obj['B_NewscalePositions'][-1][1],
+                              self.Obj['B_NewscalePositions'][-1][2]]
+            # assuming refering to the left lick spout
+            reference_spout_position = [float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceX']),
+                                        float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceY']),
+                                        float(self.Obj['meta_data_dialog']['session_metadata']['LickSpoutReferenceZ'])]
+        else:
+            logging.error('Object does not have stage positions to create metadata.')
+            return
+
+        if len(reference_spout_position) == 3:  # newscale stage
+            left_lick_spout_reference_position=np.array(reference_spout_position)-np.array(start_position)
+            right_lick_spout_reference_position=left_lick_spout_reference_position+np.array([-lick_spouts_distance,0,0])
+        else:   # aind stage
+            left_lick_spout_reference_position = [reference_spout_position[i]-start_position[i] for i in [0, 1, 3]]
+            right_lick_spout_reference_position = [reference_spout_position[i] - start_position[i] for i in [0, 2, 3]]
 
         self.reward_delivery=RewardDeliveryConfig(
             reward_solution= RewardSolution.WATER,
@@ -1243,5 +1377,6 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    generate_metadata(json_file=r'Y:\711256\behavior_711256_2024-08-15_11-17-57\behavior\711256_2024-08-15_11-17-57.json')
+    generate_metadata(json_file=r'Y:\753126\behavior_753126_2024-10-07_10-14-07\behavior\753126_2024-10-07_10-14-07.json',output_folder=r'H:\test')
+    #generate_metadata(json_file=r'Y:\753126\behavior_753126_2024-10-15_12-20-35\behavior\753126_2024-10-15_12-20-35.json',output_folder=r'H:\test')
     #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
