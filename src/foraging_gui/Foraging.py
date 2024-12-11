@@ -3802,9 +3802,9 @@ class Window(QMainWindow):
             if hasattr(self, 'schedule') and mouse_id in self.schedule['Mouse ID'].values and mouse_id not in ['0','1','2','3','4','5','6','7','8','9','10'] : # skip if test mouse or mouse isn't in schedule or
                 FIP_Mode = self._GetInfoFromSchedule(mouse_id, 'FIP Mode')
                 FIP_is_nan = (isinstance(FIP_Mode, float) and math.isnan(FIP_Mode)) or FIP_Mode is None
-                FIP_Stage = self._GetInfoFromSchedule(mouse_id, 'First FP Stage')
-                current_stage = self.AutoTrain_dialog.stage_in_use
-                stages = ['STAGE_1', 'STAGE_2', 'STAGE_3', 'FINAL', 'GRADUATED', 'unknown training stage']
+                first_fip_stage = self._GetInfoFromSchedule(mouse_id, 'First FP Stage')
+                current_stage = self._GetInfoFromSchedule(mouse_id, 'Current Stage')
+                stages = ['1', '1.1', '1.2', '2', '3', 'FINAL', 'GRADUATED', np.nan()]
                 if FIP_is_nan and self.PhotometryB.currentText()=='on':
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
@@ -3817,7 +3817,7 @@ class Window(QMainWindow):
                     else:
                         # Allow the session to continue, but log error
                         logging.error('Starting session with conflicting FIP information: mouse {}, FIP on, but not in schedule'.format(mouse_id))
-                elif not FIP_is_nan and self.PhotometryB.currentText()=='off' and stages.index(current_stage) >= stages.index(FIP_Stage):
+                elif not FIP_is_nan and self.PhotometryB.currentText()=='off' and stages.index(current_stage) >= stages.index(first_fip_stage):
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
                                                  f'Photometry is set to "off" but schedule indicate '
