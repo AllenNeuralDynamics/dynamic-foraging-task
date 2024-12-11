@@ -359,7 +359,7 @@
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="gl:Delay">
-                            <gl:DueTime>PT2.185S</gl:DueTime>
+                            <gl:DueTime>PT4.014S</gl:DueTime>
                           </Combinator>
                         </Expression>
                         <Expression xsi:type="WorkflowOutput" />
@@ -381,7 +381,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT0.547S</gl:DueTime>
+                      <gl:DueTime>PT1.119S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -654,7 +654,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Timer">
-                      <gl:DueTime>PT1S</gl:DueTime>
+                      <gl:DueTime>PT2S</gl:DueTime>
                       <gl:Period>PT0S</gl:Period>
                     </Combinator>
                   </Expression>
@@ -1061,7 +1061,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Timer">
-                      <gl:DueTime>PT1S</gl:DueTime>
+                      <gl:DueTime>PT2S</gl:DueTime>
                       <gl:Period>PT0S</gl:Period>
                     </Combinator>
                   </Expression>
@@ -7861,7 +7861,7 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="io:CsvWriter">
-                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_behavior_0_2024-12-05_18-46-46\behavior\raw.harp/../../behavior-videos/side_camera_left.csv</io:FileName>
+                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_left.csv</io:FileName>
                                 <io:Append>false</io:Append>
                                 <io:Overwrite>true</io:Overwrite>
                                 <io:Suffix>None</io:Suffix>
@@ -7906,11 +7906,11 @@
                               </Expression>
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="ffmpeg:VideoWriter">
-                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_behavior_0_2024-12-05_18-46-46\behavior\raw.harp/../../behavior-videos/side_camera_left.avi</ffmpeg:FileName>
+                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_left.avi</ffmpeg:FileName>
                                   <ffmpeg:Suffix>None</ffmpeg:Suffix>
                                   <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                                   <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M -v 24</ffmpeg:OutputArguments>
+                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M</ffmpeg:OutputArguments>
                                 </Combinator>
                               </Expression>
                             </Nodes>
@@ -8028,7 +8028,7 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="io:CsvWriter">
-                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_behavior_0_2024-12-05_18-46-46\behavior\raw.harp/../../behavior-videos/bottom_camera.csv</io:FileName>
+                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/bottom_camera.csv</io:FileName>
                                 <io:Append>false</io:Append>
                                 <io:Overwrite>true</io:Overwrite>
                                 <io:Suffix>None</io:Suffix>
@@ -8076,11 +8076,11 @@
                               </Expression>
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="ffmpeg:VideoWriter">
-                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_behavior_0_2024-12-05_18-46-46\behavior\raw.harp/../../behavior-videos/bottom_camera.avi</ffmpeg:FileName>
+                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/bottom_camera.avi</ffmpeg:FileName>
                                   <ffmpeg:Suffix>None</ffmpeg:Suffix>
                                   <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                                   <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M -v 24</ffmpeg:OutputArguments>
+                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M</ffmpeg:OutputArguments>
                                 </Combinator>
                               </Expression>
                             </Nodes>
@@ -8199,7 +8199,7 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="io:CsvWriter">
-                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_behavior_0_2024-12-05_18-46-46\behavior\raw.harp/../../behavior-videos/side_camera_right.csv</io:FileName>
+                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_right.csv</io:FileName>
                                 <io:Append>false</io:Append>
                                 <io:Overwrite>true</io:Overwrite>
                                 <io:Suffix>None</io:Suffix>
@@ -8247,11 +8247,11 @@
                               </Expression>
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="ffmpeg:VideoWriter">
-                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_behavior_0_2024-12-05_18-46-46\behavior\raw.harp/../../behavior-videos/side_camera_right.avi</ffmpeg:FileName>
+                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_right.avi</ffmpeg:FileName>
                                   <ffmpeg:Suffix>None</ffmpeg:Suffix>
                                   <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                                   <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M -v 24</ffmpeg:OutputArguments>
+                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M</ffmpeg:OutputArguments>
                                 </Combinator>
                               </Expression>
                             </Nodes>
@@ -8370,7 +8370,7 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="io:CsvWriter">
-                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_behavior_0_2024-12-05_18-46-46\behavior\raw.harp/../../behavior-videos/body_camera.csv</io:FileName>
+                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/body_camera.csv</io:FileName>
                                 <io:Append>false</io:Append>
                                 <io:Overwrite>true</io:Overwrite>
                                 <io:Suffix>None</io:Suffix>
@@ -8379,9 +8379,6 @@
                               </Expression>
                               <Expression xsi:type="MemberSelector">
                                 <Selector>Value.Image</Selector>
-                              </Expression>
-                              <Expression xsi:type="rx:PublishSubject">
-                                <Name>Camera_Image_Body</Name>
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
                                 <Name>RootPath</Name>
@@ -8418,11 +8415,11 @@
                               </Expression>
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="ffmpeg:VideoWriter">
-                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_behavior_0_2024-12-05_18-46-46\behavior\raw.harp/../../behavior-videos/body_camera.avi</ffmpeg:FileName>
+                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/body_camera.avi</ffmpeg:FileName>
                                   <ffmpeg:Suffix>None</ffmpeg:Suffix>
                                   <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                                   <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M -v 24</ffmpeg:OutputArguments>
+                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M</ffmpeg:OutputArguments>
                                 </Combinator>
                               </Expression>
                             </Nodes>
@@ -8441,16 +8438,15 @@
                               <Edge From="12" To="13" Label="Source1" />
                               <Edge From="13" To="14" Label="Source2" />
                               <Edge From="14" To="15" Label="Source1" />
-                              <Edge From="15" To="16" Label="Source1" />
-                              <Edge From="16" To="25" Label="Source1" />
+                              <Edge From="15" To="24" Label="Source1" />
+                              <Edge From="16" To="17" Label="Source1" />
                               <Edge From="17" To="18" Label="Source1" />
-                              <Edge From="18" To="19" Label="Source1" />
-                              <Edge From="19" To="25" Label="Source2" />
-                              <Edge From="20" To="21" Label="Source1" />
-                              <Edge From="21" To="25" Label="Source3" />
+                              <Edge From="18" To="24" Label="Source2" />
+                              <Edge From="19" To="20" Label="Source1" />
+                              <Edge From="20" To="24" Label="Source3" />
+                              <Edge From="21" To="22" Label="Source1" />
                               <Edge From="22" To="23" Label="Source1" />
-                              <Edge From="23" To="24" Label="Source1" />
-                              <Edge From="24" To="25" Label="Source4" />
+                              <Edge From="23" To="24" Label="Source4" />
                             </Edges>
                           </Workflow>
                         </Expression>
@@ -9280,16 +9276,12 @@
                               <Expression xsi:type="MemberSelector">
                                 <Selector>Image</Selector>
                               </Expression>
-                              <Expression xsi:type="rx:PublishSubject">
-                                <Name>Camera Image_Body_Preview</Name>
-                              </Expression>
                             </Nodes>
                             <Edges>
                               <Edge From="0" To="1" Label="Source1" />
                               <Edge From="1" To="2" Label="Source1" />
                               <Edge From="2" To="3" Label="Source1" />
                               <Edge From="3" To="4" Label="Source1" />
-                              <Edge From="4" To="5" Label="Source1" />
                             </Edges>
                           </Workflow>
                         </Expression>
