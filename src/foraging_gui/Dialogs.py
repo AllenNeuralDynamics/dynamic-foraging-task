@@ -322,7 +322,7 @@ class WaterCalibrationDialog(QDialog):
         self._UpdateFigure()
         self.setWindowTitle('Water Calibration: {}'.format(self.MainWindow.current_box))
         self.Warning.setText('')
-        self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+        self.Warning.setStyleSheet(f'color: {self.MainWindow.default_warning_color};')
         # find all buttons and set them to not be the default button
         for container in [self]:
             for child in container.findChildren((QtWidgets.QPushButton)):     
@@ -412,7 +412,7 @@ class WaterCalibrationDialog(QDialog):
         self.StartCalibratingLeft.setEnabled(True)
         self.StartCalibratingRight.setEnabled(True)
         self.Warning.setText('Calibration Finished')
-        self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+        self.Warning.setStyleSheet(f'color: {self.MainWindow.default_warning_color};')
 
  
     def _Continue(self):
@@ -515,7 +515,7 @@ class WaterCalibrationDialog(QDialog):
             self.StartCalibratingLeft.setChecked(False)
             self.StartCalibratingLeft.setStyleSheet("background-color : none")
             self.Warning.setText('Calibration was terminated!')
-            self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+            self.Warning.setStyleSheet(f'color: {self.MainWindow.default_warning_color};')
             self.StartCalibratingRight.setEnabled(True)
             return
 
@@ -666,7 +666,7 @@ class WaterCalibrationDialog(QDialog):
             self.StartCalibratingRight.setChecked(False)
             self.StartCalibratingRight.setStyleSheet("background-color : none")
             self.Warning.setText('Calibration was terminated!')
-            self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+            self.Warning.setStyleSheet(f'color: {self.MainWindow.default_warning_color};')
             self.StartCalibratingRight.setEnabled(True)
             return
 
@@ -816,7 +816,7 @@ class WaterCalibrationDialog(QDialog):
             '\nTime remaining: {}'.format(self._TimeRemaining(
                 i,cycle,opentime,interval))
             )
-        self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+        self.Warning.setStyleSheet(f'color: {self.MainWindow.default_warning_color};')
 
     def _Save(self,valve,valve_open_time,valve_open_interval,cycle,total_water,tube_weight,append=False):
         '''save the calibrated result and update the figure'''
@@ -1040,7 +1040,7 @@ class WaterCalibrationDialog(QDialog):
                     '\nTime remaining: {}'.format(self._TimeRemaining(
                         i, self.SpotCycle, open_time, self.SpotInterval))
                 )
-                self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+                self.Warning.setStyleSheet(f'color: {self.MainWindow.default_warning_color};')
 
                 # set the valve open time
                 getattr(self.MainWindow.Channel, f'{valve}Value')(float(open_time) * 1000)
@@ -1558,12 +1558,12 @@ class LaserCalibrationDialog(QDialog):
         self.Warning.setText('')
         if self.Location_1.currentText()=='Both':
             self.Warning.setText('Data not captured! Please choose left or right, not both!')
-            self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+            self.Warning.setStyleSheet(f'color: {self.MainWindow.default_warning_color};')
             self.Warning.setAlignment(Qt.AlignCenter)
             return
         if self.LaserPowerMeasured.text()=='':
             self.Warning.setText('Data not captured! Please enter power measured!')
-            self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+            self.Warning.setStyleSheet(f'color: {self.MainWindow.default_warning_color};')
             self.Warning.setAlignment(Qt.AlignCenter)
             return
         for attr_name in dir(self):
@@ -1600,7 +1600,7 @@ class LaserCalibrationDialog(QDialog):
         except Exception as e:
             logging.error(str(e))
             self.Warning.setText('Data not saved! Please Capture the power first!')
-            self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+            self.Warning.setStyleSheet(f'color: {self.MainWindow.default_warning_color};')
             self.Warning.setAlignment(Qt.AlignCenter)
             return
         # delete invalid indices
@@ -1684,7 +1684,7 @@ class LaserCalibrationDialog(QDialog):
         self.Warning.setText('')
         if LaserCalibrationResults=={}:
             self.Warning.setText('Data not saved! Please enter power measured!')
-            self.Warning.setStyleSheet(self.MainWindow.default_warning_color)
+            self.Warning.setStyleSheet(f'color: {self.MainWindow.default_warning_color};')
             self.Warning.setAlignment(Qt.AlignCenter)
             return
         self.MainWindow.LaserCalibrationResults=LaserCalibrationResults
@@ -2296,7 +2296,7 @@ class AutoTrainDialog(QDialog):
             self.label_curriculum_name.setText('subject not found')
             self.label_last_actual_stage.setText('subject not found')
             self.label_next_stage_suggested.setText('subject not found')
-            self.label_subject_id.setStyleSheet(self.MainWindow.default_warning_color)
+            self.label_subject_id.setStyleSheet(f'color: {self.MainWindow.default_warning_color};')
             
             # disable some stuff
             self.checkBox_override_stage.setChecked(False)
@@ -2380,7 +2380,7 @@ class AutoTrainDialog(QDialog):
             else:
                 self.label_last_actual_stage.setText('irrelevant (curriculum overridden)')
                 self.label_next_stage_suggested.setText('irrelevant')
-                self.label_next_stage_suggested.setStyleSheet(self.MainWindow.default_warning_color)
+                self.label_next_stage_suggested.setStyleSheet(f'color: {self.MainWindow.default_warning_color};')
                 
                 # Set override stage automatically
                 self.checkBox_override_stage.setChecked(True)
@@ -2857,7 +2857,7 @@ class AutoTrainDialog(QDialog):
                 widget.setStyleSheet("")
             self.MainWindow.TrainingParameters.setStyleSheet("")
             self.MainWindow.label_auto_train_stage.setText("off curriculum")
-            self.MainWindow.label_auto_train_stage.setStyleSheet(self.MainWindow.default_warning_color)
+            self.MainWindow.label_auto_train_stage.setStyleSheet(f'color: {self.MainWindow.default_warning_color};')
 
 
             # enable override

@@ -262,7 +262,7 @@ class GenerateTrials():
         else:
             state='on'
         self.win.Opto_dialog.SessionControlWarning.setText('Session control state: '+state)
-        self.win.Opto_dialog.SessionControlWarning.setStyleSheet(self.win.default_warning_color)    
+        self.win.Opto_dialog.SessionControlWarning.setStyleSheet(f'color: {self.win.default_warning_color};')
 
     def _get_uncoupled_reward_prob_pool(self):
         # Get reward prob pool from the input string (e.g., ["0.1", "0.5", "0.9"])
@@ -1166,24 +1166,21 @@ class GenerateTrials():
         stop = False
         msg =''
         warning_label_text = ''
-        warning_label_color = 'color: gray;'        
+
 
         # Check for reasons to stop early 
         if (np.shape(self.B_AnimalResponseHistory)[0]>=StopIgnore) and (np.all(self.B_AnimalResponseHistory[-StopIgnore:]==2)):
             stop=True
             msg = 'Stopping the session because the mouse has ignored at least {} consecutive trials'.format(self.TP_StopIgnores)
             warning_label_text = 'Stop because ignore trials exceed or equal: '+self.TP_StopIgnores
-            warning_label_color = self.win.default_warning_color
         elif self.B_CurrentTrialN>MaxTrial: 
             stop=True
             msg = 'Stopping the session because the mouse has reached the maximum trial count: {}'.format(self.TP_MaxTrial)
             warning_label_text = 'Stop because maximum trials exceed or equal: '+self.TP_MaxTrial
-            warning_label_color = self.win.default_warning_color
         elif self.BS_CurrentRunningTime>MaxTime:
             stop=True
             msg = 'Stopping the session because the session running time has reached {} minutes'.format(self.TP_MaxTime)
             warning_label_text = 'Stop because running time exceeds or equals: '+self.TP_MaxTime+'m'
-            warning_label_color = self.win.default_warning_color
         else:
             stop=False
 
