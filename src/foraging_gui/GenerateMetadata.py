@@ -569,7 +569,7 @@ class generate_metadata:
             self.data_streams = self.ophys_streams  
         elif self.ophys_streams != []:
             # add the ophys streams to the high speed camera streams
-            self.data_streams[0].stream_modalities = self.data_streams[0].stream_modalities + self.ophys_streams[0].stream_modalities
+            self.data_streams.stream_modalities = self.data_streams[0].stream_modalities + self.ophys_streams[0].stream_modalities
             self.data_streams[0].stream_start_time=min(self.data_streams[0].stream_start_time,self.ophys_streams[0].stream_start_time)
             self.data_streams[0].stream_end_time=max(self.data_streams[0].stream_end_time,self.ophys_streams[0].stream_end_time)
             self.data_streams[0].daq_names = self.data_streams[0].daq_names + self.ophys_streams[0].daq_names
