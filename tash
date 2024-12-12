@@ -1,0 +1,31 @@
+[1mdiff --git a/src/foraging_gui/Foraging.py b/src/foraging_gui/Foraging.py[m
+[1mindex 122706fe..b9a37510 100644[m
+[1m--- a/src/foraging_gui/Foraging.py[m
+[1m+++ b/src/foraging_gui/Foraging.py[m
+[36m@@ -9,7 +9,7 @@[m [mimport math[m
+ import logging[m
+ from hashlib import md5[m
+ [m
+[31m-import logging_loki[m
+[32m+[m[32m#import logging_loki[m
+ import socket[m
+ import harp[m
+ import threading[m
+[36m@@ -25,7 +25,7 @@[m [mfrom aind_slims_api import models[m
+ import serial[m
+ import numpy as np[m
+ import pandas as pd[m
+[31m-from pykeepass import PyKeePass[m
+[32m+[m[32m#from pykeepass import PyKeePass[m
+ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar[m
+ from scipy.io import savemat, loadmat[m
+ from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy[m
+[36m@@ -252,6 +252,8 @@[m [mclass Window(QMainWindow):[m
+     def _show_disk_space(self):[m
+         '''Show the disk space of the current computer'''[m
+         total, used, free = shutil.disk_usage(self.default_saveFolder)[m
+[32m+[m[32m        used = 450*1024**3[m
+[32m+[m[32m        free = total-used[m
+         self.diskspace.setText(f"Used space: {used/1024**3:.2f}GB    Free space: {free/1024**3:.2f}GB")[m
+         self.DiskSpaceProgreeBar.setValue(int(used/total*100))[m
+         if free/1024**3 < 100 or used/total > 0.9:[m
