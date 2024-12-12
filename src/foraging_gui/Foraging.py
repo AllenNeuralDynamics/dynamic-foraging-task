@@ -49,6 +49,7 @@ from foraging_gui.RigJsonBuilder import build_rig_json
 from aind_data_schema.core.session import Session
 from aind_data_schema_models.modalities import Modality
 from aind_behavior_services.session import AindBehaviorSessionModel
+from aind_auto_train.schema.task import TrainingStage
 
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear() # clear handlers so console output can be configured
@@ -3807,7 +3808,7 @@ class Window(QMainWindow):
                 # FINAL and auto-train has STAGE_FINAL
                 first_fip_stage = str(self._GetInfoFromSchedule(mouse_id, 'First FP Stage')).split('STAGE_')[-1]
                 current_stage = self.AutoTrain_dialog.stage_in_use.split('STAGE_')[-1]
-                stages = ['nan', '1', '2', '3', 'FINAL', 'GRADUATED', 'unknown training stage']
+                stages = ['nan'] + [ts.name.split('STAGE_')[-1] for ts in TrainingStage] + ['unknown training stage']
                 if fip_is_nan and self.PhotometryB.currentText()=='on':
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
