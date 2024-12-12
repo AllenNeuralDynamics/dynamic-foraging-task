@@ -9,7 +9,7 @@ import math
 import logging
 from hashlib import md5
 
-import logging_loki
+#import logging_loki
 import socket
 import harp
 import threading
@@ -25,7 +25,7 @@ from aind_slims_api import models
 import serial
 import numpy as np
 import pandas as pd
-from pykeepass import PyKeePass
+#from pykeepass import PyKeePass
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
@@ -2874,7 +2874,7 @@ class Window(QMainWindow):
     def _OpenLast(self):
         self._Open(open_last=True)
 
-    def _OpenLast_find_session(self,mouse_id):
+    def _OpenLast_find_session(self,mouse_id, experimenter):
         '''
             Returns the filepath of the last available session of this mouse
             Returns a tuple (Bool, str)
@@ -2913,7 +2913,11 @@ class Window(QMainWindow):
                     session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
                     reply = QMessageBox.information(self,
                         'Box {}, Please verify'.format(self.box_letter),
-                        '<span style="color:purple;font-weight:bold">Mouse ID: {}</span><br>Last session: {}<br>Filename: {}'.format(mouse_id, session_date, s),
+                        '<span style="color:purple;font-weight:bold">'
+                        'Mouse ID: {}</span><br>'
+                        'Last session: {}<br>'
+                        'Filename: {}<br>'
+                        'Experimenter: {}'.format(mouse_id, session_date, s, experimenter),
                         QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
                     if reply == QMessageBox.Cancel:
                         logging.info('User hit cancel')
@@ -2958,6 +2962,7 @@ class Window(QMainWindow):
                  for path in all_mouse_dirs]
         mouse_dirs = [mouse_dir for mouse_dir, mod_date in zip(all_mouse_dirs, dates) if (now-mod_date).days <= 14]
         mice = []
+        experimenters = []
         for m in mouse_dirs:
             session_dir = os.path.join(self.default_saveFolder, self.current_box, str(m))
             sessions = os.listdir(session_dir)
@@ -2966,9 +2971,13 @@ class Window(QMainWindow):
                     json_file = os.path.join(self.default_saveFolder,
                         self.current_box, str(m), s,'behavior',s.split('behavior_')[1]+'.json')
                     if os.path.isfile(json_file):
+                        with open(json_file, 'r') as file:
+                            name = json.load(file)["Experimenter"]
                         mice.append(m)
+                        print(name)
+                        experimenters.append(name)
                         break
-        return mice
+        return mice, experimenters
 
     def _Open(self,open_last = False,input_file = ''):
         if input_file == '':
@@ -2976,14 +2985,15 @@ class Window(QMainWindow):
             self._StopCurrentSession()
 
             if open_last:
-                mice = self._Open_getListOfMice()
-                W = MouseSelectorDialog(self, mice)
+                mice, experimenters = self._Open_getListOfMice()
+                W = MouseSelectorDialog(self, [m + ' ' + n for m, n in zip(mice, experimenters)])
 
-                ok, mouse_id = (
+                ok, info = (
                     W.exec_() == QtWidgets.QDialog.Accepted,
                     W.combo.currentText(),
                 )
-
+                mouse_id = info.split(' ', 1)[0]
+                experimenter = None if mouse_id not in mice else experimenters[mice.index(mouse_id)]
                 if not ok:
                     logging.info('Quick load failed, user hit cancel or X')
                     return
@@ -2999,7 +3009,7 @@ class Window(QMainWindow):
                     return
 
                 # attempt to load last session from mouse
-                good_load, fname = self._OpenLast_find_session(mouse_id)
+                good_load, fname = self._OpenLast_find_session(mouse_id, experimenter)
                 if not good_load:
                     logging.info('Quick load failed')
                     return
