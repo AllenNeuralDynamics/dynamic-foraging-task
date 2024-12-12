@@ -1166,7 +1166,6 @@ class GenerateTrials():
         stop = False
         msg =''
         warning_label_text = ''
-
         # Check for reasons to stop early
         auto_rewards = np.array([any(x) for x in np.column_stack(self.B_AutoWaterTrial.astype(bool))])
         non_auto_reward = self.B_AnimalResponseHistory[np.where(~auto_rewards.astype(bool))]   # isolate non-auto-reward
@@ -1180,8 +1179,6 @@ class GenerateTrials():
                   f'consecutive trials'
             warning_label_text = 'Stop because ignore trials exceed or equal: '+\
                                  f'{threshold}% of {self.TP_auto_stop_ignore_win}'
-            msg = 'Stopping the session because the mouse has ignored at least {} consecutive trials'.format(self.TP_StopIgnores)
-            warning_label_text = 'Stop because ignore trials exceed or equal: '+self.TP_StopIgnores
         elif self.B_CurrentTrialN>MaxTrial:
             stop=True
             msg = 'Stopping the session because the mouse has reached the maximum trial count: {}'.format(self.TP_MaxTrial)
