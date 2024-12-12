@@ -9,7 +9,7 @@ import math
 import logging
 from hashlib import md5
 
-import logging_loki
+#import logging_loki
 import socket
 import harp
 import threading
@@ -25,7 +25,7 @@ from aind_slims_api import models
 import serial
 import numpy as np
 import pandas as pd
-from pykeepass import PyKeePass
+#from pykeepass import PyKeePass
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
@@ -2810,6 +2810,7 @@ class Window(QMainWindow):
         # includes subject and date of session
         session_name = self.behavior_session_model.session_name = f'behavior_{self.behavior_session_model.subject}_' \
                                                      f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
+        id_name = session_name.split("behavior_")[-1]
         self.SessionFolder=os.path.join(self.default_saveFolder,
             self.current_box,self.behavior_session_model.subject, session_name)
         self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
@@ -2817,9 +2818,9 @@ class Window(QMainWindow):
         self.HarpFolder=os.path.join(self.SessionFolder, 'HarpFolder')
         self.VideoFolder=os.path.join(self.SessionFolder, 'VideoFolder')
         self.PhotometryFolder=os.path.join(self.SessionFolder, 'PhotometryFolder')
-        self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{session_name}.mat')
-        self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}.json')
-        self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}.json')
+        self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{id_name}.mat')
+        self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}.json')
+        self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}.json')
 
     def _get_folder_structure_new(self):
         '''get the folder structure for the new data format'''
@@ -2827,13 +2828,14 @@ class Window(QMainWindow):
         # session_name includes subject and date of session
         session_name = self.behavior_session_model.session_name=f'behavior_{self.behavior_session_model.subject}_' \
                                                      f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
+        id_name = session_name.split("behavior_")[-1]
         self.SessionFolder=os.path.join(self.default_saveFolder,
             self.current_box,self.behavior_session_model.subject, session_name)
         self.behavior_session_model.root_path=os.path.join(self.SessionFolder,'behavior')
-        self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{session_name}.mat')
-        self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}.json')
-        self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}_par.json')
-        self.behavior_session_modelJson = os.path.join(self.behavior_session_model.root_path,f'behavior_session_model_{session_name}.json')
+        self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{id_name}.mat')
+        self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}.json')
+        self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}_par.json')
+        self.behavior_session_modelJson = os.path.join(self.behavior_session_model.root_path,f'behavior_session_model_{id_name}.json')
         self.HarpFolder=os.path.join(self.behavior_session_model.root_path,'raw.harp')
         self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
         self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
@@ -2950,17 +2952,22 @@ class Window(QMainWindow):
             Returns a list of mice with data saved on this computer
         '''
         filepath = os.path.join(self.default_saveFolder,self.current_box)
-        mouse_dirs = os.listdir(filepath)
+        now = datetime.now()
+        all_mouse_dirs = os.listdir(filepath)
+        dates = [datetime.fromtimestamp(os.path.getmtime(os.path.join(self.default_saveFolder, self.current_box,path)))
+                 for path in all_mouse_dirs]
+        mouse_dirs = [mouse_dir for mouse_dir, mod_date in zip(all_mouse_dirs, dates) if (now-mod_date).days <= 14]
+        print(mouse_dirs)
         mice = []
         for m in mouse_dirs:
             session_dir = os.path.join(self.default_saveFolder, self.current_box, str(m))
             sessions = os.listdir(session_dir)
-            if len(sessions) == 0 :
-                continue
             for s in sessions:
+                print(s)
                 if 'behavior_' in s:
                     json_file = os.path.join(self.default_saveFolder,
                         self.current_box, str(m), s,'behavior',s.split('behavior_')[1]+'.json')
+                    print(json_file)
                     if os.path.isfile(json_file):
                         mice.append(m)
                         break
