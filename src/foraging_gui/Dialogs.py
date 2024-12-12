@@ -2815,7 +2815,7 @@ class AutoTrainDialog(QDialog):
             for widget in self.widgets_locked_by_auto_train:
                 # Exclude some fields so that RAs can change them without going off-curriculum
                 # See https://github.com/AllenNeuralDynamics/aind-behavior-blog/issues/620
-                if widget.objectName() in ["StopIgnores", "MaxTrial", "MaxTime"]:
+                if widget.objectName() in ["auto_stop_ignore_win", "MaxTrial", "MaxTime"]:
                     continue
                 widget.setEnabled(False)
                 # set the border color to green

@@ -1361,14 +1361,15 @@ class Window(QMainWindow):
 
         # extract software information
         logging.info('Extracting software information from first data stream')
-        software = session.data_streams[0].software[0]
+        software = session.stimulus_epochs[0].software[0]
 
         # create model
         logging.info('Creating SlimsWaterlogResult based on session information.')
         model = models.SlimsWaterlogResult(
             mouse_pk=mouse.pk,
             date=session.session_start_time,
-            weight_g=session.animal_weight_prior,
+            weight_g=session.animal_weight_post,
+            operator=self.behavior_session_model.experimenter[0],
             water_earned_ml=water['water_in_session_foraging'],
             water_supplement_delivered_ml=water['water_after_session'],
             water_supplement_recommended_ml=None,
@@ -3186,7 +3187,7 @@ class Window(QMainWindow):
                         self.stage_widget.movement_page_view.lineEdit_y1.setText(str(last_positions['y1']))
                         self.stage_widget.movement_page_view.lineEdit_y2.setText(str(last_positions['y2']))
                         self.stage_widget.movement_page_view.lineEdit_z.setText(str(last_positions['z']))
-                        threading.Thread(target=self.move_aind_stage).start()
+                        self.move_aind_stage()
                 elif 'B_NewscalePositions' in Obj.keys() and len(Obj['B_NewscalePositions']) != 0:  # cross compatibility for mice run on older version of code.
                     last_positions = Obj['B_NewscalePositions'][-1]
                     self.current_stage.move_absolute_3d(float(last_positions[0]),
@@ -3231,16 +3232,8 @@ class Window(QMainWindow):
         """
         Move all axis of stage in stage widget
         """
-        # save current positions since stage widget will reset once returnPressed in emitted
-        axes = ['x', 'y1', 'y2', 'z']
-        textboxes = [getattr(self.stage_widget.movement_page_view, f'lineEdit_{axis}') for axis in axes]
-        positions = [textbox.text() for textbox in textboxes]
-        for textbox, position in zip(textboxes, positions):
-            textbox.setText(position)
-            textbox.returnPressed.emit()
-            time.sleep(1)    # allow worker to initialize
-            while self.stage_widget.stage_model.move_thread.isRunning():
-                time.sleep(.1)
+        positions = self.stage_widget.movement_page_view.get_positions_from_line_edit()
+        self.stage_widget.movement_page_view.signal_position_change.emit(positions)
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
