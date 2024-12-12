@@ -2957,17 +2957,14 @@ class Window(QMainWindow):
         dates = [datetime.fromtimestamp(os.path.getmtime(os.path.join(self.default_saveFolder, self.current_box,path)))
                  for path in all_mouse_dirs]
         mouse_dirs = [mouse_dir for mouse_dir, mod_date in zip(all_mouse_dirs, dates) if (now-mod_date).days <= 14]
-        print(mouse_dirs)
         mice = []
         for m in mouse_dirs:
             session_dir = os.path.join(self.default_saveFolder, self.current_box, str(m))
             sessions = os.listdir(session_dir)
             for s in sessions:
-                print(s)
                 if 'behavior_' in s:
                     json_file = os.path.join(self.default_saveFolder,
                         self.current_box, str(m), s,'behavior',s.split('behavior_')[1]+'.json')
-                    print(json_file)
                     if os.path.isfile(json_file):
                         mice.append(m)
                         break
