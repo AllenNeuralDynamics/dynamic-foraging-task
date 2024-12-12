@@ -255,7 +255,7 @@ class Window(QMainWindow):
         self.diskspace.setText(f"Used space: {used/1024**3:.2f}GB    Free space: {free/1024**3:.2f}GB")
         self.DiskSpaceProgreeBar.setValue(int(used/total*100))
         if free/1024**3 < 100 or used/total > 0.9:
-            self.DiskSpaceProgreeBar.setStyleSheet("QProgressBar::chunk {background-"+self.default_warning_color+"}")
+            self.DiskSpaceProgreeBar.setStyleSheet(f"QProgressBar::chunk {{background-color: {self.default_warning_color};}}")
             logging.warning(f"Low disk space  Used space: {used/1024**3:.2f}GB    Free space: {free/1024**3:.2f}GB")
         else:
             self.DiskSpaceProgreeBar.setStyleSheet("QProgressBar::chunk {background-color: green;}")
@@ -299,19 +299,19 @@ class Window(QMainWindow):
             logging.info('Using ForagingGUI.ui interface')
             self.label_date.setText(str(date.today()))
             self.default_warning_color="purple"
-            self.default_text_color="color: purple;"
-            self.default_text_background_color='background-color: purple;'
+            self.default_text_color="purple"
+            self.default_text_background_color='purple'
         elif self.default_ui=='ForagingGUI_Ephys.ui':
             logging.info('Using ForagingGUI_Ephys.ui interface')
             self.Visualization.setTitle(str(date.today()))
             self.default_warning_color="red"
-            self.default_text_color="color: red;"
-            self.default_text_background_color='background-color: red;'
+            self.default_text_color="red"
+            self.default_text_background_color='red'
         else:
             logging.info('Using ForagingGUI.ui interface')
-            self.default_warning_color="color: red;"
-            self.default_text_color='color: red;'
-            self.default_text_background_color='background-color: red;'
+            self.default_warning_color="red"
+            self.default_text_color='red'
+            self.default_text_background_color='red'
 
     def connectSignalsSlots(self):
         '''Define callbacks'''
@@ -556,7 +556,7 @@ class Window(QMainWindow):
             warning_labels = [warning_labels]
         for warning_label in warning_labels:
             warning_label.setText(warning_text)
-            warning_label.setStyleSheet(self.default_warning_color)
+            warning_label.setStyleSheet(f'color: {self.default_warning_color};')
 
     def _session_list(self):
         '''show all sessions of the current animal and load the selected session by drop down list'''
@@ -962,7 +962,7 @@ class Window(QMainWindow):
             self.Warning_Newscale.setText('Lost newscale stage connection')
         else:
             self.Warning_Newscale.setText('Newscale stage not connected')
-        self.Warning_Newscale.setStyleSheet(self.default_warning_color)
+        self.Warning_Newscale.setStyleSheet(f'color: {self.default_warning_color};')
 
     def _connect_stage(self,instance):
         '''connect to a stage'''
@@ -1987,11 +1987,11 @@ class Window(QMainWindow):
 
                         self.Continue=0
                         if child.objectName() in {'LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','ProbeTarget','RigMetadataFile','Experimenter', 'UncoupledReward', 'ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
-                            child.setStyleSheet(self.default_text_color)
+                            child.setStyleSheet(f'color: {self.default_text_color};')
                             self.Continue=1
                         if child.text()=='': # If empty, change background color and wait for confirmation
                             self.UpdateParameters=0
-                            child.setStyleSheet(self.default_text_background_color)
+                            child.setStyleSheet(f'background-color: {self.default_text_background_color};')
                             self.Continue=1
                         if child.objectName() in {'RunLength','WindowSize','StepSize'}:
                             if child.text()=='':
@@ -2000,7 +2000,7 @@ class Window(QMainWindow):
                                 child.setStyleSheet('background-color: white;')
                         if self.Continue==1:
                             continue
-                        child.setStyleSheet(self.default_text_color)
+                        child.setStyleSheet(f'color: {self.default_text_color};')
                         try:
                             # it's valid float
                             float(child.text())
@@ -3856,7 +3856,7 @@ class Window(QMainWindow):
             # check experimenter name
             reply = QMessageBox.critical(self,
                 'Box {}, Start'.format(self.box_letter),
-                f'The experimenter is <span style="{self.default_text_color}">'
+                f'The experimenter is <span style="color: {self.default_text_color};">'
                 f'{self.behavior_session_model.experimenter[0]}</span>. Is this correct?',
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if reply == QMessageBox.No:
@@ -4589,7 +4589,7 @@ class Window(QMainWindow):
                         self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and LAS should be alerted!')
                     elif self.default_ui=='ForagingGUI_Ephys.ui':
                         self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and \n LAS should be alerted!')
-                    self.TotalWaterWarning.setStyleSheet(self.default_warning_color)
+                    self.TotalWaterWarning.setStyleSheet(f'color: {self.default_warning_color};')
                 else:
                     self.TotalWaterWarning.setText('')
                 self.SuggestedWater.setText(str(np.round(suggested_water,3)))
