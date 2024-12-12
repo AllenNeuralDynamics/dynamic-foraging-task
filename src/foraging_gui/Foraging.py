@@ -2984,9 +2984,9 @@ class Window(QMainWindow):
             self._StopCurrentSession()
 
             if open_last:
+                # list of mice, experimenters, and two week in chronological order form date modified
                 mice, experimenters, two_week = self._Open_getListOfMice()
-                print(mice, experimenters, two_week)
-                # only add mice from two weeks in drop down
+                # only add mice from two weeks in drop down.
                 W = MouseSelectorDialog(self, [m + ' ' + n for m, n in zip(two_week, experimenters)])
 
                 ok, info = (
