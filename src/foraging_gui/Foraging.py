@@ -2974,7 +2974,6 @@ class Window(QMainWindow):
                         with open(json_file, 'r') as file:
                             name = json.load(file)["Experimenter"]
                         mice.append(m)
-                        print(name)
                         experimenters.append(name)
                         break
         return mice, experimenters, two_week
