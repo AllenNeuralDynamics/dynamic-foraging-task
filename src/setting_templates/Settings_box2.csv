@@ -32,3 +32,4 @@ codec,-vcodec h264_nvenc -rc vbr -cq 23 -preset fast -b:v 50M -v 24
 AttenuationLeft,0
 AttenuationRight,0
 current_box,4xx-x-B
+RunningWheel,0
