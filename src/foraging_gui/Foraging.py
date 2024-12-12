@@ -9,7 +9,7 @@ import math
 import logging
 from hashlib import md5
 
-#import logging_loki
+import logging_loki
 import socket
 import harp
 import threading
@@ -25,7 +25,7 @@ from aind_slims_api import models
 import serial
 import numpy as np
 import pandas as pd
-#from pykeepass import PyKeePass
+from pykeepass import PyKeePass
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
