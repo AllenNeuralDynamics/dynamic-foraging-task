@@ -3797,20 +3797,22 @@ class Window(QMainWindow):
             logging.info('Start button pressed: starting trial loop')
             self.keyPressEvent()
 
-            # check if FIP setting match schedule
+            # check if FIP setting match schedule. skip if test mouse or mouse isn't in schedule or
             mouse_id = self.behavior_session_model.subject
-            if hasattr(self, 'schedule') and mouse_id in self.schedule['Mouse ID'].values and mouse_id not in ['0','1','2','3','4','5','6','7','8','9','10'] : # skip if test mouse or mouse isn't in schedule or
-                FIP_Mode = self._GetInfoFromSchedule(mouse_id, 'FIP Mode')
-                FIP_is_nan = (isinstance(FIP_Mode, float) and math.isnan(FIP_Mode)) or FIP_Mode is None
+            if hasattr(self, 'schedule') and mouse_id in self.schedule['Mouse ID'].values and \
+                    mouse_id not in ['0','1','2','3','4','5','6','7','8','9','10'] :
+                fip_mode = self._GetInfoFromSchedule(mouse_id, 'FIP Mode')
+                fip_is_nan = (isinstance(fip_mode, float) and math.isnan(fip_mode)) or fip_mode is None
                 # remove STAGE_ string for consistency between schedule and auto-train. Schedule denotes final stage as
                 # FINAL and auto-train has STAGE_FINAL
                 first_fip_stage = str(self._GetInfoFromSchedule(mouse_id, 'First FP Stage')).split('STAGE_')[-1]
                 current_stage = self.AutoTrain_dialog.stage_in_use.split('STAGE_')[-1]
                 stages = ['nan', '1', '2', '3', 'FINAL', 'GRADUATED', 'unknown training stage']
-                if FIP_is_nan and self.PhotometryB.currentText()=='on':
+                if fip_is_nan and self.PhotometryB.currentText()=='on':
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
-                                                 'Photometry is set to "on", but the FIP Mode is not in schedule. Continue anyways?',
+                                                 'Photometry is set to "on", but the FIP Mode is not in schedule. '
+                                                 'Continue anyways?',
                                                  QMessageBox.Yes | QMessageBox.No,)
                     if reply == QMessageBox.No:
                         self.Start.setChecked(False)
@@ -3818,12 +3820,14 @@ class Window(QMainWindow):
                         return
                     else:
                         # Allow the session to continue, but log error
-                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP on, but not in schedule'.format(mouse_id))
-                elif not FIP_is_nan and self.PhotometryB.currentText()=='off' and stages.index(current_stage) >= stages.index(first_fip_stage):
+                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP on, '
+                                      'but not in schedule'.format(mouse_id))
+                elif not fip_is_nan and self.PhotometryB.currentText()=='off' and first_fip_stage in stages and \
+                        stages.index(current_stage) >= stages.index(first_fip_stage):
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
                                                  f'Photometry is set to "off" but schedule indicate '
-                                                 f'FIP Mode is {FIP_Mode}. Continue anyways?',
+                                                 f'FIP Mode is {fip_mode}. Continue anyways?',
                                                  QMessageBox.Yes | QMessageBox.No,)
                     if reply == QMessageBox.No:
                         self.Start.setChecked(False)
@@ -3831,13 +3835,13 @@ class Window(QMainWindow):
                         return
                     else:
                         # Allow the session to continue, but log error
-                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP off, but schedule lists FIP {}'.format(mouse_id, FIP_Mode))
+                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP off, but schedule lists FIP {}'.format(mouse_id, fip_mode))
 
-                elif not FIP_is_nan and FIP_Mode != self.FIPMode.currentText() and self.PhotometryB.currentText()=='on':
+                elif not fip_is_nan and fip_mode != self.FIPMode.currentText() and self.PhotometryB.currentText()=='on':
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
                                                  f'FIP Mode is set to {self.FIPMode.currentText()} but schedule indicate '
-                                                 f'FIP Mode is {FIP_Mode}. Continue anyways?',
+                                                 f'FIP Mode is {fip_mode}. Continue anyways?',
                                                  QMessageBox.Yes | QMessageBox.No,)
                     if reply == QMessageBox.No:
                         self.Start.setChecked(False)
@@ -3845,7 +3849,7 @@ class Window(QMainWindow):
                         return
                     else:
                         # Allow the session to continue, but log error
-                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP mode {}, schedule lists {}'.format(mouse_id, self.FIPMode.currentText(), FIP_Mode))
+                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP mode {}, schedule lists {}'.format(mouse_id, self.FIPMode.currentText(), fip_mode))
 
             if self.StartANewSession == 0 :
                 reply = QMessageBox.question(self,
