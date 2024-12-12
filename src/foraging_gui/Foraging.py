@@ -2957,10 +2957,10 @@ class Window(QMainWindow):
         '''
         filepath = os.path.join(self.default_saveFolder,self.current_box)
         now = datetime.now()
-        all_mouse_dirs = os.listdir(filepath)
+        mouse_dirs = os.listdir(filepath)
         dates = [datetime.fromtimestamp(os.path.getmtime(os.path.join(self.default_saveFolder, self.current_box,path)))
-                 for path in all_mouse_dirs]
-        mouse_dirs = [mouse_dir for mouse_dir, mod_date in zip(all_mouse_dirs, dates) if (now-mod_date).days <= 14]
+                 for path in mouse_dirs]
+        two_week = [mouse_dir for mouse_dir, mod_date in zip(mouse_dirs, dates) if (now-mod_date).days <= 14]
         mice = []
         experimenters = []
         for m in mouse_dirs:
@@ -2977,7 +2977,7 @@ class Window(QMainWindow):
                         print(name)
                         experimenters.append(name)
                         break
-        return mice, experimenters
+        return mice, experimenters, two_week
 
     def _Open(self,open_last = False,input_file = ''):
         if input_file == '':
@@ -2985,8 +2985,9 @@ class Window(QMainWindow):
             self._StopCurrentSession()
 
             if open_last:
-                mice, experimenters = self._Open_getListOfMice()
-                W = MouseSelectorDialog(self, [m + ' ' + n for m, n in zip(mice, experimenters)])
+                mice, experimenters, two_week = self._Open_getListOfMice()
+                # only add mice from two weeks in drop down
+                W = MouseSelectorDialog(self, [m + ' ' + n for m, n in zip(two_week, experimenters)])
 
                 ok, info = (
                     W.exec_() == QtWidgets.QDialog.Accepted,
