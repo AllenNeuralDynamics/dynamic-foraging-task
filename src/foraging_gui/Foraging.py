@@ -1361,14 +1361,15 @@ class Window(QMainWindow):
 
         # extract software information
         logging.info('Extracting software information from first data stream')
-        software = session.data_streams[0].software[0]
+        software = session.stimulus_epochs[0].software[0]
 
         # create model
         logging.info('Creating SlimsWaterlogResult based on session information.')
         model = models.SlimsWaterlogResult(
             mouse_pk=mouse.pk,
             date=session.session_start_time,
-            weight_g=session.animal_weight_prior,
+            weight_g=session.animal_weight_post,
+            operator=self.behavior_session_model.experimenter[0],
             water_earned_ml=water['water_in_session_foraging'],
             water_supplement_delivered_ml=water['water_after_session'],
             water_supplement_recommended_ml=None,

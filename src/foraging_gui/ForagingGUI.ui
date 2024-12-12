@@ -3414,7 +3414,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="12" column="3">
-                       <widget class="QLineEdit" name="StopIgnores">
+                       <widget class="QLineEdit" name="auto_stop_ignore_win">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                           <horstretch>0</horstretch>
@@ -3428,7 +3428,7 @@ Double dipping:
                          </size>
                         </property>
                         <property name="text">
-                         <string>20</string>
+                         <string>30</string>
                         </property>
                        </widget>
                       </item>
@@ -3567,7 +3567,7 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
-                      <item row="12" column="5">
+                      <item row="12" column="13">
                        <widget class="QLabel" name="label_57">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -3904,7 +3904,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="12" column="2">
-                       <widget class="QLabel" name="label_51">
+                       <widget class="QLabel" name="auto_stop_ignore_win_label">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -3912,7 +3912,7 @@ Double dipping:
                          </sizepolicy>
                         </property>
                         <property name="text">
-                         <string>stop ignores&gt;</string>
+                         <string>auto stop ignore window:</string>
                         </property>
                         <property name="textFormat">
                          <enum>Qt::AutoText</enum>
@@ -3982,7 +3982,7 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
-                      <item row="12" column="6">
+                      <item row="12" column="14">
                        <widget class="QLineEdit" name="MaxTrial">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -4193,6 +4193,82 @@ Double dipping:
                         </property>
                         <property name="alignment">
                          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="12" column="11">
+                       <widget class="QLabel" name="min_time_label">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>min time (min):</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="12" column="12">
+                       <widget class="QLineEdit" name="min_time">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>30</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="12" column="5">
+                       <widget class="QLabel" name="auto_stop_ignore_ratio_threshold_label">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>auto stop ignore ratio threshold:</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="12" column="6">
+                       <widget class="QLineEdit" name="auto_stop_ignore_ratio_threshold">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>.8</string>
                         </property>
                        </widget>
                       </item>
