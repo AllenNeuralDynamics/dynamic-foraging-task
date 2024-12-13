@@ -2810,6 +2810,7 @@ class Window(QMainWindow):
         # includes subject and date of session
         session_name = self.behavior_session_model.session_name = f'behavior_{self.behavior_session_model.subject}_' \
                                                      f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
+        id_name = session_name.split("behavior_")[-1]
         self.SessionFolder=os.path.join(self.default_saveFolder,
             self.current_box,self.behavior_session_model.subject, session_name)
         self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
@@ -2817,9 +2818,9 @@ class Window(QMainWindow):
         self.HarpFolder=os.path.join(self.SessionFolder, 'HarpFolder')
         self.VideoFolder=os.path.join(self.SessionFolder, 'VideoFolder')
         self.PhotometryFolder=os.path.join(self.SessionFolder, 'PhotometryFolder')
-        self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{session_name}.mat')
-        self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}.json')
-        self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}.json')
+        self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{id_name}.mat')
+        self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}.json')
+        self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}.json')
 
     def _get_folder_structure_new(self):
         '''get the folder structure for the new data format'''
@@ -2827,13 +2828,14 @@ class Window(QMainWindow):
         # session_name includes subject and date of session
         session_name = self.behavior_session_model.session_name=f'behavior_{self.behavior_session_model.subject}_' \
                                                      f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
+        id_name = session_name.split("behavior_")[-1]
         self.SessionFolder=os.path.join(self.default_saveFolder,
             self.current_box,self.behavior_session_model.subject, session_name)
         self.behavior_session_model.root_path=os.path.join(self.SessionFolder,'behavior')
-        self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{session_name}.mat')
-        self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}.json')
-        self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}_par.json')
-        self.behavior_session_modelJson = os.path.join(self.behavior_session_model.root_path,f'behavior_session_model_{session_name}.json')
+        self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{id_name}.mat')
+        self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}.json')
+        self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}_par.json')
+        self.behavior_session_modelJson = os.path.join(self.behavior_session_model.root_path,f'behavior_session_model_{id_name}.json')
         self.HarpFolder=os.path.join(self.behavior_session_model.root_path,'raw.harp')
         self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
         self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
@@ -2872,7 +2874,7 @@ class Window(QMainWindow):
     def _OpenLast(self):
         self._Open(open_last=True)
 
-    def _OpenLast_find_session(self,mouse_id):
+    def _OpenLast_find_session(self,mouse_id, experimenter):
         '''
             Returns the filepath of the last available session of this mouse
             Returns a tuple (Bool, str)
@@ -2911,7 +2913,11 @@ class Window(QMainWindow):
                     session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
                     reply = QMessageBox.information(self,
                         'Box {}, Please verify'.format(self.box_letter),
-                        '<span style="color:purple;font-weight:bold">Mouse ID: {}</span><br>Last session: {}<br>Filename: {}'.format(mouse_id, session_date, s),
+                        '<span style="color:purple;font-weight:bold">'
+                        'Mouse ID: {}</span><br>'
+                        'Last session: {}<br>'
+                        'Filename: {}<br>'
+                        'Experimenter: {}'.format(mouse_id, session_date, s, experimenter),
                         QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
                     if reply == QMessageBox.Cancel:
                         logging.info('User hit cancel')
@@ -2950,21 +2956,27 @@ class Window(QMainWindow):
             Returns a list of mice with data saved on this computer
         '''
         filepath = os.path.join(self.default_saveFolder,self.current_box)
+        now = datetime.now()
         mouse_dirs = os.listdir(filepath)
+        mouse_dirs.sort(reverse=True, key=lambda x: os.path.getmtime(os.path.join(filepath, x)))   # in order of date modified
+        dates = [datetime.fromtimestamp(os.path.getmtime(os.path.join(filepath, path))) for path in mouse_dirs]
+        two_week = [mouse_dir for mouse_dir, mod_date in zip(mouse_dirs, dates) if (now-mod_date).days <= 14]
         mice = []
+        experimenters = []
         for m in mouse_dirs:
             session_dir = os.path.join(self.default_saveFolder, self.current_box, str(m))
             sessions = os.listdir(session_dir)
-            if len(sessions) == 0 :
-                continue
             for s in sessions:
                 if 'behavior_' in s:
                     json_file = os.path.join(self.default_saveFolder,
                         self.current_box, str(m), s,'behavior',s.split('behavior_')[1]+'.json')
                     if os.path.isfile(json_file):
+                        with open(json_file, 'r') as file:
+                            name = json.load(file)["Experimenter"]
                         mice.append(m)
+                        experimenters.append(name)
                         break
-        return mice
+        return mice, experimenters, two_week
 
     def _Open(self,open_last = False,input_file = ''):
         if input_file == '':
@@ -2972,14 +2984,17 @@ class Window(QMainWindow):
             self._StopCurrentSession()
 
             if open_last:
-                mice = self._Open_getListOfMice()
-                W = MouseSelectorDialog(self, mice)
+                # list of mice, experimenters, and two week in chronological order form date modified
+                mice, experimenters, two_week = self._Open_getListOfMice()
+                # only add mice from two weeks in drop down.
+                W = MouseSelectorDialog(self, [m + ' ' + n for m, n in zip(two_week, experimenters)])
 
-                ok, mouse_id = (
+                ok, info = (
                     W.exec_() == QtWidgets.QDialog.Accepted,
                     W.combo.currentText(),
                 )
-
+                mouse_id = info.split(' ', 1)[0]
+                experimenter = None if mouse_id not in mice else experimenters[mice.index(mouse_id)]
                 if not ok:
                     logging.info('Quick load failed, user hit cancel or X')
                     return
@@ -2995,7 +3010,7 @@ class Window(QMainWindow):
                     return
 
                 # attempt to load last session from mouse
-                good_load, fname = self._OpenLast_find_session(mouse_id)
+                good_load, fname = self._OpenLast_find_session(mouse_id, experimenter)
                 if not good_load:
                     logging.info('Quick load failed')
                     return
