@@ -3203,6 +3203,7 @@ class Window(QMainWindow):
                         self.stage_widget.movement_page_view.lineEdit_y2.setText(str(last_positions['y2']))
                         self.stage_widget.movement_page_view.lineEdit_z.setText(str(last_positions['z']))
                         self.move_aind_stage()
+                        step_size = self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
                 elif 'B_NewscalePositions' in Obj.keys() and len(Obj['B_NewscalePositions']) != 0:  # cross compatibility for mice run on older version of code.
                     last_positions = Obj['B_NewscalePositions'][-1]
                     self.current_stage.move_absolute_3d(float(last_positions[0]),
