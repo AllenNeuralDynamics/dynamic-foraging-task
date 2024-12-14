@@ -255,7 +255,7 @@ class Window(QMainWindow):
         self.diskspace.setText(f"Used space: {used/1024**3:.2f}GB    Free space: {free/1024**3:.2f}GB")
         self.DiskSpaceProgreeBar.setValue(int(used/total*100))
         if free/1024**3 < 100 or used/total > 0.9:
-            self.DiskSpaceProgreeBar.setStyleSheet("QProgressBar::chunk {background-"+self.default_warning_color+"}")
+            self.DiskSpaceProgreeBar.setStyleSheet(f"QProgressBar::chunk {{background-color: {self.default_warning_color};}}")
             logging.warning(f"Low disk space  Used space: {used/1024**3:.2f}GB    Free space: {free/1024**3:.2f}GB")
         else:
             self.DiskSpaceProgreeBar.setStyleSheet("QProgressBar::chunk {background-color: green;}")
@@ -299,19 +299,19 @@ class Window(QMainWindow):
             logging.info('Using ForagingGUI.ui interface')
             self.label_date.setText(str(date.today()))
             self.default_warning_color="purple"
-            self.default_text_color="color: purple;"
-            self.default_text_background_color='background-color: purple;'
+            self.default_text_color="purple"
+            self.default_text_background_color='purple'
         elif self.default_ui=='ForagingGUI_Ephys.ui':
             logging.info('Using ForagingGUI_Ephys.ui interface')
             self.Visualization.setTitle(str(date.today()))
             self.default_warning_color="red"
-            self.default_text_color="color: red;"
-            self.default_text_background_color='background-color: red;'
+            self.default_text_color="red"
+            self.default_text_background_color='red'
         else:
             logging.info('Using ForagingGUI.ui interface')
-            self.default_warning_color="color: red;"
-            self.default_text_color='color: red;'
-            self.default_text_background_color='background-color: red;'
+            self.default_warning_color="red"
+            self.default_text_color='red'
+            self.default_text_background_color='red'
 
     def connectSignalsSlots(self):
         '''Define callbacks'''
@@ -556,7 +556,7 @@ class Window(QMainWindow):
             warning_labels = [warning_labels]
         for warning_label in warning_labels:
             warning_label.setText(warning_text)
-            warning_label.setStyleSheet(self.default_warning_color)
+            warning_label.setStyleSheet(f'color: {self.default_warning_color};')
 
     def _session_list(self):
         '''show all sessions of the current animal and load the selected session by drop down list'''
@@ -962,7 +962,7 @@ class Window(QMainWindow):
             self.Warning_Newscale.setText('Lost newscale stage connection')
         else:
             self.Warning_Newscale.setText('Newscale stage not connected')
-        self.Warning_Newscale.setStyleSheet(self.default_warning_color)
+        self.Warning_Newscale.setStyleSheet(f'color: {self.default_warning_color};')
 
     def _connect_stage(self,instance):
         '''connect to a stage'''
@@ -1361,14 +1361,15 @@ class Window(QMainWindow):
 
         # extract software information
         logging.info('Extracting software information from first data stream')
-        software = session.data_streams[0].software[0]
+        software = session.stimulus_epochs[0].software[0]
 
         # create model
         logging.info('Creating SlimsWaterlogResult based on session information.')
         model = models.SlimsWaterlogResult(
             mouse_pk=mouse.pk,
             date=session.session_start_time,
-            weight_g=session.animal_weight_prior,
+            weight_g=session.animal_weight_post,
+            operator=self.behavior_session_model.experimenter[0],
             water_earned_ml=water['water_in_session_foraging'],
             water_supplement_delivered_ml=water['water_after_session'],
             water_supplement_recommended_ml=None,
@@ -1986,11 +1987,11 @@ class Window(QMainWindow):
 
                         self.Continue=0
                         if child.objectName() in {'LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','ProbeTarget','RigMetadataFile','Experimenter', 'UncoupledReward', 'ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
-                            child.setStyleSheet(self.default_text_color)
+                            child.setStyleSheet(f'color: {self.default_text_color};')
                             self.Continue=1
                         if child.text()=='': # If empty, change background color and wait for confirmation
                             self.UpdateParameters=0
-                            child.setStyleSheet(self.default_text_background_color)
+                            child.setStyleSheet(f'background-color: {self.default_text_background_color};')
                             self.Continue=1
                         if child.objectName() in {'RunLength','WindowSize','StepSize'}:
                             if child.text()=='':
@@ -1999,7 +2000,7 @@ class Window(QMainWindow):
                                 child.setStyleSheet('background-color: white;')
                         if self.Continue==1:
                             continue
-                        child.setStyleSheet(self.default_text_color)
+                        child.setStyleSheet(f'color: {self.default_text_color};')
                         try:
                             # it's valid float
                             float(child.text())
@@ -2809,6 +2810,7 @@ class Window(QMainWindow):
         # includes subject and date of session
         session_name = self.behavior_session_model.session_name = f'behavior_{self.behavior_session_model.subject}_' \
                                                      f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
+        id_name = session_name.split("behavior_")[-1]
         self.SessionFolder=os.path.join(self.default_saveFolder,
             self.current_box,self.behavior_session_model.subject, session_name)
         self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
@@ -2816,9 +2818,9 @@ class Window(QMainWindow):
         self.HarpFolder=os.path.join(self.SessionFolder, 'HarpFolder')
         self.VideoFolder=os.path.join(self.SessionFolder, 'VideoFolder')
         self.PhotometryFolder=os.path.join(self.SessionFolder, 'PhotometryFolder')
-        self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{session_name}.mat')
-        self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}.json')
-        self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}.json')
+        self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{id_name}.mat')
+        self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}.json')
+        self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}.json')
 
     def _get_folder_structure_new(self):
         '''get the folder structure for the new data format'''
@@ -2826,13 +2828,14 @@ class Window(QMainWindow):
         # session_name includes subject and date of session
         session_name = self.behavior_session_model.session_name=f'behavior_{self.behavior_session_model.subject}_' \
                                                      f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
+        id_name = session_name.split("behavior_")[-1]
         self.SessionFolder=os.path.join(self.default_saveFolder,
             self.current_box,self.behavior_session_model.subject, session_name)
         self.behavior_session_model.root_path=os.path.join(self.SessionFolder,'behavior')
-        self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{session_name}.mat')
-        self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}.json')
-        self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{session_name}_par.json')
-        self.behavior_session_modelJson = os.path.join(self.behavior_session_model.root_path,f'behavior_session_model_{session_name}.json')
+        self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{id_name}.mat')
+        self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}.json')
+        self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}_par.json')
+        self.behavior_session_modelJson = os.path.join(self.behavior_session_model.root_path,f'behavior_session_model_{id_name}.json')
         self.HarpFolder=os.path.join(self.behavior_session_model.root_path,'raw.harp')
         self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
         self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
@@ -2871,7 +2874,7 @@ class Window(QMainWindow):
     def _OpenLast(self):
         self._Open(open_last=True)
 
-    def _OpenLast_find_session(self,mouse_id):
+    def _OpenLast_find_session(self,mouse_id, experimenter):
         '''
             Returns the filepath of the last available session of this mouse
             Returns a tuple (Bool, str)
@@ -2910,7 +2913,11 @@ class Window(QMainWindow):
                     session_date = date.split('-')[1]+'/'+date.split('-')[2]+'/'+date.split('-')[0]
                     reply = QMessageBox.information(self,
                         'Box {}, Please verify'.format(self.box_letter),
-                        '<span style="color:purple;font-weight:bold">Mouse ID: {}</span><br>Last session: {}<br>Filename: {}'.format(mouse_id, session_date, s),
+                        '<span style="color:purple;font-weight:bold">'
+                        'Mouse ID: {}</span><br>'
+                        'Last session: {}<br>'
+                        'Filename: {}<br>'
+                        'Experimenter: {}'.format(mouse_id, session_date, s, experimenter),
                         QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
                     if reply == QMessageBox.Cancel:
                         logging.info('User hit cancel')
@@ -2949,21 +2956,27 @@ class Window(QMainWindow):
             Returns a list of mice with data saved on this computer
         '''
         filepath = os.path.join(self.default_saveFolder,self.current_box)
+        now = datetime.now()
         mouse_dirs = os.listdir(filepath)
+        mouse_dirs.sort(reverse=True, key=lambda x: os.path.getmtime(os.path.join(filepath, x)))   # in order of date modified
+        dates = [datetime.fromtimestamp(os.path.getmtime(os.path.join(filepath, path))) for path in mouse_dirs]
+        two_week = [mouse_dir for mouse_dir, mod_date in zip(mouse_dirs, dates) if (now-mod_date).days <= 14]
         mice = []
+        experimenters = []
         for m in mouse_dirs:
             session_dir = os.path.join(self.default_saveFolder, self.current_box, str(m))
             sessions = os.listdir(session_dir)
-            if len(sessions) == 0 :
-                continue
             for s in sessions:
                 if 'behavior_' in s:
                     json_file = os.path.join(self.default_saveFolder,
                         self.current_box, str(m), s,'behavior',s.split('behavior_')[1]+'.json')
                     if os.path.isfile(json_file):
+                        with open(json_file, 'r') as file:
+                            name = json.load(file)["Experimenter"]
                         mice.append(m)
+                        experimenters.append(name)
                         break
-        return mice
+        return mice, experimenters, two_week
 
     def _Open(self,open_last = False,input_file = ''):
         if input_file == '':
@@ -2971,14 +2984,17 @@ class Window(QMainWindow):
             self._StopCurrentSession()
 
             if open_last:
-                mice = self._Open_getListOfMice()
-                W = MouseSelectorDialog(self, mice)
+                # list of mice, experimenters, and two week in chronological order form date modified
+                mice, experimenters, two_week = self._Open_getListOfMice()
+                # only add mice from two weeks in drop down.
+                W = MouseSelectorDialog(self, [m + ' ' + n for m, n in zip(two_week, experimenters)])
 
-                ok, mouse_id = (
+                ok, info = (
                     W.exec_() == QtWidgets.QDialog.Accepted,
                     W.combo.currentText(),
                 )
-
+                mouse_id = info.split(' ', 1)[0]
+                experimenter = None if mouse_id not in mice else experimenters[mice.index(mouse_id)]
                 if not ok:
                     logging.info('Quick load failed, user hit cancel or X')
                     return
@@ -2994,7 +3010,7 @@ class Window(QMainWindow):
                     return
 
                 # attempt to load last session from mouse
-                good_load, fname = self._OpenLast_find_session(mouse_id)
+                good_load, fname = self._OpenLast_find_session(mouse_id, experimenter)
                 if not good_load:
                     logging.info('Quick load failed')
                     return
@@ -3186,7 +3202,8 @@ class Window(QMainWindow):
                         self.stage_widget.movement_page_view.lineEdit_y1.setText(str(last_positions['y1']))
                         self.stage_widget.movement_page_view.lineEdit_y2.setText(str(last_positions['y2']))
                         self.stage_widget.movement_page_view.lineEdit_z.setText(str(last_positions['z']))
-                        threading.Thread(target=self.move_aind_stage).start()
+                        self.move_aind_stage()
+                        step_size = self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
                 elif 'B_NewscalePositions' in Obj.keys() and len(Obj['B_NewscalePositions']) != 0:  # cross compatibility for mice run on older version of code.
                     last_positions = Obj['B_NewscalePositions'][-1]
                     self.current_stage.move_absolute_3d(float(last_positions[0]),
@@ -3231,16 +3248,8 @@ class Window(QMainWindow):
         """
         Move all axis of stage in stage widget
         """
-        # save current positions since stage widget will reset once returnPressed in emitted
-        axes = ['x', 'y1', 'y2', 'z']
-        textboxes = [getattr(self.stage_widget.movement_page_view, f'lineEdit_{axis}') for axis in axes]
-        positions = [textbox.text() for textbox in textboxes]
-        for textbox, position in zip(textboxes, positions):
-            textbox.setText(position)
-            textbox.returnPressed.emit()
-            time.sleep(1)    # allow worker to initialize
-            while self.stage_widget.stage_model.move_thread.isRunning():
-                time.sleep(.1)
+        positions = self.stage_widget.movement_page_view.get_positions_from_line_edit()
+        self.stage_widget.movement_page_view.signal_position_change.emit(positions)
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
@@ -3863,7 +3872,7 @@ class Window(QMainWindow):
             # check experimenter name
             reply = QMessageBox.critical(self,
                 'Box {}, Start'.format(self.box_letter),
-                f'The experimenter is <span style="{self.default_text_color}">'
+                f'The experimenter is <span style="color: {self.default_text_color};">'
                 f'{self.behavior_session_model.experimenter[0]}</span>. Is this correct?',
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if reply == QMessageBox.No:
@@ -4596,7 +4605,7 @@ class Window(QMainWindow):
                         self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and LAS should be alerted!')
                     elif self.default_ui=='ForagingGUI_Ephys.ui':
                         self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and \n LAS should be alerted!')
-                    self.TotalWaterWarning.setStyleSheet(self.default_warning_color)
+                    self.TotalWaterWarning.setStyleSheet(f'color: {self.default_warning_color};')
                 else:
                     self.TotalWaterWarning.setText('')
                 self.SuggestedWater.setText(str(np.round(suggested_water,3)))
