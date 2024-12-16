@@ -2959,10 +2959,6 @@ class Window(QMainWindow):
         now = datetime.now()
         mouse_dirs = os.listdir(filepath)
         mouse_dirs.sort(reverse=True, key=lambda x: os.path.getmtime(os.path.join(filepath, x)))   # in order of date modified
-        dates = [datetime.fromtimestamp(os.path.getmtime(os.path.join(filepath, path))) for path in mouse_dirs]
-        two_week = [mouse_dir for mouse_dir, mod_date in zip(mouse_dirs, dates) if (now-mod_date).days <= 14]
-        print(mouse_dirs)
-        print(two_week)
         mice = []
         experimenters = []
         for m in mouse_dirs:
@@ -2978,7 +2974,8 @@ class Window(QMainWindow):
                         mice.append(m)
                         experimenters.append(name)
                         break
-        print(mice)
+        dates = [datetime.fromtimestamp(os.path.getmtime(os.path.join(filepath, path))) for path in mouse_dirs]
+        two_week = [mouse_dir for mouse_dir, mod_date in zip(mouse_dirs, dates) if (now - mod_date).days <= 14]
         return mice, experimenters, two_week
 
     def _Open(self,open_last = False,input_file = ''):
