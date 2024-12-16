@@ -231,6 +231,8 @@ class BiasIndicator(QMainWindow):
         # reset bias list
         self._biases = []
         # reset upper and lower ci
+        self._upper_scatter_item = PlotDataItem([0], [0], pen='lightgray')
+        self._lower_scatter_item = PlotDataItem([0], [0], pen='lightgray')
         self.bias_plot.addItem(self._upper_scatter_item)
         self.bias_plot.addItem(self._lower_scatter_item)
         self.bias_plot.addItem(FillBetweenItem(curve1=self._upper_scatter_item,
