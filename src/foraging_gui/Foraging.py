@@ -2987,8 +2987,6 @@ class Window(QMainWindow):
                 # list of mice, experimenters, and two week in chronological order form date modified
                 mice, experimenters, two_week = self._Open_getListOfMice()
                 # only add mice from two weeks in drop down.
-                print(mice)
-                print(two_week)
                 W = MouseSelectorDialog(self, [m + ' ' + experimenters[mice.index(m)] for m in two_week])
 
                 ok, info = (
