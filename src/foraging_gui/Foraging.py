@@ -2960,8 +2960,6 @@ class Window(QMainWindow):
         now = datetime.now()
         mouse_dirs = os.listdir(filepath)
         mouse_dirs.sort(reverse=True, key=lambda x: os.path.getmtime(os.path.join(filepath, x)))   # in order of date modified
-        dates = [datetime.fromtimestamp(os.path.getmtime(os.path.join(filepath, path))) for path in mouse_dirs]
-        two_week = [mouse_dir for mouse_dir, mod_date in zip(mouse_dirs, dates) if (now-mod_date).days <= 14]
         mice = []
         experimenters = []
         for m in mouse_dirs:
@@ -2977,6 +2975,8 @@ class Window(QMainWindow):
                         mice.append(m)
                         experimenters.append(name)
                         break
+        dates = [datetime.fromtimestamp(os.path.getmtime(os.path.join(filepath, path))) for path in mouse_dirs]
+        two_week = [mouse_dir for mouse_dir, mod_date in zip(mice, dates) if (now - mod_date).days <= 14]
         return mice, experimenters, two_week
 
     def _Open(self,open_last = False,input_file = ''):
@@ -2988,7 +2988,7 @@ class Window(QMainWindow):
                 # list of mice, experimenters, and two week in chronological order form date modified
                 mice, experimenters, two_week = self._Open_getListOfMice()
                 # only add mice from two weeks in drop down.
-                W = MouseSelectorDialog(self, [m + ' ' + n for m, n in zip(two_week, experimenters)])
+                W = MouseSelectorDialog(self, [m + ' ' + experimenters[mice.index(m)] for m in two_week])
 
                 ok, info = (
                     W.exec_() == QtWidgets.QDialog.Accepted,
