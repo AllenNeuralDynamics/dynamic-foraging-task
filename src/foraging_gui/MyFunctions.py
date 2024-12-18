@@ -1197,7 +1197,15 @@ class GenerateTrials():
         if stop:           
             self.win.Start.setStyleSheet("background-color : none")
             self.win.Start.setChecked(False)
-            reply = QtWidgets.QMessageBox.question(self.win, 'Box {}'.format(self.win.box_letter), msg, QtWidgets.QMessageBox.Ok)
+            # create nonmodal message box so startloop can terminate
+            self.message_box = QtWidgets.QMessageBox()
+            self.message_box.setIcon(QtWidgets.QMessageBox.Warning)
+            self.message_box.setText(msg)
+            self.message_box.addButton(QtWidgets.QMessageBox.Ok)
+            self.message_box.setWindowTitle('Box {}'.format(self.win.box_letter))
+            self.message_box.setModal(False)
+            self.message_box.show()
+
             # stop FIB if running
             if self.win.StartExcitation.isChecked():
                 self.win.StartExcitation.setChecked(False)
