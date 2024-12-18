@@ -2258,7 +2258,7 @@ class Window(QMainWindow):
                         self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
         except Exception as e:
             # Catch the exception and log error information
-            logging.error(traceback.format_exc())
+            logging.warning(traceback.format_exc())
 
     def closeEvent(self, event):
         # stop the current session first
