@@ -1522,7 +1522,7 @@ class GenerateTrials():
             Channel1.RewardDelay(float(self.TP_RewardDelay))
             Channel1.DelayTime(float(self.CurrentDelay))
             Channel1.ResponseTime(float(self.TP_ResponseTime))
-            if self.TP_OptogeneticsB=='on':
+            if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:
                 Channel1.start(3)
                 self.CurrentStartType=3
                 self.B_StartType.append(self.CurrentStartType)
