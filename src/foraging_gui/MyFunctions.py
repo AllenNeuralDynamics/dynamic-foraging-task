@@ -278,7 +278,7 @@ class GenerateTrials():
 
     def _CheckWarmUp(self):
         '''Check if we should turn on warm up'''
-        if self.win.warmup.currentText()=='off':
+        if self.win.behavior_task_logic_model.task_parameters.warmup=='off':
             return
         warmup=self._get_warmup_state()
         if warmup==0 and self.TP_warmup=='on':
@@ -1647,10 +1647,11 @@ class GenerateTrials():
             self._SimulateResponse()
             return
         # set the valve time of auto water
+        multiplier = self.win.behavior_task_logic_model.task_parameters.Multiplier
         if self.CurrentAutoRewardTrial[0]==1:
-            self._set_valve_time_left(Channel3,float(self.win.LeftValue.text()),float(self.win.Multiplier.text()))
+            self._set_valve_time_left(Channel3,float(self.win.LeftValue.text()),multiplier)
         if self.CurrentAutoRewardTrial[1]==1:
-            self._set_valve_time_right(Channel3,float(self.win.RightValue.text()),float(self.win.Multiplier.text()))
+            self._set_valve_time_right(Channel3,float(self.win.RightValue.text()),multiplier)
             
         if self.CurrentStartType==3: # no delay timestamp
             ReceiveN=9
@@ -1794,14 +1795,14 @@ class GenerateTrials():
 
     def _GiveLeft(self,channel3):
         '''manually give left water'''
-        channel3.LeftValue1(float(self.win.LeftValue.text())*1000*float(self.win.Multiplier.text())) 
+        channel3.LeftValue1(float(self.win.LeftValue.text())*1000*self.win.behavior_task_logic_model.task_parameters.Multiplier)
         time.sleep(0.01) 
         channel3.ManualWater_Left(int(1))
         channel3.LeftValue1(float(self.win.LeftValue.text())*1000)
 
     def _GiveRight(self,channel3):
         '''manually give right water'''
-        channel3.RightValue1(float(self.win.RightValue.text())*1000*float(self.win.Multiplier.text()))
+        channel3.RightValue1(float(self.win.RightValue.text())*1000*self.win.behavior_task_logic_model.task_parameters.Multiplier)
         time.sleep(0.01) 
         channel3.ManualWater_Right(int(1))
         channel3.RightValue1(float(self.win.RightValue.text())*1000)

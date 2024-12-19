@@ -2885,10 +2885,10 @@ class AutoTrainDialog(QDialog):
             
             # Set warmup to off first so that all AutoTrain parameters
             # can be correctly registered in WarmupBackup if warmup is turned on later
-            if paras_dict and paras_dict['warmup'] != self.MainWindow.warmup.currentText():
+            if paras_dict and paras_dict['warmup'] != self.MainWindow.behavior_task_logic_model.task_parameters.warmup:
                 widgets_changed.update(
                     {self.MainWindow.warmup: 
-                     self.MainWindow.warmup.currentText()
+                     self.MainWindow.behavior_task_logic_model.task_parameters.warmup
                      }
                 ) # Track the changes
             

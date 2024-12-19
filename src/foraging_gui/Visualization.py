@@ -522,23 +522,23 @@ class PlotTimeDistribution(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
     def _Update(self,win):
         # randomly draw a block length between Min and Max
-        SampleMethods=win.Randomness.currentText()
+        SampleMethods=win.behavior_task_logic_model.task_parameters.Randomness
         # block length
-        Min=float(win.BlockMin.text())
-        Max=float(win.BlockMax.text())
-        Beta=float(win.BlockBeta.text())
+        Min=win.behavior_task_logic_model.task_parameters.BlockMin
+        Max=win.behavior_task_logic_model.task_parameters.BlockMax
+        Beta=win.behavior_task_logic_model.task_parameters.BlockBeta
         DataType='int'
         SampledBlockLen=self._Sample(Min=Min,Max=Max,SampleMethods=SampleMethods,Beta=Beta,DataType=DataType)
         # ITI 
-        Min=float(win.ITIMin.text())
-        Max=float(win.ITIMax.text())
-        Beta=float(win.ITIBeta.text())
+        Min=win.behavior_task_logic_model.task_parameters.ITIMin
+        Max=win.behavior_task_logic_model.task_parameters.ITIMax
+        Beta=win.behavior_task_logic_model.task_parameters.ITIBeta
         DataType='float'
         SampledITI=self._Sample(Min=Min,Max=Max,SampleMethods=SampleMethods,Beta=Beta,DataType=DataType)
         # Delay
-        Min=float(win.DelayMin.text())
-        Max=float(win.DelayMax.text())
-        Beta=float(win.DelayBeta.text())
+        Min=win.behavior_task_logic_model.task_parameters.DelayMin
+        Max=win.behavior_task_logic_model.task_parameters.DelayMax
+        Beta=win.behavior_task_logic_model.task_parameters.DelayBeta
         DataType='float'
         SampledDelay=self._Sample(Min=Min,Max=Max,SampleMethods=SampleMethods,Beta=Beta,DataType=DataType)
         self.ax1.cla()
