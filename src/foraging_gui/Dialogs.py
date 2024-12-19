@@ -2215,7 +2215,7 @@ class MetadataDialog(QDialog):
         
 class AutoTrainDialog(QDialog):
     '''For automatic training'''
-    trainingStageChanged = pyqtSignal(TrainingStage)  # signal to indicate training stage has changed
+    trainingStageChanged = pyqtSignal(str)  # signal to indicate training stage has changed
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
         uic.loadUi('AutoTrain.ui', self)

@@ -318,8 +318,8 @@ class Window(QMainWindow):
         """
 
         # update parameters in behavior task logic model
-        self.AutoTrain_dialog.trainingStageChanged.connect(
-            lambda stage: setattr(self.behavior_task_logic_model.task_parameters, 'training_stage', stage))
+        # self.AutoTrain_dialog.trainingStageChanged.connect(
+        #     lambda stage: setattr(self.behavior_task_logic_model.task_parameters, 'training_stage', stage))
         self.Task.currentIndexChanged.connect(
             lambda task: setattr(self.behavior_task_logic_model.task_parameters, 'task', task))
         self.BaseRewardSum.textChanged.connect(
@@ -330,7 +330,7 @@ class Window(QMainWindow):
             lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'RewardPairsN', int(text)))
         self.UncoupledReward.textChanged.connect(
             lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'UncoupledReward', text))
-        self.Randomness.textChanged.connect(
+        self.Randomness.currentIndexChanged.connect(
             lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'Randomness', text))
         self.BlockMin.textChanged.connect(
             lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'BlockMin', int(text)))
@@ -388,7 +388,7 @@ class Window(QMainWindow):
             lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'RightValue_volume', float(text)))
         self.LeftValue_volume.textChanged.connect(
             lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'LeftValue_volume', float(text)))
-        self.warmup.textChanged.connect(
+        self.warmup.currentIndexChanged.connect(
             lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'warmup', text))
         self.warm_min_trial.textChanged.connect(
             lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'warm_min_trial', int(text)))
@@ -399,11 +399,6 @@ class Window(QMainWindow):
             lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'warm_min_finish_ratio', float(text)))
         self.warm_windowsize.textChanged.connect(
             lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'warm_windowsize', float(text)))
-
-    # def add_task_parameter_validators(self) -> None:
-    #     """
-    #     Add validators for widget within
-    #     """
 
     def connect_session_model(self) -> None:
         """
@@ -5142,6 +5137,8 @@ if __name__ == "__main__":
 
     # Move creating AutoTrain here to catch any AWS errors
     win.create_auto_train_dialog()
-
+    win.AutoTrain_dialog.trainingStageChanged.connect(
+        lambda stage: setattr(win.behavior_task_logic_model.task_parameters, 'training_stage', stage))
+    # TODO: Feels weird doing it this way? I don't know the AWS errors reasoning though
     # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())
