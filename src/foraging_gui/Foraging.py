@@ -9,7 +9,7 @@ import math
 import logging
 from hashlib import md5
 
-import logging_loki
+#import logging_loki
 import socket
 import harp
 import threading
@@ -25,7 +25,7 @@ from aind_slims_api import models
 import serial
 import numpy as np
 import pandas as pd
-from pykeepass import PyKeePass
+#from pykeepass import PyKeePass
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
@@ -54,7 +54,9 @@ from foraging_gui.RigJsonBuilder import build_rig_json
 from aind_data_schema.core.session import Session
 from aind_data_schema_models.modalities import Modality
 from aind_behavior_services.session import AindBehaviorSessionModel
-from aind_auto_train.schema.task import TrainingStage
+from aind_behavior_services.task_logic import AindBehaviorTaskLogicModel
+from aind_auto_train.schema.task import TrainingStage, DynamicForagingParas, AdvancedBlockMode
+import aind_auto_train
 
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear() # clear handlers so console output can be configured
@@ -128,10 +130,16 @@ class Window(QMainWindow):
             subject=self.ID.text(),
             experiment_version=foraging_gui.__version__,
             notes=self.ShowNotes.toPlainText(),
-            commit_hash= subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip(),
+            commit_hash=subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip(),
             allow_dirty_repo=
             subprocess.check_output(['git','diff-index','--name-only', 'HEAD']).decode('ascii').strip() != '',
             skip_hardware_validation=True
+        )
+        # create AindBehaviorTaskLogicModel to be used and referenced for task parameter info
+        self.behavior_task_logic_model = AindBehaviorTaskLogicModel(
+            name=self.Task.currentText(),
+            task_parameters=self.initialize_task_parameters().dict(),
+            version=aind_auto_train.__version__
         )
 
         # add warning_widget to layout and set color
@@ -213,6 +221,8 @@ class Window(QMainWindow):
         self._ShowRewardPairs() # show reward pairs
         self._GetTrainingParameters() # get initial training parameters
         self.connectSignalsSlots()
+        self.connect_session_model()    # connect relevant widgets to update session model
+        self.connect_task_parameters()  # connect relevant widgets to update task parameters
         self._Task()
         self.keyPressEvent()
         self._WaterVolumnManage2()
@@ -242,6 +252,170 @@ class Window(QMainWindow):
             '''
             self._ReconnectBonsai()
         logging.info('Start up complete')
+
+    def initialize_task_parameters(self) -> DynamicForagingParas:
+        """
+        initialize schema of task parameters based on widgets
+        """
+
+        return DynamicForagingParas(
+            training_stage=TrainingStage.STAGE_1,   # dummy value
+            task=self.Task.currentText(),
+            task_schema_version=aind_auto_train.__version__,
+            BaseRewardSum=float(self.BaseRewardSum.text()),
+            RewardFamily=int(self.RewardFamily.text()),
+            RewardPairsN=int(self.RewardPairsN.text()),
+            UncoupledReward=self.UncoupledReward.text(),
+            # Randomness
+            Randomness=self.Randomness.currentText(),
+            # Block length
+            BlockMin=int(self.BlockMin.text()),
+            BlockMax=int(self.BlockMax.text()),
+            BlockBeta=int(self.BlockBeta.text()),
+            BlockMinReward=int(self.BlockMinReward.text()),
+            # Delay period
+            DelayMin=float(self.DelayMin.text()),
+            DelayMax=float(self.DelayMax.text()),
+            DelayBeta=float(self.DelayBeta.text()),
+            # Reward delay
+            RewardDelay=float(self.RewardDelay.text()),
+            # Auto water
+            AutoReward=self.AutoReward.isChecked(),
+            AutoWaterType=self.AutoWaterType.currentText(),
+            Multiplier=float(self.Multiplier.text()),
+            Unrewarded=int(self.Unrewarded.text()),
+            Ignored=int(self.Ignored.text()),
+            # ITI
+            ITIMin=float(self.ITIMin.text()),
+            ITIMax=float(self.ITIMax.text()),
+            ITIBeta=float(self.ITIBeta.text()),
+            ITIIncrease=float(self.ITIIncrease.text()),
+            # Response time
+            ResponseTime=float(self.ResponseTime.text()),
+            RewardConsumeTime=float(self.RewardConsumeTime.text()),
+            StopIgnores=round(int(self.auto_stop_ignore_win.text())*float(self.auto_stop_ignore_ratio_threshold.text())),
+            # Auto block
+            AdvancedBlockAuto=AdvancedBlockMode.OFF,
+            SwitchThr=float(self.SwitchThr.text()),
+            PointsInARow=int(self.PointsInARow.text()),
+            # Auto stop
+            MaxTrial=int(self.MaxTrial.text()),
+            MaxTime=int(self.MaxTime.text()),
+            # Reward size
+            RightValue_volume=float(self.RightValue_volume.text()),
+            LeftValue_volume=float(self.LeftValue_volume.text()),
+            # Warmup
+            warmup=self.warmup.currentText(),
+            warm_min_trial=int(self.warm_min_trial.text()),
+            warm_max_choice_ratio_bias=float(self.warm_max_choice_ratio_bias.text()),
+            warm_min_finish_ratio=float(self.warm_min_finish_ratio.text()),
+            warm_windowsize=int(self.warm_windowsize.text())
+        )
+
+    def connect_task_parameters(self) -> None:
+        """
+        Connect relevant widgets to update task parameters in task logic model
+        """
+
+        # update parameters in behavior task logic model
+        self.AutoTrain_dialog.trainingStageChanged.connect(
+            lambda stage: setattr(self.behavior_task_logic_model.task_parameters, 'training_stage', stage))
+        self.Task.currentIndexChanged.connect(
+            lambda task: setattr(self.behavior_task_logic_model.task_parameters, 'task', task))
+        self.BaseRewardSum.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'BaseRewardSum', float(text)))
+        self.RewardFamily.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'RewardFamily', int(text)))
+        self.RewardPairsN.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'RewardPairsN', int(text)))
+        self.UncoupledReward.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'UncoupledReward', text))
+        self.Randomness.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'Randomness', text))
+        self.BlockMin.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'BlockMin', int(text)))
+        self.BlockMax.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'BlockMax', int(text)))
+        self.BlockBeta.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'BlockBeta', int(text)))
+        self.BlockMinReward.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'BlockMinReward', int(text)))
+        self.DelayMin.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'DelayMin', float(text)))
+        self.DelayMax.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'DelayMax', float(text)))
+        self.DelayBeta.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'DelayBeta', float(text)))
+        self.RewardDelay.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'RewardDelay', float(text)))
+        self.AutoReward.toggled.connect(
+            lambda checked: setattr(self.behavior_task_logic_model.task_parameters, 'RewardDelay', checked))
+        self.AutoWaterType.currentIndexChanged.connect(
+            lambda water: setattr(self.behavior_task_logic_model.task_parameters, 'AutoWaterType', water))
+        self.Multiplier.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'Multiplier', float(text)))
+        self.Unrewarded.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'Unrewarded', int(text)))
+        self.Ignored.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'Ignored', int(text)))
+        self.ITIMin.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'ITIMin', float(text)))
+        self.ITIMax.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'ITIMax', float(text)))
+        self.ITIBeta.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'ITIBeta', float(text)))
+        self.ITIIncrease.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'ITIIncrease', float(text)))
+        self.ResponseTime.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'ResponseTime', float(text)))
+        self.RewardConsumeTime.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'RewardConsumeTime', float(text)))
+        self.auto_stop_ignore_win.textChanged.connect(
+            lambda win: setattr(self.behavior_task_logic_model.task_parameters, 'StopIgnores',
+                                round(int(win) * float(self.auto_stop_ignore_ratio_threshold.text()))))
+        self.auto_stop_ignore_ratio_threshold.textChanged.connect(
+            lambda ratio: setattr(self.behavior_task_logic_model.task_parameters, 'StopIgnores',
+                                  round(int(self.auto_stop_ignore_win.text()) * float(ratio))))
+        self.SwitchThr.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'SwitchThr', float(text)))
+        self.PointsInARow.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'PointsInARow', int(text)))
+        self.MaxTrial.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'MaxTrial', int(text)))
+        self.MaxTime.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'MaxTime', int(text)))
+        self.RightValue_volume.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'RightValue_volume', float(text)))
+        self.LeftValue_volume.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'LeftValue_volume', float(text)))
+        self.warmup.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'warmup', text))
+        self.warm_min_trial.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'warm_min_trial', int(text)))
+        self.warm_max_choice_ratio_bias.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'warm_max_choice_ratio_bias',
+                                 float(text)))
+        self.warm_min_finish_ratio.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'warm_min_finish_ratio', float(text)))
+        self.warm_windowsize.textChanged.connect(
+            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'warm_windowsize', float(text)))
+
+    # def add_task_parameter_validators(self) -> None:
+    #     """
+    #     Add validators for widget within
+    #     """
+
+    def connect_session_model(self) -> None:
+        """
+        Connect relevant widgets to update session model
+        """
+
+        # update parameters in behavior session model if widgets change
+        self.Task.currentTextChanged.connect(lambda task: setattr(self.behavior_session_model, 'experiment', task))
+        self.Experimenter.textChanged.connect(lambda text: setattr(self.behavior_session_model, 'experimenter', [text]))
+        self.ID.textChanged.connect(lambda subject: setattr(self.behavior_session_model, 'subject', subject))
+        self.ShowNotes.textChanged.connect(lambda: setattr(self.behavior_session_model, 'notes',
+                                                           self.ShowNotes.toPlainText()))
 
     def _load_rig_metadata(self):
         '''Load the latest rig metadata'''
@@ -406,14 +580,6 @@ class Window(QMainWindow):
         self.Opto_dialog.laser_2_calibration_voltage.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_1_calibration_power.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_2_calibration_power.textChanged.connect(self._toggle_save_color)
-
-        # update parameters in behavior session model if widgets change
-        self.Task.currentTextChanged.connect(lambda task: setattr(self.behavior_session_model, 'experiment', task))
-        self.Experimenter.textChanged.connect(lambda text: setattr(self.behavior_session_model, 'experimenter', [text]))
-        self.ID.textChanged.connect(lambda subject: setattr(self.behavior_session_model, 'subject', subject))
-        self.ShowNotes.textChanged.connect(lambda: setattr(self.behavior_session_model, 'notes',
-                                                           self.ShowNotes.toPlainText()))
-
 
         # Set manual water volume to earned reward and trigger update if changed
         for side in ['Left', 'Right']:

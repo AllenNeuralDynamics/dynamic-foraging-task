@@ -15,7 +15,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox, QGridLayout
 from PyQt5.QtWidgets import QLabel, QDialogButtonBox,QFileDialog,QInputDialog, QLineEdit
 from PyQt5 import QtWidgets, uic, QtGui
-from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject, QTimer
+from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject, QTimer, pyqtSignal
 from PyQt5.QtSvg import QSvgWidget
 
 from foraging_gui.MyFunctions import Worker
@@ -2215,7 +2215,7 @@ class MetadataDialog(QDialog):
         
 class AutoTrainDialog(QDialog):
     '''For automatic training'''
-
+    trainingStageChanged = pyqtSignal(TrainingStage)  # signal to indicate training stage has changed
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
         uic.loadUi('AutoTrain.ui', self)
@@ -2651,12 +2651,12 @@ class AutoTrainDialog(QDialog):
     def _update_stage_to_apply(self):
         if self.checkBox_override_stage.isChecked():
             self.stage_in_use = self.comboBox_override_stage.currentText()
+
             logger.info(f"Stage overridden to: {self.stage_in_use}")
         elif self.last_session is not None:
             self.stage_in_use = self.last_session['next_stage_suggested']
         else:
             self.stage_in_use = 'unknown training stage'
-        
         self.pushButton_apply_auto_train_paras.setText(
             f"Apply and lock\n"
             + '\n'.join(get_curriculum_string(self.curriculum_in_use).split('(')).strip(')') 
@@ -2665,7 +2665,7 @@ class AutoTrainDialog(QDialog):
         
         logger.info(f"Current stage to apply: {self.stage_in_use} @"
                     f"{get_curriculum_string(self.curriculum_in_use)}")
-                
+        self.trainingStageChanged.emit(self.stage_in_use)
     def _apply_curriculum(self):
         # Check if a curriculum is selected
         if not hasattr(self, 'selected_curriculum') or self.selected_curriculum is None:
