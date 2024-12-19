@@ -4242,6 +4242,7 @@ class Window(QMainWindow):
         stall_duration = 5*60
 
         while self.Start.isChecked():
+
             QApplication.processEvents()
             if self.ANewTrial==1 and self.Start.isChecked() and self.finish_Timer==1:
 
