@@ -2997,7 +2997,8 @@ class Window(QMainWindow):
         self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{id_name}.mat')
         self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}.json')
         self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}_par.json')
-        self.behavior_session_modelJson = os.path.join(self.behavior_session_model.root_path,f'behavior_session_model_{id_name}.json')
+        self.behavior_session_model_json = os.path.join(self.behavior_session_model.root_path, f'behavior_session_model_{id_name}.json')
+        self.behavior_task_logic_model_json = os.path.join(self.behavior_session_model.root_path, f'behavior_task_logic_model_{id_name}.json')
         self.HarpFolder=os.path.join(self.behavior_session_model.root_path,'raw.harp')
         self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
         self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
@@ -4206,8 +4207,17 @@ class Window(QMainWindow):
             except ValidationError as e:
                 logging.error(str(e), extra={'tags': [self.warning_log_tag]})
             # save behavior session model
-            with open(self.behavior_session_modelJson, "w") as outfile:
+            with open(self.behavior_session_model_json, "w") as outfile:
                 outfile.write(self.behavior_session_model.model_dump_json())
+
+            # validate behavior session task logic model and document validation errors if any
+            try:
+                AindBehaviorTaskLogicModel(**self.behavior_task_logic_model.model_dump())
+            except ValidationError as e:
+                logging.error(str(e), extra={'tags': [self.warning_log_tag]})
+            # save behavior session model
+            with open(self.behavior_task_logic_model_json, "w") as outfile:
+                outfile.write(self.behavior_task_logic_model.model_dump_json())
 
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
