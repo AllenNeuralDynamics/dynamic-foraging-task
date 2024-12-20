@@ -1197,7 +1197,15 @@ class GenerateTrials():
         if stop:           
             self.win.Start.setStyleSheet("background-color : none")
             self.win.Start.setChecked(False)
-            reply = QtWidgets.QMessageBox.question(self.win, 'Box {}'.format(self.win.box_letter), msg, QtWidgets.QMessageBox.Ok)
+            # create nonmodal message box so startloop can terminate
+            self.message_box = QtWidgets.QMessageBox()
+            self.message_box.setIcon(QtWidgets.QMessageBox.Warning)
+            self.message_box.setText(msg)
+            self.message_box.addButton(QtWidgets.QMessageBox.Ok)
+            self.message_box.setWindowTitle('Box {}'.format(self.win.box_letter))
+            self.message_box.setModal(False)
+            self.message_box.show()
+
             # stop FIB if running
             if self.win.StartExcitation.isChecked():
                 self.win.StartExcitation.setChecked(False)
@@ -1522,7 +1530,7 @@ class GenerateTrials():
             Channel1.RewardDelay(float(self.TP_RewardDelay))
             Channel1.DelayTime(float(self.CurrentDelay))
             Channel1.ResponseTime(float(self.TP_ResponseTime))
-            if self.TP_OptogeneticsB=='on':
+            if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:
                 Channel1.start(3)
                 self.CurrentStartType=3
                 self.B_StartType.append(self.CurrentStartType)
