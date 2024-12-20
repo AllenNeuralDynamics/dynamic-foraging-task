@@ -28,10 +28,11 @@ import pandas as pd
 from pykeepass import PyKeePass
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy, QLineEdit, QComboBox, QPushButton, QDoubleSpinBox
 from PyQt5.QtWidgets import QFileDialog,QVBoxLayout, QGridLayout, QLabel
 from PyQt5 import QtWidgets,QtGui,QtCore, uic
 from PyQt5.QtCore import QThreadPool,Qt,QThread
+from PyQt5.QtGui import QIntValidator, QDoubleValidator
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 from pydantic import ValidationError
@@ -314,93 +315,159 @@ class Window(QMainWindow):
 
     def connect_task_parameters(self) -> None:
         """
-        Connect relevant widgets to update task parameters in task logic model
+        Connect relevant widgets to update task parameters in task logic model and add validators
         """
-
         # update parameters in behavior task logic model
         # self.AutoTrain_dialog.trainingStageChanged.connect(
         #     lambda stage: setattr(self.behavior_task_logic_model.task_parameters, 'training_stage', stage))
-        self.Task.currentIndexChanged.connect(
+        self.Task.currentTextChanged.connect(
             lambda task: setattr(self.behavior_task_logic_model.task_parameters, 'task', task))
         self.BaseRewardSum.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'BaseRewardSum', float(text)))
+            lambda text: None if text in ['', '.'] else setattr(self.behavior_task_logic_model.task_parameters, 'BaseRewardSum', float(text)))
+        self.BaseRewardSum.setValidator(QDoubleValidator())
+
         self.RewardFamily.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'RewardFamily', int(text)))
+            lambda text: None if text == '' else setattr(self.behavior_task_logic_model.task_parameters, 'RewardFamily', int(text)))
+        self.RewardFamily.setValidator(QIntValidator())
+
         self.RewardPairsN.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'RewardPairsN', int(text)))
+            lambda text: None if text == '' else setattr(self.behavior_task_logic_model.task_parameters, 'RewardPairsN', int(text)))
+        self.RewardPairsN.setValidator(QIntValidator())
+
         self.UncoupledReward.textChanged.connect(
             lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'UncoupledReward', text))
+
         self.Randomness.currentIndexChanged.connect(
             lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'Randomness', text))
+
         self.BlockMin.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'BlockMin', int(text)))
+            lambda text: None if text == '' else setattr(self.behavior_task_logic_model.task_parameters, 'BlockMin', int(text)))
+        self.BlockMin.setValidator(QIntValidator())
+
         self.BlockMax.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'BlockMax', int(text)))
+            lambda text: None if text == '' else setattr(self.behavior_task_logic_model.task_parameters, 'BlockMax', int(text)))
+        self.BlockMax.setValidator(QIntValidator())
+
         self.BlockBeta.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'BlockBeta', int(text)))
+            lambda text: None if text == '' else setattr(self.behavior_task_logic_model.task_parameters, 'BlockBeta', int(text)))
+        self.BlockBeta.setValidator(QIntValidator())
+
         self.BlockMinReward.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'BlockMinReward', int(text)))
+            lambda text: None if text == '' else setattr(self.behavior_task_logic_model.task_parameters, 'BlockMinReward', int(text)))
+        self.BlockMinReward.setValidator(QIntValidator())
+
         self.DelayMin.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'DelayMin', float(text)))
+            lambda text: None if text in ['', '.'] else setattr(self.behavior_task_logic_model.task_parameters, 'DelayMin', float(text)))
+        self.DelayMin.setValidator(QDoubleValidator())
+
         self.DelayMax.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'DelayMax', float(text)))
+            lambda text: None if text in ['', '.'] else setattr(self.behavior_task_logic_model.task_parameters, 'DelayMax', float(text)))
+        self.DelayMax.setValidator(QDoubleValidator())
+
         self.DelayBeta.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'DelayBeta', float(text)))
+            lambda text: None if text in ['', '.'] else setattr(self.behavior_task_logic_model.task_parameters, 'DelayBeta', float(text)))
+        self.DelayBeta.setValidator(QDoubleValidator())
+
         self.RewardDelay.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'RewardDelay', float(text)))
+            lambda text: None if text in ['', '.'] else setattr(self.behavior_task_logic_model.task_parameters, 'RewardDelay', float(text)))
+        self.RewardDelay.setValidator(QDoubleValidator())
+
         self.AutoReward.toggled.connect(
             lambda checked: setattr(self.behavior_task_logic_model.task_parameters, 'RewardDelay', checked))
-        self.AutoWaterType.currentIndexChanged.connect(
+
+        self.AutoWaterType.currentTextChanged.connect(
             lambda water: setattr(self.behavior_task_logic_model.task_parameters, 'AutoWaterType', water))
+
         self.Multiplier.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'Multiplier', float(text)))
+            lambda text: None if text in ['', '.'] else setattr(self.behavior_task_logic_model.task_parameters, 'Multiplier', float(text)))
+        self.Multiplier.setValidator(QDoubleValidator())
+
         self.Unrewarded.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'Unrewarded', int(text)))
+            lambda text: None if text == '' else setattr(self.behavior_task_logic_model.task_parameters, 'Unrewarded', int(text)))
+        self.Unrewarded.setValidator(QIntValidator())
+
         self.Ignored.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'Ignored', int(text)))
+            lambda text: None if text == '' else setattr(self.behavior_task_logic_model.task_parameters, 'Ignored', int(text)))
+        self.Ignored.setValidator(QIntValidator())
+
         self.ITIMin.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'ITIMin', float(text)))
+            lambda text: None if text in ['', '.'] else setattr(self.behavior_task_logic_model.task_parameters, 'ITIMin', float(text)))
+        self.ITIMin.setValidator(QDoubleValidator())
+
         self.ITIMax.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'ITIMax', float(text)))
+            lambda text: None if text in ['', '.'] else setattr(self.behavior_task_logic_model.task_parameters, 'ITIMax', float(text)))
+        self.ITIMax.setValidator(QDoubleValidator())
+
         self.ITIBeta.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'ITIBeta', float(text)))
+            lambda text: None if text in ['', '.'] else setattr(self.behavior_task_logic_model.task_parameters, 'ITIBeta', float(text)))
+        self.ITIBeta.setValidator(QDoubleValidator())
+
         self.ITIIncrease.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'ITIIncrease', float(text)))
+            lambda text: None if text in ['', '.'] else setattr(self.behavior_task_logic_model.task_parameters, 'ITIIncrease', float(text)))
+        self.ITIIncrease.setValidator(QDoubleValidator())
+
         self.ResponseTime.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'ResponseTime', float(text)))
+            lambda text: None if text in ['', '.'] else setattr(self.behavior_task_logic_model.task_parameters, 'ResponseTime', float(text)))
+        self.ResponseTime.setValidator(QDoubleValidator())
+
         self.RewardConsumeTime.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'RewardConsumeTime', float(text)))
+            lambda text: None if text in ['', '.'] else setattr(self.behavior_task_logic_model.task_parameters, 'RewardConsumeTime', float(text)))
+        self.RewardConsumeTime.setValidator(QDoubleValidator())
+
         self.auto_stop_ignore_win.textChanged.connect(
-            lambda win: setattr(self.behavior_task_logic_model.task_parameters, 'StopIgnores',
+            lambda win: None if win == '' else setattr(self.behavior_task_logic_model.task_parameters, 'StopIgnores',
                                 round(int(win) * float(self.auto_stop_ignore_ratio_threshold.text()))))
+        self.auto_stop_ignore_win.setValidator(QIntValidator())
+
         self.auto_stop_ignore_ratio_threshold.textChanged.connect(
-            lambda ratio: setattr(self.behavior_task_logic_model.task_parameters, 'StopIgnores',
-                                  round(int(self.auto_stop_ignore_win.text()) * float(ratio))))
-        self.AdvancedBlockAuto.currentIndexChanged.connect(
+            lambda ratio: None if ratio in ['', '.'] else setattr(self.behavior_task_logic_model.task_parameters, 'StopIgnores',
+                                  round(int(self.auto_stop_ignore_win.text()) * (float(ratio)))))
+        self.auto_stop_ignore_ratio_threshold.setValidator(QDoubleValidator())
+
+        self.AdvancedBlockAuto.currentTextChanged.connect(
             lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'AdvancedBlockAuto', text))
+
         self.SwitchThr.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'SwitchThr', float(text)))
+            lambda text: None if text in ['', '.'] else setattr(self.behavior_task_logic_model.task_parameters, 'SwitchThr', float(text)))
+        self.SwitchThr.setValidator(QDoubleValidator())
+
         self.PointsInARow.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'PointsInARow', int(text)))
+            lambda text: None if text == '' else setattr(self.behavior_task_logic_model.task_parameters, 'PointsInARow', int(text)))
+        self.PointsInARow.setValidator(QIntValidator())
+
         self.MaxTrial.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'MaxTrial', int(text)))
+            lambda text: None if text == '' else setattr(self.behavior_task_logic_model.task_parameters, 'MaxTrial', int(text)))
+        self.MaxTrial.setValidator(QIntValidator())
+
         self.MaxTime.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'MaxTime', int(text)))
+            lambda text: None if text == '' else setattr(self.behavior_task_logic_model.task_parameters, 'MaxTime', int(text)))
+        self.MaxTime.setValidator(QIntValidator())
+
         self.RightValue_volume.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'RightValue_volume', float(text)))
+            lambda text: None if text in ['', '.'] else setattr(self.behavior_task_logic_model.task_parameters, 'RightValue_volume', float(text)))
+
         self.LeftValue_volume.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'LeftValue_volume', float(text)))
-        self.warmup.currentIndexChanged.connect(
+            lambda text: None if text in ['', '.'] else setattr(self.behavior_task_logic_model.task_parameters, 'LeftValue_volume', float(text)))
+
+        self.warmup.currentTextChanged.connect(
             lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'warmup', text))
+
         self.warm_min_trial.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'warm_min_trial', int(text)))
+            lambda text: None if text == '' else setattr(self.behavior_task_logic_model.task_parameters, 'warm_min_trial', int(text)))
+        self.warm_min_trial.setValidator(QIntValidator())
+
         self.warm_max_choice_ratio_bias.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'warm_max_choice_ratio_bias',
+            lambda text: None if text in ['', '.'] else setattr(self.behavior_task_logic_model.task_parameters, 'warm_max_choice_ratio_bias',
                                  float(text)))
+        self.warm_max_choice_ratio_bias.setValidator(QDoubleValidator())
+
         self.warm_min_finish_ratio.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'warm_min_finish_ratio', float(text)))
+            lambda text: None if text in ['', '.'] else setattr(self.behavior_task_logic_model.task_parameters, 'warm_min_finish_ratio', float(text)))
+        self.warm_min_finish_ratio.setValidator(QDoubleValidator())
+
         self.warm_windowsize.textChanged.connect(
-            lambda text: setattr(self.behavior_task_logic_model.task_parameters, 'warm_windowsize', float(text)))
+            lambda text: None if text == '' else setattr(self.behavior_task_logic_model.task_parameters, 'warm_windowsize', int(text)))
+        self.warm_windowsize.setValidator(QIntValidator())
 
     def connect_session_model(self) -> None:
         """
@@ -2195,17 +2262,16 @@ class Window(QMainWindow):
         '''Check if the input format is correct'''
         if child.objectName()=='RewardFamily': # When we change the RewardFamily, sometimes the RewardPairsN is larger than available reward pairs in this family.
             try:
-                self.RewardFamilies[int(self.RewardFamily.text())-1]
-                if int(self.RewardPairsN.text())>len(self.RewardFamilies[int(self.RewardFamily.text())-1]):
-                    self.RewardPairsN.setText(str(len(self.RewardFamilies[int(self.RewardFamily.text())-1])))
+                if self.behavior_task_logic_model.task_parameters.RewardPairsN>len(self.RewardFamilies[self.behavior_task_logic_model.task_parameters.RewardFamily-1]):
+                    self.RewardPairsN.setText(str(len(self.RewardFamilies[self.behavior_task_logic_model.task_parameters.RewardFamily-1])))
                 return 1
             except Exception as e:
                 logging.error(traceback.format_exc())
                 return 0
         if child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum':
             try:
-                self.RewardPairs=self.RewardFamilies[int(self.RewardFamily.text())-1][:int(self.RewardPairsN.text())]
-                if int(self.RewardPairsN.text())>len(self.RewardFamilies[int(self.RewardFamily.text())-1]):
+                self.RewardPairs=self.RewardFamilies[self.behavior_task_logic_model.task_parameters.RewardFamily-1][:self.behavior_task_logic_model.task_parameters.RewardPairsN]
+                if self.behavior_task_logic_model.task_parameters.RewardPairsN>len(self.RewardFamilies[self.behavior_task_logic_model.task_parameters.RewardFamily-1]):
                     return 0
                 else:
                     return 1
@@ -2394,7 +2460,7 @@ class Window(QMainWindow):
             if self.behavior_session_model.experiment in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
                 self.RewardPairs=self.RewardFamilies[int(self.behavior_task_logic_model.task_parameters.RewardFamily)-1][:int(self.behavior_task_logic_model.task_parameters.RewardPairsN)]
                 self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*\
-                                float(self.behavior_task_logic_model.task_parameters.BaseRewardSum)
+                                self.behavior_task_logic_model.task_parameters.BaseRewardSum
             elif self.behavior_session_model.experiment in ['Uncoupled Baiting','Uncoupled Without Baiting']:
                 input_string = self.behavior_task_logic_model.task_parameters.UncoupledReward
                 # remove any square brackets and spaces from the string
