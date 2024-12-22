@@ -481,10 +481,14 @@ class Window(QMainWindow):
 
     def _thread_complete_ephys_timer(self):
         '''complete of _Timer'''
-        pass
+        if self.StartEphysRecording.isChecked():
+            # ask user to stop the ephys recording
+            reply = QMessageBox.question(self, '', 'The ephys recording has reached the duration. Do you want to stop the recording?', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+            if reply == QMessageBox.Yes:
+                self.StartEphysRecording.setChecked(False)
+                self._toggle_color(self.StartEphysRecording)
+                self._StartEphysRecording()
             
-
-
     def _StartEphysRecording(self):
         '''
             Start/stop ephys recording
