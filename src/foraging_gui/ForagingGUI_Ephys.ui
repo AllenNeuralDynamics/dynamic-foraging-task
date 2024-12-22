@@ -4569,6 +4569,31 @@
      <string>1</string>
     </property>
    </widget>
+   <widget class="QLabel" name="ephys_time_label">
+    <property name="geometry">
+     <rect>
+      <x>840</x>
+      <y>860</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
    <zorder>TrainingParameters</zorder>
    <zorder>StartFIP</zorder>
    <zorder>FIPMode</zorder>
@@ -4608,6 +4633,7 @@
    <zorder>motor_stage_widget</zorder>
    <zorder>label_66</zorder>
    <zorder>recording_duration</zorder>
+   <zorder>ephys_time_label</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
