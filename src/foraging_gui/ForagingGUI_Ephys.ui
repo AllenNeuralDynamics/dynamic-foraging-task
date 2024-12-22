@@ -1463,9 +1463,9 @@
      <property name="value">
       <double>0.030000000000000</double>
      </property>
-     <property name="disabled">
-     <bool>true</bool>
-    </property>
+     <property name="disabled" stdset="0">
+      <bool>true</bool>
+     </property>
     </widget>
     <widget class="QDoubleSpinBox" name="GiveWaterR">
      <property name="geometry">
@@ -1491,9 +1491,9 @@
      <property name="value">
       <double>0.030000000000000</double>
      </property>
-     <property name="disabled">
-     <bool>true</bool>
-    </property>
+     <property name="disabled" stdset="0">
+      <bool>true</bool>
+     </property>
     </widget>
     <widget class="QLabel" name="label_56">
      <property name="geometry">
@@ -1884,9 +1884,9 @@
      <property name="value">
       <double>3.000000000000000</double>
      </property>
-     <property name="disabled">
-     <bool>true</bool>
-    </property>
+     <property name="disabled" stdset="0">
+      <bool>true</bool>
+     </property>
     </widget>
     <widget class="QDoubleSpinBox" name="GiveWaterR_volume">
      <property name="geometry">
@@ -1912,9 +1912,9 @@
      <property name="value">
       <double>3.000000000000000</double>
      </property>
-     <property name="disabled">
-     <bool>true</bool>
-    </property>
+     <property name="disabled" stdset="0">
+      <bool>true</bool>
+     </property>
     </widget>
     <widget class="QDoubleSpinBox" name="RightValue_volume">
      <property name="geometry">
@@ -2176,7 +2176,7 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
-     <widget class="QLineEdit" name="min_time">
+    <widget class="QLineEdit" name="min_time">
      <property name="geometry">
       <rect>
        <x>863</x>
@@ -4525,6 +4525,50 @@
      </item>
     </layout>
    </widget>
+   <widget class="QLabel" name="label_66">
+    <property name="geometry">
+     <rect>
+      <x>630</x>
+      <y>860</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>recording duration (m)=</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="recording_duration">
+    <property name="geometry">
+     <rect>
+      <x>750</x>
+      <y>860</y>
+      <width>80</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>1</string>
+    </property>
+   </widget>
    <zorder>TrainingParameters</zorder>
    <zorder>StartFIP</zorder>
    <zorder>FIPMode</zorder>
@@ -4562,6 +4606,8 @@
    <zorder>DiskSpaceProgreeBar</zorder>
    <zorder>diskspace</zorder>
    <zorder>motor_stage_widget</zorder>
+   <zorder>label_66</zorder>
+   <zorder>recording_duration</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
