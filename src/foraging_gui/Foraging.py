@@ -4661,12 +4661,17 @@ class Window(QMainWindow):
             :param session: session to use to create upload manifest
         '''
 
+        # skip manifest generation for test mouse
         if self.behavior_session_model.subject in ['0','1','2','3','4','5','6','7','8','9','10']:
             logging.info('Skipping upload manifest, because this is the test mouse')
             return
-
+        # skip manifest generation if automatic upload is disabled
         if not self.Settings['AutomaticUpload']:
             logging.info('Skipping Automatic Upload based on ForagingSettings.json')
+            return
+        # skip manifest generation if this is an ephys session
+        if any(Modality.ECEPHYS in stream.stream_modalities for stream in session.data_streams):
+            logging.info('Skipping upload manifest, because this is an ephys session')
             return
 
         try:
