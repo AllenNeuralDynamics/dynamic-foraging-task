@@ -481,9 +481,8 @@ class Window(QMainWindow):
 
     def _thread_complete_ephys_timer(self):
         '''complete of _Timer'''
-        if not self.ignore_timer:
-            self.finish_Timer=1
-            logging.info('Finished photometry baseline timer')
+        pass
+            
 
 
     def _StartEphysRecording(self):
