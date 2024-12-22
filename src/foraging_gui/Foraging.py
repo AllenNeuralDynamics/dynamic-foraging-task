@@ -72,6 +72,7 @@ class NumpyEncoder(json.JSONEncoder):
 
 class Window(QMainWindow):
     Time = QtCore.pyqtSignal(int) # Photometry timer signal
+    Time_ephys = QtCore.pyqtSignal(int) # Ephys timer signal
     sessionGenerated = QtCore.pyqtSignal(Session)  # signal to indicate Session has been generated
 
     def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
@@ -450,6 +451,41 @@ class Window(QMainWindow):
         if current_positions is not None:
             self.Metadata_dialog._set_reference(current_positions)
 
+    def _check_ephys_duration(self):
+        '''
+            Check the duration of the ephys recording
+        '''
+        if self.StartEphysRecording.isChecked() and self.OpenEphysRecordingType.currentText()=='Surface finding':
+            # record in a specific duration for the surface finding
+            # If we already created a workertimer and thread we can reuse them
+            if not hasattr(self, 'workertimer_ephys'):
+                self.workertimer_ephys = TimerWorker()
+                self.workertimer_ephys_thread = QThread()
+                self.workertimer_ephys.progress.connect(self._update_ephys_timer)
+                self.workertimer_ephys.finished.connect(self._thread_complete_ephys_timer)
+                self.Time_ephys.connect(self.workertimer_ephys._Timer)
+                self.workertimer_ephys.moveToThread(self.workertimer_ephys_thread)
+                self.workertimer_ephys_thread.start()
+            self.workertimer_ephys._Timer(int(np.floor(float(self.recording_duration.text())*60)))
+
+    def _update_ephys_timer(self, time):
+        '''
+            Updates ephys baseline timer
+        '''
+        minutes = int(np.floor(time/60))
+        seconds = np.remainder(time,60)
+        if len(str(seconds)) == 1:
+            seconds = '0{}'.format(seconds)
+        if not self.ignore_timer:
+            self.photometry_timer_label.setText('Running ephys: {}:{}'.format(minutes,seconds))
+
+    def _thread_complete_ephys_timer(self):
+        '''complete of _Timer'''
+        if not self.ignore_timer:
+            self.finish_Timer=1
+            logging.info('Finished photometry baseline timer')
+
+
     def _StartEphysRecording(self):
         '''
             Start/stop ephys recording
@@ -479,6 +515,7 @@ class Window(QMainWindow):
                     self._toggle_color(self.StartEphysRecording)
                     return
                 EphysControl.start_open_ephys_recording()
+                self._check_ephys_duration()
                 self.openephys_start_recording_time = str(datetime.now())
                 QMessageBox.warning(self, '', f'Open Ephys has started recording!\n Recording type: {self.OpenEphysRecordingType.currentText()}')
             except Exception as e:
