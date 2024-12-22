@@ -4670,7 +4670,7 @@ class Window(QMainWindow):
             logging.info('Skipping Automatic Upload based on ForagingSettings.json')
             return
         # skip manifest generation if this is an ephys session
-        if self.open_ephys!=[]:
+        if self.open_ephys!=[] or self.StartEphysRecording.isChecked():
             logging.info('Skipping upload manifest, because this is an ephys session')
             return
 
