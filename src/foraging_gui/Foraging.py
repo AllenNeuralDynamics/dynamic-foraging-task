@@ -224,7 +224,7 @@ class Window(QMainWindow):
         self._StopPhotometry() # Make sure photoexcitation is stopped
         # Initialize open ephys saving dictionary
         self.open_ephys=[]
-
+        self._disable_ephys_duration() # Disable ephys duration if not surface finding
         # load the rig metadata
         self._load_rig_metadata()
 
@@ -358,6 +358,7 @@ class Window(QMainWindow):
         self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
+        self.OpenEphysRecordingType.currentIndexChanged.connect(self._disable_ephys_duration)
         # Connect to ID change in the mainwindow
         self.ID.returnPressed.connect(
             lambda: self.AutoTrain_dialog.update_auto_train_lock(engaged=False)
@@ -488,7 +489,16 @@ class Window(QMainWindow):
                 self.StartEphysRecording.setChecked(False)
                 self._toggle_color(self.StartEphysRecording)
                 self._StartEphysRecording()
-            
+
+    def _disable_ephys_duration(self):
+        '''
+            Disable the ephys duration if the recording type is not surface finding
+        '''
+        if self.OpenEphysRecordingType.currentText()=='Surface finding':
+            self.recording_duration.setEnabled(True)
+        else:
+            self.recording_duration.setEnabled(False)
+
     def _StartEphysRecording(self):
         '''
             Start/stop ephys recording
