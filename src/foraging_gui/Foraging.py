@@ -3767,7 +3767,7 @@ class Window(QMainWindow):
             self.Metadata_dialog.ProjectName.addItems([project_name])
         return project_name
     def _empty_old_data(self):
-        # empty the data from the previous session
+        '''empty the data from the previous session'''
         self.open_ephys=[]
         self.ManualWaterVolume=[0,0]
         # clear camera start and end time
