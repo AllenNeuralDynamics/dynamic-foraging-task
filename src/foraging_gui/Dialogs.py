@@ -3035,7 +3035,8 @@ class OpticalTaggingDialog(QDialog):
         super().__init__(parent)
         uic.loadUi('OpticalTagging.ui', self)
         self._connectSignalsSlots()
-    
+        self.MainWindow = MainWindow
+        
     def _connectSignalsSlots(self):
         self.Start.clicked.connect(self._Start)
         self.WhichLaser.currentIndexChanged.connect(self._WhichLaser)
@@ -3047,7 +3048,15 @@ class OpticalTaggingDialog(QDialog):
             self.Start.setStyleSheet("background-color : green;")
         else:
             self.Start.setStyleSheet("background-color : none")
+        # produce the waveforms
+        self._produce_waveforms()
+        # initiate the laser
 
+        # receiving the timestamps of laser start
+
+        # save the timestamps
+
+        # save parameters
     def _WhichLaser(self):
         '''Select the laser to use and disable non-relevant widgets'''
         laser_name = self.WhichLaser.currentText()
@@ -3066,3 +3075,13 @@ class OpticalTaggingDialog(QDialog):
             self.Laser_2_power.setEnabled(True)
             self.label1_3.setEnabled(True)
             self.label1_16.setEnabled(True)
+    
+    def _produce_waveforms(self):
+        '''Produce the waveforms for the optical tagging'''
+        # get the amplitude
+        self._get_lasers_amplitude()
+
+    def _get_lasers_amplitude(self):
+        '''Get the amplitude of the laser based on the calibraion results'''
+        # get the current calibration results
+        
