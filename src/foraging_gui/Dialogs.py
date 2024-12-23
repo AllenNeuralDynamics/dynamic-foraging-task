@@ -24,6 +24,7 @@ from aind_auto_train.curriculum_manager import CurriculumManager
 from aind_auto_train.auto_train_manager import DynamicForagingAutoTrainManager
 from aind_auto_train.schema.task import TrainingStage
 from aind_auto_train.schema.curriculum import DynamicForagingCurriculum
+from foraging_gui.GenerateMetadata import generate_metadata
 codebase_curriculum_schema_version = DynamicForagingCurriculum.model_fields['curriculum_schema_version'].default
 
 logger = logging.getLogger(__name__)
@@ -3030,13 +3031,15 @@ class PandasModel(QAbstractTableModel):
             return self._data.columns[col]
         return None
     
+
 class OpticalTaggingDialog(QDialog):
+    
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
         uic.loadUi('OpticalTagging.ui', self)
         self._connectSignalsSlots()
         self.MainWindow = MainWindow
-        
+
     def _connectSignalsSlots(self):
         self.Start.clicked.connect(self._Start)
         self.WhichLaser.currentIndexChanged.connect(self._WhichLaser)
@@ -3078,10 +3081,68 @@ class OpticalTaggingDialog(QDialog):
     
     def _produce_waveforms(self):
         '''Produce the waveforms for the optical tagging'''
+        # get the laser name
+        if self.WhichLaser.currentText()=="Both":
+            laser_name_selected = ['Laser_1','Laser_2']
+        else:
+            laser_name_selected = [self.WhichLaser.currentText()]
         # get the amplitude
-        self._get_lasers_amplitude()
-
-    def _get_lasers_amplitude(self):
-        '''Get the amplitude of the laser based on the calibraion results'''
-        # get the current calibration results
+        protocol = self.Protocol.currentText()
+        for current_laser_name in laser_name_selected:
+            if current_laser_name=='Laser_1':
+                target_power = self.Laser_1_power.value()
+                laser_color = self.Laser_1_color.currentText()
+            elif current_laser_name=='Laser_2':
+                target_power = self.Laser_2_power.value()
+                laser_color = self.Laser_2_color.currentText()
+            else:
+                raise ValueError(f"Unknown laser name: {current_laser_name}")
+            if protocol!='Pulse':
+                raise ValueError(f"Unknown protocol: {protocol}")
+            else:
+                self._get_lasers_amplitude(target_power,laser_color,protocol)
+            # get the waveform
+            
+            # save the waveform
+            
         
+
+    def _get_lasers_amplitude(self,target_power:float,laser_color:str,protocol:str)->float:
+        '''Get the amplitude of the laser based on the calibraion results
+        Args:
+            target_power: The target power of the laser.
+            laser_color: The color of the laser.
+            protocol: The protocol to use.
+        Returns:
+            float: The amplitude of the laser.
+        '''
+        # get the current calibration results
+        latest_calibration_date=find_latest_calibration_date(self.MainWindow.LaserCalibrationResults,laser_color)
+        # get the selected laser
+        if latest_calibration_date=='NA':
+            logger.error(f"No calibration results found for {laser_color}")
+        else:
+            calibration_results=self.MainWindow.LaserCalibrationResults[latest_calibration_date][laser_color][protocol]
+            
+def find_latest_calibration_date(calibration:list,Laser:str)->str:
+    """
+    Find the latest calibration date for the selected laser.
+
+    Args:
+        calibration: The calibration object.
+        Laser: The selected laser name.
+
+    Returns:
+        str: The latest calibration date for the selected laser.
+    """
+    if not hasattr(calibration,'LaserCalibrationResults') :
+        return 'NA'
+    Dates=[]
+    for Date in calibration.LaserCalibrationResults:
+        if Laser in calibration.LaserCalibrationResults[Date].keys():
+            Dates.append(Date)
+    sorted_dates = sorted(Dates)
+    if sorted_dates==[]:
+        return 'NA'
+    else:
+        return sorted_dates[-1]
