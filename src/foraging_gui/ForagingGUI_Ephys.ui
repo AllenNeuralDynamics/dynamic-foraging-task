@@ -4620,6 +4620,7 @@
     <addaction name="action_Calibration"/>
     <addaction name="actionLaser_Calibration"/>
     <addaction name="actionMeta_Data"/>
+    <addaction name="actionOptical_Tagging"/>
     <addaction name="separator"/>
     <addaction name="menuSimulation"/>
     <addaction name="actionDrawing_after_stopping"/>
@@ -4745,6 +4746,7 @@
    </attribute>
    <addaction name="action_Calibration"/>
    <addaction name="actionLaser_Calibration"/>
+   <addaction name="actionOptical_Tagging"/>
    <addaction name="actionMeta_Data"/>
   </widget>
   <widget class="QToolBar" name="toolBar_3">
@@ -4765,7 +4767,6 @@
    </attribute>
    <addaction name="action_Optogenetics"/>
    <addaction name="action_Camera"/>
-   <addaction name="actionOptical_Tagging"/>
   </widget>
   <action name="action_Calibration">
    <property name="checkable">
@@ -5013,7 +5014,7 @@
   <action name="actionOptical_Tagging">
    <property name="icon">
     <iconset>
-     <normaloff>resources/pngtree-letter-t-logo-png-png-image_6100844.jpg</normaloff>resources/pngtree-letter-t-logo-png-png-image_6100844.jpg</iconset>
+     <normaloff>resources/OpticalTagging.jpg</normaloff>resources/OpticalTagging.jpg</iconset>
    </property>
    <property name="text">
     <string>Optical Tagging</string>
