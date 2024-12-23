@@ -3029,3 +3029,9 @@ class PandasModel(QAbstractTableModel):
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
             return self._data.columns[col]
         return None
+    
+class OpticalTaggingDialog(QDialog):
+    def __init__(self, MainWindow, parent=None):
+        super().__init__(parent)
+        uic.loadUi('OpticalTagging.ui', self)
+        
