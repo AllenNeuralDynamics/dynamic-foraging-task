@@ -13,6 +13,434 @@
   <property name="windowTitle">
    <string>Optical Tagging</string>
   </property>
+  <widget class="QLabel" name="label1_2">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>100</y>
+     <width>76</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>90</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>lasers=</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label1_1">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>70</y>
+     <width>76</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>90</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>laser color=</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="Protocol">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>130</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>1000</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <item>
+    <property name="text">
+     <string>Pulse</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label1_15">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>58</x>
+     <y>250</y>
+     <width>76</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>90</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>pulse dur(s)=</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label1_12">
+   <property name="geometry">
+    <rect>
+     <x>58</x>
+     <y>130</y>
+     <width>76</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>90</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>protocol=</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label1_16">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>190</y>
+     <width>116</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>laser_2  power (mw)=</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label1_13">
+   <property name="geometry">
+    <rect>
+     <x>54</x>
+     <y>220</y>
+     <width>80</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>90</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>frequency (Hz)=</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="LaserColor">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>70</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>70</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="currentIndex">
+    <number>4</number>
+   </property>
+   <item>
+    <property name="text">
+     <string>Blue</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Red</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Orange</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Green</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>NA</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QComboBox" name="WhichLaser">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>100</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>1000</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <item>
+    <property name="text">
+     <string>Both</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Laser_1</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Laser_2</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLineEdit" name="Pulse_duration">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>250</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>1000</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>0.002</string>
+   </property>
+   <property name="readOnly">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label1_3">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>160</y>
+     <width>116</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>laser_1  power (mw)=</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="Frequency">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>220</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>1000</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>20</string>
+   </property>
+   <property name="readOnly">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="Laser_1_power">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>160</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>1000</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>1,5,10</string>
+   </property>
+   <property name="readOnly">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="Laser_2_power">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>190</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>1000</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>1,5,10</string>
+   </property>
+   <property name="readOnly">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>32</y>
+     <width>70</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Start</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label1_17">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>280</y>
+     <width>76</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>90</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>location tag=</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QSpinBox" name="LocationTag">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>280</y>
+     <width>71</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
