@@ -3054,6 +3054,15 @@ class OpticalTaggingDialog(QDialog):
         if laser_name=='Laser_1':
             self.Laser_2_power.setEnabled(False)
             self.label1_16.setEnabled(False)
+            self.label1_3.setEnabled(True)
+            self.Laser_1_power.setEnabled(True)
         elif laser_name=='Laser_2':
             self.Laser_1_power.setEnabled(False)
             self.label1_3.setEnabled(False)
+            self.label1_16.setEnabled(True)
+            self.Laser_2_power.setEnabled(True)
+        else:
+            self.Laser_1_power.setEnabled(True)
+            self.Laser_2_power.setEnabled(True)
+            self.label1_3.setEnabled(True)
+            self.label1_16.setEnabled(True)
