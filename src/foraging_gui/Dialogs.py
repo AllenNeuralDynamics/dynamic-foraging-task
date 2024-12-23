@@ -3034,4 +3034,26 @@ class OpticalTaggingDialog(QDialog):
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
         uic.loadUi('OpticalTagging.ui', self)
-        
+        self._connectSignalsSlots()
+    
+    def _connectSignalsSlots(self):
+        self.Start.clicked.connect(self._Start)
+        self.WhichLaser.currentIndexChanged.connect(self._WhichLaser)
+
+    def _Start(self):
+        '''Start the optical tagging'''
+        # toggle the button color
+        if self.Start.isChecked():
+            self.Start.setStyleSheet("background-color : green;")
+        else:
+            self.Start.setStyleSheet("background-color : none")
+
+    def _WhichLaser(self):
+        '''Select the laser to use and disable non-relevant widgets'''
+        laser_name = self.WhichLaser.currentText()
+        if laser_name=='Laser_1':
+            self.Laser_2_power.setEnabled(False)
+            self.label1_16.setEnabled(False)
+        elif laser_name=='Laser_2':
+            self.Laser_1_power.setEnabled(False)
+            self.label1_3.setEnabled(False)
