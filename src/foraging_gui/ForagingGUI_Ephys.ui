@@ -4569,7 +4569,7 @@
      <string>1</string>
     </property>
    </widget>
-   <widget class="QLabel" name="ephys_time_label">
+   <widget class="QLabel" name="ephys_timer_label">
     <property name="geometry">
      <rect>
       <x>840</x>
@@ -4633,7 +4633,7 @@
    <zorder>motor_stage_widget</zorder>
    <zorder>label_66</zorder>
    <zorder>recording_duration</zorder>
-   <zorder>ephys_time_label</zorder>
+   <zorder>ephys_timer_label</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

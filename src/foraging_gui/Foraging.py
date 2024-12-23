@@ -478,7 +478,7 @@ class Window(QMainWindow):
         if len(str(seconds)) == 1:
             seconds = '0{}'.format(seconds)
         if not self.ignore_timer:
-            self.photometry_timer_label.setText('Running ephys: {}:{}'.format(minutes,seconds))
+            self.ephys_timer_label.setText('Running ephys: {}:{}'.format(minutes,seconds))
 
     def _thread_complete_ephys_timer(self):
         '''complete of _Timer'''
