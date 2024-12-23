@@ -3090,10 +3090,10 @@ class OpticalTaggingDialog(QDialog):
         protocol = self.Protocol.currentText()
         for current_laser_name in laser_name_selected:
             if current_laser_name=='Laser_1':
-                target_power = float(self.Laser_1_power.currentText())
+                target_power = float(self.Laser_1_power.text())
                 laser_color = self.Laser_1_color.currentText()
             elif current_laser_name=='Laser_2':
-                target_power = float(self.Laser_2_power.currentText())
+                target_power = float(self.Laser_2_power.text())
                 laser_color = self.Laser_2_color.currentText()
             else:
                 raise ValueError(f"Unknown laser name: {current_laser_name}")
