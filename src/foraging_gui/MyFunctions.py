@@ -13,6 +13,7 @@ from itertools import accumulate
 from serial.tools.list_ports import comports as list_comports
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
+from PyQt5.QtCore import QThread
 
 from foraging_gui.reward_schedules.uncoupled_block import UncoupledBlocks
 
@@ -2051,6 +2052,30 @@ class Worker(QtCore.QRunnable):
         finally:
             self.signals.finished.emit()  # Done
 
+class TimerWorker2(QtCore.QRunnable):
+    """
+    Worker thread that performs the timer counting logic.
+    """
+    def __init__(self, counter):
+        super().__init__()
+        self.counter = counter
+        self.signals = WorkerSignals()
+        self.is_running = True  # Control flag for stopping the worker
+
+    def stop(self):
+        """Stops the worker."""
+        self.is_running = False
+
+    def run(self):
+        """
+        Executes the worker thread logic.
+        """
+        for time in range(self.counter, 0, -1):
+            if not self.is_running:  # Check if the worker should stop
+                break
+            self.signals.progress.emit(time)
+            QThread.msleep(1000)  # 1 second interval
+        self.signals.finished.emit()
 
 
 class TimerWorker(QtCore.QObject):

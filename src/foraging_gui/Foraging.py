@@ -45,7 +45,7 @@ from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,Camer
 from foraging_gui.Dialogs import LaserCalibrationDialog
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
-from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY, EphysRecording
+from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, TimerWorker2, NewScaleSerialY, EphysRecording
 from foraging_gui.stage import Stage
 from foraging_gui.bias_indicator import BiasIndicator
 from foraging_gui.warning_widget import WarningWidget
@@ -459,15 +459,11 @@ class Window(QMainWindow):
         if self.StartEphysRecording.isChecked() and self.OpenEphysRecordingType.currentText()=='Surface finding':
             # record in a specific duration for the surface finding
             # If we already created a workertimer and thread we can reuse them
-            if not hasattr(self, 'workertimer_ephys'):
-                self.workertimer_ephys = TimerWorker()
-                self.workertimer_ephys_thread = QThread()
-                #self.workertimer_ephys.progress.connect(self._update_ephys_timer)
-                self.workertimer_ephys.finished.connect(self._thread_complete_ephys_timer)
-                self.Time_ephys.connect(self.workertimer_ephys._Timer)
-                self.workertimer_ephys.moveToThread(self.workertimer_ephys_thread)
-                self.workertimer_ephys_thread.start()
-            self.workertimer_ephys._Timer(int(np.floor(float(self.recording_duration.text())*60)))
+            recording_duration = int(np.floor(float(self.recording_duration.text()) * 60))
+            self.workertimer_ephys = TimerWorker2(recording_duration)
+            self.workertimer_ephys.signals.finished.connect(self._thread_complete_ephys_timer)
+            self.workertimer_ephys.signals.progress.connect(self._update_ephys_timer)
+            self.threadpool_workertimer.start(self.workertimer_ephys)
 
     def _update_ephys_timer(self, time):
         '''
@@ -475,10 +471,7 @@ class Window(QMainWindow):
         '''
         minutes = int(np.floor(time/60))
         seconds = np.remainder(time,60)
-        if len(str(seconds)) == 1:
-            seconds = '0{}'.format(seconds)
-        if not self.ignore_timer:
-            self.ephys_timer_label.setText('Running ephys: {}:{}'.format(minutes,seconds))
+        self.ephys_timer_label.setText('Running ephys: {}:{}'.format(minutes,seconds))
 
     def _thread_complete_ephys_timer(self):
         if self.StartEphysRecording.isChecked():
@@ -487,7 +480,6 @@ class Window(QMainWindow):
                 QMessageBox.Yes | QMessageBox.No)
             if reply == QMessageBox.Yes:
                 self.StartEphysRecording.setChecked(False)
-                self._toggle_color(self.StartEphysRecording)
                 self._StartEphysRecording()
             else:
                 # Continue the process without blocking further actions
@@ -501,6 +493,13 @@ class Window(QMainWindow):
             self.recording_duration.setEnabled(True)
         else:
             self.recording_duration.setEnabled(False)
+
+    def _stop_ephys_worker(self):
+        """Stops the ephys worker."""
+        if self.workertimer_ephys:
+            self.workertimer_ephys.stop()
+            self.workertimer_ephys = None
+            self.ephys_timer_label.setText('')
 
     def _StartEphysRecording(self):
         '''
@@ -564,6 +563,7 @@ class Window(QMainWindow):
                 self.unsaved_data=True
                 self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
                 EphysControl.stop_open_ephys_recording()
+                self._stop_ephys_worker()
                 QMessageBox.warning(self, '', 'Open Ephys has stopped recording! Please save the data again!')
             except Exception as e:
                 logging.error(traceback.format_exc())
