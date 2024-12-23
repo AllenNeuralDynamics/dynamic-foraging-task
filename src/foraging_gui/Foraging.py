@@ -531,9 +531,9 @@ class Window(QMainWindow):
                     self._toggle_color(self.StartEphysRecording)
                     return
                 EphysControl.start_open_ephys_recording()
-                self._check_ephys_duration()
                 self.openephys_start_recording_time = str(datetime.now())
                 QMessageBox.warning(self, '', f'Open Ephys has started recording!\n Recording type: {self.OpenEphysRecordingType.currentText()}')
+                self._check_ephys_duration()
             except Exception as e:
                 logging.error(traceback.format_exc())
                 self.StartEphysRecording.setChecked(False)
