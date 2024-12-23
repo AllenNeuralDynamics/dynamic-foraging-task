@@ -184,7 +184,7 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="Laser1Color">
+  <widget class="QComboBox" name="Laser_1_color">
    <property name="geometry">
     <rect>
      <x>140</x>
@@ -600,7 +600,7 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="Laser2Color">
+  <widget class="QComboBox" name="Laser_2_color">
    <property name="geometry">
     <rect>
      <x>140</x>
