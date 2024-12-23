@@ -1,9 +1,5 @@
-from pydantic import Field, BaseModel, field_validator
-from typing import Dict
-import logging
+from pydantic import Field, BaseModel
 from enum import Enum
-from typing_extensions import TypedDict
-
 
 RANDOMNESSES = ['Exponential', 'Even']
 
@@ -28,7 +24,6 @@ class Block(BaseModel):
     min: int = Field(default=20, title="Block length (min)")
     max: int = Field(default=60, title="Block length (max)")
     beta: int = Field(default=20, title="Block length (beta)")
-    min_reward: int = Field(default=1, title="Minimal rewards in a block to switch")
 
 class Delay(BaseModel):
     min_s: float = Field(default=1, title="Delay period (min) ")
@@ -72,23 +67,45 @@ class Warmup(BaseModel):
     min_finish_ratio: float = Field(default=0.8, title="Warmup finish criteria: minimal finish ratio")
     window_size: int = Field(default=20, title="Warmup finish criteria: window size to compute the bias and ratio")
 
-class Coupled(BaseModel):
+class BaseTask(BaseModel):
     """
-    Training schema for the dynamic foraging
+    Schema for base task for dynamic foraging
     """
 
-    reward_probability: RewardProbability = Field(default=RewardProbability().dict())
     randomness: str = Field('Exponential', title="Randomness mode")  # Exponential by default
-    block: Block = Field(default=Block().dict())
-    delay: Delay = Field(default=Delay().dict())
-    auto_water: AutoWater = Field(default=AutoWater().dict())
-    ITI: ITI_Parameters = Field(default=ITI_Parameters().dict())
+    delay: Delay = Field(default=Delay())
+    auto_water: AutoWater = Field(default=AutoWater())
+    ITI: ITI_Parameters = Field(default=ITI_Parameters())
     response_time_s: float = Field(default=1, title="Response time")
-    reward_consume_time_s: float = Field(default=3, title="Reward consume time", description="Time of the no-lick period before trial end")
-    auto_block: AutoBlock = Field(default=AutoBlock().dict())
-    reward_size: RewardSize = Field(default=RewardSize().dict())
-    warmup: Warmup = Field(default=Warmup().dict())
-    # UncoupledReward: str = Field("0.1,0.3,0.7", title="Uncoupled reward")  # For uncoupled tasks only
+    reward_consume_time_s: float = Field(default=3, title="Reward consume time",
+                                         description="Time of the no-lick period before trial end")
+    reward_size: RewardSize = Field(default=RewardSize())
+    warmup: Warmup = Field(default=Warmup())
+
+class Coupled(BaseTask):
+    """
+    Schema for couple task for dynamic foraging
+    """
+
+    reward_probability: RewardProbability = Field(default=RewardProbability())
+    block: Block = Field(default=Block())
+    min_reward: int = Field(default=1, title="Minimal rewards in a block to switch")
+    auto_block: AutoBlock = Field(default=AutoBlock())
+
+class Uncoupled(BaseTask):
+    """
+    Schema for uncouple task for dynamic foraging
+    """
+
+    uncoupled_reward: str = Field(default="0.1,0.3,0.7", title="Uncoupled reward")
+
+class RewardN(Coupled):
+    """
+    Schema for uncouple task for dynamic foraging
+    """
+
+    reward_n: int = Field(default=60, title="Uncoupled reward")
+
 
 
 
