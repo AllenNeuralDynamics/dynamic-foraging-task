@@ -321,6 +321,7 @@ class Window(QMainWindow):
         self.action_About.triggered.connect(self._about)
         self.action_Camera.triggered.connect(self._Camera)
         self.actionMeta_Data.triggered.connect(self._Metadata)
+        self.actionOptical_Tagging.triggered.connect(self._OpticalTagging)
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
         self.actionLicks_sta.triggered.connect(self._LickSta)
         self.actionTime_distribution.triggered.connect(self._TimeDistribution)
