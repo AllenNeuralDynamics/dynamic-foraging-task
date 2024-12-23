@@ -462,7 +462,7 @@ class Window(QMainWindow):
             if not hasattr(self, 'workertimer_ephys'):
                 self.workertimer_ephys = TimerWorker()
                 self.workertimer_ephys_thread = QThread()
-                self.workertimer_ephys.progress.connect(self._update_ephys_timer)
+                #self.workertimer_ephys.progress.connect(self._update_ephys_timer)
                 self.workertimer_ephys.finished.connect(self._thread_complete_ephys_timer)
                 self.Time_ephys.connect(self.workertimer_ephys._Timer)
                 self.workertimer_ephys.moveToThread(self.workertimer_ephys_thread)
@@ -481,14 +481,17 @@ class Window(QMainWindow):
             self.ephys_timer_label.setText('Running ephys: {}:{}'.format(minutes,seconds))
 
     def _thread_complete_ephys_timer(self):
-        '''complete of _Timer'''
         if self.StartEphysRecording.isChecked():
-            # ask user to stop the ephys recording
-            reply = QMessageBox.question(self, '', 'The ephys recording has reached the duration. Do you want to stop the recording?', QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+            reply = QMessageBox.question(self, '', 
+                'The ephys recording has reached the duration. Do you want to stop the recording?',
+                QMessageBox.Yes | QMessageBox.No)
             if reply == QMessageBox.Yes:
                 self.StartEphysRecording.setChecked(False)
                 self._toggle_color(self.StartEphysRecording)
                 self._StartEphysRecording()
+            else:
+                # Continue the process without blocking further actions
+                pass
 
     def _disable_ephys_duration(self):
         '''
