@@ -5012,6 +5012,9 @@
    </property>
   </action>
   <action name="actionOptical_Tagging">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>resources/OpticalTagging.jpg</normaloff>resources/OpticalTagging.jpg</iconset>
