@@ -184,6 +184,7 @@ class Window(QMainWindow):
         self.OpenLaserCalibration=0
         self.OpenCamera=0
         self.OpenMetadata=0
+        self.OpenOpticalTagging=0
         self.NewTrialRewardOrder=0
         self.LickSta=0
         self.LickSta_ToInitializeVisual=1
@@ -205,6 +206,7 @@ class Window(QMainWindow):
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
         self._Camera()
+        self._OpticalTagging()
         self._InitializeMotorStage()
         self._load_stage()
         self._Metadata()
@@ -2337,6 +2339,16 @@ class Window(QMainWindow):
             self.Camera_dialog.show()
         else:
             self.Camera_dialog.hide()
+
+    def _OpticalTagging(self):
+        '''Open the optical tagging dialog'''
+        if self.OpenOpticalTagging==0:
+            self.OpticalTagging_dialog = OpticalTaggingDialog(MainWindow=self)
+            self.OpenOpticalTagging=1
+        if self.actionOptical_Tagging.isChecked()==True:
+            self.OpticalTagging_dialog.show()
+        else:
+            self.OpticalTagging_dialog.hide()
 
     def _Metadata(self):
         '''Open the metadata dialog'''
