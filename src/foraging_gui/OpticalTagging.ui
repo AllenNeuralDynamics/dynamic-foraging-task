@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>265</width>
-    <height>474</height>
+    <width>275</width>
+    <height>530</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -402,9 +402,6 @@
    <property name="text">
     <string>Start</string>
    </property>
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
   </widget>
   <widget class="QLabel" name="label1_17">
    <property name="enabled">
@@ -413,7 +410,7 @@
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>280</y>
+     <y>400</y>
      <width>76</width>
      <height>20</height>
     </rect>
@@ -438,10 +435,169 @@
    <property name="geometry">
     <rect>
      <x>140</x>
-     <y>280</y>
+     <y>400</y>
      <width>71</width>
      <height>22</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label1_18">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>15</x>
+     <y>300</y>
+     <width>121</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>1000</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>duration each cycle=</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="Duration_each_cycle">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>300</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>1000</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>1</string>
+   </property>
+   <property name="readOnly">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label1_19">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>15</x>
+     <y>330</y>
+     <width>121</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>1000</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>interval between cycles=</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="Interval_between_cycles">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>330</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>1000</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>0.5</string>
+   </property>
+   <property name="readOnly">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="Cycles_each_power">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>360</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>1000</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>100</string>
+   </property>
+   <property name="readOnly">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label1_20">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>5</x>
+     <y>360</y>
+     <width>131</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>1000</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>cycles each laser power=</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
  </widget>
