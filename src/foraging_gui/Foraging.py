@@ -3766,8 +3766,8 @@ class Window(QMainWindow):
             self.Metadata_dialog.project_info = project_info
             self.Metadata_dialog.ProjectName.addItems([project_name])
         return project_name
-    def _empty_old_data(self):
-        '''empty the data from the previous session'''
+    def _empty_initialize_fields(self):
+        '''empty fields from the previous session'''
         self.open_ephys=[]
         self.ManualWaterVolume=[0,0]
         # clear camera start and end time
@@ -4068,8 +4068,8 @@ class Window(QMainWindow):
             self._StopCurrentSession()
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
-            # empty data
-            self._empty_old_data()
+            # empty fields from the previous session
+            self._empty_initialize_fields()
             # start a new logging
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
