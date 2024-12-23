@@ -71,8 +71,8 @@
      <rect>
       <x>620</x>
       <y>20</y>
-      <width>152</width>
-      <height>20</height>
+      <width>222</width>
+      <height>27</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -1463,9 +1463,9 @@
      <property name="value">
       <double>0.030000000000000</double>
      </property>
-     <property name="disabled">
-     <bool>true</bool>
-    </property>
+     <property name="disabled" stdset="0">
+      <bool>true</bool>
+     </property>
     </widget>
     <widget class="QDoubleSpinBox" name="GiveWaterR">
      <property name="geometry">
@@ -1491,9 +1491,9 @@
      <property name="value">
       <double>0.030000000000000</double>
      </property>
-     <property name="disabled">
-     <bool>true</bool>
-    </property>
+     <property name="disabled" stdset="0">
+      <bool>true</bool>
+     </property>
     </widget>
     <widget class="QLabel" name="label_56">
      <property name="geometry">
@@ -1884,9 +1884,9 @@
      <property name="value">
       <double>3.000000000000000</double>
      </property>
-     <property name="disabled">
-     <bool>true</bool>
-    </property>
+     <property name="disabled" stdset="0">
+      <bool>true</bool>
+     </property>
     </widget>
     <widget class="QDoubleSpinBox" name="GiveWaterR_volume">
      <property name="geometry">
@@ -1912,9 +1912,9 @@
      <property name="value">
       <double>3.000000000000000</double>
      </property>
-     <property name="disabled">
-     <bool>true</bool>
-    </property>
+     <property name="disabled" stdset="0">
+      <bool>true</bool>
+     </property>
     </widget>
     <widget class="QDoubleSpinBox" name="RightValue_volume">
      <property name="geometry">
@@ -2176,7 +2176,7 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
-     <widget class="QLineEdit" name="min_time">
+    <widget class="QLineEdit" name="min_time">
      <property name="geometry">
       <rect>
        <x>863</x>
@@ -4569,7 +4569,7 @@
      <x>0</x>
      <y>0</y>
      <width>1951</width>
-     <height>21</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -4765,6 +4765,7 @@
    </attribute>
    <addaction name="action_Optogenetics"/>
    <addaction name="action_Camera"/>
+   <addaction name="actionOptical_Tagging"/>
   </widget>
   <action name="action_Calibration">
    <property name="checkable">
@@ -5007,6 +5008,15 @@
   <action name="actionOpen_video_folder">
    <property name="text">
     <string>Open video folder</string>
+   </property>
+  </action>
+  <action name="actionOptical_Tagging">
+   <property name="icon">
+    <iconset>
+     <normaloff>resources/pngtree-letter-t-logo-png-png-image_6100844.jpg</normaloff>resources/pngtree-letter-t-logo-png-png-image_6100844.jpg</iconset>
+   </property>
+   <property name="text">
+    <string>Optical Tagging</string>
    </property>
   </action>
  </widget>
