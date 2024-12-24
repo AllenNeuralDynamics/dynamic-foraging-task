@@ -3069,7 +3069,7 @@ class OpticalTaggingDialog(QDialog):
             laser_color = self.optical_tagging_par['laser_color_sampled_all'][i]
         
             # produce the waveforms
-            self._produce_waveforms(protocol=protocol, frequency=frequency, pulse_duration=pulse_duration, laser_name=laser_name, target_power=target_power, laser_color=laser_color)
+            my_wave=self._produce_waveforms(protocol=protocol, frequency=frequency, pulse_duration=pulse_duration, laser_name=laser_name, target_power=target_power, laser_color=laser_color)
             # initiate the laser
 
             # receiving the timestamps of laser start
@@ -3204,7 +3204,7 @@ class OpticalTaggingDialog(QDialog):
             logger.warning(f"Unknown protocol: {protocol}")
             return
         sample_frequency=5000 # should be replaced
-        duration=self.Duration_each_cycle.text()
+        duration=float(self.Duration_each_cycle.text()) # should be replaced
         PointsEachPulse=int(sample_frequency*pulse_duration/1000)
         PulseIntervalPoints=int(1/frequency*sample_frequency-PointsEachPulse)
         if PulseIntervalPoints<0:
