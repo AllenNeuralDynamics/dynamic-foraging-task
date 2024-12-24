@@ -3,27 +3,28 @@ from PyQt5.QtWidgets import QWidget, QComboBox, QFrame, QStackedWidget, QVBoxLay
 from task_schemas import Coupled, Uncoupled, RewardN
 from pydantic import BaseModel
 from typing import Literal
-from pydantic_core import PydanticUndefined
 from PyQt5.QtCore import pyqtSignal
 
-def add_seperator_widget(widget: BaseDeviceWidget, orientation: Literal['H', 'V'] = 'H') -> BaseDeviceWidget:
+def add_border(widget: BaseDeviceWidget, orientation: Literal['H', 'V', 'VH', 'HV'] = 'VH') \
+        -> BaseDeviceWidget:
     """
-    Add line dividing property widgets in BaseDeviceWidget
+    Add border dividing property widgets in BaseDeviceWidget
     :param widget: widget to add dividers
-    :param orientation: orientation to order widgets. H for horizontal, V for vertical
+    :param orientation: orientation to order widgets. H for horizontal, V for vertical, HV or VH for combo
     """
 
     widgets = []
     for input in widget.property_widgets.values():
-        line = QFrame()
-        line.setStyleSheet('QFrame {border: 2px solid grey;}')
-        line.setFrameShape(QFrame.VLine)
-        widgets.append(input)
-        widgets.append(line)
-        widget.layout().addWidget(input)
-        widget.layout().addWidget(line)
-    #widget.setLayout(create_widget(orientation, *widgets).layout())
+        frame = QFrame()
+        layout = QVBoxLayout(frame)
+        layout.addWidget(input)
+        #frame.setLayout(layout)
+        frame.setStyleSheet(f".QFrame {{ border:1px solid grey }} ")
+        widgets.append(frame)
+    widget.setCentralWidget(create_widget(orientation, *widgets))
+
     return widget
+
 class TaskWidget(QWidget):
     """Widget to edit task"""
 
@@ -44,7 +45,7 @@ class TaskWidget(QWidget):
         for schema in task_types.values():
             widget = BaseDeviceWidget(schema, schema().dict())
             widget.ValueChangedInside.connect(self.taskValueChanged.emit)  # emit when a widget is changed
-            self.stacked_task_widget.addWidget(add_seperator_widget(widget))
+            self.stacked_task_widget.addWidget(add_border(widget))
 
         self.task_combobox.currentIndexChanged.connect(lambda i: self.stacked_task_widget.setCurrentIndex(i))
         self.task_combobox.currentTextChanged.connect(self.taskTypeChanged.emit)
@@ -62,10 +63,9 @@ if __name__ == "__main__":
         :param name: name of attribute and widget"""
 
         name_lst = name.split('.')
-        print(name_lst[0], widget.__dict__, widget)
         value = getattr(widget, name_lst[0])
-        # setattr(behavior_task_logic_model,name_lst[0], value)
-        print(behavior_task_logic_model)
+        setattr(behavior_task_logic_model.task_parameters, name_lst[0], value)
+        print(behavior_task_logic_model.task_parameters)
 
     app = QApplication(sys.argv)
     task_widget = TaskWidget(task_types={'Coupled Baiting': Coupled,
@@ -83,9 +83,5 @@ if __name__ == "__main__":
         task_parameters=Coupled().dict(),
         version='1.6.11'
     )
-
-    # base = BaseDeviceWidget(DynamicForagingParas.model_fields,
-    #                         {k: v.default if v.default != PydanticUndefined else '' for k, v in DynamicForagingParas.model_fields.items()})
-    # base.show()
 
     sys.exit(app.exec_())
