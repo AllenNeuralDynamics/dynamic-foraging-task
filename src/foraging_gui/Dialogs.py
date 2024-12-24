@@ -3042,7 +3042,7 @@ class OpticalTaggingDialog(QDialog):
         self._connectSignalsSlots()
         self.MainWindow = MainWindow
         self.optical_tagging_par={}
-        
+
     def _connectSignalsSlots(self):
         self.Start.clicked.connect(self._Start)
         self.WhichLaser.currentIndexChanged.connect(self._WhichLaser)
@@ -3079,7 +3079,7 @@ class OpticalTaggingDialog(QDialog):
         Additional parameters:
         - **Protocol**: Currently supports only `Pulse`.
         - **Frequency (Hz)**: Applied to both lasers during the cycle.
-        - **Pulse Duration (s)**: Applied to both lasers during the cycle.
+        - **Pulse Duration (ms)**: Applied to both lasers during the cycle.
         """
         # get the protocol
         protocol = self.Protocol.currentText()
