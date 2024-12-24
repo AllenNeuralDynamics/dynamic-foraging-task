@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from typing import Literal
 from PyQt5.QtCore import pyqtSignal
 
-def add_border(widget: BaseDeviceWidget, orientation: Literal['H', 'V', 'VH', 'HV'] = 'VH') \
+def add_border(widget: BaseDeviceWidget, orientation: Literal['H', 'V', 'VH', 'HV'] = 'HV') \
         -> BaseDeviceWidget:
     """
     Add border dividing property widgets in BaseDeviceWidget
@@ -14,23 +14,29 @@ def add_border(widget: BaseDeviceWidget, orientation: Literal['H', 'V', 'VH', 'H
     """
 
     widgets = []
-    for input in widget.property_widgets.values():
+    for prop_widget in widget.property_widgets.values():
         frame = QFrame()
         layout = QVBoxLayout(frame)
-        layout.addWidget(input)
-        #frame.setLayout(layout)
+        layout.addWidget(prop_widget)
         frame.setStyleSheet(f".QFrame {{ border:1px solid grey }} ")
         widgets.append(frame)
+    if len(widgets) % 2 != 0 and orientation in ['VH', 'HV']: # add dummy widget so all rows/colums can be created
+        widgets.append(QWidget())
     widget.setCentralWidget(create_widget(orientation, *widgets))
 
     return widget
+
 
 class TaskWidget(QWidget):
     """Widget to edit task"""
 
     taskTypeChanged = pyqtSignal(str)
     taskValueChanged = pyqtSignal(str)
+
     def __init__(self, task_types: dict[str, BaseModel]):
+        """
+        :param task_types: dictionary where the keys are the names of the tasks and values are the schemas
+        """
         super().__init__()
 
         self.setLayout(QVBoxLayout())
@@ -56,7 +62,10 @@ if __name__ == "__main__":
     import sys
     from aind_behavior_services.task_logic import AindBehaviorTaskLogicModel
     from aind_auto_train.schema.task import DynamicForagingParas
+    import traceback
+    import logging
 
+    behavior_task_logic_model = None
 
     def widget_property_changed(name, widget):
         """Slot to signal when widget has been changed
@@ -67,16 +76,36 @@ if __name__ == "__main__":
         setattr(behavior_task_logic_model.task_parameters, name_lst[0], value)
         print(behavior_task_logic_model.task_parameters)
 
+    def widget_task_change(name, ):
+        """Slot to signal when task type has been changed
+        :param name: name of task
+        """
+
+        behavior_task_logic_model = AindBehaviorTaskLogicModel(
+        name=name,
+        task_parameters=task_types[name]().dict(),
+        version='1.6.11')
+        print(behavior_task_logic_model)
+
+    def error_handler(etype, value, tb):
+        error_msg = ''.join(traceback.format_exception(etype, value, tb))
+        print(error_msg)
+
+    sys.excepthook = error_handler  # redirect std error
     app = QApplication(sys.argv)
-    task_widget = TaskWidget(task_types={'Coupled Baiting': Coupled,
-                                  'Coupled Without Baiting': Coupled,
-                                  'Uncoupled': Uncoupled,
-                                  'Uncoupled Without Baiting': Uncoupled,
-                                  'RewardN': RewardN})
+    task_types = {'Coupled Baiting': Coupled,
+                  'Coupled Without Baiting': Coupled,
+                  'Uncoupled': Uncoupled,
+                  'Uncoupled Without Baiting': Uncoupled,
+                  'RewardN': RewardN}
+    task_widget = TaskWidget(task_types=task_types)
 
     task_widget.show()
-    task_widget.taskTypeChanged.connect(lambda task: print(task))
-    task_widget.taskValueChanged.connect(lambda task: widget_property_changed(task, task_widget.stacked_task_widget.currentWidget()))
+
+    task_widget.taskValueChanged.connect(
+        lambda task: widget_property_changed(task, task_widget.stacked_task_widget.currentWidget()))
+    task_widget.taskTypeChanged.connect(widget_task_change)
+
 
     behavior_task_logic_model = AindBehaviorTaskLogicModel(
         name=task_widget.task_combobox.currentText(),
