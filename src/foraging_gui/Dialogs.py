@@ -3058,6 +3058,10 @@ class OpticalTaggingDialog(QDialog):
         # generate random conditions including lasers, laser power, laser color, and protocol
         self._generate_random_conditions()
 
+        self.optical_tagging_par['success_tag'] = np.zeros(len(self.optical_tagging_par['protocol_sampled_all']))
+
+        # send the trigger source
+        self.MainWindow.Channel.TriggerSource('/Dev1/PFI0')
         # iterate each condition
         for i in range(len(self.optical_tagging_par['protocol_sampled_all'])):
             # get the current parameters
@@ -3078,13 +3082,41 @@ class OpticalTaggingDialog(QDialog):
                                             laser_color=laser_color, 
                                             duration_each_cycle=duration_each_cycle
                                         )
+            my_wave_control=self._produce_waveforms(protocol=protocol,
+                                                    frequency=frequency,
+                                                    pulse_duration=pulse_duration,
+                                                    laser_name=laser_name,
+                                                    target_power=0,
+                                                    laser_color=laser_color,
+                                                    duration_each_cycle=duration_each_cycle
+                                                )
+            if my_wave is None:
+                continue
+            # send the waveform and size to the bonsai
+            if laser_name=='Laser_1':
+                getattr(self.MainWindow.Channel, 'Location1_Size')(int(my_wave.size))
+                getattr(self.MainWindow.Channel4, 'WaveForm1_1')(str(my_wave.tolist())[1:-1])
+                getattr(self.MainWindow.Channel, 'Location2_Size')(int(my_wave_control.size))
+                getattr(self.MainWindow.Channel4, 'WaveForm1_2')(str(my_wave_control.tolist())[1:-1])
+            elif laser_name=='Laser_2':
+                getattr(self.MainWindow.Channel, 'Location2_Size')(int(my_wave.size))
+                getattr(self.MainWindow.Channel4, 'WaveForm1_2')(str(my_wave.tolist())[1:-1])
+                getattr(self.MainWindow.Channel, 'Location1_Size')(int(my_wave_control.size))
+                getattr(self.MainWindow.Channel4, 'WaveForm1_1')(str(my_wave_control.tolist())[1:-1])
+            FinishOfWaveForm=self.MainWindow.Channel4.receive() 
             # initiate the laser
-
+            self._initiate_laser()
             # receiving the timestamps of laser start
 
             # save the timestamps
 
             # save parameters
+    
+    def _initiate_laser(self):
+        '''Initiate laser in bonsai'''
+        # start generating waveform in bonsai
+        self.MainWindow.Channel.OptogeneticsCalibration(int(1))
+        self.MainWindow.Channel.receive()
 
     def _generate_random_conditions(self):
         """
