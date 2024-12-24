@@ -3051,6 +3051,8 @@ class OpticalTaggingDialog(QDialog):
             self.Start.setStyleSheet("background-color : green;")
         else:
             self.Start.setStyleSheet("background-color : none")
+        # generate random conditions including lasers, laser power, laser color, and protocol
+        self._generate_random_conditions()
         # produce the waveforms
         self._produce_waveforms()
         # initiate the laser
@@ -3060,6 +3062,57 @@ class OpticalTaggingDialog(QDialog):
         # save the timestamps
 
         # save parameters
+
+    def _generate_random_conditions(self):
+        """
+        Generate random conditions for the optical tagging process. Each condition corresponds to one cycle, with parameters randomly selected for each cycle. 
+
+        The parameters are chosen as follows:
+        - **Lasers**: One of the following is selected: `Laser_1` or `Laser_2`.
+        - **Laser Power**: If `Laser_1` is selected, `Laser_1_power` is used. If `Laser_2` is selected, `Laser_2_power` is used.
+        - **Laser Color**: If `Laser_1` is selected, `Laser_1_color` is used. If `Laser_2` is selected, `Laser_2_color` is used.
+        *Note: `Laser`, `Laser Power`, and `Laser Color` are selected together as a group.*
+
+        Additional parameters:
+        - **Protocol**: Currently supports only `Pulse`.
+        - **Frequency (Hz)**: Applied to both lasers during the cycle.
+        - **Pulse Duration (s)**: Applied to both lasers during the cycle.
+        """
+        # get the number of cycles
+        number_of_cycles = int(self.Cycles_each_power.text())
+        # get the frequency
+        frequency = float(self.Frequency.text())
+        # get the pulse duration
+        pulse_duration = float(self.Pulse_duration.text())
+        # get the protocol
+        protocol = self.Protocol.currentText()
+        if protocol!='Pulse':
+            raise ValueError(f"Unknown protocol: {protocol}")
+        # get the laser name
+        if self.WhichLaser.currentText()=="Both":
+            laser_name = ['Laser_1','Laser_2']
+        else:
+            laser_name = [self.WhichLaser.currentText()]
+
+        
+        # get the amplitude
+        for current_laser_name in laser_name:
+            if current_laser_name=='Laser_1':
+                target_power = float(self.Laser_1_power.text())
+                laser_color = self.Laser_1_color.currentText()
+            elif current_laser_name=='Laser_2':
+                target_power = float(self.Laser_2_power.text())
+                laser_color = self.Laser_2_color.currentText()
+            else:
+                raise ValueError(f"Unknown laser name: {current_laser_name}")
+            if protocol!='Pulse':
+                raise ValueError(f"Unknown protocol: {protocol}")
+            else:
+                self._get_lasers_amplitude(target_power,laser_color,protocol)
+            # get the waveform
+            
+            # save the waveform
+
     def _WhichLaser(self):
         '''Select the laser to use and disable non-relevant widgets'''
         laser_name = self.WhichLaser.currentText()
@@ -3106,7 +3159,6 @@ class OpticalTaggingDialog(QDialog):
             # save the waveform
             
         
-
     def _get_lasers_amplitude(self,target_power:float,laser_color:str,protocol:str)->float:
         '''Get the amplitude of the laser based on the calibraion results
         Args:
