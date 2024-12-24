@@ -3179,13 +3179,56 @@ class OpticalTaggingDialog(QDialog):
     
     def _produce_waveforms(self,protocol:str,frequency:int,pulse_duration:float,laser_name:str,target_power:float,laser_color:str):
         '''Produce the waveforms for the optical tagging'''
-        input_voltage=self._get_lasers_amplitude(target_power=target_power,laser_color=laser_color,protocol=protocol,laser_name=laser_name)
+        # get the amplitude of the laser
+        input_voltage=self._get_laser_amplitude(target_power=target_power,laser_color=laser_color,protocol=protocol,laser_name=laser_name)
+        if input_voltage is None:
+            return
+        
+        # produce the waveform
+        my_wave=self._get_laser_waveform(protocol=protocol,frequency=frequency,pulse_duration=pulse_duration,input_voltage=input_voltage)
+        
+        return my_wave
+    
+    def _get_laser_waveform(self,protocol:str,frequency:int,pulse_duration:float,input_voltage:float):
+        '''Get the waveform for the laser
+        Args:
+            protocol: The protocol to use (only 'Pulse' is supported).
+            frequency: The frequency of the pulse.
+            pulse_duration: The duration of the pulse.
+            input_voltage: The input voltage of the laser.
+        Returns:
+            np.array: The waveform of the laser.
+        '''
         # get the waveform
-        
-        
-            
-        
-    def _get_lasers_amplitude(self,target_power:float,laser_color:str,protocol:str,laser_name:str)->float:
+        if protocol!='Pulse':
+            logger.warning(f"Unknown protocol: {protocol}")
+            return
+        sample_frequency=5000 # should be replaced
+        duration=self.Duration_each_cycle.text()
+        PointsEachPulse=int(sample_frequency*pulse_duration/1000)
+        PulseIntervalPoints=int(1/frequency*sample_frequency-PointsEachPulse)
+        if PulseIntervalPoints<0:
+            logging.warning('Pulse frequency and pulse duration are not compatible!',
+                            extra={'tags': [self.MainWindow.warning_log_tag]})
+        TotalPoints=int(sample_frequency*duration)
+        PulseNumber=np.floor(duration*frequency) 
+        EachPulse=input_voltage*np.ones(PointsEachPulse)
+        PulseInterval=np.zeros(PulseIntervalPoints)
+        WaveFormEachCycle=np.concatenate((EachPulse, PulseInterval), axis=0)
+        my_wave=np.empty(0)
+        # pulse number should be greater than 0
+        if PulseNumber>1:
+            for i in range(int(PulseNumber-1)):
+                my_wave=np.concatenate((my_wave, WaveFormEachCycle), axis=0)
+        else:
+            logging.warning('Pulse number is less than 1!', extra={'tags': [self.MainWindow.warning_log_tag]})
+            return
+        my_wave=np.concatenate((my_wave, EachPulse), axis=0)
+        my_wave=np.concatenate((my_wave, np.zeros(TotalPoints-np.shape(my_wave)[0])), axis=0)
+        my_wave=np.append(my_wave,[0,0])
+        return my_wave
+
+    def _get_laser_amplitude(self,target_power:float,laser_color:str,protocol:str,laser_name:str)->float:
         '''Get the amplitude of the laser based on the calibraion results
         Args:
             target_power: The target power of the laser.
@@ -3210,7 +3253,7 @@ class OpticalTaggingDialog(QDialog):
         slope,intercept=fit_calibration_results(calibration_results)
         # Find the corresponding input voltage for a target laser power
         input_voltage_for_target = (target_power - intercept) / slope
-        return input_voltage_for_target
+        return round(input_voltage_for_target, 2)
     
 def fit_calibration_results(calibration_results: list) -> Tuple[float, float]:
     """
