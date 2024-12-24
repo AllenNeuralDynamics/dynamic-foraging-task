@@ -460,7 +460,7 @@
     </size>
    </property>
    <property name="text">
-    <string>duration each cycle=</string>
+    <string>duration each cycle (s)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
