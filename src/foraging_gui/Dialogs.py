@@ -3207,29 +3207,37 @@ class OpticalTaggingDialog(QDialog):
                 logger.info(f"No calibration results found for {laser_color} and {laser_name}")
                 return
         # fit the calibration results with a linear model
-        slope,intercept=self._fit_calibration_results(calibration_results)
+        slope,intercept=fit_calibration_results(calibration_results)
         # Find the corresponding input voltage for a target laser power
         input_voltage_for_target = (target_power - intercept) / slope
         return input_voltage_for_target
     
-    def _fit_calibration_results(self,calibration_results:dict)->Tuple[float, float]:
-        '''Fit the calibration results with a linear model
-        Args:
-            calibration_results: The calibration results.
-        '''
-        # Separate input voltage and laser power
-        input_voltage = calibration_results[:, 0].reshape(-1, 1)  # X (features)
-        laser_power = calibration_results[:, 1]  # y (target)
+def fit_calibration_results(calibration_results: list) -> Tuple[float, float]:
+    """
+    Fit the calibration results with a linear model.
 
-        # Fit the linear model
-        model = LinearRegression()
-        model.fit(input_voltage, laser_power)
+    Args:
+        calibration_results: A list of calibration results where each entry is [input_voltage, laser_power].
 
-        # Display the model coefficients
-        slope = model.coef_[0]
-        intercept = model.intercept_
+    Returns:
+        A tuple (slope, intercept) of the fitted linear model.
+    """
+    # Convert to numpy array for easier manipulation
+    calibration_results = np.array(calibration_results)
 
-        return slope,intercept
+    # Separate input voltage and laser power
+    input_voltage = calibration_results[:, 0].reshape(-1, 1)  # X (features)
+    laser_power = calibration_results[:, 1]  # y (target)
+
+    # Fit the linear model
+    model = LinearRegression()
+    model.fit(input_voltage, laser_power)
+
+    # Extract model coefficients
+    slope = model.coef_[0]
+    intercept = model.intercept_
+
+    return slope, intercept
             
 def find_latest_calibration_date(calibration:list,laser_color:str)->str:
     """
