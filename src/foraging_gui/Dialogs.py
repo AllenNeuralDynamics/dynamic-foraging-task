@@ -3180,11 +3180,9 @@ class OpticalTaggingDialog(QDialog):
     def _produce_waveforms(self,protocol:str,frequency:int,pulse_duration:float,laser_name:str,target_power:float,laser_color:str):
         '''Produce the waveforms for the optical tagging'''
         input_voltage=self._get_lasers_amplitude(target_power=target_power,laser_color=laser_color,protocol=protocol,laser_name=laser_name)
-
-                
         # get the waveform
         
-        # save the waveform
+        
             
         
     def _get_lasers_amplitude(self,target_power:float,laser_color:str,protocol:str,laser_name:str)->float:
@@ -3214,7 +3212,7 @@ class OpticalTaggingDialog(QDialog):
         input_voltage_for_target = (target_power - intercept) / slope
         return input_voltage_for_target
     
-    def _fit_calibration_results(self,calibration_results:dict,target_power:float)->Tuple[float, float]:
+    def _fit_calibration_results(self,calibration_results:dict)->Tuple[float, float]:
         '''Fit the calibration results with a linear model
         Args:
             calibration_results: The calibration results.
