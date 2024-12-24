@@ -3067,9 +3067,17 @@ class OpticalTaggingDialog(QDialog):
             laser_name = self.optical_tagging_par['laser_name_sampled_all'][i]
             target_power = self.optical_tagging_par['target_power_sampled_all'][i]
             laser_color = self.optical_tagging_par['laser_color_sampled_all'][i]
+            duration_each_cycle = self.optical_tagging_par['duration_each_cycle_sampled_all'][i]
         
             # produce the waveforms
-            my_wave=self._produce_waveforms(protocol=protocol, frequency=frequency, pulse_duration=pulse_duration, laser_name=laser_name, target_power=target_power, laser_color=laser_color)
+            my_wave=self._produce_waveforms(protocol=protocol, 
+                                            frequency=frequency, 
+                                            pulse_duration=pulse_duration, 
+                                            laser_name=laser_name, 
+                                            target_power=target_power, 
+                                            laser_color=laser_color, 
+                                            duration_each_cycle=duration_each_cycle
+                                        )
             # initiate the laser
 
             # receiving the timestamps of laser start
@@ -3124,14 +3132,15 @@ class OpticalTaggingDialog(QDialog):
             # give an popup error window if the laser is not selected
             QMessageBox.critical(self.MainWindow, "Error", "Please select the laser to use.")
             return
-            
+        duration_each_cycle_list = extract_numbers_from_string(self.Duration_each_cycle.text())
         # Generate combinations for each laser
-        protocol_sampled, frequency_sampled, pulse_duration_sampled, laser_name_sampled, target_power_sampled, laser_color_sampled = zip(*[
-            (protocol, frequency, pulse_duration, laser_name, target_power, laser_config[laser_name][1].currentText())
+        protocol_sampled, frequency_sampled, pulse_duration_sampled, laser_name_sampled, target_power_sampled, laser_color_sampled,duration_each_cycle_sampled = zip(*[
+            (protocol, frequency, pulse_duration, laser_name, target_power, laser_config[laser_name][1].currentText(),duration_each_cycle)
             for frequency in frequency_list
             for pulse_duration in pulse_duration_list
             for laser_name, (power_field, _) in laser_config.items()
             for target_power in extract_numbers_from_string(power_field.text())
+            for duration_each_cycle in duration_each_cycle_list
         ])
 
         self.optical_tagging_par['protocol_sampled_all'] = []
@@ -3140,6 +3149,7 @@ class OpticalTaggingDialog(QDialog):
         self.optical_tagging_par['laser_name_sampled_all'] = []
         self.optical_tagging_par['target_power_sampled_all'] = []
         self.optical_tagging_par['laser_color_sampled_all'] = []
+        self.optical_tagging_par['duration_each_cycle_sampled_all'] = []
         for _ in range(number_of_cycles):
             # Generate a random index to sample conditions
             random_indices = random.sample(range(len(protocol_sampled)), len(protocol_sampled))
@@ -3157,6 +3167,7 @@ class OpticalTaggingDialog(QDialog):
             self.optical_tagging_par['laser_name_sampled_all'].extend(laser_name_sampled_now)
             self.optical_tagging_par['target_power_sampled_all'].extend(target_power_sampled_now)
             self.optical_tagging_par['laser_color_sampled_all'].extend(laser_color_sampled_now)
+            self.optical_tagging_par['duration_each_cycle_sampled_all'].extend(duration_each_cycle_sampled)
 
     def _WhichLaser(self):
         '''Select the laser to use and disable non-relevant widgets'''
@@ -3177,19 +3188,28 @@ class OpticalTaggingDialog(QDialog):
             self.label1_3.setEnabled(True)
             self.label1_16.setEnabled(True)
     
-    def _produce_waveforms(self,protocol:str,frequency:int,pulse_duration:float,laser_name:str,target_power:float,laser_color:str):
+    def _produce_waveforms(self,protocol:str,frequency:int,pulse_duration:float,laser_name:str,target_power:float,laser_color:str,duration_each_cycle:float):
         '''Produce the waveforms for the optical tagging'''
         # get the amplitude of the laser
-        input_voltage=self._get_laser_amplitude(target_power=target_power,laser_color=laser_color,protocol=protocol,laser_name=laser_name)
+        input_voltage=self._get_laser_amplitude(target_power=target_power,
+                                                laser_color=laser_color,
+                                                protocol=protocol,
+                                                laser_name=laser_name
+                                            )
         if input_voltage is None:
             return
         
         # produce the waveform
-        my_wave=self._get_laser_waveform(protocol=protocol,frequency=frequency,pulse_duration=pulse_duration,input_voltage=input_voltage)
+        my_wave=self._get_laser_waveform(protocol=protocol,
+                                         frequency=frequency,
+                                         pulse_duration=pulse_duration,
+                                         input_voltage=input_voltage,
+                                         duration_each_cycle=duration_each_cycle
+                                    )
         
         return my_wave
     
-    def _get_laser_waveform(self,protocol:str,frequency:int,pulse_duration:float,input_voltage:float):
+    def _get_laser_waveform(self,protocol:str,frequency:int,pulse_duration:float,input_voltage:float,duration_each_cycle:float)->np.array:
         '''Get the waveform for the laser
         Args:
             protocol: The protocol to use (only 'Pulse' is supported).
@@ -3204,14 +3224,13 @@ class OpticalTaggingDialog(QDialog):
             logger.warning(f"Unknown protocol: {protocol}")
             return
         sample_frequency=5000 # should be replaced
-        duration=float(self.Duration_each_cycle.text()) # should be replaced
         PointsEachPulse=int(sample_frequency*pulse_duration/1000)
         PulseIntervalPoints=int(1/frequency*sample_frequency-PointsEachPulse)
         if PulseIntervalPoints<0:
             logging.warning('Pulse frequency and pulse duration are not compatible!',
                             extra={'tags': [self.MainWindow.warning_log_tag]})
-        TotalPoints=int(sample_frequency*duration)
-        PulseNumber=np.floor(duration*frequency) 
+        TotalPoints=int(sample_frequency*duration_each_cycle)
+        PulseNumber=np.floor(duration_each_cycle*frequency) 
         EachPulse=input_voltage*np.ones(PointsEachPulse)
         PulseInterval=np.zeros(PulseIntervalPoints)
         WaveFormEachCycle=np.concatenate((EachPulse, PulseInterval), axis=0)
