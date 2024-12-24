@@ -3108,9 +3108,15 @@ class OpticalTaggingDialog(QDialog):
             self._initiate_laser()
             # receiving the timestamps of laser start
 
+            # change the success_tag to 1
+            self.optical_tagging_par['success_tag'][i]=1
             # save the timestamps
 
             # save parameters
+
+            # wait to start the next cycle
+
+            # show current cycle and parameters
     
     def _initiate_laser(self):
         '''Initiate laser in bonsai'''
