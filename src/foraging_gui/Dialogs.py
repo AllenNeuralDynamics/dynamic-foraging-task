@@ -3071,7 +3071,7 @@ class OpticalTaggingDialog(QDialog):
         self.MainWindow.Channel.TriggerSource('/Dev1/PFI0')
 
         # start the optical tagging in a different thread
-        worker_tagging = WorkerTagging(self._start_optical_tagging)
+        worker_tagging = Worker(self._start_optical_tagging)
         worker_tagging.signals.finished.connect(self._thread_complete_tag)
 
         # Execute
