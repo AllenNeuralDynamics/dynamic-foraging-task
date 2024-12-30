@@ -3259,7 +3259,7 @@ class OpticalTaggingDialog(QDialog):
         duration_each_cycle_list = extract_numbers_from_string(self.Duration_each_cycle.text())
         # Generate combinations for each laser
         protocol_sampled, frequency_sampled, pulse_duration_sampled, laser_name_sampled, target_power_sampled, laser_color_sampled,duration_each_cycle_sampled,interval_between_cycles_sampled = zip(*[
-            (protocol, frequency, pulse_duration, laser_name, target_power, laser_config[laser_name][1].currentText(),duration_each_cycle)
+            (protocol, frequency, pulse_duration, laser_name, target_power, laser_config[laser_name][1].currentText(),duration_each_cycle,interval_between_cycles)
             for frequency in frequency_list
             for pulse_duration in pulse_duration_list
             for laser_name, (power_field, _) in laser_config.items()
