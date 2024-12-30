@@ -3163,7 +3163,7 @@ class OpticalTaggingDialog(QDialog):
                 # wait to start the next cycle
                 time.sleep(duration_each_cycle+interval_between_cycles)
                 # show current cycle and parameters
-                self.label_show_current.setText(f'Epoch: {current_epoch}\n Iteration: {i%float(self.Cycles_each_condition.text())} \nprotocol: {protocol}\nFrequency: {frequency} Hz\nPulse Duration: {pulse_duration} ms\nLaser: {laser_name}\nPower: {target_power} mW\nColor: {laser_color}\nDuration: {duration_each_cycle} s\nInterval: {interval_between_cycles} s')
+                self.label_show_current.setText(f'Cycles: {i}/{len(self.current_optical_tagging_par['protocol_sampled_all'])} \nprotocol: {protocol}\nFrequency: {frequency} Hz\nPulse Duration: {pulse_duration} ms\nLaser: {laser_name}\nPower: {target_power} mW\nColor: {laser_color}\nDuration: {duration_each_cycle} s\nInterval: {interval_between_cycles} s')
     
     def _save_data(self, protocol, frequency, pulse_duration, laser_name, target_power, laser_color, duration_each_cycle, interval_between_cycles, location_tag):
         '''Extend the current parameters to self.optical_tagging_par'''
