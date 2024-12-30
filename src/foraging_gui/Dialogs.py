@@ -3092,7 +3092,7 @@ class OpticalTaggingDialog(QDialog):
             self.LocationTag.setValue(self.LocationTag.value()+1)
         self.Start.setChecked(False)
         self.Start.setStyleSheet("background-color : none")
-        
+
     def _start_optical_tagging(self,update_label):
         '''Start the optical tagging in a different thread'''
         # iterate each condition
@@ -3200,6 +3200,8 @@ class OpticalTaggingDialog(QDialog):
             self.optical_tagging_par['duration_each_cycle']=[]
             self.optical_tagging_par['interval_between_cycles']=[]
             self.optical_tagging_par['location_tag']=[]
+            self.optical_tagging_par['laser_start_timestamp']=[]
+            self.optical_tagging_par['success_tag']=[]
         else:
             self.optical_tagging_par['protocol'].append(protocol)
             self.optical_tagging_par['frequency'].append(frequency)
@@ -3210,6 +3212,8 @@ class OpticalTaggingDialog(QDialog):
             self.optical_tagging_par['duration_each_cycle'].append(duration_each_cycle)
             self.optical_tagging_par['interval_between_cycles'].append(interval_between_cycles)
             self.optical_tagging_par['location_tag'].append(location_tag)
+            self.optical_tagging_par['laser_start_timestamp'].append(laser_start_timestamp)
+            self.optical_tagging_par['success_tag'].append(success_tag)
 
     def _initiate_laser(self):
         '''Initiate laser in bonsai'''
