@@ -3093,6 +3093,7 @@ class OpticalTaggingDialog(QDialog):
     def _start_optical_tagging(self):
         '''Start the optical tagging in a different thread'''
         while self.finish_tag==0 and self.Start.isChecked():
+            QApplication.processEvents()
             # iterate each condition
             for i in self.index:
                 # exclude the index that has been run
