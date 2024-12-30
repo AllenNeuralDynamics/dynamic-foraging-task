@@ -484,6 +484,8 @@ class generate_metadata:
         # Handle the edge cases for the optical tagging
         if 'OpticalTagging_dialog' not in self.Obj:
             self.Obj['OpticalTagging_dialog'] = {}
+        if 'optical_tagging_par' not in self.Obj:
+            self.Obj['optical_tagging_par'] = {}
         if 'optical_tagging_start_time' not in self.Obj['optical_tagging_par']:
             self.Obj['optical_tagging_par']['optical_tagging_start_time'] = ''
         if 'optical_tagging_end_time' not in self.Obj['optical_tagging_par']:
