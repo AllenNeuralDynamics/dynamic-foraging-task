@@ -3043,10 +3043,12 @@ class OpticalTaggingDialog(QDialog):
         self._connectSignalsSlots()
         self.MainWindow = MainWindow
         self.optical_tagging_par={}
-
+        self.finish_tag = 1
+        self.threadpool = QThreadPool()
     def _connectSignalsSlots(self):
         self.Start.clicked.connect(self._Start)
         self.WhichLaser.currentIndexChanged.connect(self._WhichLaser)
+        self.EmergencyStop.clicked.connect(self._emegency_stop)
 
     def _Start(self):
         '''Start the optical tagging'''
@@ -3055,70 +3057,97 @@ class OpticalTaggingDialog(QDialog):
             self.Start.setStyleSheet("background-color : green;")
         else:
             self.Start.setStyleSheet("background-color : none")
+            return
         # generate random conditions including lasers, laser power, laser color, and protocol
-        self._generate_random_conditions()
-
-        self.optical_tagging_par['success_tag'] = np.zeros(len(self.optical_tagging_par['protocol_sampled_all']))
+        if self.finish_tag==1:
+            # generate new random conditions
+            self._generate_random_conditions()
+            self.optical_tagging_par['success_tag'] = np.zeros(len(self.optical_tagging_par['protocol_sampled_all']))
+            self.index=range(len(self.optical_tagging_par['protocol_sampled_all']))
+            self.finish_tag = 0
 
         # send the trigger source
         self.MainWindow.Channel.TriggerSource('/Dev1/PFI0')
-        # iterate each condition
-        for i in range(len(self.optical_tagging_par['protocol_sampled_all'])):
-            # get the current parameters
-            protocol = self.optical_tagging_par['protocol_sampled_all'][i]
-            frequency = self.optical_tagging_par['frequency_sampled_all'][i]
-            pulse_duration = self.optical_tagging_par['pulse_duration_sampled_all'][i]
-            laser_name = self.optical_tagging_par['laser_name_sampled_all'][i]
-            target_power = self.optical_tagging_par['target_power_sampled_all'][i]
-            laser_color = self.optical_tagging_par['laser_color_sampled_all'][i]
-            duration_each_cycle = self.optical_tagging_par['duration_each_cycle_sampled_all'][i]
-            interval_between_cycles = self.optical_tagging_par['interval_between_cycles_sampled_all'][i]
-            # produce the waveforms
-            my_wave=self._produce_waveforms(protocol=protocol, 
-                                            frequency=frequency, 
-                                            pulse_duration=pulse_duration, 
-                                            laser_name=laser_name, 
-                                            target_power=target_power, 
-                                            laser_color=laser_color, 
-                                            duration_each_cycle=duration_each_cycle
-                                        )
-            my_wave_control=self._produce_waveforms(protocol=protocol,
-                                                    frequency=frequency,
-                                                    pulse_duration=pulse_duration,
-                                                    laser_name=laser_name,
-                                                    target_power=0,
-                                                    laser_color=laser_color,
-                                                    duration_each_cycle=duration_each_cycle
-                                                )
-            if my_wave is None:
-                continue
-            # send the waveform and size to the bonsai
-            if laser_name=='Laser_1':
-                getattr(self.MainWindow.Channel, 'Location1_Size')(int(my_wave.size))
-                getattr(self.MainWindow.Channel4, 'WaveForm1_1')(str(my_wave.tolist())[1:-1])
-                getattr(self.MainWindow.Channel, 'Location2_Size')(int(my_wave_control.size))
-                getattr(self.MainWindow.Channel4, 'WaveForm1_2')(str(my_wave_control.tolist())[1:-1])
-            elif laser_name=='Laser_2':
-                getattr(self.MainWindow.Channel, 'Location2_Size')(int(my_wave.size))
-                getattr(self.MainWindow.Channel4, 'WaveForm1_2')(str(my_wave.tolist())[1:-1])
-                getattr(self.MainWindow.Channel, 'Location1_Size')(int(my_wave_control.size))
-                getattr(self.MainWindow.Channel4, 'WaveForm1_1')(str(my_wave_control.tolist())[1:-1])
-            FinishOfWaveForm=self.MainWindow.Channel4.receive() 
-            # initiate the laser
-            # need to change the bonsai code to initiate the laser
-            self._initiate_laser()
-            # receiving the timestamps of laser start and saving them. The laser waveforms should be sent to the NI-daq as a backup. 
-            Rec=self.MainWindow.Channel1.receive()
-            if Rec[0].address=='/ITIStartTimeHarp':
-                self.optical_tagging_par['laser_start_timestamp'][i]=Rec[1][1][0]
-                # change the success_tag to 1
-                self.optical_tagging_par['success_tag'][i]=1
-            else:
-                self.optical_tagging_par['laser_start_timestamp'][i]=-999 # error tag
-            # wait to start the next cycle
-            time.sleep(duration_each_cycle+interval_between_cycles)
-            # show current cycle and parameters
-            self.label_show_current.setText(f'Cycle {i+1}/{len(self.optical_tagging_par["protocol_sampled_all"])}\nprotocol: {protocol}\nFrequency: {frequency} Hz\nPulse Duration: {pulse_duration} ms\nLaser: {laser_name}\nPower: {target_power} mW\nColor: {laser_color}\nDuration: {duration_each_cycle} s\nInterval: {interval_between_cycles} s')
+
+        # start the optical tagging in a different thread
+        worker_tagging = Worker(self._start_optical_tagging)
+        worker_tagging.signals.finished.connect(self._thread_complete_tagging)
+
+        # Execute
+        self.threadpool.start(worker_tagging)
+        
+    def _emegency_stop(self):
+        '''Stop the optical tagging'''
+        self.finish_tag = 1
+        self.Start.setChecked(False)
+
+    def _thread_complete_tagging(self):
+        '''Complete the optical tagging'''
+        self.finish_tag = 1
+
+    def _start_optical_tagging(self):
+        '''Start the optical tagging in a different thread'''
+        while self.finish_tag==0 and self.Start.isChecked():
+            # iterate each condition
+            for i in self.index:
+                # exclude the index that has been run
+                self.index.remove(i)
+                # get the current parameters
+                protocol = self.optical_tagging_par['protocol_sampled_all'][i]
+                frequency = self.optical_tagging_par['frequency_sampled_all'][i]
+                pulse_duration = self.optical_tagging_par['pulse_duration_sampled_all'][i]
+                laser_name = self.optical_tagging_par['laser_name_sampled_all'][i]
+                target_power = self.optical_tagging_par['target_power_sampled_all'][i]
+                laser_color = self.optical_tagging_par['laser_color_sampled_all'][i]
+                duration_each_cycle = self.optical_tagging_par['duration_each_cycle_sampled_all'][i]
+                interval_between_cycles = self.optical_tagging_par['interval_between_cycles_sampled_all'][i]
+                # produce the waveforms
+                my_wave=self._produce_waveforms(protocol=protocol, 
+                                                frequency=frequency, 
+                                                pulse_duration=pulse_duration, 
+                                                laser_name=laser_name, 
+                                                target_power=target_power, 
+                                                laser_color=laser_color, 
+                                                duration_each_cycle=duration_each_cycle
+                                            )
+                my_wave_control=self._produce_waveforms(protocol=protocol,
+                                                        frequency=frequency,
+                                                        pulse_duration=pulse_duration,
+                                                        laser_name=laser_name,
+                                                        target_power=0,
+                                                        laser_color=laser_color,
+                                                        duration_each_cycle=duration_each_cycle
+                                                    )
+                if my_wave is None:
+                    continue
+                # send the waveform and size to the bonsai
+                if laser_name=='Laser_1':
+                    getattr(self.MainWindow.Channel, 'Location1_Size')(int(my_wave.size))
+                    getattr(self.MainWindow.Channel4, 'WaveForm1_1')(str(my_wave.tolist())[1:-1])
+                    getattr(self.MainWindow.Channel, 'Location2_Size')(int(my_wave_control.size))
+                    getattr(self.MainWindow.Channel4, 'WaveForm1_2')(str(my_wave_control.tolist())[1:-1])
+                elif laser_name=='Laser_2':
+                    getattr(self.MainWindow.Channel, 'Location2_Size')(int(my_wave.size))
+                    getattr(self.MainWindow.Channel4, 'WaveForm1_2')(str(my_wave.tolist())[1:-1])
+                    getattr(self.MainWindow.Channel, 'Location1_Size')(int(my_wave_control.size))
+                    getattr(self.MainWindow.Channel4, 'WaveForm1_1')(str(my_wave_control.tolist())[1:-1])
+                FinishOfWaveForm=self.MainWindow.Channel4.receive() 
+                # initiate the laser
+                # need to change the bonsai code to initiate the laser
+                self._initiate_laser()
+                # receiving the timestamps of laser start and saving them. The laser waveforms should be sent to the NI-daq as a backup. 
+                Rec=self.MainWindow.Channel1.receive()
+                if Rec[0].address=='/ITIStartTimeHarp':
+                    self.optical_tagging_par['laser_start_timestamp'][i]=Rec[1][1][0]
+                    # change the success_tag to 1
+                    self.optical_tagging_par['success_tag'][i]=1
+                else:
+                    self.optical_tagging_par['laser_start_timestamp'][i]=-999 # error tag
+                # wait to start the next cycle
+                time.sleep(duration_each_cycle+interval_between_cycles)
+                # show current cycle and parameters
+                self.label_show_current.setText(f'Cycle {i+1}/{len(self.optical_tagging_par["protocol_sampled_all"])}\nprotocol: {protocol}\nFrequency: {frequency} Hz\nPulse Duration: {pulse_duration} ms\nLaser: {laser_name}\nPower: {target_power} mW\nColor: {laser_color}\nDuration: {duration_each_cycle} s\nInterval: {interval_between_cycles} s')
+    
     def _initiate_laser(self):
         '''Initiate laser in bonsai'''
         # start generating waveform in bonsai
