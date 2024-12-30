@@ -754,7 +754,7 @@ class generate_metadata:
         self._get_behavior_stimulus()
         self._get_optogenetics_stimulus()
         self._get_optical_tagging_stimulus()
-        self.stimulus=self.behavior_stimulus+self.optogenetics_stimulus
+        self.stimulus=self.behavior_stimulus+self.optogenetics_stimulus+self.optical_tagging_stimulus
 
     def _get_optical_tagging_stimulus(self):
         '''
@@ -779,17 +779,17 @@ class generate_metadata:
     def _get_optical_tagging_output_parameters(self):
         '''Get the output parameters for optical tagging'''
         output_parameters = {
-            'Laser':self.Obj['OpticalTagging_dialog'].WhichLaser.currentText(),
-            'Protocol':self.Obj['OpticalTagging_dialog'].Protocol.currentText(),
-            'Cycles_each_condition':self.Obj['OpticalTagging_dialog'].Cycles_each_condition.text(),
-            'Frequency':self.Obj['OpticalTagging_dialog'].Frequency.text(),
-            'Pulse_duration':self.Obj['OpticalTagging_dialog'].Pulse_duration.text(),
-            'Laser_1_color':self.Obj['OpticalTagging_dialog'].Laser_1_color.currentText(),
-            'Laser_2_color':self.Obj['OpticalTagging_dialog'].Laser_2_color.currentText(),
-            'Laser_1_power':self.Obj['OpticalTagging_dialog'].Laser_1_power.text(),
-            'Laser_2_power':self.Obj['OpticalTagging_dialog'].Laser_2_power.text(),
-            'Duration_each_cycle':self.Obj['OpticalTagging_dialog'].Duration_each_cycle.text(),
-            'Interval_between_cycles':self.Obj['OpticalTagging_dialog'].Interval_between_cycles.text(),
+            'Laser':self.Obj['OpticalTagging_dialog']['WhichLaser'],
+            'Protocol':self.Obj['OpticalTagging_dialog']['Protocol'],
+            'Cycles_each_condition':self.Obj['OpticalTagging_dialog']['Cycles_each_condition'],
+            'Frequency':self.Obj['OpticalTagging_dialog']['Frequency'],
+            'Pulse_duration':self.Obj['OpticalTagging_dialog']['Pulse_duration'],
+            'Laser_1_color':self.Obj['OpticalTagging_dialog']['Laser_1_color'],
+            'Laser_2_color':self.Obj['OpticalTagging_dialog']['Laser_2_color'],
+            'Laser_1_power':self.Obj['OpticalTagging_dialog']['Laser_1_power'],
+            'Laser_2_power':self.Obj['OpticalTagging_dialog']['Laser_2_power'],
+            'Duration_each_cycle':self.Obj['OpticalTagging_dialog']['Duration_each_cycle'],
+            'Interval_between_cycles':self.Obj['OpticalTagging_dialog']['Interval_between_cycles'],
         }
         return output_parameters
     
