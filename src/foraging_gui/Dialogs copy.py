@@ -7,13 +7,10 @@ import subprocess
 from datetime import datetime
 import logging
 import webbrowser
-import re
-import random
-from typing import Literal,Tuple
+from typing import Literal
 
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LinearRegression
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox, QGridLayout
 from PyQt5.QtWidgets import QLabel, QDialogButtonBox,QFileDialog,QInputDialog, QLineEdit
@@ -27,7 +24,6 @@ from aind_auto_train.curriculum_manager import CurriculumManager
 from aind_auto_train.auto_train_manager import DynamicForagingAutoTrainManager
 from aind_auto_train.schema.task import TrainingStage
 from aind_auto_train.schema.curriculum import DynamicForagingCurriculum
-from foraging_gui.GenerateMetadata import generate_metadata
 codebase_curriculum_schema_version = DynamicForagingCurriculum.model_fields['curriculum_schema_version'].default
 
 logger = logging.getLogger(__name__)
@@ -3034,16 +3030,12 @@ class PandasModel(QAbstractTableModel):
             return self._data.columns[col]
         return None
     
-
 class OpticalTaggingDialog(QDialog):
-    
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
         uic.loadUi('OpticalTagging.ui', self)
         self._connectSignalsSlots()
-        self.MainWindow = MainWindow
-        self.optical_tagging_par={}
-
+    
     def _connectSignalsSlots(self):
         self.Start.clicked.connect(self._Start)
         self.WhichLaser.currentIndexChanged.connect(self._WhichLaser)
@@ -3055,160 +3047,7 @@ class OpticalTaggingDialog(QDialog):
             self.Start.setStyleSheet("background-color : green;")
         else:
             self.Start.setStyleSheet("background-color : none")
-        # generate random conditions including lasers, laser power, laser color, and protocol
-        self._generate_random_conditions()
 
-        self.optical_tagging_par['success_tag'] = np.zeros(len(self.optical_tagging_par['protocol_sampled_all']))
-
-        # send the trigger source
-        self.MainWindow.Channel.TriggerSource('/Dev1/PFI0')
-        # iterate each condition
-        for i in range(len(self.optical_tagging_par['protocol_sampled_all'])):
-            # get the current parameters
-            protocol = self.optical_tagging_par['protocol_sampled_all'][i]
-            frequency = self.optical_tagging_par['frequency_sampled_all'][i]
-            pulse_duration = self.optical_tagging_par['pulse_duration_sampled_all'][i]
-            laser_name = self.optical_tagging_par['laser_name_sampled_all'][i]
-            target_power = self.optical_tagging_par['target_power_sampled_all'][i]
-            laser_color = self.optical_tagging_par['laser_color_sampled_all'][i]
-            duration_each_cycle = self.optical_tagging_par['duration_each_cycle_sampled_all'][i]
-            interval_between_cycles = self.optical_tagging_par['interval_between_cycles_sampled_all'][i]
-            # produce the waveforms
-            my_wave=self._produce_waveforms(protocol=protocol, 
-                                            frequency=frequency, 
-                                            pulse_duration=pulse_duration, 
-                                            laser_name=laser_name, 
-                                            target_power=target_power, 
-                                            laser_color=laser_color, 
-                                            duration_each_cycle=duration_each_cycle
-                                        )
-            my_wave_control=self._produce_waveforms(protocol=protocol,
-                                                    frequency=frequency,
-                                                    pulse_duration=pulse_duration,
-                                                    laser_name=laser_name,
-                                                    target_power=0,
-                                                    laser_color=laser_color,
-                                                    duration_each_cycle=duration_each_cycle
-                                                )
-            if my_wave is None:
-                continue
-            # send the waveform and size to the bonsai
-            if laser_name=='Laser_1':
-                getattr(self.MainWindow.Channel, 'Location1_Size')(int(my_wave.size))
-                getattr(self.MainWindow.Channel4, 'WaveForm1_1')(str(my_wave.tolist())[1:-1])
-                getattr(self.MainWindow.Channel, 'Location2_Size')(int(my_wave_control.size))
-                getattr(self.MainWindow.Channel4, 'WaveForm1_2')(str(my_wave_control.tolist())[1:-1])
-            elif laser_name=='Laser_2':
-                getattr(self.MainWindow.Channel, 'Location2_Size')(int(my_wave.size))
-                getattr(self.MainWindow.Channel4, 'WaveForm1_2')(str(my_wave.tolist())[1:-1])
-                getattr(self.MainWindow.Channel, 'Location1_Size')(int(my_wave_control.size))
-                getattr(self.MainWindow.Channel4, 'WaveForm1_1')(str(my_wave_control.tolist())[1:-1])
-            FinishOfWaveForm=self.MainWindow.Channel4.receive() 
-            # initiate the laser
-            # need to change the bonsai code to initiate the laser
-            self._initiate_laser()
-            # receiving the timestamps of laser start and saving them. The laser waveforms should be sent to the NI-daq as a backup. 
-            Rec=self.MainWindow.Channel1.receive()
-            if Rec[0].address=='/ITIStartTimeHarp':
-                self.optical_tagging_par['laser_start_timestamp'][i]=Rec[1][1][0]
-                # change the success_tag to 1
-                self.optical_tagging_par['success_tag'][i]=1
-            else:
-                self.optical_tagging_par['laser_start_timestamp'][i]=-999 # error tag
-            # wait to start the next cycle
-            time.sleep(duration_each_cycle+interval_between_cycles)
-            # show current cycle and parameters
-            self.label_show_current.setText(f'Cycle {i+1}/{len(self.optical_tagging_par["protocol_sampled_all"])}\nprotocol: {protocol}\nFrequency: {frequency} Hz\nPulse Duration: {pulse_duration} ms\nLaser: {laser_name}\nPower: {target_power} mW\nColor: {laser_color}\nDuration: {duration_each_cycle} s\nInterval: {interval_between_cycles} s')
-    def _initiate_laser(self):
-        '''Initiate laser in bonsai'''
-        # start generating waveform in bonsai
-        self.MainWindow.Channel.OptogeneticsCalibration(int(1))
-        self.MainWindow.Channel.receive()
-
-    def _generate_random_conditions(self):
-        """
-        Generate random conditions for the optical tagging process. Each condition corresponds to one cycle, with parameters randomly selected for each duration. 
-
-        The parameters are chosen as follows:
-        - **Lasers**: One of the following is selected: `Laser_1` or `Laser_2`.
-        - **Laser Power**: If `Laser_1` is selected, `Laser_1_power` is used. If `Laser_2` is selected, `Laser_2_power` is used.
-        - **Laser Color**: If `Laser_1` is selected, `Laser_1_color` is used. If `Laser_2` is selected, `Laser_2_color` is used.
-        *Note: `Laser`, `Laser Power`, and `Laser Color` are selected together as a group.*
-
-        Additional parameters:
-        - **Protocol**: Currently supports only `Pulse`.
-        - **Frequency (Hz)**: Applied to both lasers during the cycle.
-        - **Pulse Duration (ms)**: Applied to both lasers during the cycle.
-        """
-        # get the protocol
-        protocol = self.Protocol.currentText()
-        if protocol!='Pulse':
-            raise ValueError(f"Unknown protocol: {protocol}")
-        # get the number of cycles
-        number_of_cycles = int(math.floor(float(self.Cycles_each_power.text())))
-        # get the frequency
-        frequency_list = list(map(int, extract_numbers_from_string(self.Frequency.text())))
-        # get the pulse duration (seconds)
-        pulse_duration_list = extract_numbers_from_string(self.Pulse_duration.text())
-        # get the laser name
-        if self.WhichLaser.currentText()=="Both":
-            laser_name_list = ['Laser_1','Laser_2']
-            laser_config = {
-                'Laser_1': (self.Laser_1_power, self.Laser_1_color),
-                'Laser_2': (self.Laser_2_power, self.Laser_2_color)
-            }
-        elif self.WhichLaser.currentText() in ['Laser_1','Laser_2']:
-            laser_name_list = [self.WhichLaser.currentText()]
-            if laser_name_list[0]=='Laser_1':
-                laser_config = {
-                    'Laser_1': (self.Laser_1_power, self.Laser_1_color)
-                }
-            elif laser_name_list[0]=='Laser_2':
-                laser_config = {
-                    'Laser_2': (self.Laser_2_power, self.Laser_2_color)
-                }
-        else:
-            # give an popup error window if the laser is not selected
-            QMessageBox.critical(self.MainWindow, "Error", "Please select the laser to use.")
-            return
-        duration_each_cycle_list = extract_numbers_from_string(self.Duration_each_cycle.text())
-        # Generate combinations for each laser
-        protocol_sampled, frequency_sampled, pulse_duration_sampled, laser_name_sampled, target_power_sampled, laser_color_sampled,duration_each_cycle_sampled = zip(*[
-            (protocol, frequency, pulse_duration, laser_name, target_power, laser_config[laser_name][1].currentText(),duration_each_cycle)
-            for frequency in frequency_list
-            for pulse_duration in pulse_duration_list
-            for laser_name, (power_field, _) in laser_config.items()
-            for target_power in extract_numbers_from_string(power_field.text())
-            for duration_each_cycle in duration_each_cycle_list
-        ])
-
-        self.optical_tagging_par['protocol_sampled_all'] = []
-        self.optical_tagging_par['frequency_sampled_all'] = []
-        self.optical_tagging_par['pulse_duration_sampled_all'] = []
-        self.optical_tagging_par['laser_name_sampled_all'] = []
-        self.optical_tagging_par['target_power_sampled_all'] = []
-        self.optical_tagging_par['laser_color_sampled_all'] = []
-        self.optical_tagging_par['duration_each_cycle_sampled_all'] = []
-        self.optical_tagging_par['Interval_between_cycles_sampled_all'] = []
-        for _ in range(number_of_cycles):
-            # Generate a random index to sample conditions
-            random_indices = random.sample(range(len(protocol_sampled)), len(protocol_sampled))
-            # Use the random indices to shuffle the conditions
-            protocol_sampled_now = [protocol_sampled[i] for i in random_indices]
-            frequency_sampled_now = [frequency_sampled[i] for i in random_indices]
-            pulse_duration_sampled_now = [pulse_duration_sampled[i] for i in random_indices]
-            laser_name_sampled_now = [laser_name_sampled[i] for i in random_indices]
-            target_power_sampled_now = [target_power_sampled[i] for i in random_indices]
-            laser_color_sampled_now = [laser_color_sampled[i] for i in random_indices]
-            # Append the conditions
-            self.optical_tagging_par['protocol_sampled_all'].extend(protocol_sampled_now)
-            self.optical_tagging_par['frequency_sampled_all'].extend(frequency_sampled_now)
-            self.optical_tagging_par['pulse_duration_sampled_all'].extend(pulse_duration_sampled_now)
-            self.optical_tagging_par['laser_name_sampled_all'].extend(laser_name_sampled_now)
-            self.optical_tagging_par['target_power_sampled_all'].extend(target_power_sampled_now)
-            self.optical_tagging_par['laser_color_sampled_all'].extend(laser_color_sampled_now)
-            self.optical_tagging_par['duration_each_cycle_sampled_all'].extend(duration_each_cycle_sampled)
-            self.optical_tagging_par['Interval_between_cycles_sampled_all'].append(float(self.Interval_between_cycles.text()))
     def _WhichLaser(self):
         '''Select the laser to use and disable non-relevant widgets'''
         laser_name = self.WhichLaser.currentText()
@@ -3227,151 +3066,3 @@ class OpticalTaggingDialog(QDialog):
             self.Laser_2_power.setEnabled(True)
             self.label1_3.setEnabled(True)
             self.label1_16.setEnabled(True)
-    
-    def _produce_waveforms(self,protocol:str,frequency:int,pulse_duration:float,laser_name:str,target_power:float,laser_color:str,duration_each_cycle:float):
-        '''Produce the waveforms for the optical tagging'''
-        # get the amplitude of the laser
-        input_voltage=self._get_laser_amplitude(target_power=target_power,
-                                                laser_color=laser_color,
-                                                protocol=protocol,
-                                                laser_name=laser_name
-                                            )
-        if input_voltage is None:
-            return
-        
-        # produce the waveform
-        my_wave=self._get_laser_waveform(protocol=protocol,
-                                         frequency=frequency,
-                                         pulse_duration=pulse_duration,
-                                         input_voltage=input_voltage,
-                                         duration_each_cycle=duration_each_cycle
-                                    )
-        
-        return my_wave
-    
-    def _get_laser_waveform(self,protocol:str,frequency:int,pulse_duration:float,input_voltage:float,duration_each_cycle:float)->np.array:
-        '''Get the waveform for the laser
-        Args:
-            protocol: The protocol to use (only 'Pulse' is supported).
-            frequency: The frequency of the pulse.
-            pulse_duration: The duration of the pulse.
-            input_voltage: The input voltage of the laser.
-        Returns:
-            np.array: The waveform of the laser.
-        '''
-        # get the waveform
-        if protocol!='Pulse':
-            logger.warning(f"Unknown protocol: {protocol}")
-            return
-        sample_frequency=5000 # should be replaced
-        PointsEachPulse=int(sample_frequency*pulse_duration/1000)
-        PulseIntervalPoints=int(1/frequency*sample_frequency-PointsEachPulse)
-        if PulseIntervalPoints<0:
-            logging.warning('Pulse frequency and pulse duration are not compatible!',
-                            extra={'tags': [self.MainWindow.warning_log_tag]})
-        TotalPoints=int(sample_frequency*duration_each_cycle)
-        PulseNumber=np.floor(duration_each_cycle*frequency) 
-        EachPulse=input_voltage*np.ones(PointsEachPulse)
-        PulseInterval=np.zeros(PulseIntervalPoints)
-        WaveFormEachCycle=np.concatenate((EachPulse, PulseInterval), axis=0)
-        my_wave=np.empty(0)
-        # pulse number should be greater than 0
-        if PulseNumber>1:
-            for i in range(int(PulseNumber-1)):
-                my_wave=np.concatenate((my_wave, WaveFormEachCycle), axis=0)
-        else:
-            logging.warning('Pulse number is less than 1!', extra={'tags': [self.MainWindow.warning_log_tag]})
-            return
-        my_wave=np.concatenate((my_wave, EachPulse), axis=0)
-        my_wave=np.concatenate((my_wave, np.zeros(TotalPoints-np.shape(my_wave)[0])), axis=0)
-        my_wave=np.append(my_wave,[0,0])
-        return my_wave
-
-    def _get_laser_amplitude(self,target_power:float,laser_color:str,protocol:str,laser_name:str)->float:
-        '''Get the amplitude of the laser based on the calibraion results
-        Args:
-            target_power: The target power of the laser.
-            laser_color: The color of the laser.
-            protocol: The protocol to use.
-        Returns:
-            float: The amplitude of the laser.
-        '''
-        # get the current calibration results
-        latest_calibration_date=find_latest_calibration_date(self.MainWindow.LaserCalibrationResults,laser_color)
-        # get the selected laser
-        if latest_calibration_date=='NA':
-            logger.info(f"No calibration results found for {laser_color}")
-            return
-        else:
-            try:
-                calibration_results=self.MainWindow.LaserCalibrationResults[latest_calibration_date][laser_color][protocol][laser_name]['LaserPowerVoltage']
-            except:
-                logger.info(f"No calibration results found for {laser_color} and {laser_name}")
-                return
-        # fit the calibration results with a linear model
-        slope,intercept=fit_calibration_results(calibration_results)
-        # Find the corresponding input voltage for a target laser power
-        input_voltage_for_target = (target_power - intercept) / slope
-        return round(input_voltage_for_target, 2)
-    
-def fit_calibration_results(calibration_results: list) -> Tuple[float, float]:
-    """
-    Fit the calibration results with a linear model.
-
-    Args:
-        calibration_results: A list of calibration results where each entry is [input_voltage, laser_power].
-
-    Returns:
-        A tuple (slope, intercept) of the fitted linear model.
-    """
-    # Convert to numpy array for easier manipulation
-    calibration_results = np.array(calibration_results)
-
-    # Separate input voltage and laser power
-    input_voltage = calibration_results[:, 0].reshape(-1, 1)  # X (features)
-    laser_power = calibration_results[:, 1]  # y (target)
-
-    # Fit the linear model
-    model = LinearRegression()
-    model.fit(input_voltage, laser_power)
-
-    # Extract model coefficients
-    slope = model.coef_[0]
-    intercept = model.intercept_
-
-    return slope, intercept
-            
-def find_latest_calibration_date(calibration:list,laser_color:str)->str:
-    """
-    Find the latest calibration date for the selected laser.
-
-    Args:
-        calibration: The calibration object.
-        Laser: The selected laser color.
-
-    Returns:
-        str: The latest calibration date for the selected laser.
-    """
-    Dates=[]
-    for Date in calibration:
-        if laser_color in calibration[Date].keys():
-            Dates.append(Date)
-    sorted_dates = sorted(Dates)
-    if sorted_dates==[]:
-        return 'NA'
-    else:
-        return sorted_dates[-1]
-    
-def extract_numbers_from_string(input_string:str)->list:
-    """
-    Extract numbers from a string.
-
-    Args:
-        string: The input string.
-
-    Returns:
-        list: The list of numbers.
-    """
-    # Regular expression to match floating-point numbers
-    float_pattern = r"[-+]?\d*\.\d+|\d+"  # Matches numbers like 0.4, -0.5, etc.
-    return [float(num) for num in re.findall(float_pattern, input_string)]
