@@ -516,7 +516,7 @@
     </size>
    </property>
    <property name="text">
-    <string>interval between cycles=</string>
+    <string>interval between cycles (s)=</string>
    </property>
    <property name="textFormat">
     <enum>Qt::AutoText</enum>
