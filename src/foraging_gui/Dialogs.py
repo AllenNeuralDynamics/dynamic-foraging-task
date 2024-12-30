@@ -3203,7 +3203,6 @@ class OpticalTaggingDialog(QDialog):
         '''Initiate laser in bonsai'''
         # start generating waveform in bonsai
         self.MainWindow.Channel.OptogeneticsCalibration(int(1))
-        self.MainWindow.Channel.receive()
 
     def _generate_random_conditions(self):
         """
