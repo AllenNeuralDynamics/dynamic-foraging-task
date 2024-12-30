@@ -3090,7 +3090,9 @@ class OpticalTaggingDialog(QDialog):
         # Add 1 to the location tag when the cycle is finished
         if self.cycle_finish_tag == 1:
             self.LocationTag.setValue(self.LocationTag.value()+1)
-
+        self.Start.setChecked(False)
+        self.Start.setStyleSheet("background-color : none")
+        
     def _start_optical_tagging(self,update_label):
         '''Start the optical tagging in a different thread'''
         # iterate each condition
