@@ -21,7 +21,7 @@ from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject, QTimer
 from PyQt5.QtSvg import QSvgWidget
 
-from foraging_gui.MyFunctions import Worker
+from foraging_gui.MyFunctions import Worker,WorkerTagging
 from foraging_gui.Visualization import PlotWaterCalibration
 from aind_auto_train.curriculum_manager import CurriculumManager
 from aind_auto_train.auto_train_manager import DynamicForagingAutoTrainManager
@@ -3071,7 +3071,8 @@ class OpticalTaggingDialog(QDialog):
         self.MainWindow.Channel.TriggerSource('/Dev1/PFI0')
 
         # start the optical tagging in a different thread
-        worker_tagging = Worker(self._start_optical_tagging)
+        worker_tagging = WorkerTagging(self._start_optical_tagging)
+        worker_tagging.signals.update_label.connect(self.label_show_current.setText)  # Connect to label update
         worker_tagging.signals.finished.connect(self._thread_complete_tag)
 
         # Execute
@@ -3090,7 +3091,7 @@ class OpticalTaggingDialog(QDialog):
         if self.cycle_finish_tag == 1:
             self.LocationTag.setValue(self.LocationTag.value()+1)
 
-    def _start_optical_tagging(self):
+    def _start_optical_tagging(self,update_label):
         '''Start the optical tagging in a different thread'''
         # iterate each condition
         for i in self.index[:]:
@@ -3166,17 +3167,18 @@ class OpticalTaggingDialog(QDialog):
                 # wait to start the next cycle
                 time.sleep(duration_each_cycle+interval_between_cycles)
                 # show current cycle and parameters
-                self.label_show_current.setText(
-                        f"Cycles: {i+1}/{len(self.current_optical_tagging_par['protocol_sampled_all'])} \n"
-                        f"protocol: {protocol}\n"
-                        f"Frequency: {frequency} Hz\n"
-                        f"Pulse Duration: {pulse_duration} ms\n"
-                        f"Laser: {laser_name}\n"
-                        f"Power: {target_power} mW\n"
-                        f"Color: {laser_color}\n"
-                        f"Duration: {duration_each_cycle} s\n"
-                        f"Interval: {interval_between_cycles} s"
-                    )
+                # Emit signal to update the label
+                update_label(
+                    f"Cycles: {i+1}/{len(self.current_optical_tagging_par['protocol_sampled_all'])} \n"
+                    f"protocol: {protocol}\n"
+                    f"Frequency: {frequency} Hz\n"
+                    f"Pulse Duration: {pulse_duration} ms\n"
+                    f"Laser: {laser_name}\n"
+                    f"Power: {target_power} mW\n"
+                    f"Color: {laser_color}\n"
+                    f"Duration: {duration_each_cycle} s\n"
+                    f"Interval: {interval_between_cycles} s"
+                )
                 if i == self.index[-1]:
                     self.cycle_finish_tag = 1
                 # exclude the index that has been run
