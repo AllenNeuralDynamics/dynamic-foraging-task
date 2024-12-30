@@ -3082,7 +3082,8 @@ class OpticalTaggingDialog(QDialog):
         '''Stop the optical tagging'''
         self.finish_tag = 1
         self.Start.setChecked(False)
-
+        self.Start.setStyleSheet("background-color : none")
+        
     def _thread_complete_tagging(self):
         '''Complete the optical tagging'''
         self.finish_tag = 1
