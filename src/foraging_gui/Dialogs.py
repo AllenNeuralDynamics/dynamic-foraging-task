@@ -3142,7 +3142,7 @@ class OpticalTaggingDialog(QDialog):
                 # need to change the bonsai code to initiate the laser
                 self._initiate_laser()
                 # receiving the timestamps of laser start and saving them. The laser waveforms should be sent to the NI-daq as a backup. 
-                Rec=self.MainWindow.Channel1.receive()
+                Rec=self.MainWindow.Channel.receive()
                 if Rec[0].address=='/ITIStartTimeHarp':
                     self.current_optical_tagging_par['laser_start_timestamp'][i]=Rec[1][1][0]
                     # change the success_tag to 1
