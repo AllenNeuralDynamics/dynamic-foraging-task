@@ -3095,6 +3095,9 @@ class OpticalTaggingDialog(QDialog):
         worker_tagging.signals.update_label.connect(self.label_show_current.setText)  # Connect to label update
         worker_tagging.signals.finished.connect(self._thread_complete_tag)
 
+        # get the first start time
+        if "optical_tagging_start_time" not in self.optical_tagging_par:
+            self.optical_tagging_par["optical_tagging_start_time"] = str(datetime.now())
         # Execute
         self.threadpool.start(worker_tagging)
         #self._start_optical_tagging()
@@ -3112,6 +3115,9 @@ class OpticalTaggingDialog(QDialog):
             self.LocationTag.setValue(self.LocationTag.value()+1)
         self.Start.setChecked(False)
         self.Start.setStyleSheet("background-color : none")
+        # update the stop time
+        self.optical_tagging_par["optical_tagging_end_time"] = str(datetime.now())
+
 
     def _start_optical_tagging(self,update_label):
         '''Start the optical tagging in a different thread'''
