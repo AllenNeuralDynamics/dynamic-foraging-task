@@ -3167,7 +3167,7 @@ class OpticalTaggingDialog(QDialog):
                 time.sleep(duration_each_cycle+interval_between_cycles)
                 # show current cycle and parameters
                 self.label_show_current.setText(
-                        f"Cycles: {i}/{len(self.current_optical_tagging_par['protocol_sampled_all'])} \n"
+                        f"Cycles: {i+1}/{len(self.current_optical_tagging_par['protocol_sampled_all'])} \n"
                         f"protocol: {protocol}\n"
                         f"Frequency: {frequency} Hz\n"
                         f"Pulse Duration: {pulse_duration} ms\n"
