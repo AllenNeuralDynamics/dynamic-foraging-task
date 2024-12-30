@@ -3269,6 +3269,7 @@ class OpticalTaggingDialog(QDialog):
             laser_name_sampled_now = [laser_name_sampled[i] for i in random_indices]
             target_power_sampled_now = [target_power_sampled[i] for i in random_indices]
             laser_color_sampled_now = [laser_color_sampled[i] for i in random_indices]
+            duration_each_cycle_sampled = [duration_each_cycle_sampled[i] for i in random_indices]
             # Append the conditions
             self.current_optical_tagging_par['protocol_sampled_all'].extend(protocol_sampled_now)
             self.current_optical_tagging_par['frequency_sampled_all'].extend(frequency_sampled_now)
@@ -3277,8 +3278,8 @@ class OpticalTaggingDialog(QDialog):
             self.current_optical_tagging_par['target_power_sampled_all'].extend(target_power_sampled_now)
             self.current_optical_tagging_par['laser_color_sampled_all'].extend(laser_color_sampled_now)
             self.current_optical_tagging_par['duration_each_cycle_sampled_all'].extend(duration_each_cycle_sampled)
-            self.current_optical_tagging_par['interval_between_cycles_sampled_all'].extend(float(self.Interval_between_cycles.text()))
-            self.current_optical_tagging_par['location_tag_sampled_all'].extend(float(self.LocationTag.value()))
+            self.current_optical_tagging_par['interval_between_cycles_sampled_all'].append(float(self.Interval_between_cycles.text()))
+            self.current_optical_tagging_par['location_tag_sampled_all'].append(float(self.LocationTag.value()))
 
     def _WhichLaser(self):
         '''Select the laser to use and disable non-relevant widgets'''
