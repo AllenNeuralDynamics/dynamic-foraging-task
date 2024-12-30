@@ -3064,7 +3064,6 @@ class OpticalTaggingDialog(QDialog):
         if self.finish_tag==1:
             # generate new random conditions
             self._generate_random_conditions()
-            self.current_optical_tagging_par['success_tag'] = np.zeros(len(self.current_optical_tagging_par['protocol_sampled_all']))
             self.index=list(range(len(self.current_optical_tagging_par['protocol_sampled_all'])))
             self.finish_tag = 0
 
@@ -3096,6 +3095,7 @@ class OpticalTaggingDialog(QDialog):
             QApplication.processEvents()
             # iterate each condition
             for i in self.index:
+                success_tag=0
                 # exclude the index that has been run
                 self.index.remove(i)
                 # get the current parameters
@@ -3144,12 +3144,14 @@ class OpticalTaggingDialog(QDialog):
                 self._initiate_laser()
                 # receiving the timestamps of laser start and saving them. The laser waveforms should be sent to the NI-daq as a backup. 
                 Rec=self.MainWindow.Channel.receive()
+
                 if Rec[0].address=='/ITIStartTimeHarp':
-                    self.current_optical_tagging_par['laser_start_timestamp'][i]=Rec[1][1][0]
+                    laser_start_timestamp=Rec[1][1][0]
                     # change the success_tag to 1
-                    self.current_optical_tagging_par['success_tag'][i]=1
+                    success_tag=1
                 else:
-                    self.current_optical_tagging_par['laser_start_timestamp'][i]=-999 # error tag
+                    laser_start_timestamp=-999 # error tag
+
                 # save the data 
                 self._save_data(protocol=protocol,
                                 frequency=frequency,
@@ -3159,7 +3161,9 @@ class OpticalTaggingDialog(QDialog):
                                 laser_color=laser_color,
                                 duration_each_cycle=duration_each_cycle,
                                 interval_between_cycles=interval_between_cycles,
-                                location_tag=location_tag
+                                location_tag=location_tag,
+                                laser_start_timestamp=laser_start_timestamp,
+                                success_tag=success_tag
                             )
                 # wait to start the next cycle
                 time.sleep(duration_each_cycle+interval_between_cycles)
@@ -3176,7 +3180,7 @@ class OpticalTaggingDialog(QDialog):
                         f"Interval: {interval_between_cycles} s"
                     )
 
-    def _save_data(self, protocol, frequency, pulse_duration, laser_name, target_power, laser_color, duration_each_cycle, interval_between_cycles, location_tag):
+    def _save_data(self, protocol, frequency, pulse_duration, laser_name, target_power, laser_color, duration_each_cycle, interval_between_cycles, location_tag, laser_start_timestamp, success_tag):
         '''Extend the current parameters to self.optical_tagging_par'''
         if 'protocol' not in self.optical_tagging_par.keys():
             self.optical_tagging_par['protocol']=[]
