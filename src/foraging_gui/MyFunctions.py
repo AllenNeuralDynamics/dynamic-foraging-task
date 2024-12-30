@@ -2028,10 +2028,10 @@ class Worker(QtCore.QRunnable):
         try:
             # Execute the function with provided arguments
             result = self.fn(*self.args, **self.kwargs)
-        except Exception as e:  # Catch all exceptions
-            exctype, value, tb = sys.exc_info()
+        except ValueError as e:
+            exctype, value = sys.exc_info()[:2]
             self.signals.error.emit((exctype, value, traceback.format_exc()))
-            logging.error(f"Error in worker thread: {e}")
+            logging.error(str(e))
         else:
             # Emit the result if the function completes successfully
             self.signals.result.emit(result)
