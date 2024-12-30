@@ -3044,7 +3044,8 @@ class OpticalTaggingDialog(QDialog):
         self.MainWindow = MainWindow
         self.current_optical_tagging_par={}
         self.optical_tagging_par={}
-        self.finish_tag = 1
+        self.thread_finish_tag = 0
+        self.cycle_finish_tag = 1
         self.threadpool = QThreadPool()
 
     def _connectSignalsSlots(self):
@@ -3061,18 +3062,18 @@ class OpticalTaggingDialog(QDialog):
             self.Start.setStyleSheet("background-color : none")
             return
         # generate random conditions including lasers, laser power, laser color, and protocol
-        if self.finish_tag==1:
+        if self.cycle_finish_tag==1:
             # generate new random conditions
             self._generate_random_conditions()
             self.index=list(range(len(self.current_optical_tagging_par['protocol_sampled_all'])))
-            self.finish_tag = 0
+            self.cycle_finish_tag = 0
 
         # send the trigger source
         self.MainWindow.Channel.TriggerSource('/Dev1/PFI0')
 
         # start the optical tagging in a different thread
         worker_tagging = Worker(self._start_optical_tagging)
-        worker_tagging.signals.finished.connect(self._thread_complete_tagging)
+        worker_tagging.signals.finished.connect(self._thread_complete_tag)
 
         # Execute
         self.threadpool.start(worker_tagging)
@@ -3080,22 +3081,24 @@ class OpticalTaggingDialog(QDialog):
 
     def _emegency_stop(self):
         '''Stop the optical tagging'''
-        self.finish_tag = 1
+        self.thread_finish_tag = 1
+        self.cycle_finish_tag = 1
         self.Start.setChecked(False)
         self.Start.setStyleSheet("background-color : none")
-        
-    def _thread_complete_tagging(self):
+
+    def _thread_complete_tag(self):
         '''Complete the optical tagging'''
-        self.finish_tag = 1
-        # Add 1 to the location tag
-        self.LocationTag.setValue(self.LocationTag.value()+1)
+        self.thread_finish_tag = 1
+        # Add 1 to the location tag when the cycle is finished
+        if self.cycle_finish_tag == 1:
+            self.LocationTag.setValue(self.LocationTag.value()+1)
 
     def _start_optical_tagging(self):
         '''Start the optical tagging in a different thread'''
         # iterate each condition
         for i in self.index:
             QApplication.processEvents()
-            if self.Start.isChecked() and self.finish_tag==0:
+            if self.Start.isChecked() and self.thread_finish_tag==0:
                 success_tag=0
                 # exclude the index that has been run
                 self.index.remove(i)
@@ -3180,6 +3183,8 @@ class OpticalTaggingDialog(QDialog):
                         f"Duration: {duration_each_cycle} s\n"
                         f"Interval: {interval_between_cycles} s"
                     )
+                if i == self.index[-1]:
+                    self.cycle_finish_tag = 1
             else:
                 break
 
