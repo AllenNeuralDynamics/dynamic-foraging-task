@@ -2051,6 +2051,24 @@ class Worker(QtCore.QRunnable):
         finally:
             self.signals.finished.emit()  # Done
 
+class WorkerSignals(QtCore.QObject):
+    update_label = QtCore.pyqtSignal(str)
+    finished = QtCore.pyqtSignal()
+
+class WorkerTagging(QtCore.QRunnable):
+    def __init__(self, function, *args, **kwargs):
+        super(WorkerTagging, self).__init__()
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs
+        self.signals = WorkerSignals()
+
+    def run(self):
+        try:
+            self.function(*self.args, **self.kwargs, update_label=self.signals.update_label.emit)
+        finally:
+            self.signals.finished.emit()
+
 class TimerWorker(QtCore.QObject):
     '''
         Worker for photometry timer
