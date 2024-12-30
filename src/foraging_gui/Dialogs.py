@@ -3072,7 +3072,7 @@ class OpticalTaggingDialog(QDialog):
         self.MainWindow.Channel.TriggerSource('/Dev1/PFI0')
 
         # start the optical tagging in a different thread
-        worker_tagging = Worker(self._start_optical_tagging)
+        worker_tagging = WorkerTagging(self._start_optical_tagging)
         worker_tagging.signals.finished.connect(self._thread_complete_tag)
 
         # Execute
@@ -3099,8 +3099,6 @@ class OpticalTaggingDialog(QDialog):
         for i in self.index[:]:
             if self.Start.isChecked() and self.thread_finish_tag==0:
                 success_tag=0
-                # exclude the index that has been run
-                self.index.remove(i)
                 # get the current parameters
                 protocol = self.current_optical_tagging_par['protocol_sampled_all'][i]
                 frequency = self.current_optical_tagging_par['frequency_sampled_all'][i]
@@ -3184,6 +3182,8 @@ class OpticalTaggingDialog(QDialog):
                     )
                 if i == self.index[-1]:
                     self.cycle_finish_tag = 1
+                # exclude the index that has been run
+                self.index.remove(i)
             else:
                 break
 
