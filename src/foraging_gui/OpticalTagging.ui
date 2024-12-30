@@ -550,7 +550,7 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="Cycles_each_power">
+  <widget class="QLineEdit" name="Cycles_each_condition">
    <property name="enabled">
     <bool>true</bool>
    </property>
