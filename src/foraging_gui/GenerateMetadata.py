@@ -484,12 +484,10 @@ class generate_metadata:
         # Handle the edge cases for the optical tagging
         if 'OpticalTagging_dialog' not in self.Obj:
             self.Obj['OpticalTagging_dialog'] = {}
-        if 'optical_tagging_par' not in self.Obj['OpticalTagging_dialog']:
-            self.Obj['OpticalTagging_dialog']['optical_tagging_par'] = {}
-        if 'optical_tagging_start_time' not in self.Obj['OpticalTagging_dialog']['optical_tagging_par']:
-            self.Obj['OpticalTagging_dialog']['optical_tagging_par']['optical_tagging_start_time'] = ''
-        if 'optical_tagging_end_time' not in self.Obj['OpticalTagging_dialog']['optical_tagging_par']:
-            self.Obj['OpticalTagging_dialog']['optical_tagging_par']['optical_tagging_end_time'] = ''
+        if 'optical_tagging_start_time' not in self.Obj['optical_tagging_par']:
+            self.Obj['optical_tagging_par']['optical_tagging_start_time'] = ''
+        if 'optical_tagging_end_time' not in self.Obj['optical_tagging_par']:
+            self.Obj['optical_tagging_par']['optical_tagging_end_time'] = ''
 
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
@@ -763,8 +761,8 @@ class generate_metadata:
         Make the optical tagging stimulus metadata
         '''
         self.optical_tagging_stimulus=[]
-        if self.Obj['OpticalTagging_dialog']['optical_tagging_par']['optical_tagging_start_time']=='' or self.Obj['OpticalTagging_dialog']['optical_tagging_par']['optical_tagging_end_time']=='':
-            logging.info('No optical tagging data stream detected!')
+        if self.Obj['OpticalTagging_dialog']=={} or self.Obj['optical_tagging_par']['optical_tagging_start_time']=='' or self.Obj['optical_tagging_par']['optical_tagging_end_time']=='':
+            logging.info('No optical tagging detected!')
             return 
         self._get_optical_tagging_light_source_config()
         self.optical_tagging_stimulus.append(StimulusEpoch(
@@ -772,8 +770,8 @@ class generate_metadata:
                 stimulus_device_names=self.light_names_used_in_optical_tagging,
                 stimulus_name='The optical tagging stimulus',
                 stimulus_modalities=[StimulusModality.OPTOGENETICS],
-                stimulus_start_time=self.Obj['OpticalTagging_dialog']['optical_tagging_par']['optical_tagging_start_time'],
-                stimulus_end_time=self.Obj['OpticalTagging_dialog']['optical_tagging_par']['optical_tagging_end_time'],
+                stimulus_start_time=self.Obj['optical_tagging_par']['optical_tagging_start_time'],
+                stimulus_end_time=self.Obj['optical_tagging_par']['optical_tagging_end_time'],
                 light_source_config=self.optical_tagging_light_source_config,
                 output_parameters=self._get_optical_tagging_output_parameters(),
         ))
@@ -991,12 +989,12 @@ class generate_metadata:
         '''
         self.light_names_used_in_optical_tagging=[]
         light_sources=[]
-        for i in range(len(self.Obj['OpticalTagging_dialog']['optical_tagging_par']['laser_color'])):
-            if self.Obj['OpticalTagging_dialog']['optical_tagging_par']['laser_name'][i]=="Laser_1":
+        for i in range(len(self.Obj['optical_tagging_par']['laser_color'])):
+            if self.Obj['optical_tagging_par']['laser_name'][i]=="Laser_1":
                 laser_tag=1
-            elif self.Obj['OpticalTagging_dialog']['optical_tagging_par']['laser_name'][i]=="Laser_2":
+            elif self.Obj['optical_tagging_par']['laser_name'][i]=="Laser_2":
                 laser_tag=2
-            light_sources.append({'color':self.Obj['OpticalTagging_dialog']['optical_tagging_par']['laser_color'][i],'laser_tag':laser_tag})
+            light_sources.append({'color':self.Obj['optical_tagging_par']['laser_color'][i],'laser_tag':laser_tag})
         for light_source in light_sources:
             self.light_names_used_in_optical_tagging.append([key for key, value in self.name_mapper['laser_name_mapper'].items() if value == light_source][0])
     
