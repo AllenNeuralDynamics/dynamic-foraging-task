@@ -3258,13 +3258,14 @@ class OpticalTaggingDialog(QDialog):
             return
         duration_each_cycle_list = extract_numbers_from_string(self.Duration_each_cycle.text())
         # Generate combinations for each laser
-        protocol_sampled, frequency_sampled, pulse_duration_sampled, laser_name_sampled, target_power_sampled, laser_color_sampled,duration_each_cycle_sampled = zip(*[
+        protocol_sampled, frequency_sampled, pulse_duration_sampled, laser_name_sampled, target_power_sampled, laser_color_sampled,duration_each_cycle_sampled,interval_between_cycles_sampled = zip(*[
             (protocol, frequency, pulse_duration, laser_name, target_power, laser_config[laser_name][1].currentText(),duration_each_cycle)
             for frequency in frequency_list
             for pulse_duration in pulse_duration_list
             for laser_name, (power_field, _) in laser_config.items()
             for target_power in extract_numbers_from_string(power_field.text())
             for duration_each_cycle in duration_each_cycle_list
+            for interval_between_cycles in extract_numbers_from_string(self.Interval_between_cycles.text())
         ])
 
         self.current_optical_tagging_par['protocol_sampled_all'] = []
@@ -3295,8 +3296,8 @@ class OpticalTaggingDialog(QDialog):
             self.current_optical_tagging_par['target_power_sampled_all'].extend(target_power_sampled_now)
             self.current_optical_tagging_par['laser_color_sampled_all'].extend(laser_color_sampled_now)
             self.current_optical_tagging_par['duration_each_cycle_sampled_all'].extend(duration_each_cycle_sampled)
-            self.current_optical_tagging_par['interval_between_cycles_sampled_all'].append(float(self.Interval_between_cycles.text()))
-            self.current_optical_tagging_par['location_tag_sampled_all'].append(float(self.LocationTag.value()))
+            self.current_optical_tagging_par['interval_between_cycles_sampled_all'].extend(interval_between_cycles_sampled)
+            self.current_optical_tagging_par['location_tag_sampled_all'].extend([float(self.LocationTag.value())]*len(protocol_sampled))
 
     def _WhichLaser(self):
         '''Select the laser to use and disable non-relevant widgets'''
