@@ -679,7 +679,7 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>500</y>
+     <y>520</y>
      <width>191</width>
      <height>20</height>
     </rect>
@@ -698,6 +698,19 @@
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="EmergencyStop">
+   <property name="geometry">
+    <rect>
+     <x>109</x>
+     <y>460</y>
+     <width>101</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Emergency Stop</string>
    </property>
   </widget>
  </widget>
