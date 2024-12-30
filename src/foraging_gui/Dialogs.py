@@ -3098,6 +3098,9 @@ class OpticalTaggingDialog(QDialog):
         # get the first start time
         if "optical_tagging_start_time" not in self.optical_tagging_par:
             self.optical_tagging_par["optical_tagging_start_time"] = str(datetime.now())
+        if self.optical_tagging_par["optical_tagging_start_time"]=='':
+            self.optical_tagging_par["optical_tagging_start_time"] = str(datetime.now())
+
         # Execute
         self.threadpool.start(worker_tagging)
         #self._start_optical_tagging()
