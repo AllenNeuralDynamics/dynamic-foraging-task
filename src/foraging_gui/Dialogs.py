@@ -3113,6 +3113,10 @@ class OpticalTaggingDialog(QDialog):
         # iterate each condition
         for i in self.index[:]:
             if self.Start.isChecked():
+                if i == self.index[-1]:
+                    self.cycle_finish_tag = 1
+                # exclude the index that has been run
+                self.index.remove(i)
                 success_tag=0
                 # get the current parameters
                 protocol = self.current_optical_tagging_par['protocol_sampled_all'][i]
@@ -3196,10 +3200,7 @@ class OpticalTaggingDialog(QDialog):
                     f"Duration: {duration_each_cycle} s\n"
                     f"Interval: {interval_between_cycles} s"
                 )
-                if i == self.index[-1]:
-                    self.cycle_finish_tag = 1
-                # exclude the index that has been run
-                self.index.remove(i)
+
             else:
                 break
 
