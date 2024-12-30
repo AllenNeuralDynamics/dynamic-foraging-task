@@ -508,7 +508,6 @@ class generate_metadata:
             if key not in dic:
                 dic[key] = default_value
 
-
     def _session(self):
         '''
         Create metadata related to Session class in the aind_data_schema
@@ -999,7 +998,8 @@ class generate_metadata:
             light_sources.append({'color':self.Obj['optical_tagging_par']['laser_color'][i],'laser_tag':laser_tag})
         for light_source in light_sources:
             self.light_names_used_in_optical_tagging.append([key for key, value in self.name_mapper['laser_name_mapper'].items() if value == light_source][0])
-    
+        self.light_names_used_in_optical_tagging = list(set(self.light_names_used_in_optical_tagging))
+        
     def _get_light_names_used_in_session(self):
         '''
         Get the optogenetics laser names used in the session
