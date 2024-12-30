@@ -3051,7 +3051,22 @@ class OpticalTaggingDialog(QDialog):
         self.Start.clicked.connect(self._Start)
         self.WhichLaser.currentIndexChanged.connect(self._WhichLaser)
         self.EmergencyStop.clicked.connect(self._emegency_stop)
-
+        self.Save.clicked.connect(self._Save)
+    
+    def _Save(self):
+        '''Save the optical tagging results'''
+        if self.optical_tagging_par=={}:
+            return
+        # get the save folder
+        save_folder = QFileDialog.getExistingDirectory(self, 'Select the folder to save the optical tagging results')
+        if save_folder=='':
+            return
+        # create the file name AnimalID_Date_OpticalTaggingResults.csv
+        save_file = os.path.join(save_folder, f'{self.MainWindow.AnimalID.text()}_{datetime.now().strftime("%Y-%m-%d")}_OpticalTaggingResults.json')
+        # save the data
+        with open(save_file, 'w') as f:
+            json.dump(self.optical_tagging_par, f)
+        
     def _Start(self):
         '''Start the optical tagging'''
         # toggle the button color
