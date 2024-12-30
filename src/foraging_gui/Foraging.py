@@ -2694,6 +2694,8 @@ class Window(QMainWindow):
         Obj['MetadataFolder']=self.MetadataFolder
         Obj['SaveFile']=self.SaveFile
 
+        # save optical tagging parameters
+        Obj['optical_tagging_par']=self.OpticalTagging_dialog.optical_tagging_par
         # generate the metadata file and update slims
         try:
             # save the metadata collected in the metadata dialogue
