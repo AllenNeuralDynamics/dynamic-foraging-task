@@ -1985,73 +1985,59 @@ class NewScaleSerialY():
         return data
 
 class WorkerSignals(QtCore.QObject):
-    '''
+    """
     Defines the signals available from a running worker thread.
 
-    Supported signals are:
-
-    finished
-        No data
-
-    error
-        tuple (exctype, value, traceback.format_exc() )
-
-    result
-        object data returned from processing, anything
-
-    progress
-        int indicating % progress
-
-    '''
+    Signals:
+        finished: Emitted when the task is complete.
+        error: Emitted with a tuple (exctype, value, traceback) on failure.
+        result: Emitted with the result of the processing.
+        progress: Emitted with an integer indicating % progress (optional use).
+    """
     finished = QtCore.pyqtSignal()
     error = QtCore.pyqtSignal(tuple)
     result = QtCore.pyqtSignal(object)
     progress = QtCore.pyqtSignal(int)
 
-
 class Worker(QtCore.QRunnable):
-    '''
-    Worker thread
+    """
+    Worker thread.
 
-    Inherits from QRunnable to handler worker thread setup, signals and wrap-up.
+    Inherits from QRunnable to handle worker thread setup, signals, and wrap-up.
 
-    :param callback: The function callback to run on this worker thread. Supplied args and
-                     kwargs will be passed through to the runner.
-    :type callback: function
-    :param args: Arguments to pass to the callback function
-    :param kwargs: Keywords to pass to the callback function
-
-    '''
+    :param fn: The function to execute on this worker thread.
+    :param args: Positional arguments to pass to the function.
+    :param kwargs: Keyword arguments to pass to the function.
+    """
     def __init__(self, fn, *args, **kwargs):
-        super(Worker, self).__init__()
+        super().__init__()
 
-        # Store constructor arguments (re-used for processing)
         self.fn = fn
         self.args = args
         self.kwargs = kwargs
         self.signals = WorkerSignals()
-        self.setAutoDelete(False) 
-        # Add the callback to our kwargs
+
+        # If progress callback exists, pass it to the worker function
+        self.kwargs['progress_callback'] = self.signals.progress.emit
 
     @QtCore.pyqtSlot()
     def run(self):
-        '''
-        Initialise the runner function with passed args, kwargs.
-        '''
-
-        # Retrieve args/kwargs here; and fire processing using them
+        """
+        Run the worker function and emit signals for result or errors.
+        """
         try:
+            # Execute the function with provided arguments
             result = self.fn(*self.args, **self.kwargs)
-        except ValueError as e:
-            exctype, value = sys.exc_info()[:2]
+        except Exception as e:  # Catch all exceptions
+            exctype, value, tb = sys.exc_info()
             self.signals.error.emit((exctype, value, traceback.format_exc()))
-            logging.error(str(e))
+            logging.error(f"Error in worker thread: {e}")
         else:
-            self.signals.result.emit(result)  # Return the result of the processing
+            # Emit the result if the function completes successfully
+            self.signals.result.emit(result)
         finally:
-            self.signals.finished.emit()  # Done
-
-
+            # Always emit the finished signal
+            self.signals.finished.emit()
 
 class TimerWorker(QtCore.QObject):
     '''
