@@ -3061,11 +3061,11 @@ class OpticalTaggingDialog(QDialog):
         save_folder = QFileDialog.getExistingDirectory(self, 'Select the folder to save the optical tagging results')
         if save_folder=='':
             return
-        # create the file name AnimalID_Date_OpticalTaggingResults.csv
-        save_file = os.path.join(save_folder, f'{self.MainWindow.ID.text()}_{datetime.now().strftime("%Y-%m-%d")}_OpticalTaggingResults.json')
-        # save the data
+        # create the file name AnimalID_Date(day+hour+minute)_OpticalTaggingResults.csv
+        save_file = os.path.join(save_folder, f"{self.optical_tagging_par['AnimalID']}_{datetime.now().strftime('%Y-%m-%d-%H-%M')}_OpticalTaggingResults.json")
+        # save the data 
         with open(save_file, 'w') as f:
-            json.dump(self.optical_tagging_par, f)
+            json.dump(self.optical_tagging_par, f, indent=4)
         
     def _Start(self):
         '''Start the optical tagging'''
