@@ -3044,7 +3044,6 @@ class OpticalTaggingDialog(QDialog):
         self.MainWindow = MainWindow
         self.current_optical_tagging_par={}
         self.optical_tagging_par={}
-        self.thread_finish_tag = 0
         self.cycle_finish_tag = 1
         self.threadpool = QThreadPool()
 
@@ -3081,14 +3080,12 @@ class OpticalTaggingDialog(QDialog):
 
     def _emegency_stop(self):
         '''Stop the optical tagging'''
-        self.thread_finish_tag = 1
         self.cycle_finish_tag = 1
         self.Start.setChecked(False)
         self.Start.setStyleSheet("background-color : none")
 
     def _thread_complete_tag(self):
         '''Complete the optical tagging'''
-        self.thread_finish_tag = 1
         # Add 1 to the location tag when the cycle is finished
         if self.cycle_finish_tag == 1:
             self.LocationTag.setValue(self.LocationTag.value()+1)
@@ -3097,7 +3094,7 @@ class OpticalTaggingDialog(QDialog):
         '''Start the optical tagging in a different thread'''
         # iterate each condition
         for i in self.index[:]:
-            if self.Start.isChecked() and self.thread_finish_tag==0:
+            if self.Start.isChecked():
                 success_tag=0
                 # get the current parameters
                 protocol = self.current_optical_tagging_par['protocol_sampled_all'][i]
