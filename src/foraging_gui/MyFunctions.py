@@ -2017,9 +2017,6 @@ class Worker(QtCore.QRunnable):
         self.kwargs = kwargs
         self.signals = WorkerSignals()
 
-        # If progress callback exists, pass it to the worker function
-        self.kwargs['progress_callback'] = self.signals.progress.emit
-
     @QtCore.pyqtSlot()
     def run(self):
         """
