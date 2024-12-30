@@ -3106,6 +3106,7 @@ class OpticalTaggingDialog(QDialog):
                 duration_each_cycle = self.current_optical_tagging_par['duration_each_cycle_sampled_all'][i]
                 interval_between_cycles = self.current_optical_tagging_par['interval_between_cycles_sampled_all'][i]
                 location_tag = self.current_optical_tagging_par['location_tag'][i]
+                current_epoch = self.current_optical_tagging_par['epoch'][i]
                 # produce the waveforms
                 my_wave=self._produce_waveforms(protocol=protocol, 
                                                 frequency=frequency, 
@@ -3162,7 +3163,7 @@ class OpticalTaggingDialog(QDialog):
                 # wait to start the next cycle
                 time.sleep(duration_each_cycle+interval_between_cycles)
                 # show current cycle and parameters
-                self.label_show_current.setText(f'Cycle {i+1}/{len(self.current_optical_tagging_par["protocol_sampled_all"])}\nprotocol: {protocol}\nFrequency: {frequency} Hz\nPulse Duration: {pulse_duration} ms\nLaser: {laser_name}\nPower: {target_power} mW\nColor: {laser_color}\nDuration: {duration_each_cycle} s\nInterval: {interval_between_cycles} s')
+                self.label_show_current.setText(f'Epoch: {current_epoch}\n Iteration: {i%float(self.Cycles_each_power.text())} \nprotocol: {protocol}\nFrequency: {frequency} Hz\nPulse Duration: {pulse_duration} ms\nLaser: {laser_name}\nPower: {target_power} mW\nColor: {laser_color}\nDuration: {duration_each_cycle} s\nInterval: {interval_between_cycles} s')
     
     def _save_data(self, protocol, frequency, pulse_duration, laser_name, target_power, laser_color, duration_each_cycle, interval_between_cycles, location_tag):
         '''Extend the current parameters to self.optical_tagging_par'''
@@ -3259,7 +3260,8 @@ class OpticalTaggingDialog(QDialog):
         self.current_optical_tagging_par['duration_each_cycle_sampled_all'] = []
         self.current_optical_tagging_par['interval_between_cycles_sampled_all'] = []
         self.current_optical_tagging_par['location_tag_sampled_all'] = []
-        for _ in range(number_of_cycles):
+        self.current_optical_tagging_par['epoch'] = []
+        for i in range(number_of_cycles):
             # Generate a random index to sample conditions
             random_indices = random.sample(range(len(protocol_sampled)), len(protocol_sampled))
             # Use the random indices to shuffle the conditions
@@ -3280,6 +3282,7 @@ class OpticalTaggingDialog(QDialog):
             self.current_optical_tagging_par['duration_each_cycle_sampled_all'].extend(duration_each_cycle_sampled)
             self.current_optical_tagging_par['interval_between_cycles_sampled_all'].append(float(self.Interval_between_cycles.text()))
             self.current_optical_tagging_par['location_tag_sampled_all'].append(float(self.LocationTag.value()))
+            self.current_optical_tagging_par['epoch'].extend([i+1]*len(protocol_sampled_now)) 
 
     def _WhichLaser(self):
         '''Select the laser to use and disable non-relevant widgets'''
