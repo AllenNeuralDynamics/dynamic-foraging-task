@@ -2051,7 +2051,7 @@ class Worker(QtCore.QRunnable):
         finally:
             self.signals.finished.emit()  # Done
 
-class WorkerSignals(QtCore.QObject):
+class WorkerSignalsTagging(QtCore.QObject):
     update_label = QtCore.pyqtSignal(str)
     finished = QtCore.pyqtSignal()
 
@@ -2061,7 +2061,7 @@ class WorkerTagging(QtCore.QRunnable):
         self.function = function
         self.args = args
         self.kwargs = kwargs
-        self.signals = WorkerSignals()
+        self.signals = WorkerSignalsTagging()
 
     def run(self):
         try:
