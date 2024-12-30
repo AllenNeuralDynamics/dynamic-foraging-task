@@ -3256,7 +3256,7 @@ class OpticalTaggingDialog(QDialog):
             # give an popup error window if the laser is not selected
             QMessageBox.critical(self.MainWindow, "Error", "Please select the laser to use.")
             return
-        duration_each_cycle_list = extract_numbers_from_string(self.Duration_each_cycle.text())
+        
         # Generate combinations for each laser
         protocol_sampled, frequency_sampled, pulse_duration_sampled, laser_name_sampled, target_power_sampled, laser_color_sampled,duration_each_cycle_sampled,interval_between_cycles_sampled = zip(*[
             (protocol, frequency, pulse_duration, laser_name, target_power, laser_config[laser_name][1].currentText(),duration_each_cycle,interval_between_cycles)
@@ -3264,7 +3264,7 @@ class OpticalTaggingDialog(QDialog):
             for pulse_duration in pulse_duration_list
             for laser_name, (power_field, _) in laser_config.items()
             for target_power in extract_numbers_from_string(power_field.text())
-            for duration_each_cycle in duration_each_cycle_list
+            for duration_each_cycle in extract_numbers_from_string(self.Duration_each_cycle.text())
             for interval_between_cycles in extract_numbers_from_string(self.Interval_between_cycles.text())
         ])
 
