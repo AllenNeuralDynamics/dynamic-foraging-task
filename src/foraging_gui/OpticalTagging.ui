@@ -682,9 +682,9 @@
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>30</y>
+     <y>80</y>
      <width>191</width>
-     <height>321</height>
+     <height>331</height>
     </rect>
    </property>
    <property name="maximumSize">
@@ -693,6 +693,13 @@
      <height>16777215</height>
     </size>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>15</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
    <property name="text">
     <string/>
    </property>
@@ -700,7 +707,7 @@
     <enum>Qt::AutoText</enum>
    </property>
    <property name="alignment">
-    <set>Qt::AlignCenter</set>
+    <set>Qt::AlignHCenter|Qt::AlignTop</set>
    </property>
    <property name="wordWrap">
     <bool>false</bool>
