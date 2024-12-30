@@ -3091,10 +3091,10 @@ class OpticalTaggingDialog(QDialog):
 
     def _start_optical_tagging(self):
         '''Start the optical tagging in a different thread'''
-        while self.finish_tag==0 and self.Start.isChecked():
+        # iterate each condition
+        for i in self.index:
             QApplication.processEvents()
-            # iterate each condition
-            for i in self.index:
+            if self.Start.isChecked() and self.finish_tag==0:
                 success_tag=0
                 # exclude the index that has been run
                 self.index.remove(i)
@@ -3179,6 +3179,8 @@ class OpticalTaggingDialog(QDialog):
                         f"Duration: {duration_each_cycle} s\n"
                         f"Interval: {interval_between_cycles} s"
                     )
+            else:
+                break
 
     def _save_data(self, protocol, frequency, pulse_duration, laser_name, target_power, laser_color, duration_each_cycle, interval_between_cycles, location_tag, laser_start_timestamp, success_tag):
         '''Extend the current parameters to self.optical_tagging_par'''
