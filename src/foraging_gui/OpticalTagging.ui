@@ -684,7 +684,7 @@
      <x>270</x>
      <y>30</y>
      <width>191</width>
-     <height>20</height>
+     <height>321</height>
     </rect>
    </property>
    <property name="maximumSize">
@@ -701,6 +701,9 @@
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>
+   </property>
+   <property name="wordWrap">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="EmergencyStop">
