@@ -3046,7 +3046,12 @@ class OpticalTaggingDialog(QDialog):
         self.optical_tagging_par={}
         self.cycle_finish_tag = 1
         self.threadpool = QThreadPool()
-
+        # find all buttons and set them to not be the default button
+        for container in [self]:
+            for child in container.findChildren((QtWidgets.QPushButton)):     
+                child.setDefault(False)
+                child.setAutoDefault(False)
+                
     def _connectSignalsSlots(self):
         self.Start.clicked.connect(self._Start)
         self.WhichLaser.currentIndexChanged.connect(self._WhichLaser)
