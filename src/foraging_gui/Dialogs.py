@@ -3117,7 +3117,9 @@ class OpticalTaggingDialog(QDialog):
         self.Start.setStyleSheet("background-color : none")
         # update the stop time
         self.optical_tagging_par["optical_tagging_end_time"] = str(datetime.now())
-
+        # toggle the start button in the main window
+        self.MainWindow.unsaved_data=True
+        self.MainWindow.Save.setStyleSheet("color: white;background-color : mediumorchid;")
 
     def _start_optical_tagging(self,update_label):
         '''Start the optical tagging in a different thread'''
