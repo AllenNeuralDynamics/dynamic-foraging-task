@@ -208,6 +208,7 @@ class Window(QMainWindow):
         self._WaterCalibration()# to open the water calibration panel
         self._Camera()
         self._OpticalTagging()
+        self._RandomReward()
         self._InitializeMotorStage()
         self._load_stage()
         self._Metadata()
