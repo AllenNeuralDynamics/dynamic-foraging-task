@@ -3524,7 +3524,8 @@ class RandomRewardDialog(QDialog):
             for child in container.findChildren((QtWidgets.QPushButton)):     
                 child.setDefault(False)
                 child.setAutoDefault(False)
-    
+        self.RandomWaterVolume=[0,0]
+
     def _connectSignalsSlots(self):
         self.Start.clicked.connect(self._Start)
         self.WhichSpout.currentIndexChanged.connect(self._WhichSpout)
@@ -3533,6 +3534,7 @@ class RandomRewardDialog(QDialog):
     def _emegency_stop(self):
         '''Stop the random reward'''
         self.cycle_finish_tag = 1
+        self.RandomWaterVolume=[0,0]
         self.Start.setChecked(False)
         self.Start.setStyleSheet("background-color : none")
         
@@ -3618,14 +3620,21 @@ class RandomRewardDialog(QDialog):
         if side==0:
             left_valve_open_time=((float(volume)-self.MainWindow.latest_fitting['Left'][1])/self.MainWindow.latest_fitting['Left'][0])*1000
             # set the left valve open time
+            self.Channel.LeftValue(left_valve_open_time)
             # open the left valve
-            
+            time.sleep(0.01)
+            self.Channel3.RandomWater_Left(int(1))
+            self.RandomWaterVolume[0]=self.ManualWaterVolume[0]+float(volume)/1000
         elif side==1:
             right_valve_open_time=((float(volume)-self.MainWindow.latest_fitting['Right'][1])/self.MainWindow.latest_fitting['Right'][0])*1000
             # set the right valve open time
+            self.Channel.RightValue(right_valve_open_time)
             # open the right valve
-
+            time.sleep(0.01)
+            self.Channel3.RandomWater_Right(int(1))
+            self.RandomWaterVolume[1]=self.ManualWaterVolume[1]+float(volume)/1000
         # update the reward suggestion
+        self.MainWindow._UpdateSuggestedWater()
 
 
     def _WhichSpout(self):
