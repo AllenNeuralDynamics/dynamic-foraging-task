@@ -42,7 +42,7 @@ import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
 from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
 from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,MetadataDialog
-from foraging_gui.Dialogs import LaserCalibrationDialog,OpticalTaggingDialog
+from foraging_gui.Dialogs import LaserCalibrationDialog,OpticalTaggingDialog,RandomRewardDialog
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY, EphysRecording
@@ -185,6 +185,7 @@ class Window(QMainWindow):
         self.OpenCamera=0
         self.OpenMetadata=0
         self.OpenOpticalTagging=0
+        self.OpenRandomReward=0
         self.NewTrialRewardOrder=0
         self.LickSta=0
         self.LickSta_ToInitializeVisual=1
@@ -2350,6 +2351,16 @@ class Window(QMainWindow):
             self.OpticalTagging_dialog.show()
         else:
             self.OpticalTagging_dialog.hide()
+
+    def _RandomReward(self):
+        '''Open the random reward dialog'''
+        if self.OpenRandomReward==0:
+            self.RandomReward_dialog = RandomRewardDialog(MainWindow=self)
+            self.OpenRandomReward=1
+        if self.actionRandom_Reward.isChecked()==True:
+            self.RandomReward_dialog.show()
+        else:
+            self.RandomReward_dialog.hide()
 
     def _Metadata(self):
         '''Open the metadata dialog'''
