@@ -3611,10 +3611,14 @@ class RandomRewardDialog(QDialog):
                 self._save_data(volume=volume, side=side, interval=interval,timestamp_computer=timestamp_computer,timestamp_harp=timestamp_harp)
                 # show current cycle and parameters
                 # Emit signal to update the label
+                if side==0:
+                    side_spout='Left'
+                elif side==1:
+                    side_spout='Right'
                 update_label(
                     f"Cycles: {i+1}/{len(self.current_random_reward_par['volumes_all_random'])} \n"
                     f"Volume: {volume} uL\n"
-                    f"Side: {side}\n"
+                    f"Side: {side_spout}\n"
                     f"Interval: {interval} s"
                 )
                 # wait to start the next cycle
