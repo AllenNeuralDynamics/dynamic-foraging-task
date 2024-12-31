@@ -3587,6 +3587,38 @@ class RandomRewardDialog(QDialog):
                 )
             else:
                 break
+    
+    def _save_data(self, volume:float, side:int, interval:float):
+        '''Extend the current parameters to self.random_reward_par'''
+        if 'volumes' not in self.random_reward_par.keys():
+            self.random_reward_par['volumes']=[]
+            self.random_reward_par['sides']=[]
+            self.random_reward_par['intervals']=[]
+        else:
+            self.random_reward_par['volumes'].append(volume)
+            self.random_reward_par['sides'].append(side)
+            self.random_reward_par['intervals'].append(interval)
+
+    def _thread_complete_tag(self):
+        '''Complete the random reward'''
+        self.Start.setChecked(False)
+        self.Start.setStyleSheet("background-color : none")
+        # update the stop time
+        self.random_reward_par["random_reward_end_time"] = str(datetime.now())
+
+    def _give_reward(self,volume:float,side:int):
+        '''Give the reward'''
+        if side==0:
+            left_valve_open_time=((float(volume)-self.MainWindow.latest_fitting['Left'][1])/self.MainWindow.latest_fitting['Left'][0])*1000
+            # set the left valve open time
+            # open the left valve
+            
+        elif side==1:
+            right_valve_open_time=((float(volume)-self.MainWindow.latest_fitting['Right'][1])/self.MainWindow.latest_fitting['Right'][0])*1000
+            # set the right valve open time
+            # open the right valve
+
+        # update the reward suggestion
 
 
     def _WhichSpout(self):
