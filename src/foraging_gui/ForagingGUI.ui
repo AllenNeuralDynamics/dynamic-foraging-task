@@ -5257,6 +5257,9 @@ Current pair:
    </property>
   </action>
   <action name="actionRandom_Reward">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Random Reward</string>
    </property>
