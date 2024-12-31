@@ -3529,15 +3529,20 @@ class RandomRewardDialog(QDialog):
     def _connectSignalsSlots(self):
         self.Start.clicked.connect(self._Start)
         self.WhichSpout.currentIndexChanged.connect(self._WhichSpout)
-        self.EmergencyStop.clicked.connect(self._emegency_stop)
+        self.StartOver.clicked.connect(self._start_over)
 
-    def _emegency_stop(self):
+    def _start_over(self):
         '''Stop the random reward'''
-        self.cycle_finish_tag = 1
-        self.random_reward_par['RandomWaterVolume']=[0,0]
-        self.Start.setChecked(False)
-        self.Start.setStyleSheet("background-color : none")
-        
+        # ask user if they want to start over
+        reply = QMessageBox.question(self, 'Message', 'Do you want to start over?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.cycle_finish_tag = 1
+            self.random_reward_par['RandomWaterVolume']=[0,0]
+            self.Start.setChecked(False)
+            self.Start.setStyleSheet("background-color : none")
+        else:
+            return
+
     def _Start(self):
         '''Start giving random rewards'''
         # toggle the button color
