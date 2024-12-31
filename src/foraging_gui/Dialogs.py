@@ -3507,3 +3507,21 @@ def extract_numbers_from_string(input_string:str)->list:
     # Regular expression to match floating-point numbers
     float_pattern = r"[-+]?\d*\.\d+|\d+"  # Matches numbers like 0.4, -0.5, etc.
     return [float(num) for num in re.findall(float_pattern, input_string)]
+
+
+class RandomRewardDialog(QDialog):
+    
+    def __init__(self, MainWindow, parent=None):
+        super().__init__(parent)
+        uic.loadUi('RandomReward.ui', self)
+        self._connectSignalsSlots()
+        self.MainWindow = MainWindow
+        self.threadpool = QThreadPool()
+        # find all buttons and set them to not be the default button
+        for container in [self]:
+            for child in container.findChildren((QtWidgets.QPushButton)):     
+                child.setDefault(False)
+                child.setAutoDefault(False)
+    
+    def _connectSignalsSlots(self):
+        pass
