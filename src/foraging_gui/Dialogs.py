@@ -3663,7 +3663,7 @@ class RandomRewardDialog(QDialog):
         if side==0:
             left_valve_open_time=((float(volume)-self.MainWindow.latest_fitting['Left'][1])/self.MainWindow.latest_fitting['Left'][0])*1000
             # set the left valve open time
-            self.MainWindow.Channel.LeftValue(left_valve_open_time)
+            self.MainWindow.Channel.LeftValue(float(left_valve_open_time))
             # open the left valve
             time.sleep(0.01)
             self.MainWindow.Channel3.RandomWater_Left(int(1))
@@ -3671,7 +3671,7 @@ class RandomRewardDialog(QDialog):
         elif side==1:
             right_valve_open_time=((float(volume)-self.MainWindow.latest_fitting['Right'][1])/self.MainWindow.latest_fitting['Right'][0])*1000
             # set the right valve open time
-            self.MainWindow.Channel.RightValue(right_valve_open_time)
+            self.MainWindow.Channel.RightValue(float(right_valve_open_time))
             # open the right valve
             time.sleep(0.01)
             self.MainWindow.Channel3.RandomWater_Right(int(1))
