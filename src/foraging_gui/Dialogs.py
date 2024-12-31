@@ -3582,8 +3582,6 @@ class RandomRewardDialog(QDialog):
                 self._give_reward(volume=volume, side=side)
                 # save the data 
                 self._save_data(volume=volume, side=side, interval=interval)
-                # wait to start the next cycle
-                time.sleep(interval)
                 # show current cycle and parameters
                 # Emit signal to update the label
                 update_label(
@@ -3592,6 +3590,8 @@ class RandomRewardDialog(QDialog):
                     f"Side: {side}\n"
                     f"Interval: {interval} s"
                 )
+                # wait to start the next cycle
+                time.sleep(interval)
             else:
                 break
     
