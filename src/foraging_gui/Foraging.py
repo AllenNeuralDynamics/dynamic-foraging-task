@@ -4532,7 +4532,6 @@ class Window(QMainWindow):
             logger.info('Give left manual water (ul): '+str(np.round(float(self.TP_GiveWaterL_volume),3)),
                            extra={'tags': [self.warning_log_tag]})
 
-
     def _give_reserved_water(self,valve=None):
         '''give reserved water usually after the go cue'''
         if valve=='left':

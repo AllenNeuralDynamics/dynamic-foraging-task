@@ -3518,6 +3518,7 @@ class RandomRewardDialog(QDialog):
         self.MainWindow = MainWindow
         self.threadpool = QThreadPool()
         self.cycle_finish_tag = 1
+        self.thread_finish_tag = 1
         self.random_reward_par={}
         # find all buttons and set them to not be the default button
         for container in [self]:
@@ -3537,11 +3538,15 @@ class RandomRewardDialog(QDialog):
         # ask user if they want to clear the data
         reply = QMessageBox.question(self, 'Message', 'Do you want to clear the data?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
-            self.random_reward_par={}
             self.cycle_finish_tag = 1
-            self.random_reward_par['RandomWaterVolume']=[0,0]
             self.Start.setChecked(False)
             self.Start.setStyleSheet("background-color : none")
+            # wait for the thread to finish
+            while self.thread_finish_tag == 0:
+                QApplication.processEvents()
+                time.sleep(0.1)
+            self.random_reward_par={}
+            self.random_reward_par['RandomWaterVolume']=[0,0]
             self.label_show_current.setText('')
 
     def _start_over(self):
@@ -3550,7 +3555,6 @@ class RandomRewardDialog(QDialog):
         reply = QMessageBox.question(self, 'Message', 'Do you want to start over?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
             self.cycle_finish_tag = 1
-            self.random_reward_par['RandomWaterVolume']=[0,0]
             self.Start.setChecked(False)
             self.Start.setStyleSheet("background-color : none")
         else:
@@ -3588,6 +3592,7 @@ class RandomRewardDialog(QDialog):
     def _start_random_reward(self,update_label):
         '''Start the random reward in a different thread'''
         # iterate each condition
+        self.thread_finish_tag = 0
         for i in self.index[:]:
             if self.Start.isChecked():
                 if i == self.index[-1]:
@@ -3653,6 +3658,7 @@ class RandomRewardDialog(QDialog):
 
     def _thread_complete_tag(self):
         '''Complete the random reward'''
+        self.thread_finish_tag = 1
         self.Start.setChecked(False)
         self.Start.setStyleSheet("background-color : none")
         # update the stop time
@@ -3665,7 +3671,7 @@ class RandomRewardDialog(QDialog):
             # set the left valve open time
             self.MainWindow.Channel.LeftValue(float(left_valve_open_time))
             # open the left valve
-            time.sleep(1)
+            time.sleep(0.1)
             self.MainWindow.Channel3.RandomWater_Left(int(1))
             self.random_reward_par['RandomWaterVolume'][0]=self.random_reward_par['RandomWaterVolume'][0]+float(volume)/1000
             print(float(left_valve_open_time))
@@ -3674,7 +3680,7 @@ class RandomRewardDialog(QDialog):
             # set the right valve open time
             self.MainWindow.Channel.RightValue(float(right_valve_open_time))
             # open the right valve
-            time.sleep(1)
+            time.sleep(0.1)
             self.MainWindow.Channel3.RandomWater_Right(int(1))
             self.random_reward_par['RandomWaterVolume'][1]=self.random_reward_par['RandomWaterVolume'][1]+float(volume)/1000
             print(float(right_valve_open_time))
