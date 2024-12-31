@@ -71,8 +71,8 @@
      <rect>
       <x>620</x>
       <y>20</y>
-      <width>222</width>
-      <height>27</height>
+      <width>152</width>
+      <height>20</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -4569,7 +4569,7 @@
      <x>0</x>
      <y>0</y>
      <width>1951</width>
-     <height>31</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -4621,6 +4621,7 @@
     <addaction name="actionLaser_Calibration"/>
     <addaction name="actionMeta_Data"/>
     <addaction name="actionOptical_Tagging"/>
+    <addaction name="actionRandom_Reward"/>
     <addaction name="separator"/>
     <addaction name="menuSimulation"/>
     <addaction name="actionDrawing_after_stopping"/>
@@ -5021,6 +5022,11 @@
    </property>
    <property name="text">
     <string>Optical Tagging</string>
+   </property>
+  </action>
+  <action name="actionRandom_Reward">
+   <property name="text">
+    <string>Random Reward</string>
    </property>
   </action>
  </widget>
