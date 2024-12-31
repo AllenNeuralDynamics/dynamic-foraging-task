@@ -79,7 +79,7 @@
            <x>0</x>
            <y>0</y>
            <width>894</width>
-           <height>226</height>
+           <height>236</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_17">
@@ -691,7 +691,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>624</width>
+                  <width>621</width>
                   <height>334</height>
                  </rect>
                 </property>
@@ -1626,8 +1626,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>655</width>
-                  <height>365</height>
+                  <width>610</width>
+                  <height>339</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_9">
@@ -2270,8 +2270,8 @@ Bias:</string>
                         <rect>
                          <x>0</x>
                          <y>0</y>
-                         <width>349</width>
-                         <height>189</height>
+                         <width>330</width>
+                         <height>209</height>
                         </rect>
                        </property>
                        <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -2342,8 +2342,8 @@ Double dipping:
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>1540</width>
-                  <height>504</height>
+                  <width>1177</width>
+                  <height>463</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -4445,8 +4445,8 @@ Current pair:
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>714</width>
-                  <height>286</height>
+                  <width>627</width>
+                  <height>325</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_16">
@@ -4803,7 +4803,7 @@ Current pair:
      <x>0</x>
      <y>0</y>
      <width>960</width>
-     <height>31</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -5247,6 +5247,9 @@ Current pair:
    </property>
   </action>
   <action name="actionOptical_Tagging">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>resources/OpticalTagging.jpg</normaloff>resources/OpticalTagging.jpg</iconset>
