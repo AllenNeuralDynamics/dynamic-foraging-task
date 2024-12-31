@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>606</width>
-    <height>400</height>
+    <height>460</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -421,8 +421,8 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>290</x>
-     <y>30</y>
+     <x>300</x>
+     <y>60</y>
      <width>241</width>
      <height>331</height>
     </rect>
@@ -464,6 +464,19 @@
    </property>
    <property name="text">
     <string>Start over</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="ClearData">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>400</y>
+     <width>101</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Clear data</string>
    </property>
   </widget>
  </widget>

@@ -3530,6 +3530,19 @@ class RandomRewardDialog(QDialog):
         self.Start.clicked.connect(self._Start)
         self.WhichSpout.currentIndexChanged.connect(self._WhichSpout)
         self.StartOver.clicked.connect(self._start_over)
+        self.ClearData.clicked.connect(self._clear_data)
+
+    def _clear_data(self):
+        '''Clear the data'''
+        # ask user if they want to clear the data
+        reply = QMessageBox.question(self, 'Message', 'Do you want to clear the data?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.random_reward_par={}
+            self.cycle_finish_tag = 1
+            self.random_reward_par['RandomWaterVolume']=[0,0]
+            self.Start.setChecked(False)
+            self.Start.setStyleSheet("background-color : none")
+            self.label_show_current.setText('')
 
     def _start_over(self):
         '''Stop the random reward'''
