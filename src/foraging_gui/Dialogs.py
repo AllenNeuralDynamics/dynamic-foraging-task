@@ -3667,7 +3667,7 @@ class RandomRewardDialog(QDialog):
             # open the left valve
             time.sleep(0.01)
             self.MainWindow.Channel3.RandomWater_Left(int(1))
-            self.random_reward_par['RandomWaterVolume'][0]=self.ManualWaterVolume[0]+float(volume)/1000
+            self.random_reward_par['RandomWaterVolume'][0]=elf.random_reward_par['RandomWaterVolume'][0]+float(volume)/1000
         elif side==1:
             right_valve_open_time=((float(volume)-self.MainWindow.latest_fitting['Right'][1])/self.MainWindow.latest_fitting['Right'][0])*1000
             # set the right valve open time
@@ -3675,10 +3675,9 @@ class RandomRewardDialog(QDialog):
             # open the right valve
             time.sleep(0.01)
             self.MainWindow.Channel3.RandomWater_Right(int(1))
-            self.random_reward_par['RandomWaterVolume'][1]=self.ManualWaterVolume[1]+float(volume)/1000
+            self.random_reward_par['RandomWaterVolume'][1]=elf.random_reward_par['RandomWaterVolume'][1]+float(volume)/1000
         # update the reward suggestion
         self.MainWindow._UpdateSuggestedWater()
-
 
     def _WhichSpout(self):
         '''Select the lick spout to use and disable non-relevant widgets'''
