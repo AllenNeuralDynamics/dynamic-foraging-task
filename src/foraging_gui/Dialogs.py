@@ -3582,8 +3582,10 @@ class RandomRewardDialog(QDialog):
                 interval = self.current_random_reward_par['reward_intervals'][i]
                 # give the reward
                 self._give_reward(volume=volume, side=side)
+                # receiving the timestamps of reward start time. 
+                timestamp_computer, timestamp_harp=self._receving_timestamps(side=side)
                 # save the data 
-                self._save_data(volume=volume, side=side, interval=interval)
+                self._save_data(volume=volume, side=side, interval=interval,timestamp_computer=timestamp_computer,timestamp_harp=timestamp_harp)
                 # show current cycle and parameters
                 # Emit signal to update the label
                 update_label(
@@ -3596,17 +3598,39 @@ class RandomRewardDialog(QDialog):
                 time.sleep(interval)
             else:
                 break
-    
-    def _save_data(self, volume:float, side:int, interval:float):
+    def _receving_timestamps(self,side:int):
+        '''Receiving the timestamps of reward start time'''
+        if side==0:
+            for i in range(2):
+                Rec=self.MainWindow.Channel2.receive()
+                if Rec[0].address=='/RandomLeftWaterStartTime':
+                    random_left_water_start_time_harp=Rec[1][1][0]
+                if Rec[0].address=='/LeftRewardDeliveryTimeHarp':
+                    random_left_reward_delivery_time_harp=Rec[1][1][0]
+            return random_left_water_start_time_harp,random_left_reward_delivery_time_harp
+        elif side==1:
+            for i in range(2):
+                Rec=self.MainWindow.Channel2.receive()
+                if Rec[0].address=='/RandomRightWaterStartTime':
+                    random_right_water_start_time_harp=Rec[1][1][0]
+                if Rec[0].address=='/RightRewardDeliveryTimeHarp':
+                    random_right_reward_delivery_time_harp=Rec[1][1][0]
+            return random_right_water_start_time_harp,random_right_reward_delivery_time_harp
+
+    def _save_data(self, volume:float, side:int, interval:float, timestamp_computer:float, timestamp_harp:float):
         '''Extend the current parameters to self.random_reward_par'''
         if 'volumes' not in self.random_reward_par.keys():
             self.random_reward_par['volumes']=[]
             self.random_reward_par['sides']=[]
             self.random_reward_par['intervals']=[]
+            self.random_reward_par['timestamp_computer']=[]
+            self.random_reward_par['timestamp_harp']=[]
         else:
             self.random_reward_par['volumes'].append(volume)
             self.random_reward_par['sides'].append(side)
             self.random_reward_par['intervals'].append(interval)
+            self.random_reward_par['timestamp_computer'].append(timestamp_computer)
+            self.random_reward_par['timestamp_harp'].append(timestamp_harp)
 
     def _thread_complete_tag(self):
         '''Complete the random reward'''
