@@ -3518,6 +3518,7 @@ class RandomRewardDialog(QDialog):
         self.MainWindow = MainWindow
         self.threadpool = QThreadPool()
         self.cycle_finish_tag = 1
+        self.random_reward_par={}
         # find all buttons and set them to not be the default button
         for container in [self]:
             for child in container.findChildren((QtWidgets.QPushButton)):     
@@ -3542,6 +3543,50 @@ class RandomRewardDialog(QDialog):
             self._generate_random_conditions()
             self.index=list(range(len(self.current_random_reward_par['volumes_all_random'])))
             self.cycle_finish_tag = 0
+
+        # start the random reward in a different thread
+        worker_random_reward = WorkerTagging(self._start_random_reward)
+        worker_random_reward.signals.update_label.connect(self.label_show_current.setText)  # Connect to label update
+        worker_random_reward.signals.finished.connect(self._thread_complete_tag)
+
+        # get the first start time
+        if "random_reward_start_time" not in self.random_reward_par:
+            self.random_reward_par["random_reward_start_time"] = str(datetime.now())
+        if self.random_reward_par["random_reward_start_time"]=='':
+            self.random_reward_par["random_reward_start_time"] = str(datetime.now())
+
+        # Execute
+        self.threadpool.start(worker_random_reward)
+
+    def _start_random_reward(self,update_label):
+        '''Start the random reward in a different thread'''
+        # iterate each condition
+        for i in self.index[:]:
+            if self.Start.isChecked():
+                if i == self.index[-1]:
+                    self.cycle_finish_tag = 1
+                # exclude the index that has been run
+                self.index.remove(i)
+                # get the current parameters
+                volume = self.current_random_reward_par['volumes_all_random'][i]
+                side = self.current_random_reward_par['sides_all_random'][i]
+                interval = self.current_random_reward_par['reward_intervals'][i]
+                # give the reward
+                self._give_reward(volume=volume, side=side)
+                # save the data 
+                self._save_data(volume=volume, side=side, interval=interval)
+                # wait to start the next cycle
+                time.sleep(interval)
+                # show current cycle and parameters
+                # Emit signal to update the label
+                update_label(
+                    f"Cycles: {i+1}/{len(self.current_random_reward_par['volumes_all_random'])} \n"
+                    f"Volume: {volume} uL\n"
+                    f"Side: {side}\n"
+                    f"Interval: {interval} s"
+                )
+            else:
+                break
 
 
     def _WhichSpout(self):
