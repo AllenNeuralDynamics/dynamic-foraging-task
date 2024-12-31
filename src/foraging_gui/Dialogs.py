@@ -3663,7 +3663,9 @@ class RandomRewardDialog(QDialog):
         self.Start.setStyleSheet("background-color : none")
         # update the stop time
         self.random_reward_par["random_reward_end_time"] = str(datetime.now())
-
+        # update the reward suggestion
+        self.MainWindow._UpdateSuggestedWater()
+        
     def _give_reward(self,volume:float,side:int):
         '''Give the reward'''
         if side==0:
@@ -3684,8 +3686,6 @@ class RandomRewardDialog(QDialog):
             self.MainWindow.Channel3.RandomWater_Right(int(1))
             self.random_reward_par['RandomWaterVolume'][1]=self.random_reward_par['RandomWaterVolume'][1]+float(volume)/1000
             print(float(right_valve_open_time))
-        # update the reward suggestion
-        self.MainWindow._UpdateSuggestedWater()
 
     def _WhichSpout(self):
         '''Select the lick spout to use and disable non-relevant widgets'''
