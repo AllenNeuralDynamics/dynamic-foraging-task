@@ -3623,18 +3623,18 @@ class RandomRewardDialog(QDialog):
             for i in range(2):
                 Rec=self.MainWindow.Channel2.receive()
                 if Rec[0].address=='/RandomLeftWaterStartTime':
-                    random_left_water_start_time_harp=Rec[1][1][0]
+                    random_left_water_start_time=Rec[1][1][0]
                 if Rec[0].address=='/LeftRewardDeliveryTimeHarp':
                     random_left_reward_delivery_time_harp=Rec[1][1][0]
-            return random_left_water_start_time_harp,random_left_reward_delivery_time_harp
+            return random_left_water_start_time,random_left_reward_delivery_time_harp
         elif side==1:
             for i in range(2):
                 Rec=self.MainWindow.Channel2.receive()
                 if Rec[0].address=='/RandomRightWaterStartTime':
-                    random_right_water_start_time_harp=Rec[1][1][0]
+                    random_right_water_start_time=Rec[1][1][0]
                 if Rec[0].address=='/RightRewardDeliveryTimeHarp':
                     random_right_reward_delivery_time_harp=Rec[1][1][0]
-            return random_right_water_start_time_harp,random_right_reward_delivery_time_harp
+            return random_right_water_start_time,random_right_reward_delivery_time_harp
 
     def _save_data(self, volume:float, side:int, interval:float, timestamp_computer:float, timestamp_harp:float):
         '''Extend the current parameters to self.random_reward_par'''
@@ -3665,7 +3665,7 @@ class RandomRewardDialog(QDialog):
             # set the left valve open time
             self.MainWindow.Channel.LeftValue(float(left_valve_open_time))
             # open the left valve
-            time.sleep(0.01)
+            time.sleep(1)
             self.MainWindow.Channel3.RandomWater_Left(int(1))
             self.random_reward_par['RandomWaterVolume'][0]=self.random_reward_par['RandomWaterVolume'][0]+float(volume)/1000
             print(float(left_valve_open_time))
@@ -3674,7 +3674,7 @@ class RandomRewardDialog(QDialog):
             # set the right valve open time
             self.MainWindow.Channel.RightValue(float(right_valve_open_time))
             # open the right valve
-            time.sleep(0.01)
+            time.sleep(1)
             self.MainWindow.Channel3.RandomWater_Right(int(1))
             self.random_reward_par['RandomWaterVolume'][1]=self.random_reward_par['RandomWaterVolume'][1]+float(volume)/1000
             print(float(right_valve_open_time))
