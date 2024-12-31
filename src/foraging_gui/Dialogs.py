@@ -3528,7 +3528,14 @@ class RandomRewardDialog(QDialog):
     def _connectSignalsSlots(self):
         self.Start.clicked.connect(self._Start)
         self.WhichSpout.currentIndexChanged.connect(self._WhichSpout)
+        self.EmergencyStop.clicked.connect(self._emegency_stop)
 
+    def _emegency_stop(self):
+        '''Stop the random reward'''
+        self.cycle_finish_tag = 1
+        self.Start.setChecked(False)
+        self.Start.setStyleSheet("background-color : none")
+        
     def _Start(self):
         '''Start giving random rewards'''
         # toggle the button color
