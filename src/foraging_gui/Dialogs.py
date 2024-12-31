@@ -3524,4 +3524,33 @@ class RandomRewardDialog(QDialog):
                 child.setAutoDefault(False)
     
     def _connectSignalsSlots(self):
-        pass
+        self.Start.clicked.connect(self._Start)
+        self.WhichSpout.currentIndexChanged.connect(self._WhichSpout)
+
+    def _Start(self):
+        '''Start giving random rewards'''
+        # toggle the button color
+        if self.Start.isChecked():
+            self.Start.setStyleSheet("background-color : green;")
+        else:
+            self.Start.setStyleSheet("background-color : none")
+            return
+        
+    def _WhichSpout(self):
+        '''Select the lick spout to use and disable non-relevant widgets'''
+        spout_name = self.WhichSpout.currentText()
+        if spout_name=='Left':
+            self.label1_21.setEnabled(False)
+            self.RightVolume.setEnabled(False)
+            self.label1_6.setEnabled(True)
+            self.LeftVolume.setEnabled(True)
+        elif spout_name=='Right':
+            self.label1_6.setEnabled(False)
+            self.LeftVolume.setEnabled(False)
+            self.label1_21.setEnabled(True)
+            self.RightVolume.setEnabled(True)
+        else:
+            self.label1_6.setEnabled(True)
+            self.LeftVolume.setEnabled(True)
+            self.label1_21.setEnabled(True)
+            self.RightVolume.setEnabled(True)
