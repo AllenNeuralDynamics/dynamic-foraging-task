@@ -2692,8 +2692,8 @@ class Window(QMainWindow):
             Obj['ManualWaterVolume']=self.ManualWaterVolume
 
             # save the random water
-            Obj['RandomWaterVolume']=self.RandomReward_dialog.RandomWaterVolume
-
+            Obj['RandomWaterVolume']=self.RandomReward_dialog.random_reward_par['RandomWaterVolume']
+            
             # save camera start/stop time
             Obj['Camera_dialog']['camera_start_time']=self.Camera_dialog.camera_start_time
             Obj['Camera_dialog']['camera_stop_time']=self.Camera_dialog.camera_stop_time
@@ -4632,7 +4632,7 @@ class Window(QMainWindow):
                 ManualWaterVolume=0
             
             if hasattr(self,'RandomReward_dialog'):
-                RandomWaterVolume=np.sum(self.RandomReward_dialog.RandomWaterVolume)
+                RandomWaterVolume=np.sum(self.RandomReward_dialog.random_reward_par['RandomWaterVolume'])
 
             water_in_session=BS_TotalReward+ManualWaterVolume+RandomWaterVolume
             self.water_in_session=water_in_session
