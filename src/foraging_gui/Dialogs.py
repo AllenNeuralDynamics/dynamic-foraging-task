@@ -3517,6 +3517,7 @@ class RandomRewardDialog(QDialog):
         self._connectSignalsSlots()
         self.MainWindow = MainWindow
         self.threadpool = QThreadPool()
+        self.cycle_finish_tag = 1
         # find all buttons and set them to not be the default button
         for container in [self]:
             for child in container.findChildren((QtWidgets.QPushButton)):     
@@ -3535,7 +3536,14 @@ class RandomRewardDialog(QDialog):
         else:
             self.Start.setStyleSheet("background-color : none")
             return
-        
+        # generate random conditions including lick spouts, reward volume, and reward interval
+        if self.cycle_finish_tag==1:
+            # generate new random conditions
+            self._generate_random_conditions()
+            self.index=list(range(len(self.current_random_reward_par['volumes_all_random'])))
+            self.cycle_finish_tag = 0
+
+
     def _WhichSpout(self):
         '''Select the lick spout to use and disable non-relevant widgets'''
         spout_name = self.WhichSpout.currentText()
@@ -3554,3 +3562,73 @@ class RandomRewardDialog(QDialog):
             self.LeftVolume.setEnabled(True)
             self.label1_21.setEnabled(True)
             self.RightVolume.setEnabled(True)
+
+    def _generate_random_conditions(self):
+        """
+        Generate random conditions
+
+        The parameters are chosen as follows:
+        - **Lick Spouts**: One of the following is selected: `Left`, `Right`, or `Both`.
+        - **Reward Volume**: If `Left` is selected, `LeftVolume` is used. If `Right` is selected, `RightVolume` is used.
+        - **Reward Interval**: The interval between rewards.
+        """
+        # Get the volume and reward sides
+        spout_name = self.WhichSpout.currentText()
+
+        if spout_name == 'Both':
+            # Extract volumes from left and right spouts
+            left_volumes = extract_numbers_from_string(self.LeftVolume.text())
+            right_volumes = extract_numbers_from_string(self.RightVolume.text())
+            volumes = left_volumes + right_volumes  # Combine into a single list
+
+            # Create sides: 0 for left, 1 for right
+            sides = np.zeros(len(left_volumes)).tolist() + np.ones(len(right_volumes)).tolist()
+
+        elif spout_name == 'Left':
+            # Extract volumes and assign sides for left spout
+            volumes = extract_numbers_from_string(self.LeftVolume.text())
+            sides = np.zeros(len(volumes)).tolist()  # 0 for left
+
+        elif spout_name == 'Right':
+            # Extract volumes and assign sides for right spout
+            volumes = extract_numbers_from_string(self.RightVolume.text())
+            sides = np.ones(len(volumes)).tolist()  # 1 for right
+
+        else:
+            # Popup error if spout is not selected or invalid input
+            QMessageBox.critical(self.MainWindow, "Error", "Please select a valid lick spout.")
+            return
+
+        
+        # get all rewards
+        volumes_all = volumes*int(self.RewardN.value())
+        sides_all = sides*int(self.RewardN.value())
+
+        # randomize the rewards and sides
+        random_indices = random.sample(range(len(volumes_all)), len(volumes_all))
+        volumes_all_random = [volumes_all[i] for i in random_indices]
+        sides_all_random = [sides_all[i] for i in random_indices]
+
+        # get the reward interval
+        if self.IntervalDistribution.currentText() == "Exponential":
+            reward_intervals = np.random.exponential(float(self.IntervalBeta.text()), len(volumes_all_random))+float(self.IntervalMin.text())
+            if self.IntervalMax.text()!='':
+                reward_intervals = np.minimum(reward_intervals,float(self.IntervalMax.text()))
+            # keep one decimal
+            reward_intervals = np.round(reward_intervals,1)
+        elif self.IntervalDistribution.currentText() == "Uniform":
+            reward_intervals = np.random.uniform(float(self.IntervalMin.text()), float(self.IntervalMax.text()), len(volumes_all_random))
+            # keep one decimal
+            reward_intervals = np.round(reward_intervals,1)
+
+        # save the data
+        self.current_random_reward_par={}
+        self.current_random_reward_par['volumes_all_random']=volumes_all_random
+        self.current_random_reward_par['sides_all_random']=sides_all_random
+        self.current_random_reward_par['reward_intervals']=reward_intervals
+
+
+        
+
+        
+        
