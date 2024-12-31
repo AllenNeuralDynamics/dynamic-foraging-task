@@ -3598,6 +3598,7 @@ class RandomRewardDialog(QDialog):
                 time.sleep(interval)
             else:
                 break
+
     def _receving_timestamps(self,side:int):
         '''Receiving the timestamps of reward start time'''
         if side==0:
@@ -3644,18 +3645,18 @@ class RandomRewardDialog(QDialog):
         if side==0:
             left_valve_open_time=((float(volume)-self.MainWindow.latest_fitting['Left'][1])/self.MainWindow.latest_fitting['Left'][0])*1000
             # set the left valve open time
-            self.Channel.LeftValue(left_valve_open_time)
+            self.MainWindow.Channel.LeftValue(left_valve_open_time)
             # open the left valve
             time.sleep(0.01)
-            self.Channel3.RandomWater_Left(int(1))
+            self.MainWindow.Channel3.RandomWater_Left(int(1))
             self.RandomWaterVolume[0]=self.ManualWaterVolume[0]+float(volume)/1000
         elif side==1:
             right_valve_open_time=((float(volume)-self.MainWindow.latest_fitting['Right'][1])/self.MainWindow.latest_fitting['Right'][0])*1000
             # set the right valve open time
-            self.Channel.RightValue(right_valve_open_time)
+            self.MainWindow.Channel.RightValue(right_valve_open_time)
             # open the right valve
             time.sleep(0.01)
-            self.Channel3.RandomWater_Right(int(1))
+            self.MainWindow.Channel3.RandomWater_Right(int(1))
             self.RandomWaterVolume[1]=self.ManualWaterVolume[1]+float(volume)/1000
         # update the reward suggestion
         self.MainWindow._UpdateSuggestedWater()
@@ -3716,7 +3717,6 @@ class RandomRewardDialog(QDialog):
             QMessageBox.critical(self.MainWindow, "Error", "Please select a valid lick spout.")
             return
 
-        
         # get all rewards
         volumes_all = volumes*int(self.RewardN.value())
         sides_all = sides*int(self.RewardN.value())
