@@ -2590,7 +2590,7 @@ class Window(QMainWindow):
                 QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
             widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
             self._Concat(widget_dict,Obj,'None')
-            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','Metadata_dialog','OpticalTagging_dialog']
+            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','Metadata_dialog','OpticalTagging_dialog','RandomReward_dialog']
             for dialog_name in dialogs:
                 if hasattr(self, dialog_name):
                     widget_dict = {w.objectName(): w for w in getattr(self, dialog_name).findChildren(
@@ -2712,6 +2712,10 @@ class Window(QMainWindow):
 
         # save optical tagging parameters
         Obj['optical_tagging_par']=self.OpticalTagging_dialog.optical_tagging_par
+
+        # save random reward parameters
+        Obj['random_reward_par']=self.RandomReward_dialog.random_reward_par
+        
         # generate the metadata file and update slims
         try:
             # save the metadata collected in the metadata dialogue
