@@ -2715,7 +2715,7 @@ class Window(QMainWindow):
 
         # save random reward parameters
         Obj['random_reward_par']=self.RandomReward_dialog.random_reward_par
-        
+
         # generate the metadata file and update slims
         try:
             # save the metadata collected in the metadata dialogue
@@ -3081,7 +3081,7 @@ class Window(QMainWindow):
             self.Obj = Obj
 
             widget_dict={}
-            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','centralwidget','TrainingParameters','OpticalTagging_dialog']
+            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','centralwidget','TrainingParameters','OpticalTagging_dialog','RandomReward_dialog']
             for dialog_name in dialogs:
                 if hasattr(self, dialog_name):
                     widget_types = (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit,
