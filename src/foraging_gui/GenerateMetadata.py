@@ -535,7 +535,7 @@ class generate_metadata:
         self._get_ophys_stream()
         self._get_high_speed_camera_stream()
         self._get_session_time()
-        if (self.session_start_time == '' or self.session_end_time == '') or (self.Obj['random_reward_par']['random_reward_start_time'] or self.Obj['random_reward_par']['random_reward_end_time']):
+        if (self.session_start_time == '' or self.session_end_time == '') and (self.Obj['random_reward_par']['random_reward_start_time']=='' or self.Obj['random_reward_par']['random_reward_end_time']==''):
             logging.info('session start time or session end time is empty!')
             return
         if self.session_start_time == '' or self.session_end_time == '':
@@ -544,7 +544,7 @@ class generate_metadata:
         else:
             start_time=self.session_start_time
             end_time=self.session_end_time
-            
+
         self._get_stimulus()
         self._combine_data_streams()
         #self.data_streams = self.ephys_streams+self.ophys_streams+self.high_speed_camera_streams
