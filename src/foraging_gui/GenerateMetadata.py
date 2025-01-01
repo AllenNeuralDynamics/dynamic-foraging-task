@@ -526,6 +526,7 @@ class generate_metadata:
         if self.Obj['meta_data_dialog']['rig_metadata']=={}:
             logging.info('rig metadata is empty!')
             return
+        self._get_behavior_software()
         self._get_reward_delivery()
         self._get_water_calibration()
         self._get_opto_calibration()
@@ -1217,7 +1218,6 @@ class generate_metadata:
             daq_names=self.name_mapper['rig_daq_names_janelia_lick_detector']
 
         self.behavior_streams=[]
-        self._get_behavior_software()
         self.behavior_streams.append(Stream(
                 stream_modalities=[Modality.BEHAVIOR],
                 stream_start_time=datetime.strptime(self.Obj['Other_SessionStartTime'], '%Y-%m-%d %H:%M:%S.%f'),
@@ -1503,6 +1503,6 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    generate_metadata(json_file=r'I:\BehaviorData\323_EPHYS3\0\behavior_0_2024-12-31_16-55-18\behavior\0_2024-12-31_16-55-18.json',output_folder=r'H:\test')
+    generate_metadata(json_file=r'I:\BehaviorData\323_EPHYS3\0\behavior_0_2024-12-31_17-03-06\behavior\0_2024-12-31_17-03-06.json',output_folder=r'H:\test')
     #generate_metadata(json_file=r'Y:\753126\behavior_753126_2024-10-15_12-20-35\behavior\753126_2024-10-15_12-20-35.json',output_folder=r'H:\test')
     #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
