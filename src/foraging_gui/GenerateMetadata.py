@@ -772,7 +772,7 @@ class generate_metadata:
         self._get_optogenetics_stimulus()
         self._get_optical_tagging_stimulus()
         self._get_random_reward_stimulus()
-        self.stimulus=self.behavior_stimulus+self.optogenetics_stimulus+self.optical_tagging_stimulus
+        self.stimulus=self.behavior_stimulus+self.optogenetics_stimulus+self.optical_tagging_stimulus+self.random_reward_stimulus
 
     def _get_random_reward_stimulus(self):
         '''
@@ -798,14 +798,14 @@ class generate_metadata:
     def _get_random_reward_output_parameters(self):
         '''Get the output parameters for random reward'''
         output_parameters = {
-            'spout':self.Obj['random_reward_par']['WhichSpout'],
-            'left_reward_volume':self.Obj['random_reward_par']['LeftVolume'],
-            'right_reward_volume':self.Obj['random_reward_par']['RightVolume'],
-            'reward_number_each_condition':self.Obj['random_reward_par']['RewardN'],
-            'interval_distribution':self.Obj['random_reward_par']['IntervalDistribution'],
-            'interval_beta':self.Obj['random_reward_par']['IntervalBeta'],
-            'interval_min':self.Obj['random_reward_par']['IntervalMin'],
-            'interval_max':self.Obj['random_reward_par']['IntervalMax']
+            'spout':self.Obj['RandomReward_dialog']['WhichSpout'],
+            'left_reward_volume':self.Obj['RandomReward_dialog']['LeftVolume'],
+            'right_reward_volume':self.Obj['RandomReward_dialog']['RightVolume'],
+            'reward_number_each_condition':self.Obj['RandomReward_dialog']['RewardN'],
+            'interval_distribution':self.Obj['RandomReward_dialog']['IntervalDistribution'],
+            'interval_beta':self.Obj['RandomReward_dialog']['IntervalBeta'],
+            'interval_min':self.Obj['RandomReward_dialog']['IntervalMin'],
+            'interval_max':self.Obj['RandomReward_dialog']['IntervalMax']
         }
         return output_parameters
 
@@ -1503,6 +1503,6 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    generate_metadata(json_file=r'Y:\753126\behavior_753126_2024-10-07_10-14-07\behavior\753126_2024-10-07_10-14-07.json',output_folder=r'H:\test')
+    generate_metadata(json_file=r'I:\BehaviorData\323_EPHYS3\0\behavior_0_2024-12-31_16-55-18\behavior\0_2024-12-31_16-55-18.json',output_folder=r'H:\test')
     #generate_metadata(json_file=r'Y:\753126\behavior_753126_2024-10-15_12-20-35\behavior\753126_2024-10-15_12-20-35.json',output_folder=r'H:\test')
     #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
