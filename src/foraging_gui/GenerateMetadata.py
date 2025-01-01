@@ -501,7 +501,6 @@ class generate_metadata:
         if 'random_reward_end_time' not in self.Obj['random_reward_par']:
             self.Obj['random_reward_par']['random_reward_end_time'] = ''
         
-
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
         Initialize fields
@@ -536,10 +535,16 @@ class generate_metadata:
         self._get_ophys_stream()
         self._get_high_speed_camera_stream()
         self._get_session_time()
-        if self.session_start_time == '' or self.session_end_time == '':
+        if (self.session_start_time == '' or self.session_end_time == '') or (self.Obj['random_reward_par']['random_reward_start_time'] or self.Obj['random_reward_par']['random_reward_end_time']):
             logging.info('session start time or session end time is empty!')
             return
-
+        if self.session_start_time == '' or self.session_end_time == '':
+            start_time=self.Obj['random_reward_par']['random_reward_start_time']
+            end_time=self.Obj['random_reward_par']['random_reward_end_time']
+        else:
+            start_time=self.session_start_time
+            end_time=self.session_end_time
+            
         self._get_stimulus()
         self._combine_data_streams()
         #self.data_streams = self.ephys_streams+self.ophys_streams+self.high_speed_camera_streams
@@ -547,8 +552,8 @@ class generate_metadata:
         session_params = {
             "experimenter_full_name": [self.Obj['Experimenter']],
             "subject_id": self.Obj['ID'],
-            "session_start_time": self.session_start_time,
-            "session_end_time": self.session_end_time,
+            "session_start_time": start_time,
+            "session_end_time": end_time,
             "session_type": self.Obj['Task'],
             "iacuc_protocol": self.Obj['meta_data_dialog']['session_metadata']['IACUCProtocol'],
             "rig_id": self.Obj['meta_data_dialog']['rig_metadata']['rig_id'],
