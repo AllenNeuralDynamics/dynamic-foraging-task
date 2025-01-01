@@ -491,6 +491,17 @@ class generate_metadata:
         if 'optical_tagging_end_time' not in self.Obj['optical_tagging_par']:
             self.Obj['optical_tagging_par']['optical_tagging_end_time'] = ''
 
+        # Handle the edge cases for the random reward
+        if 'RandomReward_dialog' not in self.Obj:
+            self.Obj['RandomReward_dialog'] = {}
+        if 'random_reward_par' not in self.Obj:
+            self.Obj['random_reward_par'] = {}
+        if 'random_reward_start_time' not in self.Obj['random_reward_par']:
+            self.Obj['random_reward_par']['random_reward_start_time'] = ''
+        if 'random_reward_end_time' not in self.Obj['random_reward_par']:
+            self.Obj['random_reward_par']['random_reward_end_time'] = ''
+        
+
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
         Initialize fields
