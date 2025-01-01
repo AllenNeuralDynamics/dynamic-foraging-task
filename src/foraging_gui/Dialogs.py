@@ -3647,8 +3647,8 @@ class RandomRewardDialog(QDialog):
                     f"Side: {side_spout}\n"
                     f"Interval: {interval} s"
                 )
-                # wait to start the next cycle
-                time.sleep(interval)
+                # wait to start the next cycle (minus 0.2s to account for the delay to wait for the value to be set)
+                time.sleep(interval-0.2)
             else:
                 break
 
@@ -3702,16 +3702,18 @@ class RandomRewardDialog(QDialog):
             left_valve_open_time=((float(volume)-self.MainWindow.latest_fitting['Left'][1])/self.MainWindow.latest_fitting['Left'][0])*1000
             # set the left valve open time
             self.MainWindow.Channel.LeftValue(float(left_valve_open_time))
-            # open the left valve
-            time.sleep(0.1)
+            # add 0.5s for the value to be set
+            time.sleep(0.2)
+            # open the left valve (adding 0.5s for the value to be set)
             self.MainWindow.Channel3.RandomWater_Left(int(1))
             self.random_reward_par['RandomWaterVolume'][0]=self.random_reward_par['RandomWaterVolume'][0]+float(volume)/1000
         elif side==1:
             right_valve_open_time=((float(volume)-self.MainWindow.latest_fitting['Right'][1])/self.MainWindow.latest_fitting['Right'][0])*1000
-            # set the right valve open time
+            # set the right valve open time 
             self.MainWindow.Channel.RightValue(float(right_valve_open_time))
-            # open the right valve
-            time.sleep(0.1)
+            # add 0.5s for the value to be set
+            time.sleep(0.2)
+            # open the left valve (adding 0.5s for the value to be set)
             self.MainWindow.Channel3.RandomWater_Right(int(1))
             self.random_reward_par['RandomWaterVolume'][1]=self.random_reward_par['RandomWaterVolume'][1]+float(volume)/1000
 
