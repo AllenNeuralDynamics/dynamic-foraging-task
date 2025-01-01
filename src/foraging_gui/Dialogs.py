@@ -3532,6 +3532,32 @@ class RandomRewardDialog(QDialog):
         self.WhichSpout.currentIndexChanged.connect(self._WhichSpout)
         self.StartOver.clicked.connect(self._start_over)
         self.ClearData.clicked.connect(self._clear_data)
+        self.Save.clicked.connect(self._Save)
+
+    def _Save(self):
+        '''Save the random reward results'''
+        if self.random_reward_par=={}:
+            return
+        # get the save folder
+        save_folder = QFileDialog.getExistingDirectory(self, 'Select the folder to save the random reward results')
+        if save_folder=='':
+            return
+        self.random_reward_par['task_parameters'] = {
+            'task': 'Random reward',
+            'spout': self.WhichSpout.currentText(),
+            'left_reward_volume': self.LeftVolume.text(),
+            'right_reward_volume': self.RightVolume.text(),
+            'reward_number_each_condition': self.RewardN.text(),
+            'interval_distribution': self.IntervalDistribution.currentText(),
+            'interval_beta': self.IntervalBeta.text(),
+            'interval_min': self.IntervalMin.text(),
+            'interval_max': self.IntervalMax.text(),
+        }
+        # create the file name AnimalID_Date(day+hour+minute)_RandomRewardResults.csv
+        save_file = os.path.join(save_folder, f"{self.MainWindow.ID.text()}_{datetime.now().strftime('%Y-%m-%d-%H-%M')}_RandomRewardResults.json")
+        # save the data 
+        with open(save_file, 'w') as f:
+            json.dump(self.random_reward_par, f, indent=4)
 
     def _clear_data(self):
         '''Clear the data'''
