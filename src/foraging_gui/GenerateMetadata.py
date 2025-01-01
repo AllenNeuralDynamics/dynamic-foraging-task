@@ -755,7 +755,43 @@ class generate_metadata:
         self._get_behavior_stimulus()
         self._get_optogenetics_stimulus()
         self._get_optical_tagging_stimulus()
+        self._get_random_reward_stimulus()
         self.stimulus=self.behavior_stimulus+self.optogenetics_stimulus+self.optical_tagging_stimulus
+
+    def _get_random_reward_stimulus(self):
+        '''
+        Make the random reward stimulus metadata
+        '''
+        self.random_reward_stimulus=[]
+        if self.Obj['RandomReward_dialog']=={} or self.Obj['random_reward_par']['random_reward_start_time']=='' or self.Obj['random_reward_par']['random_reward_end_time']=='':
+            logging.info('No random reward detected!')
+            return 
+        self.random_reward_stimulus.append(StimulusEpoch(
+            software=self.behavior_software,
+            stimulus_device_names=['Reward lick spout'], # this should be improved in the future
+            stimulus_name='The random reward stimulus',
+            stimulus_modalities=[StimulusModality.NONE],
+            stimulus_start_time=self.Obj['random_reward_par']['random_reward_start_time'],
+            stimulus_end_time=self.Obj['random_reward_par']['random_reward_end_time'],
+            output_parameters=self._get_random_reward_output_parameters(),
+            reward_consumed_during_epoch=np.sum(self.Obj['random_reward_par']['RandomWaterVolume']),
+            reward_consumed_unit="microliter",
+            trials_total= len(self.Obj['random_reward_par']['volumes']),
+        ))
+    
+    def _get_random_reward_output_parameters(self):
+        '''Get the output parameters for random reward'''
+        output_parameters = {
+            'spout':self.Obj['random_reward_par']['WhichSpout'],
+            'left_reward_volume':self.Obj['random_reward_par']['LeftVolume'],
+            'right_reward_volume':self.Obj['random_reward_par']['RightVolume'],
+            'reward_number_each_condition':self.Obj['random_reward_par']['RewardN'],
+            'interval_distribution':self.Obj['random_reward_par']['IntervalDistribution'],
+            'interval_beta':self.Obj['random_reward_par']['IntervalBeta'],
+            'interval_min':self.Obj['random_reward_par']['IntervalMin'],
+            'interval_max':self.Obj['random_reward_par']['IntervalMax']
+        }
+        return output_parameters
 
     def _get_optical_tagging_stimulus(self):
         '''
