@@ -3083,8 +3083,8 @@ class OpticalTaggingDialog(QDialog):
         self.optical_tagging_par["task_parameters"]={
             "laser_name": self.WhichLaser.currentText(),
             "protocol": self.Protocol.currentText(),
-            "laser_1_color": self.Laser_1_color.text(),
-            "laser_2_color": self.Laser_2_color.text(),
+            "laser_1_color": self.Laser_1_color.currentText(),
+            "laser_2_color": self.Laser_2_color.currentText(),
             "laser_1_power": self.Laser_1_power.text(),
             "laser_2_power": self.Laser_2_power.text(),
             "frequency": self.Frequency.text(),
