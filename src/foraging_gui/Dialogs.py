@@ -3075,6 +3075,10 @@ class OpticalTaggingDialog(QDialog):
         
     def _Start(self):
         '''Start the optical tagging'''
+        # restart the logging if it is not started
+        if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
+            self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
+
         # toggle the button color
         if self.Start.isChecked():
             self.Start.setStyleSheet("background-color : green;")
