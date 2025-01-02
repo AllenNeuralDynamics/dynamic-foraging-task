@@ -3708,6 +3708,8 @@ class RandomRewardDialog(QDialog):
                 )
                 # wait to start the next cycle (minus 0.2s to account for the delay to wait for the value to be set)
                 time.sleep(interval-0.2)
+                # check if the reward has been collected by the animal
+                
             else:
                 break
 
