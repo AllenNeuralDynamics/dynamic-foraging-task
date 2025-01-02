@@ -3144,12 +3144,16 @@ class OpticalTaggingDialog(QDialog):
         # ask for confirmation
         reply = QMessageBox.question(self, 'Message', 'Are you sure to clear the optical tagging data?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
-            self.optical_tagging_par={}
-            self.label_show_current.setText('')
-            self.LocationTag.setValue(0)
             self.cycle_finish_tag = 1
             self.Start.setChecked(False)
             self.Start.setStyleSheet("background-color : none")
+            # wait for the thread to finish
+            while self.thread_finish_tag == 0:
+                QApplication.processEvents()
+                time.sleep(0.1)
+            self.optical_tagging_par={}
+            self.label_show_current.setText('')
+            self.LocationTag.setValue(0)
 
     def _start_over(self):
         '''Stop the optical tagging and start over (parameters will be shuffled)'''
