@@ -3716,10 +3716,25 @@ class RandomRewardDialog(QDialog):
                     sleep_again=0
                     if not received_licks:
                         sleep_again=1
+                        # show the licks have not been received
+                        update_label(
+                            f"Cycles: {i+1}/{len(self.current_random_reward_par['volumes_all_random'])} \n"
+                            f"Volume: {volume} uL\n"
+                            f"Side: {side_spout}\n"
+                            f"Interval: {interval} s\n"
+                            f"Reward not collected"
+                        )
                     # if not received any licks, sleep until we receive a lick
-                    while not received_licks:
+                    while (not received_licks) and self.Start.isChecked():
                         time.sleep(0.01)
                         received_licks=self._get_lick_timestampes()
+                    update_label(
+                        f"Cycles: {i+1}/{len(self.current_random_reward_par['volumes_all_random'])} \n"
+                        f"Volume: {volume} uL\n"
+                        f"Side: {side_spout}\n"
+                        f"Interval: {interval} s\n"
+                        f"Reward collected"
+                    )
                     if sleep_again==1:
                         # sleep another interval-0.2s when detected a lick
                         time.sleep(interval-0.2)
