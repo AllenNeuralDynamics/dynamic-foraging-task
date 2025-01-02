@@ -3055,7 +3055,7 @@ class OpticalTaggingDialog(QDialog):
     def _connectSignalsSlots(self):
         self.Start.clicked.connect(self._Start)
         self.WhichLaser.currentIndexChanged.connect(self._WhichLaser)
-        self.EmergencyStop.clicked.connect(self._emegency_stop)
+        self.StartOver.clicked.connect(self._start_over)
         self.Save.clicked.connect(self._Save)
     
     def _Save(self):
@@ -3105,7 +3105,7 @@ class OpticalTaggingDialog(QDialog):
         self.threadpool.start(worker_tagging)
         #self._start_optical_tagging()
 
-    def _emegency_stop(self):
+    def _start_over(self):
         '''Stop the optical tagging'''
         self.cycle_finish_tag = 1
         self.Start.setChecked(False)
