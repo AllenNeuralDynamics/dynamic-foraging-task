@@ -538,12 +538,15 @@ class generate_metadata:
         self._get_ophys_stream()
         self._get_high_speed_camera_stream()
         self._get_session_time()
-        if (self.session_start_time == '' or self.session_end_time == '') and (self.Obj['random_reward_par']['random_reward_start_time']=='' or self.Obj['random_reward_par']['random_reward_end_time']==''):
+        if (self.session_start_time == '' or self.session_end_time == '') and (self.Obj['random_reward_par']['random_reward_start_time']=='' or self.Obj['random_reward_par']['random_reward_end_time']=='') and  (self.Obj['optical_tagging_par']['optical_tagging_start_time']=='' or self.Obj['optical_tagging_par']['optical_tagging_start_time']==''):
             logging.info('session start time or session end time is empty!')
             return
         if self.session_start_time == '' or self.session_end_time == '':
             start_time=self.Obj['random_reward_par']['random_reward_start_time']
             end_time=self.Obj['random_reward_par']['random_reward_end_time']
+        if start_time=='' or end_time=='':
+            start_time=self.Obj['optical_tagging_par']['optical_tagging_start_time']
+            end_time=self.Obj['optical_tagging_par']['optical_tagging_end_time']
         else:
             start_time=self.session_start_time
             end_time=self.session_end_time
