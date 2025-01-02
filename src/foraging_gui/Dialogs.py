@@ -3676,6 +3676,10 @@ class RandomRewardDialog(QDialog):
 
     def _start_random_reward(self,update_label):
         '''Start the random reward in a different thread'''
+        if self.thread_finish_tag==0:
+            self.Start.setChecked(False)
+            self.Start.setStyleSheet("background-color : none")
+            return
         # iterate each condition
         self.thread_finish_tag = 0
         for i in self.index[:]:
