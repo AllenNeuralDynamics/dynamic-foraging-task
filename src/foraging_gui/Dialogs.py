@@ -3563,8 +3563,8 @@ class RandomRewardDialog(QDialog):
         )
         # get the save folder
         if self.MainWindow.CreateNewFolder == 1:
-            self._GetSaveFolder()
-            self.CreateNewFolder = 0
+            self.MainWindow._GetSaveFolder()
+            self.MainWindow.CreateNewFolder = 0
 
         save_file=self.MainWindow.SaveFileJson
         if not os.path.exists(os.path.dirname(save_file)):
