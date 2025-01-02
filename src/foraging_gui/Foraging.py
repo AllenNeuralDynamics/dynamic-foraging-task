@@ -2737,8 +2737,7 @@ class Window(QMainWindow):
                 if self.BaseWeight.text() != '' and self.WeightAfter.text() != '' and self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']:
                     self._AddWaterLogResult(session)
                 self.bias_indicator.clear()  # prepare for new session
-
-
+                
         except Exception as e:
             logging.warning('Meta data is not saved!', extra= {'tags': {self.warning_log_tag}})
             logging.error('Error generating session metadata: '+str(e))
