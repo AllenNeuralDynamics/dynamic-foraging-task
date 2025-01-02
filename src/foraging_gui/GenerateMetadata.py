@@ -549,7 +549,9 @@ class generate_metadata:
         if start_time=='' or end_time=='':
             start_time=self.Obj['optical_tagging_par']['optical_tagging_start_time']
             end_time=self.Obj['optical_tagging_par']['optical_tagging_end_time']
-
+        if start_time=='' or end_time=='':
+            logging.info('session start time or session end time is empty!')
+            return
         self._get_stimulus()
         self._combine_data_streams()
         #self.data_streams = self.ephys_streams+self.ophys_streams+self.high_speed_camera_streams
