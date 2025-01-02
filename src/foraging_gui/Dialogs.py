@@ -3688,6 +3688,8 @@ class RandomRewardDialog(QDialog):
                 volume = self.current_random_reward_par['volumes_all_random'][i]
                 side = self.current_random_reward_par['sides_all_random'][i]
                 interval = self.current_random_reward_par['reward_intervals'][i]
+                # get all licks
+                self._get_lick_timestampes()
                 # give the reward
                 self._give_reward(volume=volume, side=side)
                 # receiving the timestamps of reward start time. 
@@ -3708,11 +3710,42 @@ class RandomRewardDialog(QDialog):
                 )
                 # wait to start the next cycle (minus 0.2s to account for the delay to wait for the value to be set)
                 time.sleep(interval-0.2)
-                # check if the reward has been collected by the animal
-                
+                if self.CheckRewardCollection.currentText()=='Yes':
+                    # check if the reward has been collected by the animal
+                    received_licks=self._get_lick_timestampes()
+                    sleep_again=0
+                    if not received_licks:
+                        sleep_again=1
+                    # if not received any licks, sleep until we receive a lick
+                    while not received_licks:
+                        time.sleep(0.01)
+                        received_licks=self._get_lick_timestampes()
+                    if sleep_again==1:
+                        # sleep another interval-0.2s when detected a lick
+                        time.sleep(interval-0.2)
             else:
                 break
+    
+    def _get_lick_timestampes(self)->bool:
+        '''Get the lick timestamps'''
+        if 'left_lick_time' not in self.random_reward_par:
+            self.random_reward_par['left_lick_time'] = []
+            self.random_reward_par['right_lick_time'] = []
 
+        Return = False # no licks received
+        while not self.MainWindow.Channel2.msgs.empty():
+            Rec = self.MainWindow.Channel2.receive()
+            address = Rec[0].address
+            lick_time = Rec[1][1][0]
+
+            if address == '/LeftLickTime':
+                self.random_reward_par['left_lick_time'].append(lick_time)
+            elif address == '/RightLickTime':
+                self.random_reward_par['right_lick_time'].append(lick_time)
+            Return = True # licks received
+
+        return Return
+            
     def _receving_timestamps(self,side:int):
         '''Receiving the timestamps of reward start time'''
         if side==0:
