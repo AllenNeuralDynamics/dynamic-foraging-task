@@ -3057,6 +3057,7 @@ class OpticalTaggingDialog(QDialog):
         self.WhichLaser.currentIndexChanged.connect(self._WhichLaser)
         self.StartOver.clicked.connect(self._start_over)
         self.Save.clicked.connect(self._Save)
+        self.ClearData.clicked.connect(self._clear_data)
     
     def _Save(self):
         '''Save the optical tagging results'''
@@ -3105,11 +3106,26 @@ class OpticalTaggingDialog(QDialog):
         self.threadpool.start(worker_tagging)
         #self._start_optical_tagging()
 
+    def _clear_data(self):
+        '''Clear the optical tagging data'''
+        # ask for confirmation
+        reply = QMessageBox.question(self, 'Message', 'Are you sure to clear the optical tagging data?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.optical_tagging_par={}
+            self.label_show_current.setText('')
+            self.LocationTag.setValue(0)
+            self.cycle_finish_tag = 1
+            self.Start.setChecked(False)
+            self.Start.setStyleSheet("background-color : none")
+
     def _start_over(self):
         '''Stop the optical tagging'''
-        self.cycle_finish_tag = 1
-        self.Start.setChecked(False)
-        self.Start.setStyleSheet("background-color : none")
+        # ask for confirmation
+        reply = QMessageBox.question(self, 'Message', 'Are you sure to start over the optical tagging?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.cycle_finish_tag = 1
+            self.Start.setChecked(False)
+            self.Start.setStyleSheet("background-color : none")
 
     def _thread_complete_tag(self):
         '''Complete the optical tagging'''
