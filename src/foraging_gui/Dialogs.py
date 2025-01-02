@@ -3245,8 +3245,6 @@ class OpticalTaggingDialog(QDialog):
                                 laser_start_timestamp=laser_start_timestamp,
                                 success_tag=success_tag
                             )
-                # wait to start the next cycle
-                time.sleep(duration_each_cycle+interval_between_cycles)
                 # show current cycle and parameters
                 # Emit signal to update the label
                 update_label(
@@ -3260,7 +3258,8 @@ class OpticalTaggingDialog(QDialog):
                     f"Duration: {duration_each_cycle} s\n"
                     f"Interval: {interval_between_cycles} s"
                 )
-
+                # wait to start the next cycle
+                time.sleep(duration_each_cycle+interval_between_cycles)
             else:
                 break
 
