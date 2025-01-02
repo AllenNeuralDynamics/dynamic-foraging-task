@@ -1251,7 +1251,7 @@ class CameraDialog(QDialog):
                 # sleep for 1 second to make sure the trigger is off
                 time.sleep(1)
             # Start logging if the formal logging is not started
-            if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
+            if self.MainWindow.logging_type!=0:
                 self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
             # set to check drop frame as true
             self.MainWindow.to_check_drop_frames=1
@@ -3100,7 +3100,7 @@ class OpticalTaggingDialog(QDialog):
     def _Start(self):
         '''Start the optical tagging'''
         # restart the logging if it is not started
-        if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
+        if self.MainWindow.logging_type!=0 :
             self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
 
         # toggle the button color
@@ -3645,7 +3645,7 @@ class RandomRewardDialog(QDialog):
     def _Start(self):
         '''Start giving random rewards'''
         # restart the logging if it is not started
-        if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
+        if self.MainWindow.logging_type!=0 :
             self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
 
         # toggle the button color
