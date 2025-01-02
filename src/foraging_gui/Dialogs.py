@@ -3779,7 +3779,7 @@ class RandomRewardDialog(QDialog):
             else:
                 break
     
-    def _get_lick_timestampes(self,side==None)->bool:
+    def _get_lick_timestampes(self,side=None)->bool:
         '''Get the lick timestamps'''
         if 'left_lick_time' not in self.random_reward_par:
             self.random_reward_par['left_lick_time'] = []
