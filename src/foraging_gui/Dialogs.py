@@ -3083,8 +3083,8 @@ class OpticalTaggingDialog(QDialog):
         self.optical_tagging_par["task_parameters"]={
             "laser_name": self.WhichLaser.currentText(),
             "protocol": self.Protocol.currentText(),
-            "laser_1_color": self.Laser_1_color.text(),
-            "laser_2_color": self.Laser_2_color.text(),
+            "laser_1_color": self.Laser_1_color.currentText(),
+            "laser_2_color": self.Laser_2_color.currentText(),
             "laser_1_power": self.Laser_1_power.text(),
             "laser_2_power": self.Laser_2_power.text(),
             "frequency": self.Frequency.text(),
@@ -3245,8 +3245,6 @@ class OpticalTaggingDialog(QDialog):
                                 laser_start_timestamp=laser_start_timestamp,
                                 success_tag=success_tag
                             )
-                # wait to start the next cycle
-                time.sleep(duration_each_cycle+interval_between_cycles)
                 # show current cycle and parameters
                 # Emit signal to update the label
                 update_label(
@@ -3260,7 +3258,8 @@ class OpticalTaggingDialog(QDialog):
                     f"Duration: {duration_each_cycle} s\n"
                     f"Interval: {interval_between_cycles} s"
                 )
-
+                # wait to start the next cycle
+                time.sleep(duration_each_cycle+interval_between_cycles)
             else:
                 break
 
