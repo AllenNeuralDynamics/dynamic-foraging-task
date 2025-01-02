@@ -713,7 +713,7 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QPushButton" name="StartOver">
+  <widget class="QPushButton" name="Restart">
    <property name="geometry">
     <rect>
      <x>130</x>
@@ -723,7 +723,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Start over</string>
+    <string>Restart</string>
    </property>
   </widget>
   <widget class="QPushButton" name="Save">

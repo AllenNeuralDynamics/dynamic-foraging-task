@@ -3055,7 +3055,7 @@ class OpticalTaggingDialog(QDialog):
     def _connectSignalsSlots(self):
         self.Start.clicked.connect(self._Start)
         self.WhichLaser.currentIndexChanged.connect(self._WhichLaser)
-        self.StartOver.clicked.connect(self._start_over)
+        self.Restart.clicked.connect(self._start_over)
         self.Save.clicked.connect(self._Save)
         self.ClearData.clicked.connect(self._clear_data)
     
@@ -3119,7 +3119,7 @@ class OpticalTaggingDialog(QDialog):
             self.Start.setStyleSheet("background-color : none")
 
     def _start_over(self):
-        '''Stop the optical tagging'''
+        '''Stop the optical tagging and start over (parameters will be shuffled)'''
         # ask for confirmation
         reply = QMessageBox.question(self, 'Message', 'Are you sure to start over the optical tagging?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
