@@ -3728,7 +3728,7 @@ class RandomRewardDialog(QDialog):
                     while (not received_licks) and self.Start.isChecked():
                         time.sleep(0.01)
                         received_licks=self._get_lick_timestampes()
-                    if self.Start.isChecked():
+                    if not self.Start.isChecked():
                         update_label(
                             f"Cycles: {i+1}/{len(self.current_random_reward_par['volumes_all_random'])} \n"
                             f"Volume: {volume} uL\n"
