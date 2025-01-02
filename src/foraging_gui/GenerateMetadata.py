@@ -541,15 +541,14 @@ class generate_metadata:
         if (self.session_start_time == '' or self.session_end_time == '') and (self.Obj['random_reward_par']['random_reward_start_time']=='' or self.Obj['random_reward_par']['random_reward_end_time']=='') and  (self.Obj['optical_tagging_par']['optical_tagging_start_time']=='' or self.Obj['optical_tagging_par']['optical_tagging_start_time']==''):
             logging.info('session start time or session end time is empty!')
             return
-        if self.session_start_time == '' or self.session_end_time == '':
+        start_time=self.session_start_time
+        end_time=self.session_end_time
+        if start_time == '' or end_time == '':
             start_time=self.Obj['random_reward_par']['random_reward_start_time']
             end_time=self.Obj['random_reward_par']['random_reward_end_time']
-        if start_time=='' or end_time=='':
+        elif start_time=='' or end_time=='':
             start_time=self.Obj['optical_tagging_par']['optical_tagging_start_time']
             end_time=self.Obj['optical_tagging_par']['optical_tagging_end_time']
-        else:
-            start_time=self.session_start_time
-            end_time=self.session_end_time
 
         self._get_stimulus()
         self._combine_data_streams()
@@ -1508,6 +1507,6 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    generate_metadata(json_file=r'I:\BehaviorData\323_EPHYS3\0\behavior_0_2024-12-31_17-03-06\behavior\0_2024-12-31_17-03-06.json',output_folder=r'H:\test')
+    generate_metadata(json_file=r'I:\BehaviorData\323_EPHYS3\0\behavior_0_2025-01-02_13-11-29\behavior\0_2025-01-02_13-11-29.json',output_folder=r'H:\test')
     #generate_metadata(json_file=r'Y:\753126\behavior_753126_2024-10-15_12-20-35\behavior\753126_2024-10-15_12-20-35.json',output_folder=r'H:\test')
     #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
