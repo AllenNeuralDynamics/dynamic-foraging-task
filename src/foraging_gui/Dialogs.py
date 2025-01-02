@@ -3752,9 +3752,9 @@ class RandomRewardDialog(QDialog):
                             f"Interval: {interval} s\n"
                             f"Reward collected"
                         )
-                    if sleep_again==1:
-                        # sleep another interval-0.2s when detected a lick
-                        time.sleep(interval-0.2)
+                        if sleep_again==1:
+                            # sleep another interval-0.2s when detected a lick
+                            time.sleep(interval-0.2)
             else:
                 break
     
