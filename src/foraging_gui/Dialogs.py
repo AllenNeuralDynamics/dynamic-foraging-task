@@ -1251,7 +1251,7 @@ class CameraDialog(QDialog):
                 # sleep for 1 second to make sure the trigger is off
                 time.sleep(1)
             # Start logging if the formal logging is not started
-            if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
+            if self.MainWindow.logging_type!=0:
                 self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
             # set to check drop frame as true
             self.MainWindow.to_check_drop_frames=1
@@ -3045,6 +3045,7 @@ class OpticalTaggingDialog(QDialog):
         self.current_optical_tagging_par={}
         self.optical_tagging_par={}
         self.cycle_finish_tag = 1
+        self.thread_finish_tag = 1
         self.threadpool = QThreadPool()
         # find all buttons and set them to not be the default button
         for container in [self]:
@@ -3100,7 +3101,7 @@ class OpticalTaggingDialog(QDialog):
     def _Start(self):
         '''Start the optical tagging'''
         # restart the logging if it is not started
-        if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
+        if self.MainWindow.logging_type!=0 :
             self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
 
         # toggle the button color
@@ -3131,7 +3132,11 @@ class OpticalTaggingDialog(QDialog):
             self.optical_tagging_par["optical_tagging_start_time"] = str(datetime.now())
 
         # Execute
-        self.threadpool.start(worker_tagging)
+        if self.thread_finish_tag == 1:
+            self.threadpool.start(worker_tagging)
+        else:
+            self.Start.setChecked(False)
+            self.Start.setStyleSheet("background-color : none")
         #self._start_optical_tagging()
 
     def _clear_data(self):
@@ -3139,12 +3144,16 @@ class OpticalTaggingDialog(QDialog):
         # ask for confirmation
         reply = QMessageBox.question(self, 'Message', 'Are you sure to clear the optical tagging data?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
-            self.optical_tagging_par={}
-            self.label_show_current.setText('')
-            self.LocationTag.setValue(0)
             self.cycle_finish_tag = 1
             self.Start.setChecked(False)
             self.Start.setStyleSheet("background-color : none")
+            # wait for the thread to finish
+            while self.thread_finish_tag == 0:
+                QApplication.processEvents()
+                time.sleep(0.1)
+            self.optical_tagging_par={}
+            self.label_show_current.setText('')
+            self.LocationTag.setValue(0)
 
     def _start_over(self):
         '''Stop the optical tagging and start over (parameters will be shuffled)'''
@@ -3157,6 +3166,7 @@ class OpticalTaggingDialog(QDialog):
 
     def _thread_complete_tag(self):
         '''Complete the optical tagging'''
+        self.thread_finish_tag = 1
         # Add 1 to the location tag when the cycle is finished
         if self.cycle_finish_tag == 1:
             self.LocationTag.setValue(self.LocationTag.value()+1)
@@ -3170,6 +3180,7 @@ class OpticalTaggingDialog(QDialog):
 
     def _start_optical_tagging(self,update_label):
         '''Start the optical tagging in a different thread'''
+        self.thread_finish_tag = 0
         # iterate each condition
         for i in self.index[:]:
             if self.Start.isChecked():
