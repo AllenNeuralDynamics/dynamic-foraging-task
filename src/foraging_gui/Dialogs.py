@@ -3672,7 +3672,11 @@ class RandomRewardDialog(QDialog):
             self.random_reward_par["random_reward_start_time"] = str(datetime.now())
 
         # Execute
-        self.threadpool.start(worker_random_reward)
+        if self.thread_finish_tag==1:
+            self.threadpool.start(worker_random_reward)
+        else:
+            self.Start.setChecked(False)
+            self.Start.setStyleSheet("background-color : none")
 
     def _start_random_reward(self,update_label):
         '''Start the random reward in a different thread'''
