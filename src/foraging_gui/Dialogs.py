@@ -3739,7 +3739,7 @@ class RandomRewardDialog(QDialog):
                 time.sleep(interval-0.2)
                 if self.CheckRewardCollection.currentText()=='Yes':
                     # check if the reward has been collected by the animal
-                    received_licks=self._get_lick_timestampes()
+                    received_licks=self._get_lick_timestampes(side=side)
                     sleep_again=0
                     if not received_licks:
                         sleep_again=1
