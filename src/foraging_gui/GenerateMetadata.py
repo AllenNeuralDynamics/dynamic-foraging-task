@@ -464,7 +464,9 @@ class generate_metadata:
             self.trials_finished=np.count_nonzero(self.Obj['B_AnimalResponseHistory']!=2)
             self.trials_rewarded=np.count_nonzero(np.logical_or(self.Obj['B_RewardedHistory'][0],self.Obj['B_RewardedHistory'][1]))
             self.total_reward_consumed_in_session= float(self.Obj.get('BS_TotalReward', 0))
-
+        if 'random_reward_par' in self.Obj:
+            if 'RandomWaterVolume' in self.Obj['random_reward_par']:
+                self.total_reward_consumed_in_session+=np.sum(self.Obj['random_reward_par']['RandomWaterVolume'])
         # Wrong format of WeightAfter
         # Remove all the non-numeric characters except the dot in the WeightAfter
         if self.Obj['WeightAfter']!='':
