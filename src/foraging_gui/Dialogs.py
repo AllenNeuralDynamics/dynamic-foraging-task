@@ -3406,11 +3406,15 @@ class OpticalTaggingDialog(QDialog):
     def _produce_waveforms(self,protocol:str,frequency:int,pulse_duration:float,laser_name:str,target_power:float,laser_color:str,duration_each_cycle:float):
         '''Produce the waveforms for the optical tagging'''
         # get the amplitude of the laser
-        input_voltage=self._get_laser_amplitude(target_power=target_power,
-                                                laser_color=laser_color,
-                                                protocol=protocol,
-                                                laser_name=laser_name
-                                            )
+        if target_power==0:
+            # force the input_voltage to be 0 when the target_power is 0
+            input_voltage=0
+        else:
+            input_voltage=self._get_laser_amplitude(target_power=target_power,
+                                                    laser_color=laser_color,
+                                                    protocol=protocol,
+                                                    laser_name=laser_name
+                                                )
         if input_voltage is None:
             return
         
