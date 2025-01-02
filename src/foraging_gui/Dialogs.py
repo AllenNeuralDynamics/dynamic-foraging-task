@@ -3554,10 +3554,23 @@ class RandomRewardDialog(QDialog):
         '''Save the random reward results'''
         if self.random_reward_par=={}:
             return
+        # giving the user a warning message to show "This will only save the current parameters and results related to the random reward. If you want to save more including the metadata, please go to the main window and click the save button."
+        QMessageBox.warning(
+            self,
+            "Save Warning",
+            "Only the current parameters and results related to the random reward will be saved. "
+            "To save additional data, including metadata, please use the Save button in the main window."
+        )
         # get the save folder
-        save_folder = QFileDialog.getExistingDirectory(self, 'Select the folder to save the random reward results')
-        if save_folder=='':
-            return
+        if self.MainWindow.CreateNewFolder == 1:
+            self._GetSaveFolder()
+            self.CreateNewFolder = 0
+
+        save_file=self.MainWindow.SaveFileJson
+        if not os.path.exists(os.path.dirname(save_file)):
+            os.makedirs(os.path.dirname(save_file))
+            logging.info(f"Created new folder: {os.path.dirname(save_file)}")
+
         self.random_reward_par['task_parameters'] = {
             'task': 'Random reward',
             'spout': self.WhichSpout.currentText(),
@@ -3569,9 +3582,8 @@ class RandomRewardDialog(QDialog):
             'interval_min': self.IntervalMin.text(),
             'interval_max': self.IntervalMax.text(),
         }
-        # create the file name AnimalID_Date(day+hour+minute)_RandomRewardResults.csv
-        save_file = os.path.join(save_folder, f"{self.MainWindow.ID.text()}_{datetime.now().strftime('%Y-%m-%d-%H-%M')}_RandomRewardResults.json")
-        # save the data 
+
+        # save the data in the standard format and folder
         with open(save_file, 'w') as f:
             json.dump(self.random_reward_par, f, indent=4)
 
@@ -3604,6 +3616,10 @@ class RandomRewardDialog(QDialog):
 
     def _Start(self):
         '''Start giving random rewards'''
+        # restart the logging if it is not started
+        if self.MainWindow.logging_type!=0 or self.MainWindow.logging_type==-1:
+            self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
+
         # toggle the button color
         if self.Start.isChecked():
             self.Start.setStyleSheet("background-color : green;")
