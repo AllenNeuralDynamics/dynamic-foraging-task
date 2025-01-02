@@ -3687,7 +3687,11 @@ class RandomRewardDialog(QDialog):
                 if i == self.index[-1]:
                     self.cycle_finish_tag = 1
                 # exclude the index that has been run
-                self.index.remove(i)
+                # check if i is in the index
+                if i in self.index:
+                    self.index.remove(i)
+                else:
+                    continue
                 # get the current parameters
                 volume = self.current_random_reward_par['volumes_all_random'][i]
                 side = self.current_random_reward_par['sides_all_random'][i]
