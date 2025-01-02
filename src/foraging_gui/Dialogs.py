@@ -3546,7 +3546,7 @@ class RandomRewardDialog(QDialog):
     def _connectSignalsSlots(self):
         self.Start.clicked.connect(self._Start)
         self.WhichSpout.currentIndexChanged.connect(self._WhichSpout)
-        self.StartOver.clicked.connect(self._start_over)
+        self.Restart.clicked.connect(self._start_over)
         self.ClearData.clicked.connect(self._clear_data)
         self.Save.clicked.connect(self._Save)
 
@@ -3592,7 +3592,7 @@ class RandomRewardDialog(QDialog):
             self.label_show_current.setText('')
 
     def _start_over(self):
-        '''Stop the random reward'''
+        '''Stop the random reward and start over (parameters will be shuffled)'''
         # ask user if they want to start over
         reply = QMessageBox.question(self, 'Message', 'Do you want to start over?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
