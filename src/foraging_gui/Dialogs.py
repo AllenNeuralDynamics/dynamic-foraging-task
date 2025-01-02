@@ -3756,7 +3756,7 @@ class RandomRewardDialog(QDialog):
                     # if not received any licks, sleep until we receive a lick
                     while (not received_licks) and self.Start.isChecked():
                         time.sleep(0.01)
-                        received_licks=self._get_lick_timestampes()
+                        received_licks=self._get_lick_timestampes(side=side)
                     if not self.Start.isChecked():
                         update_label(
                             f"Cycles: {i+1}/{len(self.current_random_reward_par['volumes_all_random'])} \n"
@@ -3779,7 +3779,7 @@ class RandomRewardDialog(QDialog):
             else:
                 break
     
-    def _get_lick_timestampes(self)->bool:
+    def _get_lick_timestampes(self,side==None)->bool:
         '''Get the lick timestamps'''
         if 'left_lick_time' not in self.random_reward_par:
             self.random_reward_par['left_lick_time'] = []
@@ -3793,10 +3793,12 @@ class RandomRewardDialog(QDialog):
 
             if address == '/LeftLickTime':
                 self.random_reward_par['left_lick_time'].append(lick_time)
+                if side==0:
+                    Return = True # left licks received
             elif address == '/RightLickTime':
                 self.random_reward_par['right_lick_time'].append(lick_time)
-            Return = True # licks received
-
+                if side==1:
+                    Return = True # right licks received
         return Return
             
     def _receving_timestamps(self,side:int):
