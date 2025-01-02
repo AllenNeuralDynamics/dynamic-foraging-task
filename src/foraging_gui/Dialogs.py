@@ -3063,12 +3063,36 @@ class OpticalTaggingDialog(QDialog):
         '''Save the optical tagging results'''
         if self.optical_tagging_par=={}:
             return
+        # giving the user a warning message to show "This will only save the current parameters and results related to the random reward. If you want to save more including the metadata, please go to the main window and click the save button."
+        QMessageBox.warning(
+            self,
+            "Save Warning",
+            "Only the current parameters and results related to the optical tagging will be saved. "
+            "To save additional data, including metadata, please use the Save button in the main window."
+        )
         # get the save folder
-        save_folder = QFileDialog.getExistingDirectory(self, 'Select the folder to save the optical tagging results')
-        if save_folder=='':
-            return
-        # create the file name AnimalID_Date(day+hour+minute)_OpticalTaggingResults.csv
-        save_file = os.path.join(save_folder, f"{self.MainWindow.ID.text()}_{datetime.now().strftime('%Y-%m-%d-%H-%M')}_OpticalTaggingResults.json")
+        if self.MainWindow.CreateNewFolder == 1:
+            self.MainWindow._GetSaveFolder()
+            self.MainWindow.CreateNewFolder = 0
+
+        save_file=self.MainWindow.SaveFileJson
+        if not os.path.exists(os.path.dirname(save_file)):
+            os.makedirs(os.path.dirname(save_file))
+            logging.info(f"Created new folder: {os.path.dirname(save_file)}")
+            
+        self.optical_tagging_par["task_parameters"]={
+            "laser_name": self.WhichLaser.currentText(),
+            "protocol": self.Protocol.currentText(),
+            "laser_1_color": self.Laser_1_color.text(),
+            "laser_2_color": self.Laser_2_color.text(),
+            "laser_1_power": self.Laser_1_power.text(),
+            "laser_2_power": self.Laser_2_power.text(),
+            "frequency": self.Frequency.text(),
+            "pulse_duration": self.Pulse_duration.text(),
+            "duration_each_cycle": self.Duration_each_cycle.text(),
+            "interval_between_cycles": self.Interval_between_cycles.text(),
+            "cycles_each_condition": self.Cycles_each_condition.text(),
+        }
         # save the data 
         with open(save_file, 'w') as f:
             json.dump(self.optical_tagging_par, f, indent=4)
