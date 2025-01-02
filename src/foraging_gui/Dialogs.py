@@ -3732,6 +3732,8 @@ class RandomRewardDialog(QDialog):
                             f"Interval: {interval} s\n"
                             f"Reward not collected"
                         )
+                    else:
+                        continue
                     # if not received any licks, sleep until we receive a lick
                     while (not received_licks) and self.Start.isChecked():
                         time.sleep(0.01)
