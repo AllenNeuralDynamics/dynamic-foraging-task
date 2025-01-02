@@ -3720,9 +3720,9 @@ class RandomRewardDialog(QDialog):
                 # give the reward
                 self._give_reward(volume=volume, side=side)
                 # receiving the timestamps of reward start time. 
-                timestamp_computer, timestamp_harp=self._receving_timestamps(side=side)
+                reward_start_timestamp_computer, reward_start_timestamp_harp=self._receving_timestamps(side=side)
                 # save the data 
-                self._save_data(volume=volume, side=side, interval=interval,timestamp_computer=timestamp_computer,timestamp_harp=timestamp_harp)
+                self._save_data(volume=volume, side=side, interval=interval,timestamp_computer=reward_start_timestamp_computer,timestamp_harp=reward_start_timestamp_harp)
                 # show current cycle and parameters
                 # Emit signal to update the label
                 if side==0:
@@ -3826,14 +3826,14 @@ class RandomRewardDialog(QDialog):
             self.random_reward_par['volumes']=[]
             self.random_reward_par['sides']=[]
             self.random_reward_par['intervals']=[]
-            self.random_reward_par['timestamp_computer']=[]
-            self.random_reward_par['timestamp_harp']=[]
+            self.random_reward_par['reward_start_timestamp_computer']=[]
+            self.random_reward_par['reward_start_timestamp_harp']=[]
         else:
             self.random_reward_par['volumes'].append(volume)
             self.random_reward_par['sides'].append(side)
             self.random_reward_par['intervals'].append(interval)
-            self.random_reward_par['timestamp_computer'].append(timestamp_computer)
-            self.random_reward_par['timestamp_harp'].append(timestamp_harp)
+            self.random_reward_par['reward_start_timestamp_computer'].append(timestamp_computer)
+            self.random_reward_par['reward_start_timestamp_harp'].append(timestamp_harp)
 
     def _thread_complete_tag(self):
         '''Complete the random reward'''
