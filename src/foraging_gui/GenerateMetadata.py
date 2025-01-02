@@ -546,7 +546,7 @@ class generate_metadata:
         if start_time == '' or end_time == '':
             start_time=self.Obj['random_reward_par']['random_reward_start_time']
             end_time=self.Obj['random_reward_par']['random_reward_end_time']
-        elif start_time=='' or end_time=='':
+        if start_time=='' or end_time=='':
             start_time=self.Obj['optical_tagging_par']['optical_tagging_start_time']
             end_time=self.Obj['optical_tagging_par']['optical_tagging_end_time']
 
