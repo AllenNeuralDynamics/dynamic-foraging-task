@@ -428,7 +428,6 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         # populate lick spouts with correct format depending if using newscale or aind stage
         stage_positions = getattr(obj, 'B_StagePositions', [])  # If obj doesn't have attr, skip if since i !< len([])
         if i < len(stage_positions):    # index is valid for stage position lengths
-            print('adding lickspout')
             trial_kwargs['lickspout_position_x'] = stage_positions[i].get('x', np.nan)  # nan default if keys are wrong
             trial_kwargs['lickspout_position_z'] = stage_positions[i].get('z', np.nan)  # nan default if keys are wrong
             if list(stage_positions[i].keys()) == ['x', 'y1', 'y2', 'z']:    # aind stage
