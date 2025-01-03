@@ -2689,7 +2689,8 @@ class Window(QMainWindow):
             # generate the metadata file
             generated_metadata=generate_metadata(Obj=Obj)
             session = generated_metadata._session()
-            self.sessionGenerated.emit(session)   # emit sessionGenerated
+            if session is not None:     # skip if metadata generation failed
+                self.sessionGenerated.emit(session)   # emit sessionGenerated
 
             if BackupSave==0:
                 text="Session metadata generated successfully: " + str(generated_metadata.session_metadata_success)+"\n"+\
