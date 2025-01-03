@@ -21,12 +21,12 @@ class RewardProbability(BaseModel):
     pairs: int = Field(default=1, title="Number of pairs")
 
 class Block(BaseModel):
-    min: int = Field(default=20, title="Block length (min)")
+    minimum: int = Field(default=20, title="Block length (min)")
     max: int = Field(default=60, title="Block length (max)")
     beta: int = Field(default=20, title="Block length (beta)")
 
 class Delay(BaseModel):
-    min_s: float = Field(default=1, title="Delay period (min) ")
+    minimum_s: float = Field(default=1, title="Delay period (min) ")
     max_s: float = Field(default=8, title="Delay period (max) ")
     beta_s:  float = Field(default=1, title="Delay period (beta)")
     reward_s: int = Field(default=0, title="Reward delay (sec)")
@@ -39,7 +39,7 @@ class AutoWater(BaseModel):
     ignored: int = Field(default=100, title="Number of ignored trials before auto water")
 
 class ITI_Parameters(BaseModel):
-    min: float = Field(default=0.0, title="ITI (min)")
+    minimum: float = Field(default=0.0, title="ITI (min)")
     max: float = Field(default=0.0, title="ITI (max)")
     beta: float = Field(default=0.0, title="ITI (beta)")
     increase: float = Field(default=0.0, title="ITI increase")
@@ -47,9 +47,9 @@ class ITI_Parameters(BaseModel):
 class AutoStop(BaseModel):
     ignore_window: int = Field(default=30, description="Trial window in which to monitor ignored trials")
     ignore_ratio: float = Field(default=0.8, description="Percent of ignored licks in window to trigger auto-stop")
-    max_time: float = Field(default=120, title="Maximal session time (min)")
-    min_time: float = Field(default=30, title="Minimum session time (min)")
-    max_trial: int = Field(..., title="Maximal number of trials")
+    max_time_min: float = Field(default=120, title="Maximal session time (min)")
+    minimum_time_min: float = Field(default=30, title="Minimum session time (min)")
+    max_trial: int = Field(default=1000, title="Maximal number of trials")
 
 class AutoBlock(BaseModel):
     advanced_block_auto: AdvancedBlockMode = Field(default=AdvancedBlockMode.OFF, title="Auto block mode")
@@ -57,14 +57,14 @@ class AutoBlock(BaseModel):
     points_in_a_row: int = Field(default=5, title="Points in a row for auto block")
 
 class RewardSize(BaseModel):
-    right_volume: float = Field(default=3.00, title="Right reward size (uL)")
-    left_volume: float = Field(default=3.00, title="Left reward size (uL)")
+    right_volume_uL: float = Field(default=3.00, title="Right reward size (uL)")
+    left_volume_uL: float = Field(default=3.00, title="Left reward size (uL)")
 
 class Warmup(BaseModel):
     warmup: bool = Field(default=False, title="Warmup master switch")
-    min_trial: int = Field(default=50, title="Warmup finish criteria: minimal trials")
+    minimum_trial: int = Field(default=50, title="Warmup finish criteria: minimal trials")
     max_choice_ratio_bias: float = Field(default=0.1, title="Warmup finish criteria: maximal choice ratio bias from 0.5")
-    min_finish_ratio: float = Field(default=0.8, title="Warmup finish criteria: minimal finish ratio")
+    minimum_finish_ratio: float = Field(default=0.8, title="Warmup finish criteria: minimal finish ratio")
     window_size: int = Field(default=20, title="Warmup finish criteria: window size to compute the bias and ratio")
 
 class BaseTask(BaseModel):
@@ -81,6 +81,7 @@ class BaseTask(BaseModel):
                                          description="Time of the no-lick period before trial end")
     reward_size: RewardSize = Field(default=RewardSize())
     warmup: Warmup = Field(default=Warmup())
+    auto_stop: AutoStop = Field(default=AutoStop())
 
 class Coupled(BaseTask):
     """
@@ -89,7 +90,7 @@ class Coupled(BaseTask):
 
     reward_probability: RewardProbability = Field(default=RewardProbability())
     block: Block = Field(default=Block())
-    min_reward: int = Field(default=1, title="Minimal rewards in a block to switch")
+    minimum_reward: int = Field(default=1, title="Minimal rewards in a block to switch")
     auto_block: AutoBlock = Field(default=AutoBlock())
 
 class Uncoupled(BaseTask):

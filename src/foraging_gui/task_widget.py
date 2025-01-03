@@ -47,10 +47,11 @@ class TaskWidget(QWidget):
 
         self.stacked_task_widget = QStackedWidget()
         self.layout().addWidget(self.stacked_task_widget)
-
         for schema in task_types.values():
             widget = BaseDeviceWidget(schema, schema().dict())
-            widget.ValueChangedInside.connect(self.taskValueChanged.emit)  # emit when a widget is changed
+            # emit signal when widget is changed
+            widget.ValueChangedInside.connect(self.taskValueChanged.emit)
+            widget.ValueChangedOutside.connect(self.taskValueChanged.emit)
             self.stacked_task_widget.addWidget(add_border(widget))
 
         self.task_combobox.currentIndexChanged.connect(lambda i: self.stacked_task_widget.setCurrentIndex(i))

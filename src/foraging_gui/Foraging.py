@@ -240,12 +240,17 @@ class Window(QMainWindow):
         self.keyPressEvent()
         #self._WaterVolumnManage2()
         self._LickSta()
-        #self._warmup()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
         self._StopPhotometry() # Make sure photoexcitation is stopped
         # Initialize open ephys saving dictionary
         self.open_ephys=[]
+
+        # set task_widget in correct state based on initial values
+        self.warmup_changed(False)
+        self.randomness_changed('Exponential')
+        self.auto_reward_changed(False)
+        self.advanced_block_auto_changed('OFF')
 
         # load the rig metadata
         self._load_rig_metadata()
@@ -317,7 +322,7 @@ class Window(QMainWindow):
         param value: new value of randomness
         """
         task = self.task_widget.currentTask()
-        getattr(task, 'delay.beta_widget').setEnabled(value == 'Exponential')
+        getattr(task, 'delay.beta_s_widget').setEnabled(value == 'Exponential')
         getattr(task, 'ITI.beta_widget').setEnabled(value == 'Exponential')
         if 'Uncoupled' not in self.behavior_task_logic_model.name:  # update block widgets if coupled
             getattr(task, 'block.beta_widget').setEnabled(value == 'Exponential')
@@ -328,8 +333,8 @@ class Window(QMainWindow):
         param value: new value of advanced_block_auto
         """
         task = self.task_widget.currentTask()
-        getattr(task, 'delay.switch_thr_widget').setEnabled(value != 'off')
-        getattr(task, 'delay.points_in_a_row_widget').setEnabled(value != 'off')
+        getattr(task, 'auto_block.switch_thr_widget').setEnabled(value != 'OFF')
+        getattr(task, 'auto_block.points_in_a_row_widget').setEnabled(value != 'OFF')
 
     def warmup_changed(self, value: bool) -> None:
         """
@@ -337,31 +342,27 @@ class Window(QMainWindow):
         param value: new value of warmup
         """
         task = self.task_widget.currentTask()
-        getattr(task, 'warmup.min_trial_widget').setEnabled(value)
-        getattr(task, 'warmup.min_finish_ratio_widget').setEnabled(value)
+        getattr(task, 'warmup.minimum_trial_widget').setEnabled(value)
+        getattr(task, 'warmup.minimum_finish_ratio_widget').setEnabled(value)
         getattr(task, 'warmup.max_choice_ratio_bias_widget').setEnabled(value)
-        getattr(task, 'warmup.window_size_widget')
+        getattr(task, 'warmup.window_size_widget').setEnabled(value)
 
         if value:
             self.task_widget.setTask('Coupled Baiting')
             # configure reward_probability
-            getattr(task, 'reward_probability.sum_widget').setValue(1)
-            getattr(task, 'reward_probability.family_widget').setValue(3)
-            getattr(task, 'reward_probability.pairs_widget').setValue(1)
+            task.reward_probability = {'sum': 1.0, 'family': 3, 'pairs': 1}
             # configure block
-            getattr(task, 'block.beta_widget').setValue(1)
-            getattr(task, 'block.min_widget').setValue(1)
-            getattr(task, 'block.max_widget').setValue(1)
+            task.block = {'beta': 1, 'minimum': 1, 'max': 1}
             # configure min_reward
-            getattr(task, 'min_reward_widget').setValue(1)
+            task.minimum_reward = 1
             # configure auto_reward
-            getattr(task, 'auto_water.auto_reward_widget').setChecked(True)
-            getattr(task, 'auto_water.auto_water_type_widget').setCurrentText('NATURAL')
-            getattr(task, 'auto_water.multiplier_widget').setValue(.8)
-            getattr(task, 'auto_water.unrewarded_widget').setValue(0)
-            getattr(task, 'auto_water.ignored_widget').setValue(0)
+            task.auto_water = {'auto_reward': True,
+                               'auto_water_type': 'NATURAL',
+                               'multiplier': .8,
+                               'unrewarded': 0,
+                               'ignored': 0 }
             # configure auto_block
-            getattr(task, 'auto_water.auto_water_type_widget').setCurrentText('OFF')
+            task.auto_block['advanced_block_auto'] = 'OFF'
         self.update_reward_pairs()
 
     def auto_reward_changed(self, value: bool) -> None:
@@ -371,10 +372,10 @@ class Window(QMainWindow):
         """
 
         task = self.task_widget.currentTask()
-        getattr(task, 'auto_water.auto_water_type').setEnabled(value)
-        getattr(task, 'auto_water.multiplier').setEnabled(value)
-        getattr(task, 'auto_water.unrewarded').setEnabled(value)
-        getattr(task, 'auto_water.ignored').setEnabled(value)
+        getattr(task, 'auto_water.auto_water_type_widget').setEnabled(value)
+        getattr(task, 'auto_water.multiplier_widget').setEnabled(value)
+        getattr(task, 'auto_water.unrewarded_widget').setEnabled(value)
+        getattr(task, 'auto_water.ignored_widget').setEnabled(value)
 
     def _load_rig_metadata(self):
         '''Load the latest rig metadata'''
@@ -2119,13 +2120,13 @@ class Window(QMainWindow):
 
     def update_reward_pairs(self):
         """
-        Update reward pairs based on gui values
+        Update reward pairs attribute and textbox based on gui values
         """
         try:
-            if self.behavior_session_model.experiment in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
-                sm = self.behavior_task_logic_model.reward_probability.sum
-                family = self.behavior_task_logic_model.reward_probability.family
-                pairs = self.behavior_task_logic_model.reward_probability.pairs
+            if self.behavior_session_model.experiment in ['Coupled Baiting' , 'Coupled Without Baiting' , 'RewardN']:
+                sm, family, pairs  = self.behavior_task_logic_model.task_parameters.reward_probability.values()
+                # family = self.behavior_task_logic_model.task_parameters.reward_probability['family']
+                # pairs = self.behavior_task_logic_model.task_parameters.reward_probability['pairs']
                 self.RewardPairs = self.RewardFamilies[family-1][:pairs]
                 self.RewardProb = np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs, axis=1), axis=1) \
                                   * sm
@@ -2139,8 +2140,6 @@ class Window(QMainWindow):
             if hasattr(self, 'GeneratedTrials'):
                 text += str(np.round(self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2))
             self.ShowRewardPairs.setText(text)
-            if self.default_ui=='ForagingGUI.ui':
-                self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
 
         except Exception as e:
             # Catch the exception and log error information
@@ -2365,11 +2364,16 @@ class Window(QMainWindow):
         logging.info('Saving current session, ForceSave={}'.format(ForceSave))
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
-        if (self.BaseWeight.text()=='' or self.WeightAfter.text()=='' or self.TargetRatio.text()=='') and BackupSave==0:
+
+        # check if water or weight is empty
+        if (self.BaseWeight.text() == '' or
+            self.WeightAfter.text() == '' or
+            self.TargetRatio.text() == '') and BackupSave == 0:
+
             response = QMessageBox.question(self,
-                'Box {}, Save without weight or extra water:'.format(self.box_letter),
+                f'Box {}, Save without weight or extra water:'.format(self.box_letter),
                 "Do you want to save without weight or extra water information provided?",
-                 QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,QMessageBox.Yes)
+                 QMessageBox.Yes | QMessageBox.No)
             if response==QMessageBox.Yes:
                 logging.warning('Saving without weight or extra water!', extra={'tags': [self.warning_log_tag]})
                 pass
@@ -2377,12 +2381,15 @@ class Window(QMainWindow):
                 logging.info('saving declined by user')
                 self.Save.setChecked(False)  # uncheck button
                 return
-            elif response==QMessageBox.Cancel:
-                logging.info('saving canceled by user')
-                self.Save.setChecked(False)  # uncheck button
-                return
+
         # check if the laser power and target are entered
-        if BackupSave==0 and self.OptogeneticsB.currentText()=='on' and (self.Opto_dialog.laser_1_target.text()=='' or self.Opto_dialog.laser_1_calibration_power.text()=='' or self.Opto_dialog.laser_2_target.text()=='' or self.Opto_dialog.laser_2_calibration_power.text()=='' or self.Opto_dialog.laser_1_calibration_voltage.text()=='' or self.Opto_dialog.laser_2_calibration_voltage.text()==''):
+        if BackupSave == 0 and self.OptogeneticsB.currentText() == 'on' \
+                and (self.Opto_dialog.laser_1_target.text() == '' or
+                     self.Opto_dialog.laser_1_calibration_power.text() == '' or
+                     self.Opto_dialog.laser_2_target.text() == '' or
+                     self.Opto_dialog.laser_2_calibration_power.text() == '' or
+                     self.Opto_dialog.laser_1_calibration_voltage.text() == '' or
+                     self.Opto_dialog.laser_2_calibration_voltage.text() == ''):
             response = QMessageBox.question(self,
                 'Box {}, Save without laser target or laser power:'.format(self.box_letter),
                 "Do you want to save without complete laser target or laser power calibration information provided?",
@@ -2405,7 +2412,7 @@ class Window(QMainWindow):
             self._StartExcitation()
             logging.info('Stopping excitation before saving')
 
-        # get iregular timestamp
+        # get irregular timestamp
         if hasattr(self, 'GeneratedTrials') and self.InitializeBonsaiSuccessfully==1 and BackupSave==0:
             self.GeneratedTrials._get_irregular_timestamp(self.Channel2)
 
@@ -2422,7 +2429,9 @@ class Window(QMainWindow):
         if SaveAs == 0:
             self.SaveFile = self.SaveFileJson
         else:
-            Names = QFileDialog.getSaveFileName(self, 'Save File',self.SaveFileJson,"JSON files (*.json);;MAT files (*.mat);;JSON parameters (*_par.json)")
+            Names = QFileDialog.getSaveFileName(self, 'Save File',
+                                                self.SaveFileJson,
+                                                "JSON files (*.json);;MAT files (*.mat);;JSON parameters (*_par.json)")
             if Names[1]=='JSON parameters (*_par.json)':
                 self.SaveFile=Names[0].replace('.json', '_par.json')
             else:
