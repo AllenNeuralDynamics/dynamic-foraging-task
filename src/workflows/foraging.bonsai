@@ -7852,7 +7852,7 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="io:CsvWriter">
-                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_left.csv</io:FileName>
+                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-01-03_11-35-43\behavior\raw.harp/../../behavior-videos/side_camera_left.csv</io:FileName>
                                 <io:Append>false</io:Append>
                                 <io:Overwrite>true</io:Overwrite>
                                 <io:Suffix>None</io:Suffix>
@@ -7897,11 +7897,11 @@
                               </Expression>
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="ffmpeg:VideoWriter">
-                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_left.avi</ffmpeg:FileName>
+                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-01-03_11-35-43\behavior\raw.harp/../../behavior-videos/side_camera_left.avi</ffmpeg:FileName>
                                   <ffmpeg:Suffix>None</ffmpeg:Suffix>
                                   <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                                   <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M</ffmpeg:OutputArguments>
+                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M -v 24</ffmpeg:OutputArguments>
                                 </Combinator>
                               </Expression>
                             </Nodes>
@@ -8019,7 +8019,7 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="io:CsvWriter">
-                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/bottom_camera.csv</io:FileName>
+                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-01-03_11-35-43\behavior\raw.harp/../../behavior-videos/bottom_camera.csv</io:FileName>
                                 <io:Append>false</io:Append>
                                 <io:Overwrite>true</io:Overwrite>
                                 <io:Suffix>None</io:Suffix>
@@ -8067,11 +8067,11 @@
                               </Expression>
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="ffmpeg:VideoWriter">
-                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/bottom_camera.avi</ffmpeg:FileName>
+                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-01-03_11-35-43\behavior\raw.harp/../../behavior-videos/bottom_camera.avi</ffmpeg:FileName>
                                   <ffmpeg:Suffix>None</ffmpeg:Suffix>
                                   <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                                   <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M</ffmpeg:OutputArguments>
+                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M -v 24</ffmpeg:OutputArguments>
                                 </Combinator>
                               </Expression>
                             </Nodes>
@@ -8190,7 +8190,7 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="io:CsvWriter">
-                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_right.csv</io:FileName>
+                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-01-03_11-35-43\behavior\raw.harp/../../behavior-videos/side_camera_right.csv</io:FileName>
                                 <io:Append>false</io:Append>
                                 <io:Overwrite>true</io:Overwrite>
                                 <io:Suffix>None</io:Suffix>
@@ -8238,11 +8238,11 @@
                               </Expression>
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="ffmpeg:VideoWriter">
-                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_right.avi</ffmpeg:FileName>
+                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-01-03_11-35-43\behavior\raw.harp/../../behavior-videos/side_camera_right.avi</ffmpeg:FileName>
                                   <ffmpeg:Suffix>None</ffmpeg:Suffix>
                                   <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                                   <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M</ffmpeg:OutputArguments>
+                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M -v 24</ffmpeg:OutputArguments>
                                 </Combinator>
                               </Expression>
                             </Nodes>
@@ -8361,7 +8361,7 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="io:CsvWriter">
-                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/body_camera.csv</io:FileName>
+                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-01-03_11-35-43\behavior\raw.harp/../../behavior-videos/body_camera.csv</io:FileName>
                                 <io:Append>false</io:Append>
                                 <io:Overwrite>true</io:Overwrite>
                                 <io:Suffix>None</io:Suffix>
@@ -8406,11 +8406,11 @@
                               </Expression>
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="ffmpeg:VideoWriter">
-                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/body_camera.avi</ffmpeg:FileName>
+                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-01-03_11-35-43\behavior\raw.harp/../../behavior-videos/body_camera.avi</ffmpeg:FileName>
                                   <ffmpeg:Suffix>None</ffmpeg:Suffix>
                                   <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                                   <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M</ffmpeg:OutputArguments>
+                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M -v 24</ffmpeg:OutputArguments>
                                 </Combinator>
                               </Expression>
                             </Nodes>
@@ -8765,6 +8765,11 @@
             <Expression xsi:type="SubscribeSubject">
               <Name>CameraImage_Bottom</Name>
             </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="cv:Flip">
+                <cv:Mode>Horizontal</cv:Mode>
+              </Combinator>
+            </Expression>
             <Expression xsi:type="VisualizerMapping">
               <VisualizerType xsi:type="TypeMapping" TypeArguments="p4:IplImageRotateVisualizer" />
             </Expression>
@@ -8867,10 +8872,11 @@
             <Edge From="52" To="53" Label="Source1" />
             <Edge From="53" To="54" Label="Source2" />
             <Edge From="55" To="56" Label="Source1" />
-            <Edge From="56" To="59" Label="Source1" />
-            <Edge From="57" To="58" Label="Source1" />
-            <Edge From="58" To="59" Label="Source2" />
-            <Edge From="60" To="61" Label="Source1" />
+            <Edge From="56" To="57" Label="Source1" />
+            <Edge From="57" To="60" Label="Source1" />
+            <Edge From="58" To="59" Label="Source1" />
+            <Edge From="59" To="60" Label="Source2" />
+            <Edge From="61" To="62" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
