@@ -56,6 +56,23 @@ class TaskWidget(QWidget):
         self.task_combobox.currentIndexChanged.connect(lambda i: self.stacked_task_widget.setCurrentIndex(i))
         self.task_combobox.currentTextChanged.connect(self.taskTypeChanged.emit)
 
+    def currentTask(self) -> BaseDeviceWidget:
+        """
+        Convenience function to return current widget of stacked_task_widget
+        :return current widget of stacked_task_widget
+        """
+
+        return self.stacked_task_widget.currentWidget()
+
+    def setTask(self, task_name: str) -> None:
+        """
+        Set current task programmatically
+        :param task_name: name of task to change to
+        """
+
+        if task_name not in [self.task_combobox.itemText(i) for i in range(self.task_combobox.count())]:
+            raise ValueError(f'{task_name} not a valid task selection.')
+        self.task_combobox.setCurrentText(task_name)
 
 if __name__ == "__main__":
     from qtpy.QtWidgets import QApplication
@@ -85,6 +102,8 @@ if __name__ == "__main__":
         name=name,
         task_parameters=task_types[name]().dict(),
         version='1.6.11')
+        for name, widget in task_widget.currentTask().property_widgets.items():
+            task_widget.taskValueChanged.emit(name)
         print(behavior_task_logic_model)
 
     def error_handler(etype, value, tb):
@@ -99,11 +118,10 @@ if __name__ == "__main__":
                   'Uncoupled Without Baiting': Uncoupled,
                   'RewardN': RewardN}
     task_widget = TaskWidget(task_types=task_types)
-
     task_widget.show()
 
     task_widget.taskValueChanged.connect(
-        lambda task: widget_property_changed(task, task_widget.stacked_task_widget.currentWidget()))
+        lambda task: widget_property_changed(task, task_widget.currentTask()))
     task_widget.taskTypeChanged.connect(widget_task_change)
 
 

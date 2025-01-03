@@ -32,8 +32,8 @@ class Delay(BaseModel):
     reward_s: int = Field(default=0, title="Reward delay (sec)")
 
 class AutoWater(BaseModel):
-    autoReward: bool = Field(default=False, title="Auto reward switch")
-    autoWaterType: AutoWaterModes = Field(default=AutoWaterModes.NATURAL, title="Auto water mode")
+    auto_reward: bool = Field(default=False, title="Auto reward switch")
+    auto_water_type: AutoWaterModes = Field(default=AutoWaterModes.NATURAL, title="Auto water mode")
     multiplier: float = Field(default=0.8, title="Multiplier for auto reward")
     unrewarded: int = Field(default=200, title="Number of unrewarded trials before auto water")
     ignored: int = Field(default=100, title="Number of ignored trials before auto water")
@@ -97,7 +97,7 @@ class Uncoupled(BaseTask):
     Schema for uncouple task for dynamic foraging
     """
 
-    uncoupled_reward: str = Field(default="0.1,0.3,0.7", title="Uncoupled reward")
+    uncoupled_reward: list = Field(default=[0.1,0.3,0.7], title="Uncoupled reward")
 
 class RewardN(Coupled):
     """
