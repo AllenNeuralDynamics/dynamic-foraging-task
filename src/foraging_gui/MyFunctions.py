@@ -1736,10 +1736,10 @@ class GenerateTrials():
             elif Rec[0].address=='/TrialEndTime':
                 TrialEndTime=Rec[1][1][0]
             elif Rec[0].address=='/GoCueTimeSoundCard':
-                soundcard_eventN = soundcard_eventN + 1
                 if soundcard_eventN == 1:
                     GoCueTimeSoundCard_SecondStimulus=Rec[1][1][0]
                     continue
+                soundcard_eventN = soundcard_eventN + 1
                 # give auto water after Co cue
                 # Randomlizing the order to avoid potential bias. 
                 if np.random.random(1)<0.5:
