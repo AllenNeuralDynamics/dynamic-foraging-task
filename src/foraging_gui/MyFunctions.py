@@ -1543,6 +1543,7 @@ class GenerateTrials():
             if self.TP_GiveSecondStimulus=='on':
                 # The delay time set in the GUI is corresponding to the delay time after the first reinforcement
                 reward_delay=float(reward_delay)+float(self.CurrentSecondStimulusDelay)
+            self.reward_delay=reward_delay
             Channel1.RewardDelay(float(reward_delay))
             Channel1.DelayTime(float(self.CurrentDelay))
             Channel1.ResponseTime(float(self.TP_ResponseTime))
@@ -1810,6 +1811,14 @@ class GenerateTrials():
         self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime)
         self.B_GoCueTime=np.append(self.B_GoCueTime,GoCueTime)
         self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,RewardOutcomeTime)
+        # If there is a reward delay and a second stimulus delay, the trial end time should be adjusted accordingly.
+        # The trial end time is determined by the sum of:
+        # - reward outcome timestamp (which includes reward, no reward, or no response)
+        # - reward consume time
+        # The reward delay and second stimulus delay are added to the reward outcome time,
+        # thereby extending the trial end time.
+        # The next trial will start after this adjusted trial end time.
+        time.sleep(float(self.reward_delay))
         self.GetResponseFinish=1
 
     def _set_valve_time_left(self,channel3,LeftValue=0.01,Multiplier=1):
