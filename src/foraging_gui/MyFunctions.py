@@ -1682,7 +1682,7 @@ class GenerateTrials():
         in_delay=0 #0, the next /BehaviorEvent is not the delay; 1, the next /BehaviorEvent is the delay following the /TrialStartTime
         first_behavior_event=0
         first_delay_start=0
-        first_soundcard_event=0
+        soundcard_eventN=0
         GoCueTimeSoundCard_SecondStimulus=None
         while 1:
             Rec=Channel1.receive()
@@ -1736,8 +1736,8 @@ class GenerateTrials():
             elif Rec[0].address=='/TrialEndTime':
                 TrialEndTime=Rec[1][1][0]
             elif Rec[0].address=='/GoCueTimeSoundCard':
-                if first_soundcard_event == 0:
-                    first_soundcard_event=1
+                soundcard_eventN = soundcard_eventN + 1
+                if soundcard_eventN == 1:
                     GoCueTimeSoundCard_SecondStimulus=Rec[1][1][0]
                     continue
                 # give auto water after Co cue
