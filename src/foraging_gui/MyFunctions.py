@@ -39,6 +39,8 @@ class GenerateTrials():
         self.B_CurrentRewardProbRandomNumber=[]
         self.B_ITIHistory=[]
         self.B_DelayHistory=[]
+        self.B_SecondStimulusDelay=[]
+        self.B_RewardDelay=[]
         self.B_ResponseTimeHistory=[]
         self.B_CurrentRewardProb=np.empty((2,))
         self.B_AnimalCurrentResponse=[]
@@ -395,10 +397,12 @@ class GenerateTrials():
             self.CurrentITI = float(np.random.exponential(float(self.TP_ITIBeta),1)+float(self.TP_ITIMin))
             self.CurrentDelay = float(np.random.exponential(float(self.TP_DelayBeta),1)+float(self.TP_DelayMin))
             self.CurrentSecondStimulusDelay = float(np.random.exponential(float(self.TP_SecondStimulusBeta),1)+float(self.TP_SecondStimulusMin))
+            self.CurrentRewardDelay = float(np.random.exponential(float(self.TP_RewardDelayBeta),1)+float(self.TP_RewardDelayMin))
         elif self.TP_Randomness=='Even':
             self.CurrentITI = random.uniform(float(self.TP_ITIMin),float(self.TP_ITIMax))
             self.CurrentDelay=random.uniform(float(self.TP_DelayMin),float(self.TP_DelayMax))
             self.CurrentSecondStimulusDelay=random.uniform(float(self.TP_SecondStimulusMin),float(self.TP_SecondStimulusMax))
+            self.CurrentRewardDelay=random.uniform(float(self.TP_RewardDelayMin),float(self.TP_RewardDelayMax))
         
         if self.CurrentITI>float(self.TP_ITIMax):
             self.CurrentITI=float(self.TP_ITIMax)           
@@ -406,6 +410,8 @@ class GenerateTrials():
             self.CurrentDelay=float(self.TP_DelayMax)
         if self.CurrentSecondStimulusDelay>float(self.TP_SecondStimulusMax):
             self.CurrentSecondStimulusDelay=float(self.TP_SecondStimulusMax)
+        if self.CurrentRewardDelay>float(self.TP_RewardDelayMax):
+            self.CurrentRewardDelay=float(self.TP_RewardDelayMax)
         # extremely important. Currently, the shaders timer does not allow delay close to zero. 
         if self.CurrentITI<0.05:
             self.CurrentITI=0.05
@@ -414,6 +420,8 @@ class GenerateTrials():
         self.B_ITIHistory.append(self.CurrentITI)
         self.B_DelayHistory.append(self.CurrentDelay)
         self.B_ResponseTimeHistory.append(float(self.TP_ResponseTime))
+        self.B_SecondStimulusDelay.append(self.CurrentSecondStimulusDelay)
+        self.B_RewardDelay.append(self.CurrentRewardDelay)
 
     def _check_coupled_block_transition(self):
         '''Check if we should perform a block change for the next trial. 
@@ -1536,9 +1544,7 @@ class GenerateTrials():
             Channel1.Left_Bait(int(self.CurrentBait[0]))
             Channel1.Right_Bait(int(self.CurrentBait[1]))
             Channel1.ITI(float(self.CurrentITI))
-            reward_delay=self.TP_RewardDelay
-            if reward_delay=='':
-                reward_delay=0
+            reward_delay=self.CurrentRewardDelay
             if self.TP_GiveSecondStimulus=='on':
                 # The delay time set in the GUI is corresponding to the delay time after the first reinforcement
                 reward_delay=float(reward_delay)+float(self.CurrentSecondStimulusDelay)
