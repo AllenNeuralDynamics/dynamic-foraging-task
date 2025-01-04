@@ -1531,9 +1531,6 @@ class GenerateTrials():
                 Channel1.SecondStimulusDelay(float(self.CurrentSecondStimulusDelay))
             else:
                 Channel1.GiveSecondStimulus(int(0))
-
-
-
             Channel1.LeftValue(float(self.TP_LeftValue)*1000)
             Channel1.RightValue(float(self.TP_RightValue)*1000)
             Channel1.Left_Bait(int(self.CurrentBait[0]))
@@ -1557,7 +1554,7 @@ class GenerateTrials():
             # thereby extending the trial end time.
             # The next trial will start after this adjusted trial end time.
             # The reward consume time will also add extra self.TP_RewardDelay for no response trial in this case. 
-            adjusted_reward_consume_time=float(self.TP_RewardConsumeTime)+reward_delay
+            adjusted_reward_consume_time=float(self.TP_RewardConsumeTime)+float(reward_delay)
             Channel1.RewardConsumeTime(adjusted_reward_consume_time)
             if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:
                 Channel1.start(3)
