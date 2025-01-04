@@ -59,6 +59,7 @@ class GenerateTrials():
         self.B_DelayStartTimeHarpComplete=[]
         self.B_TrialEndTimeHarp=np.array([]).astype(float)
         self.B_GoCueTimeBehaviorBoard=np.array([]).astype(float) # the time from the behavior board
+        self.B_GoCueTimeSoundCardSecondStimulus=np.array([]).astype(float) # the time of the second sound
         self.B_GoCueTimeSoundCard=np.array([]).astype(float) # the time from the soundcard
         self.B_DOPort2Output=np.array([]).astype(float)
         self.B_LeftRewardDeliveryTime=np.array([]).astype(float)
@@ -1634,6 +1635,7 @@ class GenerateTrials():
         self.B_TrialEndTimeHarp=np.append(self.B_TrialEndTimeHarp,TrialEndTimeHarp)
         self.B_GoCueTimeBehaviorBoard=np.append(self.B_GoCueTimeBehaviorBoard,GoCueTimeBehaviorBoard)
         self.B_GoCueTimeSoundCard=np.append(self.B_GoCueTimeBehaviorBoard,GoCueTimeBehaviorBoard)
+        self.B_GoCueTimeSoundCardSecondStimulus=np.append(self.B_GoCueTimeSoundCardSecondStimulus,GoCueTimeBehaviorBoard)
         self.B_DOPort2Output=np.append(self.B_DOPort2Output,B_DOPort2Output)
         # get the event time
         self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime)
@@ -1680,6 +1682,8 @@ class GenerateTrials():
         in_delay=0 #0, the next /BehaviorEvent is not the delay; 1, the next /BehaviorEvent is the delay following the /TrialStartTime
         first_behavior_event=0
         first_delay_start=0
+        first_soundcard_event=0
+        GoCueTimeSoundCard_SecondStimulus=None
         while 1:
             Rec=Channel1.receive()
             if Rec[0].address not in ['/BehaviorEvent','/DelayStartTime']:
@@ -1699,6 +1703,9 @@ class GenerateTrials():
                 RewardOutcomeTime=Rec[1][1][0]
             elif Rec[0].address=='/RewardOutcome':
                 TrialOutcome=Rec[1][1][0]
+                if TrialOutcome!='NoResponse' and self.TP_GiveSecondStimulus=='on':
+                    # expecting another /GoCueTimeSoundCard and '/BehaviorEvent' event
+                    current_receiveN+=1
                 if TrialOutcome=='NoResponse':
                     self.B_AnimalCurrentResponse=2
                     self.B_CurrentRewarded[0]=False
@@ -1729,6 +1736,10 @@ class GenerateTrials():
             elif Rec[0].address=='/TrialEndTime':
                 TrialEndTime=Rec[1][1][0]
             elif Rec[0].address=='/GoCueTimeSoundCard':
+                if first_soundcard_event == 0:
+                    first_soundcard_event=1
+                    GoCueTimeSoundCard_SecondStimulus=Rec[1][1][0]
+                    continue
                 # give auto water after Co cue
                 # Randomlizing the order to avoid potential bias. 
                 if np.random.random(1)<0.5:
@@ -1789,6 +1800,7 @@ class GenerateTrials():
         self.B_DelayStartTimeHarpComplete.append(DelayStartTimeHarp)
         self.B_TrialEndTimeHarp=np.append(self.B_TrialEndTimeHarp,TrialEndTimeHarp)
         self.B_GoCueTimeBehaviorBoard=np.append(self.B_GoCueTimeBehaviorBoard,GoCueTimeBehaviorBoard)
+        self.B_GoCueTimeSoundCardSecondStimulus=np.append(self.B_GoCueTimeSoundCardSecondStimulus,GoCueTimeSoundCard_SecondStimulus)
         self.B_GoCueTimeSoundCard=np.append(self.B_GoCueTimeSoundCard,GoCueTimeSoundCard)
         # get the event time
         self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime)
