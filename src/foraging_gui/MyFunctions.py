@@ -1704,7 +1704,7 @@ class GenerateTrials():
             elif Rec[0].address=='/RewardOutcome':
                 TrialOutcome=Rec[1][1][0]
                 if TrialOutcome!='NoResponse' and self.TP_GiveSecondStimulus=='on':
-                    # expecting another /GoCueTimeSoundCard and '/BehaviorEvent' event
+                    # expecting another /GoCueTimeSoundCard
                     ReceiveN+=1
                 if TrialOutcome=='NoResponse':
                     self.B_AnimalCurrentResponse=2
@@ -1738,39 +1738,39 @@ class GenerateTrials():
             elif Rec[0].address=='/GoCueTimeSoundCard':
                 if soundcard_eventN == 1:
                     GoCueTimeSoundCard_SecondStimulus=Rec[1][1][0]
-                    continue
-                soundcard_eventN = soundcard_eventN + 1
-                # give auto water after Co cue
-                # Randomlizing the order to avoid potential bias. 
-                if np.random.random(1)<0.5:
-                    if self.CurrentAutoRewardTrial[0]==1:
-                        Channel3.AutoWater_Left(int(1))
-                    if self.CurrentAutoRewardTrial[1]==1:
-                        Channel3.AutoWater_Right(int(1))
                 else:
-                    if self.CurrentAutoRewardTrial[1]==1:
-                        Channel3.AutoWater_Right(int(1))
-                    if self.CurrentAutoRewardTrial[0]==1:
-                        Channel3.AutoWater_Left(int(1))
-                        
-                # give reserved manual water
-                if float(self.win.give_left_volume_reserved) > 0 or float(self.win.give_right_volume_reserved) > 0:
-                    # Set the text of a label or text widget to show the reserved volumes
-                    logging.info(
-                        f'Give reserved manual water (ul) left: {self.win.give_left_volume_reserved}; '
-                        f'right: {self.win.give_right_volume_reserved}',
-                        extra={'tags': [self.win.warning_log_tag]}
-                    )
+                    # give auto water after Co cue
+                    # Randomlizing the order to avoid potential bias. 
+                    if np.random.random(1)<0.5:
+                        if self.CurrentAutoRewardTrial[0]==1:
+                            Channel3.AutoWater_Left(int(1))
+                        if self.CurrentAutoRewardTrial[1]==1:
+                            Channel3.AutoWater_Right(int(1))
+                    else:
+                        if self.CurrentAutoRewardTrial[1]==1:
+                            Channel3.AutoWater_Right(int(1))
+                        if self.CurrentAutoRewardTrial[0]==1:
+                            Channel3.AutoWater_Left(int(1))
+                            
+                    # give reserved manual water
+                    if float(self.win.give_left_volume_reserved) > 0 or float(self.win.give_right_volume_reserved) > 0:
+                        # Set the text of a label or text widget to show the reserved volumes
+                        logging.info(
+                            f'Give reserved manual water (ul) left: {self.win.give_left_volume_reserved}; '
+                            f'right: {self.win.give_right_volume_reserved}',
+                            extra={'tags': [self.win.warning_log_tag]}
+                        )
 
-                # The manual water of two sides are given sequentially. Randomlizing the order to avoid bias. 
-                if np.random.random(1)<0.5:
-                    self.win._give_reserved_water(valve='left')
-                    self.win._give_reserved_water(valve='right')
-                else:
-                    self.win._give_reserved_water(valve='right')
-                    self.win._give_reserved_water(valve='left')
-                GoCueTimeSoundCard=Rec[1][1][0]
-                in_delay=0
+                    # The manual water of two sides are given sequentially. Randomlizing the order to avoid bias. 
+                    if np.random.random(1)<0.5:
+                        self.win._give_reserved_water(valve='left')
+                        self.win._give_reserved_water(valve='right')
+                    else:
+                        self.win._give_reserved_water(valve='right')
+                        self.win._give_reserved_water(valve='left')
+                    GoCueTimeSoundCard=Rec[1][1][0]
+                    in_delay=0
+                soundcard_eventN = soundcard_eventN + 1
             elif Rec[0].address=='/DOPort2Output': #this port is used to trigger optogenetics aligned to Go cue
                 B_DOPort2Output=Rec[1][1][0]
                 self.B_DOPort2Output=np.append(self.B_DOPort2Output,B_DOPort2Output)
