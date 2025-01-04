@@ -1538,6 +1538,9 @@ class GenerateTrials():
             Channel1.ITI(float(self.CurrentITI))
             if self.TP_RewardDelay=='':
                 self.TP_RewardDelay=0
+            if self.TP_GiveSecondStimulus=='on':
+                # The delay time set in the GUI is corresponding to the delay time after the first reinforcement
+                self.TP_RewardDelay=float(self.TP_RewardDelay)+float(self.CurrentSecondDelay)
             Channel1.RewardDelay(float(self.TP_RewardDelay))
             Channel1.DelayTime(float(self.CurrentDelay))
             Channel1.ResponseTime(float(self.TP_ResponseTime))
