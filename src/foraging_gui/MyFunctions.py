@@ -403,8 +403,8 @@ class GenerateTrials():
             self.CurrentITI=float(self.TP_ITIMax)           
         if self.CurrentDelay>float(self.TP_DelayMax):
             self.CurrentDelay=float(self.TP_DelayMax)
-        if self.CurrentSecondStimulusDelay>float(self.TP_SecondDelayMax):
-            self.CurrentSecondStimulusDelay=float(self.TP_SecondDelayMax)
+        if self.CurrentSecondStimulusDelay>float(self.TP_SecondStimulusMax):
+            self.CurrentSecondStimulusDelay=float(self.TP_SecondStimulusMax)
         # extremely important. Currently, the shaders timer does not allow delay close to zero. 
         if self.CurrentITI<0.05:
             self.CurrentITI=0.05
