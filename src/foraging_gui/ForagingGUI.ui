@@ -79,7 +79,7 @@
            <x>0</x>
            <y>0</y>
            <width>894</width>
-           <height>226</height>
+           <height>234</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_17">
@@ -691,7 +691,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>624</width>
+                  <width>621</width>
                   <height>334</height>
                  </rect>
                 </property>
@@ -1626,8 +1626,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>655</width>
-                  <height>365</height>
+                  <width>610</width>
+                  <height>344</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_9">
@@ -2270,8 +2270,8 @@ Bias:</string>
                         <rect>
                          <x>0</x>
                          <y>0</y>
-                         <width>349</width>
-                         <height>189</height>
+                         <width>330</width>
+                         <height>214</height>
                         </rect>
                        </property>
                        <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -2341,9 +2341,9 @@ Double dipping:
                 <property name="geometry">
                  <rect>
                   <x>0</x>
-                  <y>-218</y>
-                  <width>1540</width>
-                  <height>504</height>
+                  <y>-183</y>
+                  <width>1177</width>
+                  <height>489</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -2370,6 +2370,25 @@ Double dipping:
                    <layout class="QVBoxLayout" name="verticalLayout_10">
                     <item>
                      <layout class="QGridLayout" name="gridLayout">
+                      <item row="15" column="12">
+                       <widget class="QLabel" name="label_68">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>max=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
                       <item row="15" column="4">
                        <widget class="QComboBox" name="GiveSecondStimulus">
                         <property name="enabled">
@@ -2416,6 +2435,63 @@ Double dipping:
                         </item>
                        </widget>
                       </item>
+                      <item row="15" column="10">
+                       <widget class="QLineEdit" name="SecondStimulusMin">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>1</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="15" column="9">
+                       <widget class="QLabel" name="label_59">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>min=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="15" column="7">
+                       <widget class="QLineEdit" name="SecondStimulusBeta">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>2</string>
+                        </property>
+                       </widget>
+                      </item>
                       <item row="15" column="0">
                        <widget class="QLabel" name="label_67">
                         <property name="sizePolicy">
@@ -2442,6 +2518,44 @@ Double dipping:
                         </property>
                         <property name="text">
                          <string>give second stimulus=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="15" column="13">
+                       <widget class="QLineEdit" name="SecondStimulusMax">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>8</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="15" column="6">
+                       <widget class="QLabel" name="label_51">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>beta=</string>
                         </property>
                         <property name="textFormat">
                          <enum>Qt::AutoText</enum>
@@ -2774,25 +2888,6 @@ Double dipping:
                         </property>
                         <property name="textFormat">
                          <enum>Qt::AutoText</enum>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="5" column="13">
-                       <widget class="QLineEdit" name="RewardDelay">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>7</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>0</string>
                         </property>
                        </widget>
                       </item>
@@ -3426,25 +3521,6 @@ Double dipping:
                         </property>
                         <property name="text">
                          <string># of pairs</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="5" column="12">
-                       <widget class="QLabel" name="label_89">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>Reward delay=</string>
                         </property>
                         <property name="textFormat">
                          <enum>Qt::AutoText</enum>
@@ -4431,8 +4507,8 @@ Double dipping:
                         </item>
                        </widget>
                       </item>
-                      <item row="15" column="9">
-                       <widget class="QLabel" name="label_59">
+                      <item row="16" column="0">
+                       <widget class="QLabel" name="label_70">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -4440,37 +4516,15 @@ Double dipping:
                          </sizepolicy>
                         </property>
                         <property name="text">
-                         <string>min=</string>
+                         <string>Reward delay:</string>
                         </property>
                         <property name="textFormat">
                          <enum>Qt::AutoText</enum>
                         </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
                        </widget>
                       </item>
-                      <item row="15" column="10">
-                       <widget class="QLineEdit" name="SecondStimulusMin">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>70</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>1</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="15" column="6">
-                       <widget class="QLabel" name="label_51">
+                      <item row="16" column="2">
+                       <widget class="QLabel" name="label_69">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -4488,8 +4542,8 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
-                      <item row="15" column="7">
-                       <widget class="QLineEdit" name="SecondStimulusBeta">
+                      <item row="16" column="4">
+                       <widget class="QLineEdit" name="RewardDelayBeta">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -4507,8 +4561,46 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
-                      <item row="15" column="12">
-                       <widget class="QLabel" name="label_68">
+                      <item row="16" column="6">
+                       <widget class="QLabel" name="label_71">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>min=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="16" column="7">
+                       <widget class="QLineEdit" name="RewardDelayMin">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>70</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>1</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="16" column="9">
+                       <widget class="QLabel" name="label_76">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -4526,8 +4618,8 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
-                      <item row="15" column="13">
-                       <widget class="QLineEdit" name="SecondStimulusMax">
+                      <item row="16" column="10">
+                       <widget class="QLineEdit" name="RewardDelayMax">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -4617,8 +4709,8 @@ Current pair:
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>714</width>
-                  <height>286</height>
+                  <width>627</width>
+                  <height>323</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_16">
@@ -4975,7 +5067,7 @@ Current pair:
      <x>0</x>
      <y>0</y>
      <width>960</width>
-     <height>31</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="sizePolicy">
