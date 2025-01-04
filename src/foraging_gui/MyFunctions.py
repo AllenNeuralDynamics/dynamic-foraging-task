@@ -392,16 +392,19 @@ class GenerateTrials():
         # get the ITI time and delay time
         if self.TP_Randomness=='Exponential':
             self.CurrentITI = float(np.random.exponential(float(self.TP_ITIBeta),1)+float(self.TP_ITIMin))
+            self.CurrentDelay = float(np.random.exponential(float(self.TP_DelayBeta),1)+float(self.TP_DelayMin))
+            self.CurrentSecondDelay = float(np.random.exponential(float(self.TP_SecondDelayBeta),1)+float(self.TP_SecondDelayMin))
         elif self.TP_Randomness=='Even':
             self.CurrentITI = random.uniform(float(self.TP_ITIMin),float(self.TP_ITIMax))
-        if self.CurrentITI>float(self.TP_ITIMax):
-            self.CurrentITI=float(self.TP_ITIMax)
-        if self.TP_Randomness=='Exponential':
-            self.CurrentDelay = float(np.random.exponential(float(self.TP_DelayBeta),1)+float(self.TP_DelayMin))
-        elif self.TP_Randomness=='Even':
             self.CurrentDelay=random.uniform(float(self.TP_DelayMin),float(self.TP_DelayMax))
+            self.CurrentSecondDelay=random.uniform(float(self.TP_SecondDelayMin),float(self.TP_SecondDelayMax))
+        
+        if self.CurrentITI>float(self.TP_ITIMax):
+            self.CurrentITI=float(self.TP_ITIMax)           
         if self.CurrentDelay>float(self.TP_DelayMax):
             self.CurrentDelay=float(self.TP_DelayMax)
+        if self.CurrentSecondDelay>float(self.TP_SecondDelayMax):
+            self.CurrentSecondDelay=float(self.TP_SecondDelayMax)
         # extremely important. Currently, the shaders timer does not allow delay close to zero. 
         if self.CurrentITI<0.05:
             self.CurrentITI=0.05
@@ -1519,6 +1522,14 @@ class GenerateTrials():
             else:
                 Channel1.PassGoCue(int(0))
                 Channel1.PassRewardOutcome(int(0))
+            # check if we should give the second reinforcement
+            if self.TP_GiveSecondStimulus=='on':
+                # give the second auditory stimulus
+                Channel1.GiveSecondStimulus(int(1))
+                # set the delay time after the second reinforcement
+                Channel1.SecondStimulusDelay(float(self.CurrentSecondDelay))
+            else:
+                Channel1.GiveSecondStimulus(int(0))
             Channel1.LeftValue(float(self.TP_LeftValue)*1000)
             Channel1.RightValue(float(self.TP_RightValue)*1000)
             Channel1.RewardConsumeTime(float(self.TP_RewardConsumeTime))
