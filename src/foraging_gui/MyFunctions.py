@@ -1537,12 +1537,13 @@ class GenerateTrials():
             Channel1.Left_Bait(int(self.CurrentBait[0]))
             Channel1.Right_Bait(int(self.CurrentBait[1]))
             Channel1.ITI(float(self.CurrentITI))
-            if self.TP_RewardDelay=='':
-                self.TP_RewardDelay=0
+            reward_delay=self.TP_RewardDelay
+            if reward_delay=='':
+                reward_delay=0
             if self.TP_GiveSecondStimulus=='on':
                 # The delay time set in the GUI is corresponding to the delay time after the first reinforcement
-                self.TP_RewardDelay=float(self.TP_RewardDelay)+float(self.CurrentSecondStimulusDelay)
-            Channel1.RewardDelay(float(self.TP_RewardDelay))
+                reward_delay=float(reward_delay)+float(self.CurrentSecondStimulusDelay)
+            Channel1.RewardDelay(float(reward_delay))
             Channel1.DelayTime(float(self.CurrentDelay))
             Channel1.ResponseTime(float(self.TP_ResponseTime))
             if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:
