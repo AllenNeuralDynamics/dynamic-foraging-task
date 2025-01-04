@@ -415,9 +415,6 @@ class GenerateTrials():
         '''Check if we should perform a block change for the next trial. 
         If you change the block length parameter, it only takes effect 
         after the current block is completed'''
-        # Check advanced block swith
-        # and set self.AdvancedBlockSwitchPermitted
-        self._check_advanced_block_switch()
         
         # --- Force transition to the next block when NextBlock button is clicked ---
         if self.TP_NextBlock:
@@ -426,6 +423,10 @@ class GenerateTrials():
             self.win.NextBlock.setStyleSheet("background-color : none")
             self._override_block_len([0,1])
             return  # Early return here
+        
+        # Check advanced block swith
+        # and set self.AdvancedBlockSwitchPermitted
+        self._check_advanced_block_switch()
             
         # --- Decide block transition based on this block length ---
         # self.BlockLenHistory is initialized as [[],[]] in __init__
