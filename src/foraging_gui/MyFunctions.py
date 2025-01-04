@@ -1531,9 +1531,11 @@ class GenerateTrials():
                 Channel1.SecondStimulusDelay(float(self.CurrentSecondStimulusDelay))
             else:
                 Channel1.GiveSecondStimulus(int(0))
+
+
+
             Channel1.LeftValue(float(self.TP_LeftValue)*1000)
             Channel1.RightValue(float(self.TP_RightValue)*1000)
-            Channel1.RewardConsumeTime(float(self.TP_RewardConsumeTime))
             Channel1.Left_Bait(int(self.CurrentBait[0]))
             Channel1.Right_Bait(int(self.CurrentBait[1]))
             Channel1.ITI(float(self.CurrentITI))
@@ -1547,6 +1549,16 @@ class GenerateTrials():
             Channel1.RewardDelay(float(reward_delay))
             Channel1.DelayTime(float(self.CurrentDelay))
             Channel1.ResponseTime(float(self.TP_ResponseTime))
+            # If there is a reward delay and a second stimulus delay, the trial end time should be adjusted accordingly.
+            # The trial end time is determined by the sum of:
+            # - reward outcome timestamp (which includes reward, no reward, or no response)
+            # - reward consume time
+            # The reward delay and second stimulus delay are added to the reward outcome time,
+            # thereby extending the trial end time.
+            # The next trial will start after this adjusted trial end time.
+            # The reward consume time will also add extra self.TP_RewardDelay for no response trial in this case. 
+            adjusted_reward_consume_time=float(self.TP_RewardConsumeTime)+reward_delay
+            Channel1.RewardConsumeTime(adjusted_reward_consume_time)
             if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:
                 Channel1.start(3)
                 self.CurrentStartType=3
@@ -1708,6 +1720,8 @@ class GenerateTrials():
                 if TrialOutcome!='NoResponse' and self.TP_GiveSecondStimulus=='on':
                     # expecting another /GoCueTimeSoundCard
                     ReceiveN+=1
+                    print(ReceiveN)
+                print(self.TP_GiveSecondStimulus)
                 if TrialOutcome=='NoResponse':
                     self.B_AnimalCurrentResponse=2
                     self.B_CurrentRewarded[0]=False
@@ -1811,14 +1825,6 @@ class GenerateTrials():
         self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime)
         self.B_GoCueTime=np.append(self.B_GoCueTime,GoCueTime)
         self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,RewardOutcomeTime)
-        # If there is a reward delay and a second stimulus delay, the trial end time should be adjusted accordingly.
-        # The trial end time is determined by the sum of:
-        # - reward outcome timestamp (which includes reward, no reward, or no response)
-        # - reward consume time
-        # The reward delay and second stimulus delay are added to the reward outcome time,
-        # thereby extending the trial end time.
-        # The next trial will start after this adjusted trial end time.
-        time.sleep(float(self.reward_delay))
         self.GetResponseFinish=1
 
     def _set_valve_time_left(self,channel3,LeftValue=0.01,Multiplier=1):
