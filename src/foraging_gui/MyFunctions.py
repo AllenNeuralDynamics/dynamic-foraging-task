@@ -1525,7 +1525,7 @@ class GenerateTrials():
                 Channel1.PassRewardOutcome(int(0))
             # check if we should give the second reinforcement
             if self.TP_GiveSecondStimulus=='on':
-                # give the second auditory stimulus
+                # open the gate for the second auditory stimulus
                 Channel1.GiveSecondStimulus(int(1))
                 # set the delay time after the second reinforcement
                 Channel1.SecondStimulusDelay(float(self.CurrentSecondStimulusDelay))
