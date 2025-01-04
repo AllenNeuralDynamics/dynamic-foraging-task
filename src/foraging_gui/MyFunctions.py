@@ -1705,7 +1705,7 @@ class GenerateTrials():
                 TrialOutcome=Rec[1][1][0]
                 if TrialOutcome!='NoResponse' and self.TP_GiveSecondStimulus=='on':
                     # expecting another /GoCueTimeSoundCard and '/BehaviorEvent' event
-                    current_receiveN+=1
+                    ReceiveN+=1
                 if TrialOutcome=='NoResponse':
                     self.B_AnimalCurrentResponse=2
                     self.B_CurrentRewarded[0]=False
