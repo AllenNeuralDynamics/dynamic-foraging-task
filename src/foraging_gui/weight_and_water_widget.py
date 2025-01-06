@@ -30,7 +30,7 @@ class WeightAndWaterWidget(BaseDeviceWidget):
         self.total_water_warning_widget = QLabel()
 
         # reorganize layout
-        widgets = self.property_widgets.values()
+        widgets = list(self.property_widgets.values())
         if len(widgets) % 2 != 0:   # add dummy widget so all rows/columns can be created
             widgets.append(QWidget())
         self.setCentralWidget(create_widget('HV', *widgets, self.total_water_warning_widget))
@@ -59,8 +59,8 @@ class WeightAndWaterWidget(BaseDeviceWidget):
         """
 
 
-        target_weight = self.target_ratio * self.base_weight_g
-        self.target_weight_g_widget.setValue(round(target_weight, 3))
+        self.target_weight_g = self.target_ratio * self.base_weight_g
+        self.target_weight_g_widget.setValue(round(self.target_weight_g, 3))
 
 
 if __name__ == "__main__":

@@ -535,8 +535,8 @@ class generate_metadata:
             "mouse_platform_name": self.Obj['meta_data_dialog']['rig_metadata']['mouse_platform']['name'],
             "active_mouse_platform": False,
             "protocol_id":[self.Obj['meta_data_dialog']['session_metadata']['ProtocolID']],
-            "animal_weight_post": self.Obj['WeightAfter'] if self.Obj['WeightAfter'] != 0 else float('nan'),
-            "animal_weight_prior": self.Obj['BaseWeight'] if self.Obj['BaseWeight'] != 0 else float('nan'),
+            "animal_weight_post": self.Obj['WeightAfter'] if self.Obj['WeightAfter'] != 0 else None,
+            "animal_weight_prior": self.Obj['BaseWeight'] if self.Obj['BaseWeight'] != 0 else None,
         }
 
         if self.reward_delivery!=[]:

@@ -4569,9 +4569,6 @@ class Window(QMainWindow):
         """
         Update the supplemental water from the manually given water
         """
-
-        print('update_supplemental_water')
-
         try:
             total_reward = getattr(self.GeneratedTrials, 'BS_TotalReward', 0) / 1000
             manual_water_volume = sum(getattr(self, 'ManualWaterVolume', [0]))
@@ -4586,7 +4583,6 @@ class Window(QMainWindow):
                     supplemental_water = 1-self.water_in_session
                 else:
                     supplemental_water = 0
-
                 # maximum 3.5ml
                 self.weight_widget.total_water_warning_widget.setVisible(supplemental_water > 3.5)
                 self.weight_widget.supplemental_mL = round(supplemental_water, 3)
