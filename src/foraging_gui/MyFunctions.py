@@ -685,7 +685,7 @@ class GenerateTrials():
             # show next trial
             self._get_current_block_reward(0)
         # update suggested reward
-        self.win._UpdateSuggestedWater()
+        self.win.update_supplemental_water()
         # foraging efficiency
         Len=np.shape(self.B_RewardedHistory)[1]
         if Len>0:

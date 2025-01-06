@@ -29,6 +29,7 @@ dependencies = [
     "aind-slims-api@git+https://github.com/AllenNeuralDynamics/aind-slims-api@main",
     "aind-dynamic-foraging-models@git+https://github.com/AllenNeuralDynamics/aind-dynamic-foraging-models@main",
     "aind-behavior-services >=0.8, <0.9",
+    "view@https://github.com/AllenNeuralDynamics/view.git@main",
     "pynwb >=2, <3",
     "requests >=2, <3",
     "harp-python >=0.3, <2",

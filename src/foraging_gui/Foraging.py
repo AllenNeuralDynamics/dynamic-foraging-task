@@ -9,7 +9,7 @@ import math
 import logging
 from hashlib import md5
 
-import logging_loki
+#import logging_loki
 import socket
 import harp
 import threading
@@ -25,7 +25,7 @@ from aind_slims_api import models
 import serial
 import numpy as np
 import pandas as pd
-from pykeepass import PyKeePass
+#from pykeepass import PyKeePass
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
@@ -49,6 +49,7 @@ from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScal
 from foraging_gui.stage import Stage
 from foraging_gui.bias_indicator import BiasIndicator
 from foraging_gui.warning_widget import WarningWidget
+from foraging_gui.weight_and_water_widget import WeightAndWaterWidget
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
 from aind_data_schema.core.session import Session
@@ -81,6 +82,9 @@ class Window(QMainWindow):
         self.warning_log_tag = 'warning_widget'  # TODO: How to set this or does it matter?
 
         super().__init__(parent)
+
+        # initialize generated trials as None
+        self.GeneratedTrials = None
 
         # Process inputs        
         self.box_number=box_number
@@ -138,6 +142,15 @@ class Window(QMainWindow):
         self.warning_widget = WarningWidget(log_tag=self.warning_log_tag,
                                             warning_color=self.default_warning_color)
         self.scrollArea_6.setWidget(self.warning_widget)
+
+        # add and configure water and weight widget
+        self.weight_widget = WeightAndWaterWidget()
+        self.verticalLayout_13.insertWidget(0, self.weight_widget)
+        self.weight_widget.total_water_warning_widget.setText('Supplemental water is >3.5! Health issue and'
+                                                              ' LAS should be alerted!')
+        self.weight_widget.total_water_warning_widget.setStyleSheet(f'color: {self.default_warning_color};')
+        self.weight_widget.total_water_warning_widget.setVisible(False)
+        self.weight_widget.ValueChangedInside.connect(lambda name: self.update_supplemental_water())
 
         # set window title
         self.setWindowTitle(self.rig_name)
@@ -372,9 +385,6 @@ class Window(QMainWindow):
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._Task)
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._AdvancedBlockAuto)
-        self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
-        self.WeightAfter.textChanged.connect(self._PostWeightChange)
-        self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
         self.Randomness.currentIndexChanged.connect(self._Randomness)
         self.actionTemporary_Logging.triggered.connect(self._startTemporaryLogging)
         self.actionFormal_logging.triggered.connect(self._startFormalLogging)
@@ -1025,7 +1035,7 @@ class Window(QMainWindow):
             trial generation loops indefinitiely. See issue #166. I cannot understand
             the root cause, so I am warning users to start a new session. 
         '''
-        if self.InitializeBonsaiSuccessfully ==1 and hasattr(self, 'GeneratedTrials'):
+        if self.InitializeBonsaiSuccessfully ==1 and self.GeneratedTrials is not None:
             msg = 'Reconnected to Bonsai. Start a new session before running more trials'
             reply = QMessageBox.information(self,
                 'Box {}, Reconnect Bonsai'.format(self.box_letter), msg, QMessageBox.Ok )
@@ -1769,9 +1779,6 @@ class Window(QMainWindow):
         '''
         if key in parameters:
             # skip some keys
-            if key=='ExtraWater' or key=='WeightAfter' or key=='SuggestedWater':
-                self.WeightAfter.setText('')
-                return
             widget = widget_dict[key]
             try: # load the paramter used by last trial
                 value=np.array([parameters[key]])
@@ -1890,11 +1897,9 @@ class Window(QMainWindow):
                     self.current_stage.move_absolute_3d(float(self.PositionX.text()),float(self.PositionY.text()),float(self.PositionZ.text()))
                 except Exception as e:
                     logging.error(traceback.format_exc())
-        # Get the parameters before change
-        if hasattr(self, 'GeneratedTrials') and self.ToInitializeVisual==0: # use the current GUI paramters when no session starts running
-            Parameters=self.GeneratedTrials
-        else:
-            Parameters=self
+
+        # Get the parameters before change and use the current GUI parameters when no session starts running
+        Parameters= self.GeneratedTrials if self.GeneratedTrials is not None and self.ToInitializeVisual == 0 else self
         if event is None or not isinstance(event, QtGui.QKeyEvent):
             event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, Qt.Key_Return, Qt.KeyboardModifiers())
         if (event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter):
@@ -1918,14 +1923,14 @@ class Window(QMainWindow):
                         child.setStyleSheet('background-color: white;')
                         self._Task()
 
-                    if child.objectName() in {'WeightAfter','LickSpoutDistance','ModuleAngle','ArcAngle','ProtocolID','Stick_RotationAngle','LickSpoutReferenceX','LickSpoutReferenceY','LickSpoutReferenceZ','LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','Stick_ArcAngle','Stick_ModuleAngle','RotationAngle','ManipulatorX','ManipulatorY','ManipulatorZ','ProbeTarget','RigMetadataFile','IACUCProtocol','Experimenter','TotalWater','ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
+                    if child.objectName() in {'WeightAfter','LickSpoutDistance','ModuleAngle','ArcAngle','ProtocolID','Stick_RotationAngle','LickSpoutReferenceX','LickSpoutReferenceY','LickSpoutReferenceZ','LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','Stick_ArcAngle','Stick_ModuleAngle','RotationAngle','ManipulatorX','ManipulatorY','ManipulatorZ','ProbeTarget','RigMetadataFile','IACUCProtocol','Experimenter','ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
                         continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
                         if Correct ==0: # incorrect format; don't change
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
-                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight','','GoCueDecibel','ConditionP_5','ConditionP_6','Duration_5','Duration_6','OffsetEnd_5','OffsetEnd_6','OffsetStart_5','OffsetStart_6','Probability_5','Probability_6','PulseDur_5','PulseDur_6','RD_5','RD_6']) and
+                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','','GoCueDecibel','ConditionP_5','ConditionP_6','Duration_5','Duration_6','OffsetEnd_5','OffsetEnd_6','OffsetStart_5','OffsetStart_6','Probability_5','Probability_6','PulseDur_5','PulseDur_6','RD_5','RD_6']) and
                         (child.text() == '')):
                         # These attributes can have the empty string, but we can't set the value as the empty string, unless we allow resets
                         if allow_reset:
@@ -1966,10 +1971,7 @@ class Window(QMainWindow):
     def _CheckTextChange(self):
         '''Check if the text change is reasonable'''
         # Get the parameters before change
-        if hasattr(self, 'GeneratedTrials'):
-            Parameters=self.GeneratedTrials
-        else:
-            Parameters=self
+        Parameters = self.GeneratedTrials if self.GeneratedTrials is not None else self
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
@@ -2007,12 +2009,7 @@ class Window(QMainWindow):
                             float(child.text())
                         except Exception as e:
                             #logging.error(traceback.format_exc())
-                            # Invalid float. Do not change the parameter
-                            if child.objectName() in ['BaseWeight', 'WeightAfter']:
-                                # Strip the last character which triggered the invalid float
-                                child.setText(child.text()[:-1])
-                                continue
-                            elif isinstance(child, QtWidgets.QDoubleSpinBox):
+                            if isinstance(child, QtWidgets.QDoubleSpinBox):
                                 child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
                             elif isinstance(child, QtWidgets.QSpinBox):
                                 child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
@@ -2242,7 +2239,7 @@ class Window(QMainWindow):
                 # create a numpy array from the list of numbers
                 self.RewardProb=np.array(num_list)
             if self.behavior_session_model.experiment in ['Coupled Baiting','Coupled Without Baiting','RewardN','Uncoupled Baiting','Uncoupled Without Baiting']:
-                if hasattr(self, 'GeneratedTrials'):
+                if self.GeneratedTrials is not None:
                     self.ShowRewardPairs.setText('Reward pairs:\n'
                                                  + str(np.round(self.RewardProb,2)).replace('\n', ',')
                                                  + '\n\n'
@@ -2274,7 +2271,7 @@ class Window(QMainWindow):
                 event.ignore()
                 return
         # post weight not entered and session ran
-        elif self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
+        elif self.weight_widget.post_weight_g == 0 and self.session_run and not self.unsaved_data:
             reply = QMessageBox.critical(self,
                                          'Box {}, Foraging Close'.format(self.box_letter),
                                          'Post weight appears to not be entered. Do you want to close gui?',
@@ -2430,7 +2427,7 @@ class Window(QMainWindow):
 
             self.LickSta_ToInitializeVisual=0
         try:
-            if hasattr(self, 'GeneratedTrials'):
+            if self.GeneratedTrials is not None:
                 self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
         except Exception as e:
             logging.error(traceback.format_exc())
@@ -2480,7 +2477,9 @@ class Window(QMainWindow):
         logging.info('Saving current session, ForceSave={}'.format(ForceSave))
         if ForceSave==0:
             self._StopCurrentSession() # stop the current session first
-        if (self.BaseWeight.text()=='' or self.WeightAfter.text()=='' or self.TargetRatio.text()=='') and BackupSave==0:
+        if (self.weight_widget.base_weight_g == 0.0 or
+            self.weight_widget.post_weight_g == 0.0 or
+            self.weight_widget.target_ratio == 0.0) and BackupSave==0:
             response = QMessageBox.question(self,
                 'Box {}, Save without weight or extra water:'.format(self.box_letter),
                 "Do you want to save without weight or extra water information provided?",
@@ -2521,7 +2520,7 @@ class Window(QMainWindow):
             logging.info('Stopping excitation before saving')
 
         # get iregular timestamp
-        if hasattr(self, 'GeneratedTrials') and self.InitializeBonsaiSuccessfully==1 and BackupSave==0:
+        if self.GeneratedTrials is not None and self.InitializeBonsaiSuccessfully==1 and BackupSave==0:
             self.GeneratedTrials._get_irregular_timestamp(self.Channel2)
 
         # Create new folders.
@@ -2700,7 +2699,9 @@ class Window(QMainWindow):
             Obj['generate_rig_metadata_success']=generated_metadata.rig_metadata_success
 
             if save_clicked:    # create water log result if weight after filled and uncheck save
-                if self.BaseWeight.text() != '' and self.WeightAfter.text() != '' and self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']:
+                if self.weight_widget.base_weight_g == 0.0 \
+                        and self.weight_widget.post_weight_g != 0\
+                        and self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']:
                     self._AddWaterLogResult(session)
                 self.bias_indicator.clear()  # prepare for new session
 
@@ -2950,7 +2951,7 @@ class Window(QMainWindow):
         logging.info('User starting a new mouse: {}'.format(mouse_id))
         self.ID.setText(mouse_id)
         self.ID.returnPressed.emit()
-        self.TargetRatio.setText('0.85')
+        self.weight_widget.target_rato.setValue(.85)
         self.keyPressEvent(allow_reset=True)
 
     def _Open_getListOfMice(self):
@@ -3081,7 +3082,7 @@ class Window(QMainWindow):
                             continue
                         # skip some keys
                         if key in ['Start','warmup','SessionlistSpin','StartPreview','StartRecording']:
-                            self.WeightAfter.setText('')
+                            self.weight_widget.post_weight_g_widget.setValue(0.0)
                             continue
                         widget = widget_dict[key]
 
@@ -3090,13 +3091,6 @@ class Window(QMainWindow):
                             value=np.array([CurrentObj['TP_'+key][-2]])
                             loading_parameters_type=0
                         else:
-                            value=CurrentObj[key]
-                            loading_parameters_type=1
-
-                        if key in {'BaseWeight','TotalWater','TargetWeight','WeightAfter','SuggestedWater','TargetRatio'}:
-                            self.BaseWeight.disconnect()
-                            self.TargetRatio.disconnect()
-                            self.WeightAfter.disconnect()
                             value=CurrentObj[key]
                             loading_parameters_type=1
 
@@ -3117,10 +3111,6 @@ class Window(QMainWindow):
 
                         if isinstance(widget, QtWidgets.QLineEdit):
                             widget.setText(final_value)
-                            if key in {'BaseWeight','TotalWater','TargetWeight','WeightAfter','SuggestedWater','TargetRatio'}:
-                                self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
-                                self.WeightAfter.textChanged.connect(self._PostWeightChange)
-                                self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
                         elif isinstance(widget, QtWidgets.QComboBox):
                             index=widget.findText(final_value)
                             if key.startswith('Frequency_'):
@@ -3319,7 +3309,7 @@ class Window(QMainWindow):
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
         # post weight not entered and session ran and new session button was clicked
-        elif self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
+        elif self.weight_widget.post_weight_g == 0 and self.session_run and not self.unsaved_data:
             reply = QMessageBox.critical(self,
                                          'Box {}, Foraging Close'.format(self.box_letter),
                                          'Post weight appears to not be entered. Do you want to clear training parameters?',
@@ -3597,7 +3587,10 @@ class Window(QMainWindow):
                 logging.info('New Session declined')
                 return False
         # post weight not entered and session ran and new session button was clicked
-        elif self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data and self.NewSession.isChecked():
+        elif self.weight_widget.post_weight_g == 0 \
+                and self.session_run \
+                and not self.unsaved_data \
+                and self.NewSession.isChecked():
             reply = QMessageBox.critical(self,
                                          'Box {}, Foraging Close'.format(self.box_letter),
                                          'Post weight appears to not be entered. Start new session without entering and saving?',
@@ -3618,8 +3611,8 @@ class Window(QMainWindow):
         if self.NewSession.isChecked():
             logging.info('Resetting session run flag')
             self.session_run = False
-            self.BaseWeight.setText('')
-            self.WeightAfter.setText('')
+            self.weight_widget.base_weight_g_widget.setValue(0.0)
+            self.weight_widget.post_weight_g_widget.setValue(0.0)
 
         # Reset GUI visuals
         self.Save.setStyleSheet("color:black;background-color:None;")
@@ -3628,7 +3621,7 @@ class Window(QMainWindow):
         self.Start.setStyleSheet("background-color : none")
         self.Start.setChecked(False)
         self.Start.setDisabled(False)
-        self.TotalWaterWarning.setText('')
+        self.weight_widget.total_water_mL = 0.0
         self._set_metadata_enabled(True)
 
         self._ConnectBonsai()
@@ -3775,7 +3768,7 @@ class Window(QMainWindow):
         self.load_tag=0
 
         # post weight not entered and session ran
-        if self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
+        if self.weight_widget.post_weight_g == 0 and self.session_run and not self.unsaved_data:
             reply = QMessageBox.critical(self,
                                          'Box {}, Foraging Close'.format(self.box_letter),
                                          'Post weight appears to not be entered. Do you want to start a new session?',
@@ -3961,7 +3954,7 @@ class Window(QMainWindow):
                     return
 
             # empty post weight after pass through checks in case user cancels run
-            self.WeightAfter.setText('')
+            self.weight_widget.post_weight_g_widget.setValue(0.0)
 
             # change button color and mark the state change
             self.Start.setStyleSheet("background-color : green;")
@@ -4498,7 +4491,7 @@ class Window(QMainWindow):
             time.sleep(0.01+float(self.TP_GiveWaterL))
             self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
             self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+float(self.TP_GiveWaterL_volume)/1000
-            self._UpdateSuggestedWater()
+            self.update_supplemental_water()
             logger.info('Give left manual water (ul): '+str(np.round(float(self.TP_GiveWaterL_volume),3)),
                            extra={'tags': [self.warning_log_tag]})
 
@@ -4554,7 +4547,7 @@ class Window(QMainWindow):
             time.sleep(0.01+float(self.TP_GiveWaterR))
             self.Channel.RightValue(float(self.TP_RightValue)*1000)
             self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
-            self._UpdateSuggestedWater()
+            self.update_supplemental_water()
             logger.info('Give right manual water (ul): '+str(np.round(float(self.TP_GiveWaterR_volume),3)),
                         extra={'tags': [self.warning_log_tag]})
 
@@ -4563,74 +4556,36 @@ class Window(QMainWindow):
         self.unsaved_data=True
         self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
 
-    def _PostWeightChange(self):
-        self.unsaved_data=True
-        self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
-        self._UpdateSuggestedWater()
+    def update_supplemental_water(self):
+        """
+        Update the supplemental water from the manually given water
+        """
 
-    def _UpdateSuggestedWater(self,ManualWater=0):
-        '''Update the suggested water from the manually give water'''
         try:
-            if self.BaseWeight.text()!='':
-                float(self.BaseWeight.text())
-        except Exception as e:
-            logging.warning(str(e))
-            return
-        try:
-            if self.WeightAfter.text()!='':
-                float(self.WeightAfter.text())
-        except Exception as e:
-            logging.warning(str(e))
-            return
-        try:
-            if self.BaseWeight.text()!='' and self.TargetRatio.text()!='':
-                # set the target weight
-                target_weight=float(self.TargetRatio.text())*float(self.BaseWeight.text())
-                self.TargetWeight.setText(str(np.round(target_weight,3)))
+            total_reward = getattr(self.GeneratedTrials, 'BS_TotalReward', 0) / 1000
+            manual_water_volume = sum(getattr(self, 'ManualWaterVolume', [0]))
+            self.water_in_session = total_reward + manual_water_volume
 
-            if hasattr(self,'GeneratedTrials'):
-                if hasattr(self.GeneratedTrials,'BS_TotalReward'):
-                    BS_TotalReward=float(self.GeneratedTrials.BS_TotalReward)/1000
+            if self.weight_widget.post_weight_g != 0  \
+                    and self.weight_widget.base_weight_g != 0 \
+                    and self.weight_widget.target_ratio != 0:
+                # calculate the supplemental water
+                supplemental_water = self.weight_widget.target_weight_g - self.weight_widget.post_weight_g
+                if supplemental_water < 1-self.water_in_session > 0:    # give at lease 1ml
+                    supplemental_water = 1-self.water_in_session
                 else:
-                    BS_TotalReward=0
-            else:
-                BS_TotalReward=0
+                    supplemental_water = 0
 
-            if hasattr(self,'ManualWaterVolume'):
-                ManualWaterVolume=np.sum(self.ManualWaterVolume)
-            else:
-                ManualWaterVolume=0
-            water_in_session=BS_TotalReward+ManualWaterVolume
-            self.water_in_session=water_in_session
-            if self.WeightAfter.text()!='' and self.BaseWeight.text()!='' and self.TargetRatio.text()!='':
-                # calculate the suggested water
-                suggested_water=target_weight-float(self.WeightAfter.text())
-                # give at lease 1ml
-                if suggested_water<1-water_in_session:
-                    suggested_water=1-water_in_session
-                if suggested_water<0:
-                    suggested_water=0
                 # maximum 3.5ml
-                if suggested_water>3.5:
-                    suggested_water=3.5
-                    if self.default_ui=='ForagingGUI.ui':
-                        self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and LAS should be alerted!')
-                    elif self.default_ui=='ForagingGUI_Ephys.ui':
-                        self.TotalWaterWarning.setText('Supplemental water is >3.5! Health issue and \n LAS should be alerted!')
-                    self.TotalWaterWarning.setStyleSheet(f'color: {self.default_warning_color};')
-                else:
-                    self.TotalWaterWarning.setText('')
-                self.SuggestedWater.setText(str(np.round(suggested_water,3)))
+                self.weight_widget.total_water_warning_widget.setVisible(supplemental_water > 3.5)
+                self.weight_widget.supplemental_mL = round(supplemental_water, 3)
+
             else:
-                self.SuggestedWater.setText('')
-                self.TotalWaterWarning.setText('')
+                self.weight_widget.supplemental_mL = 0.0
+
             # update total water
-            if self.SuggestedWater.text()=='':
-                ExtraWater=0
-            else:
-                ExtraWater=float(self.SuggestedWater.text())
-            TotalWater=ExtraWater+water_in_session
-            self.TotalWater.setText(str(np.round(TotalWater,3)))
+            self.weight_widget.total_water_mL = round(self.weight_widget.supplemental_mL + self.water_in_session, 3)
+
         except Exception as e:
             logging.error(traceback.format_exc())
 
