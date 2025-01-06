@@ -2644,6 +2644,15 @@ class Window(QMainWindow):
             # save the open ephys recording information
             Obj['open_ephys'] = self.open_ephys
 
+            # save weight info
+            Obj['WeightAfter'] = self.weight_widget.post_weight_g
+            Obj['BaseWeight'] = self.weight_widget.base_weight_g
+            Obj['TargetRatio'] = self.weight_widget.target_ratio
+            Obj['TargetWeight'] = self.weight_widget.target_ratio
+            Obj['SuggestedWater'] = self.weight_widget.supplemental_mL
+            Obj['TotalWater'] = self.weight_widget.total_water_mL
+
+
             if SaveContinue==0:
                 # force to start a new session; Logging will stop and users cannot run new behaviors, but can still modify GUI parameters and save them.                 
                 self.unsaved_data=False
@@ -4560,6 +4569,8 @@ class Window(QMainWindow):
         """
         Update the supplemental water from the manually given water
         """
+
+        print('update_supplemental_water')
 
         try:
             total_reward = getattr(self.GeneratedTrials, 'BS_TotalReward', 0) / 1000

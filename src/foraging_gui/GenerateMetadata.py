@@ -465,12 +465,6 @@ class generate_metadata:
             self.trials_rewarded=np.count_nonzero(np.logical_or(self.Obj['B_RewardedHistory'][0],self.Obj['B_RewardedHistory'][1]))
             self.total_reward_consumed_in_session= float(self.Obj.get('BS_TotalReward', 0))
 
-        # Wrong format of WeightAfter
-        # Remove all the non-numeric characters except the dot in the WeightAfter
-        if self.Obj['WeightAfter']!='':
-            self.Obj['WeightAfter']=self.Obj['WeightAfter'].replace('..','.')
-            self.Obj['WeightAfter']=re.sub(r'[^\.\d]', '', self.Obj['WeightAfter']) 
-
         # Typo 
         if 'PtotocolID' in self.Obj['meta_data_dialog']['session_metadata']:
             self.Obj['meta_data_dialog']['session_metadata']['ProtocolID']=self.Obj['meta_data_dialog']['session_metadata']['PtotocolID']
@@ -541,6 +535,8 @@ class generate_metadata:
             "mouse_platform_name": self.Obj['meta_data_dialog']['rig_metadata']['mouse_platform']['name'],
             "active_mouse_platform": False,
             "protocol_id":[self.Obj['meta_data_dialog']['session_metadata']['ProtocolID']],
+            "animal_weight_post": self.Obj['WeightAfter'] if self.Obj['WeightAfter'] != 0 else float('nan'),
+            "animal_weight_prior": self.Obj['BaseWeight'] if self.Obj['BaseWeight'] != 0 else float('nan'),
         }
 
         if self.reward_delivery!=[]:
@@ -550,10 +546,6 @@ class generate_metadata:
         if self.stimulus!=[]:
             session_params["stimulus_epochs"] = self.stimulus
 
-        if self.Obj['WeightAfter']!='':
-            session_params["animal_weight_post"]=float(self.Obj['WeightAfter'])
-        if self.Obj['BaseWeight']!='':
-            session_params["animal_weight_prior"]=float(self.Obj['BaseWeight'])
         session = Session(**session_params)
         session.write_standard_file(output_directory=self.output_folder)
         self.session_metadata_success=True

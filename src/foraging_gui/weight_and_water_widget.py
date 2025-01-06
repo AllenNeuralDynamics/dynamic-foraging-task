@@ -22,7 +22,7 @@ class WeightAndWaterWidget(BaseDeviceWidget):
 
     def __init__(self):
 
-        widget_dict = {k: v.default if v.default is not PydanticUndefined else v.annotation
+        widget_dict = {k: v.default if v.default is not PydanticUndefined else v.annotation()
                        for k, v in WeightAndWater.model_fields.items()}
         super().__init__(WeightAndWater, widget_dict)
 
@@ -30,11 +30,10 @@ class WeightAndWaterWidget(BaseDeviceWidget):
         self.total_water_warning_widget = QLabel()
 
         # reorganize layout
-        widgets = list(self.property_widgets.values())
+        widgets = self.property_widgets.values()
         if len(widgets) % 2 != 0:   # add dummy widget so all rows/columns can be created
             widgets.append(QWidget())
-        widgets.append(self.total_water_warning_widget)
-        self.setCentralWidget(create_widget('HV', *widgets))
+        self.setCentralWidget(create_widget('HV', *widgets, self.total_water_warning_widget))
 
         # add validators so no value can go below 0
         self.base_weight_g_widget.validator().setBottom(0.0)
