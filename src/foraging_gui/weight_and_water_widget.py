@@ -28,12 +28,13 @@ class WeightAndWaterWidget(BaseDeviceWidget):
 
         # add warning label
         self.total_water_warning_widget = QLabel()
+        self.total_water_warning_widget.setWordWrap(True)
 
         # reorganize layout
-        widgets = list(self.property_widgets.values())
+        widgets = list(self.property_widgets.values()) + [self.total_water_warning_widget]
         if len(widgets) % 2 != 0:   # add dummy widget so all rows/columns can be created
             widgets.append(QWidget())
-        self.setCentralWidget(create_widget('HV', *widgets, self.total_water_warning_widget))
+        self.setCentralWidget(create_widget('HV', *widgets))
 
         # add validators so no value can go below 0
         self.base_weight_g_widget.validator().setBottom(0.0)

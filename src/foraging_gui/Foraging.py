@@ -9,7 +9,7 @@ import math
 import logging
 from hashlib import md5
 
-#import logging_loki
+import logging_loki
 import socket
 import harp
 import threading
@@ -25,7 +25,7 @@ from aind_slims_api import models
 import serial
 import numpy as np
 import pandas as pd
-#from pykeepass import PyKeePass
+from pykeepass import PyKeePass
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
@@ -4579,9 +4579,9 @@ class Window(QMainWindow):
                     and self.weight_widget.target_ratio != 0:
                 # calculate the supplemental water
                 supplemental_water = self.weight_widget.target_weight_g - self.weight_widget.post_weight_g
-                if supplemental_water < 1-self.water_in_session > 0:    # give at lease 1ml
+                if supplemental_water < 1-self.water_in_session:    # give at lease 1ml
                     supplemental_water = 1-self.water_in_session
-                else:
+                if supplemental_water < 0:
                     supplemental_water = 0
                 # maximum 3.5ml
                 self.weight_widget.total_water_warning_widget.setVisible(supplemental_water > 3.5)
