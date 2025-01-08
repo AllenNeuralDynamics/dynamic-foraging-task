@@ -2259,7 +2259,7 @@ class Window(QMainWindow):
                         self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
         except Exception as e:
             # Catch the exception and log error information
-            logging.error(traceback.format_exc())
+            logging.warning(traceback.format_exc())
 
     def closeEvent(self, event):
         # stop the current session first
@@ -4001,7 +4001,7 @@ class Window(QMainWindow):
 
             if self.add_default_project_name and add_default:
                 project_name=self._set_default_project()
-
+            
             self.project_name = project_name
             self.session_run = True   # session has been started
 
@@ -4673,7 +4673,8 @@ class Window(QMainWindow):
         try:
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
-
+            if self.project_name==None:
+                self.project_name = 'Behavior Platform'
             # Upload time is 8:30 tonight, plus a random offset over a 30 minute period
             # Random offset reduces strain on downstream servers getting many requests at once
             date_format = "%Y-%m-%d_%H-%M-%S"
