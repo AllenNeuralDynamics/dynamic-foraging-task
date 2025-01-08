@@ -3775,8 +3775,7 @@ class Window(QMainWindow):
         if hasattr(self, 'fiber_photometry_end_time'):
             self.fiber_photometry_end_time = ''
         if not self.StartExcitation.isChecked():
-            if hasattr(self, 'fiber_photometry_start_time'):
-                self.fiber_photometry_start_time = ''
+            self.fiber_photometry_start_time = ''
 
 
     def _Start(self):
