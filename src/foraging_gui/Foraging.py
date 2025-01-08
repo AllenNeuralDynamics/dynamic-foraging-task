@@ -3767,7 +3767,7 @@ class Window(QMainWindow):
             self.Metadata_dialog.project_info = project_info
             self.Metadata_dialog.ProjectName.addItems([project_name])
         return project_name
-
+                
     def _Start(self):
         '''start trial loop'''
 
@@ -4055,7 +4055,6 @@ class Window(QMainWindow):
             self._StopCurrentSession()
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
-            # generate a new session id
             self.ManualWaterVolume=[0,0]
             # start a new logging
             try:
@@ -4662,12 +4661,17 @@ class Window(QMainWindow):
             :param session: session to use to create upload manifest
         '''
 
+        # skip manifest generation for test mouse
         if self.behavior_session_model.subject in ['0','1','2','3','4','5','6','7','8','9','10']:
             logging.info('Skipping upload manifest, because this is the test mouse')
             return
-
+        # skip manifest generation if automatic upload is disabled
         if not self.Settings['AutomaticUpload']:
             logging.info('Skipping Automatic Upload based on ForagingSettings.json')
+            return
+        # skip manifest generation if this is an ephys session
+        if self.open_ephys!=[] or self.StartEphysRecording.isChecked():
+            logging.info('Skipping upload manifest, because this is an ephys session')
             return
 
         try:
