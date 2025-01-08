@@ -3777,10 +3777,10 @@ class Window(QMainWindow):
             self.Camera_dialog.camera_stop_time=''
         # clear fiber start and end time
         if hasattr(self, 'fiber_photometry_end_time'):
-            del self.fiber_photometry_end_time
+            self.fiber_photometry_end_time = ''
         if not self.StartExcitation.isChecked():
             if hasattr(self, 'fiber_photometry_start_time'):
-                del self.fiber_photometry_start_time
+                self.fiber_photometry_start_time = ''
 
 
     def _Start(self):
