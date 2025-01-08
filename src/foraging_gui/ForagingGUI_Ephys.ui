@@ -3333,6 +3333,20 @@
     </layout>
    </widget>
    <widget class="QGroupBox" name="groupBox_2">
+    <layout class="QVBoxLayout" name="weight_and_water_layout">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+    
     <property name="geometry">
      <rect>
       <x>1230</x>
@@ -3348,7 +3362,7 @@
      </sizepolicy>
     </property>
     <property name="title">
-     <string>Weigtht and water</string>
+     <string>Weight and water</string>
     </property>
     <widget class="QLineEdit" name="BaseWeight">
      <property name="geometry">

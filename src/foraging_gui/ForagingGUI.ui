@@ -1214,7 +1214,7 @@
                      <height>16777215</height>
                     </size>
                    </property>
-                   <layout class="QVBoxLayout" name="verticalLayout_13">
+                   <layout class="QVBoxLayout" name="weight_and_water_layout">
                     <property name="leftMargin">
                      <number>0</number>
                     </property>
@@ -1227,6 +1227,33 @@
                     <property name="bottomMargin">
                      <number>0</number>
                     </property>
+                    <item alignment="Qt::AlignTop">
+                     <widget class="QGroupBox" name="groupBox_2">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                        <horstretch>0</horstretch>
+                        <verstretch>15</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>140</height>
+                       </size>
+                      </property>
+                      <property name="font">
+                       <font>
+                        <pointsize>8</pointsize>
+                        <weight>50</weight>
+                        <italic>false</italic>
+                        <bold>false</bold>
+                       </font>
+                      </property>
+                      <property name="title">
+                       <string>Weight and water</string>
+                      </property>
+                     </widget>
+                    </item>
                     <item>
                      <widget class="QWidget" name="groupBox_6">
                      </widget>

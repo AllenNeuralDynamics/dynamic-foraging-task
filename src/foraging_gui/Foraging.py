@@ -9,7 +9,7 @@ import math
 import logging
 from hashlib import md5
 
-import logging_loki
+#import logging_loki
 import socket
 import harp
 import threading
@@ -25,7 +25,7 @@ from aind_slims_api import models
 import serial
 import numpy as np
 import pandas as pd
-from pykeepass import PyKeePass
+#from pykeepass import PyKeePass
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
@@ -145,7 +145,7 @@ class Window(QMainWindow):
 
         # add and configure water and weight widget
         self.weight_widget = WeightAndWaterWidget()
-        self.verticalLayout_13.insertWidget(0, self.weight_widget)
+        self.weight_and_water_layout.insertWidget(0, self.weight_widget)
         self.weight_widget.total_water_warning_widget.setText('Supplemental water is >3.5! Health issue and'
                                                               ' LAS should be alerted!')
         self.weight_widget.total_water_warning_widget.setStyleSheet(f'color: {self.default_warning_color};')
