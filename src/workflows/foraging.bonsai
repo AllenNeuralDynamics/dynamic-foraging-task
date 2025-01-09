@@ -1698,7 +1698,7 @@
                     </PropertyMappings>
                   </Expression>
                   <Expression xsi:type="rx:SelectMany">
-                    <Name>DelayReward</Name>
+                    <Name>SecondStimulusDelay</Name>
                     <Workflow>
                       <Nodes>
                         <Expression xsi:type="WorkflowInput">
@@ -1814,7 +1814,7 @@
                     </PropertyMappings>
                   </Expression>
                   <Expression xsi:type="rx:SelectMany">
-                    <Name>DelayReward</Name>
+                    <Name>SecondStimulusDelay</Name>
                     <Workflow>
                       <Nodes>
                         <Expression xsi:type="WorkflowInput">
