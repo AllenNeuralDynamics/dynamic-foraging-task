@@ -1705,10 +1705,9 @@
                           <Property Name="DueTime" />
                         </Expression>
                         <Expression xsi:type="Combinator">
-                          <Combinator xsi:type="rx:Timer">
-                            <rx:DueTime>PT0S</rx:DueTime>
-                            <rx:Period>PT0S</rx:Period>
-                          </Combinator>
+                          <Combinator xsi:type="gl:Timer">
+                            <gl:DueTime>PT0S</gl:DueTime>
+                                                      </Combinator>
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="rx:Zip" />
@@ -1741,7 +1740,7 @@
                     <harp:Register xsi:type="p1:PlaySoundOrFrequency" />
                   </Expression>
                   <Expression xsi:type="MulticastSubject">
-                    <Name>BehaviorCommands</Name>
+                    <Name>SoundCardCommands</Name>
                   </Expression>
                 </Nodes>
                 <Edges>
