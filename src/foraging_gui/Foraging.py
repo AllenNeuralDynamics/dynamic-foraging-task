@@ -3208,7 +3208,7 @@ class Window(QMainWindow):
                             2: float(last_positions['y2']),
                             3: float(last_positions['z'])
                         }
-                        self.move_aind_stage(positions)
+                        self.stage_widget.stage_model.update_position(positions)
                         step_size = self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
                 elif 'B_NewscalePositions' in Obj.keys() and len(Obj['B_NewscalePositions']) != 0:  # cross compatibility for mice run on older version of code.
                     last_positions = Obj['B_NewscalePositions'][-1]
@@ -3249,14 +3249,6 @@ class Window(QMainWindow):
         self.keyPressEvent() # Accept all updates
         self.load_tag=1
         self.ID.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
-
-    def move_aind_stage(self, positions: dict):
-        """
-        Move all axis of stage in stage widget
-
-        :param positions: Dict where key = motor index, and value = the desired position to move the motor
-        """
-        self.stage_widget.stage_model.update_position(positions)
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
