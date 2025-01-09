@@ -1662,7 +1662,7 @@
                           <Name>GiveSecondStimulus</Name>
                         </Expression>
                         <Expression xsi:type="Combinator">
-                          <Combinator xsi:type="rx:CombineLatest" />
+                          <Combinator xsi:type="rx:WithLatestFrom" />
                         </Expression>
                         <Expression xsi:type="MemberSelector">
                           <Selector>Item2</Selector>
