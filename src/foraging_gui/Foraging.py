@@ -809,10 +809,12 @@ class Window(QMainWindow):
             self._UpdatePosition(current_position,(0,0,0))
             return {axis: float(pos) for axis, pos in zip(['x', 'y', 'z'], current_position) }
         elif self.stage_widget is not None:     # aind stage
-            return {'x': float(self.stage_widget.movement_page_view.lineEdit_x.text()),
-                    'y1': float(self.stage_widget.movement_page_view.lineEdit_y1.text()),
-                    'y2': float(self.stage_widget.movement_page_view.lineEdit_y2.text()),
-                    'z': float(self.stage_widget.movement_page_view.lineEdit_z.text())}
+            # Get absolute position of motors in AIND stage
+            positions = self.stage_widget.stage_model.get_current_positions_mm()
+            return {'x': positions[0],
+                    'y1': positions[1],
+                    'y2': positions[2],
+                    'z': positions[3]}
         else:   # no stage
             logging.info('GetPositions called, but no current stage')
             return None
@@ -3200,11 +3202,14 @@ class Window(QMainWindow):
                                               float(last_positions['y']),
                                               float(last_positions['z'])),(0,0,0))
                     elif self.stage_widget is not None:  # aind stage
-                        self.stage_widget.movement_page_view.lineEdit_x.setText(str(last_positions['x']))
-                        self.stage_widget.movement_page_view.lineEdit_y1.setText(str(last_positions['y1']))
-                        self.stage_widget.movement_page_view.lineEdit_y2.setText(str(last_positions['y2']))
-                        self.stage_widget.movement_page_view.lineEdit_z.setText(str(last_positions['z']))
-                        self.move_aind_stage()
+                        # Move AIND stage to the last session positions
+                        positions = {
+                            0: float(last_positions['x']),
+                            1: float(last_positions['y1']),
+                            2: float(last_positions['y2']),
+                            3: float(last_positions['z'])
+                        }
+                        self.stage_widget.stage_model.update_position(positions)
                         step_size = self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
                 elif 'B_NewscalePositions' in Obj.keys() and len(Obj['B_NewscalePositions']) != 0:  # cross compatibility for mice run on older version of code.
                     last_positions = Obj['B_NewscalePositions'][-1]
@@ -3245,13 +3250,6 @@ class Window(QMainWindow):
         self.keyPressEvent() # Accept all updates
         self.load_tag=1
         self.ID.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
-
-    def move_aind_stage(self):
-        """
-        Move all axis of stage in stage widget
-        """
-        positions = self.stage_widget.movement_page_view.get_positions_from_line_edit()
-        self.stage_widget.movement_page_view.signal_position_change.emit(positions)
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
