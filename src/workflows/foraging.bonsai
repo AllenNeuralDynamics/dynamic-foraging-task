@@ -687,7 +687,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT3S</gl:DueTime>
+                      <gl:DueTime>PT7S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -768,7 +768,7 @@
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="gl:Delay">
-                            <gl:DueTime>PT8.28S</gl:DueTime>
+                            <gl:DueTime>PT1.497S</gl:DueTime>
                           </Combinator>
                         </Expression>
                         <Expression xsi:type="WorkflowOutput" />
@@ -790,7 +790,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT1S</gl:DueTime>
+                      <gl:DueTime>PT0.689S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -1386,7 +1386,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT3S</gl:DueTime>
+                      <gl:DueTime>PT7S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
@@ -1654,8 +1654,13 @@
                         </Expression>
                         <Expression xsi:type="Equal">
                           <Operand xsi:type="IntProperty">
-                            <Value>0</Value>
+                            <Value>1</Value>
                           </Operand>
+                        </Expression>
+                        <Expression xsi:type="Combinator">
+                          <Combinator xsi:type="rx:Take">
+                            <rx:Count>1</rx:Count>
+                          </Combinator>
                         </Expression>
                         <Expression xsi:type="rx:Condition">
                           <Workflow>
@@ -1677,6 +1682,7 @@
                         <Edge From="1" To="2" Label="Source2" />
                         <Edge From="2" To="3" Label="Source1" />
                         <Edge From="3" To="4" Label="Source1" />
+                        <Edge From="4" To="5" Label="Source1" />
                       </Edges>
                     </Workflow>
                   </Expression>
@@ -1703,7 +1709,12 @@
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="gl:Delay">
-                            <gl:DueTime>PT0S</gl:DueTime>
+                            <gl:DueTime>PT3S</gl:DueTime>
+                          </Combinator>
+                        </Expression>
+                        <Expression xsi:type="Combinator">
+                          <Combinator xsi:type="rx:Take">
+                            <rx:Count>1</rx:Count>
                           </Combinator>
                         </Expression>
                         <Expression xsi:type="WorkflowOutput" />
@@ -1712,6 +1723,7 @@
                         <Edge From="0" To="2" Label="Source1" />
                         <Edge From="1" To="2" Label="Source2" />
                         <Edge From="2" To="3" Label="Source1" />
+                        <Edge From="3" To="4" Label="Source1" />
                       </Edges>
                     </Workflow>
                   </Expression>
@@ -1758,8 +1770,13 @@
                         </Expression>
                         <Expression xsi:type="Equal">
                           <Operand xsi:type="IntProperty">
-                            <Value>0</Value>
+                            <Value>1</Value>
                           </Operand>
+                        </Expression>
+                        <Expression xsi:type="Combinator">
+                          <Combinator xsi:type="rx:Take">
+                            <rx:Count>1</rx:Count>
+                          </Combinator>
                         </Expression>
                         <Expression xsi:type="rx:Condition">
                           <Workflow>
@@ -1781,6 +1798,7 @@
                         <Edge From="1" To="2" Label="Source2" />
                         <Edge From="2" To="3" Label="Source1" />
                         <Edge From="3" To="4" Label="Source1" />
+                        <Edge From="4" To="5" Label="Source1" />
                       </Edges>
                     </Workflow>
                   </Expression>
@@ -1807,7 +1825,12 @@
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="gl:Delay">
-                            <gl:DueTime>PT0S</gl:DueTime>
+                            <gl:DueTime>PT3S</gl:DueTime>
+                          </Combinator>
+                        </Expression>
+                        <Expression xsi:type="Combinator">
+                          <Combinator xsi:type="rx:Take">
+                            <rx:Count>1</rx:Count>
                           </Combinator>
                         </Expression>
                         <Expression xsi:type="WorkflowOutput" />
@@ -1816,6 +1839,7 @@
                         <Edge From="0" To="2" Label="Source1" />
                         <Edge From="1" To="2" Label="Source2" />
                         <Edge From="2" To="3" Label="Source1" />
+                        <Edge From="3" To="4" Label="Source1" />
                       </Edges>
                     </Workflow>
                   </Expression>
@@ -1941,7 +1965,7 @@
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="gl:Delay">
-                            <gl:DueTime>PT0S</gl:DueTime>
+                            <gl:DueTime>PT4S</gl:DueTime>
                           </Combinator>
                         </Expression>
                         <Expression xsi:type="WorkflowOutput" />
@@ -2005,7 +2029,7 @@
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="gl:Delay">
-                            <gl:DueTime>PT0S</gl:DueTime>
+                            <gl:DueTime>PT4S</gl:DueTime>
                           </Combinator>
                         </Expression>
                         <Expression xsi:type="WorkflowOutput" />
@@ -9199,7 +9223,7 @@
               <gui:Enabled>true</gui:Enabled>
               <gui:Visible>true</gui:Visible>
               <gui:Font>Microsoft Sans Serif, 15.75pt, style=Bold</gui:Font>
-              <gui:Text>4xx-x-A</gui:Text>
+              <gui:Text>323_Ephys3</gui:Text>
             </Expression>
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="SubscribeSubject">
