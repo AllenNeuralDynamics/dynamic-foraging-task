@@ -572,13 +572,14 @@ def test_bonsai_json_to_nwb(test_json_urls):
             results.append(f'Converting {file_name} to nwb: {result}')
             
             # Try read the nwb file and show number of trials
-            temp_nwb_name = temp_json_name.replace("json", "nwb")
-            io = NWBHDF5IO(temp_nwb_name, mode='r')
-            nwbfile = io.read()
-            results.append(f'   Reload nwb and get {len(nwbfile.trials)} trials!\n')
-            io.close()
-            print(temp_nwb_name)
-            os.remove(temp_nwb_name)
+            if result != 'empty_trials':
+                temp_nwb_name = temp_json_name.replace("json", "nwb")
+                io = NWBHDF5IO(temp_nwb_name, mode='r')
+                nwbfile = io.read()
+                results.append(f'   Reload nwb and get {len(nwbfile.trials)} trials!\n')
+                io.close()
+                print(temp_nwb_name)
+                os.remove(temp_nwb_name)
         except Exception as e:
             results.append(f'{file_name} failed!!\n    {e}\n')
             
@@ -599,14 +600,14 @@ if __name__ == '__main__':
     logger.addHandler(logging.StreamHandler())
     
     test_json_urls = [
-        # 'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936281/668551_2023-06-16.json',
-        # 'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936313/662914_2023-09-22.json',
-        # 'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936315/684039_2023-12-01_08-22-32.json',
-        # 'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936331/704151_2024-02-27_09-59-17.json',
-        # 'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936356/1_2024-04-06_16-31-06.json',
-        # 'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936359/706893_2024-04-09_14-27-56_ephys.json',
-        # r'https://github.com/user-attachments/files/18304002/746346_2025-01-02_10-16-10.json',
-        r'https://github.com/user-attachments/files/18304087/746346_2024-12-02_13-16-12.json'
+        'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936281/668551_2023-06-16.json',
+        'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936313/662914_2023-09-22.json',
+        'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936315/684039_2023-12-01_08-22-32.json',
+        'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936331/704151_2024-02-27_09-59-17.json',
+        'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936356/1_2024-04-06_16-31-06.json',
+        'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936359/706893_2024-04-09_14-27-56_ephys.json',
+        r'https://github.com/user-attachments/files/18304002/746346_2025-01-02_10-16-10.json',  # https://github.com/AllenNeuralDynamics/dynamic-foraging-task/pull/1274
+        r'https://github.com/user-attachments/files/18304087/746346_2024-12-02_13-16-12.json'  # Empty trials
     ]
 
     test_bonsai_json_to_nwb(test_json_urls)
