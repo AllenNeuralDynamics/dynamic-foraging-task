@@ -71,8 +71,8 @@
      <rect>
       <x>620</x>
       <y>20</y>
-      <width>152</width>
-      <height>20</height>
+      <width>222</width>
+      <height>27</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -2706,7 +2706,7 @@
     <widget class="QLineEdit" name="SecondStimulusBeta">
      <property name="geometry">
       <rect>
-       <x>400</x>
+       <x>615</x>
        <y>340</y>
        <width>80</width>
        <height>20</height>
@@ -2753,7 +2753,7 @@
     <widget class="QLabel" name="label_51">
      <property name="geometry">
       <rect>
-       <x>335</x>
+       <x>550</x>
        <y>340</y>
        <width>51</width>
        <height>20</height>
@@ -2778,7 +2778,7 @@
     <widget class="QLabel" name="label_75">
      <property name="geometry">
       <rect>
-       <x>740</x>
+       <x>960</x>
        <y>340</y>
        <width>113</width>
        <height>19</height>
@@ -2803,7 +2803,7 @@
     <widget class="QLineEdit" name="SecondStimulusMin">
      <property name="geometry">
       <rect>
-       <x>610</x>
+       <x>863</x>
        <y>340</y>
        <width>80</width>
        <height>20</height>
@@ -2828,7 +2828,7 @@
     <widget class="QLabel" name="label_68">
      <property name="geometry">
       <rect>
-       <x>557</x>
+       <x>810</x>
        <y>340</y>
        <width>41</width>
        <height>20</height>
@@ -2853,7 +2853,7 @@
     <widget class="QLineEdit" name="SecondStimulusMax">
      <property name="geometry">
       <rect>
-       <x>860</x>
+       <x>1080</x>
        <y>340</y>
        <width>80</width>
        <height>20</height>
@@ -2878,8 +2878,8 @@
     <widget class="QLabel" name="label_76">
      <property name="geometry">
       <rect>
-       <x>60</x>
-       <y>364</y>
+       <x>270</x>
+       <y>370</y>
        <width>122</width>
        <height>19</height>
       </rect>
@@ -2903,8 +2903,8 @@
     <widget class="QLineEdit" name="RewardDelayBeta">
      <property name="geometry">
       <rect>
-       <x>190</x>
-       <y>364</y>
+       <x>400</x>
+       <y>370</y>
        <width>80</width>
        <height>20</height>
       </rect>
@@ -2928,8 +2928,8 @@
     <widget class="QLineEdit" name="RewardDelayMin">
      <property name="geometry">
       <rect>
-       <x>400</x>
-       <y>364</y>
+       <x>615</x>
+       <y>370</y>
        <width>80</width>
        <height>20</height>
       </rect>
@@ -2975,8 +2975,8 @@
     <widget class="QLabel" name="label_78">
      <property name="geometry">
       <rect>
-       <x>345</x>
-       <y>364</y>
+       <x>560</x>
+       <y>370</y>
        <width>41</width>
        <height>20</height>
       </rect>
@@ -2997,13 +2997,13 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
-    <widget class="QLabel" name="label_79">
+    <widget class="QLabel" name="label_32">
      <property name="geometry">
       <rect>
-       <x>547</x>
-       <y>364</y>
-       <width>51</width>
-       <height>20</height>
+       <x>315</x>
+       <y>340</y>
+       <width>81</width>
+       <height>23</height>
       </rect>
      </property>
      <property name="sizePolicy">
@@ -3013,7 +3013,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>max=</string>
+      <string>randomness=</string>
      </property>
      <property name="textFormat">
       <enum>Qt::AutoText</enum>
@@ -3022,30 +3022,82 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
-    <widget class="QLineEdit" name="RewardDelayMax">
+    <widget class="QComboBox" name="Randomness_SecondStimulus">
      <property name="geometry">
       <rect>
-       <x>610</x>
-       <y>364</y>
+       <x>400</x>
+       <y>340</y>
        <width>80</width>
        <height>20</height>
       </rect>
      </property>
      <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>16777215</height>
-      </size>
+     <item>
+      <property name="text">
+       <string>Exponential</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Even</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QLabel" name="label_33">
+     <property name="geometry">
+      <rect>
+       <x>105</x>
+       <y>370</y>
+       <width>81</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
      <property name="text">
-      <string>8</string>
+      <string>randomness=</string>
      </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="Randomness_RewardDelay">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>370</y>
+       <width>80</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <item>
+      <property name="text">
+       <string>Exponential</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Even</string>
+      </property>
+     </item>
     </widget>
    </widget>
    <widget class="QPushButton" name="Load">
@@ -4898,6 +4950,56 @@
      </item>
     </layout>
    </widget>
+   <widget class="QLineEdit" name="RewardDelayMax">
+    <property name="geometry">
+     <rect>
+      <x>860</x>
+      <y>830</y>
+      <width>80</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>16777215</width>
+      <height>16777215</height>
+     </size>
+    </property>
+    <property name="text">
+     <string>8</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_79">
+    <property name="geometry">
+     <rect>
+      <x>797</x>
+      <y>830</y>
+      <width>51</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>max=</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
    <zorder>TrainingParameters</zorder>
    <zorder>StartFIP</zorder>
    <zorder>FIPMode</zorder>
@@ -4935,6 +5037,8 @@
    <zorder>DiskSpaceProgreeBar</zorder>
    <zorder>diskspace</zorder>
    <zorder>motor_stage_widget</zorder>
+   <zorder>RewardDelayMax</zorder>
+   <zorder>label_79</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -4942,7 +5046,7 @@
      <x>0</x>
      <y>0</y>
      <width>1951</width>
-     <height>21</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="sizePolicy">
