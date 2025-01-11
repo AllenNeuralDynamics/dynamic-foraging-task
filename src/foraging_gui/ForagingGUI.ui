@@ -4505,7 +4505,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="15" column="7">
-                       <widget class="QComboBox" name="Randomness_SecondStimulus">
+                       <widget class="QComboBox" name="RandomnessSecondStimulus">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -4683,7 +4683,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="16" column="4">
-                       <widget class="QComboBox" name="Randomness_RewardDelay">
+                       <widget class="QComboBox" name="RandomnessRewardDelay">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>

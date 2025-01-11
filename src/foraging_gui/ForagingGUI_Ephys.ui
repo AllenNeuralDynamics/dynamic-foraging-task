@@ -3022,7 +3022,7 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
-    <widget class="QComboBox" name="Randomness_SecondStimulus">
+    <widget class="QComboBox" name="RandomnessSecondStimulus">
      <property name="geometry">
       <rect>
        <x>400</x>
@@ -3073,7 +3073,7 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
-    <widget class="QComboBox" name="Randomness_RewardDelay">
+    <widget class="QComboBox" name="RandomnessRewardDelay">
      <property name="geometry">
       <rect>
        <x>190</x>
