@@ -396,14 +396,20 @@ class GenerateTrials():
         if self.TP_Randomness=='Exponential':
             self.CurrentITI = float(np.random.exponential(float(self.TP_ITIBeta),1)+float(self.TP_ITIMin))
             self.CurrentDelay = float(np.random.exponential(float(self.TP_DelayBeta),1)+float(self.TP_DelayMin))
-            self.CurrentSecondStimulusDelay = float(np.random.exponential(float(self.TP_SecondStimulusBeta),1)+float(self.TP_SecondStimulusMin))
-            self.CurrentRewardDelay = float(np.random.exponential(float(self.TP_RewardDelayBeta),1)+float(self.TP_RewardDelayMin))
         elif self.TP_Randomness=='Even':
             self.CurrentITI = random.uniform(float(self.TP_ITIMin),float(self.TP_ITIMax))
             self.CurrentDelay=random.uniform(float(self.TP_DelayMin),float(self.TP_DelayMax))
+            
+        if self.TP_RandomnessSecondStimulus=='Exponential':
+            self.CurrentSecondStimulusDelay = float(np.random.exponential(float(self.TP_SecondStimulusBeta),1)+float(self.TP_SecondStimulusMin))
+        elif self.TP_RandomnessSecondStimulus=='Even':
             self.CurrentSecondStimulusDelay=random.uniform(float(self.TP_SecondStimulusMin),float(self.TP_SecondStimulusMax))
+
+        if self.TP_RandomnessRewardDelay=='Exponential':
+            self.CurrentRewardDelay = float(np.random.exponential(float(self.TP_RewardDelayBeta),1)+float(self.TP_RewardDelayMin))
+        elif self.TP_RandomnessRewardDelay=='Even':
             self.CurrentRewardDelay=random.uniform(float(self.TP_RewardDelayMin),float(self.TP_RewardDelayMax))
-        
+
         if self.CurrentITI>float(self.TP_ITIMax):
             self.CurrentITI=float(self.TP_ITIMax)           
         if self.CurrentDelay>float(self.TP_DelayMax):
