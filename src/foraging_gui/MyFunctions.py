@@ -1792,7 +1792,6 @@ class GenerateTrials():
                         self.win._give_reserved_water(valve='right')
                         self.win._give_reserved_water(valve='left')
                     GoCueTimeSoundCard=Rec[1][1][0]
-                    in_delay=0
                 soundcard_eventN = soundcard_eventN + 1
             elif Rec[0].address=='/DOPort2Output': #this port is used to trigger optogenetics aligned to Go cue
                 B_DOPort2Output=Rec[1][1][0]
@@ -1808,6 +1807,7 @@ class GenerateTrials():
                 else:
                     if behavior_eventN==0:
                         GoCueTimeBehaviorBoard=Rec[1][1][0]
+                        in_delay=0
                     elif behavior_eventN==1:
                         TrialEndTimeHarp=Rec[1][1][0]
                     behavior_eventN+=1
