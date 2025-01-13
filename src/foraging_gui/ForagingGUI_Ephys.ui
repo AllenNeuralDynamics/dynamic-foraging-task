@@ -2879,7 +2879,7 @@
      <property name="geometry">
       <rect>
        <x>270</x>
-       <y>370</y>
+       <y>364</y>
        <width>122</width>
        <height>19</height>
       </rect>
@@ -2904,7 +2904,7 @@
      <property name="geometry">
       <rect>
        <x>400</x>
-       <y>370</y>
+       <y>364</y>
        <width>80</width>
        <height>20</height>
       </rect>
@@ -2929,7 +2929,7 @@
      <property name="geometry">
       <rect>
        <x>615</x>
-       <y>370</y>
+       <y>364</y>
        <width>80</width>
        <height>20</height>
       </rect>
@@ -2976,7 +2976,7 @@
      <property name="geometry">
       <rect>
        <x>560</x>
-       <y>370</y>
+       <y>364</y>
        <width>41</width>
        <height>20</height>
       </rect>
@@ -3052,7 +3052,7 @@
      <property name="geometry">
       <rect>
        <x>105</x>
-       <y>370</y>
+       <y>364</y>
        <width>81</width>
        <height>23</height>
       </rect>
@@ -3077,7 +3077,7 @@
      <property name="geometry">
       <rect>
        <x>190</x>
-       <y>370</y>
+       <y>364</y>
        <width>80</width>
        <height>20</height>
       </rect>
@@ -3098,6 +3098,56 @@
        <string>Even</string>
       </property>
      </item>
+    </widget>
+    <widget class="QLabel" name="label_79">
+     <property name="geometry">
+      <rect>
+       <x>800</x>
+       <y>364</y>
+       <width>51</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>max=</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="RewardDelayMax">
+     <property name="geometry">
+      <rect>
+       <x>863</x>
+       <y>364</y>
+       <width>80</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>999900</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>8</string>
+     </property>
     </widget>
    </widget>
    <widget class="QPushButton" name="Load">
@@ -4950,56 +5000,6 @@
      </item>
     </layout>
    </widget>
-   <widget class="QLineEdit" name="RewardDelayMax">
-    <property name="geometry">
-     <rect>
-      <x>860</x>
-      <y>830</y>
-      <width>80</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="maximumSize">
-     <size>
-      <width>16777215</width>
-      <height>16777215</height>
-     </size>
-    </property>
-    <property name="text">
-     <string>8</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_79">
-    <property name="geometry">
-     <rect>
-      <x>797</x>
-      <y>830</y>
-      <width>51</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="text">
-     <string>max=</string>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::AutoText</enum>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-    </property>
-   </widget>
    <zorder>TrainingParameters</zorder>
    <zorder>StartFIP</zorder>
    <zorder>FIPMode</zorder>
@@ -5037,8 +5037,6 @@
    <zorder>DiskSpaceProgreeBar</zorder>
    <zorder>diskspace</zorder>
    <zorder>motor_stage_widget</zorder>
-   <zorder>RewardDelayMax</zorder>
-   <zorder>label_79</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -5046,7 +5044,7 @@
      <x>0</x>
      <y>0</y>
      <width>1951</width>
-     <height>31</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="sizePolicy">
