@@ -809,10 +809,12 @@ class Window(QMainWindow):
             self._UpdatePosition(current_position,(0,0,0))
             return {axis: float(pos) for axis, pos in zip(['x', 'y', 'z'], current_position) }
         elif self.stage_widget is not None:     # aind stage
-            return {'x': float(self.stage_widget.movement_page_view.lineEdit_x.text()),
-                    'y1': float(self.stage_widget.movement_page_view.lineEdit_y1.text()),
-                    'y2': float(self.stage_widget.movement_page_view.lineEdit_y2.text()),
-                    'z': float(self.stage_widget.movement_page_view.lineEdit_z.text())}
+            # Get absolute position of motors in AIND stage
+            positions = self.stage_widget.stage_model.get_current_positions_mm()
+            return {'x': positions[0],
+                    'y1': positions[1],
+                    'y2': positions[2],
+                    'z': positions[3]}
         else:   # no stage
             logging.info('GetPositions called, but no current stage')
             return None
@@ -2259,7 +2261,7 @@ class Window(QMainWindow):
                         self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
         except Exception as e:
             # Catch the exception and log error information
-            logging.error(traceback.format_exc())
+            logging.warning(traceback.format_exc())
 
     def closeEvent(self, event):
         # stop the current session first
@@ -2689,7 +2691,8 @@ class Window(QMainWindow):
             # generate the metadata file
             generated_metadata=generate_metadata(Obj=Obj)
             session = generated_metadata._session()
-            self.sessionGenerated.emit(session)   # emit sessionGenerated
+            if session is not None:     # skip if metadata generation failed
+                self.sessionGenerated.emit(session)   # emit sessionGenerated
 
             if BackupSave==0:
                 text="Session metadata generated successfully: " + str(generated_metadata.session_metadata_success)+"\n"+\
@@ -3199,11 +3202,14 @@ class Window(QMainWindow):
                                               float(last_positions['y']),
                                               float(last_positions['z'])),(0,0,0))
                     elif self.stage_widget is not None:  # aind stage
-                        self.stage_widget.movement_page_view.lineEdit_x.setText(str(last_positions['x']))
-                        self.stage_widget.movement_page_view.lineEdit_y1.setText(str(last_positions['y1']))
-                        self.stage_widget.movement_page_view.lineEdit_y2.setText(str(last_positions['y2']))
-                        self.stage_widget.movement_page_view.lineEdit_z.setText(str(last_positions['z']))
-                        self.move_aind_stage()
+                        # Move AIND stage to the last session positions
+                        positions = {
+                            0: float(last_positions['x']),
+                            1: float(last_positions['y1']),
+                            2: float(last_positions['y2']),
+                            3: float(last_positions['z'])
+                        }
+                        self.stage_widget.stage_model.update_position(positions)
                         step_size = self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
                 elif 'B_NewscalePositions' in Obj.keys() and len(Obj['B_NewscalePositions']) != 0:  # cross compatibility for mice run on older version of code.
                     last_positions = Obj['B_NewscalePositions'][-1]
@@ -3244,13 +3250,6 @@ class Window(QMainWindow):
         self.keyPressEvent() # Accept all updates
         self.load_tag=1
         self.ID.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
-
-    def move_aind_stage(self):
-        """
-        Move all axis of stage in stage widget
-        """
-        positions = self.stage_widget.movement_page_view.get_positions_from_line_edit()
-        self.stage_widget.movement_page_view.signal_position_change.emit(positions)
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
@@ -3762,7 +3761,7 @@ class Window(QMainWindow):
             self.Metadata_dialog.project_info = project_info
             self.Metadata_dialog.ProjectName.addItems([project_name])
         return project_name
-    
+
     def _empty_initialize_fields(self):
         '''empty fields from the previous session'''
         self.open_ephys=[]
@@ -3776,8 +3775,7 @@ class Window(QMainWindow):
             self.fiber_photometry_end_time = ''
         if not self.StartExcitation.isChecked():
             self.fiber_photometry_start_time = ''
-
-
+            
     def _Start(self):
         '''start trial loop'''
 
@@ -4011,7 +4009,7 @@ class Window(QMainWindow):
 
             if self.add_default_project_name and add_default:
                 project_name=self._set_default_project()
-
+            
             self.project_name = project_name
             self.session_run = True   # session has been started
 
@@ -4672,18 +4670,24 @@ class Window(QMainWindow):
             :param session: session to use to create upload manifest
         '''
 
+        # skip manifest generation for test mouse
         if self.behavior_session_model.subject in ['0','1','2','3','4','5','6','7','8','9','10']:
             logging.info('Skipping upload manifest, because this is the test mouse')
             return
-
+        # skip manifest generation if automatic upload is disabled
         if not self.Settings['AutomaticUpload']:
             logging.info('Skipping Automatic Upload based on ForagingSettings.json')
+            return
+        # skip manifest generation if this is an ephys session
+        if self.open_ephys!=[] or self.StartEphysRecording.isChecked():
+            logging.info('Skipping upload manifest, because this is an ephys session')
             return
 
         try:
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
-
+            if self.project_name==None:
+                self.project_name = 'Behavior Platform'
             # Upload time is 8:30 tonight, plus a random offset over a 30 minute period
             # Random offset reduces strain on downstream servers getting many requests at once
             date_format = "%Y-%m-%d_%H-%M-%S"
