@@ -3039,12 +3039,12 @@
      </property>
      <item>
       <property name="text">
-       <string>Exponential</string>
+       <string>Even</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Even</string>
+       <string>Exponential</string>
       </property>
      </item>
     </widget>
@@ -3090,12 +3090,12 @@
      </property>
      <item>
       <property name="text">
-       <string>Exponential</string>
+       <string>Even</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Even</string>
+       <string>Exponential</string>
       </property>
      </item>
     </widget>
