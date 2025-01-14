@@ -455,7 +455,7 @@ class WaterCalibrationDialog(QDialog):
         save.setStyleSheet("background-color : green;")
         QApplication.processEvents()
 
-        valve_open_time = str(self.SpotLeftOpenTime)
+        valve_open_time = str(getattr(self, f'Spot{valve}OpenTime'))
         water_txt = getattr(self, f'TotalWaterSingle{valve}').text()
         before_txt = getattr(self, f'SpotCheckPreWeight{valve}').text()
 
