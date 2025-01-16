@@ -1809,14 +1809,14 @@ class GenerateTrials():
 
     def _GiveLeft(self,channel3):
         '''manually give left water'''
-        channel3.LeftValue1(float(self.win.LeftValue.text()) * 1000 * self.win.task_logic.task_parameters.Multiplier)
+        channel3.LeftValue1(float(self.win.LeftValue.text()) * 1000 * self.win.task_logic.task_parameters.multiplier)
         time.sleep(0.01) 
         channel3.ManualWater_Left(int(1))
         channel3.LeftValue1(float(self.win.LeftValue.text())*1000)
 
     def _GiveRight(self,channel3):
         '''manually give right water'''
-        channel3.RightValue1(float(self.win.RightValue.text()) * 1000 * self.win.task_logic.task_parameters.Multiplier)
+        channel3.RightValue1(float(self.win.RightValue.text()) * 1000 * self.win.task_logic.task_parameters.multiplier)
         time.sleep(0.01) 
         channel3.ManualWater_Right(int(1))
         channel3.RightValue1(float(self.win.RightValue.text())*1000)

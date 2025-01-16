@@ -1970,7 +1970,7 @@ class Window(QMainWindow):
 
     def _Randomness(self):
         '''enable/disable some fields in the Block/Delay Period/ITI'''
-        if self.task_logic.task_parameters.Randomness == 'Exponential':
+        if self.task_logic.task_parameters.randomness == 'Exponential':
             self.label_14.setEnabled(True)
             self.label_18.setEnabled(True)
             self.label_39.setEnabled(True)
@@ -1979,7 +1979,7 @@ class Window(QMainWindow):
             self.ITIBeta.setEnabled(True)
             # if self.Task.currentText()!='RewardN':
             #     self.BlockBeta.setStyleSheet("color: black;border: 1px solid gray;background-color: white;")
-        elif self.task_logic.task_parameters.Randomness == 'Even':
+        elif self.task_logic.task_parameters.randomness == 'Even':
             self.label_14.setEnabled(False)
             self.label_18.setEnabled(False)
             self.label_39.setEnabled(False)
@@ -1993,7 +1993,7 @@ class Window(QMainWindow):
 
     def _AdvancedBlockAuto(self):
         '''enable/disable some fields in the AdvancedBlockAuto'''
-        if self.task_logic.task_parameters.AdvancedBlockAuto== 'off':
+        if self.task_logic.task_parameters.advanced_block_auto == 'off':
             self.label_54.setEnabled(False)
             self.label_60.setEnabled(False)
             self.SwitchThr.setEnabled(False)
@@ -2167,18 +2167,19 @@ class Window(QMainWindow):
 
     def _CheckFormat(self,child):
         '''Check if the input format is correct'''
+        tp = self.task_logic.task_parameters
         if child.objectName()=='RewardFamily': # When we change the RewardFamily, sometimes the RewardPairsN is larger than available reward pairs in this family.
             try:
-                if self.task_logic.task_parameters.RewardPairsN>len(self.RewardFamilies[self.task_logic.task_parameters.RewardFamily - 1]):
-                    self.RewardPairsN.setText(str(len(self.RewardFamilies[self.task_logic.task_parameters.RewardFamily - 1])))
+                if tp.reward_pairs_n>len(self.RewardFamilies[tp.reward_family - 1]):
+                    self.RewardPairsN.setText(str(len(self.RewardFamilies[tp.reward_family - 1])))
                 return 1
             except Exception as e:
                 logging.error(traceback.format_exc())
                 return 0
         if child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum':
             try:
-                self.RewardPairs= self.RewardFamilies[self.task_logic.task_parameters.RewardFamily - 1][:self.task_logic.task_parameters.RewardPairsN]
-                if self.task_logic.task_parameters.RewardPairsN>len(self.RewardFamilies[self.task_logic.task_parameters.RewardFamily - 1]):
+                self.RewardPairs= self.RewardFamilies[tp.reward_family - 1][:tp.reward_pairs_n]
+                if tp.reward_pairs_n>len(self.RewardFamilies[tp.reward_family - 1]):
                     return 0
                 else:
                     return 1
@@ -2187,7 +2188,7 @@ class Window(QMainWindow):
                 return 0
         if child.objectName()=='UncoupledReward':
             try:
-                input_string = self.task_logic.task_parameters.UncoupledReward
+                input_string = tp.uncoupled_reward
                 if input_string=='': # do not permit empty uncoupled reward
                     return 0
                 # remove any square brackets and spaces from the string
@@ -2370,7 +2371,7 @@ class Window(QMainWindow):
                 self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*\
                                 tp.base_reward_sum
             elif self.behavior_session_model.experiment in ['Uncoupled Baiting','Uncoupled Without Baiting']:
-                input_string = self.task_logic.task_parameters.UncoupledReward
+                input_string = tp.uncoupled_reward
                 # remove any square brackets and spaces from the string
                 input_string = input_string.replace('[','').replace(']','').replace(',', ' ')
                 # split the remaining string into a list of individual numbers
@@ -3685,7 +3686,7 @@ class Window(QMainWindow):
                 QMessageBox.Ok)
 
     def _AutoReward(self):
-        if self.task_logic.task_parameters.AutoReward:
+        if self.task_logic.task_parameters.auto_reward:
             self.AutoReward.setStyleSheet("background-color : green;")
             self.AutoReward.setText('Auto water On')
             for widget in ['AutoWaterType', 'Multiplier', 'Unrewarded', 'Ignored']:
