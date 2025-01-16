@@ -294,7 +294,7 @@ class Window(QMainWindow):
             # Response time
             ResponseTime=self.ResponseTime.value(),
             RewardConsumeTime=self.RewardConsumeTime.value(),
-            StopIgnores=self.auto_stop_ignore_win.value()*self.auto_stop_ignore_ratio_threshold.value(),
+            StopIgnores=round(self.auto_stop_ignore_win.value()*self.auto_stop_ignore_ratio_threshold.value()),
             # Auto block
             AdvancedBlockAuto=AdvancedBlockMode(self.AdvancedBlockAuto.currentText()),
             SwitchThr=self.SwitchThr.value(),

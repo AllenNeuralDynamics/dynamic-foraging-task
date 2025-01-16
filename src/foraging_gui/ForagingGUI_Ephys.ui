@@ -2289,7 +2289,7 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
-    <widget class="QLineEdit" name="auto_stop_ignore_ratio_threshold">
+    <widget class="QDoubleSpinBox" name="auto_stop_ignore_ratio_threshold">
      <property name="geometry">
       <rect>
        <x>402</x>
@@ -2304,7 +2304,7 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="text">
+     <property name="value">
       <string>.8</string>
      </property>
     </widget>
