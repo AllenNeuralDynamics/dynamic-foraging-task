@@ -2215,7 +2215,7 @@ class MetadataDialog(QDialog):
         
 class AutoTrainDialog(QDialog):
     '''For automatic training'''
-    trainingStageChanged = pyqtSignal(str)  # signal to indicate training stage has changed
+
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
         uic.loadUi('AutoTrain.ui', self)
@@ -2665,7 +2665,7 @@ class AutoTrainDialog(QDialog):
         
         logger.info(f"Current stage to apply: {self.stage_in_use} @"
                     f"{get_curriculum_string(self.curriculum_in_use)}")
-        self.trainingStageChanged.emit(self.stage_in_use)
+
     def _apply_curriculum(self):
         # Check if a curriculum is selected
         if not hasattr(self, 'selected_curriculum') or self.selected_curriculum is None:
@@ -2885,10 +2885,10 @@ class AutoTrainDialog(QDialog):
             
             # Set warmup to off first so that all AutoTrain parameters
             # can be correctly registered in WarmupBackup if warmup is turned on later
-            if paras_dict and paras_dict['warmup'] != self.MainWindow.behavior_task_logic_model.task_parameters.warmup:
+            if paras_dict and paras_dict['warmup'] != self.MainWindow.task_logic.task_parameters.warmup:
                 widgets_changed.update(
                     {self.MainWindow.warmup: 
-                     self.MainWindow.behavior_task_logic_model.task_parameters.warmup
+                     self.MainWindow.task_logic.task_parameters.warmup
                      }
                 ) # Track the changes
             
