@@ -15,6 +15,7 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 
 from foraging_gui.reward_schedules.uncoupled_block import UncoupledBlocks
+from aind_behavior_dynamic_foraging import AindDynamicForagingTaskLogic
 
 if PLATFORM == 'win32':
     from newscale.usbxpress import USBXpressLib, USBXpressDevice
@@ -23,8 +24,9 @@ PID_NEWSCALE = 0xea61
 
 
 class GenerateTrials():
-    def __init__(self,win):
+    def __init__(self,win, task_logic: AindDynamicForagingTaskLogic):
         self.win=win
+        self.task_logic = task_logic
         self.B_LeftLickIntervalPercent = None      # percentage of left lick intervals under 100ms
         self.B_RightLickIntervalPercent = None     # percentage of right lick intervals under 100ms
         self.B_CrossSideIntervalPercent = None     # percentage of cross side lick intervals under 100ms
@@ -142,8 +144,8 @@ class GenerateTrials():
                 # Initialize the UncoupledBlocks object and generate the first trial
                 self.uncoupled_blocks = UncoupledBlocks(                 
                     rwd_prob_array=self.RewardProbPoolUncoupled,
-                    block_min=int(self.TP_BlockMin), 
-                    block_max=int(self.TP_BlockMax),
+                    block_min=self.task_logic.task_parameters.block_min,
+                    block_max=self.task_logic.task_parameters.block_max,
                     persev_add=True,  # Hard-coded to True for now
                     perseverative_limit=4, # Hard-coded to 4 for now
                     max_block_tally=3, # Hard-coded to 3 for now
@@ -239,13 +241,13 @@ class GenerateTrials():
     def _CheckSessionControl(self):
         '''Check if the session control is on'''
         if self.TP_SessionWideControl=='on':
-            session_control_block_length=float(self.TP_MaxTrial)*float(self.TP_FractionOfSession)
+            session_control_block_length=self.task_logic.task_parameters.max_trial*float(self.TP_FractionOfSession)
             if self.TP_SessionStartWith=='on':
                 initial_state=1
             elif self.TP_SessionStartWith=='off':
                 initial_state=0
-            calculated_state=np.zeros(int(self.TP_MaxTrial))
-            numbers=np.arange(int(self.TP_MaxTrial))
+            calculated_state=np.zeros(self.task_logic.task_parameters.max_trial)
+            numbers=np.arange(self.task_logic.task_parameters.max_trial)
             numbers_floor=np.floor(numbers/session_control_block_length)
             # Find odd values: A value is odd if value % 2 != 0
             odd_values_mask = (numbers_floor % 2 != 0)
@@ -266,7 +268,7 @@ class GenerateTrials():
 
     def _get_uncoupled_reward_prob_pool(self):
         # Get reward prob pool from the input string (e.g., ["0.1", "0.5", "0.9"])
-        input_string = self.win.UncoupledReward.text()
+        input_string = self.task_logic.task_parameters.uncoupled_reward
         # remove any square brackets and spaces from the string
         input_string = input_string.replace('[','').replace(']','').replace(',', ' ')
         # split the remaining string into a list of individual numbers
@@ -278,10 +280,10 @@ class GenerateTrials():
 
     def _CheckWarmUp(self):
         '''Check if we should turn on warm up'''
-        if self.win.task_logic.task_parameters.warmup== 'off':
+        if self.task_logic.task_parameters.warmup== 'off':
             return
         warmup=self._get_warmup_state()
-        if warmup==0 and self.TP_warmup=='on':
+        if warmup==0 and self.task_logic.task_parameters.warmup == 'on':
             # set warm up to off
             index=self.win.warmup.findText('off')
             self.win.warmup.setCurrentIndex(index)
@@ -293,8 +295,8 @@ class GenerateTrials():
 
     def _get_warmup_state(self):
         '''calculate the metrics related to the warm up and decide if we should turn on the warm up'''
-        TP_warm_windowsize=int(self.TP_warm_windowsize)
-        B_AnimalResponseHistory_window=self.B_AnimalResponseHistory[-TP_warm_windowsize:]
+        warm_windowsize=self.task_logic.task_parameters.warm_windowsize
+        B_AnimalResponseHistory_window=self.B_AnimalResponseHistory[-warm_windowsize:]
         finish_trial=self.B_AnimalResponseHistory.shape[0] # the warmup is only turned on at the beginning of the session, thus the number of finished trials is equal to the number of trials with warmup on
         left_choices = np.count_nonzero(B_AnimalResponseHistory_window == 0)
         right_choices = np.count_nonzero(B_AnimalResponseHistory_window == 1)
@@ -307,7 +309,9 @@ class GenerateTrials():
             choice_ratio=0
         else:
             choice_ratio=right_choices/(left_choices+right_choices)
-        if finish_trial>=float(self.TP_warm_min_trial) and finish_ratio>=float(self.TP_warm_min_finish_ratio) and abs(choice_ratio-0.5)<=float(self.TP_warm_max_choice_ratio_bias):
+        if finish_trial>=self.task_logic.task_parameters.warm_min_trial and \
+                finish_ratio>=self.task_logic.task_parameters.warm_min_finish_ratio\
+                and abs(choice_ratio-0.5)<=self.task_logic.task_parameters.warm_max_choice_ratio_bias:
             # turn off the warm up
             warmup=0
         else:
@@ -362,8 +366,11 @@ class GenerateTrials():
     def _generate_next_coupled_block(self):
         '''Generate the next block reward probability and block length (coupled task only)'''
         # determine the reward probability of the next trial based on tasks
-        self.RewardPairs=self.B_RewardFamilies[int(self.TP_RewardFamily)-1][:int(self.TP_RewardPairsN)]
-        self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.TP_BaseRewardSum)
+
+        tp = self.task_logic.task_parameters
+
+        self.RewardPairs=self.B_RewardFamilies[tp.reward_family-1][:tp.reward_pairs_n]
+        self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*tp.base_reward_sum
         # get the reward probabilities pool
         RewardProbPool=np.append(self.RewardProb,np.fliplr(self.RewardProb),axis=0)
         if self.B_RewardProHistory.size!=0:
@@ -377,12 +384,12 @@ class GenerateTrials():
         # get the reward probabilities of the current block
         self.B_CurrentRewardProb=RewardProbPool[random.choice(range(np.shape(RewardProbPool)[0]))]
         # randomly draw a block length between Min and Max
-        if self.TP_Randomness=='Exponential':
-            self.BlockLen = np.array(int(np.random.exponential(float(self.TP_BlockBeta),1)+float(self.TP_BlockMin)))
-        elif self.TP_Randomness=='Even':
-            self.BlockLen=  np.array(np.random.randint(float(self.TP_BlockMin), float(self.TP_BlockMax)+1))
-        if self.BlockLen>float(self.TP_BlockMax):
-            self.BlockLen=int(self.TP_BlockMax)
+        if tp.randomness=='Exponential':
+            self.BlockLen = np.array(int(np.random.exponential(tp.block_beta,1)+tp.block_min))
+        elif tp.randomness=='Even':
+            self.BlockLen=  np.array(np.random.randint(tp.block_min, tp.block_max+1))
+        if self.BlockLen>tp.block_max:
+            self.BlockLen=tp.block_max
         for i in range(len(self.B_ANewBlock)):
             self.BlockLenHistory[i].append(self.BlockLen)
         self.B_ANewBlock=np.array([0,0])
@@ -390,18 +397,26 @@ class GenerateTrials():
 
     def _generate_next_trial_other_paras(self):
         # get the ITI time and delay time
-        if self.TP_Randomness=='Exponential':
-            self.CurrentITI = float(np.random.exponential(float(self.TP_ITIBeta),1)+float(self.TP_ITIMin))
-        elif self.TP_Randomness=='Even':
-            self.CurrentITI = random.uniform(float(self.TP_ITIMin),float(self.TP_ITIMax))
-        if self.CurrentITI>float(self.TP_ITIMax):
-            self.CurrentITI=float(self.TP_ITIMax)
-        if self.TP_Randomness=='Exponential':
-            self.CurrentDelay = float(np.random.exponential(float(self.TP_DelayBeta),1)+float(self.TP_DelayMin))
-        elif self.TP_Randomness=='Even':
-            self.CurrentDelay=random.uniform(float(self.TP_DelayMin),float(self.TP_DelayMax))
-        if self.CurrentDelay>float(self.TP_DelayMax):
-            self.CurrentDelay=float(self.TP_DelayMax)
+        randomness = self.task_logic.task_parameters.randomness
+        iti_min = self.task_logic.task_parameters.iti_min
+        iti_max = self.task_logic.task_parameters.iti_max
+        iti_beta = self.task_logic.task_parameters.iti_beta
+        delay_beta = self.task_logic.task_parameters.delay_beta
+        delay_min = self.task_logic.task_parameters.delay_min
+        delay_max = self.task_logic.task_parameters.delay_max
+        response_time = self.task_logic.task_parameters.response_time
+        if randomness=='Exponential':
+            self.CurrentITI = float(np.random.exponential(iti_beta,1)+iti_min)
+        elif randomness=='Even':
+            self.CurrentITI = random.uniform(iti_min,iti_max)
+        if self.CurrentITI>iti_max:
+            self.CurrentITI=iti_max
+        if randomness=='Exponential':
+            self.CurrentDelay = float(np.random.exponential(delay_beta,1)+delay_min)
+        elif randomness=='Even':
+            self.CurrentDelay=random.uniform(delay_min, delay_max)
+        if self.CurrentDelay>delay_max:
+            self.CurrentDelay=delay_max
         # extremely important. Currently, the shaders timer does not allow delay close to zero. 
         if self.CurrentITI<0.05:
             self.CurrentITI=0.05
@@ -409,7 +424,7 @@ class GenerateTrials():
             self.CurrentDelay=0.05
         self.B_ITIHistory.append(self.CurrentITI)
         self.B_DelayHistory.append(self.CurrentDelay)
-        self.B_ResponseTimeHistory.append(float(self.TP_ResponseTime))
+        self.B_ResponseTimeHistory.append(response_time)
 
     def _check_coupled_block_transition(self):
         '''Check if we should perform a block change for the next trial. 
@@ -449,7 +464,7 @@ class GenerateTrials():
         # or advanced block switch is not permitted
         # For the coupled task, hold block switch on both sides       
         if np.all(self.B_ANewBlock==1) and self.AllRewardThisBlock!=-1:
-            if self.AllRewardThisBlock < float(self.TP_BlockMinReward) \
+            if self.AllRewardThisBlock < self.task_logic.task_parameters.block_min_reward \
                 or self.AdvancedBlockSwitchPermitted==0:
                 self.B_ANewBlock=np.zeros_like(self.B_ANewBlock)
                 self._override_block_len(range(len(self.B_ANewBlock)))
@@ -474,7 +489,7 @@ class GenerateTrials():
         
     def _check_advanced_block_switch(self):
         '''Check if we can switch to a different block'''
-        if self.TP_AdvancedBlockAuto=='off':
+        if self.task_logic.task_parameters.advanced_block_auto.value == 'off':
             self.AdvancedBlockSwitchPermitted=1
             return
         kernel_size=2
@@ -490,7 +505,7 @@ class GenerateTrials():
                 return
             ChoiceFractionCurrentBlock=ChoiceFraction[-CurrentEffectiveBlockLen:]
             # decide the current high rewrad side and threshold(for 2 reward probability)
-            Delta=abs((self.B_CurrentRewardProb[0]-self.B_CurrentRewardProb[1])*float(self.TP_SwitchThr))
+            Delta=abs((self.B_CurrentRewardProb[0]-self.B_CurrentRewardProb[1])*self.task_logic.task_parameters.switch_thr)
             if self.B_CurrentRewardProb[0]>self.B_CurrentRewardProb[1]:
                 # it's the left side with high reward probability
                 # decide the threshold 
@@ -510,19 +525,15 @@ class GenerateTrials():
             if consecutive_lengths.size==0:
                 self.AdvancedBlockSwitchPermitted=0
                 return
-            # determine if we can switch
-            if self.TP_PointsInARow=='':
-                self.AdvancedBlockSwitchPermitted=1
-                return
-            if self.TP_AdvancedBlockAuto=='now':
+            if self.task_logic.task_parameters.advanced_block_auto.value == 'now':
                 # the courrent condition is qualified
-                if len(OkPoints) in consecutive_indices[consecutive_lengths>float(self.TP_PointsInARow)][:,1]+1:
+                if len(OkPoints) in consecutive_indices[consecutive_lengths>self.task_logic.task_parameters.points_in_a_row][:,1]+1:
                     self.AdvancedBlockSwitchPermitted=1
                 else:
                     self.AdvancedBlockSwitchPermitted=0
-            elif self.TP_AdvancedBlockAuto=='once':
+            elif self.task_logic.task_parameters.advanced_block_auto.value == 'once':
                 # it happens before
-                if np.any(consecutive_lengths>float(self.TP_PointsInARow)):
+                if np.any(consecutive_lengths>self.task_logic.task_parameters.points_in_a_row):
                     self.AdvancedBlockSwitchPermitted=1
                 else:
                     self.AdvancedBlockSwitchPermitted=0
@@ -1011,7 +1022,8 @@ class GenerateTrials():
             # Performance info
             # 1. essential info
             # left side in the GUI
-            if (self.TP_AutoReward  or int(self.TP_BlockMinReward)>0) and self.win.Start.isChecked():
+            if (self.task_logic.task_parameters.auto_reward or
+                self.task_logic.task_parameters.block_min_reward>0) and self.win.Start.isChecked():
                 # show the next trial
                 self.win.info_performance_essential_1 = f'Current trial: {self.B_CurrentTrialN + 2}\n'
 
@@ -1078,7 +1090,8 @@ class GenerateTrials():
             self.win.label_info_performance_others.setText(self.win.info_performance_others)
         elif self.win.default_ui=='ForagingGUI_Ephys.ui':
             self.win.Other_inforTitle='Session started: '+SessionStartTimeHM+ '  Current: '+CurrentTimeHM+ '  Run: '+str(self.win.Other_RunningTime)+'m'
-            if (self.TP_AutoReward  or int(self.TP_BlockMinReward)>0) and self.win.Start.isChecked():
+            if (self.task_logic.task_parameters.auto_reward  or
+                self.task_logic.task_parameters.block_min_reward>0) and self.win.Start.isChecked():
                 # show the next trial
                 self.win.Other_BasicTitle='Current trial: ' + str(self.B_CurrentTrialN+2)
             else:
@@ -1154,9 +1167,9 @@ class GenerateTrials():
      
     def _CheckStop(self):
         '''Stop if there are many ingoral trials or if the maximam trial is exceeded MaxTrial'''
-        StopIgnore=round(float(self.TP_auto_stop_ignore_ratio_threshold)*int(self.TP_auto_stop_ignore_win))
-        MaxTrial=int(self.TP_MaxTrial)-2 # trial number starts from 0
-        MaxTime=float(self.TP_MaxTime)*60 # convert minutes to seconds
+        stop_ignore=self.task_logic.task_parameters.stop_ignore
+        max_trial=self.task_logic.task_parameters.max_trial-2 # trial number starts from 0
+        max_time=self.task_logic.task_parameters.max_time*60 # convert minutes to seconds
         if hasattr(self, 'BS_CurrentRunningTime'):
             pass
         else:
@@ -1171,7 +1184,7 @@ class GenerateTrials():
         non_auto_reward = self.B_AnimalResponseHistory[np.where(~auto_rewards.astype(bool))]   # isolate non-auto-reward
         win_sz = int(self.TP_auto_stop_ignore_win)
         min_time = int(self.TP_min_time)
-        if self.BS_CurrentRunningTime/60 >= min_time and len(np.where(non_auto_reward[-win_sz:] == 2)[0]) >= StopIgnore:
+        if self.BS_CurrentRunningTime/60 >= min_time and len(np.where(non_auto_reward[-win_sz:] == 2)[0]) >= stop_ignore:
             stop=True
             threshold = float(self.TP_auto_stop_ignore_ratio_threshold)*100
             msg = f'Stopping the session because the mouse has ignored at least ' \
@@ -1179,14 +1192,14 @@ class GenerateTrials():
                   f'consecutive trials'
             warning_label_text = 'Stop because ignore trials exceed or equal: '+\
                                  f'{threshold}% of {self.TP_auto_stop_ignore_win}'
-        elif self.B_CurrentTrialN>MaxTrial:
+        elif self.B_CurrentTrialN>max_trial:
             stop=True
-            msg = 'Stopping the session because the mouse has reached the maximum trial count: {}'.format(self.TP_MaxTrial)
-            warning_label_text = 'Stop because maximum trials exceed or equal: '+self.TP_MaxTrial
-        elif self.BS_CurrentRunningTime>MaxTime:
+            msg = 'Stopping the session because the mouse has reached the maximum trial count: {}'.format(max_trial)
+            warning_label_text = f'Stop because maximum trials exceed or equal: {max_trial}'
+        elif self.BS_CurrentRunningTime>max_time:
             stop=True
-            msg = 'Stopping the session because the session running time has reached {} minutes'.format(self.TP_MaxTime)
-            warning_label_text = 'Stop because running time exceeds or equals: '+self.TP_MaxTime+'m'
+            msg = 'Stopping the session because the session running time has reached {} minutes'.format(max_time)
+            warning_label_text = f'Stop because running time exceeds or equals: {max_time}m'
         else:
             stop=False
 
@@ -1217,31 +1230,34 @@ class GenerateTrials():
 
     def _CheckAutoWater(self):
         '''Check if it should be an auto water trial'''
-        if self.TP_AutoReward:
-            UnrewardedN=int(self.TP_Unrewarded)
-            IgnoredN=int(self.TP_Ignored)
-            if UnrewardedN<=0:
+        if self.task_logic.task_parameters.auto_reward:
+            unrewarded = self.task_logic.task_parameters.unrewarded
+            ignored=self.task_logic.task_parameters.ignored
+            if unrewarded<=0:
                 self.CurrentAutoReward=1
-                logging.warning('Auto water because unrewarded trials exceed: '+self.TP_Unrewarded,
+                logging.warning(f'Auto water because unrewarded trials exceed: {unrewarded}',
                                 extra={'tags': [self.win.warning_log_tag]})
-            elif  IgnoredN <=0:
-                logging.warning('Auto water because ignored trials exceed: '+self.TP_Ignored,
+            elif  ignored <=0:
+                logging.warning(f'Auto water because ignored trials exceed: {ignored}',
                                 extra={'tags': [self.win.warning_log_tag]})
                 self.CurrentAutoReward=1
             else:
-                if np.shape(self.B_AnimalResponseHistory)[0]>=IgnoredN or np.shape(self.B_RewardedHistory[0])[0]>=UnrewardedN:
+                if np.shape(self.B_AnimalResponseHistory)[0]>=ignored or \
+                        np.shape(self.B_RewardedHistory[0])[0]>=unrewarded:
                     # auto reward is considered as reward
                     B_RewardedHistory=self.B_RewardedHistory.copy()
                     Ind=range(len(self.B_RewardedHistory[0]))
                     for i in range(len(self.B_RewardedHistory)):
                         B_RewardedHistory[i]=np.logical_or(self.B_RewardedHistory[i],self.B_AutoWaterTrial[i][Ind])
-                    if np.all(self.B_AnimalResponseHistory[-IgnoredN:]==2) and np.shape(self.B_AnimalResponseHistory)[0]>=IgnoredN:
+                    if np.all(self.B_AnimalResponseHistory[-ignored:]==2) and np.shape(self.B_AnimalResponseHistory)[0]>=ignored:
                         self.CurrentAutoReward=1
-                        logging.warning('Auto water because ignored trials exceed: '+self.TP_Ignored,
+                        logging.warning(f'Auto water because ignored trials exceed: {ignored}',
                                         extra={'tags': [self.win.warning_log_tag]})
-                    elif (np.all(B_RewardedHistory[0][-UnrewardedN:]==False) and np.all(B_RewardedHistory[1][-UnrewardedN:]==False) and np.shape(B_RewardedHistory[0])[0]>=UnrewardedN):
+                    elif (np.all(B_RewardedHistory[0][-unrewarded:]==False)
+                          and np.all(B_RewardedHistory[1][-unrewarded:]==False)
+                          and np.shape(B_RewardedHistory[0])[0]>=unrewarded):
                         self.CurrentAutoReward=1
-                        logging.warning('Auto water because unrewarded trials exceed: '+self.TP_Unrewarded,
+                        logging.warning(f'Auto water because unrewarded trials exceed: {unrewarded}',
                                         extra={'tags': [self.win.warning_log_tag]})
                     else:
                         self.CurrentAutoReward=0
@@ -1283,7 +1299,7 @@ class GenerateTrials():
         elif self.CLP_LaserStart=='Go cue' and self.CLP_LaserEnd=='Trial start':
             # The duration is inaccurate as it doesn't account for time outside of bonsai (can be solved in Bonsai)
             # the duration is determined by TP_ResponseTime, self.CLP_OffsetStart, self.CLP_OffsetEnd
-            self.CLP_CurrentDuration=float(self.TP_ResponseTime)-self.CLP_OffsetStart+self.CLP_OffsetEnd
+            self.CLP_CurrentDuration=self.task_logic.task_parameters.response_time-self.CLP_OffsetStart+self.CLP_OffsetEnd
         else:
             pass
         self.B_LaserDuration.append(self.CLP_CurrentDuration)
@@ -1469,13 +1485,13 @@ class GenerateTrials():
         # determine auto water
         if self.CurrentAutoReward==1:
             self.CurrentAutoRewardTrial=[0,0]
-            if self.TP_AutoWaterType=='Natural':
+            if self.task_logic.task_parameters.auto_water_type.value == 'Natural':
                 for i in range(len(self.CurrentBait)):
                     if self.CurrentBait[i]==True:
                         self.CurrentAutoRewardTrial[i]=1
-            if self.TP_AutoWaterType=='Both':
+            if self.task_logic.task_parameters.auto_water_type.value == 'Both':
                 self.CurrentAutoRewardTrial=[1,1]
-            if self.TP_AutoWaterType=='High pro':
+            if self.task_logic.task_parameters.auto_water_type.value == 'High pro':
                 if self.B_CurrentRewardProb[0]>self.B_CurrentRewardProb[1]:
                     self.CurrentAutoRewardTrial=[1,0]
                 elif self.B_CurrentRewardProb[0]<self.B_CurrentRewardProb[1]:
@@ -1521,15 +1537,13 @@ class GenerateTrials():
                 Channel1.PassRewardOutcome(int(0))
             Channel1.LeftValue(float(self.TP_LeftValue)*1000)
             Channel1.RightValue(float(self.TP_RightValue)*1000)
-            Channel1.RewardConsumeTime(float(self.TP_RewardConsumeTime))
+            Channel1.RewardConsumeTime(self.task_logic.task_parameters.reward_consume_time)
             Channel1.Left_Bait(int(self.CurrentBait[0]))
             Channel1.Right_Bait(int(self.CurrentBait[1]))
             Channel1.ITI(float(self.CurrentITI))
-            if self.TP_RewardDelay=='':
-                self.TP_RewardDelay=0
-            Channel1.RewardDelay(float(self.TP_RewardDelay))
+            Channel1.RewardDelay(self.task_logic.task_parameters.reward_delay)
             Channel1.DelayTime(float(self.CurrentDelay))
-            Channel1.ResponseTime(float(self.TP_ResponseTime))
+            Channel1.ResponseTime(self.task_logic.task_parameters.response_time)
             if self.TP_OptogeneticsB=='on':
                 Channel1.start(3)
                 self.CurrentStartType=3
@@ -1647,7 +1661,7 @@ class GenerateTrials():
             self._SimulateResponse()
             return
         # set the valve time of auto water
-        multiplier = self.win.task_logic.task_parameters.Multiplier
+        multiplier = self.task_logic.task_parameters.multiplier
         if self.CurrentAutoRewardTrial[0]==1:
             self._set_valve_time_left(Channel3,float(self.win.LeftValue.text()),multiplier)
         if self.CurrentAutoRewardTrial[1]==1:
