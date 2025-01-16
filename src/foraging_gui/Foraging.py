@@ -3396,7 +3396,7 @@ class Window(QMainWindow):
         '''To visulize the training when loading a session'''
         self.ToInitializeVisual=1
         Obj=self.Obj
-        self.GeneratedTrials=GenerateTrials(self)
+        self.GeneratedTrials=GenerateTrials(self, self.task_logic)
         # Iterate over all attributes of the GeneratedTrials object
         for attr_name in dir(self.GeneratedTrials):
             if attr_name in Obj.keys():
@@ -4240,7 +4240,7 @@ class Window(QMainWindow):
                 self.Camera_dialog.StartRecording.setChecked(True)
             self.SessionStartTime=datetime.now()
             self.Other_SessionStartTime=str(self.SessionStartTime) # for saving
-            GeneratedTrials=GenerateTrials(self)
+            GeneratedTrials=GenerateTrials(self, self.task_logic)
             self.GeneratedTrials=GeneratedTrials
             self.StartANewSession=0
             PlotM=PlotV(win=self,GeneratedTrials=GeneratedTrials,width=5, height=4)
