@@ -9,30 +9,27 @@ import math
 import logging
 from hashlib import md5
 
-#import logging_loki
+import logging_loki
 import socket
 import harp
 import threading
-from random import randint
 import yaml
 import copy
 import shutil
 from pathlib import Path
 from datetime import date, datetime, timezone, timedelta
-import csv
 from aind_slims_api import SlimsClient
 from aind_slims_api import models
 import serial
 import numpy as np
 import pandas as pd
-#from pykeepass import PyKeePass
+from pykeepass import PyKeePass
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy, QLineEdit, QComboBox, QPushButton, QDoubleSpinBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
 from PyQt5.QtWidgets import QFileDialog,QVBoxLayout, QGridLayout, QLabel
 from PyQt5 import QtWidgets,QtGui,QtCore, uic
 from PyQt5.QtCore import QThreadPool,Qt,QThread
-from PyQt5.QtGui import QIntValidator, QDoubleValidator
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 from pydantic import ValidationError
