@@ -927,7 +927,7 @@ class GenerateTrials():
             if same_side_frac >= threshold:
                 self.win.same_side_lick_interval.setText(f'Percentage of same side lick intervals under 100 ms is '
                                                          f'over 10%: {same_side_frac * 100:.2f}%.')
-                logging.error(f'Percentage of same side lick intervals under 100 ms in Box {self.win.box_number}'
+                logging.warning(f'Percentage of same side lick intervals under 100 ms in Box {self.win.box_number}'
                               f'{self.win.box_letter} mouse {self.win.behavior_session_model.subject} exceeded 10%')
             else:
                 self.win.same_side_lick_interval.setText('')
@@ -954,7 +954,7 @@ class GenerateTrials():
             if cross_side_frac >= threshold:
                 self.win.cross_side_lick_interval.setText(f'Percentage of cross side lick intervals under 100 ms is '
                                                           f'over 10%: {cross_side_frac * 100:.2f}%.')
-                logging.error(f'Percentage of cross side lick intervals under 100 ms in Box {self.win.box_number}'
+                logging.warning(f'Percentage of cross side lick intervals under 100 ms in Box {self.win.box_number}'
                               f'{self.win.box_letter} mouse {self.win.behavior_session_model.subject} exceeded 10%')
             else:
                 self.win.cross_side_lick_interval.setText('')
@@ -963,6 +963,7 @@ class GenerateTrials():
         '''get the number of double dipping. e.g. 0 1 0 will result in 2 double dipping''' 
         DoubleDipping=np.sum(np.diff(LicksIndex)!=0)
         return DoubleDipping
+
     def _ForagingEfficiency(self):
         pass
 
