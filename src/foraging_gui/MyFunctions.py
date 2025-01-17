@@ -398,23 +398,23 @@ class GenerateTrials():
     def _generate_next_trial_other_paras(self):
         # get the ITI time and delay time
         tp = self.task_logic.task_parameters
-        if tp.randomness=='Exponential':
+        if tp.randomness == 'Exponential':
             self.CurrentITI = float(np.random.exponential(tp.iti_beta,1)+tp.iti_min)
-        elif tp.randomness=='Even':
+        elif tp.randomness == 'Even':
             self.CurrentITI = random.uniform(tp.iti_min,tp.iti_max)
-        if self.CurrentITI>tp.iti_max:
-            self.CurrentITI=tp.iti_max
-        if tp.randomness=='Exponential':
+        if self.CurrentITI > tp.iti_max:
+            self.CurrentITI = tp.iti_max
+        if tp.randomness == 'Exponential':
             self.CurrentDelay = float(np.random.exponential(tp.delay_beta,1)+tp.delay_min)
-        elif tp.randomness=='Even':
-            self.CurrentDelay=random.uniform(tp.delay_min, tp.delay_max)
-        if self.CurrentDelay>tp.delay_max:
-            self.CurrentDelay=tp.delay_max
-        # extremely important. Currently, the shaders timer does not allow delay close to zero. 
-        if self.CurrentITI<0.05:
-            self.CurrentITI=0.05
-        if self.CurrentDelay<0.05:
-            self.CurrentDelay=0.05
+        elif tp.randomness == 'Even':
+            self.CurrentDelay = random.uniform(tp.delay_min, tp.delay_max)
+        if self.CurrentDelay > tp.delay_max:
+            self.CurrentDelay = tp.delay_max
+        # extremely important. Currently, the shaders timer does not allow delay close to zero.
+        if self.CurrentITI < 0.05:
+            self.CurrentITI = 0.05
+        if self.CurrentDelay < 0.05:
+            self.CurrentDelay = 0.05
         self.B_ITIHistory.append(self.CurrentITI)
         self.B_DelayHistory.append(self.CurrentDelay)
         self.B_ResponseTimeHistory.append(tp.response_time)
@@ -1802,14 +1802,14 @@ class GenerateTrials():
 
     def _GiveLeft(self,channel3):
         '''manually give left water'''
-        channel3.LeftValue1(float(self.win.LeftValue.text()) * 1000 * self.win.task_logic.task_parameters.multiplier)
+        channel3.LeftValue1(float(self.win.LeftValue.text()) * 1000 * self.task_logic.task_parameters.multiplier)
         time.sleep(0.01) 
         channel3.ManualWater_Left(int(1))
         channel3.LeftValue1(float(self.win.LeftValue.text())*1000)
 
     def _GiveRight(self,channel3):
         '''manually give right water'''
-        channel3.RightValue1(float(self.win.RightValue.text()) * 1000 * self.win.task_logic.task_parameters.multiplier)
+        channel3.RightValue1(float(self.win.RightValue.text()) * 1000 * self.task_logic.task_parameters.multiplier)
         time.sleep(0.01) 
         channel3.ManualWater_Right(int(1))
         channel3.RightValue1(float(self.win.RightValue.text())*1000)
