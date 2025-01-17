@@ -291,7 +291,8 @@ class Window(QMainWindow):
             # Response time
             response_time=self.ResponseTime.value(),
             reward_consume_time=self.RewardConsumeTime.value(),
-            stop_ignores=round(self.auto_stop_ignore_win.value()*self.auto_stop_ignore_ratio_threshold.value()),
+            auto_stop_ignore_window=self.auto_stop_ignore_win.value(),
+            auto_stop_ignore_ratio_threshold=self.auto_stop_ignore_ratio_threshold.value(),
             # Auto block
             advanced_block_auto=AdvancedBlockMode(self.AdvancedBlockAuto.currentText()),
             switch_thr=self.SwitchThr.value(),
@@ -345,11 +346,12 @@ class Window(QMainWindow):
         self.ResponseTime.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'response_time', v))
         self.RewardConsumeTime.valueChanged.connect(lambda v:
                                                     setattr(self.task_logic.task_parameters, 'reward_consume_time', v))
-        self.auto_stop_ignore_win.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'stop_ignores',
-                                                                         round(v * self.auto_stop_ignore_ratio_threshold.value())))
-        self.auto_stop_ignore_ratio_threshold.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters,
-                                                                                     'stop_ignores',
-                                                                                     round(self.auto_stop_ignore_win.value() * v)))
+        self.auto_stop_ignore_win.valueChanged.connect(lambda v:
+                                                       setattr(self.task_logic.task_parameters,
+                                                               'auto_stop_ignore_window', v))
+        self.auto_stop_ignore_ratio_threshold.valueChanged.connect(lambda v:
+                                                                   setattr(self.task_logic.task_parameters,
+                                                                           'auto_stop_ignore_ratio_threshold', v))
         self.AdvancedBlockAuto.currentTextChanged.connect(
             lambda text: setattr(self.task_logic.task_parameters, 'advanced_block_auto', AdvancedBlockMode(text)))
         self.SwitchThr.valueChanged.connect(lambda v:setattr(self.task_logic.task_parameters, 'switch_thr', v))
