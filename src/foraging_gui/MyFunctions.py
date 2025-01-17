@@ -397,26 +397,19 @@ class GenerateTrials():
 
     def _generate_next_trial_other_paras(self):
         # get the ITI time and delay time
-        randomness = self.task_logic.task_parameters.randomness
-        iti_min = self.task_logic.task_parameters.iti_min
-        iti_max = self.task_logic.task_parameters.iti_max
-        iti_beta = self.task_logic.task_parameters.iti_beta
-        delay_beta = self.task_logic.task_parameters.delay_beta
-        delay_min = self.task_logic.task_parameters.delay_min
-        delay_max = self.task_logic.task_parameters.delay_max
-        response_time = self.task_logic.task_parameters.response_time
-        if randomness=='Exponential':
-            self.CurrentITI = float(np.random.exponential(iti_beta,1)+iti_min)
-        elif randomness=='Even':
-            self.CurrentITI = random.uniform(iti_min,iti_max)
-        if self.CurrentITI>iti_max:
-            self.CurrentITI=iti_max
-        if randomness=='Exponential':
-            self.CurrentDelay = float(np.random.exponential(delay_beta,1)+delay_min)
-        elif randomness=='Even':
-            self.CurrentDelay=random.uniform(delay_min, delay_max)
-        if self.CurrentDelay>delay_max:
-            self.CurrentDelay=delay_max
+        tp = self.task_logic.task_parameters
+        if tp.randomness=='Exponential':
+            self.CurrentITI = float(np.random.exponential(tp.iti_beta,1)+tp.iti_min)
+        elif tp.randomness=='Even':
+            self.CurrentITI = random.uniform(tp.iti_min,tp.iti_max)
+        if self.CurrentITI>tp.iti_max:
+            self.CurrentITI=tp.iti_max
+        if tp.randomness=='Exponential':
+            self.CurrentDelay = float(np.random.exponential(tp.delay_beta,1)+tp.delay_min)
+        elif tp.randomness=='Even':
+            self.CurrentDelay=random.uniform(tp.delay_min, tp.delay_max)
+        if self.CurrentDelay>tp.delay_max:
+            self.CurrentDelay=tp.delay_max
         # extremely important. Currently, the shaders timer does not allow delay close to zero. 
         if self.CurrentITI<0.05:
             self.CurrentITI=0.05
@@ -424,7 +417,7 @@ class GenerateTrials():
             self.CurrentDelay=0.05
         self.B_ITIHistory.append(self.CurrentITI)
         self.B_DelayHistory.append(self.CurrentDelay)
-        self.B_ResponseTimeHistory.append(response_time)
+        self.B_ResponseTimeHistory.append(tp.response_time)
 
     def _check_coupled_block_transition(self):
         '''Check if we should perform a block change for the next trial. 
