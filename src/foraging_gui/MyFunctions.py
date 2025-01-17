@@ -1161,7 +1161,7 @@ class GenerateTrials():
      
     def _CheckStop(self):
         '''Stop if there are many ingoral trials or if the maximam trial is exceeded MaxTrial'''
-        stop_ignore=self.task_logic.task_parameters.stop_ignore
+        stop_ignore=self.task_logic.task_parameters.stop_ignores
         max_trial=self.task_logic.task_parameters.max_trial-2 # trial number starts from 0
         max_time=self.task_logic.task_parameters.max_time*60 # convert minutes to seconds
         if hasattr(self, 'BS_CurrentRunningTime'):
