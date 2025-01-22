@@ -4602,11 +4602,24 @@ class Window(QMainWindow):
             if self.WeightAfter.text()!='' and self.BaseWeight.text()!='' and self.TargetRatio.text()!='':
                 # calculate the suggested water
                 suggested_water=target_weight-float(self.WeightAfter.text())
-                # give at lease 1ml
-                if suggested_water<1-water_in_session:
-                    suggested_water=1-water_in_session
-                if suggested_water<0:
-                    suggested_water=0
+                
+                if suggested_water<0:# the weight after is higher than the target weight. 
+                    if 1-water_in_session<0:# the animal got enough water during the session, no extra water is needed.
+                        suggested_water = 0
+                    else:# the animal did not get enough water during the session, give the animal the extra water
+                        suggested_water=1-water_in_session
+                else:# the animal is below the target weight
+                    if 1-water_in_session >0: # the animal did not get enough water during the session
+                        if suggested_water<1-water_in_session: # give at least 1ml water
+                            suggested_water=1-water_in_session
+                        else:# give the original water calculated by the body weight difference.
+                            pass
+                    else: # water in session is more than 1ml
+                        if water_in_session>suggested_water: # the animal got more water than the suggested water during the session
+                            suggested_water=0
+                        else: # the animal got less water than the suggested water during the session, and give the animal the extra water
+                            suggested_water=suggested_water-water_in_session
+
                 # maximum 3.5ml
                 if suggested_water>3.5:
                     suggested_water=3.5
