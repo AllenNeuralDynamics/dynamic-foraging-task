@@ -2361,7 +2361,7 @@ class Window(QMainWindow):
             self.label_26.setGeometry(QtCore.QRect(460, 128, 146, 16))
             # set block length to be 1
             self.BlockMin.setValue(1)
-            self.BlockMax.setVlue(1)
+            self.BlockMax.setValue(1)
 
     def _ShowRewardPairs(self):
         '''Show reward pairs'''
