@@ -348,7 +348,7 @@ class Window(QMainWindow):
                                                     setattr(self.task_logic.task_parameters, 'reward_consume_time', v))
         self.auto_stop_ignore_win.valueChanged.connect(lambda v:
                                                        setattr(self.task_logic.task_parameters,
-                                                               'auto_stop_ignore_window', v))
+                                                               'auto_stop_ignore_win', v))
         self.auto_stop_ignore_ratio_threshold.valueChanged.connect(lambda v:
                                                                    setattr(self.task_logic.task_parameters,
                                                                            'auto_stop_ignore_ratio_threshold', v))
