@@ -2097,7 +2097,6 @@ class Window(QMainWindow):
                             new = float(child.text())
                             if new != old:
                                 logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
-
             # update the current training parameters
             self._GetTrainingParameters()
 
