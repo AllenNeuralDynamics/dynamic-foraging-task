@@ -28,7 +28,7 @@ dependencies = [
     "aind-auto-train@git+https://github.com/AllenNeuralDynamics/aind-foraging-behavior-bonsai-automatic-training.git@main",
     "aind-slims-api@git+https://github.com/AllenNeuralDynamics/aind-slims-api@main",
     "aind-dynamic-foraging-models@git+https://github.com/AllenNeuralDynamics/aind-dynamic-foraging-models@main",
-    "aind-behavior-dynamic-foraging@git+https://github.com/AllenNeuralDynamics/Aind.Behavior.DynamicForaging@test-pip-install",
+    "aind-behavior-dynamic-foraging@git+https://github.com/AllenNeuralDynamics/Aind.Behavior.DynamicForaging@main",
     "aind-behavior-services==0.9",
     "pynwb >=2, <3",
     "requests >=2, <3",
