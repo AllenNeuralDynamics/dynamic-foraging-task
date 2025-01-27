@@ -35,7 +35,7 @@ from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 from pydantic import ValidationError
-
+from queue import Queue
 from StageWidget.main import get_stage_widget
 
 import foraging_gui
@@ -201,6 +201,9 @@ class Window(QMainWindow):
         self.Other_manual_water_left_time=[] # the valve open time of manual water given by the left valve each time
         self.Other_manual_water_right_volume=[] # the volume of manual water given by the right valve each time
         self.Other_manual_water_right_time=[] # the valve open time of manual water given by the right valve each time
+        self.data_lock = threading.Lock()
+        self.backup_queue = Queue()
+
         self._Optogenetics()    # open the optogenetics panel
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
@@ -4163,6 +4166,12 @@ class Window(QMainWindow):
             workerStartTrialLoop1=self.workerStartTrialLoop1
             worker_save=self.worker_save
 
+        # Start the backup worker thread if not already running
+        if not hasattr(self, 'backup_thread') or not self.backup_thread.is_alive():
+            self.backup_queue = Queue()  # Initialize the queue for backup tasks
+            self.backup_thread = threading.Thread(target=self.backup_worker, daemon=True)
+            self.backup_thread.start()
+
         # collecting the base signal for photometry. Only run once
         if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and self.PhotometryRun==0:
             logging.info('Starting photometry baseline timer')
@@ -4346,11 +4355,10 @@ class Window(QMainWindow):
                 if end_time - start_time>1:
                     logging.info(f"Time taken to backup the data is too long: {elapsed_time:.6f} seconds")
                 '''
+
                 # Save data in a separate thread
-                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
-                    self.previous_backup_completed=0
-                    self.GeneratedTrials_backup=copy.copy(self.GeneratedTrials)
-                    self.threadpool6.start(worker_save)
+                if GeneratedTrials.B_CurrentTrialN>0 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
+                    self.backup_queue.put(self.perform_backup)
 
                 # show disk space
                 self._show_disk_space()
@@ -4395,6 +4403,27 @@ class Window(QMainWindow):
                     # User continues, wait another stall_duration and prompt again
                     logging.error('trial stalled {} minutes, user continued trials'.format(elapsed_time))
                     stall_iteration +=1
+
+    def backup_worker(self):
+        # Worker thread for processing backup tasks
+        while True:
+            task = self.backup_queue.get()
+            if task is None:
+                break
+            try:
+                task()
+            except Exception as e:
+                logging.error(f"Backup task failed: {e}")
+            finally:
+                self.backup_queue.task_done()
+
+    
+    def perform_backup(self):
+        # Backup save logic
+        with self.data_lock:
+            self.GeneratedTrials_backup = copy.copy(self.GeneratedTrials)
+        self._Save(BackupSave=1)
+
 
     def bias_calculated(self, bias: float, trial_number: int) -> None:
         """
