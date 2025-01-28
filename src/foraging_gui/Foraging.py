@@ -699,20 +699,21 @@ class Window(QMainWindow):
                     csv_file = avi_file.replace('.avi', '.csv')
                     camera_name = avi_file.replace('.avi','')
                     if csv_file not in csv_files:
-                        self.drop_frames_warning_text+=f'No csv file found for {avi_file}\n'
+                        self.drop_frames_warning_text+=f'No csv file found for {avi_file}'
                     else:
                         current_frames = pd.read_csv(os.path.join(video_folder, csv_file), header=None)
                         num_frames = len(current_frames)
                         if num_frames != self.trigger_length:
-                            self.drop_frames_warning_text+=f"Error: {avi_file} has {num_frames} frames, but {self.trigger_length} triggers\n"
+                            this_text = f"Error: {avi_file} has {num_frames} frames, but {self.trigger_length} triggers. "
+                            self.drop_frames_warning_text+= this_text
+                            logging.error(this_text, extra={'tags': [self.warning_log_tag]})
                             self.drop_frames_tag=1
                         else:
-                            self.drop_frames_warning_text+=f"Correct: {avi_file} has {num_frames} frames and {self.trigger_length} triggers\n"
+                            this_text = f"Correct: {avi_file} has {num_frames} frames and {self.trigger_length} triggers. "
+                            self.drop_frames_warning_text+= this_text
+                            logging.info(this_text, extra={'tags': [self.warning_log_tag]})
                         self.frame_num[camera_name] = num_frames
-            if self.drop_frames_tag:
-                logging.error(self.drop_frames_warning_text, extra={'tags': [self.warning_log_tag]})
-            else:
-                logging.info(self.drop_frames_warning_text, extra={'tags': [self.warning_log_tag]})
+
             # only check drop frames once each session
             self.to_check_drop_frames=0
 
