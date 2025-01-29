@@ -42,7 +42,7 @@ import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
 from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
 from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,MetadataDialog
-from foraging_gui.Dialogs import LaserCalibrationDialog
+from foraging_gui.Dialogs import LaserCalibrationDialog,OpticalTaggingDialog
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY, EphysRecording
@@ -184,6 +184,7 @@ class Window(QMainWindow):
         self.OpenLaserCalibration=0
         self.OpenCamera=0
         self.OpenMetadata=0
+        self.OpenOpticalTagging=0
         self.NewTrialRewardOrder=0
         self.LickSta=0
         self.LickSta_ToInitializeVisual=1
@@ -205,6 +206,7 @@ class Window(QMainWindow):
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
         self._Camera()
+        self._OpticalTagging()
         self._InitializeMotorStage()
         self._load_stage()
         self._Metadata()
@@ -319,6 +321,7 @@ class Window(QMainWindow):
         self.action_About.triggered.connect(self._about)
         self.action_Camera.triggered.connect(self._Camera)
         self.actionMeta_Data.triggered.connect(self._Metadata)
+        self.actionOptical_Tagging.triggered.connect(self._OpticalTagging)
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
         self.actionLicks_sta.triggered.connect(self._LickSta)
         self.actionTime_distribution.triggered.connect(self._TimeDistribution)
@@ -1068,6 +1071,10 @@ class Window(QMainWindow):
             pass
 
         self.logging_type=loggingtype # 0 for formal logging, 1 for temporary logging
+
+        # if we are starting a new logging, we should initialize/empty some fields
+        self._empty_initialize_fields()
+    
         return log_folder
 
     def _GetLaserCalibration(self):
@@ -2341,6 +2348,16 @@ class Window(QMainWindow):
         else:
             self.Camera_dialog.hide()
 
+    def _OpticalTagging(self):
+        '''Open the optical tagging dialog'''
+        if self.OpenOpticalTagging==0:
+            self.OpticalTagging_dialog = OpticalTaggingDialog(MainWindow=self)
+            self.OpenOpticalTagging=1
+        if self.actionOptical_Tagging.isChecked()==True:
+            self.OpticalTagging_dialog.show()
+        else:
+            self.OpticalTagging_dialog.hide()
+
     def _Metadata(self):
         '''Open the metadata dialog'''
         if self.OpenMetadata==0:
@@ -2567,7 +2584,7 @@ class Window(QMainWindow):
                 QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
             widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
             self._Concat(widget_dict,Obj,'None')
-            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','Metadata_dialog']
+            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','Metadata_dialog','OpticalTagging_dialog']
             for dialog_name in dialogs:
                 if hasattr(self, dialog_name):
                     widget_dict = {w.objectName(): w for w in getattr(self, dialog_name).findChildren(
@@ -2684,6 +2701,9 @@ class Window(QMainWindow):
         Obj['MetadataFolder']=self.MetadataFolder
         Obj['SaveFile']=self.SaveFile
 
+        # save optical tagging parameters
+        if not self.OpticalTagging_dialog.optical_tagging_par == {}:
+            Obj['optical_tagging_par']=self.OpticalTagging_dialog.optical_tagging_par
         # generate the metadata file and update slims
         try:
             # save the metadata collected in the metadata dialogue
@@ -3050,7 +3070,7 @@ class Window(QMainWindow):
             self.Obj = Obj
 
             widget_dict={}
-            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','centralwidget','TrainingParameters']
+            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','centralwidget','TrainingParameters','OpticalTagging_dialog']
             for dialog_name in dialogs:
                 if hasattr(self, dialog_name):
                     widget_types = (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit,
@@ -3642,10 +3662,6 @@ class Window(QMainWindow):
 
         self.unsaved_data=False
         self.ManualWaterVolume=[0,0]
-        if hasattr(self, 'fiber_photometry_start_time'):
-            del self.fiber_photometry_start_time
-        if hasattr(self, 'fiber_photometry_end_time'):
-            del self.fiber_photometry_end_time
 
         # Clear Plots
         if hasattr(self, 'PlotM') and self.clear_figure_after_save:
@@ -3766,7 +3782,44 @@ class Window(QMainWindow):
             self.Metadata_dialog.project_info = project_info
             self.Metadata_dialog.ProjectName.addItems([project_name])
         return project_name
-                
+
+    def _empty_initialize_fields(self):
+        '''empty fields from the previous session'''
+        # empty the manual water volume
+        self.ManualWaterVolume=[0,0]
+        # delete open ephys data
+        self.open_ephys=[]
+        # set the flag to check drop frames
+        self.to_check_drop_frames=1
+        # empty the laser calibration
+        self.Opto_dialog.laser_1_calibration_voltage.setText('')
+        self.Opto_dialog.laser_2_calibration_voltage.setText('')
+        self.Opto_dialog.laser_1_calibration_power.setText('')
+        self.Opto_dialog.laser_2_calibration_power.setText('')
+
+        # clear camera start and end time
+        self.Camera_dialog.camera_start_time=''
+        self.Camera_dialog.camera_stop_time=''
+        
+        # clear fiber start and end time (this could be simplified after refactoring the photometry code)
+        if hasattr(self, 'fiber_photometry_end_time'):
+            self.fiber_photometry_end_time = ''
+        if not self.StartExcitation.isChecked():
+            self.fiber_photometry_start_time = ''
+        
+        # delete generate trials
+        if hasattr(self, 'GeneratedTrials'):
+            # delete GeneratedTrials
+            del self.GeneratedTrials
+
+        # delete the random reward 
+        if hasattr(self, 'RandomReward_dialog'):
+            self.RandomReward_dialog.random_reward_par={}
+
+        # delete the optical tagging
+        if hasattr(self, 'OpticalTagging_dialog'):
+            self.OpticalTagging_dialog.optical_tagging_par={}
+        
     def _Start(self):
         '''start trial loop'''
 
@@ -3782,12 +3835,6 @@ class Window(QMainWindow):
             if reply == QMessageBox.No:
                 return
 
-        # empty the laser calibration
-        self.Opto_dialog.laser_1_calibration_voltage.setText('')
-        self.Opto_dialog.laser_2_calibration_voltage.setText('')
-        self.Opto_dialog.laser_1_calibration_power.setText('')
-        self.Opto_dialog.laser_2_calibration_power.setText('')
-
         # Check for Bonsai connection
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
@@ -3795,9 +3842,6 @@ class Window(QMainWindow):
             self.Start.setChecked(False)
             self.Start.setStyleSheet('background-color:none;')
             return
-
-        # set the flag to check drop frames
-        self.to_check_drop_frames=1
 
         # clear the session list
         self._connect_Sessionlist(connect=False)
@@ -4054,7 +4098,6 @@ class Window(QMainWindow):
             self._StopCurrentSession()
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
-            self.ManualWaterVolume=[0,0]
             # start a new logging
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
