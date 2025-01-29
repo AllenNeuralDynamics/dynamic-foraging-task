@@ -3801,24 +3801,45 @@ class RandomRewardDialog(QDialog):
                     Return = True # right licks received
         return Return
             
-    def _receving_timestamps(self,side:int):
-        '''Receiving the timestamps of reward start time'''
-        if side==0:
-            for i in range(2):
-                Rec=self.MainWindow.Channel2.receive()
-                if Rec[0].address=='/RandomLeftWaterStartTime':
-                    random_left_water_start_time=Rec[1][1][0]
-                if Rec[0].address=='/LeftRewardDeliveryTimeHarp':
-                    random_left_reward_delivery_time_harp=Rec[1][1][0]
-            return random_left_water_start_time,random_left_reward_delivery_time_harp
-        elif side==1:
-            for i in range(2):
-                Rec=self.MainWindow.Channel2.receive()
-                if Rec[0].address=='/RandomRightWaterStartTime':
-                    random_right_water_start_time=Rec[1][1][0]
-                if Rec[0].address=='/RightRewardDeliveryTimeHarp':
-                    random_right_reward_delivery_time_harp=Rec[1][1][0]
-            return random_right_water_start_time,random_right_reward_delivery_time_harp
+    def _receiving_timestamps(self, side: int):
+        """Receives the timestamps of reward start time from OSC messages.
+
+        Ensures both '/RandomLeftWaterStartTime' and '/LeftRewardDeliveryTimeHarp' 
+        are received before returning when side == 0, and both '/RandomRightWaterStartTime' and
+        '/RightRewardDeliveryTimeHarp' are received before returning when side == 1.
+        
+        Args:
+            side (int): 0 for left, 1 for right.
+        
+        Returns:
+            tuple: (random water start time, reward delivery time harp)
+        """
+        if side == 0:
+            random_left_water_start_time = None
+            random_left_reward_delivery_time_harp = None
+
+            while random_left_water_start_time is None or random_left_reward_delivery_time_harp is None:
+                Rec = self.MainWindow.Channel2.receive()
+                if Rec[0].address == '/RandomLeftWaterStartTime':
+                    random_left_water_start_time = Rec[1][1][0]
+                elif Rec[0].address == '/LeftRewardDeliveryTimeHarp':
+                    random_left_reward_delivery_time_harp = Rec[1][1][0]
+
+            return random_left_water_start_time, random_left_reward_delivery_time_harp
+
+        elif side == 1:
+            random_right_water_start_time = None
+            random_right_reward_delivery_time_harp = None
+
+            while random_right_water_start_time is None or random_right_reward_delivery_time_harp is None:
+                Rec = self.MainWindow.Channel2.receive()
+                if Rec[0].address == '/RandomRightWaterStartTime':
+                    random_right_water_start_time = Rec[1][1][0]
+                elif Rec[0].address == '/RightRewardDeliveryTimeHarp':
+                    random_right_reward_delivery_time_harp = Rec[1][1][0]
+
+            return random_right_water_start_time, random_right_reward_delivery_time_harp
+
 
     def _save_data(self, volume:float, side:int, interval:float, timestamp_computer:float, timestamp_harp:float):
         '''Extend the current parameters to self.random_reward_par'''
