@@ -4747,7 +4747,7 @@
             <Expression xsi:type="beh:CreateMessage">
               <harp:MessageType>Write</harp:MessageType>
               <harp:Payload xsi:type="beh:CreatePulseDO0Payload">
-                <beh:PulseDO0>1</beh:PulseDO0>
+                <beh:PulseDO0>100</beh:PulseDO0>
               </harp:Payload>
             </Expression>
             <Expression xsi:type="MulticastSubject">

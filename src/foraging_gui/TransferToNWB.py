@@ -271,14 +271,12 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_trial_column(name='auto_train_curriculum_schema_version', description=f'The schema version of the auto training curriculum')
     nwbfile.add_trial_column(name='auto_train_stage', description=f'The current stage of auto training')
     nwbfile.add_trial_column(name='auto_train_stage_overridden', description=f'Whether the auto training stage is overridden')
-    
-    # add lickspout position
-    nwbfile.add_trial_column(name='lickspout_position_x', description=f'x position (um) of the lickspout position (left-right)')
-    nwbfile.add_trial_column(name='lickspout_position_z', description=f'z position (um) of the lickspout position (up-down)')
 
     # determine lickspout keys based on stage position keys
     stage_positions = getattr(obj, 'B_StagePositions', [{}])
-    if list(stage_positions[0].keys()) == ['x', 'y1', 'y2', 'z']:   # aind stage
+    nwbfile.add_trial_column(name='lickspout_position_x', description=f'x position (um) of the lickspout position (left-right)')
+    nwbfile.add_trial_column(name='lickspout_position_z', description=f'z position (um) of the lickspout position (up-down)')
+    if len(stage_positions) > 0 and list(stage_positions[0].keys()) == ['x', 'y1', 'y2', 'z']:   # aind stage
         nwbfile.add_trial_column(name='lickspout_position_y1',
                                  description=f'y position (um) of the left lickspout position (forward-backward)')
         nwbfile.add_trial_column(name='lickspout_position_y2',
@@ -516,7 +514,7 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     DO0 stored in B_TrialStartTimeHarp), and the second source is the optogenetics time stamps aligned to other events 
     (e.g go cue and reward outcome; from the DO3 stored in B_OptogeneticsTimeHarp).
     '''
-    start_time=np.array(_get_field(obj, f'B_TrialStartTime{Harp}'))
+    start_time=np.array(_get_field(obj, f'B_TrialStartTime{Harp}', default=[np.nan]))
     LaserStart=[]
     for i in range(len(obj.B_TrialEndTime)):
         Sc = obj.B_SelectedCondition[i] # the optogenetics conditions
@@ -574,13 +572,14 @@ def test_bonsai_json_to_nwb(test_json_urls):
             results.append(f'Converting {file_name} to nwb: {result}')
             
             # Try read the nwb file and show number of trials
-            temp_nwb_name = temp_json_name.replace("json", "nwb")
-            io = NWBHDF5IO(temp_nwb_name, mode='r')
-            nwbfile = io.read()
-            results.append(f'   Reload nwb and get {len(nwbfile.trials)} trials!\n')
-            io.close()
-            print(temp_nwb_name)
-            os.remove(temp_nwb_name)
+            if result != 'empty_trials':
+                temp_nwb_name = temp_json_name.replace("json", "nwb")
+                io = NWBHDF5IO(temp_nwb_name, mode='r')
+                nwbfile = io.read()
+                results.append(f'   Reload nwb and get {len(nwbfile.trials)} trials!\n')
+                io.close()
+                print(temp_nwb_name)
+                os.remove(temp_nwb_name)
         except Exception as e:
             results.append(f'{file_name} failed!!\n    {e}\n')
             
@@ -607,6 +606,8 @@ if __name__ == '__main__':
         'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936331/704151_2024-02-27_09-59-17.json',
         'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936356/1_2024-04-06_16-31-06.json',
         'https://github.com/AllenNeuralDynamics/dynamic-foraging-task/files/14936359/706893_2024-04-09_14-27-56_ephys.json',
+        r'https://github.com/user-attachments/files/18304002/746346_2025-01-02_10-16-10.json',  # https://github.com/AllenNeuralDynamics/dynamic-foraging-task/pull/1274
+        r'https://github.com/user-attachments/files/18304087/746346_2024-12-02_13-16-12.json'  # Empty trials
     ]
 
     test_bonsai_json_to_nwb(test_json_urls)
