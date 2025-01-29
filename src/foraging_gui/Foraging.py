@@ -3832,6 +3832,7 @@ class Window(QMainWindow):
         # delete the random reward 
         if hasattr(self, 'RandomReward_dialog'):
             self.RandomReward_dialog.random_reward_par={}
+            self.RandomReward_dialog.random_reward_par['RandomWaterVolume']=[0,0]
 
         # delete the optical tagging
         if hasattr(self, 'OpticalTagging_dialog'):
