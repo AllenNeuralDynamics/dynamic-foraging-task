@@ -3768,8 +3768,10 @@ class Window(QMainWindow):
 
     def _empty_initialize_fields(self):
         '''empty fields from the previous session'''
-        self.open_ephys=[]
+        # empty the manual water volume
         self.ManualWaterVolume=[0,0]
+        # delete open ephys data
+        self.open_ephys=[]
         # set the flag to check drop frames
         self.to_check_drop_frames=1
         # empty the laser calibration
