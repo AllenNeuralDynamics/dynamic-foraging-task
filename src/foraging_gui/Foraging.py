@@ -3798,7 +3798,7 @@ class Window(QMainWindow):
         self.RandomReward_dialog.random_reward_par={}
 
         # delete the optical tagging
-        self.Opto_dialog.opto_tagging_par={}
+        self.OpticalTagging_dialog.optical_tagging_par={}
         
     def _Start(self):
         '''start trial loop'''
