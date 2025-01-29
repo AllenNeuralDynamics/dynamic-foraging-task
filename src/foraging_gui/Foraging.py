@@ -812,10 +812,12 @@ class Window(QMainWindow):
             self._UpdatePosition(current_position,(0,0,0))
             return {axis: float(pos) for axis, pos in zip(['x', 'y', 'z'], current_position) }
         elif self.stage_widget is not None:     # aind stage
-            return {'x': float(self.stage_widget.movement_page_view.lineEdit_x.text()),
-                    'y1': float(self.stage_widget.movement_page_view.lineEdit_y1.text()),
-                    'y2': float(self.stage_widget.movement_page_view.lineEdit_y2.text()),
-                    'z': float(self.stage_widget.movement_page_view.lineEdit_z.text())}
+            # Get absolute position of motors in AIND stage
+            positions = self.stage_widget.stage_model.get_current_positions_mm()
+            return {'x': positions[0],
+                    'y1': positions[1],
+                    'y2': positions[2],
+                    'z': positions[3]}
         else:   # no stage
             logging.info('GetPositions called, but no current stage')
             return None
@@ -1068,6 +1070,10 @@ class Window(QMainWindow):
             pass
 
         self.logging_type=loggingtype # 0 for formal logging, 1 for temporary logging
+
+        # if we are starting a new logging, we should initialize/empty some fields
+        self._empty_initialize_fields()
+    
         return log_folder
 
     def _GetLaserCalibration(self):
@@ -2262,7 +2268,7 @@ class Window(QMainWindow):
                         self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
         except Exception as e:
             # Catch the exception and log error information
-            logging.error(traceback.format_exc())
+            logging.warning(traceback.format_exc())
 
     def closeEvent(self, event):
         # stop the current session first
@@ -2705,7 +2711,8 @@ class Window(QMainWindow):
             # generate the metadata file
             generated_metadata=generate_metadata(Obj=Obj)
             session = generated_metadata._session()
-            self.sessionGenerated.emit(session)   # emit sessionGenerated
+            if session is not None:     # skip if metadata generation failed
+                self.sessionGenerated.emit(session)   # emit sessionGenerated
 
             if BackupSave==0:
                 text="Session metadata generated successfully: " + str(generated_metadata.session_metadata_success)+"\n"+\
@@ -3215,11 +3222,14 @@ class Window(QMainWindow):
                                               float(last_positions['y']),
                                               float(last_positions['z'])),(0,0,0))
                     elif self.stage_widget is not None:  # aind stage
-                        self.stage_widget.movement_page_view.lineEdit_x.setText(str(last_positions['x']))
-                        self.stage_widget.movement_page_view.lineEdit_y1.setText(str(last_positions['y1']))
-                        self.stage_widget.movement_page_view.lineEdit_y2.setText(str(last_positions['y2']))
-                        self.stage_widget.movement_page_view.lineEdit_z.setText(str(last_positions['z']))
-                        self.move_aind_stage()
+                        # Move AIND stage to the last session positions
+                        positions = {
+                            0: float(last_positions['x']),
+                            1: float(last_positions['y1']),
+                            2: float(last_positions['y2']),
+                            3: float(last_positions['z'])
+                        }
+                        self.stage_widget.stage_model.update_position(positions)
                         step_size = self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
                 elif 'B_NewscalePositions' in Obj.keys() and len(Obj['B_NewscalePositions']) != 0:  # cross compatibility for mice run on older version of code.
                     last_positions = Obj['B_NewscalePositions'][-1]
@@ -3260,13 +3270,6 @@ class Window(QMainWindow):
         self.keyPressEvent() # Accept all updates
         self.load_tag=1
         self.ID.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
-
-    def move_aind_stage(self):
-        """
-        Move all axis of stage in stage widget
-        """
-        positions = self.stage_widget.movement_page_view.get_positions_from_line_edit()
-        self.stage_widget.movement_page_view.signal_position_change.emit(positions)
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
@@ -3658,10 +3661,6 @@ class Window(QMainWindow):
 
         self.unsaved_data=False
         self.ManualWaterVolume=[0,0]
-        if hasattr(self, 'fiber_photometry_start_time'):
-            del self.fiber_photometry_start_time
-        if hasattr(self, 'fiber_photometry_end_time'):
-            del self.fiber_photometry_end_time
 
         # Clear Plots
         if hasattr(self, 'PlotM') and self.clear_figure_after_save:
@@ -3783,6 +3782,43 @@ class Window(QMainWindow):
             self.Metadata_dialog.ProjectName.addItems([project_name])
         return project_name
 
+    def _empty_initialize_fields(self):
+        '''empty fields from the previous session'''
+        # empty the manual water volume
+        self.ManualWaterVolume=[0,0]
+        # delete open ephys data
+        self.open_ephys=[]
+        # set the flag to check drop frames
+        self.to_check_drop_frames=1
+        # empty the laser calibration
+        self.Opto_dialog.laser_1_calibration_voltage.setText('')
+        self.Opto_dialog.laser_2_calibration_voltage.setText('')
+        self.Opto_dialog.laser_1_calibration_power.setText('')
+        self.Opto_dialog.laser_2_calibration_power.setText('')
+
+        # clear camera start and end time
+        self.Camera_dialog.camera_start_time=''
+        self.Camera_dialog.camera_stop_time=''
+        
+        # clear fiber start and end time (this could be simplified after refactoring the photometry code)
+        if hasattr(self, 'fiber_photometry_end_time'):
+            self.fiber_photometry_end_time = ''
+        if not self.StartExcitation.isChecked():
+            self.fiber_photometry_start_time = ''
+        
+        # delete generate trials
+        if hasattr(self, 'GeneratedTrials'):
+            # delete GeneratedTrials
+            del self.GeneratedTrials
+
+        # delete the random reward 
+        if hasattr(self, 'RandomReward_dialog'):
+            self.RandomReward_dialog.random_reward_par={}
+
+        # delete the optical tagging
+        if hasattr(self, 'OpticalTagging_dialog'):
+            self.OpticalTagging_dialog.optical_tagging_par={}
+        
     def _Start(self):
         '''start trial loop'''
 
@@ -3798,12 +3834,6 @@ class Window(QMainWindow):
             if reply == QMessageBox.No:
                 return
 
-        # empty the laser calibration
-        self.Opto_dialog.laser_1_calibration_voltage.setText('')
-        self.Opto_dialog.laser_2_calibration_voltage.setText('')
-        self.Opto_dialog.laser_1_calibration_power.setText('')
-        self.Opto_dialog.laser_2_calibration_power.setText('')
-
         # Check for Bonsai connection
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
@@ -3811,9 +3841,6 @@ class Window(QMainWindow):
             self.Start.setChecked(False)
             self.Start.setStyleSheet('background-color:none;')
             return
-
-        # set the flag to check drop frames
-        self.to_check_drop_frames=1
 
         # clear the session list
         self._connect_Sessionlist(connect=False)
@@ -4016,7 +4043,7 @@ class Window(QMainWindow):
 
             if self.add_default_project_name and add_default:
                 project_name=self._set_default_project()
-
+            
             self.project_name = project_name
             self.session_run = True   # session has been started
 
@@ -4070,8 +4097,6 @@ class Window(QMainWindow):
             self._StopCurrentSession()
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
-            # generate a new session id
-            self.ManualWaterVolume=[0,0]
             # start a new logging
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
@@ -4677,18 +4702,24 @@ class Window(QMainWindow):
             :param session: session to use to create upload manifest
         '''
 
+        # skip manifest generation for test mouse
         if self.behavior_session_model.subject in ['0','1','2','3','4','5','6','7','8','9','10']:
             logging.info('Skipping upload manifest, because this is the test mouse')
             return
-
+        # skip manifest generation if automatic upload is disabled
         if not self.Settings['AutomaticUpload']:
             logging.info('Skipping Automatic Upload based on ForagingSettings.json')
+            return
+        # skip manifest generation if this is an ephys session
+        if self.open_ephys!=[] or self.StartEphysRecording.isChecked():
+            logging.info('Skipping upload manifest, because this is an ephys session')
             return
 
         try:
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
-
+            if self.project_name==None:
+                self.project_name = 'Behavior Platform'
             # Upload time is 8:30 tonight, plus a random offset over a 30 minute period
             # Random offset reduces strain on downstream servers getting many requests at once
             date_format = "%Y-%m-%d_%H-%M-%S"
