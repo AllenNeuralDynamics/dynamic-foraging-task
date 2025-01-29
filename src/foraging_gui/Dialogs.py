@@ -3587,10 +3587,28 @@ class RandomRewardDialog(QDialog):
 
     def _connectSignalsSlots(self):
         self.Start.clicked.connect(self._Start)
+        self.Start.toggled.connect(self._enable_disable)
         self.WhichSpout.currentIndexChanged.connect(self._WhichSpout)
         self.Restart.clicked.connect(self._start_over)
         self.ClearData.clicked.connect(self._clear_data)
         self.Save.clicked.connect(self._Save)
+    
+    def _enable_disable(self):
+        """
+        Enables or disables the 'GiveLeft' and 'GiveRight' buttons based on the state of the 'Start' button.
+
+        When 'Start' is checked (active), 'GiveLeft' and 'GiveRight' buttons are disabled.
+        When 'Start' is unchecked (inactive), 'GiveLeft' and 'GiveRight' buttons are enabled.
+
+        This prevents users from manually triggering left or right rewards while a session is running.
+
+        Returns:
+            None
+        """
+        # Disable 'GiveLeft' and 'GiveRight' when 'Start' is checked (active)
+        # Enable them when 'Start' is unchecked (inactive)
+        self.MainWindow.GiveLeft.setEnabled(not self.Start.isChecked())
+        self.MainWindow.GiveRight.setEnabled(not self.Start.isChecked())
 
     def _Save(self):
         '''Save the random reward results'''
