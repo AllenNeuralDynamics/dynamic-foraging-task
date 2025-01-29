@@ -3720,7 +3720,7 @@ class RandomRewardDialog(QDialog):
                 # give the reward
                 self._give_reward(volume=volume, side=side)
                 # receiving the timestamps of reward start time. 
-                reward_start_timestamp_computer, reward_start_timestamp_harp=self._receving_timestamps(side=side)
+                reward_start_timestamp_computer, reward_start_timestamp_harp=self._receiving_timestamps(side=side)
                 # save the data 
                 self._save_data(volume=volume, side=side, interval=interval,timestamp_computer=reward_start_timestamp_computer,timestamp_harp=reward_start_timestamp_harp)
                 # show current cycle and parameters
