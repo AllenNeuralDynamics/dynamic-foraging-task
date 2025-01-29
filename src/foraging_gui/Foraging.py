@@ -3544,12 +3544,14 @@ class Window(QMainWindow):
             #    'Box {}, New Session:'.format(self.box_letter),
             #    'Please restart the FIP workflow',
             #    QMessageBox.Ok)
+            logging.info('DEBUG TEST')
             msgbox = QMessageBox()
             msgbox.setWindowTitle('Box {}, New Session:'.format(self.box_letter))
             msgbox.setText('Please restart the FIP workflow')
             msgbox.setStandardButtons(QMessageBox.Ok)
             msgbox.setModal(False)
             msgbox.show()
+            logging.info('DEBUG TEST 2 ')
 
     def _AutoReward(self):
         if self.AutoReward.isChecked():
