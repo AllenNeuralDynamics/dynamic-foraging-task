@@ -3784,7 +3784,7 @@ class Window(QMainWindow):
         self.Camera_dialog.camera_start_time=''
         self.Camera_dialog.camera_stop_time=''
         
-        # clear fiber start and end time
+        # clear fiber start and end time (this could be simplified after refactoring the photometry code)
         if hasattr(self, 'fiber_photometry_end_time'):
             self.fiber_photometry_end_time = ''
         if not self.StartExcitation.isChecked():
