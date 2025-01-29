@@ -3770,16 +3770,36 @@ class Window(QMainWindow):
         '''empty fields from the previous session'''
         self.open_ephys=[]
         self.ManualWaterVolume=[0,0]
+        # set the flag to check drop frames
+        self.to_check_drop_frames=1
+        # empty the laser calibration
+        self.Opto_dialog.laser_1_calibration_voltage.setText('')
+        self.Opto_dialog.laser_2_calibration_voltage.setText('')
+        self.Opto_dialog.laser_1_calibration_power.setText('')
+        self.Opto_dialog.laser_2_calibration_power.setText('')
+
         # clear camera start and end time
         if not self.Camera_dialog.StartRecording.isChecked():
             self.Camera_dialog.camera_start_time=''
             self.Camera_dialog.camera_stop_time=''
+        
         # clear fiber start and end time
         if hasattr(self, 'fiber_photometry_end_time'):
             self.fiber_photometry_end_time = ''
         if not self.StartExcitation.isChecked():
             self.fiber_photometry_start_time = ''
-            
+        
+        # delete generate trials
+        if hasattr(self, 'GeneratedTrials'):
+            # delete GeneratedTrials
+            del self.GeneratedTrials
+
+        # delete the random reward 
+
+
+        # delete the optical tagging
+
+        
     def _Start(self):
         '''start trial loop'''
 
@@ -3795,12 +3815,6 @@ class Window(QMainWindow):
             if reply == QMessageBox.No:
                 return
 
-        # empty the laser calibration
-        self.Opto_dialog.laser_1_calibration_voltage.setText('')
-        self.Opto_dialog.laser_2_calibration_voltage.setText('')
-        self.Opto_dialog.laser_1_calibration_power.setText('')
-        self.Opto_dialog.laser_2_calibration_power.setText('')
-
         # Check for Bonsai connection
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
@@ -3808,9 +3822,6 @@ class Window(QMainWindow):
             self.Start.setChecked(False)
             self.Start.setStyleSheet('background-color:none;')
             return
-
-        # set the flag to check drop frames
-        self.to_check_drop_frames=1
 
         # clear the session list
         self._connect_Sessionlist(connect=False)
