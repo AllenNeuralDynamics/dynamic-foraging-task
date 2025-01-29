@@ -3540,18 +3540,12 @@ class Window(QMainWindow):
             self.FIP_started=False
 
         if (FIP_was_running)&(not closing):
-            #reply = QMessageBox.critical(self,
-            #    'Box {}, New Session:'.format(self.box_letter),
-            #    'Please restart the FIP workflow',
-            #    QMessageBox.Ok)
-            logging.info('DEBUG TEST')
             self.FIP_msgbox = QMessageBox()
             self.FIP_msgbox.setWindowTitle('Box {}, New Session:'.format(self.box_letter))
             self.FIP_msgbox.setText('Please restart the FIP workflow')
             self.FIP_msgbox.setStandardButtons(QMessageBox.Ok)
             self.FIP_msgbox.setModal(False)
             self.FIP_msgbox.show()
-            logging.info('DEBUG TEST 2 ')
 
     def _AutoReward(self):
         if self.AutoReward.isChecked():
