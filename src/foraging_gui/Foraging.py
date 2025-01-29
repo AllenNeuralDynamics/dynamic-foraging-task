@@ -3797,10 +3797,12 @@ class Window(QMainWindow):
             del self.GeneratedTrials
 
         # delete the random reward 
-        self.RandomReward_dialog.random_reward_par={}
+        if hasattr(self, 'RandomReward_dialog'):
+            self.RandomReward_dialog.random_reward_par={}
 
         # delete the optical tagging
-        self.OpticalTagging_dialog.optical_tagging_par={}
+        if hasattr(self, 'OpticalTagging_dialog'):
+            self.OpticalTagging_dialog.optical_tagging_par={}
         
     def _Start(self):
         '''start trial loop'''
