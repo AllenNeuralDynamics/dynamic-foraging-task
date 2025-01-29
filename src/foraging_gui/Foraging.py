@@ -4034,7 +4034,8 @@ class Window(QMainWindow):
             # fill out GenerateTrials B_Bias
             last_bias = self.GeneratedTrials.B_Bias[-1]
             b_bias_len = len(self.GeneratedTrials.B_Bias)
-            self.GeneratedTrials.B_Bias += [last_bias]*((self.GeneratedTrials.B_CurrentTrialN+1)-b_bias_len)
+            bias_filler = [last_bias]*((self.GeneratedTrials.B_CurrentTrialN+1)-b_bias_len)
+            self.GeneratedTrials.B_Bias = np.concatenate(self.GeneratedTrials.B_Bias, bias_filler)
 
             # stop lick interval calculation
             self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
