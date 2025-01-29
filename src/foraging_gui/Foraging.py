@@ -1067,6 +1067,10 @@ class Window(QMainWindow):
             pass
 
         self.logging_type=loggingtype # 0 for formal logging, 1 for temporary logging
+
+        # if we are starting a new logging, we should initialize/empty some fields
+        self._empty_initialize_fields()
+    
         return log_folder
 
     def _GetLaserCalibration(self):
@@ -4063,8 +4067,6 @@ class Window(QMainWindow):
             self._StopCurrentSession()
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
-            # if we are starting a new session, we should initialize/empty some fields
-            self._empty_initialize_fields()
             # start a new logging
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
