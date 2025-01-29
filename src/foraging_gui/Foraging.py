@@ -3781,9 +3781,8 @@ class Window(QMainWindow):
         self.Opto_dialog.laser_2_calibration_power.setText('')
 
         # clear camera start and end time
-        if not self.Camera_dialog.StartRecording.isChecked():
-            self.Camera_dialog.camera_start_time=''
-            self.Camera_dialog.camera_stop_time=''
+        self.Camera_dialog.camera_start_time=''
+        self.Camera_dialog.camera_stop_time=''
         
         # clear fiber start and end time
         if hasattr(self, 'fiber_photometry_end_time'):
