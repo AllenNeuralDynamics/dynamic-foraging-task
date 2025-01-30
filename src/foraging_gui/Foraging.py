@@ -2694,6 +2694,8 @@ class Window(QMainWindow):
             session = generated_metadata._session()
             if session is not None:     # skip if metadata generation failed
                 self.sessionGenerated.emit(session)   # emit sessionGenerated
+            else:
+                logging.error('Could not generated upload manifest, missing metadata')
 
             if BackupSave==0:
                 text="Session metadata generated successfully: " + str(generated_metadata.session_metadata_success)+"\n"+\
@@ -4675,6 +4677,7 @@ class Window(QMainWindow):
             logging.info('Skipping upload manifest, because this is an ephys session')
             return
 
+        logging.info('Generating upload manifest')
         try:
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
@@ -4730,7 +4733,7 @@ class Window(QMainWindow):
             # Write the manifest file
             with open(filename,'w') as yaml_file:
                 yaml.dump(contents, yaml_file, default_flow_style=False)
-
+            logging.info('Finished generating manifest')
         except Exception as e:
             logging.error('Could not generate upload manifest: {}'.format(str(e)))
             QMessageBox.critical(self, 'Upload manifest',
