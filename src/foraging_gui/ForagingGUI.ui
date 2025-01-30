@@ -2373,7 +2373,7 @@ Double dipping:
                     <item>
                      <layout class="QGridLayout" name="gridLayout">
                       <item row="6" column="6">
-                       <widget class="QLineEdit" name="ITIMin">
+                       <widget class="QDoubleSpinBox" name="ITIMin">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -2386,13 +2386,13 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>1</string>
                         </property>
                        </widget>
                       </item>
                       <item row="5" column="6">
-                       <widget class="QLineEdit" name="DelayMin">
+                       <widget class="QDoubleSpinBox" name="DelayMin">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -2405,7 +2405,7 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>0</string>
                         </property>
                        </widget>
@@ -2506,7 +2506,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="5" column="3">
-                       <widget class="QLineEdit" name="DelayBeta">
+                       <widget class="QDoubleSpinBox" name="DelayBeta">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -2519,7 +2519,7 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>1</string>
                         </property>
                        </widget>
@@ -2544,7 +2544,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="5" column="9">
-                       <widget class="QLineEdit" name="DelayMax">
+                       <widget class="QDoubleSpinBox" name="DelayMax">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -2557,7 +2557,7 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>1</string>
                         </property>
                        </widget>
@@ -2642,7 +2642,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="11" column="3">
-                       <widget class="QLineEdit" name="BlockMinReward">
+                       <widget class="QSpinBox" name="BlockMinReward">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>7</horstretch>
@@ -2655,7 +2655,7 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>0</string>
                         </property>
                        </widget>
@@ -2788,7 +2788,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="6" column="12">
-                       <widget class="QLineEdit" name="ITIIncrease">
+                       <widget class="QDoubleSpinBox" name="ITIIncrease">
                         <property name="enabled">
                          <bool>false</bool>
                         </property>
@@ -2798,7 +2798,7 @@ Double dipping:
                           <verstretch>0</verstretch>
                          </sizepolicy>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>0</string>
                         </property>
                        </widget>
@@ -2888,7 +2888,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="4" column="9">
-                       <widget class="QLineEdit" name="BlockMax">
+                       <widget class="QSpinBox" name="BlockMax">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>7</horstretch>
@@ -2901,7 +2901,7 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>60</string>
                         </property>
                        </widget>
@@ -2920,7 +2920,7 @@ Double dipping:
                        </spacer>
                       </item>
                       <item row="5" column="12">
-                       <widget class="QLineEdit" name="RewardDelay">
+                       <widget class="QDoubleSpinBox" name="RewardDelay">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>7</horstretch>
@@ -2933,13 +2933,13 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>0</string>
                         </property>
                        </widget>
                       </item>
                       <item row="10" column="6">
-                       <widget class="QLineEdit" name="SwitchThr">
+                       <widget class="QDoubleSpinBox" name="SwitchThr">
                         <property name="enabled">
                          <bool>false</bool>
                         </property>
@@ -2955,7 +2955,7 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>0.5</string>
                         </property>
                        </widget>
@@ -3015,7 +3015,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="6" column="9">
-                       <widget class="QLineEdit" name="ITIMax">
+                       <widget class="QDoubleSpinBox" name="ITIMax">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -3028,13 +3028,13 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>8</string>
                         </property>
                        </widget>
                       </item>
                       <item row="6" column="3">
-                       <widget class="QLineEdit" name="ITIBeta">
+                       <widget class="QDoubleSpinBox" name="ITIBeta">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -3047,7 +3047,7 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>2</string>
                         </property>
                        </widget>
@@ -3072,7 +3072,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="7" column="3">
-                       <widget class="QLineEdit" name="ResponseTime">
+                       <widget class="QDoubleSpinBox" name="ResponseTime">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -3085,7 +3085,7 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>1</string>
                         </property>
                        </widget>
@@ -3110,7 +3110,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="10" column="9">
-                       <widget class="QLineEdit" name="PointsInARow">
+                       <widget class="QSpinBox" name="PointsInARow">
                         <property name="enabled">
                          <bool>false</bool>
                         </property>
@@ -3120,7 +3120,7 @@ Double dipping:
                           <verstretch>0</verstretch>
                          </sizepolicy>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>5</string>
                         </property>
                        </widget>
@@ -3239,7 +3239,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="8" column="12">
-                       <widget class="QLineEdit" name="Ignored">
+                       <widget class="QSpinBox" name="Ignored">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -3252,7 +3252,7 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>100</string>
                         </property>
                        </widget>
@@ -3306,7 +3306,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="4" column="3">
-                       <widget class="QLineEdit" name="BlockBeta">
+                       <widget class="QSpinBox" name="BlockBeta">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>7</horstretch>
@@ -3319,7 +3319,7 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>20</string>
                         </property>
                        </widget>
@@ -3395,7 +3395,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="4" column="6">
-                       <widget class="QLineEdit" name="BlockMin">
+                       <widget class="QSpinBox" name="BlockMin">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>7</horstretch>
@@ -3408,13 +3408,13 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>20</string>
                         </property>
                        </widget>
                       </item>
                       <item row="12" column="3">
-                       <widget class="QLineEdit" name="auto_stop_ignore_win">
+                       <widget class="QSpinBox" name="auto_stop_ignore_win">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                           <horstretch>0</horstretch>
@@ -3427,7 +3427,7 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>30</string>
                         </property>
                        </widget>
@@ -3452,7 +3452,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="3" column="9">
-                       <widget class="QLineEdit" name="RewardPairsN">
+                       <widget class="QSpinBox" name="RewardPairsN">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -3465,7 +3465,7 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>1</string>
                         </property>
                        </widget>
@@ -3478,7 +3478,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="12" column="9">
-                       <widget class="QLineEdit" name="MaxTime">
+                       <widget class="QSpinBox" name="MaxTime">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                           <horstretch>0</horstretch>
@@ -3491,13 +3491,13 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>120</string>
                         </property>
                        </widget>
                       </item>
                       <item row="7" column="6">
-                       <widget class="QLineEdit" name="RewardConsumeTime">
+                       <widget class="QDoubleSpinBox" name="RewardConsumeTime">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -3510,7 +3510,7 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>3</string>
                         </property>
                        </widget>
@@ -3673,7 +3673,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="8" column="6">
-                       <widget class="QLineEdit" name="Multiplier">
+                       <widget class="QDoubleSpinBox" name="Multiplier">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -3686,13 +3686,13 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>0.8</string>
                         </property>
                        </widget>
                       </item>
                       <item row="3" column="6">
-                       <widget class="QLineEdit" name="RewardFamily">
+                       <widget class="QSpinBox" name="RewardFamily">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -3705,7 +3705,7 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>1</string>
                         </property>
                        </widget>
@@ -3923,7 +3923,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="3" column="3">
-                       <widget class="QLineEdit" name="BaseRewardSum">
+                       <widget class="QDoubleSpinBox" name="BaseRewardSum">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -3936,7 +3936,7 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>0.8</string>
                         </property>
                        </widget>
@@ -3983,7 +3983,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="12" column="14">
-                       <widget class="QLineEdit" name="MaxTrial">
+                       <widget class="QSpinBox" name="MaxTrial">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                           <horstretch>7</horstretch>
@@ -3996,13 +3996,13 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>1000</string>
                         </property>
                        </widget>
                       </item>
                       <item row="8" column="9">
-                       <widget class="QLineEdit" name="Unrewarded">
+                       <widget class="QSpinBox" name="Unrewarded">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>7</horstretch>
@@ -4015,7 +4015,7 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>200</string>
                         </property>
                        </widget>
@@ -4065,27 +4065,27 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="13" column="12">
-                       <widget class="QLineEdit" name="warm_windowsize">
+                       <widget class="QSpinBox" name="warm_windowsize">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
                           <verstretch>0</verstretch>
                          </sizepolicy>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>20</string>
                         </property>
                        </widget>
                       </item>
                       <item row="13" column="9">
-                       <widget class="QLineEdit" name="warm_max_choice_ratio_bias">
+                       <widget class="QDoubleSpinBox" name="warm_max_choice_ratio_bias">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
                           <verstretch>0</verstretch>
                          </sizepolicy>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>0.1</string>
                         </property>
                        </widget>
@@ -4152,27 +4152,27 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="13" column="15">
-                       <widget class="QLineEdit" name="warm_min_finish_ratio">
+                       <widget class="QDoubleSpinBox" name="warm_min_finish_ratio">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
                           <verstretch>0</verstretch>
                          </sizepolicy>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>0.8</string>
                         </property>
                        </widget>
                       </item>
                       <item row="13" column="6">
-                       <widget class="QLineEdit" name="warm_min_trial">
+                       <widget class="QSpinBox" name="warm_min_trial">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
                           <verstretch>0</verstretch>
                          </sizepolicy>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>60</string>
                         </property>
                        </widget>
@@ -4254,7 +4254,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="12" column="6">
-                       <widget class="QLineEdit" name="auto_stop_ignore_ratio_threshold">
+                       <widget class="QDoubleSpinBox" name="auto_stop_ignore_ratio_threshold">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                           <horstretch>0</horstretch>
@@ -4267,7 +4267,7 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
+                        <property name="value">
                          <string>.8</string>
                         </property>
                        </widget>

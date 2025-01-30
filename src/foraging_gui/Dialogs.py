@@ -2656,7 +2656,7 @@ class AutoTrainDialog(QDialog):
             self.stage_in_use = self.last_session['next_stage_suggested']
         else:
             self.stage_in_use = 'unknown training stage'
-        
+
         self.pushButton_apply_auto_train_paras.setText(
             f"Apply and lock\n"
             + '\n'.join(get_curriculum_string(self.curriculum_in_use).split('(')).strip(')') 
@@ -2665,7 +2665,7 @@ class AutoTrainDialog(QDialog):
         
         logger.info(f"Current stage to apply: {self.stage_in_use} @"
                     f"{get_curriculum_string(self.curriculum_in_use)}")
-                
+
     def _apply_curriculum(self):
         # Check if a curriculum is selected
         if not hasattr(self, 'selected_curriculum') or self.selected_curriculum is None:
@@ -2885,10 +2885,10 @@ class AutoTrainDialog(QDialog):
             
             # Set warmup to off first so that all AutoTrain parameters
             # can be correctly registered in WarmupBackup if warmup is turned on later
-            if paras_dict and paras_dict['warmup'] != self.MainWindow.warmup.currentText():
+            if paras_dict and paras_dict['warmup'] != self.MainWindow.task_logic.task_parameters.warmup:
                 widgets_changed.update(
                     {self.MainWindow.warmup: 
-                     self.MainWindow.warmup.currentText()
+                     self.MainWindow.task_logic.task_parameters.warmup
                      }
                 ) # Track the changes
             

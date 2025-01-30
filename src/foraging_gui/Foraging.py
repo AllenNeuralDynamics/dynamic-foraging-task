@@ -13,13 +13,11 @@ import logging_loki
 import socket
 import harp
 import threading
-from random import randint
 import yaml
 import copy
 import shutil
 from pathlib import Path
 from datetime import date, datetime, timezone, timedelta
-import csv
 from aind_slims_api import SlimsClient
 from aind_slims_api import models
 import serial
@@ -55,7 +53,13 @@ from aind_data_schema.core.session import Session
 from aind_data_schema_models.modalities import Modality
 from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_auto_train.schema.task import TrainingStage
-
+from aind_behavior_dynamic_foraging import (
+    AindDynamicForagingTaskLogic,
+    AindDynamicForagingTaskParameters,
+    AutoWaterMode,
+    AdvancedBlockMode
+)
+import aind_behavior_dynamic_foraging
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear() # clear handlers so console output can be configured
 logging.raiseExceptions = os.getenv('FORAGING_DEV_MODE', False)
@@ -128,10 +132,15 @@ class Window(QMainWindow):
             subject=self.ID.text(),
             experiment_version=foraging_gui.__version__,
             notes=self.ShowNotes.toPlainText(),
-            commit_hash= subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip(),
+            commit_hash=subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip(),
             allow_dirty_repo=
             subprocess.check_output(['git','diff-index','--name-only', 'HEAD']).decode('ascii').strip() != '',
             skip_hardware_validation=True
+        )
+        # create AindDynamicForagingTaskLogic to be used and referenced for task parameter info
+        self.task_logic = AindDynamicForagingTaskLogic(
+            task_parameters=self.initialize_task_parameters().dict(),
+            version=aind_behavior_dynamic_foraging.__version__
         )
 
         # add warning_widget to layout and set color
@@ -213,6 +222,8 @@ class Window(QMainWindow):
         self._ShowRewardPairs() # show reward pairs
         self._GetTrainingParameters() # get initial training parameters
         self.connectSignalsSlots()
+        self.connect_session_model()    # connect relevant widgets to update session model
+        self.connect_task_parameters()  # connect relevant widgets to update task parameters
         self._Task()
         self.keyPressEvent()
         self._WaterVolumnManage2()
@@ -242,6 +253,139 @@ class Window(QMainWindow):
             '''
             self._ReconnectBonsai()
         logging.info('Start up complete')
+
+    def initialize_task_parameters(self) -> AindDynamicForagingTaskParameters:
+        """
+        initialize schema of task parameters based on widgets
+        """
+
+        return AindDynamicForagingTaskParameters(
+            base_reward_sum=self.BaseRewardSum.value(),
+            reward_family=self.RewardFamily.value(),
+            reward_pairs_n=self.RewardPairsN.value(),
+            uncoupled_reward=self.UncoupledReward.text(),
+            # Randomness
+            randomness=self.Randomness.currentText(),
+            # Block length
+            block_min=self.BlockMin.value(),
+            block_max=self.BlockMax.value(),
+            block_beta=self.BlockBeta.value(),
+            block_min_reward=self.BlockMinReward.value(),
+            # Delay period
+            delay_min=self.DelayMin.value(),
+            delay_max=self.DelayMax.value(),
+            delay_beta=self.DelayBeta.value(),
+            # Reward delay
+            reward_delay=self.RewardDelay.value(),
+            # Auto water
+            auto_reward=self.AutoReward.isChecked(),
+            auto_water_type=AutoWaterMode(self.AutoWaterType.currentText()),
+            multiplier=self.Multiplier.value(),
+            unrewarded=self.Unrewarded.value(),
+            ignored=self.Ignored.value(),
+            # ITI
+            iti_min=self.ITIMin.value(),
+            iti_max=self.ITIMax.value(),
+            iti_beta=self.ITIBeta.value(),
+            iti_increase=self.ITIIncrease.value(),
+            # Response time
+            response_time=self.ResponseTime.value(),
+            reward_consume_time=self.RewardConsumeTime.value(),
+            auto_stop_ignore_win=self.auto_stop_ignore_win.value(),
+            auto_stop_ignore_ratio_threshold=self.auto_stop_ignore_ratio_threshold.value(),
+            # Auto block
+            advanced_block_auto=AdvancedBlockMode(self.AdvancedBlockAuto.currentText()),
+            switch_thr=self.SwitchThr.value(),
+            points_in_a_row=self.PointsInARow.value(),
+            # Auto stop
+            max_trial=self.MaxTrial.value(),
+            max_time=self.MaxTime.value(),
+            # Reward size
+            right_value_volume=self.RightValue_volume.value(),
+            left_value_volume=self.LeftValue_volume.value(),
+            # Warmup
+            warmup=self.warmup.currentText(),
+            warm_min_trial=self.warm_min_trial.value(),
+            warm_max_choice_ratio_bias=self.warm_max_choice_ratio_bias.value(),
+            warm_min_finish_ratio=self.warm_min_finish_ratio.value(),
+            warm_windowsize=self.warm_windowsize.value()
+        )
+
+    def connect_task_parameters(self) -> None:
+        """
+        Connect relevant widgets to update task parameters in task logic model
+        """
+        # update parameters in task logic model
+        self.BaseRewardSum.valueChanged.connect(lambda v:
+                                                setattr(self.task_logic.task_parameters, 'base_reward_sum', v))
+        self.RewardFamily.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'reward_family', v))
+        self.RewardPairsN.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'reward_pairs_n', v))
+        self.UncoupledReward.textChanged.connect(lambda t:
+                                                 setattr(self.task_logic.task_parameters, 'uncoupled_reward', t))
+        self.Randomness.currentIndexChanged.connect(lambda t: setattr(self.task_logic.task_parameters, 'randomness', t))
+        self.BlockMin.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'block_min', v))
+        self.BlockMax.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'block_max', v))
+        self.BlockBeta.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'block_beta', v))
+        self.BlockMinReward.valueChanged.connect(lambda v:
+                                                 setattr(self.task_logic.task_parameters, 'block_min_reward', v))
+        self.DelayMin.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'delay_min', v))
+        self.DelayMax.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'delay_max', v))
+        self.DelayBeta.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'delay_beta', v))
+        self.RewardDelay.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'reward_delay', v))
+        self.AutoReward.toggled.connect(lambda c: setattr(self.task_logic.task_parameters, 'auto_reward', c))
+        self.AutoWaterType.currentTextChanged.connect(lambda water:
+                                                      setattr(self.task_logic.task_parameters, 'auto_water_type',
+                                                              AutoWaterMode(water)))
+        self.Multiplier.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'multiplier', v))
+        self.Unrewarded.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'unrewarded', v))
+        self.Ignored.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'ignored', v))
+        self.ITIMin.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'iti_min', v))
+        self.ITIMax.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'iti_max', v))
+        self.ITIBeta.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'iti_beta', v))
+        self.ITIIncrease.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'iti_increase', v))
+        self.ResponseTime.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'response_time', v))
+        self.RewardConsumeTime.valueChanged.connect(lambda v:
+                                                    setattr(self.task_logic.task_parameters, 'reward_consume_time', v))
+        self.auto_stop_ignore_win.valueChanged.connect(lambda v:
+                                                       setattr(self.task_logic.task_parameters,
+                                                               'auto_stop_ignore_win', v))
+        self.auto_stop_ignore_ratio_threshold.valueChanged.connect(lambda v:
+                                                                   setattr(self.task_logic.task_parameters,
+                                                                           'auto_stop_ignore_ratio_threshold', v))
+        self.AdvancedBlockAuto.currentTextChanged.connect(
+            lambda text: setattr(self.task_logic.task_parameters, 'advanced_block_auto', AdvancedBlockMode(text)))
+        self.SwitchThr.valueChanged.connect(lambda v:setattr(self.task_logic.task_parameters, 'switch_thr', v))
+        self.PointsInARow.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'points_in_a_row', v))
+        self.MaxTrial.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'max_trial', v))
+        self.MaxTime.valueChanged.connect(lambda v: setattr(self.task_logic.task_parameters, 'max_time', v))
+        self.RightValue_volume.valueChanged.connect(lambda v:
+                                                   setattr(self.task_logic.task_parameters, 'right_value_volume', v))
+
+        self.LeftValue_volume.valueChanged.connect(lambda v:
+                                                   setattr(self.task_logic.task_parameters, 'left_value_volume', v))
+
+        self.warmup.currentTextChanged.connect(lambda text: setattr(self.task_logic.task_parameters, 'warmup', text))
+        self.warm_min_trial.valueChanged.connect(lambda v:
+                                                 setattr(self.task_logic.task_parameters, 'warm_min_trial', v))
+        self.warm_max_choice_ratio_bias.valueChanged.connect(
+            lambda v: setattr(self.task_logic.task_parameters, 'warm_max_choice_ratio_bias', v))
+        self.warm_min_finish_ratio.valueChanged.connect(lambda v:
+                                                        setattr(self.task_logic.task_parameters,
+                                                                'warm_min_finish_ratio', v))
+        self.warm_windowsize.valueChanged.connect(lambda v:
+                                                  setattr(self.task_logic.task_parameters, 'warm_windowsize', v))
+
+    def connect_session_model(self) -> None:
+        """
+        Connect relevant widgets to update session model
+        """
+
+        # update parameters in behavior session model if widgets change
+        self.Task.currentTextChanged.connect(lambda task: setattr(self.behavior_session_model, 'experiment', task))
+        self.Experimenter.textChanged.connect(lambda text: setattr(self.behavior_session_model, 'experimenter', [text]))
+        self.ID.textChanged.connect(lambda subject: setattr(self.behavior_session_model, 'subject', subject))
+        self.ShowNotes.textChanged.connect(lambda: setattr(self.behavior_session_model, 'notes',
+                                                           self.ShowNotes.toPlainText()))
 
     def _load_rig_metadata(self):
         '''Load the latest rig metadata'''
@@ -406,14 +550,6 @@ class Window(QMainWindow):
         self.Opto_dialog.laser_2_calibration_voltage.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_1_calibration_power.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_2_calibration_power.textChanged.connect(self._toggle_save_color)
-
-        # update parameters in behavior session model if widgets change
-        self.Task.currentTextChanged.connect(lambda task: setattr(self.behavior_session_model, 'experiment', task))
-        self.Experimenter.textChanged.connect(lambda text: setattr(self.behavior_session_model, 'experimenter', [text]))
-        self.ID.textChanged.connect(lambda subject: setattr(self.behavior_session_model, 'subject', subject))
-        self.ShowNotes.textChanged.connect(lambda: setattr(self.behavior_session_model, 'notes',
-                                                           self.ShowNotes.toPlainText()))
-
 
         # Set manual water volume to earned reward and trigger update if changed
         for side in ['Left', 'Right']:
@@ -724,7 +860,7 @@ class Window(QMainWindow):
             to some incorrect parameters when it was turned off.
         '''
         # set warm up parameters
-        if self.warmup.currentText()=='on':
+        if self.task_logic.task_parameters.warmup== 'on':
             # get parameters before the warm up is on;WarmupBackup_ stands for Warmup backup, which are parameters before warm-up.
             self._GetTrainingParameters(prefix='WarmupBackup_')
             self.warm_min_trial.setEnabled(True)
@@ -738,25 +874,25 @@ class Window(QMainWindow):
 
             # set warm up default parameters
             self.Task.setCurrentIndex(self.Task.findText('Coupled Baiting'))
-            self.BaseRewardSum.setText('1')
-            self.RewardFamily.setText('3')
-            self.RewardPairsN.setText('1')
+            self.BaseRewardSum.setValue(1)
+            self.RewardFamily.setValue(3)
+            self.RewardPairsN.setValue(1)
 
-            self.BlockBeta.setText('1')
-            self.BlockMin.setText('1')
-            self.BlockMax.setText('1')
-            self.BlockMinReward.setText('1')
+            self.BlockBeta.setValue(1)
+            self.BlockMin.setValue(1)
+            self.BlockMax.setValue(1)
+            self.BlockMinReward.setValue(1)
 
             self.AutoReward.setChecked(True)
             self._AutoReward()
             self.AutoWaterType.setCurrentIndex(self.AutoWaterType.findText('Natural'))
-            self.Multiplier.setText('0.8')
-            self.Unrewarded.setText('0')
-            self.Ignored.setText('0')
+            self.Multiplier.setValue(0.8)
+            self.Unrewarded.setValue(0)
+            self.Ignored.setValue(0)
             # turn advanced block auto off
             self.AdvancedBlockAuto.setCurrentIndex(self.AdvancedBlockAuto.findText('off'))
             self._ShowRewardPairs()
-        elif self.warmup.currentText()=='off':
+        elif self.task_logic.task_parameters.warmup== 'off':
             # set parameters back to the previous parameters before warm up
             self._revert_to_previous_parameters()
             self.warm_min_trial.setEnabled(False)
@@ -1836,7 +1972,7 @@ class Window(QMainWindow):
 
     def _Randomness(self):
         '''enable/disable some fields in the Block/Delay Period/ITI'''
-        if self.Randomness.currentText()=='Exponential':
+        if self.task_logic.task_parameters.randomness == 'Exponential':
             self.label_14.setEnabled(True)
             self.label_18.setEnabled(True)
             self.label_39.setEnabled(True)
@@ -1845,7 +1981,7 @@ class Window(QMainWindow):
             self.ITIBeta.setEnabled(True)
             # if self.Task.currentText()!='RewardN':
             #     self.BlockBeta.setStyleSheet("color: black;border: 1px solid gray;background-color: white;")
-        elif self.Randomness.currentText()=='Even':
+        elif self.task_logic.task_parameters.randomness == 'Even':
             self.label_14.setEnabled(False)
             self.label_18.setEnabled(False)
             self.label_39.setEnabled(False)
@@ -1859,7 +1995,7 @@ class Window(QMainWindow):
 
     def _AdvancedBlockAuto(self):
         '''enable/disable some fields in the AdvancedBlockAuto'''
-        if self.AdvancedBlockAuto.currentText()=='off':
+        if self.task_logic.task_parameters.advanced_block_auto == 'off':
             self.label_54.setEnabled(False)
             self.label_60.setEnabled(False)
             self.SwitchThr.setEnabled(False)
@@ -1962,7 +2098,6 @@ class Window(QMainWindow):
                             new = float(child.text())
                             if new != old:
                                 logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
-
             # update the current training parameters
             self._GetTrainingParameters()
 
@@ -2033,19 +2168,19 @@ class Window(QMainWindow):
 
     def _CheckFormat(self,child):
         '''Check if the input format is correct'''
+        tp = self.task_logic.task_parameters
         if child.objectName()=='RewardFamily': # When we change the RewardFamily, sometimes the RewardPairsN is larger than available reward pairs in this family.
             try:
-                self.RewardFamilies[int(self.RewardFamily.text())-1]
-                if int(self.RewardPairsN.text())>len(self.RewardFamilies[int(self.RewardFamily.text())-1]):
-                    self.RewardPairsN.setText(str(len(self.RewardFamilies[int(self.RewardFamily.text())-1])))
+                if tp.reward_pairs_n>len(self.RewardFamilies[tp.reward_family - 1]):
+                    self.RewardPairsN.setText(str(len(self.RewardFamilies[tp.reward_family - 1])))
                 return 1
             except Exception as e:
                 logging.error(traceback.format_exc())
                 return 0
         if child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum':
             try:
-                self.RewardPairs=self.RewardFamilies[int(self.RewardFamily.text())-1][:int(self.RewardPairsN.text())]
-                if int(self.RewardPairsN.text())>len(self.RewardFamilies[int(self.RewardFamily.text())-1]):
+                self.RewardPairs= self.RewardFamilies[tp.reward_family - 1][:tp.reward_pairs_n]
+                if tp.reward_pairs_n>len(self.RewardFamilies[tp.reward_family - 1]):
                     return 0
                 else:
                     return 1
@@ -2054,7 +2189,7 @@ class Window(QMainWindow):
                 return 0
         if child.objectName()=='UncoupledReward':
             try:
-                input_string=self.UncoupledReward.text()
+                input_string = tp.uncoupled_reward
                 if input_string=='': # do not permit empty uncoupled reward
                     return 0
                 # remove any square brackets and spaces from the string
@@ -2225,17 +2360,19 @@ class Window(QMainWindow):
             self.IncludeAutoReward.setGeometry(QtCore.QRect(614, 128, 80, 20))
             self.label_26.setGeometry(QtCore.QRect(460, 128, 146, 16))
             # set block length to be 1
-            self.BlockMin.setText('1')
-            self.BlockMax.setText('1')
+            self.BlockMin.setValue(1)
+            self.BlockMax.setValue(1)
 
     def _ShowRewardPairs(self):
         '''Show reward pairs'''
+        tp = self.task_logic.task_parameters
         try:
             if self.behavior_session_model.experiment in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
-                self.RewardPairs=self.RewardFamilies[int(self.RewardFamily.text())-1][:int(self.RewardPairsN.text())]
-                self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.BaseRewardSum.text())
+                self.RewardPairs= self.RewardFamilies[tp.reward_family - 1][:tp.reward_pairs_n]
+                self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*\
+                                tp.base_reward_sum
             elif self.behavior_session_model.experiment in ['Uncoupled Baiting','Uncoupled Without Baiting']:
-                input_string=self.UncoupledReward.text()
+                input_string = tp.uncoupled_reward
                 # remove any square brackets and spaces from the string
                 input_string = input_string.replace('[','').replace(']','').replace(',', ' ')
                 # split the remaining string into a list of individual numbers
@@ -2840,7 +2977,8 @@ class Window(QMainWindow):
         self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{id_name}.mat')
         self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}.json')
         self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}_par.json')
-        self.behavior_session_modelJson = os.path.join(self.behavior_session_model.root_path,f'behavior_session_model_{id_name}.json')
+        self.behavior_session_model_json = os.path.join(self.behavior_session_model.root_path, f'behavior_session_model_{id_name}.json')
+        self.behavior_task_logic_model_json = os.path.join(self.behavior_session_model.root_path, f'behavior_task_logic_model_{id_name}.json')
         self.HarpFolder=os.path.join(self.behavior_session_model.root_path,'raw.harp')
         self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
         self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
@@ -3256,7 +3394,7 @@ class Window(QMainWindow):
         '''To visulize the training when loading a session'''
         self.ToInitializeVisual=1
         Obj=self.Obj
-        self.GeneratedTrials=GenerateTrials(self)
+        self.GeneratedTrials=GenerateTrials(self, self.task_logic)
         # Iterate over all attributes of the GeneratedTrials object
         for attr_name in dir(self.GeneratedTrials):
             if attr_name in Obj.keys():
@@ -3548,7 +3686,7 @@ class Window(QMainWindow):
             self.FIP_msgbox.show()
 
     def _AutoReward(self):
-        if self.AutoReward.isChecked():
+        if self.task_logic.task_parameters.auto_reward:
             self.AutoReward.setStyleSheet("background-color : green;")
             self.AutoReward.setText('Auto water On')
             for widget in ['AutoWaterType', 'Multiplier', 'Unrewarded', 'Ignored']:
@@ -4048,8 +4186,17 @@ class Window(QMainWindow):
             except ValidationError as e:
                 logging.error(str(e), extra={'tags': [self.warning_log_tag]})
             # save behavior session model
-            with open(self.behavior_session_modelJson, "w") as outfile:
+            with open(self.behavior_session_model_json, "w") as outfile:
                 outfile.write(self.behavior_session_model.model_dump_json())
+
+            # validate behavior session task logic model and document validation errors if any
+            try:
+                AindDynamicForagingTaskLogic(**self.task_logic.model_dump())
+            except ValidationError as e:
+                logging.error(str(e), extra={'tags': [self.warning_log_tag]})
+            # save behavior session model
+            with open(self.behavior_task_logic_model_json, "w") as outfile:
+                outfile.write(self.task_logic.model_dump_json())
 
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
@@ -4093,7 +4240,7 @@ class Window(QMainWindow):
                 self.Camera_dialog.StartRecording.setChecked(True)
             self.SessionStartTime=datetime.now()
             self.Other_SessionStartTime=str(self.SessionStartTime) # for saving
-            GeneratedTrials=GenerateTrials(self)
+            GeneratedTrials=GenerateTrials(self, self.task_logic)
             self.GeneratedTrials=GeneratedTrials
             self.StartANewSession=0
             PlotM=PlotV(win=self,GeneratedTrials=GeneratedTrials,width=5, height=4)
@@ -4257,8 +4404,9 @@ class Window(QMainWindow):
                 GeneratedTrials.B_CurrentTrialN+=1
                 print('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
                 logging.info('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
-                if (self.GeneratedTrials.TP_AutoReward  or int(self.GeneratedTrials.TP_BlockMinReward)>0
-                    or self.GeneratedTrials.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']) or self.AddOneTrialForNoresponse.currentText()=='Yes':
+                if (self.task_logic.task_parameters.auto_reward or self.task_logic.task_parameters.block_min_reward>0
+                    or self.GeneratedTrials.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']) or \
+                        self.AddOneTrialForNoresponse.currentText()=='Yes':
                     # The next trial parameters must be dependent on the current trial's choice
                     # get animal response and then generate a new trial
                     self.NewTrialRewardOrder=0
@@ -4420,7 +4568,7 @@ class Window(QMainWindow):
                 GeneratedTrials.B_CurrentTrialN+=1
                 print('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
                 logging.info('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
-                if not (self.GeneratedTrials.TP_AutoReward  or int(self.GeneratedTrials.TP_BlockMinReward)>0):
+                if not (self.task_logic.task_parameters.auto_reward or self.task_logic.task_parameters.block_min_reward>0):
                     # generate new trial and get reward
                     self.NewTrialRewardOrder=1
                 else:
@@ -4983,6 +5131,5 @@ if __name__ == "__main__":
 
     # Move creating AutoTrain here to catch any AWS errors
     win.create_auto_train_dialog()
-
     # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())
