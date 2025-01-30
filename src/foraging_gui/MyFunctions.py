@@ -424,7 +424,8 @@ class GenerateTrials():
             self.B_ANewBlock[:]=1
             self.win.NextBlock.setChecked(False)
             self.win.NextBlock.setStyleSheet("background-color : none")
-            self._override_block_len([0,1])
+            if self.B_CurrentTrialN>=0:
+                self._override_block_len([0,1])
             return  # Early return here
             
         # --- Decide block transition based on this block length ---
