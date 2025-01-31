@@ -72,7 +72,7 @@ class NumpyEncoder(json.JSONEncoder):
 
 class Window(QMainWindow):
     Time = QtCore.pyqtSignal(int) # Photometry timer signal
-    sessionGenerated = QtCore.pyqtSignal(Session)  # signal to indicate Session has been generated
+    sessionGenerated = QtCore.pyqtSignal()  # signal to indicate Session has been generated
 
     def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
@@ -2692,10 +2692,6 @@ class Window(QMainWindow):
             # generate the metadata file
             generated_metadata=generate_metadata(Obj=Obj)
             session = generated_metadata._session()
-            if session is not None:     # skip if metadata generation failed
-                self.sessionGenerated.emit(session)   # emit sessionGenerated
-            else:
-                logging.error('Could not generated upload manifest, missing metadata')
 
             if BackupSave==0:
                 text="Session metadata generated successfully: " + str(generated_metadata.session_metadata_success)+"\n"+\
@@ -4053,7 +4049,6 @@ class Window(QMainWindow):
             with open(self.behavior_session_modelJson, "w") as outfile:
                 outfile.write(self.behavior_session_model.model_dump_json())
 
-
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
             self._StopCurrentSession()
@@ -4237,6 +4232,7 @@ class Window(QMainWindow):
     def _StartTrialLoop(self,GeneratedTrials,worker1,worker_save):
         if self.Start.isChecked():
             logging.info('starting trial loop')
+            self.sessionGenerated.emit()   # Generate upload manifest
         else:
             logging.info('ending trial loop')
 
@@ -4658,10 +4654,9 @@ class Window(QMainWindow):
                          '&session_plot_selected_draw_types=1.+Choice+history'
         )
 
-    def _generate_upload_manifest(self, session: Session):
+    def _generate_upload_manifest(self):
         '''
             Generates a manifest.yml file for triggering data copy to VAST and upload to aws
-            :param session: session to use to create upload manifest
         '''
 
         # skip manifest generation for test mouse
@@ -4688,8 +4683,6 @@ class Window(QMainWindow):
             date_format = "%Y-%m-%d_%H-%M-%S"
             schedule = self.behavior_session_model.date.strftime(date_format).split('_')[0]+'_20-30-00'
             schedule_time = datetime.strptime(schedule,date_format) + timedelta(seconds=np.random.randint(30*60))
-            # This ID is outdated as of 11/21/2024. We will remove this comment once we confirm everything works
-            #capsule_id = 'c089614a-347e-4696-b17e-86980bb782c1'
             capsule_id = '0ae9703f-9012-4d0b-ad8d-b6a00858b80d'
             mount = 'FIP'
 
