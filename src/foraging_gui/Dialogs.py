@@ -1835,7 +1835,6 @@ class MetadataDialog(QDialog):
         self.meta_data['rig_metadata'] = {}
         self.meta_data['session_metadata'] = {}
         self.meta_data['rig_metadata_file'] = ''
-        self.GoCueDecibel.setText(str(self.MainWindow.Other_go_cue_decibel))
         self.LickSpoutDistance.setText(str(self.MainWindow.Other_lick_spout_distance))
         self._get_basics()
         self._show_project_names()
@@ -1874,7 +1873,6 @@ class MetadataDialog(QDialog):
         self.Stick_ModuleAngle.textChanged.connect(self._save_configuration)
         self.Stick_RotationAngle.textChanged.connect(self._save_configuration)
         self.ProjectName.currentIndexChanged.connect(self._show_project_info)
-        self.GoCueDecibel.textChanged.connect(self._save_go_cue_decibel)
         self.LickSpoutDistance.textChanged.connect(self._save_lick_spout_distance)
 
     def _set_reference(self, reference: dict):
@@ -1903,10 +1901,6 @@ class MetadataDialog(QDialog):
     def _save_lick_spout_distance(self):
         '''save the lick spout distance'''
         self.MainWindow.Other_lick_spout_distance=self.LickSpoutDistance.text()
-
-    def _save_go_cue_decibel(self):
-        '''save the go cue decibel'''
-        self.MainWindow.Other_go_cue_decibel=self.GoCueDecibel.text()
 
     def _show_project_names(self):
         '''show the project names from the project spreadsheet'''
