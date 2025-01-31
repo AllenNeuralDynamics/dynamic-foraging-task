@@ -1157,7 +1157,7 @@ class Window(QMainWindow):
         project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
     
         # Check if this is a valid project name
-        if not self._CheckValidProjectName(project_name):
+        if project_name not in self._GetApprovedAINDProjectNames():
             project_name = None
             logging.error('Project name {} is not valid, using default, please correct schedule'.format(project_name))
 
@@ -1176,12 +1176,8 @@ class Window(QMainWindow):
         if self.add_default_project_name and add_default:
             project_name=self._set_default_project()
         return project_name
-
-    def _CheckValidProjectName(self, project_name):
-        project_names = self._GetProjectNames()
-        return project_name in project_names
     
-    def _GetProjectNames(self):
+    def _GetApprovedAINDProjectNames(self):
         end_point = "http://aind-metadata-service/project_names"
         timeout = 5
         response = requests.get(end_point, timeout=timeout)
