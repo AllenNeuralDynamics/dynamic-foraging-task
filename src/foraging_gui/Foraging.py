@@ -7,6 +7,7 @@ import time
 import subprocess
 import math
 import logging
+import requests
 from hashlib import md5
 
 import logging_loki
@@ -1150,6 +1151,20 @@ class Window(QMainWindow):
         if mouse_id not in self.schedule['Mouse ID'].values:
             return None
         return self.schedule.query('`Mouse ID` == @mouse_id').iloc[0][column]
+
+    def _CheckValidProjectName(self, project_name):
+        project_names = self._GetProjectNames()
+        return project_name in project_names
+    
+    def _GetProjectNames(self):
+        end_point = "http://aind-metadata-service/project_names"
+        timeout = 5
+        response = requests.get(end_point, timeout=timeout)
+        if response.ok:
+            return json.loads(response.content)["data"]
+        else:
+            logging.error(f"Failed to fetch project names from endpoint. {response.content}")
+            return []
 
     def _GetSettings(self):
         '''
@@ -3989,6 +4004,14 @@ class Window(QMainWindow):
             # Set Project Name in metadata based on schedule
             add_default=True
             project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
+    
+            # Check if this is a valid project name
+            valid_project_name = self._CheckValidProjectName(project_name)
+            if not valid_project_name:
+                project_name = None
+                add_default = True
+                logging.error('Project name {} is not valid, using default, please correct schedule'.format(project_name))
+
             if project_name is not None:
                 projects = [self.Metadata_dialog.ProjectName.itemText(i)
                             for i in range(self.Metadata_dialog.ProjectName.count())]
