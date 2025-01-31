@@ -1152,6 +1152,31 @@ class Window(QMainWindow):
             return None
         return self.schedule.query('`Mouse ID` == @mouse_id').iloc[0][column]
 
+    def _GetProjectName(self, mouse_id):
+        add_default=True
+        project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
+    
+        # Check if this is a valid project name
+        if not self._CheckValidProjectName(project_name):
+            project_name = None
+            logging.error('Project name {} is not valid, using default, please correct schedule'.format(project_name))
+
+        # If we have a valid name update the metadata dialog
+        if project_name is not None:
+            projects = [self.Metadata_dialog.ProjectName.itemText(i)
+                        for i in range(self.Metadata_dialog.ProjectName.count())]
+            index = np.where(np.array(projects) == project_name)[0]
+            if len(index) > 0:
+                index = index[0]
+                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+                self.Metadata_dialog._show_project_info()
+                logging.info('Setting Project name: {}'.format(project_name))
+                add_default = False
+
+        if self.add_default_project_name and add_default:
+            project_name=self._set_default_project()
+        return project_name
+
     def _CheckValidProjectName(self, project_name):
         project_names = self._GetProjectNames()
         return project_name in project_names
@@ -4002,31 +4027,8 @@ class Window(QMainWindow):
                 logging.info('Setting IACUC Protocol: {}'.format(protocol))
 
             # Set Project Name in metadata based on schedule
-            add_default=True
-            project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
-    
-            # Check if this is a valid project name
-            valid_project_name = self._CheckValidProjectName(project_name)
-            if not valid_project_name:
-                project_name = None
-                add_default = True
-                logging.error('Project name {} is not valid, using default, please correct schedule'.format(project_name))
-
-            if project_name is not None:
-                projects = [self.Metadata_dialog.ProjectName.itemText(i)
-                            for i in range(self.Metadata_dialog.ProjectName.count())]
-                index = np.where(np.array(projects) == project_name)[0]
-                if len(index) > 0:
-                    index = index[0]
-                    self.Metadata_dialog.ProjectName.setCurrentIndex(index)
-                    self.Metadata_dialog._show_project_info()
-                    logging.info('Setting Project name: {}'.format(project_name))
-                    add_default = False
-
-            if self.add_default_project_name and add_default:
-                project_name=self._set_default_project()
+            self.project_name = self._GetProjectName(mouse_id)
             
-            self.project_name = project_name
             self.session_run = True   # session has been started
 
             self.keyPressEvent(allow_reset=True)
