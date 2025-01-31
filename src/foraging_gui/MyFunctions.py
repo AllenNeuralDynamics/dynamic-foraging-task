@@ -28,7 +28,7 @@ class GenerateTrials():
         self.B_LeftLickIntervalPercent = None      # percentage of left lick intervals under 100ms
         self.B_RightLickIntervalPercent = None     # percentage of right lick intervals under 100ms
         self.B_CrossSideIntervalPercent = None     # percentage of cross side lick intervals under 100ms
-        self.B_Bias = [0]  # lick bias
+        self.B_Bias =np.array([0], dtype=np.float64)  # lick bias
         self.B_RewardFamilies=self.win.RewardFamilies
         self.B_CurrentTrialN=-1 # trial number starts from 0; Update when trial starts
         self.B_LickPortN=2
@@ -424,7 +424,8 @@ class GenerateTrials():
             self.B_ANewBlock[:]=1
             self.win.NextBlock.setChecked(False)
             self.win.NextBlock.setStyleSheet("background-color : none")
-            self._override_block_len([0,1])
+            if self.B_CurrentTrialN>=0:
+                self._override_block_len([0,1])
             return  # Early return here
             
         # --- Decide block transition based on this block length ---

@@ -155,9 +155,9 @@ class BiasIndicator(QMainWindow):
                                              cv=cv,
                                              fit_exponential=False)
                 bias = lr['df_beta'].loc['bias']['cross_validation'].values[0]
-                self.log.info(f"Bias: {bias} Trial Count: {trial_count}")
+                self.log.info(f"Bias: {bias} Trial Number: {trial_num}")
                 self._biases.append(bias)
-                self.biasValue.emit(bias, trial_count)
+                self.biasValue.emit(bias, trial_num)
 
                 # add confidence intervals
                 upper = lr['df_beta'].loc['bias']['bootstrap_CI_upper'].values[0]

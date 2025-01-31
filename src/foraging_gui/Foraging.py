@@ -699,20 +699,21 @@ class Window(QMainWindow):
                     csv_file = avi_file.replace('.avi', '.csv')
                     camera_name = avi_file.replace('.avi','')
                     if csv_file not in csv_files:
-                        self.drop_frames_warning_text+=f'No csv file found for {avi_file}\n'
+                        self.drop_frames_warning_text+=f'No csv file found for {avi_file}'
                     else:
                         current_frames = pd.read_csv(os.path.join(video_folder, csv_file), header=None)
                         num_frames = len(current_frames)
                         if num_frames != self.trigger_length:
-                            self.drop_frames_warning_text+=f"Error: {avi_file} has {num_frames} frames, but {self.trigger_length} triggers\n"
+                            this_text = f"Error: {avi_file} has {num_frames} frames, but {self.trigger_length} triggers. "
+                            self.drop_frames_warning_text+= this_text
+                            logging.error(this_text, extra={'tags': [self.warning_log_tag]})
                             self.drop_frames_tag=1
                         else:
-                            self.drop_frames_warning_text+=f"Correct: {avi_file} has {num_frames} frames and {self.trigger_length} triggers\n"
+                            this_text = f"Correct: {avi_file} has {num_frames} frames and {self.trigger_length} triggers. "
+                            self.drop_frames_warning_text+= this_text
+                            logging.info(this_text, extra={'tags': [self.warning_log_tag]})
                         self.frame_num[camera_name] = num_frames
-            if self.drop_frames_tag:
-                logging.error(self.drop_frames_warning_text, extra={'tags': [self.warning_log_tag]})
-            else:
-                logging.info(self.drop_frames_warning_text, extra={'tags': [self.warning_log_tag]})
+
             # only check drop frames once each session
             self.to_check_drop_frames=0
 
@@ -3539,10 +3540,12 @@ class Window(QMainWindow):
             self.FIP_started=False
 
         if (FIP_was_running)&(not closing):
-            reply = QMessageBox.critical(self,
-                'Box {}, New Session:'.format(self.box_letter),
-                'Please restart the FIP workflow',
-                QMessageBox.Ok)
+            self.FIP_msgbox = QMessageBox()
+            self.FIP_msgbox.setWindowTitle('Box {}, New Session:'.format(self.box_letter))
+            self.FIP_msgbox.setText('Please restart the FIP workflow')
+            self.FIP_msgbox.setStandardButtons(QMessageBox.Ok)
+            self.FIP_msgbox.setModal(False)
+            self.FIP_msgbox.show()
 
     def _AutoReward(self):
         if self.AutoReward.isChecked():
@@ -4033,7 +4036,8 @@ class Window(QMainWindow):
             # fill out GenerateTrials B_Bias
             last_bias = self.GeneratedTrials.B_Bias[-1]
             b_bias_len = len(self.GeneratedTrials.B_Bias)
-            self.GeneratedTrials.B_Bias += [last_bias]*((self.GeneratedTrials.B_CurrentTrialN+1)-b_bias_len)
+            bias_filler = [last_bias]*((self.GeneratedTrials.B_CurrentTrialN+1)-b_bias_len)
+            self.GeneratedTrials.B_Bias = np.concatenate((self.GeneratedTrials.B_Bias, bias_filler), axis=0)
 
             # stop lick interval calculation
             self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
@@ -4402,12 +4406,11 @@ class Window(QMainWindow):
         :param bias: bias value
         :param trial_number: trial number at which bias value was calculated
         """
-
         self.B_Bias_R = bias
-        last_bias_filler = [self.GeneratedTrials.B_Bias[-1]]*(trial_number-len(self.GeneratedTrials.B_Bias))
-        self.GeneratedTrials.B_Bias += last_bias_filler
-        self.GeneratedTrials.B_Bias[trial_number-1] = bias
-
+        last_bias_filler = [self.GeneratedTrials.B_Bias[-1]]*(self.GeneratedTrials.B_CurrentTrialN-len(self.GeneratedTrials.B_Bias))
+        self.GeneratedTrials.B_Bias = np.concatenate((self.GeneratedTrials.B_Bias, last_bias_filler), axis=0)
+        self.GeneratedTrials.B_Bias[trial_number-1:] = bias
+    
     def _StartTrialLoop1(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         logging.info('starting trial loop 1')
         while self.Start.isChecked():
