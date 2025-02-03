@@ -73,7 +73,6 @@ class NumpyEncoder(json.JSONEncoder):
 
 class Window(QMainWindow):
     Time = QtCore.pyqtSignal(int) # Photometry timer signal
-    sessionGenerated = QtCore.pyqtSignal(Session)  # signal to indicate Session has been generated
 
     def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
@@ -230,9 +229,6 @@ class Window(QMainWindow):
 
         # Initializes session log handler as None
         self.session_log_handler = None
-
-        # generate an upload manifest when a session has been produced
-        self.upload_manifest_slot = self.sessionGenerated.connect(self._generate_upload_manifest)
 
         # show disk space
         self._show_disk_space()
@@ -2730,8 +2726,6 @@ class Window(QMainWindow):
             # generate the metadata file
             generated_metadata=generate_metadata(Obj=Obj)
             session = generated_metadata._session()
-            if session is not None:     # skip if metadata generation failed
-                self.sessionGenerated.emit(session)   # emit sessionGenerated
 
             if BackupSave==0:
                 text="Session metadata generated successfully: " + str(generated_metadata.session_metadata_success)+"\n"+\
@@ -4009,11 +4003,6 @@ class Window(QMainWindow):
             # disable metadata fields
             self._set_metadata_enabled(False)
 
-            # generate an upload manifest when a session has been produced if slot is not already connected
-            if self.upload_manifest_slot is None:
-                logging.debug('Connecting sessionGenerated to _generate_upload_manifest')
-                self.upload_manifest_slot = self.sessionGenerated.connect(self._generate_upload_manifest)
-
             # Set IACUC protocol in metadata based on schedule
             protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
             if protocol is not None:
@@ -4073,7 +4062,6 @@ class Window(QMainWindow):
             # save behavior session model
             with open(self.behavior_session_modelJson, "w") as outfile:
                 outfile.write(self.behavior_session_model.model_dump_json())
-
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
@@ -4326,6 +4314,11 @@ class Window(QMainWindow):
                 if self.actionLicks_sta.isChecked():
                     self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
 
+                # Generate upload manifest when we generate the second trial
+                # counter starts at 0
+                if GeneratedTrials.B_CurrentTrialN == 1:
+                    self._generate_upload_manifest()                
+ 
                 # calculate bias every 10 trials
                 if (GeneratedTrials.B_CurrentTrialN+1) % 10 == 0 and GeneratedTrials.B_CurrentTrialN+1 > 20:
                     # correctly format data for bias indicator
@@ -4679,10 +4672,9 @@ class Window(QMainWindow):
                          '&session_plot_selected_draw_types=1.+Choice+history'
         )
 
-    def _generate_upload_manifest(self, session: Session):
+    def _generate_upload_manifest(self):
         '''
             Generates a manifest.yml file for triggering data copy to VAST and upload to aws
-            :param session: session to use to create upload manifest
         '''
 
         # skip manifest generation for test mouse
@@ -4698,6 +4690,7 @@ class Window(QMainWindow):
             logging.info('Skipping upload manifest, because this is an ephys session')
             return
 
+        logging.info('Generating upload manifest')
         try:
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
@@ -4708,19 +4701,16 @@ class Window(QMainWindow):
             date_format = "%Y-%m-%d_%H-%M-%S"
             schedule = self.behavior_session_model.date.strftime(date_format).split('_')[0]+'_20-30-00'
             schedule_time = datetime.strptime(schedule,date_format) + timedelta(seconds=np.random.randint(30*60))
-            # This ID is outdated as of 11/21/2024. We will remove this comment once we confirm everything works
-            #capsule_id = 'c089614a-347e-4696-b17e-86980bb782c1'
             capsule_id = '0ae9703f-9012-4d0b-ad8d-b6a00858b80d'
             mount = 'FIP'
 
             modalities = {}
             modalities['behavior'] = [self.behavior_session_model.root_path.replace('\\', '/')]
-            for stream in session.data_streams:
-                if Modality.FIB in stream.stream_modalities:
-                    modalities['fib'] = [self.PhotometryFolder.replace('\\', '/')]
-                    modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
-                elif Modality.BEHAVIOR_VIDEOS in stream.stream_modalities:
-                    modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
+            if (self.Camera_dialog.camera_start_time != '') and (self.camera_names != []):
+                modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
+            if hasattr(self, 'fiber_photometry_start_time') and (self.fiber_photometry_start_time != ''): 
+                modalities['fib'] = [self.PhotometryFolder.replace('\\', '/')]
+                modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
 
             # Define contents of manifest file
             contents = {
@@ -4753,16 +4743,12 @@ class Window(QMainWindow):
             # Write the manifest file
             with open(filename,'w') as yaml_file:
                 yaml.dump(contents, yaml_file, default_flow_style=False)
-
+            logging.info('Finished generating manifest')
         except Exception as e:
             logging.error('Could not generate upload manifest: {}'.format(str(e)))
             QMessageBox.critical(self, 'Upload manifest',
                 'Could not generate upload manifest. '+\
                 'Please alert the mouse owner, and report on github.')
-
-        # disconnect slot to only create manifest once
-        logging.debug('Disconnecting sessionGenerated from _generate_upload_manifest')
-        self.upload_manifest_slot = self.sessionGenerated.disconnect(self.upload_manifest_slot)
 
 def setup_loki_logging(box_number):
     db_file=os.getenv('SIPE_DB_FILE', r'//allen/aibs/mpe/keepass/sipe_sw_passwords.kdbx')
