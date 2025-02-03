@@ -72,7 +72,6 @@ class NumpyEncoder(json.JSONEncoder):
 
 class Window(QMainWindow):
     Time = QtCore.pyqtSignal(int) # Photometry timer signal
-    sessionGenerated = QtCore.pyqtSignal()  # signal to indicate Session has been generated
 
     def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
@@ -229,9 +228,6 @@ class Window(QMainWindow):
 
         # Initializes session log handler as None
         self.session_log_handler = None
-
-        # generate an upload manifest when a session has been produced
-        self.upload_manifest_slot = self.sessionGenerated.connect(self._generate_upload_manifest)
 
         # show disk space
         self._show_disk_space()
@@ -3969,11 +3965,6 @@ class Window(QMainWindow):
             # disable metadata fields
             self._set_metadata_enabled(False)
 
-            # generate an upload manifest when a session has been produced if slot is not already connected
-            if self.upload_manifest_slot is None:
-                logging.debug('Connecting sessionGenerated to _generate_upload_manifest')
-                self.upload_manifest_slot = self.sessionGenerated.connect(self._generate_upload_manifest)
-
             # Set IACUC protocol in metadata based on schedule
             protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
             if protocol is not None:
@@ -4303,8 +4294,8 @@ class Window(QMainWindow):
                 # Generate upload manifest when we generate the second trial
                 # counter starts at 0
                 if GeneratedTrials.B_CurrentTrialN == 1:
-                    self.sessionGenerated.emit()   
-                     
+                    self._generate_upload_manifest()                
+ 
                 # calculate bias every 10 trials
                 if (GeneratedTrials.B_CurrentTrialN+1) % 10 == 0 and GeneratedTrials.B_CurrentTrialN+1 > 20:
                     # correctly format data for bias indicator
@@ -4735,10 +4726,6 @@ class Window(QMainWindow):
             QMessageBox.critical(self, 'Upload manifest',
                 'Could not generate upload manifest. '+\
                 'Please alert the mouse owner, and report on github.')
-
-        # disconnect slot to only create manifest once
-        logging.debug('Disconnecting sessionGenerated from _generate_upload_manifest')
-        self.upload_manifest_slot = self.sessionGenerated.disconnect(self.upload_manifest_slot)
 
 def setup_loki_logging(box_number):
     db_file=os.getenv('SIPE_DB_FILE', r'//allen/aibs/mpe/keepass/sipe_sw_passwords.kdbx')
