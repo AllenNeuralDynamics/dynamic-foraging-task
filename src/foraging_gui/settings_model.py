@@ -6,7 +6,6 @@ class BonsaiSettingsModel(BaseModel):
     '''
         Defines a model for the Settings_box.csv file
     '''
-    # TODO, need to add more required fields here
     Behavior: str = Field(pattern=r"^COM[0-9]+$")
     Soundcard: str = Field(pattern=r"^COM[0-9]+$")
     BonsaiOsc1: str = Field(pattern=r"^40[0-9][0-9]$")
@@ -17,11 +16,19 @@ class BonsaiSettingsModel(BaseModel):
     AttenuationRight: int
     current_box: str = Field(pattern=r"^[0-9][0-9][0-9]-[0-9]+-[ABCD]$")
     RunningWheel: Literal["0","1"]
-    HighSpeedCamera: Literal["0","1"]
     AINDLickDetector: Literal["0","1"]
     LeftLickDetector: Optional[str] = Field(default="COM0",pattern=r"^COM[0-9]+$")
-    #RightLickDetector: Optional[str] = Field(pattern=r"^COM[0-9]+$")
+    RightLickDetector: Optional[str] = Field(default="COM0",pattern=r"^COM[0-9]+$")
+    HighSpeedCamera: Literal["0","1"] 
     HasSideCameraLeft: Literal["0","1"] = Field(default=0)
+    HasSideCameraRight: Literal["0","1"] = Field(default=0)
+    HasBottomCamera: Literal["0","1"] = Field(default=0)
+    HasBodyCamera: Literal["0","1"] = Field(default=0)
+    SideCameraLeft: int = Field(default=0)
+    SideCameraRight: int= Field(default=0)
+    BottomCamera: int= Field(default=0)
+    BodyCamera: int= Field(default=0)
+    codec: Optional[str] = Field(default='')
 
 class DFTSettingsModel(BaseModel):
     '''
