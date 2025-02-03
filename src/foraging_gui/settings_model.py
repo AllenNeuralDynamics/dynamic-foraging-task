@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from pydantic import Field
-from typing import Literal
+from typing import Literal, Optional
 
 class BonsaiSettingsModel(BaseModel):
     '''
@@ -19,6 +19,9 @@ class BonsaiSettingsModel(BaseModel):
     RunningWheel: Literal["0","1"]
     HighSpeedCamera: Literal["0","1"]
     AINDLickDetector: Literal["0","1"]
+    LeftLickDetector: Optional[str] = Field(pattern=r"^COM[0-9]+$")
+    RightLickDetector: Optional[str] = Field(pattern=r"^COM[0-9]+$")
+    HasSideCameraLeft, Optional[Literal["0","1"]]
 
 class DFTSettingsModel(BaseModel):
     '''
