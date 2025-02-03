@@ -29,7 +29,7 @@ class BonsaiSettingsModel(BaseModel):
     BottomCamera: int= Field(default=0)
     BodyCamera: int= Field(default=0)
     codec: Optional[str] = Field(default='')
-    HasOpto, Literal["0","1"] = Field(default=0)
+    HasOpto: Literal["0","1"] = Field(default=0)
     # TODO OptoLaser<x>Manufacturer 
     # TODO OptoLaser<x>Wavelength
     # TODO OptoLaser<x>Model
