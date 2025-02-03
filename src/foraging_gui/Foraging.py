@@ -7,6 +7,7 @@ import time
 import subprocess
 import math
 import logging
+import requests
 from hashlib import md5
 
 import logging_loki
@@ -1150,6 +1151,43 @@ class Window(QMainWindow):
         if mouse_id not in self.schedule['Mouse ID'].values:
             return None
         return self.schedule.query('`Mouse ID` == @mouse_id').iloc[0][column]
+
+    def _GetProjectName(self, mouse_id):
+        logging.info('Getting Project name')
+        add_default=True
+        project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
+    
+        # Check if this is a valid project name
+        if project_name not in self._GetApprovedAINDProjectNames():
+            logging.error('Project name {} is not valid, using default, please correct schedule'.format(project_name))
+            project_name = None
+
+        # If we have a valid name update the metadata dialog
+        if project_name is not None:
+            projects = [self.Metadata_dialog.ProjectName.itemText(i)
+                        for i in range(self.Metadata_dialog.ProjectName.count())]
+            index = np.where(np.array(projects) == project_name)[0]
+            if len(index) > 0:
+                index = index[0]
+                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+                self.Metadata_dialog._show_project_info()
+                logging.info('Setting Project name: {}'.format(project_name))
+                add_default = False
+
+        if self.add_default_project_name and add_default:
+            logging.info('setting project name to default')
+            project_name=self._set_default_project()
+        return project_name
+    
+    def _GetApprovedAINDProjectNames(self):
+        end_point = "http://aind-metadata-service/project_names"
+        timeout = 5
+        response = requests.get(end_point, timeout=timeout)
+        if response.ok:
+            return json.loads(response.content)["data"]
+        else:
+            logging.error(f"Failed to fetch project names from endpoint. {response.content}")
+            return []
 
     def _GetSettings(self):
         '''
@@ -3987,23 +4025,8 @@ class Window(QMainWindow):
                 logging.info('Setting IACUC Protocol: {}'.format(protocol))
 
             # Set Project Name in metadata based on schedule
-            add_default=True
-            project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
-            if project_name is not None:
-                projects = [self.Metadata_dialog.ProjectName.itemText(i)
-                            for i in range(self.Metadata_dialog.ProjectName.count())]
-                index = np.where(np.array(projects) == project_name)[0]
-                if len(index) > 0:
-                    index = index[0]
-                    self.Metadata_dialog.ProjectName.setCurrentIndex(index)
-                    self.Metadata_dialog._show_project_info()
-                    logging.info('Setting Project name: {}'.format(project_name))
-                    add_default = False
-
-            if self.add_default_project_name and add_default:
-                project_name=self._set_default_project()
+            self.project_name = self._GetProjectName(mouse_id)
             
-            self.project_name = project_name
             self.session_run = True   # session has been started
 
             self.keyPressEvent(allow_reset=True)
