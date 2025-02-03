@@ -8,10 +8,10 @@ class BonsaiSettingsModel(BaseModel):
     # TODO, need to add more required fields here
     Behavior: str = Field(pattern=r"^COM[0-9]+$")
     Soundcard: str = Field(pattern=r"^COM[0-9]+$")
-    BonsaiOsc1: int
-    BonsaiOsc2: int
-    BonsaiOsc3: int
-    BonsaiOsc4: int
+    BonsaiOsc1: str = Field(pattern=r"^40[0-9][0-9]$")
+    BonsaiOsc2: str = Field(pattern=r"^40[0-9][0-9]$")
+    BonsaiOsc3: str = Field(pattern=r"^40[0-9][0-9]$")
+    BonsaiOsc4: str = Field(pattern=r"^40[0-9][0-9]$")
     AttenuationLeft: int
     AttenuationRight: int
     current_box: str = Field(pattern=r"^[0-9][0-9][0-9]-[0-9]+-[ABCD]$")
