@@ -1279,7 +1279,6 @@ p, li { white-space: pre-wrap; }
   <zorder>DataDescription</zorder>
   <zorder>LoadMeta</zorder>
   <zorder>label_83</zorder>
-  <zorder>GoCueDecibel</zorder>
   <zorder>groupBox</zorder>
  </widget>
  <tabstops>
@@ -1308,7 +1307,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>ManipulatorX</tabstop>
   <tabstop>ManipulatorZ</tabstop>
   <tabstop>ManipulatorY</tabstop>
-  <tabstop>GoCueDecibel</tabstop>
   <tabstop>Fundee</tabstop>
   <tabstop>LickSpoutReferenceArea</tabstop>
  </tabstops>
