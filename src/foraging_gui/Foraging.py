@@ -4232,7 +4232,6 @@ class Window(QMainWindow):
     def _StartTrialLoop(self,GeneratedTrials,worker1,worker_save):
         if self.Start.isChecked():
             logging.info('starting trial loop')
-            self.sessionGenerated.emit()   # Generate upload manifest
         else:
             logging.info('ending trial loop')
 
@@ -4301,6 +4300,11 @@ class Window(QMainWindow):
                 if self.actionLicks_sta.isChecked():
                     self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
 
+                # Generate upload manifest when we generate the second trial
+                # counter starts at 0
+                if GeneratedTrials.B_CurrentTrialN == 1:
+                    self.sessionGenerated.emit()   
+                     
                 # calculate bias every 10 trials
                 if (GeneratedTrials.B_CurrentTrialN+1) % 10 == 0 and GeneratedTrials.B_CurrentTrialN+1 > 20:
                     # correctly format data for bias indicator
@@ -4688,12 +4692,11 @@ class Window(QMainWindow):
 
             modalities = {}
             modalities['behavior'] = [self.behavior_session_model.root_path.replace('\\', '/')]
-            for stream in session.data_streams:
-                if Modality.FIB in stream.stream_modalities:
-                    modalities['fib'] = [self.PhotometryFolder.replace('\\', '/')]
-                    modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
-                elif Modality.BEHAVIOR_VIDEOS in stream.stream_modalities:
-                    modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
+            if (self.Camera_dialog.camera_start_time != '') and (self.camera_names != []):
+                modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
+            if hasattr(self, 'fiber_photometry_start_time') and (self.fiber_photometry_start_time != ''): 
+                modalities['fib'] = [self.PhotometryFolder.replace('\\', '/')]
+                modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
 
             # Define contents of manifest file
             contents = {
