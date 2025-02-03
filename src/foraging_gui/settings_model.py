@@ -24,12 +24,14 @@ class BonsaiSettingsModel(BaseModel):
     HasSideCameraRight: Literal["0","1"] = Field(default=0)
     HasBottomCamera: Literal["0","1"] = Field(default=0)
     HasBodyCamera: Literal["0","1"] = Field(default=0)
+    # TODO, need to add a validator that these camera serial numbers are required if Has<camera> is 1
     SideCameraLeft: int = Field(default=0)
     SideCameraRight: int= Field(default=0)
     BottomCamera: int= Field(default=0)
     BodyCamera: int= Field(default=0)
     codec: Optional[str] = Field(default='')
     HasOpto: Literal["0","1"] = Field(default=0)
+    # Need to add Optogenetic parameters
     # TODO OptoLaser<x>Manufacturer 
     # TODO OptoLaser<x>Wavelength
     # TODO OptoLaser<x>Model
@@ -40,6 +42,7 @@ class DFTSettingsModel(BaseModel):
     '''
         Defines a model for the ForagingSettings.json file
     '''
+    # TODO, should check that the path fields are valid fields
     default_saveFolder: str
     current_box:str
     temporary_video_folder:str
