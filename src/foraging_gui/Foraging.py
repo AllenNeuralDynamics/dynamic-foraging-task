@@ -7,6 +7,7 @@ import time
 import subprocess
 import math
 import logging
+import requests
 from hashlib import md5
 
 import logging_loki
@@ -72,7 +73,6 @@ class NumpyEncoder(json.JSONEncoder):
 
 class Window(QMainWindow):
     Time = QtCore.pyqtSignal(int) # Photometry timer signal
-    sessionGenerated = QtCore.pyqtSignal(Session)  # signal to indicate Session has been generated
 
     def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
@@ -229,9 +229,6 @@ class Window(QMainWindow):
 
         # Initializes session log handler as None
         self.session_log_handler = None
-
-        # generate an upload manifest when a session has been produced
-        self.upload_manifest_slot = self.sessionGenerated.connect(self._generate_upload_manifest)
 
         # show disk space
         self._show_disk_space()
@@ -699,20 +696,21 @@ class Window(QMainWindow):
                     csv_file = avi_file.replace('.avi', '.csv')
                     camera_name = avi_file.replace('.avi','')
                     if csv_file not in csv_files:
-                        self.drop_frames_warning_text+=f'No csv file found for {avi_file}\n'
+                        self.drop_frames_warning_text+=f'No csv file found for {avi_file}'
                     else:
                         current_frames = pd.read_csv(os.path.join(video_folder, csv_file), header=None)
                         num_frames = len(current_frames)
                         if num_frames != self.trigger_length:
-                            self.drop_frames_warning_text+=f"Error: {avi_file} has {num_frames} frames, but {self.trigger_length} triggers\n"
+                            this_text = f"Error: {avi_file} has {num_frames} frames, but {self.trigger_length} triggers. "
+                            self.drop_frames_warning_text+= this_text
+                            logging.error(this_text, extra={'tags': [self.warning_log_tag]})
                             self.drop_frames_tag=1
                         else:
-                            self.drop_frames_warning_text+=f"Correct: {avi_file} has {num_frames} frames and {self.trigger_length} triggers\n"
+                            this_text = f"Correct: {avi_file} has {num_frames} frames and {self.trigger_length} triggers. "
+                            self.drop_frames_warning_text+= this_text
+                            logging.info(this_text, extra={'tags': [self.warning_log_tag]})
                         self.frame_num[camera_name] = num_frames
-            if self.drop_frames_tag:
-                logging.warning(self.drop_frames_warning_text, extra={'tags': [self.warning_log_tag]})
-            else:
-                logging.info(self.drop_frames_warning_text, extra={'tags': [self.warning_log_tag]})
+
             # only check drop frames once each session
             self.to_check_drop_frames=0
 
@@ -1149,6 +1147,43 @@ class Window(QMainWindow):
         if mouse_id not in self.schedule['Mouse ID'].values:
             return None
         return self.schedule.query('`Mouse ID` == @mouse_id').iloc[0][column]
+
+    def _GetProjectName(self, mouse_id):
+        logging.info('Getting Project name')
+        add_default=True
+        project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
+    
+        # Check if this is a valid project name
+        if project_name not in self._GetApprovedAINDProjectNames():
+            logging.error('Project name {} is not valid, using default, please correct schedule'.format(project_name))
+            project_name = None
+
+        # If we have a valid name update the metadata dialog
+        if project_name is not None:
+            projects = [self.Metadata_dialog.ProjectName.itemText(i)
+                        for i in range(self.Metadata_dialog.ProjectName.count())]
+            index = np.where(np.array(projects) == project_name)[0]
+            if len(index) > 0:
+                index = index[0]
+                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+                self.Metadata_dialog._show_project_info()
+                logging.info('Setting Project name: {}'.format(project_name))
+                add_default = False
+
+        if self.add_default_project_name and add_default:
+            logging.info('setting project name to default')
+            project_name=self._set_default_project()
+        return project_name
+    
+    def _GetApprovedAINDProjectNames(self):
+        end_point = "http://aind-metadata-service/project_names"
+        timeout = 5
+        response = requests.get(end_point, timeout=timeout)
+        if response.ok:
+            return json.loads(response.content)["data"]
+        else:
+            logging.error(f"Failed to fetch project names from endpoint. {response.content}")
+            return []
 
     def _GetSettings(self):
         '''
@@ -1927,7 +1962,7 @@ class Window(QMainWindow):
                         if Correct ==0: # incorrect format; don't change
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
-                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight','','GoCueDecibel','ConditionP_5','ConditionP_6','Duration_5','Duration_6','OffsetEnd_5','OffsetEnd_6','OffsetStart_5','OffsetStart_6','Probability_5','Probability_6','PulseDur_5','PulseDur_6','RD_5','RD_6']) and
+                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight','','ConditionP_5','ConditionP_6','Duration_5','Duration_6','OffsetEnd_5','OffsetEnd_6','OffsetStart_5','OffsetStart_6','Probability_5','Probability_6','PulseDur_5','PulseDur_6','RD_5','RD_6']) and
                         (child.text() == '')):
                         # These attributes can have the empty string, but we can't set the value as the empty string, unless we allow resets
                         if allow_reset:
@@ -2691,8 +2726,6 @@ class Window(QMainWindow):
             # generate the metadata file
             generated_metadata=generate_metadata(Obj=Obj)
             session = generated_metadata._session()
-            if session is not None:     # skip if metadata generation failed
-                self.sessionGenerated.emit(session)   # emit sessionGenerated
 
             if BackupSave==0:
                 text="Session metadata generated successfully: " + str(generated_metadata.session_metadata_success)+"\n"+\
@@ -3539,10 +3572,12 @@ class Window(QMainWindow):
             self.FIP_started=False
 
         if (FIP_was_running)&(not closing):
-            reply = QMessageBox.critical(self,
-                'Box {}, New Session:'.format(self.box_letter),
-                'Please restart the FIP workflow',
-                QMessageBox.Ok)
+            self.FIP_msgbox = QMessageBox()
+            self.FIP_msgbox.setWindowTitle('Box {}, New Session:'.format(self.box_letter))
+            self.FIP_msgbox.setText('Please restart the FIP workflow')
+            self.FIP_msgbox.setStandardButtons(QMessageBox.Ok)
+            self.FIP_msgbox.setModal(False)
+            self.FIP_msgbox.show()
 
     def _AutoReward(self):
         if self.AutoReward.isChecked():
@@ -3968,11 +4003,6 @@ class Window(QMainWindow):
             # disable metadata fields
             self._set_metadata_enabled(False)
 
-            # generate an upload manifest when a session has been produced if slot is not already connected
-            if self.upload_manifest_slot is None:
-                logging.debug('Connecting sessionGenerated to _generate_upload_manifest')
-                self.upload_manifest_slot = self.sessionGenerated.connect(self._generate_upload_manifest)
-
             # Set IACUC protocol in metadata based on schedule
             protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
             if protocol is not None:
@@ -3984,23 +4014,8 @@ class Window(QMainWindow):
                 logging.info('Setting IACUC Protocol: {}'.format(protocol))
 
             # Set Project Name in metadata based on schedule
-            add_default=True
-            project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
-            if project_name is not None:
-                projects = [self.Metadata_dialog.ProjectName.itemText(i)
-                            for i in range(self.Metadata_dialog.ProjectName.count())]
-                index = np.where(np.array(projects) == project_name)[0]
-                if len(index) > 0:
-                    index = index[0]
-                    self.Metadata_dialog.ProjectName.setCurrentIndex(index)
-                    self.Metadata_dialog._show_project_info()
-                    logging.info('Setting Project name: {}'.format(project_name))
-                    add_default = False
-
-            if self.add_default_project_name and add_default:
-                project_name=self._set_default_project()
+            self.project_name = self._GetProjectName(mouse_id)
             
-            self.project_name = project_name
             self.session_run = True   # session has been started
 
             self.keyPressEvent(allow_reset=True)
@@ -4033,7 +4048,8 @@ class Window(QMainWindow):
             # fill out GenerateTrials B_Bias
             last_bias = self.GeneratedTrials.B_Bias[-1]
             b_bias_len = len(self.GeneratedTrials.B_Bias)
-            self.GeneratedTrials.B_Bias += [last_bias]*((self.GeneratedTrials.B_CurrentTrialN+1)-b_bias_len)
+            bias_filler = [last_bias]*((self.GeneratedTrials.B_CurrentTrialN+1)-b_bias_len)
+            self.GeneratedTrials.B_Bias = np.concatenate((self.GeneratedTrials.B_Bias, bias_filler), axis=0)
 
             # stop lick interval calculation
             self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
@@ -4046,7 +4062,6 @@ class Window(QMainWindow):
             # save behavior session model
             with open(self.behavior_session_modelJson, "w") as outfile:
                 outfile.write(self.behavior_session_model.model_dump_json())
-
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
@@ -4299,6 +4314,11 @@ class Window(QMainWindow):
                 if self.actionLicks_sta.isChecked():
                     self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
 
+                # Generate upload manifest when we generate the second trial
+                # counter starts at 0
+                if GeneratedTrials.B_CurrentTrialN == 1:
+                    self._generate_upload_manifest()                
+ 
                 # calculate bias every 10 trials
                 if (GeneratedTrials.B_CurrentTrialN+1) % 10 == 0 and GeneratedTrials.B_CurrentTrialN+1 > 20:
                     # correctly format data for bias indicator
@@ -4402,12 +4422,11 @@ class Window(QMainWindow):
         :param bias: bias value
         :param trial_number: trial number at which bias value was calculated
         """
-
         self.B_Bias_R = bias
-        last_bias_filler = [self.GeneratedTrials.B_Bias[-1]]*(trial_number-len(self.GeneratedTrials.B_Bias))
-        self.GeneratedTrials.B_Bias += last_bias_filler
-        self.GeneratedTrials.B_Bias[trial_number-1] = bias
-
+        last_bias_filler = [self.GeneratedTrials.B_Bias[-1]]*(self.GeneratedTrials.B_CurrentTrialN-len(self.GeneratedTrials.B_Bias))
+        self.GeneratedTrials.B_Bias = np.concatenate((self.GeneratedTrials.B_Bias, last_bias_filler), axis=0)
+        self.GeneratedTrials.B_Bias[trial_number-1:] = bias
+    
     def _StartTrialLoop1(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         logging.info('starting trial loop 1')
         while self.Start.isChecked():
@@ -4653,10 +4672,9 @@ class Window(QMainWindow):
                          '&session_plot_selected_draw_types=1.+Choice+history'
         )
 
-    def _generate_upload_manifest(self, session: Session):
+    def _generate_upload_manifest(self):
         '''
             Generates a manifest.yml file for triggering data copy to VAST and upload to aws
-            :param session: session to use to create upload manifest
         '''
 
         # skip manifest generation for test mouse
@@ -4672,6 +4690,7 @@ class Window(QMainWindow):
             logging.info('Skipping upload manifest, because this is an ephys session')
             return
 
+        logging.info('Generating upload manifest')
         try:
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
@@ -4682,19 +4701,16 @@ class Window(QMainWindow):
             date_format = "%Y-%m-%d_%H-%M-%S"
             schedule = self.behavior_session_model.date.strftime(date_format).split('_')[0]+'_20-30-00'
             schedule_time = datetime.strptime(schedule,date_format) + timedelta(seconds=np.random.randint(30*60))
-            # This ID is outdated as of 11/21/2024. We will remove this comment once we confirm everything works
-            #capsule_id = 'c089614a-347e-4696-b17e-86980bb782c1'
             capsule_id = '0ae9703f-9012-4d0b-ad8d-b6a00858b80d'
             mount = 'FIP'
 
             modalities = {}
             modalities['behavior'] = [self.behavior_session_model.root_path.replace('\\', '/')]
-            for stream in session.data_streams:
-                if Modality.FIB in stream.stream_modalities:
-                    modalities['fib'] = [self.PhotometryFolder.replace('\\', '/')]
-                    modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
-                elif Modality.BEHAVIOR_VIDEOS in stream.stream_modalities:
-                    modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
+            if (self.Camera_dialog.camera_start_time != '') and (self.camera_names != []):
+                modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
+            if hasattr(self, 'fiber_photometry_start_time') and (self.fiber_photometry_start_time != ''): 
+                modalities['fib'] = [self.PhotometryFolder.replace('\\', '/')]
+                modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
 
             # Define contents of manifest file
             contents = {
@@ -4727,16 +4743,12 @@ class Window(QMainWindow):
             # Write the manifest file
             with open(filename,'w') as yaml_file:
                 yaml.dump(contents, yaml_file, default_flow_style=False)
-
+            logging.info('Finished generating manifest')
         except Exception as e:
             logging.error('Could not generate upload manifest: {}'.format(str(e)))
             QMessageBox.critical(self, 'Upload manifest',
                 'Could not generate upload manifest. '+\
                 'Please alert the mouse owner, and report on github.')
-
-        # disconnect slot to only create manifest once
-        logging.debug('Disconnecting sessionGenerated from _generate_upload_manifest')
-        self.upload_manifest_slot = self.sessionGenerated.disconnect(self.upload_manifest_slot)
 
 def setup_loki_logging(box_number):
     db_file=os.getenv('SIPE_DB_FILE', r'//allen/aibs/mpe/keepass/sipe_sw_passwords.kdbx')
