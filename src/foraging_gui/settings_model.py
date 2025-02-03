@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from pydantic import Field
+from typing import Literal
 
 class BonsaiSettingsModel(BaseModel):
     '''
@@ -15,6 +16,7 @@ class BonsaiSettingsModel(BaseModel):
     AttenuationLeft: int
     AttenuationRight: int
     current_box: str = Field(pattern=r"^[0-9][0-9][0-9]-[0-9]+-[ABCD]$")
+    RunningWheel: Literal["0","1"]
 
 class DFTSettingsModel(BaseModel):
     '''
