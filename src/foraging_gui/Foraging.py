@@ -1179,7 +1179,7 @@ class Window(QMainWindow):
 
         # Validate Bonsai Settings file
         BonsaiSettingsModel(**self.SettingsBox)
-
+        logging.info('Settings_box.csv file validated')
 
         # Get default settings for ForagingSettings.JSON
         defaults = {
@@ -1254,6 +1254,7 @@ class Window(QMainWindow):
 
         # Check that settings are valid
         DFTSettingsModel(**self.Settings)
+        logging.info('ForagingSettings.json validated')
 
         if 'default_openFolder' not in self.Settings:
             self.Settings['default_openFolder'] = self.Settings['default_saveFolder']
