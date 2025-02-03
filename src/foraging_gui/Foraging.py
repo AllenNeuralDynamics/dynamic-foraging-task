@@ -1153,6 +1153,7 @@ class Window(QMainWindow):
         return self.schedule.query('`Mouse ID` == @mouse_id').iloc[0][column]
 
     def _GetProjectName(self, mouse_id):
+        logging.info('Getting Project name')
         add_default=True
         project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
     
@@ -1174,6 +1175,7 @@ class Window(QMainWindow):
                 add_default = False
 
         if self.add_default_project_name and add_default:
+            logging.info('setting project name to default')
             project_name=self._set_default_project()
         return project_name
     
