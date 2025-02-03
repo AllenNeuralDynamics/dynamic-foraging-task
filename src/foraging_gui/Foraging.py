@@ -1159,8 +1159,8 @@ class Window(QMainWindow):
     
         # Check if this is a valid project name
         if project_name not in self._GetApprovedAINDProjectNames():
-            project_name = None
             logging.error('Project name {} is not valid, using default, please correct schedule'.format(project_name))
+            project_name = None
 
         # If we have a valid name update the metadata dialog
         if project_name is not None:
