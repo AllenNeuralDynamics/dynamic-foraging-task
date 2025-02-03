@@ -21,7 +21,7 @@ class BonsaiSettingsModel(BaseModel):
     AINDLickDetector: Literal["0","1"]
     LeftLickDetector: Optional[str] = Field(pattern=r"^COM[0-9]+$")
     RightLickDetector: Optional[str] = Field(pattern=r"^COM[0-9]+$")
-    HasSideCameraLeft, Optional[Literal["0","1"]]
+    HasSideCameraLeft: Optional[Literal["0","1"]]
 
 class DFTSettingsModel(BaseModel):
     '''
