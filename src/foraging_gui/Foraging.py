@@ -2100,7 +2100,7 @@ class Window(QMainWindow):
         self.ITIIncrease.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
         self._Randomness()
 
-        if self.Task.currentText() in ['Coupled Baiting','Coupled Without Baiting']:
+        if self.behavior_session_model.experiment in ['Coupled Baiting','Coupled Without Baiting']:
             self.label_6.setEnabled(True)
             self.label_7.setEnabled(True)
             self.label_8.setEnabled(True)
@@ -2144,7 +2144,7 @@ class Window(QMainWindow):
             self.AdvancedBlockAuto.setEnabled(True)
             self._AdvancedBlockAuto() # Update states of SwitchThr and PointsInARow
 
-        elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
+        elif self.behavior_session_model.experiment in ['Uncoupled Baiting','Uncoupled Without Baiting']:
             self.label_6.setEnabled(False)
             self.label_7.setEnabled(False)
             self.label_8.setEnabled(False)
@@ -2186,7 +2186,7 @@ class Window(QMainWindow):
             self.PointsInARow.setEnabled(False)
             self.BlockMinReward.setEnabled(False)
             self.IncludeAutoReward.setEnabled(False)
-        elif self.Task.currentText() in ['RewardN']:
+        elif self.behavior_session_model.experiment in ['RewardN']:
             self.label_6.setEnabled(True)
             self.label_7.setEnabled(True)
             self.label_8.setEnabled(True)
