@@ -17,6 +17,8 @@ class BonsaiSettingsModel(BaseModel):
     AttenuationRight: int
     current_box: str = Field(pattern=r"^[0-9][0-9][0-9]-[0-9]+-[ABCD]$")
     RunningWheel: Literal["0","1"]
+    HighSpeedCamera: Literal["0","1"]
+    AINDLickDetector: Literal["0","1"]
 
 class DFTSettingsModel(BaseModel):
     '''
