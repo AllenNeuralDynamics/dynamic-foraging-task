@@ -52,6 +52,7 @@ from foraging_gui.bias_indicator import BiasIndicator
 from foraging_gui.warning_widget import WarningWidget
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
+from foraging_gui.settings_model import DFTSettingsModel, BonsaiSettingsModel
 from aind_data_schema.core.session import Session
 from aind_data_schema_models.modalities import Modality
 from aind_behavior_services.session import AindBehaviorSessionModel
@@ -1190,7 +1191,31 @@ class Window(QMainWindow):
             Load the settings that are specific to this computer
         '''
 
-        # Get default settings
+        # Try to load Settings_box#.csv
+        self.SettingsBox={}
+        if not os.path.exists(self.SettingsBoxFile):
+            logging.error('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
+            raise Exception('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
+        try:
+            # Open the csv settings file
+            df = pd.read_csv(self.SettingsBoxFile,index_col=None, header=None)
+            self.SettingsBox = {row[0]: row[1] for _, row in df.iterrows()}
+            logging.info('Loaded settings_box file')
+        except Exception as e:
+            logging.error('Could not load settings_box file at: {}, {}'.format(self.SettingsBoxFile,str(e)))
+            e.args = ('Could not load settings box file at: {}'.format(self.SettingsBoxFile), *e.args)
+            raise e
+
+        # check that there is a newline for final entry of csv files
+        if not self._check_line_terminator(self.SettingsBoxFile):
+            logging.error('Settings box file does not have a newline at the end')
+            raise Exception('Settings box file does not have a newline at the end')
+
+        # Validate Bonsai Settings file
+        BonsaiSettingsModel(**self.SettingsBox)
+        logging.info('Settings_box.csv file validated')
+
+        # Get default settings for ForagingSettings.JSON
         defaults = {
             'default_saveFolder':os.path.join(os.path.expanduser("~"), "Documents")+'\\',
             'current_box':'',
@@ -1237,35 +1262,7 @@ class Window(QMainWindow):
             'add_default_project_name':True
         }
 
-        # Try to load Settings_box#.csv
-        self.SettingsBox={}
-        if not os.path.exists(self.SettingsBoxFile):
-            logging.error('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
-            raise Exception('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
-        try:
-            # Open the csv settings file
-            df = pd.read_csv(self.SettingsBoxFile,index_col=None, header=None)
-            self.SettingsBox = {row[0]: row[1] for _, row in df.iterrows()}
-            logging.info('Loaded settings_box file')
-        except Exception as e:
-            logging.error('Could not load settings_box file at: {}, {}'.format(self.SettingsBoxFile,str(e)))
-            e.args = ('Could not load settings box file at: {}'.format(self.SettingsBoxFile), *e.args)
-            raise e
-
-        # check that there is a newline for final entry of csv files
-        if not self._check_line_terminator(self.SettingsBoxFile):
-            logging.error('Settings box file does not have a newline at the end')
-            raise Exception('Settings box file does not have a newline at the end')
-
-        # check that the SettingsBox has each of the values in mandatory_fields as a key, if not log an error for the missing key
-
-        csv_mandatory_fields = ['Behavior', 'Soundcard', 'BonsaiOsc1', 'BonsaiOsc2', 'BonsaiOsc3', 'BonsaiOsc4','AttenuationLeft','AttenuationRight','current_box']
-        for field in csv_mandatory_fields:
-            if field not in self.SettingsBox.keys():
-                logging.error('Missing key ({}) in settings_box file'.format(field))
-                raise Exception('Missing key ({}) in settings_box file'.format(field))
-
-        # Try to load the settings file        
+        # Try to load the ForagingSettings.json file    
         self.Settings = {}
         if not os.path.exists(self.SettingFile):
             logging.error('Could not find settings file at: {}'.format(self.SettingFile))
@@ -1289,10 +1286,15 @@ class Window(QMainWindow):
                     logging.error('Missing setting ({}), is required'.format(key))
                     raise Exception('Missing setting ({}), is required'.format(key))
 
+        # Check that settings are valid
+        DFTSettingsModel(**self.Settings)
+        logging.info('ForagingSettings.json validated')
+
         if 'default_openFolder' not in self.Settings:
             self.Settings['default_openFolder'] = self.Settings['default_saveFolder']
 
         # Save all settings
+        # TODO, should always use the values in self.Settings[x], not self.x
         self.default_saveFolder=self.Settings['default_saveFolder']
         self.default_openFolder=self.Settings['default_openFolder']
         self.current_box=self.Settings['current_box']
@@ -1325,6 +1327,7 @@ class Window(QMainWindow):
         self.add_default_project_name = self.Settings['add_default_project_name']
         if not is_absolute_path(self.project_info_file):
             self.project_info_file = os.path.join(self.SettingFolder,self.project_info_file)
+
         # Also stream log info to the console if enabled
         if self.Settings['show_log_info_in_console']:
 
