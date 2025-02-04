@@ -35,7 +35,6 @@ from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 from pydantic import ValidationError
-from queue import Queue
 from StageWidget.main import get_stage_widget
 
 import foraging_gui
@@ -150,6 +149,7 @@ class Window(QMainWindow):
         self.ANewTrial = 1          # permission to start a new trial
         self.UpdateParameters = 1   # permission to update parameters
         self.logging_type = -1    # -1, logging is not started; 0, temporary logging; 1, formal logging
+        self.previous_backup_completed = 1 # permission to save backup data; 0, the previous saving has not finished, and it will not trigger the next saving; 1, it is allowed to save backup data
         self.unsaved_data = False   # Setting unsaved data to False
         self.to_check_drop_frames = 1 # 1, to check drop frames during saving data; 0, not to check drop frames
         self.session_run = False    # flag to indicate if session has been run or not
@@ -3718,6 +3718,10 @@ class Window(QMainWindow):
         '''complete of generating a trial'''
         self.ToGenerateATrial=1
 
+    def _thread_complete6(self):
+        '''complete of save data'''
+        self.previous_backup_completed=1
+
     def _thread_complete_timer(self):
         '''complete of _Timer'''
         if not self.ignore_timer:
@@ -4140,12 +4144,16 @@ class Window(QMainWindow):
             workerGenerateAtrial.signals.finished.connect(self._thread_complete4)
             workerStartTrialLoop = Worker(self._StartTrialLoop,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
             workerStartTrialLoop1 = Worker(self._StartTrialLoop1,GeneratedTrials)
+            worker_save = Worker(self._perform_backup,BackupSave=1)
+            worker_save.signals.finished.connect(self._thread_complete6)
             self.worker1=worker1
             self.workerLick=workerLick
             self.workerPlot=workerPlot
             self.workerGenerateAtrial=workerGenerateAtrial
             self.workerStartTrialLoop=workerStartTrialLoop
             self.workerStartTrialLoop1=workerStartTrialLoop1
+            self.worker_save=worker_save
+            self.data_lock = threading.Lock()
         else:
             PlotM=self.PlotM
             worker1=self.worker1
@@ -4154,13 +4162,7 @@ class Window(QMainWindow):
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
             workerStartTrialLoop1=self.workerStartTrialLoop1
-
-        # Start the backup worker thread if not already running
-        if not hasattr(self, 'backup_thread') or not self.backup_thread.is_alive():
-            self.data_lock = threading.Lock()
-            self.backup_queue = Queue()  # Initialize the queue for backup tasks
-            self.backup_thread = threading.Thread(target=self.backup_worker, daemon=True)
-            self.backup_thread.start()
+            worker_save=self.worker_save
 
         # collecting the base signal for photometry. Only run once
         if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and self.PhotometryRun==0:
@@ -4187,7 +4189,7 @@ class Window(QMainWindow):
             self.Time.emit(int(np.floor(float(self.baselinetime.text())*60)))
             logging.info('Running photometry baseline', extra={'tags': [self.warning_log_tag]})
 
-        self._StartTrialLoop(GeneratedTrials,worker1)
+        self._StartTrialLoop(GeneratedTrials,worker1,worker_save)
 
         if self.actionDrawing_after_stopping.isChecked()==True:
             try:
@@ -4227,7 +4229,7 @@ class Window(QMainWindow):
         else:
             logging.info(f'No active session logger')
 
-    def _StartTrialLoop(self,GeneratedTrials,worker1):
+    def _StartTrialLoop(self,GeneratedTrials,worker1,worker_save):
         if self.Start.isChecked():
             logging.info('starting trial loop')
         else:
@@ -4333,10 +4335,12 @@ class Window(QMainWindow):
                 #generate a new trial
                 if self.NewTrialRewardOrder==1:
                     GeneratedTrials._GenerateATrial(self.Channel4)
-   
+
                 # Save data in a separate thread
-                if GeneratedTrials.B_CurrentTrialN>0 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
-                    self.backup_queue.put(self.perform_backup)
+                with self.data_lock:
+                    if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
+                        self.previous_backup_completed=0
+                        self.threadpool6.start(worker_save)
 
                 # show disk space
                 self._show_disk_space()
@@ -4382,23 +4386,10 @@ class Window(QMainWindow):
                     logging.error('trial stalled {} minutes, user continued trials'.format(elapsed_time))
                     stall_iteration +=1
 
-    def backup_worker(self):
-        # Worker thread for processing backup tasks
-        while True:
-            task = self.backup_queue.get()
-            if task is None:
-                break
-            try:
-                task()
-            except Exception as e:
-                logging.error(f"Backup task failed: {e}")
-            finally:
-                self.backup_queue.task_done()
-
-    def perform_backup(self):
+    def _perform_backup(self,BackupSave):
         # Backup save logic
         with self.data_lock:
-            self._Save(BackupSave=1)
+            self._Save(BackupSave=BackupSave)
 
     def bias_calculated(self, bias: float, trial_number: int) -> None:
         """
