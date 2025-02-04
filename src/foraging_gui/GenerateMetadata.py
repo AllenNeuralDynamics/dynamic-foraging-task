@@ -780,7 +780,7 @@ class generate_metadata:
             trials_total= self.trials_total,
             trials_finished= self.trials_finished,
             trials_rewarded=self.trials_rewarded,
-            notes=f"The duration of go cue is 100ms. The frequency is 7500Hz. Decibel is {self.Obj['Other_go_cue_decibel']}dB. The total reward consumed in the session is {self.total_reward_consumed_in_session} microliter. The total reward indcluding consumed in the session and supplementary water is {self.Obj['TotalWater']} millimeters.",
+            notes=f"The duration of go cue is 100 ms. The frequency is 7500 Hz. Amplitude is {self.Obj['Other_go_cue_decibel']}dB. The total reward consumed in the session is {self.total_reward_consumed_in_session} microliters. The total reward including consumed in the session and supplementary water is {self.Obj['TotalWater']} milliliters.",
         ))
 
 
