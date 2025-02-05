@@ -4389,7 +4389,10 @@ class Window(QMainWindow):
     def _perform_backup(self,BackupSave):
         # Backup save logic
         with self.data_lock:
-            self._Save(BackupSave=BackupSave)
+            try:
+                self._Save(BackupSave=BackupSave)
+            except Exception as e:
+                logging.error('backup save error: {}'.format(e))
 
     def bias_calculated(self, bias: float, trial_number: int) -> None:
         """
