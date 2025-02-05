@@ -36,7 +36,6 @@ from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 from pydantic import ValidationError
-
 from StageWidget.main import get_stage_widget
 
 import foraging_gui
@@ -149,9 +148,9 @@ class Window(QMainWindow):
         self.ToInitializeVisual = 1 # Should we visualize performance
         self.FigureUpdateTooSlow = 0# if the FigureUpdateTooSlow is true, using different process to update figures
         self.ANewTrial = 1          # permission to start a new trial
-        self.previous_backup_completed = 1   # permission to save backup data; 0, the previous saving has not finished, and it will not trigger the next saving; 1, it is allowed to save backup data
         self.UpdateParameters = 1   # permission to update parameters
         self.logging_type = -1    # -1, logging is not started; 0, temporary logging; 1, formal logging
+        self.previous_backup_completed = 1 # permission to save backup data; 0, the previous saving has not finished, and it will not trigger the next saving; 1, it is allowed to save backup data
         self.unsaved_data = False   # Setting unsaved data to False
         self.to_check_drop_frames = 1 # 1, to check drop frames during saving data; 0, not to check drop frames
         self.session_run = False    # flag to indicate if session has been run or not
@@ -202,6 +201,7 @@ class Window(QMainWindow):
         self.Other_manual_water_left_time=[] # the valve open time of manual water given by the left valve each time
         self.Other_manual_water_right_volume=[] # the volume of manual water given by the right valve each time
         self.Other_manual_water_right_time=[] # the valve open time of manual water given by the right valve each time
+
         self._Optogenetics()    # open the optogenetics panel
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
@@ -2508,7 +2508,7 @@ class Window(QMainWindow):
             SaveAs=0
             SaveContinue=1
             saving_type_label = 'backup saving'
-            behavior_data_field='GeneratedTrials_backup'
+            behavior_data_field='GeneratedTrials'
         elif ForceSave==1:
             saving_type_label = 'force saving'
             behavior_data_field='GeneratedTrials'
@@ -4162,7 +4162,7 @@ class Window(QMainWindow):
             workerGenerateAtrial.signals.finished.connect(self._thread_complete4)
             workerStartTrialLoop = Worker(self._StartTrialLoop,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
             workerStartTrialLoop1 = Worker(self._StartTrialLoop1,GeneratedTrials)
-            worker_save = Worker(self._Save,BackupSave=1)
+            worker_save = Worker(self._perform_backup,BackupSave=1)
             worker_save.signals.finished.connect(self._thread_complete6)
             self.worker1=worker1
             self.workerLick=workerLick
@@ -4171,6 +4171,7 @@ class Window(QMainWindow):
             self.workerStartTrialLoop=workerStartTrialLoop
             self.workerStartTrialLoop1=workerStartTrialLoop1
             self.worker_save=worker_save
+            self.data_lock = threading.Lock()
         else:
             PlotM=self.PlotM
             worker1=self.worker1
@@ -4357,23 +4358,12 @@ class Window(QMainWindow):
                 #generate a new trial
                 if self.NewTrialRewardOrder==1:
                     GeneratedTrials._GenerateATrial(self.Channel4)
-                '''
-                ### Save data in the main thread. Keep it temporarily for testing ### 
-                start_time = time.time()
-                self.previous_backup_completed=1
-                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
-                    self._Save(BackupSave=1)
-                # Record the end time
-                end_time = time.time()
-                # Calculate the time elapsed and log if it is too long
-                if end_time - start_time>1:
-                    logging.info(f"Time taken to backup the data is too long: {elapsed_time:.6f} seconds")
-                '''
+
                 # Save data in a separate thread
-                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
-                    self.previous_backup_completed=0
-                    self.GeneratedTrials_backup=copy.copy(self.GeneratedTrials)
-                    self.threadpool6.start(worker_save)
+                with self.data_lock:
+                    if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
+                        self.previous_backup_completed=0
+                        self.threadpool6.start(worker_save)
 
                 # show disk space
                 self._show_disk_space()
@@ -4418,6 +4408,14 @@ class Window(QMainWindow):
                     # User continues, wait another stall_duration and prompt again
                     logging.error('trial stalled {} minutes, user continued trials'.format(elapsed_time))
                     stall_iteration +=1
+
+    def _perform_backup(self,BackupSave):
+        # Backup save logic
+        with self.data_lock:
+            try:
+                self._Save(BackupSave=BackupSave)
+            except Exception as e:
+                logging.error('backup save failed: {}'.format(e))
 
     def bias_calculated(self, bias: float, trial_number: int) -> None:
         """
