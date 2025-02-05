@@ -4392,7 +4392,7 @@ class Window(QMainWindow):
             try:
                 self._Save(BackupSave=BackupSave)
             except Exception as e:
-                logging.error('backup save error: {}'.format(e))
+                logging.error('backup save failed: {}'.format(e))
 
     def bias_calculated(self, bias: float, trial_number: int) -> None:
         """
