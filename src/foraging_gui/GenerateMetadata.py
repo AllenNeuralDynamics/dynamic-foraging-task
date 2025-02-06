@@ -422,7 +422,7 @@ class generate_metadata:
         # Possible reason: 1) the go cue decibel is not set in the foraging settings file. 2) old version of the software.
         if self.Obj.get('Other_go_cue_decibel', '') == '':
             self.Obj['Other_go_cue_decibel'] = 74
-            logging.error('No go cue decibel recorded in the behavior json file')
+            logging.error('No go cue decibel recorded in the ForagingSettings.json file')
 
         # Missing field 'fiber_photometry_start_time' and 'fiber_photometry_end_time' in the json file.
         # Possible reason: 1) the fiber photometry data is not recorded in the session. 2) the fiber photometry data is recorded but the start and end time are not recorded in the old version of the software.
