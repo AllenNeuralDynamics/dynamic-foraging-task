@@ -293,21 +293,6 @@ class generate_metadata:
         else:
             self.session_start_time = ''
             self.session_end_time = ''
-
-
-    def _get_modality(self):
-        '''
-        Get all the modalities used in the session
-        '''
-        self.modality = []
-        if self.behavior_streams!=[]:
-            self.modality.append(Modality.BEHAVIOR)
-        if self.ephys_streams!=[]:
-            self.modality.append(Modality.ECEPHYS)
-        if self.ophys_streams!=[]:
-            self.modality.append(Modality.FIB)
-        if self.high_speed_camera_streams!=[]:
-            self.modality.append(Modality.BEHAVIOR_VIDEOS)
         
     def _get_investigators(self):
         '''
