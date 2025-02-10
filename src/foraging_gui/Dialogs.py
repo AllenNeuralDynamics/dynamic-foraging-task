@@ -1096,7 +1096,7 @@ class WaterCalibrationDialog(QDialog):
             if reply == QMessageBox.Cancel:
                 logging.warning('Spot check discarded due to type', extra={'tags': self.MainWindow.warning_log_tag})
             else:
-                logging.error('Water calibration spot check exceeds tolerance: {}'.format(error))
+                logging.error('Water calibration spot check, {}, exceeds tolerance: {}'.format(valve,error))
                 save.setStyleSheet("color: white;background-color : mediumorchid;")
                 self.Warning.setText(
                     f'Measuring {valve.lower()} valve: {volume}uL' + \
@@ -1106,8 +1106,8 @@ class WaterCalibrationDialog(QDialog):
                 )
                 self._SaveValve(valve)
                 if self.check_spot_failures(valve) >= 2:
-                    msg = 'Two or more spot checks have failed in the last 30 days. Please create a SIPE ticket to ' \
-                          'check rig.'
+                    msg = 'Two or more spot checks, {}, have failed in the last 30 days. Please create a SIPE ticket to ' \
+                          'check rig.'.format(valve)
                     logging.error(msg, extra={'tags': self.MainWindow.warning_log_tag})
                     QMessageBox.critical(self, f'Spot check {valve}', msg, QMessageBox.Ok)
         else:
