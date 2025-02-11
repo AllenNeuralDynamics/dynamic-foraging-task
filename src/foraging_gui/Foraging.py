@@ -4707,7 +4707,7 @@ class Window(QMainWindow):
 
             modalities = {}
             modalities['behavior'] = [self.behavior_session_model.root_path.replace('\\', '/')]
-            if (self.Camera_dialog.camera_start_time != '') and (self.camera_names != []):
+            if (self.Camera_dialog.camera_start_time != ''):
                 modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
             if hasattr(self, 'fiber_photometry_start_time') and (self.fiber_photometry_start_time != ''): 
                 modalities['fib'] = [self.PhotometryFolder.replace('\\', '/')]
