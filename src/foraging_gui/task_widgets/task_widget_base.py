@@ -1,5 +1,5 @@
-from qtpy.QtCore import Signal, Slot
-from qtpy.QtWidgets import (
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import (
     QFrame,
     QWidget,
     QLabel,
@@ -25,8 +25,8 @@ import logging
 import typing
 
 class TaskWidgetBase(QMainWindow):
-    ValueChangedOutside = Signal((str,))
-    ValueChangedInside = Signal((str,))
+    ValueChangedOutside = pyqtSignal((str,))
+    ValueChangedInside = pyqtSignal((str,))
 
     def __init__(self, schema: BaseModel):
 
@@ -358,7 +358,7 @@ def add_border(widget: QMainWindow,
 
 
 if __name__ == "__main__":
-    from qtpy.QtWidgets import QApplication
+    from PyQt5.QtWidgets import QApplication
     import sys
     import traceback
     from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (

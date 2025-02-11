@@ -2,8 +2,6 @@ from task_widget_base import TaskWidgetBase, add_border
 from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
     FiberPhotometry
 )
-import logging
-from qtpy.QtWidgets import QCheckBox
 
 class FIBParametersWidget(TaskWidgetBase):
 
@@ -18,7 +16,7 @@ class FIBParametersWidget(TaskWidgetBase):
 
 
 if __name__ == "__main__":
-    from qtpy.QtWidgets import QApplication
+    from PyQt5.QtWidgets import QApplication
     import sys
     import traceback
 

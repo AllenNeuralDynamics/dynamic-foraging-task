@@ -8,7 +8,7 @@ from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
     Warmup
 )
 import logging
-from qtpy.QtWidgets import QCheckBox
+from PyQt5.QtWidgets import QCheckBox
 
 class BehaviorParametersWidget(TaskWidgetBase):
     """
@@ -99,7 +99,7 @@ class BehaviorParametersWidget(TaskWidgetBase):
                     self.update_field_widget(f"{name}.{i}")
 
 if __name__ == "__main__":
-    from qtpy.QtWidgets import QApplication
+    from PyQt5.QtWidgets import QApplication
     import sys
     import traceback
 

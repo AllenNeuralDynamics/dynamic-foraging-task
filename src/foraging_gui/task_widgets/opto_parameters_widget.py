@@ -15,7 +15,7 @@ from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
 )
 from pydantic import BaseModel
 import logging
-from qtpy.QtWidgets import QCheckBox, QComboBox
+from PyQt5.QtWidgets import QCheckBox, QComboBox
 
 
 class OptoParametersWidget(TaskWidgetBase):
@@ -275,7 +275,7 @@ class OptoParametersWidget(TaskWidgetBase):
 
 
 if __name__ == "__main__":
-    from qtpy.QtWidgets import QApplication
+    from PyQt5.QtWidgets import QApplication
     import sys
     import traceback
 
