@@ -37,8 +37,8 @@ class BonsaiSettingsModel(BaseModel):
         description="Calibration parameter for the left channel sound stimulus"
     )
     current_box: str = Field(
-        pattern=r"^[0-9][0-9][0-9]-[0-9]+-[ABCD]$",
-        description="Box name in ROOM-TOWER-BOX format",
+        pattern=r"^[0-9][0-9][0-9](-[0-9]+-[ABCD]|_EPHYS[0-9]+|_Ephys[0-9]+)$",
+        description="Box name in ROOM-TOWER-BOX format, or ROOM-EphysNUM",
     )
     RunningWheel: Literal["0", "1"] = Field(
         default=0, description="Using AIND running wheel"
