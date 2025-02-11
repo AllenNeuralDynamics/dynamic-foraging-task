@@ -1,6 +1,6 @@
-from qtpy.QtCore import Signal, Slot, QTimer
-from qtpy.QtGui import QIntValidator, QDoubleValidator
+from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import (
+    QFrame,
     QWidget,
     QLabel,
     QComboBox,
@@ -16,41 +16,45 @@ from qtpy.QtWidgets import (
 from inspect import currentframe
 from importlib import import_module
 import enum
-import types
 import re
-import logging
 import inflection
-from view.widgets.miscellaneous_widgets.q_scrollable_line_edit import QScrollableLineEdit
 from view.widgets.miscellaneous_widgets.q_scrollable_float_slider import QScrollableFloatSlider
-import inspect
 from pydantic import BaseModel
 from typing import Literal
-from aind_behavior_dynamic_foraging.DataSchemas.task_logic import \
-    AindBehaviorTaskLogicModel, AindDynamicForagingTaskParameters
+import logging
+import typing
 
-class TaskParameterWidget(QMainWindow):
+class TaskWidgetBase(QMainWindow):
+    ValueChangedOutside = Signal((str,))
+    ValueChangedInside = Signal((str,))
 
-    def __init__(self, schema: AindBehaviorTaskLogicModel):
+    def __init__(self, schema: BaseModel):
 
         self.log = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
         super().__init__()
         self.schema = schema
         self.schema_module = import_module(self.schema.__module__)
-        widget = self.create_field_widgets(schema.model_dump())
-        self.setCentralWidget(create_widget("V", widget))
+        widget = self.create_field_widgets(self.schema.model_dump(),
+                                           "task_parameters")
+        self.setCentralWidget(create_widget("V", **widget))
+        #add_border(self)
         self.ValueChangedOutside[str].connect(self.update_field_widget)  # Trigger update when property value changes
 
-    def create_field_widgets(self, fields: dict):
-        """Create input widgets based on properties
-        :param properties: dictionary containing properties within a class and mapping to values
-        :param widget_group: attribute name for dictionary of widgets"""
-
+    def create_field_widgets(self, fields: dict,  widget_field: str) -> dict:
+        """
+        Create input widgets based on properties
+        :param fields: dictionary containing properties within a class and mapping to values
+        :param model: schema model corresponding to the fields dict
+        :param widget_field: attribute name for dictionary of widgets
+        :return dictionary of widget with keys corresponding to attribute name
+        """
         widgets = {}
         for name, value in fields.items():
+            name_lst = name.split(".")
             arg_type = type(value)
-            search_name = arg_type.__name__ if arg_type.__name__ in dir(self.schema_module ) else name.split(".")[-1]
-            boxes = {"label": QLabel(label_maker(name.split(".")[-1]))}
+            search_name = arg_type.__name__ if arg_type.__name__ in dir(self.schema_module) else name_lst[-1]
+            boxes = {"label": QLabel(label_maker(name_lst[-1]))} if not name_lst[-1].isdigit() else {}
             if dict not in type(value).__mro__ and list not in type(value).__mro__ or type(arg_type) == enum.EnumMeta:
                 # Create combo boxes if there are preset options
                 if input_specs := self.check_driver_variables(search_name):
@@ -62,19 +66,25 @@ class TaskParameterWidget(QMainWindow):
 
             elif dict in type(value).__mro__:  # deal with dict like variables
                 boxes[name] = create_widget(
-                    "V", **self.create_field_widgets({f"{name}.{k}": v for k, v in value.items()})
+                    "V", **self.create_field_widgets({f"{name}.{k}": v for k, v in value.items()},
+                                                     name)
                 )
+                setattr(self, name+"_widget", boxes[name])
             elif list in type(value).__mro__:  # deal with list like variables
                 boxes[name] = create_widget(
-                    "H", **self.create_field_widgets({f"{name}.{i}": v for i, v in enumerate(value)})
+                    "H", **self.create_field_widgets({f"{name}.{i}": v for i, v in enumerate(value)},
+                                                     name)
                 )
+                setattr(self, name+"_widget", boxes[name])
             orientation = "H"
             if "." in name:  # see if parent list and format index label and input vertically
-                parent = pathGet(self.__dict__, name.split(".")[0:-1])
+                parent = path_get(self.schema.model_dump(), name_lst[0:-1])
                 if list in type(parent).__mro__:
                     orientation = "V"
-            widgets[name] = create_widget(orientation, **boxes)
+            widgets[name_lst[-1]] = create_widget(orientation, **boxes)
 
+        # Add attribute of grouped widgets for easy access
+        setattr(self, f"{widget_field}_widgets", widgets)
         return widgets
 
     def check_driver_variables(self, name: str):
@@ -89,6 +99,8 @@ class TaskParameterWidget(QMainWindow):
             if x is not None:
                 if type(driver_vars[variable]) in [dict, list]:
                     return driver_vars[variable]
+                elif type(driver_vars[variable]) == typing._LiteralGenericAlias:
+                    return list(typing.get_args(driver_vars[variable]))
                 elif type(driver_vars[variable]) == enum.EnumMeta:  # if enum
                     enum_class = driver_vars[variable]
                     return {i.name: i.value for i in enum_class}
@@ -110,24 +122,27 @@ class TaskParameterWidget(QMainWindow):
         :param name: name to emit when text is edited is changed
         :param value: initial value to add to box"""
         value_type = type(value)
-        if value_type == int:
-            textbox = QSpinBox(value)
-            textbox.editingFinished
+        if value_type in [int, float]:
+            textbox = QSpinBox() if value_type == int else QDoubleSpinBox()
+            textbox.setRange(0, 1000000)
+            textbox.setValue(value)
+            textbox.valueChanged.connect(lambda v: self.textbox_edited(name, v))
         else:
             textbox = QLineEdit(str(value))
             textbox.editingFinished.connect(lambda: self.textbox_edited(name))
         return textbox
 
-    def textbox_edited(self, name):
+    def textbox_edited(self, name, value=None):
         """
         Correctly set attribute after textbox has been edited
         :param name: name of property that was edited
+        :param value: new value
         :return:
         """
 
         name_lst = name.split(".")
-        value = getattr(self, name + "_widget").text()
-        path_set(self.schema, name, value)
+        value = value if value else getattr(self, name + "_widget").text()
+        path_set(self.schema, name_lst, value)
         self.ValueChangedInside.emit(name)
 
     def create_check_box(self, name, value: bool) -> QCheckBox:
@@ -150,15 +165,10 @@ class TaskParameterWidget(QMainWindow):
         """
 
         name_lst = name.split(".")
-        parent_attr = pathGet(self.__dict__, name_lst[0:-1])
-        if dict in type(parent_attr).__mro__:  # name is a dictionary
-            parent_attr[name_lst[-1]] = state
-        elif list in type(parent_attr).__mro__:
-            parent_attr[int(name_lst[-1])] = state
-        setattr(self, name, state)
+        path_set(self.schema, name_lst, state)
         self.ValueChangedInside.emit(name)
 
-    def create_combo_box(self, name, items):
+    def create_combo_box(self, name: str, items: dict or list):
         """Convenience function to build combo boxes and add items
         :param name: name to emit when combobox index is changed
         :param items: items to add to combobox"""
@@ -167,7 +177,7 @@ class TaskParameterWidget(QMainWindow):
         box = QComboBox()
         box.addItems([str(x) for x in options])
         box.currentTextChanged.connect(lambda value: self.combo_box_changed(value, name))
-        box.setCurrentText(str(getattr(self, name)))
+        box.setCurrentText(str(path_get(self.schema.model_dump(), name.split("."))))
 
         return box
 
@@ -180,52 +190,40 @@ class TaskParameterWidget(QMainWindow):
         """
 
         name_lst = name.split(".")
-
-        parent_attr = pathGet(self.__dict__, name_lst[0:-1])
-        if dict in type(parent_attr).__mro__:  # name is a dict
-            parent_attr[str(name_lst[-1])] = value_type(value)
-        elif list in type(parent_attr).__mro__:  # name is a list
-
-            parent_attr[int(name_lst[-1])] = value_type(value)
-        setattr(self, name, value_type(value))
+        value_type = type(path_get(self.schema.model_dump(), name_lst))
+        value = value_type[value] if type(value_type) == enum.EnumMeta else value_type(value)
+        path_set(self.schema, name_lst, value)
         self.ValueChangedInside.emit(name)
 
     @Slot(str)
     def update_field_widget(self, name):
         """Update property widget. Triggers when attribute has been changed outside of widget
         :param name: name of attribute and widget"""
-
-        value = getattr(self, name, None)
+        value = path_get(self.schema.model_dump(), name.split("."))
         if dict not in type(value).__mro__ and list not in type(value).__mro__:  # not a dictionary or list like value
             self._set_widget_text(name, value)
         elif dict in type(value).__mro__:
             for k, v in value.items():  # multiple widgets to set values for
-                setattr(self, f"{name}.{k}", v)
                 self.update_field_widget(f"{name}.{k}")
-        else:
+        else:  # update list
             for i, item in enumerate(value):
-                if hasattr(self, f"{name}.{i}"):  # can't handle added indexes yet
-                    setattr(self, f"{name}.{i}", item)
+                if hasattr(self, f"{name}.{i}_widget"):  # can't handle added indexes yet
                     self.update_field_widget(f"{name}.{i}")
 
     def _set_widget_text(self, name, value):
         """Set widget text if widget is QLineEdit or QCombobox
         :param name: widget name to set text to
         :param value: value of text"""
-
         if hasattr(self, f"{name}_widget"):
             widget = getattr(self, f"{name}_widget")
             widget.blockSignals(True)  # block signal indicating change since changing internally
-            if hasattr(widget, "setText") and hasattr(widget, "validator"):
-                if widget.validator() is None:
-                    widget.setText(str(value))
-                elif type(widget.validator()) == QIntValidator:
-                    widget.setValue(round(value))
-                elif type(widget.validator()) == QDoubleValidator:
-                    widget.setValue(str(round(value, widget.validator().decimals())))
+            if type(widget) in [QLineEdit]:
+                widget.setText(str(value))
             elif type(widget) in [QSpinBox, QDoubleSpinBox, QSlider, QScrollableFloatSlider]:
                 widget.setValue(value)
             elif type(widget) == QComboBox:
+                value_type = type(path_get(self.schema.model_dump(), name.split(".")))
+                value = value.name if type(value_type) == enum.EnumMeta else value_type(value)
                 widget.setCurrentText(str(value))
             elif hasattr(widget, 'setChecked'):
                 widget.setChecked(value)
@@ -233,12 +231,20 @@ class TaskParameterWidget(QMainWindow):
         else:
             self.log.warning(f"{name} doesn't correspond to a widget")
 
+    def apply_schema(self, schema: BaseModel):
+        """
+        Convenience function to apply new schema
+        """
+        self.schema = schema
+        for name in self.schema.model_dump().keys():
+            self.update_field_widget(name)
+
     def __setattr__(self, name, value):
         """Overwrite __setattr__ to trigger update if property is changed"""
-        if name == "schema":    # if schema has been updated, update widgets
-            self.__dict__[name] = value
-            if currentframe().f_back.f_locals.get("self", None) != self:  # call from outside so update widgets
-                self.ValueChangedOutside.emit(name)
+        super().__setattr__(name, value)
+        self.__dict__[name] = value
+        if currentframe().f_back.f_locals.get("self", None) != self:  # call from outside so update widgets
+            self.ValueChangedOutside.emit(name)
 
 
 # Convenience Functions
@@ -282,7 +288,7 @@ def label_maker(string):
     :param string: string to make label out of
     """
 
-    possible_units = ["mm", "um", "px", "mW", "W", "ms", "C", "V", "us", "s", "ms", "uL", "min", "g", "mL"]
+    possible_units = ["mm", "um", "px", "mW", "W", "ms", "C", "V", "us", "s", "ms", "uL", "g", "mL"]
     label = string.split("_")
     label = [words.capitalize() for words in label]
 
@@ -294,105 +300,75 @@ def label_maker(string):
     label = " ".join(label)
     return label
 
-def path_set(dictionary: dict, path: list[str], value) -> None:
+
+def path_set(iterable: BaseModel, path: list[str], value) -> None:
     """
-    Set value in a nested dictionary
-    :param dictionary: dictionary to set value
+    Set value in a nested dictionary or list
+    :param iterable: dictionary or list to set value
     :param path: list of strings that point towards value to set.
     """
 
-    for k in path[:-1]:
-        dictionary = dictionary[k]
-    dictionary[-1] = value
+    for i, k in enumerate(path):
+        if i != len(path)-1:
+            iterable = iterable[int(k)] if type(iterable) == list else getattr(iterable, k)
+        else:
+            if type(iterable) == list:
+                iterable[int(k)] = value
+            else:
+                setattr(iterable, k, value)
+
+def path_get(iterable: dict or list, path: list[str]):
+    """
+    Get value in a nested dictionary or listt
+    :param iterable: dictionary or list to set value
+    :param path: list of strings that point towards value to set.
+    :return value found at end of path
+    """
+
+    for i, k in enumerate(path):
+        k = int(k) if type(iterable) == list else k
+        iterable = iterable.__getitem__(k)
+    return iterable
 
 
-# def pathGet(iterable: dict or list, path: list):
-#     """Based on list of nested dictionary keys or list indices, return inner dictionary"""
 #
-#     for k in path:
-#         k = int(k) if type(iterable) == list else k
-#         iterable = iterable.__getitem__(k)
-#     return iterable
+def add_border(widget: QMainWindow,
+               orientation: Literal['H', 'V', 'VH', 'HV'] = 'HV') \
+        -> QMainWindow:
+    """
+    Add border dividing property widgets in BaseDeviceWidget
+    :param widget: widget to add dividers
+    :param: schema: schema used to create widget
+    :param orientation: orientation to order widgets. H for horizontal, V for vertical, HV or VH for combo
+    """
 
-#
-# def add_border(widget: BaseDeviceWidget, orientation: Literal['H', 'V', 'VH', 'HV'] = 'HV') \
-#         -> BaseDeviceWidget:
-#     """
-#     Add border dividing property widgets in BaseDeviceWidget
-#     :param widget: widget to add dividers
-#     :param orientation: orientation to order widgets. H for horizontal, V for vertical, HV or VH for combo
-#     """
-#
-#     widgets = []
-#     for prop_widget in widget.property_widgets.values():
-#         frame = QFrame()
-#         layout = QVBoxLayout(frame)
-#         layout.addWidget(prop_widget)
-#         frame.setStyleSheet(f".QFrame {{ border:1px solid grey }} ")
-#         widgets.append(frame)
-#     if len(widgets) % 2 != 0 and orientation in ['VH', 'HV']:  # add dummy widget so all rows/colums can be created
-#         widgets.append(QWidget())
-#     widget.setCentralWidget(create_widget(orientation, *widgets))
-#
-#     return widget
-#
-#
-# class TaskWidget(QWidget):
-#     """Widget to edit task"""
-#
-#     taskTypeChanged = pyqtSignal(str)
-#     taskValueChanged = pyqtSignal(str)
-#
-#     def __init__(self, task_types: dict[str, BaseModel]):
-#         """
-#         :param task_types: dictionary where the keys are the names of the tasks and values are the schemas
-#         """
-#         super().__init__()
-#
-#         self.setLayout(QVBoxLayout())
-#
-#         self.task_combobox = QComboBox()
-#         self.task_combobox.addItems(task_types.keys())
-#         self.layout().addWidget(self.task_combobox)
-#
-#         self.stacked_task_widget = QStackedWidget()
-#         self.layout().addWidget(self.stacked_task_widget)
-#         for schema in task_types.values():
-#             widget = BaseDeviceWidget(schema, schema().dict())
-#             # emit signal when widget is changed
-#             widget.ValueChangedInside.connect(self.taskValueChanged.emit)
-#             widget.ValueChangedOutside.connect(self.taskValueChanged.emit)
-#             self.stacked_task_widget.addWidget(add_border(widget))
-#
-#         self.task_combobox.currentIndexChanged.connect(lambda i: self.stacked_task_widget.setCurrentIndex(i))
-#         self.task_combobox.currentTextChanged.connect(self.taskTypeChanged.emit)
-#
-#     def currentTask(self) -> BaseDeviceWidget:
-#         """
-#         Convenience function to return current widget of stacked_task_widget
-#         :return current widget of stacked_task_widget
-#         """
-#
-#         return self.stacked_task_widget.currentWidget()
-#
-#     def setTask(self, task_name: str) -> None:
-#         """
-#         Set current task programmatically
-#         :param task_name: name of task to change to
-#         """
-#
-#         if task_name not in [self.task_combobox.itemText(i) for i in range(self.task_combobox.count())]:
-#             raise ValueError(f'{task_name} not a valid task selection.')
-#        self.task_combobox.setCurrentText(task_name)
+    widgets = []
+    for name, field_widget in getattr(widget, "task_parameters_widgets").items():
+        frame = QFrame()
+        layout = QVBoxLayout(frame)
+        layout.addWidget(field_widget)
+        frame.setStyleSheet(f".QFrame {{ border:1px solid grey }} ")
+        widgets.append(frame)
+    if len(widgets) % 2 != 0 and orientation in ['VH', 'HV']:  # add dummy widget so all rows/colums can be created
+        widgets.append(QWidget())
+    widget.setCentralWidget(create_widget(orientation, *widgets))
+
+    return widget
+
 
 if __name__ == "__main__":
-
     from qtpy.QtWidgets import QApplication
     import sys
     import traceback
-    import logging
+    from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
+        AindDynamicForagingTaskLogic,
+        AindDynamicForagingTaskParameters,
+        AutoWater,
+        AutoStop,
+        AutoBlock,
+        Warmup
+    )
 
-    behavior_task_logic_model = None
 
     def error_handler(etype, value, tb):
         error_msg = ''.join(traceback.format_exception(etype, value, tb))
@@ -401,10 +377,16 @@ if __name__ == "__main__":
 
     sys.excepthook = error_handler  # redirect std error
     app = QApplication(sys.argv)
-    task_model = AindBehaviorTaskLogicModel(name="coupled",
-        task_parameters=AindDynamicForagingTaskParameters(),
-        version='1.6.11')
-    task_widget = TaskParameterWidget(task_model)
+    task_model = AindDynamicForagingTaskLogic(
+        task_parameters=AindDynamicForagingTaskParameters(
+            auto_water=AutoWater(),
+            auto_stop=AutoStop(),
+            auto_block=AutoBlock(),
+            warmup=Warmup()
+        ),
+    )
+    task_widget = TaskWidgetBase(task_model.task_parameters)
+    task_widget.ValueChangedInside.connect(lambda name: print(task_model))
     task_widget.show()
 
     sys.exit(app.exec_())
