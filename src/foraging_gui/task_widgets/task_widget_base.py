@@ -78,7 +78,7 @@ class TaskWidgetBase(QMainWindow):
                 setattr(self, name+"_widget", boxes[name])
             orientation = "H"
             if "." in name:  # see if parent list and format index label and input vertically
-                parent = path_get(self.schema.model_dump(), name_lst[0:-1])
+                parent = self.path_get(self.schema, name_lst[0:-1])
                 if list in type(parent).__mro__:
                     orientation = "V"
             widgets[name_lst[-1]] = create_widget(orientation, **boxes)
@@ -142,7 +142,8 @@ class TaskWidgetBase(QMainWindow):
 
         name_lst = name.split(".")
         value = value if value else getattr(self, name + "_widget").text()
-        path_set(self.schema, name_lst, value)
+        print(value, name)
+        self.path_set(self.schema, name_lst, value)
         self.ValueChangedInside.emit(name)
 
     def create_check_box(self, name, value: bool) -> QCheckBox:
@@ -165,7 +166,7 @@ class TaskWidgetBase(QMainWindow):
         """
 
         name_lst = name.split(".")
-        path_set(self.schema, name_lst, state)
+        self.path_set(self.schema, name_lst, state)
         self.ValueChangedInside.emit(name)
 
     def create_combo_box(self, name: str, items: dict or list):
@@ -177,7 +178,7 @@ class TaskWidgetBase(QMainWindow):
         box = QComboBox()
         box.addItems([str(x) for x in options])
         box.currentTextChanged.connect(lambda value: self.combo_box_changed(value, name))
-        box.setCurrentText(str(path_get(self.schema.model_dump(), name.split("."))))
+        box.setCurrentText(str(self.path_get(self.schema, name.split("."))))
 
         return box
 
@@ -190,19 +191,20 @@ class TaskWidgetBase(QMainWindow):
         """
 
         name_lst = name.split(".")
-        value_type = type(path_get(self.schema.model_dump(), name_lst))
+        value_type = type(self.path_get(self.schema, name_lst))
         value = value_type[value] if type(value_type) == enum.EnumMeta else value_type(value)
-        path_set(self.schema, name_lst, value)
+        self.path_set(self.schema, name_lst, value)
         self.ValueChangedInside.emit(name)
 
     @Slot(str)
     def update_field_widget(self, name):
         """Update property widget. Triggers when attribute has been changed outside of widget
         :param name: name of attribute and widget"""
-        value = path_get(self.schema.model_dump(), name.split("."))
-        if dict not in type(value).__mro__ and list not in type(value).__mro__:  # not a dictionary or list like value
+        value = self.path_get(self.schema, name.split("."))
+        if dict not in type(value).__mro__ and list not in type(value).__mro__ and BaseModel not in type(value).__mro__:  # not a dictionary or list like value
             self._set_widget_text(name, value)
-        elif dict in type(value).__mro__:
+        elif dict in type(value).__mro__ or BaseModel in type(value).__mro__:
+            value = value.model_dump() if BaseModel in type(value).__mro__ else value
             for k, v in value.items():  # multiple widgets to set values for
                 self.update_field_widget(f"{name}.{k}")
         else:  # update list
@@ -222,7 +224,7 @@ class TaskWidgetBase(QMainWindow):
             elif type(widget) in [QSpinBox, QDoubleSpinBox, QSlider, QScrollableFloatSlider]:
                 widget.setValue(value)
             elif type(widget) == QComboBox:
-                value_type = type(path_get(self.schema.model_dump(), name.split(".")))
+                value_type = type(self.path_get(self.schema, name.split(".")))
                 value = value.name if type(value_type) == enum.EnumMeta else value_type(value)
                 widget.setCurrentText(str(value))
             elif hasattr(widget, 'setChecked'):
@@ -245,6 +247,36 @@ class TaskWidgetBase(QMainWindow):
         self.__dict__[name] = value
         if currentframe().f_back.f_locals.get("self", None) != self:  # call from outside so update widgets
             self.ValueChangedOutside.emit(name)
+    @staticmethod
+    def path_set(iterable: BaseModel, path: list[str], value) -> None:
+        """
+        Set value in a nested dictionary or list
+        :param iterable: dictionary or list to set value
+        :param path: list of strings that point towards value to set.
+        """
+
+        for i, k in enumerate(path):
+            if i != len(path) - 1:
+                iterable = iterable[int(k)] if type(iterable) == list else getattr(iterable, k)
+            else:
+                if type(iterable) == list:
+                    iterable[int(k)] = value
+                else:
+                    setattr(iterable, k, value)
+
+    @staticmethod
+    def path_get(iterable: BaseModel, path: list[str]):
+        """
+        Get value in a nested dictionary or listt
+        :param iterable: dictionary or list to set value
+        :param path: list of strings that point towards value to set.
+        :return value found at end of path
+        """
+
+        for i, k in enumerate(path):
+            k = int(k) if type(iterable) == list else k
+            iterable = iterable[int(k)] if type(iterable) == list else getattr(iterable, k)
+        return iterable
 
 
 # Convenience Functions
@@ -299,37 +331,6 @@ def label_maker(string):
 
     label = " ".join(label)
     return label
-
-
-def path_set(iterable: BaseModel, path: list[str], value) -> None:
-    """
-    Set value in a nested dictionary or list
-    :param iterable: dictionary or list to set value
-    :param path: list of strings that point towards value to set.
-    """
-
-    for i, k in enumerate(path):
-        if i != len(path)-1:
-            iterable = iterable[int(k)] if type(iterable) == list else getattr(iterable, k)
-        else:
-            if type(iterable) == list:
-                iterable[int(k)] = value
-            else:
-                setattr(iterable, k, value)
-
-def path_get(iterable: dict or list, path: list[str]):
-    """
-    Get value in a nested dictionary or listt
-    :param iterable: dictionary or list to set value
-    :param path: list of strings that point towards value to set.
-    :return value found at end of path
-    """
-
-    for i, k in enumerate(path):
-        k = int(k) if type(iterable) == list else k
-        iterable = iterable.__getitem__(k)
-    return iterable
-
 
 #
 def add_border(widget: QMainWindow,

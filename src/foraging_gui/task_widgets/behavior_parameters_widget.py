@@ -1,4 +1,4 @@
-from task_widget_base import TaskWidgetBase, add_border, path_get, path_set, create_widget
+from task_widget_base import TaskWidgetBase, add_border
 from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
     AindDynamicForagingTaskLogic,
     AindDynamicForagingTaskParameters,
@@ -74,17 +74,17 @@ class BehaviorParametersWidget(TaskWidgetBase):
             widget.setEnabled(enabled)
         name_lst = name.split(".")
         if enabled:
-            path_set(self.schema, name_lst, value)
+            self.path_set(self.schema, name_lst, value)
         else:
-            path_set(self.schema, name_lst, None)
-        self.ValueChangedOutside.emit(name)
+            self.path_set(self.schema, name_lst, None)
+        self.ValueChangedInside.emit(name)
 
     def update_field_widget(self, name):
         """
         Overwrite to apply optional None value
         """
 
-        value = path_get(self.schema.model_dump(), name.split("."))
+        value = self.path_get(self.schema, name.split("."))
         if dict not in type(value).__mro__ and list not in type(value).__mro__:  # not a dictionary or list like value
             if value is None and hasattr(self, name+"_check_box"):   # optional type so uncheck widget
                getattr(self, name+"_check_box").setChecked(False)
