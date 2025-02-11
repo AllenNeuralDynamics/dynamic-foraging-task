@@ -2998,7 +2998,7 @@ class Window(QMainWindow):
         filepath = os.path.join(self.default_saveFolder,self.current_box)
         now = datetime.now()
         mouse_dirs = os.listdir(filepath)
-        mouse_dirs.sort(reverse=True)
+        mouse_dirs.sort(reverse=True, key=lambda x: os.path.getmtime(os.path.join(filepath,x))) # in order of date modified
         mice = []
         experimenters = []
         for m in mouse_dirs:
