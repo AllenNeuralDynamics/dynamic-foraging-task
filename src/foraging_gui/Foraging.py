@@ -3004,6 +3004,7 @@ class Window(QMainWindow):
         for m in mouse_dirs:
             session_dir = os.path.join(self.default_saveFolder, self.current_box, str(m))
             sessions = os.listdir(session_dir)
+            sessions.sort(reverse=True, key=lambda x: os.path.getmtime(os.path.join(session_dir,x)))
             for s in sessions:
                 if 'behavior_' in s:
                     json_file = os.path.join(self.default_saveFolder,
