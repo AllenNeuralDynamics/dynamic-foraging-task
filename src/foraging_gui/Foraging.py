@@ -7,6 +7,7 @@ import time
 import subprocess
 import math
 import logging
+import requests
 from hashlib import md5
 
 import logging_loki
@@ -35,7 +36,6 @@ from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 from pydantic import ValidationError
-
 from StageWidget.main import get_stage_widget
 
 import foraging_gui
@@ -51,6 +51,7 @@ from foraging_gui.bias_indicator import BiasIndicator
 from foraging_gui.warning_widget import WarningWidget
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
+from foraging_gui.settings_model import DFTSettingsModel, BonsaiSettingsModel
 from aind_data_schema.core.session import Session
 from aind_data_schema_models.modalities import Modality
 from aind_behavior_services.session import AindBehaviorSessionModel
@@ -72,7 +73,6 @@ class NumpyEncoder(json.JSONEncoder):
 
 class Window(QMainWindow):
     Time = QtCore.pyqtSignal(int) # Photometry timer signal
-    sessionGenerated = QtCore.pyqtSignal(Session)  # signal to indicate Session has been generated
 
     def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
@@ -148,9 +148,9 @@ class Window(QMainWindow):
         self.ToInitializeVisual = 1 # Should we visualize performance
         self.FigureUpdateTooSlow = 0# if the FigureUpdateTooSlow is true, using different process to update figures
         self.ANewTrial = 1          # permission to start a new trial
-        self.previous_backup_completed = 1   # permission to save backup data; 0, the previous saving has not finished, and it will not trigger the next saving; 1, it is allowed to save backup data
         self.UpdateParameters = 1   # permission to update parameters
         self.logging_type = -1    # -1, logging is not started; 0, temporary logging; 1, formal logging
+        self.previous_backup_completed = 1 # permission to save backup data; 0, the previous saving has not finished, and it will not trigger the next saving; 1, it is allowed to save backup data
         self.unsaved_data = False   # Setting unsaved data to False
         self.to_check_drop_frames = 1 # 1, to check drop frames during saving data; 0, not to check drop frames
         self.session_run = False    # flag to indicate if session has been run or not
@@ -201,6 +201,7 @@ class Window(QMainWindow):
         self.Other_manual_water_left_time=[] # the valve open time of manual water given by the left valve each time
         self.Other_manual_water_right_volume=[] # the volume of manual water given by the right valve each time
         self.Other_manual_water_right_time=[] # the valve open time of manual water given by the right valve each time
+
         self._Optogenetics()    # open the optogenetics panel
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
@@ -229,9 +230,6 @@ class Window(QMainWindow):
 
         # Initializes session log handler as None
         self.session_log_handler = None
-
-        # generate an upload manifest when a session has been produced
-        self.upload_manifest_slot = self.sessionGenerated.connect(self._generate_upload_manifest)
 
         # show disk space
         self._show_disk_space()
@@ -1151,12 +1149,73 @@ class Window(QMainWindow):
             return None
         return self.schedule.query('`Mouse ID` == @mouse_id').iloc[0][column]
 
+    def _GetProjectName(self, mouse_id):
+        logging.info('Getting Project name')
+        add_default=True
+        project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
+    
+        # Check if this is a valid project name
+        if project_name not in self._GetApprovedAINDProjectNames():
+            logging.error('Project name {} is not valid, using default, please correct schedule'.format(project_name))
+            project_name = None
+
+        # If we have a valid name update the metadata dialog
+        if project_name is not None:
+            projects = [self.Metadata_dialog.ProjectName.itemText(i)
+                        for i in range(self.Metadata_dialog.ProjectName.count())]
+            index = np.where(np.array(projects) == project_name)[0]
+            if len(index) > 0:
+                index = index[0]
+                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
+                self.Metadata_dialog._show_project_info()
+                logging.info('Setting Project name: {}'.format(project_name))
+                add_default = False
+
+        if self.add_default_project_name and add_default:
+            logging.info('setting project name to default')
+            project_name=self._set_default_project()
+        return project_name
+    
+    def _GetApprovedAINDProjectNames(self):
+        end_point = "http://aind-metadata-service/project_names"
+        timeout = 5
+        response = requests.get(end_point, timeout=timeout)
+        if response.ok:
+            return json.loads(response.content)["data"]
+        else:
+            logging.error(f"Failed to fetch project names from endpoint. {response.content}")
+            return []
+
     def _GetSettings(self):
         '''
             Load the settings that are specific to this computer
         '''
 
-        # Get default settings
+        # Try to load Settings_box#.csv
+        self.SettingsBox={}
+        if not os.path.exists(self.SettingsBoxFile):
+            logging.error('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
+            raise Exception('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
+        try:
+            # Open the csv settings file
+            df = pd.read_csv(self.SettingsBoxFile,index_col=None, header=None)
+            self.SettingsBox = {row[0]: row[1] for _, row in df.iterrows()}
+            logging.info('Loaded settings_box file')
+        except Exception as e:
+            logging.error('Could not load settings_box file at: {}, {}'.format(self.SettingsBoxFile,str(e)))
+            e.args = ('Could not load settings box file at: {}'.format(self.SettingsBoxFile), *e.args)
+            raise e
+
+        # check that there is a newline for final entry of csv files
+        if not self._check_line_terminator(self.SettingsBoxFile):
+            logging.error('Settings box file does not have a newline at the end')
+            raise Exception('Settings box file does not have a newline at the end')
+
+        # Validate Bonsai Settings file
+        BonsaiSettingsModel(**self.SettingsBox)
+        logging.info('Settings_box.csv file validated')
+
+        # Get default settings for ForagingSettings.JSON
         defaults = {
             'default_saveFolder':os.path.join(os.path.expanduser("~"), "Documents")+'\\',
             'current_box':'',
@@ -1203,35 +1262,7 @@ class Window(QMainWindow):
             'add_default_project_name':True
         }
 
-        # Try to load Settings_box#.csv
-        self.SettingsBox={}
-        if not os.path.exists(self.SettingsBoxFile):
-            logging.error('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
-            raise Exception('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
-        try:
-            # Open the csv settings file
-            df = pd.read_csv(self.SettingsBoxFile,index_col=None, header=None)
-            self.SettingsBox = {row[0]: row[1] for _, row in df.iterrows()}
-            logging.info('Loaded settings_box file')
-        except Exception as e:
-            logging.error('Could not load settings_box file at: {}, {}'.format(self.SettingsBoxFile,str(e)))
-            e.args = ('Could not load settings box file at: {}'.format(self.SettingsBoxFile), *e.args)
-            raise e
-
-        # check that there is a newline for final entry of csv files
-        if not self._check_line_terminator(self.SettingsBoxFile):
-            logging.error('Settings box file does not have a newline at the end')
-            raise Exception('Settings box file does not have a newline at the end')
-
-        # check that the SettingsBox has each of the values in mandatory_fields as a key, if not log an error for the missing key
-
-        csv_mandatory_fields = ['Behavior', 'Soundcard', 'BonsaiOsc1', 'BonsaiOsc2', 'BonsaiOsc3', 'BonsaiOsc4','AttenuationLeft','AttenuationRight','current_box']
-        for field in csv_mandatory_fields:
-            if field not in self.SettingsBox.keys():
-                logging.error('Missing key ({}) in settings_box file'.format(field))
-                raise Exception('Missing key ({}) in settings_box file'.format(field))
-
-        # Try to load the settings file        
+        # Try to load the ForagingSettings.json file    
         self.Settings = {}
         if not os.path.exists(self.SettingFile):
             logging.error('Could not find settings file at: {}'.format(self.SettingFile))
@@ -1255,10 +1286,15 @@ class Window(QMainWindow):
                     logging.error('Missing setting ({}), is required'.format(key))
                     raise Exception('Missing setting ({}), is required'.format(key))
 
+        # Check that settings are valid
+        DFTSettingsModel(**self.Settings)
+        logging.info('ForagingSettings.json validated')
+
         if 'default_openFolder' not in self.Settings:
             self.Settings['default_openFolder'] = self.Settings['default_saveFolder']
 
         # Save all settings
+        # TODO, should always use the values in self.Settings[x], not self.x
         self.default_saveFolder=self.Settings['default_saveFolder']
         self.default_openFolder=self.Settings['default_openFolder']
         self.current_box=self.Settings['current_box']
@@ -1291,6 +1327,7 @@ class Window(QMainWindow):
         self.add_default_project_name = self.Settings['add_default_project_name']
         if not is_absolute_path(self.project_info_file):
             self.project_info_file = os.path.join(self.SettingFolder,self.project_info_file)
+
         # Also stream log info to the console if enabled
         if self.Settings['show_log_info_in_console']:
 
@@ -1928,7 +1965,7 @@ class Window(QMainWindow):
                         if Correct ==0: # incorrect format; don't change
                             child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
-                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight','','GoCueDecibel','ConditionP_5','ConditionP_6','Duration_5','Duration_6','OffsetEnd_5','OffsetEnd_6','OffsetStart_5','OffsetStart_6','Probability_5','Probability_6','PulseDur_5','PulseDur_6','RD_5','RD_6']) and
+                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight','','ConditionP_5','ConditionP_6','Duration_5','Duration_6','OffsetEnd_5','OffsetEnd_6','OffsetStart_5','OffsetStart_6','Probability_5','Probability_6','PulseDur_5','PulseDur_6','RD_5','RD_6']) and
                         (child.text() == '')):
                         # These attributes can have the empty string, but we can't set the value as the empty string, unless we allow resets
                         if allow_reset:
@@ -2101,7 +2138,7 @@ class Window(QMainWindow):
         self.ITIIncrease.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
         self._Randomness()
 
-        if self.behavior_session_model.experiment in ['Coupled Baiting','Coupled Without Baiting']:
+        if self.Task.currentText() in ['Coupled Baiting','Coupled Without Baiting']:
             self.label_6.setEnabled(True)
             self.label_7.setEnabled(True)
             self.label_8.setEnabled(True)
@@ -2145,7 +2182,7 @@ class Window(QMainWindow):
             self.AdvancedBlockAuto.setEnabled(True)
             self._AdvancedBlockAuto() # Update states of SwitchThr and PointsInARow
 
-        elif self.behavior_session_model.experiment in ['Uncoupled Baiting','Uncoupled Without Baiting']:
+        elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
             self.label_6.setEnabled(False)
             self.label_7.setEnabled(False)
             self.label_8.setEnabled(False)
@@ -2187,7 +2224,7 @@ class Window(QMainWindow):
             self.PointsInARow.setEnabled(False)
             self.BlockMinReward.setEnabled(False)
             self.IncludeAutoReward.setEnabled(False)
-        elif self.behavior_session_model.experiment in ['RewardN']:
+        elif self.Task.currentText() in ['RewardN']:
             self.label_6.setEnabled(True)
             self.label_7.setEnabled(True)
             self.label_8.setEnabled(True)
@@ -2471,7 +2508,7 @@ class Window(QMainWindow):
             SaveAs=0
             SaveContinue=1
             saving_type_label = 'backup saving'
-            behavior_data_field='GeneratedTrials_backup'
+            behavior_data_field='GeneratedTrials'
         elif ForceSave==1:
             saving_type_label = 'force saving'
             behavior_data_field='GeneratedTrials'
@@ -2692,8 +2729,6 @@ class Window(QMainWindow):
             # generate the metadata file
             generated_metadata=generate_metadata(Obj=Obj)
             session = generated_metadata._session()
-            if session is not None:     # skip if metadata generation failed
-                self.sessionGenerated.emit(session)   # emit sessionGenerated
 
             if BackupSave==0:
                 text="Session metadata generated successfully: " + str(generated_metadata.session_metadata_success)+"\n"+\
@@ -3971,11 +4006,6 @@ class Window(QMainWindow):
             # disable metadata fields
             self._set_metadata_enabled(False)
 
-            # generate an upload manifest when a session has been produced if slot is not already connected
-            if self.upload_manifest_slot is None:
-                logging.debug('Connecting sessionGenerated to _generate_upload_manifest')
-                self.upload_manifest_slot = self.sessionGenerated.connect(self._generate_upload_manifest)
-
             # Set IACUC protocol in metadata based on schedule
             protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
             if protocol is not None:
@@ -3987,23 +4017,8 @@ class Window(QMainWindow):
                 logging.info('Setting IACUC Protocol: {}'.format(protocol))
 
             # Set Project Name in metadata based on schedule
-            add_default=True
-            project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
-            if project_name is not None:
-                projects = [self.Metadata_dialog.ProjectName.itemText(i)
-                            for i in range(self.Metadata_dialog.ProjectName.count())]
-                index = np.where(np.array(projects) == project_name)[0]
-                if len(index) > 0:
-                    index = index[0]
-                    self.Metadata_dialog.ProjectName.setCurrentIndex(index)
-                    self.Metadata_dialog._show_project_info()
-                    logging.info('Setting Project name: {}'.format(project_name))
-                    add_default = False
-
-            if self.add_default_project_name and add_default:
-                project_name=self._set_default_project()
+            self.project_name = self._GetProjectName(mouse_id)
             
-            self.project_name = project_name
             self.session_run = True   # session has been started
 
             self.keyPressEvent(allow_reset=True)
@@ -4050,7 +4065,6 @@ class Window(QMainWindow):
             # save behavior session model
             with open(self.behavior_session_modelJson, "w") as outfile:
                 outfile.write(self.behavior_session_model.model_dump_json())
-
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
@@ -4148,7 +4162,7 @@ class Window(QMainWindow):
             workerGenerateAtrial.signals.finished.connect(self._thread_complete4)
             workerStartTrialLoop = Worker(self._StartTrialLoop,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
             workerStartTrialLoop1 = Worker(self._StartTrialLoop1,GeneratedTrials)
-            worker_save = Worker(self._Save,BackupSave=1)
+            worker_save = Worker(self._perform_backup,BackupSave=1)
             worker_save.signals.finished.connect(self._thread_complete6)
             self.worker1=worker1
             self.workerLick=workerLick
@@ -4157,6 +4171,7 @@ class Window(QMainWindow):
             self.workerStartTrialLoop=workerStartTrialLoop
             self.workerStartTrialLoop1=workerStartTrialLoop1
             self.worker_save=worker_save
+            self.data_lock = threading.Lock()
         else:
             PlotM=self.PlotM
             worker1=self.worker1
@@ -4303,6 +4318,11 @@ class Window(QMainWindow):
                 if self.actionLicks_sta.isChecked():
                     self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
 
+                # Generate upload manifest when we generate the second trial
+                # counter starts at 0
+                if GeneratedTrials.B_CurrentTrialN == 1:
+                    self._generate_upload_manifest()                
+ 
                 # calculate bias every 10 trials
                 if (GeneratedTrials.B_CurrentTrialN+1) % 10 == 0 and GeneratedTrials.B_CurrentTrialN+1 > 20:
                     # correctly format data for bias indicator
@@ -4338,23 +4358,12 @@ class Window(QMainWindow):
                 #generate a new trial
                 if self.NewTrialRewardOrder==1:
                     GeneratedTrials._GenerateATrial(self.Channel4)
-                '''
-                ### Save data in the main thread. Keep it temporarily for testing ### 
-                start_time = time.time()
-                self.previous_backup_completed=1
-                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
-                    self._Save(BackupSave=1)
-                # Record the end time
-                end_time = time.time()
-                # Calculate the time elapsed and log if it is too long
-                if end_time - start_time>1:
-                    logging.info(f"Time taken to backup the data is too long: {elapsed_time:.6f} seconds")
-                '''
+
                 # Save data in a separate thread
-                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
-                    self.previous_backup_completed=0
-                    self.GeneratedTrials_backup=copy.copy(self.GeneratedTrials)
-                    self.threadpool6.start(worker_save)
+                with self.data_lock:
+                    if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
+                        self.previous_backup_completed=0
+                        self.threadpool6.start(worker_save)
 
                 # show disk space
                 self._show_disk_space()
@@ -4399,6 +4408,14 @@ class Window(QMainWindow):
                     # User continues, wait another stall_duration and prompt again
                     logging.error('trial stalled {} minutes, user continued trials'.format(elapsed_time))
                     stall_iteration +=1
+
+    def _perform_backup(self,BackupSave):
+        # Backup save logic
+        with self.data_lock:
+            try:
+                self._Save(BackupSave=BackupSave)
+            except Exception as e:
+                logging.error('backup save failed: {}'.format(e))
 
     def bias_calculated(self, bias: float, trial_number: int) -> None:
         """
@@ -4656,10 +4673,9 @@ class Window(QMainWindow):
                          '&session_plot_selected_draw_types=1.+Choice+history'
         )
 
-    def _generate_upload_manifest(self, session: Session):
+    def _generate_upload_manifest(self):
         '''
             Generates a manifest.yml file for triggering data copy to VAST and upload to aws
-            :param session: session to use to create upload manifest
         '''
 
         # skip manifest generation for test mouse
@@ -4675,6 +4691,7 @@ class Window(QMainWindow):
             logging.info('Skipping upload manifest, because this is an ephys session')
             return
 
+        logging.info('Generating upload manifest')
         try:
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
@@ -4685,19 +4702,16 @@ class Window(QMainWindow):
             date_format = "%Y-%m-%d_%H-%M-%S"
             schedule = self.behavior_session_model.date.strftime(date_format).split('_')[0]+'_20-30-00'
             schedule_time = datetime.strptime(schedule,date_format) + timedelta(seconds=np.random.randint(30*60))
-            # This ID is outdated as of 11/21/2024. We will remove this comment once we confirm everything works
-            #capsule_id = 'c089614a-347e-4696-b17e-86980bb782c1'
             capsule_id = '0ae9703f-9012-4d0b-ad8d-b6a00858b80d'
             mount = 'FIP'
 
             modalities = {}
             modalities['behavior'] = [self.behavior_session_model.root_path.replace('\\', '/')]
-            for stream in session.data_streams:
-                if Modality.FIB in stream.stream_modalities:
-                    modalities['fib'] = [self.PhotometryFolder.replace('\\', '/')]
-                    modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
-                elif Modality.BEHAVIOR_VIDEOS in stream.stream_modalities:
-                    modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
+            if (self.Camera_dialog.camera_start_time != ''):
+                modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
+            if hasattr(self, 'fiber_photometry_start_time') and (self.fiber_photometry_start_time != ''): 
+                modalities['fib'] = [self.PhotometryFolder.replace('\\', '/')]
+                modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
 
             # Define contents of manifest file
             contents = {
@@ -4730,16 +4744,12 @@ class Window(QMainWindow):
             # Write the manifest file
             with open(filename,'w') as yaml_file:
                 yaml.dump(contents, yaml_file, default_flow_style=False)
-
+            logging.info('Finished generating manifest')
         except Exception as e:
             logging.error('Could not generate upload manifest: {}'.format(str(e)))
             QMessageBox.critical(self, 'Upload manifest',
                 'Could not generate upload manifest. '+\
                 'Please alert the mouse owner, and report on github.')
-
-        # disconnect slot to only create manifest once
-        logging.debug('Disconnecting sessionGenerated from _generate_upload_manifest')
-        self.upload_manifest_slot = self.sessionGenerated.disconnect(self.upload_manifest_slot)
 
 def setup_loki_logging(box_number):
     db_file=os.getenv('SIPE_DB_FILE', r'//allen/aibs/mpe/keepass/sipe_sw_passwords.kdbx')
