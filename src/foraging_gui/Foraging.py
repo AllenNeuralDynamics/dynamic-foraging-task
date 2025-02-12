@@ -1066,6 +1066,10 @@ class Window(QMainWindow):
             pass
 
         self.logging_type=loggingtype # 0 for formal logging, 1 for temporary logging
+
+        # if we are starting a new logging, we should initialize/empty some fields
+        self._empty_initialize_fields()
+    
         return log_folder
 
     def _GetLaserCalibration(self):
@@ -3699,10 +3703,6 @@ class Window(QMainWindow):
 
         self.unsaved_data=False
         self.ManualWaterVolume=[0,0]
-        if hasattr(self, 'fiber_photometry_start_time'):
-            del self.fiber_photometry_start_time
-        if hasattr(self, 'fiber_photometry_end_time'):
-            del self.fiber_photometry_end_time
 
         # Clear Plots
         if hasattr(self, 'PlotM') and self.clear_figure_after_save:
@@ -3823,7 +3823,45 @@ class Window(QMainWindow):
             self.Metadata_dialog.project_info = project_info
             self.Metadata_dialog.ProjectName.addItems([project_name])
         return project_name
-                
+
+    def _empty_initialize_fields(self):
+        '''empty fields from the previous session'''
+        # empty the manual water volume
+        self.ManualWaterVolume=[0,0]
+        # delete open ephys data
+        self.open_ephys=[]
+        # set the flag to check drop frames
+        self.to_check_drop_frames=1
+        # empty the laser calibration
+        self.Opto_dialog.laser_1_calibration_voltage.setText('')
+        self.Opto_dialog.laser_2_calibration_voltage.setText('')
+        self.Opto_dialog.laser_1_calibration_power.setText('')
+        self.Opto_dialog.laser_2_calibration_power.setText('')
+
+        # clear camera start and end time
+        self.Camera_dialog.camera_start_time=''
+        self.Camera_dialog.camera_stop_time=''
+        
+        # clear fiber start and end time (this could be simplified after refactoring the photometry code)
+        if hasattr(self, 'fiber_photometry_end_time'):
+            self.fiber_photometry_end_time = ''
+        if not self.StartExcitation.isChecked():
+            self.fiber_photometry_start_time = ''
+        
+        # delete generate trials
+        if hasattr(self, 'GeneratedTrials'):
+            # delete GeneratedTrials
+            del self.GeneratedTrials
+
+        # delete the random reward 
+        if hasattr(self, 'RandomReward_dialog'):
+            self.RandomReward_dialog.random_reward_par={}
+            self.RandomReward_dialog.random_reward_par['RandomWaterVolume']=[0,0]
+            
+        # delete the optical tagging
+        if hasattr(self, 'OpticalTagging_dialog'):
+            self.OpticalTagging_dialog.optical_tagging_par={}
+        
     def _Start(self):
         '''start trial loop'''
 
@@ -3839,12 +3877,6 @@ class Window(QMainWindow):
             if reply == QMessageBox.No:
                 return
 
-        # empty the laser calibration
-        self.Opto_dialog.laser_1_calibration_voltage.setText('')
-        self.Opto_dialog.laser_2_calibration_voltage.setText('')
-        self.Opto_dialog.laser_1_calibration_power.setText('')
-        self.Opto_dialog.laser_2_calibration_power.setText('')
-
         # Check for Bonsai connection
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
@@ -3852,9 +3884,6 @@ class Window(QMainWindow):
             self.Start.setChecked(False)
             self.Start.setStyleSheet('background-color:none;')
             return
-
-        # set the flag to check drop frames
-        self.to_check_drop_frames=1
 
         # clear the session list
         self._connect_Sessionlist(connect=False)
@@ -4091,7 +4120,6 @@ class Window(QMainWindow):
             self._StopCurrentSession()
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
-            self.ManualWaterVolume=[0,0]
             # start a new logging
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
