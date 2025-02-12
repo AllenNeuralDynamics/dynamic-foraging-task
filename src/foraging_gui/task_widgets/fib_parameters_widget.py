@@ -1,4 +1,4 @@
-from task_widget_base import TaskWidgetBase, add_border
+from foraging_gui.task_widgets.task_widget_base import TaskWidgetBase, add_border
 from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
     FiberPhotometry
 )

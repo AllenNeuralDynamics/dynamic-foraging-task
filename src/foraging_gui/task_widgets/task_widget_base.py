@@ -196,7 +196,6 @@ class TaskWidgetBase(QMainWindow):
         self.path_set(self.schema, name_lst, value)
         self.ValueChangedInside.emit(name)
 
-    @Slot(str)
     def update_field_widget(self, name):
         """Update property widget. Triggers when attribute has been changed outside of widget
         :param name: name of attribute and widget"""
