@@ -16,6 +16,7 @@ from PyQt5 import QtCore
 
 from foraging_gui.reward_schedules.uncoupled_block import UncoupledBlocks
 from aind_behavior_dynamic_foraging import AindDynamicForagingTaskLogic
+from aind_behavior_services.session import AindBehaviorSessionModel
 
 if PLATFORM == 'win32':
     from newscale.usbxpress import USBXpressLib, USBXpressDevice
@@ -24,9 +25,10 @@ PID_NEWSCALE = 0xea61
 
 
 class GenerateTrials():
-    def __init__(self,win, task_logic: AindDynamicForagingTaskLogic):
+    def __init__(self,win, task_logic: AindDynamicForagingTaskLogic, session_model:AindBehaviorSessionModel):
         self.win=win
         self.task_logic = task_logic
+        self.session_model = session_model
         self.B_LeftLickIntervalPercent = None      # percentage of left lick intervals under 100ms
         self.B_RightLickIntervalPercent = None     # percentage of right lick intervals under 100ms
         self.B_CrossSideIntervalPercent = None     # percentage of cross side lick intervals under 100ms
@@ -127,14 +129,14 @@ class GenerateTrials():
         self._CheckAutoWater()
         
         # --- Handle reward schedule ---
-        if self.TP_Task in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
+        if self.session_model.task in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
             # -- Use the old logic --
             # check block transition and set self.B_ANewBlock
             self._check_coupled_block_transition()
             if any(self.B_ANewBlock==1):
                 # assign the next block's reward prob to self.B_CurrentRewardProb 
                 self._generate_next_coupled_block()
-        elif self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']:
+        elif self.session_model.task in ['Uncoupled Baiting','Uncoupled Without Baiting']:
             # -- Use Han's standalone class --
             if self.B_CurrentTrialN == -1 or \
                 not hasattr(self, 'uncoupled_blocks'): # Or the user start uncoupled in the midde of the session
@@ -318,10 +320,10 @@ class GenerateTrials():
     def _CheckBaitPermitted(self):
         '''Check if bait is permitted of the current trial'''
         #For task rewardN, if this is the "initial N trials" of the active side, no bait will be be given.
-        if self.TP_Task=='RewardN':
+        if self.session_model.task=='RewardN':
             # get the maximum consecutive selection of the active side of the current block
             MaxCLen=self._GetMaximumConSelection()
-            if MaxCLen>=float(self.TP_InitiallyInactiveN):
+            if MaxCLen>=self.task_logic.task_parameters.reward_n.initial_inactive_trials:
                 self.BaitPermitted=True
             else:
                 self.BaitPermitted=False
@@ -329,7 +331,8 @@ class GenerateTrials():
             self.BaitPermitted=True
         if self.BaitPermitted==False:
             logging.warning('The active side has no reward due to consecutive \nselections('+str(MaxCLen)+')<'+
-                            self.TP_InitiallyInactiveN, extra={'tags': [self.win.warning_log_tag]})
+                            self.task_logic.task_parameters.reward_n.initial_inactive_trials,
+                            extra={'tags': [self.win.warning_log_tag]})
 
     def _GetMaximumConSelection(self):
         '''get the maximum consecutive selection of the active side of the current block'''
@@ -602,12 +605,12 @@ class GenerateTrials():
 
         B_RewardedHistory=self.B_RewardedHistory.copy()
         if CountAutoWater==1:
-            if self.TP_IncludeAutoReward=='yes':
+            if self.task_logic.task_parameters.auto_water.include_reward:
                 # auto reward is considered as reward no matter the animal's choice. B_RewardedHistory and B_AutoWaterTrial cannot both be True
                 Ind=range(len(self.B_RewardedHistory[0]))
                 for i in range(len(self.B_RewardedHistory)):
                     B_RewardedHistory[i]=np.logical_or(self.B_RewardedHistory[i],self.B_AutoWaterTrial[i][Ind])
-            elif self.TP_IncludeAutoReward=='no':
+            else:
                 # auto reward is not considered as reward (auto reward is considered reward only when the animal makes a choice). Reward is determined by the animal's response history and the bait history
                 Ind=range(len(self.B_RewardedHistory[0]))
                 for i in range(len(self.B_RewardedHistory)): 
@@ -690,9 +693,9 @@ class GenerateTrials():
             p_Rs=self.B_RewardProHistory[1][:Len]
             random_number_L= np.concatenate(self.B_CurrentRewardProbRandomNumber,axis=0)[0::2][:Len]
             random_number_R= np.concatenate(self.B_CurrentRewardProbRandomNumber,axis=0)[1::2][:Len]
-            if (self.TP_Task in ['Coupled Baiting','Uncoupled Baiting']):
+            if (self.session_model.task in ['Coupled Baiting','Uncoupled Baiting']):
                 self.B_for_eff_optimal, self.B_for_eff_optimal_random_seed=self.foraging_eff(reward_rate,p_Ls,p_Rs,random_number_L,random_number_R)
-            elif (self.TP_Task in ['Coupled Without Baiting','Uncoupled Without Baiting']):
+            elif (self.session_model.task in ['Coupled Without Baiting','Uncoupled Without Baiting']):
                 self.B_for_eff_optimal, self.B_for_eff_optimal_random_seed=self.foraging_eff_no_baiting(reward_rate,p_Ls,p_Rs,random_number_L,random_number_R)
             else:
                 self.B_for_eff_optimal=np.nan
@@ -924,7 +927,7 @@ class GenerateTrials():
                 self.win.same_side_lick_interval.setText(f'Percentage of same side lick intervals under 100 ms is '
                                                          f'over 10%: {same_side_frac * 100:.2f}%.')
                 logging.warning(f'Percentage of same side lick intervals under 100 ms in Box {self.win.box_number}'
-                              f'{self.win.box_letter} mouse {self.win.behavior_session_model.subject} exceeded 10%')
+                              f'{self.win.box_letter} mouse {self.win.session_model.subject} exceeded 10%')
             else:
                 self.win.same_side_lick_interval.setText('')
 
@@ -951,7 +954,7 @@ class GenerateTrials():
                 self.win.cross_side_lick_interval.setText(f'Percentage of cross side lick intervals under 100 ms is '
                                                           f'over 10%: {cross_side_frac * 100:.2f}%.')
                 logging.warning(f'Percentage of cross side lick intervals under 100 ms in Box {self.win.box_number}'
-                              f'{self.win.box_letter} mouse {self.win.behavior_session_model.subject} exceeded 10%')
+                              f'{self.win.box_letter} mouse {self.win.session_model.subject} exceeded 10%')
             else:
                 self.win.cross_side_lick_interval.setText('')
 
@@ -967,7 +970,7 @@ class GenerateTrials():
         '''Show session/trial related information in the information section'''
         # show reward pairs and current reward probability
         try:
-            if (self.TP_Task in ['Coupled Baiting','Coupled Without Baiting','RewardN']):
+            if (self.session_model.task in ['Coupled Baiting','Coupled Without Baiting','RewardN']):
                 self.win.ShowRewardPairs.setText('Reward pairs:\n'
                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
                                                 + '\n\n'
@@ -976,7 +979,7 @@ class GenerateTrials():
                                                     self.B_RewardProHistory[:,self.B_CurrentTrialN],2))) 
                 if self.win.default_ui=='ForagingGUI.ui': 
                     self.win.ShowRewardPairs_2.setText(self.win.ShowRewardPairs.text())
-            elif (self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']):
+            elif (self.session_model.task in ['Uncoupled Baiting','Uncoupled Without Baiting']):
                 self.win.ShowRewardPairs.setText('Reward pairs:\n'
                                 + str(np.round(self.RewardProbPoolUncoupled,2)).replace('\n', ',')
                                 + '\n\n'
@@ -1456,7 +1459,7 @@ class GenerateTrials():
         RandomNumber=np.random.random(2)
         self.B_CurrentRewardProbRandomNumber.append(RandomNumber)
         self.CurrentBait=self.B_CurrentRewardProb>RandomNumber
-        if (self.TP_Task in ['Coupled Baiting','Uncoupled Baiting']):
+        if (self.session_model.task in ['Coupled Baiting','Uncoupled Baiting']):
              self.CurrentBait= self.CurrentBait | self.B_Baited
         # For task rewardN, if this is the "initial N trials" of the active side, no bait will be be given.
         if self.BaitPermitted is False:
@@ -1629,11 +1632,11 @@ class GenerateTrials():
 
     def _add_one_trial(self):
         # to decide if we should add one trial to the block length on both sides
-        if self.TP_AddOneTrialForNoresponse=='Yes':
-            if self.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']:
+        if self.task_logic.no_response_trial_addition:
+            if self.session_model.task in ['Uncoupled Baiting','Uncoupled Without Baiting']:
                 for i, side in enumerate(['L', 'R']):
                     self.uncoupled_blocks.block_ends[side][-1] = self.uncoupled_blocks.block_ends[side][-1]+1
-            elif self.TP_Task in ['Coupled Baiting','Coupled Without Baiting']:
+            elif self.session_model.task in ['Coupled Baiting','Coupled Without Baiting']:
                 for i, side in enumerate(['L', 'R']):
                     self.BlockLenHistory[i][-1] = self.BlockLenHistory[i][-1]+1
 

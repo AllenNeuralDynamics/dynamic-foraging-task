@@ -1,28 +1,30 @@
-from foraging_gui.task_widgets.task_widget_base import TaskWidgetBase, add_border
+from foraging_gui.schema_widgets.schema_widget_base import SchemaWidgetBase, add_border
 from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
     AindDynamicForagingTaskLogic,
     AindDynamicForagingTaskParameters,
     AutoWater,
     AutoStop,
     AutoBlock,
-    Warmup
+    Warmup,
+    RewardN
 )
-import logging
 from PyQt5.QtWidgets import QCheckBox
+from PyQt5.QtCore import pyqtSignal
 
-class BehaviorParametersWidget(TaskWidgetBase):
+class BehaviorParametersWidget(SchemaWidgetBase):
     """
     Widget to expose task logic for behavior sessions
     """
 
+    taskUpdated = pyqtSignal(str)
+
     def __init__(self, schema: AindDynamicForagingTaskParameters):
 
         super().__init__(schema)
-        #print(self.__dict__)
 
         # delete widgets unrelated to session
-        del self.task_parameters_widgets["rng_seed"]
-        del self.task_parameters_widgets["aind_behavior_services_pkg_version"]
+        del self.schema_fields_widgets["rng_seed"]
+        del self.schema_fields_widgets["aind_behavior_services_pkg_version"]
 
         # set range on certain widgets
         getattr(self, "auto_water.multiplier_widget").setRange(0, 1)
@@ -48,20 +50,57 @@ class BehaviorParametersWidget(TaskWidgetBase):
         # hide or show uncoupled_reward
         widget = self.uncoupled_reward_widget
         self.uncoupled_reward_check_box = QCheckBox()
-        self.uncoupled_reward_check_box.setChecked(True)
         self.uncoupled_reward_check_box.toggled.connect(lambda s: self.toggle_optional_field("uncoupled_reward",
                                                                                              s,
                                                                                              [0.1, 0.3, 0.7]))
+        self.uncoupled_reward_check_box.setChecked(False)
+        self.uncoupled_reward_check_box.toggled.emit(False)
+
         widget.layout().insertWidget(0, self.uncoupled_reward_check_box)
 
-        # hide or show warmuo
+        # hide or show warmup
         widget = self.warmup_widget
         self.warmup_check_box = QCheckBox()
         self.warmup_check_box.setChecked(True)
         self.warmup_check_box.toggled.connect(lambda state: self.toggle_optional_field("warmup", state, Warmup()))
         widget.layout().insertWidget(0, self.warmup_check_box)
 
+        # hide or show reward n
+        widget = self.reward_n_widget
+        self.reward_n_check_box = QCheckBox()
+        self.reward_n_check_box.toggled.connect(lambda state: self.toggle_optional_field("reward_n", state, RewardN()))
+        widget.parent().layout().insertWidget(0, self.reward_n_check_box)
+        self.reward_n_check_box.setChecked(False)
+        self.reward_n_check_box.toggled.emit(False)
+
         add_border(self)
+
+        self.ValueChangedInside.connect(self.update_task_option)
+
+    def update_task_option(self, name):
+        """
+        Emit task type change and correctly configure parameters
+        :param name of field changed
+        """
+
+        if name == "uncoupled_reward":
+            if self.uncoupled_reward_check_box.isChecked():
+                self.taskUpdated.emit("uncoupled")
+                if self.reward_n_check_box.isChecked():
+                    self.reward_n_check_box.setChecked(False)
+            else:
+                if not self.reward_n_check_box.isChecked():
+                    self.taskUpdated.emit("coupled")
+
+        if name == "reward_n":
+            if self.reward_n_check_box.isChecked():
+                self.taskUpdated.emit("reward_n")
+                if self.uncoupled_reward_check_box.isChecked():
+                    self.uncoupled_reward_check_box.setChecked(False)
+            else:
+                if not self.uncoupled_reward_check_box.isChecked():
+                    self.taskUpdated.emit("coupled")
+
 
     def toggle_optional_field(self, name: str, enabled: bool, value) -> None:
         """
@@ -70,7 +109,9 @@ class BehaviorParametersWidget(TaskWidgetBase):
         :param enabled: whether to add or remove field
         :param value: value to set field to
         """
-        for widget in getattr(self, name+"_widgets").values():
+        widgets = getattr(self, name+"_widgets") if hasattr(self, name+"_widgets") \
+            else {"k": getattr(self, name+"_widget")}  # disable all sub widgets
+        for widget in widgets.values():
             widget.setEnabled(enabled)
         name_lst = name.split(".")
         if enabled:
@@ -120,7 +161,8 @@ if __name__ == "__main__":
         ),
     )
     task_widget = BehaviorParametersWidget(task_model.task_parameters)
-    task_widget.ValueChangedInside.connect(lambda name: print(task_model))
+    #task_widget.ValueChangedInside.connect(lambda name: print(task_model))
+    task_widget.taskUpdated.connect(print)
     task_widget.show()
 
     task_model.task_parameters.block_parameters.min = 10

@@ -1,9 +1,9 @@
-from foraging_gui.task_widgets.task_widget_base import TaskWidgetBase, add_border
+from foraging_gui.schema_widgets.schema_widget_base import SchemaWidgetBase, add_border
 from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
     FiberPhotometry
 )
 
-class FIBParametersWidget(TaskWidgetBase):
+class FIBParametersWidget(SchemaWidgetBase):
 
     """
     Widget to expose task logic for fiber photometry sessions
@@ -12,7 +12,7 @@ class FIBParametersWidget(TaskWidgetBase):
     def __init__(self, schema: FiberPhotometry):
 
         super().__init__(schema)
-        self.task_parameters_widgets["experiment_type"].hide()
+        self.schema_fields_widgets["experiment_type"].hide()
 
 
 if __name__ == "__main__":

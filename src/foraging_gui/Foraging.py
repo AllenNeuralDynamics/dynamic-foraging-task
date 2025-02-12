@@ -9,6 +9,7 @@ import math
 import logging
 import requests
 from hashlib import md5
+from typing import Literal
 
 import logging_loki
 import socket
@@ -49,9 +50,10 @@ from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScal
 from foraging_gui.stage import Stage
 from foraging_gui.bias_indicator import BiasIndicator
 from foraging_gui.warning_widget import WarningWidget
-from foraging_gui.task_widgets.behavior_parameters_widget import BehaviorParametersWidget
-from foraging_gui.task_widgets.fib_parameters_widget import FIBParametersWidget
-from foraging_gui.task_widgets.opto_parameters_widget import OptoParametersWidget
+from foraging_gui.schema_widgets.behavior_parameters_widget import BehaviorParametersWidget
+from foraging_gui.schema_widgets.fib_parameters_widget import FIBParametersWidget
+from foraging_gui.schema_widgets.opto_parameters_widget import OptoParametersWidget
+from foraging_gui.schema_widgets.session_model_widget import SessionModelWidget
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
 from foraging_gui.settings_model import DFTSettingsModel, BonsaiSettingsModel
@@ -59,6 +61,7 @@ from aind_data_schema.core.session import Session
 from aind_data_schema_models.modalities import Modality
 from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_auto_train.schema.task import TrainingStage
+
 
 from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
     AindDynamicForagingTaskLogic,
@@ -131,20 +134,23 @@ class Window(QMainWindow):
         self._LoadUI()
 
         # create AINDBehaviorSession model to be used and referenced for session info
-        self.behavior_session_model = AindBehaviorSessionModel(
-            experiment=self.Task.currentText(),
-            experimenter=[self.Experimenter.text()],
+        self.session_model = AindBehaviorSessionModel(
+            experiment="Coupled Baiting",
+            experimenter=[""],
             date=datetime.now(),   # update when folders are created
             root_path='',         # update when created
             session_name= '',   # update when date and subject are filled in
-            subject=self.ID.text(),
+            subject="",
             experiment_version=foraging_gui.__version__,
-            notes=self.ShowNotes.toPlainText(),
+            notes="",
             commit_hash= subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip(),
             allow_dirty_repo=
             subprocess.check_output(['git','diff-index','--name-only', 'HEAD']).decode('ascii').strip() != '',
             skip_hardware_validation=True
         )
+        self.session_widget = SessionModelWidget(self.session_model)
+        self.verticalLayout_9.insertWidget(0, self.session_widget)
+        self.verticalLayout_16.insertWidget(0, self.session_widget.schema_fields_widgets["notes"])
 
         self.task_logic = AindDynamicForagingTaskLogic(
                             task_parameters=AindDynamicForagingTaskParameters(
@@ -156,6 +162,8 @@ class Window(QMainWindow):
                             )
         self.task_widget = BehaviorParametersWidget(self.task_logic.task_parameters)
         self.scrollArea.setWidget(self.task_widget)
+        self.task_widget.taskUpdated.connect(self.update_session_task)
+
 
         # add warning_widget to layout and set color
         self.warning_widget = WarningWidget(log_tag=self.warning_log_tag,
@@ -263,6 +271,32 @@ class Window(QMainWindow):
             self._ReconnectBonsai()
         logging.info('Start up complete')
 
+    def update_session_task(self, task_type: Literal["coupled", "uncoupled", "rewardN"]):
+        """
+        Configure session task based on task parameters configured
+        :param task_type: task type curently configured
+        """
+
+        if task_type == "coupled":
+            for i in range(2, 5):
+                self.session_widget.experiment_widget.model().item(i).setEnabled(False)
+            for i in range(2):
+                self.session_widget.experiment_widget.model().item(i).setEnabled(True)
+            self.session_widget.experiment_widget.setCurrentIndex(0)
+
+        elif task_type == "uncoupled":
+            for i in range(5):
+                if i in [0, 1, 4]:
+                    self.session_widget.experiment_widget.model().item(i).setEnabled(False)
+                else:
+                    self.session_widget.experiment_widget.model().item(i).setEnabled(True)
+                self.session_widget.experiment_widget.setCurrentIndex(2)
+        else:
+            for i in range(4):
+                self.session_widget.experiment_widget.model().item(i).setEnabled(False)
+
+            self.session_widget.experiment_widget.model().item(4).setEnabled(True)
+            self.session_widget.experiment_widget.setCurrentIndex(4)
     def _load_rig_metadata(self):
         '''Load the latest rig metadata'''
 
@@ -318,7 +352,7 @@ class Window(QMainWindow):
         uic.loadUi(self.default_ui, self)
         if self.default_ui=='ForagingGUI.ui':
             logging.info('Using ForagingGUI.ui interface')
-            self.label_date.setText(str(date.today()))
+            #self.label_date.setText(str(date.today()))
             self.default_warning_color="purple"
             self.default_text_color="purple"
             self.default_text_background_color='purple'
@@ -373,19 +407,6 @@ class Window(QMainWindow):
         self.FIPMode.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('FIPMode', self.FIPMode.currentText()))
         # self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         # self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
-        # Connect to ID change in the mainwindow
-        self.ID.returnPressed.connect(
-            lambda: self.AutoTrain_dialog.update_auto_train_lock(engaged=False)
-        )
-        self.ID.returnPressed.connect(
-            lambda: self.AutoTrain_dialog.update_auto_train_fields(
-                subject_id=self.behavior_session_model.subject,
-                auto_engage=self.auto_engage,
-                )
-            )
-
-        self.AutoTrain.clicked.connect(self._auto_train_clicked)
-        self.pushButton_streamlit.clicked.connect(self._open_mouse_on_streamlit)
         # self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         # self.Task.currentIndexChanged.connect(self._Task)
         self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
@@ -411,7 +432,6 @@ class Window(QMainWindow):
         self.MoveZN.clicked.connect(self._MoveZN)
         self.StageStop.clicked.connect(self._StageStop)
         self.GetPositions.clicked.connect(self._GetPositions)
-        self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
         self.Sessionlist.currentIndexChanged.connect(self._session_list)
         self.SessionlistSpin.textChanged.connect(self._session_list_spin)
         self.StartEphysRecording.clicked.connect(self._StartEphysRecording)
@@ -420,14 +440,6 @@ class Window(QMainWindow):
         self.Opto_dialog.laser_2_calibration_voltage.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_1_calibration_power.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_2_calibration_power.textChanged.connect(self._toggle_save_color)
-
-        # update parameters in behavior session model if widgets change
-        #self.Task.currentTextChanged.connect(lambda task: setattr(self.behavior_session_model, 'experiment', task))
-        self.Experimenter.textChanged.connect(lambda text: setattr(self.behavior_session_model, 'experimenter', [text]))
-        self.ID.textChanged.connect(lambda subject: setattr(self.behavior_session_model, 'subject', subject))
-        self.ShowNotes.textChanged.connect(lambda: setattr(self.behavior_session_model, 'notes',
-                                                           self.ShowNotes.toPlainText()))
-
 
         # Set manual water volume to earned reward and trigger update if changed
         # for side in ['Left', 'Right']:
@@ -484,7 +496,7 @@ class Window(QMainWindow):
                 self._toggle_color(self.StartEphysRecording)
                 return
 
-        EphysControl=EphysRecording(open_ephys_machine_ip_address=self.open_ephys_machine_ip_address,mouse_id=self.behavior_session_model.subject)
+        EphysControl=EphysRecording(open_ephys_machine_ip_address=self.open_ephys_machine_ip_address, mouse_id=self.session_model.subject)
         if self.StartEphysRecording.isChecked():
             try:
                 if EphysControl.get_status()['mode']=='RECORD':
@@ -1374,7 +1386,7 @@ class Window(QMainWindow):
             mouse_pk=mouse.pk,
             date=session.session_start_time,
             weight_g=session.animal_weight_post,
-            operator=self.behavior_session_model.experimenter[0],
+            operator=self.session_model.experimenter[0],
             water_earned_ml=water['water_in_session_foraging'],
             water_supplement_delivered_ml=water['water_after_session'],
             water_supplement_recommended_ml=None,
@@ -1744,7 +1756,7 @@ class Window(QMainWindow):
             folder_name = os.path.dirname(self.SaveFileJson)
             subprocess.Popen(['explorer', folder_name])
         elif hasattr(self, 'default_saveFolder'):
-            AnimalFolder = os.path.join(self.default_saveFolder, self.current_box, self.behavior_session_model.subject)
+            AnimalFolder = os.path.join(self.default_saveFolder, self.current_box, self.session_model.subject)
             logging.warning(f'Save folder unspecified, so opening {AnimalFolder}')
             subprocess.Popen(['explorer', AnimalFolder])
         else:
@@ -2177,12 +2189,12 @@ class Window(QMainWindow):
         '''Show reward pairs'''
         tp = self.task_logic.task_parameters
         try:
-            if self.behavior_session_model.experiment in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
+            if self.session_model.experiment in ['Coupled Baiting', 'Coupled Without Baiting', 'RewardN']:
                 self.RewardPairs=self.RewardFamilies[int(self.RewardFamily.text())-1][:int(self.RewardPairsN.text())]
                 self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.BaseRewardSum.text())
-            elif self.behavior_session_model.experiment in ['Uncoupled Baiting','Uncoupled Without Baiting']:
+            elif self.session_model.experiment in ['Uncoupled Baiting', 'Uncoupled Without Baiting']:
                 self.RewardProb=np.array(tp.uncoupled_reward)
-            if self.behavior_session_model.experiment in ['Coupled Baiting','Coupled Without Baiting','RewardN','Uncoupled Baiting','Uncoupled Without Baiting']:
+            if self.session_model.experiment in ['Coupled Baiting', 'Coupled Without Baiting', 'RewardN', 'Uncoupled Baiting', 'Uncoupled Without Baiting']:
                 if hasattr(self, 'GeneratedTrials'):
                     self.ShowRewardPairs.setText('Reward pairs:\n'
                                                  + str(np.round(self.RewardProb,2)).replace('\n', ',')
@@ -2576,12 +2588,12 @@ class Window(QMainWindow):
             Obj['settings_box']=self.SettingsBox
 
             # save the commit hash
-            Obj['commit_ID']=self.behavior_session_model.commit_hash
+            Obj['commit_ID']=self.session_model.commit_hash
             Obj['repo_url']=self.repo_url
             Obj['current_branch'] =self.current_branch
-            Obj['repo_dirty_flag'] =self.behavior_session_model.allow_dirty_repo
+            Obj['repo_dirty_flag'] =self.session_model.allow_dirty_repo
             Obj['dirty_files'] =self.dirty_files
-            Obj['version'] = self.behavior_session_model.experiment_version
+            Obj['version'] = self.session_model.experiment_version
 
             # save the open ephys recording information
             Obj['open_ephys'] = self.open_ephys
@@ -2615,7 +2627,7 @@ class Window(QMainWindow):
 
         # save folders
         Obj['SessionFolder']=self.SessionFolder
-        Obj['TrainingFolder']=self.behavior_session_model.root_path
+        Obj['TrainingFolder']=self.session_model.root_path
         Obj['HarpFolder']=self.HarpFolder
         Obj['VideoFolder']=self.VideoFolder
         Obj['PhotometryFolder']=self.PhotometryFolder
@@ -2639,7 +2651,7 @@ class Window(QMainWindow):
             Obj['generate_rig_metadata_success']=generated_metadata.rig_metadata_success
 
             if save_clicked:    # create water log result if weight after filled and uncheck save
-                if self.BaseWeight.text() != '' and self.WeightAfter.text() != '' and self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']:
+                if self.BaseWeight.text() != '' and self.WeightAfter.text() != '' and self.session_model.subject not in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']:
                     self._AddWaterLogResult(session)
                 self.bias_indicator.clear()  # prepare for new session
 
@@ -2700,10 +2712,10 @@ class Window(QMainWindow):
         '''
 
         if self.load_tag==0:
-            self.behavior_session_model.date = datetime.now()   # update session model with correct date
+            self.session_model.date = datetime.now()   # update session model with correct date
             self._get_folder_structure_new()
-            self.behavior_session_model.session_name=f'behavior_{self.behavior_session_model.subject}_' \
-                                                     f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
+            self.session_model.session_name= f'behavior_{self.session_model.subject}_' \
+                                                     f'{self.session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
         else:
             self._parse_folder_structure()
 
@@ -2717,9 +2729,9 @@ class Window(QMainWindow):
         if not os.path.exists(self.MetadataFolder):
             os.makedirs(self.MetadataFolder)
             logging.info(f"Created new folder: {self.MetadataFolder}")
-        if not os.path.exists(self.behavior_session_model.root_path):
-            os.makedirs(self.behavior_session_model.root_path)
-            logging.info(f"Created new folder: {self.behavior_session_model.root_path}")
+        if not os.path.exists(self.session_model.root_path):
+            os.makedirs(self.session_model.root_path)
+            logging.info(f"Created new folder: {self.session_model.root_path}")
         if not os.path.exists(self.HarpFolder):
             os.makedirs(self.HarpFolder)
             logging.info(f"Created new folder: {self.HarpFolder}")
@@ -2738,7 +2750,7 @@ class Window(QMainWindow):
         :return string of the date used to name folders
         """
         formatted_datetime = os.path.basename(self.fname).split('_')[1]+'_'+os.path.basename(self.fname).split('_')[-1].split('.')[0]
-        self.behavior_session_model.date = datetime.strptime(formatted_datetime, "%Y-%m-%d_%H-%M-%S")
+        self.session_model.date = datetime.strptime(formatted_datetime, "%Y-%m-%d_%H-%M-%S")
         if os.path.basename(os.path.dirname(self.fname))=='TrainingFolder':
             # old data format
             self._get_folder_structure_old()
@@ -2749,38 +2761,38 @@ class Window(QMainWindow):
     def _get_folder_structure_old(self):
         '''get the folder structure for the old data format'''
         # includes subject and date of session
-        session_name = self.behavior_session_model.session_name = f'behavior_{self.behavior_session_model.subject}_' \
-                                                     f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
+        session_name = self.session_model.session_name = f'behavior_{self.session_model.subject}_' \
+                                                     f'{self.session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
         id_name = session_name.split("behavior_")[-1]
         self.SessionFolder=os.path.join(self.default_saveFolder,
-            self.current_box,self.behavior_session_model.subject, session_name)
+                                        self.current_box, self.session_model.subject, session_name)
         self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
-        self.behavior_session_model.root_path = os.path.join(self.SessionFolder, 'TrainingFolder')
+        self.session_model.root_path = os.path.join(self.SessionFolder, 'TrainingFolder')
         self.HarpFolder=os.path.join(self.SessionFolder, 'HarpFolder')
         self.VideoFolder=os.path.join(self.SessionFolder, 'VideoFolder')
         self.PhotometryFolder=os.path.join(self.SessionFolder, 'PhotometryFolder')
-        self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{id_name}.mat')
-        self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}.json')
-        self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}.json')
+        self.SaveFileMat=os.path.join(self.session_model.root_path, f'{id_name}.mat')
+        self.SaveFileJson=os.path.join(self.session_model.root_path, f'{id_name}.json')
+        self.SaveFileParJson=os.path.join(self.session_model.root_path, f'{id_name}.json')
 
     def _get_folder_structure_new(self):
         '''get the folder structure for the new data format'''
         # Determine folders
         # session_name includes subject and date of session
-        session_name = self.behavior_session_model.session_name=f'behavior_{self.behavior_session_model.subject}_' \
-                                                     f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
+        session_name = self.session_model.session_name= f'behavior_{self.session_model.subject}_' \
+                                                     f'{self.session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
         id_name = session_name.split("behavior_")[-1]
         self.SessionFolder=os.path.join(self.default_saveFolder,
-            self.current_box,self.behavior_session_model.subject, session_name)
-        self.behavior_session_model.root_path=os.path.join(self.SessionFolder,'behavior')
-        self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{id_name}.mat')
-        self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}.json')
-        self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}_par.json')
-        self.behavior_session_model_json = os.path.join(self.behavior_session_model.root_path,
+                                        self.current_box, self.session_model.subject, session_name)
+        self.session_model.root_path=os.path.join(self.SessionFolder, 'behavior')
+        self.SaveFileMat=os.path.join(self.session_model.root_path, f'{id_name}.mat')
+        self.SaveFileJson=os.path.join(self.session_model.root_path, f'{id_name}.json')
+        self.SaveFileParJson=os.path.join(self.session_model.root_path, f'{id_name}_par.json')
+        self.behavior_session_model_json = os.path.join(self.session_model.root_path,
                                                         f'behavior_session_model_{id_name}.json')
-        self.behavior_task_logic_model_json = os.path.join(self.behavior_session_model.root_path,
+        self.behavior_task_logic_model_json = os.path.join(self.session_model.root_path,
                                                            f'behavior_task_logic_model_{id_name}.json')
-        self.HarpFolder=os.path.join(self.behavior_session_model.root_path,'raw.harp')
+        self.HarpFolder=os.path.join(self.session_model.root_path, 'raw.harp')
         self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
         self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
         self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
@@ -3624,24 +3636,6 @@ class Window(QMainWindow):
                         stall_iteration+=1
                         logging.info('trial stalled {} minutes, user did not force stopped trials'.format(elapsed_time))
 
-        # validate behavior session model and document validation errors if any
-        try:
-            AindBehaviorSessionModel(**self.behavior_session_model.model_dump())
-        except ValidationError as e:
-            logging.error(str(e), extra={'tags': [self.warning_log_tag]})
-        # save behavior session model
-        with open(self.behavior_session_model_json, "w") as outfile:
-            outfile.write(self.behavior_session_model.model_dump_json())
-
-        # validate behavior task logic model and document validation errors if any
-        try:
-            AindDynamicForagingTaskLogic(**self.task_logic.model_dump())
-        except ValidationError as e:
-            logging.error(str(e), extra={'tags': [self.warning_log_tag]})
-        # save behavior session model
-        with open(self.behavior_task_logic_model_json, "w") as outfile:
-            outfile.write(self.task_logic.model_dump_json())
-
     def _thread_complete(self):
         '''complete of a trial'''
         if self.NewTrialRewardOrder==0:
@@ -3756,7 +3750,7 @@ class Window(QMainWindow):
             self.keyPressEvent()
 
             # check if FIP setting match schedule. skip if test mouse or mouse isn't in schedule or
-            mouse_id = self.behavior_session_model.subject
+            mouse_id = self.session_model.subject
             if hasattr(self, 'schedule') and mouse_id in self.schedule['Mouse ID'].values and \
                     mouse_id not in ['0','1','2','3','4','5','6','7','8','9','10'] :
                 fip_mode = self._GetInfoFromSchedule(mouse_id, 'FIP Mode')
@@ -3824,16 +3818,16 @@ class Window(QMainWindow):
             reply = QMessageBox.critical(self,
                 'Box {}, Start'.format(self.box_letter),
                 f'The experimenter is <span style="color: {self.default_text_color};">'
-                f'{self.behavior_session_model.experimenter[0]}</span>. Is this correct?',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                f'{self.session_model.experimenter[0]}</span>. Is this correct?',
+                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if reply == QMessageBox.No:
                 self.Start.setChecked(False)
                 logging.info('User declines using default name')
                 return
-            logging.info('Starting session, with experimenter: {}'.format(self.behavior_session_model.experimenter[0]))
+            logging.info('Starting session, with experimenter: {}'.format(self.session_model.experimenter[0]))
 
             # check repo status
-            if (self.current_branch not in ['main','production_testing']) & (self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']):
+            if (self.current_branch not in ['main','production_testing']) & (self.session_model.subject not in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']):
                 # Prompt user over off-pipeline branch
                 reply = QMessageBox.critical(self,
                     'Box {}, Start'.format(self.box_letter),
@@ -3849,7 +3843,7 @@ class Window(QMainWindow):
                     logging.error('Starting session on branch: {}'.format(self.current_branch))
 
             # Check for untracked local changes
-            if self.behavior_session_model.allow_dirty_repo & (self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']):
+            if self.session_model.allow_dirty_repo & (self.session_model.subject not in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']):
                 # prompt user over untracked local changes
                 reply = QMessageBox.critical(self,
                     'Box {}, Start'.format(self.box_letter),
@@ -3863,7 +3857,7 @@ class Window(QMainWindow):
                 else:
                     # Allow the session to continue, but log error
                     logging.error('Starting session with untracked local changes: {}'.format(self.dirty_files))
-            elif self.behavior_session_model.allow_dirty_repo is None:
+            elif self.session_model.allow_dirty_repo is None:
                 logging.error('Could not check for untracked local changes')
 
             if self.PhotometryB.currentText()=='on' and (not self.FIP_started):
@@ -3960,6 +3954,24 @@ class Window(QMainWindow):
 
             # stop lick interval calculation
             self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
+
+            # validate behavior session model and document validation errors if any
+            try:
+                AindBehaviorSessionModel(**self.session_model.model_dump())
+            except ValidationError as e:
+                logging.error(str(e), extra={'tags': [self.warning_log_tag]})
+            # save behavior session model
+            with open(self.behavior_session_model_json, "w") as outfile:
+                outfile.write(self.session_model.model_dump_json())
+
+            # validate behavior task logic model and document validation errors if any
+            try:
+                AindDynamicForagingTaskLogic(**self.task_logic.model_dump())
+            except ValidationError as e:
+                logging.error(str(e), extra={'tags': [self.warning_log_tag]})
+            # save behavior session model
+            with open(self.behavior_task_logic_model_json, "w") as outfile:
+                outfile.write(self.task_logic.model_dump_json())
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
@@ -4115,7 +4127,7 @@ class Window(QMainWindow):
         Setup a log handler to write logs during session to TrainingFolder
         """
 
-        logging_filename = os.path.join(self.behavior_session_model.root_path, 'python_gui_log.txt')
+        logging_filename = os.path.join(self.session_model.root_path, 'python_gui_log.txt')
 
         # Format the log file:
         log_format = '%(asctime)s:%(levelname)s:%(module)s:%(filename)s:%(funcName)s:line %(lineno)d:%(message)s'
@@ -4127,7 +4139,7 @@ class Window(QMainWindow):
         self.session_log_handler.setLevel(logging.INFO)
         logger.root.addHandler(self.session_log_handler)
 
-        logging.info(f'Starting log file at {self.behavior_session_model.root_path}')
+        logging.info(f'Starting log file at {self.session_model.root_path}')
 
     def end_session_log(self) -> None:
         """
@@ -4169,7 +4181,7 @@ class Window(QMainWindow):
                 logging.info('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
                 if (self.task_logic.task_parameters.auto_water is not None or
                     self.task_logic.task_parameters.block_parameters.min_reward > 0
-                    or self.GeneratedTrials.TP_Task in ['Uncoupled Baiting', 'Uncoupled Without Baiting']) or \
+                    or self.session_model.task in ['Uncoupled Baiting', 'Uncoupled Without Baiting']) or \
                         self.task_logic.task_parameters.no_response_trial_addition:
                     # The next trial parameters must be dependent on the current trial's choice
                     # get animal response and then generate a new trial
@@ -4560,12 +4572,12 @@ class Window(QMainWindow):
         self.AutoTrain_dialog.show()
 
         # Check subject id each time the dialog is opened
-        self.AutoTrain_dialog.update_auto_train_fields(subject_id=self.behavior_session_model.subject)
+        self.AutoTrain_dialog.update_auto_train_fields(subject_id=self.session_model.subject)
 
     def _open_mouse_on_streamlit(self):
         '''open the training history of the current mouse on the streamlit app'''
         # See this PR: https://github.com/AllenNeuralDynamics/foraging-behavior-browser/pull/25
-        webbrowser.open(f'https://foraging-behavior-browser.allenneuraldynamics-test.org/?filter_subject_id={self.behavior_session_model.subject}'
+        webbrowser.open(f'https://foraging-behavior-browser.allenneuraldynamics-test.org/?filter_subject_id={self.session_model.subject}'
                          '&tab_id=tab_session_inspector'
                          '&session_plot_mode=all+sessions+filtered+from+sidebar'
                          '&session_plot_selected_draw_types=1.+Choice+history'
@@ -4577,7 +4589,7 @@ class Window(QMainWindow):
         '''
 
         # skip manifest generation for test mouse
-        if self.behavior_session_model.subject in ['0','1','2','3','4','5','6','7','8','9','10']:
+        if self.session_model.subject in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']:
             logging.info('Skipping upload manifest, because this is the test mouse')
             return
         # skip manifest generation if automatic upload is disabled
@@ -4598,13 +4610,13 @@ class Window(QMainWindow):
             # Upload time is 8:30 tonight, plus a random offset over a 30 minute period
             # Random offset reduces strain on downstream servers getting many requests at once
             date_format = "%Y-%m-%d_%H-%M-%S"
-            schedule = self.behavior_session_model.date.strftime(date_format).split('_')[0]+'_20-30-00'
+            schedule = self.session_model.date.strftime(date_format).split('_')[0] + '_20-30-00'
             schedule_time = datetime.strptime(schedule,date_format) + timedelta(seconds=np.random.randint(30*60))
             capsule_id = '0ae9703f-9012-4d0b-ad8d-b6a00858b80d'
             mount = 'FIP'
 
             modalities = {}
-            modalities['behavior'] = [self.behavior_session_model.root_path.replace('\\', '/')]
+            modalities['behavior'] = [self.session_model.root_path.replace('\\', '/')]
             if (self.Camera_dialog.camera_start_time != '') and (self.camera_names != []):
                 modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
             if hasattr(self, 'fiber_photometry_start_time') and (self.fiber_photometry_start_time != ''): 
@@ -4613,10 +4625,10 @@ class Window(QMainWindow):
 
             # Define contents of manifest file
             contents = {
-                'acquisition_datetime': self.behavior_session_model.date,
-                'name': self.behavior_session_model.session_name,
+                'acquisition_datetime': self.session_model.date,
+                'name': self.session_model.session_name,
                 'platform': 'behavior',
-                'subject_id': int(self.behavior_session_model.subject),
+                'subject_id': int(self.session_model.subject),
                 'capsule_id': capsule_id,
                 'mount':mount,
                 'destination': '//allen/aind/scratch/dynamic_foraging_rig_transfer',

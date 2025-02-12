@@ -1,4 +1,4 @@
-from foraging_gui.task_widgets.task_widget_base import TaskWidgetBase, add_border
+from foraging_gui.schema_widgets.schema_widget_base import SchemaWidgetBase, add_border
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
     Optogenetics,
     IntervalConditions,
@@ -18,7 +18,7 @@ import logging
 from PyQt5.QtWidgets import QCheckBox, QComboBox
 
 
-class OptoParametersWidget(TaskWidgetBase):
+class OptoParametersWidget(SchemaWidgetBase):
     """
     Widget to expose task logic for behavior sessions
     """
@@ -27,7 +27,7 @@ class OptoParametersWidget(TaskWidgetBase):
         super().__init__(schema)
 
         # delete widgets unrelated to session
-        del self.task_parameters_widgets["experiment_type"]
+        del self.schema_fields_widgets["experiment_type"]
 
         # add or remove laser colors
         for laser, widget in self.laser_colors_widgets.items():

@@ -18,13 +18,12 @@ from importlib import import_module
 import enum
 import re
 import inflection
-from view.widgets.miscellaneous_widgets.q_scrollable_float_slider import QScrollableFloatSlider
 from pydantic import BaseModel
 from typing import Literal
 import logging
 import typing
 
-class TaskWidgetBase(QMainWindow):
+class SchemaWidgetBase(QMainWindow):
     ValueChangedOutside = pyqtSignal((str,))
     ValueChangedInside = pyqtSignal((str,))
 
@@ -36,7 +35,7 @@ class TaskWidgetBase(QMainWindow):
         self.schema = schema
         self.schema_module = import_module(self.schema.__module__)
         widget = self.create_field_widgets(self.schema.model_dump(),
-                                           "task_parameters")
+                                           "schema_fields")
         self.setCentralWidget(create_widget("V", **widget))
         #add_border(self)
         self.ValueChangedOutside[str].connect(self.update_field_widget)  # Trigger update when property value changes
@@ -142,7 +141,6 @@ class TaskWidgetBase(QMainWindow):
 
         name_lst = name.split(".")
         value = value if value else getattr(self, name + "_widget").text()
-        print(value, name)
         self.path_set(self.schema, name_lst, value)
         self.ValueChangedInside.emit(name)
 
@@ -220,7 +218,7 @@ class TaskWidgetBase(QMainWindow):
             widget.blockSignals(True)  # block signal indicating change since changing internally
             if type(widget) in [QLineEdit]:
                 widget.setText(str(value))
-            elif type(widget) in [QSpinBox, QDoubleSpinBox, QSlider, QScrollableFloatSlider]:
+            elif type(widget) in [QSpinBox, QDoubleSpinBox, QSlider]:
                 widget.setValue(value)
             elif type(widget) == QComboBox:
                 value_type = type(self.path_get(self.schema, name.split(".")))
@@ -343,7 +341,7 @@ def add_border(widget: QMainWindow,
     """
 
     widgets = []
-    for name, field_widget in getattr(widget, "task_parameters_widgets").items():
+    for name, field_widget in getattr(widget, "schema_fields_widgets").items():
         frame = QFrame()
         layout = QVBoxLayout(frame)
         layout.addWidget(field_widget)
@@ -385,7 +383,7 @@ if __name__ == "__main__":
             warmup=Warmup()
         ),
     )
-    task_widget = TaskWidgetBase(task_model.task_parameters)
+    task_widget = SchemaWidgetBase(task_model.task_parameters)
     task_widget.ValueChangedInside.connect(lambda name: print(task_model))
     task_widget.show()
 

@@ -2235,7 +2235,7 @@ class AutoTrainDialog(QDialog):
         self._setup_allbacks()
         
         # Sync selected subject_id
-        self.update_auto_train_fields(subject_id=self.MainWindow.behavior_session_model.subject)
+        self.update_auto_train_fields(subject_id=self.MainWindow.session_model.subject)
                 
     def _setup_allbacks(self):
         self.checkBox_show_this_mouse_only.stateChanged.connect(
