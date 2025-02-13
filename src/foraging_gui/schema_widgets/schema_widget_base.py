@@ -230,11 +230,11 @@ class SchemaWidgetBase(QMainWindow):
         else:
             self.log.warning(f"{name} doesn't correspond to a widget")
 
-    def apply_schema(self, schema: BaseModel):
+    def apply_schema(self, schema: BaseModel = None):
         """
         Convenience function to apply new schema
         """
-        self.schema = schema
+        self.schema = schema if not schema else self.schema
         for name in self.schema.model_dump().keys():
             self.update_field_widget(name)
 
@@ -330,18 +330,21 @@ def label_maker(string):
     return label
 
 #
-def add_border(widget: QMainWindow,
+def add_border(widget: SchemaWidgetBase,
+               widget_group: dict = None,
                orientation: Literal['H', 'V', 'VH', 'HV'] = 'HV') \
-        -> QMainWindow:
+        -> SchemaWidgetBase:
     """
     Add border dividing property widgets in BaseDeviceWidget
     :param widget: widget to add dividers
+    :param widget_group: dictionary of widgets to add border to. If None, default is schema_fields_widgets
     :param: schema: schema used to create widget
     :param orientation: orientation to order widgets. H for horizontal, V for vertical, HV or VH for combo
     """
 
     widgets = []
-    for name, field_widget in getattr(widget, "schema_fields_widgets").items():
+    widget_group = widget_group if widget_group else widget.schema_fields_widgets
+    for name, field_widget in widget_group.items():
         frame = QFrame()
         layout = QVBoxLayout(frame)
         layout.addWidget(field_widget)

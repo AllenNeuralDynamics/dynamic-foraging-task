@@ -160,10 +160,20 @@ class Window(QMainWindow):
                                 warmup=Warmup()
                                 )
                             )
-        self.task_widget = BehaviorParametersWidget(self.task_logic.task_parameters)
+        self.RewardFamilies = [[[8, 1], [6, 1], [3, 1], [1, 1]],
+                              [[8, 1], [1, 1]], [[1, 0], [.9, .1], [.8, .2], [.7, .3], [.6, .4], [.5, .5]],
+                              [[6, 1], [3, 1], [1, 1]]]
+        self.task_widget = BehaviorParametersWidget(self.task_logic.task_parameters,
+                                                    reward_families=self.RewardFamilies)
         self.scrollArea.setWidget(self.task_widget)
         self.task_widget.taskUpdated.connect(self.update_session_task)
-
+        # update reward pairs when task has changed
+        self.task_widget.taskUpdated.connect(lambda task: self._ShowRewardPairs())
+        self.task_widget.ValueChangedInside.connect(lambda name: self._ShowRewardPairs())
+        # initialize valve times and update valve times when reward volumes change
+        self.left_valve_open_time = None
+        self.right_valve_open_time = None
+        self.task_widget.volumeChanged.connect(self.update_valve_open_time)
 
         # add warning_widget to layout and set color
         self.warning_widget = WarningWidget(log_tag=self.warning_log_tag,
@@ -240,14 +250,13 @@ class Window(QMainWindow):
         self._InitializeMotorStage()
         self._load_stage()
         self._Metadata()
-        self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self.WaterPerRewardedTrial=0.005
         self._ShowRewardPairs() # show reward pairs
         self._GetTrainingParameters() # get initial training parameters
         self.connectSignalsSlots()
-        #self._Task()
         self.keyPressEvent()
-        #self._WaterVolumnManage2()
+        self.update_valve_open_time("Left")
+        self.update_valve_open_time("Right")
         self._LickSta()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
@@ -297,6 +306,7 @@ class Window(QMainWindow):
 
             self.session_widget.experiment_widget.model().item(4).setEnabled(True)
             self.session_widget.experiment_widget.setCurrentIndex(4)
+
     def _load_rig_metadata(self):
         '''Load the latest rig metadata'''
 
@@ -395,8 +405,8 @@ class Window(QMainWindow):
         self.Save.clicked.connect(self._Save)
         self.Clear.clicked.connect(self._Clear)
         self.Start.clicked.connect(self._Start)
-        self.GiveLeft.clicked.connect(self._GiveLeft)
-        self.GiveRight.clicked.connect(self._GiveRight)
+        self.GiveLeft.clicked.connect(lambda: self.give_manual_water("Left"))
+        self.GiveRight.clicked.connect(lambda: self.give_manual_water("Right"))
         self.NewSession.clicked.connect(self._NewSession)
         self.StartFIP.clicked.connect(self._StartFIP)
         self.StartExcitation.clicked.connect(self._StartExcitation)
@@ -405,10 +415,6 @@ class Window(QMainWindow):
         self.OptogeneticsB.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('Optogenetics',self.OptogeneticsB.currentText()))
         self.PhotometryB.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('Photometry',self.PhotometryB.currentText()))
         self.FIPMode.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('FIPMode', self.FIPMode.currentText()))
-        # self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
-        # self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
-        # self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
-        # self.Task.currentIndexChanged.connect(self._Task)
         self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
         self.WeightAfter.textChanged.connect(self._PostWeightChange)
         self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
@@ -420,10 +426,6 @@ class Window(QMainWindow):
         self.actionOpen_rig_metadata_folder.triggered.connect(self._OpenRigMetadataFolder)
         self.actionOpen_metadata_dialog_folder.triggered.connect(self._OpenMetadataDialogFolder)
         self.actionOpen_video_folder.triggered.connect(self._OpenVideoFolder)
-        # self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
-        # self.RightValue.textChanged.connect(self._WaterVolumnManage1)
-        # self.LeftValue_volume.textChanged.connect(self._WaterVolumnManage2)
-        # self.RightValue_volume.textChanged.connect(self._WaterVolumnManage2)
         self.MoveXP.clicked.connect(self._MoveXP)
         self.MoveYP.clicked.connect(self._MoveYP)
         self.MoveZP.clicked.connect(self._MoveZP)
@@ -440,18 +442,6 @@ class Window(QMainWindow):
         self.Opto_dialog.laser_2_calibration_voltage.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_1_calibration_power.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_2_calibration_power.textChanged.connect(self._toggle_save_color)
-
-        # Set manual water volume to earned reward and trigger update if changed
-        # for side in ['Left', 'Right']:
-        #     reward_volume_widget = getattr(self, f'{side}Value_volume')
-        #     manual_volume_widget = getattr(self, f'GiveWater{side[0]}_volume')
-        #     manual_volume_widget.setValue(reward_volume_widget.value())
-        #     reward_volume_widget.valueChanged.connect(manual_volume_widget.setValue)
-        #
-        #     reward_time_widget = getattr(self, f'{side}Value')
-        #     manual_time_widget = getattr(self, f'GiveWater{side[0]}')
-        #     manual_time_widget.setValue(reward_time_widget.value())
-        #     reward_time_widget.valueChanged.connect(manual_time_widget.setValue)
 
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
@@ -1657,97 +1647,39 @@ class Window(QMainWindow):
         '''Do not restart a session after saving'''
         self._Save(SaveAs=1)
 
-    def _WaterVolumnManage1(self):
-        '''Change the water volume based on the valve open time'''
-        self.LeftValue.textChanged.disconnect(self._WaterVolumnManage1)
-        self.RightValue.textChanged.disconnect(self._WaterVolumnManage1)
-        self.LeftValue_volume.textChanged.disconnect(self._WaterVolumnManage2)
-        self.RightValue_volume.textChanged.disconnect(self._WaterVolumnManage2)
+    def update_valve_open_time(self, valve: Literal["Left", "Right"]):
+        """
+        Change the valve open time based on the water volume
+        :param valve: valve to update
+        """
+
         # use the latest calibration result
         if hasattr(self, 'WaterCalibration_dialog'):
             if hasattr(self.WaterCalibration_dialog, 'PlotM'):
-                if  hasattr(self.WaterCalibration_dialog.PlotM, 'FittingResults'):
-                    FittingResults=self.WaterCalibration_dialog.PlotM.FittingResults
-                    tag=1
-        if tag==1:
-            self._GetLatestFitting(FittingResults)
-            self._ValvetimeVolumnTransformation(widget2=self.LeftValue_volume,widget1=self.LeftValue,direction=1,valve='Left')
-            self._ValvetimeVolumnTransformation(widget2=self.RightValue_volume,widget1=self.RightValue,direction=1,valve='Right')
-            self.LeftValue_volume.setEnabled(True)
-            self.RightValue_volume.setEnabled(True)
-            self.label_28.setEnabled(True)
-            self.label_29.setEnabled(True)
-        else:
-            self.LeftValue_volume.setEnabled(False)
-            self.RightValue_volume.setEnabled(False)
-            self.label_28.setEnabled(False)
-            self.label_29.setEnabled(False)
-        self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
-        self.RightValue.textChanged.connect(self._WaterVolumnManage1)
-        self.LeftValue_volume.textChanged.connect(self._WaterVolumnManage2)
-        self.RightValue_volume.textChanged.connect(self._WaterVolumnManage2)
-
-    def _WaterVolumnManage2(self):
-        '''Change the valve open time based on the water volume'''
-        self.LeftValue.textChanged.disconnect(self._WaterVolumnManage1)
-        self.RightValue.textChanged.disconnect(self._WaterVolumnManage1)
-        self.LeftValue_volume.textChanged.disconnect(self._WaterVolumnManage2)
-        self.RightValue_volume.textChanged.disconnect(self._WaterVolumnManage2)
-        # use the latest calibration result
-        if hasattr(self, 'WaterCalibration_dialog'):
-            if hasattr(self.WaterCalibration_dialog, 'PlotM'):
-                if  hasattr(self.WaterCalibration_dialog.PlotM, 'FittingResults'):
-                    FittingResults=self.WaterCalibration_dialog.PlotM.FittingResults
-                    tag=1
-        if tag==1:
-            self._GetLatestFitting(FittingResults)
-            self._ValvetimeVolumnTransformation(widget1=self.LeftValue_volume,widget2=self.LeftValue,direction=-1,valve='Left')
-            self._ValvetimeVolumnTransformation(widget1=self.RightValue_volume,widget2=self.RightValue,direction=-1,valve='Right')
-        else:
-            self.LeftValue_volume.setEnabled(False)
-            self.RightValue_volume.setEnabled(False)
-            self.label_28.setEnabled(False)
-            self.label_29.setEnabled(False)
-        self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
-        self.RightValue.textChanged.connect(self._WaterVolumnManage1)
-        self.LeftValue_volume.textChanged.connect(self._WaterVolumnManage2)
-        self.RightValue_volume.textChanged.connect(self._WaterVolumnManage2)
-
-    def _ValvetimeVolumnTransformation(self,widget1,widget2,direction,valve):
-        '''Transformation between valve open time the the water volume'''
-        # widget1 is the source widget and widget2 is the target widget
-        try:
-            if valve not in self.latest_fitting:
-                # disable the widget
-                if direction==1:
-                    widget2.setEnabled(False)
-                elif direction==-1:
-                    widget1.setEnabled(False)
-                return
-            else:
-                widget2.setEnabled(True)
-                widget1.setEnabled(True)
-            if direction==1:
-                widget2.setValue(float(widget1.text())*self.latest_fitting[valve][0]+self.latest_fitting[valve][1])
-            elif direction==-1:
-                widget2.setValue((float(widget1.text())-self.latest_fitting[valve][1])/self.latest_fitting[valve][0])
-        except Exception as e:
-            logging.error(traceback.format_exc())
-
-    def _GetLatestFitting(self,FittingResults):
-        '''Get the latest fitting results from water calibration'''
+                if hasattr(self.WaterCalibration_dialog.PlotM, 'FittingResults'):
+                    self.set_water_calibration_latest_fitting(self.WaterCalibration_dialog.PlotM.FittingResults)
+                    volume = getattr(self.task_logic.task_parameters.reward_size, f"{valve.lower()}_value_volume")
+                    valve_time = (volume-self.latest_fitting[valve][1])/self.latest_fitting[valve][0]
+                    setattr(self, f"{valve.lower()}_open_time", valve_time)
+                    getattr(self, f'GiveWater{valve[0]}').setValue(valve_time)
+                    getattr(self, f'GiveWater{valve[0]}_volume').setValue(volume)
+    def set_water_calibration_latest_fitting(self, fitting_results: dict):
+        """
+        Set the latest fitting results from water calibration
+        :param fitting_results: dictionary containing the water calibration values
+        """
         latest_fitting={}
-        sorted_dates = sorted(FittingResults.keys(), key=self._custom_sort_key)
+        sorted_dates = sorted(fitting_results.keys(), key=self._custom_sort_key)
         sorted_dates=sorted_dates[::-1]
         for current_date in sorted_dates:
-            if 'Left' in FittingResults[current_date]:
-                latest_fitting['Left']=FittingResults[current_date]['Left']
+            if 'Left' in fitting_results[current_date]:
+                latest_fitting['Left']=fitting_results[current_date]['Left']
                 break
         for current_date in sorted_dates:
-            if 'Right' in FittingResults[current_date]:
-                latest_fitting['Right']=FittingResults[current_date]['Right']
+            if 'Right' in fitting_results[current_date]:
+                latest_fitting['Right']=fitting_results[current_date]['Right']
                 break
-        self.latest_fitting=latest_fitting
+        self.latest_fitting = latest_fitting
 
     def _OpenBehaviorFolder(self):
         '''Open the the current behavior folder'''
@@ -1865,7 +1797,6 @@ class Window(QMainWindow):
         if hasattr(self,'current_stage'):
             if (self.PositionX.text() != '')and (self.PositionY.text() != '')and (self.PositionZ.text() != ''):
                 try:
-                    self.StageStop.click
                     self.current_stage.move_absolute_3d(float(self.PositionX.text()),float(self.PositionY.text()),float(self.PositionZ.text()))
                 except Exception as e:
                     logging.error(traceback.format_exc())
@@ -1890,19 +1821,10 @@ class Window(QMainWindow):
                         continue
 
                     if not (hasattr(self, 'AutoTrain_dialog') and self.AutoTrain_dialog.auto_train_engaged):
-                        # Only run _Task again if AutoTrain is NOT engaged
-                        # To avoid the _Task() function overwriting the AutoTrain UI locks
-                        # resolves https://github.com/AllenNeuralDynamics/dynamic-foraging-task/issues/239
                         child.setStyleSheet('color: black;')
                         child.setStyleSheet('background-color: white;')
-                        #self._Task()
 
                     if child.objectName() in {'WeightAfter','LickSpoutDistance','ModuleAngle','ArcAngle','ProtocolID','Stick_RotationAngle','LickSpoutReferenceX','LickSpoutReferenceY','LickSpoutReferenceZ','LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','Stick_ArcAngle','Stick_ModuleAngle','RotationAngle','ManipulatorX','ManipulatorY','ManipulatorZ','ProbeTarget','RigMetadataFile','IACUCProtocol','Experimenter','TotalWater','ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
-                        continue
-                    if child.objectName()=='UncoupledReward':
-                        Correct=self._CheckFormat(child)
-                        if Correct ==0: # incorrect format; don't change
-                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))
                         continue
                     if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight','','ConditionP_5','ConditionP_6','Duration_5','Duration_6','OffsetEnd_5','OffsetEnd_6','OffsetStart_5','OffsetStart_6','Probability_5','Probability_6','PulseDur_5','PulseDur_6','RD_5','RD_6']) and
                         (child.text() == '')):
@@ -1954,11 +1876,6 @@ class Window(QMainWindow):
             for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
                 if child.objectName()=='qt_spinbox_lineedit' or child.isEnabled()==False: # I don't understand where the qt_spinbox_lineedit comes from.
                     continue
-                if (child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum') and (child.text()!=''):
-                    Correct=self._CheckFormat(child)
-                    if Correct ==0: # incorrect format; don't change
-                        child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                    self._ShowRewardPairs()
                 try:
                     if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
                         # Changes are not allowed until press is typed except for PositionX, PositionY and PositionZ
@@ -2007,29 +1924,6 @@ class Window(QMainWindow):
                     #logging.error(traceback.format_exc())
                     pass
 
-    def _CheckFormat(self,child):
-        '''Check if the input format is correct'''
-        tp = self.task_logic.task_parameters
-        if child.objectName()=='RewardFamily': # When we change the RewardFamily, sometimes the RewardPairsN is larger than available reward pairs in this family.
-            try:
-                if tp.reward_probability.pairs_n > len(self.RewardFamilies[tp.reward_probability.family - 1]):
-                    self.RewardPairsN.setText(str(len(self.RewardFamilies[tp.reward_probability.family - 1])))
-                return 1
-            except Exception as e:
-                logging.error(traceback.format_exc())
-                return 0
-        if child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum':
-            try:
-                self.RewardPairs = self.RewardFamilies[tp.reward_probability.family - 1][:tp.reward_probability.pairs_n]
-                if tp.reward_probability.pairs_n > len(self.RewardFamilies[tp.reward_probability.family - 1]):
-                    return 0
-                else:
-                    return 1
-            except Exception as e:
-                logging.error(traceback.format_exc())
-                return 0
-        return 1
-
     def _GetTrainingParameters(self,prefix='TP_'):
         '''Get training parameters'''
         # Iterate over each container to find child widgets and store their values in self
@@ -2051,165 +1945,26 @@ class Window(QMainWindow):
                 # Set an attribute in self with the name 'TP_' followed by the child's object name
                 # and store whether the child is checked or not
                 setattr(self, prefix+child.objectName(), child.isChecked())
-
-
-    def _Task(self):
-        '''hide and show some fields based on the task type'''
-        self.label_43.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-        self.ITIIncrease.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-        self._Randomness()
-
-        if self.Task.currentText() in ['Coupled Baiting','Coupled Without Baiting']:
-            self.label_6.setEnabled(True)
-            self.label_7.setEnabled(True)
-            self.label_8.setEnabled(True)
-            self.BaseRewardSum.setEnabled(True)
-            self.RewardPairsN.setEnabled(True)
-            self.RewardFamily.setEnabled(True)
-            self.label_20.setEnabled(False)
-            self.UncoupledReward.setEnabled(False)
-            # block
-            self.BlockMinReward.setEnabled(True)
-            self.IncludeAutoReward.setEnabled(True)
-            self.BlockBeta.setEnabled(True)
-            self.BlockMin.setEnabled(True)
-            self.BlockMax.setEnabled(True)
-            self.label_12.setStyleSheet("color: black;")
-            self.label_11.setStyleSheet("color: black;")
-            self.label_14.setStyleSheet("color: black;")
-            self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.BlockMin.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.BlockMax.setStyleSheet("color: black;""border: 1px solid gray;")
-
-            self.label_27.setEnabled(False)
-            self.InitiallyInactiveN.setEnabled(False)
-            self.label_27.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.InitiallyInactiveN.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
-            # change name of min reward each block
-            self.label_13.setText('min reward each block=')
-            # self.BlockMinReward.setText('0')
-            # change the position of RewardN=/min reward each block=
-            self.BlockMinReward.setGeometry(QtCore.QRect(863, 128, 80, 20))
-            self.label_13.setGeometry(QtCore.QRect(711, 128, 146, 16))
-            # move auto-reward
-            self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 128, 80, 20))
-            self.label_26.setGeometry(QtCore.QRect(929, 128, 146, 16))
-
-            # Reopen block beta, NextBlock, and AutoBlock panel
-            self.BlockBeta.setEnabled(True)
-            self.NextBlock.setEnabled(True)
-
-            self.AdvancedBlockAuto.setEnabled(True)
-
-        elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
-            self.label_6.setEnabled(False)
-            self.label_7.setEnabled(False)
-            self.label_8.setEnabled(False)
-            self.BaseRewardSum.setEnabled(False)
-            self.RewardPairsN.setEnabled(False)
-            self.RewardFamily.setEnabled(False)
-            self.label_20.setEnabled(True)
-            self.UncoupledReward.setEnabled(True)
-            # block
-            self.BlockBeta.setEnabled(True)
-            self.BlockMin.setEnabled(True)
-            self.BlockMax.setEnabled(True)
-            self.label_12.setStyleSheet("color: black;")
-            self.label_11.setStyleSheet("color: black;")
-            self.label_14.setStyleSheet("color: black;")
-            self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.BlockMin.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.BlockMax.setStyleSheet("color: black;""border: 1px solid gray;")
-
-            self.label_27.setEnabled(False)
-            self.InitiallyInactiveN.setEnabled(False)
-            self.label_27.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.InitiallyInactiveN.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
-            # change name of min reward each block
-            self.label_13.setText('min reward each block=')
-            #self.BlockMinReward.setText('0')
-            # change the position of RewardN=/min reward each block=
-            self.BlockMinReward.setGeometry(QtCore.QRect(863, 128, 80, 20))
-            self.label_13.setGeometry(QtCore.QRect(711, 128, 146, 16))
-            # move auto-reward
-            self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 128, 80, 20))
-            self.label_26.setGeometry(QtCore.QRect(929, 128, 146, 16))
-            # Disable block beta, NextBlock, and AutoBlock panel
-            self.BlockBeta.setEnabled(False)
-            self.NextBlock.setEnabled(False)
-            self.AdvancedBlockAuto.setEnabled(False)
-            self.SwitchThr.setEnabled(False)
-            self.PointsInARow.setEnabled(False)
-            self.BlockMinReward.setEnabled(False)
-            self.IncludeAutoReward.setEnabled(False)
-        elif self.Task.currentText() in ['RewardN']:
-            self.label_6.setEnabled(True)
-            self.label_7.setEnabled(True)
-            self.label_8.setEnabled(True)
-            self.BaseRewardSum.setEnabled(True)
-            self.RewardPairsN.setEnabled(True)
-            self.RewardFamily.setEnabled(True)
-            self.label_20.setEnabled(False)
-            self.UncoupledReward.setEnabled(False)
-            self.label_20.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.UncoupledReward.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            # block
-            self.BlockMinReward.setEnabled(True)
-            self.IncludeAutoReward.setEnabled(True)
-            self.BlockBeta.setEnabled(False)
-            self.BlockMin.setEnabled(False)
-            self.BlockMax.setEnabled(False)
-            self.label_14.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.label_12.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.label_11.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.BlockBeta.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.BlockMin.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.BlockMax.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            # block; no reward when initially active
-            self.label_27.setEnabled(True)
-            self.InitiallyInactiveN.setEnabled(True)
-            self.label_27.setStyleSheet("color: black;")
-            self.InitiallyInactiveN.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.InitiallyInactiveN.setGeometry(QtCore.QRect(403, 128, 80, 20))
-            # change name of min reward each block
-            self.label_13.setText('RewardN=')
-            # change the position of RewardN=/min reward each block=
-            self.BlockMinReward.setGeometry(QtCore.QRect(191, 128, 80, 20))
-            self.label_13.setGeometry(QtCore.QRect(40, 128, 146, 16))
-            # move auto-reward
-            self.IncludeAutoReward.setGeometry(QtCore.QRect(614, 128, 80, 20))
-            self.label_26.setGeometry(QtCore.QRect(460, 128, 146, 16))
-            # set block length to be 1
-            self.BlockMin.setText('1')
-            self.BlockMax.setText('1')
-
     def _ShowRewardPairs(self):
         '''Show reward pairs'''
         tp = self.task_logic.task_parameters
         try:
             if self.session_model.experiment in ['Coupled Baiting', 'Coupled Without Baiting', 'RewardN']:
-                self.RewardPairs=self.RewardFamilies[int(self.RewardFamily.text())-1][:int(self.RewardPairsN.text())]
-                self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.BaseRewardSum.text())
+                self.RewardPairs = self.RewardFamilies[tp.reward_probability.family-1][:tp.reward_probability.pairs_n]
+                self.RewardProb = np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*\
+                                 tp.reward_probability.base_reward_sum
             elif self.session_model.experiment in ['Uncoupled Baiting', 'Uncoupled Without Baiting']:
                 self.RewardProb=np.array(tp.uncoupled_reward)
-            if self.session_model.experiment in ['Coupled Baiting', 'Coupled Without Baiting', 'RewardN', 'Uncoupled Baiting', 'Uncoupled Without Baiting']:
-                if hasattr(self, 'GeneratedTrials'):
-                    self.ShowRewardPairs.setText('Reward pairs:\n'
-                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
-                                                 + '\n\n'
-                                                 +'Current pair:\n'
-                                                 + str(np.round(self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2)))
-                    if self.default_ui=='ForagingGUI.ui':
-                        self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
-                else:
-                    self.ShowRewardPairs.setText('Reward pairs:\n'
-                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
-                                                 + '\n\n'
-                                                 +'Current pair:\n ')
-                    if self.default_ui=='ForagingGUI.ui':
-                        self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
+            reward_str = 'Reward pairs:\n' + \
+                         str(np.round(self.RewardProb,2)).replace('\n', ',') + \
+                         '\n\n' +\
+                         'Current pair:\n'
+            if hasattr(self, 'GeneratedTrials'):
+                history = np.round(self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN], 2)
+                self.ShowRewardPairs.setText(f"{reward_str}{history}")
+            else:
+                self.ShowRewardPairs.setText(reward_str)
+
         except Exception as e:
             # Catch the exception and log error information
             logging.warning(traceback.format_exc())
@@ -4403,87 +4158,65 @@ class Window(QMainWindow):
             self.DelayMin.setEnabled(True)
             self.DelayMax.setEnabled(True)
 
-    def _GiveLeft(self):
-        '''manually give left water'''
+    def give_manual_water(self, valve: Literal["Right", "Left"]):
+        """
+        Give manual water
+        :param valve: valve to give manual water
+        """
+
+        volume = getattr(self.task_logic.task_parameters.reward_size, f"{valve.lower()}_value_volume")
+        open_time_s = getattr(self, f"{valve.lower()}_valve_open_time")
         self._ConnectBonsai()
-        if self.InitializeBonsaiSuccessfully==0:
+        if self.InitializeBonsaiSuccessfully == 0:
             return
-        if self.AlignToGoCue.currentText()=='yes':
+        if self.AlignToGoCue.currentText() == 'yes':
             # Reserving the water after the go cue.Each click will add the water to the reserved water
-            self.give_left_volume_reserved=self.give_left_volume_reserved+float(self.TP_GiveWaterL_volume)
-            if self.latest_fitting!={}:
-                self.give_left_time_reserved=((float(self.give_left_volume_reserved)-self.latest_fitting['Left'][1])/self.latest_fitting['Left'][0])*1000
+            reserve_volume = getattr(self, f"give_{valve.lower()}_volume_reserved") + volume
+            setattr(self, f"give_{valve.lower()}_volume_reserved", reserve_volume)
+            if self.latest_fitting != {}:
+                time_reserve = ((reserve_volume - self.latest_fitting[valve][1]) / self.latest_fitting[valve][0]) * 1000
             else:
-                self.give_left_time_reserved=self.give_left_time_reserved+float(self.TP_GiveWaterL)*1000
+                time_reserve = getattr(self, f"give_{valve.lower()}_time_reserved") + open_time_s * 1000
+
+            setattr(self, f"give_{valve.lower()}_time_reserved", time_reserve)
         else:
-            self.Other_manual_water_left_volume.append(float(self.TP_GiveWaterL_volume))
-            self.Other_manual_water_left_time.append(float(self.TP_GiveWaterL)*1000)
+            getattr(self, f"Other_manual_water_{valve.lower()}_volume").append(volume)
+            getattr(self, f"Other_manual_water_{valve.lower()}_time").append(open_time_s*1000)
 
-            self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
+            getattr(self.Channel, f"{valve}Value")(float(open_time_s*1000))
             time.sleep(0.01)
-            self.Channel3.ManualWater_Left(int(1))
-            time.sleep(0.01+float(self.TP_GiveWaterL))
-            self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
-            self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+float(self.TP_GiveWaterL_volume)/1000
+            getattr(self.Channel3, f"ManualWater_{valve}")(int(1))
+            time.sleep(0.01 + open_time_s)
+            getattr(self.Channel, f"{valve}Value")(float(open_time_s * 1000))
+            index = 0 if valve == "Left" else 1
+            self.ManualWaterVolume[index] = self.ManualWaterVolume[index] + volume / 1000
             self._UpdateSuggestedWater()
-            logger.info('Give left manual water (ul): '+str(np.round(float(self.TP_GiveWaterL_volume),3)),
-                           extra={'tags': [self.warning_log_tag]})
-
-
-    def _give_reserved_water(self,valve=None):
-        '''give reserved water usually after the go cue'''
-        if valve=='left':
-            if self.give_left_volume_reserved==0:
-                return
-            self.Channel.LeftValue(float(self.give_left_time_reserved))
-            time.sleep(0.01)
-            self.Channel3.ManualWater_Left(int(1))
-            time.sleep(0.01+float(self.give_left_time_reserved)/1000)
-            self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
-            self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+self.give_left_volume_reserved/1000
-            self.Other_manual_water_left_volume.append(self.give_left_volume_reserved)
-            self.Other_manual_water_left_time.append(self.give_left_time_reserved)
-            self.give_left_volume_reserved=0
-            self.give_left_time_reserved=0
-        elif valve=='right':
-            if self.give_right_volume_reserved==0:
-                return
-            self.Channel.RightValue(float(self.give_right_time_reserved))
-            time.sleep(0.01)
-            self.Channel3.ManualWater_Right(int(1))
-            time.sleep(0.01+float(self.give_right_time_reserved)/1000)
-            self.Channel.RightValue(float(self.TP_RightValue)*1000)
-            self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+self.give_right_volume_reserved/1000
-            self.Other_manual_water_right_volume.append(self.give_right_volume_reserved)
-            self.Other_manual_water_right_time.append(self.give_right_time_reserved)
-            self.give_right_volume_reserved=0
-            self.give_right_time_reserved=0
-
-    def _GiveRight(self):
-        '''manually give right water'''
-        self._ConnectBonsai()
-        if self.InitializeBonsaiSuccessfully==0:
-            return
-        if self.AlignToGoCue.currentText()=='yes':
-            # Reserving the water after the go cue.Each click will add the water to the reserved water
-            self.give_right_volume_reserved=self.give_right_volume_reserved+float(self.TP_GiveWaterR_volume)
-            if self.latest_fitting!={}:
-                self.give_right_time_reserved=((float(self.give_right_volume_reserved)-self.latest_fitting['Right'][1])/self.latest_fitting['Right'][0])*1000
-            else:
-                self.give_right_time_reserved=self.give_right_time_reserved+float(self.TP_GiveWaterR)*1000
-        else:
-            self.Other_manual_water_right_volume.append(float(self.TP_GiveWaterR_volume))
-            self.Other_manual_water_right_time.append(float(self.TP_GiveWaterR)*1000)
-
-            self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
-            time.sleep(0.01)
-            self.Channel3.ManualWater_Right(int(1))
-            time.sleep(0.01+float(self.TP_GiveWaterR))
-            self.Channel.RightValue(float(self.TP_RightValue)*1000)
-            self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
-            self._UpdateSuggestedWater()
-            logger.info('Give right manual water (ul): '+str(np.round(float(self.TP_GiveWaterR_volume),3)),
+            logger.info(f"Give {valve.lower()} manual water (ul): {round(volume, 3)}",
                         extra={'tags': [self.warning_log_tag]})
+
+    def _give_reserved_water(self, valve= Literal["Right", "Left"]):
+        """
+        Give reserved water usually after the go cue
+        :param valve: valve to give water from
+        """
+
+        reserve = getattr(self, f"give_{valve}_volume_reserved")
+        open_time_s = getattr(self, f"{valve.lower()}_valve_open_time")
+        volume = getattr(self.task_logic.task_parameters.reward_size, f"{valve.lower()}_value_volume")
+
+        if reserve == 0:
+            return
+        getattr(self.Channel, f"{valve.title()}Value")(float(reserve))
+        time.sleep(0.01)
+        getattr(self.Channel3, f"ManualWater_{valve.title()}")(int(1))
+        time.sleep(0.01 + reserve / 1000)
+        getattr(self.Channel, f"{valve}Value")(float(open_time_s * 1000))
+        index = 0 if valve == "Left" else 1
+        self.ManualWaterVolume[index] = self.ManualWaterVolume[index] + volume / 1000
+        getattr(self, f"Other_manual_water_{valve.lower()}_volume").append(volume)
+        getattr(self, f"Other_manual_water_{valve.lower()}_time").append(open_time_s * 1000)
+        setattr(self, f"give_{valve}_volume_reserved", 0)
+        setattr(self, f"give_{valve}_time_reserved", 0)
 
     def _toggle_save_color(self):
         '''toggle the color of the save button to mediumorchid'''

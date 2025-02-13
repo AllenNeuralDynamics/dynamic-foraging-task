@@ -1,4 +1,4 @@
-from foraging_gui.schema_widgets.schema_widget_base import SchemaWidgetBase, add_border
+from foraging_gui.schema_widgets.schema_widget_base import SchemaWidgetBase, add_border, create_widget
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
     Optogenetics,
     IntervalConditions,

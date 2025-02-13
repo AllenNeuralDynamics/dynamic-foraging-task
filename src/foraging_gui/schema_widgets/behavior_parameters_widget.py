@@ -10,6 +10,7 @@ from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
 )
 from PyQt5.QtWidgets import QCheckBox
 from PyQt5.QtCore import pyqtSignal
+from pydantic import BaseModel
 
 class BehaviorParametersWidget(SchemaWidgetBase):
     """
@@ -17,14 +18,14 @@ class BehaviorParametersWidget(SchemaWidgetBase):
     """
 
     taskUpdated = pyqtSignal(str)
+    volumeChanged = pyqtSignal(str)
 
-    def __init__(self, schema: AindDynamicForagingTaskParameters):
+    def __init__(self, schema: AindDynamicForagingTaskParameters,
+                 reward_families: list):
 
         super().__init__(schema)
 
-        # delete widgets unrelated to session
-        del self.schema_fields_widgets["rng_seed"]
-        del self.schema_fields_widgets["aind_behavior_services_pkg_version"]
+        self.reward_families = reward_families
 
         # set range on certain widgets
         getattr(self, "auto_water.multiplier_widget").setRange(0, 1)
@@ -32,6 +33,18 @@ class BehaviorParametersWidget(SchemaWidgetBase):
         getattr(self, "warmup.max_choice_ratio_bias_widget").setRange(0, 1)
         getattr(self, "warmup.min_finish_ratio_widget").setRange(0, 1)
         getattr(self, "auto_stop.ignore_ratio_threshold_widget").setRange(0, 1)
+        getattr(self, "reward_probability.family_widget").setRange(1, len(self.reward_families[:]))
+        getattr(self, "reward_probability.pairs_n_widget").setMinimum(1)
+
+        # connect reward family signal to update pair_n if needed
+        getattr(self, "reward_probability.family_widget").valueChanged.connect(self.update_reward_family)
+        getattr(self, "reward_probability.pairs_n_widget").valueChanged.connect(self.update_reward_family)
+
+        # emit signal if reward volume changes
+        getattr(self, "reward_size.right_value_volume_widget").valueChanged.connect(
+            lambda: self.volumeChanged.emit('Right'))
+        getattr(self, "reward_size.left_value_volume_widget").valueChanged.connect(
+            lambda: self.volumeChanged.emit('Left'))
 
         # hide or show auto_water
         widget = self.auto_water_widget
@@ -73,7 +86,12 @@ class BehaviorParametersWidget(SchemaWidgetBase):
         self.reward_n_check_box.setChecked(False)
         self.reward_n_check_box.toggled.emit(False)
 
-        add_border(self)
+        # delete widgets unrelated to session
+        self.schema_fields_widgets["rng_seed"].hide()
+        self.schema_fields_widgets["aind_behavior_services_pkg_version"].hide()
+
+        add_border(self, {k: v for k, v in self.schema_fields_widgets.items() if
+                          k not in ["rng_seed", "aind_behavior_services_pkg_version"]})
 
         self.ValueChangedInside.connect(self.update_task_option)
 
@@ -95,12 +113,25 @@ class BehaviorParametersWidget(SchemaWidgetBase):
         if name == "reward_n":
             if self.reward_n_check_box.isChecked():
                 self.taskUpdated.emit("reward_n")
+                self.schema.block_parameters.min = 1
+                self.schema.block_parameters.max = 1
+                self.apply_schema(self.schema)
                 if self.uncoupled_reward_check_box.isChecked():
                     self.uncoupled_reward_check_box.setChecked(False)
             else:
                 if not self.uncoupled_reward_check_box.isChecked():
                     self.taskUpdated.emit("coupled")
 
+    def update_reward_family(self):
+        """
+        Ensure that reward_probability pairs_n is larger than available reward pairs in family
+        """
+
+        family = self.schema.reward_probability.family
+        pairs_n = self.schema.reward_probability.pairs_n
+        if pairs_n > len(self.reward_families[family-1]):
+            self.schema.reward_probability.pairs_n = len(self.reward_families[family-1])
+            self.apply_schema(self.schema)
 
     def toggle_optional_field(self, name: str, enabled: bool, value) -> None:
         """
@@ -126,12 +157,13 @@ class BehaviorParametersWidget(SchemaWidgetBase):
         """
 
         value = self.path_get(self.schema, name.split("."))
-        if dict not in type(value).__mro__ and list not in type(value).__mro__:  # not a dictionary or list like value
+        if dict not in type(value).__mro__ and list not in type(value).__mro__ and BaseModel not in type(value).__mro__:  # not a dictionary or list like value
             if value is None and hasattr(self, name+"_check_box"):   # optional type so uncheck widget
                getattr(self, name+"_check_box").setChecked(False)
             else:
                 self._set_widget_text(name, value)
-        elif dict in type(value).__mro__:
+        elif dict in type(value).__mro__ or BaseModel in type(value).__mro__:
+            value = value.model_dump() if BaseModel in type(value).__mro__ else value
             for k, v in value.items():  # multiple widgets to set values for
                 self.update_field_widget(f"{name}.{k}")
         else:  # update list
@@ -160,7 +192,10 @@ if __name__ == "__main__":
             warmup=Warmup()
         ),
     )
-    task_widget = BehaviorParametersWidget(task_model.task_parameters)
+    reward_families = [[[8, 1], [6, 1], [3, 1], [1, 1]], [[8, 1], [1, 1]],
+                           [[1, 0], [.9, .1], [.8, .2], [.7, .3], [.6, .4], [.5, .5]], [[6, 1], [3, 1], [1, 1]]]
+
+    task_widget = BehaviorParametersWidget(task_model.task_parameters, reward_families)
     #task_widget.ValueChangedInside.connect(lambda name: print(task_model))
     task_widget.taskUpdated.connect(print)
     task_widget.show()
