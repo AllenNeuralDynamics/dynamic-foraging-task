@@ -90,57 +90,22 @@ class OptogeneticsDialog(QDialog):
         uic.loadUi('Optogenetics.ui', self)
         self.opto_model = opto_model
         self.opto_widget = OptoParametersWidget(self.opto_model)
-        # initialize with no lasers
+        # initialize model as no optogenetics
         self.opto_model.laser_colors = []
+        self.opto_model.session_control = None
         self.opto_widget.apply_schema(self.opto_model)
         self.QScrollOptogenetics.setWidget(self.opto_widget)
 
-        self.condition_idx = [1, 2, 3, 4, 5, 6] # corresponding to optogenetics condition 1, 2, 3, 4, 5, 6
-        self.laser_tags=[1,2] # corresponding to Laser_1 and Laser_2
-        #self._connectSignalsSlots()
+
         self.MainWindow=MainWindow
-        # for i in self.condition_idx:
-        #     getattr(self, f'_LaserColor')(i)
-        # self._Laser_calibration()
-        # self._SessionWideControl()
+
     def _connectSignalsSlots(self):
-        for i in self.condition_idx:
-            # Connect LaserColor signals
-            self._connectSignalSlot(f'LaserColor_{i}', self._LaserColor, i)
-
-            # Connect Protocol signals
-            self._connectSignalSlot(f'Protocol_{i}', self._activated, i)
-            self._connectSignalSlot(f'Protocol_{i}', self._LaserColor, i)
-
-            # Connect Frequency signals
-            self._connectSignalSlot(f'Frequency_{i}', self._Frequency, i)
-
-            # Connect LaserStart and LaserEnd signals
-            self._connectSignalSlot(f'LaserStart_{i}', self._activated, i)
-            self._connectSignalSlot(f'LaserEnd_{i}', self._activated, i)
 
         self.Laser_calibration.currentIndexChanged.connect(self._Laser_calibration)
         self.Laser_calibration.activated.connect(self._Laser_calibration)
         self.SessionWideControl.currentIndexChanged.connect(self._SessionWideControl)
 
-    def _connectSignalSlot(self, signal_name, slot_method, index):
-        signal = getattr(self, signal_name)
-        signal.currentIndexChanged.connect(lambda: slot_method(index))
-        signal.activated.connect(lambda: slot_method(index))
 
-    def _SessionWideControl(self):
-        '''enable/disable items based on session wide control'''
-        if self.SessionWideControl.currentText()=='on':
-            enable=True
-        else:
-            enable=False
-        self.label3_18.setEnabled(enable)
-        self.label3_21.setEnabled(enable)
-        self.FractionOfSession.setEnabled(enable)
-        self.label3_19.setEnabled(enable)
-        self.SessionStartWith.setEnabled(enable)
-        self.label3_17.setEnabled(enable)
-        self.SessionAlternating.setEnabled(enable)
     def _Laser_calibration(self):
         ''''change the laser calibration date'''
         # find the latest calibration date for the selected laser
@@ -162,156 +127,6 @@ class OptogeneticsDialog(QDialog):
             return 'NA'
         else:
             return sorted_dates[-1]
-
-    def _Frequency(self,Numb):
-        try:
-            Color = getattr(self, f"LaserColor_{str(Numb)}").currentText()
-            Protocol = getattr(self, f"Protocol_{str(Numb)}").currentText()
-            CurrentFrequency = getattr(self, f"Frequency_{str(Numb)}").currentText()
-            latest_calibration_date=self._FindLatestCalibrationDate(Color)
-            if latest_calibration_date=='NA':
-                RecentLaserCalibration={}
-            else:
-                RecentLaserCalibration=self.MainWindow.LaserCalibrationResults[latest_calibration_date]
-            for laser_tag in self.laser_tags:
-                ItemsLaserPower=[]
-                CurrentlaserPowerLaser = getattr(self, f"Laser{str(laser_tag)}_power_{str(Numb)}").currentText()
-                if Protocol in ['Sine']:
-                    for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{str(laser_tag)}"]['LaserPowerVoltage'])):
-                        ItemsLaserPower.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{str(laser_tag)}"]['LaserPowerVoltage'][i]))
-                if Protocol in ['Constant','Pulse']:
-                    for i in range(len(RecentLaserCalibration[Color][Protocol][f"Laser_{str(laser_tag)}"]['LaserPowerVoltage'])):
-                        ItemsLaserPower.append(str(RecentLaserCalibration[Color][Protocol][f"Laser_{str(laser_tag)}"]['LaserPowerVoltage'][i]))
-                ItemsLaserPower=sorted(ItemsLaserPower)
-                getattr(self, f"Laser{str(laser_tag)}_power_{str(Numb)}").clear()
-                getattr(self, f"Laser{str(laser_tag)}_power_{str(Numb)}").addItems(ItemsLaserPower)
-                index = getattr(self, f"Laser{str(laser_tag)}_power_{str(Numb)}").findText(CurrentlaserPowerLaser)
-                if index != -1:
-                    getattr(self, f"Laser{str(laser_tag)}_power_{str(Numb)}").setCurrentIndex(index)
-
-        except Exception as e:
-            logging.error(str(e))
-
-    def _activated(self,Numb):
-        '''enable/disable items based on protocols and laser start/end'''
-        Inactlabel1=15 # pulse duration
-        Inactlabel2=13 # frequency
-        Inactlabel3=14 # Ramping down
-        if getattr(self, f'Protocol_{Numb}').currentText() == 'Sine':
-            getattr(self, f'label{Numb}_{Inactlabel1}').setEnabled(False)
-            getattr(self, f'PulseDur_{Numb}').setEnabled(False)
-            getattr(self, f'label{Numb}_{Inactlabel2}').setEnabled(True)
-            getattr(self, f'Frequency_{Numb}').setEnabled(True)
-            getattr(self, f'label{Numb}_{Inactlabel3}').setEnabled(True)
-            getattr(self, f'RD_{Numb}').setEnabled(True)
-            getattr(self, f'Frequency_{Numb}').setEditable(False)
-        if getattr(self, f'Protocol_{Numb}').currentText() == 'Pulse':
-            getattr(self, f'label{Numb}_{Inactlabel1}').setEnabled(True)
-            getattr(self, f'PulseDur_{Numb}').setEnabled(True)
-            getattr(self, f'label{Numb}_{Inactlabel2}').setEnabled(True)
-            getattr(self, f'Frequency_{Numb}').setEnabled(True)
-            getattr(self, f'label{Numb}_{Inactlabel3}').setEnabled(False)
-            getattr(self, f'RD_{Numb}').setEnabled(False)
-            getattr(self, f'Frequency_{Numb}').setEditable(True)
-        if getattr(self, f'Protocol_{Numb}').currentText() == 'Constant':
-            getattr(self, f'label{Numb}_{Inactlabel1}').setEnabled(False)
-            getattr(self, f'PulseDur_{Numb}').setEnabled(False)
-            getattr(self, f'label{Numb}_{Inactlabel2}').setEnabled(False)
-            getattr(self, f'Frequency_{Numb}').setEnabled(False)
-            getattr(self, f'label{Numb}_{Inactlabel3}').setEnabled(True)
-            getattr(self, f'RD_{Numb}').setEnabled(True)
-            getattr(self, f'Frequency_{Numb}').clear()
-            getattr(self, f'Frequency_{Numb}').setEditable(False)
-        if getattr(self, f'LaserStart_{Numb}').currentText() == 'NA':
-            getattr(self, f'label{Numb}_9').setEnabled(False)
-            getattr(self, f'OffsetStart_{Numb}').setEnabled(False)
-        else:
-            getattr(self, f'label{Numb}_9').setEnabled(True)
-            getattr(self, f'OffsetStart_{Numb}').setEnabled(True)
-        if getattr(self, f'LaserEnd_{Numb}').currentText() == 'NA':
-            getattr(self, f'label{Numb}_11').setEnabled(False)
-            getattr(self, f'OffsetEnd_{Numb}').setEnabled(False)
-        else:
-            getattr(self, f'label{Numb}_11').setEnabled(True)
-            getattr(self, f'OffsetEnd_{Numb}').setEnabled(True)
-    def _LaserColor(self,Numb):
-        ''' enable/disable items based on laser (blue/green/orange/red/NA)'''
-        Inactlabel=range(2,17)
-        if getattr(self, 'LaserColor_' + str(Numb)).currentText() == 'NA':
-            Label=False
-        else:
-            Label=True
-            Color = getattr(self, 'LaserColor_' + str(Numb)).currentText()
-            Protocol = getattr(self, 'Protocol_' + str(Numb)).currentText()
-            CurrentFrequency = getattr(self, 'Frequency_' + str(Numb)).currentText()
-            latest_calibration_date=self._FindLatestCalibrationDate(Color)
-            if latest_calibration_date=='NA':
-                RecentLaserCalibration={}
-            else:
-                RecentLaserCalibration=self.MainWindow.LaserCalibrationResults[latest_calibration_date]
-            no_calibration=False
-            if not RecentLaserCalibration=={}:
-                if Color in RecentLaserCalibration.keys():
-                    if Protocol in RecentLaserCalibration[Color].keys():
-                        if Protocol=='Sine': 
-                            Frequency=RecentLaserCalibration[Color][Protocol].keys()
-                            ItemsFrequency=[]
-                            for Fre in Frequency:
-                                ItemsFrequency.append(Fre)
-                            ItemsFrequency=sorted(ItemsFrequency)
-                            getattr(self, f'Frequency_{Numb}').clear()
-                            getattr(self, f'Frequency_{Numb}').addItems(ItemsFrequency)
-                            if not CurrentFrequency in Frequency:
-                                CurrentFrequency = getattr(self, 'Frequency_' + str(Numb)).currentText()
-                            for laser_tag in self.laser_tags:
-                                ItemsLaserPower=[]
-                                for i in range(len(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
-                                    ItemsLaserPower.append(str(RecentLaserCalibration[Color][Protocol][CurrentFrequency][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
-                                ItemsLaserPower=sorted(ItemsLaserPower)
-                                getattr(self, f"Laser{laser_tag}_power_{str(Numb)}").clear()
-                                getattr(self, f"Laser{laser_tag}_power_{str(Numb)}").addItems(ItemsLaserPower)
-                        elif Protocol=='Constant' or Protocol=='Pulse':
-                            for laser_tag in self.laser_tags:
-                                ItemsLaserPower=[]
-                                for i in range(len(RecentLaserCalibration[Color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'])):
-                                    ItemsLaserPower.append(str(RecentLaserCalibration[Color][Protocol][f"Laser_{laser_tag}"]['LaserPowerVoltage'][i]))
-                                ItemsLaserPower=sorted(ItemsLaserPower)
-                                getattr(self, f"Laser{laser_tag}_power_{str(Numb)}").clear()
-                                getattr(self, f"Laser{laser_tag}_power_{str(Numb)}").addItems(ItemsLaserPower)
-                    else:
-                        no_calibration=True
-                else:
-                    no_calibration=True
-            else:
-                no_calibration=True
-
-            if no_calibration:
-                for laser_tag in self.laser_tags:
-                    getattr(self, f"Laser{laser_tag}_power_{str(Numb)}").clear()
-                    logging.warning('No calibration for this protocol identified!',
-                                    extra={'tags': [self.MainWindow.warning_log_tag]})
-
-        getattr(self, 'Location_' + str(Numb)).setEnabled(Label)
-        getattr(self, 'Laser1_power_' + str(Numb)).setEnabled(Label)
-        getattr(self, 'Laser2_power_' + str(Numb)).setEnabled(Label)
-        getattr(self, 'Probability_' + str(Numb)).setEnabled(Label)
-        getattr(self, 'Duration_' + str(Numb)).setEnabled(Label)
-        getattr(self, 'Condition_' + str(Numb)).setEnabled(Label)
-        getattr(self, 'ConditionP_' + str(Numb)).setEnabled(Label)
-        getattr(self, 'LaserStart_' + str(Numb)).setEnabled(Label)
-        getattr(self, 'OffsetStart_' + str(Numb)).setEnabled(Label)
-        getattr(self, 'LaserEnd_' + str(Numb)).setEnabled(Label)
-        getattr(self, 'OffsetEnd_' + str(Numb)).setEnabled(Label)
-        getattr(self, 'Protocol_' + str(Numb)).setEnabled(Label)
-        getattr(self, 'Frequency_' + str(Numb)).setEnabled(Label)
-        getattr(self, 'RD_' + str(Numb)).setEnabled(Label)
-        getattr(self, 'PulseDur_' + str(Numb)).setEnabled(Label)
-
-        for i in Inactlabel:
-            getattr(self, 'label' + str(Numb) + '_' + str(i)).setEnabled(Label)
-        if getattr(self, 'LaserColor_' + str(Numb)).currentText() != 'NA':
-            getattr(self, '_activated')(Numb)
-
 
 class WaterCalibrationDialog(QDialog):
     '''Water valve calibration'''

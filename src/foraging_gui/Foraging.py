@@ -52,7 +52,6 @@ from foraging_gui.bias_indicator import BiasIndicator
 from foraging_gui.warning_widget import WarningWidget
 from foraging_gui.schema_widgets.behavior_parameters_widget import BehaviorParametersWidget
 from foraging_gui.schema_widgets.fib_parameters_widget import FIBParametersWidget
-from foraging_gui.schema_widgets.opto_parameters_widget import OptoParametersWidget
 from foraging_gui.schema_widgets.session_model_widget import SessionModelWidget
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
@@ -84,6 +83,8 @@ from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
     LaserColorTwo,
     LaserColorThree,
     LaserColorFour,
+    LaserColorFive,
+    LaserColorSix,
     SessionControl
 )
 
@@ -2084,6 +2085,30 @@ class Window(QMainWindow):
                         ),
                     ),
                     LaserColorFour(
+                        color="Orange",
+                        pulse_condition="Right choice",
+                        start=IntervalConditions(
+                            interval_condition="Trial start",
+                            offset=0
+                        ),
+                        end=IntervalConditions(
+                            interval_condition="Right reward",
+                            offset=0
+                        ),
+                    ),
+                    LaserColorFive(
+                        color="Orange",
+                        pulse_condition="Right choice",
+                        start=IntervalConditions(
+                            interval_condition="Trial start",
+                            offset=0
+                        ),
+                        end=IntervalConditions(
+                            interval_condition="Right reward",
+                            offset=0
+                        ),
+                    ),
+                    LaserColorSix(
                         color="Orange",
                         pulse_condition="Right choice",
                         start=IntervalConditions(

@@ -11,6 +11,8 @@ from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
     LaserColorTwo,
     LaserColorThree,
     LaserColorFour,
+    LaserColorFive,
+    LaserColorSix,
     SessionControl
 )
 from pydantic import BaseModel
@@ -55,6 +57,20 @@ class OptoParametersWidget(SchemaWidgetBase):
                 location_widget.layout().insertWidget(0, check_box)
                 setattr(self, f"laser_colors.{laser}.location.{location}_check_box", check_box)
 
+
+            # add/remove start and end
+            for interval in ["start", "end"]:
+                check_box = QCheckBox(interval.title())
+                check_box.setChecked(True)
+                check_box.toggled.connect(lambda s, laser_i=laser, name=interval: self.toggle_optional_field(
+                    f"laser_colors.{laser_i}.{name}", s, IntervalConditions()))
+                layout = getattr(self, f"laser_colors.{laser}.{interval}_widget").parent().layout()
+                label = layout.itemAt(0).widget()
+                layout.replaceWidget(label, check_box)
+                setattr(self, f"laser_colors.{laser}.{interval}_check_box", check_box)
+            # set 0 minimum for start
+            getattr(self, f"laser_colors.{laser}.start_widget").setMinimum(0)
+
             # change protocol
             protocol_widget = QComboBox()
             protocol_widget.addItems(["Sine", "Pulse", "Constant"])
@@ -72,7 +88,7 @@ class OptoParametersWidget(SchemaWidgetBase):
         self.session_control_check_box.toggled.connect(lambda s: self.toggle_optional_field("session_control", s, SessionControl()))
         widget.layout().insertWidget(0, self.session_control_check_box)
 
-        add_border(self)
+        add_border(self, orientation="V")
 
     def toggle_optional_field(self, name: str, enabled: bool, value) -> None:
         """
@@ -102,7 +118,7 @@ class OptoParametersWidget(SchemaWidgetBase):
         [widget.show() if enabled else widget.hide() for widget in widget_dict.values()]
         name_lst = name.split(".")
 
-        possible_lasers = [LaserColorOne, LaserColorTwo, LaserColorThree, LaserColorFour]
+        possible_lasers = [LaserColorOne, LaserColorTwo, LaserColorThree, LaserColorFour, LaserColorFive, LaserColorSix]
         laser_color = possible_lasers[int(name_lst[-1])](
             color="Blue",
             pulse_condition="Right choice",
@@ -207,7 +223,7 @@ class OptoParametersWidget(SchemaWidgetBase):
         self.schema = schema
         for name in self.schema.model_dump().keys():
             if name == "laser_colors":
-                for color_i in range(4):
+                for color_i in range(6):
                     self.update_field_widget(f"{name}.{color_i}")
                     if self.path_get(self.schema, [name, color_i]) is not None:
                         for loc_i in range(2):
@@ -225,7 +241,12 @@ class OptoParametersWidget(SchemaWidgetBase):
 
         for i, k in enumerate(path):
             if k == "laser_colors" and i != len(path) - 1:
-                sort_map = ["LaserColorOne", "LaserColorTwo", "LaserColorThree", "LaserColorFour"]
+                sort_map = ["LaserColorOne",
+                            "LaserColorTwo",
+                            "LaserColorThree",
+                            "LaserColorFour",
+                            "LaserColorFive",
+                            "LaserColorSix"]
                 laser_dict = {k: None for k in sort_map}
                 # fill gaps in laser dict
                 laser_dict.update({laser.name: laser for laser in iterable.laser_colors})
@@ -257,7 +278,12 @@ class OptoParametersWidget(SchemaWidgetBase):
 
         for i, k in enumerate(path):
             if k == "laser_colors" and i != len(path)-1:
-                sort_map = ["LaserColorOne", "LaserColorTwo", "LaserColorThree", "LaserColorFour"]
+                sort_map = ["LaserColorOne",
+                            "LaserColorTwo",
+                            "LaserColorThree",
+                            "LaserColorFour",
+                            "LaserColorFive",
+                            "LaserColorSix"]
                 laser_dict = {k: None for k in sort_map}
                 # fill gaps in laser dict
                 laser_dict.update({laser.name: laser for laser in iterable.laser_colors})
@@ -288,58 +314,83 @@ if __name__ == "__main__":
     sys.excepthook = error_handler  # redirect std error
     app = QApplication(sys.argv)
     task_model = Optogenetics(
-        laser_colors=[
-            LaserColorOne(
-                color="Blue",
-                pulse_condition="Right choice",
-                start=IntervalConditions(
-                    interval_condition="Trial start",
-                    offset=0
-                ),
-                end=IntervalConditions(
-                    interval_condition="Right reward",
-                    offset=0
-                ),
-            ),
-            LaserColorTwo(
-                color="Red",
-                pulse_condition="Right choice",
-                start=IntervalConditions(
-                    interval_condition="Trial start",
-                    offset=0
-                ),
-                end=IntervalConditions(
-                    interval_condition="Right reward",
-                    offset=0
-                ),
-            ),
-            LaserColorThree(
-                color="Green",
-                pulse_condition="Right choice",
-                start=IntervalConditions(
-                    interval_condition="Trial start",
-                    offset=0
-                ),
-                end=IntervalConditions(
-                    interval_condition="Right reward",
-                    offset=0
-                ),
-            ),
-            LaserColorFour(
-                color="Orange",
-                pulse_condition="Right choice",
-                start=IntervalConditions(
-                    interval_condition="Trial start",
-                    offset=0
-                ),
-                end=IntervalConditions(
-                    interval_condition="Right reward",
-                    offset=0
-                ),
-            ),
-        ],
-        session_control=SessionControl(),
-    )
+                sample_frequency=5000,
+                laser_colors=[
+                    LaserColorOne(
+                        color="Blue",
+                        pulse_condition="Right choice",
+                        start=IntervalConditions(
+                            interval_condition="Trial start",
+                            offset=0
+                        ),
+                        end=IntervalConditions(
+                            interval_condition="Right reward",
+                            offset=0
+                        ),
+                    ),
+                    LaserColorTwo(
+                        color="Red",
+                        pulse_condition="Right choice",
+                        start=IntervalConditions(
+                            interval_condition="Trial start",
+                            offset=0
+                        ),
+                        end=IntervalConditions(
+                            interval_condition="Right reward",
+                            offset=0
+                        ),
+                    ),
+                    LaserColorThree(
+                        color="Green",
+                        pulse_condition="Right choice",
+                        start=IntervalConditions(
+                            interval_condition="Trial start",
+                            offset=0
+                        ),
+                        end=IntervalConditions(
+                            interval_condition="Right reward",
+                            offset=0
+                        ),
+                    ),
+                    LaserColorFour(
+                        color="Orange",
+                        pulse_condition="Right choice",
+                        start=IntervalConditions(
+                            interval_condition="Trial start",
+                            offset=0
+                        ),
+                        end=IntervalConditions(
+                            interval_condition="Right reward",
+                            offset=0
+                        ),
+                    ),
+                    LaserColorFive(
+                        color="Orange",
+                        pulse_condition="Right choice",
+                        start=IntervalConditions(
+                            interval_condition="Trial start",
+                            offset=0
+                        ),
+                        end=IntervalConditions(
+                            interval_condition="Right reward",
+                            offset=0
+                        ),
+                    ),
+                    LaserColorSix(
+                        color="Orange",
+                        pulse_condition="Right choice",
+                        start=IntervalConditions(
+                            interval_condition="Trial start",
+                            offset=0
+                        ),
+                        end=IntervalConditions(
+                            interval_condition="Right reward",
+                            offset=0
+                        ),
+                    ),
+                ],
+                session_control=SessionControl(),
+            )
     task_widget = OptoParametersWidget(task_model)
     task_widget.ValueChangedInside.connect(lambda name: print(task_model))
     task_widget.show()

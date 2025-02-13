@@ -17,6 +17,7 @@ from PyQt5 import QtCore
 from foraging_gui.reward_schedules.uncoupled_block import UncoupledBlocks
 from aind_behavior_dynamic_foraging import AindDynamicForagingTaskLogic
 from aind_behavior_services.session import AindBehaviorSessionModel
+from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import Optogenetics
 
 if PLATFORM == 'win32':
     from newscale.usbxpress import USBXpressLib, USBXpressDevice
@@ -25,10 +26,13 @@ PID_NEWSCALE = 0xea61
 
 
 class GenerateTrials():
-    def __init__(self,win, task_logic: AindDynamicForagingTaskLogic, session_model:AindBehaviorSessionModel):
+    def __init__(self,win, task_logic: AindDynamicForagingTaskLogic,
+                 session_model: AindBehaviorSessionModel,
+                 opto_model: Optogenetics):
         self.win=win
         self.task_logic = task_logic
         self.session_model = session_model
+        self.opto_model = opto_model
         self.B_LeftLickIntervalPercent = None      # percentage of left lick intervals under 100ms
         self.B_RightLickIntervalPercent = None     # percentage of right lick intervals under 100ms
         self.B_CrossSideIntervalPercent = None     # percentage of cross side lick intervals under 100ms
@@ -206,7 +210,7 @@ class GenerateTrials():
         control_trial=0
         self.opto_error_tag=0
         try:
-            if self.TP_OptogeneticsB=='on': # optogenetics is turned on
+            if self.opto_model.laser_colors != []: # optogenetics is turned on
                 # select the current optogenetics condition
                 self._SelectOptogeneticsCondition()
                 # session control is regarded as off when the optogenetics is turned off
@@ -241,13 +245,15 @@ class GenerateTrials():
             self.CurrentLaserAmplitude=[0,0]
 
     def _CheckSessionControl(self):
-        '''Check if the session control is on'''
-        if self.TP_SessionWideControl=='on':
-            session_control_block_length=self.task_logic.task_parameters.auto_stop.max_trial*float(self.TP_FractionOfSession)
-            if self.TP_SessionStartWith=='on':
-                initial_state=1
-            elif self.TP_SessionStartWith=='off':
-                initial_state=0
+        """
+        Check if the session control is on
+        """
+
+        if self.opto_model.session_control is not None:
+            session_control_block_length = self.task_logic.task_parameters.auto_stop.max_trial * \
+                                           self.opto_model.session_control.session_fraction
+            initial_state = 1 if self.opto_model.session_control.optogenetic_start else 0
+
             calculated_state=np.zeros(self.task_logic.task_parameters.auto_stop.max_trial)
             numbers=np.arange(self.task_logic.task_parameters.auto_stop.max_trial)
             numbers_floor=np.floor(numbers/session_control_block_length)
@@ -1253,32 +1259,39 @@ class GenerateTrials():
             self.CurrentAutoReward=0
 
     def _GetLaserWaveForm(self):
-        '''Get the waveform of the laser. It dependens on color/duration/protocol(frequency/RD/pulse duration)/locations/laser power'''
-        N=self.SelctedCondition
+        """
+        Get the waveform of the laser. It dependens on color/duration/protocol(frequency/RD/pulse duration)/locations/laser power
+        """
+
+        laser_num = self.SelctedCondition
         # CLP, current laser parameter
-        self.CLP_Color=getattr(self,f"TP_LaserColor_{N}")
-        self.CLP_Location=getattr(self,f"TP_Location_{N}")
-        self.CLP_Laser1Power=getattr(self,f"TP_Laser1_power_{N}")
-        self.CLP_Laser2Power=getattr(self,f"TP_Laser2_power_{N}")
-        self.CLP_Duration=float(getattr(self,f"TP_Duration_{N}"))
-        self.CLP_Protocol=getattr(self,f"TP_Protocol_{N}")
-        if not self.CLP_Protocol=='Constant':
-            self.CLP_Frequency=float(getattr(self,f"TP_Frequency_{N}"))
-        self.CLP_RampingDown=float(getattr(self,f"TP_RD_{N}"))
-        self.CLP_PulseDur=getattr(self,f"TP_PulseDur_{N}")
-        self.CLP_LaserStart=getattr(self,f"TP_LaserStart_{N}")
-        self.CLP_OffsetStart=float(getattr(self,f"TP_OffsetStart_{N}"))
-        self.CLP_LaserEnd=getattr(self,f"TP_LaserEnd_{N}")
-        self.CLP_OffsetEnd=float(getattr(self,f"TP_OffsetEnd_{N}"))# negative, backward; positive forward
-        self.CLP_SampleFrequency=float(self.TP_SampleFrequency)
+        nums = ["One", "Two", "Three", "Four", "Five", "Six"]
+        laser = [laser for laser in self.opto_model.laser_colors if laser.name == f"LaserColor{nums[laser_num]}"][0]
+        self.CLP_Color = laser.color
+        self.CLP_Location = laser.location
+        for location in laser.location:
+            loc_num = 1 if location.name == "LocationOne" else 2
+            setattr(self, f"CLP_Laser{loc_num}Power", location.power)
+        self.CLP_Duration = laser.duration
+        self.CLP_Protocol = laser.protocol
+        # if not self.CLP_Protocol=='Constant':
+        #     self.CLP_Frequency=float(getattr(self,f"TP_Frequency_{N}"))
+        # self.CLP_RampingDown=float(getattr(self,f"TP_RD_{N}"))
+        # self.CLP_PulseDur=getattr(self,f"TP_PulseDur_{N}")
+        self.CLP_LaserStart = laser.start
+        # self.CLP_OffsetStart=float(getattr(self,f"TP_OffsetStart_{N}"))
+        self.CLP_LaserEnd = laser.end
+        # self.CLP_OffsetEnd = float(getattr(self,f"TP_OffsetEnd_{N}"))# negative, backward; positive forward
+        self.CLP_SampleFrequency= self.opto_model.sample_frequency
         # align to trial start
-        if (self.CLP_LaserStart=='Trial start' or self.CLP_LaserStart=='Go cue' or self.CLP_LaserStart=='Reward outcome') and self.CLP_LaserEnd=='NA':
+        
+        if laser.start.interval_condition in ['Trial start', 'Go cue', 'Reward outcome'] and laser.end == None:
             # the duration is determined by Duration
             self.CLP_CurrentDuration=self.CLP_Duration
-        elif self.CLP_LaserStart=='Trial start' and self.CLP_LaserEnd=='Go cue':
+        elif laser.start.interval_condition == 'Trial start' and laser.end.interval_condition == 'Go cue':
             # the duration is determined by CurrentITI, CurrentDelay, self.CLP_OffsetStart, self.CLP_OffsetEnd
             # only positive CLP_OffsetStart is allowed
-            if self.CLP_OffsetStart<0:
+            if laser.start.offset < 0:
                 logging.warning('Please set offset start to be positive!', extra={'tags': [self.win.warning_log_tag]})
             # there is no delay for optogenetics trials 
             self.CLP_CurrentDuration=self.CurrentITI-self.CLP_OffsetStart+self.CLP_OffsetEnd
