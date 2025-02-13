@@ -206,7 +206,10 @@ class GenerateTrials():
         # finish to generate the next trial
         self.GeneFinish=1
     def _PerformOptogenetics(self,Channel4):
-        '''Optogenetics section to generate optogenetics parameters and send waveform to Bonsai'''
+        """
+        Optogenetics section to generate optogenetics parameters and send waveform to Bonsai
+        """
+
         control_trial=0
         self.opto_error_tag=0
         try:
@@ -1274,33 +1277,30 @@ class GenerateTrials():
             setattr(self, f"CLP_Laser{loc_num}Power", location.power)
         self.CLP_Duration = laser.duration
         self.CLP_Protocol = laser.protocol
+        self.CLP_LaserStart = laser.start
+        self.CLP_LaserEnd = laser.end
+        self.CLP_SampleFrequency = self.opto_model.sample_frequency
         # if not self.CLP_Protocol=='Constant':
         #     self.CLP_Frequency=float(getattr(self,f"TP_Frequency_{N}"))
         # self.CLP_RampingDown=float(getattr(self,f"TP_RD_{N}"))
         # self.CLP_PulseDur=getattr(self,f"TP_PulseDur_{N}")
-        self.CLP_LaserStart = laser.start
         # self.CLP_OffsetStart=float(getattr(self,f"TP_OffsetStart_{N}"))
-        self.CLP_LaserEnd = laser.end
         # self.CLP_OffsetEnd = float(getattr(self,f"TP_OffsetEnd_{N}"))# negative, backward; positive forward
-        self.CLP_SampleFrequency= self.opto_model.sample_frequency
+
         # align to trial start
-        
-        if laser.start.interval_condition in ['Trial start', 'Go cue', 'Reward outcome'] and laser.end == None:
-            # the duration is determined by Duration
-            self.CLP_CurrentDuration=self.CLP_Duration
-        elif laser.start.interval_condition == 'Trial start' and laser.end.interval_condition == 'Go cue':
-            # the duration is determined by CurrentITI, CurrentDelay, self.CLP_OffsetStart, self.CLP_OffsetEnd
-            # only positive CLP_OffsetStart is allowed
-            if laser.start.offset < 0:
-                logging.warning('Please set offset start to be positive!', extra={'tags': [self.win.warning_log_tag]})
-            # there is no delay for optogenetics trials 
-            self.CLP_CurrentDuration=self.CurrentITI-self.CLP_OffsetStart+self.CLP_OffsetEnd
-        elif self.CLP_LaserStart=='Go cue' and self.CLP_LaserEnd=='Trial start':
-            # The duration is inaccurate as it doesn't account for time outside of bonsai (can be solved in Bonsai)
-            # the duration is determined by TP_ResponseTime, self.CLP_OffsetStart, self.CLP_OffsetEnd
-            self.CLP_CurrentDuration=self.task_logic.task_parameters.response_time.response_time-self.CLP_OffsetStart+self.CLP_OffsetEnd
-        else:
-            pass
+        if laser.start is not None:
+            if laser.start.interval_condition in ['Trial start', 'Go cue', 'Reward outcome'] and laser.end is None:
+                # the duration is determined by Duration
+                self.CLP_CurrentDuration=self.CLP_Duration
+            if laser.end is not None:
+                if laser.start.interval_condition == 'Trial start' and laser.end.interval_condition == 'Go cue':
+                    # there is no delay for optogenetics trials
+                    self.CLP_CurrentDuration=self.CurrentITI-laser.start.offset+laser.end.offset
+                elif self.CLP_LaserStart=='Go cue' and self.CLP_LaserEnd=='Trial start':
+                    # The duration is inaccurate as it doesn't account for time outside of bonsai (can be solved in Bonsai)
+                    # the duration is determined by response time, start offset, end offset
+                    self.CLP_CurrentDuration=self.task_logic.task_parameters.response_time.response_time-laser.start.offset+laser.end.offset
+
         self.B_LaserDuration.append(self.CLP_CurrentDuration)
         # generate the waveform based on self.CLP_CurrentDuration and Protocol, Frequency, RampingDown, PulseDur
         self._GetLaserAmplitude()
@@ -1424,42 +1424,33 @@ class GenerateTrials():
         self.B_LaserAmplitude.append(self.CurrentLaserAmplitude)
 
     def _SelectOptogeneticsCondition(self):
-        '''To decide if this should be an optogenetics trial'''
+        """
+        Decide if trial should be an optogenetics trial
+        """
         # condition should be taken into account in the future
         # check session session
         self._CheckSessionControl()
-        if self.session_control_state==0 and self.TP_SessionWideControl=='on':
-            self.SelctedCondition=0
+        if self.session_control_state == 0 and self.opto_model.laser_colors != []:
+            self.SelctedCondition = 0
             return
-        ConditionsOn=[]
-        Probabilities=[]
-        empty=1
-        condition_idx = [1, 2, 3, 4, 5, 6]
-        TP_LaserColors = [ f'TP_LaserColor_{i}' for i in condition_idx]
-        for attr_name in dir(self):
-            if attr_name in TP_LaserColors:
-                if getattr(self, attr_name) !='NA':
-                    parts = attr_name.split('_')
-                    ConditionsOn.append(parts[-1])
-                    Probabilities.append(float(getattr(self, 'TP_Probability_' + parts[-1])))
-                    empty=0
-        if empty==1:
-            self.SelctedCondition=0
+        if self.opto_model.laser_colors == []:
+            self.SelctedCondition = 0
             return
-        self.ConditionsOn=ConditionsOn
-        self.Probabilities=Probabilities
-        ProAccu=list(accumulate(Probabilities))
-        b=random.uniform(0,1)
+        self.ConditionsOn = self.opto_model.laser_colors
+        self.Probabilities = [laser.probability for laser in self.opto_model.laser_colors]
+
+        ProAccu = list(accumulate(self.Probabilities))
+        b = random.uniform(0,1)
         for i in range(len(ProAccu)):
             if b <= ProAccu[i]:
-                self.SelctedCondition=self.ConditionsOn[i]
+                self.SelctedCondition = self.ConditionsOn[i]
                 break
             else:
                 self.SelctedCondition=0 # control is selected
         # Determine whether the interval between two near trials is larger than the MinOptoInterval
         non_zero_indices=np.nonzero(np.array(self.B_SelectedCondition).astype(int))
         if len(non_zero_indices[0])>0:
-            if len(self.B_SelectedCondition)-(non_zero_indices[0][-1]+1)<float(self.TP_MinOptoInterval):
+            if len(self.B_SelectedCondition)-(non_zero_indices[0][-1]+1) < self.opto_model.minimum_trial_interval:
                 self.SelctedCondition=0
                 
     def _InitiateATrial(self,Channel1,Channel4):
@@ -1534,8 +1525,8 @@ class GenerateTrials():
             else:
                 Channel1.PassGoCue(int(0))
                 Channel1.PassRewardOutcome(int(0))
-            Channel1.LeftValue(float(self.TP_LeftValue)*1000)
-            Channel1.RightValue(float(self.TP_RightValue)*1000)
+            Channel1.LeftValue(self.win.left_valve_open_time*1000)
+            Channel1.RightValue(self.win.right_valve_open_time*1000)
             Channel1.RewardConsumeTime(self.task_logic.task_parameters.response_time.reward_consume_time)
             Channel1.Left_Bait(int(self.CurrentBait[0]))
             Channel1.Right_Bait(int(self.CurrentBait[1]))
@@ -1662,9 +1653,9 @@ class GenerateTrials():
         # set the valve time of auto water
         multiplier = self.task_logic.task_parameters.auto_water.multiplier
         if self.CurrentAutoRewardTrial[0]==1:
-            self._set_valve_time_left(Channel3,float(self.win.LeftValue.text()),multiplier)
+            self._set_valve_time_left(Channel3,self.win.left_valve_open_time,multiplier)
         if self.CurrentAutoRewardTrial[1]==1:
-            self._set_valve_time_right(Channel3,float(self.win.RightValue.text()),multiplier)
+            self._set_valve_time_right(Channel3,self.win.right_valve_open_time,multiplier)
             
         if self.CurrentStartType==3: # no delay timestamp
             ReceiveN=9
@@ -1808,17 +1799,17 @@ class GenerateTrials():
 
     def _GiveLeft(self,channel3):
         '''manually give left water'''
-        channel3.LeftValue1(float(self.win.LeftValue.text())*1000*self.task_logic.task_parameters.auto_water.multiplier)
+        channel3.LeftValue1(self.win.left_valve_open_time*1000*self.task_logic.task_parameters.auto_water.multiplier)
         time.sleep(0.01) 
         channel3.ManualWater_Left(int(1))
-        channel3.LeftValue1(float(self.win.LeftValue.text())*1000)
+        channel3.LeftValue1(self.win.left_valve_open_time*1000)
 
     def _GiveRight(self,channel3):
         '''manually give right water'''
-        channel3.RightValue1(float(self.win.RightValue.text())*1000*self.task_logic.task_parameters.auto_water.multiplier)
+        channel3.RightValue1(self.win.right_valve_open_time*1000*self.task_logic.task_parameters.auto_water.multiplier)
         time.sleep(0.01) 
         channel3.ManualWater_Right(int(1))
-        channel3.RightValue1(float(self.win.RightValue.text())*1000)
+        channel3.RightValue1(self.win.right_valve_open_time*1000)
 
     def _get_irregular_timestamp(self,Channel2):
         '''Get timestamps occurred irregularly (e.g. licks and reward delivery time)'''

@@ -71,6 +71,9 @@ class OptoParametersWidget(SchemaWidgetBase):
             # set 0 minimum for start
             getattr(self, f"laser_colors.{laser}.start_widget").setMinimum(0)
 
+            # set range on probability widget
+            getattr(self, f"laser_colors.{laser}.probability").setRange(0, 1)
+
             # change protocol
             protocol_widget = QComboBox()
             protocol_widget.addItems(["Sine", "Pulse", "Constant"])

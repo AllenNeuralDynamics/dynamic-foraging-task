@@ -2047,6 +2047,7 @@ class Window(QMainWindow):
         if self.OpenOptogenetics==0:
             # initialize opto schema
             self.opto_model = Optogenetics(
+                sample_frequency=5000,
                 laser_colors=[
                     LaserColorOne(
                         color="Blue",
