@@ -69,10 +69,10 @@ class OptoParametersWidget(SchemaWidgetBase):
                 layout.replaceWidget(label, check_box)
                 setattr(self, f"laser_colors.{laser}.{interval}_check_box", check_box)
             # set 0 minimum for start
-            getattr(self, f"laser_colors.{laser}.start_widget").setMinimum(0)
+            getattr(self, f"laser_colors.{laser}.start.offset_widget").setMinimum(0)
 
             # set range on probability widget
-            getattr(self, f"laser_colors.{laser}.probability").setRange(0, 1)
+            getattr(self, f"laser_colors.{laser}.probability_widget").setRange(0, 1)
 
             # change protocol
             protocol_widget = QComboBox()

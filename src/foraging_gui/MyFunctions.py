@@ -1270,6 +1270,7 @@ class GenerateTrials():
         # CLP, current laser parameter
         nums = ["One", "Two", "Three", "Four", "Five", "Six"]
         laser = [laser for laser in self.opto_model.laser_colors if laser.name == f"LaserColor{nums[laser_num]}"][0]
+        self.selected_condition_laser = laser
         self.CLP_Color = laser.color
         self.CLP_Location = laser.location
         for location in laser.location:
@@ -1312,10 +1313,13 @@ class GenerateTrials():
             setattr(self, f"Location{i+1}_Size", getattr(self, f"WaveFormLocation_{i+1}").size)
 
     def _ProduceWaveForm(self,Amplitude):
-        '''generate the waveform based on Duration and Protocol, Laser Power, Frequency, RampingDown, PulseDur and the sample frequency'''
-        if self.CLP_Protocol=='Sine':
-            resolution=self.CLP_SampleFrequency*self.CLP_CurrentDuration # how many datapoints to generate
-            cycles=self.CLP_CurrentDuration*self.CLP_Frequency # how many sine cycles
+        """
+        Generate the waveform based on Duration and Protocol, Laser Power, Frequency, RampingDown, PulseDur and
+        the sample frequency
+        """
+        if self.selected_condition_laser.protocol.name == 'Sine':
+            resolution = self.opto_model.sample_frequency * self.CLP_CurrentDuration # how many datapoints to generate
+            cycles = self.CLP_CurrentDuration*self.selected_condition_laser.protocol.frequency # how many sine cycles
             length = np.pi * 2 * cycles
             self.my_wave = Amplitude*(1+np.sin(np.arange(0+1.5*math.pi, length+1.5*math.pi, length / resolution)))/2
             # add ramping down
@@ -1378,21 +1382,26 @@ class GenerateTrials():
         plt.show()
         '''
     def _get_ramping_down(self):
-        '''Add ramping down to the waveform'''
-        if self.CLP_RampingDown>0:
-            if self.CLP_RampingDown>self.CLP_CurrentDuration:
-                logging.warning('Ramping down is longer than the laser duration!',
-                                extra={'tags': [self.win.warning_log_tag]})
-            else:
-                Constant=np.ones(int((self.CLP_CurrentDuration-self.CLP_RampingDown)*self.CLP_SampleFrequency))
-                RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
-                RampingDown = np.concatenate((Constant, RD), axis=0)
-                self.my_wave=self.my_wave*RampingDown
+        """
+        Add ramping down to the waveform
+        """
+        if self.session_control_state.protocol.name == "Constant":
+            ramp_down = self.session_control_state.protocol.ramp_down
+            if ramp_down > 0:
+                if ramp_down > self.CLP_CurrentDuration:
+                    logging.warning('Ramping down is longer than the laser duration!',
+                                    extra={'tags': [self.win.warning_log_tag]})
+                else:
+                    Constant=np.ones(int((self.CLP_CurrentDuration-ramp_down)*self.opto_model.sample_frequency))
+                    RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
+                    RampingDown = np.concatenate((Constant, RD), axis=0)
+                    self.my_wave=self.my_wave*RampingDown
 
     def _add_offset(self):
         '''Add offset to the waveform'''            
-        if self.CLP_OffsetStart>0:
-            OffsetPoints=int(self.CLP_SampleFrequency*self.CLP_OffsetStart)
+
+        if self.selected_condition_laser.start is not None and self.selected_condition_laser.start.offset > 0:
+            OffsetPoints=int(self.opto_model.sample_frequency*self.selected_condition_laser.start)
             Offset=np.zeros(OffsetPoints)
             self.my_wave=np.concatenate((Offset,self.my_wave),axis=0)
 

@@ -1131,7 +1131,7 @@ class LaserCalibrationDialog(QDialog):
     def _connectSignalsSlots(self):
         self.Open.clicked.connect(self._Open)
         self.KeepOpen.clicked.connect(self._KeepOpen)
-        self.CopyFromOpto.clicked.connect(self._CopyFromOpto)
+        #self.CopyFromOpto.clicked.connect(self._CopyFromOpto)
         self.Save.clicked.connect(self._Save)
         self.Capture.clicked.connect(self._Capture)
         self.LaserColor_1.currentIndexChanged.connect(self._LaserColor_1)
