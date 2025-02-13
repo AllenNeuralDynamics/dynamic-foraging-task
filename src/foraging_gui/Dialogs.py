@@ -24,6 +24,10 @@ from aind_auto_train.curriculum_manager import CurriculumManager
 from aind_auto_train.auto_train_manager import DynamicForagingAutoTrainManager
 from aind_auto_train.schema.task import TrainingStage
 from aind_auto_train.schema.curriculum import DynamicForagingCurriculum
+from foraging_gui.schema_widgets.opto_parameters_widget import OptoParametersWidget
+from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import Optogenetics
+
+
 codebase_curriculum_schema_version = DynamicForagingCurriculum.model_fields['curriculum_schema_version'].default
 
 logger = logging.getLogger(__name__)
@@ -81,17 +85,24 @@ class TimeDistributionDialog(QDialog):
 
 class OptogeneticsDialog(QDialog):
     '''Optogenetics dialog'''
-    def __init__(self, MainWindow, parent=None):
+    def __init__(self, MainWindow, opto_model: Optogenetics, parent=None):
         super().__init__(parent)
         uic.loadUi('Optogenetics.ui', self)
+        self.opto_model = opto_model
+        self.opto_widget = OptoParametersWidget(self.opto_model)
+        # initialize with no lasers
+        self.opto_model.laser_colors = []
+        self.opto_widget.apply_schema(self.opto_model)
+        self.QScrollOptogenetics.setWidget(self.opto_widget)
+
         self.condition_idx = [1, 2, 3, 4, 5, 6] # corresponding to optogenetics condition 1, 2, 3, 4, 5, 6
         self.laser_tags=[1,2] # corresponding to Laser_1 and Laser_2
-        self._connectSignalsSlots()
+        #self._connectSignalsSlots()
         self.MainWindow=MainWindow
-        for i in self.condition_idx:
-            getattr(self, f'_LaserColor')(i)
-        self._Laser_calibration()
-        self._SessionWideControl()
+        # for i in self.condition_idx:
+        #     getattr(self, f'_LaserColor')(i)
+        # self._Laser_calibration()
+        # self._SessionWideControl()
     def _connectSignalsSlots(self):
         for i in self.condition_idx:
             # Connect LaserColor signals

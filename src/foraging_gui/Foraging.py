@@ -72,6 +72,21 @@ from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
     Warmup
 )
 
+from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
+    Optogenetics,
+    IntervalConditions,
+    LocationOne,
+    LocationTwo,
+    SineProtocol,
+    PulseProtocol,
+    ConstantProtocol,
+    LaserColorOne,
+    LaserColorTwo,
+    LaserColorThree,
+    LaserColorFour,
+    SessionControl
+)
+
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear() # clear handlers so console output can be configured
 logging.raiseExceptions = os.getenv('FORAGING_DEV_MODE', False)
@@ -2029,7 +2044,61 @@ class Window(QMainWindow):
     def _Optogenetics(self):
         '''will be triggered when the optogenetics icon is pressed'''
         if self.OpenOptogenetics==0:
-            self.Opto_dialog = OptogeneticsDialog(MainWindow=self)
+            # initialize opto schema
+            self.opto_model = Optogenetics(
+                laser_colors=[
+                    LaserColorOne(
+                        color="Blue",
+                        pulse_condition="Right choice",
+                        start=IntervalConditions(
+                            interval_condition="Trial start",
+                            offset=0
+                        ),
+                        end=IntervalConditions(
+                            interval_condition="Right reward",
+                            offset=0
+                        ),
+                    ),
+                    LaserColorTwo(
+                        color="Red",
+                        pulse_condition="Right choice",
+                        start=IntervalConditions(
+                            interval_condition="Trial start",
+                            offset=0
+                        ),
+                        end=IntervalConditions(
+                            interval_condition="Right reward",
+                            offset=0
+                        ),
+                    ),
+                    LaserColorThree(
+                        color="Green",
+                        pulse_condition="Right choice",
+                        start=IntervalConditions(
+                            interval_condition="Trial start",
+                            offset=0
+                        ),
+                        end=IntervalConditions(
+                            interval_condition="Right reward",
+                            offset=0
+                        ),
+                    ),
+                    LaserColorFour(
+                        color="Orange",
+                        pulse_condition="Right choice",
+                        start=IntervalConditions(
+                            interval_condition="Trial start",
+                            offset=0
+                        ),
+                        end=IntervalConditions(
+                            interval_condition="Right reward",
+                            offset=0
+                        ),
+                    ),
+                ],
+                session_control=SessionControl(),
+            )
+            self.Opto_dialog = OptogeneticsDialog(MainWindow=self, opto_model=self.opto_model)
             self.OpenOptogenetics=1
         if self.action_Optogenetics.isChecked()==True:
             self.Opto_dialog.show()

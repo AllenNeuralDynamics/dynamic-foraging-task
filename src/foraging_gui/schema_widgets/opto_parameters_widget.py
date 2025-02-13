@@ -344,24 +344,10 @@ if __name__ == "__main__":
     task_widget.ValueChangedInside.connect(lambda name: print(task_model))
     task_widget.show()
 
-    task_model.laser_colors = [
-
-        LaserColorThree(
-            color="Red",
-            pulse_condition="Left reward",
-            start=IntervalConditions(
-                interval_condition="Trial start",
-                offset=0
-            ),
-            end=IntervalConditions(
-                interval_condition="Right reward",
-                offset=2
-            ),
-        ),
-    ]
-    task_model.laser_colors[0].location = [LocationOne()]
+    task_model.laser_colors = []
+    #task_model.laser_colors[0].location = [LocationOne()]
     #task_model.laser_colors[1].location = [LocationTwo()]
-    task_model.laser_colors[0].protocol = PulseProtocol()
+    #task_model.laser_colors[0].protocol = PulseProtocol()
 
     task_widget.apply_schema(task_model)
 
