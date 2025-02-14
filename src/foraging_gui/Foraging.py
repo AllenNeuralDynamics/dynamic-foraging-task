@@ -152,11 +152,11 @@ class Window(QMainWindow):
         # create AINDBehaviorSession model to be used and referenced for session info
         self.session_model = AindBehaviorSessionModel(
             experiment="Coupled Baiting",
-            experimenter=[""],
+            experimenter=["the ghost in the shell"],
             date=datetime.now(),   # update when folders are created
-            root_path='',         # update when created
-            session_name= '',   # update when date and subject are filled in
-            subject="",
+            root_path="",         # update when created
+            session_name="",   # update when date and subject are filled in
+            subject="0",
             experiment_version=foraging_gui.__version__,
             notes="",
             commit_hash= subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip(),
@@ -177,8 +177,8 @@ class Window(QMainWindow):
                                 )
                             )
         self.RewardFamilies = [[[8, 1], [6, 1], [3, 1], [1, 1]],
-                              [[8, 1], [1, 1]], [[1, 0], [.9, .1], [.8, .2], [.7, .3], [.6, .4], [.5, .5]],
-                              [[6, 1], [3, 1], [1, 1]]]
+                               [[8, 1], [1, 1]], [[1, 0], [.9, .1], [.8, .2], [.7, .3], [.6, .4], [.5, .5]],
+                               [[6, 1], [3, 1], [1, 1]]]
         self.task_widget = BehaviorParametersWidget(self.task_logic.task_parameters,
                                                     reward_families=self.RewardFamilies)
         self.scrollArea.setWidget(self.task_widget)
@@ -299,7 +299,7 @@ class Window(QMainWindow):
     def update_session_task(self, task_type: Literal["coupled", "uncoupled", "rewardN"]):
         """
         Configure session task based on task parameters configured
-        :param task_type: task type curently configured
+        :param task_type: task type currently configured
         """
 
         if task_type == "coupled":
@@ -1883,62 +1883,62 @@ class Window(QMainWindow):
     def _CheckTextChange(self):
         '''Check if the text change is reasonable'''
         # Get the parameters before change
-        if hasattr(self, 'GeneratedTrials'):
-            Parameters=self.GeneratedTrials
-        else:
-            Parameters=self
-        for container in [self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
-            # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
-            for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
-                if child.objectName()=='qt_spinbox_lineedit' or child.isEnabled()==False: # I don't understand where the qt_spinbox_lineedit comes from.
-                    continue
-                try:
-                    if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
-                        # Changes are not allowed until press is typed except for PositionX, PositionY and PositionZ
-                        if child.objectName() not in ('PositionX', 'PositionY', 'PositionZ'):
-                            self.UpdateParameters = 0
-
-                        self.Continue=0
-                        if child.objectName() in {'LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','ProbeTarget','RigMetadataFile','Experimenter', 'UncoupledReward', 'ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
-                            child.setStyleSheet(f'color: {self.default_text_color};')
-                            self.Continue=1
-                        if child.text()=='': # If empty, change background color and wait for confirmation
-                            self.UpdateParameters=0
-                            child.setStyleSheet(f'background-color: {self.default_text_background_color};')
-                            self.Continue=1
-                        if child.objectName() in {'RunLength','WindowSize','StepSize'}:
-                            if child.text()=='':
-                                child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
-                                child.setStyleSheet('color: black;')
-                                child.setStyleSheet('background-color: white;')
-                        if self.Continue==1:
-                            continue
-                        child.setStyleSheet(f'color: {self.default_text_color};')
-                        try:
-                            # it's valid float
-                            float(child.text())
-                        except Exception as e:
-                            #logging.error(traceback.format_exc())
-                            # Invalid float. Do not change the parameter
-                            if child.objectName() in ['BaseWeight', 'WeightAfter']:
-                                # Strip the last character which triggered the invalid float
-                                child.setText(child.text()[:-1])
-                                continue
-                            elif isinstance(child, QtWidgets.QDoubleSpinBox):
-                                child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
-                            elif isinstance(child, QtWidgets.QSpinBox):
-                                child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
-                            else:
-                                child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                            child.setStyleSheet('color: black;')
-                            self.UpdateParameters=0
-                    else:
-                        child.setStyleSheet('color: black;')
-                        child.setStyleSheet('background-color: white;')
-                except Exception as e:
-                    #logging.error(traceback.format_exc())
-                    pass
+        # if hasattr(self, 'GeneratedTrials'):
+        #     Parameters=self.GeneratedTrials
+        # else:
+        #     Parameters=self
+        # for container in [self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
+        #     # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
+        #     for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
+        #         if child.objectName()=='qt_spinbox_lineedit' or child.isEnabled()==False: # I don't understand where the qt_spinbox_lineedit comes from.
+        #             continue
+        #         try:
+        #             if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
+        #                 # Changes are not allowed until press is typed except for PositionX, PositionY and PositionZ
+        #                 if child.objectName() not in ('PositionX', 'PositionY', 'PositionZ'):
+        #                     self.UpdateParameters = 0
+        #
+        #                 self.Continue=0
+        #                 if child.objectName() in {'LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','ProbeTarget','RigMetadataFile','Experimenter', 'UncoupledReward', 'ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
+        #                     child.setStyleSheet(f'color: {self.default_text_color};')
+        #                     self.Continue=1
+        #                 if child.text()=='': # If empty, change background color and wait for confirmation
+        #                     self.UpdateParameters=0
+        #                     child.setStyleSheet(f'background-color: {self.default_text_background_color};')
+        #                     self.Continue=1
+        #                 if child.objectName() in {'RunLength','WindowSize','StepSize'}:
+        #                     if child.text()=='':
+        #                         child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
+        #                         child.setStyleSheet('color: black;')
+        #                         child.setStyleSheet('background-color: white;')
+        #                 if self.Continue==1:
+        #                     continue
+        #                 child.setStyleSheet(f'color: {self.default_text_color};')
+        #                 try:
+        #                     # it's valid float
+        #                     float(child.text())
+        #                 except Exception as e:
+        #                     #logging.error(traceback.format_exc())
+        #                     # Invalid float. Do not change the parameter
+        #                     if child.objectName() in ['BaseWeight', 'WeightAfter']:
+        #                         # Strip the last character which triggered the invalid float
+        #                         child.setText(child.text()[:-1])
+        #                         continue
+        #                     elif isinstance(child, QtWidgets.QDoubleSpinBox):
+        #                         child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
+        #                     elif isinstance(child, QtWidgets.QSpinBox):
+        #                         child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
+        #                     else:
+        #                         child.setText(getattr(Parameters, 'TP_'+child.objectName()))
+        #                     child.setText(getattr(Parameters, 'TP_'+child.objectName()))
+        #                     child.setStyleSheet('color: black;')
+        #                     self.UpdateParameters=0
+        #             else:
+        #                 child.setStyleSheet('color: black;')
+        #                 child.setStyleSheet('background-color: white;')
+        #         except Exception as e:
+        #             #logging.error(traceback.format_exc())
+        #             pass
 
     def _GetTrainingParameters(self,prefix='TP_'):
         '''Get training parameters'''
@@ -2753,7 +2753,7 @@ class Window(QMainWindow):
         # Set ID, clear weight information
         logging.info('User starting a new mouse: {}'.format(mouse_id))
         self.session_widget.subject_widget.setText(mouse_id)
-        self.session_widget.returnPressed.emit()
+        self.session_widget.subject_widget.returnPressed.emit()
         self.TargetRatio.setText('0.85')
         self.keyPressEvent(allow_reset=True)
 
@@ -3489,6 +3489,7 @@ class Window(QMainWindow):
 
     def _thread_complete(self):
         '''complete of a trial'''
+        print("thread complete")
         if self.NewTrialRewardOrder==0:
             self.GeneratedTrials._GenerateATrial()
         self.ANewTrial=1

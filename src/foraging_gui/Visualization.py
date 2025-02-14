@@ -207,9 +207,11 @@ class PlotV(FigureCanvas):
             self.ax1.plot(self.B_ManualRightWaterStartTime, np.zeros(len(self.B_ManualRightWaterStartTime))+0.7, 
                 'bs',markerfacecolor =(0, 1, 0, 1),markersize=self.MarkerSize,label='ManualWater')
 
-        condition_list = list(set([condition.name for condition in self.B_SelectedCondition]))
+        non_none_conditions = [condition.name for condition in self.B_SelectedCondition if condition is not None]
+        condition_list = list(set(non_none_conditions))
         for condition in condition_list:
-            Optogenetics_On=np.where(np.logical_and(self.B_LaserOnTrial[:-1]==1,[con.name for con in self.B_SelectedCondition[:-1]]==condition))
+            Optogenetics_On=np.where(np.logical_and(self.B_LaserOnTrial[:-1] == 1, non_none_conditions == condition))
+            print(Optogenetics_On)
             if len(Optogenetics_On[0])==0:
                 continue
             current_color=color_mapping['Condition'+str(condition)]

@@ -249,7 +249,7 @@ class GenerateTrials():
             self.B_LaserOnTrial.append(self.LaserOn)
             self.B_LaserAmplitude.append([0, 0])
             self.B_LaserDuration.append(0)
-            self.B_SelectedCondition.append(0)
+            self.B_SelectedCondition.append(None)
             self.CurrentLaserAmplitude = [0, 0]
 
     def _CheckSessionControl(self):
@@ -1409,9 +1409,9 @@ class GenerateTrials():
             else:
                 self.selected_condition = None # control is selected
         # Determine whether the interval between two near trials is larger than the MinOptoInterval
-        non_zero_indices=np.nonzero(np.array(self.B_SelectedCondition).astype(int))
-        if len(non_zero_indices[0])>0:
-            if len(self.B_SelectedCondition)-(non_zero_indices[0][-1]+1) < self.opto_model.minimum_trial_interval:
+        non_none_indices= [i for i, condition in enumerate(self.B_SelectedCondition) if condition is not None]
+        if len(non_none_indices)>0:
+            if len(self.B_SelectedCondition)-(non_none_indices[-1]+1) < self.opto_model.minimum_trial_interval:
                 self.selected_condition = None
                 
     def _InitiateATrial(self,Channel1,Channel4):
@@ -1479,11 +1479,11 @@ class GenerateTrials():
                     logging.warning('Unindentified optogenetics start event!',
                                     extra={'tags': [self.win.warning_log_tag]})
                 # send the waveform size
-                # Channel1.Location1_Size(int(self.Location1_Size))
-                # Channel1.Location2_Size(int(self.Location2_Size))
+                Channel1.Location1_Size(int(self.Location1_Size))
+                Channel1.Location2_Size(int(self.Location2_Size))
                 # for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
                 #     getattr(Channel4, 'WaveForm' + str(1)+'_'+str(i+1))(str(getattr(self, 'WaveFormLocation_'+str(i+1)).tolist())[1:-1])
-                # FinishOfWaveForm=Channel4.receive()
+                #FinishOfWaveForm=Channel4.receive()
             else:
                 Channel1.PassGoCue(int(0))
                 Channel1.PassRewardOutcome(int(0))
@@ -1608,6 +1608,7 @@ class GenerateTrials():
 
     def _GetAnimalResponse(self,Channel1,Channel3):
         '''Get the animal's response'''
+
         self._CheckSimulationSession()
         if self.CurrentSimulation==True:
             self._SimulateResponse()
@@ -1627,7 +1628,6 @@ class GenerateTrials():
             ReceiveN=11
             DelayStartTimeHarp=[]
             DelayStartTime=[]
-
         current_receiveN=0
         behavior_eventN=0
         in_delay=0 #0, the next /BehaviorEvent is not the delay; 1, the next /BehaviorEvent is the delay following the /TrialStartTime
@@ -1718,6 +1718,7 @@ class GenerateTrials():
                 self.B_DOPort2Output=np.append(self.B_DOPort2Output,B_DOPort2Output)
             elif Rec[0].address=='/ITIStartTimeHarp':
                 TrialStartTimeHarp=Rec[1][1][0]
+
             elif Rec[0].address=='/BehaviorEvent':
                 if in_delay==1:
                     DelayStartTimeHarp.append(Rec[1][1][0])
@@ -2013,6 +2014,7 @@ class Worker(QtCore.QRunnable):
         # Retrieve args/kwargs here; and fire processing using them
         try:
             result = self.fn(*self.args, **self.kwargs)
+            print("result", result)
         except ValueError as e:
             exctype, value = sys.exc_info()[:2]
             self.signals.error.emit((exctype, value, traceback.format_exc()))
