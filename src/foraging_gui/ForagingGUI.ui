@@ -262,6 +262,31 @@
           </property>
          </widget>
         </item>
+        <item row="2" column="3">
+         <widget class="QPushButton" name="NextBlock">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string>NextBlock</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
         <item row="2" column="1">
          <widget class="QPushButton" name="Save">
           <property name="sizePolicy">
@@ -3289,22 +3314,6 @@ Double dipping:
                        <widget class="Line" name="line">
                         <property name="orientation">
                          <enum>Qt::Vertical</enum>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="10" column="11" rowspan="2">
-                       <widget class="QPushButton" name="NextBlock">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>Next block</string>
-                        </property>
-                        <property name="checkable">
-                         <bool>true</bool>
                         </property>
                        </widget>
                       </item>

@@ -187,8 +187,8 @@ class Window(QMainWindow):
         self.task_widget.taskUpdated.connect(lambda task: self._ShowRewardPairs())
         self.task_widget.ValueChangedInside.connect(lambda name: self._ShowRewardPairs())
         # initialize valve times and update valve times when reward volumes change
-        self.left_valve_open_time = None
-        self.right_valve_open_time = None
+        self.left_valve_open_time = 0.03
+        self.right_valve_open_time = 0.03
         self.task_widget.volumeChanged.connect(self.update_valve_open_time)
 
         # add warning_widget to layout and set color
@@ -1803,82 +1803,82 @@ class Window(QMainWindow):
             Enter press to allow change of parameters
             allow_reset (bool) allows the Baseweight etc. parameters to be reset to the empty string
         '''
-        try:
-            if self.actionTime_distribution.isChecked()==True:
-                self.PlotTime._Update(self)
-        except Exception as e:
-            logging.error(traceback.format_exc())
-
-        # move newscale stage
-        if hasattr(self,'current_stage'):
-            if (self.PositionX.text() != '')and (self.PositionY.text() != '')and (self.PositionZ.text() != ''):
-                try:
-                    self.current_stage.move_absolute_3d(float(self.PositionX.text()),float(self.PositionY.text()),float(self.PositionZ.text()))
-                except Exception as e:
-                    logging.error(traceback.format_exc())
-        # Get the parameters before change
-        if hasattr(self, 'GeneratedTrials') and self.ToInitializeVisual==0: # use the current GUI paramters when no session starts running
-            Parameters=self.GeneratedTrials
-        else:
-            Parameters=self
-        if event is None or not isinstance(event, QtGui.QKeyEvent):
-            event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, Qt.Key_Return, Qt.KeyboardModifiers())
-        if (event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter):
-            # handle the return key press event here
-            logging.info('processing parameter changes')
-            # prevent the default behavior of the return key press event
-            event.accept()
-            self.UpdateParameters=1 # Changes are allowed
-            # change color to black
-            for container in [self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
-                # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
-                for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
-                    if child.objectName()=='qt_spinbox_lineedit':
-                        continue
-
-                    if not (hasattr(self, 'AutoTrain_dialog') and self.AutoTrain_dialog.auto_train_engaged):
-                        child.setStyleSheet('color: black;')
-                        child.setStyleSheet('background-color: white;')
-
-                    if child.objectName() in {'WeightAfter','LickSpoutDistance','ModuleAngle','ArcAngle','ProtocolID','Stick_RotationAngle','LickSpoutReferenceX','LickSpoutReferenceY','LickSpoutReferenceZ','LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','Stick_ArcAngle','Stick_ModuleAngle','RotationAngle','ManipulatorX','ManipulatorY','ManipulatorZ','ProbeTarget','RigMetadataFile','IACUCProtocol','Experimenter','TotalWater','ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
-                        continue
-                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight','','ConditionP_5','ConditionP_6','Duration_5','Duration_6','OffsetEnd_5','OffsetEnd_6','OffsetStart_5','OffsetStart_6','Probability_5','Probability_6','PulseDur_5','PulseDur_6','RD_5','RD_6']) and
-                        (child.text() == '')):
-                        # These attributes can have the empty string, but we can't set the value as the empty string, unless we allow resets
-                        if allow_reset:
-                            continue
-                        if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
-                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                        continue
-                    if (child.objectName() in ['LatestCalibrationDate','SessionlistSpin']):
-                        continue
-
-
-                    # check for empty string condition
-                    try:
-                        float(child.text())
-                    except Exception as e:
-                        # Invalid float. Do not change the parameter, reset back to previous value
-                        logging.warning('Cannot convert input to float: {}, \'{}\''.format(child.objectName(),child.text()))
-                        if isinstance(child, QtWidgets.QDoubleSpinBox):
-                            child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
-                        elif isinstance(child, QtWidgets.QSpinBox):
-                            child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
-                        else:
-                            if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
-                                child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                    else:
-                        if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
-                            # If this parameter changed, add the change to the log
-                            old = getattr(Parameters,'TP_'+child.objectName())
-                            if old != '':
-                                old = float(old)
-                            new = float(child.text())
-                            if new != old:
-                                logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
-
-            # update the current training parameters
-            self._GetTrainingParameters()
+        # try:
+        #     if self.actionTime_distribution.isChecked()==True:
+        #         self.PlotTime._Update(self)
+        # except Exception as e:
+        #     logging.error(traceback.format_exc())
+        #
+        # # move newscale stage
+        # if hasattr(self,'current_stage'):
+        #     if (self.PositionX.text() != '')and (self.PositionY.text() != '')and (self.PositionZ.text() != ''):
+        #         try:
+        #             self.current_stage.move_absolute_3d(float(self.PositionX.text()),float(self.PositionY.text()),float(self.PositionZ.text()))
+        #         except Exception as e:
+        #             logging.error(traceback.format_exc())
+        # # Get the parameters before change
+        # if hasattr(self, 'GeneratedTrials') and self.ToInitializeVisual==0: # use the current GUI paramters when no session starts running
+        #     Parameters=self.GeneratedTrials
+        # else:
+        #     Parameters=self
+        # if event is None or not isinstance(event, QtGui.QKeyEvent):
+        #     event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, Qt.Key_Return, Qt.KeyboardModifiers())
+        # if (event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter):
+        #     # handle the return key press event here
+        #     logging.info('processing parameter changes')
+        #     # prevent the default behavior of the return key press event
+        #     event.accept()
+        #     self.UpdateParameters=1 # Changes are allowed
+        #     # change color to black
+        #     for container in [self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
+        #         # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
+        #         for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
+        #             if child.objectName()=='qt_spinbox_lineedit':
+        #                 continue
+        #
+        #             if not (hasattr(self, 'AutoTrain_dialog') and self.AutoTrain_dialog.auto_train_engaged):
+        #                 child.setStyleSheet('color: black;')
+        #                 child.setStyleSheet('background-color: white;')
+        #
+        #             if child.objectName() in {'WeightAfter','LickSpoutDistance','ModuleAngle','ArcAngle','ProtocolID','Stick_RotationAngle','LickSpoutReferenceX','LickSpoutReferenceY','LickSpoutReferenceZ','LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','Stick_ArcAngle','Stick_ModuleAngle','RotationAngle','ManipulatorX','ManipulatorY','ManipulatorZ','ProbeTarget','RigMetadataFile','IACUCProtocol','Experimenter','TotalWater','ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
+        #                 continue
+        #             if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight','','ConditionP_5','ConditionP_6','Duration_5','Duration_6','OffsetEnd_5','OffsetEnd_6','OffsetStart_5','OffsetStart_6','Probability_5','Probability_6','PulseDur_5','PulseDur_6','RD_5','RD_6']) and
+        #                 (child.text() == '')):
+        #                 # These attributes can have the empty string, but we can't set the value as the empty string, unless we allow resets
+        #                 if allow_reset:
+        #                     continue
+        #                 if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
+        #                     child.setText(getattr(Parameters, 'TP_'+child.objectName()))
+        #                 continue
+        #             if (child.objectName() in ['LatestCalibrationDate','SessionlistSpin']):
+        #                 continue
+        #
+        #
+        #             # check for empty string condition
+        #             try:
+        #                 float(child.text())
+        #             except Exception as e:
+        #                 # Invalid float. Do not change the parameter, reset back to previous value
+        #                 logging.warning('Cannot convert input to float: {}, \'{}\''.format(child.objectName(),child.text()))
+        #                 if isinstance(child, QtWidgets.QDoubleSpinBox):
+        #                     child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
+        #                 elif isinstance(child, QtWidgets.QSpinBox):
+        #                     child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
+        #                 else:
+        #                     if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
+        #                         child.setText(getattr(Parameters, 'TP_'+child.objectName()))
+        #             else:
+        #                 if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
+        #                     # If this parameter changed, add the change to the log
+        #                     old = getattr(Parameters,'TP_'+child.objectName())
+        #                     if old != '':
+        #                         old = float(old)
+        #                     new = float(child.text())
+        #                     if new != old:
+        #                         logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
+        #
+        #     # update the current training parameters
+        #     self._GetTrainingParameters()
 
     def _CheckTextChange(self):
         '''Check if the text change is reasonable'''
@@ -2752,8 +2752,8 @@ class Window(QMainWindow):
 
         # Set ID, clear weight information
         logging.info('User starting a new mouse: {}'.format(mouse_id))
-        self.ID.setText(mouse_id)
-        self.ID.returnPressed.emit()
+        self.session_widget.subject_widget.setText(mouse_id)
+        self.session_widget.returnPressed.emit()
         self.TargetRatio.setText('0.85')
         self.keyPressEvent(allow_reset=True)
 
@@ -3051,13 +3051,13 @@ class Window(QMainWindow):
         self.StartExcitation.setChecked(False)
         self.keyPressEvent() # Accept all updates
         self.load_tag=1
-        self.ID.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
+        self.session_widget.subject_widget.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
         self.ToInitializeVisual=1
         Obj=self.Obj
-        self.GeneratedTrials=GenerateTrials(self, self.task_logic)
+        self.GeneratedTrials=GenerateTrials(self, self.task_logic, self.session_model, self.opto_model)
         # Iterate over all attributes of the GeneratedTrials object
         for attr_name in dir(self.GeneratedTrials):
             if attr_name in Obj.keys():
@@ -3356,8 +3356,9 @@ class Window(QMainWindow):
     def _stop_logging(self):
         '''Stop the logging'''
         self.Camera_dialog.StartPreview.setEnabled(True)
-        self.ID.setEnabled(True)
-        self.Load.setEnabled(True)
+        self.session_widget.subject_widget.setEnabled(True)
+        #self.ID.setEnabled(True)
+        #self.Load.setEnabled(True)
         try:
             self.Channel.StopLogging('s')
             self.logging_type=-1 # logging has stopped
@@ -3527,8 +3528,8 @@ class Window(QMainWindow):
 
     def _set_metadata_enabled(self, enable: bool):
         '''Enable or disable metadata fields'''
-        self.ID.setEnabled(enable)
-        self.Experimenter.setEnabled(enable)
+        self.session_widget.experimenter_widget.setEnabled(enable)
+        self.session_widget.subject_widget.setEnabled(enable)
 
     def _set_default_project(self):
         '''Set default project information'''
@@ -3864,7 +3865,7 @@ class Window(QMainWindow):
                 self.Camera_dialog.StartRecording.setChecked(True)
             self.SessionStartTime=datetime.now()
             self.Other_SessionStartTime=str(self.SessionStartTime) # for saving
-            GeneratedTrials=GenerateTrials(self, self.task_logic)
+            GeneratedTrials=GenerateTrials(self, self.task_logic, self.session_model, self.opto_model)
             self.GeneratedTrials=GeneratedTrials
             self.StartANewSession=0
             PlotM=PlotV(win=self,GeneratedTrials=GeneratedTrials,width=5, height=4)
@@ -4031,7 +4032,7 @@ class Window(QMainWindow):
                 logging.info('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
                 if (self.task_logic.task_parameters.auto_water is not None or
                     self.task_logic.task_parameters.block_parameters.min_reward > 0
-                    or self.session_model.task in ['Uncoupled Baiting', 'Uncoupled Without Baiting']) or \
+                    or self.session_model.experiment in ['Uncoupled Baiting', 'Uncoupled Without Baiting']) or \
                         self.task_logic.task_parameters.no_response_trial_addition:
                     # The next trial parameters must be dependent on the current trial's choice
                     # get animal response and then generate a new trial
