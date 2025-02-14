@@ -179,7 +179,7 @@ class PlotV(FigureCanvas):
             self.ax2.eventplot(NewTrialStart.reshape((1,)), lineoffsets=.5, 
                 linelengths=2, linewidth=2, color='k', alpha=0.3)
             if self.B_BaitHistory[0][-1]==True:
-                self.ax1.plot(NewTrialStart2,-0.2, 'kD',label='Bait',markersize=self.MarkerSize, alpha=0.4)
+                self.ax1.plot(NewTrialStart2,-0.2, 'kD',label='Reward available',markersize=self.MarkerSize, alpha=0.4)
             if self.B_BaitHistory[1][-1]==True:
                 self.ax1.plot(NewTrialStart2,1.2, 'kD',markersize=self.MarkerSize, alpha=0.4)
             if self.B_LaserOnTrial[-1]==1:
