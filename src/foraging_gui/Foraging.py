@@ -3490,7 +3490,7 @@ class Window(QMainWindow):
     def _thread_complete(self):
         '''complete of a trial'''
         if self.NewTrialRewardOrder==0:
-            self.GeneratedTrials._GenerateATrial(self.Channel4)
+            self.GeneratedTrials._GenerateATrial()
         self.ANewTrial=1
 
     def _thread_complete2(self):
@@ -3876,7 +3876,7 @@ class Window(QMainWindow):
             self.ToUpdateFigure=1
             self.ToGenerateATrial=1
             self.ToInitializeVisual=1
-            GeneratedTrials._GenerateATrial(self.Channel4)
+            GeneratedTrials._GenerateATrial()
             # delete licks from the previous session
             GeneratedTrials._DeletePreviousLicks(self.Channel2)
             GeneratedTrials.lick_interval_time.start()  # start lick interval calculation
@@ -3910,13 +3910,13 @@ class Window(QMainWindow):
             # clear bias indicator graph
             self.bias_indicator.clear()
             # create workers
-            worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.Channel,self.Channel3,self.Channel4)
+            worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.Channel,self.Channel3)
             worker1.signals.finished.connect(self._thread_complete)
             workerLick = Worker(GeneratedTrials._get_irregular_timestamp,self.Channel2)
             workerLick.signals.finished.connect(self._thread_complete2)
             workerPlot = Worker(PlotM._Update,GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
             workerPlot.signals.finished.connect(self._thread_complete3)
-            workerGenerateAtrial = Worker(GeneratedTrials._GenerateATrial,self.Channel4)
+            workerGenerateAtrial = Worker(GeneratedTrials._GenerateATrial)
             workerGenerateAtrial.signals.finished.connect(self._thread_complete4)
             workerStartTrialLoop = Worker(self._StartTrialLoop,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
             workerStartTrialLoop1 = Worker(self._StartTrialLoop1,GeneratedTrials)
@@ -4043,34 +4043,34 @@ class Window(QMainWindow):
                     self.NewTrialRewardOrder=1
 
                 #initiate the generated trial
-                try:
-                    GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
-                except Exception as e:
-                    if 'ConnectionAbortedError' in str(e):
-                        logging.info('lost bonsai connection: InitiateATrial')
-                        logging.warning('Lost bonsai connection', extra={'tags': [self.warning_log_tag]})
-                        self.Start.setChecked(False)
-                        self.Start.setStyleSheet("background-color : none")
-                        self.InitializeBonsaiSuccessfully=0
-                        reply = QMessageBox.question(self,
-                            'Box {}, Start'.format(self.box_letter),
-                            'Cannot connect to Bonsai. Attempt reconnection?',
-                            QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
-                        if reply == QMessageBox.Yes:
-                            self._ReconnectBonsai()
-                            logging.info('User selected reconnect bonsai')
-                        else:
-                            logging.info('User selected not to reconnect bonsai')
-                        self.ANewTrial=1
-
-                        break
-                    else:
-                        reply = QMessageBox.critical(self, 'Box {}, Error'.format(self.box_letter), 'Encountered the following error: {}'.format(e),QMessageBox.Ok )
-                        logging.error('Caught this error: {}'.format(e))
-                        self.ANewTrial=1
-                        self.Start.setChecked(False)
-                        self.Start.setStyleSheet("background-color : none")
-                        break
+                #try:
+                GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
+                # except Exception as e:
+                #     if 'ConnectionAbortedError' in str(e):
+                #         logging.info('lost bonsai connection: InitiateATrial')
+                #         logging.warning('Lost bonsai connection', extra={'tags': [self.warning_log_tag]})
+                #         self.Start.setChecked(False)
+                #         self.Start.setStyleSheet("background-color : none")
+                #         self.InitializeBonsaiSuccessfully=0
+                #         reply = QMessageBox.question(self,
+                #             'Box {}, Start'.format(self.box_letter),
+                #             'Cannot connect to Bonsai. Attempt reconnection?',
+                #             QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+                #         if reply == QMessageBox.Yes:
+                #             self._ReconnectBonsai()
+                #             logging.info('User selected reconnect bonsai')
+                #         else:
+                #             logging.info('User selected not to reconnect bonsai')
+                #         self.ANewTrial=1
+                #
+                #         break
+                #     else:
+                #         reply = QMessageBox.critical(self, 'Box {}, Error'.format(self.box_letter), 'Encountered the following error: {}'.format(e),QMessageBox.Ok )
+                #         logging.error('Caught this error: {}'.format(e))
+                #         self.ANewTrial=1
+                #         self.Start.setChecked(False)
+                #         self.Start.setStyleSheet("background-color : none")
+                #         break
                 #receive licks and update figures
                 if self.actionDrawing_after_stopping.isChecked()==False:
                     self.PlotM._Update(GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
@@ -4109,7 +4109,7 @@ class Window(QMainWindow):
 
                 # save the data everytrial
                 if GeneratedTrials.CurrentSimulation==True:
-                    GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3,self.Channel4)
+                    GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3)
                     self.ANewTrial=1
                     self.NewTrialRewardOrder=1
                 else:
@@ -4117,7 +4117,7 @@ class Window(QMainWindow):
                     self.threadpool.start(worker1)
                 #generate a new trial
                 if self.NewTrialRewardOrder==1:
-                    GeneratedTrials._GenerateATrial(self.Channel4)
+                    GeneratedTrials._GenerateATrial()
 
                 # Save data in a separate thread
                 with self.data_lock:
@@ -4219,7 +4219,7 @@ class Window(QMainWindow):
                 if self.test==1:
                     self.ANewTrial=1
                     GeneratedTrials.GetResponseFinish=0
-                    GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3,self.Channel4)
+                    GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3)
                 else:
                     GeneratedTrials.GetResponseFinish=0
                     self.threadpool.start(worker1)
@@ -4227,7 +4227,7 @@ class Window(QMainWindow):
                 #generate a new trial
                 if self.test==1:
                     self.ToGenerateATrial=1
-                    GeneratedTrials._GenerateATrial(self.Channel4)
+                    GeneratedTrials._GenerateATrial()
                 else:
                     self.ToGenerateATrial=0
                     self.threadpool4.start(workerGenerateAtrial)

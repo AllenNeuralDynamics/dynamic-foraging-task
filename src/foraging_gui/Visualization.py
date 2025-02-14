@@ -114,12 +114,12 @@ class PlotV(FigureCanvas):
 
         # Colors for different optogenetics conditions
         color_mapping = {
-            'Condition1': (0, 191/255, 255/255, 1),  # Deep Sky Blue
-            'Condition2': (255/255, 127/255, 80/255, 1),  # Coral Red
-            'Condition3': (34/255, 139/255, 34/255, 1),  # Forest Green
-            'Condition4': (218/255, 165/255, 32/255, 1),  # Goldenrod
-            'Condition5': (255/255, 0/255, 0/255, 1),  # Red
-            'Condition6': (0/255, 0/255, 255/255, 1)  # Blue
+            'ConditionLaserColorOne': (0, 191/255, 255/255, 1),  # Deep Sky Blue
+            'ConditionLaserColorTwo': (255/255, 127/255, 80/255, 1),  # Coral Red
+            'ConditionLaserColorThree': (34/255, 139/255, 34/255, 1),  # Forest Green
+            'ConditionLaserColorFour': (218/255, 165/255, 32/255, 1),  # Goldenrod
+            'ConditionLaserColorFive': (255/255, 0/255, 0/255, 1),  # Red
+            'ConditionLaserColorSix': (0/255, 0/255, 255/255, 1)  # Blue
         }
 
         # Define trial types
@@ -183,7 +183,7 @@ class PlotV(FigureCanvas):
             if self.B_BaitHistory[1][-1]==True:
                 self.ax1.plot(NewTrialStart2,1.2, 'kD',markersize=self.MarkerSize, alpha=0.4)
             if self.B_LaserOnTrial[-1]==1:
-                current_color=color_mapping['Condition'+str(self.B_SelectedCondition[-1])]
+                current_color=color_mapping['Condition'+self.B_SelectedCondition[-1].name]
                 self.ax1.plot(NewTrialStart2,1.5, 'o',markersize=self.MarkerSize,markeredgecolor=current_color, markerfacecolor = current_color, alpha=1)
             if self.B_AutoWaterTrial[0][-1]==1:
                 self.ax1.plot(NewTrialStart2,0.4, 'bo',markerfacecolor = (0, 1, 0, 1),markersize=self.MarkerSize)
@@ -207,9 +207,9 @@ class PlotV(FigureCanvas):
             self.ax1.plot(self.B_ManualRightWaterStartTime, np.zeros(len(self.B_ManualRightWaterStartTime))+0.7, 
                 'bs',markerfacecolor =(0, 1, 0, 1),markersize=self.MarkerSize,label='ManualWater')
 
-        condition_list=list(set(self.B_SelectedCondition))
+        condition_list = list(set([condition.name for condition in self.B_SelectedCondition]))
         for condition in condition_list:
-            Optogenetics_On=np.where(np.logical_and(self.B_LaserOnTrial[:-1]==1,self.B_SelectedCondition[:-1]==condition))
+            Optogenetics_On=np.where(np.logical_and(self.B_LaserOnTrial[:-1]==1,[con.name for con in self.B_SelectedCondition[:-1]]==condition))
             if len(Optogenetics_On[0])==0:
                 continue
             current_color=color_mapping['Condition'+str(condition)]

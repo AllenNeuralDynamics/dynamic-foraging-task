@@ -117,13 +117,14 @@ class GenerateTrials():
             "right_valve_open_times": [],
             "multiplier": []
         }
+        self.selected_condition = None
         # get all of the training parameters of the current trial
         self._GetTrainingParameters(self.win)
 
         # create timer to calculate lick intervals every 10 minutes
         self.lick_interval_time = QtCore.QTimer(timeout=self.calculate_inter_lick_intervals, interval=600000)
 
-    def _GenerateATrial(self,Channel4):
+    def _GenerateATrial(self):
         self.finish_select_par=0
         if self.win.UpdateParameters==1:
             # get all of the training parameters of the current trial
@@ -216,33 +217,33 @@ class GenerateTrials():
 
         control_trial=0
         self.opto_error_tag=0
-        try:
-            if self.opto_model.laser_colors != []: # optogenetics is turned on
-                # select the current optogenetics condition
-                self._SelectOptogeneticsCondition()
-                # session control is regarded as off when the optogenetics is turned off
-                self.B_session_control_state.append(self.session_control_state)
-                if self.SelctedCondition is not None:
-                    self.LaserOn = 1
-                    self.B_LaserOnTrial.append(self.LaserOn) 
-                    # generate the optogenetics waveform of the next trial
-                    self._GetLaserWaveForm()
-                    self.B_SelectedCondition.append(self.SelctedCondition)
-                else:
-                    # this is the control trial
-                    control_trial = 1
+        #try:
+        if self.opto_model.laser_colors != []: # optogenetics is turned on
+            # select the current optogenetics condition
+            self._SelectOptogeneticsCondition()
+            # session control is regarded as off when the optogenetics is turned off
+            self.B_session_control_state.append(self.session_control_state)
+            if self.selected_condition is not None:
+                self.LaserOn = 1
+                self.B_LaserOnTrial.append(self.LaserOn)
+                # generate the optogenetics waveform of the next trial
+                self._GetLaserWaveForm()
+                self.B_SelectedCondition.append(self.selected_condition)
             else:
-                # optogenetics is turned off
+                # this is the control trial
                 control_trial = 1
-                self.B_session_control_state.append(0)
-            self.B_opto_error.append(self.opto_error_tag)
-        except Exception as e:
+        else:
             # optogenetics is turned off
             control_trial = 1
-            self.B_opto_error.append(1)
             self.B_session_control_state.append(0)
+        self.B_opto_error.append(self.opto_error_tag)
+        #except Exception as e:
+            # optogenetics is turned off
+            # control_trial = 1
+            # self.B_opto_error.append(1)
+            # self.B_session_control_state.append(0)
             # Catch the exception and print error information
-            logging.error(str(e))
+            #logging.error(str(e))
         if control_trial == 1:
             self.LaserOn = 0
             self.B_LaserOnTrial.append(self.LaserOn)
@@ -718,7 +719,6 @@ class GenerateTrials():
         BS_EarnedReward=0
         BS_AutoWater_N=0
         BS_EarnedReward_N=0
-        print(values, auto_water_trial, multiplier_values, rewarded_history)
         for i, s in enumerate(values[:len(rewarded_history)]):
             try:
                 if auto_water_trial[i] == 1 and rewarded_history[i] == 1:
@@ -1269,7 +1269,7 @@ class GenerateTrials():
         Get the waveform of the laser. It depends on color/duration/protocol/locations/power
         """
 
-        laser = self.SelctedCondition
+        laser = self.selected_condition
         # align to trial start
         if laser.end is not None and laser.start is not None:
             if laser.start.interval_condition == 'Trial start' and laser.end.interval_condition == 'Go cue':
@@ -1296,9 +1296,9 @@ class GenerateTrials():
         Generate the waveform based on Duration and Protocol, Laser Power, Frequency, RampingDown, PulseDur and
         the sample frequency
         """
-        if self.SelctedCondition.protocol.name == 'Sine':
-            resolution = self.opto_model.sample_frequency * self.SelctedCondition.duration # how many datapoints to generate
-            cycles = self.SelctedCondition.duration*self.SelctedCondition.protocol.frequency # how many sine cycles
+        if self.selected_condition.protocol.name == 'Sine':
+            resolution = self.opto_model.sample_frequency * self.selected_condition.duration # how many datapoints to generate
+            cycles = self.selected_condition.duration*self.selected_condition.protocol.frequency # how many sine cycles
             length = np.pi * 2 * cycles
             self.my_wave = Amplitude*(1+np.sin(np.arange(0+1.5*math.pi, length+1.5*math.pi, length / resolution)))/2
             # add ramping down
@@ -1307,14 +1307,14 @@ class GenerateTrials():
             self._add_offset()
             self.my_wave=np.append(self.my_wave,[0,0])
 
-        elif self.SelctedCondition.protocol.name == 'Pulse':
-            PointsEachPulse=int(self.opto_model.sample_frequency*self.SelctedCondition.protocol.duration)
-            PulseIntervalPoints=int(1/self.SelctedCondition.protocol.frequency*self.opto_model.sample_frequency-PointsEachPulse)
+        elif self.selected_condition.protocol.name == 'Pulse':
+            PointsEachPulse=int(self.opto_model.sample_frequency*self.selected_condition.protocol.duration)
+            PulseIntervalPoints=int(1/self.selected_condition.protocol.frequency*self.opto_model.sample_frequency-PointsEachPulse)
             if PulseIntervalPoints<0:
                 logging.warning('Pulse frequency and pulse duration are not compatible!',
                                 extra={'tags': [self.win.warning_log_tag]})
-            TotalPoints=int(self.opto_model.sample_frequency*self.SelctedCondition.duration)
-            PulseNumber=np.floor(self.SelctedCondition.duration*self.SelctedCondition.protocol.frequency)
+            TotalPoints=int(self.opto_model.sample_frequency*self.selected_condition.duration)
+            PulseNumber=np.floor(self.selected_condition.duration*self.selected_condition.protocol.frequency)
             EachPulse=Amplitude*np.ones(PointsEachPulse)
             PulseInterval=np.zeros(PulseIntervalPoints)
             WaveFormEachCycle=np.concatenate((EachPulse, PulseInterval), axis=0)
@@ -1331,8 +1331,8 @@ class GenerateTrials():
             # add offset
             self._add_offset()
             self.my_wave=np.append(self.my_wave,[0,0])
-        elif self.SelctedCondition.protocol.name == 'Constant':
-            resolution=self.opto_model.sample_frequency*self.SelctedCondition.duration # how many datapoints to generate
+        elif self.selected_condition.protocol.name == 'Constant':
+            resolution=self.opto_model.sample_frequency*self.selected_condition.duration # how many datapoints to generate
             self.my_wave=Amplitude*np.ones(int(resolution))
             # add ramping down
             self._get_ramping_down()
@@ -1352,14 +1352,14 @@ class GenerateTrials():
         """
         Add ramping down to the waveform
         """
-        if hasattr(self.session_control_state.protocol, "ramp_down"):
-            ramp_down = self.session_control_state.protocol.ramp_down
+        if hasattr(self.selected_condition.protocol, "ramp_down"):
+            ramp_down = self.selected_condition.protocol.ramp_down
             if ramp_down > 0:
-                if ramp_down > self.SelctedCondition.duration:
+                if ramp_down > self.selected_condition.duration:
                     logging.warning('Ramping down is longer than the laser duration!',
                                     extra={'tags': [self.win.warning_log_tag]})
                 else:
-                    Constant=np.ones(int((self.SelctedCondition.duration-ramp_down)*self.opto_model.sample_frequency))
+                    Constant=np.ones(int((self.selected_condition.duration-ramp_down)*self.opto_model.sample_frequency))
                     RD=np.arange(1,0, -1/(np.shape(self.my_wave)[0]-np.shape(Constant)[0]))
                     RampingDown = np.concatenate((Constant, RD), axis=0)
                     self.my_wave=self.my_wave*RampingDown
@@ -1367,8 +1367,8 @@ class GenerateTrials():
     def _add_offset(self):
         '''Add offset to the waveform'''            
 
-        if self.SelctedCondition.start is not None and self.SelctedCondition.start.offset > 0:
-            OffsetPoints=int(self.opto_model.sample_frequency*self.SelctedCondition.start)
+        if self.selected_condition.start is not None and self.selected_condition.start.offset > 0:
+            OffsetPoints=int(self.opto_model.sample_frequency*self.selected_condition.start)
             Offset=np.zeros(OffsetPoints)
             self.my_wave=np.concatenate((Offset,self.my_wave),axis=0)
 
@@ -1377,7 +1377,7 @@ class GenerateTrials():
         The voltage amplitude depends on Protocol, Laser Power, Laser color, and the stimulation locations<>
         """
         self.CurrentLaserAmplitude = [0, 0]
-        for location in self.SelctedCondition.location:
+        for location in self.selected_condition.location:
             index = 0 if location.name == "LocationOne" else 1
             self.CurrentLaserAmplitude[index] = location.power
         if self.CurrentLaserAmplitude == [0, 0]:
@@ -1392,10 +1392,10 @@ class GenerateTrials():
         # check session session
         self._CheckSessionControl()
         if self.session_control_state == 0 and self.opto_model.session_control is not None:
-            self.SelctedCondition = None
+            self.selected_condition = None
             return
         if self.opto_model.laser_colors == []:
-            self.SelctedCondition = None
+            self.selected_condition = None
             return
         possible_conditions = self.opto_model.laser_colors
         probabilities = [laser.probability for laser in self.opto_model.laser_colors]
@@ -1404,15 +1404,15 @@ class GenerateTrials():
         b = random.uniform(0, 1)
         for i in range(len(ProAccu)):
             if b <= ProAccu[i]:
-                self.SelctedCondition = possible_conditions[i]
+                self.selected_condition = possible_conditions[i]
                 break
             else:
-                self.SelctedCondition = None # control is selected
+                self.selected_condition = None # control is selected
         # Determine whether the interval between two near trials is larger than the MinOptoInterval
         non_zero_indices=np.nonzero(np.array(self.B_SelectedCondition).astype(int))
         if len(non_zero_indices[0])>0:
             if len(self.B_SelectedCondition)-(non_zero_indices[0][-1]+1) < self.opto_model.minimum_trial_interval:
-                self.SelctedCondition = None
+                self.selected_condition = None
                 
     def _InitiateATrial(self,Channel1,Channel4):
     
@@ -1462,16 +1462,16 @@ class GenerateTrials():
         if self.CurrentSimulation==False: # run simulation if it's true
             # send optogenetics waveform of the upcoming trial if this is an optogenetics trial
             if self.B_LaserOnTrial[self.B_CurrentTrialN]==1:     
-                if self.SelectedCondition.start.interval_condition is not None:
-                    if self.SelectedCondition.start.interval_condition == 'Trial start':
+                if self.selected_condition.start.interval_condition is not None:
+                    if self.selected_condition.start.interval_condition == 'Trial start':
                         Channel1.TriggerSource('/Dev1/PFI0') # /Dev1/PFI0 corresponding to P2.0 of NIdaq USB6002; Using /Dev1/PFI0 specific for ITI; Using DO0 to trigger NIDaq
                         Channel1.PassGoCue(int(0))
                         Channel1.PassRewardOutcome(int(0))
-                    elif self.SelectedCondition.start.interval_condition == 'Go cue':
+                    elif self.selected_condition.start.interval_condition == 'Go cue':
                         Channel1.TriggerSource('/Dev1/PFI1') # /Dev1/PFI1 corresponding to P1.1 of NIdaq USB6002; Using /Dev1/PFI1 for optogenetics aligned to non "Trial start" events; Using DO3 to trigger NiDaq
                         Channel1.PassGoCue(int(1))
                         Channel1.PassRewardOutcome(int(0))
-                    elif self.SelectedCondition.start.interval_condition == 'Reward outcome':
+                    elif self.selected_condition.start.interval_condition == 'Reward outcome':
                         Channel1.TriggerSource('/Dev1/PFI1')
                         Channel1.PassGoCue(int(0))
                         Channel1.PassRewardOutcome(int(1))
@@ -1479,15 +1479,14 @@ class GenerateTrials():
                     logging.warning('Unindentified optogenetics start event!',
                                     extra={'tags': [self.win.warning_log_tag]})
                 # send the waveform size
-                Channel1.Location1_Size(int(self.Location1_Size))
-                Channel1.Location2_Size(int(self.Location2_Size))
-                for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
-                    getattr(Channel4, 'WaveForm' + str(1)+'_'+str(i+1))(str(getattr(self, 'WaveFormLocation_'+str(i+1)).tolist())[1:-1])
-                FinishOfWaveForm=Channel4.receive()  
+                # Channel1.Location1_Size(int(self.Location1_Size))
+                # Channel1.Location2_Size(int(self.Location2_Size))
+                # for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
+                #     getattr(Channel4, 'WaveForm' + str(1)+'_'+str(i+1))(str(getattr(self, 'WaveFormLocation_'+str(i+1)).tolist())[1:-1])
+                # FinishOfWaveForm=Channel4.receive()
             else:
                 Channel1.PassGoCue(int(0))
                 Channel1.PassRewardOutcome(int(0))
-            print('sending to channels')
             Channel1.LeftValue(float(self.win.left_valve_open_time*1000))
             Channel1.RightValue(float(self.win.right_valve_open_time*1000))
             Channel1.RewardConsumeTime(float(self.task_logic.task_parameters.response_time.reward_consume_time))
@@ -1505,7 +1504,6 @@ class GenerateTrials():
                 Channel1.start(1)
                 self.CurrentStartType=1
                 self.B_StartType.append(self.CurrentStartType)
-            print('finished sending to channel')
     def _CheckSimulationSession(self):
         '''To check if this is a simulation session'''
         if self.win.actionWin_stay_lose_switch.isChecked() == True or self.win.actionRandom_choice.isChecked() == True:
@@ -1608,7 +1606,7 @@ class GenerateTrials():
                 for i, side in enumerate(['L', 'R']):
                     self.BlockLenHistory[i][-1] = self.BlockLenHistory[i][-1]+1
 
-    def _GetAnimalResponse(self,Channel1,Channel3,Channel4):
+    def _GetAnimalResponse(self,Channel1,Channel3):
         '''Get the animal's response'''
         self._CheckSimulationSession()
         if self.CurrentSimulation==True:
@@ -1617,9 +1615,9 @@ class GenerateTrials():
         # set the valve time of auto water
         multiplier = self.task_logic.task_parameters.auto_water.multiplier
         if self.CurrentAutoRewardTrial[0]==1:
-            self._set_valve_time_left(Channel3,self.win.left_valve_open_time,multiplier)
+            self._set_valve_time_left(Channel3, float(self.win.left_valve_open_time,multiplier))
         if self.CurrentAutoRewardTrial[1]==1:
-            self._set_valve_time_right(Channel3,self.win.right_valve_open_time,multiplier)
+            self._set_valve_time_right(Channel3, float(self.win.right_valve_open_time,multiplier))
             
         if self.CurrentStartType==3: # no delay timestamp
             ReceiveN=9
@@ -1756,24 +1754,24 @@ class GenerateTrials():
 
     def _set_valve_time_left(self,channel3,LeftValue=0.01,Multiplier=1):
         '''set the left valve time'''
-        channel3.LeftValue1(LeftValue*1000*Multiplier) 
+        channel3.LeftValue1(float(LeftValue*1000*Multiplier))
     def _set_valve_time_right(self,channel3,RightValue=0.01,Multiplier=1):
         '''set the right valve time'''
-        channel3.RightValue1(RightValue*1000*Multiplier)
+        channel3.RightValue1(float(RightValue*1000*Multiplier))
 
     def _GiveLeft(self,channel3):
         '''manually give left water'''
-        channel3.LeftValue1(self.win.left_valve_open_time*1000*self.task_logic.task_parameters.auto_water.multiplier)
+        channel3.LeftValue1(float(self.win.left_valve_open_time*1000*self.task_logic.task_parameters.auto_water.multiplier))
         time.sleep(0.01) 
         channel3.ManualWater_Left(int(1))
-        channel3.LeftValue1(self.win.left_valve_open_time*1000)
+        channel3.LeftValue1(float(self.win.left_valve_open_time*1000))
 
     def _GiveRight(self,channel3):
         '''manually give right water'''
-        channel3.RightValue1(self.win.right_valve_open_time*1000*self.task_logic.task_parameters.auto_water.multiplier)
+        channel3.RightValue1(float(self.win.right_valve_open_time*1000*self.task_logic.task_parameters.auto_water.multiplier))
         time.sleep(0.01) 
         channel3.ManualWater_Right(int(1))
-        channel3.RightValue1(self.win.right_valve_open_time*1000)
+        channel3.RightValue1(float(self.win.right_valve_open_time*1000))
 
     def _get_irregular_timestamp(self,Channel2):
         '''Get timestamps occurred irregularly (e.g. licks and reward delivery time)'''
