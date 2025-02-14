@@ -14,6 +14,10 @@ from aind_data_schema.components.stimulus import AuditoryStimulation
 from aind_data_schema.components.devices import SpoutSide,Calibration
 from aind_data_schema_models.units import SizeUnit,FrequencyUnit,SoundIntensityUnit,PowerUnit
 
+from aind_behavior_services.session import AindBehaviorSessionModel
+from aind_behavior_dynamic_foraging.DataSchemas.task_logic import AindDynamicForagingTaskLogic
+from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import Optogenetics
+
 from aind_data_schema.core.data_description import Funding
 from aind_data_schema_models.organizations import Organization
 from aind_data_schema_models.modalities import Modality
@@ -63,8 +67,15 @@ class generate_metadata:
         json file to the metadata folder
 
     '''
-    def __init__(self, json_file=None, Obj=None, dialog_metadata_file=None,dialog_metadata=None, output_folder=None):
-        
+    def __init__(self, session_model: AindBehaviorSessionModel,
+                 task_logic: AindDynamicForagingTaskLogic,
+                 opto_model: Optogenetics,
+                 json_file=None, Obj=None, dialog_metadata_file=None,dialog_metadata=None, output_folder=None):
+
+        self.session_model = session_model
+        self.task_logic = task_logic
+        self.opto_model = opto_model
+
         self.session_metadata_success=False
         self.rig_metadata_success=False
 
@@ -511,14 +522,14 @@ class generate_metadata:
         #self.data_streams = self.ephys_streams+self.ophys_streams+self.high_speed_camera_streams
 
         session_params = {
-            "experimenter_full_name": [self.Obj['Experimenter']],
-            "subject_id": self.Obj['ID'],
+            "experimenter_full_name": self.session_model.experimenter,
+            "subject_id": self.session_model.subject,
             "session_start_time": self.session_start_time,
             "session_end_time": self.session_end_time,
-            "session_type": self.Obj['Task'],
+            "session_type": self.session_model.experiment,
             "iacuc_protocol": self.Obj['meta_data_dialog']['session_metadata']['IACUCProtocol'],
             "rig_id": self.Obj['meta_data_dialog']['rig_metadata']['rig_id'],
-            "notes": self.Obj['ShowNotes'],
+            "notes": self.session_model.notes,
             "weight_unit": "gram",
             "reward_consumed_total": self.total_reward_consumed_in_session,
             "reward_consumed_unit": "microliter",
@@ -849,12 +860,13 @@ class generate_metadata:
         '''
         Get the reward probability
         '''
-        if self.Obj['Task'] in ['Uncoupled Baiting','Uncoupled Without Baiting']:
+        if self.session_model.experiment in ['Uncoupled Baiting','Uncoupled Without Baiting']:
             # Get reward prob pool from the input string (e.g., ["0.1", "0.5", "0.9"])
-            return self.Obj['UncoupledReward']
-        elif self.Obj['Task'] in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
-            RewardPairs=self.Obj['B_RewardFamilies'][int(self.Obj['RewardFamily'])-1][:int(self.Obj['RewardPairsN'])]
-            RewardProb=np.array(RewardPairs)/np.expand_dims(np.sum(RewardPairs,axis=1),axis=1)*float(self.Obj['BaseRewardSum'])
+            return self.task_logic.task_parameters.uncoupled_reward
+        elif self.session_model.experiment in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
+            tp = self.task_logic.task_parameters
+            RewardPairs=self.Obj['B_RewardFamilies'][tp.reward_probability.family-1][:tp.reward_probability.pairs_n]
+            RewardProb=np.array(RewardPairs)/np.expand_dims(np.sum(RewardPairs,axis=1),axis=1)*tp.reward_probability.base_reward_sum
             return str(RewardProb.tolist())
         else:
             logging.info('Task is not recognized!')
@@ -868,9 +880,8 @@ class generate_metadata:
         if 'B_SelectedCondition' not in self.Obj:
             logging.info('B_SelectedCondition is not included in the self.Obj!')
             return 
-        a=np.array(self.Obj['B_SelectedCondition'])
-        self.Obj['B_SelectedCondition']=a.astype(int)
-        if sum( self.Obj['B_SelectedCondition'])==0:
+
+        if all(i is None for i in self.Obj['B_SelectedCondition']):
             return  
         self._get_light_source_config()
         self.optogenetics_stimulus.append(StimulusEpoch(
@@ -916,34 +927,28 @@ class generate_metadata:
         '''
         Get the optogenetics laser names used in the session
         '''
-        self.light_names_used_in_session=[]
-        light_sources=[]
-        index=np.where(np.array(self.Obj['B_SelectedCondition'])==1)[0]
-        for i in index:
-            current_condition=self.Obj['B_SelectedCondition'][i]
-            if f'TP_LaserColor_{current_condition}' not in self.Obj:
-                # old format
-                current_color=self.Obj[f'TP_Laser_{current_condition}'][i]
-            else:
-                # new format
-                current_color=self.Obj[f'TP_LaserColor_{current_condition}'][i]
-            current_location=self.Obj[f'TP_Location_{current_condition}'][i]
-            if current_location=='Both':
-                light_sources.append({'color':current_color,'laser_tag':1})
-                light_sources.append({'color':current_color,'laser_tag':2})
-            elif current_location=='Left':
-                light_sources.append({'color':current_color,'laser_tag':1})
-            elif current_location=='Right':
-                light_sources.append({'color':current_color,'laser_tag':2})
 
-        if self.box_type=='Ephys':
-            for light_source in light_sources:
-                self.light_names_used_in_session.append([key for key, value in self.name_mapper['laser_name_mapper'].items() if value == light_source][0])
-        elif self.box_type=='Behavior':
-            for light_source in light_sources:
-                self.light_names_used_in_session.append([key for key, value in self.name_mapper['led_name_mapper'].items() if value == light_source][0])
+        """
+        laser_name_mapper
+        ':{
+        'Oxxius Laser 473-1': {'color': 'Blue', 'laser_tag': 1},
+        'Oxxius Laser 473-2': {'color': 'Blue', 'laser_tag': 2},
+        'Oxxius Laser 561-1': {'color': 'Yellow', 'laser_tag': 1},
+        'Oxxius Laser 561-2': {'color': 'Yellow', 'laser_tag': 2},
+        'Oxxius Laser 638-1': {'color': 'Red', 'laser_tag': 1},
+        'Oxxius Laser 638-2': {'color': 'Red', 'laser_tag': 2},
+        }
+        """
 
-        self.light_names_used_in_session = list(set(self.light_names_used_in_session))
+        self.light_names_used_in_session = []
+        num_map = ["LocationOne", "LocationTwo"]
+        mapper_key = 'laser_name_mapper' if self.box_type=='Ephys' else 'led_name_mapper'
+        invert_laser_mapper = {str(v): k for k, v in self.name_mapper[mapper_key].items()}
+        for laser in self.opto_model.laser_colors:
+            for location in laser.location:
+                key = f"{{'color': '{laser.color}', 'laser_tag': {num_map.index(location.name)}}}"
+                self.light_names_used_in_session.append(invert_laser_mapper[key])
+        print(self.light_names_used_in_session)
 
     def _get_ephys_stream(self):
         '''

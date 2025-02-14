@@ -2365,7 +2365,6 @@ class Window(QMainWindow):
             widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren(
                 (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit,
                 QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-            widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
             self._Concat(widget_dict,Obj,'None')
             dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','Metadata_dialog']
             for dialog_name in dialogs:
@@ -2490,7 +2489,10 @@ class Window(QMainWindow):
             self.Metadata_dialog._save_metadata_dialog_parameters()
             Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
             # generate the metadata file
-            generated_metadata=generate_metadata(Obj=Obj)
+            generated_metadata=generate_metadata(Obj=Obj,
+                                                 session_model=self.session_model,
+                                                 task_logic=self.task_logic,
+                                                 opto_model=self.opto_model)
             session = generated_metadata._session()
 
             if BackupSave==0:
