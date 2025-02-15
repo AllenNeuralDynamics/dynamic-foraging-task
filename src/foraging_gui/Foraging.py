@@ -37,7 +37,7 @@ from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 from pydantic import ValidationError
-from StageWidget.main import get_stage_widget
+#from StageWidget.main import get_stage_widget
 
 import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
@@ -74,11 +74,6 @@ from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
     Optogenetics,
     IntervalConditions,
-    LocationOne,
-    LocationTwo,
-    SineProtocol,
-    PulseProtocol,
-    ConstantProtocol,
     LaserColorOne,
     LaserColorTwo,
     LaserColorThree,
@@ -86,6 +81,10 @@ from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
     LaserColorFive,
     LaserColorSix,
     SessionControl
+)
+
+from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
+    FiberPhotometry
 )
 
 logger = logging.getLogger(__name__)
@@ -165,8 +164,9 @@ class Window(QMainWindow):
             skip_hardware_validation=True
         )
         self.session_widget = SessionModelWidget(self.session_model)
-        self.verticalLayout_9.insertWidget(0, self.session_widget)
-        self.verticalLayout_16.insertWidget(0, self.session_widget.schema_fields_widgets["notes"])
+        for i, widget in enumerate(self.session_widget.schema_fields_widgets.values()):
+            self.session_param_layout.insertWidget(i, widget)
+        self.notes_layout.insertWidget(0, self.session_widget.schema_fields_widgets["notes"])
 
         self.task_logic = AindDynamicForagingTaskLogic(
                             task_parameters=AindDynamicForagingTaskParameters(
@@ -181,7 +181,7 @@ class Window(QMainWindow):
                                [[6, 1], [3, 1], [1, 1]]]
         self.task_widget = BehaviorParametersWidget(self.task_logic.task_parameters,
                                                     reward_families=self.RewardFamilies)
-        self.scrollArea.setWidget(self.task_widget)
+        self.task_parameter_scroll_area.setWidget(self.task_widget)
         self.task_widget.taskUpdated.connect(self.update_session_task)
         # update reward pairs when task has changed
         self.task_widget.taskUpdated.connect(lambda task: self._ShowRewardPairs())
@@ -190,6 +190,12 @@ class Window(QMainWindow):
         self.left_valve_open_time = 0.03
         self.right_valve_open_time = 0.03
         self.task_widget.volumeChanged.connect(self.update_valve_open_time)
+
+        # add fip schema widget
+        self.fip_model = FiberPhotometry()
+        self.fip_widget = FIBParametersWidget(self.fip_model)
+        for i, widget in enumerate(self.fip_widget.schema_fields_widgets.values()):
+            self.fip_layout.insertWidget(i, widget)
 
         # add warning_widget to layout and set color
         self.warning_widget = WarningWidget(log_tag=self.warning_log_tag,
@@ -430,7 +436,6 @@ class Window(QMainWindow):
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
         self.OptogeneticsB.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('Optogenetics',self.OptogeneticsB.currentText()))
         self.PhotometryB.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('Photometry',self.PhotometryB.currentText()))
-        self.FIPMode.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('FIPMode', self.FIPMode.currentText()))
         self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
         self.WeightAfter.textChanged.connect(self._PostWeightChange)
         self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
@@ -2492,7 +2497,8 @@ class Window(QMainWindow):
             generated_metadata=generate_metadata(Obj=Obj,
                                                  session_model=self.session_model,
                                                  task_logic=self.task_logic,
-                                                 opto_model=self.opto_model)
+                                                 opto_model=self.opto_model,
+                                                 fip_model=self.fip_model)
             session = generated_metadata._session()
 
             if BackupSave==0:
@@ -2957,10 +2963,6 @@ class Window(QMainWindow):
                             widget.setText(final_value)
                         elif isinstance(widget, QtWidgets.QPushButton):
                             widget.setChecked(bool(final_value))
-                            if key=='AutoReward':
-                                self._AutoReward()
-                            if key=='NextBlock':
-                                self._NextBlock()
                     else:
                         widget = widget_dict[key]
                         if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
@@ -3203,14 +3205,14 @@ class Window(QMainWindow):
             return 0
 
         if self.StartExcitation.isChecked():
-            logging.info('StartExcitation is checked, photometry mode: {}'.format(self.FIPMode.currentText()))
+            logging.info('StartExcitation is checked, photometry mode: {}'.format(self.fip_model.mode))
             self.StartExcitation.setStyleSheet("background-color : green;")
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
                 # Trigger Teensy with the above specified exp mode
-                if self.FIPMode.currentText() == "Normal":
+                if self.fip_model.mode == "Normal":
                     ser.write(b'c')
-                elif self.FIPMode.currentText() == "Axon":
+                elif self.fip_model.mode == "Axon":
                     ser.write(b'e')
                 ser.close()
                 logging.info('Started FIP excitation', extra={'tags': [self.warning_log_tag]})
@@ -3643,10 +3645,10 @@ class Window(QMainWindow):
                         # Allow the session to continue, but log error
                         logging.error('Starting session with conflicting FIP information: mouse {}, FIP off, but schedule lists FIP {}'.format(mouse_id, fip_mode))
 
-                elif not fip_is_nan and fip_mode != self.FIPMode.currentText() and self.PhotometryB.currentText()=='on':
+                elif not fip_is_nan and fip_mode != self.fip_model.mode and self.PhotometryB.currentText()=='on':
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
-                                                 f'FIP Mode is set to {self.FIPMode.currentText()} but schedule indicate '
+                                                 f'FIP Mode is set to {self.fip_model.mode} but schedule indicate '
                                                  f'FIP Mode is {fip_mode}. Continue anyways?',
                                                  QMessageBox.Yes | QMessageBox.No,)
                     if reply == QMessageBox.No:
@@ -3655,7 +3657,7 @@ class Window(QMainWindow):
                         return
                     else:
                         # Allow the session to continue, but log error
-                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP mode {}, schedule lists {}'.format(mouse_id, self.FIPMode.currentText(), fip_mode))
+                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP mode {}, schedule lists {}'.format(mouse_id, self.fip_model.mode, fip_mode))
 
             if self.StartANewSession == 0 :
                 reply = QMessageBox.question(self,
@@ -3965,7 +3967,7 @@ class Window(QMainWindow):
                 self.workertimer.moveToThread(self.workertimer_thread)
                 self.workertimer_thread.start()
 
-            self.Time.emit(int(np.floor(float(self.baselinetime.text())*60)))
+            self.Time.emit(int(np.floor(self.fip_model.baseline_time*60)))
             logging.info('Running photometry baseline', extra={'tags': [self.warning_log_tag]})
 
         self._StartTrialLoop(GeneratedTrials,worker1,worker_save)
@@ -4137,7 +4139,7 @@ class Window(QMainWindow):
                 # and elapsed time since last harp message is more than tolerance
 
                 # Check if we are in the photometry baseline period.
-                if (self.finish_Timer==0) & ((time.time() - last_trial_start) < (float(self.baselinetime.text())*60+10)):
+                if (self.finish_Timer==0) & ((time.time() - last_trial_start) < (self.fip_model.baseline_time*60+10)):
                     # Extra 10 seconds is to avoid any race conditions
                     # We are in the photometry baseline period
                     continue
