@@ -196,7 +196,7 @@ if __name__ == "__main__":
                            [[1, 0], [.9, .1], [.8, .2], [.7, .3], [.6, .4], [.5, .5]], [[6, 1], [3, 1], [1, 1]]]
 
     task_widget = BehaviorParametersWidget(task_model.task_parameters, reward_families)
-    #task_widget.ValueChangedInside.connect(lambda name: print(task_model))
+    task_widget.ValueChangedInside.connect(lambda name: print(task_model))
     task_widget.taskUpdated.connect(print)
     task_widget.show()
 

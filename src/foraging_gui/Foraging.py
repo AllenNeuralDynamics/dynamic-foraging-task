@@ -435,7 +435,6 @@ class Window(QMainWindow):
         self.StartBleaching.clicked.connect(self._StartBleaching)
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
         self.OptogeneticsB.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('Optogenetics',self.OptogeneticsB.currentText()))
-        self.PhotometryB.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('Photometry',self.PhotometryB.currentText()))
         self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
         self.WeightAfter.textChanged.connect(self._PostWeightChange)
         self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
@@ -3616,7 +3615,7 @@ class Window(QMainWindow):
                 first_fip_stage = str(self._GetInfoFromSchedule(mouse_id, 'First FP Stage')).split('STAGE_')[-1]
                 current_stage = self.AutoTrain_dialog.stage_in_use.split('STAGE_')[-1]
                 stages = ['nan'] + [ts.name.split('STAGE_')[-1] for ts in TrainingStage] + ['unknown training stage']
-                if fip_is_nan and self.PhotometryB.currentText()=='on':
+                if fip_is_nan and self.fip_model.mode is not None:
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
                                                  'Photometry is set to "on", but the FIP Mode is not in schedule. '
@@ -3630,7 +3629,7 @@ class Window(QMainWindow):
                         # Allow the session to continue, but log error
                         logging.error('Starting session with conflicting FIP information: mouse {}, FIP on, '
                                       'but not in schedule'.format(mouse_id))
-                elif not fip_is_nan and self.PhotometryB.currentText()=='off' and first_fip_stage in stages and \
+                elif not fip_is_nan and self.fip_model.mode is None and first_fip_stage in stages and \
                         stages.index(current_stage) >= stages.index(first_fip_stage):
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
@@ -3645,7 +3644,7 @@ class Window(QMainWindow):
                         # Allow the session to continue, but log error
                         logging.error('Starting session with conflicting FIP information: mouse {}, FIP off, but schedule lists FIP {}'.format(mouse_id, fip_mode))
 
-                elif not fip_is_nan and fip_mode != self.fip_model.mode and self.PhotometryB.currentText()=='on':
+                elif not fip_is_nan and self.fip_model.mode is not None and fip_mode != self.fip_model.mode:
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
                                                  f'FIP Mode is set to {self.fip_model.mode} but schedule indicate '
@@ -3716,7 +3715,7 @@ class Window(QMainWindow):
             elif self.session_model.allow_dirty_repo is None:
                 logging.error('Could not check for untracked local changes')
 
-            if self.PhotometryB.currentText()=='on' and (not self.FIP_started):
+            if self.fip_model.mode is not None and (not self.FIP_started):
                 reply = QMessageBox.critical(self,
                     'Box {}, Start'.format(self.box_letter),
                     'Photometry is set to "on", but the FIP workflow has not been started',
@@ -3726,7 +3725,7 @@ class Window(QMainWindow):
                 return
 
             # Check if photometry excitation is running or not
-            if self.PhotometryB.currentText()=='on' and (not self.StartExcitation.isChecked()):
+            if self.fip_model.mode is not None and (not self.StartExcitation.isChecked()):
                 logging.warning('photometry is set to "on", but excitation is not running')
 
                 reply = QMessageBox.question(self,
@@ -3946,7 +3945,7 @@ class Window(QMainWindow):
             worker_save=self.worker_save
 
         # collecting the base signal for photometry. Only run once
-        if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and self.PhotometryRun==0:
+        if self.Start.isChecked() and self.fip_model.mode is not None and self.PhotometryRun==0:
             logging.info('Starting photometry baseline timer')
             self.finish_Timer=0
             self.PhotometryRun=1
