@@ -276,7 +276,6 @@ class Window(QMainWindow):
         self._ShowRewardPairs() # show reward pairs
         self._GetTrainingParameters() # get initial training parameters
         self.connectSignalsSlots()
-        self.keyPressEvent()
         self.update_valve_open_time("Left")
         self.update_valve_open_time("Right")
         self._LickSta()
@@ -463,18 +462,22 @@ class Window(QMainWindow):
         self.Opto_dialog.laser_1_calibration_power.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_2_calibration_power.textChanged.connect(self._toggle_save_color)
 
-        # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
-        for container in [self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
-            # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
-            for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
-                child.textChanged.connect(self._CheckTextChange)
-            for child in container.findChildren((QtWidgets.QComboBox)):
-                child.currentIndexChanged.connect(self.keyPressEvent)
-        # Opto_dialog can not detect natural enter press, so returnPressed is used here. 
-        for container in [self.Opto_dialog,self.Metadata_dialog]:
-            # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
-            for child in container.findChildren((QtWidgets.QLineEdit)):
-                child.returnPressed.connect(self.keyPressEvent)
+        # add validator for weight and water fields
+        double_validator = QtGui.QDoubleValidator()
+        self.BaseWeight.setValidator(double_validator)
+        self.TargetWeight.setValidator(double_validator)
+        self.TargetRatio.setValidator(double_validator)
+        self.TotalWater.setValidator(double_validator)
+        self.WeightAfter.setValidator(double_validator)
+        self.SuggestedWater.setValidator(double_validator)
+
+        # add validator for stage position fields if using newscale stage widget
+        if not hasattr(self, "stage_widget"):
+            double_validator = QtGui.QIntValidator()
+            self.PositionZ.setValidator(double_validator)
+            self.PositionY.setValidator(double_validator)
+            self.PositionX.setValidator(double_validator)
+            self.Step.setValidator(double_validator)
 
     def _set_reference(self):
         '''
@@ -768,10 +771,6 @@ class Window(QMainWindow):
         except Exception as e:
             # Catch the exception and log error information
             logging.error(traceback.format_exc())
-
-    def _keyPressEvent(self):
-        # press enter to confirm parameters change
-        self.keyPressEvent()
 
     def _CheckStageConnection(self):
         '''get the current position of the stage'''
@@ -1801,149 +1800,6 @@ class Window(QMainWindow):
     def _QComboBoxUpdate(self, parameter,value):
         logging.info('Field updated: {}:{}'.format(parameter, value))
 
-
-    def keyPressEvent(self, event=None,allow_reset=False):
-        '''
-            Enter press to allow change of parameters
-            allow_reset (bool) allows the Baseweight etc. parameters to be reset to the empty string
-        '''
-        # try:
-        #     if self.actionTime_distribution.isChecked()==True:
-        #         self.PlotTime._Update(self)
-        # except Exception as e:
-        #     logging.error(traceback.format_exc())
-        #
-        # # move newscale stage
-        # if hasattr(self,'current_stage'):
-        #     if (self.PositionX.text() != '')and (self.PositionY.text() != '')and (self.PositionZ.text() != ''):
-        #         try:
-        #             self.current_stage.move_absolute_3d(float(self.PositionX.text()),float(self.PositionY.text()),float(self.PositionZ.text()))
-        #         except Exception as e:
-        #             logging.error(traceback.format_exc())
-        # # Get the parameters before change
-        # if hasattr(self, 'GeneratedTrials') and self.ToInitializeVisual==0: # use the current GUI paramters when no session starts running
-        #     Parameters=self.GeneratedTrials
-        # else:
-        #     Parameters=self
-        # if event is None or not isinstance(event, QtGui.QKeyEvent):
-        #     event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, Qt.Key_Return, Qt.KeyboardModifiers())
-        # if (event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter):
-        #     # handle the return key press event here
-        #     logging.info('processing parameter changes')
-        #     # prevent the default behavior of the return key press event
-        #     event.accept()
-        #     self.UpdateParameters=1 # Changes are allowed
-        #     # change color to black
-        #     for container in [self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
-        #         # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
-        #         for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
-        #             if child.objectName()=='qt_spinbox_lineedit':
-        #                 continue
-        #
-        #             if not (hasattr(self, 'AutoTrain_dialog') and self.AutoTrain_dialog.auto_train_engaged):
-        #                 child.setStyleSheet('color: black;')
-        #                 child.setStyleSheet('background-color: white;')
-        #
-        #             if child.objectName() in {'WeightAfter','LickSpoutDistance','ModuleAngle','ArcAngle','ProtocolID','Stick_RotationAngle','LickSpoutReferenceX','LickSpoutReferenceY','LickSpoutReferenceZ','LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','Stick_ArcAngle','Stick_ModuleAngle','RotationAngle','ManipulatorX','ManipulatorY','ManipulatorZ','ProbeTarget','RigMetadataFile','IACUCProtocol','Experimenter','TotalWater','ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
-        #                 continue
-        #             if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight','','ConditionP_5','ConditionP_6','Duration_5','Duration_6','OffsetEnd_5','OffsetEnd_6','OffsetStart_5','OffsetStart_6','Probability_5','Probability_6','PulseDur_5','PulseDur_6','RD_5','RD_6']) and
-        #                 (child.text() == '')):
-        #                 # These attributes can have the empty string, but we can't set the value as the empty string, unless we allow resets
-        #                 if allow_reset:
-        #                     continue
-        #                 if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
-        #                     child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-        #                 continue
-        #             if (child.objectName() in ['LatestCalibrationDate','SessionlistSpin']):
-        #                 continue
-        #
-        #
-        #             # check for empty string condition
-        #             try:
-        #                 float(child.text())
-        #             except Exception as e:
-        #                 # Invalid float. Do not change the parameter, reset back to previous value
-        #                 logging.warning('Cannot convert input to float: {}, \'{}\''.format(child.objectName(),child.text()))
-        #                 if isinstance(child, QtWidgets.QDoubleSpinBox):
-        #                     child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
-        #                 elif isinstance(child, QtWidgets.QSpinBox):
-        #                     child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
-        #                 else:
-        #                     if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
-        #                         child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-        #             else:
-        #                 if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
-        #                     # If this parameter changed, add the change to the log
-        #                     old = getattr(Parameters,'TP_'+child.objectName())
-        #                     if old != '':
-        #                         old = float(old)
-        #                     new = float(child.text())
-        #                     if new != old:
-        #                         logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
-        #
-        #     # update the current training parameters
-        #     self._GetTrainingParameters()
-
-    def _CheckTextChange(self):
-        '''Check if the text change is reasonable'''
-        # Get the parameters before change
-        # if hasattr(self, 'GeneratedTrials'):
-        #     Parameters=self.GeneratedTrials
-        # else:
-        #     Parameters=self
-        # for container in [self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
-        #     # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
-        #     for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
-        #         if child.objectName()=='qt_spinbox_lineedit' or child.isEnabled()==False: # I don't understand where the qt_spinbox_lineedit comes from.
-        #             continue
-        #         try:
-        #             if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
-        #                 # Changes are not allowed until press is typed except for PositionX, PositionY and PositionZ
-        #                 if child.objectName() not in ('PositionX', 'PositionY', 'PositionZ'):
-        #                     self.UpdateParameters = 0
-        #
-        #                 self.Continue=0
-        #                 if child.objectName() in {'LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','ProbeTarget','RigMetadataFile','Experimenter', 'UncoupledReward', 'ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
-        #                     child.setStyleSheet(f'color: {self.default_text_color};')
-        #                     self.Continue=1
-        #                 if child.text()=='': # If empty, change background color and wait for confirmation
-        #                     self.UpdateParameters=0
-        #                     child.setStyleSheet(f'background-color: {self.default_text_background_color};')
-        #                     self.Continue=1
-        #                 if child.objectName() in {'RunLength','WindowSize','StepSize'}:
-        #                     if child.text()=='':
-        #                         child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
-        #                         child.setStyleSheet('color: black;')
-        #                         child.setStyleSheet('background-color: white;')
-        #                 if self.Continue==1:
-        #                     continue
-        #                 child.setStyleSheet(f'color: {self.default_text_color};')
-        #                 try:
-        #                     # it's valid float
-        #                     float(child.text())
-        #                 except Exception as e:
-        #                     #logging.error(traceback.format_exc())
-        #                     # Invalid float. Do not change the parameter
-        #                     if child.objectName() in ['BaseWeight', 'WeightAfter']:
-        #                         # Strip the last character which triggered the invalid float
-        #                         child.setText(child.text()[:-1])
-        #                         continue
-        #                     elif isinstance(child, QtWidgets.QDoubleSpinBox):
-        #                         child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
-        #                     elif isinstance(child, QtWidgets.QSpinBox):
-        #                         child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
-        #                     else:
-        #                         child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-        #                     child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-        #                     child.setStyleSheet('color: black;')
-        #                     self.UpdateParameters=0
-        #             else:
-        #                 child.setStyleSheet('color: black;')
-        #                 child.setStyleSheet('background-color: white;')
-        #         except Exception as e:
-        #             #logging.error(traceback.format_exc())
-        #             pass
-
     def _GetTrainingParameters(self,prefix='TP_'):
         '''Get training parameters'''
         # Iterate over each container to find child widgets and store their values in self
@@ -2762,7 +2618,6 @@ class Window(QMainWindow):
         self.session_widget.subject_widget.setText(mouse_id)
         self.session_widget.subject_widget.returnPressed.emit()
         self.TargetRatio.setText('0.85')
-        self.keyPressEvent(allow_reset=True)
 
     def _Open_getListOfMice(self):
         '''
@@ -3052,7 +2907,6 @@ class Window(QMainWindow):
         else:
             self.NewSession.setDisabled(False)
         self.StartExcitation.setChecked(False)
-        self.keyPressEvent() # Accept all updates
         self.load_tag=1
         self.session_widget.subject_widget.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
 
@@ -3602,7 +3456,6 @@ class Window(QMainWindow):
         # Toggle button colors
         if self.Start.isChecked():
             logging.info('Start button pressed: starting trial loop')
-            self.keyPressEvent()
 
             # check if FIP setting match schedule. skip if test mouse or mouse isn't in schedule or
             mouse_id = self.session_model.subject
@@ -3773,8 +3626,6 @@ class Window(QMainWindow):
             self.project_name = self._GetProjectName(mouse_id)
             
             self.session_run = True   # session has been started
-
-            self.keyPressEvent(allow_reset=True)
 
         else:
             # Prompt user to confirm stopping trials
@@ -4047,34 +3898,34 @@ class Window(QMainWindow):
                     self.NewTrialRewardOrder=1
 
                 #initiate the generated trial
-                #try:
-                GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
-                # except Exception as e:
-                #     if 'ConnectionAbortedError' in str(e):
-                #         logging.info('lost bonsai connection: InitiateATrial')
-                #         logging.warning('Lost bonsai connection', extra={'tags': [self.warning_log_tag]})
-                #         self.Start.setChecked(False)
-                #         self.Start.setStyleSheet("background-color : none")
-                #         self.InitializeBonsaiSuccessfully=0
-                #         reply = QMessageBox.question(self,
-                #             'Box {}, Start'.format(self.box_letter),
-                #             'Cannot connect to Bonsai. Attempt reconnection?',
-                #             QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
-                #         if reply == QMessageBox.Yes:
-                #             self._ReconnectBonsai()
-                #             logging.info('User selected reconnect bonsai')
-                #         else:
-                #             logging.info('User selected not to reconnect bonsai')
-                #         self.ANewTrial=1
-                #
-                #         break
-                #     else:
-                #         reply = QMessageBox.critical(self, 'Box {}, Error'.format(self.box_letter), 'Encountered the following error: {}'.format(e),QMessageBox.Ok )
-                #         logging.error('Caught this error: {}'.format(e))
-                #         self.ANewTrial=1
-                #         self.Start.setChecked(False)
-                #         self.Start.setStyleSheet("background-color : none")
-                #         break
+                try:
+                    GeneratedTrials._InitiateATrial(self.Channel,self.Channel4)
+                except Exception as e:
+                    if 'ConnectionAbortedError' in str(e):
+                        logging.info('lost bonsai connection: InitiateATrial')
+                        logging.warning('Lost bonsai connection', extra={'tags': [self.warning_log_tag]})
+                        self.Start.setChecked(False)
+                        self.Start.setStyleSheet("background-color : none")
+                        self.InitializeBonsaiSuccessfully=0
+                        reply = QMessageBox.question(self,
+                            'Box {}, Start'.format(self.box_letter),
+                            'Cannot connect to Bonsai. Attempt reconnection?',
+                            QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+                        if reply == QMessageBox.Yes:
+                            self._ReconnectBonsai()
+                            logging.info('User selected reconnect bonsai')
+                        else:
+                            logging.info('User selected not to reconnect bonsai')
+                        self.ANewTrial=1
+
+                        break
+                    else:
+                        reply = QMessageBox.critical(self, 'Box {}, Error'.format(self.box_letter), 'Encountered the following error: {}'.format(e),QMessageBox.Ok )
+                        logging.error('Caught this error: {}'.format(e))
+                        self.ANewTrial=1
+                        self.Start.setChecked(False)
+                        self.Start.setStyleSheet("background-color : none")
+                        break
                 #receive licks and update figures
                 if self.actionDrawing_after_stopping.isChecked()==False:
                     self.PlotM._Update(GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
