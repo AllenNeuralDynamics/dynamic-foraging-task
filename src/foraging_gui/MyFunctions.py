@@ -290,12 +290,9 @@ class GenerateTrials():
         warmup=self._get_warmup_state()
         if warmup==0 and self.task_logic.task_parameters.warmup is not None:
             # set warm up to off
-            index=self.win.warmup.findText('off')
-            self.win.warmup.setCurrentIndex(index)
-            self.win._warmup()
-            self.win.keyPressEvent()
+            self.task_logic.task_parameters.warmup = None
+            self.win.task_widget.apply_schema(self.task_logic)
             self.win.NextBlock.setChecked(True)
-            self.win._NextBlock()
             logging.info('Warm up is turned off', extra={'tags': [self.win.warning_log_tag]})
 
     def _get_warmup_state(self):
@@ -988,17 +985,13 @@ class GenerateTrials():
                                                 + '\n\n'
                                                 + 'Current pair:\n'
                                                 + str(np.round(
-                                                    self.B_RewardProHistory[:,self.B_CurrentTrialN],2))) 
-                if self.win.default_ui=='ForagingGUI.ui': 
-                    self.win.ShowRewardPairs_2.setText(self.win.ShowRewardPairs.text())
+                                                    self.B_RewardProHistory[:,self.B_CurrentTrialN],2)))
             elif (self.session_model.experiment in ['Uncoupled Baiting','Uncoupled Without Baiting']):
                 self.win.ShowRewardPairs.setText('Reward pairs:\n'
                                 + str(np.round(self.RewardProbPoolUncoupled,2)).replace('\n', ',')
                                 + '\n\n'
                                 +'Current pair:\n'
                                 + str(np.round(self.B_RewardProHistory[:,self.B_CurrentTrialN],2)))
-                if self.win.default_ui=='ForagingGUI.ui': 
-                    self.win.ShowRewardPairs_2.setText(self.win.ShowRewardPairs.text())
         except Exception as e:
             logging.error(str(e))
             
@@ -1481,9 +1474,9 @@ class GenerateTrials():
                 # send the waveform size
                 Channel1.Location1_Size(int(self.Location1_Size))
                 Channel1.Location2_Size(int(self.Location2_Size))
-                # for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
-                #     getattr(Channel4, 'WaveForm' + str(1)+'_'+str(i+1))(str(getattr(self, 'WaveFormLocation_'+str(i+1)).tolist())[1:-1])
-                #FinishOfWaveForm=Channel4.receive()
+                for i in range(len(self.CurrentLaserAmplitude)): # locations of these waveforms
+                    getattr(Channel4, 'WaveForm' + str(1)+'_'+str(i+1))(str(getattr(self, 'WaveFormLocation_'+str(i+1)).tolist())[1:-1])
+                FinishOfWaveForm=Channel4.receive()
             else:
                 Channel1.PassGoCue(int(0))
                 Channel1.PassRewardOutcome(int(0))

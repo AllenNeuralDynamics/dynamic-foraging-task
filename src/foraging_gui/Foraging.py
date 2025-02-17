@@ -3346,7 +3346,6 @@ class Window(QMainWindow):
 
     def _thread_complete(self):
         '''complete of a trial'''
-        print("thread complete")
         if self.NewTrialRewardOrder==0:
             self.GeneratedTrials._GenerateATrial()
         self.ANewTrial=1
@@ -4093,21 +4092,10 @@ class Window(QMainWindow):
             self._Optogenetics() # press the optogenetics icon
             self.action_Optogenetics.setChecked(True)
             self.Opto_dialog.show()
-            self.label_18.setEnabled(False)
-            self.label_15.setEnabled(False)
-            self.label_17.setEnabled(False)
-            self.DelayBeta.setEnabled(False)
-            self.DelayMin.setEnabled(False)
-            self.DelayMax.setEnabled(False)
+
         else:
             self.action_Optogenetics.setChecked(False)
             self.Opto_dialog.hide()
-            self.label_18.setEnabled(True)
-            self.label_15.setEnabled(True)
-            self.label_17.setEnabled(True)
-            self.DelayBeta.setEnabled(True)
-            self.DelayMin.setEnabled(True)
-            self.DelayMax.setEnabled(True)
 
     def give_manual_water(self, valve: Literal["Right", "Left"]):
         """

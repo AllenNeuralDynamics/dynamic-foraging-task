@@ -211,7 +211,6 @@ class PlotV(FigureCanvas):
         condition_list = list(set(non_none_conditions))
         for condition in condition_list:
             Optogenetics_On=np.where(np.logical_and(self.B_LaserOnTrial[:-1] == 1, non_none_conditions == condition))
-            print(Optogenetics_On)
             if len(Optogenetics_On[0])==0:
                 continue
             current_color=color_mapping['Condition'+str(condition)]

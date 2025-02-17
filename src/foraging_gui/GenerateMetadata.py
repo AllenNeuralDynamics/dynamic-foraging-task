@@ -940,11 +940,11 @@ class generate_metadata:
         num_map = ["LocationOne", "LocationTwo"]
         mapper_key = 'laser_name_mapper' if self.box_type=='Ephys' else 'led_name_mapper'
         invert_laser_mapper = {str(v): k for k, v in self.name_mapper[mapper_key].items()}
+
         for laser in self.opto_model.laser_colors:
             for location in laser.location:
                 key = f"{{'color': '{laser.color}', 'laser_tag': {num_map.index(location.name)}}}"
                 self.light_names_used_in_session.append(invert_laser_mapper[key])
-        print(self.light_names_used_in_session)
 
     def _get_ephys_stream(self):
         '''
