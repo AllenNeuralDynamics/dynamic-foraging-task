@@ -37,7 +37,6 @@ class SchemaWidgetBase(QMainWindow):
         widget = self.create_field_widgets(self.schema.model_dump(),
                                            "schema_fields")
         self.setCentralWidget(create_widget("V", **widget))
-        #add_border(self)
         self.ValueChangedOutside[str].connect(self.update_field_widget)  # Trigger update when property value changes
 
     def create_field_widgets(self, fields: dict,  widget_field: str) -> dict:
@@ -236,7 +235,11 @@ class SchemaWidgetBase(QMainWindow):
         """
         self.schema = schema if not schema else self.schema
         for name in self.schema.model_dump().keys():
-            self.update_field_widget(name)
+            try:
+                self.update_field_widget(name)
+            except RuntimeError as e:
+                if "has been deleted" not in str(e):    # catch errors not related to deleted widgets
+                    raise RuntimeError(e)
 
     def __setattr__(self, name, value):
         """Overwrite __setattr__ to trigger update if property is changed"""

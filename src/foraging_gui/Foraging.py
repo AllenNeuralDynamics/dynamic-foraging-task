@@ -10,6 +10,8 @@ import logging
 import requests
 from hashlib import md5
 from typing import Literal
+from pydantic import BaseModel
+
 
 import logging_loki
 import socket
@@ -103,6 +105,7 @@ class NumpyEncoder(json.JSONEncoder):
 
 class Window(QMainWindow):
     Time = QtCore.pyqtSignal(int) # Photometry timer signal
+    sessionEnded = QtCore.pyqtSignal()
 
     def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
@@ -196,6 +199,9 @@ class Window(QMainWindow):
         self.fip_widget = FIBParametersWidget(self.fip_model)
         for i, widget in enumerate(self.fip_widget.schema_fields_widgets.values()):
             self.fip_layout.insertWidget(i, widget)
+
+        # when session is ended, save relevant models
+        self.sessionEnded.connect(self.save_task_models)
 
         # add warning_widget to layout and set color
         self.warning_widget = WarningWidget(log_tag=self.warning_log_tag,
@@ -2501,14 +2507,53 @@ class Window(QMainWindow):
         self.SaveFileMat=os.path.join(self.session_model.root_path, f'{id_name}.mat')
         self.SaveFileJson=os.path.join(self.session_model.root_path, f'{id_name}.json')
         self.SaveFileParJson=os.path.join(self.session_model.root_path, f'{id_name}_par.json')
-        self.behavior_session_model_json = os.path.join(self.session_model.root_path,
-                                                        f'behavior_session_model_{id_name}.json')
-        self.behavior_task_logic_model_json = os.path.join(self.session_model.root_path,
-                                                           f'behavior_task_logic_model_{id_name}.json')
         self.HarpFolder=os.path.join(self.session_model.root_path, 'raw.harp')
         self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
         self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
         self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
+
+    def save_task_models(self):
+        """
+        Save session and task model as well as opto and fip if applicable
+        """
+
+        id_name = self.session_model.session_name.split("behavior_")[-1]
+        session_model_path = os.path.join(self.session_model.root_path, f'behavior_session_model_{id_name}.json')
+        task_model_path = os.path.join(self.session_model.root_path, f'behavior_task_logic_model_{id_name}.json')
+
+        # validate behavior session model and document validation errors if any
+        self.validate_and_save_model(AindBehaviorSessionModel, self.session_model, session_model_path)
+
+        # validate behavior task logic model and document validation errors if any
+        self.validate_and_save_model(AindDynamicForagingTaskLogic, self.task_logic, task_model_path)
+
+        # check if opto ran
+        if self.opto_model.laser_colors != []:
+            opto_model_path = os.path.join(self.session_model.root_path, f'behavior_optogenetics_model_{id_name}.json')
+            self.validate_and_save_model(Optogenetics, self.opto_model, opto_model_path)
+
+        # check if fip ran
+        if self.fip_model.mode is not None:
+            fip_model_path = os.path.join(self.session_model.root_path,
+                                          f'behavior_fiber_photometry_model_{id_name}.json')
+            self.validate_and_save_model(FiberPhotometry, self.fip_model, fip_model_path)
+    def validate_and_save_model(self, schema: BaseModel, model, path: str):
+        """
+        Validate a model against schema and log any errors. Save schema regardless.
+        :param schema: BaseModel class to validate against
+        :param model: model object to validate and save
+        :param path: path of where to save model
+        """
+
+        # validate model and document validation errors if any
+        try:
+            schema(**model.model_dump())
+        except ValidationError as e:
+            logging.error(str(e), extra={'tags': [self.warning_log_tag]})
+        # save behavior session model
+        with open(path, "w") as outfile:
+            outfile.write(model.model_dump_json(indent=1))
+
 
     def _Concat(self,widget_dict,Obj,keyname):
         '''Help manage save different dialogs'''
@@ -3660,23 +3705,7 @@ class Window(QMainWindow):
             # stop lick interval calculation
             self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
 
-            # validate behavior session model and document validation errors if any
-            try:
-                AindBehaviorSessionModel(**self.session_model.model_dump())
-            except ValidationError as e:
-                logging.error(str(e), extra={'tags': [self.warning_log_tag]})
-            # save behavior session model
-            with open(self.behavior_session_model_json, "w") as outfile:
-                outfile.write(self.session_model.model_dump_json())
-
-            # validate behavior task logic model and document validation errors if any
-            try:
-                AindDynamicForagingTaskLogic(**self.task_logic.model_dump())
-            except ValidationError as e:
-                logging.error(str(e), extra={'tags': [self.warning_log_tag]})
-            # save behavior session model
-            with open(self.behavior_task_logic_model_json, "w") as outfile:
-                outfile.write(self.task_logic.model_dump_json())
+            self.sessionEnded.emit()
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish

@@ -87,11 +87,10 @@ class BehaviorParametersWidget(SchemaWidgetBase):
         self.reward_n_check_box.toggled.emit(False)
 
         # delete widgets unrelated to session
-        self.schema_fields_widgets["rng_seed"].hide()
-        self.schema_fields_widgets["aind_behavior_services_pkg_version"].hide()
+        del self.schema_fields_widgets["rng_seed"]
+        del self.schema_fields_widgets["aind_behavior_services_pkg_version"]
 
-        add_border(self, {k: v for k, v in self.schema_fields_widgets.items() if
-                          k not in ["rng_seed", "aind_behavior_services_pkg_version"]})
+        add_border(self)
 
         self.ValueChangedInside.connect(self.update_task_option)
 
