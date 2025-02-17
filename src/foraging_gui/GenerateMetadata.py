@@ -631,6 +631,8 @@ class generate_metadata:
         if self.Obj['fiber_photometry_start_time']=='':
             logging.info('No photometry data stream detected!')
             return
+        if self.Obj['fiber_photometry_end_time'] == '':
+            self.Obj['fiber_photometry_end_time'] = str(datetime.now())
         self._get_photometry_light_sources_config()
         self._get_photometry_detectors()
         self._get_fiber_connections()
