@@ -497,6 +497,7 @@ class generate_metadata:
         self._get_water_calibration()
         self._get_opto_calibration()
         self.calibration=self.water_calibration+self.opto_calibration
+        self._get_behavior_software()
         self._get_behavior_stream()
         self._get_ephys_stream()
         self._get_ophys_stream()
@@ -1077,7 +1078,6 @@ class generate_metadata:
             daq_names=self.name_mapper['rig_daq_names_janelia_lick_detector']
 
         self.behavior_streams=[]
-        self._get_behavior_software()
         self.behavior_streams.append(Stream(
                 stream_modalities=[Modality.BEHAVIOR],
                 stream_start_time=datetime.strptime(self.Obj['Other_SessionStartTime'], '%Y-%m-%d %H:%M:%S.%f'),
