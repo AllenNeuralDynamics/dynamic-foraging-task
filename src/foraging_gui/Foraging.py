@@ -2998,13 +2998,15 @@ class Window(QMainWindow):
         logging.info('User input mouse id {}, which had no sessions on this computer'.format(mouse_id))
         return False, ''
 
-    def _OpenNewMouse(self, mouse_id):
+    def _OpenNewMouse(self, mouse_id,experimenter):
         '''
             Queries the user to start a new mouse
         '''
         reply = QMessageBox.question(self,
             'Box {}, Load mouse'.format(self.box_letter),
-            'No data for mouse <span style="color:purple;font-weight:bold">{}</span>, start new mouse?'.format(mouse_id),
+            'No data for mouse <span style="color:purple;font-weight:bold">{}</span>'.format(mouse_id) +\
+            '<br>Experimenter: {}<br>'.format(experimenter) +\
+            'start new mouse?',
             QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if reply == QMessageBox.No:
             logging.info('User declines to start new mouse: {}'.format(mouse_id))
@@ -3013,6 +3015,7 @@ class Window(QMainWindow):
         # Set ID, clear weight information
         logging.info('User starting a new mouse: {}'.format(mouse_id))
         self.ID.setText(mouse_id)
+        self.Experimenter.setText(experimenter)
         self.ID.returnPressed.emit()
         self.TargetRatio.setText('0.85')
         self.keyPressEvent(allow_reset=True)
@@ -3070,7 +3073,10 @@ class Window(QMainWindow):
                 if mouse_id not in mice:
                     # figureout out new Mouse
                     logging.info('User entered the ID for a mouse with no data: {}'.format(mouse_id))
-                    reply = self._OpenNewMouse(mouse_id)
+                    experimenter = self._GetInfoFromSchedule(mouse_id, 'Trainer')
+                    if experimenter is None:
+                        experimenter = self.behavior_session_model.experimenter[0]
+                    reply = self._OpenNewMouse(mouse_id,experimenter)
                     if reply != QMessageBox.No:     # user pressed yes
                         self.NewSession.setChecked(True)
                         self._NewSession()
