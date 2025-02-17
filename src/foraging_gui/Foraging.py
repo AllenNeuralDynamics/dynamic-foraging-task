@@ -467,6 +467,7 @@ class Window(QMainWindow):
         self.Opto_dialog.laser_2_calibration_voltage.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_1_calibration_power.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_2_calibration_power.textChanged.connect(self._toggle_save_color)
+        self.pushButton_streamlit.clicked.connect(self._open_mouse_on_streamlit)
 
         # add validator for weight and water fields
         double_validator = QtGui.QDoubleValidator()

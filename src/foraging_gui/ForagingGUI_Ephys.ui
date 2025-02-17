@@ -1262,29 +1262,6 @@
     <layout class="QHBoxLayout" name="fip_layout">
     </layout>
    </widget>
-   <widget class="QPushButton" name="AutoTrain">
-    <property name="geometry">
-     <rect>
-      <x>1005</x>
-      <y>10</y>
-      <width>111</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color:  rgb(0, 189, 22);</string>
-    </property>
-    <property name="text">
-     <string>Auto Train
-(Ctrl+Alt+A)</string>
-    </property>
-    <property name="shortcut">
-     <string>Ctrl+Alt+A</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_auto_train_stage">
     <property name="geometry">
      <rect>
