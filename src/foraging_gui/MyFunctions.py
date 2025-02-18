@@ -1656,11 +1656,12 @@ class GenerateTrials():
         if self.CurrentSimulation == True:
             self._SimulateResponse()
             return
-        # # set the valve time of auto water
-        # if self.CurrentAutoRewardTrial[0] == 1:
-        #     self._set_valve_time_left(Channel3, float(self.win.LeftValue.text()), float(self.win.Multiplier.text()))
-        # if self.CurrentAutoRewardTrial[1] == 1:
-        #     self._set_valve_time_right(Channel3, float(self.win.RightValue.text()), float(self.win.Multiplier.text()))
+        # set the valve time of auto water
+        multiplier = self.task_logic.task_parameters.auto_water.multiplier
+        if self.CurrentAutoRewardTrial[0] == 1:
+            self._set_valve_time_left(Channel3, float(self.win.left_valve_open_time, multiplier))
+        if self.CurrentAutoRewardTrial[1] == 1:
+            self._set_valve_time_right(Channel3, float(self.win.right_valve_open_time, multiplier))
 
         if self.CurrentStartType == 3:  # no delay timestamp
             ReceiveN = 9
