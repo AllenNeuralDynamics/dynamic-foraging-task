@@ -360,7 +360,7 @@ class Window(QMainWindow):
         uic.loadUi(self.default_ui, self)
         if self.default_ui=='ForagingGUI.ui':
             logging.info('Using ForagingGUI.ui interface')
-            self.label_date.setText(str(date.today()))
+            #self.label_date.setText(str(date.today()))
             self.default_warning_color="purple"
             self.default_text_color="purple"
             self.default_text_background_color='purple'
@@ -2413,7 +2413,6 @@ class Window(QMainWindow):
         self.SaveFileMat=os.path.join(self.session_model.root_path,f'{id_name}.mat')
         self.SaveFileJson=os.path.join(self.session_model.root_path,f'{id_name}.json')
         self.SaveFileParJson=os.path.join(self.session_model.root_path,f'{id_name}_par.json')
-        self.behavior_session_modelJson = os.path.join(self.session_model.root_path,f'behavior_session_model_{id_name}.json')
         self.HarpFolder=os.path.join(self.session_model.root_path,'raw.harp')
         self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
         self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
@@ -3147,7 +3146,7 @@ class Window(QMainWindow):
     def _stop_logging(self):
         '''Stop the logging'''
         self.Camera_dialog.StartPreview.setEnabled(True)
-        self.ID.setEnabled(True)
+        self.session_widget.subject_widget.setEnabled(True)
         self.Load.setEnabled(True)
         try:
             self.Channel.StopLogging('s')
@@ -3414,7 +3413,6 @@ class Window(QMainWindow):
         # Toggle button colors
         if self.Start.isChecked():
             logging.info('Start button pressed: starting trial loop')
-            self.keyPressEvent()
 
             # check if FIP setting match schedule. skip if test mouse or mouse isn't in schedule or
             mouse_id = self.session_model.subject

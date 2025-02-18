@@ -1650,96 +1650,96 @@ class GenerateTrials():
                 for i, side in enumerate(['L', 'R']):
                     self.BlockLenHistory[i][-1] = self.BlockLenHistory[i][-1]+1
 
-    def _GetAnimalResponse(self,Channel1,Channel3):
+    def _GetAnimalResponse(self, Channel1, Channel3):
         '''Get the animal's response'''
         self._CheckSimulationSession()
-        if self.CurrentSimulation==True:
+        if self.CurrentSimulation == True:
             self._SimulateResponse()
             return
-        # set the valve time of auto water
-        multiplier = self.task_logic.task_parameters.auto_water.multiplier if \
-            self.task_logic.task_parameters.auto_water is not None else 1
-        if self.CurrentAutoRewardTrial[0] == 1:
-            self._set_valve_time_left(Channel3, float(self.win.left_valve_open_time, multiplier))
-        if self.CurrentAutoRewardTrial[1] == 1:
-            self._set_valve_time_right(Channel3, float(self.win.right_valve_open_time, multiplier))
+        # # set the valve time of auto water
+        # if self.CurrentAutoRewardTrial[0] == 1:
+        #     self._set_valve_time_left(Channel3, float(self.win.LeftValue.text()), float(self.win.Multiplier.text()))
+        # if self.CurrentAutoRewardTrial[1] == 1:
+        #     self._set_valve_time_right(Channel3, float(self.win.RightValue.text()), float(self.win.Multiplier.text()))
 
-        if self.CurrentStartType==3: # no delay timestamp
-            ReceiveN=9
-            DelayStartTimeHarp=[None] # -999 means a placeholder
-            DelayStartTime=[None]
-        elif self.CurrentStartType==1:
-            ReceiveN=11
-            DelayStartTimeHarp=[]
-            DelayStartTime=[]
+        if self.CurrentStartType == 3:  # no delay timestamp
+            ReceiveN = 9
+            DelayStartTimeHarp = [None]  # -999 means a placeholder
+            DelayStartTime = [None]
+        elif self.CurrentStartType == 1:
+            ReceiveN = 11
+            DelayStartTimeHarp = []
+            DelayStartTime = []
 
-        current_receiveN=0
-        behavior_eventN=0
-        in_delay=0 #0, the next /BehaviorEvent is not the delay; 1, the next /BehaviorEvent is the delay following the /TrialStartTime
-        first_behavior_event=0
-        first_delay_start=0
+        current_receiveN = 0
+        behavior_eventN = 0
+        in_delay = 0  # 0, the next /BehaviorEvent is not the delay; 1, the next /BehaviorEvent is the delay following the /TrialStartTime
+        first_behavior_event = 0
+        first_delay_start = 0
         while 1:
-            Rec=Channel1.receive()
-            if Rec[0].address not in ['/BehaviorEvent','/DelayStartTime']:
-                current_receiveN+=1
-            if Rec[0].address=='/TrialStartTime':
-                TrialStartTime=Rec[1][1][0]
-                in_delay=1 # the next /BehaviorEvent is the delay
-            elif Rec[0].address=='/DelayStartTime':
+            print('before')
+            Rec = Channel1.receive()
+            print('afdter')
+            if Rec[0].address not in ['/BehaviorEvent', '/DelayStartTime']:
+                current_receiveN += 1
+            if Rec[0].address == '/TrialStartTime':
+                TrialStartTime = Rec[1][1][0]
+                in_delay = 1  # the next /BehaviorEvent is the delay
+            elif Rec[0].address == '/DelayStartTime':
                 DelayStartTime.append(Rec[1][1][0])
-                if first_delay_start==0:
-                    first_delay_start=1
-                    current_receiveN+=1
-            elif Rec[0].address=='/GoCueTime':
-                GoCueTime=Rec[1][1][0]
-                in_delay=0
-            elif Rec[0].address=='/RewardOutcomeTime':
-                RewardOutcomeTime=Rec[1][1][0]
-            elif Rec[0].address=='/RewardOutcome':
-                TrialOutcome=Rec[1][1][0]
-                if TrialOutcome=='NoResponse':
-                    self.B_AnimalCurrentResponse=2
-                    self.B_CurrentRewarded[0]=False
-                    self.B_CurrentRewarded[1]=False
+                if first_delay_start == 0:
+                    first_delay_start = 1
+                    current_receiveN += 1
+            elif Rec[0].address == '/GoCueTime':
+                GoCueTime = Rec[1][1][0]
+                in_delay = 0
+            elif Rec[0].address == '/RewardOutcomeTime':
+                RewardOutcomeTime = Rec[1][1][0]
+            elif Rec[0].address == '/RewardOutcome':
+                TrialOutcome = Rec[1][1][0]
+                if TrialOutcome == 'NoResponse':
+                    self.B_AnimalCurrentResponse = 2
+                    self.B_CurrentRewarded[0] = False
+                    self.B_CurrentRewarded[1] = False
                     self._add_one_trial()
-                elif TrialOutcome=='RewardLeft':
-                    self.B_AnimalCurrentResponse=0
-                    self.B_Baited[0]=False
-                    self.B_CurrentRewarded[1]=False
-                    self.B_CurrentRewarded[0]=True  
-                elif TrialOutcome=='ErrorLeft':
-                    self.B_AnimalCurrentResponse=0
-                    self.B_Baited[0]=False
-                    self.B_CurrentRewarded[0]=False
-                    self.B_CurrentRewarded[1]=False
-                elif TrialOutcome=='RewardRight':
-                    self.B_AnimalCurrentResponse=1
-                    self.B_Baited[1]=False
-                    self.B_CurrentRewarded[0]=False
-                    self.B_CurrentRewarded[1]=True
-                elif TrialOutcome=='ErrorRight':
-                    self.B_AnimalCurrentResponse=1
-                    self.B_Baited[1]=False
-                    self.B_CurrentRewarded[0]=False
-                    self.B_CurrentRewarded[1]=False
-                B_CurrentRewarded=self.B_CurrentRewarded
-                B_AnimalCurrentResponse=self.B_AnimalCurrentResponse
-            elif Rec[0].address=='/TrialEndTime':
-                TrialEndTime=Rec[1][1][0]
-            elif Rec[0].address=='/GoCueTimeSoundCard':
+                elif TrialOutcome == 'RewardLeft':
+                    self.B_AnimalCurrentResponse = 0
+                    self.B_Baited[0] = False
+                    self.B_CurrentRewarded[1] = False
+                    self.B_CurrentRewarded[0] = True
+                elif TrialOutcome == 'ErrorLeft':
+                    self.B_AnimalCurrentResponse = 0
+                    self.B_Baited[0] = False
+                    self.B_CurrentRewarded[0] = False
+                    self.B_CurrentRewarded[1] = False
+                elif TrialOutcome == 'RewardRight':
+                    self.B_AnimalCurrentResponse = 1
+                    self.B_Baited[1] = False
+                    self.B_CurrentRewarded[0] = False
+                    self.B_CurrentRewarded[1] = True
+                elif TrialOutcome == 'ErrorRight':
+                    self.B_AnimalCurrentResponse = 1
+                    self.B_Baited[1] = False
+                    self.B_CurrentRewarded[0] = False
+                    self.B_CurrentRewarded[1] = False
+                B_CurrentRewarded = self.B_CurrentRewarded
+                B_AnimalCurrentResponse = self.B_AnimalCurrentResponse
+            elif Rec[0].address == '/TrialEndTime':
+                TrialEndTime = Rec[1][1][0]
+            elif Rec[0].address == '/GoCueTimeSoundCard':
                 # give auto water after Co cue
-                # Randomlizing the order to avoid potential bias. 
-                if np.random.random(1)<0.5:
-                    if self.CurrentAutoRewardTrial[0]==1:
+                # Randomlizing the order to avoid potential bias.
+                if np.random.random(1) < 0.5:
+                    if self.CurrentAutoRewardTrial[0] == 1:
                         Channel3.AutoWater_Left(int(1))
-                    if self.CurrentAutoRewardTrial[1]==1:
+                    if self.CurrentAutoRewardTrial[1] == 1:
                         Channel3.AutoWater_Right(int(1))
                 else:
-                    if self.CurrentAutoRewardTrial[1]==1:
+                    if self.CurrentAutoRewardTrial[1] == 1:
                         Channel3.AutoWater_Right(int(1))
-                    if self.CurrentAutoRewardTrial[0]==1:
+                    if self.CurrentAutoRewardTrial[0] == 1:
                         Channel3.AutoWater_Left(int(1))
-                        
+
                 # give reserved manual water
                 if float(self.win.give_left_volume_reserved) > 0 or float(self.win.give_right_volume_reserved) > 0:
                     # Set the text of a label or text widget to show the reserved volumes
@@ -1749,53 +1749,53 @@ class GenerateTrials():
                         extra={'tags': [self.win.warning_log_tag]}
                     )
 
-                # The manual water of two sides are given sequentially. Randomlizing the order to avoid bias. 
-                if np.random.random(1)<0.5:
+                # The manual water of two sides are given sequentially. Randomlizing the order to avoid bias.
+                if np.random.random(1) < 0.5:
                     self.win._give_reserved_water(valve='left')
                     self.win._give_reserved_water(valve='right')
                 else:
                     self.win._give_reserved_water(valve='right')
                     self.win._give_reserved_water(valve='left')
-                GoCueTimeSoundCard=Rec[1][1][0]
-                in_delay=0
-            elif Rec[0].address=='/DOPort2Output': #this port is used to trigger optogenetics aligned to Go cue
-                B_DOPort2Output=Rec[1][1][0]
-                self.B_DOPort2Output=np.append(self.B_DOPort2Output,B_DOPort2Output)
-            elif Rec[0].address=='/ITIStartTimeHarp':
-                TrialStartTimeHarp=Rec[1][1][0]
-            elif Rec[0].address=='/BehaviorEvent':
-                if in_delay==1:
+                GoCueTimeSoundCard = Rec[1][1][0]
+                in_delay = 0
+            elif Rec[0].address == '/DOPort2Output':  # this port is used to trigger optogenetics aligned to Go cue
+                B_DOPort2Output = Rec[1][1][0]
+                self.B_DOPort2Output = np.append(self.B_DOPort2Output, B_DOPort2Output)
+            elif Rec[0].address == '/ITIStartTimeHarp':
+                TrialStartTimeHarp = Rec[1][1][0]
+            elif Rec[0].address == '/BehaviorEvent':
+                if in_delay == 1:
                     DelayStartTimeHarp.append(Rec[1][1][0])
-                    if first_behavior_event==0:
-                        first_behavior_event=1
-                        current_receiveN+=1 # only count once
+                    if first_behavior_event == 0:
+                        first_behavior_event = 1
+                        current_receiveN += 1  # only count once
                 else:
-                    if behavior_eventN==0:
-                        GoCueTimeBehaviorBoard=Rec[1][1][0]
-                    elif behavior_eventN==1:
-                        TrialEndTimeHarp=Rec[1][1][0]
-                    behavior_eventN+=1
-                    current_receiveN+=1
-            if current_receiveN==ReceiveN:
+                    if behavior_eventN == 0:
+                        GoCueTimeBehaviorBoard = Rec[1][1][0]
+                    elif behavior_eventN == 1:
+                        TrialEndTimeHarp = Rec[1][1][0]
+                    behavior_eventN += 1
+                    current_receiveN += 1
+            if current_receiveN == ReceiveN:
                 break
-        
-        self.B_RewardedHistory=np.append(self.B_RewardedHistory,B_CurrentRewarded,axis=1)
-        self.B_AnimalResponseHistory=np.append(self.B_AnimalResponseHistory,B_AnimalCurrentResponse)
+
+        self.B_RewardedHistory = np.append(self.B_RewardedHistory, B_CurrentRewarded, axis=1)
+        self.B_AnimalResponseHistory = np.append(self.B_AnimalResponseHistory, B_AnimalCurrentResponse)
         # get the event harp time
-        self.B_TrialStartTimeHarp=np.append(self.B_TrialStartTimeHarp,TrialStartTimeHarp)
-        self.B_DelayStartTimeHarp=np.append(self.B_DelayStartTimeHarp,DelayStartTimeHarp[0])
+        self.B_TrialStartTimeHarp = np.append(self.B_TrialStartTimeHarp, TrialStartTimeHarp)
+        self.B_DelayStartTimeHarp = np.append(self.B_DelayStartTimeHarp, DelayStartTimeHarp[0])
         self.B_DelayStartTimeHarpComplete.append(DelayStartTimeHarp)
-        self.B_TrialEndTimeHarp=np.append(self.B_TrialEndTimeHarp,TrialEndTimeHarp)
-        self.B_GoCueTimeBehaviorBoard=np.append(self.B_GoCueTimeBehaviorBoard,GoCueTimeBehaviorBoard)
-        self.B_GoCueTimeSoundCard=np.append(self.B_GoCueTimeSoundCard,GoCueTimeSoundCard)
+        self.B_TrialEndTimeHarp = np.append(self.B_TrialEndTimeHarp, TrialEndTimeHarp)
+        self.B_GoCueTimeBehaviorBoard = np.append(self.B_GoCueTimeBehaviorBoard, GoCueTimeBehaviorBoard)
+        self.B_GoCueTimeSoundCard = np.append(self.B_GoCueTimeSoundCard, GoCueTimeSoundCard)
         # get the event time
-        self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime)
-        self.B_DelayStartTime=np.append(self.B_DelayStartTime,DelayStartTime[0])
+        self.B_TrialStartTime = np.append(self.B_TrialStartTime, TrialStartTime)
+        self.B_DelayStartTime = np.append(self.B_DelayStartTime, DelayStartTime[0])
         self.B_DelayStartTimeComplete.append(DelayStartTime)
-        self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime)
-        self.B_GoCueTime=np.append(self.B_GoCueTime,GoCueTime)
-        self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,RewardOutcomeTime)
-        self.GetResponseFinish=1
+        self.B_TrialEndTime = np.append(self.B_TrialEndTime, TrialEndTime)
+        self.B_GoCueTime = np.append(self.B_GoCueTime, GoCueTime)
+        self.B_RewardOutcomeTime = np.append(self.B_RewardOutcomeTime, RewardOutcomeTime)
+        self.GetResponseFinish = 1
 
     def _set_valve_time_left(self,channel3,LeftValue=0.01,Multiplier=1):
         '''set the left valve time'''
