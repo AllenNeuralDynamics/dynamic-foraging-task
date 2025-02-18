@@ -1678,9 +1678,7 @@ class GenerateTrials():
         first_behavior_event = 0
         first_delay_start = 0
         while 1:
-            print('before')
             Rec = Channel1.receive()
-            print('afdter')
             if Rec[0].address not in ['/BehaviorEvent', '/DelayStartTime']:
                 current_receiveN += 1
             if Rec[0].address == '/TrialStartTime':
