@@ -42,7 +42,7 @@ import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
 from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
 from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,MetadataDialog
-from foraging_gui.Dialogs import LaserCalibrationDialog
+from foraging_gui.Dialogs import LaserCalibrationDialog,OpticalTaggingDialog
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY, EphysRecording
@@ -184,6 +184,7 @@ class Window(QMainWindow):
         self.OpenLaserCalibration=0
         self.OpenCamera=0
         self.OpenMetadata=0
+        self.OpenOpticalTagging=0
         self.NewTrialRewardOrder=0
         self.LickSta=0
         self.LickSta_ToInitializeVisual=1
@@ -206,6 +207,7 @@ class Window(QMainWindow):
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
         self._Camera()
+        self._OpticalTagging()
         self._InitializeMotorStage()
         self._load_stage()
         self._Metadata()
@@ -317,6 +319,7 @@ class Window(QMainWindow):
         self.action_About.triggered.connect(self._about)
         self.action_Camera.triggered.connect(self._Camera)
         self.actionMeta_Data.triggered.connect(self._Metadata)
+        self.actionOptical_Tagging.triggered.connect(self._OpticalTagging)
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
         self.actionLicks_sta.triggered.connect(self._LickSta)
         self.actionTime_distribution.triggered.connect(self._TimeDistribution)
@@ -2404,6 +2407,16 @@ class Window(QMainWindow):
         else:
             self.Camera_dialog.hide()
 
+    def _OpticalTagging(self):
+        '''Open the optical tagging dialog'''
+        if self.OpenOpticalTagging==0:
+            self.OpticalTagging_dialog = OpticalTaggingDialog(MainWindow=self)
+            self.OpenOpticalTagging=1
+        if self.actionOptical_Tagging.isChecked()==True:
+            self.OpticalTagging_dialog.show()
+        else:
+            self.OpticalTagging_dialog.hide()
+
     def _Metadata(self):
         '''Open the metadata dialog'''
         if self.OpenMetadata==0:
@@ -2630,7 +2643,7 @@ class Window(QMainWindow):
                 QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
             widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
             self._Concat(widget_dict,Obj,'None')
-            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','Metadata_dialog']
+            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','Metadata_dialog','OpticalTagging_dialog']
             for dialog_name in dialogs:
                 if hasattr(self, dialog_name):
                     widget_dict = {w.objectName(): w for w in getattr(self, dialog_name).findChildren(
@@ -2747,6 +2760,9 @@ class Window(QMainWindow):
         Obj['MetadataFolder']=self.MetadataFolder
         Obj['SaveFile']=self.SaveFile
 
+        # save optical tagging parameters
+        if not self.OpticalTagging_dialog.optical_tagging_par == {}:
+            Obj['optical_tagging_par']=self.OpticalTagging_dialog.optical_tagging_par
         # generate the metadata file and update slims
         try:
             # save the metadata collected in the metadata dialogue
@@ -3112,7 +3128,7 @@ class Window(QMainWindow):
             self.Obj = Obj
 
             widget_dict={}
-            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','centralwidget','TrainingParameters']
+            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','centralwidget','TrainingParameters','OpticalTagging_dialog']
             for dialog_name in dialogs:
                 if hasattr(self, dialog_name):
                     widget_types = (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit,
