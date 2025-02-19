@@ -360,7 +360,6 @@ class Window(QMainWindow):
         uic.loadUi(self.default_ui, self)
         if self.default_ui=='ForagingGUI.ui':
             logging.info('Using ForagingGUI.ui interface')
-            #self.label_date.setText(str(date.today()))
             self.default_warning_color="purple"
             self.default_text_color="purple"
             self.default_text_background_color='purple'
