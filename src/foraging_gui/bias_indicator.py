@@ -15,7 +15,7 @@ class BiasIndicator(QMainWindow):
 
     biasOver = pyqtSignal(float, int)   # emit bias and trial number it occurred
     biasError = pyqtSignal(str, int)    # emit error and trial number it occurred
-    biasValue = pyqtSignal(float, int)  # emit bias and trial number it occurred
+    biasValue = pyqtSignal(float, list,  int)  # emit bias, confidence intervals, and trial number it occurred
 
     def __init__(self, bias_threshold: float = .7, x_range: int = 15, *args, **kwargs):
         """
@@ -74,8 +74,8 @@ class BiasIndicator(QMainWindow):
 
         # create bias label
         self.bias_label = TextItem(color='black', anchor=(-.02, 0))
-        self.biasValue.connect(lambda bias, trial: self.bias_label.setText(str(round(bias, 3))))
-        self.biasValue.connect(lambda bias, trial: self.bias_label.setPos(self._current_bias_point.pos[0][0], bias))
+        self.biasValue.connect(lambda bias, c, trial: self.bias_label.setText(str(round(bias, 3))))
+        self.biasValue.connect(lambda bias, c,  trial: self.bias_label.setPos(self._current_bias_point.pos[0][0], bias))
         self.bias_plot.addItem(self.bias_label)
 
     @property
@@ -157,7 +157,6 @@ class BiasIndicator(QMainWindow):
                 bias = lr['df_beta'].loc['bias']['cross_validation'].values[0]
                 self.log.info(f"Bias: {bias} Trial Number: {trial_num}")
                 self._biases.append(bias)
-                self.biasValue.emit(bias, trial_num)
 
                 # add confidence intervals
                 upper = lr['df_beta'].loc['bias']['bootstrap_CI_upper'].values[0]
@@ -181,6 +180,8 @@ class BiasIndicator(QMainWindow):
 
             else:   # skip bias calculation if no conditions are met
                 return
+
+            self.biasValue.emit(bias, [lower, upper], trial_num)
 
             # update
             self._upper_scatter_item.setData(x=np.append(self._upper_scatter_item.xData, trial_num),
