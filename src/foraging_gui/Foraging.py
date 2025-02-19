@@ -198,7 +198,9 @@ class Window(QMainWindow):
         # add fip schema widget
         self.fip_model = FiberPhotometry()
         self.fip_widget = FIBParametersWidget(self.fip_model)
-        for i, widget in enumerate(self.fip_widget.schema_fields_widgets.values()):
+        for i, widget in enumerate([self.fip_widget.fip_schema_check_box] +
+                                   list(self.fip_widget.schema_fields_widgets.values())):
+            self.fip_layout.insertWidget(i, widget)
             self.fip_layout.insertWidget(i, widget)
 
         # when session is ended, save relevant models
