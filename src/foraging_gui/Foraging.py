@@ -36,7 +36,6 @@ from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 from pydantic import ValidationError
-
 from StageWidget.main import get_stage_widget
 
 import foraging_gui
@@ -52,6 +51,7 @@ from foraging_gui.bias_indicator import BiasIndicator
 from foraging_gui.warning_widget import WarningWidget
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
+from foraging_gui.settings_model import DFTSettingsModel, BonsaiSettingsModel
 from aind_data_schema.core.session import Session
 from aind_data_schema_models.modalities import Modality
 from aind_behavior_services.session import AindBehaviorSessionModel
@@ -148,9 +148,9 @@ class Window(QMainWindow):
         self.ToInitializeVisual = 1 # Should we visualize performance
         self.FigureUpdateTooSlow = 0# if the FigureUpdateTooSlow is true, using different process to update figures
         self.ANewTrial = 1          # permission to start a new trial
-        self.previous_backup_completed = 1   # permission to save backup data; 0, the previous saving has not finished, and it will not trigger the next saving; 1, it is allowed to save backup data
         self.UpdateParameters = 1   # permission to update parameters
         self.logging_type = -1    # -1, logging is not started; 0, temporary logging; 1, formal logging
+        self.previous_backup_completed = 1 # permission to save backup data; 0, the previous saving has not finished, and it will not trigger the next saving; 1, it is allowed to save backup data
         self.unsaved_data = False   # Setting unsaved data to False
         self.to_check_drop_frames = 1 # 1, to check drop frames during saving data; 0, not to check drop frames
         self.session_run = False    # flag to indicate if session has been run or not
@@ -201,6 +201,7 @@ class Window(QMainWindow):
         self.Other_manual_water_left_time=[] # the valve open time of manual water given by the left valve each time
         self.Other_manual_water_right_volume=[] # the volume of manual water given by the right valve each time
         self.Other_manual_water_right_time=[] # the valve open time of manual water given by the right valve each time
+
         self._Optogenetics()    # open the optogenetics panel
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
@@ -1065,6 +1066,10 @@ class Window(QMainWindow):
             pass
 
         self.logging_type=loggingtype # 0 for formal logging, 1 for temporary logging
+
+        # if we are starting a new logging, we should initialize/empty some fields
+        self._empty_initialize_fields()
+    
         return log_folder
 
     def _GetLaserCalibration(self):
@@ -1155,7 +1160,10 @@ class Window(QMainWindow):
     
         # Check if this is a valid project name
         if project_name not in self._GetApprovedAINDProjectNames():
-            logging.error('Project name {} is not valid, using default, please correct schedule'.format(project_name))
+            if project_name is not None:
+                logging.error('Project name {} is not valid, using default, please correct schedule'.format(project_name))
+            else:
+                logging.info('Project name {} is not valid, using default, please correct schedule'.format(project_name))
             project_name = None
 
         # If we have a valid name update the metadata dialog
@@ -1190,7 +1198,31 @@ class Window(QMainWindow):
             Load the settings that are specific to this computer
         '''
 
-        # Get default settings
+        # Try to load Settings_box#.csv
+        self.SettingsBox={}
+        if not os.path.exists(self.SettingsBoxFile):
+            logging.error('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
+            raise Exception('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
+        try:
+            # Open the csv settings file
+            df = pd.read_csv(self.SettingsBoxFile,index_col=None, header=None)
+            self.SettingsBox = {row[0]: row[1] for _, row in df.iterrows()}
+            logging.info('Loaded settings_box file')
+        except Exception as e:
+            logging.error('Could not load settings_box file at: {}, {}'.format(self.SettingsBoxFile,str(e)))
+            e.args = ('Could not load settings box file at: {}'.format(self.SettingsBoxFile), *e.args)
+            raise e
+
+        # check that there is a newline for final entry of csv files
+        if not self._check_line_terminator(self.SettingsBoxFile):
+            logging.error('Settings box file does not have a newline at the end')
+            raise Exception('Settings box file does not have a newline at the end')
+
+        # Validate Bonsai Settings file
+        BonsaiSettingsModel(**self.SettingsBox)
+        logging.info('Settings_box.csv file validated')
+
+        # Get default settings for ForagingSettings.JSON
         defaults = {
             'default_saveFolder':os.path.join(os.path.expanduser("~"), "Documents")+'\\',
             'current_box':'',
@@ -1201,9 +1233,28 @@ class Window(QMainWindow):
             'Teensy_COM_box4':'',
             'FIP_workflow_path':'',
             'FIP_settings':os.path.join(os.path.expanduser("~"),"Documents","FIPSettings"),
-            'bonsai_path':os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.exe'),
-            'bonsai_config_path':os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),'bonsai','Bonsai.config'),
-            'bonsaiworkflow_path':os.path.join(os.path.dirname(os.getcwd()),'workflows','foraging.bonsai'),
+            'bonsai_path':os.path.join(
+                os.path.expanduser("~"),
+                "Documents",
+                "Github",
+                "dynamic-foraging-task",
+                'bonsai',
+                'Bonsai.exe'),
+            'bonsai_config_path':os.path.join(
+                os.path.expanduser("~"),
+                "Documents",
+                "Github",
+                "dynamic-foraging-task",
+                'bonsai',
+                'Bonsai.config'),
+            'bonsaiworkflow_path':os.path.join(
+                os.path.expanduser("~"),
+                "Documents",
+                "Github",
+                "dynamic-foraging-task",
+                'src',
+                'workflows',
+                'foraging.bonsai'),
             'newscale_serial_num_box1':'',
             'newscale_serial_num_box2':'',
             'newscale_serial_num_box3':'',
@@ -1237,35 +1288,7 @@ class Window(QMainWindow):
             'add_default_project_name':True
         }
 
-        # Try to load Settings_box#.csv
-        self.SettingsBox={}
-        if not os.path.exists(self.SettingsBoxFile):
-            logging.error('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
-            raise Exception('Could not find settings_box file at: {}'.format(self.SettingsBoxFile))
-        try:
-            # Open the csv settings file
-            df = pd.read_csv(self.SettingsBoxFile,index_col=None, header=None)
-            self.SettingsBox = {row[0]: row[1] for _, row in df.iterrows()}
-            logging.info('Loaded settings_box file')
-        except Exception as e:
-            logging.error('Could not load settings_box file at: {}, {}'.format(self.SettingsBoxFile,str(e)))
-            e.args = ('Could not load settings box file at: {}'.format(self.SettingsBoxFile), *e.args)
-            raise e
-
-        # check that there is a newline for final entry of csv files
-        if not self._check_line_terminator(self.SettingsBoxFile):
-            logging.error('Settings box file does not have a newline at the end')
-            raise Exception('Settings box file does not have a newline at the end')
-
-        # check that the SettingsBox has each of the values in mandatory_fields as a key, if not log an error for the missing key
-
-        csv_mandatory_fields = ['Behavior', 'Soundcard', 'BonsaiOsc1', 'BonsaiOsc2', 'BonsaiOsc3', 'BonsaiOsc4','AttenuationLeft','AttenuationRight','current_box']
-        for field in csv_mandatory_fields:
-            if field not in self.SettingsBox.keys():
-                logging.error('Missing key ({}) in settings_box file'.format(field))
-                raise Exception('Missing key ({}) in settings_box file'.format(field))
-
-        # Try to load the settings file        
+        # Try to load the ForagingSettings.json file    
         self.Settings = {}
         if not os.path.exists(self.SettingFile):
             logging.error('Could not find settings file at: {}'.format(self.SettingFile))
@@ -1289,10 +1312,15 @@ class Window(QMainWindow):
                     logging.error('Missing setting ({}), is required'.format(key))
                     raise Exception('Missing setting ({}), is required'.format(key))
 
+        # Check that settings are valid
+        DFTSettingsModel(**self.Settings)
+        logging.info('ForagingSettings.json validated')
+
         if 'default_openFolder' not in self.Settings:
             self.Settings['default_openFolder'] = self.Settings['default_saveFolder']
 
         # Save all settings
+        # TODO, should always use the values in self.Settings[x], not self.x
         self.default_saveFolder=self.Settings['default_saveFolder']
         self.default_openFolder=self.Settings['default_openFolder']
         self.current_box=self.Settings['current_box']
@@ -1325,6 +1353,7 @@ class Window(QMainWindow):
         self.add_default_project_name = self.Settings['add_default_project_name']
         if not is_absolute_path(self.project_info_file):
             self.project_info_file = os.path.join(self.SettingFolder,self.project_info_file)
+
         # Also stream log info to the console if enabled
         if self.Settings['show_log_info_in_console']:
 
@@ -2135,7 +2164,7 @@ class Window(QMainWindow):
         self.ITIIncrease.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
         self._Randomness()
 
-        if self.behavior_session_model.experiment in ['Coupled Baiting','Coupled Without Baiting']:
+        if self.Task.currentText() in ['Coupled Baiting','Coupled Without Baiting']:
             self.label_6.setEnabled(True)
             self.label_7.setEnabled(True)
             self.label_8.setEnabled(True)
@@ -2179,7 +2208,7 @@ class Window(QMainWindow):
             self.AdvancedBlockAuto.setEnabled(True)
             self._AdvancedBlockAuto() # Update states of SwitchThr and PointsInARow
 
-        elif self.behavior_session_model.experiment in ['Uncoupled Baiting','Uncoupled Without Baiting']:
+        elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
             self.label_6.setEnabled(False)
             self.label_7.setEnabled(False)
             self.label_8.setEnabled(False)
@@ -2221,7 +2250,7 @@ class Window(QMainWindow):
             self.PointsInARow.setEnabled(False)
             self.BlockMinReward.setEnabled(False)
             self.IncludeAutoReward.setEnabled(False)
-        elif self.behavior_session_model.experiment in ['RewardN']:
+        elif self.Task.currentText() in ['RewardN']:
             self.label_6.setEnabled(True)
             self.label_7.setEnabled(True)
             self.label_8.setEnabled(True)
@@ -2505,7 +2534,7 @@ class Window(QMainWindow):
             SaveAs=0
             SaveContinue=1
             saving_type_label = 'backup saving'
-            behavior_data_field='GeneratedTrials_backup'
+            behavior_data_field='GeneratedTrials'
         elif ForceSave==1:
             saving_type_label = 'force saving'
             behavior_data_field='GeneratedTrials'
@@ -2969,13 +2998,15 @@ class Window(QMainWindow):
         logging.info('User input mouse id {}, which had no sessions on this computer'.format(mouse_id))
         return False, ''
 
-    def _OpenNewMouse(self, mouse_id):
+    def _OpenNewMouse(self, mouse_id,experimenter):
         '''
             Queries the user to start a new mouse
         '''
         reply = QMessageBox.question(self,
             'Box {}, Load mouse'.format(self.box_letter),
-            'No data for mouse <span style="color:purple;font-weight:bold">{}</span>, start new mouse?'.format(mouse_id),
+            'No data for mouse <span style="color:purple;font-weight:bold">{}</span>'.format(mouse_id) +\
+            '<br>Experimenter: {}<br>'.format(experimenter) +\
+            'start new mouse?',
             QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if reply == QMessageBox.No:
             logging.info('User declines to start new mouse: {}'.format(mouse_id))
@@ -2984,6 +3015,7 @@ class Window(QMainWindow):
         # Set ID, clear weight information
         logging.info('User starting a new mouse: {}'.format(mouse_id))
         self.ID.setText(mouse_id)
+        self.Experimenter.setText(experimenter)
         self.ID.returnPressed.emit()
         self.TargetRatio.setText('0.85')
         self.keyPressEvent(allow_reset=True)
@@ -2995,12 +3027,13 @@ class Window(QMainWindow):
         filepath = os.path.join(self.default_saveFolder,self.current_box)
         now = datetime.now()
         mouse_dirs = os.listdir(filepath)
-        mouse_dirs.sort(reverse=True, key=lambda x: os.path.getmtime(os.path.join(filepath, x)))   # in order of date modified
+        mouse_dirs.sort(reverse=True, key=lambda x: os.path.getmtime(os.path.join(filepath,x))) # in order of date modified
         mice = []
         experimenters = []
         for m in mouse_dirs:
             session_dir = os.path.join(self.default_saveFolder, self.current_box, str(m))
             sessions = os.listdir(session_dir)
+            sessions.sort(reverse=True)
             for s in sessions:
                 if 'behavior_' in s:
                     json_file = os.path.join(self.default_saveFolder,
@@ -3040,7 +3073,10 @@ class Window(QMainWindow):
                 if mouse_id not in mice:
                     # figureout out new Mouse
                     logging.info('User entered the ID for a mouse with no data: {}'.format(mouse_id))
-                    reply = self._OpenNewMouse(mouse_id)
+                    experimenter = self._GetInfoFromSchedule(mouse_id, 'Trainer')
+                    if experimenter is None:
+                        experimenter = self.behavior_session_model.experimenter[0]
+                    reply = self._OpenNewMouse(mouse_id,experimenter)
                     if reply != QMessageBox.No:     # user pressed yes
                         self.NewSession.setChecked(True)
                         self._NewSession()
@@ -3676,10 +3712,6 @@ class Window(QMainWindow):
 
         self.unsaved_data=False
         self.ManualWaterVolume=[0,0]
-        if hasattr(self, 'fiber_photometry_start_time'):
-            del self.fiber_photometry_start_time
-        if hasattr(self, 'fiber_photometry_end_time'):
-            del self.fiber_photometry_end_time
 
         # Clear Plots
         if hasattr(self, 'PlotM') and self.clear_figure_after_save:
@@ -3800,7 +3832,45 @@ class Window(QMainWindow):
             self.Metadata_dialog.project_info = project_info
             self.Metadata_dialog.ProjectName.addItems([project_name])
         return project_name
-                
+
+    def _empty_initialize_fields(self):
+        '''empty fields from the previous session'''
+        # empty the manual water volume
+        self.ManualWaterVolume=[0,0]
+        # delete open ephys data
+        self.open_ephys=[]
+        # set the flag to check drop frames
+        self.to_check_drop_frames=1
+        # empty the laser calibration
+        self.Opto_dialog.laser_1_calibration_voltage.setText('')
+        self.Opto_dialog.laser_2_calibration_voltage.setText('')
+        self.Opto_dialog.laser_1_calibration_power.setText('')
+        self.Opto_dialog.laser_2_calibration_power.setText('')
+
+        # clear camera start and end time
+        self.Camera_dialog.camera_start_time=''
+        self.Camera_dialog.camera_stop_time=''
+        
+        # clear fiber start and end time (this could be simplified after refactoring the photometry code)
+        if hasattr(self, 'fiber_photometry_end_time'):
+            self.fiber_photometry_end_time = ''
+        if not self.StartExcitation.isChecked():
+            self.fiber_photometry_start_time = ''
+        
+        # delete generate trials
+        if hasattr(self, 'GeneratedTrials'):
+            # delete GeneratedTrials
+            del self.GeneratedTrials
+
+        # delete the random reward 
+        if hasattr(self, 'RandomReward_dialog'):
+            self.RandomReward_dialog.random_reward_par={}
+            self.RandomReward_dialog.random_reward_par['RandomWaterVolume']=[0,0]
+            
+        # delete the optical tagging
+        if hasattr(self, 'OpticalTagging_dialog'):
+            self.OpticalTagging_dialog.optical_tagging_par={}
+        
     def _Start(self):
         '''start trial loop'''
 
@@ -3816,12 +3886,6 @@ class Window(QMainWindow):
             if reply == QMessageBox.No:
                 return
 
-        # empty the laser calibration
-        self.Opto_dialog.laser_1_calibration_voltage.setText('')
-        self.Opto_dialog.laser_2_calibration_voltage.setText('')
-        self.Opto_dialog.laser_1_calibration_power.setText('')
-        self.Opto_dialog.laser_2_calibration_power.setText('')
-
         # Check for Bonsai connection
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully==0:
@@ -3829,9 +3893,6 @@ class Window(QMainWindow):
             self.Start.setChecked(False)
             self.Start.setStyleSheet('background-color:none;')
             return
-
-        # set the flag to check drop frames
-        self.to_check_drop_frames=1
 
         # clear the session list
         self._connect_Sessionlist(connect=False)
@@ -4068,7 +4129,6 @@ class Window(QMainWindow):
             self._StopCurrentSession()
         # to see if we should start a new session
         if self.StartANewSession==1 and self.ANewTrial==1:
-            self.ManualWaterVolume=[0,0]
             # start a new logging
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
@@ -4159,7 +4219,7 @@ class Window(QMainWindow):
             workerGenerateAtrial.signals.finished.connect(self._thread_complete4)
             workerStartTrialLoop = Worker(self._StartTrialLoop,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
             workerStartTrialLoop1 = Worker(self._StartTrialLoop1,GeneratedTrials)
-            worker_save = Worker(self._Save,BackupSave=1)
+            worker_save = Worker(self._perform_backup,BackupSave=1)
             worker_save.signals.finished.connect(self._thread_complete6)
             self.worker1=worker1
             self.workerLick=workerLick
@@ -4168,6 +4228,7 @@ class Window(QMainWindow):
             self.workerStartTrialLoop=workerStartTrialLoop
             self.workerStartTrialLoop1=workerStartTrialLoop1
             self.worker_save=worker_save
+            self.data_lock = threading.Lock()
         else:
             PlotM=self.PlotM
             worker1=self.worker1
@@ -4354,23 +4415,12 @@ class Window(QMainWindow):
                 #generate a new trial
                 if self.NewTrialRewardOrder==1:
                     GeneratedTrials._GenerateATrial(self.Channel4)
-                '''
-                ### Save data in the main thread. Keep it temporarily for testing ### 
-                start_time = time.time()
-                self.previous_backup_completed=1
-                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
-                    self._Save(BackupSave=1)
-                # Record the end time
-                end_time = time.time()
-                # Calculate the time elapsed and log if it is too long
-                if end_time - start_time>1:
-                    logging.info(f"Time taken to backup the data is too long: {elapsed_time:.6f} seconds")
-                '''
+
                 # Save data in a separate thread
-                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
-                    self.previous_backup_completed=0
-                    self.GeneratedTrials_backup=copy.copy(self.GeneratedTrials)
-                    self.threadpool6.start(worker_save)
+                with self.data_lock:
+                    if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
+                        self.previous_backup_completed=0
+                        self.threadpool6.start(worker_save)
 
                 # show disk space
                 self._show_disk_space()
@@ -4415,6 +4465,14 @@ class Window(QMainWindow):
                     # User continues, wait another stall_duration and prompt again
                     logging.error('trial stalled {} minutes, user continued trials'.format(elapsed_time))
                     stall_iteration +=1
+
+    def _perform_backup(self,BackupSave):
+        # Backup save logic
+        with self.data_lock:
+            try:
+                self._Save(BackupSave=BackupSave)
+            except Exception as e:
+                logging.error('backup save failed: {}'.format(e))
 
     def bias_calculated(self, bias: float, trial_number: int) -> None:
         """
@@ -4706,7 +4764,7 @@ class Window(QMainWindow):
 
             modalities = {}
             modalities['behavior'] = [self.behavior_session_model.root_path.replace('\\', '/')]
-            if (self.Camera_dialog.camera_start_time != '') and (self.camera_names != []):
+            if (self.Camera_dialog.camera_start_time != ''):
                 modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
             if hasattr(self, 'fiber_photometry_start_time') and (self.fiber_photometry_start_time != ''): 
                 modalities['fib'] = [self.PhotometryFolder.replace('\\', '/')]

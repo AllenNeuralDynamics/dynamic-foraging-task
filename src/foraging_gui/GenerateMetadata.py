@@ -405,8 +405,9 @@ class generate_metadata:
     
         # Missing field Other_go_cue_decibel is not recorded in the behavior json file.
         # Possible reason: 1) the go cue decibel is not set in the foraging settings file. 2) old version of the software.
-        if 'Other_go_cue_decibel' not in self.Obj:
-            self.Obj['Other_go_cue_decibel'] = 60
+        if self.Obj.get('Other_go_cue_decibel', '') == '':
+            self.Obj['Other_go_cue_decibel'] = 74
+            logging.error('No go cue decibel recorded in the ForagingSettings.json file. Using default value of 74 dB')
 
         # Missing field 'fiber_photometry_start_time' and 'fiber_photometry_end_time' in the json file.
         # Possible reason: 1) the fiber photometry data is not recorded in the session. 2) the fiber photometry data is recorded but the start and end time are not recorded in the old version of the software.
@@ -496,6 +497,7 @@ class generate_metadata:
         self._get_water_calibration()
         self._get_opto_calibration()
         self.calibration=self.water_calibration+self.opto_calibration
+        self._get_behavior_software()
         self._get_behavior_stream()
         self._get_ephys_stream()
         self._get_ophys_stream()
@@ -630,6 +632,8 @@ class generate_metadata:
         if self.Obj['fiber_photometry_start_time']=='':
             logging.info('No photometry data stream detected!')
             return
+        if self.Obj['fiber_photometry_end_time'] == '':
+            self.Obj['fiber_photometry_end_time'] = str(datetime.now())
         self._get_photometry_light_sources_config()
         self._get_photometry_detectors()
         self._get_fiber_connections()
@@ -1076,7 +1080,6 @@ class generate_metadata:
             daq_names=self.name_mapper['rig_daq_names_janelia_lick_detector']
 
         self.behavior_streams=[]
-        self._get_behavior_software()
         self.behavior_streams.append(Stream(
                 stream_modalities=[Modality.BEHAVIOR],
                 stream_start_time=datetime.strptime(self.Obj['Other_SessionStartTime'], '%Y-%m-%d %H:%M:%S.%f'),
