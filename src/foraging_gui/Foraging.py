@@ -16,7 +16,6 @@ import logging_loki
 import socket
 import harp
 import threading
-import math
 import yaml
 import copy
 import shutil
@@ -3976,7 +3975,7 @@ class Window(QMainWindow):
                 self.workertimer.moveToThread(self.workertimer_thread)
                 self.workertimer_thread.start()
 
-            self.Time.emit(int(math.floor(self.fip_model.baseline_time * 60)))
+            self.Time.emit(int(np.floor(self.fip_model.baseline_time * 60)))
             logging.info('Running photometry baseline', extra={'tags': [self.warning_log_tag]})
 
         self._StartTrialLoop(GeneratedTrials, worker1, worker_save)
