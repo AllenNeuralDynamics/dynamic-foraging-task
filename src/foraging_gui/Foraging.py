@@ -4265,7 +4265,8 @@ class Window(QMainWindow):
         last_ci = self.GeneratedTrials.B_Bias_CI[-1]
         b_ci_len = len(self.GeneratedTrials.B_Bias_CI)
         ci_filler = [last_ci] * ((self.GeneratedTrials.B_CurrentTrialN + 1) - b_ci_len)
-        self.GeneratedTrials.B_Bias_CI = np.concatenate((self.GeneratedTrials.B_Bias_CI, ci_filler), axis=0)
+        if ci_filler != []:
+            self.GeneratedTrials.B_Bias_CI = np.concatenate((self.GeneratedTrials.B_Bias_CI, ci_filler), axis=0)
 
         # stop lick interval calculation
         self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
@@ -4499,9 +4500,10 @@ class Window(QMainWindow):
         # back-fill bias confidence interval list with previous bias CI
         last_ci_filler = [self.GeneratedTrials.B_Bias_CI[-1]] * (
                     self.GeneratedTrials.B_CurrentTrialN - len(self.GeneratedTrials.B_Bias_CI))
-        self.GeneratedTrials.B_Bias_CI = np.concatenate((self.GeneratedTrials.B_Bias_CI, last_ci_filler), axis=0)
-        self.GeneratedTrials.B_Bias_CI[trial_number - 1:] = confidence_interval # set last value to newest bias CI
-    
+        if last_ci_filler !=  []:
+            self.GeneratedTrials.B_Bias_CI = np.concatenate((self.GeneratedTrials.B_Bias_CI, last_ci_filler), axis=0)
+            self.GeneratedTrials.B_Bias_CI[trial_number - 1:] = confidence_interval # set last value to newest bias CI
+
     def _StartTrialLoop1(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         logging.info('starting trial loop 1')
         while self.Start.isChecked():
