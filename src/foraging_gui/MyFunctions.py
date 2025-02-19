@@ -1627,9 +1627,7 @@ class GenerateTrials():
                 # send the waveform size
                 Channel1.Location1_Size(int(self.Location1_Size))
                 Channel1.Location2_Size(int(self.Location2_Size))
-                print(self.CurrentLaserAmplitude)
                 for i in range(len(self.CurrentLaserAmplitude)):  # locations of these waveforms
-                    print(i, 'WaveForm' + str(1) + '_' + str(i + 1))
                     getattr(Channel4, 'WaveForm' + str(1) + '_' + str(i + 1))(
                         str(getattr(self, 'WaveFormLocation_' + str(i + 1)).tolist())[1:-1])
                 FinishOfWaveForm = Channel4.receive()
