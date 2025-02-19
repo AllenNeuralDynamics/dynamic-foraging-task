@@ -2454,6 +2454,8 @@ class Window(QMainWindow):
                     json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
             elif self.SaveFile.endswith('.json'):
                 with open(self.SaveFile, "w") as outfile:
+                    from pprint import pprint
+                    pprint(Obj)
                     json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
 
         # Toggle unsaved data to False
