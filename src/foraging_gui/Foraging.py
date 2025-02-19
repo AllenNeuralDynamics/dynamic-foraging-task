@@ -4263,7 +4263,7 @@ class Window(QMainWindow):
 
         # fill out GenerateTrials B_Bias_CI
         last_ci = self.GeneratedTrials.B_Bias_CI[-1]
-        b_ci_len = len(self.GeneratedTrials.B_Bias)
+        b_ci_len = len(self.GeneratedTrials.B_Bias_CI)
         ci_filler = [last_ci] * ((self.GeneratedTrials.B_CurrentTrialN + 1) - b_ci_len)
         self.GeneratedTrials.B_Bias_CI = np.concatenate((self.GeneratedTrials.B_Bias_CI, ci_filler), axis=0)
 
@@ -4501,7 +4501,7 @@ class Window(QMainWindow):
                     self.GeneratedTrials.B_CurrentTrialN - len(self.GeneratedTrials.B_Bias_CI))
         self.GeneratedTrials.B_Bias_CI = np.concatenate((self.GeneratedTrials.B_Bias_CI, last_ci_filler), axis=0)
         self.GeneratedTrials.B_Bias_CI[trial_number - 1:] = confidence_interval # set last value to newest bias CI
-
+    
     def _StartTrialLoop1(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         logging.info('starting trial loop 1')
         while self.Start.isChecked():
