@@ -4388,12 +4388,10 @@ class Window(QMainWindow):
                     # add data to bias_indicator
                     if not self.bias_thread.is_alive():
                         logger.debug('Starting bias thread.')
-                        self.bias_thread = threading.Thread(target=self.bias_indicator.calculate_bias,
+                        self.bias_thread = threading.Thread(target=self.calculate_bias,
                                                        kwargs={'trial_num': len(formatted_history),
                                                                'choice_history': choice_history,
-                                                               'reward_history': np.array(any_reward).astype(int),
-                                                               'n_trial_back': 5,
-                                                               'cv': 1})
+                                                               'reward_history': np.array(any_reward).astype(int)})
                         self.bias_thread.start()
                     else:
                         logger.debug('Skipping bias calculation as previous is still in progress. ')
@@ -4478,7 +4476,23 @@ class Window(QMainWindow):
         last_bias_filler = [self.GeneratedTrials.B_Bias[-1]]*(self.GeneratedTrials.B_CurrentTrialN-len(self.GeneratedTrials.B_Bias))
         self.GeneratedTrials.B_Bias = np.concatenate((self.GeneratedTrials.B_Bias, last_bias_filler), axis=0)
         self.GeneratedTrials.B_Bias[trial_number-1:] = bias
-    
+
+    def calculate_bias(self, trial_num: int, choice_history: np.ndarray, reward_history:np.ndarray):
+        """
+        Calculate bias based on lick data
+        :param trial_num: Trial number of currently at
+        :param choice_history: Choice history (0 = left choice, 1 = right choice).
+        :param reward_history: Reward history (0 = unrewarded, 1 = rewarded).
+        """
+
+        with self.data_lock:
+            self.bias_indicator.calculate_bias(trial_num= trial_num,
+                                               choice_history= choice_history,
+                                               reward_history= np.array(reward_history).astype(int),
+                                               n_trial_back= 5,
+                                               cv=1)
+
+
     def _StartTrialLoop1(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         logging.info('starting trial loop 1')
         while self.Start.isChecked():
