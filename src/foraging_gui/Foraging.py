@@ -4203,7 +4203,7 @@ class Window(QMainWindow):
             # clear bias indicator graph
             self.bias_indicator.clear()
             # create workers
-            worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.Channel,self.Channel3,self.Channel4)
+            worker1 = Worker(self.get_animal_response,self.Channel,self.Channel3,self.Channel4)
             worker1.signals.finished.connect(self._thread_complete)
             workerLick = Worker(GeneratedTrials._get_irregular_timestamp,self.Channel2)
             workerLick.signals.finished.connect(self._thread_complete2)
@@ -4465,6 +4465,13 @@ class Window(QMainWindow):
                 self._Save(BackupSave=BackupSave)
             except Exception as e:
                 logging.error('backup save failed: {}'.format(e))
+
+    def get_animal_response(self, channel1, channel3, channel4):
+        """
+        Data locking thread for update animal response data
+        """
+        with self.data_lock:
+            self.GeneratedTrials._GetAnimalResponse(channel1, channel3, channel4)
 
     def bias_calculated(self, bias: float, trial_number: int) -> None:
         """
