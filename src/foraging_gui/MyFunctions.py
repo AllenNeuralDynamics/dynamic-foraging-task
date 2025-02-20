@@ -622,7 +622,8 @@ class GenerateTrials():
 
         B_RewardedHistory = self.B_RewardedHistory.copy()
         if CountAutoWater == 1:
-            if self.task_logic.task_parameters.auto_water.include_reward:
+            if self.task_logic.task_parameters.auto_water is not None and \
+                    self.task_logic.task_parameters.auto_water.include_reward:
                 # auto reward is considered as reward no matter the animal's choice. B_RewardedHistory and B_AutoWaterTrial cannot both be True
                 Ind = range(len(self.B_RewardedHistory[0]))
                 for i in range(len(self.B_RewardedHistory)):
