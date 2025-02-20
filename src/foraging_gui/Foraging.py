@@ -3036,8 +3036,7 @@ class Window(QMainWindow):
                             experimenters.append(name)
                             break
                         except:
-                            logging.error('No Experimenter key in {}'.format(json_file))
-                            print('No Experimenter key in {}'.format(json_file))
+                            logging.info('No Experimenter key in {}'.format(json_file))
         dates = [datetime.fromtimestamp(os.path.getmtime(os.path.join(filepath, path))) for path in mouse_dirs]
         two_week = [mouse_dir for mouse_dir, mod_date in zip(mice, dates) if (now - mod_date).days <= 14]
         return mice, experimenters, two_week
