@@ -331,12 +331,12 @@ class GenerateTrials():
                 self.BaitPermitted = True
             else:
                 self.BaitPermitted = False
+                logging.warning(f'The active side has no reward due to consecutive \n selections({MaxCLen})< '
+                                f'{self.task_logic.task_parameters.reward_n.initial_inactive_trials}',
+                                extra={'tags': [self.win.warning_log_tag]})
         else:
             self.BaitPermitted = True
-        if self.BaitPermitted == False:
-            logging.warning('The active side has no reward due to consecutive \nselections('+str(MaxCLen)+')<'+
-                            self.task_logic.task_parameters.reward_n.initial_inactive_trials,
-                            extra={'tags': [self.win.warning_log_tag]})
+
 
     def _GetMaximumConSelection(self):
         '''get the maximum consecutive selection of the active side of the current block'''
