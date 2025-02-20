@@ -4314,7 +4314,7 @@ class Window(QMainWindow):
         time.sleep(0.01)
         getattr(self.Channel3, f"ManualWater_{valve.title()}")(int(1))
         time.sleep(0.01 + reserve / 1000)
-        getattr(self.Channel, f"{valve}Value")(float(open_time_s * 1000))
+        getattr(self.Channel, f"{valve.title()}Value")(float(open_time_s * 1000))
         index = 0 if valve == "Left" else 1
         self.ManualWaterVolume[index] = self.ManualWaterVolume[index] + volume / 1000
         getattr(self, f"Other_manual_water_{valve.lower()}_volume").append(volume)
