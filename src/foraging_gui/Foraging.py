@@ -16,13 +16,10 @@ import logging_loki
 import socket
 import harp
 import threading
-from random import randint
 import yaml
-import copy
 import shutil
 from pathlib import Path
 from datetime import date, datetime, timezone, timedelta
-import csv
 from aind_slims_api import SlimsClient
 from aind_slims_api import models
 import serial
@@ -382,11 +379,10 @@ class Window(QMainWindow):
         uic.loadUi(self.default_ui, self)
         if self.default_ui == 'ForagingGUI.ui':
             logging.info('Using ForagingGUI.ui interface')
-            # self.label_date.setText(str(date.today()))
-            self.default_warning_color = "purple"
-            self.default_text_color = "purple"
-            self.default_text_background_color = 'purple'
-        elif self.default_ui == 'ForagingGUI_Ephys.ui':
+            self.default_warning_color="purple"
+            self.default_text_color="purple"
+            self.default_text_background_color='purple'
+        elif self.default_ui=='ForagingGUI_Ephys.ui':
             logging.info('Using ForagingGUI_Ephys.ui interface')
             self.Visualization.setTitle(str(date.today()))
             self.default_warning_color = "red"

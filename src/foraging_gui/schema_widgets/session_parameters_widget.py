@@ -7,7 +7,7 @@ from PyQt5.QtGui import QIntValidator
 class SessionParametersWidget(SchemaWidgetBase):
 
     """
-    Widget to expose task logic for fiber photometry sessions
+    Widget to expose fields from session models
     """
 
     def __init__(self, schema: AindBehaviorSessionModel):
