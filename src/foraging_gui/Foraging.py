@@ -2291,6 +2291,10 @@ class Window(QMainWindow):
                     if attr_name.startswith('B_') or attr_name.startswith('BS_'):
                         if attr_name == 'B_RewardFamilies' and self.SaveFile.endswith('.mat'):
                             pass
+                        elif attr_name == 'B_SelectedCondition':
+                            B_SelectedCondition = getattr(getattr(self, behavior_data_field), attr_name)
+                            Obj['B_SelectedCondition'] = [laser.model_dump_json() if BaseModel in type(laser).__mro__
+                                                          else laser for laser in B_SelectedCondition]
                         else:
                             Value = getattr(getattr(self, behavior_data_field), attr_name)
                             try:

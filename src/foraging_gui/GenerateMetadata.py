@@ -966,7 +966,7 @@ class generate_metadata:
 
         for laser in self.opto_model.laser_colors:
             for location in laser.location:
-                key = f"{{'color': '{laser.color}', 'laser_tag': {num_map.index(location.name)}}}"
+                key = f"{{'color': '{laser.color}', 'laser_tag': {num_map.index(location.name)+1}}}"
                 self.light_names_used_in_session.append(invert_laser_mapper[key])
 
     def _get_ephys_stream(self):
