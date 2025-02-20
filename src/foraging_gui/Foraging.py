@@ -3039,11 +3039,14 @@ class Window(QMainWindow):
                     json_file = os.path.join(self.default_saveFolder,
                         self.current_box, str(m), s,'behavior',s.split('behavior_')[1]+'.json')
                     if os.path.isfile(json_file):
-                        with open(json_file, 'r') as file:
-                            name = json.load(file)["Experimenter"]
-                        mice.append(m)
-                        experimenters.append(name)
-                        break
+                        try:
+                            with open(json_file, 'r') as file:
+                                name = json.load(file)["Experimenter"]
+                            mice.append(m)
+                            experimenters.append(name)
+                            break
+                        except:
+                            logging.info('No Experimenter key in {}'.format(json_file))
         dates = [datetime.fromtimestamp(os.path.getmtime(os.path.join(filepath, path))) for path in mouse_dirs]
         two_week = [mouse_dir for mouse_dir, mod_date in zip(mice, dates) if (now - mod_date).days <= 14]
         return mice, experimenters, two_week
