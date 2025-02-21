@@ -4196,7 +4196,7 @@ class Window(QMainWindow):
             # clear bias indicator graph
             self.bias_indicator.clear()
             # create workers
-            worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.Channel,self.Channel3,self.Channel4)
+            worker1 = Worker(self.get_animal_response,self.Channel,self.Channel3,self.Channel4)
             worker1.signals.finished.connect(self._thread_complete)
             workerLick = Worker(GeneratedTrials._get_irregular_timestamp,self.Channel2)
             workerLick.signals.finished.connect(self._thread_complete2)
@@ -4412,12 +4412,10 @@ class Window(QMainWindow):
                     # add data to bias_indicator
                     if not self.bias_thread.is_alive():
                         logger.debug('Starting bias thread.')
-                        self.bias_thread = threading.Thread(target=self.bias_indicator.calculate_bias,
+                        self.bias_thread = threading.Thread(target=self.calculate_bias,
                                                        kwargs={'trial_num': len(formatted_history),
                                                                'choice_history': choice_history,
-                                                               'reward_history': np.array(any_reward).astype(int),
-                                                               'n_trial_back': 5,
-                                                               'cv': 1})
+                                                               'reward_history': np.array(any_reward).astype(int)})
                         self.bias_thread.start()
                     else:
                         logger.debug('Skipping bias calculation as previous is still in progress. ')
@@ -4492,6 +4490,13 @@ class Window(QMainWindow):
             except Exception as e:
                 logging.error('backup save failed: {}'.format(e))
 
+    def get_animal_response(self, channel1, channel3, channel4):
+        """
+        Data locking thread for update animal response data
+        """
+        with self.data_lock:
+            self.GeneratedTrials._GetAnimalResponse(channel1, channel3, channel4)
+
     def bias_calculated(self, bias: float, confidence_interval: list[float, float], trial_number: int) -> None:
         """
         Function to update GeneratedTrials.B_Bias and Bias attribute when new bias value is calculated
@@ -4512,6 +4517,24 @@ class Window(QMainWindow):
         if last_ci_filler !=  []:
             self.GeneratedTrials.B_Bias_CI = np.concatenate((self.GeneratedTrials.B_Bias_CI, last_ci_filler), axis=0)
             self.GeneratedTrials.B_Bias_CI[trial_number - 1:] = confidence_interval # set last value to newest bias CI
+
+        self.GeneratedTrials.B_Bias[trial_number-1:] = bias
+
+    def calculate_bias(self, trial_num: int, choice_history: np.ndarray, reward_history:np.ndarray):
+        """
+        Calculate bias based on lick data
+        :param trial_num: Trial number of currently at
+        :param choice_history: Choice history (0 = left choice, 1 = right choice).
+        :param reward_history: Reward history (0 = unrewarded, 1 = rewarded).
+        """
+
+        with self.data_lock:
+            self.bias_indicator.calculate_bias(trial_num= trial_num,
+                                               choice_history= choice_history,
+                                               reward_history= np.array(reward_history).astype(int),
+                                               n_trial_back= 5,
+                                               cv=1)
+
 
     def _StartTrialLoop1(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         logging.info('starting trial loop 1')
