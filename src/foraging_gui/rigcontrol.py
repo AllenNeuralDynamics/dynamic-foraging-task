@@ -65,8 +65,8 @@ class RigClient:
     def receive2(self):
         return self.msgs.get(block=False)
 
-    def TriggerGoCue(self):
-        self.send("/TriggerGoCue", True)
+    def TriggerGoCue(self, value):
+        self.send("/TriggerGoCue", value)
 
     def Left_Bait(self, value):
         self.send("/Left_Bait", value)
