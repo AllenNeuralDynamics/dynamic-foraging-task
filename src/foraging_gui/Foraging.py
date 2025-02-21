@@ -2410,6 +2410,8 @@ class Window(QMainWindow):
         Convenience function to play tone
         """
 
+        self.Channel3.TriggerGoCue(1)
+
 
     def _Metadata(self):
         '''Open the metadata dialog'''
