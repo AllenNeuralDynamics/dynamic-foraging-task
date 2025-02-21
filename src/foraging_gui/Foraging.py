@@ -2411,7 +2411,7 @@ class Window(QMainWindow):
         """
 
         self.Channel3.TriggerGoCue(1)
-
+        self.Channel3.receive() # clear buffer
 
     def _Metadata(self):
         '''Open the metadata dialog'''
