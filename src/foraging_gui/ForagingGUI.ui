@@ -5002,6 +5002,7 @@ Current pair:
    </attribute>
    <addaction name="action_Optogenetics"/>
    <addaction name="action_Camera"/>
+   <addaction name="action_Sound"/>
   </widget>
   <action name="action_Calibration">
    <property name="checkable">
@@ -5013,6 +5014,12 @@ Current pair:
    </property>
    <property name="text">
     <string>Water Calibration</string>
+   </property>
+  </action>
+  <action name="action_Sound">
+   <property name="icon">
+    <iconset>
+     <normaloff>resources/speaker.png</normaloff>resources/speaker.png</iconset>
    </property>
   </action>
   <action name="action_Camera">

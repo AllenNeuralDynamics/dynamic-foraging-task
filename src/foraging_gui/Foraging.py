@@ -316,6 +316,7 @@ class Window(QMainWindow):
         '''Define callbacks'''
         self.action_About.triggered.connect(self._about)
         self.action_Camera.triggered.connect(self._Camera)
+        self.action_Sound.triggered.connect(self.play_beep)
         self.actionMeta_Data.triggered.connect(self._Metadata)
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
         self.actionLicks_sta.triggered.connect(self._LickSta)
@@ -2403,6 +2404,12 @@ class Window(QMainWindow):
             self.Camera_dialog.show()
         else:
             self.Camera_dialog.hide()
+
+    def play_beep(self):
+        """
+        Convenience function to play tone
+        """
+
 
     def _Metadata(self):
         '''Open the metadata dialog'''
