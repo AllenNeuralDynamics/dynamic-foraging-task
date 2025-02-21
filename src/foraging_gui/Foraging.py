@@ -4067,7 +4067,7 @@ class Window(QMainWindow):
                     return
 
             # disable sound button
-            self.action_Sound.setEnabled(True)
+            self.action_Sound.setEnabled(False)
 
             # empty post weight after pass through checks in case user cancels run
             self.WeightAfter.setText('')
@@ -4301,6 +4301,7 @@ class Window(QMainWindow):
         with open(self.behavior_session_modelJson, "w") as outfile:
             outfile.write(self.behavior_session_model.model_dump_json())
 
+        self.action_Sound.setEnabled(True)
 
     def log_session(self) -> None:
         """
