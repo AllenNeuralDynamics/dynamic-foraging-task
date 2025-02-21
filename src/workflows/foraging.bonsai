@@ -1565,8 +1565,8 @@
                     <Name>TriggerGoCue</Name>
                   </Expression>
                   <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="IntProperty">
-                      <Value>1</Value>
+                    <Combinator xsi:type="BooleanProperty">
+                      <Value>true</Value>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="MulticastSubject">
