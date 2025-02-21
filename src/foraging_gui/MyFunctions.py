@@ -28,7 +28,8 @@ class GenerateTrials():
         self.B_LeftLickIntervalPercent = None      # percentage of left lick intervals under 100ms
         self.B_RightLickIntervalPercent = None     # percentage of right lick intervals under 100ms
         self.B_CrossSideIntervalPercent = None     # percentage of cross side lick intervals under 100ms
-        self.B_Bias =np.array([0], dtype=np.float64)  # lick bias
+        self.B_Bias = np.array([0], dtype=np.float64)  # lick bias
+        self.B_Bias_CI = np.array([[0, 0]], dtype=np.float64)  # lick bias confidence intervals
         self.B_RewardFamilies=self.win.RewardFamilies
         self.B_CurrentTrialN=-1 # trial number starts from 0; Update when trial starts
         self.B_LickPortN=2
@@ -289,6 +290,7 @@ class GenerateTrials():
             self.win.keyPressEvent()
             self.win.NextBlock.setChecked(True)
             self.win._NextBlock()
+            self.win.UpdateParameters=1
             logging.info('Warm up is turned off', extra={'tags': [self.win.warning_log_tag]})
 
     def _get_warmup_state(self):
@@ -1216,6 +1218,8 @@ class GenerateTrials():
                 self.fip_stop_timer = QtCore.QTimer(timeout=self.win._StartExcitation, interval=5000)
                 self.fip_stop_timer.setSingleShot(True)
                 self.fip_stop_timer.start()
+
+            self.win.session_end_tasks()
 
     def _CheckAutoWater(self):
         '''Check if it should be an auto water trial'''
