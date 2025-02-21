@@ -4121,23 +4121,7 @@ class Window(QMainWindow):
                     # so we set the text to get ignored as well
                     self.workertimer._stop()
 
-            # fill out GenerateTrials B_Bias
-            last_bias = self.GeneratedTrials.B_Bias[-1]
-            b_bias_len = len(self.GeneratedTrials.B_Bias)
-            bias_filler = [last_bias]*((self.GeneratedTrials.B_CurrentTrialN+1)-b_bias_len)
-            self.GeneratedTrials.B_Bias = np.concatenate((self.GeneratedTrials.B_Bias, bias_filler), axis=0)
-
-            # stop lick interval calculation
-            self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
-
-            # validate behavior session model and document validation errors if any
-            try:
-                AindBehaviorSessionModel(**self.behavior_session_model.model_dump())
-            except ValidationError as e:
-                logging.error(str(e), extra={'tags': [self.warning_log_tag]})
-            # save behavior session model
-            with open(self.behavior_session_modelJson, "w") as outfile:
-                outfile.write(self.behavior_session_model.model_dump_json())
+            self.session_end_tasks()
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
@@ -4224,7 +4208,7 @@ class Window(QMainWindow):
             # clear bias indicator graph
             self.bias_indicator.clear()
             # create workers
-            worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.Channel,self.Channel3,self.Channel4)
+            worker1 = Worker(self.get_animal_response,self.Channel,self.Channel3,self.Channel4)
             worker1.signals.finished.connect(self._thread_complete)
             workerLick = Worker(GeneratedTrials._get_irregular_timestamp,self.Channel2)
             workerLick.signals.finished.connect(self._thread_complete2)
@@ -4286,6 +4270,37 @@ class Window(QMainWindow):
                 self.PlotM._Update(GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
             except Exception as e:
                 logging.error(traceback.format_exc())
+
+    def session_end_tasks(self):
+        """
+        Data cleanup and saving that needs to be done at end of session.
+        """
+
+        # fill out GenerateTrials B_Bias
+        last_bias = self.GeneratedTrials.B_Bias[-1]
+        b_bias_len = len(self.GeneratedTrials.B_Bias)
+        bias_filler = [last_bias] * ((self.GeneratedTrials.B_CurrentTrialN + 1) - b_bias_len)
+        self.GeneratedTrials.B_Bias = np.concatenate((self.GeneratedTrials.B_Bias, bias_filler), axis=0)
+
+        # fill out GenerateTrials B_Bias_CI
+        last_ci = self.GeneratedTrials.B_Bias_CI[-1]
+        b_ci_len = len(self.GeneratedTrials.B_Bias_CI)
+        ci_filler = [last_ci] * ((self.GeneratedTrials.B_CurrentTrialN + 1) - b_ci_len)
+        if ci_filler != []:
+            self.GeneratedTrials.B_Bias_CI = np.concatenate((self.GeneratedTrials.B_Bias_CI, ci_filler), axis=0)
+
+        # stop lick interval calculation
+        self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
+
+        # validate behavior session model and document validation errors if any
+        try:
+            AindBehaviorSessionModel(**self.behavior_session_model.model_dump())
+        except ValidationError as e:
+            logging.error(str(e), extra={'tags': [self.warning_log_tag]})
+        # save behavior session model
+        with open(self.behavior_session_modelJson, "w") as outfile:
+            outfile.write(self.behavior_session_model.model_dump_json())
+
 
     def log_session(self) -> None:
         """
@@ -4409,12 +4424,10 @@ class Window(QMainWindow):
                     # add data to bias_indicator
                     if not self.bias_thread.is_alive():
                         logger.debug('Starting bias thread.')
-                        self.bias_thread = threading.Thread(target=self.bias_indicator.calculate_bias,
+                        self.bias_thread = threading.Thread(target=self.calculate_bias,
                                                        kwargs={'trial_num': len(formatted_history),
                                                                'choice_history': choice_history,
-                                                               'reward_history': np.array(any_reward).astype(int),
-                                                               'n_trial_back': 5,
-                                                               'cv': 1})
+                                                               'reward_history': np.array(any_reward).astype(int)})
                         self.bias_thread.start()
                     else:
                         logger.debug('Skipping bias calculation as previous is still in progress. ')
@@ -4489,17 +4502,52 @@ class Window(QMainWindow):
             except Exception as e:
                 logging.error('backup save failed: {}'.format(e))
 
-    def bias_calculated(self, bias: float, trial_number: int) -> None:
+    def get_animal_response(self, channel1, channel3, channel4):
+        """
+        Data locking thread for update animal response data
+        """
+        with self.data_lock:
+            self.GeneratedTrials._GetAnimalResponse(channel1, channel3, channel4)
+
+    def bias_calculated(self, bias: float, confidence_interval: list[float, float], trial_number: int) -> None:
         """
         Function to update GeneratedTrials.B_Bias and Bias attribute when new bias value is calculated
         :param bias: bias value
+        :param confidence_interval: confidence interval of bias
         :param trial_number: trial number at which bias value was calculated
         """
         self.B_Bias_R = bias
-        last_bias_filler = [self.GeneratedTrials.B_Bias[-1]]*(self.GeneratedTrials.B_CurrentTrialN-len(self.GeneratedTrials.B_Bias))
+        # back-fill bias list with previous bias
+        last_bias_filler = [self.GeneratedTrials.B_Bias[-1]]*(
+                self.GeneratedTrials.B_CurrentTrialN-len(self.GeneratedTrials.B_Bias))
         self.GeneratedTrials.B_Bias = np.concatenate((self.GeneratedTrials.B_Bias, last_bias_filler), axis=0)
+        self.GeneratedTrials.B_Bias[trial_number-1:] = bias # set last value to newest bias
+
+        # back-fill bias confidence interval list with previous bias CI
+        last_ci_filler = [self.GeneratedTrials.B_Bias_CI[-1]] * (
+                    self.GeneratedTrials.B_CurrentTrialN - len(self.GeneratedTrials.B_Bias_CI))
+        if last_ci_filler !=  []:
+            self.GeneratedTrials.B_Bias_CI = np.concatenate((self.GeneratedTrials.B_Bias_CI, last_ci_filler), axis=0)
+            self.GeneratedTrials.B_Bias_CI[trial_number - 1:] = confidence_interval # set last value to newest bias CI
+
         self.GeneratedTrials.B_Bias[trial_number-1:] = bias
-    
+
+    def calculate_bias(self, trial_num: int, choice_history: np.ndarray, reward_history:np.ndarray):
+        """
+        Calculate bias based on lick data
+        :param trial_num: Trial number of currently at
+        :param choice_history: Choice history (0 = left choice, 1 = right choice).
+        :param reward_history: Reward history (0 = unrewarded, 1 = rewarded).
+        """
+
+        with self.data_lock:
+            self.bias_indicator.calculate_bias(trial_num= trial_num,
+                                               choice_history= choice_history,
+                                               reward_history= np.array(reward_history).astype(int),
+                                               n_trial_back= 5,
+                                               cv=1)
+
+
     def _StartTrialLoop1(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         logging.info('starting trial loop 1')
         while self.Start.isChecked():
