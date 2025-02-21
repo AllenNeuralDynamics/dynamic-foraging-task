@@ -4066,6 +4066,9 @@ class Window(QMainWindow):
                     self.Start.setChecked(False)
                     return
 
+            # disable sound button
+            self.action_Sound.setEnabled(True)
+
             # empty post weight after pass through checks in case user cancels run
             self.WeightAfter.setText('')
 
