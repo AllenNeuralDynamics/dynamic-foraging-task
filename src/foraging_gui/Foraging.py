@@ -2412,8 +2412,7 @@ class Window(QMainWindow):
 
         self.Channel3.TriggerGoCue(1)
         # clear messages
-        while not self.Channel.msgs.empty():
-            self.Channel.receive()
+        self.Channel.receive()
         # while not self.Channel2.msgs.empty():
         #     self.Channel2.receive()
         # while not self.Channel3.msgs.empty():
