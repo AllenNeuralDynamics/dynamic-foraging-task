@@ -2413,7 +2413,7 @@ class Window(QMainWindow):
         self.Channel3.TriggerGoCue(1)
         # clear messages
         self.Channel.receive()
-      
+
     def _Metadata(self):
         '''Open the metadata dialog'''
         if self.OpenMetadata==0:
@@ -3704,6 +3704,7 @@ class Window(QMainWindow):
             self.WeightAfter.setText('')
 
         # Reset GUI visuals
+        self.action_Sound.setEnabled(True)
         self.Save.setStyleSheet("color:black;background-color:None;")
         self.NewSession.setStyleSheet("background-color : green;")
         self.NewSession.setChecked(False)
@@ -4301,8 +4302,6 @@ class Window(QMainWindow):
         # save behavior session model
         with open(self.behavior_session_modelJson, "w") as outfile:
             outfile.write(self.behavior_session_model.model_dump_json())
-
-        self.action_Sound.setEnabled(True)
 
     def log_session(self) -> None:
         """
