@@ -2411,8 +2411,15 @@ class Window(QMainWindow):
         """
 
         self.Channel3.TriggerGoCue(1)
-        #self.Channel3.receive() # clear buffer
-
+        # clear messages
+        while not self.Channel.msgs.empty():
+            self.Channel.receive()
+        while not self.Channel2.msgs.empty():
+            self.Channel2.receive()
+        while not self.Channel3.msgs.empty():
+            self.Channel3.receive()
+        while not self.Channel4.msgs.empty():
+            self.Channel4.receive()
     def _Metadata(self):
         '''Open the metadata dialog'''
         if self.OpenMetadata==0:
