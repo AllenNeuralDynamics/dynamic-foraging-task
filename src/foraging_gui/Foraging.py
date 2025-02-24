@@ -320,7 +320,6 @@ class Window(QMainWindow):
         # create QTimer to deliver constant tone
         self.beep_loop = QtCore.QTimer(timeout=self.play_beep, interval=100)
         self.action_Sound.toggled.connect(lambda checked: self.beep_loop.start() if checked else self.beep_loop.stop())
-        self.action_Sound.toggled.connect(print)
 
         self.actionMeta_Data.triggered.connect(self._Metadata)
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
