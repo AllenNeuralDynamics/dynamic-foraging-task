@@ -5017,6 +5017,9 @@ Current pair:
    </property>
   </action>
   <action name="action_Sound">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>resources/speaker.png</normaloff>resources/speaker.png</iconset>
