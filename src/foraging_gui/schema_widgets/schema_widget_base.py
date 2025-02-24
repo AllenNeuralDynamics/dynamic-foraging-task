@@ -27,8 +27,8 @@ from typing import Literal
 import logging
 import typing
 
-
 TYPE_MAP = {'string': str, "number": float, "integer": int, "boolean": bool, "array": list, "null": None}
+
 
 class SchemaWidgetBase(QMainWindow):
     ValueChangedOutside = pyqtSignal((str,))
@@ -50,7 +50,7 @@ class SchemaWidgetBase(QMainWindow):
         self.setCentralWidget(widget)
         self.ValueChangedOutside[str].connect(self.update_field_widget)  # Trigger update when property value changes
 
-    def create_field_widgets(self, fields: dict,  layout: QFieldVBoxLayout or QFieldHBoxLayout) -> None:
+    def create_field_widgets(self, fields: dict, layout: QFieldVBoxLayout or QFieldHBoxLayout) -> None:
         """
         Create input widgets based on properties
         :param fields: dictionary containing properties within a class and mapping to values
@@ -60,7 +60,7 @@ class SchemaWidgetBase(QMainWindow):
 
         for name, json_schema in fields.items():
             name_lst = name.split(".")
-            value = self.path_get(self.schema, name_lst)
+            value = self.get_value(name_lst, json_schema)
             arg_type = TYPE_MAP[json_schema.get("type", "null")]
 
             # create groupbox and corresponding layout to use if json schema outline an object or list
@@ -69,9 +69,9 @@ class SchemaWidgetBase(QMainWindow):
             field_layout = QFieldVBoxLayout()
 
             if arg_type is not None:
-                layout.addWidget(QLabel(label_maker(name_lst[-1])))
                 # Create combo boxes if there are preset options
                 if "enum" in json_schema.keys():
+                    layout.addWidget(QLabel(label_maker(name_lst[-1])), attr_name=f"{name_lst[-1]}_label")
                     layout.addWidget(self.create_attribute_widget(name, "combo", json_schema["enum"]),
                                      attr_name=name_lst[-1])
 
@@ -81,45 +81,50 @@ class SchemaWidgetBase(QMainWindow):
                     self.create_field_widgets({f"{name}.{i}": json_schema["items"] for i, v in
                                                enumerate(value)}, field_layout)
 
-                else:   # If no found options, create an editable text box or checkbox
+                else:  # If no found options, create an editable text box or checkbox
+                    layout.addWidget(QLabel(label_maker(name_lst[-1])), attr_name=f"{name_lst[-1]}_label")
                     box_type = 'text' if bool not in type(value).__mro__ else 'check'
                     layout.addWidget(self.create_attribute_widget(name, box_type, value), attr_name=name_lst[-1],
                                      )
 
             elif "$ref" in json_schema.keys():  # deal with dict like variables
                 ref = self.path_get(self.model_json_schema, json_schema["$ref"].split("/")[1:])
-                value = {name: ref} if "properties" not in ref.keys() else \
-                    {f"{name}.{k}": v for k, v in ref["properties"].items()}
-                # create vertical layout
-                field_layout = QFieldVBoxLayout()
-                setattr(self, name, field_layout)
-                self.__annotations__[name] = QFieldVBoxLayout  # add to class annotations
-                self.create_field_widgets(value, field_layout)
+                if "properties" in ref.keys():
+                    # create vertical layout
+                    field_layout = QFieldVBoxLayout()
+                    setattr(self, name, field_layout)
+                    self.__annotations__[name] = QFieldVBoxLayout  # add to class annotations
+                    self.create_field_widgets({f"{name}.{k}": v for k, v in ref["properties"].items()}, field_layout)
+                else:
+                    self.create_field_widgets({name: ref}, layout)
 
             elif "anyOf" in json_schema.keys():
-                setattr(self, name, field_layout)
-                for types in json_schema["anyOf"]:
-                    if types != {'type': 'null'}:
-                        radio_button = QRadioButton()
-                        #field_layout.insertWidget(0, radio_button)
-                        self.create_field_widgets({f"{name}": types}, field_layout)
+                # handle optional types
+                if len(json_schema["anyOf"]) == 2 and {'type': 'null'} in json_schema["anyOf"]:
+                    radio_button = QRadioButton()
+                    layout.addWidget(radio_button, attr_name=f"{name_lst[0]}_radio")
+                    self.create_field_widgets({f"{name}": json_schema["anyOf"][0]}, layout)
+                else:
+                    setattr(self, name, field_layout)
+                    for types in json_schema["anyOf"]:
+                        if types != {'type': 'null'}:
+                            radio_button = QRadioButton()
+                            field_layout.insertWidget(0, radio_button)
+                            self.create_field_widgets({f"{name}": types}, field_layout)
 
-                # if {'type': 'null'} in possible_values:
-                #     # enable/disable widget
-                #     checkbox = QCheckBox()
-                #     setattr(self, f"{name}_checkbox", checkbox)
-                #     self.__annotations__[name] = QCheckBox  # add to class annotations
-                #     checkbox.setChecked(True if value is None else False)
-                #     checkbox.toggled.connect(lambda s: self.toggle_optional_field(name, s, AutoWater()))
-                #     layout.insertWidget(0, checkbox)
-
-                #print(name, json_schema["anyOf"])
             if field_layout.count() != 0:
                 groupbox.setLayout(field_layout)
                 layout.addWidget(groupbox)
 
-
         return layout
+
+    def get_value(self, name_lst: list, json_schema: dict):
+        """
+        Create a value for schema input
+        """
+
+        print(name_lst, json_schema)
+        return self.path_get(self.schema, name_lst)
 
     def toggle_optional_field(self, name: str, enabled: bool, value) -> None:
         """
@@ -172,7 +177,7 @@ class SchemaWidgetBase(QMainWindow):
         """
 
         name_lst = name.split(".")
-        value = value if value else getattr(self, name + "_widget").text()
+        value = value if value else self.path_get(self, name_lst).text()
         self.path_set(self.schema, name_lst, value)
         self.ValueChangedInside.emit(name)
 
@@ -222,7 +227,7 @@ class SchemaWidgetBase(QMainWindow):
 
         name_lst = name.split(".")
         value_type = type(self.path_get(self.schema, name_lst))
-        value = value_type[value] if type(value_type) == enum.EnumMeta else value_type(value)
+        value = value_type[value] if enum in value_type.__mro__ else value_type(value)
         self.path_set(self.schema, name_lst, value)
         self.ValueChangedInside.emit(name)
 
@@ -230,7 +235,8 @@ class SchemaWidgetBase(QMainWindow):
         """Update property widget. Triggers when attribute has been changed outside of widget
         :param name: name of attribute and widget"""
         value = self.path_get(self.schema, name.split("."))
-        if dict not in type(value).__mro__ and list not in type(value).__mro__ and BaseModel not in type(value).__mro__:  # not a dictionary or list like value
+        if dict not in type(value).__mro__ and list not in type(value).__mro__ and BaseModel not in type(
+                value).__mro__:  # not a dictionary or list like value
             self._set_widget_text(name, value)
         elif dict in type(value).__mro__ or BaseModel in type(value).__mro__:
             value = value.model_dump() if BaseModel in type(value).__mro__ else value
@@ -238,15 +244,15 @@ class SchemaWidgetBase(QMainWindow):
                 self.update_field_widget(f"{name}.{k}")
         else:  # update list
             for i, item in enumerate(value):
-                if hasattr(self, f"{name}.{i}_widget"):  # can't handle added indexes yet
-                    self.update_field_widget(f"{name}.{i}")
+                self.update_field_widget(f"{name}.{i}")
 
     def _set_widget_text(self, name, value):
         """Set widget text if widget is QLineEdit or QCombobox
         :param name: widget name to set text to
         :param value: value of text"""
-        if hasattr(self, f"{name}_widget"):
-            widget = getattr(self, f"{name}_widget")
+
+        try:
+            widget = self.path_get(self, name.split("."))
             widget.blockSignals(True)  # block signal indicating change since changing internally
             if type(widget) in [QLineEdit]:
                 widget.setText(str(value))
@@ -259,7 +265,7 @@ class SchemaWidgetBase(QMainWindow):
             elif hasattr(widget, 'setChecked'):
                 widget.setChecked(value)
             widget.blockSignals(False)
-        else:
+        except:
             self.log.warning(f"{name} doesn't correspond to a widget")
 
     def apply_schema(self, schema: BaseModel = None):
@@ -271,7 +277,7 @@ class SchemaWidgetBase(QMainWindow):
             try:
                 self.update_field_widget(name)
             except RuntimeError as e:
-                if "has been deleted" not in str(e):    # catch errors not related to deleted widgets
+                if "has been deleted" not in str(e):  # catch errors not related to deleted widgets
                     raise RuntimeError(e)
 
     def __setattr__(self, name, value):
@@ -280,6 +286,7 @@ class SchemaWidgetBase(QMainWindow):
         self.__dict__[name] = value
         if currentframe().f_back.f_locals.get("self", None) != self:  # call from outside so update widgets
             self.ValueChangedOutside.emit(name)
+
     @staticmethod
     def path_set(iterable: BaseModel, path: list[str], value) -> None:
         """
@@ -365,6 +372,7 @@ def label_maker(string):
     label = " ".join(label)
     return label
 
+
 #
 def add_border(widget: SchemaWidgetBase,
                widget_group: dict = None,
@@ -415,9 +423,12 @@ if __name__ == "__main__":
     sys.excepthook = error_handler  # redirect std error
     app = QApplication(sys.argv)
     from pprint import pprint
-    #pprint(AindDynamicForagingTaskParameters.model_json_schema())
+
+    # pprint(AindDynamicForagingTaskParameters.model_json_schema())
+    pprint(AindDynamicForagingTaskLogic.model_json_schema())
     task_model = AindDynamicForagingTaskLogic(
         task_parameters=AindDynamicForagingTaskParameters(
+            uncoupled_reward = None,
             auto_water=AutoWater(),
             auto_stop=AutoStop(),
             auto_block=AutoBlock(),
@@ -427,7 +438,4 @@ if __name__ == "__main__":
     task_widget = SchemaWidgetBase(task_model.task_parameters)
     task_widget.ValueChangedInside.connect(lambda name: print(task_model))
     task_widget.show()
-
-    pprint(task_widget.__dict__)
-    print(task_widget.rng_seed.rng_seed.hide())
     sys.exit(app.exec_())
