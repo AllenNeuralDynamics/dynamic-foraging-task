@@ -11,8 +11,12 @@ from PyQt5.QtWidgets import (
     QSpinBox,
     QDoubleSpinBox,
     QSlider,
-    QCheckBox
+    QCheckBox,
+    QGroupBox,
+    QLayout,
+    QRadioButton
 )
+from q_field_box_layout import QFieldVBoxLayout, QFieldHBoxLayout
 from inspect import currentframe
 from importlib import import_module
 import enum
@@ -23,6 +27,9 @@ from typing import Literal
 import logging
 import typing
 
+
+TYPE_MAP = {'string': str, "number": float, "integer": int, "boolean": bool, "array": list, "null": None}
+
 class SchemaWidgetBase(QMainWindow):
     ValueChangedOutside = pyqtSignal((str,))
     ValueChangedInside = pyqtSignal((str,))
@@ -30,78 +37,107 @@ class SchemaWidgetBase(QMainWindow):
     def __init__(self, schema: BaseModel):
 
         self.log = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+        self.__annotations__ = {}
 
         super().__init__()
         self.schema = schema
         self.schema_module = import_module(self.schema.__module__)
-        widget = self.create_field_widgets(self.schema.model_dump(),
-                                           "schema_fields")
-        self.setCentralWidget(create_widget("V", **widget))
+        self.model_json_schema = self.schema.model_json_schema()
+        layout = QFieldVBoxLayout()
+        self.create_field_widgets(self.model_json_schema["properties"], layout)
+        widget = QWidget()
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
         self.ValueChangedOutside[str].connect(self.update_field_widget)  # Trigger update when property value changes
 
-    def create_field_widgets(self, fields: dict,  widget_field: str) -> dict:
+    def create_field_widgets(self, fields: dict,  layout: QFieldVBoxLayout or QFieldHBoxLayout) -> None:
         """
         Create input widgets based on properties
         :param fields: dictionary containing properties within a class and mapping to values
-        :param model: schema model corresponding to the fields dict
-        :param widget_field: attribute name for dictionary of widgets
+        :param layout: layout to put widgets
         :return dictionary of widget with keys corresponding to attribute name
         """
-        widgets = {}
-        for name, value in fields.items():
+
+        for name, json_schema in fields.items():
             name_lst = name.split(".")
-            arg_type = type(value)
-            search_name = arg_type.__name__ if arg_type.__name__ in dir(self.schema_module) else name_lst[-1]
-            boxes = {"label": QLabel(label_maker(name_lst[-1]))} if not name_lst[-1].isdigit() else {}
-            if dict not in type(value).__mro__ and list not in type(value).__mro__ or type(arg_type) == enum.EnumMeta:
+            value = self.path_get(self.schema, name_lst)
+            arg_type = TYPE_MAP[json_schema.get("type", "null")]
+
+            # create groupbox and corresponding layout to use if json schema outline an object or list
+            groupbox = QGroupBox()
+            groupbox.setTitle(label_maker(name_lst[-1]))
+            field_layout = QFieldVBoxLayout()
+
+            if arg_type is not None:
+                layout.addWidget(QLabel(label_maker(name_lst[-1])))
                 # Create combo boxes if there are preset options
-                if input_specs := self.check_driver_variables(search_name):
-                    boxes[name] = self.create_attribute_widget(name, "combo", input_specs)
-                # If no found options, create an editable text box or checkbox
-                else:
+                if "enum" in json_schema.keys():
+                    layout.addWidget(self.create_attribute_widget(name, "combo", json_schema["enum"]),
+                                     attr_name=name_lst[-1])
+
+                elif json_schema["type"] == "array":  # deal with list like variables
+                    setattr(self, name, field_layout)
+                    self.__annotations__[name] = QFieldHBoxLayout  # add to class annotations
+                    self.create_field_widgets({f"{name}.{i}": json_schema["items"] for i, v in
+                                               enumerate(value)}, field_layout)
+
+                else:   # If no found options, create an editable text box or checkbox
                     box_type = 'text' if bool not in type(value).__mro__ else 'check'
-                    boxes[name] = self.create_attribute_widget(name, box_type, value)
+                    layout.addWidget(self.create_attribute_widget(name, box_type, value), attr_name=name_lst[-1],
+                                     )
 
-            elif dict in type(value).__mro__:  # deal with dict like variables
-                boxes[name] = create_widget(
-                    "V", **self.create_field_widgets({f"{name}.{k}": v for k, v in value.items()},
-                                                     name)
-                )
-                setattr(self, name+"_widget", boxes[name])
-            elif list in type(value).__mro__:  # deal with list like variables
-                boxes[name] = create_widget(
-                    "H", **self.create_field_widgets({f"{name}.{i}": v for i, v in enumerate(value)},
-                                                     name)
-                )
-                setattr(self, name+"_widget", boxes[name])
-            orientation = "H"
-            if "." in name:  # see if parent list and format index label and input vertically
-                parent = self.path_get(self.schema, name_lst[0:-1])
-                if list in type(parent).__mro__:
-                    orientation = "V"
-            widgets[name_lst[-1]] = create_widget(orientation, **boxes)
+            elif "$ref" in json_schema.keys():  # deal with dict like variables
+                ref = self.path_get(self.model_json_schema, json_schema["$ref"].split("/")[1:])
+                value = {name: ref} if "properties" not in ref.keys() else \
+                    {f"{name}.{k}": v for k, v in ref["properties"].items()}
+                # create vertical layout
+                field_layout = QFieldVBoxLayout()
+                setattr(self, name, field_layout)
+                self.__annotations__[name] = QFieldVBoxLayout  # add to class annotations
+                self.create_field_widgets(value, field_layout)
 
-        # Add attribute of grouped widgets for easy access
-        setattr(self, f"{widget_field}_widgets", widgets)
-        return widgets
+            elif "anyOf" in json_schema.keys():
+                setattr(self, name, field_layout)
+                for types in json_schema["anyOf"]:
+                    if types != {'type': 'null'}:
+                        radio_button = QRadioButton()
+                        #field_layout.insertWidget(0, radio_button)
+                        self.create_field_widgets({f"{name}": types}, field_layout)
 
-    def check_driver_variables(self, name: str):
-        """Check if there is variable in device driver that has name of
-        property to inform input widget type and values
-        :param name: name of property to search for"""
+                # if {'type': 'null'} in possible_values:
+                #     # enable/disable widget
+                #     checkbox = QCheckBox()
+                #     setattr(self, f"{name}_checkbox", checkbox)
+                #     self.__annotations__[name] = QCheckBox  # add to class annotations
+                #     checkbox.setChecked(True if value is None else False)
+                #     checkbox.toggled.connect(lambda s: self.toggle_optional_field(name, s, AutoWater()))
+                #     layout.insertWidget(0, checkbox)
 
-        driver_vars = self.schema_module.__dict__
-        for variable in driver_vars:
-            search_name = inflection.pluralize(name.replace(".", "_"))
-            x = re.search(variable, rf"\b{search_name}?\b", re.IGNORECASE)
-            if x is not None:
-                if type(driver_vars[variable]) in [dict, list]:
-                    return driver_vars[variable]
-                elif type(driver_vars[variable]) == typing._LiteralGenericAlias:
-                    return list(typing.get_args(driver_vars[variable]))
-                elif type(driver_vars[variable]) == enum.EnumMeta:  # if enum
-                    enum_class = driver_vars[variable]
-                    return {i.name: i.value for i in enum_class}
+                #print(name, json_schema["anyOf"])
+            if field_layout.count() != 0:
+                groupbox.setLayout(field_layout)
+                layout.addWidget(groupbox)
+
+
+        return layout
+
+    def toggle_optional_field(self, name: str, enabled: bool, value) -> None:
+        """
+        Add or remove optional field
+        :param name: name of field
+        :param enabled: whether to add or remove field
+        :param value: value to set field to
+        """
+        widgets = getattr(self, name + "_widgets") if hasattr(self, name + "_widgets") \
+            else {"k": getattr(self, name + "_widget")}  # disable all sub widgets
+        for widget in widgets.values():
+            widget.setEnabled(enabled)
+        name_lst = name.split(".")
+        if enabled:
+            self.path_set(self.schema, name_lst, value)
+        else:
+            self.path_set(self.schema, name_lst, None)
+        self.ValueChangedInside.emit(name)
 
     def create_attribute_widget(self, name, widget_type: Literal["combo", "text", "check"], values):
         """Create a widget and create corresponding attribute
@@ -109,10 +145,7 @@ class SchemaWidgetBase(QMainWindow):
                 :param widget_type: widget type ('combo', 'text', 'check')
                 :param values: input into widget"""
 
-        # options = values.keys() if widget_type == 'combo' else values
         box = getattr(self, f"create_{widget_type}_box")(name, values)
-        setattr(self, f"{name}_widget", box)  # add attribute for widget input for easy access
-
         return box
 
     def create_text_box(self, name, value) -> QLineEdit or QDoubleSpinBox or QSpinBox:
@@ -275,7 +308,7 @@ class SchemaWidgetBase(QMainWindow):
 
         for i, k in enumerate(path):
             k = int(k) if type(iterable) == list else k
-            iterable = iterable[int(k)] if type(iterable) == list else getattr(iterable, k)
+            iterable = iterable[k] if type(iterable) in [list, dict] else getattr(iterable, k)
         return iterable
 
 
@@ -381,6 +414,8 @@ if __name__ == "__main__":
 
     sys.excepthook = error_handler  # redirect std error
     app = QApplication(sys.argv)
+    from pprint import pprint
+    #pprint(AindDynamicForagingTaskParameters.model_json_schema())
     task_model = AindDynamicForagingTaskLogic(
         task_parameters=AindDynamicForagingTaskParameters(
             auto_water=AutoWater(),
@@ -393,4 +428,6 @@ if __name__ == "__main__":
     task_widget.ValueChangedInside.connect(lambda name: print(task_model))
     task_widget.show()
 
+    pprint(task_widget.__dict__)
+    print(task_widget.rng_seed.rng_seed.hide())
     sys.exit(app.exec_())

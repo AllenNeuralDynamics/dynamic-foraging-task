@@ -14,6 +14,8 @@ class SessionParametersWidget(SchemaWidgetBase):
 
         super().__init__(schema)
 
+        self.aind_behavior_services_pkg_version.hide()
+
         # hide unnecessary widgets
         self.schema_fields_widgets["version"].hide()
         self.schema_fields_widgets["root_path"].hide()
