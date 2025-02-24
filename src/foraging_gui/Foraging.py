@@ -318,7 +318,7 @@ class Window(QMainWindow):
         self.action_Camera.triggered.connect(self._Camera)
 
         # create QTimer to deliver constant tone
-        self.beep_loop = QtCore.QTimer(timeout=self.play_beep, interval=100)
+        self.beep_loop = QtCore.QTimer(timeout=self.play_beep, interval=10)
         self.action_Sound.toggled.connect(lambda checked: self.beep_loop.start() if checked else self.beep_loop.stop())
 
         self.actionMeta_Data.triggered.connect(self._Metadata)
