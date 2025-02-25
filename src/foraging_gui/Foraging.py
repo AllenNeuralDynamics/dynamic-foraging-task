@@ -3035,6 +3035,8 @@ class Window(QMainWindow):
 
         # Set ID, clear weight information
         logging.info('User starting a new mouse: {}'.format(mouse_id))
+        if ask_about_schedule:
+            logging.warning('Adding mouse off schedule: {}'.format(mouse_id))
         self.ID.setText(mouse_id)
         self.Experimenter.setText(experimenter)
         self.ID.returnPressed.emit()
@@ -3965,6 +3967,8 @@ class Window(QMainWindow):
                         # Allow the session to continue, but log error
                         logging.error('Starting session with conflicting FIP information: mouse {}, FIP on, '
                                       'but not in schedule'.format(mouse_id))
+                        logging.warning('Starting session with conflicting FIP information: mouse {}, FIP on, '
+                                      'but not in schedule'.format(mouse_id))
                 elif not fip_is_nan and self.PhotometryB.currentText()=='off' and first_fip_stage in stages and \
                         stages.index(current_stage) >= stages.index(first_fip_stage):
                     reply = QMessageBox.critical(self,
@@ -3979,6 +3983,7 @@ class Window(QMainWindow):
                     else:
                         # Allow the session to continue, but log error
                         logging.error('Starting session with conflicting FIP information: mouse {}, FIP off, but schedule lists FIP {}'.format(mouse_id, fip_mode))
+                        logging.warning('Starting session with conflicting FIP information: mouse {}, FIP off, but schedule lists FIP {}'.format(mouse_id, fip_mode))
 
                 elif not fip_is_nan and fip_mode != self.FIPMode.currentText() and self.PhotometryB.currentText()=='on':
                     reply = QMessageBox.critical(self,
@@ -3993,6 +3998,7 @@ class Window(QMainWindow):
                     else:
                         # Allow the session to continue, but log error
                         logging.error('Starting session with conflicting FIP information: mouse {}, FIP mode {}, schedule lists {}'.format(mouse_id, self.FIPMode.currentText(), fip_mode))
+                        logging.warning('Starting session with conflicting FIP information: mouse {}, FIP mode {}, schedule lists {}'.format(mouse_id, self.FIPMode.currentText(), fip_mode))
 
             if self.StartANewSession == 0 :
                 reply = QMessageBox.question(self,
@@ -4032,6 +4038,7 @@ class Window(QMainWindow):
                 else:
                     # Allow the session to continue, but log error
                     logging.error('Starting session on branch: {}'.format(self.current_branch))
+                    logging.warning('Starting session on branch: {}'.format(self.current_branch))
 
             # Check for untracked local changes
             if self.behavior_session_model.allow_dirty_repo & (self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']):
@@ -4048,6 +4055,7 @@ class Window(QMainWindow):
                 else:
                     # Allow the session to continue, but log error
                     logging.error('Starting session with untracked local changes: {}'.format(self.dirty_files))
+                    logging.warning('Starting session with untracked local changes: {}'.format(self.dirty_files))
             elif self.behavior_session_model.allow_dirty_repo is None:
                 logging.error('Could not check for untracked local changes')
 
