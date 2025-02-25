@@ -1139,6 +1139,7 @@ class Window(QMainWindow):
     def _LoadSchedule(self):
         if os.path.exists(self.Settings['schedule_path']):
             schedule = pd.read_csv(self.Settings['schedule_path'])
+            self.schedule_mice = schedule['Mouse ID'].unique()
             self.schedule = schedule.dropna(subset=['Mouse ID','Box']).copy()
             logging.info('Loaded behavior schedule')
         else:
@@ -1146,10 +1147,10 @@ class Window(QMainWindow):
             return
 
     def _GetScheduleMice(self):
-        if not hasattr(self, 'schedule'):
+        if not hasattr(self, 'schedule_mice'):
             logging.info('No schedule found')
             return None
-        return self.schedule['Mouse ID'].unique()
+        return self.schedule_mice
 
     def _GetInfoFromSchedule(self, mouse_id, column):
         mouse_id = str(mouse_id)
