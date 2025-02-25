@@ -1183,61 +1183,6 @@
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
      </property>
     </widget>
-    <widget class="QComboBox" name="PhotometryB">
-    <property name="geometry">
-     <rect>
-      <x>89</x>
-      <y>900</y>
-      <width>80</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <item>
-     <property name="text">
-      <string>off</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>on</string>
-     </property>
-    </item>
-   </widget>
-    <widget class="QComboBox" name="FIPMode">
-    <property name="geometry">
-     <rect>
-      <x>795</x>
-      <y>900</y>
-      <width>81</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="editable">
-     <bool>false</bool>
-    </property>
-    <item>
-     <property name="text">
-      <string>Normal</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Axon</string>
-     </property>
-    </item>
-   </widget>
    </widget>
    <widget class="QPushButton" name="StartFIP">
     <property name="geometry">

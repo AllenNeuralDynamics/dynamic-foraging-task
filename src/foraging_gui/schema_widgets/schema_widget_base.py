@@ -124,7 +124,7 @@ class SchemaWidgetBase(QMainWindow):
             textbox = QSpinBox() if value_type == int else QDoubleSpinBox()
             textbox.setRange(0, 1000000)
             textbox.setValue(value)
-            textbox.valueChanged.connect(lambda v: self.textbox_edited(name, v))
+            textbox.valueChanged.connect(lambda v: self.textbox_edited(name, value_type(v)))
         else:
             textbox = QLineEdit(str(value))
             textbox.editingFinished.connect(lambda: self.textbox_edited(name))
@@ -139,7 +139,7 @@ class SchemaWidgetBase(QMainWindow):
         """
 
         name_lst = name.split(".")
-        value = value if value else getattr(self, name + "_widget").text()
+        value = value if value is not None else getattr(self, name + "_widget").text()
         self.path_set(self.schema, name_lst, value)
         self.ValueChangedInside.emit(name)
 
