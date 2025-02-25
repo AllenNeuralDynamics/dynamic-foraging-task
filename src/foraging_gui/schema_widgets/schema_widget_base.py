@@ -22,14 +22,13 @@ from importlib import import_module
 import enum
 import re
 import inflection
-from pydantic import BaseModel
+from pydantic import BaseModel, create_model
 from typing import Literal
 import logging
 import typing
 
-from hypothesis import given
-
-from hypothesis_jsonschema import from_schema
+import schemathesis
+from schemathesis import DataGenerationMethod
 
 TYPE_MAP = {'string': str, "number": float, "integer": int, "boolean": bool, "array": list, "null": None}
 
@@ -47,6 +46,11 @@ class SchemaWidgetBase(QMainWindow):
         self.schema = schema
         self.schema_module = import_module(self.schema.__module__)
         self.model_json_schema = self.schema.model_json_schema()
+
+        self.faker = create_model()
+        #print(self.faker.uncoupled_reward)
+        print(self.faker)
+
         layout = QFieldGridLayout()
         self.create_field_widgets(self.model_json_schema["properties"], layout)
         widget = QWidget()
@@ -133,6 +137,7 @@ class SchemaWidgetBase(QMainWindow):
 
         return self.path_get(self.schema, name_lst)
 
+
     def toggle_optional_field(self, name: str, json_schema: dict, enabled: bool) -> None:
         """
         Add or remove optional field
@@ -151,12 +156,7 @@ class SchemaWidgetBase(QMainWindow):
             layout.itemAt(i).widget().setEnabled(enabled)
 
         if enabled:
-            value = from_schema(json_schema)
-            print(value)
-            # if "default" in json_schema.keys():
-            #     value = json_schema["default"]
-            # else:
-            #     value = from_schema(json_schema)
+            print(getattr(self.faker, name_lst[0]))
 
         # for widget in widgets.values():
         #     widget.setEnabled(enabled)
@@ -447,7 +447,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     from pprint import pprint
 
-    # pprint(AindDynamicForagingTaskParameters.model_json_schema())
+    #pprint(AindDynamicForagingTaskParameters.model_json_schema(mode="serialization"))
     task_model = AindDynamicForagingTaskLogic(
         task_parameters=AindDynamicForagingTaskParameters(
             # uncoupled_reward = None,
