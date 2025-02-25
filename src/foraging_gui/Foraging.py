@@ -1139,7 +1139,7 @@ class Window(QMainWindow):
     def _LoadSchedule(self):
         if os.path.exists(self.Settings['schedule_path']):
             schedule = pd.read_csv(self.Settings['schedule_path'])
-            self.schedule_mice =[x for x in schedule['Mouse ID'].unique() if isinstance(x,str)&(len(x) >3)&('/' not in x)]
+            self.schedule_mice =[x for x in schedule['Mouse ID'].unique() if isinstance(x,str)and (len(x) >3)and ('/' not in x)]
             self.schedule = schedule.dropna(subset=['Mouse ID','Box']).copy()
             logging.info('Loaded behavior schedule')
         else:
