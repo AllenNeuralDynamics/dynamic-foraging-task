@@ -1145,6 +1145,12 @@ class Window(QMainWindow):
             logging.error('Could not find schedule at {}'.format(self.Settings['schedule_path']))
             return
 
+    def _GetScheduleMice(self):
+        if not hasattr(self, 'schedule'):
+            logging.info('No schedule found')
+            return None
+        return self.schedule['Mouse ID'].unique()
+
     def _GetInfoFromSchedule(self, mouse_id, column):
         mouse_id = str(mouse_id)
         if not hasattr(self, 'schedule'):
@@ -3003,12 +3009,26 @@ class Window(QMainWindow):
         '''
             Queries the user to start a new mouse
         '''
-        reply = QMessageBox.question(self,
-            'Box {}, Load mouse'.format(self.box_letter),
-            'No data for mouse <span style="color:purple;font-weight:bold">{}</span>'.format(mouse_id) +\
-            '<br>Experimenter: {}<br>'.format(experimenter) +\
-            'start new mouse?',
-            QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        ask_about_schedule=False
+        if self.Settings['check_schedule']:
+            schedule_mice = self._GetScheduleMice()
+            ask_about_schedule = (schedule_mice is not None) & (mouse_id not in schedule_mice)
+       
+        if ask_about_schedule:
+            reply = QMessageBox.question(self,
+                'Box {}, Load mouse'.format(self.box_letter),
+                'No data for mouse <span style="color:purple;font-weight:bold">{}</span>'.format(mouse_id) +\
+                '<br>Experimenter: {}<br>'.format(experimenter) +\
+                'start new mouse?<br><br>'+\
+                'This mouse is <span style="color:purple;font-weight:bold">NOT ON THE SCHEDULE</span>',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        else: 
+            reply = QMessageBox.question(self,
+                'Box {}, Load mouse'.format(self.box_letter),
+                'No data for mouse <span style="color:purple;font-weight:bold">{}</span>'.format(mouse_id) +\
+                '<br>Experimenter: {}<br>'.format(experimenter) +\
+                'start new mouse?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if reply == QMessageBox.No:
             logging.info('User declines to start new mouse: {}'.format(mouse_id))
             return reply
@@ -3027,10 +3047,17 @@ class Window(QMainWindow):
         '''
         filepath = os.path.join(self.default_saveFolder,self.current_box)
         now = datetime.now()
+
         mouse_dirs = os.listdir(filepath)
+        # If check_schedule, only show schedule mice as options
+        if self.Settings['check_schedule']:
+            schedule_mice = self._GetScheduleMice()
+            if schedule_mice is not None:
+                mouse_dirs = [x for x in mouse_dirs if x not in schedule_mice]
         mouse_dirs.sort(reverse=True, key=lambda x: os.path.getmtime(os.path.join(filepath,x))) # in order of date modified
         mice = []
         experimenters = []
+ 
         for m in mouse_dirs:
             session_dir = os.path.join(self.default_saveFolder, self.current_box, str(m))
             sessions = os.listdir(session_dir)
