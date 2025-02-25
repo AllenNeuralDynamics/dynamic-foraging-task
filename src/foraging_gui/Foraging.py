@@ -3012,6 +3012,7 @@ class Window(QMainWindow):
         ask_about_schedule=False
         if self.Settings['check_schedule']:
             schedule_mice = self._GetScheduleMice()
+            print(schedule_mice)
             ask_about_schedule = (schedule_mice is not None) & (mouse_id not in schedule_mice)
        
         if ask_about_schedule:
@@ -3054,8 +3055,10 @@ class Window(QMainWindow):
         # If check_schedule, only show schedule mice as options
         if self.Settings['check_schedule']:
             schedule_mice = self._GetScheduleMice()
+            print(schedule_mice)
+            print(mouse_dirs)
             if schedule_mice is not None:
-                mouse_dirs = [x for x in mouse_dirs if x not in schedule_mice]
+                mouse_dirs = [x for x in mouse_dirs if x in schedule_mice]
         mouse_dirs.sort(reverse=True, key=lambda x: os.path.getmtime(os.path.join(filepath,x))) # in order of date modified
         mice = []
         experimenters = []
