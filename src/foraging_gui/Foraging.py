@@ -3454,7 +3454,7 @@ class Window(QMainWindow):
 
         if self.FIP_workflow_path == "":
             logging.warning('No FIP workflow path defined in ForagingSettings.json',
-                extra={'tags': [self.warning_log_tag]}
+                extra={'tags': [self.warning_log_tag]})
             msg = 'FIP workflow path not defined, cannot start FIP workflow'
             reply = QMessageBox.information(self,
                 'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
