@@ -1285,7 +1285,8 @@ class Window(QMainWindow):
                 'manifest'),
             'auto_engage':True,
             'clear_figure_after_save':True,
-            'add_default_project_name':True
+            'add_default_project_name':True,
+            'check_schedule':False
         }
 
         # Try to load the ForagingSettings.json file    
