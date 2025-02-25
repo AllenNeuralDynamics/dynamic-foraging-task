@@ -1,4 +1,4 @@
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtWidgets import (
     QFrame,
     QWidget,
@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import (
     QLayout,
     QRadioButton
 )
-from q_field_box_layout import QFieldVBoxLayout, QFieldHBoxLayout
+from q_field_box_layout import QFieldVBoxLayout, QFieldHBoxLayout, QFieldGridLayout
 from inspect import currentframe
 from importlib import import_module
 import enum
@@ -26,6 +26,10 @@ from pydantic import BaseModel
 from typing import Literal
 import logging
 import typing
+
+from hypothesis import given
+
+from hypothesis_jsonschema import from_schema
 
 TYPE_MAP = {'string': str, "number": float, "integer": int, "boolean": bool, "array": list, "null": None}
 
@@ -43,14 +47,14 @@ class SchemaWidgetBase(QMainWindow):
         self.schema = schema
         self.schema_module = import_module(self.schema.__module__)
         self.model_json_schema = self.schema.model_json_schema()
-        layout = QFieldVBoxLayout()
+        layout = QFieldGridLayout()
         self.create_field_widgets(self.model_json_schema["properties"], layout)
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
         self.ValueChangedOutside[str].connect(self.update_field_widget)  # Trigger update when property value changes
 
-    def create_field_widgets(self, fields: dict, layout: QFieldVBoxLayout or QFieldHBoxLayout) -> None:
+    def create_field_widgets(self, fields: dict, layout: QFieldGridLayout) -> None:
         """
         Create input widgets based on properties
         :param fields: dictionary containing properties within a class and mapping to values
@@ -66,34 +70,35 @@ class SchemaWidgetBase(QMainWindow):
             # create groupbox and corresponding layout to use if json schema outline an object or list
             groupbox = QGroupBox()
             groupbox.setTitle(label_maker(name_lst[-1]))
-            field_layout = QFieldVBoxLayout()
+            field_layout = QFieldGridLayout()
+            row = layout.rowCount() + 1
 
             if arg_type is not None:
+                label = QLabel(label_maker(name_lst[-1])) if not name_lst[-1].isdigit() else QLabel()
                 # Create combo boxes if there are preset options
                 if "enum" in json_schema.keys():
-                    layout.addWidget(QLabel(label_maker(name_lst[-1])), attr_name=f"{name_lst[-1]}_label")
+                    layout.addWidget(label, row, 0, alignment=Qt.AlignRight, attr_name=f"{name_lst[-1]}_label")
                     layout.addWidget(self.create_attribute_widget(name, "combo", json_schema["enum"]),
-                                     attr_name=name_lst[-1])
+                                     row, 1, attr_name=name_lst[-1])
 
                 elif json_schema["type"] == "array":  # deal with list like variables
                     setattr(self, name, field_layout)
-                    self.__annotations__[name] = QFieldHBoxLayout  # add to class annotations
+                    self.__annotations__[name] = QFieldGridLayout  # add to class annotations
                     self.create_field_widgets({f"{name}.{i}": json_schema["items"] for i, v in
                                                enumerate(value)}, field_layout)
 
                 else:  # If no found options, create an editable text box or checkbox
-                    layout.addWidget(QLabel(label_maker(name_lst[-1])), attr_name=f"{name_lst[-1]}_label")
+                    layout.addWidget(label, row, 0, alignment=Qt.AlignRight, attr_name=f"{name_lst[-1]}_label")
                     box_type = 'text' if bool not in type(value).__mro__ else 'check'
-                    layout.addWidget(self.create_attribute_widget(name, box_type, value), attr_name=name_lst[-1],
-                                     )
+                    layout.addWidget(self.create_attribute_widget(name, box_type, value), row, 1,
+                                     attr_name=name_lst[-1])
 
             elif "$ref" in json_schema.keys():  # deal with dict like variables
                 ref = self.path_get(self.model_json_schema, json_schema["$ref"].split("/")[1:])
                 if "properties" in ref.keys():
                     # create vertical layout
-                    field_layout = QFieldVBoxLayout()
                     setattr(self, name, field_layout)
-                    self.__annotations__[name] = QFieldVBoxLayout  # add to class annotations
+                    self.__annotations__[name] = QFieldGridLayout  # add to class annotations
                     self.create_field_widgets({f"{name}.{k}": v for k, v in ref["properties"].items()}, field_layout)
                 else:
                     self.create_field_widgets({name: ref}, layout)
@@ -102,19 +107,22 @@ class SchemaWidgetBase(QMainWindow):
                 # handle optional types
                 if len(json_schema["anyOf"]) == 2 and {'type': 'null'} in json_schema["anyOf"]:
                     radio_button = QRadioButton()
-                    layout.addWidget(radio_button, attr_name=f"{name_lst[0]}_radio")
+                    radio_button.setAutoExclusive(False)
+                    radio_button.toggled.connect(lambda toggle, json=json_schema, n=name:
+                                                 self.toggle_optional_field(n, json, toggle))
                     self.create_field_widgets({f"{name}": json_schema["anyOf"][0]}, layout)
+                    layout.addWidget(radio_button, row, 0, attr_name=f"{name_lst[-1]}_radio")
                 else:
                     setattr(self, name, field_layout)
                     for types in json_schema["anyOf"]:
                         if types != {'type': 'null'}:
                             radio_button = QRadioButton()
-                            field_layout.insertWidget(0, radio_button)
+                            field_layout.addWidget(radio_button, row, 0)
                             self.create_field_widgets({f"{name}": types}, field_layout)
 
             if field_layout.count() != 0:
                 groupbox.setLayout(field_layout)
-                layout.addWidget(groupbox)
+                layout.addWidget(groupbox, row, 0, 1, 2)
 
         return layout
 
@@ -123,26 +131,41 @@ class SchemaWidgetBase(QMainWindow):
         Create a value for schema input
         """
 
-        print(name_lst, json_schema)
         return self.path_get(self.schema, name_lst)
 
-    def toggle_optional_field(self, name: str, enabled: bool, value) -> None:
+    def toggle_optional_field(self, name: str, json_schema: dict, enabled: bool) -> None:
         """
         Add or remove optional field
         :param name: name of field
+        :param json_schema: schema of parameter
         :param enabled: whether to add or remove field
-        :param value: value to set field to
         """
-        widgets = getattr(self, name + "_widgets") if hasattr(self, name + "_widgets") \
-            else {"k": getattr(self, name + "_widget")}  # disable all sub widgets
-        for widget in widgets.values():
-            widget.setEnabled(enabled)
+
         name_lst = name.split(".")
+
+        # disable widget
+        layout = getattr(self, name_lst[0])
+        for n in name_lst:
+            layout = getattr(self, n)
+        for i in range(layout.count()):
+            layout.itemAt(i).widget().setEnabled(enabled)
+
         if enabled:
-            self.path_set(self.schema, name_lst, value)
-        else:
-            self.path_set(self.schema, name_lst, None)
-        self.ValueChangedInside.emit(name)
+            value = from_schema(json_schema)
+            print(value)
+            # if "default" in json_schema.keys():
+            #     value = json_schema["default"]
+            # else:
+            #     value = from_schema(json_schema)
+
+        # for widget in widgets.values():
+        #     widget.setEnabled(enabled)
+        # name_lst = name.split(".")
+        # if enabled:
+        #     self.path_set(self.schema, name_lst, value)
+        # else:
+        #     self.path_set(self.schema, name_lst, None)
+        # self.ValueChangedInside.emit(name)
 
     def create_attribute_widget(self, name, widget_type: Literal["combo", "text", "check"], values):
         """Create a widget and create corresponding attribute
@@ -425,10 +448,9 @@ if __name__ == "__main__":
     from pprint import pprint
 
     # pprint(AindDynamicForagingTaskParameters.model_json_schema())
-    pprint(AindDynamicForagingTaskLogic.model_json_schema())
     task_model = AindDynamicForagingTaskLogic(
         task_parameters=AindDynamicForagingTaskParameters(
-            uncoupled_reward = None,
+            # uncoupled_reward = None,
             auto_water=AutoWater(),
             auto_stop=AutoStop(),
             auto_block=AutoBlock(),
