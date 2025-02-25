@@ -1144,6 +1144,7 @@ class Window(QMainWindow):
             logging.info('Loaded behavior schedule')
         else:
             logging.error('Could not find schedule at {}'.format(self.Settings['schedule_path']))
+            logging.warning('Could not find schedule', extra={'tags': [self.warning_log_tag]})
             return
 
     def _GetScheduleMice(self):
@@ -3037,7 +3038,7 @@ class Window(QMainWindow):
         # Set ID, clear weight information
         logging.info('User starting a new mouse: {}'.format(mouse_id))
         if ask_about_schedule:
-            logging.warning('Adding mouse off schedule: {}'.format(mouse_id))
+            logging.warning('Adding mouse off schedule: {}'.format(mouse_id), extra={'tags': [self.warning_log_tag]})
         self.ID.setText(mouse_id)
         self.Experimenter.setText(experimenter)
         self.ID.returnPressed.emit()
