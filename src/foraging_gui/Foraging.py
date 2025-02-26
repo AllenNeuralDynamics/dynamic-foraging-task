@@ -279,8 +279,7 @@ class Window(QMainWindow):
         self.Other_manual_water_right_time = []  # the valve open time of manual water given by the right valve each time
 
         # initialize mouse selector
-        slims_mice = self.slims_client.fetch_models(models.SlimsMouseContent, start=0,
-                                                    end=100)  # grab 100 latest mice from slims
+        slims_mice = self.slims_client.fetch_models(models.SlimsMouseContent)[-100:]  # grab 100 latest mice from slims
         self.mouse_selector_dialog = MouseSelectorDialog([mouse.barcode for mouse in slims_mice], self.box_letter)
         self.mouse_selector_dialog.acceptedMouseID.connect(self.load_slims_mouse)
 
@@ -635,29 +634,52 @@ class Window(QMainWindow):
         """
 
         try:
-            self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
+            logging.info(f"Fetching {mouse_id} from Slims.")
+            mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
         except Exception as e:
             if 'No record found' in str(e):  # mouse doesn't exist
                 QMessageBox.information(self, "Invalid Subject ID",
                                         f"{mouse_id} is not in Slims. Double check id, and add to Slims if missing",
                                         buttons=QMessageBox.Ok)
 
+        logging.info(f"Successfully fetched {mouse_id} from Slims.")
+
+        logging.info(f"Fetching curriculum, trainer_state, and metrics for {mouse_id} from Slims.")
         self.curriculum, self.trainer_state, metrics = self.trainer.load_data(mouse_id)
 
         self.task_logic = self.trainer_state.stage.task
-        self.task_widget.apply_schema(self.task_logic)
+        logging.info(f"Applying task logic")
+        self.task_widget.apply_schema(self.task_logic.task_parameters)
 
-        # check for opto and fip attachments
-        attachments = self.trainer.session_attachments(mouse_id)
+        # fetch session and check for session, opto and fip attachments
+        logging.info(f"Checking for attachments")
+        last_ses = self.slims_client.fetch_models(models.behavior_session.SlimsBehaviorSession, mouse_pk=mouse.pk)[-1]
+        attachments = self.slims_client.fetch_attachments(last_ses)
         attachment_names = [attachment.name for attachment in attachments]
 
-        if self.opto_model.experiment_type in attachment_names:
-            self.opto_model = Optogenetics(**attachments[attachment_names.index(self.opto_model.experiment_type)])
-            self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
+        # update session model with slims session information
+        sess_attach = attachments[attachment_names.index(AindBehaviorSessionModel.__name__)]
+        slims_session_model = AindBehaviorSessionModel(**self.slims_client.fetch_attachment_content(sess_attach).json())
+        self.session_model.experiment = slims_session_model.experiment
+        self.session_model.experimenter = slims_session_model.experimenter
+        self.session_model.subject = slims_session_model.subject
+        self.session_widget.apply_schema(self.session_model)
 
+        # update opto_model
+        if self.opto_model.experiment_type in attachment_names:
+            logging.info(f"Applying opto model")
+            opto_attachment = attachments[attachment_names.index(self.opto_model.experiment_type)]
+            self.opto_model = Optogenetics(**self.slims_client.fetch_attachment_content(opto_attachment).json())
+            print(self.opto_model)
+            self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
+        # update fip_model
         if self.fip_model.experiment_type in attachment_names:
-            self.fip_model = FiberPhotometry(**attachments[attachment_names.index(self.fip_model.experiment_type)])
+            logging.info(f"Applying fip model")
+            fip_attachment = attachments[attachment_names.index(self.fip_model.experiment_type)]
+            self.fip_model = FiberPhotometry(**self.slims_client.fetch_attachment_content(fip_attachment).json())
+            print(self.fip_model)
             self.fip_widget.apply_schema(self.fip_model)
+
 
     def _session_list(self):
         '''show all sessions of the current animal and load the selected session by drop down list'''

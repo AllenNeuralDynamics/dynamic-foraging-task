@@ -29,7 +29,7 @@ class OptoParametersWidget(SchemaWidgetBase):
         super().__init__(schema)
 
         # delete widgets unrelated to session
-        del self.schema_fields_widgets["experiment_type"]
+        self.schema_fields_widgets["experiment_type"].hide()
 
         # add or remove laser colors
         for laser, widget in self.laser_colors_widgets.items():
@@ -225,6 +225,7 @@ class OptoParametersWidget(SchemaWidgetBase):
 
         self.schema = schema
         for name in self.schema.model_dump().keys():
+            print(name)
             if name == "laser_colors":
                 for color_i in range(6):
                     self.update_field_widget(f"{name}.{color_i}")
@@ -398,10 +399,10 @@ if __name__ == "__main__":
     task_widget.ValueChangedInside.connect(lambda name: print(task_model))
     task_widget.show()
 
-    task_model.laser_colors = []
-    #task_model.laser_colors[0].location = [LocationOne()]
-    #task_model.laser_colors[1].location = [LocationTwo()]
-    #task_model.laser_colors[0].protocol = PulseProtocol()
+    #task_model.laser_colors = []
+    task_model.laser_colors[0].location = [LocationOne()]
+    task_model.laser_colors[1].location = [LocationTwo()]
+    task_model.laser_colors[0].protocol = PulseProtocol()
 
     task_widget.apply_schema(task_model)
 

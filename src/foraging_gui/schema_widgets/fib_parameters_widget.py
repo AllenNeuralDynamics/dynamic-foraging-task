@@ -2,8 +2,9 @@ from foraging_gui.schema_widgets.schema_widget_base import SchemaWidgetBase, cre
 from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
     FiberPhotometry
 )
-from PyQt5.QtWidgets import QCheckBox, QLabel
+from PyQt5.QtWidgets import QCheckBox, QLabel, QLineEdit, QSpinBox, QDoubleSpinBox, QSlider, QComboBox
 from PyQt5.QtCore import pyqtSignal
+import enum
 
 class FIBParametersWidget(SchemaWidgetBase):
 
@@ -32,7 +33,7 @@ class FIBParametersWidget(SchemaWidgetBase):
         """
         Allow schema to be None type to indicate if session is run with FIP or not
         """
-
+        print('toggle')
         if enabled:
             self.schema.mode = "Normal"
             self.apply_schema(self.schema)
@@ -42,6 +43,38 @@ class FIBParametersWidget(SchemaWidgetBase):
         for widget in self.schema_fields_widgets.values():
             widget.setEnabled(enabled)
         self.schemaToggled.emit()
+
+    def apply_schema(self, *args, **kwargs):
+        """
+        toggle schema on if applied
+        """
+
+        for widget in self.schema_fields_widgets.values():
+            widget.setEnabled(True)
+        super().apply_schema(*args, **kwargs)
+
+
+    def _set_widget_text(self, name, value):
+        """Set widget text if widget is QLineEdit or QCombobox
+        :param name: widget name to set text to
+        :param value: value of text"""
+        if hasattr(self, f"{name}_widget"):
+            widget = getattr(self, f"{name}_widget")
+            widget.blockSignals(True)  # block signal indicating change since changing internally
+            if type(widget) in [QLineEdit]:
+                widget.setText(str(value))
+            elif type(widget) in [QSpinBox, QDoubleSpinBox, QSlider]:
+                widget.setValue(value)
+            elif type(widget) == QComboBox:
+                value_type = type(self.path_get(self.schema, name.split("."))) if name != "mode" else str
+                value = value.name if type(value_type) == enum.EnumMeta else value_type(value)
+                print(name, value)
+                widget.setCurrentText(str(value))
+            elif hasattr(widget, 'setChecked'):
+                widget.setChecked(value)
+            widget.blockSignals(False)
+        else:
+            self.log.warning(f"{name} doesn't correspond to a widget")
 
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication
@@ -62,6 +95,8 @@ if __name__ == "__main__":
     task_widget.schemaToggled.connect(lambda: print(task_model))
     task_widget.show()
 
-    print(task_model)
+    task_model.mode = "Axon"
+    task_model.baseline_time = 7
+    task_widget.apply_schema(task_model)
 
     sys.exit(app.exec_())
