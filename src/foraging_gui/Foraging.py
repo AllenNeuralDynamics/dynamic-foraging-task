@@ -3962,8 +3962,6 @@ class Window(QMainWindow):
                     else:
                         # Allow the session to continue, but log error
                         logging.error('Starting session with conflicting FIP information: mouse {}, FIP on, '
-                                      'but not in schedule'.format(mouse_id))
-                        logging.warning('Starting session with conflicting FIP information: mouse {}, FIP on, '
                                       'but not in schedule'.format(mouse_id),extra={'tags': [self.warning_log_tag]})
                 elif not fip_is_nan and self.PhotometryB.currentText()=='off' and first_fip_stage in stages and \
                         stages.index(current_stage) >= stages.index(first_fip_stage):
@@ -3978,8 +3976,7 @@ class Window(QMainWindow):
                         return
                     else:
                         # Allow the session to continue, but log error
-                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP off, but schedule lists FIP {}'.format(mouse_id, fip_mode))
-                        logging.warning('Starting session with conflicting FIP information: mouse {}, FIP off, but schedule lists FIP {}'.format(mouse_id, fip_mode),extra={'tags': [self.warning_log_tag]})
+                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP off, but schedule lists FIP {}'.format(mouse_id, fip_mode),extra={'tags': [self.warning_log_tag]})
 
                 elif not fip_is_nan and fip_mode != self.FIPMode.currentText() and self.PhotometryB.currentText()=='on':
                     reply = QMessageBox.critical(self,
@@ -3993,8 +3990,7 @@ class Window(QMainWindow):
                         return
                     else:
                         # Allow the session to continue, but log error
-                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP mode {}, schedule lists {}'.format(mouse_id, self.FIPMode.currentText(), fip_mode))
-                        logging.warning('Starting session with conflicting FIP information: mouse {}, FIP mode {}, schedule lists {}'.format(mouse_id, self.FIPMode.currentText(), fip_mode),extra={'tags': [self.warning_log_tag]})
+                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP mode {}, schedule lists {}'.format(mouse_id, self.FIPMode.currentText(), fip_mode),extra={'tags': [self.warning_log_tag]})
 
             if self.StartANewSession == 0 :
                 reply = QMessageBox.question(self,
@@ -4033,8 +4029,7 @@ class Window(QMainWindow):
                     return
                 else:
                     # Allow the session to continue, but log error
-                    logging.error('Starting session on branch: {}'.format(self.current_branch))
-                    logging.warning('Starting session on branch: {}'.format(self.current_branch),extra={'tags': [self.warning_log_tag]})
+                    logging.error('Starting session on branch: {}'.format(self.current_branch),extra={'tags': [self.warning_log_tag]})
 
             # Check for untracked local changes
             if self.behavior_session_model.allow_dirty_repo & (self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']):
@@ -4050,8 +4045,7 @@ class Window(QMainWindow):
                     return
                 else:
                     # Allow the session to continue, but log error
-                    logging.error('Starting session with untracked local changes: {}'.format(self.dirty_files))
-                    logging.warning('Starting session with untracked local changes: {}'.format(self.dirty_files),extra={'tags': [self.warning_log_tag]})
+                    logging.error('Starting session with untracked local changes: {}'.format(self.dirty_files),extra={'tags': [self.warning_log_tag]})
             elif self.behavior_session_model.allow_dirty_repo is None:
                 logging.error('Could not check for untracked local changes')
 
