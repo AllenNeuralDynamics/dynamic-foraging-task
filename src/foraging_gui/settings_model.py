@@ -137,3 +137,4 @@ class DFTSettingsModel(BaseModel):
     auto_engage: bool
     clear_figure_after_save: bool
     add_default_project_name: bool
+    check_schedule: bool
