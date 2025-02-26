@@ -43,7 +43,7 @@ from foraging_gui.Visualization import PlotV, PlotLickDistribution, PlotTimeDist
 from foraging_gui.Dialogs import OptogeneticsDialog, WaterCalibrationDialog, CameraDialog, MetadataDialog
 from foraging_gui.Dialogs import LaserCalibrationDialog
 from foraging_gui.Dialogs import LickStaDialog, TimeDistributionDialog
-from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
+from foraging_gui.Dialogs import MouseSelectorDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker, TimerWorker, NewScaleSerialY, EphysRecording
 from foraging_gui.stage import Stage
 from foraging_gui.bias_indicator import BiasIndicator
@@ -57,7 +57,6 @@ from foraging_gui.settings_model import DFTSettingsModel, BonsaiSettingsModel
 from aind_data_schema.core.session import Session
 from aind_data_schema_models.modalities import Modality
 from aind_behavior_services.session import AindBehaviorSessionModel
-from aind_auto_train.schema.task import TrainingStage
 
 from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
     AindDynamicForagingTaskLogic,
@@ -83,6 +82,8 @@ from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
 from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
     FiberPhotometry
 )
+
+from aind_behavior_dynamic_foraging.CurriculumManager.trainer import DynamicForagingTrainerServer
 
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear()  # clear handlers so console output can be configured
@@ -230,6 +231,11 @@ class Window(QMainWindow):
         # connect to Slims
         self._ConnectSlims()
 
+        # set up Trainer and initialize curriculum and trainer
+        self.trainer = DynamicForagingTrainerServer(slims_client=self.slims_client)
+        self.curriculum = None
+        self.trainer_state = None
+
         # Set up threads
         self.threadpool = QThreadPool()  # get animal response
         self.threadpool2 = QThreadPool()  # get animal lick
@@ -272,6 +278,12 @@ class Window(QMainWindow):
         self.Other_manual_water_right_volume = []  # the volume of manual water given by the right valve each time
         self.Other_manual_water_right_time = []  # the valve open time of manual water given by the right valve each time
 
+        # initialize mouse selector
+        slims_mice = self.slims_client.fetch_models(models.SlimsMouseContent, start=0,
+                                                    end=100)  # grab 100 latest mice from slims
+        self.mouse_selector_dialog = MouseSelectorDialog([mouse.barcode for mouse in slims_mice], self.box_letter)
+        self.mouse_selector_dialog.acceptedMouseID.connect(self.load_slims_mouse)
+
         self._Optogenetics()  # open the optogenetics panel
         self._LaserCalibration()  # to open the laser calibration panel
         self._WaterCalibration()  # to open the water calibration panel
@@ -289,6 +301,7 @@ class Window(QMainWindow):
         self.CreateNewFolder = 1  # to create new folder structure (a new session)
         self.ManualWaterVolume = [0, 0]
         self._StopPhotometry()  # Make sure photoexcitation is stopped
+
         # Initialize open ephys saving dictionary
         self.open_ephys = []
 
@@ -429,7 +442,7 @@ class Window(QMainWindow):
         self.action_NewSession.triggered.connect(self.NewSession.click)
         self.actionConnectBonsai.triggered.connect(self._ConnectBonsai)
         self.actionReconnect_bonsai.triggered.connect(self._ReconnectBonsai)
-        self.Load.clicked.connect(self._OpenLast)
+        self.Load.clicked.connect(self.mouse_selector_dialog.show)
         self.Save.setCheckable(True)
         self.Save.clicked.connect(self._Save)
         self.Clear.clicked.connect(self._Clear)
@@ -614,6 +627,37 @@ class Window(QMainWindow):
         for warning_label in warning_labels:
             warning_label.setText(warning_text)
             warning_label.setStyleSheet(f'color: {self.default_warning_color};')
+
+    def load_slims_mouse(self, mouse_id: str):
+        """
+        Load in specified mouse from slims
+        :params mouse_id: mouse id string to load from slims
+        """
+
+        try:
+            self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
+        except Exception as e:
+            if 'No record found' in str(e):  # mouse doesn't exist
+                QMessageBox.information(self, "Invalid Subject ID",
+                                        f"{mouse_id} is not in Slims. Double check id, and add to Slims if missing",
+                                        buttons=QMessageBox.Ok)
+
+        self.curriculum, self.trainer_state, metrics = self.trainer.load_data(mouse_id)
+
+        self.task_logic = self.trainer_state.stage.task
+        self.task_widget.apply_schema(self.task_logic)
+
+        # check for opto and fip attachments
+        attachments = self.trainer.session_attachments(mouse_id)
+        attachment_names = [attachment.name for attachment in attachments]
+
+        if self.opto_model.experiment_type in attachment_names:
+            self.opto_model = Optogenetics(**attachments[attachment_names.index(self.opto_model.experiment_type)])
+            self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
+
+        if self.fip_model.experiment_type in attachment_names:
+            self.fip_model = FiberPhotometry(**attachments[attachment_names.index(self.fip_model.experiment_type)])
+            self.fip_widget.apply_schema(self.fip_model)
 
     def _session_list(self):
         '''show all sessions of the current animal and load the selected session by drop down list'''
@@ -2651,162 +2695,18 @@ class Window(QMainWindow):
                     Obj[keyname][widget.objectName()] = widget.currentText()
         return Obj
 
-    def _OpenLast(self):
-        self._Open(open_last=True)
-
-    def _OpenLast_find_session(self, mouse_id, experimenter):
-        '''
-            Returns the filepath of the last available session of this mouse
-            Returns a tuple (Bool, str)
-            Bool is True is a valid filepath was found, false otherwise
-            If a valid filepath was found, then str contains the filepath
-        '''
-
-        # Is this mouse on this computer?
-        filepath = os.path.join(self.default_saveFolder, self.current_box)
-        mouse_dirs = os.listdir(filepath)
-        if mouse_id not in mouse_dirs:
-            reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
-                                         'Mouse ID {} does not have any saved sessions on this computer'.format(
-                                             mouse_id),
-                                         QMessageBox.Ok)
-            logging.info('User input mouse id {}, which had no sessions on this computer'.format(mouse_id))
-            return False, ''
-
-        # Are there any session from this mouse?
-        session_dir = os.path.join(self.default_saveFolder, self.current_box, mouse_id)
-        sessions = os.listdir(session_dir)
-        if len(sessions) == 0:
-            reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
-                                         'Mouse ID {} does not have any saved sessions on this computer'.format(
-                                             mouse_id),
-                                         QMessageBox.Ok)
-            logging.info('User input mouse id {}, which had no sessions on this computer'.format(mouse_id))
-            return False, ''
-
-        # do any of the sessions have saved data? Grab the most recent
-        for i in range(len(sessions) - 1, -1, -1):
-            s = sessions[i]
-            if 'behavior_' in s:
-                json_file = os.path.join(self.default_saveFolder,
-                                         self.current_box, mouse_id, s, 'behavior', s.split('behavior_')[1] + '.json')
-                if os.path.isfile(json_file):
-                    date = s.split('_')[2]
-                    session_date = date.split('-')[1] + '/' + date.split('-')[2] + '/' + date.split('-')[0]
-                    reply = QMessageBox.information(self,
-                                                    'Box {}, Please verify'.format(self.box_letter),
-                                                    '<span style="color:purple;font-weight:bold">'
-                                                    'Mouse ID: {}</span><br>'
-                                                    'Last session: {}<br>'
-                                                    'Filename: {}<br>'
-                                                    'Experimenter: {}'.format(mouse_id, session_date, s, experimenter),
-                                                    QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
-                    if reply == QMessageBox.Cancel:
-                        logging.info('User hit cancel')
-                        return False, ''
-                    else:
-                        return True, json_file
-
-        # none of the sessions have saved data.
-        reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
-                                     'Mouse ID {} does not have any saved sessions on this computer'.format(mouse_id),
-                                     QMessageBox.Ok)
-        logging.info('User input mouse id {}, which had no sessions on this computer'.format(mouse_id))
-        return False, ''
-
-    def _OpenNewMouse(self, mouse_id):
-        '''
-            Queries the user to start a new mouse
-        '''
-        reply = QMessageBox.question(self,
-                                     'Box {}, Load mouse'.format(self.box_letter),
-                                     'No data for mouse <span style="color:purple;font-weight:bold">{}</span>, start new mouse?'.format(
-                                         mouse_id),
-                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
-        if reply == QMessageBox.No:
-            logging.info('User declines to start new mouse: {}'.format(mouse_id))
-            return reply
-
-        # Set ID, clear weight information
-        logging.info('User starting a new mouse: {}'.format(mouse_id))
-        self.session_widget.subject_widget.setText(mouse_id)
-        self.session_widget.subject_widget.returnPressed.emit()
-        self.TargetRatio.setText('0.85')
-
-    def _Open_getListOfMice(self):
-        '''
-            Returns a list of mice with data saved on this computer
-        '''
-        filepath = os.path.join(self.default_saveFolder, self.current_box)
-        now = datetime.now()
-        mouse_dirs = os.listdir(filepath)
-        mouse_dirs.sort(reverse=True,
-                        key=lambda x: os.path.getmtime(os.path.join(filepath, x)))  # in order of date modified
-        mice = []
-        experimenters = []
-        for m in mouse_dirs:
-            session_dir = os.path.join(self.default_saveFolder, self.current_box, str(m))
-            sessions = os.listdir(session_dir)
-            sessions.sort(reverse=True)
-            for s in sessions:
-                if 'behavior_' in s:
-                    json_file = os.path.join(self.default_saveFolder,
-                                             self.current_box, str(m), s, 'behavior', s.split('behavior_')[1] + '.json')
-                    if os.path.isfile(json_file):
-                        with open(json_file, 'r') as file:
-                            name = json.load(file)["Experimenter"]
-                        mice.append(m)
-                        experimenters.append(name)
-                        break
-        dates = [datetime.fromtimestamp(os.path.getmtime(os.path.join(filepath, path))) for path in mouse_dirs]
-        two_week = [mouse_dir for mouse_dir, mod_date in zip(mice, dates) if (now - mod_date).days <= 14]
-        return mice, experimenters, two_week
-
-    def _Open(self, open_last=False, input_file=''):
+    def _Open(self, input_file=''):
         if input_file == '':
             # stop current session first
             self._StopCurrentSession()
 
-            if open_last:
-                # list of mice, experimenters, and two week in chronological order form date modified
-                mice, experimenters, two_week = self._Open_getListOfMice()
-                # only add mice from two weeks in drop down.
-                W = MouseSelectorDialog(self, [m + ' ' + experimenters[mice.index(m)] for m in two_week])
-
-                ok, info = (
-                    W.exec_() == QtWidgets.QDialog.Accepted,
-                    W.combo.currentText(),
-                )
-                mouse_id = info.split(' ', 1)[0]
-                experimenter = None if mouse_id not in mice else experimenters[mice.index(mouse_id)]
-                if not ok:
-                    logging.info('Quick load failed, user hit cancel or X')
-                    return
-
-                # Mouse ID not in list of mice:
-                if mouse_id not in mice:
-                    # figureout out new Mouse
-                    logging.info('User entered the ID for a mouse with no data: {}'.format(mouse_id))
-                    reply = self._OpenNewMouse(mouse_id)
-                    if reply != QMessageBox.No:  # user pressed yes
-                        self.NewSession.setChecked(True)
-                        self._NewSession()
-                    return
-
-                # attempt to load last session from mouse
-                good_load, fname = self._OpenLast_find_session(mouse_id, experimenter)
-                if not good_load:
-                    logging.info('Quick load failed')
-                    return
-                logging.info('Quick load success: {}'.format(fname))
-            else:
-                # Open dialog box
-                fname, _ = QFileDialog.getOpenFileName(self, 'Open file',
-                                                       self.default_openFolder + '\\' + self.current_box,
-                                                       "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
-                logging.info('User selected: {}'.format(fname))
-                if fname != '':
-                    self.default_openFolder = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(fname))))
+            # Open dialog box
+            fname, _ = QFileDialog.getOpenFileName(self, 'Open file',
+                                                   self.default_openFolder + '\\' + self.current_box,
+                                                   "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
+            logging.info('User selected: {}'.format(fname))
+            if fname != '':
+                self.default_openFolder = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(fname))))
 
             self.fname = fname
 
@@ -3625,55 +3525,55 @@ class Window(QMainWindow):
                 fip_is_nan = (isinstance(fip_mode, float) and math.isnan(fip_mode)) or fip_mode is None
                 # remove STAGE_ string for consistency between schedule and auto-train. Schedule denotes final stage as
                 # FINAL and auto-train has STAGE_FINAL
-                first_fip_stage = str(self._GetInfoFromSchedule(mouse_id, 'First FP Stage')).split('STAGE_')[-1]
-                current_stage = self.AutoTrain_dialog.stage_in_use.split('STAGE_')[-1]
-                stages = ['nan'] + [ts.name.split('STAGE_')[-1] for ts in TrainingStage] + ['unknown training stage']
-                if fip_is_nan and self.fip_model.mode is not None:
-                    reply = QMessageBox.critical(self,
-                                                 'Box {}, Start'.format(self.box_letter),
-                                                 'Photometry is set to "on", but the FIP Mode is not in schedule. '
-                                                 'Continue anyways?',
-                                                 QMessageBox.Yes | QMessageBox.No, )
-                    if reply == QMessageBox.No:
-                        self.Start.setChecked(False)
-                        logging.info('User declines starting session due to conflicting FIP information')
-                        return
-                    else:
-                        # Allow the session to continue, but log error
-                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP on, '
-                                      'but not in schedule'.format(mouse_id))
-                elif not fip_is_nan and self.fip_model.mode is None and first_fip_stage in stages and \
-                        stages.index(current_stage) >= stages.index(first_fip_stage):
-                    reply = QMessageBox.critical(self,
-                                                 'Box {}, Start'.format(self.box_letter),
-                                                 f'Photometry is set to "off" but schedule indicate '
-                                                 f'FIP Mode is {fip_mode}. Continue anyways?',
-                                                 QMessageBox.Yes | QMessageBox.No, )
-                    if reply == QMessageBox.No:
-                        self.Start.setChecked(False)
-                        logging.info('User declines starting session due to conflicting FIP information')
-                        return
-                    else:
-                        # Allow the session to continue, but log error
-                        logging.error(
-                            'Starting session with conflicting FIP information: mouse {}, FIP off, but schedule lists FIP {}'.format(
-                                mouse_id, fip_mode))
-
-                elif not fip_is_nan and self.fip_model.mode is not None and fip_mode != self.fip_model.mode:
-                    reply = QMessageBox.critical(self,
-                                                 'Box {}, Start'.format(self.box_letter),
-                                                 f'FIP Mode is set to {self.fip_model.mode} but schedule indicate '
-                                                 f'FIP Mode is {fip_mode}. Continue anyways?',
-                                                 QMessageBox.Yes | QMessageBox.No, )
-                    if reply == QMessageBox.No:
-                        self.Start.setChecked(False)
-                        logging.info('User declines starting session due to conflicting FIP information')
-                        return
-                    else:
-                        # Allow the session to continue, but log error
-                        logging.error(
-                            'Starting session with conflicting FIP information: mouse {}, FIP mode {}, schedule lists {}'.format(
-                                mouse_id, self.fip_model.mode, fip_mode))
+                # first_fip_stage = str(self._GetInfoFromSchedule(mouse_id, 'First FP Stage')).split('STAGE_')[-1]
+                # current_stage = None
+                # stages = ['nan'] + [ts.name.split('STAGE_')[-1] for ts in TrainingStage] + ['unknown training stage']
+                # if fip_is_nan and self.fip_model.mode is not None:
+                #     reply = QMessageBox.critical(self,
+                #                                  'Box {}, Start'.format(self.box_letter),
+                #                                  'Photometry is set to "on", but the FIP Mode is not in schedule. '
+                #                                  'Continue anyways?',
+                #                                  QMessageBox.Yes | QMessageBox.No, )
+                #     if reply == QMessageBox.No:
+                #         self.Start.setChecked(False)
+                #         logging.info('User declines starting session due to conflicting FIP information')
+                #         return
+                #     else:
+                #         # Allow the session to continue, but log error
+                #         logging.error('Starting session with conflicting FIP information: mouse {}, FIP on, '
+                #                       'but not in schedule'.format(mouse_id))
+                # elif not fip_is_nan and self.fip_model.mode is None and first_fip_stage in stages and \
+                #         stages.index(current_stage) >= stages.index(first_fip_stage):
+                #     reply = QMessageBox.critical(self,
+                #                                  'Box {}, Start'.format(self.box_letter),
+                #                                  f'Photometry is set to "off" but schedule indicate '
+                #                                  f'FIP Mode is {fip_mode}. Continue anyways?',
+                #                                  QMessageBox.Yes | QMessageBox.No, )
+                #     if reply == QMessageBox.No:
+                #         self.Start.setChecked(False)
+                #         logging.info('User declines starting session due to conflicting FIP information')
+                #         return
+                #     else:
+                #         # Allow the session to continue, but log error
+                #         logging.error(
+                #             'Starting session with conflicting FIP information: mouse {}, FIP off, but schedule lists FIP {}'.format(
+                #                 mouse_id, fip_mode))
+                #
+                # elif not fip_is_nan and self.fip_model.mode is not None and fip_mode != self.fip_model.mode:
+                #     reply = QMessageBox.critical(self,
+                #                                  'Box {}, Start'.format(self.box_letter),
+                #                                  f'FIP Mode is set to {self.fip_model.mode} but schedule indicate '
+                #                                  f'FIP Mode is {fip_mode}. Continue anyways?',
+                #                                  QMessageBox.Yes | QMessageBox.No, )
+                #     if reply == QMessageBox.No:
+                #         self.Start.setChecked(False)
+                #         logging.info('User declines starting session due to conflicting FIP information')
+                #         return
+                #     else:
+                #         # Allow the session to continue, but log error
+                #         logging.error(
+                #             'Starting session with conflicting FIP information: mouse {}, FIP mode {}, schedule lists {}'.format(
+                #                 mouse_id, self.fip_model.mode, fip_mode))
 
             if self.StartANewSession == 0:
                 reply = QMessageBox.question(self,
@@ -4397,18 +4297,6 @@ class Window(QMainWindow):
         except Exception as e:
             logging.error(traceback.format_exc())
 
-    def create_auto_train_dialog(self):
-        # Note: by only create one AutoTrainDialog, all objects associated with
-        # AutoTrainDialog are now persistent!
-        self.AutoTrain_dialog = AutoTrainDialog(MainWindow=self, parent=None)
-
-    def _auto_train_clicked(self):
-        """set up auto training"""
-        self.AutoTrain_dialog.show()
-
-        # Check subject id each time the dialog is opened
-        self.AutoTrain_dialog.update_auto_train_fields(subject_id=self.session_model.subject)
-
     def _open_mouse_on_streamlit(self):
         '''open the training history of the current mouse on the streamlit app'''
         # See this PR: https://github.com/AllenNeuralDynamics/foraging-behavior-browser/pull/25
@@ -4744,9 +4632,6 @@ if __name__ == "__main__":
     win.repo_url = repo_url
     win.dirty_files = dirty_files
     win.show()
-
-    # Move creating AutoTrain here to catch any AWS errors
-    win.create_auto_train_dialog()
 
     # Run your application's event loop and stop after closing all windows
     sys.exit(app.exec())
