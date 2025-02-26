@@ -1143,15 +1143,10 @@ class Window(QMainWindow):
             self.schedule = schedule.dropna(subset=['Mouse ID','Box']).copy()
             logging.info('Loaded behavior schedule')
         else:
+            self.schedule_mice = None
             logging.error('Could not find schedule at {}'.format(self.Settings['schedule_path']))
             logging.warning('Could not find schedule', extra={'tags': [self.warning_log_tag]})
             return
-
-    def _GetScheduleMice(self):
-        if not hasattr(self, 'schedule_mice'):
-            logging.info('No schedule found')
-            return None
-        return self.schedule_mice
 
     def _GetInfoFromSchedule(self, mouse_id, column):
         mouse_id = str(mouse_id)
@@ -3011,10 +3006,9 @@ class Window(QMainWindow):
         '''
             Queries the user to start a new mouse
         '''
-        ask_about_schedule=False
-        if self.Settings['check_schedule']:
-            schedule_mice = self._GetScheduleMice()
-            ask_about_schedule = (schedule_mice is not None) & (mouse_id not in schedule_mice)
+        ask_about_schedule = (self.Settings['check_schedule']) and 
+                (self.schedule_mice is not None) and 
+                (mouse_id not in self.schedule_mice)
        
         if ask_about_schedule:
             reply = QMessageBox.question(self,
@@ -3058,10 +3052,8 @@ class Window(QMainWindow):
         experimenters = []
 
         # If check_schedule, only show schedule mice as options
-        if self.Settings['check_schedule']:
-            schedule_mice = self._GetScheduleMice()
-            if schedule_mice is not None:
-                mouse_dirs = [x for x in mouse_dirs if x in schedule_mice]
+        if self.Settings['check_schedule'] and (self.schedule_mice is not None):
+            mouse_dirs = [x for x in mouse_dirs if x in self.schedule_mice]
         
         for m in mouse_dirs:
             session_dir = os.path.join(self.default_saveFolder, self.current_box, str(m))
