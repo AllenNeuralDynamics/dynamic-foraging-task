@@ -1144,8 +1144,8 @@ class Window(QMainWindow):
             logging.info('Loaded behavior schedule')
         else:
             self.schedule_mice = None
-            logging.error('Could not find schedule at {}'.format(self.Settings['schedule_path']))
-            logging.warning('Could not find schedule', extra={'tags': [self.warning_log_tag]})
+            logging.info('Could not find schedule at {}'.format(self.Settings['schedule_path']))
+            logging.error('Could not find schedule', extra={'tags': [self.warning_log_tag]})
             return
 
     def _GetInfoFromSchedule(self, mouse_id, column):
