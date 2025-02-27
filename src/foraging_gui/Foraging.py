@@ -647,7 +647,7 @@ class Window(QMainWindow):
         logging.info(f"Fetching curriculum, trainer_state, and metrics for {mouse_id} from Slims.")
         self.curriculum, self.trainer_state, metrics = self.trainer.load_data(mouse_id)
 
-        self.task_logic = self.trainer_state.stage.task
+        self.task_logic = AindDynamicForagingTaskLogic(**self.trainer_state.stage.task.model_dump())
         logging.info(f"Applying task logic")
         self.task_widget.apply_schema(self.task_logic.task_parameters)
 

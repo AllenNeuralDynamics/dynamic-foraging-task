@@ -157,8 +157,8 @@ class BehaviorParametersWidget(SchemaWidgetBase):
 
         value = self.path_get(self.schema, name.split("."))
         if dict not in type(value).__mro__ and list not in type(value).__mro__ and BaseModel not in type(value).__mro__:  # not a dictionary or list like value
-            if value is None and hasattr(self, name+"_check_box"):   # optional type so uncheck widget
-               getattr(self, name+"_check_box").setChecked(False)
+            if hasattr(self, name + "_check_box"):  # optional type
+                getattr(self, name + "_check_box").setChecked(not value is None)
             else:
                 self._set_widget_text(name, value)
         elif dict in type(value).__mro__ or BaseModel in type(value).__mro__:

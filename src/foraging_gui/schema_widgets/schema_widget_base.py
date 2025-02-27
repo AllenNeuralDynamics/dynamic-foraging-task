@@ -233,9 +233,8 @@ class SchemaWidgetBase(QMainWindow):
         """
         Convenience function to apply new schema
         """
-        print("new", schema)
+
         self.schema = schema
-        print("old", self.schema)
         for name in self.schema.model_dump().keys():
             try:
                 self.update_field_widget(name)

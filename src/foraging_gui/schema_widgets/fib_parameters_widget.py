@@ -33,7 +33,7 @@ class FIBParametersWidget(SchemaWidgetBase):
         """
         Allow schema to be None type to indicate if session is run with FIP or not
         """
-        print('toggle')
+
         if enabled:
             self.schema.mode = "Normal"
             self.apply_schema(self.schema)
