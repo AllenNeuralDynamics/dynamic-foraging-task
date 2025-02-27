@@ -3006,8 +3006,8 @@ class Window(QMainWindow):
         '''
             Queries the user to start a new mouse
         '''
-        ask_about_schedule = (self.Settings['check_schedule']) and 
-                (self.schedule_mice is not None) and 
+        ask_about_schedule = (self.Settings['check_schedule']) and \
+                (self.schedule_mice is not None) and \
                 (mouse_id not in self.schedule_mice)
        
         if ask_about_schedule:
