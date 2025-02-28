@@ -84,6 +84,8 @@ from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
 )
 
 from aind_behavior_dynamic_foraging.CurriculumManager.trainer import DynamicForagingTrainerServer
+from aind_behavior_dynamic_foraging.CurriculumManager.metrics import DynamicForagingMetrics
+from aind_behavior_curriculum import Trainer, TrainerState
 
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear()  # clear handlers so console output can be configured
@@ -235,6 +237,7 @@ class Window(QMainWindow):
         self.trainer = DynamicForagingTrainerServer(slims_client=self.slims_client)
         self.curriculum = None
         self.trainer_state = None
+        self.metrics = None
 
         # Set up threads
         self.threadpool = QThreadPool()  # get animal response
@@ -641,11 +644,12 @@ class Window(QMainWindow):
                 QMessageBox.information(self, "Invalid Subject ID",
                                         f"{mouse_id} is not in Slims. Double check id, and add to Slims if missing",
                                         buttons=QMessageBox.Ok)
+                return
 
         logging.info(f"Successfully fetched {mouse_id} from Slims.")
 
         logging.info(f"Fetching curriculum, trainer_state, and metrics for {mouse_id} from Slims.")
-        self.curriculum, self.trainer_state, metrics = self.trainer.load_data(mouse_id)
+        self.curriculum, self.trainer_state, self.metrics = self.trainer.load_data(mouse_id)
 
         self.task_logic = AindDynamicForagingTaskLogic(**self.trainer_state.stage.task.model_dump())
         logging.info(f"Applying task logic")
@@ -678,6 +682,50 @@ class Window(QMainWindow):
             self.fip_model = FiberPhotometry(**self.slims_client.fetch_attachment_content(fip_attachment).json())
             self.fip_widget.apply_schema(self.fip_model)
 
+    def write_session_to_slims(self, mouse_id):
+        """
+        Write next session to slims based on performance
+        :param mouse_id: mouse id string to load from slims
+        """
+
+        if self.metrics is not None:    # loaded mouse
+            # add current session to metrics
+            logging.info("Constructing new metrics.")
+            new_metrics = DynamicForagingMetrics(
+                foraging_efficiency=self.metrics.foraging_efficiency+[self.GeneratedTrials.B_for_eff_optimal],
+                finished_trials=self.metrics.finished_trials+[self.GeneratedTrials.B_CurrentTrialN],
+                session_total=self.metrics.session_total+1,
+                session_at_current_stage=self.metrics.session_at_current_stage+1
+            )
+
+            logging.info("Generating next session stage.")
+            next_trainer_state = Trainer(self.curriculum).evaluate(trainer_state=self.trainer_state.stage,
+                                                                   metrics=new_metrics)
+
+            logging.info("Writing trainer state to slims.")
+            slims_model = self.trainer.write_data(mouse_id, self.curriculum, next_trainer_state)
+
+            # add session model as an attachment
+            self.slims_client.add_attachment_content(
+                record=slims_model,
+                name=AindBehaviorSessionModel.__name__,
+                content=self.session_model.model_dump_json()
+            )
+
+            # add opto model if run
+            if self.opto_model.laser_colors != []:
+                self.slims_client.add_attachment_content(
+                    record=slims_model,
+                    name=self.opto_model.experiment_type,
+                    content=self.opto_model.model_dump_json()
+                )
+
+            if self.fip_model.mode is not None:
+                self.slims_client.add_attachment_content(
+                    record=slims_model,
+                    name=self.fip_model.experiment_type,
+                    content=self.fip_model.model_dump_json()
+                )
 
     def _session_list(self):
         '''show all sessions of the current animal and load the selected session by drop down list'''
@@ -3324,6 +3372,9 @@ class Window(QMainWindow):
         self.Start.setDisabled(False)
         self.TotalWaterWarning.setText('')
         self._set_metadata_enabled(True)
+
+        # add session to slims
+        self.write_session_to_slims(self.session_model.subject)
 
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully == 0:
