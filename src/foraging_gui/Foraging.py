@@ -2043,7 +2043,7 @@ class Window(QMainWindow):
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
-                if child.objectName()=='qt_spinbox_lineedit' or child.isEnabled()==False: # I don't understand where the qt_spinbox_lineedit comes from.
+                if child.objectName() in ['qt_spinbox_lineedit',None,''] or child.isEnabled()==False: # I don't understand where the qt_spinbox_lineedit comes from.
                     continue
                 if (child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum') and (child.text()!=''):
                     Correct=self._CheckFormat(child)
