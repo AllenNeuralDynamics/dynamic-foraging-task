@@ -112,9 +112,6 @@ class Window(QMainWindow):
         # Load Rig Json
         self._LoadRigJson()
 
-        # Stage Widget
-        self.stage_widget = None
-
         # Load User interface
         self._LoadUI()
 
@@ -154,6 +151,10 @@ class Window(QMainWindow):
         self.unsaved_data = False   # Setting unsaved data to False
         self.to_check_drop_frames = 1 # 1, to check drop frames during saving data; 0, not to check drop frames
         self.session_run = False    # flag to indicate if session has been run or not
+
+        # Stage Widget
+        self.stage_widget = None
+        self._load_stage()
 
         # Connect to Bonsai
         self._InitializeBonsai()
@@ -207,7 +208,6 @@ class Window(QMainWindow):
         self._WaterCalibration()# to open the water calibration panel
         self._Camera()
         self._InitializeMotorStage()
-        self._load_stage()
         self._Metadata()
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self.WaterPerRewardedTrial=0.005
