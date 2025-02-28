@@ -68,7 +68,6 @@ class FIBParametersWidget(SchemaWidgetBase):
             elif type(widget) == QComboBox:
                 value_type = type(self.path_get(self.schema, name.split("."))) if name != "mode" else str
                 value = value.name if type(value_type) == enum.EnumMeta else value_type(value)
-                print(name, value)
                 widget.setCurrentText(str(value))
             elif hasattr(widget, 'setChecked'):
                 widget.setChecked(value)
