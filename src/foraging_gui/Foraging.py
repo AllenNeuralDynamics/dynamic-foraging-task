@@ -316,6 +316,11 @@ class Window(QMainWindow):
         '''Define callbacks'''
         self.action_About.triggered.connect(self._about)
         self.action_Camera.triggered.connect(self._Camera)
+
+        # create QTimer to deliver constant tone
+        self.beep_loop = QtCore.QTimer(timeout=self.play_beep, interval=10)
+        self.action_Sound.toggled.connect(lambda checked: self.beep_loop.start() if checked else self.beep_loop.stop())
+
         self.actionMeta_Data.triggered.connect(self._Metadata)
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
         self.actionLicks_sta.triggered.connect(self._LickSta)
@@ -2408,6 +2413,15 @@ class Window(QMainWindow):
         else:
             self.Camera_dialog.hide()
 
+    def play_beep(self):
+        """
+        Convenience function to play tone
+        """
+
+        self.Channel3.TriggerGoCue(1)
+        # clear messages
+        self.Channel.receive()
+
     def _Metadata(self):
         '''Open the metadata dialog'''
         if self.OpenMetadata==0:
@@ -3720,6 +3734,7 @@ class Window(QMainWindow):
             self.WeightAfter.setText('')
 
         # Reset GUI visuals
+        self.action_Sound.setEnabled(True)
         self.Save.setStyleSheet("color:black;background-color:None;")
         self.NewSession.setStyleSheet("background-color : green;")
         self.NewSession.setChecked(False)
@@ -4083,6 +4098,9 @@ class Window(QMainWindow):
                     self.Start.setChecked(False)
                     return
 
+            # disable sound button
+            self.action_Sound.setEnabled(False)
+
             # empty post weight after pass through checks in case user cancels run
             self.WeightAfter.setText('')
 
@@ -4314,7 +4332,6 @@ class Window(QMainWindow):
         # save behavior session model
         with open(self.behavior_session_modelJson, "w") as outfile:
             outfile.write(self.behavior_session_model.model_dump_json())
-
 
     def log_session(self) -> None:
         """
