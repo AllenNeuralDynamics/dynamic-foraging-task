@@ -3161,11 +3161,8 @@ class Window(QMainWindow):
 
                         # loading_parameters_type=0, get the last value of saved training parameters for each trial; 
                         # loading_parameters_type=1, get the current value for single value data directly from the window. 
-                        if 'TP_{}'.format(key) in CurrentObj:
-                            if len(CurrentObj['TP_'+key])< 2:
-                                # Adding debugging code for dynamic_foraging_error_tracking/issues/4
-                                logging.info('key {}: {}'.format(key,CurrentObj['TP_'+key]))
-                            value=np.array([CurrentObj['TP_'+key][-2]])
+                        if ('TP_{}'.format(key) in CurrentObj) and (len(CurrentObj['TP_{}'.format(key)]) > 1):
+                            value=np.array([CurrentObj['TP_{}'.format(key)][-2]])
                             loading_parameters_type=0
                         else:
                             value=CurrentObj[key]
