@@ -154,7 +154,20 @@ class Window(QMainWindow):
 
         # Stage Widget
         self.stage_widget = None
-        self._load_stage()
+        try:
+            self._load_stage()
+        except IOError as e:
+            logging.error(e)
+            logging.error(f"ERROR..."
+                          f"Dear scientist, please perform the following to document this issue:"
+                          f"    1) Create comment here: https://github.com/AllenNeuralDynamics/dynamic-foraging-task/issues/925"
+                          f"    2) In the comment list the following information: "
+                          f"            - Date and time of error"
+                          f"            - Box info (ex. 6D)"
+                          f"            - Attach logs (found in  C:\\Users\\svc_aind_behavior\\Documents\\foraging_gui_logs"
+                          f"            - Short description of the last thing done on the machine (ex. overnight bleaching)"
+                          f"Thank you, with your efforts hopefully we can vanquish this error and never see it again...")
+            raise e
 
         # Connect to Bonsai
         self._InitializeBonsai()
