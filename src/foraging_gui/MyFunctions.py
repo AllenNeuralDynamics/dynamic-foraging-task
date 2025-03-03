@@ -2017,6 +2017,9 @@ class GenerateTrials():
         # save session model
         self.Obj[AindBehaviorSessionModel.__name__].append(self.session_model.model_dump_json())
 
+        #save opto model
+        self.Obj[self.opto_model.experiment_type].append(self.opto_model.model_dump_json())
+
         for attr_name in dir(self):
             if attr_name.startswith('TP_'):
                 # Add the field to the dictionary with the 'TP_' prefix removed
