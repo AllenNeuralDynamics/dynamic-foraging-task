@@ -157,15 +157,15 @@ class Window(QMainWindow):
         try:
             self._load_stage()
         except IOError as e:
-            msg = (f"ERROR..."
-                  f"Dear scientist, please perform the following to document this issue:"
-                  f"    1) Create comment here: https://github.com/AllenNeuralDynamics/dynamic-foraging-task/issues/925"
-                  f"    2) In the comment list the following information: "
-                  f"            - Date and time of error"
-                  f"            - Box info (ex. 6D)"
-                  f"            - Attach logs (found in  C:\\Users\\svc_aind_behavior\\Documents\\foraging_gui_logs"
-                  f"            - Short description of the last thing done on the machine (ex. overnight bleaching)"
-                  f"Thank you, with your efforts hopefully we can vanquish this error and never see it again...")
+            msg = (f"ERROR...<br>"
+                  f"Dear scientist, please perform the following to document this issue:<br>"
+                  f"    1) Create comment here: <a href=https://github.com/AllenNeuralDynamics/dynamic-foraging-task/issues/925>Github Link</a><br>"
+                  f"    2) In the comment list the following information:<br> "
+                  f"            - Date and time of error<br>"
+                  f"            - Box info (ex. 6D)<br>"
+                  f"            - Attach logs (found in  C:\\Users\\svc_aind_behavior\\Documents\\foraging_gui_logs<br>"
+                  f"            - Short description of the last thing done on the machine (ex. overnight bleaching)<br>"
+                  f"Thank you, with your efforts hopefully we can vanquish this error and never see it again...<br>")
             show_msg_box("Stage Widget Error", "Stage Widget Error Diagnostic Help", msg)
             raise e
 
