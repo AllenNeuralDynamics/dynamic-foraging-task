@@ -113,9 +113,11 @@ class GenerateTrials():
         self.GeneFinish=1
         self.GetResponseFinish=1
         self.Obj = {
+            self.task_logic.name: [],
+            AindBehaviorSessionModel.__name__: [],
             "left_valve_open_times": [],
             "right_valve_open_times": [],
-            "multiplier": []
+            "multipliers": []
         }
         # get all of the training parameters of the current trial
         self._GetTrainingParameters(self.win)
@@ -1187,11 +1189,11 @@ class GenerateTrials():
         elif self.B_CurrentTrialN>max_trial:
             stop=True
             msg = 'Stopping the session because the mouse has reached the maximum trial count: {}'.format(max_trial)
-            warning_label_text = 'Stop because maximum trials exceed or equal: '+max_trial
+            warning_label_text = f'Stop because maximum trials exceed or equal: {max_trial}'
         elif self.BS_CurrentRunningTime>max_time:
             stop=True
             msg = 'Stopping the session because the session running time has reached {} minutes'.format(max_trial)
-            warning_label_text = 'Stop because running time exceeds or equals: '+max_trial+'m'
+            warning_label_text = f'Stop because running time exceeds or equals: {max_time} m'
         else:
             stop=False
 
@@ -1900,6 +1902,12 @@ class GenerateTrials():
 
 
     def _SaveParameters(self):
+        # save task_logic model
+        self.Obj[self.task_logic.name].append(self.task_logic.model_dump_json())
+
+        # save session model
+        self.Obj[AindBehaviorSessionModel.__name__].append(self.session_model.model_dump_json())
+
         for attr_name in dir(self):
             if attr_name.startswith('TP_'):
                 # Add the field to the dictionary with the 'TP_' prefix removed
@@ -1921,9 +1929,8 @@ class GenerateTrials():
         self.Obj["left_valve_open_times"].append(self.win.left_valve_open_time)
         self.Obj["right_valve_open_times"].append(self.win.right_valve_open_time)
         # save multiplier value
-        self.Obj["multipliers"] = .8 if self.task_logic.task_parameters.auto_water is None \
-            else self.task_logic.task_parameters.auto_water.multiplier
-
+        self.Obj["multipliers"].append(.8 if self.task_logic.task_parameters.auto_water is None
+                                       else self.task_logic.task_parameters.auto_water.multiplier)
 
 class NewScaleSerialY():
     '''modified by Xinxin Yin'''

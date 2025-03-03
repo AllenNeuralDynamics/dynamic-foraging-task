@@ -3205,6 +3205,10 @@ class Window(QMainWindow):
         self.TotalWaterWarning.setText('')
         self._set_metadata_enabled(True)
 
+        # enable task model widgets
+        self.task_widget.setEnabled(True)
+        self.session_widget.setEnabled(True)
+
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully == 0:
             logging.warning('Lost bonsai connection', extra={'tags': [self.warning_log_tag]})
@@ -3581,7 +3585,11 @@ class Window(QMainWindow):
 
             # Set Project Name in metadata based on schedule
             self.project_name = self._GetProjectName(mouse_id)
-            
+
+            # disable task model widgets
+            self.task_widget.setEnabled(False)
+            self.session_widget.setEnabled(False)
+
             self.session_run = True   # session has been started
 
         else:
@@ -3599,6 +3607,11 @@ class Window(QMainWindow):
                 logging.info('Start button pressed: user continued session')
                 self.Start.setChecked(True)
                 return
+
+            # enable task model widgets
+            self.task_widget.setEnabled(True)
+            self.session_widget.setEnabled(True)
+
             # If the photometry timer is running, stop it
             if self.finish_Timer==0:
                 self.ignore_timer=True
