@@ -1990,23 +1990,6 @@ class GenerateTrials():
                 # and store whether the child is checked or not
                 setattr(self, 'TP_' + child.objectName(), child.isChecked())
 
-        # Manually attach auto training parameters
-        if hasattr(win, 'AutoTrain_dialog') and win.AutoTrain_dialog.auto_train_engaged:
-            self.TP_auto_train_engaged = True
-            _curr = win.AutoTrain_dialog.curriculum_in_use
-            self.TP_auto_train_curriculum_name = _curr.curriculum_name
-            self.TP_auto_train_curriculum_version = _curr.curriculum_version
-            self.TP_auto_train_curriculum_schema_version = _curr.curriculum_schema_version
-            self.TP_auto_train_stage = win.AutoTrain_dialog.stage_in_use
-            self.TP_auto_train_stage_overridden = win.AutoTrain_dialog.checkBox_override_stage.isChecked()
-        else:
-            self.TP_auto_train_engaged = False
-            self.TP_auto_train_curriculum_name = None
-            self.TP_auto_train_curriculum_version = None
-            self.TP_auto_train_curriculum_schema_version = None
-            self.TP_auto_train_stage = None
-            self.TP_auto_train_stage_overridden = None
-
     def _SaveParameters(self):
         for attr_name in dir(self):
             if attr_name.startswith('TP_'):

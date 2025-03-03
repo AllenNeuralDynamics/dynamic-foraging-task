@@ -229,11 +229,12 @@ class SchemaWidgetBase(QMainWindow):
         else:
             self.log.warning(f"{name} doesn't correspond to a widget")
 
-    def apply_schema(self, schema: BaseModel = None):
+    def apply_schema(self, schema: BaseModel):
         """
         Convenience function to apply new schema
         """
-        self.schema = schema if not schema else self.schema
+
+        self.schema = schema
         for name in self.schema.model_dump().keys():
             try:
                 self.update_field_widget(name)
