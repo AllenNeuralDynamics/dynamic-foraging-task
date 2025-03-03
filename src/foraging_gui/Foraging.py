@@ -184,6 +184,7 @@ class Window(QMainWindow):
                                                     reward_families=self.RewardFamilies)
         self.task_parameter_scroll_area.setWidget(self.task_widget)
         self.task_widget.taskUpdated.connect(self.update_session_task)
+        self.update_session_task("coupled")     # initialize to coupled
         # update reward pairs when task has changed
         self.task_widget.taskUpdated.connect(lambda task: self._ShowRewardPairs())
         self.task_widget.ValueChangedInside.connect(lambda name: self._ShowRewardPairs())
