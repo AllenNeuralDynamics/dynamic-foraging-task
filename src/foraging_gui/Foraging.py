@@ -3391,6 +3391,7 @@ class Window(QMainWindow):
         # enable task model widgets
         self.task_widget.setEnabled(True)
         self.session_widget.setEnabled(True)
+        self.Opto_dialog.opto_widget.setWidget(True)
 
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully == 0:
@@ -3782,6 +3783,7 @@ class Window(QMainWindow):
             # disable task model widgets
             self.task_widget.setEnabled(False)
             self.session_widget.setEnabled(False)
+            self.Opto_dialog.opto_widget.setWidget(False)
 
             self.session_run = True   # session has been started
 
@@ -3804,6 +3806,7 @@ class Window(QMainWindow):
             # enable task model widgets
             self.task_widget.setEnabled(True)
             self.session_widget.setEnabled(True)
+            self.Opto_dialog.opto_widget.setWidget(True)
 
             # If the photometry timer is running, stop it
             if self.finish_Timer == 0:
