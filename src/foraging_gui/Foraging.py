@@ -3041,7 +3041,7 @@ class Window(QMainWindow):
         '''To visulize the training when loading a session'''
         self.ToInitializeVisual = 1
         Obj = self.Obj
-        self.GeneratedTrials = GenerateTrials(self, self.task_logic, self.session_model, self.opto_model)
+        self.GeneratedTrials = GenerateTrials(self, self.task_logic, self.session_model, self.opto_model, self.fip_model)
         # Iterate over all attributes of the GeneratedTrials object
         for attr_name in dir(self.GeneratedTrials):
             if attr_name in Obj.keys():
@@ -3410,6 +3410,7 @@ class Window(QMainWindow):
         self.task_widget.setEnabled(True)
         self.session_widget.setEnabled(True)
         self.Opto_dialog.opto_widget.setWidget(True)
+        self.fip_widget.setWidget(True)
 
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully == 0:
@@ -3802,6 +3803,7 @@ class Window(QMainWindow):
             self.task_widget.setEnabled(False)
             self.session_widget.setEnabled(False)
             self.Opto_dialog.opto_widget.setWidget(False)
+            self.fip_widget.setWidget(False)
 
             self.session_run = True   # session has been started
 
@@ -3825,6 +3827,7 @@ class Window(QMainWindow):
             self.task_widget.setEnabled(True)
             self.session_widget.setEnabled(True)
             self.Opto_dialog.opto_widget.setWidget(True)
+            self.fip_widget.setWidget(True)
 
             # If the photometry timer is running, stop it
             if self.finish_Timer == 0:
@@ -3891,7 +3894,7 @@ class Window(QMainWindow):
                 self.Camera_dialog.StartRecording.setChecked(True)
             self.SessionStartTime = datetime.now()
             self.Other_SessionStartTime = str(self.SessionStartTime)  # for saving
-            GeneratedTrials = GenerateTrials(self, self.task_logic, self.session_model, self.opto_model)
+            GeneratedTrials = GenerateTrials(self, self.task_logic, self.session_model, self.opto_model, self.fip_model)
             self.GeneratedTrials = GeneratedTrials
             self.StartANewSession = 0
             PlotM = PlotV(win=self, GeneratedTrials=GeneratedTrials, width=5, height=4)

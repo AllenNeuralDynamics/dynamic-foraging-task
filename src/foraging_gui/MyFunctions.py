@@ -18,6 +18,7 @@ from foraging_gui.reward_schedules.uncoupled_block import UncoupledBlocks
 from aind_behavior_dynamic_foraging import AindDynamicForagingTaskLogic
 from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import Optogenetics
+from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import FiberPhotometry
 
 if PLATFORM == 'win32':
     from newscale.usbxpress import USBXpressLib, USBXpressDevice
@@ -28,11 +29,13 @@ PID_NEWSCALE = 0xea61
 class GenerateTrials():
     def __init__(self, win, task_logic: AindDynamicForagingTaskLogic,
                  session_model: AindBehaviorSessionModel,
-                 opto_model: Optogenetics):
+                 opto_model: Optogenetics,
+                 fip_model: FiberPhotometry):
         self.win = win
         self.task_logic = task_logic
         self.session_model = session_model
         self.opto_model = opto_model
+        self.fip_model = fip_model
         self.B_LeftLickIntervalPercent = None  # percentage of left lick intervals under 100ms
         self.B_RightLickIntervalPercent = None  # percentage of right lick intervals under 100ms
         self.B_CrossSideIntervalPercent = None  # percentage of cross side lick intervals under 100ms
@@ -2019,6 +2022,9 @@ class GenerateTrials():
 
         #save opto model
         self.Obj[self.opto_model.experiment_type].append(self.opto_model.model_dump_json())
+
+        # save fip model
+        self.Obj[self.fip_model.experiment_type].append(self.fip_model.model_dump_json())
 
         for attr_name in dir(self):
             if attr_name.startswith('TP_'):
