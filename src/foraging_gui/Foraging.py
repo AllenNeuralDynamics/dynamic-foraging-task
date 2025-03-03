@@ -646,10 +646,12 @@ class Window(QMainWindow):
 
         logging.info(f"Fetching curriculum, trainer_state, and metrics for {mouse_id} from Slims.")
         self.curriculum, self.trainer_state, metrics = self.trainer.load_data(mouse_id)
-        print(self.curriculum)
+
         self.task_logic = AindDynamicForagingTaskLogic(**self.trainer_state.stage.task.model_dump())
         logging.info(f"Applying task logic")
         self.task_widget.apply_schema(self.task_logic.task_parameters)
+
+
 
         # fetch session and check for session, opto and fip attachments
         logging.info(f"Checking for attachments")
@@ -3547,7 +3549,8 @@ class Window(QMainWindow):
                 # FINAL and auto-train has STAGE_FINAL
                 first_fip_stage = str(self._GetInfoFromSchedule(mouse_id, 'First FP Stage')).split('STAGE_')[-1]
                 current_stage = 'nan' if self.trainer_state is None else self.trainer_state.stage
-                stages = ['nan'] + [stage.name.split('stage_')[-1] for stage in self.curriculum.graph.nodes.values()] \
+                nodes = {} if self.curriculum is None else self.curriculum.graph.nodes
+                stages = ['nan'] + [stage.name.split('stage_')[-1] for stage in nodes.values()] \
                          + ['unknown training stage']
                 if fip_is_nan and self.fip_model.mode is not None:
                     reply = QMessageBox.critical(self,
