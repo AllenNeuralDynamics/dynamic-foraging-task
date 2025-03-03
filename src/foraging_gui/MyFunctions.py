@@ -115,6 +115,7 @@ class GenerateTrials():
         self.Obj = {
             self.task_logic.name: [],
             AindBehaviorSessionModel.__name__: [],
+            self.opto_model.experiment_type: [],
             "left_valve_open_times": [],
             "right_valve_open_times": [],
             "multipliers": []
