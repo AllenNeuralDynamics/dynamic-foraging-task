@@ -316,6 +316,11 @@ class Window(QMainWindow):
         '''Define callbacks'''
         self.action_About.triggered.connect(self._about)
         self.action_Camera.triggered.connect(self._Camera)
+
+        # create QTimer to deliver constant tone
+        self.beep_loop = QtCore.QTimer(timeout=self.play_beep, interval=10)
+        self.action_Sound.toggled.connect(lambda checked: self.beep_loop.start() if checked else self.beep_loop.stop())
+
         self.actionMeta_Data.triggered.connect(self._Metadata)
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
         self.actionLicks_sta.triggered.connect(self._LickSta)
@@ -1139,10 +1144,13 @@ class Window(QMainWindow):
     def _LoadSchedule(self):
         if os.path.exists(self.Settings['schedule_path']):
             schedule = pd.read_csv(self.Settings['schedule_path'])
+            self.schedule_mice =[x for x in schedule['Mouse ID'].unique() if isinstance(x,str)and (len(x) >3)and ('/' not in x)]
             self.schedule = schedule.dropna(subset=['Mouse ID','Box']).copy()
             logging.info('Loaded behavior schedule')
         else:
-            logging.error('Could not find schedule at {}'.format(self.Settings['schedule_path']))
+            self.schedule_mice = None
+            logging.info('Could not find schedule at {}'.format(self.Settings['schedule_path']))
+            logging.error('Could not find schedule', extra={'tags': [self.warning_log_tag]})
             return
 
     def _GetInfoFromSchedule(self, mouse_id, column):
@@ -1186,7 +1194,11 @@ class Window(QMainWindow):
     def _GetApprovedAINDProjectNames(self):
         end_point = "http://aind-metadata-service/project_names"
         timeout = 5
-        response = requests.get(end_point, timeout=timeout)
+        try:
+            response = requests.get(end_point, timeout=timeout)
+        except TimeoutError as e:
+            logging.error(f"Failed to fetch project names from endpoint. {e}")
+            return []
         if response.ok:
             return json.loads(response.content)["data"]
         else:
@@ -1285,7 +1297,8 @@ class Window(QMainWindow):
                 'manifest'),
             'auto_engage':True,
             'clear_figure_after_save':True,
-            'add_default_project_name':True
+            'add_default_project_name':True,
+            'check_schedule':False
         }
 
         # Try to load the ForagingSettings.json file    
@@ -2039,7 +2052,7 @@ class Window(QMainWindow):
         for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
-                if child.objectName()=='qt_spinbox_lineedit' or child.isEnabled()==False: # I don't understand where the qt_spinbox_lineedit comes from.
+                if child.objectName() in ['qt_spinbox_lineedit',None,''] or child.isEnabled()==False: # I don't understand where the qt_spinbox_lineedit comes from.
                     continue
                 if (child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum') and (child.text()!=''):
                     Correct=self._CheckFormat(child)
@@ -2403,6 +2416,15 @@ class Window(QMainWindow):
             self.Camera_dialog.show()
         else:
             self.Camera_dialog.hide()
+
+    def play_beep(self):
+        """
+        Convenience function to play tone
+        """
+
+        self.Channel3.TriggerGoCue(1)
+        # clear messages
+        self.Channel.receive()
 
     def _Metadata(self):
         '''Open the metadata dialog'''
@@ -3002,18 +3024,33 @@ class Window(QMainWindow):
         '''
             Queries the user to start a new mouse
         '''
-        reply = QMessageBox.question(self,
-            'Box {}, Load mouse'.format(self.box_letter),
-            'No data for mouse <span style="color:purple;font-weight:bold">{}</span>'.format(mouse_id) +\
-            '<br>Experimenter: {}<br>'.format(experimenter) +\
-            'start new mouse?',
-            QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        ask_about_schedule = (self.Settings['check_schedule']) and \
+                (self.schedule_mice is not None) and \
+                (mouse_id not in self.schedule_mice)
+       
+        if ask_about_schedule:
+            reply = QMessageBox.question(self,
+                'Box {}, Load mouse'.format(self.box_letter),
+                'No data for mouse <span style="color:purple;font-weight:bold">{}</span>'.format(mouse_id) +\
+                '<br>Experimenter: {}<br>'.format(experimenter) +\
+                'start new mouse?<br><br>'+\
+                'This mouse is <span style="color:purple;font-weight:bold">NOT ON THE SCHEDULE</span>',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        else: 
+            reply = QMessageBox.question(self,
+                'Box {}, Load mouse'.format(self.box_letter),
+                'No data for mouse <span style="color:purple;font-weight:bold">{}</span>'.format(mouse_id) +\
+                '<br>Experimenter: {}<br>'.format(experimenter) +\
+                'start new mouse?',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if reply == QMessageBox.No:
             logging.info('User declines to start new mouse: {}'.format(mouse_id))
             return reply
 
         # Set ID, clear weight information
         logging.info('User starting a new mouse: {}'.format(mouse_id))
+        if ask_about_schedule:
+            logging.warning('Adding mouse off schedule: {}'.format(mouse_id), extra={'tags': [self.warning_log_tag]})
         self.ID.setText(mouse_id)
         self.Experimenter.setText(experimenter)
         self.ID.returnPressed.emit()
@@ -3026,10 +3063,16 @@ class Window(QMainWindow):
         '''
         filepath = os.path.join(self.default_saveFolder,self.current_box)
         now = datetime.now()
+
         mouse_dirs = os.listdir(filepath)
         mouse_dirs.sort(reverse=True, key=lambda x: os.path.getmtime(os.path.join(filepath,x))) # in order of date modified
         mice = []
         experimenters = []
+
+        # If check_schedule, only show schedule mice as options
+        if self.Settings['check_schedule'] and (self.schedule_mice is not None):
+            mouse_dirs = [x for x in mouse_dirs if x in self.schedule_mice]
+        
         for m in mouse_dirs:
             session_dir = os.path.join(self.default_saveFolder, self.current_box, str(m))
             sessions = os.listdir(session_dir)
@@ -3159,9 +3202,10 @@ class Window(QMainWindow):
                             continue
                         widget = widget_dict[key]
 
-                        # loading_parameters_type=0, get the last value of saved training parameters for each trial; loading_parameters_type=1, get the current value for single value data directly from the window. 
-                        if 'TP_{}'.format(key) in CurrentObj:
-                            value=np.array([CurrentObj['TP_'+key][-2]])
+                        # loading_parameters_type=0, get the last value of saved training parameters for each trial; 
+                        # loading_parameters_type=1, get the current value for single value data directly from the window. 
+                        if ('TP_{}'.format(key) in CurrentObj) and (len(CurrentObj['TP_{}'.format(key)]) > 1):
+                            value=np.array([CurrentObj['TP_{}'.format(key)][-2]])
                             loading_parameters_type=0
                         else:
                             value=CurrentObj[key]
@@ -3421,7 +3465,8 @@ class Window(QMainWindow):
             return
 
         if self.FIP_workflow_path == "":
-            logging.warning('No FIP workflow path defined in ForagingSettings.json')
+            logging.warning('No FIP workflow path defined in ForagingSettings.json',
+                extra={'tags': [self.warning_log_tag]})
             msg = 'FIP workflow path not defined, cannot start FIP workflow'
             reply = QMessageBox.information(self,
                 'Box {}, StartFIP'.format(self.box_letter), msg, QMessageBox.Ok )
@@ -3436,7 +3481,7 @@ class Window(QMainWindow):
                 logging.warning('FIP workflow already started, user declines to restart')
                 return
             else:
-                logging.warning('FIP workflow already started, user restarts')
+                logging.warning('FIP workflow already started, user restarts',extra={'tags': [self.warning_log_tag]})
 
         # Start logging
         self.Ot_log_folder=self._restartlogging()
@@ -3694,6 +3739,7 @@ class Window(QMainWindow):
             self.WeightAfter.setText('')
 
         # Reset GUI visuals
+        self.action_Sound.setEnabled(True)
         self.Save.setStyleSheet("color:black;background-color:None;")
         self.NewSession.setStyleSheet("background-color : green;")
         self.NewSession.setChecked(False)
@@ -3936,7 +3982,7 @@ class Window(QMainWindow):
                     else:
                         # Allow the session to continue, but log error
                         logging.error('Starting session with conflicting FIP information: mouse {}, FIP on, '
-                                      'but not in schedule'.format(mouse_id))
+                                      'but not in schedule'.format(mouse_id),extra={'tags': [self.warning_log_tag]})
                 elif not fip_is_nan and self.PhotometryB.currentText()=='off' and first_fip_stage in stages and \
                         stages.index(current_stage) >= stages.index(first_fip_stage):
                     reply = QMessageBox.critical(self,
@@ -3950,7 +3996,7 @@ class Window(QMainWindow):
                         return
                     else:
                         # Allow the session to continue, but log error
-                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP off, but schedule lists FIP {}'.format(mouse_id, fip_mode))
+                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP off, but schedule lists FIP {}'.format(mouse_id, fip_mode),extra={'tags': [self.warning_log_tag]})
 
                 elif not fip_is_nan and fip_mode != self.FIPMode.currentText() and self.PhotometryB.currentText()=='on':
                     reply = QMessageBox.critical(self,
@@ -3964,7 +4010,7 @@ class Window(QMainWindow):
                         return
                     else:
                         # Allow the session to continue, but log error
-                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP mode {}, schedule lists {}'.format(mouse_id, self.FIPMode.currentText(), fip_mode))
+                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP mode {}, schedule lists {}'.format(mouse_id, self.FIPMode.currentText(), fip_mode),extra={'tags': [self.warning_log_tag]})
 
             if self.StartANewSession == 0 :
                 reply = QMessageBox.question(self,
@@ -4003,7 +4049,7 @@ class Window(QMainWindow):
                     return
                 else:
                     # Allow the session to continue, but log error
-                    logging.error('Starting session on branch: {}'.format(self.current_branch))
+                    logging.error('Starting session on branch: {}'.format(self.current_branch),extra={'tags': [self.warning_log_tag]})
 
             # Check for untracked local changes
             if self.behavior_session_model.allow_dirty_repo & (self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']):
@@ -4019,7 +4065,7 @@ class Window(QMainWindow):
                     return
                 else:
                     # Allow the session to continue, but log error
-                    logging.error('Starting session with untracked local changes: {}'.format(self.dirty_files))
+                    logging.error('Starting session with untracked local changes: {}'.format(self.dirty_files),extra={'tags': [self.warning_log_tag]})
             elif self.behavior_session_model.allow_dirty_repo is None:
                 logging.error('Could not check for untracked local changes')
 
@@ -4056,6 +4102,9 @@ class Window(QMainWindow):
                     logging.info('User selected not to start excitation')
                     self.Start.setChecked(False)
                     return
+
+            # disable sound button
+            self.action_Sound.setEnabled(False)
 
             # empty post weight after pass through checks in case user cancels run
             self.WeightAfter.setText('')
@@ -4288,7 +4337,6 @@ class Window(QMainWindow):
         # save behavior session model
         with open(self.behavior_session_modelJson, "w") as outfile:
             outfile.write(self.behavior_session_model.model_dump_json())
-
 
     def log_session(self) -> None:
         """
