@@ -2963,7 +2963,7 @@ class Window(QMainWindow):
         '''To visulize the training when loading a session'''
         self.ToInitializeVisual = 1
         Obj = self.Obj
-        self.GeneratedTrials = GenerateTrials(self, self.task_logic, self.session_model, self.opto_model)
+        self.GeneratedTrials = GenerateTrials(self, self.task_logic, self.session_model, self.opto_model, self.fip_model)
         # Iterate over all attributes of the GeneratedTrials object
         for attr_name in dir(self.GeneratedTrials):
             if attr_name in Obj.keys():
@@ -3327,6 +3327,12 @@ class Window(QMainWindow):
         self.Start.setDisabled(False)
         self.TotalWaterWarning.setText('')
         self._set_metadata_enabled(True)
+
+        # enable task model widgets
+        self.task_widget.setEnabled(True)
+        self.session_widget.setEnabled(True)
+        self.Opto_dialog.opto_widget.setEnabled(True)
+        self.fip_widget.setEnabled(True)
 
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully == 0:
@@ -3717,7 +3723,13 @@ class Window(QMainWindow):
             # Set Project Name in metadata based on schedule
             self.project_name = self._GetProjectName(mouse_id)
 
-            self.session_run = True  # session has been started
+            # disable task model widgets
+            self.task_widget.setEnabled(False)
+            self.session_widget.setEnabled(False)
+            self.Opto_dialog.opto_widget.setEnabled(False)
+            self.fip_widget.setEnabled(False)
+
+            self.session_run = True   # session has been started
 
         else:
             # Prompt user to confirm stopping trials
@@ -3734,6 +3746,13 @@ class Window(QMainWindow):
                 logging.info('Start button pressed: user continued session')
                 self.Start.setChecked(True)
                 return
+
+            # enable task model widgets
+            self.task_widget.setEnabled(True)
+            self.session_widget.setEnabled(True)
+            self.Opto_dialog.opto_widget.setEnabled(True)
+            self.fip_widget.setEnabled(True)
+
             # If the photometry timer is running, stop it
             if self.finish_Timer == 0:
                 self.ignore_timer = True
@@ -3799,7 +3818,7 @@ class Window(QMainWindow):
                 self.Camera_dialog.StartRecording.setChecked(True)
             self.SessionStartTime = datetime.now()
             self.Other_SessionStartTime = str(self.SessionStartTime)  # for saving
-            GeneratedTrials = GenerateTrials(self, self.task_logic, self.session_model, self.opto_model)
+            GeneratedTrials = GenerateTrials(self, self.task_logic, self.session_model, self.opto_model, self.fip_model)
             self.GeneratedTrials = GeneratedTrials
             self.StartANewSession = 0
             PlotM = PlotV(win=self, GeneratedTrials=GeneratedTrials, width=5, height=4)

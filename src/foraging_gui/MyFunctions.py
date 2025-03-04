@@ -18,6 +18,7 @@ from foraging_gui.reward_schedules.uncoupled_block import UncoupledBlocks
 from aind_behavior_dynamic_foraging import AindDynamicForagingTaskLogic
 from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import Optogenetics
+from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import FiberPhotometry
 
 if PLATFORM == 'win32':
     from newscale.usbxpress import USBXpressLib, USBXpressDevice
@@ -28,11 +29,13 @@ PID_NEWSCALE = 0xea61
 class GenerateTrials():
     def __init__(self, win, task_logic: AindDynamicForagingTaskLogic,
                  session_model: AindBehaviorSessionModel,
-                 opto_model: Optogenetics):
+                 opto_model: Optogenetics,
+                 fip_model: FiberPhotometry):
         self.win = win
         self.task_logic = task_logic
         self.session_model = session_model
         self.opto_model = opto_model
+        self.fip_model = fip_model
         self.B_LeftLickIntervalPercent = None  # percentage of left lick intervals under 100ms
         self.B_RightLickIntervalPercent = None  # percentage of right lick intervals under 100ms
         self.B_CrossSideIntervalPercent = None  # percentage of cross side lick intervals under 100ms
@@ -113,9 +116,13 @@ class GenerateTrials():
         self.GeneFinish = 1
         self.GetResponseFinish = 1
         self.Obj = {
+            self.task_logic.name: [],
+            AindBehaviorSessionModel.__name__: [],
+            self.opto_model.experiment_type: [],
+            self.fip_model.experiment_type: [],
             "left_valve_open_times": [],
             "right_valve_open_times": [],
-            "multiplier": []
+            "multipliers": []
         }
         self.selected_condition = None
         # get all of the training parameters of the current trial
@@ -1331,11 +1338,11 @@ class GenerateTrials():
         elif self.B_CurrentTrialN > max_trial:
             stop = True
             msg = 'Stopping the session because the mouse has reached the maximum trial count: {}'.format(max_trial)
-            warning_label_text = 'Stop because maximum trials exceed or equal: ' + max_trial
-        elif self.BS_CurrentRunningTime > max_time:
-            stop = True
+            warning_label_text = f'Stop because maximum trials exceed or equal: {max_trial}'
+        elif self.BS_CurrentRunningTime>max_time:
+            stop=True
             msg = 'Stopping the session because the session running time has reached {} minutes'.format(max_trial)
-            warning_label_text = 'Stop because running time exceeds or equals: ' + max_trial + 'm'
+            warning_label_text = f'Stop because running time exceeds or equals: {max_time} m'
         else:
             stop = False
 
@@ -1992,6 +1999,18 @@ class GenerateTrials():
                 setattr(self, 'TP_' + child.objectName(), child.isChecked())
 
     def _SaveParameters(self):
+        # save task_logic model
+        self.Obj[self.task_logic.name].append(self.task_logic.model_dump_json())
+
+        # save session model
+        self.Obj[AindBehaviorSessionModel.__name__].append(self.session_model.model_dump_json())
+
+        #save opto model
+        self.Obj[self.opto_model.experiment_type].append(self.opto_model.model_dump_json())
+
+        # save fip model
+        self.Obj[self.fip_model.experiment_type].append(self.fip_model.model_dump_json())
+
         for attr_name in dir(self):
             if attr_name.startswith('TP_'):
                 # Add the field to the dictionary with the 'TP_' prefix removed
@@ -2013,9 +2032,8 @@ class GenerateTrials():
         self.Obj["left_valve_open_times"].append(self.win.left_valve_open_time)
         self.Obj["right_valve_open_times"].append(self.win.right_valve_open_time)
         # save multiplier value
-        self.Obj["multipliers"] = .8 if self.task_logic.task_parameters.auto_water is None \
-            else self.task_logic.task_parameters.auto_water.multiplier
-
+        self.Obj["multipliers"].append(.8 if self.task_logic.task_parameters.auto_water is None
+                                       else self.task_logic.task_parameters.auto_water.multiplier)
 
 class NewScaleSerialY():
     '''modified by Xinxin Yin'''
