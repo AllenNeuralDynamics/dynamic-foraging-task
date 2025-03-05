@@ -29,7 +29,7 @@ from pykeepass import PyKeePass
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
-from PyQt5.QtWidgets import QFileDialog, QVBoxLayout, QGridLayout, QLabel
+from PyQt5.QtWidgets import QFileDialog, QVBoxLayout, QGridLayout, QLabel, QProgressDialog
 from PyQt5 import QtWidgets, QtGui, QtCore, uic
 from PyQt5.QtCore import QThreadPool, Qt, QThread
 from pyOSC3.OSC3 import OSCStreamingClient
@@ -282,6 +282,11 @@ class Window(QMainWindow):
         # initialize mouse selector
         slims_mice = self.slims_client.fetch_models(models.SlimsMouseContent)[-100:]  # grab 100 latest mice from slims
         self.mouse_selector_dialog = MouseSelectorDialog([mouse.barcode for mouse in slims_mice], self.box_letter)
+        # self.load_slims_progress = QProgressDialog()    # create QProgressDialog to update as mouse is loaded
+        # #self.load_slims_progress.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
+        # self.load_slims_progress.setLabelText("Loading in curriculum from slims. This will take a few seconds.")
+        # self.load_slims_progress.setCancelButton(None)
+        # self.load_slims_progress.hide()
         self.mouse_selector_dialog.acceptedMouseID.connect(self.load_slims_mouse)
 
         self._Optogenetics()  # open the optogenetics panel
@@ -634,6 +639,8 @@ class Window(QMainWindow):
         :params mouse_id: mouse id string to load from slims
         """
 
+        self.load_slims_progress.show()
+
         try:
             logging.info(f"Fetching {mouse_id} from Slims.")
             mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
@@ -642,6 +649,7 @@ class Window(QMainWindow):
                 QMessageBox.information(self, "Invalid Subject ID",
                                         f"{mouse_id} is not in Slims. Double check id, and add to Slims if missing",
                                         buttons=QMessageBox.Ok)
+
 
         logging.info(f"Successfully fetched {mouse_id} from Slims.")
 
@@ -681,6 +689,8 @@ class Window(QMainWindow):
             self.fip_model = FiberPhotometry(**self.slims_client.fetch_attachment_content(fip_attachment).json())
             self.fip_widget.apply_schema(self.fip_model)
 
+        logging.info(f"Mouse {mouse_id} curriculum loaded from Slims.", extra={'tags': [self.warning_log_tag]})
+        self.load_slims_progress.hide()
 
     def _session_list(self):
         '''show all sessions of the current animal and load the selected session by drop down list'''
