@@ -2979,8 +2979,8 @@ class AutoTrainDialog(QDialog):
                 )
         
         # Mimic an "ENTER" press event to update the parameters
-        if if_apply_and_lock:
-            self.MainWindow._keyPressEvent()
+        # if if_apply_and_lock:
+        #     self.MainWindow._keyPressEvent()
         
         return widgets_set, widgets_changed
             
