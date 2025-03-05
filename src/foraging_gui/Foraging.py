@@ -49,6 +49,7 @@ from foraging_gui.stage import Stage
 from foraging_gui.bias_indicator import BiasIndicator
 from foraging_gui.warning_widget import WarningWidget
 from foraging_gui.schema_widgets.behavior_parameters_widget import BehaviorParametersWidget
+from foraging_gui.schema_widgets.fib_parameters_widget import FIBParametersWidget
 from foraging_gui.schema_widgets.session_parameters_widget import SessionParametersWidget
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
@@ -77,6 +78,10 @@ from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
     LaserColorFive,
     LaserColorSix,
     SessionControl
+)
+
+from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
+    FiberPhotometry
 )
 
 logger = logging.getLogger(__name__)
@@ -187,6 +192,14 @@ class Window(QMainWindow):
         self.left_valve_open_time = 0.03
         self.right_valve_open_time = 0.03
         self.task_widget.volumeChanged.connect(self.update_valve_open_time)
+
+        # add fip schema widget
+        self.fip_model = FiberPhotometry()
+        self.fip_widget = FIBParametersWidget(self.fip_model)
+        for i, widget in enumerate([self.fip_widget.fip_schema_check_box] +
+                                   list(self.fip_widget.schema_fields_widgets.values())):
+            self.fip_layout.insertWidget(i, widget)
+            self.fip_layout.insertWidget(i, widget)
 
         # when session is ended, save relevant models
         self.sessionEnded.connect(self.save_task_models)
@@ -2407,7 +2420,7 @@ class Window(QMainWindow):
                                                    session_model=self.session_model,
                                                    task_logic=self.task_logic,
                                                    opto_model=self.opto_model,
-                                                   )
+                                                   fip_model=self.fip_model)
             session = generated_metadata._session()
 
             if BackupSave == 0:
@@ -2582,6 +2595,11 @@ class Window(QMainWindow):
             opto_model_path = os.path.join(self.session_model.root_path, f'behavior_optogenetics_model_{id_name}.json')
             self.validate_and_save_model(Optogenetics, self.opto_model, opto_model_path)
 
+        # check if fip ran
+        if self.fip_model.mode is not None:
+            fip_model_path = os.path.join(self.session_model.root_path,
+                                          f'behavior_fiber_photometry_model_{id_name}.json')
+            self.validate_and_save_model(FiberPhotometry, self.fip_model, fip_model_path)
 
     def validate_and_save_model(self, schema: BaseModel, model, path: str):
         """
@@ -3021,7 +3039,7 @@ class Window(QMainWindow):
         '''To visulize the training when loading a session'''
         self.ToInitializeVisual = 1
         Obj = self.Obj
-        self.GeneratedTrials = GenerateTrials(self, self.task_logic, self.session_model, self.opto_model)
+        self.GeneratedTrials = GenerateTrials(self, self.task_logic, self.session_model, self.opto_model, self.fip_model)
         # Iterate over all attributes of the GeneratedTrials object
         for attr_name in dir(self.GeneratedTrials):
             if attr_name in Obj.keys():
@@ -3168,14 +3186,14 @@ class Window(QMainWindow):
             return 0
 
         if self.StartExcitation.isChecked():
-            logging.info('StartExcitation is checked, photometry mode: {}'.format(self.FIPMode.currentText()))
+            logging.info('StartExcitation is checked, photometry mode: {}'.format(self.fip_model.mode))
             self.StartExcitation.setStyleSheet("background-color : green;")
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
                 # Trigger Teensy with the above specified exp mode
-                if self.FIPMode.currentText() == "Normal":
+                if self.fip_model.mode == "Normal":
                     ser.write(b'c')
-                elif self.FIPMode.currentText() == "Axon":
+                elif self.fip_model.mode == "Axon":
                     ser.write(b'e')
                 ser.close()
                 logging.info('Started FIP excitation', extra={'tags': [self.warning_log_tag]})
@@ -3390,6 +3408,7 @@ class Window(QMainWindow):
         self.task_widget.setEnabled(True)
         self.session_widget.setEnabled(True)
         self.Opto_dialog.opto_widget.setEnabled(True)
+        self.fip_widget.setEnabled(True)
 
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully == 0:
@@ -3614,7 +3633,7 @@ class Window(QMainWindow):
                 first_fip_stage = str(self._GetInfoFromSchedule(mouse_id, 'First FP Stage')).split('STAGE_')[-1]
                 current_stage = self.AutoTrain_dialog.stage_in_use.split('STAGE_')[-1]
                 stages = ['nan'] + [ts.name.split('STAGE_')[-1] for ts in TrainingStage] + ['unknown training stage']
-                if fip_is_nan and self.PhotometryB.currentText()=='off':
+                if fip_is_nan and self.fip_model.mode is not None:
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
                                                  'Photometry is set to "on", but the FIP Mode is not in schedule. '
@@ -3628,7 +3647,7 @@ class Window(QMainWindow):
                         # Allow the session to continue, but log error
                         logging.error('Starting session with conflicting FIP information: mouse {}, FIP on, '
                                       'but not in schedule'.format(mouse_id))
-                elif not fip_is_nan and self.PhotometryB.currentText()=='off' and first_fip_stage in stages and \
+                elif not fip_is_nan and self.fip_model.mode is None and first_fip_stage in stages and \
                         stages.index(current_stage) >= stages.index(first_fip_stage):
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
@@ -3645,10 +3664,10 @@ class Window(QMainWindow):
                             'Starting session with conflicting FIP information: mouse {}, FIP off, but schedule lists FIP {}'.format(
                                 mouse_id, fip_mode))
 
-                elif not fip_is_nan and self.PhotometryB.currentText()=='on' and fip_mode != self.PhotometryB.currentText()=='on':
+                elif not fip_is_nan and self.fip_model.mode is not None and fip_mode != self.fip_model.mode:
                     reply = QMessageBox.critical(self,
                                                  'Box {}, Start'.format(self.box_letter),
-                                                 f'FIP Mode is set to {self.PhotometryB.currentText()} but schedule indicate '
+                                                 f'FIP Mode is set to {self.fip_model.mode} but schedule indicate '
                                                  f'FIP Mode is {fip_mode}. Continue anyways?',
                                                  QMessageBox.Yes | QMessageBox.No, )
                     if reply == QMessageBox.No:
@@ -3659,7 +3678,7 @@ class Window(QMainWindow):
                         # Allow the session to continue, but log error
                         logging.error(
                             'Starting session with conflicting FIP information: mouse {}, FIP mode {}, schedule lists {}'.format(
-                                mouse_id, self.PhotometryB.currentText(), fip_mode))
+                                mouse_id, self.fip_model.mode, fip_mode))
 
             if self.StartANewSession == 0:
                 reply = QMessageBox.question(self,
@@ -3721,7 +3740,7 @@ class Window(QMainWindow):
             elif self.session_model.allow_dirty_repo is None:
                 logging.error('Could not check for untracked local changes')
 
-            if self.PhotometryB.currentText()=='on' and (not self.FIP_started):
+            if self.fip_model.mode is not None and (not self.FIP_started):
                 reply = QMessageBox.critical(self,
                                              'Box {}, Start'.format(self.box_letter),
                                              'Photometry is set to "on", but the FIP workflow has not been started',
@@ -3731,7 +3750,7 @@ class Window(QMainWindow):
                 return
 
             # Check if photometry excitation is running or not
-            if self.PhotometryB.currentText()=='on' and (not self.StartExcitation.isChecked()):
+            if self.fip_model.mode is not None and (not self.StartExcitation.isChecked()):
                 logging.warning('photometry is set to "on", but excitation is not running')
 
                 reply = QMessageBox.question(self,
@@ -3782,6 +3801,7 @@ class Window(QMainWindow):
             self.task_widget.setEnabled(False)
             self.session_widget.setEnabled(False)
             self.Opto_dialog.opto_widget.setEnabled(False)
+            self.fip_widget.setEnabled(False)
 
             self.session_run = True   # session has been started
 
@@ -3805,6 +3825,7 @@ class Window(QMainWindow):
             self.task_widget.setEnabled(True)
             self.session_widget.setEnabled(True)
             self.Opto_dialog.opto_widget.setEnabled(True)
+            self.fip_widget.setEnabled(True)
 
             # If the photometry timer is running, stop it
             if self.finish_Timer == 0:
@@ -3871,7 +3892,7 @@ class Window(QMainWindow):
                 self.Camera_dialog.StartRecording.setChecked(True)
             self.SessionStartTime = datetime.now()
             self.Other_SessionStartTime = str(self.SessionStartTime)  # for saving
-            GeneratedTrials = GenerateTrials(self, self.task_logic, self.session_model, self.opto_model)
+            GeneratedTrials = GenerateTrials(self, self.task_logic, self.session_model, self.opto_model, self.fip_model)
             self.GeneratedTrials = GeneratedTrials
             self.StartANewSession = 0
             PlotM = PlotV(win=self, GeneratedTrials=GeneratedTrials, width=5, height=4)
@@ -3948,7 +3969,7 @@ class Window(QMainWindow):
             worker_save = self.worker_save
 
         # collecting the base signal for photometry. Only run once
-        if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and self.PhotometryRun == 0:
+        if self.Start.isChecked() and self.fip_model.mode is not None and self.PhotometryRun == 0:
             logging.info('Starting photometry baseline timer')
             self.finish_Timer = 0
             self.PhotometryRun = 1
@@ -3969,7 +3990,7 @@ class Window(QMainWindow):
                 self.workertimer.moveToThread(self.workertimer_thread)
                 self.workertimer_thread.start()
 
-            self.Time.emit(int(np.floor(float(self.baselinetime.text())*60)))
+            self.Time.emit(int(np.floor(self.fip_model.baseline_time * 60)))
             logging.info('Running photometry baseline', extra={'tags': [self.warning_log_tag]})
 
         self._StartTrialLoop(GeneratedTrials, worker1, worker_save)
@@ -4144,7 +4165,7 @@ class Window(QMainWindow):
 
                 # Check if we are in the photometry baseline period.
                 if (self.finish_Timer == 0) & (
-                        (time.time() - last_trial_start) < (float(self.baselinetime.text()) * 60 + 10)):
+                        (time.time() - last_trial_start) < (self.fip_model.baseline_time * 60 + 10)):
                     # Extra 10 seconds is to avoid any race conditions
                     # We are in the photometry baseline period
                     continue
