@@ -2730,9 +2730,8 @@ class Window(QMainWindow):
 
         # Set ID, clear weight information
         logging.info('User starting a new mouse: {}'.format(mouse_id))
-        self.session_widget.subject_widget.setText(mouse_id)
-        self.session_widget.subject_widget.returnPressed.emit()
         self.TargetRatio.setText('0.85')
+
 
     def _Open_getListOfMice(self):
         '''
@@ -3034,8 +3033,7 @@ class Window(QMainWindow):
         else:
             self.NewSession.setDisabled(False)
         self.StartExcitation.setChecked(False)
-        self.load_tag = 1
-        self.session_widget.subject_widget.returnPressed.emit()  # Mimic the return press event to auto-engage AutoTrain
+        self.load_tag=1
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
