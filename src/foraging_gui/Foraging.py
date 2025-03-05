@@ -694,6 +694,9 @@ class Window(QMainWindow):
             self.fip_model = FiberPhotometry(**self.slims_client.fetch_attachment_content(fip_attachment).json())
 
         logging.info(f"Mouse {mouse_id} curriculum loaded from Slims.", extra={'tags': [self.warning_log_tag]})
+        self.label_curriculum_stage.setText(self.trainer_state.stage.name)
+        self.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
+
         self.load_slims_progress.hide()
         self.modelsChanged.emit()
 
@@ -3403,6 +3406,8 @@ class Window(QMainWindow):
         self.session_widget.setEnabled(True)
         self.Opto_dialog.opto_widget.setEnabled(True)
         self.fip_widget.setEnabled(True)
+
+        self.label_curriculum_stage.setText("")
 
         # add session to slims
         self.write_session_to_slims(self.session_model.subject)

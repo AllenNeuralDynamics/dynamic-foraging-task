@@ -1262,7 +1262,7 @@
     <layout class="QHBoxLayout" name="fip_layout">
     </layout>
    </widget>
-   <widget class="QLabel" name="label_auto_train_stage">
+   <widget class="QLabel" name="label_curriculum_stage">
     <property name="geometry">
      <rect>
       <x>830</x>
@@ -1879,7 +1879,7 @@
    <zorder>StartExcitation</zorder>
    <zorder>StartBleaching</zorder>
    <zorder>AutoTrain</zorder>
-   <zorder>label_auto_train_stage</zorder>
+   <zorder>label_curriculum_stage</zorder>
    <zorder>pushButton_streamlit</zorder>
    <zorder>StartEphysRecording</zorder>
    <zorder>label_65</zorder>
