@@ -648,7 +648,6 @@ class Window(QMainWindow):
         :params mouse_id: mouse id string to load from slims
         """
 
-
         try:
             logging.info(f"Fetching {mouse_id} from Slims.")
             mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
@@ -663,8 +662,6 @@ class Window(QMainWindow):
         logging.info(f"Fetching curriculum, trainer_state, and metrics for {mouse_id} from Slims.")
         self.curriculum, self.trainer_state, metrics = self.trainer.load_data(mouse_id)
         self.task_logic = AindDynamicForagingTaskLogic(**self.trainer_state.stage.task.model_dump())
-        logging.info(f"Applying task logic")
-        #self.task_widget.apply_schema(self.task_logic.task_parameters)
 
         # fetch session and check for session, opto and fip attachments
         logging.info(f"Checking for attachments")
@@ -679,21 +676,17 @@ class Window(QMainWindow):
         self.session_model.experimenter = slims_session_model.experimenter
         self.session_model.subject = slims_session_model.subject
         self.session_model.notes = slims_session_model.notes
-        #self.session_widget.apply_schema(self.session_model)
 
         # update opto_model
         if self.opto_model.experiment_type in attachment_names:
-            logging.info(f"Applying opto model")
             opto_attachment = attachments[attachment_names.index(self.opto_model.experiment_type)]
             self.opto_model = Optogenetics(**self.slims_client.fetch_attachment_content(opto_attachment).json())
-            #self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
 
         # update fip_model
         if self.fip_model.experiment_type in attachment_names:
             logging.info(f"Applying fip model")
             fip_attachment = attachments[attachment_names.index(self.fip_model.experiment_type)]
             self.fip_model = FiberPhotometry(**self.slims_client.fetch_attachment_content(fip_attachment).json())
-            #self.fip_widget.apply_schema(self.fip_model)
 
         logging.info(f"Mouse {mouse_id} curriculum loaded from Slims.", extra={'tags': [self.warning_log_tag]})
         self.load_slims_progress.hide()
