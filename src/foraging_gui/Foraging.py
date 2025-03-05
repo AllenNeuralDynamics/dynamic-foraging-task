@@ -29,7 +29,7 @@ from pykeepass import PyKeePass
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
-from PyQt5.QtWidgets import QFileDialog, QVBoxLayout, QGridLayout, QLabel
+from PyQt5.QtWidgets import QFileDialog, QVBoxLayout, QGridLayout, QLabel, QProgressDialog, QDialog
 from PyQt5 import QtWidgets, QtGui, QtCore, uic
 from PyQt5.QtCore import QThreadPool, Qt, QThread
 from pyOSC3.OSC3 import OSCStreamingClient
@@ -106,6 +106,7 @@ class NumpyEncoder(json.JSONEncoder):
 class Window(QMainWindow):
     Time = QtCore.pyqtSignal(int)  # Photometry timer signal
     sessionEnded = QtCore.pyqtSignal()
+    modelsChanged = QtCore.pyqtSignal()
 
     def __init__(self, parent=None, box_number=1, start_bonsai_ide=True):
         logging.info('Creating Window')
@@ -285,7 +286,17 @@ class Window(QMainWindow):
         # initialize mouse selector
         slims_mice = self.slims_client.fetch_models(models.SlimsMouseContent)[-100:]  # grab 100 latest mice from slims
         self.mouse_selector_dialog = MouseSelectorDialog([mouse.barcode for mouse in slims_mice], self.box_letter)
-        self.mouse_selector_dialog.acceptedMouseID.connect(self.load_slims_mouse)
+        # create label gif to indicate mouse is being loaded
+        movie = QtGui.QMovie("resources/mouse_loading.gif")
+        movie.setScaledSize(QtCore.QSize(200, 200))
+        movie.start()
+        self.load_slims_progress = QLabel()
+        self.load_slims_progress.setWindowFlag(Qt.FramelessWindowHint)
+        self.load_slims_progress.setMovie(movie)
+
+        self.mouse_selector_dialog.acceptedMouseID.connect(self.load_slims_progress.show)
+        self.mouse_selector_dialog.acceptedMouseID.connect(lambda: threading.Thread(target=self.load_slims_mouse,
+                                                                                    kwargs={"mouse_id": self.mouse_selector_dialog.combo.currentText()}).start())
 
         self._Optogenetics()  # open the optogenetics panel
         self._LaserCalibration()  # to open the laser calibration panel
@@ -505,6 +516,9 @@ class Window(QMainWindow):
             self.PositionX.setValidator(double_validator)
             self.Step.setValidator(double_validator)
 
+        # update model widgets if models have changed
+        self.modelsChanged.connect(self.update_model_widgets)
+
     def _set_reference(self):
         '''
         set the reference point for lick spout position in the metadata dialog
@@ -653,10 +667,6 @@ class Window(QMainWindow):
         self.curriculum, self.trainer_state, self.metrics = self.trainer.load_data(mouse_id)
 
         self.task_logic = AindDynamicForagingTaskLogic(**self.trainer_state.stage.task.model_dump())
-        logging.info(f"Applying task logic")
-        self.task_widget.apply_schema(self.task_logic.task_parameters)
-
-
 
         # fetch session and check for session, opto and fip attachments
         logging.info(f"Checking for attachments")
@@ -670,20 +680,22 @@ class Window(QMainWindow):
         self.session_model.experiment = slims_session_model.experiment
         self.session_model.experimenter = slims_session_model.experimenter
         self.session_model.subject = slims_session_model.subject
-        self.session_widget.apply_schema(self.session_model)
+        self.session_model.notes = slims_session_model.notes
 
         # update opto_model
         if self.opto_model.experiment_type in attachment_names:
-            logging.info(f"Applying opto model")
             opto_attachment = attachments[attachment_names.index(self.opto_model.experiment_type)]
             self.opto_model = Optogenetics(**self.slims_client.fetch_attachment_content(opto_attachment).json())
-            self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
+
         # update fip_model
         if self.fip_model.experiment_type in attachment_names:
             logging.info(f"Applying fip model")
             fip_attachment = attachments[attachment_names.index(self.fip_model.experiment_type)]
             self.fip_model = FiberPhotometry(**self.slims_client.fetch_attachment_content(fip_attachment).json())
-            self.fip_widget.apply_schema(self.fip_model)
+
+        logging.info(f"Mouse {mouse_id} curriculum loaded from Slims.", extra={'tags': [self.warning_log_tag]})
+        self.load_slims_progress.hide()
+        self.modelsChanged.emit()
 
     def write_session_to_slims(self, mouse_id):
         """
@@ -2689,6 +2701,16 @@ class Window(QMainWindow):
         self.PhotometryFolder = os.path.join(self.SessionFolder, 'fib')
         self.MetadataFolder = os.path.join(self.SessionFolder, 'metadata-dir')
 
+    def update_model_widgets(self):
+        """
+        Method to update all widget based on pydantic models
+        """
+
+        self.task_widget.apply_schema(self.task_logic.task_parameters)
+        self.session_widget.apply_schema(self.session_model)
+        self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
+        self.fip_widget.apply_schema(self.fip_model)
+
     def save_task_models(self):
         """
         Save session and task model as well as opto and fip if applicable
@@ -3011,7 +3033,7 @@ class Window(QMainWindow):
         '''To visulize the training when loading a session'''
         self.ToInitializeVisual = 1
         Obj = self.Obj
-        self.GeneratedTrials = GenerateTrials(self, self.task_logic, self.session_model, self.opto_model)
+        self.GeneratedTrials = GenerateTrials(self, self.task_logic, self.session_model, self.opto_model, self.fip_model)
         # Iterate over all attributes of the GeneratedTrials object
         for attr_name in dir(self.GeneratedTrials):
             if attr_name in Obj.keys():
@@ -3375,6 +3397,12 @@ class Window(QMainWindow):
         self.Start.setDisabled(False)
         self.TotalWaterWarning.setText('')
         self._set_metadata_enabled(True)
+
+        # enable task model widgets
+        self.task_widget.setEnabled(True)
+        self.session_widget.setEnabled(True)
+        self.Opto_dialog.opto_widget.setEnabled(True)
+        self.fip_widget.setEnabled(True)
 
         # add session to slims
         self.write_session_to_slims(self.session_model.subject)
@@ -3768,7 +3796,13 @@ class Window(QMainWindow):
             # Set Project Name in metadata based on schedule
             self.project_name = self._GetProjectName(mouse_id)
 
-            self.session_run = True  # session has been started
+            # disable task model widgets
+            self.task_widget.setEnabled(False)
+            self.session_widget.setEnabled(False)
+            self.Opto_dialog.opto_widget.setEnabled(False)
+            self.fip_widget.setEnabled(False)
+
+            self.session_run = True   # session has been started
 
         else:
             # Prompt user to confirm stopping trials
@@ -3785,6 +3819,13 @@ class Window(QMainWindow):
                 logging.info('Start button pressed: user continued session')
                 self.Start.setChecked(True)
                 return
+
+            # enable task model widgets
+            self.task_widget.setEnabled(True)
+            self.session_widget.setEnabled(True)
+            self.Opto_dialog.opto_widget.setEnabled(True)
+            self.fip_widget.setEnabled(True)
+
             # If the photometry timer is running, stop it
             if self.finish_Timer == 0:
                 self.ignore_timer = True
@@ -3850,7 +3891,7 @@ class Window(QMainWindow):
                 self.Camera_dialog.StartRecording.setChecked(True)
             self.SessionStartTime = datetime.now()
             self.Other_SessionStartTime = str(self.SessionStartTime)  # for saving
-            GeneratedTrials = GenerateTrials(self, self.task_logic, self.session_model, self.opto_model)
+            GeneratedTrials = GenerateTrials(self, self.task_logic, self.session_model, self.opto_model, self.fip_model)
             self.GeneratedTrials = GeneratedTrials
             self.StartANewSession = 0
             PlotM = PlotV(win=self, GeneratedTrials=GeneratedTrials, width=5, height=4)
