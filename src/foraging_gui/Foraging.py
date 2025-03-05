@@ -9,18 +9,17 @@ import math
 import logging
 import requests
 from hashlib import md5
+from typing import Literal
+from pydantic import BaseModel
 
 import logging_loki
 import socket
 import harp
 import threading
-from random import randint
 import yaml
-import copy
 import shutil
 from pathlib import Path
 from datetime import date, datetime, timezone, timedelta
-import csv
 from aind_slims_api import SlimsClient
 from aind_slims_api import models
 import serial
@@ -49,13 +48,23 @@ from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScal
 from foraging_gui.stage import Stage
 from foraging_gui.bias_indicator import BiasIndicator
 from foraging_gui.warning_widget import WarningWidget
+from foraging_gui.schema_widgets.behavior_parameters_widget import BehaviorParametersWidget
+from foraging_gui.schema_widgets.session_parameters_widget import SessionParametersWidget
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
 from foraging_gui.settings_model import DFTSettingsModel, BonsaiSettingsModel
 from aind_data_schema.core.session import Session
-from aind_data_schema_models.modalities import Modality
 from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_auto_train.schema.task import TrainingStage
+
+from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
+    AindDynamicForagingTaskLogic,
+    AindDynamicForagingTaskParameters,
+    AutoWater,
+    AutoStop,
+    AutoBlock,
+    Warmup
+)
 
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear() # clear handlers so console output can be configured
@@ -73,6 +82,7 @@ class NumpyEncoder(json.JSONEncoder):
 
 class Window(QMainWindow):
     Time = QtCore.pyqtSignal(int) # Photometry timer signal
+    sessionEnded = QtCore.pyqtSignal()
 
     def __init__(self, parent=None,box_number=1,start_bonsai_ide=True):
         logging.info('Creating Window')
@@ -119,20 +129,51 @@ class Window(QMainWindow):
         self._LoadUI()
 
         # create AINDBehaviorSession model to be used and referenced for session info
-        self.behavior_session_model = AindBehaviorSessionModel(
-            experiment=self.Task.currentText(),
-            experimenter=[self.Experimenter.text()],
-            date=datetime.now(),   # update when folders are created
-            root_path='',         # update when created
-            session_name= '',   # update when date and subject are filled in
-            subject=self.ID.text(),
+        self.session_model = AindBehaviorSessionModel(
+            experiment="Coupled Baiting",
+            experimenter=["the ghost in the shell"],
+            date=datetime.now(),  # update when folders are created
+            root_path="",  # update when created
+            session_name="",  # update when date and subject are filled in
+            subject="0",
             experiment_version=foraging_gui.__version__,
-            notes=self.ShowNotes.toPlainText(),
-            commit_hash= subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip(),
+            notes="",
+            commit_hash=subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip(),
             allow_dirty_repo=
-            subprocess.check_output(['git','diff-index','--name-only', 'HEAD']).decode('ascii').strip() != '',
+            subprocess.check_output(['git', 'diff-index', '--name-only', 'HEAD']).decode('ascii').strip() != '',
             skip_hardware_validation=True
         )
+        self.session_widget = SessionParametersWidget(self.session_model)
+        for i, widget in enumerate(self.session_widget.schema_fields_widgets.values()):
+            self.session_param_layout.insertWidget(i, widget)
+        self.notes_layout.insertWidget(0, self.session_widget.schema_fields_widgets["notes"])
+
+        self.task_logic = AindDynamicForagingTaskLogic(
+            task_parameters=AindDynamicForagingTaskParameters(
+                auto_water=AutoWater(),
+                auto_stop=AutoStop(),
+                auto_block=AutoBlock(),
+                warmup=Warmup()
+            )
+        )
+        self.RewardFamilies = [[[8, 1], [6, 1], [3, 1], [1, 1]],
+                               [[8, 1], [1, 1]], [[1, 0], [.9, .1], [.8, .2], [.7, .3], [.6, .4], [.5, .5]],
+                               [[6, 1], [3, 1], [1, 1]]]
+        self.task_widget = BehaviorParametersWidget(self.task_logic.task_parameters,
+                                                    reward_families=self.RewardFamilies)
+        self.task_parameter_scroll_area.setWidget(self.task_widget)
+        self.task_widget.taskUpdated.connect(self.update_session_task)
+        self.update_session_task("coupled")     # initialize to coupled
+        # update reward pairs when task has changed
+        self.task_widget.taskUpdated.connect(lambda task: self._ShowRewardPairs())
+        self.task_widget.ValueChangedInside.connect(lambda name: self._ShowRewardPairs())
+        # initialize valve times and update valve times when reward volumes change
+        self.left_valve_open_time = 0.03
+        self.right_valve_open_time = 0.03
+        self.task_widget.volumeChanged.connect(self.update_valve_open_time)
+
+        # when session is ended, save relevant models
+        self.sessionEnded.connect(self.save_task_models)
 
         # add warning_widget to layout and set color
         self.warning_widget = WarningWidget(log_tag=self.warning_log_tag,
@@ -209,16 +250,13 @@ class Window(QMainWindow):
         self._InitializeMotorStage()
         self._load_stage()
         self._Metadata()
-        self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self.WaterPerRewardedTrial=0.005
         self._ShowRewardPairs() # show reward pairs
         self._GetTrainingParameters() # get initial training parameters
         self.connectSignalsSlots()
-        self._Task()
-        self.keyPressEvent()
-        self._WaterVolumnManage2()
+        self.update_valve_open_time("Left")
+        self.update_valve_open_time("Right")
         self._LickSta()
-        self._warmup()
         self.CreateNewFolder=1 # to create new folder structure (a new session)
         self.ManualWaterVolume=[0,0]
         self._StopPhotometry() # Make sure photoexcitation is stopped
@@ -240,6 +278,33 @@ class Window(QMainWindow):
             '''
             self._ReconnectBonsai()
         logging.info('Start up complete')
+
+    def update_session_task(self, task_type: Literal["coupled", "uncoupled", "rewardN"]):
+        """
+        Configure session task based on task parameters configured
+        :param task_type: task type currently configured
+        """
+
+        if task_type == "coupled":
+            for i in range(2, 5):
+                self.session_widget.experiment_widget.model().item(i).setEnabled(False)
+            for i in range(2):
+                self.session_widget.experiment_widget.model().item(i).setEnabled(True)
+            self.session_widget.experiment_widget.setCurrentIndex(0)
+
+        elif task_type == "uncoupled":
+            for i in range(5):
+                if i in [0, 1, 4]:
+                    self.session_widget.experiment_widget.model().item(i).setEnabled(False)
+                else:
+                    self.session_widget.experiment_widget.model().item(i).setEnabled(True)
+                self.session_widget.experiment_widget.setCurrentIndex(2)
+        else:
+            for i in range(4):
+                self.session_widget.experiment_widget.model().item(i).setEnabled(False)
+
+            self.session_widget.experiment_widget.model().item(4).setEnabled(True)
+            self.session_widget.experiment_widget.setCurrentIndex(4)
 
     def _load_rig_metadata(self):
         '''Load the latest rig metadata'''
@@ -296,7 +361,6 @@ class Window(QMainWindow):
         uic.loadUi(self.default_ui, self)
         if self.default_ui=='ForagingGUI.ui':
             logging.info('Using ForagingGUI.ui interface')
-            self.label_date.setText(str(date.today()))
             self.default_warning_color="purple"
             self.default_text_color="purple"
             self.default_text_background_color='purple'
@@ -339,41 +403,20 @@ class Window(QMainWindow):
         self.Save.clicked.connect(self._Save)
         self.Clear.clicked.connect(self._Clear)
         self.Start.clicked.connect(self._Start)
-        self.GiveLeft.clicked.connect(self._GiveLeft)
-        self.GiveRight.clicked.connect(self._GiveRight)
+        self.GiveLeft.clicked.connect(lambda: self.give_manual_water("Left"))
+        self.GiveRight.clicked.connect(lambda: self.give_manual_water("Right"))
         self.NewSession.clicked.connect(self._NewSession)
-        self.AutoReward.clicked.connect(self._AutoReward)
         self.StartFIP.clicked.connect(self._StartFIP)
         self.StartExcitation.clicked.connect(self._StartExcitation)
         self.StartBleaching.clicked.connect(self._StartBleaching)
-        self.NextBlock.clicked.connect(self._NextBlock)
         self.OptogeneticsB.activated.connect(self._OptogeneticsB) # turn on/off optogenetics
         self.OptogeneticsB.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('Optogenetics',self.OptogeneticsB.currentText()))
         self.PhotometryB.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('Photometry',self.PhotometryB.currentText()))
         self.FIPMode.currentIndexChanged.connect(lambda: self._QComboBoxUpdate('FIPMode', self.FIPMode.currentText()))
-        self.AdvancedBlockAuto.currentIndexChanged.connect(self._keyPressEvent)
-        self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
-        self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
-        self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
-        # Connect to ID change in the mainwindow
-        self.ID.returnPressed.connect(
-            lambda: self.AutoTrain_dialog.update_auto_train_lock(engaged=False)
-        )
-        self.ID.returnPressed.connect(
-            lambda: self.AutoTrain_dialog.update_auto_train_fields(
-                subject_id=self.behavior_session_model.subject,
-                auto_engage=self.auto_engage,
-                )
-            )
-        self.AutoTrain.clicked.connect(self._auto_train_clicked)
         self.pushButton_streamlit.clicked.connect(self._open_mouse_on_streamlit)
-        self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
-        self.Task.currentIndexChanged.connect(self._Task)
-        self.AdvancedBlockAuto.currentIndexChanged.connect(self._AdvancedBlockAuto)
         self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
         self.WeightAfter.textChanged.connect(self._PostWeightChange)
         self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
-        self.Randomness.currentIndexChanged.connect(self._Randomness)
         self.actionTemporary_Logging.triggered.connect(self._startTemporaryLogging)
         self.actionFormal_logging.triggered.connect(self._startFormalLogging)
         self.actionOpen_logging_folder.triggered.connect(self._OpenLoggingFolder)
@@ -382,10 +425,6 @@ class Window(QMainWindow):
         self.actionOpen_rig_metadata_folder.triggered.connect(self._OpenRigMetadataFolder)
         self.actionOpen_metadata_dialog_folder.triggered.connect(self._OpenMetadataDialogFolder)
         self.actionOpen_video_folder.triggered.connect(self._OpenVideoFolder)
-        self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
-        self.RightValue.textChanged.connect(self._WaterVolumnManage1)
-        self.LeftValue_volume.textChanged.connect(self._WaterVolumnManage2)
-        self.RightValue_volume.textChanged.connect(self._WaterVolumnManage2)
         self.MoveXP.clicked.connect(self._MoveXP)
         self.MoveYP.clicked.connect(self._MoveYP)
         self.MoveZP.clicked.connect(self._MoveZP)
@@ -394,8 +433,7 @@ class Window(QMainWindow):
         self.MoveZN.clicked.connect(self._MoveZN)
         self.StageStop.clicked.connect(self._StageStop)
         self.GetPositions.clicked.connect(self._GetPositions)
-        self.ShowNotes.setStyleSheet("background-color: #F0F0F0;")
-        self.warmup.currentIndexChanged.connect(self._warmup)
+        self.session_widget.notes_widget.setStyleSheet("background-color: #F0F0F0;")
         self.Sessionlist.currentIndexChanged.connect(self._session_list)
         self.SessionlistSpin.textChanged.connect(self._session_list_spin)
         self.StartEphysRecording.clicked.connect(self._StartEphysRecording)
@@ -405,38 +443,22 @@ class Window(QMainWindow):
         self.Opto_dialog.laser_1_calibration_power.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_2_calibration_power.textChanged.connect(self._toggle_save_color)
 
-        # update parameters in behavior session model if widgets change
-        self.Task.currentTextChanged.connect(lambda task: setattr(self.behavior_session_model, 'experiment', task))
-        self.Experimenter.textChanged.connect(lambda text: setattr(self.behavior_session_model, 'experimenter', [text]))
-        self.ID.textChanged.connect(lambda subject: setattr(self.behavior_session_model, 'subject', subject))
-        self.ShowNotes.textChanged.connect(lambda: setattr(self.behavior_session_model, 'notes',
-                                                           self.ShowNotes.toPlainText()))
+        # add validator for weight and water fields
+        double_validator = QtGui.QDoubleValidator()
+        self.BaseWeight.setValidator(double_validator)
+        self.TargetWeight.setValidator(double_validator)
+        self.TargetRatio.setValidator(double_validator)
+        self.TotalWater.setValidator(double_validator)
+        self.WeightAfter.setValidator(double_validator)
+        self.SuggestedWater.setValidator(double_validator)
 
-
-        # Set manual water volume to earned reward and trigger update if changed
-        for side in ['Left', 'Right']:
-            reward_volume_widget = getattr(self, f'{side}Value_volume')
-            manual_volume_widget = getattr(self, f'GiveWater{side[0]}_volume')
-            manual_volume_widget.setValue(reward_volume_widget.value())
-            reward_volume_widget.valueChanged.connect(manual_volume_widget.setValue)
-
-            reward_time_widget = getattr(self, f'{side}Value')
-            manual_time_widget = getattr(self, f'GiveWater{side[0]}')
-            manual_time_widget.setValue(reward_time_widget.value())
-            reward_time_widget.valueChanged.connect(manual_time_widget.setValue)
-
-        # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
-        for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
-            # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
-            for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
-                child.textChanged.connect(self._CheckTextChange)
-            for child in container.findChildren((QtWidgets.QComboBox)):
-                child.currentIndexChanged.connect(self.keyPressEvent)
-        # Opto_dialog can not detect natural enter press, so returnPressed is used here. 
-        for container in [self.Opto_dialog,self.Metadata_dialog]:
-            # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
-            for child in container.findChildren((QtWidgets.QLineEdit)):
-                child.returnPressed.connect(self.keyPressEvent)
+        # add validator for stage position fields if using newscale stage widget
+        if not hasattr(self, "stage_widget"):
+            double_validator = QtGui.QIntValidator()
+            self.PositionZ.setValidator(double_validator)
+            self.PositionY.setValidator(double_validator)
+            self.PositionX.setValidator(double_validator)
+            self.Step.setValidator(double_validator)
 
     def _set_reference(self):
         '''
@@ -468,7 +490,7 @@ class Window(QMainWindow):
                 self._toggle_color(self.StartEphysRecording)
                 return
 
-        EphysControl=EphysRecording(open_ephys_machine_ip_address=self.open_ephys_machine_ip_address,mouse_id=self.behavior_session_model.subject)
+        EphysControl=EphysRecording(open_ephys_machine_ip_address=self.open_ephys_machine_ip_address,mouse_id=self.session_model.subject)
         if self.StartEphysRecording.isChecked():
             try:
                 if EphysControl.get_status()['mode']=='RECORD':
@@ -714,78 +736,6 @@ class Window(QMainWindow):
 
             # only check drop frames once each session
             self.to_check_drop_frames=0
-
-    def _warmup(self):
-        '''warm up the session before starting.
-            Use warm up with caution. Usually, it is only used for the first time training. 
-            Turn on the warm up only when all parameters are set correctly, otherwise it would revert 
-            to some incorrect parameters when it was turned off.
-        '''
-        # set warm up parameters
-        if self.warmup.currentText()=='on':
-            # get parameters before the warm up is on;WarmupBackup_ stands for Warmup backup, which are parameters before warm-up.
-            self._GetTrainingParameters(prefix='WarmupBackup_')
-            self.warm_min_trial.setEnabled(True)
-            self.warm_min_finish_ratio.setEnabled(True)
-            self.warm_max_choice_ratio_bias.setEnabled(True)
-            self.warm_windowsize.setEnabled(True)
-            self.label_64.setEnabled(True)
-            self.label_116.setEnabled(True)
-            self.label_117.setEnabled(True)
-            self.label_118.setEnabled(True)
-
-            # set warm up default parameters
-            self.Task.setCurrentIndex(self.Task.findText('Coupled Baiting'))
-            self.BaseRewardSum.setText('1')
-            self.RewardFamily.setText('3')
-            self.RewardPairsN.setText('1')
-
-            self.BlockBeta.setText('1')
-            self.BlockMin.setText('1')
-            self.BlockMax.setText('1')
-            self.BlockMinReward.setText('1')
-
-            self.AutoReward.setChecked(True)
-            self._AutoReward()
-            self.AutoWaterType.setCurrentIndex(self.AutoWaterType.findText('Natural'))
-            self.Multiplier.setText('0.8')
-            self.Unrewarded.setText('0')
-            self.Ignored.setText('0')
-            # turn advanced block auto off
-            self.AdvancedBlockAuto.setCurrentIndex(self.AdvancedBlockAuto.findText('off'))
-            self._ShowRewardPairs()
-        elif self.warmup.currentText()=='off':
-            # set parameters back to the previous parameters before warm up
-            self._revert_to_previous_parameters()
-            self.warm_min_trial.setEnabled(False)
-            self.warm_min_finish_ratio.setEnabled(False)
-            self.warm_max_choice_ratio_bias.setEnabled(False)
-            self.warm_windowsize.setEnabled(False)
-            self.label_64.setEnabled(False)
-            self.label_116.setEnabled(False)
-            self.label_117.setEnabled(False)
-            self.label_118.setEnabled(False)
-            self._ShowRewardPairs()
-
-    def _revert_to_previous_parameters(self):
-        '''reverse to previous parameters before warm up'''
-        # get parameters before the warm up is on
-        parameters={}
-        for attr_name in dir(self):
-            if attr_name.startswith('WarmupBackup_') and attr_name!='WarmupBackup_' and attr_name!='WarmupBackup_warmup':
-                parameters[attr_name.replace('WarmupBackup_','')]=getattr(self,attr_name)
-        widget_dict = {w.objectName(): w for w in self.TrainingParameters.findChildren((QtWidgets.QPushButton,QtWidgets.QLineEdit,QtWidgets.QTextEdit, QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-        widget_dict['Task']=self.Task
-        try:
-            for key in widget_dict.keys():
-                self._set_parameters(key,widget_dict,parameters)
-        except Exception as e:
-            # Catch the exception and log error information
-            logging.error(traceback.format_exc())
-
-    def _keyPressEvent(self):
-        # press enter to confirm parameters change
-        self.keyPressEvent()
 
     def _CheckStageConnection(self):
         '''get the current position of the stage'''
@@ -1436,7 +1386,7 @@ class Window(QMainWindow):
             mouse_pk=mouse.pk,
             date=session.session_start_time,
             weight_g=session.animal_weight_post,
-            operator=self.behavior_session_model.experimenter[0],
+            operator=self.session_model.experimenter[0],
             water_earned_ml=water['water_in_session_foraging'],
             water_supplement_delivered_ml=water['water_after_session'],
             water_supplement_recommended_ml=None,
@@ -1707,97 +1657,39 @@ class Window(QMainWindow):
         '''Do not restart a session after saving'''
         self._Save(SaveAs=1)
 
-    def _WaterVolumnManage1(self):
-        '''Change the water volume based on the valve open time'''
-        self.LeftValue.textChanged.disconnect(self._WaterVolumnManage1)
-        self.RightValue.textChanged.disconnect(self._WaterVolumnManage1)
-        self.LeftValue_volume.textChanged.disconnect(self._WaterVolumnManage2)
-        self.RightValue_volume.textChanged.disconnect(self._WaterVolumnManage2)
+    def update_valve_open_time(self, valve: Literal["Left", "Right"]):
+        """
+        Change the valve open time based on the water volume
+        :param valve: valve to update
+        """
+
         # use the latest calibration result
         if hasattr(self, 'WaterCalibration_dialog'):
             if hasattr(self.WaterCalibration_dialog, 'PlotM'):
-                if  hasattr(self.WaterCalibration_dialog.PlotM, 'FittingResults'):
-                    FittingResults=self.WaterCalibration_dialog.PlotM.FittingResults
-                    tag=1
-        if tag==1:
-            self._GetLatestFitting(FittingResults)
-            self._ValvetimeVolumnTransformation(widget2=self.LeftValue_volume,widget1=self.LeftValue,direction=1,valve='Left')
-            self._ValvetimeVolumnTransformation(widget2=self.RightValue_volume,widget1=self.RightValue,direction=1,valve='Right')
-            self.LeftValue_volume.setEnabled(True)
-            self.RightValue_volume.setEnabled(True)
-            self.label_28.setEnabled(True)
-            self.label_29.setEnabled(True)
-        else:
-            self.LeftValue_volume.setEnabled(False)
-            self.RightValue_volume.setEnabled(False)
-            self.label_28.setEnabled(False)
-            self.label_29.setEnabled(False)
-        self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
-        self.RightValue.textChanged.connect(self._WaterVolumnManage1)
-        self.LeftValue_volume.textChanged.connect(self._WaterVolumnManage2)
-        self.RightValue_volume.textChanged.connect(self._WaterVolumnManage2)
-
-    def _WaterVolumnManage2(self):
-        '''Change the valve open time based on the water volume'''
-        self.LeftValue.textChanged.disconnect(self._WaterVolumnManage1)
-        self.RightValue.textChanged.disconnect(self._WaterVolumnManage1)
-        self.LeftValue_volume.textChanged.disconnect(self._WaterVolumnManage2)
-        self.RightValue_volume.textChanged.disconnect(self._WaterVolumnManage2)
-        # use the latest calibration result
-        if hasattr(self, 'WaterCalibration_dialog'):
-            if hasattr(self.WaterCalibration_dialog, 'PlotM'):
-                if  hasattr(self.WaterCalibration_dialog.PlotM, 'FittingResults'):
-                    FittingResults=self.WaterCalibration_dialog.PlotM.FittingResults
-                    tag=1
-        if tag==1:
-            self._GetLatestFitting(FittingResults)
-            self._ValvetimeVolumnTransformation(widget1=self.LeftValue_volume,widget2=self.LeftValue,direction=-1,valve='Left')
-            self._ValvetimeVolumnTransformation(widget1=self.RightValue_volume,widget2=self.RightValue,direction=-1,valve='Right')
-        else:
-            self.LeftValue_volume.setEnabled(False)
-            self.RightValue_volume.setEnabled(False)
-            self.label_28.setEnabled(False)
-            self.label_29.setEnabled(False)
-        self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
-        self.RightValue.textChanged.connect(self._WaterVolumnManage1)
-        self.LeftValue_volume.textChanged.connect(self._WaterVolumnManage2)
-        self.RightValue_volume.textChanged.connect(self._WaterVolumnManage2)
-
-    def _ValvetimeVolumnTransformation(self,widget1,widget2,direction,valve):
-        '''Transformation between valve open time the the water volume'''
-        # widget1 is the source widget and widget2 is the target widget
-        try:
-            if valve not in self.latest_fitting:
-                # disable the widget
-                if direction==1:
-                    widget2.setEnabled(False)
-                elif direction==-1:
-                    widget1.setEnabled(False)
-                return
-            else:
-                widget2.setEnabled(True)
-                widget1.setEnabled(True)
-            if direction==1:
-                widget2.setValue(float(widget1.text())*self.latest_fitting[valve][0]+self.latest_fitting[valve][1])
-            elif direction==-1:
-                widget2.setValue((float(widget1.text())-self.latest_fitting[valve][1])/self.latest_fitting[valve][0])
-        except Exception as e:
-            logging.error(traceback.format_exc())
-
-    def _GetLatestFitting(self,FittingResults):
-        '''Get the latest fitting results from water calibration'''
-        latest_fitting={}
-        sorted_dates = sorted(FittingResults.keys(), key=self._custom_sort_key)
-        sorted_dates=sorted_dates[::-1]
+                if hasattr(self.WaterCalibration_dialog.PlotM, 'FittingResults'):
+                    self.set_water_calibration_latest_fitting(self.WaterCalibration_dialog.PlotM.FittingResults)
+                    volume = getattr(self.task_logic.task_parameters.reward_size, f"{valve.lower()}_value_volume")
+                    valve_time = (volume - self.latest_fitting[valve][1]) / self.latest_fitting[valve][0]
+                    setattr(self, f"{valve.lower()}_open_time", valve_time)
+                    getattr(self, f'GiveWater{valve[0]}').setValue(valve_time)
+                    getattr(self, f'GiveWater{valve[0]}_volume').setValue(volume)
+    def set_water_calibration_latest_fitting(self, fitting_results: dict):
+        """
+        Set the latest fitting results from water calibration
+        :param fitting_results: dictionary containing the water calibration values
+        """
+        latest_fitting = {}
+        sorted_dates = sorted(fitting_results.keys(), key=self._custom_sort_key)
+        sorted_dates = sorted_dates[::-1]
         for current_date in sorted_dates:
-            if 'Left' in FittingResults[current_date]:
-                latest_fitting['Left']=FittingResults[current_date]['Left']
+            if 'Left' in fitting_results[current_date]:
+                latest_fitting['Left'] = fitting_results[current_date]['Left']
                 break
         for current_date in sorted_dates:
-            if 'Right' in FittingResults[current_date]:
-                latest_fitting['Right']=FittingResults[current_date]['Right']
+            if 'Right' in fitting_results[current_date]:
+                latest_fitting['Right'] = fitting_results[current_date]['Right']
                 break
-        self.latest_fitting=latest_fitting
+        self.latest_fitting = latest_fitting
 
     def _OpenBehaviorFolder(self):
         '''Open the the current behavior folder'''
@@ -1806,7 +1698,7 @@ class Window(QMainWindow):
             folder_name = os.path.dirname(self.SaveFileJson)
             subprocess.Popen(['explorer', folder_name])
         elif hasattr(self, 'default_saveFolder'):
-            AnimalFolder = os.path.join(self.default_saveFolder, self.current_box, self.behavior_session_model.subject)
+            AnimalFolder = os.path.join(self.default_saveFolder, self.current_box, self.session_model.subject)
             logging.warning(f'Save folder unspecified, so opening {AnimalFolder}')
             subprocess.Popen(['explorer', AnimalFolder])
         else:
@@ -1890,255 +1782,20 @@ class Window(QMainWindow):
                         widget.setChecked(bool(value[-1]))
                     elif loading_parameters_type==1:
                         widget.setChecked(value)
-                    self._AutoReward()
         else:
             widget = widget_dict[key]
             if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
                 pass
                 #widget.clear()
 
-    def _Randomness(self):
-        '''enable/disable some fields in the Block/Delay Period/ITI'''
-        if self.Randomness.currentText()=='Exponential':
-            self.label_14.setEnabled(True)
-            self.label_18.setEnabled(True)
-            self.label_39.setEnabled(True)
-            self.BlockBeta.setEnabled(True)
-            self.DelayBeta.setEnabled(True)
-            self.ITIBeta.setEnabled(True)
-            # if self.Task.currentText()!='RewardN':
-            #     self.BlockBeta.setStyleSheet("color: black;border: 1px solid gray;background-color: white;")
-        elif self.Randomness.currentText()=='Even':
-            self.label_14.setEnabled(False)
-            self.label_18.setEnabled(False)
-            self.label_39.setEnabled(False)
-            self.BlockBeta.setEnabled(False)
-            self.DelayBeta.setEnabled(False)
-            self.ITIBeta.setEnabled(False)
-            # if self.Task.currentText()!='RewardN':
-            #     border_color = "rgb(100, 100, 100,80)"
-            #     border_style = "1px solid " + border_color
-            #     self.BlockBeta.setStyleSheet(f"color: gray;border:{border_style};background-color: rgba(0, 0, 0, 0);")
-
-    def _AdvancedBlockAuto(self):
-        '''enable/disable some fields in the AdvancedBlockAuto'''
-        if self.AdvancedBlockAuto.currentText()=='off':
-            self.label_54.setEnabled(False)
-            self.label_60.setEnabled(False)
-            self.SwitchThr.setEnabled(False)
-            self.PointsInARow.setEnabled(False)
-        else:
-            self.label_54.setEnabled(True)
-            self.label_60.setEnabled(True)
-            self.SwitchThr.setEnabled(True)
-            self.PointsInARow.setEnabled(True)
 
     def _QComboBoxUpdate(self, parameter,value):
         logging.info('Field updated: {}:{}'.format(parameter, value))
 
-
-    def keyPressEvent(self, event=None,allow_reset=False):
-        '''
-            Enter press to allow change of parameters
-            allow_reset (bool) allows the Baseweight etc. parameters to be reset to the empty string
-        '''
-        try:
-            if self.actionTime_distribution.isChecked()==True:
-                self.PlotTime._Update(self)
-        except Exception as e:
-            logging.error(traceback.format_exc())
-
-        # move newscale stage
-        if hasattr(self,'current_stage'):
-            if (self.PositionX.text() != '')and (self.PositionY.text() != '')and (self.PositionZ.text() != ''):
-                try:
-                    self.StageStop.click
-                    self.current_stage.move_absolute_3d(float(self.PositionX.text()),float(self.PositionY.text()),float(self.PositionZ.text()))
-                except Exception as e:
-                    logging.error(traceback.format_exc())
-        # Get the parameters before change
-        if hasattr(self, 'GeneratedTrials') and self.ToInitializeVisual==0: # use the current GUI paramters when no session starts running
-            Parameters=self.GeneratedTrials
-        else:
-            Parameters=self
-        if event is None or not isinstance(event, QtGui.QKeyEvent):
-            event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, Qt.Key_Return, Qt.KeyboardModifiers())
-        if (event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter):
-            # handle the return key press event here
-            logging.info('processing parameter changes')
-            # prevent the default behavior of the return key press event
-            event.accept()
-            self.UpdateParameters=1 # Changes are allowed
-            # change color to black
-            for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
-                # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
-                for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
-                    if child.objectName()=='qt_spinbox_lineedit':
-                        continue
-
-                    if not (hasattr(self, 'AutoTrain_dialog') and self.AutoTrain_dialog.auto_train_engaged):
-                        # Only run _Task again if AutoTrain is NOT engaged
-                        # To avoid the _Task() function overwriting the AutoTrain UI locks
-                        # resolves https://github.com/AllenNeuralDynamics/dynamic-foraging-task/issues/239
-                        child.setStyleSheet('color: black;')
-                        child.setStyleSheet('background-color: white;')
-                        self._Task()
-
-                    if child.objectName() in {'WeightAfter','LickSpoutDistance','ModuleAngle','ArcAngle','ProtocolID','Stick_RotationAngle','LickSpoutReferenceX','LickSpoutReferenceY','LickSpoutReferenceZ','LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','Stick_ArcAngle','Stick_ModuleAngle','RotationAngle','ManipulatorX','ManipulatorY','ManipulatorZ','ProbeTarget','RigMetadataFile','IACUCProtocol','Experimenter','TotalWater','ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
-                        continue
-                    if child.objectName()=='UncoupledReward':
-                        Correct=self._CheckFormat(child)
-                        if Correct ==0: # incorrect format; don't change
-                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                        continue
-                    if ((child.objectName() in ['PositionX','PositionY','PositionZ','SuggestedWater','BaseWeight','TargetWeight','','ConditionP_5','ConditionP_6','Duration_5','Duration_6','OffsetEnd_5','OffsetEnd_6','OffsetStart_5','OffsetStart_6','Probability_5','Probability_6','PulseDur_5','PulseDur_6','RD_5','RD_6']) and
-                        (child.text() == '')):
-                        # These attributes can have the empty string, but we can't set the value as the empty string, unless we allow resets
-                        if allow_reset:
-                            continue
-                        if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
-                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                        continue
-                    if (child.objectName() in ['LatestCalibrationDate','SessionlistSpin']):
-                        continue
-
-
-                    # check for empty string condition
-                    try:
-                        float(child.text())
-                    except Exception as e:
-                        # Invalid float. Do not change the parameter, reset back to previous value
-                        logging.warning('Cannot convert input to float: {}, \'{}\''.format(child.objectName(),child.text()))
-                        if isinstance(child, QtWidgets.QDoubleSpinBox):
-                            child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
-                        elif isinstance(child, QtWidgets.QSpinBox):
-                            child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
-                        else:
-                            if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
-                                child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                    else:
-                        if hasattr(Parameters, 'TP_'+child.objectName()) and child.objectName()!='':
-                            # If this parameter changed, add the change to the log
-                            old = getattr(Parameters,'TP_'+child.objectName())
-                            if old != '':
-                                old = float(old)
-                            new = float(child.text())
-                            if new != old:
-                                logging.info('Changing parameter: {}, {} -> {}'.format(child.objectName(), old,new))
-
-            # update the current training parameters
-            self._GetTrainingParameters()
-
-    def _CheckTextChange(self):
-        '''Check if the text change is reasonable'''
-        # Get the parameters before change
-        if hasattr(self, 'GeneratedTrials'):
-            Parameters=self.GeneratedTrials
-        else:
-            Parameters=self
-        for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
-            # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
-            for child in container.findChildren((QtWidgets.QLineEdit,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
-                if child.objectName()=='qt_spinbox_lineedit' or child.isEnabled()==False: # I don't understand where the qt_spinbox_lineedit comes from.
-                    continue
-                if (child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum') and (child.text()!=''):
-                    Correct=self._CheckFormat(child)
-                    if Correct ==0: # incorrect format; don't change
-                        child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                    self._ShowRewardPairs()
-                try:
-                    if getattr(Parameters, 'TP_'+child.objectName())!=child.text() :
-                        # Changes are not allowed until press is typed except for PositionX, PositionY and PositionZ
-                        if child.objectName() not in ('PositionX', 'PositionY', 'PositionZ'):
-                            self.UpdateParameters = 0
-
-                        self.Continue=0
-                        if child.objectName() in {'LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','ProbeTarget','RigMetadataFile','Experimenter', 'UncoupledReward', 'ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
-                            child.setStyleSheet(f'color: {self.default_text_color};')
-                            self.Continue=1
-                        if child.text()=='': # If empty, change background color and wait for confirmation
-                            self.UpdateParameters=0
-                            child.setStyleSheet(f'background-color: {self.default_text_background_color};')
-                            self.Continue=1
-                        if child.objectName() in {'RunLength','WindowSize','StepSize'}:
-                            if child.text()=='':
-                                child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
-                                child.setStyleSheet('color: black;')
-                                child.setStyleSheet('background-color: white;')
-                        if self.Continue==1:
-                            continue
-                        child.setStyleSheet(f'color: {self.default_text_color};')
-                        try:
-                            # it's valid float
-                            float(child.text())
-                        except Exception as e:
-                            #logging.error(traceback.format_exc())
-                            # Invalid float. Do not change the parameter
-                            if child.objectName() in ['BaseWeight', 'WeightAfter']:
-                                # Strip the last character which triggered the invalid float
-                                child.setText(child.text()[:-1])
-                                continue
-                            elif isinstance(child, QtWidgets.QDoubleSpinBox):
-                                child.setValue(float(getattr(Parameters, 'TP_'+child.objectName())))
-                            elif isinstance(child, QtWidgets.QSpinBox):
-                                child.setValue(int(getattr(Parameters, 'TP_'+child.objectName())))
-                            else:
-                                child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                            child.setText(getattr(Parameters, 'TP_'+child.objectName()))
-                            child.setStyleSheet('color: black;')
-                            self.UpdateParameters=0
-                    else:
-                        child.setStyleSheet('color: black;')
-                        child.setStyleSheet('background-color: white;')
-                except Exception as e:
-                    #logging.error(traceback.format_exc())
-                    pass
-
-    def _CheckFormat(self,child):
-        '''Check if the input format is correct'''
-        if child.objectName()=='RewardFamily': # When we change the RewardFamily, sometimes the RewardPairsN is larger than available reward pairs in this family.
-            try:
-                self.RewardFamilies[int(self.RewardFamily.text())-1]
-                if int(self.RewardPairsN.text())>len(self.RewardFamilies[int(self.RewardFamily.text())-1]):
-                    self.RewardPairsN.setText(str(len(self.RewardFamilies[int(self.RewardFamily.text())-1])))
-                return 1
-            except Exception as e:
-                logging.error(traceback.format_exc())
-                return 0
-        if child.objectName()=='RewardFamily' or child.objectName()=='RewardPairsN' or child.objectName()=='BaseRewardSum':
-            try:
-                self.RewardPairs=self.RewardFamilies[int(self.RewardFamily.text())-1][:int(self.RewardPairsN.text())]
-                if int(self.RewardPairsN.text())>len(self.RewardFamilies[int(self.RewardFamily.text())-1]):
-                    return 0
-                else:
-                    return 1
-            except Exception as e:
-                logging.error(traceback.format_exc())
-                return 0
-        if child.objectName()=='UncoupledReward':
-            try:
-                input_string=self.UncoupledReward.text()
-                if input_string=='': # do not permit empty uncoupled reward
-                    return 0
-                # remove any square brackets and spaces from the string
-                input_string = input_string.replace('[','').replace(']','').replace(',', ' ')
-                # split the remaining string into a list of individual numbers
-                num_list = input_string.split()
-                # convert each number in the list to a float
-                num_list = [float(num) for num in num_list]
-                # create a numpy array from the list of numbers
-                self.RewardProb=np.array(num_list)
-                return 1
-            except Exception as e:
-                logging.error(traceback.format_exc())
-                return 0
-        else:
-            return 1
-
     def _GetTrainingParameters(self,prefix='TP_'):
         '''Get training parameters'''
         # Iterate over each container to find child widgets and store their values in self
-        for container in [self.TrainingParameters, self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
+        for container in [self.centralwidget, self.Opto_dialog,self.Metadata_dialog]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit, QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox)):
                 if child.objectName()=='qt_spinbox_lineedit':
@@ -2157,172 +1814,26 @@ class Window(QMainWindow):
                 # and store whether the child is checked or not
                 setattr(self, prefix+child.objectName(), child.isChecked())
 
-
-    def _Task(self):
-        '''hide and show some fields based on the task type'''
-        self.label_43.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-        self.ITIIncrease.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-        self._Randomness()
-
-        if self.Task.currentText() in ['Coupled Baiting','Coupled Without Baiting']:
-            self.label_6.setEnabled(True)
-            self.label_7.setEnabled(True)
-            self.label_8.setEnabled(True)
-            self.BaseRewardSum.setEnabled(True)
-            self.RewardPairsN.setEnabled(True)
-            self.RewardFamily.setEnabled(True)
-            self.label_20.setEnabled(False)
-            self.UncoupledReward.setEnabled(False)
-            # block
-            self.BlockMinReward.setEnabled(True)
-            self.IncludeAutoReward.setEnabled(True)
-            self.BlockBeta.setEnabled(True)
-            self.BlockMin.setEnabled(True)
-            self.BlockMax.setEnabled(True)
-            self.label_12.setStyleSheet("color: black;")
-            self.label_11.setStyleSheet("color: black;")
-            self.label_14.setStyleSheet("color: black;")
-            self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.BlockMin.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.BlockMax.setStyleSheet("color: black;""border: 1px solid gray;")
-
-            self.label_27.setEnabled(False)
-            self.InitiallyInactiveN.setEnabled(False)
-            self.label_27.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.InitiallyInactiveN.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
-            # change name of min reward each block
-            self.label_13.setText('min reward each block=')
-            # self.BlockMinReward.setText('0')
-            # change the position of RewardN=/min reward each block=
-            self.BlockMinReward.setGeometry(QtCore.QRect(863, 128, 80, 20))
-            self.label_13.setGeometry(QtCore.QRect(711, 128, 146, 16))
-            # move auto-reward
-            self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 128, 80, 20))
-            self.label_26.setGeometry(QtCore.QRect(929, 128, 146, 16))
-
-            # Reopen block beta, NextBlock, and AutoBlock panel
-            self.BlockBeta.setEnabled(True)
-            self.NextBlock.setEnabled(True)
-
-            self.AdvancedBlockAuto.setEnabled(True)
-            self._AdvancedBlockAuto() # Update states of SwitchThr and PointsInARow
-
-        elif self.Task.currentText() in ['Uncoupled Baiting','Uncoupled Without Baiting']:
-            self.label_6.setEnabled(False)
-            self.label_7.setEnabled(False)
-            self.label_8.setEnabled(False)
-            self.BaseRewardSum.setEnabled(False)
-            self.RewardPairsN.setEnabled(False)
-            self.RewardFamily.setEnabled(False)
-            self.label_20.setEnabled(True)
-            self.UncoupledReward.setEnabled(True)
-            # block
-            self.BlockBeta.setEnabled(True)
-            self.BlockMin.setEnabled(True)
-            self.BlockMax.setEnabled(True)
-            self.label_12.setStyleSheet("color: black;")
-            self.label_11.setStyleSheet("color: black;")
-            self.label_14.setStyleSheet("color: black;")
-            self.BlockBeta.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.BlockMin.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.BlockMax.setStyleSheet("color: black;""border: 1px solid gray;")
-
-            self.label_27.setEnabled(False)
-            self.InitiallyInactiveN.setEnabled(False)
-            self.label_27.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.InitiallyInactiveN.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
-            # change name of min reward each block
-            self.label_13.setText('min reward each block=')
-            #self.BlockMinReward.setText('0')
-            # change the position of RewardN=/min reward each block=
-            self.BlockMinReward.setGeometry(QtCore.QRect(863, 128, 80, 20))
-            self.label_13.setGeometry(QtCore.QRect(711, 128, 146, 16))
-            # move auto-reward
-            self.IncludeAutoReward.setGeometry(QtCore.QRect(1080, 128, 80, 20))
-            self.label_26.setGeometry(QtCore.QRect(929, 128, 146, 16))
-            # Disable block beta, NextBlock, and AutoBlock panel
-            self.BlockBeta.setEnabled(False)
-            self.NextBlock.setEnabled(False)
-            self.AdvancedBlockAuto.setEnabled(False)
-            self.SwitchThr.setEnabled(False)
-            self.PointsInARow.setEnabled(False)
-            self.BlockMinReward.setEnabled(False)
-            self.IncludeAutoReward.setEnabled(False)
-        elif self.Task.currentText() in ['RewardN']:
-            self.label_6.setEnabled(True)
-            self.label_7.setEnabled(True)
-            self.label_8.setEnabled(True)
-            self.BaseRewardSum.setEnabled(True)
-            self.RewardPairsN.setEnabled(True)
-            self.RewardFamily.setEnabled(True)
-            self.label_20.setEnabled(False)
-            self.UncoupledReward.setEnabled(False)
-            self.label_20.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.UncoupledReward.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            # block
-            self.BlockMinReward.setEnabled(True)
-            self.IncludeAutoReward.setEnabled(True)
-            self.BlockBeta.setEnabled(False)
-            self.BlockMin.setEnabled(False)
-            self.BlockMax.setEnabled(False)
-            self.label_14.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.label_12.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.label_11.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.BlockBeta.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.BlockMin.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            self.BlockMax.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);""border: none;")
-            # block; no reward when initially active
-            self.label_27.setEnabled(True)
-            self.InitiallyInactiveN.setEnabled(True)
-            self.label_27.setStyleSheet("color: black;")
-            self.InitiallyInactiveN.setStyleSheet("color: black;""border: 1px solid gray;")
-            self.InitiallyInactiveN.setGeometry(QtCore.QRect(403, 128, 80, 20))
-            # change name of min reward each block
-            self.label_13.setText('RewardN=')
-            # change the position of RewardN=/min reward each block=
-            self.BlockMinReward.setGeometry(QtCore.QRect(191, 128, 80, 20))
-            self.label_13.setGeometry(QtCore.QRect(40, 128, 146, 16))
-            # move auto-reward
-            self.IncludeAutoReward.setGeometry(QtCore.QRect(614, 128, 80, 20))
-            self.label_26.setGeometry(QtCore.QRect(460, 128, 146, 16))
-            # set block length to be 1
-            self.BlockMin.setText('1')
-            self.BlockMax.setText('1')
-
     def _ShowRewardPairs(self):
         '''Show reward pairs'''
+        tp = self.task_logic.task_parameters
         try:
-            if self.behavior_session_model.experiment in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
-                self.RewardPairs=self.RewardFamilies[int(self.RewardFamily.text())-1][:int(self.RewardPairsN.text())]
-                self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.BaseRewardSum.text())
-            elif self.behavior_session_model.experiment in ['Uncoupled Baiting','Uncoupled Without Baiting']:
-                input_string=self.UncoupledReward.text()
-                # remove any square brackets and spaces from the string
-                input_string = input_string.replace('[','').replace(']','').replace(',', ' ')
-                # split the remaining string into a list of individual numbers
-                num_list = input_string.split()
-                # convert each number in the list to a float
-                num_list = [float(num) for num in num_list]
-                # create a numpy array from the list of numbers
-                self.RewardProb=np.array(num_list)
-            if self.behavior_session_model.experiment in ['Coupled Baiting','Coupled Without Baiting','RewardN','Uncoupled Baiting','Uncoupled Without Baiting']:
-                if hasattr(self, 'GeneratedTrials'):
-                    self.ShowRewardPairs.setText('Reward pairs:\n'
-                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
-                                                 + '\n\n'
-                                                 +'Current pair:\n'
-                                                 + str(np.round(self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN],2)))
-                    if self.default_ui=='ForagingGUI.ui':
-                        self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
-                else:
-                    self.ShowRewardPairs.setText('Reward pairs:\n'
-                                                 + str(np.round(self.RewardProb,2)).replace('\n', ',')
-                                                 + '\n\n'
-                                                 +'Current pair:\n ')
-                    if self.default_ui=='ForagingGUI.ui':
-                        self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
+            if self.session_model.experiment in ['Coupled Baiting', 'Coupled Without Baiting', 'RewardN']:
+                self.RewardPairs = self.RewardFamilies[tp.reward_probability.family-1][:tp.reward_probability.pairs_n]
+                self.RewardProb = np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*\
+                                 tp.reward_probability.base_reward_sum
+            elif self.session_model.experiment in ['Uncoupled Baiting', 'Uncoupled Without Baiting']:
+                self.RewardProb=np.array(tp.uncoupled_reward)
+            reward_str = 'Reward pairs:\n' + \
+                         str(np.round(self.RewardProb,2)).replace('\n', ',') + \
+                         '\n\n' +\
+                         'Current pair:\n'
+            if hasattr(self, 'GeneratedTrials'):
+                history = np.round(self.GeneratedTrials.B_RewardProHistory[:,self.GeneratedTrials.B_CurrentTrialN], 2)
+                self.ShowRewardPairs.setText(f"{reward_str}{history}")
+            else:
+                self.ShowRewardPairs.setText(reward_str)
+
         except Exception as e:
             # Catch the exception and log error information
             logging.warning(traceback.format_exc())
@@ -2628,7 +2139,6 @@ class Window(QMainWindow):
             widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren(
                 (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit,
                 QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
-            widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
             self._Concat(widget_dict,Obj,'None')
             dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','Metadata_dialog']
             for dialog_name in dialogs:
@@ -2701,12 +2211,12 @@ class Window(QMainWindow):
             Obj['settings_box']=self.SettingsBox
 
             # save the commit hash
-            Obj['commit_ID']=self.behavior_session_model.commit_hash
+            Obj['commit_ID']=self.session_model.commit_hash
             Obj['repo_url']=self.repo_url
             Obj['current_branch'] =self.current_branch
-            Obj['repo_dirty_flag'] =self.behavior_session_model.allow_dirty_repo
+            Obj['repo_dirty_flag'] =self.session_model.allow_dirty_repo
             Obj['dirty_files'] =self.dirty_files
-            Obj['version'] = self.behavior_session_model.experiment_version
+            Obj['version'] = self.session_model.experiment_version
 
             # save the open ephys recording information
             Obj['open_ephys'] = self.open_ephys
@@ -2740,7 +2250,7 @@ class Window(QMainWindow):
 
         # save folders
         Obj['SessionFolder']=self.SessionFolder
-        Obj['TrainingFolder']=self.behavior_session_model.root_path
+        Obj['TrainingFolder']=self.session_model.root_path
         Obj['HarpFolder']=self.HarpFolder
         Obj['VideoFolder']=self.VideoFolder
         Obj['PhotometryFolder']=self.PhotometryFolder
@@ -2753,7 +2263,9 @@ class Window(QMainWindow):
             self.Metadata_dialog._save_metadata_dialog_parameters()
             Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
             # generate the metadata file
-            generated_metadata=generate_metadata(Obj=Obj)
+            generated_metadata=generate_metadata(Obj=Obj,
+                                                 session_model=self.session_model,
+                                                 task_logic=self.task_logic)
             session = generated_metadata._session()
 
             if BackupSave==0:
@@ -2764,7 +2276,7 @@ class Window(QMainWindow):
             Obj['generate_rig_metadata_success']=generated_metadata.rig_metadata_success
 
             if save_clicked:    # create water log result if weight after filled and uncheck save
-                if self.BaseWeight.text() != '' and self.WeightAfter.text() != '' and self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']:
+                if self.BaseWeight.text() != '' and self.WeightAfter.text() != '' and self.session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']:
                     self._AddWaterLogResult(session)
                 self.bias_indicator.clear()  # prepare for new session
 
@@ -2825,10 +2337,10 @@ class Window(QMainWindow):
         '''
 
         if self.load_tag==0:
-            self.behavior_session_model.date = datetime.now()   # update session model with correct date
+            self.session_model.date = datetime.now()   # update session model with correct date
             self._get_folder_structure_new()
-            self.behavior_session_model.session_name=f'behavior_{self.behavior_session_model.subject}_' \
-                                                     f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
+            self.session_model.session_name=f'behavior_{self.session_model.subject}_' \
+                                                     f'{self.session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
         else:
             self._parse_folder_structure()
 
@@ -2842,9 +2354,9 @@ class Window(QMainWindow):
         if not os.path.exists(self.MetadataFolder):
             os.makedirs(self.MetadataFolder)
             logging.info(f"Created new folder: {self.MetadataFolder}")
-        if not os.path.exists(self.behavior_session_model.root_path):
-            os.makedirs(self.behavior_session_model.root_path)
-            logging.info(f"Created new folder: {self.behavior_session_model.root_path}")
+        if not os.path.exists(self.session_model.root_path):
+            os.makedirs(self.session_model.root_path)
+            logging.info(f"Created new folder: {self.session_model.root_path}")
         if not os.path.exists(self.HarpFolder):
             os.makedirs(self.HarpFolder)
             logging.info(f"Created new folder: {self.HarpFolder}")
@@ -2863,7 +2375,7 @@ class Window(QMainWindow):
         :return string of the date used to name folders
         """
         formatted_datetime = os.path.basename(self.fname).split('_')[1]+'_'+os.path.basename(self.fname).split('_')[-1].split('.')[0]
-        self.behavior_session_model.date = datetime.strptime(formatted_datetime, "%Y-%m-%d_%H-%M-%S")
+        self.session_model.date = datetime.strptime(formatted_datetime, "%Y-%m-%d_%H-%M-%S")
         if os.path.basename(os.path.dirname(self.fname))=='TrainingFolder':
             # old data format
             self._get_folder_structure_old()
@@ -2874,38 +2386,69 @@ class Window(QMainWindow):
     def _get_folder_structure_old(self):
         '''get the folder structure for the old data format'''
         # includes subject and date of session
-        session_name = self.behavior_session_model.session_name = f'behavior_{self.behavior_session_model.subject}_' \
-                                                     f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
+        session_name = self.session_model.session_name = f'behavior_{self.session_model.subject}_' \
+                                                     f'{self.session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
         id_name = session_name.split("behavior_")[-1]
         self.SessionFolder=os.path.join(self.default_saveFolder,
-            self.current_box,self.behavior_session_model.subject, session_name)
+            self.current_box,self.session_model.subject, session_name)
         self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
-        self.behavior_session_model.root_path = os.path.join(self.SessionFolder, 'TrainingFolder')
+        self.session_model.root_path = os.path.join(self.SessionFolder, 'TrainingFolder')
         self.HarpFolder=os.path.join(self.SessionFolder, 'HarpFolder')
         self.VideoFolder=os.path.join(self.SessionFolder, 'VideoFolder')
         self.PhotometryFolder=os.path.join(self.SessionFolder, 'PhotometryFolder')
-        self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{id_name}.mat')
-        self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}.json')
-        self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}.json')
+        self.SaveFileMat=os.path.join(self.session_model.root_path,f'{id_name}.mat')
+        self.SaveFileJson=os.path.join(self.session_model.root_path,f'{id_name}.json')
+        self.SaveFileParJson=os.path.join(self.session_model.root_path,f'{id_name}.json')
 
     def _get_folder_structure_new(self):
         '''get the folder structure for the new data format'''
         # Determine folders
         # session_name includes subject and date of session
-        session_name = self.behavior_session_model.session_name=f'behavior_{self.behavior_session_model.subject}_' \
-                                                     f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
+        session_name = self.session_model.session_name=f'behavior_{self.session_model.subject}_' \
+                                                     f'{self.session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
         id_name = session_name.split("behavior_")[-1]
         self.SessionFolder=os.path.join(self.default_saveFolder,
-            self.current_box,self.behavior_session_model.subject, session_name)
-        self.behavior_session_model.root_path=os.path.join(self.SessionFolder,'behavior')
-        self.SaveFileMat=os.path.join(self.behavior_session_model.root_path,f'{id_name}.mat')
-        self.SaveFileJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}.json')
-        self.SaveFileParJson=os.path.join(self.behavior_session_model.root_path,f'{id_name}_par.json')
-        self.behavior_session_modelJson = os.path.join(self.behavior_session_model.root_path,f'behavior_session_model_{id_name}.json')
-        self.HarpFolder=os.path.join(self.behavior_session_model.root_path,'raw.harp')
+            self.current_box,self.session_model.subject, session_name)
+        self.session_model.root_path=os.path.join(self.SessionFolder,'behavior')
+        self.SaveFileMat=os.path.join(self.session_model.root_path,f'{id_name}.mat')
+        self.SaveFileJson=os.path.join(self.session_model.root_path,f'{id_name}.json')
+        self.SaveFileParJson=os.path.join(self.session_model.root_path,f'{id_name}_par.json')
+        self.HarpFolder=os.path.join(self.session_model.root_path,'raw.harp')
         self.VideoFolder=os.path.join(self.SessionFolder,'behavior-videos')
         self.PhotometryFolder=os.path.join(self.SessionFolder,'fib')
         self.MetadataFolder=os.path.join(self.SessionFolder, 'metadata-dir')
+
+    def save_task_models(self):
+        """
+        Save session and task model as well as opto and fip if applicable
+        """
+
+        id_name = self.session_model.session_name.split("behavior_")[-1]
+        session_model_path = os.path.join(self.session_model.root_path, f'behavior_session_model_{id_name}.json')
+        task_model_path = os.path.join(self.session_model.root_path, f'behavior_task_logic_model_{id_name}.json')
+
+        # validate behavior session model and document validation errors if any
+        self.validate_and_save_model(AindBehaviorSessionModel, self.session_model, session_model_path)
+
+        # validate behavior task logic model and document validation errors if any
+        self.validate_and_save_model(AindDynamicForagingTaskLogic, self.task_logic, task_model_path)
+
+    def validate_and_save_model(self, schema: BaseModel, model, path: str):
+        """
+        Validate a model against schema and log any errors. Save schema regardless.
+        :param schema: BaseModel class to validate against
+        :param model: model object to validate and save
+        :param path: path of where to save model
+        """
+
+        # validate model and document validation errors if any
+        try:
+            schema(**model.model_dump())
+        except ValidationError as e:
+            logging.error(str(e), extra={'tags': [self.warning_log_tag]})
+        # save behavior session model
+        with open(path, "w") as outfile:
+            outfile.write(model.model_dump_json(indent=1))
 
     def _Concat(self,widget_dict,Obj,keyname):
         '''Help manage save different dialogs'''
@@ -3012,10 +2555,8 @@ class Window(QMainWindow):
 
         # Set ID, clear weight information
         logging.info('User starting a new mouse: {}'.format(mouse_id))
-        self.ID.setText(mouse_id)
-        self.ID.returnPressed.emit()
         self.TargetRatio.setText('0.85')
-        self.keyPressEvent(allow_reset=True)
+
 
     def _Open_getListOfMice(self):
         '''
@@ -3310,15 +2851,13 @@ class Window(QMainWindow):
         else:
             self.NewSession.setDisabled(False)
         self.StartExcitation.setChecked(False)
-        self.keyPressEvent() # Accept all updates
         self.load_tag=1
-        self.ID.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
         self.ToInitializeVisual=1
         Obj=self.Obj
-        self.GeneratedTrials=GenerateTrials(self)
+        self.GeneratedTrials=GenerateTrials(self, self.task_logic, self.session_model)
         # Iterate over all attributes of the GeneratedTrials object
         for attr_name in dir(self.GeneratedTrials):
             if attr_name in Obj.keys():
@@ -3385,20 +2924,6 @@ class Window(QMainWindow):
                                          'Box {}, Foraging Close'.format(self.box_letter),
                                          'Post weight appears to not be entered. Do you want to clear training parameters?',
                                          QMessageBox.Yes, QMessageBox.No)
-        else:
-            reply = QMessageBox.question(self,
-                'Box {}, Clear parameters:'.format(self.box_letter),
-                'Do you want to clear training parameters?',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-
-        # If yes, clear parameters
-        if reply == QMessageBox.Yes:
-            for child in self.TrainingParameters.findChildren(QtWidgets.QLineEdit)+ self.centralwidget.findChildren(QtWidgets.QLineEdit):
-                if child.isEnabled():
-                    child.clear()
-        else:
-            logging.info('Clearing declined')
-            return
 
     def _StartFIP(self):
         self.StartFIP.setChecked(False)
@@ -3609,24 +3134,6 @@ class Window(QMainWindow):
             self.FIP_msgbox.setModal(False)
             self.FIP_msgbox.show()
 
-    def _AutoReward(self):
-        if self.AutoReward.isChecked():
-            self.AutoReward.setStyleSheet("background-color : green;")
-            self.AutoReward.setText('Auto water On')
-            for widget in ['AutoWaterType', 'Multiplier', 'Unrewarded', 'Ignored']:
-                getattr(self, widget).setEnabled(True)
-        else:
-            self.AutoReward.setStyleSheet("background-color : none")
-            self.AutoReward.setText('Auto water Off')
-            for widget in ['AutoWaterType', 'Multiplier', 'Unrewarded', 'Ignored']:
-                getattr(self, widget).setEnabled(False)
-
-    def _NextBlock(self):
-        if self.NextBlock.isChecked():
-            self.NextBlock.setStyleSheet("background-color : green;")
-        else:
-            self.NextBlock.setStyleSheet("background-color : none")
-
     def _stop_camera(self):
         '''Stop the camera if it is running'''
         if self.Camera_dialog.StartRecording.isChecked():
@@ -3635,7 +3142,7 @@ class Window(QMainWindow):
     def _stop_logging(self):
         '''Stop the logging'''
         self.Camera_dialog.StartPreview.setEnabled(True)
-        self.ID.setEnabled(True)
+        self.session_widget.subject_widget.setEnabled(True)
         self.Load.setEnabled(True)
         try:
             self.Channel.StopLogging('s')
@@ -3693,6 +3200,10 @@ class Window(QMainWindow):
         self.Start.setDisabled(False)
         self.TotalWaterWarning.setText('')
         self._set_metadata_enabled(True)
+
+        # enable task model widgets
+        self.task_widget.setEnabled(True)
+        self.session_widget.setEnabled(True)
 
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully == 0:
@@ -3764,7 +3275,7 @@ class Window(QMainWindow):
     def _thread_complete(self):
         '''complete of a trial'''
         if self.NewTrialRewardOrder==0:
-            self.GeneratedTrials._GenerateATrial(self.Channel4)
+            self.GeneratedTrials._GenerateATrial()
         self.ANewTrial=1
 
     def _thread_complete2(self):
@@ -3801,10 +3312,11 @@ class Window(QMainWindow):
             self.photometry_timer_label.setText('Running photometry baseline: {}:{}'.format(minutes,seconds))
 
     def _set_metadata_enabled(self, enable: bool):
-        '''Enable or disable metadata fields'''
-        self.ID.setEnabled(enable)
-        self.Experimenter.setEnabled(enable)
-
+        """
+        Enable or disable metadata fields
+        """
+        self.session_widget.experimenter_widget.setEnabled(enable)
+        self.session_widget.subject_widget.setEnabled(enable)
     def _set_default_project(self):
         '''Set default project information'''
         project_name = 'Behavior Platform'
@@ -3901,10 +3413,9 @@ class Window(QMainWindow):
         # Toggle button colors
         if self.Start.isChecked():
             logging.info('Start button pressed: starting trial loop')
-            self.keyPressEvent()
 
             # check if FIP setting match schedule. skip if test mouse or mouse isn't in schedule or
-            mouse_id = self.behavior_session_model.subject
+            mouse_id = self.session_model.subject
             if hasattr(self, 'schedule') and mouse_id in self.schedule['Mouse ID'].values and \
                     mouse_id not in ['0','1','2','3','4','5','6','7','8','9','10'] :
                 fip_mode = self._GetInfoFromSchedule(mouse_id, 'FIP Mode')
@@ -3972,16 +3483,16 @@ class Window(QMainWindow):
             reply = QMessageBox.critical(self,
                 'Box {}, Start'.format(self.box_letter),
                 f'The experimenter is <span style="color: {self.default_text_color};">'
-                f'{self.behavior_session_model.experimenter[0]}</span>. Is this correct?',
+                f'{self.session_model.experimenter[0]}</span>. Is this correct?',
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if reply == QMessageBox.No:
                 self.Start.setChecked(False)
                 logging.info('User declines using default name')
                 return
-            logging.info('Starting session, with experimenter: {}'.format(self.behavior_session_model.experimenter[0]))
+            logging.info('Starting session, with experimenter: {}'.format(self.session_model.experimenter[0]))
 
             # check repo status
-            if (self.current_branch not in ['main','production_testing']) & (self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']):
+            if (self.current_branch not in ['main','production_testing']) & (self.session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']):
                 # Prompt user over off-pipeline branch
                 reply = QMessageBox.critical(self,
                     'Box {}, Start'.format(self.box_letter),
@@ -3997,7 +3508,7 @@ class Window(QMainWindow):
                     logging.error('Starting session on branch: {}'.format(self.current_branch))
 
             # Check for untracked local changes
-            if self.behavior_session_model.allow_dirty_repo & (self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']):
+            if self.session_model.allow_dirty_repo & (self.session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']):
                 # prompt user over untracked local changes
                 reply = QMessageBox.critical(self,
                     'Box {}, Start'.format(self.box_letter),
@@ -4011,7 +3522,7 @@ class Window(QMainWindow):
                 else:
                     # Allow the session to continue, but log error
                     logging.error('Starting session with untracked local changes: {}'.format(self.dirty_files))
-            elif self.behavior_session_model.allow_dirty_repo is None:
+            elif self.session_model.allow_dirty_repo is None:
                 logging.error('Could not check for untracked local changes')
 
             if self.PhotometryB.currentText()=='on' and (not self.FIP_started):
@@ -4070,10 +3581,12 @@ class Window(QMainWindow):
 
             # Set Project Name in metadata based on schedule
             self.project_name = self._GetProjectName(mouse_id)
-            
-            self.session_run = True   # session has been started
 
-            self.keyPressEvent(allow_reset=True)
+            # disable task model widgets
+            self.task_widget.setEnabled(False)
+            self.session_widget.setEnabled(False)
+
+            self.session_run = True   # session has been started
 
         else:
             # Prompt user to confirm stopping trials
@@ -4090,6 +3603,11 @@ class Window(QMainWindow):
                 logging.info('Start button pressed: user continued session')
                 self.Start.setChecked(True)
                 return
+
+            # enable task model widgets
+            self.task_widget.setEnabled(True)
+            self.session_widget.setEnabled(True)
+
             # If the photometry timer is running, stop it
             if self.finish_Timer==0:
                 self.ignore_timer=True
@@ -4109,14 +3627,7 @@ class Window(QMainWindow):
             # stop lick interval calculation
             self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
 
-            # validate behavior session model and document validation errors if any
-            try:
-                AindBehaviorSessionModel(**self.behavior_session_model.model_dump())
-            except ValidationError as e:
-                logging.error(str(e), extra={'tags': [self.warning_log_tag]})
-            # save behavior session model
-            with open(self.behavior_session_modelJson, "w") as outfile:
-                outfile.write(self.behavior_session_model.model_dump_json())
+            self.sessionEnded.emit()
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
@@ -4158,7 +3669,7 @@ class Window(QMainWindow):
                 self.Camera_dialog.StartRecording.setChecked(True)
             self.SessionStartTime=datetime.now()
             self.Other_SessionStartTime=str(self.SessionStartTime) # for saving
-            GeneratedTrials=GenerateTrials(self)
+            GeneratedTrials=GenerateTrials(self, self.task_logic, self.session_model)
             self.GeneratedTrials=GeneratedTrials
             self.StartANewSession=0
             PlotM=PlotV(win=self,GeneratedTrials=GeneratedTrials,width=5, height=4)
@@ -4169,7 +3680,7 @@ class Window(QMainWindow):
             self.ToUpdateFigure=1
             self.ToGenerateATrial=1
             self.ToInitializeVisual=1
-            GeneratedTrials._GenerateATrial(self.Channel4)
+            GeneratedTrials._GenerateATrial()
             # delete licks from the previous session
             GeneratedTrials._DeletePreviousLicks(self.Channel2)
             GeneratedTrials.lick_interval_time.start()  # start lick interval calculation
@@ -4203,13 +3714,13 @@ class Window(QMainWindow):
             # clear bias indicator graph
             self.bias_indicator.clear()
             # create workers
-            worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.Channel,self.Channel3,self.Channel4)
+            worker1 = Worker(GeneratedTrials._GetAnimalResponse,self.Channel,self.Channel3)
             worker1.signals.finished.connect(self._thread_complete)
             workerLick = Worker(GeneratedTrials._get_irregular_timestamp,self.Channel2)
             workerLick.signals.finished.connect(self._thread_complete2)
             workerPlot = Worker(PlotM._Update,GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
             workerPlot.signals.finished.connect(self._thread_complete3)
-            workerGenerateAtrial = Worker(GeneratedTrials._GenerateATrial,self.Channel4)
+            workerGenerateAtrial = Worker(GeneratedTrials._GenerateATrial)
             workerGenerateAtrial.signals.finished.connect(self._thread_complete4)
             workerStartTrialLoop = Worker(self._StartTrialLoop,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
             workerStartTrialLoop1 = Worker(self._StartTrialLoop1,GeneratedTrials)
@@ -4271,7 +3782,7 @@ class Window(QMainWindow):
         Setup a log handler to write logs during session to TrainingFolder
         """
 
-        logging_filename = os.path.join(self.behavior_session_model.root_path, 'python_gui_log.txt')
+        logging_filename = os.path.join(self.session_model.root_path, 'python_gui_log.txt')
 
         # Format the log file:
         log_format = '%(asctime)s:%(levelname)s:%(module)s:%(filename)s:%(funcName)s:line %(lineno)d:%(message)s'
@@ -4283,7 +3794,7 @@ class Window(QMainWindow):
         self.session_log_handler.setLevel(logging.INFO)
         logger.root.addHandler(self.session_log_handler)
 
-        logging.info(f'Starting log file at {self.behavior_session_model.root_path}')
+        logging.info(f'Starting log file at {self.session_model.root_path}')
 
     def end_session_log(self) -> None:
         """
@@ -4323,8 +3834,10 @@ class Window(QMainWindow):
                 GeneratedTrials.B_CurrentTrialN+=1
                 print('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
                 logging.info('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
-                if (self.GeneratedTrials.TP_AutoReward  or int(self.GeneratedTrials.TP_BlockMinReward)>0
-                    or self.GeneratedTrials.TP_Task in ['Uncoupled Baiting','Uncoupled Without Baiting']) or self.AddOneTrialForNoresponse.currentText()=='Yes':
+                if (self.task_logic.task_parameters.auto_water is not None or
+                 self.task_logic.task_parameters.block_parameters.min_reward > 0
+                 or self.session_model.experiment in ['Uncoupled Baiting', 'Uncoupled Without Baiting']) or \
+                self.task_logic.task_parameters.no_response_trial_addition:
                     # The next trial parameters must be dependent on the current trial's choice
                     # get animal response and then generate a new trial
                     self.NewTrialRewardOrder=0
@@ -4400,7 +3913,7 @@ class Window(QMainWindow):
 
                 # save the data everytrial
                 if GeneratedTrials.CurrentSimulation==True:
-                    GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3,self.Channel4)
+                    GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3)
                     self.ANewTrial=1
                     self.NewTrialRewardOrder=1
                 else:
@@ -4408,7 +3921,7 @@ class Window(QMainWindow):
                     self.threadpool.start(worker1)
                 #generate a new trial
                 if self.NewTrialRewardOrder==1:
-                    GeneratedTrials._GenerateATrial(self.Channel4)
+                    GeneratedTrials._GenerateATrial()
 
                 # Save data in a separate thread
                 with self.data_lock:
@@ -4488,7 +4001,8 @@ class Window(QMainWindow):
                 GeneratedTrials.B_CurrentTrialN+=1
                 print('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
                 logging.info('Current trial: '+str(GeneratedTrials.B_CurrentTrialN+1))
-                if not (self.GeneratedTrials.TP_AutoReward  or int(self.GeneratedTrials.TP_BlockMinReward)>0):
+                if not (self.task_logic.task_parameters.auto_water is not None or
+                        self.task_logic.task_parameters.block_parameters.min_reward > 0):
                     # generate new trial and get reward
                     self.NewTrialRewardOrder=1
                 else:
@@ -4509,7 +4023,7 @@ class Window(QMainWindow):
                 if self.test==1:
                     self.ANewTrial=1
                     GeneratedTrials.GetResponseFinish=0
-                    GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3,self.Channel4)
+                    GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3)
                 else:
                     GeneratedTrials.GetResponseFinish=0
                     self.threadpool.start(worker1)
@@ -4517,7 +4031,7 @@ class Window(QMainWindow):
                 #generate a new trial
                 if self.test==1:
                     self.ToGenerateATrial=1
-                    GeneratedTrials._GenerateATrial(self.Channel4)
+                    GeneratedTrials._GenerateATrial()
                 else:
                     self.ToGenerateATrial=0
                     self.threadpool4.start(workerGenerateAtrial)
@@ -4544,87 +4058,65 @@ class Window(QMainWindow):
             self.DelayMin.setEnabled(True)
             self.DelayMax.setEnabled(True)
 
-    def _GiveLeft(self):
-        '''manually give left water'''
+    def give_manual_water(self, valve: Literal["Right", "Left"]):
+        """
+        Give manual water
+        :param valve: valve to give manual water
+        """
+
+        volume = getattr(self.task_logic.task_parameters.reward_size, f"{valve.lower()}_value_volume")
+        open_time_s = getattr(self, f"{valve.lower()}_valve_open_time")
         self._ConnectBonsai()
-        if self.InitializeBonsaiSuccessfully==0:
+        if self.InitializeBonsaiSuccessfully == 0:
             return
-        if self.AlignToGoCue.currentText()=='yes':
+        if self.AlignToGoCue.currentText() == 'yes':
             # Reserving the water after the go cue.Each click will add the water to the reserved water
-            self.give_left_volume_reserved=self.give_left_volume_reserved+float(self.TP_GiveWaterL_volume)
-            if self.latest_fitting!={}:
-                self.give_left_time_reserved=((float(self.give_left_volume_reserved)-self.latest_fitting['Left'][1])/self.latest_fitting['Left'][0])*1000
+            reserve_volume = getattr(self, f"give_{valve.lower()}_volume_reserved") + volume
+            setattr(self, f"give_{valve.lower()}_volume_reserved", reserve_volume)
+            if self.latest_fitting != {}:
+                time_reserve = ((reserve_volume - self.latest_fitting[valve][1]) / self.latest_fitting[valve][0]) * 1000
             else:
-                self.give_left_time_reserved=self.give_left_time_reserved+float(self.TP_GiveWaterL)*1000
+                time_reserve = getattr(self, f"give_{valve.lower()}_time_reserved") + open_time_s * 1000
+
+            setattr(self, f"give_{valve.lower()}_time_reserved", time_reserve)
         else:
-            self.Other_manual_water_left_volume.append(float(self.TP_GiveWaterL_volume))
-            self.Other_manual_water_left_time.append(float(self.TP_GiveWaterL)*1000)
+            getattr(self, f"Other_manual_water_{valve.lower()}_volume").append(volume)
+            getattr(self, f"Other_manual_water_{valve.lower()}_time").append(open_time_s * 1000)
 
-            self.Channel.LeftValue(float(self.TP_GiveWaterL)*1000)
+            getattr(self.Channel, f"{valve}Value")(float(open_time_s * 1000))
             time.sleep(0.01)
-            self.Channel3.ManualWater_Left(int(1))
-            time.sleep(0.01+float(self.TP_GiveWaterL))
-            self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
-            self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+float(self.TP_GiveWaterL_volume)/1000
+            getattr(self.Channel3, f"ManualWater_{valve}")(int(1))
+            time.sleep(0.01 + open_time_s)
+            getattr(self.Channel, f"{valve}Value")(float(open_time_s * 1000))
+            index = 0 if valve == "Left" else 1
+            self.ManualWaterVolume[index] = self.ManualWaterVolume[index] + volume / 1000
             self._UpdateSuggestedWater()
-            logger.info('Give left manual water (ul): '+str(np.round(float(self.TP_GiveWaterL_volume),3)),
-                           extra={'tags': [self.warning_log_tag]})
-
-
-    def _give_reserved_water(self,valve=None):
-        '''give reserved water usually after the go cue'''
-        if valve=='left':
-            if self.give_left_volume_reserved==0:
-                return
-            self.Channel.LeftValue(float(self.give_left_time_reserved))
-            time.sleep(0.01)
-            self.Channel3.ManualWater_Left(int(1))
-            time.sleep(0.01+float(self.give_left_time_reserved)/1000)
-            self.Channel.LeftValue(float(self.TP_LeftValue)*1000)
-            self.ManualWaterVolume[0]=self.ManualWaterVolume[0]+self.give_left_volume_reserved/1000
-            self.Other_manual_water_left_volume.append(self.give_left_volume_reserved)
-            self.Other_manual_water_left_time.append(self.give_left_time_reserved)
-            self.give_left_volume_reserved=0
-            self.give_left_time_reserved=0
-        elif valve=='right':
-            if self.give_right_volume_reserved==0:
-                return
-            self.Channel.RightValue(float(self.give_right_time_reserved))
-            time.sleep(0.01)
-            self.Channel3.ManualWater_Right(int(1))
-            time.sleep(0.01+float(self.give_right_time_reserved)/1000)
-            self.Channel.RightValue(float(self.TP_RightValue)*1000)
-            self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+self.give_right_volume_reserved/1000
-            self.Other_manual_water_right_volume.append(self.give_right_volume_reserved)
-            self.Other_manual_water_right_time.append(self.give_right_time_reserved)
-            self.give_right_volume_reserved=0
-            self.give_right_time_reserved=0
-
-    def _GiveRight(self):
-        '''manually give right water'''
-        self._ConnectBonsai()
-        if self.InitializeBonsaiSuccessfully==0:
-            return
-        if self.AlignToGoCue.currentText()=='yes':
-            # Reserving the water after the go cue.Each click will add the water to the reserved water
-            self.give_right_volume_reserved=self.give_right_volume_reserved+float(self.TP_GiveWaterR_volume)
-            if self.latest_fitting!={}:
-                self.give_right_time_reserved=((float(self.give_right_volume_reserved)-self.latest_fitting['Right'][1])/self.latest_fitting['Right'][0])*1000
-            else:
-                self.give_right_time_reserved=self.give_right_time_reserved+float(self.TP_GiveWaterR)*1000
-        else:
-            self.Other_manual_water_right_volume.append(float(self.TP_GiveWaterR_volume))
-            self.Other_manual_water_right_time.append(float(self.TP_GiveWaterR)*1000)
-
-            self.Channel.RightValue(float(self.TP_GiveWaterR)*1000)
-            time.sleep(0.01)
-            self.Channel3.ManualWater_Right(int(1))
-            time.sleep(0.01+float(self.TP_GiveWaterR))
-            self.Channel.RightValue(float(self.TP_RightValue)*1000)
-            self.ManualWaterVolume[1]=self.ManualWaterVolume[1]+float(self.TP_GiveWaterR_volume)/1000
-            self._UpdateSuggestedWater()
-            logger.info('Give right manual water (ul): '+str(np.round(float(self.TP_GiveWaterR_volume),3)),
+            logger.info(f"Give {valve.lower()} manual water (ul): {round(volume, 3)}",
                         extra={'tags': [self.warning_log_tag]})
+
+    def _give_reserved_water(self, valve=Literal["Right", "Left"]):
+        """
+        Give reserved water usually after the go cue
+        :param valve: valve to give water from
+        """
+
+        reserve = getattr(self, f"give_{valve}_volume_reserved")
+        open_time_s = getattr(self, f"{valve.lower()}_valve_open_time")
+        volume = getattr(self.task_logic.task_parameters.reward_size, f"{valve.lower()}_value_volume")
+
+        if reserve == 0:
+            return
+        getattr(self.Channel, f"{valve.title()}Value")(float(reserve))
+        time.sleep(0.01)
+        getattr(self.Channel3, f"ManualWater_{valve.title()}")(int(1))
+        time.sleep(0.01 + reserve / 1000)
+        getattr(self.Channel, f"{valve.title()}Value")(float(open_time_s * 1000))
+        index = 0 if valve == "Left" else 1
+        self.ManualWaterVolume[index] = self.ManualWaterVolume[index] + volume / 1000
+        getattr(self, f"Other_manual_water_{valve.lower()}_volume").append(volume)
+        getattr(self, f"Other_manual_water_{valve.lower()}_time").append(open_time_s * 1000)
+        setattr(self, f"give_{valve}_volume_reserved", 0)
+        setattr(self, f"give_{valve}_time_reserved", 0)
 
     def _toggle_save_color(self):
         '''toggle the color of the save button to mediumorchid'''
@@ -4713,12 +4205,12 @@ class Window(QMainWindow):
         self.AutoTrain_dialog.show()
 
         # Check subject id each time the dialog is opened
-        self.AutoTrain_dialog.update_auto_train_fields(subject_id=self.behavior_session_model.subject)
+        self.AutoTrain_dialog.update_auto_train_fields(subject_id=self.session_model.subject)
 
     def _open_mouse_on_streamlit(self):
         '''open the training history of the current mouse on the streamlit app'''
         # See this PR: https://github.com/AllenNeuralDynamics/foraging-behavior-browser/pull/25
-        webbrowser.open(f'https://foraging-behavior-browser.allenneuraldynamics-test.org/?filter_subject_id={self.behavior_session_model.subject}'
+        webbrowser.open(f'https://foraging-behavior-browser.allenneuraldynamics-test.org/?filter_subject_id={self.session_model.subject}'
                          '&tab_id=tab_session_inspector'
                          '&session_plot_mode=all+sessions+filtered+from+sidebar'
                          '&session_plot_selected_draw_types=1.+Choice+history'
@@ -4730,7 +4222,7 @@ class Window(QMainWindow):
         '''
 
         # skip manifest generation for test mouse
-        if self.behavior_session_model.subject in ['0','1','2','3','4','5','6','7','8','9','10']:
+        if self.session_model.subject in ['0','1','2','3','4','5','6','7','8','9','10']:
             logging.info('Skipping upload manifest, because this is the test mouse')
             return
         # skip manifest generation if automatic upload is disabled
@@ -4751,13 +4243,13 @@ class Window(QMainWindow):
             # Upload time is 8:30 tonight, plus a random offset over a 30 minute period
             # Random offset reduces strain on downstream servers getting many requests at once
             date_format = "%Y-%m-%d_%H-%M-%S"
-            schedule = self.behavior_session_model.date.strftime(date_format).split('_')[0]+'_20-30-00'
+            schedule = self.session_model.date.strftime(date_format).split('_')[0]+'_20-30-00'
             schedule_time = datetime.strptime(schedule,date_format) + timedelta(seconds=np.random.randint(30*60))
             capsule_id = '0ae9703f-9012-4d0b-ad8d-b6a00858b80d'
             mount = 'FIP'
 
             modalities = {}
-            modalities['behavior'] = [self.behavior_session_model.root_path.replace('\\', '/')]
+            modalities['behavior'] = [self.session_model.root_path.replace('\\', '/')]
             if (self.Camera_dialog.camera_start_time != ''):
                 modalities['behavior-videos'] = [self.VideoFolder.replace('\\', '/')]
             if hasattr(self, 'fiber_photometry_start_time') and (self.fiber_photometry_start_time != ''): 
@@ -4766,10 +4258,10 @@ class Window(QMainWindow):
 
             # Define contents of manifest file
             contents = {
-                'acquisition_datetime': self.behavior_session_model.date,
-                'name': self.behavior_session_model.session_name,
+                'acquisition_datetime': self.session_model.date,
+                'name': self.session_model.session_name,
                 'platform': 'behavior',
-                'subject_id': int(self.behavior_session_model.subject),
+                'subject_id': int(self.session_model.subject),
                 'capsule_id': capsule_id,
                 'mount':mount,
                 'destination': '//allen/aind/scratch/dynamic_foraging_rig_transfer',
