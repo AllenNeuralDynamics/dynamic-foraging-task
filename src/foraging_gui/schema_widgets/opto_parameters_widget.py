@@ -135,14 +135,15 @@ class OptoParametersWidget(SchemaWidgetBase):
             ),
         )
         active_lasers = self.path_get(self.schema, name_lst[:-1])
-        if enabled:
-            active_lasers.append(laser_color)
-        else:
-            remove_index = [i for i, laser in enumerate(active_lasers) if laser.name == laser_color.name]
-            if len(remove_index) == 1:
-                del active_lasers[remove_index[0]]
-        self.path_set(self.schema, name_lst[:-1], active_lasers)
-        self.ValueChangedInside.emit(".".join(name_lst[:-1]))
+        if laser_color.name not in [laser.name for laser in active_lasers]:
+            if enabled:
+                active_lasers.append(laser_color)
+            else:
+                remove_index = [i for i, laser in enumerate(active_lasers) if laser.name == laser_color.name]
+                if len(remove_index) == 1:
+                    del active_lasers[remove_index[0]]
+            self.path_set(self.schema, name_lst[:-1], active_lasers)
+            self.ValueChangedInside.emit(".".join(name_lst[:-1]))
 
     def toggle_location_field(self, name: str, enabled: bool) -> None:
         """
@@ -200,7 +201,6 @@ class OptoParametersWidget(SchemaWidgetBase):
         value = self.path_get(self.schema, name_lst)
         if hasattr(self, name + "_check_box"):  # optional type
             getattr(self, name + "_check_box").setChecked(not value is None)
-
         elif "protocol" == name_lst[-1]:
             getattr(self, f"{name}_combo_box_widget").setCurrentText(value.name)
             for widget in getattr(self, name + "_widgets").values():
@@ -418,6 +418,62 @@ if __name__ == "__main__":
     # task_model.laser_colors[1].location = [LocationTwo()]
     # task_model.laser_colors[0].protocol = PulseProtocol()
 
+    task_widget.apply_schema(task_model)
+    new_model = Optogenetics(
+        sample_frequency=5000,
+        laser_colors=[
+            LaserColorOne(
+                color="Blue",
+                pulse_condition="Right choice",
+                start=IntervalConditions(
+                    interval_condition="Trial start",
+                    offset=0
+                ),
+                end=IntervalConditions(
+                    interval_condition="Right reward",
+                    offset=0
+                ),
+            ),
+            LaserColorThree(
+                color="Blue",
+                pulse_condition="Right choice",
+                start=IntervalConditions(
+                    interval_condition="Trial start",
+                    offset=0
+                ),
+                end=IntervalConditions(
+                    interval_condition="Right reward",
+                    offset=0
+                ),
+            ),
+            LaserColorFour(
+                color="Blue",
+                pulse_condition="Right choice",
+                start=IntervalConditions(
+                    interval_condition="Trial start",
+                    offset=0
+                ),
+                end=IntervalConditions(
+                    interval_condition="Right reward",
+                    offset=0
+                ),
+            ),
+            LaserColorFive(
+                color="Blue",
+                pulse_condition="Right choice",
+                start=IntervalConditions(
+                    interval_condition="Trial start",
+                    offset=0
+                ),
+                end=IntervalConditions(
+                    interval_condition="Right reward",
+                    offset=0
+                ),
+            ),
+        ],
+        session_control=SessionControl(),
+    ).model_dump()
+    task_model = Optogenetics(**new_model)
     task_widget.apply_schema(task_model)
 
     sys.exit(app.exec_())
