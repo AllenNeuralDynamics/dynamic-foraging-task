@@ -2712,6 +2712,7 @@ class Window(QMainWindow):
         self.task_widget.apply_schema(self.task_logic.task_parameters)
         self.session_widget.apply_schema(self.session_model)
         self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
+        print(self.opto_model.laser_colors)
         self.fip_widget.apply_schema(self.fip_model)
 
     def save_task_models(self):

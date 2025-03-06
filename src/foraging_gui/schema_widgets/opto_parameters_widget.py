@@ -181,6 +181,7 @@ class OptoParametersWidget(SchemaWidgetBase):
         else:
             protocol_type = ConstantProtocol()
         name_lst = name.split(".")
+
         self.path_set(self.schema, name_lst, protocol_type)
 
         for widget in getattr(self, name + "_widgets").values():
@@ -201,26 +202,31 @@ class OptoParametersWidget(SchemaWidgetBase):
         value = self.path_get(self.schema, name_lst)
         if hasattr(self, name + "_check_box"):  # optional type
             getattr(self, name + "_check_box").setChecked(not value is None)
-        elif "protocol" == name_lst[-1]:
-            getattr(self, f"{name}_combo_box_widget").setCurrentText(value.name)
-            for widget in getattr(self, name + "_widgets").values():
-                widget.deleteLater()
-            fields = {f"{name}.{k}": v for k, v in self.path_get(self.schema, name_lst).model_dump().items()}
-            new_widget = create_widget(**self.create_field_widgets(fields, name),
-                                       struct="V")
-            getattr(self, f"{name}_widget").layout().insertWidget(1, new_widget)
-            getattr(self, f"{name}_widgets")["name"].hide()
-        elif dict not in type(value).__mro__ and list not in type(value).__mro__ and BaseModel not in type(
-                value).__mro__:  # not a dictionary or list like value
-            self._set_widget_text(name, value)
-        elif dict in type(value).__mro__ or BaseModel in type(value).__mro__:
-            value = value.model_dump() if BaseModel in type(value).__mro__ else value
-            for k, v in value.items():  # multiple widgets to set values for
-                self.update_field_widget(f"{name}.{k}")
-        else:  # update list
-            for i, item in enumerate(value):
-                if hasattr(self, f"{name}.{i}_widget"):  # can't handle added indexes yet
-                    self.update_field_widget(f"{name}.{i}")
+
+        if value is not None:
+            if "protocol" == name_lst[-1]:
+                getattr(self, f"{name}_combo_box_widget").blockSignals(True)
+                getattr(self, f"{name}_combo_box_widget").setCurrentText(value.name)
+                getattr(self, f"{name}_combo_box_widget").blockSignals(False)
+                self._set_widget_text(name, value)
+                for widget in getattr(self, name + "_widgets").values():
+                    widget.deleteLater()
+                fields = {f"{name}.{k}": v for k, v in self.path_get(self.schema, name_lst).model_dump().items()}
+                new_widget = create_widget(**self.create_field_widgets(fields, name),
+                                           struct="V")
+                getattr(self, f"{name}_widget").layout().insertWidget(1, new_widget)
+                getattr(self, f"{name}_widgets")["name"].hide()
+            elif dict not in type(value).__mro__ and list not in type(value).__mro__ and BaseModel not in type(
+                    value).__mro__:  # not a dictionary or list like value
+                self._set_widget_text(name, value)
+            elif dict in type(value).__mro__ or BaseModel in type(value).__mro__:
+                value = value.model_dump() if BaseModel in type(value).__mro__ else value
+                for k, v in value.items():  # multiple widgets to set values for
+                    self.update_field_widget(f"{name}.{k}")
+            else:  # update list
+                for i, item in enumerate(value):
+                    if hasattr(self, f"{name}.{i}_widget"):  # can't handle added indexes yet
+                        self.update_field_widget(f"{name}.{i}")
 
     def apply_schema(self, schema: Optogenetics):
         """Overwrite to handle laser color and location"""
@@ -397,13 +403,13 @@ if __name__ == "__main__":
         session_control=SessionControl(),
     )
     task_widget = OptoParametersWidget(task_model)
-    task_widget.ValueChangedInside.connect(lambda name: print(task_model))
+    #task_widget.ValueChangedInside.connect(lambda name: print(task_model))
     task_widget.show()
 
     task_model.laser_colors = []
     task_widget.apply_schema(task_model)
     task_model.laser_colors.append(LaserColorFive(
-        color="Orange",
+        color="Blue",
         pulse_condition="Right choice",
         start=IntervalConditions(
             interval_condition="Trial start",
@@ -474,6 +480,17 @@ if __name__ == "__main__":
         session_control=SessionControl(),
     ).model_dump()
     task_model = Optogenetics(**new_model)
+    task_model.laser_colors[0].location = []
+    task_model.laser_colors[0].probability = .75
+    task_model.laser_colors[0].duration = 6
+    task_model.laser_colors[0].pulse_condition = "Left reward"
+    task_model.laser_colors[0].start = None
+    task_model.laser_colors[0].end.interval_condition = "Reward outcome"
+    task_model.laser_colors[0].end.offset = 1
+    task_model.laser_colors[0].protocol.frequency = 60
+    task_model.laser_colors[0].protocol.ramp_down = 4
+    task_model.laser_colors[1].protocol = ConstantProtocol(ramp_down=4)
+
     task_widget.apply_schema(task_model)
 
     sys.exit(app.exec_())
