@@ -690,17 +690,16 @@ class Window(QMainWindow):
             self.label_curriculum_stage.setText(self.trainer_state.stage.name)
             self.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
 
-            self.modelsChanged.emit()
         except Exception as e:
             if 'No record found' in str(e):  # mouse doesn't exist
-                QMessageBox.information(self, "Invalid Subject ID",
-                                        f"{mouse_id} is not in Slims. Double check id, and add to Slims if missing",
-                                        buttons=QMessageBox.Ok)
+                logging.warning(f"{mouse_id} is not in Slims. Double check id, and add to Slims if missing",
+                                extra={'tags': [self.warning_log_tag]})
             else:
                 logging.warning(f"Error loading mouse {mouse_id} curriculum loaded from Slims.",
                                 extra={'tags': [self.warning_log_tag]})
         finally:
             self.load_slims_progress.hide()
+            self.modelsChanged.emit()
 
     def write_session_to_slims(self, mouse_id):
         """
@@ -2710,13 +2709,12 @@ class Window(QMainWindow):
         """
         Method to update all widget based on pydantic models
         """
-
+        print('update models')
         self.task_widget.apply_schema(self.task_logic.task_parameters)
         self.session_widget.apply_schema(self.session_model)
         self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
-        print(self.opto_model.laser_colors)
         self.fip_widget.apply_schema(self.fip_model)
-
+        print('finished updating models')
     def save_task_models(self):
         """
         Save session and task model as well as opto and fip if applicable
