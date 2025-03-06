@@ -31,7 +31,7 @@ from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
 from PyQt5.QtWidgets import QFileDialog, QVBoxLayout, QGridLayout, QLabel, QProgressDialog, QDialog
 from PyQt5 import QtWidgets, QtGui, QtCore, uic
-from PyQt5.QtCore import QThreadPool, Qt, QThread
+from PyQt5.QtCore import QThreadPool, Qt, QThread, QTimer
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 from pydantic import ValidationError
@@ -651,49 +651,53 @@ class Window(QMainWindow):
         try:
             logging.info(f"Fetching {mouse_id} from Slims.")
             mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
+            logging.info(f"Successfully fetched {mouse_id} from Slims.")
+
+
+            logging.info(f"Fetching curriculum, trainer_state, and metrics for {mouse_id} from Slims.")
+            self.curriculum, self.trainer_state, metrics = self.trainer.load_data(mouse_id)
+            self.task_logic = AindDynamicForagingTaskLogic(**self.trainer_state.stage.task.model_dump())
+
+            # fetch session and check for session, opto and fip attachments
+            logging.info(f"Checking for attachments")
+            last_ses = self.slims_client.fetch_models(models.behavior_session.SlimsBehaviorSession, mouse_pk=mouse.pk)[-1]
+            attachments = self.slims_client.fetch_attachments(last_ses)
+            attachment_names = [attachment.name for attachment in attachments]
+
+            # update session model with slims session information
+            sess_attach = attachments[attachment_names.index(AindBehaviorSessionModel.__name__)]
+            slims_session_model = AindBehaviorSessionModel(**self.slims_client.fetch_attachment_content(sess_attach).json())
+            self.session_model.experiment = slims_session_model.experiment
+            self.session_model.experimenter = slims_session_model.experimenter
+            self.session_model.subject = slims_session_model.subject
+            self.session_model.notes = slims_session_model.notes
+
+            # update opto_model
+            if self.opto_model.experiment_type in attachment_names:
+                opto_attachment = attachments[attachment_names.index(self.opto_model.experiment_type)]
+                self.opto_model = Optogenetics(**self.slims_client.fetch_attachment_content(opto_attachment).json())
+
+            # update fip_model
+            if self.fip_model.experiment_type in attachment_names:
+                logging.info(f"Applying fip model")
+                fip_attachment = attachments[attachment_names.index(self.fip_model.experiment_type)]
+                self.fip_model = FiberPhotometry(**self.slims_client.fetch_attachment_content(fip_attachment).json())
+
+            logging.info(f"Mouse {mouse_id} curriculum loaded from Slims.", extra={'tags': [self.warning_log_tag]})
+            self.label_curriculum_stage.setText(self.trainer_state.stage.name)
+            self.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
+
+            self.modelsChanged.emit()
         except Exception as e:
             if 'No record found' in str(e):  # mouse doesn't exist
                 QMessageBox.information(self, "Invalid Subject ID",
                                         f"{mouse_id} is not in Slims. Double check id, and add to Slims if missing",
                                         buttons=QMessageBox.Ok)
-
-        logging.info(f"Successfully fetched {mouse_id} from Slims.")
-
-        logging.info(f"Fetching curriculum, trainer_state, and metrics for {mouse_id} from Slims.")
-        self.curriculum, self.trainer_state, metrics = self.trainer.load_data(mouse_id)
-        self.task_logic = AindDynamicForagingTaskLogic(**self.trainer_state.stage.task.model_dump())
-
-        # fetch session and check for session, opto and fip attachments
-        logging.info(f"Checking for attachments")
-        last_ses = self.slims_client.fetch_models(models.behavior_session.SlimsBehaviorSession, mouse_pk=mouse.pk)[-1]
-        attachments = self.slims_client.fetch_attachments(last_ses)
-        attachment_names = [attachment.name for attachment in attachments]
-
-        # update session model with slims session information
-        sess_attach = attachments[attachment_names.index(AindBehaviorSessionModel.__name__)]
-        slims_session_model = AindBehaviorSessionModel(**self.slims_client.fetch_attachment_content(sess_attach).json())
-        self.session_model.experiment = slims_session_model.experiment
-        self.session_model.experimenter = slims_session_model.experimenter
-        self.session_model.subject = slims_session_model.subject
-        self.session_model.notes = slims_session_model.notes
-
-        # update opto_model
-        if self.opto_model.experiment_type in attachment_names:
-            opto_attachment = attachments[attachment_names.index(self.opto_model.experiment_type)]
-            self.opto_model = Optogenetics(**self.slims_client.fetch_attachment_content(opto_attachment).json())
-
-        # update fip_model
-        if self.fip_model.experiment_type in attachment_names:
-            logging.info(f"Applying fip model")
-            fip_attachment = attachments[attachment_names.index(self.fip_model.experiment_type)]
-            self.fip_model = FiberPhotometry(**self.slims_client.fetch_attachment_content(fip_attachment).json())
-
-        logging.info(f"Mouse {mouse_id} curriculum loaded from Slims.", extra={'tags': [self.warning_log_tag]})
-        self.label_curriculum_stage.setText(self.trainer_state.stage.name)
-        self.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
-
-        self.load_slims_progress.hide()
-        self.modelsChanged.emit()
+            else:
+                logging.warning(f"Error loading mouse {mouse_id} curriculum loaded from Slims.",
+                                extra={'tags': [self.warning_log_tag]})
+        finally:
+            self.load_slims_progress.hide()
 
     def _session_list(self):
         '''show all sessions of the current animal and load the selected session by drop down list'''
