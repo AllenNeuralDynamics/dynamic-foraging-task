@@ -681,7 +681,7 @@ class Window(QMainWindow):
         if self.opto_model.experiment_type in attachment_names:
             opto_attachment = attachments[attachment_names.index(self.opto_model.experiment_type)]
             self.opto_model = Optogenetics(**self.slims_client.fetch_attachment_content(opto_attachment).json())
-            print(self.opto_model.laser_colors)
+
         # update fip_model
         if self.fip_model.experiment_type in attachment_names:
             logging.info(f"Applying fip model")
