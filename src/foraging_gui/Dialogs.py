@@ -1096,7 +1096,7 @@ class WaterCalibrationDialog(QDialog):
             if reply == QMessageBox.Cancel:
                 logging.warning('Spot check discarded due to type', extra={'tags': self.MainWindow.warning_log_tag})
             else:
-                logging.error('Water calibration spot check, {}, exceeds tolerance: {}'.format(valve,error))
+                logging.warning('Water calibration spot check, {}, exceeds tolerance: {}'.format(valve,error))
                 save.setStyleSheet("color: white;background-color : mediumorchid;")
                 self.Warning.setText(
                     f'Measuring {valve.lower()} valve: {volume}uL' + \
