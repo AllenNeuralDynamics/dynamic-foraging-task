@@ -85,7 +85,7 @@ from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
 
 from aind_behavior_dynamic_foraging.CurriculumManager.trainer import DynamicForagingTrainerServer
 from aind_behavior_dynamic_foraging.CurriculumManager.metrics import DynamicForagingMetrics
-from aind_behavior_curriculum import Trainer, TrainerState
+from aind_behavior_curriculum import Trainer
 
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear()  # clear handlers so console output can be configured
@@ -718,7 +718,7 @@ class Window(QMainWindow):
             )
 
             logging.info("Generating next session stage.")
-            next_trainer_state = Trainer(self.curriculum).evaluate(trainer_state=self.trainer_state.stage,
+            next_trainer_state = Trainer(self.curriculum).evaluate(trainer_state=self.trainer_state,
                                                                    metrics=new_metrics)
 
             logging.info("Writing trainer state to slims.")
@@ -745,6 +745,11 @@ class Window(QMainWindow):
                     name=self.fip_model.experiment_type,
                     content=self.fip_model.model_dump_json()
                 )
+
+            logging.info(f"Writing next session to Slims successful. "
+                         f"Mouse {mouse_id} will run on {next_trainer_state.stage.name} next session.",
+                         extra={'tags': [self.warning_log_tag]})
+
 
     def _session_list(self):
         '''show all sessions of the current animal and load the selected session by drop down list'''
