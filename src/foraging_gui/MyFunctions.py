@@ -15,6 +15,7 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 
 from foraging_gui.reward_schedules.uncoupled_block import UncoupledBlocks
+from aind_behavior_dynamic_foraging.CurriculumManager.trainer import DynamicForagingTrainerState
 from aind_behavior_dynamic_foraging import AindDynamicForagingTaskLogic
 from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import Optogenetics
@@ -30,12 +31,22 @@ class GenerateTrials():
     def __init__(self, win, task_logic: AindDynamicForagingTaskLogic,
                  session_model: AindBehaviorSessionModel,
                  opto_model: Optogenetics,
-                 fip_model: FiberPhotometry):
+                 fip_model: FiberPhotometry,
+                 curriculum=None,
+                 trainer_state=None,
+                 ):
         self.win = win
+        # set model attributes
         self.task_logic = task_logic
         self.session_model = session_model
         self.opto_model = opto_model
         self.fip_model = fip_model
+
+        # set curriculum attributes
+        self.curriculum = curriculum
+        self.trainer_state = trainer_state
+
+
         self.B_LeftLickIntervalPercent = None  # percentage of left lick intervals under 100ms
         self.B_RightLickIntervalPercent = None  # percentage of right lick intervals under 100ms
         self.B_CrossSideIntervalPercent = None  # percentage of cross side lick intervals under 100ms
@@ -323,6 +334,14 @@ class GenerateTrials():
         if finish_trial >= self.task_logic.task_parameters.warmup.min_trial and \
                 finish_ratio >= self.task_logic.task_parameters.warmup.min_finish_ratio and \
                 abs(choice_ratio - 0.5) <= self.task_logic.task_parameters.warmup.max_choice_ratio_bias:
+
+            if self.curriculum is not None:
+                logging.info("Updating curriculum")
+                # find next transition from warmup state
+                next_stage = self.curriculum.curriculum.see_stage_transitions(self.trainer_state.stage)[0][1]
+                self.trainer_state = DynamicForagingTrainerState(curriculum=self.curriculum,
+                                                                 stage=next_stage,
+                                                                 is_on_curriculum=True)
             # turn off the warm up
             warmup = 0
         else:
